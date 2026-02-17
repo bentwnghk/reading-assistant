@@ -4,6 +4,24 @@
   "openSource": "Mr.🆖 AI Hub",
   "copyright": "Powered by {{name}}",
   "searchPlaceholder": "Por favor, introduce palabras clave",
+  "header": {
+    "session": {
+      "export": "Exportar sesión",
+      "import": "Importar sesión",
+      "exportSuccess": "Sesión actual exportada.",
+      "importSuccess": "Sesión importada correctamente.",
+      "importFailed": "No se pudo importar la sesión."
+    },
+    "shortcuts": {
+      "title": "Atajos avanzados",
+      "openSetting": "Abrir ajustes",
+      "openHistory": "Abrir historial",
+      "openKnowledge": "Abrir base de conocimiento",
+      "exportSession": "Exportar sesión actual",
+      "importSession": "Importar sesión",
+      "toggleHelp": "Mostrar/Ocultar ayuda de atajos"
+    }
+  },
   "research": {
     "common": {
       "startThinking": "Empezar a Pensar",
@@ -29,12 +47,22 @@
       "save": "Guardar",
       "copy": "Copiar",
       "export": "Exportar",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "submitShortcut": "Atajo: Ctrl/Cmd + Enter"
     },
     "topic": {
       "title": "1. Definición de la investigación",
       "topicLabel": "1.1 Temas de investigación",
-      "topicPlaceholder": "Detalla el tema o temas de la investigación..."
+      "topicPlaceholder": "Detalla el tema o temas de la investigación...",
+      "presetsLabel": "Plantillas rápidas",
+      "presets": {
+        "marketLabel": "Mapa de mercado",
+        "marketPrompt": "Mapea el panorama actual del mercado para [tu tema]. Compara proveedores principales, modelos de precios, tendencias de cuota y riesgos clave para los próximos 12 meses.",
+        "technicalLabel": "Análisis técnico",
+        "technicalPrompt": "Realiza un análisis técnico profundo sobre [tu tema]. Explica opciones de arquitectura, trade-offs de implementación, límites de rendimiento y estrategia de despliegue recomendada.",
+        "comparisonLabel": "Comparar opciones",
+        "comparisonPrompt": "Compara las principales soluciones para [tu tema]. Crea una matriz de decisión que cubra funcionalidades, costo, esfuerzo de integración, seguridad/cumplimiento y mantenibilidad a largo plazo."
+      }
     },
     "feedback": {
       "title": "2. Formulación de preguntas",
@@ -50,7 +78,27 @@
       "suggestionLabel": "Sugerencias de investigación (Opcional)",
       "suggestionPlaceholder": "Indica si deseas añadir nuevos temas o ajustar la dirección de la investigación...",
       "references": "Referencias",
-      "relatedImages": "Imágenes relacionadas"
+      "relatedImages": "Imágenes relacionadas",
+      "taskSearchPlaceholder": "Buscar tareas por tema u objetivo...",
+      "statusFilterAll": "Todos los estados",
+      "statusUnprocessed": "Sin procesar",
+      "statusProcessing": "Procesando",
+      "statusCompleted": "Completado",
+      "statusFailed": "Fallido",
+      "retryFailed": "Reintentar fallidos",
+      "removeFailed": "Eliminar fallidos",
+      "sortDefault": "Ordenar: predeterminado",
+      "sortQueryAsc": "Ordenar: consulta (A-Z)",
+      "sortStatus": "Ordenar: estado",
+      "sortSourcesDesc": "Ordenar: más fuentes",
+      "expandAll": "Expandir todo",
+      "collapseAll": "Colapsar todo",
+      "exportFilteredMarkdown": "Exportar Markdown filtrado",
+      "exportFilteredJSON": "Exportar JSON filtrado",
+      "exportEmpty": "No hay tareas filtradas para exportar.",
+      "exportSuccess": "Tareas filtradas exportadas.",
+      "showingTasks": "Mostrando {{shown}} de {{total}} tareas",
+      "noFilteredTasks": "Ninguna tarea coincide con los filtros actuales."
     },
     "finalReport": {
       "title": "4. Informe Final",
@@ -59,6 +107,19 @@
       "localResearchedInfor": "Se investigaron {{total}} recursos locales",
       "writingRequirementLabel": "Requisitos de redacción (opcional)",
       "writingRequirementPlaceholder": "Puedes indicar cualquier requisito relacionado con la redacción del informe."
+    },
+    "workflow": {
+      "title": "Flujo de investigación",
+      "summary": "{{progress}}% completado ({{completed}}/{{total}} etapas)",
+      "topic": "Tema",
+      "questions": "Preguntas",
+      "plan": "Plan",
+      "collection": "Recopilación",
+      "report": "Informe final",
+      "collectionDetail": "{{completed}}/{{total}} tareas completadas",
+      "done": "Completado",
+      "active": "En progreso",
+      "pending": "Pendiente"
     }
   },
   "history": {
@@ -288,8 +349,17 @@
     "bocha": "Bocha",
     "parallelSearch": "Búsqueda Paralela",
     "parallelSearchTip": "La búsqueda paralela ayuda a acelerar el proceso de recopilación de datos, pero una tasa demasiado alta puede activar el límite de solicitudes por minuto del modelo.",
+    "autoReviewRounds": "Rondas de seguimiento automáticas",
+    "autoReviewRoundsTip": "Ejecuta automáticamente rondas adicionales de revisión y búsqueda después de la primera ronda. Usa 0 para desactivarlo.",
+    "maxCollectionTopics": "Temas de recopilación",
+    "maxCollectionTopicsTip": "Número máximo de temas de recopilación de información que se generan e investigan en cada ronda.",
     "searchResults": "Resultados de Búsqueda",
     "searchResultsTip": "El número máximo de búsquedas web. Algunos motores de búsqueda no admiten este parámetro.",
+    "searchIncludeDomains": "Dominios permitidos",
+    "searchIncludeDomainsTip": "Conserva solo resultados de estos dominios. Separa con comas, espacios o saltos de línea. Aplica a proveedores de búsqueda de terceros.",
+    "searchExcludeDomains": "Dominios bloqueados",
+    "searchExcludeDomainsTip": "Excluye resultados de estos dominios. Separa con comas, espacios o saltos de línea.",
+    "searchDomainsPlaceholder": "example.com\nsubdomain.example.org",
     "searchApiKeyPlaceholder": "Por favor, introduce tu Clave API",
     "searchScope": "Ámbito de Búsqueda",
     "scopeValue": {
@@ -327,6 +397,21 @@
     "citationImageTip": "Al habilitar las imágenes de referencia, se intentará añadir imágenes relacionadas con el contenido al informe final mediante una solicitud.",
     "textOutputMode": "Modo de salida de texto",
     "textOutputModeTip": "Efecto de salida de texto de IA. Caracteres, salida de texto como una máquina de escribir. Palabras, salida por palabra, la salida es más eficiente. Líneas, la salida es más estable.",
+    "reportStyle": "Estilo del informe",
+    "reportStyleTip": "Controla cómo se redacta el informe final.",
+    "reportStyleValue": {
+      "balanced": "Equilibrado",
+      "executive": "Ejecutivo",
+      "technical": "Técnico",
+      "concise": "Conciso"
+    },
+    "reportLength": "Longitud del informe",
+    "reportLengthTip": "Controla la profundidad objetivo del informe final.",
+    "reportLengthValue": {
+      "brief": "Breve",
+      "standard": "Estándar",
+      "comprehensive": "Completo"
+    },
     "fileFormatResource": "Archivo adjunto",
     "fileFormatResourceTip": "El uso de archivos adjuntos en formato de archivo puede reducir eficazmente el uso de tokens y evitar exceder el límite máximo de contexto del modelo. Esto solo es válido para modelos que admiten la comprensión de documentos.",
     "character": "Carácter",
@@ -336,6 +421,10 @@
     "confirm": "Confirmar",
     "cancel": "Cancelar",
     "useLocalResource": "Solo usar recursos locales",
-    "useLocalResourceTip": "Al habilitarlo, solo se utilizarán recursos locales para la investigación y el rastreo web. No se realizarán solicitudes externas."
+    "useLocalResourceTip": "Al habilitarlo, solo se utilizarán recursos locales para la investigación y el rastreo web. No se realizarán solicitudes externas.",
+    "promptOverrides": "Sobrescritura de prompts",
+    "promptOverridesTip": "Usa un objeto JSON para sobrescribir los prompts integrados de investigación profunda. Solo se sobrescriben las claves proporcionadas.",
+    "promptOverridesPlaceholder": "{\n  \"systemInstruction\": \"You are an expert researcher...\",\n  \"reportPlanPrompt\": \"Given the following query...\"\n}",
+    "promptOverridesInvalid": "La sobrescritura de prompts debe ser un objeto JSON válido."
   }
 }

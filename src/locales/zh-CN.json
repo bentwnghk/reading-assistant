@@ -4,6 +4,24 @@
   "openSource": "Mr.🆖 AI Hub",
   "copyright": "Powered by {{name}}",
   "searchPlaceholder": "請輸入關鍵詞",
+  "header": {
+    "session": {
+      "export": "導出會話",
+      "import": "導入會話",
+      "exportSuccess": "當前會話已導出。",
+      "importSuccess": "會話導入成功。",
+      "importFailed": "會話導入失敗。"
+    },
+    "shortcuts": {
+      "title": "高級快捷鍵",
+      "openSetting": "打開設置",
+      "openHistory": "打開歷史記錄",
+      "openKnowledge": "打開知識庫",
+      "exportSession": "導出當前會話",
+      "importSession": "導入會話快照",
+      "toggleHelp": "切換快捷鍵幫助"
+    }
+  },
   "research": {
     "common": {
       "startThinking": "開始思考",
@@ -29,12 +47,22 @@
       "save": "保存",
       "copy": "複製",
       "export": "導出",
-      "delete": "刪除"
+      "delete": "刪除",
+      "submitShortcut": "快捷鍵：Ctrl/Cmd + Enter"
     },
     "topic": {
       "title": "1. 研究方向",
       "topicLabel": "1.1 研究主題",
-      "topicPlaceholder": "任何您想了解的問題..."
+      "topicPlaceholder": "任何您想了解的問題...",
+      "presetsLabel": "快速模板",
+      "presets": {
+        "marketLabel": "市場全景",
+        "marketPrompt": "梳理 [你的主題] 的當前市場格局。對比主要廠商、定價模式、市場份額趨勢，並評估未來 12 個月的關鍵風險。",
+        "technicalLabel": "技術深度分析",
+        "technicalPrompt": "對 [你的主題] 做技術深度分析。說明架構方案、實現權衡、性能約束，以及推薦的落地路線。",
+        "comparisonLabel": "方案對比",
+        "comparisonPrompt": "對比 [你的主題] 的主流方案。構建決策矩陣，覆蓋功能、成本、集成難度、安全合規和長期可維護性。"
+      }
     },
     "feedback": {
       "title": "2. 提出您的想法",
@@ -50,7 +78,27 @@
       "suggestionLabel": "研究建議（可選）",
       "suggestionPlaceholder": "是否增加或者調整研究方向...",
       "references": "參考文獻",
-      "relatedImages": "相關圖片"
+      "relatedImages": "相關圖片",
+      "taskSearchPlaceholder": "按主題或研究目標搜索任務...",
+      "statusFilterAll": "全部狀態",
+      "statusUnprocessed": "未處理",
+      "statusProcessing": "處理中",
+      "statusCompleted": "已完成",
+      "statusFailed": "失敗",
+      "retryFailed": "重試失敗任務",
+      "removeFailed": "刪除失敗任務",
+      "sortDefault": "排序：默認",
+      "sortQueryAsc": "排序：查詢 (A-Z)",
+      "sortStatus": "排序：狀態",
+      "sortSourcesDesc": "排序：來源最多",
+      "expandAll": "全部展開",
+      "collapseAll": "全部摺疊",
+      "exportFilteredMarkdown": "導出篩選結果 Markdown",
+      "exportFilteredJSON": "導出篩選結果 JSON",
+      "exportEmpty": "沒有可導出的篩選任務。",
+      "exportSuccess": "篩選任務已導出。",
+      "showingTasks": "顯示 {{shown}} / {{total}} 個任務",
+      "noFilteredTasks": "當前篩選條件下沒有匹配任務。"
     },
     "finalReport": {
       "title": "4. 最終報告",
@@ -59,6 +107,19 @@
       "localResearchedInfor": "已研究 {{total}} 個本地資源",
       "writingRequirementLabel": "寫作要求（可選）",
       "writingRequirementPlaceholder": "您可以提出任何與撰寫報告相關的要求。"
+    },
+    "workflow": {
+      "title": "研究流程",
+      "summary": "已完成 {{progress}}%（{{completed}}/{{total}} 階段）",
+      "topic": "主題",
+      "questions": "問題",
+      "plan": "計劃",
+      "collection": "信息收集",
+      "report": "最終報告",
+      "collectionDetail": "已完成 {{completed}}/{{total}} 個任務",
+      "done": "已完成",
+      "active": "進行中",
+      "pending": "待開始"
     }
   },
   "history": {
@@ -287,9 +348,18 @@
     "modelBuiltin": "模型內置",
     "bocha": "博查",
     "parallelSearch": "並行搜索",
-    "parallelSearchTip": "並行搜索能加快數據信息蒐集，但過高的並發率可能觸發模型的每分鐘請求次數限制。",
+    "parallelSearchTip": "並行搜索能加快數據信息收集，但過高的併發率可能觸發模型的每分鐘請求次數限制。",
+    "autoReviewRounds": "自動追加研究輪次",
+    "autoReviewRoundsTip": "在首輪研究後自動執行額外的覆盤與搜索輪次。設為 0 可關閉。",
+    "maxCollectionTopics": "採集主題數",
+    "maxCollectionTopicsTip": "每輪信息採集中，最多生成並研究的主題數量。",
     "searchResults": "搜索數量",
     "searchResultsTip": "最大搜索數量。部分搜索引擎並不支持此參數。",
+    "searchIncludeDomains": "包含域名",
+    "searchIncludeDomainsTip": "僅保留這些域名的搜索結果。支持逗號、空格或換行分隔。僅對第三方搜索服務生效。",
+    "searchExcludeDomains": "排除域名",
+    "searchExcludeDomainsTip": "排除這些域名的搜索結果。支持逗號、空格或換行分隔。",
+    "searchDomainsPlaceholder": "example.com\nsubdomain.example.org",
     "searchApiKeyPlaceholder": "請輸入您的 API 密鑰",
     "searchScope": "搜索範圍",
     "scopeValue": {
@@ -313,7 +383,7 @@
     "debug": "調試模式",
     "debugTip": "系統調試可以幫助用戶捕捉請求異常，定位未知錯誤。通常情況下無需開啟。",
     "PWA": "安裝PWA",
-    "PWATip": "漸進式 Web 應用是一個使用 web 平台技術構建的應用程序，它提供與原生應用程序相近的用戶體驗。",
+    "PWATip": "漸進式 Web 應用是一個使用 web 平臺技術構建的應用程序，它提供與原生應用程序相近的用戶體驗。",
     "installlPWA": "安裝瀏覽器應用(PWA)",
     "resetSetting": "重置設置",
     "resetAllSettings": "重置設置並清空緩存",
@@ -326,7 +396,22 @@
     "citationImage": "引用圖片",
     "citationImageTip": "啟用引用圖片，會通過 prompt 嘗試在最終報告中添加與內容相關的圖片。",
     "textOutputMode": "文本輸出模式",
-    "textOutputModeTip": "AI 的文本輸出效果。字符：像打字機那樣輸出文本。單詞：按單詞輸出，輸出效率最高。行：輸出效果最平穩。",
+    "textOutputModeTip": "AI 的文本輸出效果。字符，像打字機那樣輸出文本。單詞，按單詞輸出，輸出效率最高。行，輸出效果最平穩。",
+    "reportStyle": "報告風格",
+    "reportStyleTip": "控制最終報告的寫作風格。",
+    "reportStyleValue": {
+      "balanced": "均衡",
+      "executive": "高管",
+      "technical": "技術",
+      "concise": "簡潔"
+    },
+    "reportLength": "報告長度",
+    "reportLengthTip": "控制最終報告的目標深度。",
+    "reportLengthValue": {
+      "brief": "簡短",
+      "standard": "標準",
+      "comprehensive": "全面"
+    },
     "fileFormatResource": "文件附件",
     "fileFormatResourceTip": "使用文件格式的附件可以有效減少 token 的使用量，避免超出模型最大上下文限制，僅對支援文件理解的模型有效。",
     "character": "字符",
@@ -336,6 +421,10 @@
     "confirm": "確認",
     "cancel": "取消",
     "useLocalResource": "僅本地資源",
-    "useLocalResourceTip": "開啟後，研究和網頁爬取僅使用本地資源，不會發起外部網路請求。"
+    "useLocalResourceTip": "開啟後，研究和網頁爬取僅使用本地資源，不會發起外部網絡請求。",
+    "promptOverrides": "提示詞覆蓋",
+    "promptOverridesTip": "使用 JSON 對象覆蓋內置深度研究提示詞。只會覆蓋你提供的鍵。",
+    "promptOverridesPlaceholder": "{\n  \"systemInstruction\": \"You are an expert researcher...\",\n  \"reportPlanPrompt\": \"Given the following query...\"\n}",
+    "promptOverridesInvalid": "提示詞覆蓋必須是合法的 JSON 對象。"
   }
 }
