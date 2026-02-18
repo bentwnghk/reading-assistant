@@ -14,25 +14,30 @@ function ExtractedText() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
 
-  const handleMouseUp = useCallback(() => {
-    const selectedText = window.getSelection()?.toString().trim();
-    if (selectedText && selectedText.length > 0 && selectedText.length <= 50) {
-      const selectionObj = window.getSelection();
-      if (selectionObj && selectionObj.rangeCount > 0) {
-        const range = selectionObj.getRangeAt(0);
+  const handleSelectionChange = useCallback(() => {
+    const selectionObj = window.getSelection();
+    const selectedText = selectionObj?.toString().trim();
+
+    if (!selectedText || selectedText.length === 0 || selectedText.length > 50) {
+      setSelection(null);
+      return;
+    }
+
+    if (selectionObj && selectionObj.rangeCount > 0) {
+      const range = selectionObj.getRangeAt(0);
+      const container = containerRef.current;
+
+      if (container && container.contains(range.commonAncestorContainer)) {
         const rect = range.getBoundingClientRect();
-        const containerRect = containerRef.current?.getBoundingClientRect();
-        if (containerRect) {
-          setSelection({
-            text: selectedText,
-            x: rect.left - containerRect.left + rect.width / 2,
-            y: rect.top - containerRect.top - 40,
-          });
-          return;
-        }
+        setSelection({
+          text: selectedText,
+          x: rect.left + rect.width / 2,
+          y: rect.top - 45,
+        });
+      } else {
+        setSelection(null);
       }
     }
-    setSelection(null);
   }, []);
 
   const handleAddWord = useCallback(() => {
@@ -44,22 +49,22 @@ function ExtractedText() {
     }
   }, [selection, addHighlightedWord]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest(".selection-popup")) {
+      setSelection(null);
+    }
+  }, []);
 
-    container.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("mousedown", (e) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest(".selection-popup")) {
-        setSelection(null);
-      }
-    });
+  useEffect(() => {
+    document.addEventListener("mouseup", handleSelectionChange);
+    document.addEventListener("mousedown", handleMouseDown);
 
     return () => {
-      container.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mouseup", handleSelectionChange);
+      document.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [handleMouseUp]);
+  }, [handleSelectionChange, handleMouseDown]);
 
   if (!extractedText) {
     return null;
@@ -70,7 +75,7 @@ function ExtractedText() {
       <h3 className="font-semibold text-lg border-b mb-4 leading-10">
         {t("reading.extractedText.title")}
       </h3>
-      
+
       {highlightedWords.length > 0 && (
         <div className="mb-4 p-3 bg-muted/50 rounded-md">
           <p className="text-sm font-medium mb-2">
@@ -91,24 +96,25 @@ function ExtractedText() {
         </div>
       )}
 
-      <div className="prose prose-slate dark:prose-invert max-w-full relative" ref={containerRef}>
+      <div className="prose prose-slate dark:prose-invert max-w-full" ref={containerRef}>
         <MagicDown
           value={extractedText}
           onChange={() => {}}
           hideTools
         />
-        {selection && (
-          <Button
-            size="sm"
-            className="selection-popup absolute z-50 shadow-md"
-            style={{ left: selection.x, top: selection.y, transform: "translateX(-50%)" }}
-            onClick={handleAddWord}
-          >
-            <Plus className="h-4 w-4" />
-            <span>{t("reading.extractedText.addWord")}</span>
-          </Button>
-        )}
       </div>
+
+      {selection && (
+        <Button
+          size="sm"
+          className="selection-popup fixed z-[9999] shadow-md"
+          style={{ left: selection.x, top: selection.y, transform: "translateX(-50%)" }}
+          onClick={handleAddWord}
+        >
+          <Plus className="h-4 w-4" />
+          <span>{t("reading.extractedText.addWord")}</span>
+        </Button>
+      )}
 
       <p className="text-xs text-muted-foreground mt-4">
         {t("reading.extractedText.highlightTip")}
