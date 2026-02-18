@@ -42,8 +42,8 @@ function Home() {
         <WorkflowProgress />
         <ExtractedText />
         <Summary />
-        <AdaptedText />
         <MindMap />
+        <AdaptedText />
         <ReadingTest />
         <Glossary />
       </main>

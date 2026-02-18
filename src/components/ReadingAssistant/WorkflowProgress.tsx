@@ -11,8 +11,8 @@ function WorkflowProgress() {
   const steps = [
     { key: "upload", label: t("reading.workflow.upload"), completed: !!extractedText },
     { key: "summary", label: t("reading.workflow.summary"), completed: !!summary },
-    { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText },
     { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap },
+    { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText },
     { key: "test", label: t("reading.workflow.test"), completed: readingTest.length > 0 },
     { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0 },
     { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0 },
