@@ -36,7 +36,9 @@
       "orClick": "或點擊選擇",
       "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP",
       "extracting": "正在提取文字...",
-      "uploadNew": "上傳新圖片以重新開始"
+      "uploadNew": "上傳新圖片以重新開始",
+      "clearAll": "清除全部",
+      "addMore": "添加更多圖片"
     },
     "extractedText": {
       "title": "提取的文字",

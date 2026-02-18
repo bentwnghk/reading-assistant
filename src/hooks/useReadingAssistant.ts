@@ -39,10 +39,10 @@ function useReadingAssistant() {
   const [status, setStatus] = useState<ReadingStatus>("idle");
 
   async function extractTextFromImage(imageData: string) {
-    const { setStatus: setStoreStatus, setExtractedText, setError, setOriginalImage } = readingStore;
+    const { setStatus: setStoreStatus, setExtractedText, setError, addOriginalImage } = readingStore;
     setStoreStatus("extracting");
     setStatus("extracting");
-    setOriginalImage(imageData);
+    addOriginalImage(imageData);
 
     try {
       const visionModel = await createModelProvider("gpt-4.1-mini");
@@ -74,7 +74,10 @@ function useReadingAssistant() {
         },
       });
 
-      let text = "";
+      let text = readingStore.extractedText || "";
+      if (text) {
+        text += "\n\n";
+      }
       for await (const textPart of result.textStream) {
         text += textPart;
         setExtractedText(text);

@@ -17,7 +17,7 @@ export type ReadingStatus =
 export interface ReadingStore {
   id: string;
   studentAge: number;
-  originalImage: string;
+  originalImages: string[];
   extractedText: string;
   summary: string;
   adaptedText: string;
@@ -36,7 +36,9 @@ export interface ReadingStore {
 
 interface ReadingActions {
   setStudentAge: (age: number) => void;
-  setOriginalImage: (image: string) => void;
+  setOriginalImages: (images: string[]) => void;
+  addOriginalImage: (image: string) => void;
+  removeOriginalImage: (index: number) => void;
   setExtractedText: (text: string) => void;
   setSummary: (summary: string) => void;
   setAdaptedText: (text: string) => void;
@@ -60,7 +62,7 @@ interface ReadingActions {
 const defaultValues: ReadingStore = {
   id: "",
   studentAge: 14,
-  originalImage: "",
+  originalImages: [],
   extractedText: "",
   summary: "",
   adaptedText: "",
@@ -86,9 +88,19 @@ export const useReadingStore = create(
           studentAge: Math.max(11, Math.min(19, age)),
           updatedAt: Date.now(),
         })),
-      setOriginalImage: (image) =>
+      setOriginalImages: (images) =>
         set(() => ({
-          originalImage: image,
+          originalImages: images,
+          updatedAt: Date.now(),
+        })),
+      addOriginalImage: (image) =>
+        set((state) => ({
+          originalImages: [...state.originalImages, image],
+          updatedAt: Date.now(),
+        })),
+      removeOriginalImage: (index) =>
+        set((state) => ({
+          originalImages: state.originalImages.filter((_, i) => i !== index),
           updatedAt: Date.now(),
         })),
       setExtractedText: (text) =>

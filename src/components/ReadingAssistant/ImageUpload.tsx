@@ -11,24 +11,25 @@ function ImageUpload() {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { originalImage, extractedText } = useReadingStore();
+  const { originalImages, extractedText } = useReadingStore();
   const { status, extractTextFromImage } = useReadingAssistant();
   const isExtracting = status === "extracting";
 
-  const handleFile = useCallback(
-    async (file: File) => {
-      if (!file.type.startsWith("image/")) {
-        return;
-      }
+  const handleFiles = useCallback(
+    async (files: FileList | File[]) => {
+      const fileArray = Array.from(files);
+      const imageFiles = fileArray.filter((file) => file.type.startsWith("image/"));
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const imageData = e.target?.result as string;
-        if (imageData) {
-          await extractTextFromImage(imageData);
-        }
-      };
-      reader.readAsDataURL(file);
+      for (const file of imageFiles) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const imageData = e.target?.result as string;
+          if (imageData) {
+            await extractTextFromImage(imageData);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     },
     [extractTextFromImage]
   );
@@ -38,12 +39,12 @@ function ImageUpload() {
       e.preventDefault();
       setIsDragging(false);
 
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        handleFile(file);
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFiles(files);
       }
     },
-    [handleFile]
+    [handleFiles]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -58,22 +59,26 @@ function ImageUpload() {
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        handleFile(file);
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        handleFiles(files);
       }
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     },
-    [handleFile]
+    [handleFiles]
   );
 
   const handleClick = () => {
     fileInputRef.current?.click();
   };
 
-  const clearImage = () => {
+  const clearImage = (index: number) => {
+    useReadingStore.getState().removeOriginalImage(index);
+  };
+
+  const clearAllImages = () => {
     useReadingStore.getState().reset();
   };
 
@@ -83,26 +88,59 @@ function ImageUpload() {
         {t("reading.imageUpload.title")}
       </h3>
 
-      {originalImage && extractedText ? (
+      {originalImages.length > 0 && extractedText ? (
         <div className="space-y-4">
-          <div className="relative group">
-            <img
-              src={originalImage}
-              alt="Uploaded"
-              className="max-h-64 mx-auto rounded-lg border object-contain"
-            />
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={clearImage}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-wrap gap-2">
+            {originalImages.map((image, index) => (
+              <div key={index} className="relative group">
+                <img
+                  src={image}
+                  alt={`Uploaded ${index + 1}`}
+                  className="max-h-40 rounded-lg border object-contain"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                  onClick={() => clearImage(index)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
           </div>
-          <p className="text-sm text-center text-muted-foreground">
-            {t("reading.imageUpload.uploadNew")}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {t("reading.imageUpload.uploadNew")}
+            </p>
+            {originalImages.length > 1 && (
+              <Button variant="outline" size="sm" onClick={clearAllImages}>
+                <X className="h-4 w-4 mr-1" />
+                {t("reading.imageUpload.clearAll")}
+              </Button>
+            )}
+          </div>
+          <div
+            className={cn(
+              "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
+              "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
+              isExtracting && "pointer-events-none opacity-50"
+            )}
+            onClick={handleClick}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileInput}
+            />
+            <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("reading.imageUpload.addMore")}
+            </p>
+          </div>
         </div>
       ) : (
         <div
@@ -122,6 +160,7 @@ function ImageUpload() {
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            multiple
             className="hidden"
             onChange={handleFileInput}
           />

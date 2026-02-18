@@ -24,7 +24,7 @@ interface ReadingSession {
   id: string;
   title: string;
   studentAge: number;
-  originalImage?: string;
+  originalImages?: string[];
   extractedText: string;
   summary: string;
   adaptedText: string;
