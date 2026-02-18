@@ -79,7 +79,7 @@
       "generating": "正在生成...",
       "submit": "提交答案",
       "retry": "重新作答",
-      "emptyTip": "點擊上方按鈕生成理解測驗",
+      "emptyTip": "點擊上方按鈕生成閱讀理解測驗",
       "multipleChoice": "選擇題",
       "trueFalse": "是非題",
       "shortAnswer": "短答題",
