@@ -3,9 +3,9 @@ import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 
 function useAutoSave() {
-  const { id, extractedText } = useReadingStore();
+  const { id, extractedText, summary, adaptedText, mindMap, readingTest, glossary } = useReadingStore();
   const prevIdRef = useRef<string>(id);
-  const prevExtractedTextRef = useRef<string>(extractedText);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     const { backup } = useReadingStore.getState();
@@ -15,24 +15,20 @@ function useAutoSave() {
       return;
     }
 
-    const isNewSession = !prevExtractedTextRef.current && extractedText;
     const sessionData = backup();
+    const existingInHistory = history.some((item) => item.id === id);
 
-    if (isNewSession) {
-      const existingInHistory = history.some((item) => item.id === id);
+    if (!hasInitializedRef.current) {
       if (!existingInHistory) {
         save(sessionData);
       }
-    } else if (id && prevIdRef.current === id) {
-      const existingInHistory = history.some((item) => item.id === id);
-      if (existingInHistory) {
-        update(id, sessionData);
-      }
+      hasInitializedRef.current = true;
+    } else if (id && prevIdRef.current === id && existingInHistory) {
+      update(id, sessionData);
     }
 
     prevIdRef.current = id;
-    prevExtractedTextRef.current = extractedText;
-  }, [id, extractedText]);
+  }, [id, extractedText, summary, adaptedText, mindMap, readingTest, glossary]);
 }
 
 export default useAutoSave;
