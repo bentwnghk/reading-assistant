@@ -103,8 +103,14 @@ function ImageUpload() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <h3 className="font-semibold text-lg border-b mb-4 leading-10">
+      <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
         {t("reading.imageUpload.title")}
+        {(originalImages.length > 0 || extractedText) && (
+          <Button variant="outline" size="sm" onClick={clearAllImages}>
+            <X className="h-4 w-4 mr-1" />
+            {t("reading.imageUpload.clearAll")}
+          </Button>
+        )}
       </h3>
 
       {originalImages.length > 0 && extractedText ? (
@@ -128,15 +134,9 @@ function ImageUpload() {
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {t("reading.imageUpload.uploadNew")}
-            </p>
-            <Button variant="outline" size="sm" onClick={clearAllImages}>
-              <X className="h-4 w-4 mr-1" />
-              {t("reading.imageUpload.clearAll")}
-            </Button>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            {t("reading.imageUpload.uploadNew")}
+          </p>
           {isExtracting && (
             <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
               <LoaderCircle className="h-4 w-4 animate-spin text-primary" />
