@@ -74,7 +74,8 @@ function useReadingAssistant() {
         },
       });
 
-      let text = readingStore.extractedText || "";
+      const currentText = useReadingStore.getState().extractedText || "";
+      let text = currentText;
       if (text) {
         text += "\n\n";
       }
