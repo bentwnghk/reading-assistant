@@ -132,12 +132,10 @@ function ImageUpload() {
             <p className="text-sm text-muted-foreground">
               {t("reading.imageUpload.uploadNew")}
             </p>
-            {originalImages.length > 1 && (
-              <Button variant="outline" size="sm" onClick={clearAllImages}>
-                <X className="h-4 w-4 mr-1" />
-                {t("reading.imageUpload.clearAll")}
-              </Button>
-            )}
+            <Button variant="outline" size="sm" onClick={clearAllImages}>
+              <X className="h-4 w-4 mr-1" />
+              {t("reading.imageUpload.clearAll")}
+            </Button>
           </div>
           {isExtracting && (
             <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
