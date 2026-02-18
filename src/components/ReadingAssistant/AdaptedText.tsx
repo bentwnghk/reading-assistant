@@ -103,14 +103,36 @@ function AdaptedText() {
 
           <TabsContent value="simplified" className="mt-4">
             {simplifiedText ? (
-              <div className="prose prose-slate dark:prose-invert max-w-full">
-                <MagicDown
-                  value={simplifiedText}
-                  onChange={() => {}}
-                  hideTools
-                  disableMath
-                />
-              </div>
+              <>
+                <div className="prose prose-slate dark:prose-invert max-w-full">
+                  <MagicDown
+                    value={simplifiedText}
+                    onChange={() => {}}
+                    hideTools
+                    disableMath
+                  />
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                  <Button
+                    onClick={() => simplifyText()}
+                    disabled={isSimplifying}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    {isSimplifying ? (
+                      <>
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                        <span>{t("reading.adaptedText.simplifying")}</span>
+                      </>
+                    ) : (
+                      <>
+                        <ArrowDown className="h-4 w-4" />
+                        <span>{t("reading.adaptedText.simplifyFurther")}</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>{t("reading.adaptedText.simplifiedEmptyTip")}</p>

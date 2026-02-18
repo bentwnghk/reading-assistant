@@ -187,9 +187,11 @@ function useReadingAssistant() {
   }
 
   async function simplifyText() {
-    const { studentAge, adaptedText, setSimplifiedText, setStatus: setStoreStatus, setError } = readingStore;
+    const { studentAge, adaptedText, simplifiedText, setSimplifiedText, setStatus: setStoreStatus, setError } = readingStore;
     
-    if (!adaptedText) {
+    const textToSimplify = simplifiedText || adaptedText;
+    
+    if (!textToSimplify) {
       toast.error("Please adapt the text first.");
       return "";
     }
@@ -203,7 +205,7 @@ function useReadingAssistant() {
       const result = streamText({
         model: thinkingModel,
         system: getSystemPrompt(),
-        prompt: simplifyTextPrompt(studentAge, adaptedText),
+        prompt: simplifyTextPrompt(studentAge, textToSimplify),
         experimental_transform: smoothTextStream(smoothTextStreamType),
         onError: (error) => {
           const msg = handleError(error);

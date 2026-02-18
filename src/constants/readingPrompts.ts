@@ -75,22 +75,24 @@ Rewrite this text to match the student's English level.
 **Respond with ONLY the adapted text, maintaining the paragraph structure.**`;
 }
 
-export function simplifyTextPrompt(age: number, adaptedText: string) {
-  return `You are further simplifying an already-adapted text for a ${age}-year-old student who needs extra help understanding.
+export function simplifyTextPrompt(age: number, text: string) {
+  return `You are simplifying a text even further for a ${age}-year-old student who needs extra help understanding. The text may have already been simplified before.
 
-<adapted-text>
-${adaptedText}
-</adapted-text>
+<text>
+${text}
+</text>
 
-Make this even simpler while preserving meaning.
+Make this text even simpler while preserving its core meaning.
 
 **CRITICAL REQUIREMENTS:**
 - **Preserve the exact same paragraph structure.**
 - **Do not merge, split, or rearrange paragraphs.**
-- Use the simplest possible vocabulary.
-- Make sentences very short and clear (8-12 words max per sentence).
-- Add helpful context where needed.
-- Keep the same meaning.
+- Use the simplest possible vocabulary (basic English words).
+- Make sentences very short and clear (6-10 words max per sentence).
+- Replace difficult words with easier synonyms.
+- Add brief explanations in parentheses for any remaining complex concepts.
+- Use simple sentence structures (subject-verb-object).
+- Keep the same meaning but make it extremely easy to read.
 
 **Respond with ONLY the simplified text.**`;
 }
