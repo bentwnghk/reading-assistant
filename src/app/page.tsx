@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
+import useAutoSave from "@/hooks/useAutoSave";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
 const Setting = dynamic(() => import("@/components/Setting"));
@@ -24,6 +25,8 @@ function Home() {
   const { openSetting, setOpenSetting, openHistory, setOpenHistory } = useGlobalStore();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
+
+  useAutoSave();
 
   useLayoutEffect(() => {
     const settingStore = useSettingStore.getState();
