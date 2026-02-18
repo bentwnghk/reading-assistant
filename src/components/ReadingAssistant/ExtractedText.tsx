@@ -18,7 +18,7 @@ function ExtractedText() {
     const selectionObj = window.getSelection();
     const selectedText = selectionObj?.toString().trim();
 
-    if (!selectedText || selectedText.length === 0 || selectedText.length > 50) {
+    if (!selectedText || selectedText.length === 0 || selectedText.length > 100) {
       setSelection(null);
       return;
     }
@@ -42,8 +42,7 @@ function ExtractedText() {
 
   const handleAddWord = useCallback(() => {
     if (selection?.text) {
-      const words = selection.text.split(/\s+/).filter(w => w.length > 0);
-      words.forEach(word => addHighlightedWord(word));
+      addHighlightedWord(selection.text);
       setSelection(null);
       window.getSelection()?.removeAllRanges();
     }

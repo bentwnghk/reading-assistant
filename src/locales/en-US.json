@@ -40,9 +40,9 @@
     },
     "extractedText": {
       "title": "Extracted Text",
-      "highlightedWords": "Highlighted Words",
+      "highlightedWords": "Vocabulary List",
       "clickToRemove": "Click to remove",
-      "highlightTip": "Tip: Select words in the text above to add them to your vocabulary list",
+      "highlightTip": "Tip: Select words or phrases in the text above to add them to your vocabulary list",
       "addWord": "Add to vocabulary"
     },
     "summary": {
