@@ -24,7 +24,7 @@ function Glossary() {
   const handleDownloadCSV = () => {
     if (glossary.length === 0) return;
 
-    const headers = ["Word", "Part of Speech", "English Definition", "Chinese Definition", "Example"];
+    const headers = ["Word", "PoS", "English Definition", "Chinese Definition", "Example"];
     const rows = glossary.map((entry) => [
       entry.word,
       entry.partOfSpeech || "",
