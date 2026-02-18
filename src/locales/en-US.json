@@ -42,7 +42,8 @@
       "title": "Extracted Text",
       "highlightedWords": "Highlighted Words",
       "clickToRemove": "Click to remove",
-      "highlightTip": "Tip: Select words in the text above to add them to your vocabulary list"
+      "highlightTip": "Tip: Select words in the text above to add them to your vocabulary list",
+      "addWord": "Add to vocabulary"
     },
     "summary": {
       "title": "Summary",
