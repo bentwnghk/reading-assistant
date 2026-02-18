@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useSettingStore } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS } from "@/store/setting";
 import { OPENAI_BASE_URL } from "@/constants/urls";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
@@ -47,6 +47,7 @@ const VERSION = process.env.NEXT_PUBLIC_VERSION;
 const formSchema = z.object({
   provider: z.string(),
   mode: z.string().optional(),
+  model: z.enum(AVAILABLE_MODELS),
   openAIApiKey: z.string().optional(),
   openAIApiProxy: z.string().optional(),
   openaicompatibleApiKey: z.string().optional(),
@@ -185,6 +186,37 @@ function Setting({ open, onClose }: SettingProps) {
                         <SelectItem value="openaicompatible">
                           OpenAI Compatible
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="model"
+              render={({ field }) => (
+                <FormItem className="from-item">
+                  <FormLabel className="from-label">
+                    {t("setting.model")}
+                  </FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        updateSetting("model", value);
+                      }}
+                    >
+                      <SelectTrigger className="form-field">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {AVAILABLE_MODELS.map((model) => (
+                          <SelectItem key={model} value={model}>
+                            {model}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>

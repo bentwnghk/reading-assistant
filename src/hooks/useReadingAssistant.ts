@@ -33,6 +33,7 @@ function handleError(error: unknown) {
 
 function useReadingAssistant() {
   const { smoothTextStreamType } = useSettingStore();
+  const { model } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
   const [status, setStatus] = useState<ReadingStatus>("idle");
@@ -103,7 +104,7 @@ function useReadingAssistant() {
     setStatus("summarizing");
 
     try {
-      const thinkingModel = await createModelProvider("gpt-4.1-mini");
+      const thinkingModel = await createModelProvider(model);
       
       const result = streamText({
         model: thinkingModel,
@@ -148,7 +149,7 @@ function useReadingAssistant() {
     setStatus("adapting");
 
     try {
-      const thinkingModel = await createModelProvider("gpt-4.1-mini");
+      const thinkingModel = await createModelProvider(model);
       
       const result = streamText({
         model: thinkingModel,
@@ -193,7 +194,7 @@ function useReadingAssistant() {
     setStatus("simplifying");
 
     try {
-      const thinkingModel = await createModelProvider("gpt-4.1-mini");
+      const thinkingModel = await createModelProvider(model);
       
       const result = streamText({
         model: thinkingModel,
@@ -238,7 +239,7 @@ function useReadingAssistant() {
     setStatus("mindmap");
 
     try {
-      const thinkingModel = await createModelProvider("gpt-4.1-mini");
+      const thinkingModel = await createModelProvider(model);
       
       const result = streamText({
         model: thinkingModel,
@@ -283,7 +284,7 @@ function useReadingAssistant() {
     setStatus("testing");
 
     try {
-      const thinkingModel = await createModelProvider("gpt-4.1-mini");
+      const thinkingModel = await createModelProvider(model);
       
       const result = await generateText({
         model: thinkingModel,
@@ -336,7 +337,7 @@ function useReadingAssistant() {
     setStatus("glossary");
 
     try {
-      const thinkingModel = await createModelProvider("gpt-4.1-mini");
+      const thinkingModel = await createModelProvider(model);
       
       const result = await generateText({
         model: thinkingModel,

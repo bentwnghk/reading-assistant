@@ -1,9 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export const AVAILABLE_MODELS = [
+  "gpt-5-mini",
+  "gpt-5.1",
+  "gemini-3-flash-preview",
+  "claude-sonnet-4-5",
+  "glm-4.7",
+  "minimax-m2.5",
+  "deepseek-chat",
+] as const;
+
+export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
+
 export interface SettingStore {
   provider: string;
   mode: string;
+  model: AvailableModel;
   openAIApiKey: string;
   openAIApiProxy: string;
   openaicompatibleApiKey: string;
@@ -23,6 +36,7 @@ interface SettingActions {
 export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "",
+  model: "gpt-5-mini",
   openAIApiKey: "",
   openAIApiProxy: "",
   openaicompatibleApiKey: "",
