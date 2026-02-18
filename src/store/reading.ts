@@ -204,6 +204,13 @@ export const useReadingStore = create(
           ...session,
         })),
     }),
-    { name: "reading" }
+    {
+      name: "reading",
+      partialize: (state) => {
+        const persisted = { ...state };
+        delete (persisted as Record<string, unknown>).originalImages;
+        return persisted as ReadingStore & ReadingActions;
+      },
+    }
   )
 );
