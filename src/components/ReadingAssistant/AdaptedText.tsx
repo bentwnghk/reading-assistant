@@ -73,6 +73,7 @@ function AdaptedText() {
                 value={adaptedText}
                 onChange={() => {}}
                 hideTools
+                disableMath
               />
             </div>
             
@@ -107,6 +108,7 @@ function AdaptedText() {
                   value={simplifiedText}
                   onChange={() => {}}
                   hideTools
+                  disableMath
                 />
               </div>
             ) : (

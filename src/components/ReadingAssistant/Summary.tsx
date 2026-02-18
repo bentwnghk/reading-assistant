@@ -51,6 +51,7 @@ function Summary() {
             value={summary}
             onChange={() => {}}
             hideTools
+            disableMath
           />
         </div>
       ) : (

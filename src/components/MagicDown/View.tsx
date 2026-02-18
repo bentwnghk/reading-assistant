@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { useMemo, memo } from "react";
-import ReactMarkdown, { type Options, type Components } from "react-markdown";
+import ReactMarkdown, { type Options } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -16,14 +16,11 @@ import "./style.css";
 const Code = dynamic(() => import("./Code"));
 const Mermaid = dynamic(() => import("./Mermaid"));
 
-export type MarkdownProps = {
-  id?: string;
-  className?: string;
-  children: string;
-  components?: Partial<Components>;
+export type MarkdownProps = Options & {
+  disableMath?: boolean;
 };
 
-function MarkdownBlock({ children: content, ...rest }: Options) {
+function MarkdownBlock({ children: content, disableMath, ...rest }: MarkdownProps) {
   const remarkPlugins = useMemo(
     () => rest.remarkPlugins ?? [],
     [rest.remarkPlugins]
@@ -34,16 +31,28 @@ function MarkdownBlock({ children: content, ...rest }: Options) {
   );
   const components = useMemo(() => rest.components ?? {}, [rest.components]);
 
-  return (
-    <ReactMarkdown
-      {...rest}
-      remarkPlugins={[remarkGfm, remarkMath, remarkBreaks, ...remarkPlugins]}
-      rehypePlugins={[
+  const baseRemarkPlugins: any = disableMath
+    ? [remarkGfm, remarkBreaks, ...remarkPlugins]
+    : [remarkGfm, remarkMath, remarkBreaks, ...remarkPlugins];
+
+  const baseRehypePlugins: any = disableMath
+    ? [
+        rehypeRaw,
+        [rehypeHighlight, { detect: true, ignoreMissing: true }],
+        ...rehypePlugins,
+      ]
+    : [
         rehypeRaw,
         [rehypeHighlight, { detect: true, ignoreMissing: true }],
         [rehypeKatex, { strict: false }],
         ...rehypePlugins,
-      ]}
+      ];
+
+  return (
+    <ReactMarkdown
+      {...rest}
+      remarkPlugins={baseRemarkPlugins}
+      rehypePlugins={baseRehypePlugins}
       disallowedElements={["script", "form"]}
       components={{
         pre: (props) => {

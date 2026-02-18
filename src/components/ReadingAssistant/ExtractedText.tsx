@@ -100,6 +100,7 @@ function ExtractedText() {
           value={extractedText}
           onChange={() => {}}
           hideTools
+          disableMath
         />
       </div>
 

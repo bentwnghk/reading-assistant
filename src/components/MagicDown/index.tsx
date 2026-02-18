@@ -20,6 +20,7 @@ type Props = {
   fixedTopOffset?: number;
   fixedRightOffset?: number;
   tools?: ReactNode;
+  disableMath?: boolean;
 };
 
 function MagicDown({
@@ -30,6 +31,7 @@ function MagicDown({
   fixedTopOffset,
   fixedRightOffset,
   tools,
+  disableMath,
 }: Props) {
   const { t } = useTranslation();
   const isMobile = useMobile(450);
@@ -49,7 +51,7 @@ function MagicDown({
     <div className={cn("relative", className)} ref={containerRef}>
       {mode === "view" ? (
         <div className="magicdown-view prose prose-slate dark:prose-invert max-w-full">
-          <View>{value}</View>
+          <View disableMath={disableMath}>{value}</View>
         </div>
       ) : (
         <div className="magicdown-editor my-2">
