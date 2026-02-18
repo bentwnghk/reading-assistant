@@ -36,6 +36,7 @@
       "orClick": "or click to select",
       "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP",
       "extracting": "Extracting text...",
+      "extractingProgress": "Extracting text ({{current}}/{{total}})...",
       "uploadNew": "Upload a new image to start over",
       "clearAll": "Clear All",
       "addMore": "Add more images"

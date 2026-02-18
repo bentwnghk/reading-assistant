@@ -7,10 +7,20 @@ import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
 
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function ImageUpload() {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
   const { originalImages, extractedText } = useReadingStore();
   const { status, extractTextFromImage } = useReadingAssistant();
   const isExtracting = status === "extracting";
@@ -19,17 +29,18 @@ function ImageUpload() {
     async (files: FileList | File[]) => {
       const fileArray = Array.from(files);
       const imageFiles = fileArray.filter((file) => file.type.startsWith("image/"));
+      
+      if (imageFiles.length === 0) return;
 
-      for (const file of imageFiles) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const imageData = e.target?.result as string;
-          if (imageData) {
-            await extractTextFromImage(imageData);
-          }
-        };
-        reader.readAsDataURL(file);
+      setExtractionProgress({ current: 1, total: imageFiles.length });
+
+      for (let i = 0; i < imageFiles.length; i++) {
+        setExtractionProgress({ current: i + 1, total: imageFiles.length });
+        const imageData = await readFileAsDataURL(imageFiles[i]);
+        await extractTextFromImage(imageData);
       }
+
+      setExtractionProgress(null);
     },
     [extractTextFromImage]
   );
@@ -82,6 +93,14 @@ function ImageUpload() {
     useReadingStore.getState().reset();
   };
 
+  const getExtractionMessage = () => {
+    if (!extractionProgress) return t("reading.imageUpload.extracting");
+    return t("reading.imageUpload.extractingProgress", {
+      current: extractionProgress.current,
+      total: extractionProgress.total,
+    });
+  };
+
   return (
     <section className="p-4 border rounded-md mt-4">
       <h3 className="font-semibold text-lg border-b mb-4 leading-10">
@@ -120,6 +139,12 @@ function ImageUpload() {
               </Button>
             )}
           </div>
+          {isExtracting && (
+            <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
+              <LoaderCircle className="h-4 w-4 animate-spin text-primary" />
+              <p className="text-sm font-medium text-primary">{getExtractionMessage()}</p>
+            </div>
+          )}
           <div
             className={cn(
               "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
@@ -169,7 +194,7 @@ function ImageUpload() {
             <div className="flex flex-col items-center gap-2">
               <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
               <p className="text-lg font-medium">
-                {t("reading.imageUpload.extracting")}
+                {getExtractionMessage()}
               </p>
             </div>
           ) : (
