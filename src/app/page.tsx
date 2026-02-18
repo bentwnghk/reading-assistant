@@ -8,29 +8,20 @@ import { useSettingStore } from "@/store/setting";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
 const Setting = dynamic(() => import("@/components/Setting"));
-const WorkflowProgress = dynamic(
-  () => import("@/components/Research/WorkflowProgress")
-);
-const Topic = dynamic(() => import("@/components/Research/Topic"));
-const Feedback = dynamic(() => import("@/components/Research/Feedback"));
-const SearchResult = dynamic(
-  () => import("@/components/Research/SearchResult")
-);
-const FinalReport = dynamic(() => import("@/components/Research/FinalReport"));
 const History = dynamic(() => import("@/components/History"));
-const Knowledge = dynamic(() => import("@/components/Knowledge"));
+const StudentInfo = dynamic(() => import("@/components/ReadingAssistant/StudentInfo"));
+const ImageUpload = dynamic(() => import("@/components/ReadingAssistant/ImageUpload"));
+const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/WorkflowProgress"));
+const ExtractedText = dynamic(() => import("@/components/ReadingAssistant/ExtractedText"));
+const Summary = dynamic(() => import("@/components/ReadingAssistant/Summary"));
+const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedText"));
+const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
+const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
+const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
 
 function Home() {
   const { t } = useTranslation();
-  const {
-    openSetting,
-    setOpenSetting,
-    openHistory,
-    setOpenHistory,
-    openKnowledge,
-    setOpenKnowledge,
-  } = useGlobalStore();
-
+  const { openSetting, setOpenSetting, openHistory, setOpenHistory } = useGlobalStore();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
 
@@ -38,15 +29,20 @@ function Home() {
     const settingStore = useSettingStore.getState();
     setTheme(settingStore.theme);
   }, [theme, setTheme]);
+
   return (
     <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
       <Header />
       <main>
+        <StudentInfo />
+        <ImageUpload />
         <WorkflowProgress />
-        <Topic />
-        <Feedback />
-        <SearchResult />
-        <FinalReport />
+        <ExtractedText />
+        <Summary />
+        <AdaptedText />
+        <MindMap />
+        <ReadingTest />
+        <Glossary />
       </main>
       <footer className="my-4 text-center text-sm text-gray-600 print:hidden">
         <a href="https://api.mr5ai.com/" target="_blank">
@@ -58,10 +54,6 @@ function Home() {
       <aside className="print:hidden">
         <Setting open={openSetting} onClose={() => setOpenSetting(false)} />
         <History open={openHistory} onClose={() => setOpenHistory(false)} />
-        <Knowledge
-          open={openKnowledge}
-          onClose={() => setOpenKnowledge(false)}
-        />
       </aside>
     </div>
   );

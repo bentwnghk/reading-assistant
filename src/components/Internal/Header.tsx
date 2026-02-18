@@ -1,9 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
-import { toast } from "sonner";
-import { Settings, Github, History, BookText, Keyboard } from "lucide-react";
+import { Settings, History, Keyboard } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import {
   Dialog,
@@ -12,92 +10,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useGlobalStore } from "@/store/global";
-import { useTaskStore, type TaskStore } from "@/store/task";
-import { useHistoryStore } from "@/store/history";
+import { useReadingStore } from "@/store/reading";
 import { downloadFile } from "@/utils/file";
-import { fileParser } from "@/utils/parser";
 
 const VERSION = process.env.NEXT_PUBLIC_VERSION;
 
-const resourceSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  type: z.string(),
-  size: z.number(),
-  status: z.enum(["unprocessed", "processing", "completed", "failed"]),
-});
-
-const imageSourceSchema = z.object({
-  url: z.string(),
-  description: z.string().optional(),
-});
-
-const sourceSchema = z.object({
-  title: z.string().optional(),
-  content: z.string().optional(),
-  url: z.string(),
-  images: z.array(imageSourceSchema).optional(),
-});
-
-const searchTaskSchema = z.object({
-  state: z.enum(["unprocessed", "processing", "completed", "failed"]),
-  query: z.string(),
-  researchGoal: z.string(),
-  learning: z.string(),
-  sources: z.array(sourceSchema).optional(),
-  images: z.array(imageSourceSchema).optional(),
-});
-
-const taskSnapshotSchema = z.object({
-  id: z.string().optional(),
-  question: z.string().optional(),
-  resources: z.array(resourceSchema).optional(),
-  query: z.string().optional(),
-  questions: z.string().optional(),
-  feedback: z.string().optional(),
-  reportPlan: z.string().optional(),
-  suggestion: z.string().optional(),
-  tasks: z.array(searchTaskSchema).optional(),
-  requirement: z.string().optional(),
-  title: z.string().optional(),
-  finalReport: z.string().optional(),
-  sources: z.array(sourceSchema).optional(),
-  images: z.array(imageSourceSchema).optional(),
-  knowledgeGraph: z.string().optional(),
-});
-
-function normalizeTaskSnapshot(
-  snapshot: z.infer<typeof taskSnapshotSchema>,
-): TaskStore {
-  return {
-    id: snapshot.id ?? "",
-    question: snapshot.question ?? "",
-    resources: snapshot.resources ?? [],
-    query: snapshot.query ?? "",
-    questions: snapshot.questions ?? "",
-    feedback: snapshot.feedback ?? "",
-    reportPlan: snapshot.reportPlan ?? "",
-    suggestion: snapshot.suggestion ?? "",
-    tasks: (snapshot.tasks ?? []).map((task) => ({
-      ...task,
-      sources: task.sources ?? [],
-      images: task.images ?? [],
-    })),
-    requirement: snapshot.requirement ?? "",
-    title: snapshot.title ?? "",
-    finalReport: snapshot.finalReport ?? "",
-    sources: snapshot.sources ?? [],
-    images: snapshot.images ?? [],
-    knowledgeGraph: snapshot.knowledgeGraph ?? "",
-  };
-}
-
-function getSafeSnapshotFilename(value: string): string {
+function getSafeFilename(value: string): string {
   return (
     value
       .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-")
       .replace(/\s+/g, "-")
-      .slice(0, 80) || "deep-research-session"
+      .slice(0, 80) || "reading-session"
   );
 }
 
@@ -116,43 +39,31 @@ function Header() {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
-  const { setOpenSetting, setOpenHistory, setOpenKnowledge } = useGlobalStore();
+  const { setOpenSetting, setOpenHistory } = useGlobalStore();
 
   const exportSnapshot = useCallback(() => {
-    const { backup, title, question } = useTaskStore.getState();
-    const snapshot = backup();
-    const baseName = title || question || "deep-research-session";
+    const { backup } = useReadingStore.getState();
+    const session = backup();
+    const baseName = session.extractedText?.slice(0, 50) || "reading-session";
     downloadFile(
-      JSON.stringify(snapshot, null, 2),
-      `${getSafeSnapshotFilename(baseName)}.session.json`,
-      "application/json;charset=utf-8",
+      JSON.stringify(session, null, 2),
+      `${getSafeFilename(baseName)}.session.json`,
+      "application/json;charset=utf-8"
     );
-    toast.message(t("header.session.exportSuccess"));
-  }, [t]);
+  }, []);
 
   const importSnapshot = useCallback(
     async (file: File) => {
       try {
-        const raw = await fileParser(file);
-        const parsed = JSON.parse(raw);
-        const snapshotResult = taskSnapshotSchema.safeParse(parsed);
-        if (!snapshotResult.success) {
-          throw snapshotResult.error;
-        }
-        const nextTask = normalizeTaskSnapshot(snapshotResult.data);
-        const { id, backup, reset, restore } = useTaskStore.getState();
-        if (id) {
-          useHistoryStore.getState().update(id, backup());
-        }
-        reset();
-        restore(nextTask);
-        toast.message(t("header.session.importSuccess"));
+        const text = await file.text();
+        const session = JSON.parse(text);
+        const { restore } = useReadingStore.getState();
+        restore(session);
       } catch (error) {
         console.error(error);
-        toast.error(t("header.session.importFailed"));
       }
     },
-    [t],
+    []
   );
 
   const openSnapshotImport = useCallback(() => {
@@ -170,10 +81,6 @@ function Header() {
         description: t("header.shortcuts.openHistory"),
       },
       {
-        key: "Ctrl/Cmd + Shift + K",
-        description: t("header.shortcuts.openKnowledge"),
-      },
-      {
         key: "Ctrl/Cmd + Shift + E",
         description: t("header.shortcuts.exportSession"),
       },
@@ -186,7 +93,7 @@ function Header() {
         description: t("header.shortcuts.toggleHelp"),
       },
     ],
-    [t],
+    [t]
   );
 
   useEffect(() => {
@@ -204,11 +111,6 @@ function Header() {
       if (event.shiftKey && key === "h") {
         event.preventDefault();
         setOpenHistory(true);
-        return;
-      }
-      if (event.shiftKey && key === "k") {
-        event.preventDefault();
-        setOpenKnowledge(true);
         return;
       }
       if (event.shiftKey && key === "e") {
@@ -231,13 +133,7 @@ function Header() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    exportSnapshot,
-    openSnapshotImport,
-    setOpenHistory,
-    setOpenKnowledge,
-    setOpenSetting,
-  ]);
+  }, [exportSnapshot, openSnapshotImport, setOpenHistory, setOpenSetting]);
 
   async function handleFileUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -250,23 +146,11 @@ function Header() {
   return (
     <>
       <header className="flex justify-between items-center my-6 max-sm:my-4 print:hidden">
-        <a href="https://research.mr5ai.com/" target="_self">
-          <h1 className="text-left text-xl font-semibold">
-            {t("title")}
-            <small className="ml-2 font-normal text-base">v{VERSION}</small>
-          </h1>
-        </a>
+        <h1 className="text-left text-xl font-semibold">
+          {t("title")}
+          <small className="ml-2 font-normal text-base">v{VERSION}</small>
+        </h1>
         <div className="flex">
-          <a href="https://api.mr5ai.com/" target="_blank">
-            <Button
-              className="h-8 w-8"
-              title={t("openSource")}
-              variant="ghost"
-              size="icon"
-            >
-              <Github className="h-5 w-5" />
-            </Button>
-          </a>
           <Button
             className="h-8 w-8"
             variant="ghost"
@@ -284,15 +168,6 @@ function Header() {
             onClick={() => setOpenHistory(true)}
           >
             <History className="h-5 w-5" />
-          </Button>
-          <Button
-            className="h-8 w-8"
-            variant="ghost"
-            size="icon"
-            title={t("knowledge.title")}
-            onClick={() => setOpenKnowledge(true)}
-          >
-            <BookText />
           </Button>
           <Button
             className="h-8 w-8"

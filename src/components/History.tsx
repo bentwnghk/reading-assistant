@@ -24,10 +24,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useTaskStore, type TaskStore } from "@/store/task";
-import { useHistoryStore, type ResearchHistory } from "@/store/history";
+import { useReadingStore, type ReadingStore } from "@/store/reading";
+import { useHistoryStore, type ReadingHistory } from "@/store/history";
 import { downloadFile } from "@/utils/file";
-import { fileParser } from "@/utils/parser";
 
 interface HistoryProps {
   open: boolean;
@@ -36,43 +35,22 @@ interface HistoryProps {
 
 const PAGE_SIZE = 20;
 
-const resourceSchema = z.object({
+const readingSessionSchema = z.object({
   id: z.string(),
-  name: z.string(),
-  type: z.string(),
-  size: z.number(),
-  status: z.enum(["unprocessed", "processing", "completed", "failed"]),
-});
-
-const sourceSchema = z.object({
-  title: z.string().optional(),
-  content: z.string().optional(),
-  url: z.string(),
-});
-
-const searchTaskSchema = z.object({
-  state: z.enum(["unprocessed", "processing", "completed", "failed"]),
-  query: z.string(),
-  researchGoal: z.string(),
-  learning: z.string(),
-  sources: z.array(sourceSchema),
-});
-
-const taskStoreSchema = z.object({
-  id: z.string(),
-  question: z.string(),
-  resources: z.array(resourceSchema).optional(),
-  query: z.string(),
-  questions: z.string(),
-  feedback: z.string().optional(),
-  reportPlan: z.string(),
-  suggestion: z.string().optional(),
-  tasks: z.array(searchTaskSchema),
-  requirement: z.string().optional(),
-  title: z.string(),
-  finalReport: z.string(),
-  sources: z.array(sourceSchema).optional(),
-  version: z.string().optional(),
+  studentAge: z.number(),
+  originalImage: z.string().optional(),
+  extractedText: z.string(),
+  summary: z.string().optional(),
+  adaptedText: z.string().optional(),
+  simplifiedText: z.string().optional(),
+  highlightedWords: z.array(z.string()).optional(),
+  mindMap: z.string().optional(),
+  readingTest: z.array(z.any()).optional(),
+  glossary: z.array(z.any()).optional(),
+  testScore: z.number().optional(),
+  testCompleted: z.boolean().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number().optional(),
 });
 
 function formatDate(timestamp: number) {
@@ -82,44 +60,53 @@ function formatDate(timestamp: number) {
 function History({ open, onClose }: HistoryProps) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { backup, restore, reset } = useTaskStore();
+  const { backup, restore, reset } = useReadingStore();
   const { history, save, load, update, remove } = useHistoryStore();
-  const [historyList, setHistoryList] = useState<ResearchHistory[]>([]);
+  const [historyList, setHistoryList] = useState<ReadingHistory[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  
   const showLoadMore = useMemo(() => {
     return history.length > currentPage * PAGE_SIZE;
   }, [history, currentPage]);
 
-  async function importResearch(file: File) {
-    const text = await fileParser(file);
-    const data = JSON.parse(text) as z.infer<typeof taskStoreSchema>;
-    const verifyFileformat = taskStoreSchema.safeParse(data);
-    if (verifyFileformat.success) {
-      save(data as TaskStore);
-      toast.message(t("history.importSuccess", { title: file.name }));
-    } else {
-      console.error(verifyFileformat.error);
+  async function importSession(file: File) {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text) as z.infer<typeof readingSessionSchema>;
+      const verifyFormat = readingSessionSchema.safeParse(data);
+      if (verifyFormat.success) {
+        save(data as ReadingStore);
+        toast.message(t("history.importSuccess", { title: file.name }));
+      } else {
+        console.error(verifyFormat.error);
+        toast.error(t("history.importFailed", { title: file.name }));
+      }
+    } catch (error) {
+      console.error(error);
       toast.error(t("history.importFailed", { title: file.name }));
     }
   }
 
   function loadHistory(id: string) {
-    const { id: currentId } = useTaskStore.getState();
+    const { id: currentId } = useReadingStore.getState();
     const data = load(id);
     if (data) {
-      update(currentId, backup());
+      if (currentId) {
+        update(currentId, backup());
+      }
       reset();
       restore(data);
     }
     onClose();
   }
 
-  function downloadResearch(id: string) {
+  function downloadSession(id: string) {
     const data = load(id);
     if (data) {
+      const title = data.extractedText?.slice(0, 50) || "reading-session";
       downloadFile(
         JSON.stringify(data, null, 4),
-        `${data.title}.json`,
+        `${title}.json`,
         "application/json;charset=utf-8"
       );
     }
@@ -130,11 +117,11 @@ function History({ open, onClose }: HistoryProps) {
   }
 
   function handleSearch(value: string) {
-    const options = { keys: ["question", "finalReport"] };
-    const knowledgeIndex = Fuse.createIndex(options.keys, history);
-    const fuse = new Fuse(history, options, knowledgeIndex);
+    const options = { keys: ["extractedText", "summary"] };
+    const index = Fuse.createIndex(options.keys, history);
+    const fuse = new Fuse(history, options, index);
     const result = fuse.search(value);
-    setHistoryList(result.map((value) => value.item));
+    setHistoryList(result.map((v) => v.item));
   }
 
   function handleClose(open: boolean) {
@@ -150,10 +137,9 @@ function History({ open, onClose }: HistoryProps) {
 
   async function handleFileUpload(files: FileList | null) {
     if (files) {
-      for await (const file of files) {
-        await importResearch(file);
+      for (const file of Array.from(files)) {
+        await importSession(file);
       }
-      // Clear the input file to avoid processing the previous file multiple times
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -209,10 +195,10 @@ function History({ open, onClose }: HistoryProps) {
                       <TableCell>
                         <p
                           className="truncate w-96 max-lg:max-w-72 max-sm:max-w-52 cursor-pointer hover:text-blue-500"
-                          title={item.title}
+                          title={item.extractedText?.slice(0, 100)}
                           onClick={() => loadHistory(item.id)}
                         >
-                          {item.title || item.question}
+                          {item.extractedText?.slice(0, 50) || "Untitled Session"}
                         </p>
                       </TableCell>
                       <TableCell className="text-center whitespace-nowrap max-sm:hidden">
@@ -232,7 +218,7 @@ function History({ open, onClose }: HistoryProps) {
                             variant="ghost"
                             size="icon"
                             title={t("history.export")}
-                            onClick={() => downloadResearch(item.id)}
+                            onClick={() => downloadSession(item.id)}
                           >
                             <Download className="h-4 w-4" />
                           </Button>

@@ -8,8 +8,10 @@ import { keys } from "radash";
 const normalizeLocale = (locale: string) => {
   if (locale.startsWith("en")) {
     return "en-US";
+  } else if (locale.startsWith("zh-HK") || locale.startsWith("zh-TW")) {
+    return "zh-HK";
   } else if (locale.startsWith("zh")) {
-    return "zh-CN";
+    return "zh-HK";
   } else {
     return locale;
   }
@@ -19,17 +21,21 @@ export function detectLanguage() {
   const languageDetector = new LanguageDetector();
   languageDetector.init();
   const detectedLang = languageDetector.detect();
-  let lang: string = "zh-CN";
+  let lang: string = "en-US";
   const localeLang = keys(locales);
   if (Array.isArray(detectedLang)) {
     detectedLang.reverse().forEach((langCode) => {
       if (localeLang.includes(langCode)) {
         lang = langCode;
+      } else if (localeLang.includes(normalizeLocale(langCode))) {
+        lang = normalizeLocale(langCode);
       }
     });
   } else if (typeof detectedLang === "string") {
     if (localeLang.includes(detectedLang)) {
       lang = detectedLang;
+    } else if (localeLang.includes(normalizeLocale(detectedLang))) {
+      lang = normalizeLocale(detectedLang);
     }
   }
   return lang;
@@ -44,7 +50,7 @@ i18next
   )
   .init({
     supportedLngs: keys(locales),
-    fallbackLng: "zh-CN",
+    fallbackLng: "en-US",
   });
 
 export default i18next;

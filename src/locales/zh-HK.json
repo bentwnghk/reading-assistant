@@ -1,0 +1,230 @@
+{
+  "title": "英語閱讀助理",
+  "theme": "主題",
+  "openSource": "Mr.🆖 AI Hub",
+  "copyright": "由 {{name}} 提供",
+  "searchPlaceholder": "請輸入關鍵字",
+  "header": {
+    "session": {
+      "export": "匯出工作階段",
+      "import": "匯入工作階段",
+      "exportSuccess": "已匯出目前工作階段",
+      "importSuccess": "成功匯入工作階段",
+      "importFailed": "匯入工作階段失敗"
+    },
+    "shortcuts": {
+      "title": "鍵盤快捷鍵",
+      "openSetting": "開啟設定",
+      "openHistory": "開啟歷史記錄",
+      "exportSession": "匯出目前工作階段",
+      "importSession": "匯入工作階段",
+      "toggleHelp": "切換快捷鍵說明"
+    }
+  },
+  "reading": {
+    "form1to3": "中一至中三",
+    "form4to6": "中四至中六",
+    "studentInfo": {
+      "title": "學生資料",
+      "ageLabel": "你的年齡",
+      "yearsOld": "歲",
+      "estimatedLevel": "預計程度"
+    },
+    "imageUpload": {
+      "title": "上傳圖片",
+      "dropHere": "拖放圖片到這裡",
+      "orClick": "或點擊選擇",
+      "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP",
+      "extracting": "正在提取文字...",
+      "uploadNew": "上傳新圖片以重新開始"
+    },
+    "extractedText": {
+      "title": "提取的文字",
+      "highlightedWords": "已標記的生字",
+      "clickToRemove": "點擊移除",
+      "highlightTip": "提示：在上方文字中選取生字，將它們加入你的詞彙表"
+    },
+    "summary": {
+      "title": "摘要",
+      "generate": "生成摘要",
+      "generating": "正在生成...",
+      "emptyTip": "點擊上方按鈕生成文字摘要"
+    },
+    "adaptedText": {
+      "title": "改寫文字",
+      "adapt": "改寫",
+      "adapting": "正在改寫...",
+      "adaptedTab": "改寫版本",
+      "simplifiedTab": "簡化版本",
+      "emptyTip": "點擊上方按鈕將文字改寫至你的程度",
+      "simplifyFurther": "進一步簡化",
+      "simplifying": "正在簡化...",
+      "simplifiedEmptyTip": "點擊下方按鈕創建更簡單的版本",
+      "generateSimplified": "生成簡化版本"
+    },
+    "mindMap": {
+      "title": "思維導圖",
+      "generate": "生成思維導圖",
+      "generating": "正在生成...",
+      "regenerate": "重新生成",
+      "emptyTip": "點擊上方按鈕生成視覺化思維導圖"
+    },
+    "readingTest": {
+      "title": "閱讀測驗",
+      "generate": "生成測驗",
+      "generating": "正在生成...",
+      "submit": "提交答案",
+      "retry": "重新作答",
+      "emptyTip": "點擊上方按鈕生成理解測驗",
+      "multipleChoice": "選擇題",
+      "trueFalse": "是非題",
+      "shortAnswer": "短答題",
+      "true": "正確",
+      "false": "錯誤",
+      "yourScore": "你的分數",
+      "excellent": "太棒了！理解得很好！",
+      "good": "做得不錯！繼續努力！",
+      "keepPracticing": "繼續練習，會越來越好！",
+      "shortAnswerPlaceholder": "在這裡輸入你的答案...",
+      "suggestedAnswer": "參考答案",
+      "explanation": "解釋"
+    },
+    "glossary": {
+      "title": "詞彙表",
+      "generate": "生成詞彙表",
+      "generating": "正在生成...",
+      "regenerate": "重新生成",
+      "download": "下載 CSV",
+      "word": "生字",
+      "englishDefinition": "英文解釋",
+      "chineseDefinition": "中文解釋",
+      "example": "例句",
+      "emptyTip": "點擊上方按鈕為 {{count}} 個已標記生字生成解釋",
+      "noHighlightedWords": "請先在提取的文字中標記生字"
+    },
+    "workflow": {
+      "title": "進度",
+      "progress": "已完成 {{percent}}%",
+      "upload": "上傳",
+      "summary": "摘要",
+      "adapt": "改寫",
+      "mindmap": "思維導圖",
+      "test": "測驗",
+      "highlight": "標記生字",
+      "glossary": "詞彙表"
+    }
+  },
+  "history": {
+    "title": "閱讀記錄",
+    "description": "你的閱讀工作階段儲存在瀏覽器中。",
+    "name": "文字預覽",
+    "emptyTip": "沒有記錄",
+    "date": "日期",
+    "actions": "操作",
+    "import": "匯入",
+    "importTip": "匯入閱讀工作階段",
+    "importSuccess": "{{title}} 匯入成功",
+    "importFailed": "{{title}} 匯入失敗",
+    "load": "載入",
+    "export": "匯出",
+    "delete": "刪除",
+    "loadMore": "載入更多記錄",
+    "noHistory": "沒有記錄"
+  },
+  "setting": {
+    "title": "設定",
+    "description": "所有設定都儲存在你的瀏覽器中。",
+    "model": "模型",
+    "general": "系統",
+    "provider": "AI 供應商",
+    "providerTip": "AI 服務供應商",
+    "mode": "API 模式",
+    "modeTip": "本地模式下，請求直接發送。代理模式下，請求通過伺服器轉發。",
+    "local": "本地",
+    "proxy": "代理",
+    "apiKeyLabel": "API 金鑰",
+    "apiKeyPlaceholder": "輸入你的 API 金鑰",
+    "apiUrlLabel": "API 基礎網址",
+    "apiUrlPlaceholder": "輸入 API 基礎網址",
+    "accessPassword": "存取密碼",
+    "accessPasswordPlaceholder": "輸入存取密碼",
+    "accessPasswordTip": "伺服器端 API 認證",
+    "language": "語言",
+    "languageTip": "系統會根據你的瀏覽器自動選擇",
+    "system": "系統",
+    "light": "淺色",
+    "dark": "深色",
+    "debug": "除錯",
+    "debugTip": "啟用以進行疑難排解",
+    "resetSetting": "重設設定",
+    "resetAllSettings": "重設所有設定並清除快取",
+    "resetSettingWarning": "這將清除所有數據並重設應用程式。",
+    "version": "目前版本",
+    "checkForUpdate": "檢查更新",
+    "confirm": "確定",
+    "cancel": "取消",
+    "save": "儲存"
+  },
+  "editor": {
+    "copy": "複製",
+    "mermaid": {
+      "downloadSvg": "下載為圖片",
+      "copyText": "複製文字",
+      "zoomIn": "放大",
+      "zoomOut": "縮小",
+      "resize": "重設大小"
+    },
+    "tooltip": {
+      "bold": "粗體",
+      "italic": "斜體",
+      "strikethrough": "刪除線",
+      "code": "程式碼",
+      "math": "數學",
+      "link": "連結",
+      "quote": "引用"
+    },
+    "slash": {
+      "heading": {
+        "name": "標題",
+        "description": "插入標題"
+      },
+      "h1": {
+        "name": "標題 1",
+        "description": "插入標題 1"
+      },
+      "h2": {
+        "name": "標題 2",
+        "description": "插入標題 2"
+      },
+      "h3": {
+        "name": "標題 3",
+        "description": "插入標題 3"
+      },
+      "list": {
+        "name": "清單",
+        "description": "插入清單"
+      },
+      "ul": {
+        "name": "項目符號清單",
+        "description": "插入項目符號清單"
+      },
+      "ol": {
+        "name": "編號清單",
+        "description": "插入編號清單"
+      },
+      "link": {
+        "name": "連結",
+        "description": "插入連結"
+      },
+      "code": {
+        "name": "程式碼區塊",
+        "description": "插入程式碼區塊"
+      },
+      "quote": {
+        "name": "引用",
+        "description": "插入引用"
+      }
+    },
+    "placeholder": "輸入文字，或輸入 \"/\" 使用命令"
+  }
+}

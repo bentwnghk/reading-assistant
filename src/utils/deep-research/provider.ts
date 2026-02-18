@@ -46,17 +46,14 @@ export async function createAIProvider({
     }
     const googleVertex = createVertex(googleVertexOptions);
     return googleVertex(model, settings);
-  } else if (provider === "openai") {
+  } else if (provider === "openai" || provider === "openaicompatible") {
     const { createOpenAI } = await import("@ai-sdk/openai");
     const openai = createOpenAI({
       baseURL,
       apiKey,
+      headers,
     });
-    return model.startsWith("gpt-4o") ||
-      model.startsWith("gpt-4.1") ||
-      model.startsWith("gpt-5")
-      ? openai.responses(model)
-      : openai(model, settings);
+    return openai(model, settings);
   } else if (provider === "anthropic") {
     const { createAnthropic } = await import("@ai-sdk/anthropic");
     const anthropic = createAnthropic({
@@ -107,26 +104,6 @@ export async function createAIProvider({
       apiKey,
     });
     return openrouter(model, settings);
-  } else if (provider === "openaicompatible") {
-    const { createOpenAICompatible } = await import(
-      "@ai-sdk/openai-compatible"
-    );
-    const openaicompatible = createOpenAICompatible({
-      name: "openaicompatible",
-      baseURL,
-      apiKey,
-    });
-    return openaicompatible(model, settings);
-  } else if (provider === "pollinations") {
-    const { createOpenAICompatible } = await import(
-      "@ai-sdk/openai-compatible"
-    );
-    const pollinations = createOpenAICompatible({
-      name: "pollinations",
-      baseURL,
-      apiKey,
-    });
-    return pollinations(model, settings);
   } else if (provider === "ollama") {
     const { createOllama } = await import("ollama-ai-provider");
     const local = global.location || {};

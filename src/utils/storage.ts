@@ -1,7 +1,7 @@
 import localforage from "localforage";
 
-export const researchStore = localforage.createInstance({
-  name: "DeepResearch",
-  storeName: "researchStore",
-  description: "Stores the history and results of in-depth research.",
+export const readingStore = localforage.createInstance({
+  name: "ReadingAssistant",
+  storeName: "readingStore",
+  description: "Stores the history and results of reading sessions.",
 });
