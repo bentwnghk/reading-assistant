@@ -8,15 +8,14 @@ function I18Provider({ children }: { children: React.ReactNode }) {
   const { language } = useSettingStore();
 
   useLayoutEffect(() => {
-    const settingStore = useSettingStore.getState();
-    if (settingStore.language === "") {
+    if (language === "system" || language === "") {
       const browserLang = detectLanguage();
-      settingStore.update({ language: browserLang });
       i18n.changeLanguage(browserLang);
+      document.documentElement.setAttribute("lang", browserLang);
     } else {
       i18n.changeLanguage(language);
+      document.documentElement.setAttribute("lang", language);
     }
-    document.documentElement.setAttribute("lang", language);
     document.title = i18n.t("title");
   }, [language]);
 

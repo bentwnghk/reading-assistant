@@ -334,13 +334,13 @@ function Setting({ open, onClose }: SettingProps) {
                         <SelectValue placeholder={t("setting.system")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t("setting.system")}</SelectItem>
-                        {Object.entries(locales).map(([key, value]) => (
-                          <SelectItem key={key} value={key}>
-                            {value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                         <SelectItem value="system">{t("setting.system")}</SelectItem>
+                         {Object.entries(locales).map(([key, value]) => (
+                           <SelectItem key={key} value={key}>
+                             {value}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
                     </Select>
                   </FormControl>
                 </FormItem>

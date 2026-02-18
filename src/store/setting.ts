@@ -28,7 +28,7 @@ export const defaultValues: SettingStore = {
   openaicompatibleApiKey: "",
   openaicompatibleApiProxy: "",
   accessPassword: "",
-  language: "",
+  language: "system",
   theme: "system",
   debug: "disable",
   smoothTextStreamType: "word",
