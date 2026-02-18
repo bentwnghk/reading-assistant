@@ -190,6 +190,7 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 [
   {
     "word": "example",
+    "partOfSpeech": "noun",
     "englishDefinition": "A clear, simple English definition appropriate for secondary students",
     "chineseDefinition": "繁體中文解釋",
     "example": "A simple example sentence using the word in context"
@@ -197,6 +198,7 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 ]
 
 **Requirements:**
+- Part of speech should be: noun, verb, adjective, adverb, preposition, conjunction, interjection, pronoun, or phrase.
 - English definitions should be simple and clear for secondary students.
 - Chinese translations MUST be in Traditional Chinese (繁體中文), not Simplified.
 - Examples should be relevant and easy to understand.

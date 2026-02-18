@@ -15,6 +15,7 @@ interface ReadingTestQuestion {
 
 interface GlossaryEntry {
   word: string;
+  partOfSpeech: string;
   englishDefinition: string;
   chineseDefinition: string;
   example?: string;
