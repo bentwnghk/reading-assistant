@@ -41,7 +41,7 @@ function MarkdownBlock({ children: content, ...rest }: Options) {
       rehypePlugins={[
         rehypeRaw,
         [rehypeHighlight, { detect: true, ignoreMissing: true }],
-        rehypeKatex,
+        [rehypeKatex, { strict: false }],
         ...rehypePlugins,
       ]}
       disallowedElements={["script", "form"]}
