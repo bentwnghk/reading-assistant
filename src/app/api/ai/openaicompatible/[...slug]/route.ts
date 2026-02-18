@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { Md5 } from "ts-md5";
 
 export const runtime = "edge";
 export const preferredRegion = [
@@ -16,6 +17,26 @@ const API_PROXY_BASE_URL = process.env.OPENAI_COMPATIBLE_API_BASE_URL || "";
 const API_KEY = process.env.OPENAI_COMPATIBLE_API_KEY || "";
 const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || "";
 
+function generateSignature(key: string, timestamp: number): string {
+  const timePrefix = timestamp.toString().substring(0, 8);
+  const data = `${key}::${timePrefix}`;
+  return Md5.hashStr(data);
+}
+
+function verifySignature(signature: string, key: string): boolean {
+  const now = Date.now();
+  
+  for (let offset = -1; offset <= 1; offset++) {
+    const checkTime = now + (offset * 10000);
+    const expected = generateSignature(key, checkTime);
+    if (signature === expected) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
 async function handler(req: NextRequest) {
   let body;
   if (req.method.toUpperCase() !== "GET") {
@@ -26,18 +47,35 @@ async function handler(req: NextRequest) {
   searchParams.delete("slug");
   const params = searchParams.toString();
 
+  if (!API_PROXY_BASE_URL) {
+    return NextResponse.json(
+      { error: { code: 500, message: "API base URL not configured" } },
+      { status: 500 }
+    );
+  }
+
+  const clientAuth = req.headers.get("Authorization") || "";
+  
+  let authorization: string;
+  
+  if (ACCESS_PASSWORD && API_KEY) {
+    const token = clientAuth.replace("Bearer ", "");
+    
+    if (!token || !verifySignature(token, ACCESS_PASSWORD)) {
+      return NextResponse.json(
+        { error: { code: 403, message: "No permissions", status: "FORBIDDEN" } },
+        { status: 403 }
+      );
+    }
+    
+    authorization = `Bearer ${API_KEY}`;
+  } else {
+    authorization = clientAuth;
+  }
+
   try {
     let url = `${API_PROXY_BASE_URL}/${decodeURIComponent(path.join("/"))}`;
     if (params) url += `?${params}`;
-    
-    const clientAuth = req.headers.get("Authorization") || "";
-    
-    let authorization: string;
-    if (ACCESS_PASSWORD && API_KEY) {
-      authorization = `Bearer ${API_KEY}`;
-    } else {
-      authorization = clientAuth;
-    }
     
     const payload: RequestInit = {
       method: req.method,
