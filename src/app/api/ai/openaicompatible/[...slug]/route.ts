@@ -13,6 +13,8 @@ export const preferredRegion = [
 ];
 
 const API_PROXY_BASE_URL = process.env.OPENAI_COMPATIBLE_API_BASE_URL || "";
+const API_KEY = process.env.OPENAI_COMPATIBLE_API_KEY || "";
+const ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || "";
 
 async function handler(req: NextRequest) {
   let body;
@@ -27,11 +29,21 @@ async function handler(req: NextRequest) {
   try {
     let url = `${API_PROXY_BASE_URL}/${decodeURIComponent(path.join("/"))}`;
     if (params) url += `?${params}`;
+    
+    const clientAuth = req.headers.get("Authorization") || "";
+    
+    let authorization: string;
+    if (ACCESS_PASSWORD && API_KEY) {
+      authorization = `Bearer ${API_KEY}`;
+    } else {
+      authorization = clientAuth;
+    }
+    
     const payload: RequestInit = {
       method: req.method,
       headers: {
         "Content-Type": req.headers.get("Content-Type") || "application/json",
-        Authorization: req.headers.get("Authorization") || "",
+        Authorization: authorization,
       },
     };
     if (body) payload.body = JSON.stringify(body);

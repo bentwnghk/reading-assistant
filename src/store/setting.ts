@@ -21,7 +21,7 @@ interface SettingActions {
 }
 
 export const defaultValues: SettingStore = {
-  provider: "openai",
+  provider: "openaicompatible",
   mode: "",
   openAIApiKey: "",
   openAIApiProxy: "",
