@@ -331,16 +331,15 @@ function Setting({ open, onClose }: SettingProps) {
               <p className="text-sm text-muted-foreground">
                 <Trans
                   i18nKey="setting.apiKeyTip"
-                  components={{
-                    link: (
-                      <a
-                        href="https://api.mr5ai.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary underline"
-                      />
-                    ),
-                  }}
+                  components={[
+                    <a
+                      key="api-link"
+                      href="https://api.mr5ai.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline"
+                    />,
+                  ]}
                 />
               </p>
               <div

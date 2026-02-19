@@ -153,7 +153,7 @@
     "proxy": "EDU",
     "apiKeyLabel": "API Key",
     "apiKeyPlaceholder": "Enter your API key",
-    "apiKeyTip": "💡 Get your Mr.🆖 AI Hub API Key at <link>https://api.mr5ai.com</link>",
+    "apiKeyTip": "💡 Get your Mr.🆖 AI Hub API Key at <1>https://api.mr5ai.com</1>",
     "apiUrlLabel": "API Base URL",
     "apiUrlPlaceholder": "Enter API base URL",
     "accessPassword": "Access Password",

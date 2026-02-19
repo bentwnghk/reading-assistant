@@ -153,7 +153,7 @@
     "proxy": "教育",
     "apiKeyLabel": "API 金鑰",
     "apiKeyPlaceholder": "輸入你的 API 金鑰",
-    "apiKeyTip": "💡 往 <link>https://api.mr5ai.com</link> 取得你的 Mr.🆖 AI Hub API 金鑰",
+    "apiKeyTip": "💡 往 <1>https://api.mr5ai.com</1> 取得你的 Mr.🆖 AI Hub API 金鑰",
     "apiUrlLabel": "API 基礎網址",
     "apiUrlPlaceholder": "輸入 API 基礎網址",
     "accessPassword": "訪問密碼",
