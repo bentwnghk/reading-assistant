@@ -45,7 +45,7 @@ function useReadingAssistant() {
     addOriginalImage(imageData);
 
     try {
-      const visionModel = await createModelProvider("gpt-4.1-mini");
+      const visionModel = await createModelProvider(model);
       
       const result = streamText({
         model: visionModel,
