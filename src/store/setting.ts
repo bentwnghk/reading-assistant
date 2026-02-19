@@ -3,12 +3,11 @@ import { persist } from "zustand/middleware";
 
 export const AVAILABLE_MODELS = [
   "gpt-5-mini",
+  "deepseek-chat",
   "gpt-5.1",
   "gemini-3-flash-preview",
-  "claude-sonnet-4-5",
   "glm-4.7",
-  "minimax-m2.5",
-  "deepseek-chat",
+  "claude-sonnet-4-5",
 ] as const;
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
@@ -38,9 +37,9 @@ export const defaultValues: SettingStore = {
   mode: "",
   model: "gpt-5-mini",
   openAIApiKey: "",
-  openAIApiProxy: "",
+  openAIApiProxy: "https://api.mr5ai.com",
   openaicompatibleApiKey: "",
-  openaicompatibleApiProxy: "",
+  openaicompatibleApiProxy: "https://api.mr5ai.com",
   accessPassword: "",
   language: "system",
   theme: "system",
