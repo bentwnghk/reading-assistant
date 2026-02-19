@@ -24,6 +24,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -314,6 +315,20 @@ function Setting({ open, onClose }: SettingProps) {
                       <FormLabel className="from-label">
                         {t("setting.apiKeyLabel")}
                       </FormLabel>
+                      <FormDescription>
+                        {t("setting.apiKeyTip", {
+                          link: (
+                            <a
+                              href="https://api.mr5ai.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary underline"
+                            >
+                              https://api.mr5ai.com
+                            </a>
+                          ),
+                        })}
+                      </FormDescription>
                       <FormControl className="form-field">
                         <Password
                           type="text"
