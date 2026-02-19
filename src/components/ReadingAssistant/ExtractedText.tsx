@@ -109,7 +109,8 @@ function ExtractedText() {
         throw new Error("TTS request failed");
       }
 
-      const audioBlob = await response.blob();
+      const audioBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
       const audioUrl = URL.createObjectURL(audioBlob);
       
       const audio = new Audio(audioUrl);
