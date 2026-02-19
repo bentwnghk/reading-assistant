@@ -22,8 +22,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: {
-      type: "image/svg+xml",
-      url: "./logo.svg",
+      type: "image/png",
+      url: "./logo.png",
     },
   },
   description: APP_DESCRIPTION,
