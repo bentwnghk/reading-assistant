@@ -80,19 +80,27 @@ function ExtractedText() {
         "Content-Type": "application/json",
       };
 
-      if (mode === "local" && openaicompatibleApiKey) {
-        headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
-      } else if (mode === "proxy" && accessPassword) {
-        headers["Authorization"] = `Bearer ${accessPassword}`;
+      let url: string;
+      if (mode === "local") {
+        url = `${openaicompatibleApiProxy}/audio/speech`;
+        if (openaicompatibleApiKey) {
+          headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
+        }
+      } else {
+        url = "/api/ai/openaicompatible/audio/speech";
+        if (accessPassword) {
+          headers["Authorization"] = `Bearer ${accessPassword}`;
+        }
       }
 
-      const baseUrl = mode === "local" ? openaicompatibleApiProxy : "";
-      const response = await fetch(`${baseUrl}/api/ai/openai/tts`, {
+      const response = await fetch(url, {
         method: "POST",
         headers,
         body: JSON.stringify({
-          text: selectedText,
+          model: "tts-1",
+          input: selectedText,
           voice: ttsVoice,
+          response_format: "mp3",
         }),
       });
 
