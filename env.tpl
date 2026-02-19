@@ -107,10 +107,6 @@ MCP_THINKING_MODEL=
 # (Optional) MCP Server task model id, used for secondary tasks, high output models are recommended.
 MCP_TASK_MODEL=
 
-# (Optional) Vision model used for image text extraction. Overrides the model selected in Settings.
-# Must be a vision-capable model supported by the configured AI provider.
-NEXT_PUBLIC_VISION_MODEL=
-
 # (Optional) Disable server-side AI provider usage permissions
 # Possible values ​​include: google, openai, anthropic, deepseek, xai, mistral, azure, openrouter, openaicompatible, pollinations, ollama
 NEXT_PUBLIC_DISABLED_AI_PROVIDER=

@@ -140,6 +140,7 @@
     "title": "設定",
     "description": "所有設定都儲存在你的瀏覽器中。",
     "model": "模型",
+    "visionModel": "視覺模型",
     "general": "系統",
     "provider": "AI 供應商",
     "providerTip": "AI 服務供應商",

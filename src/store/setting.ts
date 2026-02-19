@@ -12,10 +12,15 @@ export const AVAILABLE_MODELS = [
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
 
+export const VISION_MODELS = ["gpt-4.1-mini", "gpt-5-mini"] as const;
+
+export type VisionModel = (typeof VISION_MODELS)[number];
+
 export interface SettingStore {
   provider: string;
   mode: string;
   model: AvailableModel;
+  visionModel: VisionModel;
   openAIApiKey: string;
   openAIApiProxy: string;
   openaicompatibleApiKey: string;
@@ -36,6 +41,7 @@ export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "",
   model: "gpt-5-mini",
+  visionModel: "gpt-4.1-mini",
   openAIApiKey: "",
   openAIApiProxy: "https://api.mr5ai.com",
   openaicompatibleApiKey: "",

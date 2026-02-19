@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useSettingStore, AVAILABLE_MODELS } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS } from "@/store/setting";
 import { OPENAI_BASE_URL } from "@/constants/urls";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
@@ -48,6 +48,7 @@ const formSchema = z.object({
   provider: z.string(),
   mode: z.string().optional(),
   model: z.enum(AVAILABLE_MODELS),
+  visionModel: z.enum(VISION_MODELS),
   openAIApiKey: z.string().optional(),
   openAIApiProxy: z.string().optional(),
   openaicompatibleApiKey: z.string().optional(),
@@ -215,6 +216,37 @@ function Setting({ open, onClose }: SettingProps) {
                         {AVAILABLE_MODELS.map((model) => (
                           <SelectItem key={model} value={model}>
                             {model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="visionModel"
+              render={({ field }) => (
+                <FormItem className="from-item">
+                  <FormLabel className="from-label">
+                    {t("setting.visionModel")}
+                  </FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        updateSetting("visionModel", value);
+                      }}
+                    >
+                      <SelectTrigger className="form-field">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VISION_MODELS.map((m) => (
+                          <SelectItem key={m} value={m}>
+                            {m}
                           </SelectItem>
                         ))}
                       </SelectContent>

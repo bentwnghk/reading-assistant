@@ -32,8 +32,7 @@ function handleError(error: unknown) {
 }
 
 function useReadingAssistant() {
-  const { smoothTextStreamType } = useSettingStore();
-  const { model } = useSettingStore();
+  const { smoothTextStreamType, model, visionModel: visionModelName } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
   const [status, setStatus] = useState<ReadingStatus>("idle");
@@ -45,7 +44,6 @@ function useReadingAssistant() {
     addOriginalImage(imageData);
 
     try {
-      const visionModelName = process.env.NEXT_PUBLIC_VISION_MODEL || model;
       const visionModel = await createModelProvider(visionModelName);
       
       const result = streamText({

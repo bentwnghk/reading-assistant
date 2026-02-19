@@ -140,6 +140,7 @@
     "title": "Settings",
     "description": "All settings are saved in your browser.",
     "model": "Model",
+    "visionModel": "Vision Model",
     "general": "System",
     "provider": "AI Provider",
     "providerTip": "AI service provider",
