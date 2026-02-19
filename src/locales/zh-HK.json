@@ -45,7 +45,7 @@
       "title": "提取的文字",
       "highlightedWords": "詞彙列表",
       "clickToRemove": "點擊移除",
-      "highlightTip": "提示：在上方文字中選取單字或詞組，將它們加入你的詞彙表",
+      "highlightTip": "提示：在上方文字中選取單字或詞組，將它們朗讀或加入你的詞彙表",
       "addWord": "加入詞彙表",
       "readAloud": "朗讀"
     },
