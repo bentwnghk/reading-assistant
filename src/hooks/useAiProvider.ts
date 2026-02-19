@@ -20,36 +20,62 @@ function useModelProvider() {
       settings,
     };
 
-    switch (provider) {
-      case "openai":
-        const { openAIApiKey = "", openAIApiProxy } =
-          useSettingStore.getState();
-        if (mode === "local") {
+    if (mode === "proxy") {
+      options.apiKey = generateSignature(accessPassword, Date.now());
+      switch (provider) {
+        case "openai":
+          options.baseURL = location.origin + "/api/ai/openai/v1";
+          break;
+        case "openaicompatible":
+          options.baseURL = location.origin + "/api/ai/openaicompatible/v1";
+          break;
+        case "google":
+          options.baseURL = location.origin + "/api/ai/google/v1beta";
+          break;
+        case "anthropic":
+          options.baseURL = location.origin + "/api/ai/anthropic/v1";
+          break;
+        case "deepseek":
+          options.baseURL = location.origin + "/api/ai/deepseek/v1";
+          break;
+        case "xai":
+          options.baseURL = location.origin + "/api/ai/xai/v1";
+          break;
+        case "mistral":
+          options.baseURL = location.origin + "/api/ai/mistral/v1";
+          break;
+        case "openrouter":
+          options.baseURL = location.origin + "/api/ai/openrouter/v1";
+          break;
+        case "ollama":
+          options.baseURL = location.origin + "/api/ai/ollama/v1";
+          break;
+        case "pollinations":
+          options.baseURL = location.origin + "/api/ai/pollinations/v1";
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (provider) {
+        case "openai":
+          const { openAIApiKey = "", openAIApiProxy } =
+            useSettingStore.getState();
           options.baseURL = completePath(
             openAIApiProxy || OPENAI_BASE_URL,
             "/v1"
           );
           options.apiKey = multiApiKeyPolling(openAIApiKey);
-        } else {
-          options.baseURL = location.origin + "/api/ai/openai/v1";
-        }
-        break;
-      case "openaicompatible":
-        const { openaicompatibleApiKey = "", openaicompatibleApiProxy } =
-          useSettingStore.getState();
-        if (mode === "local") {
+          break;
+        case "openaicompatible":
+          const { openaicompatibleApiKey = "", openaicompatibleApiProxy } =
+            useSettingStore.getState();
           options.baseURL = completePath(openaicompatibleApiProxy, "/v1");
           options.apiKey = multiApiKeyPolling(openaicompatibleApiKey);
-        } else {
-          options.baseURL = location.origin + "/api/ai/openaicompatible/v1";
-        }
-        break;
-      default:
-        break;
-    }
-
-    if (mode === "proxy") {
-      options.apiKey = generateSignature(accessPassword, Date.now());
+          break;
+        default:
+          break;
+      }
     }
 
     return await createAIProvider(options);
