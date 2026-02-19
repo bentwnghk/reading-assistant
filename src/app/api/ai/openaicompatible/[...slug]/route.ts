@@ -55,10 +55,13 @@ async function handler(req: NextRequest) {
   }
 
   const clientAuth = req.headers.get("Authorization") || "";
+  const authVerified = req.headers.get("X-Auth-Verified") === "true";
   
   let authorization: string;
   
-  if (ACCESS_PASSWORD && API_KEY) {
+  if (authVerified) {
+    authorization = clientAuth;
+  } else if (ACCESS_PASSWORD && API_KEY) {
     const token = clientAuth.replace("Bearer ", "");
     
     if (!token || !verifySignature(token, ACCESS_PASSWORD)) {

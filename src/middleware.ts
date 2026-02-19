@@ -192,6 +192,7 @@ export async function middleware(request: NextRequest) {
           request.headers.get("Content-Type") || "application/json"
         );
         requestHeaders.set("Authorization", `Bearer ${apiKey}`);
+        requestHeaders.set("X-Auth-Verified", "true");
         return NextResponse.next({
           request: {
             headers: requestHeaders,
