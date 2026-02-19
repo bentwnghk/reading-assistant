@@ -77,7 +77,7 @@ flowchart LR
     B --> F[❓ Generate Test]
     B --> G[📖 Build Glossary]
     
-    D --> E2[⬇️ Simplify Further]
+    E --> E2[⬇️ Simplify Further]
     F --> F2[📊 Submit & Score]
 ```
 
