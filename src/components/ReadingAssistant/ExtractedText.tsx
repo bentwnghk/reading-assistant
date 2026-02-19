@@ -13,6 +13,7 @@ function ExtractedText() {
   const { extractedText, highlightedWords, addHighlightedWord, removeHighlightedWord } = useReadingStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
+  const isTouchDeviceRef = useRef(false);
 
   const handleSelectionChange = useCallback(() => {
     const selectionObj = window.getSelection();
@@ -40,15 +41,21 @@ function ExtractedText() {
     }
   }, []);
 
-  const handleAddWord = useCallback(() => {
-    if (selection?.text) {
-      addHighlightedWord(selection.text);
+  const handleAddWord = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    
+    const selectionObj = window.getSelection();
+    const selectedText = selectionObj?.toString().trim() || selection?.text;
+    
+    if (selectedText) {
+      addHighlightedWord(selectedText);
       setSelection(null);
-      window.getSelection()?.removeAllRanges();
+      selectionObj?.removeAllRanges();
     }
   }, [selection, addHighlightedWord]);
 
-  const handleMouseDown = useCallback((e: MouseEvent) => {
+  const handleMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
     const target = e.target as HTMLElement;
     if (!target.closest(".selection-popup")) {
       setSelection(null);
@@ -56,12 +63,20 @@ function ExtractedText() {
   }, []);
 
   useEffect(() => {
+    isTouchDeviceRef.current = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  }, []);
+
+  useEffect(() => {
     document.addEventListener("mouseup", handleSelectionChange);
+    document.addEventListener("touchend", handleSelectionChange);
     document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("touchstart", handleMouseDown, { passive: true });
 
     return () => {
       document.removeEventListener("mouseup", handleSelectionChange);
+      document.removeEventListener("touchend", handleSelectionChange);
       document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("touchstart", handleMouseDown);
     };
   }, [handleSelectionChange, handleMouseDown]);
 
@@ -110,6 +125,7 @@ function ExtractedText() {
           className="selection-popup fixed z-[9999] shadow-md"
           style={{ left: selection.x, top: selection.y, transform: "translateX(-50%)" }}
           onClick={handleAddWord}
+          onTouchEnd={handleAddWord}
         >
           <Plus className="h-4 w-4" />
           <span>{t("reading.extractedText.addWord")}</span>
