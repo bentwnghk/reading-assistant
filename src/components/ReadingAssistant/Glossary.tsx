@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { BookOpen, LoaderCircle, Download } from "lucide-react";
+import { BookMarked, LoaderCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -71,12 +71,12 @@ function Glossary() {
               </>
             ) : glossary.length > 0 ? (
               <>
-                <BookOpen className="h-4 w-4" />
+                <BookMarked className="h-4 w-4" />
                 <span>{t("reading.glossary.regenerate")}</span>
               </>
             ) : (
               <>
-                <BookOpen className="h-4 w-4" />
+                <BookMarked className="h-4 w-4" />
                 <span>{t("reading.glossary.generate")}</span>
               </>
             )}
@@ -86,11 +86,12 @@ function Glossary() {
 
       {highlightedWords.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <BookMarked className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p>{t("reading.glossary.noHighlightedWords")}</p>
         </div>
       ) : glossary.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
+          <BookMarked className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p>{t("reading.glossary.emptyTip", { count: highlightedWords.length })}</p>
         </div>
       ) : (
