@@ -78,7 +78,8 @@ Rewrite this text to match the student's English level.
 }
 
 export function simplifyTextPrompt(age: number, text: string) {
-  return `You are simplifying a text even further for a ${age}-year-old student who needs extra help understanding. The text may have already been simplified before.
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `You are simplifying a text even further for a ${age}-year-old Hong Kong ${schoolLevel} student who needs extra help understanding. The text may have already been simplified before.
 
 <text>
 ${text}
@@ -92,15 +93,16 @@ Make this text even simpler while preserving its core meaning.
 - Use the simplest possible vocabulary (basic English words).
 - Make sentences very short and clear (6-10 words max per sentence).
 - Replace difficult words with easier synonyms.
-- Add brief explanations in parentheses for any remaining complex concepts.
+- Add brief explanations in parentheses for any remaining complex concepts and vocabulary.
 - Use simple sentence structures (subject-verb-object).
 - Keep the same meaning but make it extremely easy to read.
 
 **Respond with ONLY the simplified text.**`;
 }
 
-export function generateMindMapPrompt(text: string) {
-  return `Create a mind map for this text to help students visualize and connect the main ideas.
+export function generateMindMapPrompt(age: number, text: string) {
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `Create a mind map for this text to help a ${age}-year-old Hong Kong ${schoolLevel} student visualize and connect the main ideas.
 
 <text>
 ${text}
@@ -151,7 +153,7 @@ Generate 8 questions in JSON format. You MUST respond with ONLY a valid JSON arr
   },
   {
     "id": "q2",
-    "type": "true-false",
+    "type": "true-false-notgiven",
     "question": "Statement to evaluate",
     "correctAnswer": "true",
     "explanation": "Brief explanation"
@@ -167,7 +169,7 @@ Generate 8 questions in JSON format. You MUST respond with ONLY a valid JSON arr
 
 **Question Distribution:**
 - 5 multiple-choice questions (test comprehension and details)
-- 2 true/false questions (test factual understanding)
+- 2 true/false/not given questions (test factual understanding)
 - 1 short-answer question (test deeper understanding)
 
 **Guidelines:**

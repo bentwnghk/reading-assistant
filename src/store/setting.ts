@@ -4,10 +4,8 @@ import { persist } from "zustand/middleware";
 export const AVAILABLE_MODELS = [
   "gpt-5-mini",
   "deepseek-chat",
-  "gpt-5.1",
   "gemini-3-flash-preview",
   "glm-4.7",
-  "claude-sonnet-4-5",
 ] as const;
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
@@ -16,7 +14,7 @@ export const VISION_MODELS = ["gpt-4.1-mini", "gpt-5-mini"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
-export const TTS_VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"] as const;
+export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] as const;
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
 
