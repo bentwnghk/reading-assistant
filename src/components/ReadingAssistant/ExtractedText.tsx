@@ -106,27 +106,44 @@ function ExtractedText() {
       });
 
       if (!response.ok) {
-        throw new Error("TTS request failed");
+        const errText = await response.text();
+        throw new Error(`TTS request failed (${response.status}): ${errText}`);
       }
 
+      const contentType = response.headers.get("content-type") || "";
       const audioBuffer = await response.arrayBuffer();
+      console.debug(`[TTS] content-type: "${contentType}", bytes: ${audioBuffer.byteLength}`);
+
+      if (audioBuffer.byteLength === 0) {
+        throw new Error("TTS returned empty audio buffer");
+      }
+
       const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
       const audioUrl = URL.createObjectURL(audioBlob);
-      
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
 
-      audio.onerror = () => {
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
+      await new Promise<void>((resolve, reject) => {
+        const audio = new Audio();
+        audioRef.current = audio;
 
-      await audio.play();
+        audio.oncanplay = () => {
+          audio.play().then(resolve).catch(reject);
+        };
+
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+        };
+
+        audio.onerror = (e) => {
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+          reject(new Error(`Audio element error: ${JSON.stringify(e)}`));
+        };
+
+        audio.src = audioUrl;
+        audio.load();
+      });
+
       setSelection(null);
       selectionObj?.removeAllRanges();
     } catch (error) {
