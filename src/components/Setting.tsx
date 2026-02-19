@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS } from "@/store/setting";
-import { OPENAI_BASE_URL } from "@/constants/urls";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 
@@ -183,7 +182,6 @@ function Setting({ open, onClose }: SettingProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="openai">OpenAI</SelectItem>
                         <SelectItem value="openaicompatible">
                           OpenAI Compatible
                         </SelectItem>
@@ -256,53 +254,6 @@ function Setting({ open, onClose }: SettingProps) {
               )}
             />
             <div className={cn("space-y-4", { hidden: mode === "proxy" })}>
-              <div
-                className={cn("space-y-4", {
-                  hidden: provider !== "openai",
-                })}
-              >
-                <FormField
-                  control={form.control}
-                  name="openAIApiKey"
-                  render={({ field }) => (
-                    <FormItem className="from-item">
-                      <FormLabel className="from-label">
-                        {t("setting.apiKeyLabel")}
-                      </FormLabel>
-                      <FormControl className="form-field">
-                        <Password
-                          type="text"
-                          placeholder={t("setting.apiKeyPlaceholder")}
-                          {...field}
-                          onBlur={() =>
-                            updateSetting("openAIApiKey", form.getValues("openAIApiKey"))
-                          }
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="openAIApiProxy"
-                  render={({ field }) => (
-                    <FormItem className="from-item">
-                      <FormLabel className="from-label">
-                        {t("setting.apiUrlLabel")}
-                      </FormLabel>
-                      <FormControl className="form-field">
-                        <Input
-                          placeholder={OPENAI_BASE_URL}
-                          {...field}
-                          onBlur={() =>
-                            updateSetting("openAIApiProxy", form.getValues("openAIApiProxy"))
-                          }
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
               <div
                 className={cn("space-y-4", {
                   hidden: provider !== "openaicompatible",
