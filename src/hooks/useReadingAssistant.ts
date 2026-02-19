@@ -45,7 +45,8 @@ function useReadingAssistant() {
     addOriginalImage(imageData);
 
     try {
-      const visionModel = await createModelProvider(model);
+      const visionModelName = process.env.NEXT_PUBLIC_VISION_MODEL || model;
+      const visionModel = await createModelProvider(visionModelName);
       
       const result = streamText({
         model: visionModel,
