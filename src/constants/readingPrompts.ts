@@ -153,7 +153,7 @@ Generate 8 questions in JSON format. You MUST respond with ONLY a valid JSON arr
   },
   {
     "id": "q2",
-    "type": "true-false-notgiven",
+    "type": "true-false",
     "question": "Statement to evaluate",
     "correctAnswer": "true",
     "explanation": "Brief explanation"
@@ -169,7 +169,7 @@ Generate 8 questions in JSON format. You MUST respond with ONLY a valid JSON arr
 
 **Question Distribution:**
 - 5 multiple-choice questions (test comprehension and details)
-- 2 true/false/not given questions (test factual understanding)
+- 2 true/false questions (test factual understanding)
 - 1 short-answer question (test deeper understanding)
 
 **Guidelines:**
