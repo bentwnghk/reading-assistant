@@ -39,7 +39,7 @@ function ExtractedText() {
         setSelection({
           text: selectedText,
           x: rect.left + rect.width / 2,
-          y: rect.top - 45,
+          y: rect.bottom + 8,
         });
       } else {
         setSelection(null);
