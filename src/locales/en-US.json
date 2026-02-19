@@ -46,7 +46,8 @@
       "highlightedWords": "Vocabulary List",
       "clickToRemove": "Click to remove",
       "highlightTip": "Tip: Select words or phrases in the text above to add them to your vocabulary list",
-      "addWord": "Add to vocabulary"
+      "addWord": "Add to vocabulary",
+      "readAloud": "Read aloud"
     },
     "summary": {
       "title": "Summary",
@@ -141,6 +142,7 @@
     "description": "All settings are saved in your browser.",
     "model": "Model",
     "visionModel": "Vision Model",
+    "ttsVoice": "TTS Voice",
     "general": "System",
     "provider": "AI Provider",
     "providerTip": "AI service provider",

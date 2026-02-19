@@ -46,7 +46,8 @@
       "highlightedWords": "詞彙列表",
       "clickToRemove": "點擊移除",
       "highlightTip": "提示：在上方文字中選取單字或詞組，將它們加入你的詞彙表",
-      "addWord": "加入詞彙表"
+      "addWord": "加入詞彙表",
+      "readAloud": "朗讀"
     },
     "summary": {
       "title": "摘要",
@@ -141,6 +142,7 @@
     "description": "所有設定都儲存在你的瀏覽器中。",
     "model": "模型",
     "visionModel": "視覺模型",
+    "ttsVoice": "語音選擇",
     "general": "系統",
     "provider": "AI 供應商",
     "providerTip": "AI 服務供應商",

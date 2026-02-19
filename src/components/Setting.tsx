@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TTS_VOICES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 
@@ -48,6 +48,7 @@ const formSchema = z.object({
   mode: z.string().optional(),
   model: z.enum(AVAILABLE_MODELS),
   visionModel: z.enum(VISION_MODELS),
+  ttsVoice: z.enum(TTS_VOICES),
   openAIApiKey: z.string().optional(),
   openAIApiProxy: z.string().optional(),
   openaicompatibleApiKey: z.string().optional(),
@@ -245,6 +246,37 @@ function Setting({ open, onClose }: SettingProps) {
                         {VISION_MODELS.map((m) => (
                           <SelectItem key={m} value={m}>
                             {m}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ttsVoice"
+              render={({ field }) => (
+                <FormItem className="from-item">
+                  <FormLabel className="from-label">
+                    {t("setting.ttsVoice")}
+                  </FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        updateSetting("ttsVoice", value);
+                      }}
+                    >
+                      <SelectTrigger className="form-field">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TTS_VOICES.map((voice) => (
+                          <SelectItem key={voice} value={voice}>
+                            {voice}
                           </SelectItem>
                         ))}
                       </SelectContent>

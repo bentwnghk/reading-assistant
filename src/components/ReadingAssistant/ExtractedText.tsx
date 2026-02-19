@@ -2,8 +2,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { Plus } from "lucide-react";
+import { Plus, Volume2, Loader2 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
+import { useSettingStore } from "@/store/setting";
 import { Button } from "@/components/ui/button";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown"));
@@ -11,15 +12,18 @@ const MagicDown = dynamic(() => import("@/components/MagicDown"));
 function ExtractedText() {
   const { t } = useTranslation();
   const { extractedText, highlightedWords, addHighlightedWord, removeHighlightedWord } = useReadingStore();
+  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
+  const [isTTSLoading, setIsTTSLoading] = useState(false);
   const isTouchDeviceRef = useRef(false);
 
   const handleSelectionChange = useCallback(() => {
     const selectionObj = window.getSelection();
     const selectedText = selectionObj?.toString().trim();
 
-    if (!selectedText || selectedText.length === 0 || selectedText.length > 100) {
+    if (!selectedText || selectedText.length === 0 || selectedText.length > 4096) {
       setSelection(null);
       return;
     }
@@ -55,6 +59,73 @@ function ExtractedText() {
     }
   }, [selection, addHighlightedWord]);
 
+  const handleReadAloud = useCallback(async (e?: React.MouseEvent | React.TouchEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+
+    const selectionObj = window.getSelection();
+    const selectedText = selectionObj?.toString().trim() || selection?.text;
+
+    if (!selectedText) return;
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    setIsTTSLoading(true);
+
+    try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (mode === "local" && openaicompatibleApiKey) {
+        headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
+      } else if (mode === "proxy" && accessPassword) {
+        headers["Authorization"] = `Bearer ${accessPassword}`;
+      }
+
+      const baseUrl = mode === "local" ? openaicompatibleApiProxy : "";
+      const response = await fetch(`${baseUrl}/api/ai/openai/tts`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          text: selectedText,
+          voice: ttsVoice,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("TTS request failed");
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+
+      await audio.play();
+      setSelection(null);
+      selectionObj?.removeAllRanges();
+    } catch (error) {
+      console.error("TTS error:", error);
+    } finally {
+      setIsTTSLoading(false);
+    }
+  }, [selection, ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+
   const handleMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
     const target = e.target as HTMLElement;
     if (!target.closest(".selection-popup")) {
@@ -77,6 +148,10 @@ function ExtractedText() {
       document.removeEventListener("touchend", handleSelectionChange);
       document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("touchstart", handleMouseDown);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, [handleSelectionChange, handleMouseDown]);
 
@@ -120,16 +195,36 @@ function ExtractedText() {
       </div>
 
       {selection && (
-        <Button
-          size="sm"
-          className="selection-popup fixed z-[9999] shadow-md"
+        <div
+          className="selection-popup fixed z-[9999] shadow-md flex gap-0.5 bg-background border rounded-md p-0.5"
           style={{ left: selection.x, top: selection.y, transform: "translateX(-50%)" }}
-          onClick={handleAddWord}
-          onTouchEnd={handleAddWord}
         >
-          <Plus className="h-4 w-4" />
-          <span>{t("reading.extractedText.addWord")}</span>
-        </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleAddWord}
+            onTouchEnd={handleAddWord}
+            className="rounded-r-none border-r"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">{t("reading.extractedText.addWord")}</span>
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleReadAloud}
+            onTouchEnd={handleReadAloud}
+            disabled={isTTSLoading}
+            className="rounded-l-none"
+          >
+            {isTTSLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Volume2 className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">{t("reading.extractedText.readAloud")}</span>
+          </Button>
+        </div>
       )}
 
       <p className="text-xs text-muted-foreground mt-4">
