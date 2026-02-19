@@ -233,7 +233,7 @@ function useReadingAssistant() {
   }
 
   async function generateMindMap() {
-    const { extractedText, setMindMap, setStatus: setStoreStatus, setError } = readingStore;
+    const { studentAge, extractedText, setMindMap, setStatus: setStoreStatus, setError } = readingStore;
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -249,7 +249,7 @@ function useReadingAssistant() {
       const result = streamText({
         model: thinkingModel,
         system: getSystemPrompt(),
-        prompt: generateMindMapPrompt(extractedText),
+        prompt: generateMindMapPrompt(studentAge, extractedText),
         experimental_transform: smoothTextStream(smoothTextStreamType),
         onError: (error) => {
           const msg = handleError(error);
