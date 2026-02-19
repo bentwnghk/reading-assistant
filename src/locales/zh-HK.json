@@ -2,7 +2,7 @@
   "title": "Mr.🆖 英語閱讀助理",
   "theme": "主題",
   "openSource": "Mr.🆖 AI Hub",
-  "copyright": "由 {{name}} 提供",
+  "copyright": "由 {{name}} 驅動",
   "searchPlaceholder": "請輸入關鍵字",
   "header": {
     "session": {
@@ -37,7 +37,7 @@
       "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP",
       "extracting": "正在提取文字...",
       "extractingProgress": "正在提取文字（{{current}}/{{total}}）...",
-      "uploadNew": "點擊上方[清除全部]按鈕以重新開始",
+      "uploadNew": "點擊上方 [x 清除全部] 按鈕以重新開始",
       "clearAll": "清除全部",
       "addMore": "添加更多圖片"
     },
