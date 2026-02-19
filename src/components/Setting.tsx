@@ -2,7 +2,7 @@
 import {
   useLayoutEffect,
 } from "react";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -329,18 +329,16 @@ function Setting({ open, onClose }: SettingProps) {
                 />
               </div>
               <p className="text-sm text-muted-foreground">
-                <Trans
-                  i18nKey="setting.apiKeyTip"
-                  components={[
-                    <a
-                      key="api-link"
-                      href="https://api.mr5ai.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline"
-                    />,
-                  ]}
-                />
+                {t("setting.apiKeyTipBefore")}
+                <a
+                  href="https://api.mr5ai.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline"
+                >
+                  https://api.mr5ai.com
+                </a>
+                {t("setting.apiKeyTipAfter")}
               </p>
               <div
                 className={cn("space-y-4", {
