@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Plus, Volume2, Loader2 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
+import { generateSignature } from "@/utils/signature";
 import { Button } from "@/components/ui/button";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown"));
@@ -89,7 +90,7 @@ function ExtractedText() {
       } else {
         url = "/api/ai/openaicompatible/audio/speech";
         if (accessPassword) {
-          headers["Authorization"] = `Bearer ${accessPassword}`;
+          headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
         }
       }
 
