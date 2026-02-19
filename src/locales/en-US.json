@@ -148,7 +148,7 @@
     "provider": "AI Provider",
     "providerTip": "AI service provider",
     "mode": "API Mode",
-    "modeTip": "In Paid mode, you pay for your own LLM usage. In EDU mode, Mr.🆖 pays all the LLM costs for you.",
+    "modeTip": "In Paid mode, you pay for your own AI usage. In EDU mode, Mr.🆖 pays all the AI costs for you.",
     "local": "Paid",
     "proxy": "EDU",
     "apiKeyLabel": "API Key",
