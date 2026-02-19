@@ -2,7 +2,7 @@
 import {
   useLayoutEffect,
 } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,7 +24,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -315,20 +314,6 @@ function Setting({ open, onClose }: SettingProps) {
                       <FormLabel className="from-label">
                         {t("setting.apiKeyLabel")}
                       </FormLabel>
-                      <FormDescription>
-                        {t("setting.apiKeyTip", {
-                          link: (
-                            <a
-                              href="https://api.mr5ai.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary underline"
-                            >
-                              https://api.mr5ai.com
-                            </a>
-                          ),
-                        })}
-                      </FormDescription>
                       <FormControl className="form-field">
                         <Password
                           type="text"
@@ -342,6 +327,27 @@ function Setting({ open, onClose }: SettingProps) {
                     </FormItem>
                   )}
                 />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                <Trans
+                  i18nKey="setting.apiKeyTip"
+                  components={{
+                    link: (
+                      <a
+                        href="https://api.mr5ai.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                      />
+                    ),
+                  }}
+                />
+              </p>
+              <div
+                className={cn("space-y-4", {
+                  hidden: provider !== "openaicompatible",
+                })}
+              >
                 <FormField
                   control={form.control}
                   name="openaicompatibleApiProxy"
