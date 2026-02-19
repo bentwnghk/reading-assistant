@@ -8,8 +8,15 @@ export function generateSignature(key: string, timestamp: number): string {
 export function verifySignature(
   signature = "",
   key: string,
-  timestamp: number
+  _timestamp: number
 ): boolean {
-  const generatedSignature = generateSignature(key, timestamp);
-  return signature === generatedSignature;
+  const now = Date.now();
+  for (let offset = -1; offset <= 1; offset++) {
+    const checkTime = now + offset * 10000;
+    const generatedSignature = generateSignature(key, checkTime);
+    if (signature === generatedSignature) {
+      return true;
+    }
+  }
+  return false;
 }
