@@ -6,6 +6,7 @@ import { Plus, Volume2, Loader2 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
+import { completePath } from "@/utils/url";
 import { Button } from "@/components/ui/button";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown"));
@@ -83,12 +84,12 @@ function ExtractedText() {
 
       let url: string;
       if (mode === "local") {
-        url = `${openaicompatibleApiProxy}/audio/speech`;
+        url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
         if (openaicompatibleApiKey) {
           headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
         }
       } else {
-        url = "/api/ai/openaicompatible/audio/speech";
+        url = "/api/ai/openaicompatible/v1/audio/speech";
         if (accessPassword) {
           headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
         }
@@ -110,14 +111,7 @@ function ExtractedText() {
         throw new Error(`TTS request failed (${response.status}): ${errText}`);
       }
 
-      const contentType = response.headers.get("content-type") || "";
       const audioBuffer = await response.arrayBuffer();
-      console.debug(`[TTS] content-type: "${contentType}", bytes: ${audioBuffer.byteLength}`);
-
-      if (audioBuffer.byteLength === 0) {
-        throw new Error("TTS returned empty audio buffer");
-      }
-
       const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
       const audioUrl = URL.createObjectURL(audioBlob);
 
