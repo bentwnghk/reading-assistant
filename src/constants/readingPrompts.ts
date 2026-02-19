@@ -1,4 +1,4 @@
-export const systemInstruction = `You are an expert English reading teacher for Hong Kong secondary school students. Today is {now}. Follow these instructions:
+export const systemInstruction = `You are an expert English reading teacher for Hong Kong primary and secondary school students. Today is {now}. Follow these instructions:
 
 - Adapt your language and explanations to be appropriate for the student's age.
 - Use clear, simple English that students can understand.
@@ -38,7 +38,8 @@ export function extractTextFromImagePrompt() {
 }
 
 export function generateSummaryPrompt(age: number, text: string) {
-  return `You are helping a ${age}-year-old Hong Kong secondary student understand a text.
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `You are helping a ${age}-year-old Hong Kong ${schoolLevel} student understand a text.
 
 <text>
 ${text}
@@ -56,7 +57,8 @@ Write a brief summary (3-5 sentences) that captures the main ideas.
 }
 
 export function adaptTextPrompt(age: number, text: string) {
-  return `You are adapting an English text for a ${age}-year-old Hong Kong secondary student.
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `You are adapting an English text for a ${age}-year-old Hong Kong ${schoolLevel} student.
 
 <original-text>
 ${text}
@@ -129,7 +131,8 @@ mindmap
 }
 
 export function generateReadingTestPrompt(text: string, age: number) {
-  return `Create a reading comprehension test for a ${age}-year-old Hong Kong secondary student based on this text.
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `Create a reading comprehension test for a ${age}-year-old Hong Kong ${schoolLevel} student based on this text.
 
 <text>
 ${text}
@@ -193,7 +196,7 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
   {
     "word": "example",
     "partOfSpeech": "noun",
-    "englishDefinition": "A clear, simple English definition appropriate for secondary students",
+    "englishDefinition": "A clear, simple English definition appropriate for students",
     "chineseDefinition": "繁體中文解釋",
     "example": "A simple example sentence using the word in context"
   }
@@ -201,7 +204,7 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 
 **Requirements:**
 - Part of speech should be: noun, verb, adjective, adverb, preposition, conjunction, interjection, pronoun, or phrase.
-- English definitions should be simple and clear for secondary students.
+- English definitions should be simple and clear for students.
 - Chinese translations MUST be in Traditional Chinese (繁體中文), not Simplified.
 - Examples should be relevant and easy to understand.
 - Include ALL highlighted words in the response.

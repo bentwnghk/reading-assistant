@@ -61,7 +61,7 @@ interface ReadingActions {
 
 const defaultValues: ReadingStore = {
   id: "",
-  studentAge: 14,
+  studentAge: 13,
   originalImages: [],
   extractedText: "",
   summary: "",
@@ -85,7 +85,7 @@ export const useReadingStore = create(
       ...defaultValues,
       setStudentAge: (age) =>
         set(() => ({
-          studentAge: Math.max(11, Math.min(19, age)),
+          studentAge: Math.max(8, Math.min(18, age)),
           updatedAt: Date.now(),
         })),
       setOriginalImages: (images) =>

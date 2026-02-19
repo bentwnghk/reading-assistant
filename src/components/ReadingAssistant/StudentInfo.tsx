@@ -10,9 +10,8 @@ function StudentInfo() {
   const { studentAge, setStudentAge } = useReadingStore();
 
   function getFormLevel(age: number): string {
-    if (age <= 12) return t("reading.form1to3");
-    if (age <= 15) return t("reading.form1to3");
-    if (age <= 17) return t("reading.form4to6");
+    if (age <= 11) return t("reading.primary3to6");
+    if (age <= 14) return t("reading.form1to3");
     return t("reading.form4to6");
   }
 
@@ -33,17 +32,17 @@ function StudentInfo() {
           </div>
           <Slider
             id="age-slider"
-            min={11}
-            max={19}
+            min={8}
+            max={18}
             step={1}
             value={[studentAge]}
             onValueChange={(value) => setStudentAge(value[0])}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>11</span>
-            <span>15</span>
-            <span>19</span>
+            <span>8</span>
+            <span>13</span>
+            <span>18</span>
           </div>
         </div>
         <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
@@ -52,6 +51,7 @@ function StudentInfo() {
           </span>
           <span className={cn(
             "px-2 py-1 rounded text-sm font-medium",
+            studentAge <= 11 ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" :
             studentAge <= 14 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
             "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
           )}>

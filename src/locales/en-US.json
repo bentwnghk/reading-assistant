@@ -22,8 +22,9 @@
     }
   },
   "reading": {
-    "form1to3": "Form 1-3",
-    "form4to6": "Form 4-6",
+    "primary3to6": "Primary 3-6",
+    "form1to3": "Secondary 1-3",
+    "form4to6": "Secondary 4-6",
     "studentInfo": {
       "title": "Student Information",
       "ageLabel": "Your Age",

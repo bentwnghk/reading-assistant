@@ -22,6 +22,7 @@
     }
   },
   "reading": {
+    "primary3to6": "小三至小六",
     "form1to3": "中一至中三",
     "form4to6": "中四至中六",
     "studentInfo": {
