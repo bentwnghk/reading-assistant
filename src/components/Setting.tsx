@@ -16,6 +16,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Form,
   FormControl,
   FormField,
@@ -135,9 +141,18 @@ function Setting({ open, onClose }: SettingProps) {
                 name="mode"
                 render={({ field }) => (
                   <FormItem className="from-item">
-                    <FormLabel className="from-label">
-                      {t("setting.mode")}
-                    </FormLabel>
+                    <TooltipProvider>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <FormLabel className="from-label cursor-help">
+                            {t("setting.mode")}
+                          </FormLabel>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{t("setting.modeTip")}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     <FormControl>
                       <Select
                         value={field.value}
@@ -344,9 +359,18 @@ function Setting({ open, onClose }: SettingProps) {
                 name="accessPassword"
                 render={({ field }) => (
                   <FormItem className="from-item">
-                    <FormLabel className="from-label">
-                      {t("setting.accessPassword")}
-                    </FormLabel>
+                    <TooltipProvider>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <FormLabel className="from-label cursor-help">
+                            {t("setting.accessPassword")}
+                          </FormLabel>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{t("setting.accessPasswordTip")}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     <FormControl className="form-field">
                       <Password
                         type="text"
