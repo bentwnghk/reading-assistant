@@ -40,6 +40,7 @@ import { Button } from "@/components/ui/button";
 import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TTS_VOICES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
+import { CircleHelp } from "lucide-react";
 
 type SettingProps = {
   open: boolean;
@@ -144,8 +145,9 @@ function Setting({ open, onClose }: SettingProps) {
                     <TooltipProvider>
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger asChild>
-                          <FormLabel className="from-label cursor-help">
+                          <FormLabel className="from-label cursor-help flex items-center gap-1">
                             {t("setting.mode")}
+                            <CircleHelp className="h-3.5 w-3.5" />
                           </FormLabel>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -380,8 +382,9 @@ function Setting({ open, onClose }: SettingProps) {
                     <TooltipProvider>
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger asChild>
-                          <FormLabel className="from-label cursor-help">
+                          <FormLabel className="from-label cursor-help flex items-center gap-1">
                             {t("setting.accessPassword")}
+                            <CircleHelp className="h-3.5 w-3.5" />
                           </FormLabel>
                         </TooltipTrigger>
                         <TooltipContent>
