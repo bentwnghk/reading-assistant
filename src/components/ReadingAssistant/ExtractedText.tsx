@@ -30,7 +30,7 @@ function highlightText(text: string, words: string[]): string {
     if (match.index > lastIndex) {
       parts.push(text.slice(lastIndex, match.index));
     }
-    parts.push(`<mark class="bg-yellow-200 dark:bg-yellow-200 px-0.5 rounded">${match[0]}</mark>`);
+    parts.push(`<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">${match[0]}</mark>`);
     lastIndex = match.index + match[0].length;
   }
 
