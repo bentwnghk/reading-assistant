@@ -148,7 +148,7 @@
     "provider": "AI 供應商",
     "providerTip": "AI 服務供應商",
     "mode": "API 模式",
-    "modeTip": "付費模式下，您需自行支付 AI 的使用費用。教育模式下，Mr.🆖 將為您支付所有 AI 費用。",
+    "modeTip": "付費模式下，您需自行支付 AI 費用。教育模式下，Mr.🆖 將為您支付所有 AI 費用。",
     "local": "付費",
     "proxy": "教育",
     "apiKeyLabel": "API 金鑰",
