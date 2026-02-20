@@ -1,7 +1,20 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Settings, History, Keyboard } from "lucide-react";
+import {
+  Settings,
+  History,
+  Keyboard,
+  Info,
+  GraduationCap,
+  BookOpen,
+  PenTool,
+  Volume2,
+  Camera,
+  Brain,
+  MessageSquare,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import {
   Dialog,
@@ -39,6 +52,7 @@ function Header() {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
+  const [openAbout, setOpenAbout] = useState<boolean>(false);
   const { setOpenSetting, setOpenHistory } = useGlobalStore();
 
   const exportSnapshot = useCallback(() => {
@@ -155,6 +169,15 @@ function Header() {
             className="h-8 w-8"
             variant="ghost"
             size="icon"
+            title={t("header.about.title")}
+            onClick={() => setOpenAbout(true)}
+          >
+            <Info className="h-5 w-5" />
+          </Button>
+          <Button
+            className="h-8 w-8"
+            variant="ghost"
+            size="icon"
             title={t("header.shortcuts.title")}
             onClick={() => setOpenShortcuts(true)}
           >
@@ -197,6 +220,82 @@ function Header() {
                 <span>{shortcut.description}</span>
               </div>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openAbout} onOpenChange={setOpenAbout}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="text-2xl">📚</span>
+              {t("header.about.title")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <p className="text-muted-foreground">
+              {t("header.about.description")}
+            </p>
+
+            <div>
+              <h3 className="font-semibold flex items-center gap-2 mb-2">
+                <GraduationCap className="h-4 w-4" />
+                {t("header.about.objectives.title")}
+              </h3>
+              <ul className="space-y-1 text-muted-foreground ml-6">
+                <li>🎓 {t("header.about.objectives.personalized")}</li>
+                <li>📖 {t("header.about.objectives.comprehension")}</li>
+                <li>📝 {t("header.about.objectives.vocabulary")}</li>
+                <li>🔊 {t("header.about.objectives.pronunciation")}</li>
+                <li>🔒 {t("header.about.objectives.privacy")}</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold flex items-center gap-2 mb-2">
+                <Sparkles className="h-4 w-4" />
+                {t("header.about.features.title")}
+              </h3>
+              <ul className="space-y-1 text-muted-foreground ml-6">
+                <li className="flex items-center gap-1">
+                  <Camera className="h-3 w-3" /> {t("header.about.features.ocr")}
+                </li>
+                <li className="flex items-center gap-1">
+                  <PenTool className="h-3 w-3" /> {t("header.about.features.adaptation")}
+                </li>
+                <li className="flex items-center gap-1">
+                  <Brain className="h-3 w-3" /> {t("header.about.features.visual")}
+                </li>
+                <li className="flex items-center gap-1">
+                  <MessageSquare className="h-3 w-3" /> {t("header.about.features.assessment")}
+                </li>
+                <li className="flex items-center gap-1">
+                  <BookOpen className="h-3 w-3" /> {t("header.about.features.glossary")}
+                </li>
+                <li className="flex items-center gap-1">
+                  <Volume2 className="h-3 w-3" /> {t("header.about.features.tts")}
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold flex items-center gap-2 mb-2">
+                <span className="text-base">🔄</span>
+                {t("header.about.workflow.title")}
+              </h3>
+              <ol className="space-y-1 text-muted-foreground ml-6 list-decimal list-inside">
+                <li>{t("header.about.workflow.upload")}</li>
+                <li>{t("header.about.workflow.extract")}</li>
+                <li>{t("header.about.workflow.summarize")}</li>
+                <li>{t("header.about.workflow.visualize")}</li>
+                <li>{t("header.about.workflow.adapt")}</li>
+                <li>{t("header.about.workflow.test")}</li>
+                <li>{t("header.about.workflow.learn")}</li>
+              </ol>
+            </div>
+
+            <div className="pt-2 border-t text-center text-muted-foreground text-xs">
+              {t("header.about.builtWith")}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
