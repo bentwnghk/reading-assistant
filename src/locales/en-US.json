@@ -21,14 +21,14 @@
       "toggleHelp": "Toggle shortcut help"
     },
     "about": {
-      "title": "About",
+      "title": "About Mr.🆖 English Reading Assistant",
       "description": "AI-Powered Reading Companion for Students. Designed to help students master English reading through personalized, AI-powered learning experiences.",
       "objectives": {
         "title": "Objectives",
         "personalized": "Personalized Learning - Content adapted to student's age (8-18 years old)",
         "comprehension": "Reading Comprehension - Build understanding through summaries, mind maps, and tests",
         "vocabulary": "Vocabulary Building - Interactive glossary with bilingual definitions",
-        "pronunciation": "Text-to-Speech - Listen to words and passages for better pronunciation",
+        "pronunciation": "Text-to-Speech - Listen to words and sentences for better pronunciation",
         "privacy": "Privacy First - All data stored locally in the browser"
       },
       "features": {
@@ -38,7 +38,7 @@
         "visual": "Visual Learning Tools - Summary and Mind Map generation",
         "assessment": "Interactive Assessment - Auto-generated comprehension questions",
         "glossary": "Vocabulary Builder - Bilingual glossary with context examples",
-        "tts": "Text-to-Speech - Listen to highlighted words or passages"
+        "tts": "Text-to-Speech - Listen to highlighted words or sentences"
       },
       "workflow": {
         "title": "How It Works",
@@ -50,7 +50,7 @@
         "test": "Test - Take a comprehension quiz",
         "learn": "Learn - Build vocabulary from highlighted words"
       },
-      "builtWith": "Built with ❤️ for students learning English"
+      "builtWith": "Built with ❤️ by Mr.🆖 for students learning English"
     }
   },
   "reading": {
