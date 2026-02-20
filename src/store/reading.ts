@@ -26,6 +26,7 @@ export interface ReadingStore {
   mindMap: string;
   readingTest: ReadingTestQuestion[];
   glossary: GlossaryEntry[];
+  glossaryRatings: Record<string, GlossaryRating>;
   testScore: number;
   testCompleted: boolean;
   status: ReadingStatus;
@@ -50,6 +51,7 @@ interface ReadingActions {
   setReadingTest: (questions: ReadingTestQuestion[]) => void;
   setUserAnswer: (questionId: string, answer: string) => void;
   setGlossary: (entries: GlossaryEntry[]) => void;
+  setGlossaryRating: (word: string, rating: GlossaryRating) => void;
   setTestScore: (score: number) => void;
   setTestCompleted: (completed: boolean) => void;
   setStatus: (status: ReadingStatus) => void;
@@ -71,6 +73,7 @@ const defaultValues: ReadingStore = {
   mindMap: "",
   readingTest: [],
   glossary: [],
+  glossaryRatings: {},
   testScore: 0,
   testCompleted: false,
   status: "idle",
@@ -170,6 +173,11 @@ export const useReadingStore = create(
       setGlossary: (entries) =>
         set(() => ({
           glossary: entries,
+          updatedAt: Date.now(),
+        })),
+      setGlossaryRating: (word, rating) =>
+        set((state) => ({
+          glossaryRatings: { ...state.glossaryRatings, [word]: rating },
           updatedAt: Date.now(),
         })),
       setTestScore: (score) =>

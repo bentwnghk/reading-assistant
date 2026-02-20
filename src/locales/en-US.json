@@ -139,7 +139,42 @@
       "chineseDefinition": "Chinese Definition",
       "example": "Example",
       "emptyTip": "Click the button above to generate definitions for {{count}} highlighted words",
-      "noHighlightedWords": "Highlight some words in the extracted text first"
+      "noHighlightedWords": "Highlight some words in the extracted text first",
+      "tabTable": "Table",
+      "tabFlashcard": "Flashcard",
+      "tabQuiz": "Quiz",
+      "flashcard": {
+        "flip": "Flip",
+        "previous": "Previous",
+        "next": "Next",
+        "shuffle": "Shuffle",
+        "cardProgress": "{{current}} / {{total}}",
+        "rateCard": "How well did you know this?",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "noCards": "Generate a glossary first to use flashcards",
+        "clickFlip": "Click to flip"
+      },
+      "quiz": {
+        "startQuiz": "Start Quiz",
+        "submitQuiz": "Submit",
+        "retryQuiz": "Retry All",
+        "retryMissed": "Retry Missed",
+        "quizComplete": "Quiz Complete!",
+        "yourScore": "Your Score",
+        "question": "Question",
+        "chooseDefinition": "What does this word mean?",
+        "chooseWord": "Which word matches this definition?",
+        "fillBlank": "Fill in the blank:",
+        "reviewAnswers": "Review Answers",
+        "noQuizWords": "Need at least 4 words for quiz",
+        "correct": "Correct",
+        "incorrect": "Incorrect",
+        "scoreBreakdown": "Score Breakdown",
+        "of": "of",
+        "pressKey": "Press"
+      }
     },
     "workflow": {
       "title": "Progress",

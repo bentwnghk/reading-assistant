@@ -21,6 +21,18 @@ interface GlossaryEntry {
   example?: string;
 }
 
+type GlossaryRating = "easy" | "medium" | "hard";
+
+interface VocabularyQuizQuestion {
+  id: string;
+  type: "word-to-definition" | "definition-to-word" | "fill-blank";
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  userAnswer?: string;
+  wordRef: string;
+}
+
 interface ReadingSession {
   id: string;
   title: string;
