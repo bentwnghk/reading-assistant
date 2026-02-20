@@ -23,6 +23,10 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+function formatBilingualDefinition(entry: GlossaryEntry): string {
+  return `${entry.englishDefinition} (${entry.chineseDefinition})`;
+}
+
 function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestion[] {
   const questions: VocabularyQuizQuestion[] = [];
   const shuffledGlossary = shuffleArray(glossary);
@@ -36,15 +40,16 @@ function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestio
     if (type === "word-to-definition") {
       const wrongOptions = shuffleArray(otherEntries)
         .slice(0, 3)
-        .map((e) => e.englishDefinition);
-      const options = shuffleArray([entry.englishDefinition, ...wrongOptions]);
+        .map((e) => formatBilingualDefinition(e));
+      const correctOption = formatBilingualDefinition(entry);
+      const options = shuffleArray([correctOption, ...wrongOptions]);
 
       questions.push({
         id: nanoid(),
         type: "word-to-definition",
         question: entry.word,
         options,
-        correctAnswer: entry.englishDefinition,
+        correctAnswer: correctOption,
         wordRef: entry.word,
       });
     } else if (type === "definition-to-word") {
@@ -56,7 +61,7 @@ function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestio
       questions.push({
         id: nanoid(),
         type: "definition-to-word",
-        question: entry.englishDefinition,
+        question: formatBilingualDefinition(entry),
         options,
         correctAnswer: entry.word,
         wordRef: entry.word,
@@ -88,15 +93,16 @@ function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestio
 
       const wrongOptions = shuffleArray(otherEntries)
         .slice(0, 3)
-        .map((e) => e.englishDefinition);
-      const options = shuffleArray([entry.englishDefinition, ...wrongOptions]);
+        .map((e) => formatBilingualDefinition(e));
+      const correctOption = formatBilingualDefinition(entry);
+      const options = shuffleArray([correctOption, ...wrongOptions]);
 
       questions.push({
         id: nanoid(),
         type: "word-to-definition",
         question: entry.word,
         options,
-        correctAnswer: entry.englishDefinition,
+        correctAnswer: correctOption,
         wordRef: entry.word,
       });
     }
