@@ -173,7 +173,8 @@
         "incorrect": "Incorrect",
         "scoreBreakdown": "Score Breakdown",
         "of": "of",
-        "pressKey": "Press"
+        "pressKey": "Press",
+        "wordsAvailable": "{{count}} words available"
       }
     },
     "workflow": {

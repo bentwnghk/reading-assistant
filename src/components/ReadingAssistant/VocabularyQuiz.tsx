@@ -182,9 +182,9 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   if (quizState === "idle") {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground mb-6">
-          {glossary.length} {t("reading.glossary.word").toLowerCase()}s available
-        </p>
+          <p className="text-muted-foreground mb-6">
+            {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
+          </p>
         <Button onClick={startQuiz} size="lg">
           <Play className="h-5 w-5 mr-2" />
           {t("reading.glossary.quiz.startQuiz")}
