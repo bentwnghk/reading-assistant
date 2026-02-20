@@ -1,5 +1,6 @@
 "use client";
 import {
+  useState,
   useLayoutEffect,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -68,6 +69,30 @@ const formSchema = z.object({
 });
 
 let preLoading = false;
+
+function InfoTooltip({ content }: { content: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <TooltipProvider>
+      <Tooltip open={open} onOpenChange={setOpen} disableHoverableContent>
+        <TooltipTrigger asChild>
+          <CircleHelp
+            className="h-3.5 w-3.5 cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setOpen((v) => !v);
+            }}
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{content}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 function Setting({ open, onClose }: SettingProps) {
   const { t } = useTranslation();
@@ -142,19 +167,10 @@ function Setting({ open, onClose }: SettingProps) {
                 name="mode"
                 render={({ field }) => (
                   <FormItem className="from-item">
-                    <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <FormLabel className="from-label cursor-help flex items-center gap-1">
-                            {t("setting.mode")}
-                            <CircleHelp className="h-3.5 w-3.5" />
-                          </FormLabel>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t("setting.modeTip")}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <FormLabel className="from-label flex items-center gap-1">
+                      {t("setting.mode")}
+                      <InfoTooltip content={t("setting.modeTip")} />
+                    </FormLabel>
                     <FormControl>
                       <Select
                         value={field.value}
@@ -379,19 +395,10 @@ function Setting({ open, onClose }: SettingProps) {
                 name="accessPassword"
                 render={({ field }) => (
                   <FormItem className="from-item">
-                    <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <FormLabel className="from-label cursor-help flex items-center gap-1">
-                            {t("setting.accessPassword")}
-                            <CircleHelp className="h-3.5 w-3.5" />
-                          </FormLabel>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t("setting.accessPasswordTip")}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <FormLabel className="from-label flex items-center gap-1">
+                      {t("setting.accessPassword")}
+                      <InfoTooltip content={t("setting.accessPasswordTip")} />
+                    </FormLabel>
                     <FormControl className="form-field">
                       <Password
                         type="text"
