@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { Plus, Volume2, Loader2 } from "lucide-react";
@@ -10,6 +10,36 @@ import { completePath } from "@/utils/url";
 import { Button } from "@/components/ui/button";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown"));
+
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text: string, words: string[]): string {
+  if (words.length === 0) return text;
+
+  const sortedWords = [...words].sort((a, b) => b.length - a.length);
+  const escapedWords = sortedWords.map(escapeRegExp);
+  const pattern = new RegExp(`(${escapedWords.join("|")})`, "gi");
+
+  const parts: string[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    parts.push(`<mark class="bg-yellow-200 dark:bg-yellow-800 px-0.5 rounded">${match[0]}</mark>`);
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.join("");
+}
 
 function ExtractedText() {
   const { t } = useTranslation();
@@ -158,6 +188,10 @@ function ExtractedText() {
     isTouchDeviceRef.current = "ontouchstart" in window || navigator.maxTouchPoints > 0;
   }, []);
 
+  const highlightedText = useMemo(() => {
+    return highlightText(extractedText, highlightedWords);
+  }, [extractedText, highlightedWords]);
+
   useEffect(() => {
     document.addEventListener("mouseup", handleSelectionChange);
     document.addEventListener("touchend", handleSelectionChange);
@@ -208,7 +242,7 @@ function ExtractedText() {
 
       <div className="prose prose-slate dark:prose-invert max-w-full" ref={containerRef}>
         <MagicDown
-          value={extractedText}
+          value={highlightedText}
           onChange={() => {}}
           hideTools
           disableMath
