@@ -296,20 +296,15 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
                           option === question.correctAnswer && "text-green-600 font-medium",
                           option === userAnswer &&
                             option !== question.correctAnswer &&
-                            "text-red-600 line-through"
+                            "text-red-600"
                         )}
                       >
                         {option}
                         {option === question.correctAnswer && " ✓"}
+                        {option === userAnswer && option !== question.correctAnswer && " ✘"}
                       </div>
                     ))}
                   </div>
-
-                  {!isCorrect && (
-                    <div className="ml-6 mt-2 text-sm text-muted-foreground">
-                      {t("reading.glossary.quiz.yourScore")}: {userAnswer || "-"}
-                    </div>
-                  )}
                 </div>
               );
             })}
