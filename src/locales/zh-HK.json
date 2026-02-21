@@ -175,7 +175,7 @@
         "of": "/",
         "pressKey": "按",
         "wordsAvailable": "有 {{count}} 個生字",
-        "scoreFormat": "{{correct}}/{{total}} 正確"
+        "scoreFormat": "{{correct}} / {{total}} 正確"
       }
     },
     "workflow": {
