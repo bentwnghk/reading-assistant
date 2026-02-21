@@ -30,8 +30,8 @@ interface VocabularySpellingProps {
 type GameStatus = "setup" | "playing" | "completed";
 
 const DIFFICULTY_CONFIG: Record<SpellingDifficulty, { timeLimit: number; hintsAllowed: number; blankRatio: number }> = {
-  easy: { timeLimit: 35, hintsAllowed: 5, blankRatio: 0.2 },
-  medium: { timeLimit: 25, hintsAllowed: 3, blankRatio: 0.35 },
+  easy: { timeLimit: 45, hintsAllowed: 5, blankRatio: 0.2 },
+  medium: { timeLimit: 30, hintsAllowed: 3, blankRatio: 0.35 },
   hard: { timeLimit: 20, hintsAllowed: 1, blankRatio: 0.5 },
 };
 
