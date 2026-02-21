@@ -65,6 +65,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
 
   const [userInput, setUserInput] = useState("");
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
+  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -129,6 +130,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     setCorrectCount(0);
     setUserInput("");
     setSelectedLetters([]);
+    setUsedIndices([]);
     setRevealedPositions([]);
     setShowFeedback(false);
     setGameStatus("playing");
@@ -156,6 +158,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
                 setCurrentIndex(nextIndex);
                 setUserInput("");
                 setSelectedLetters([]);
+                setUsedIndices([]);
                 setRevealedPositions([]);
                 setShowFeedback(false);
                 setTimeRemaining(config.timeLimit);
@@ -190,6 +193,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
       setCurrentIndex(nextIndex);
       setUserInput("");
       setSelectedLetters([]);
+      setUsedIndices([]);
       setRevealedPositions([]);
       setShowFeedback(false);
       setTimeRemaining(config.timeLimit);
@@ -338,9 +342,10 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     }
   }, [hintsRemaining, currentChallenge, currentMode, revealedPositions]);
 
-  const handleLetterClick = useCallback((letter: string, _index: number) => {
+  const handleLetterClick = useCallback((letter: string, index: number) => {
     setSelectedLetters((prev) => [...prev, letter]);
     setUserInput((prev) => prev + letter);
+    setUsedIndices((prev) => [...prev, index]);
   }, []);
 
   const handleScrambleKeyDown = useCallback(
@@ -348,6 +353,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
       if (e.key === "Backspace" && selectedLetters.length > 0) {
         setSelectedLetters((prev) => prev.slice(0, -1));
         setUserInput((prev) => prev.slice(0, -1));
+        setUsedIndices((prev) => prev.slice(0, -1));
       } else if (e.key === "Enter") {
         checkAnswer();
       }
@@ -675,7 +681,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
               tabIndex={0}
             >
               {currentChallenge.shuffledLetters.map((letter, idx) => {
-                const isSelected = selectedLetters.length > idx && selectedLetters[idx] !== undefined;
+                const isSelected = usedIndices.includes(idx);
                 return (
                   <button
                     key={idx}
@@ -701,6 +707,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
                 onClick={() => {
                   setSelectedLetters([]);
                   setUserInput("");
+                  setUsedIndices([]);
                 }}
                 disabled={selectedLetters.length === 0 || showFeedback}
               >
