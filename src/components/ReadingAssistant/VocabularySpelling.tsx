@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
 import { useReadingStore } from "@/store/reading";
+import { useHistoryStore } from "@/store/history";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
@@ -49,7 +50,8 @@ const MODE_ICONS: Record<SpellingGameMode, React.ReactNode> = {
 function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
-  const { spellingGameBestScore, setSpellingGameBestScore } = useReadingStore();
+  const { id, spellingGameBestScore, setSpellingGameBestScore, backup } = useReadingStore();
+  const { update, save } = useHistoryStore();
 
   const [gameStatus, setGameStatus] = useState<GameStatus>("setup");
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
@@ -441,8 +443,16 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   useEffect(() => {
     if (gameStatus === "completed" && score > 0) {
       setSpellingGameBestScore(score);
+      
+      if (id) {
+        const session = backup();
+        const updated = update(id, session);
+        if (!updated) {
+          save(session);
+        }
+      }
     }
-  }, [gameStatus, score, setSpellingGameBestScore]);
+  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save]);
 
   if (glossary.length < 3) {
     return (
