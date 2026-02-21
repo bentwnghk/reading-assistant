@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Shuffle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
+import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
 
 interface VocabularyFlashcardProps {
@@ -12,7 +13,8 @@ interface VocabularyFlashcardProps {
 
 function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
-  const { glossaryRatings, setGlossaryRating } = useReadingStore();
+  const { id, glossaryRatings, setGlossaryRating, backup } = useReadingStore();
+  const { update, save } = useHistoryStore();
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -58,6 +60,13 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const handleRate = (rating: GlossaryRating) => {
     if (currentEntry) {
       setGlossaryRating(currentEntry.word, rating);
+      if (id) {
+        const session = backup();
+        const updated = update(id, session);
+        if (!updated) {
+          save(session);
+        }
+      }
     }
     handleNext();
   };

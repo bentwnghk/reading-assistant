@@ -45,17 +45,16 @@ export const useHistoryStore = create(
         if (current) return clone(current);
       },
       update: (id, session) => {
-        const newHistory = get().history.map((item) => {
-          if (item.id === id) {
-            return {
-              ...clone(session),
-              updatedAt: Date.now(),
-            } as ReadingHistory;
-          } else {
-            return item;
-          }
-        });
-        set(() => ({ history: [...newHistory] }));
+        const history = get().history;
+        const index = history.findIndex((item) => item.id === id);
+        if (index === -1) return false;
+        
+        const newHistory = [...history];
+        newHistory[index] = {
+          ...clone(session),
+          updatedAt: Date.now(),
+        } as ReadingHistory;
+        set(() => ({ history: newHistory }));
         return true;
       },
       remove: (id) => {

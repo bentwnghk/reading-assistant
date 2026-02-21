@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useReadingStore } from "@/store/reading";
+import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
 import { nanoid } from "nanoid";
 
@@ -114,7 +115,8 @@ function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestio
 
 function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
-  const { vocabularyQuizScore, setVocabularyQuizScore } = useReadingStore();
+  const { id, vocabularyQuizScore, setVocabularyQuizScore, backup } = useReadingStore();
+  const { update, save } = useHistoryStore();
 
   const [quizState, setQuizState] = useState<QuizState>("idle");
   const [questions, setQuestions] = useState<VocabularyQuizQuestion[]>([]);
@@ -149,6 +151,14 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
       const percentage = Math.round((correct / questions.length) * 100);
       setVocabularyQuizScore(percentage);
       setQuizState("completed");
+      
+      if (id) {
+        const session = backup();
+        const updated = update(id, session);
+        if (!updated) {
+          save(session);
+        }
+      }
     }
   };
 
