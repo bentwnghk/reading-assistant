@@ -29,6 +29,7 @@ export interface ReadingStore {
   glossaryRatings: Record<string, GlossaryRating>;
   testScore: number;
   testCompleted: boolean;
+  vocabularyQuizScore: number;
   status: ReadingStatus;
   error: string | null;
   createdAt: number;
@@ -54,6 +55,7 @@ interface ReadingActions {
   setGlossaryRating: (word: string, rating: GlossaryRating) => void;
   setTestScore: (score: number) => void;
   setTestCompleted: (completed: boolean) => void;
+  setVocabularyQuizScore: (score: number) => void;
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
   reset: () => void;
@@ -76,6 +78,7 @@ const defaultValues: ReadingStore = {
   glossaryRatings: {},
   testScore: 0,
   testCompleted: false,
+  vocabularyQuizScore: 0,
   status: "idle",
   error: null,
   createdAt: 0,
@@ -187,6 +190,11 @@ export const useReadingStore = create(
       setTestCompleted: (completed) =>
         set(() => ({
           testCompleted: completed,
+        })),
+      setVocabularyQuizScore: (score) =>
+        set(() => ({
+          vocabularyQuizScore: score,
+          updatedAt: Date.now(),
         })),
       setStatus: (status) =>
         set(() => ({

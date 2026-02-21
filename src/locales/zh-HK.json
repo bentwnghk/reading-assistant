@@ -174,7 +174,8 @@
         "scoreBreakdown": "得分詳情",
         "of": "/",
         "pressKey": "按",
-        "wordsAvailable": "有 {{count}} 個生字"
+        "wordsAvailable": "有 {{count}} 個生字",
+        "scoreFormat": "{{correct}}/{{total}} 正確"
       }
     },
     "workflow": {

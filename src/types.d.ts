@@ -46,8 +46,10 @@ interface ReadingSession {
   mindMap: string;
   readingTest: ReadingTestQuestion[];
   glossary: GlossaryEntry[];
+  glossaryRatings?: Record<string, GlossaryRating>;
   testScore?: number;
   testCompleted?: boolean;
+  vocabularyQuizScore?: number;
   createdAt: number;
   updatedAt: number;
 }

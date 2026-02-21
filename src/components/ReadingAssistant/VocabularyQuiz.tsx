@@ -5,6 +5,7 @@ import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight } f
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useReadingStore } from "@/store/reading";
 import { cn } from "@/utils/style";
 import { nanoid } from "nanoid";
 
@@ -113,6 +114,7 @@ function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestio
 
 function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
+  const { setVocabularyQuizScore } = useReadingStore();
 
   const [quizState, setQuizState] = useState<QuizState>("idle");
   const [questions, setQuestions] = useState<VocabularyQuizQuestion[]>([]);
@@ -141,6 +143,11 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
+      const correct = questions.filter(
+        (q) => answers[q.id] === q.correctAnswer
+      ).length;
+      const percentage = Math.round((correct / questions.length) * 100);
+      setVocabularyQuizScore(percentage);
       setQuizState("completed");
     }
   };
@@ -219,8 +226,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
             {percentage}%
           </div>
           <p className="text-muted-foreground">
-            {getScore.correct} {t("reading.glossary.quiz.correct")} {t("reading.glossary.quiz.of")}{" "}
-            {getScore.total}
+            {t("reading.glossary.quiz.scoreFormat", { correct: getScore.correct, total: getScore.total })}
           </p>
         </div>
 

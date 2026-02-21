@@ -174,7 +174,8 @@
         "scoreBreakdown": "Score Breakdown",
         "of": "of",
         "pressKey": "Press",
-        "wordsAvailable": "{{count}} words available"
+        "wordsAvailable": "{{count}} words available",
+        "scoreFormat": "{{correct}}/{{total}} Correct"
       }
     },
     "workflow": {
