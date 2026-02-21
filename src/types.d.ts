@@ -73,6 +73,7 @@ interface ReadingSession {
   testScore?: number;
   testCompleted?: boolean;
   vocabularyQuizScore?: number;
+  spellingGameBestScore?: number;
   createdAt: number;
   updatedAt: number;
 }

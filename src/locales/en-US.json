@@ -196,6 +196,7 @@
         "correctWords": "Correct Words",
         "maxStreak": "Best Streak",
         "score": "Score",
+        "bestScore": "Best Score",
         "useHint": "Use Hint (Ctrl+Space)",
         "clickToHear": "Click to hear the word",
         "typeAnswer": "Type the word you hear...",

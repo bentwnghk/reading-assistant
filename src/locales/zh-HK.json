@@ -196,6 +196,7 @@
         "correctWords": "正確生字",
         "maxStreak": "最佳連勝",
         "score": "分數",
+        "bestScore": "最高分",
         "useHint": "使用提示 (Ctrl+Space)",
         "clickToHear": "點擊聽取生字",
         "typeAnswer": "輸入你聽到的生字...",

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
+import { useReadingStore } from "@/store/reading";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
@@ -48,6 +49,7 @@ const MODE_ICONS: Record<SpellingGameMode, React.ReactNode> = {
 function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
+  const { spellingGameBestScore, setSpellingGameBestScore } = useReadingStore();
 
   const [gameStatus, setGameStatus] = useState<GameStatus>("setup");
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
@@ -436,6 +438,12 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     }
   }, [currentIndex, gameStatus, currentMode, currentChallenge, speakWord]);
 
+  useEffect(() => {
+    if (gameStatus === "completed" && score > 0) {
+      setSpellingGameBestScore(score);
+    }
+  }, [gameStatus, score, setSpellingGameBestScore]);
+
   if (glossary.length < 3) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -590,6 +598,12 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
             <Play className="h-5 w-5 mr-2" />
             {t("reading.glossary.spelling.startGame")}
           </Button>
+
+          {spellingGameBestScore > 0 && (
+            <p className="text-sm text-muted-foreground text-center">
+              {t("reading.glossary.spelling.bestScore")}: <span className="font-medium">{spellingGameBestScore}</span>
+            </p>
+          )}
         </div>
       </div>
     );

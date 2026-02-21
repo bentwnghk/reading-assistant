@@ -30,6 +30,7 @@ export interface ReadingStore {
   testScore: number;
   testCompleted: boolean;
   vocabularyQuizScore: number;
+  spellingGameBestScore: number;
   status: ReadingStatus;
   error: string | null;
   createdAt: number;
@@ -56,6 +57,7 @@ interface ReadingActions {
   setTestScore: (score: number) => void;
   setTestCompleted: (completed: boolean) => void;
   setVocabularyQuizScore: (score: number) => void;
+  setSpellingGameBestScore: (score: number) => void;
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
   reset: () => void;
@@ -79,6 +81,7 @@ const defaultValues: ReadingStore = {
   testScore: 0,
   testCompleted: false,
   vocabularyQuizScore: 0,
+  spellingGameBestScore: 0,
   status: "idle",
   error: null,
   createdAt: 0,
@@ -194,6 +197,11 @@ export const useReadingStore = create(
       setVocabularyQuizScore: (score) =>
         set(() => ({
           vocabularyQuizScore: score,
+          updatedAt: Date.now(),
+        })),
+      setSpellingGameBestScore: (score) =>
+        set((state) => ({
+          spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
           updatedAt: Date.now(),
         })),
       setStatus: (status) =>
