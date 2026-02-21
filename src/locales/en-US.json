@@ -210,7 +210,18 @@
           "easy": "Easy",
           "medium": "Medium",
           "hard": "Hard"
-        }
+        },
+        "aboutTitle": "How It Works",
+        "aboutDesc": "Practice spelling through interactive games designed to reinforce vocabulary learning.",
+        "modeDesc": {
+          "listen-type": "Listen to the word pronunciation and type what you hear. Great for auditory learning!",
+          "scramble": "Rearrange jumbled letters to form the correct word. A visual puzzle approach!",
+          "fill-blanks": "Type the missing letters shown as underscores. Focus on specific letter patterns!",
+          "mixed": "Randomly switches between all modes for variety and comprehensive practice!"
+        },
+        "tipStreak": "Build streaks for bonus points (+10% per 3 consecutive)",
+        "tipHint": "Use hints wisely - they reveal letters but reduce your score",
+        "tipTime": "Time bonus rewards faster responses"
       }
     },
     "workflow": {

@@ -16,6 +16,9 @@ import {
   Keyboard,
   Eye,
   HelpCircle,
+  Info,
+  Headphones,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
@@ -70,6 +73,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -443,11 +447,76 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   if (gameStatus === "setup") {
     return (
       <div className="flex flex-col items-center gap-6 py-8">
-        <div className="text-center">
-          <h3 className="text-xl font-semibold mb-2">{t("reading.glossary.spelling.title")}</h3>
+        <div className="text-center relative">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h3 className="text-xl font-semibold">{t("reading.glossary.spelling.title")}</h3>
+            <button
+              onClick={() => setShowInfo(!showInfo)}
+              className="p-1 rounded-full hover:bg-muted transition-colors"
+              title={t("reading.glossary.spelling.aboutTitle")}
+            >
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
           <p className="text-muted-foreground text-sm">
             {t("reading.glossary.spelling.subtitle", { count: glossary.length })}
           </p>
+
+          {showInfo && (
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 bg-popover border rounded-lg shadow-lg p-4 z-50 text-left">
+              <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                {t("reading.glossary.spelling.aboutTitle")}
+              </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                {t("reading.glossary.spelling.aboutDesc")}
+              </p>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Headphones className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.spelling.modes.listen-type")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.spelling.modeDesc.listen-type")}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Shuffle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.spelling.modes.scramble")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.spelling.modeDesc.scramble")}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Keyboard className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.spelling.modes.fill-blanks")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.spelling.modeDesc.fill-blanks")}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <HelpCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.spelling.modes.mixed")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.spelling.modeDesc.mixed")}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 mb-1">
+                  <Flame className="h-3 w-3 text-orange-500" />
+                  <span>{t("reading.glossary.spelling.tipStreak")}</span>
+                </div>
+                <div className="flex items-center gap-1 mb-1">
+                  <Lightbulb className="h-3 w-3 text-yellow-500" />
+                  <span>{t("reading.glossary.spelling.tipHint")}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Timer className="h-3 w-3 text-blue-500" />
+                  <span>{t("reading.glossary.spelling.tipTime")}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="w-full max-w-md space-y-6">
