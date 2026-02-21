@@ -23,6 +23,28 @@ interface GlossaryEntry {
 
 type GlossaryRating = "easy" | "medium" | "hard";
 
+type SpellingGameMode = "listen-type" | "scramble" | "fill-blanks" | "mixed";
+type SpellingDifficulty = "easy" | "medium" | "hard";
+
+interface SpellingWordChallenge {
+  word: string;
+  definition: string;
+  shuffledLetters: string[];
+  blankedWord: string;
+  blankPositions: number[];
+  revealedHints: number[];
+}
+
+interface SpellingGameResult {
+  mode: SpellingGameMode;
+  difficulty: SpellingDifficulty;
+  score: number;
+  maxStreak: number;
+  totalWords: number;
+  correctWords: number;
+  completedAt: number;
+}
+
 interface VocabularyQuizQuestion {
   id: string;
   type: "word-to-definition" | "definition-to-word" | "fill-blank";

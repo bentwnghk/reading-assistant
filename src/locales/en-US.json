@@ -143,6 +143,7 @@
       "tabTable": "Table",
       "tabFlashcard": "Flashcard",
       "tabQuiz": "Quiz",
+      "tabSpelling": "Spelling",
       "flashcard": {
         "flip": "Flip",
         "previous": "Previous",
@@ -177,6 +178,39 @@
         "wordsAvailable": "{{count}} words available",
         "scoreFormat": "{{correct}} / {{total}} Correct",
         "lastScore": "Last score"
+      },
+      "spelling": {
+        "title": "Spelling Challenge",
+        "subtitle": "Practice spelling {{count}} words",
+        "notEnoughWords": "Need at least 3 words for spelling game",
+        "selectMode": "Select Game Mode",
+        "selectDifficulty": "Select Difficulty",
+        "timeChallenge": "Time Challenge",
+        "startGame": "Start Game",
+        "playAgain": "Play Again",
+        "gameComplete": "Game Complete!",
+        "points": "points",
+        "accuracy": "Accuracy",
+        "correctWords": "Correct Words",
+        "maxStreak": "Best Streak",
+        "score": "Score",
+        "useHint": "Use Hint (Ctrl+Space)",
+        "clickToHear": "Click to hear the word",
+        "typeAnswer": "Type the word you hear...",
+        "typeMissing": "Type the missing letters...",
+        "clear": "Clear",
+        "submit": "Submit",
+        "modes": {
+          "listen-type": "Listen & Type",
+          "scramble": "Letter Scramble",
+          "fill-blanks": "Fill Blanks",
+          "mixed": "Mixed Mode"
+        },
+        "difficulty": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard"
+        }
       }
     },
     "workflow": {

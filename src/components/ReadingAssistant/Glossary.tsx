@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, Download, Table, Layers, ClipboardList } from "lucide-react";
+import { BookMarked, LoaderCircle, Download, Table, Layers, ClipboardList, SpellCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table as DataTable,
@@ -17,8 +17,9 @@ import { downloadFile } from "@/utils/file";
 import { cn } from "@/utils/style";
 import VocabularyFlashcard from "./VocabularyFlashcard";
 import VocabularyQuiz from "./VocabularyQuiz";
+import VocabularySpelling from "./VocabularySpelling";
 
-type TabType = "table" | "flashcard" | "quiz";
+type TabType = "table" | "flashcard" | "quiz" | "spelling";
 
 function Glossary() {
   const { t } = useTranslation();
@@ -52,6 +53,7 @@ function Glossary() {
     { key: "table", label: t("reading.glossary.tabTable"), icon: <Table className="h-4 w-4" /> },
     { key: "flashcard", label: t("reading.glossary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
     { key: "quiz", label: t("reading.glossary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },
+    { key: "spelling", label: t("reading.glossary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },
   ];
 
   const renderContent = () => {
@@ -78,6 +80,8 @@ function Glossary() {
         return <VocabularyFlashcard glossary={glossary} />;
       case "quiz":
         return <VocabularyQuiz glossary={glossary} />;
+      case "spelling":
+        return <VocabularySpelling glossary={glossary} />;
       default:
         return (
           <div className="overflow-x-auto">

@@ -143,6 +143,7 @@
       "tabTable": "表格",
       "tabFlashcard": "生字卡",
       "tabQuiz": "測驗",
+      "tabSpelling": "拼字",
       "flashcard": {
         "flip": "翻轉",
         "previous": "上一個",
@@ -177,6 +178,39 @@
         "wordsAvailable": "有 {{count}} 個生字",
         "scoreFormat": "{{correct}} / {{total}} 正確",
         "lastScore": "上次得分"
+      },
+      "spelling": {
+        "title": "拼字挑戰",
+        "subtitle": "練習拼寫 {{count}} 個生字",
+        "notEnoughWords": "至少需要3個生字才能玩拼字遊戲",
+        "selectMode": "選擇遊戲模式",
+        "selectDifficulty": "選擇難度",
+        "timeChallenge": "限時挑戰",
+        "startGame": "開始遊戲",
+        "playAgain": "再玩一次",
+        "gameComplete": "遊戲完成！",
+        "points": "分",
+        "accuracy": "準確率",
+        "correctWords": "正確生字",
+        "maxStreak": "最佳連勝",
+        "score": "分數",
+        "useHint": "使用提示 (Ctrl+Space)",
+        "clickToHear": "點擊聽取生字",
+        "typeAnswer": "輸入你聽到的生字...",
+        "typeMissing": "輸入缺少的字母...",
+        "clear": "清除",
+        "submit": "提交",
+        "modes": {
+          "listen-type": "聽音拼字",
+          "scramble": "字母重組",
+          "fill-blanks": "填空",
+          "mixed": "混合模式"
+        },
+        "difficulty": {
+          "easy": "簡單",
+          "medium": "中等",
+          "hard": "困難"
+        }
       }
     },
     "workflow": {
