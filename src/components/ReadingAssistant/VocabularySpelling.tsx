@@ -368,7 +368,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hintsRemaining, currentChallenge, currentMode, selectedLetters, usedIndices]);
+  }, [hintsRemaining, currentChallenge, currentMode, selectedLetters, usedIndices, userInput]);
 
   const handleLetterClick = useCallback((letter: string, index: number) => {
     setSelectedLetters((prev) => [...prev, letter]);
