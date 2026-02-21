@@ -30,9 +30,9 @@ interface VocabularySpellingProps {
 type GameStatus = "setup" | "playing" | "completed";
 
 const DIFFICULTY_CONFIG: Record<SpellingDifficulty, { timeLimit: number; hintsAllowed: number; blankRatio: number }> = {
-  easy: { timeLimit: 30, hintsAllowed: 5, blankRatio: 0.2 },
-  medium: { timeLimit: 20, hintsAllowed: 3, blankRatio: 0.35 },
-  hard: { timeLimit: 12, hintsAllowed: 1, blankRatio: 0.5 },
+  easy: { timeLimit: 35, hintsAllowed: 5, blankRatio: 0.2 },
+  medium: { timeLimit: 25, hintsAllowed: 3, blankRatio: 0.35 },
+  hard: { timeLimit: 20, hintsAllowed: 1, blankRatio: 0.5 },
 };
 
 const MODE_ICONS: Record<SpellingGameMode, React.ReactNode> = {
@@ -606,24 +606,6 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
       </div>
 
       <div className="w-full max-w-md bg-card border rounded-xl p-6 relative overflow-hidden">
-        {showFeedback && (
-          <div
-            className={cn(
-              "absolute inset-0 flex items-center justify-center z-10",
-              isCorrect ? "bg-green-500/20" : "bg-red-500/20"
-            )}
-          >
-            {isCorrect ? (
-              <CheckCircle className="h-16 w-16 text-green-500" />
-            ) : (
-              <div className="text-center">
-                <XCircle className="h-16 w-16 text-red-500 mx-auto mb-2" />
-                <p className="text-lg font-semibold">{currentChallenge.word}</p>
-              </div>
-            )}
-          </div>
-        )}
-
         <div className="text-center mb-4">
           <span className="text-xs px-2 py-1 bg-muted rounded-full">
             {t(`reading.glossary.spelling.modes.${currentMode}`)}
@@ -788,6 +770,36 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
           </Button>
         )}
       </div>
+
+      {showFeedback && (
+        <div
+          className={cn(
+            "w-full max-w-md p-4 rounded-xl flex items-center justify-center gap-3",
+            isCorrect
+              ? "bg-green-100 dark:bg-green-900/30 border-2 border-green-500"
+              : "bg-red-100 dark:bg-red-900/30 border-2 border-red-500"
+          )}
+        >
+          {isCorrect ? (
+            <>
+              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+              <span className="text-lg font-semibold text-green-600 dark:text-green-400">
+                {t("reading.glossary.quiz.correct")}
+              </span>
+            </>
+          ) : (
+            <>
+              <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              <span className="text-lg text-red-600 dark:text-red-400">
+                {t("reading.glossary.quiz.incorrect")}
+              </span>
+              <span className="text-2xl font-bold text-foreground">
+                {currentChallenge.word.toUpperCase()}
+              </span>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <span>{t("reading.glossary.spelling.score")}:</span>
