@@ -728,10 +728,12 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
               {currentChallenge.word.split("").map((char, idx) => {
                 const isBlank = currentChallenge.blankPositions.includes(idx);
                 const isRevealed = revealedPositions.includes(idx);
-                const userChar = userInput[idx - currentChallenge.blankPositions.indexOf(idx)] || 
-                  (isBlank && isRevealed ? char : null);
+                const blankIndex = currentChallenge.blankPositions.indexOf(idx);
+                const userChar = blankIndex !== -1 && blankIndex < userInput.length 
+                  ? userInput[blankIndex] 
+                  : null;
 
-                if (isBlank && !isRevealed) {
+                if (isBlank && !isRevealed && !userChar) {
                   return (
                     <span
                       key={idx}
@@ -739,9 +741,10 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
                     />
                   );
                 }
+
                 return (
                   <span key={idx} className="inline-block w-6 h-8 mx-0.5">
-                    {isRevealed ? char : userChar || char}
+                    {isRevealed ? char : isBlank && userChar ? userChar : char}
                   </span>
                 );
               })}
@@ -752,7 +755,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder={t("reading.glossary.spelling.typeMissing")}
+              placeholder={t("reading.glossary.spelling.typeWord")}
               className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
               autoFocus
               disabled={showFeedback}
