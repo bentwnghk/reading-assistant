@@ -217,6 +217,7 @@ export const useReadingStore = create(
       },
       restore: (session) =>
         set(() => ({
+          ...defaultValues,
           ...session,
         })),
     }),
