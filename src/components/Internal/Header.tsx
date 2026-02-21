@@ -12,8 +12,10 @@ import {
   Volume2,
   Camera,
   Brain,
-  MessageSquare,
   Sparkles,
+  Gamepad2,
+  Layers,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import {
@@ -242,10 +244,10 @@ function Header() {
                 {t("header.about.objectives.title")}
               </h3>
               <ul className="space-y-1 text-muted-foreground ml-6">
-                <li>🎓 {t("header.about.objectives.personalized")}</li>
-                <li>📖 {t("header.about.objectives.comprehension")}</li>
-                <li>📝 {t("header.about.objectives.vocabulary")}</li>
-                <li>🔊 {t("header.about.objectives.pronunciation")}</li>
+                <li>🎯 {t("header.about.objectives.personalized")}</li>
+                <li>🧠 {t("header.about.objectives.comprehension")}</li>
+                <li>📚 {t("header.about.objectives.vocabulary")}</li>
+                <li>🎮 {t("header.about.objectives.gamification")}</li>
                 <li>🔒 {t("header.about.objectives.privacy")}</li>
               </ul>
             </div>
@@ -266,10 +268,16 @@ function Header() {
                   <Brain className="h-3 w-3" /> {t("header.about.features.visual")}
                 </li>
                 <li className="flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3" /> {t("header.about.features.assessment")}
+                  <BookOpen className="h-3 w-3" /> {t("header.about.features.glossary")}
                 </li>
                 <li className="flex items-center gap-1">
-                  <BookOpen className="h-3 w-3" /> {t("header.about.features.glossary")}
+                  <Layers className="h-3 w-3" /> {t("header.about.features.flashcard")}
+                </li>
+                <li className="flex items-center gap-1">
+                  <ClipboardList className="h-3 w-3" /> {t("header.about.features.quiz")}
+                </li>
+                <li className="flex items-center gap-1">
+                  <Gamepad2 className="h-3 w-3" /> {t("header.about.features.spelling")}
                 </li>
                 <li className="flex items-center gap-1">
                   <Volume2 className="h-3 w-3" /> {t("header.about.features.tts")}

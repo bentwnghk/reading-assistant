@@ -52,8 +52,8 @@ function Glossary() {
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
     { key: "table", label: t("reading.glossary.tabTable"), icon: <Table className="h-4 w-4" /> },
     { key: "flashcard", label: t("reading.glossary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
-    { key: "quiz", label: t("reading.glossary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },
     { key: "spelling", label: t("reading.glossary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },
+    { key: "quiz", label: t("reading.glossary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },
   ];
 
   const renderContent = () => {
