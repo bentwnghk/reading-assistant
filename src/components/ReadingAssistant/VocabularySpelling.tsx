@@ -75,6 +75,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const challengeRef = useRef<SpellingWordChallenge | null>(null);
+  const revealedPositionsRef = useRef<number[]>([]);
 
   const currentChallenge = challenges[currentIndex];
   challengeRef.current = currentChallenge;
@@ -133,6 +134,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     setSelectedLetters([]);
     setUsedIndices([]);
     setRevealedPositions([]);
+    revealedPositionsRef.current = [];
     setShowFeedback(false);
     setGameStatus("playing");
     setCurrentMode(gameMode === "mixed" ? gameChallenges[0].word ? "listen-type" : gameMode : gameMode);
@@ -161,6 +163,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
                 setSelectedLetters([]);
                 setUsedIndices([]);
                 setRevealedPositions([]);
+                revealedPositionsRef.current = [];
                 setShowFeedback(false);
                 setTimeRemaining(config.timeLimit);
 
@@ -196,6 +199,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
       setSelectedLetters([]);
       setUsedIndices([]);
       setRevealedPositions([]);
+      revealedPositionsRef.current = [];
       setShowFeedback(false);
       setTimeRemaining(config.timeLimit);
 
@@ -342,12 +346,16 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
         setRevealedPositions((prev) => [...prev, hintPos].sort((a, b) => a - b));
       }
     } else if (currentMode === "fill-blanks") {
+      const currentRevealed = revealedPositionsRef.current;
       const unrevealedBlanks = currentChallenge.blankPositions.filter(
-        (pos) => !revealedPositions.includes(pos)
+        (pos) => !currentRevealed.includes(pos)
       );
       if (unrevealedBlanks.length > 0) {
         const hintPos = unrevealedBlanks[0];
+        const hintLetter = currentChallenge.word[hintPos];
+        revealedPositionsRef.current = [...currentRevealed, hintPos].sort((a, b) => a - b);
         setRevealedPositions((prev) => [...prev, hintPos].sort((a, b) => a - b));
+        setUserInput((prev) => prev + hintLetter);
       }
     } else if (currentMode === "scramble") {
       const nextCorrectLetter = currentChallenge.word[selectedLetters.length];
@@ -362,7 +370,8 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
         }
       }
     }
-  }, [hintsRemaining, currentChallenge, currentMode, revealedPositions, selectedLetters, usedIndices]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hintsRemaining, currentChallenge, currentMode, selectedLetters, usedIndices]);
 
   const handleLetterClick = useCallback((letter: string, index: number) => {
     setSelectedLetters((prev) => [...prev, letter]);
