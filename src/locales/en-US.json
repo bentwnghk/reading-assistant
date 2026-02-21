@@ -214,6 +214,8 @@
     "model": "Model",
     "visionModel": "Vision Model",
     "ttsVoice": "TTS Voice",
+    "autoSpeakFlashcard": "Auto-speak Flashcard",
+    "autoSpeakFlashcardTip": "Automatically read the word aloud when a flashcard loads",
     "general": "System",
     "provider": "AI Provider",
     "providerTip": "AI service provider",

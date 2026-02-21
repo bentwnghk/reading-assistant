@@ -24,6 +24,7 @@ export interface SettingStore {
   model: AvailableModel;
   visionModel: VisionModel;
   ttsVoice: TTSVoice;
+  autoSpeakFlashcard: boolean;
   openAIApiKey: string;
   openAIApiProxy: string;
   openaicompatibleApiKey: string;
@@ -46,6 +47,7 @@ export const defaultValues: SettingStore = {
   model: "gpt-5-mini",
   visionModel: "gpt-4.1-mini",
   ttsVoice: "alloy",
+  autoSpeakFlashcard: true,
   openAIApiKey: "",
   openAIApiProxy: "https://api.mr5ai.com",
   openaicompatibleApiKey: "",

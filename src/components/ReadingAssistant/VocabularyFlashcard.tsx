@@ -18,7 +18,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
   const { id, glossaryRatings, setGlossaryRating, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
-  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
+  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -77,10 +77,8 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
     handleNext();
   };
 
-  const handleSpeak = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!currentEntry?.word) return;
+  const speakWord = useCallback(async (word: string) => {
+    if (!word) return;
 
     if (audioRef.current) {
       audioRef.current.pause();
@@ -112,7 +110,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
         headers,
         body: JSON.stringify({
           model: "tts-1",
-          input: currentEntry.word,
+          input: word,
           voice: ttsVoice,
           response_format: "mp3",
         }),
@@ -154,7 +152,20 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
     } finally {
       setIsTTSLoading(false);
     }
-  }, [currentEntry, ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+  }, [ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+
+  const handleSpeak = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentEntry?.word) {
+      speakWord(currentEntry.word);
+    }
+  }, [currentEntry, speakWord]);
+
+  useEffect(() => {
+    if (autoSpeakFlashcard && currentEntry?.word) {
+      speakWord(currentEntry.word);
+    }
+  }, [currentIndex, isShuffled, autoSpeakFlashcard, currentEntry, speakWord]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
