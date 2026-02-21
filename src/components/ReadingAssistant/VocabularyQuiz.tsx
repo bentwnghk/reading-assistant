@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight } from "lucide-react";
+import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -213,9 +213,11 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
           {t("reading.glossary.quiz.startQuiz")}
         </Button>
         {vocabularyQuizScore > 0 && (
-          <p className="text-sm text-muted-foreground mt-4">
-            {t("reading.glossary.quiz.lastScore")}: <span className="font-medium">{vocabularyQuizScore}%</span>
-          </p>
+          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+            <Trophy className="h-4 w-4 text-yellow-500" />
+            <span className="text-sm font-medium">{t("reading.glossary.quiz.lastScore")}</span>
+            <span className="text-lg font-bold text-primary">{vocabularyQuizScore}%</span>
+          </div>
         )}
       </div>
     );

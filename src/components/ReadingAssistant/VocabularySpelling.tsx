@@ -610,9 +610,11 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
           </Button>
 
           {spellingGameBestScore > 0 && (
-            <p className="text-sm text-muted-foreground text-center">
-              {t("reading.glossary.spelling.bestScore")}: <span className="font-medium">{spellingGameBestScore}</span>
-            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+              <Trophy className="h-4 w-4 text-yellow-500" />
+              <span className="text-sm font-medium">{t("reading.glossary.spelling.bestScore")}</span>
+              <span className="text-lg font-bold text-primary">{spellingGameBestScore}</span>
+            </div>
           )}
         </div>
       </div>
