@@ -175,7 +175,8 @@
         "of": "of",
         "pressKey": "Press",
         "wordsAvailable": "{{count}} words available",
-        "scoreFormat": "{{correct}} / {{total}} Correct"
+        "scoreFormat": "{{correct}} / {{total}} Correct",
+        "lastScore": "Last score"
       }
     },
     "workflow": {

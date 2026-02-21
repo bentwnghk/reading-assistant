@@ -114,7 +114,7 @@ function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestio
 
 function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
-  const { setVocabularyQuizScore } = useReadingStore();
+  const { vocabularyQuizScore, setVocabularyQuizScore } = useReadingStore();
 
   const [quizState, setQuizState] = useState<QuizState>("idle");
   const [questions, setQuestions] = useState<VocabularyQuizQuestion[]>([]);
@@ -195,13 +195,18 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   if (quizState === "idle") {
     return (
       <div className="text-center py-12">
-          <p className="text-muted-foreground mb-6">
-            {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
-          </p>
+        <p className="text-muted-foreground mb-6">
+          {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
+        </p>
         <Button onClick={startQuiz} size="lg">
           <Play className="h-5 w-5 mr-2" />
           {t("reading.glossary.quiz.startQuiz")}
         </Button>
+        {vocabularyQuizScore > 0 && (
+          <p className="text-sm text-muted-foreground mt-4">
+            {t("reading.glossary.quiz.lastScore")}: <span className="font-medium">{vocabularyQuizScore}%</span>
+          </p>
+        )}
       </div>
     );
   }
