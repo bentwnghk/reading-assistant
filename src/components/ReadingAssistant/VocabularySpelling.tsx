@@ -346,14 +346,11 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
         setRevealedPositions((prev) => [...prev, hintPos].sort((a, b) => a - b));
       }
     } else if (currentMode === "fill-blanks") {
-      const currentRevealed = revealedPositionsRef.current;
-      const unrevealedBlanks = currentChallenge.blankPositions.filter(
-        (pos) => !currentRevealed.includes(pos)
-      );
-      if (unrevealedBlanks.length > 0) {
-        const hintPos = unrevealedBlanks[0];
+      const nextBlankIndex = userInput.length;
+      if (nextBlankIndex < currentChallenge.blankPositions.length) {
+        const hintPos = currentChallenge.blankPositions[nextBlankIndex];
         const hintLetter = currentChallenge.word[hintPos];
-        revealedPositionsRef.current = [...currentRevealed, hintPos].sort((a, b) => a - b);
+        revealedPositionsRef.current = [...revealedPositionsRef.current, hintPos].sort((a, b) => a - b);
         setRevealedPositions((prev) => [...prev, hintPos].sort((a, b) => a - b));
         setUserInput((prev) => prev + hintLetter);
       }
