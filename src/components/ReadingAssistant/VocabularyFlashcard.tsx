@@ -248,7 +248,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               "flex flex-col items-center justify-center p-6 overflow-y-auto"
             )}
           >
-            <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="flex items-center justify-center gap-2 mb-2">
               <div className="text-2xl font-bold text-center">
                 {currentEntry.word}
               </div>
@@ -265,18 +265,23 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 )}
               </button>
             </div>
+            {currentEntry.partOfSpeech && (
+              <div className="text-sm text-muted-foreground italic mb-4">
+                {currentEntry.partOfSpeech}
+              </div>
+            )}
             <div className="text-center space-y-4 w-full">
               <div>
-                <div className="text-xs text-muted-foreground mb-1">English</div>
+                <div className="text-xs text-muted-foreground mb-1">English Definition</div>
                 <div className="text-sm">{currentEntry.englishDefinition}</div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground mb-1">中文</div>
+                <div className="text-xs text-muted-foreground mb-1">中文解釋</div>
                 <div className="text-sm font-noto-sans-tc">{currentEntry.chineseDefinition}</div>
               </div>
               {currentEntry.example && (
                 <div>
-                  <div className="text-xs text-muted-foreground mb-1">Example</div>
+                  <div className="text-xs text-muted-foreground mb-1">Example 例句</div>
                   <div className="text-sm italic text-muted-foreground">
                     &ldquo;{currentEntry.example}&rdquo;
                   </div>
