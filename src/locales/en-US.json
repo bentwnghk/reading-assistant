@@ -197,7 +197,7 @@
         "useHint": "Use Hint (Ctrl+Space)",
         "clickToHear": "Click to hear the word",
         "typeAnswer": "Type the word you hear...",
-        "typeWord": "Type the complete word...",
+        "typeMissing": "Type the missing letters...",
         "clear": "Clear",
         "submit": "Submit",
         "modes": {

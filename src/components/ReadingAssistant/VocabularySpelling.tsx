@@ -287,8 +287,17 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     if (!currentChallenge) return;
 
     const normalizedInput = userInput.toLowerCase().trim();
-    const normalizedAnswer = currentChallenge.word.toLowerCase();
-    const correct = normalizedInput === normalizedAnswer;
+    let correct: boolean;
+
+    if (currentMode === "fill-blanks") {
+      const missingLetters = currentChallenge.blankPositions
+        .map((pos) => currentChallenge.word[pos].toLowerCase())
+        .join("");
+      correct = normalizedInput === missingLetters;
+    } else {
+      const normalizedAnswer = currentChallenge.word.toLowerCase();
+      correct = normalizedInput === normalizedAnswer;
+    }
 
     setIsCorrect(correct);
     setShowFeedback(true);
@@ -313,7 +322,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     }
 
     setTimeout(() => moveToNext(), 1500);
-  }, [currentChallenge, userInput, streak, isTimed, timeRemaining, config.timeLimit, hintsUsed, moveToNext]);
+  }, [currentChallenge, userInput, streak, isTimed, timeRemaining, config.timeLimit, hintsUsed, moveToNext, currentMode]);
 
   const handleHint = useCallback(() => {
     if (hintsRemaining <= 0 || !currentChallenge) return;
@@ -755,7 +764,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder={t("reading.glossary.spelling.typeWord")}
+              placeholder={t("reading.glossary.spelling.typeMissing")}
               className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
               autoFocus
               disabled={showFeedback}

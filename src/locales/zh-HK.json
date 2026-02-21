@@ -197,7 +197,7 @@
         "useHint": "使用提示 (Ctrl+Space)",
         "clickToHear": "點擊聽取生字",
         "typeAnswer": "輸入你聽到的生字...",
-        "typeWord": "輸入完整的生字...",
+        "typeMissing": "輸入缺少的字母...",
         "clear": "清除",
         "submit": "提交",
         "modes": {
