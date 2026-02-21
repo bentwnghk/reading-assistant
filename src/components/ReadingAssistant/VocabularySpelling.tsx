@@ -349,8 +349,20 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
         const hintPos = unrevealedBlanks[0];
         setRevealedPositions((prev) => [...prev, hintPos].sort((a, b) => a - b));
       }
+    } else if (currentMode === "scramble") {
+      const nextCorrectLetter = currentChallenge.word[selectedLetters.length];
+      if (nextCorrectLetter) {
+        const letterIndex = currentChallenge.shuffledLetters.findIndex(
+          (letter, idx) => letter === nextCorrectLetter && !usedIndices.includes(idx)
+        );
+        if (letterIndex !== -1) {
+          setSelectedLetters((prev) => [...prev, nextCorrectLetter]);
+          setUserInput((prev) => prev + nextCorrectLetter);
+          setUsedIndices((prev) => [...prev, letterIndex]);
+        }
+      }
     }
-  }, [hintsRemaining, currentChallenge, currentMode, revealedPositions]);
+  }, [hintsRemaining, currentChallenge, currentMode, revealedPositions, selectedLetters, usedIndices]);
 
   const handleLetterClick = useCallback((letter: string, index: number) => {
     setSelectedLetters((prev) => [...prev, letter]);
