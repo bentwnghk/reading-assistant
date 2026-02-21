@@ -1,10 +1,13 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Shuffle, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
+import { useSettingStore } from "@/store/setting";
+import { generateSignature } from "@/utils/signature";
+import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
 
 interface VocabularyFlashcardProps {
@@ -15,11 +18,14 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
   const { id, glossaryRatings, setGlossaryRating, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
+  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [shuffledGlossary, setShuffledGlossary] = useState<GlossaryEntry[]>([]);
   const [isShuffled, setIsShuffled] = useState(false);
+  const [isTTSLoading, setIsTTSLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setShuffledGlossary(glossary);
@@ -71,6 +77,85 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
     handleNext();
   };
 
+  const handleSpeak = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!currentEntry?.word) return;
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    setIsTTSLoading(true);
+
+    try {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      let url: string;
+      if (mode === "local") {
+        url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
+        if (openaicompatibleApiKey) {
+          headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
+        }
+      } else {
+        url = "/api/ai/openaicompatible/v1/audio/speech";
+        if (accessPassword) {
+          headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
+        }
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: "tts-1",
+          input: currentEntry.word,
+          voice: ttsVoice,
+          response_format: "mp3",
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`TTS request failed (${response.status}): ${errText}`);
+      }
+
+      const audioBuffer = await response.arrayBuffer();
+      const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      await new Promise<void>((resolve, reject) => {
+        const audio = new Audio();
+        audioRef.current = audio;
+
+        audio.oncanplay = () => {
+          audio.play().then(resolve).catch(reject);
+        };
+
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+        };
+
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+          reject(new Error("Audio element error"));
+        };
+
+        audio.src = audioUrl;
+        audio.load();
+      });
+    } catch (error) {
+      console.error("TTS error:", error);
+    } finally {
+      setIsTTSLoading(false);
+    }
+  }, [currentEntry, ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
@@ -86,6 +171,15 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handlePrevious, handleNext, handleFlip]);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   if (!currentEntry) {
     return (
@@ -120,8 +214,22 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               "flex flex-col items-center justify-center p-6"
             )}
           >
-            <div className="text-4xl font-bold text-center mb-4">
-              {currentEntry.word}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="text-4xl font-bold text-center">
+                {currentEntry.word}
+              </div>
+              <button
+                onClick={handleSpeak}
+                disabled={isTTSLoading}
+                className="p-2 rounded-full hover:bg-muted transition-colors disabled:opacity-50"
+                title={t("reading.extractedText.readAloud")}
+              >
+                {isTTSLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <Volume2 className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                )}
+              </button>
             </div>
             {currentEntry.partOfSpeech && (
               <div className="text-sm text-muted-foreground italic">
@@ -140,8 +248,22 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               "flex flex-col items-center justify-center p-6 overflow-y-auto"
             )}
           >
-            <div className="text-2xl font-bold mb-4 text-center">
-              {currentEntry.word}
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="text-2xl font-bold text-center">
+                {currentEntry.word}
+              </div>
+              <button
+                onClick={handleSpeak}
+                disabled={isTTSLoading}
+                className="p-2 rounded-full hover:bg-muted transition-colors disabled:opacity-50"
+                title={t("reading.extractedText.readAloud")}
+              >
+                {isTTSLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <Volume2 className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                )}
+              </button>
             </div>
             <div className="text-center space-y-4 w-full">
               <div>
