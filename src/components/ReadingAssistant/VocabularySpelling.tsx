@@ -102,7 +102,8 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
 
     return {
       word: entry.word,
-      definition: entry.englishDefinition,
+      englishDefinition: entry.englishDefinition,
+      chineseDefinition: entry.chineseDefinition,
       shuffledLetters,
       blankedWord,
       blankPositions: positions.sort((a, b) => a - b),
@@ -637,9 +638,9 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
               </div>
             )}
 
-            <div className="text-sm text-muted-foreground text-center">
-              <Eye className="h-4 w-4 inline mr-1" />
-              {currentChallenge.definition}
+            <div className="text-sm text-muted-foreground text-center space-y-1">
+              <div><Eye className="h-4 w-4 inline mr-1" />{currentChallenge.englishDefinition}</div>
+              <div className="font-noto-sans-tc">{currentChallenge.chineseDefinition}</div>
             </div>
 
             <input
@@ -657,9 +658,9 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
 
         {currentMode === "scramble" && (
           <div className="space-y-6">
-            <div className="text-sm text-muted-foreground text-center mb-4">
-              <Eye className="h-4 w-4 inline mr-1" />
-              {currentChallenge.definition}
+            <div className="text-sm text-muted-foreground text-center space-y-1">
+              <div><Eye className="h-4 w-4 inline mr-1" />{currentChallenge.englishDefinition}</div>
+              <div className="font-noto-sans-tc">{currentChallenge.chineseDefinition}</div>
             </div>
 
             <div className="text-center font-mono text-2xl tracking-wider min-h-[2.5rem] p-2 border-b-2 border-dashed">
@@ -710,9 +711,9 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
 
         {currentMode === "fill-blanks" && (
           <div className="space-y-6">
-            <div className="text-sm text-muted-foreground text-center mb-4">
-              <Eye className="h-4 w-4 inline mr-1" />
-              {currentChallenge.definition}
+            <div className="text-sm text-muted-foreground text-center space-y-1">
+              <div><Eye className="h-4 w-4 inline mr-1" />{currentChallenge.englishDefinition}</div>
+              <div className="font-noto-sans-tc">{currentChallenge.chineseDefinition}</div>
             </div>
 
             <div className="text-center font-mono text-2xl tracking-wider">
@@ -790,11 +791,11 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
           ) : (
             <>
               <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
-              <span className="text-lg text-red-600 dark:text-red-400">
-                {t("reading.glossary.quiz.incorrect")}
-              </span>
               <span className="text-2xl font-bold text-foreground">
                 {currentChallenge.word.toUpperCase()}
+              </span>
+              <span className="text-lg text-muted-foreground font-noto-sans-tc">
+                ({currentChallenge.chineseDefinition})
               </span>
             </>
           )}

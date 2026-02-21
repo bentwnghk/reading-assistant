@@ -28,7 +28,8 @@ type SpellingDifficulty = "easy" | "medium" | "hard";
 
 interface SpellingWordChallenge {
   word: string;
-  definition: string;
+  englishDefinition: string;
+  chineseDefinition: string;
   shuffledLetters: string[];
   blankedWord: string;
   blankPositions: number[];
