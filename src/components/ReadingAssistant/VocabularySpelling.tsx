@@ -29,10 +29,10 @@ interface VocabularySpellingProps {
 
 type GameStatus = "setup" | "playing" | "completed";
 
-const DIFFICULTY_CONFIG: Record<SpellingDifficulty, { timeLimit: number; hintsAllowed: number; blankRatio: number }> = {
-  easy: { timeLimit: 45, hintsAllowed: 5, blankRatio: 0.2 },
-  medium: { timeLimit: 30, hintsAllowed: 3, blankRatio: 0.35 },
-  hard: { timeLimit: 20, hintsAllowed: 1, blankRatio: 0.5 },
+const DIFFICULTY_CONFIG: Record<SpellingDifficulty, { timeLimits: Record<SpellingGameMode, number>; hintsAllowed: number; blankRatio: number }> = {
+  easy: { timeLimits: { "listen-type": 30, scramble: 45, "fill-blanks": 30, mixed: 30 }, hintsAllowed: 5, blankRatio: 0.2 },
+  medium: { timeLimits: { "listen-type": 20, scramble: 30, "fill-blanks": 20, mixed: 20 }, hintsAllowed: 3, blankRatio: 0.35 },
+  hard: { timeLimits: { "listen-type": 12, scramble: 20, "fill-blanks": 12, mixed: 12 }, hintsAllowed: 1, blankRatio: 0.5 },
 };
 
 const MODE_ICONS: Record<SpellingGameMode, React.ReactNode> = {
@@ -128,7 +128,10 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     setMaxStreak(0);
     setHintsUsed(0);
     setHintsRemaining(config.hintsAllowed);
-    setTimeRemaining(config.timeLimit);
+    const initialMode = gameMode === "mixed" 
+      ? (["listen-type", "scramble", "fill-blanks"] as SpellingGameMode[])[Math.floor(Math.random() * 3)]
+      : gameMode;
+    setTimeRemaining(config.timeLimits[initialMode]);
     setCorrectCount(0);
     setUserInput("");
     setSelectedLetters([]);
@@ -137,12 +140,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     revealedPositionsRef.current = [];
     setShowFeedback(false);
     setGameStatus("playing");
-    setCurrentMode(gameMode === "mixed" ? gameChallenges[0].word ? "listen-type" : gameMode : gameMode);
-
-    if (gameMode === "mixed" && gameChallenges.length > 0) {
-      const firstMode = (["listen-type", "scramble", "fill-blanks"] as SpellingGameMode[])[Math.floor(Math.random() * 3)];
-      setCurrentMode(firstMode);
-    }
+    setCurrentMode(initialMode);
   }, [glossary, gameMode, config, generateChallenge]);
 
   useEffect(() => {
@@ -165,17 +163,19 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
                 setRevealedPositions([]);
                 revealedPositionsRef.current = [];
                 setShowFeedback(false);
-                setTimeRemaining(config.timeLimit);
 
                 if (gameMode === "mixed") {
                   const nextMode = (["listen-type", "scramble", "fill-blanks"] as SpellingGameMode[])[Math.floor(Math.random() * 3)];
                   setCurrentMode(nextMode);
+                  setTimeRemaining(config.timeLimits[nextMode]);
+                } else {
+                  setTimeRemaining(config.timeLimits[gameMode]);
                 }
 
                 setTimeout(() => inputRef.current?.focus(), 100);
               }
             }, 1500);
-            return config.timeLimit;
+            return config.timeLimits[currentMode];
           }
           return prev - 1;
         });
@@ -187,7 +187,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
         clearInterval(timerRef.current);
       }
     };
-  }, [gameStatus, isTimed, showFeedback, currentIndex, challenges.length, gameMode, config.timeLimit]);
+  }, [gameStatus, isTimed, showFeedback, currentIndex, challenges.length, gameMode, config.timeLimits, currentMode]);
 
   const moveToNext = useCallback(() => {
     if (currentIndex >= challenges.length - 1) {
@@ -201,16 +201,18 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
       setRevealedPositions([]);
       revealedPositionsRef.current = [];
       setShowFeedback(false);
-      setTimeRemaining(config.timeLimit);
 
       if (gameMode === "mixed") {
         const nextMode = (["listen-type", "scramble", "fill-blanks"] as SpellingGameMode[])[Math.floor(Math.random() * 3)];
         setCurrentMode(nextMode);
+        setTimeRemaining(config.timeLimits[nextMode]);
+      } else {
+        setTimeRemaining(config.timeLimits[gameMode]);
       }
 
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [currentIndex, challenges.length, gameMode, config.timeLimit]);
+  }, [currentIndex, challenges.length, gameMode, config.timeLimits]);
 
   const speakWord = useCallback(async (word: string) => {
     if (!word) return;
@@ -315,7 +317,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
 
       let points = 100;
       if (isTimed) {
-        points += Math.floor((timeRemaining / config.timeLimit) * 50);
+        points += Math.floor((timeRemaining / config.timeLimits[currentMode]) * 50);
       }
       if (newStreak >= 3) {
         points += Math.floor(points * 0.1 * Math.min(newStreak - 2, 5));
@@ -327,7 +329,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     }
 
     setTimeout(() => moveToNext(), 1500);
-  }, [currentChallenge, userInput, streak, isTimed, timeRemaining, config.timeLimit, hintsUsed, moveToNext, currentMode]);
+  }, [currentChallenge, userInput, streak, isTimed, timeRemaining, config.timeLimits, hintsUsed, moveToNext, currentMode]);
 
   const handleHint = useCallback(() => {
     if (hintsRemaining <= 0 || !currentChallenge) return;
