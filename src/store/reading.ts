@@ -223,6 +223,7 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
+      version: 1,
       partialize: (state) => {
         const persisted = { ...state };
         delete (persisted as Record<string, unknown>).originalImages;

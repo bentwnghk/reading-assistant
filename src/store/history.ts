@@ -67,7 +67,18 @@ export const useHistoryStore = create(
     }),
     {
       name: "historyStore",
-      version: 2,
+      version: 3,
+      migrate: (persistedState, version) => {
+        const state = persistedState as HistoryStore & HistoryActions;
+        if (version < 3) {
+          state.history = state.history?.map((item) => ({
+            ...item,
+            vocabularyQuizScore: item.vocabularyQuizScore ?? 0,
+            glossaryRatings: item.glossaryRatings ?? {},
+          })) || [];
+        }
+        return state;
+      },
       storage: {
         getItem: async (key: string) => {
           return await readingStore.getItem<
