@@ -292,12 +292,15 @@ function Header() {
               </h3>
               <ol className="space-y-1 text-muted-foreground ml-6 list-decimal list-inside">
                 <li>{t("header.about.workflow.upload")}</li>
-                <li>{t("header.about.workflow.extract")}</li>
-                <li>{t("header.about.workflow.summarize")}</li>
-                <li>{t("header.about.workflow.visualize")}</li>
+                <li>{t("header.about.workflow.summary")}</li>
                 <li>{t("header.about.workflow.adapt")}</li>
+                <li>{t("header.about.workflow.mindmap")}</li>
                 <li>{t("header.about.workflow.test")}</li>
-                <li>{t("header.about.workflow.learn")}</li>
+                <li>{t("header.about.workflow.analyze")}</li>
+                <li>{t("header.about.workflow.highlight")}</li>
+                <li>{t("header.about.workflow.glossary")}</li>
+                <li>{t("header.about.workflow.spelling")}</li>
+                <li>{t("header.about.workflow.vocabQuiz")}</li>
               </ol>
             </div>
 
