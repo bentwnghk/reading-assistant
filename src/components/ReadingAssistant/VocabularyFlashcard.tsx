@@ -264,7 +264,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               </button>
             </div>
             {currentEntry.partOfSpeech && (
-              <div className="text-base text-muted-foreground italic">
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-medium">
                 {currentEntry.partOfSpeech}
               </div>
             )}
@@ -276,7 +276,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           <div
             className={cn(
               "absolute inset-0 backface-hidden rotate-y-180",
-              "bg-gradient-to-br from-card via-card to-primary/10 border-2 rounded-xl shadow-lg",
+              "bg-gradient-to-br from-card via-card to-amber-100 dark:to-amber-950/50 border-2 border-amber-200 dark:border-amber-800 rounded-xl shadow-lg",
               "hover:shadow-xl transition-shadow duration-300",
               "flex flex-col items-center justify-center p-6 overflow-y-auto"
             )}
