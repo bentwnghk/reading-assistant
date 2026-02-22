@@ -234,7 +234,7 @@
       }
     },
     "workflow": {
-      "title": "Progress",
+      "title": "Learning Progress",
       "progress": "{{percent}}% complete",
       "upload": "Upload",
       "summary": "Summary",
@@ -243,7 +243,9 @@
       "test": "Test",
       "analyze": "Analyze Sentence",
       "highlight": "Highlight Word",
-      "glossary": "Glossary"
+      "glossary": "Glossary",
+      "spelling": "Spelling Game",
+      "vocabQuiz": "Vocab Quiz"
     }
   },
   "history": {

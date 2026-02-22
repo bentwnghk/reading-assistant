@@ -6,7 +6,7 @@ import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
   const { t } = useTranslation();
-  const { extractedText, summary, adaptedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences } = useReadingStore();
+  const { extractedText, summary, adaptedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore } = useReadingStore();
 
   const steps = [
     { key: "upload", label: t("reading.workflow.upload"), completed: !!extractedText },
@@ -17,6 +17,8 @@ function WorkflowProgress() {
     { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0 },
     { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0 },
     { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0 },
+    { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0 },
+    { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0 },
   ];
 
   const completedCount = steps.filter((s) => s.completed).length;

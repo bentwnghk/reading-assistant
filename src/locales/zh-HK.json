@@ -234,7 +234,7 @@
       }
     },
     "workflow": {
-      "title": "進度",
+      "title": "學習進度",
       "progress": "已完成 {{percent}}%",
       "upload": "上傳",
       "summary": "摘要",
@@ -243,7 +243,9 @@
       "test": "測驗",
       "analyze": "分析句子",
       "highlight": "標記生字",
-      "glossary": "詞彙表"
+      "glossary": "詞彙表",
+      "spelling": "拼字遊戲",
+      "vocabQuiz": "詞彙測驗"
     }
   },
   "history": {
