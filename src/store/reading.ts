@@ -63,6 +63,7 @@ interface ReadingActions {
   removeHighlightedWord: (word: string) => void;
   setHighlightedWords: (words: string[]) => void;
   setSentenceAnalysis: (sentence: string, analysis: string) => void;
+  removeSentenceAnalysis: (sentence: string) => void;
   getSentenceAnalysis: (sentence: string) => SentenceAnalysis | null;
   setMindMap: (mermaidCode: string) => void;
   setReadingTest: (questions: ReadingTestQuestion[]) => void;
@@ -191,6 +192,17 @@ export const useReadingStore = create(
                 createdAt: Date.now(),
               },
             },
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
+      removeSentenceAnalysis: (sentence) =>
+        set((state) => {
+          const key = sentence.trim().toLowerCase();
+          const { [key]: _, ...remaining } = state.analyzedSentences;
+          const newState = {
+            analyzedSentences: remaining,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

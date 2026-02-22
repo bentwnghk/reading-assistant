@@ -91,6 +91,7 @@ function ExtractedText() {
     studentAge,
     addHighlightedWord, 
     removeHighlightedWord,
+    removeSentenceAnalysis,
     setSentenceAnalysis,
     getSentenceAnalysis
   } = useReadingStore();
@@ -287,6 +288,8 @@ function ExtractedText() {
     return html;
   }, [extractedText, highlightedWords, analyzedSentences]);
 
+  const analyzedSentencesKeys = useMemo(() => Object.keys(analyzedSentences), [analyzedSentences]);
+
   useEffect(() => {
     document.addEventListener("mouseup", handleSelectionChange);
     document.addEventListener("touchend", handleSelectionChange);
@@ -368,6 +371,37 @@ function ExtractedText() {
                 {word}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {analyzedSentencesKeys.length > 0 && (
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/50 rounded-md">
+          <p className="text-sm font-medium mb-2 text-blue-800 dark:text-blue-200">
+            {t("reading.extractedText.analyzedSentences")} ({analyzedSentencesKeys.length}):
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {analyzedSentencesKeys.map((key) => {
+              const item = analyzedSentences[key];
+              const displayText = item.sentence.length > 40 
+                ? item.sentence.slice(0, 40) + "..." 
+                : item.sentence;
+              return (
+                <span
+                  key={key}
+                  className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm cursor-pointer hover:opacity-75 border-b-2 border-blue-500 dark:border-blue-400"
+                  onClick={() => {
+                    if (activeSentence === item.sentence) {
+                      setActiveSentence(null);
+                    }
+                    removeSentenceAnalysis(item.sentence);
+                  }}
+                  title={t("reading.extractedText.clickToRemoveAnalysis")}
+                >
+                  {displayText}
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
