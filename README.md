@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📚 Mr.🆖 English Reading Assistant
+# 📚 Mr.🆖 ProReader
 
 **AI-Powered Reading Companion for Students**
 
@@ -15,7 +15,7 @@
 
 ## 🎯 Objectives
 
-**Mr.🆖 English Reading Assistant** is designed to help students master English reading through personalized, AI-powered learning experiences. The app adapts to each student's age and reading level, making English comprehension accessible and engaging.
+**Mr.🆖 ProReader** is designed to help students master English reading through personalized, AI-powered learning experiences. The app adapts to each student's age and reading level, making English comprehension accessible and engaging.
 
 ### Core Goals
 - 🎓 **Personalized Learning** - Content adapted to student's age (8-18 years old)

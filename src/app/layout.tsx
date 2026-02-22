@@ -8,8 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const HEAD_SCRIPTS = process.env.HEAD_SCRIPTS as string;
-const APP_NAME = "Mr.🆖 English Reading Assistant";
-const APP_DEFAULT_TITLE = "Mr.🆖 English Reading Assistant";
+const APP_NAME = "Mr.🆖 ProReader";
+const APP_DEFAULT_TITLE = "Mr.🆖 ProReader";
 const APP_TITLE_TEMPLATE = "%s - PWA App";
 const APP_DESCRIPTION =
   "Use any LLMs (Large Language Models) for assisting students with English reading";

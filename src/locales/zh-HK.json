@@ -1,5 +1,5 @@
 {
-  "title": "Mr.🆖 英語閱讀助理",
+  "title": "Mr.🆖 ProReader",
   "theme": "主題",
   "openSource": "Mr.🆖 AI Hub",
   "copyright": "Mr.🆖 為學習英語的學生用 ❤️ 打造，並由 {{name}} 驅動",
@@ -21,7 +21,7 @@
       "toggleHelp": "切換快捷鍵說明"
     },
     "about": {
-      "title": "關於 Mr.🆖 英語閱讀助理",
+      "title": "關於 Mr.🆖 ProReader",
       "description": "你的 AI 英語學習探險之旅！🚀 透過個人化指導、互動遊戲和遊戲化詞彙練習，輕鬆掌握英語閱讀。學習英語從未如此有趣！",
       "objectives": {
         "title": "學習目標",

@@ -1,5 +1,5 @@
 {
-  "title": "Mr.🆖 English Reading Assistant",
+  "title": "Mr.🆖 ProReader",
   "theme": "Theme",
   "openSource": "Mr.🆖 AI Hub",
   "copyright": "Built with ❤️ by Mr.🆖 for students learning English. Powered by {{name}}",
@@ -21,7 +21,7 @@
       "toggleHelp": "Toggle shortcut help"
     },
     "about": {
-      "title": "About Mr.🆖 English Reading Assistant",
+      "title": "About Mr.🆖 ProReader",
       "description": "Your AI-Powered English Learning Adventure! 🚀 Master reading through personalized guidance, interactive games, and gamified vocabulary practice. Learning English has never been this fun!",
       "objectives": {
         "title": "Learning Goals",
