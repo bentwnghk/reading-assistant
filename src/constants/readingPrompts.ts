@@ -235,6 +235,8 @@ ${context}
 
 Analyze why this sentence might be difficult for this student to understand. Structure your response in Traditional Chinese (繁體中文) as follows:
 
+**${sentence}**
+
 ## 句意概要
 [Brief explanation of what the sentence means in simple terms - 1-2 sentences]
 
