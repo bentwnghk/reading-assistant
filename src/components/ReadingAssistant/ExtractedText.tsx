@@ -2,14 +2,13 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { Plus, Volume2, Loader2, Brain } from "lucide-react";
+import { Plus, Volume2, Loader2, Brain, X } from "lucide-react";
 import { generateText } from "ai";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent } from "@/components/ui/popover";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
 
@@ -38,9 +37,9 @@ function highlightTextAndSentences(
   words: string[], 
   analyzedSentences: Record<string, SentenceAnalysis>
 ): string {
-  const analyzedKeys = Object.keys(analyzedSentences);
   let result = text;
 
+  const analyzedKeys = Object.keys(analyzedSentences);
   if (analyzedKeys.length > 0) {
     const sortedSentences = analyzedKeys
       .map(key => analyzedSentences[key].sentence)
@@ -60,25 +59,14 @@ function highlightTextAndSentences(
   if (words.length > 0) {
     const sortedWords = [...words].sort((a, b) => b.length - a.length);
     const escapedWords = sortedWords.map(escapeRegExp);
-    const pattern = new RegExp(`(${escapedWords.join("|")})`, "gi");
-
-    const parts: string[] = [];
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = pattern.exec(result)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push(result.slice(lastIndex, match.index));
+    const wordPattern = new RegExp(`(${escapedWords.join("|")})`, "gi");
+    
+    result = result.replace(/<[^>]+>|([^<]+)/g, (match, textContent) => {
+      if (textContent) {
+        return textContent.replace(wordPattern, '<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">$1</mark>');
       }
-      parts.push(`<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">${match[0]}</mark>`);
-      lastIndex = match.index + match[0].length;
-    }
-
-    if (lastIndex < result.length) {
-      parts.push(result.slice(lastIndex));
-    }
-
-    result = parts.join("");
+      return match;
+    });
   }
 
   return result;
@@ -435,35 +423,31 @@ function ExtractedText() {
         </div>
       )}
 
-      <Popover open={!!activePopover} onOpenChange={(open) => !open && setActivePopover(null)}>
-        {activePopover && (
-          <div
-            className="fixed"
-            style={{ left: activePopover.x, top: activePopover.y, transform: "translateX(-50%)" }}
+      {activePopover && activeAnalysis?.analysis && (
+        <div
+          className="fixed z-[10000] bg-popover text-popover-foreground border rounded-lg shadow-lg p-4 w-[90vw] max-w-lg max-h-[70vh] overflow-y-auto"
+          style={{ 
+            left: activePopover.x, 
+            top: activePopover.y, 
+            transform: "translateX(-50%)" 
+          }}
+        >
+          <button 
+            className="absolute top-2 right-2 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+            onClick={() => setActivePopover(null)}
           >
-            <PopoverContent 
-              className="w-[90vw] max-w-lg max-h-[70vh] overflow-y-auto"
-              onOpenAutoFocus={(e) => e.preventDefault()}
-            >
-              <div className="prose prose-sm dark:prose-invert max-w-full">
-                {activeAnalysis?.analysis ? (
-                  <MagicDown
-                    value={activeAnalysis.analysis}
-                    onChange={() => {}}
-                    hideTools
-                    disableMath
-                  />
-                ) : (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                    <span>{t("reading.extractedText.analyzing")}</span>
-                  </div>
-                )}
-              </div>
-            </PopoverContent>
+            <X className="h-4 w-4" />
+          </button>
+          <div className="prose prose-sm dark:prose-invert max-w-full pr-6">
+            <MagicDown
+              value={activeAnalysis.analysis}
+              onChange={() => {}}
+              hideTools
+              disableMath
+            />
           </div>
-        )}
-      </Popover>
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground mt-4">
         {t("reading.extractedText.highlightTip")}
