@@ -85,7 +85,8 @@
       "readAloud": "朗讀",
       "analyze": "分析句子",
       "analyzing": "分析中...",
-      "analysisTitle": "句子分析"
+      "analysisTitle": "句子分析",
+      "analysisDescription": "所選句子的詳細分析"
     },
     "summary": {
       "title": "摘要",

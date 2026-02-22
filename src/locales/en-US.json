@@ -85,7 +85,8 @@
       "readAloud": "Read aloud",
       "analyze": "Analyze sentence",
       "analyzing": "Analyzing...",
-      "analysisTitle": "Sentence Analysis"
+      "analysisTitle": "Sentence Analysis",
+      "analysisDescription": "Detailed analysis of the selected sentence"
     },
     "summary": {
       "title": "Summary",

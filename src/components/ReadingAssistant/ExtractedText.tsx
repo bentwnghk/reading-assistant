@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -426,6 +427,9 @@ function ExtractedText() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t("reading.extractedText.analysisTitle")}</DialogTitle>
+            <DialogDescription className="sr-only">
+              {t("reading.extractedText.analysisDescription")}
+            </DialogDescription>
           </DialogHeader>
           <div className="prose prose-sm dark:prose-invert max-w-full">
             {isAnalysisLoading && !activeAnalysis ? (
