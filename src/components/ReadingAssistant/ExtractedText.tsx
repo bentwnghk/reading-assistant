@@ -346,8 +346,8 @@ function ExtractedText() {
         {t("reading.extractedText.title")}
       </h3>
 
-      <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-md">
-        <p className="text-sm text-blue-700 dark:text-blue-300">
+      <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 rounded-md">
+        <p className="text-sm text-green-800 dark:text-green-200">
           💡 {t("reading.extractedText.highlightTip")}
         </p>
       </div>
