@@ -3,6 +3,18 @@ import { persist } from "zustand/middleware";
 import { pick } from "radash";
 import { nanoid } from "nanoid";
 
+let syncToHistoryFn: ((store: ReadingStore) => void) | null = null;
+
+export function setHistorySyncFn(fn: (store: ReadingStore) => void) {
+  syncToHistoryFn = fn;
+}
+
+function syncToHistoryIfNeeded(state: ReadingStore) {
+  if (syncToHistoryFn && state.id && state.extractedText) {
+    syncToHistoryFn(state);
+  }
+}
+
 export type ReadingStatus =
   | "idle"
   | "extracting"
@@ -144,18 +156,24 @@ export const useReadingStore = create(
           if (state.highlightedWords.includes(normalizedWord)) {
             return state;
           }
-          return {
+          const newState = {
             highlightedWords: [...state.highlightedWords, normalizedWord],
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
         }),
       removeHighlightedWord: (word) =>
-        set((state) => ({
-          highlightedWords: state.highlightedWords.filter(
-            (w) => w !== word.toLowerCase().trim()
-          ),
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            highlightedWords: state.highlightedWords.filter(
+              (w) => w !== word.toLowerCase().trim()
+            ),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setHighlightedWords: (words) =>
         set(() => ({
           highlightedWords: words.map((w) => w.toLowerCase().trim()),
@@ -164,7 +182,7 @@ export const useReadingStore = create(
       setSentenceAnalysis: (sentence, analysis) =>
         set((state) => {
           const key = sentence.trim().toLowerCase();
-          return {
+          const newState = {
             analyzedSentences: {
               ...state.analyzedSentences,
               [key]: {
@@ -175,6 +193,8 @@ export const useReadingStore = create(
             },
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
         }),
       getSentenceAnalysis: (sentence) => {
         const key = sentence.trim().toLowerCase();

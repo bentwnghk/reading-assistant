@@ -19,6 +19,7 @@ interface HistoryActions {
   load: (id: string) => ReadingHistory | void;
   update: (id: string, readingStore: ReadingStore) => boolean;
   remove: (id: string) => boolean;
+  syncToHistory: (readingStore: ReadingStore) => void;
 }
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 12);
@@ -63,10 +64,24 @@ export const useHistoryStore = create(
         }));
         return true;
       },
+      syncToHistory: (session) => {
+        if (!session.id || !session.extractedText) return;
+        
+        const history = get().history;
+        const index = history.findIndex((item) => item.id === session.id);
+        if (index === -1) return;
+        
+        const newHistory = [...history];
+        newHistory[index] = {
+          ...clone(session),
+          updatedAt: Date.now(),
+        } as ReadingHistory;
+        set(() => ({ history: newHistory }));
+      },
     }),
     {
       name: "historyStore",
-      version: 3,
+      version: 4,
       migrate: (persistedState, version) => {
         const state = persistedState as HistoryStore & HistoryActions;
         if (version < 3) {
@@ -74,6 +89,12 @@ export const useHistoryStore = create(
             ...item,
             vocabularyQuizScore: item.vocabularyQuizScore ?? 0,
             glossaryRatings: item.glossaryRatings ?? {},
+          })) || [];
+        }
+        if (version < 4) {
+          state.history = state.history?.map((item) => ({
+            ...item,
+            analyzedSentences: item.analyzedSentences ?? {},
           })) || [];
         }
         return state;

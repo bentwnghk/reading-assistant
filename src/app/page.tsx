@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
+import { useHistoryStore } from "@/store/history";
+import { setHistorySyncFn } from "@/store/reading";
 import useAutoSave from "@/hooks/useAutoSave";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
@@ -27,6 +29,12 @@ function Home() {
   const { setTheme } = useTheme();
 
   useAutoSave();
+
+  useLayoutEffect(() => {
+    setHistorySyncFn((readingStore) => {
+      useHistoryStore.getState().syncToHistory(readingStore);
+    });
+  }, []);
 
   useLayoutEffect(() => {
     const settingStore = useSettingStore.getState();
