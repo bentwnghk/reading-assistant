@@ -42,8 +42,9 @@ function highlightTextAndSentences(
   text: string, 
   words: string[], 
   analyzedSentences: Record<string, SentenceAnalysis>
-): string {
+): { html: string; sentenceList: string[] } {
   let result = text;
+  const sentenceList: string[] = [];
 
   const analyzedKeys = Object.keys(analyzedSentences);
   if (analyzedKeys.length > 0) {
@@ -53,11 +54,13 @@ function highlightTextAndSentences(
       .sort((a, b) => b.length - a.length);
     
     for (const sentence of sortedSentences) {
+      const sentenceIndex = sentenceList.length;
+      sentenceList.push(sentence);
       const escaped = escapeRegExp(sentence);
       const pattern = new RegExp(`(${escaped})`, "g");
       result = result.replace(
         pattern,
-        `<span class="analyzed-sentence border-b-2 border-blue-500 dark:border-blue-400 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950" data-sentence="${sentence.replace(/"/g, '&quot;')}">$1</span>`
+        `<span class="analyzed-sentence border-b-2 border-blue-500 dark:border-blue-400 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950" data-idx="${sentenceIndex}">$1</span>`
       );
     }
   }
@@ -75,7 +78,7 @@ function highlightTextAndSentences(
     });
   }
 
-  return result;
+  return { html: result, sentenceList };
 }
 
 function ExtractedText() {
@@ -99,6 +102,7 @@ function ExtractedText() {
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const isTouchDeviceRef = useRef(false);
+  const sentenceListRef = useRef<string[]>([]);
 
   const handleSelectionChange = useCallback(() => {
     const selectionObj = window.getSelection();
@@ -277,7 +281,9 @@ function ExtractedText() {
   }, []);
 
   const highlightedText = useMemo(() => {
-    return highlightTextAndSentences(extractedText, highlightedWords, analyzedSentences);
+    const { html, sentenceList } = highlightTextAndSentences(extractedText, highlightedWords, analyzedSentences);
+    sentenceListRef.current = sentenceList;
+    return html;
   }, [extractedText, highlightedWords, analyzedSentences]);
 
   useEffect(() => {
@@ -302,16 +308,21 @@ function ExtractedText() {
     const container = containerRef.current;
     if (!container) return;
 
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
+    const handleClick = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
+      const target = mouseEvent.target as HTMLElement;
       const analyzedSpan = target.closest(".analyzed-sentence") as HTMLElement | null;
       
       if (analyzedSpan) {
         e.stopPropagation();
         e.preventDefault();
-        const sentence = analyzedSpan.getAttribute("data-sentence");
-        if (sentence) {
-          setActiveSentence(sentence);
+        const idxAttr = analyzedSpan.getAttribute("data-idx");
+        if (idxAttr !== null) {
+          const idx = parseInt(idxAttr, 10);
+          const sentence = sentenceListRef.current[idx];
+          if (sentence) {
+            setActiveSentence(sentence);
+          }
         }
       }
     };
@@ -320,7 +331,7 @@ function ExtractedText() {
     return () => {
       container.removeEventListener("click", handleClick, true);
     };
-  }, []);
+  }, [analyzedSentences]);
 
   const activeAnalysis = activeSentence ? getSentenceAnalysis(activeSentence) : null;
 
