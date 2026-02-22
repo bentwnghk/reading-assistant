@@ -3,7 +3,19 @@ import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 
 function useAutoSave() {
-  const { id, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary } = useReadingStore();
+  const { 
+    id, 
+    originalImages, 
+    extractedText, 
+    summary, 
+    adaptedText, 
+    simplifiedText, 
+    mindMap, 
+    readingTest, 
+    glossary,
+    highlightedWords,
+    analyzedSentences
+  } = useReadingStore();
   const prevIdRef = useRef<string>(id);
   const hasInitializedRef = useRef(false);
 
@@ -28,7 +40,7 @@ function useAutoSave() {
     }
 
     prevIdRef.current = id;
-  }, [id, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary]);
+  }, [id, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences]);
 }
 
 export default useAutoSave;

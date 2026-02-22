@@ -44,6 +44,7 @@ const readingSessionSchema = z.object({
   adaptedText: z.string().optional(),
   simplifiedText: z.string().optional(),
   highlightedWords: z.array(z.string()).optional(),
+  analyzedSentences: z.record(z.any()).optional(),
   mindMap: z.string().optional(),
   readingTest: z.array(z.any()).optional(),
   glossary: z.array(z.any()).optional(),
