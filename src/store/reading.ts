@@ -23,6 +23,7 @@ export interface ReadingStore {
   adaptedText: string;
   simplifiedText: string;
   highlightedWords: string[];
+  analyzedSentences: Record<string, SentenceAnalysis>;
   mindMap: string;
   readingTest: ReadingTestQuestion[];
   glossary: GlossaryEntry[];
@@ -49,6 +50,8 @@ interface ReadingActions {
   addHighlightedWord: (word: string) => void;
   removeHighlightedWord: (word: string) => void;
   setHighlightedWords: (words: string[]) => void;
+  setSentenceAnalysis: (sentence: string, analysis: string) => void;
+  getSentenceAnalysis: (sentence: string) => SentenceAnalysis | null;
   setMindMap: (mermaidCode: string) => void;
   setReadingTest: (questions: ReadingTestQuestion[]) => void;
   setUserAnswer: (questionId: string, answer: string) => void;
@@ -74,6 +77,7 @@ const defaultValues: ReadingStore = {
   adaptedText: "",
   simplifiedText: "",
   highlightedWords: [],
+  analyzedSentences: {},
   mindMap: "",
   readingTest: [],
   glossary: [],
@@ -157,6 +161,25 @@ export const useReadingStore = create(
           highlightedWords: words.map((w) => w.toLowerCase().trim()),
           updatedAt: Date.now(),
         })),
+      setSentenceAnalysis: (sentence, analysis) =>
+        set((state) => {
+          const key = sentence.trim().toLowerCase();
+          return {
+            analyzedSentences: {
+              ...state.analyzedSentences,
+              [key]: {
+                sentence: sentence.trim(),
+                analysis,
+                createdAt: Date.now(),
+              },
+            },
+            updatedAt: Date.now(),
+          };
+        }),
+      getSentenceAnalysis: (sentence) => {
+        const key = sentence.trim().toLowerCase();
+        return get().analyzedSentences[key] || null;
+      },
       setMindMap: (mermaidCode) =>
         set(() => ({
           mindMap: mermaidCode,

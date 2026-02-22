@@ -80,9 +80,11 @@
       "title": "提取的文字",
       "highlightedWords": "詞彙列表",
       "clickToRemove": "點擊移除",
-      "highlightTip": "提示：在上方文字中選取單字或詞組，然後點擊 [+ 加入詞彙表] 或 [🔊 朗讀]",
+      "highlightTip": "提示：在上方文字中選取單字或詞組，然後點擊 [+ 加入詞彙表]、[🔊 朗讀] 或 [🧠 分析]。點擊藍色底線的句子可查看分析。",
       "addWord": "加入詞彙表",
-      "readAloud": "朗讀"
+      "readAloud": "朗讀",
+      "analyze": "分析句子",
+      "analyzing": "分析中..."
     },
     "summary": {
       "title": "摘要",

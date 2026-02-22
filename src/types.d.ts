@@ -23,6 +23,12 @@ interface GlossaryEntry {
 
 type GlossaryRating = "easy" | "medium" | "hard";
 
+interface SentenceAnalysis {
+  sentence: string;
+  analysis: string;
+  createdAt: number;
+}
+
 type SpellingGameMode = "listen-type" | "scramble" | "fill-blanks" | "mixed";
 type SpellingDifficulty = "easy" | "medium" | "hard";
 

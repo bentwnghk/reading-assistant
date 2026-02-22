@@ -212,7 +212,51 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 - Include ALL highlighted words in the response.
 - Maintain the same order as the highlighted words list.
 
-**Respond with ONLY the JSON array, no markdown, no code blocks.**`;
+**Respond with ONLY the JSON array, no markdown, no code blocks.`;
+}
+
+export function analyzeSentencePrompt(age: number, sentence: string, context: string) {
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `You are an expert English language teacher specializing in helping Hong Kong students learn English as a foreign language.
+
+<Student Profile>
+- Age: ${age} years old
+- Education level: ${schoolLevel} school student
+- Target: English reading comprehension support
+</Student Profile>
+
+<Selected Sentence>
+${sentence}
+</Selected Sentence>
+
+<Surrounding Context>
+${context}
+</Surrounding Context>
+
+Analyze why this sentence might be difficult for this student to understand. Structure your response in Traditional Chinese (繁體中文) as follows:
+
+## 句意概要
+[Brief explanation of what the sentence means in simple terms - 1-2 sentences]
+
+## 詞彙分析
+- **難詞**: [Identify 2-4 challenging vocabulary words from the sentence]
+- **解釋**: [Provide simple definitions - English + Traditional Chinese]
+- **用法示例**: [One simple example sentence for each difficult word]
+
+## 句法分析
+- **句子結構**: [Identify the sentence type: simple/compound/complex]
+- **主要從句**: [Break down the main clause components: subject, verb, object]
+- **難點解析**: [Explain any tricky grammatical structures, e.g., passive voice, inverted word order, relative clauses, participial phrases]
+
+## 語用分析
+- **語境功能**: [What is the sentence doing? Describing, arguing, contrasting, expressing emotion, etc.]
+- **修辭手法**: [Any figures of speech? Metaphor, simile, personification, hyperbole, etc. If none, say "無特殊修辭手法"]
+- **語氣語調**: [Formal/informal, factual/emotional, objective/subjective, etc.]
+
+## 學習建議
+[2-3 practical tips for understanding similar sentences in the future - make them actionable and age-appropriate]
+
+Keep explanations age-appropriate and use clear, simple language throughout. Respond entirely in Traditional Chinese (繁體中文).`;
 }
 
 export function getSystemPrompt(): string {
