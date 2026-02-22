@@ -376,8 +376,8 @@ function ExtractedText() {
       )}
 
       {analyzedSentencesKeys.length > 0 && (
-        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/50 rounded-md">
-          <p className="text-sm font-medium mb-2 text-blue-800 dark:text-blue-200">
+        <div className="mb-4 p-3 bg-muted/50 rounded-md">
+          <p className="text-sm font-medium mb-2">
             {t("reading.extractedText.analyzedSentences")} ({analyzedSentencesKeys.length}):
           </p>
           <div className="flex flex-wrap gap-2">
