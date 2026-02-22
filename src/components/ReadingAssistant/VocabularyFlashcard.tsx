@@ -35,6 +35,17 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const currentEntry = currentGlossary[currentIndex];
   const totalCount = currentGlossary.length;
 
+  const highlightWord = (text: string, word: string) => {
+    if (!word) return text;
+    const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, index) => 
+      part.toLowerCase() === word.toLowerCase() 
+        ? <span key={index} className="text-primary font-semibold">{part}</span>
+        : part
+    );
+  };
+
   const handlePrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalCount - 1));
     setIsFlipped(false);
@@ -204,8 +215,17 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
 
   return (
     <div className="flex flex-col items-center gap-6 py-4">
-      <div className="text-sm text-muted-foreground">
-        {t("reading.glossary.flashcard.cardProgress", { current: currentIndex + 1, total: totalCount })}
+      <div className="w-full max-w-md space-y-2">
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{currentIndex + 1} / {totalCount}</span>
+          <span>{Math.round(((currentIndex + 1) / totalCount) * 100)}%</span>
+        </div>
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300 rounded-full"
+            style={{ width: `${((currentIndex + 1) / totalCount) * 100}%` }}
+          />
+        </div>
       </div>
 
       <div
@@ -221,12 +241,13 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           <div
             className={cn(
               "absolute inset-0 backface-hidden",
-              "bg-card border-2 rounded-xl shadow-lg",
+              "bg-gradient-to-br from-card via-card to-primary/5 border-2 rounded-xl shadow-lg",
+              "hover:shadow-xl transition-shadow duration-300",
               "flex flex-col items-center justify-center p-6"
             )}
           >
             <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="text-4xl font-bold text-center">
+              <div className="text-5xl font-extrabold text-center">
                 {currentEntry.word}
               </div>
               <button
@@ -243,7 +264,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               </button>
             </div>
             {currentEntry.partOfSpeech && (
-              <div className="text-sm text-muted-foreground italic">
+              <div className="text-base text-muted-foreground italic">
                 {currentEntry.partOfSpeech}
               </div>
             )}
@@ -255,12 +276,13 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           <div
             className={cn(
               "absolute inset-0 backface-hidden rotate-y-180",
-              "bg-card border-2 rounded-xl shadow-lg",
+              "bg-gradient-to-br from-card via-card to-primary/10 border-2 rounded-xl shadow-lg",
+              "hover:shadow-xl transition-shadow duration-300",
               "flex flex-col items-center justify-center p-6 overflow-y-auto"
             )}
           >
             <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="text-2xl font-bold text-center">
+              <div className="text-3xl font-extrabold text-center">
                 {currentEntry.word}
               </div>
               <button
@@ -277,24 +299,24 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               </button>
             </div>
             {currentEntry.partOfSpeech && (
-              <div className="text-sm text-muted-foreground italic mb-4">
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-medium mb-4">
                 {currentEntry.partOfSpeech}
               </div>
             )}
             <div className="text-center space-y-4 w-full">
-              <div>
+              <div className="bg-muted/30 rounded-lg p-3">
                 <div className="text-xs text-muted-foreground mb-1">English Definition</div>
-                <div className="text-sm">{currentEntry.englishDefinition}</div>
+                <div className="text-base">{currentEntry.englishDefinition}</div>
               </div>
-              <div>
+              <div className="bg-muted/30 rounded-lg p-3">
                 <div className="text-xs text-muted-foreground mb-1">中文解釋</div>
-                <div className="text-sm font-noto-sans-tc">{currentEntry.chineseDefinition}</div>
+                <div className="text-base font-noto-sans-tc">{currentEntry.chineseDefinition}</div>
               </div>
               {currentEntry.example && (
-                <div>
+                <div className="bg-muted/30 rounded-lg p-3">
                   <div className="text-xs text-muted-foreground mb-1">Example 例句</div>
-                  <div className="text-sm italic text-muted-foreground">
-                    &ldquo;{currentEntry.example}&rdquo;
+                  <div className="text-base italic">
+                    &ldquo;{highlightWord(currentEntry.example, currentEntry.word)}&rdquo;
                   </div>
                 </div>
               )}
@@ -384,6 +406,12 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           <span className="hidden sm:inline">{t("reading.glossary.flashcard.next")}</span>
           <ChevronRight className="h-4 w-4" />
         </Button>
+      </div>
+
+      <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1"><ChevronLeft className="h-3 w-3" /> Prev</span>
+        <span className="flex items-center gap-1"><ChevronRight className="h-3 w-3" /> Next</span>
+        <span>Space: Flip</span>
       </div>
     </div>
   );
