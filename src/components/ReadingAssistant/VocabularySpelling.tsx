@@ -74,6 +74,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
   const [usedIndices, setUsedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
+  const [definitionsRevealed, setDefinitionsRevealed] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
@@ -146,6 +147,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     setUsedIndices([]);
     setRevealedPositions([]);
     revealedPositionsRef.current = [];
+    setDefinitionsRevealed(false);
     setShowFeedback(false);
     setGameStatus("playing");
     setCurrentMode(initialMode);
@@ -170,6 +172,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
                 setUsedIndices([]);
                 setRevealedPositions([]);
                 revealedPositionsRef.current = [];
+                setDefinitionsRevealed(false);
                 setShowFeedback(false);
 
                 if (gameMode === "mixed") {
@@ -208,6 +211,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
       setUsedIndices([]);
       setRevealedPositions([]);
       revealedPositionsRef.current = [];
+      setDefinitionsRevealed(false);
       setShowFeedback(false);
 
       if (gameMode === "mixed") {
@@ -346,6 +350,10 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     setHintsUsed((prev) => prev + 1);
 
     if (currentMode === "listen-type") {
+      if (!definitionsRevealed) {
+        setDefinitionsRevealed(true);
+        return;
+      }
       const unrevealed = currentChallenge.word
         .split("")
         .map((_, idx) => idx)
@@ -753,10 +761,12 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
               </div>
             )}
 
-            <div className="text-sm text-muted-foreground text-center space-y-1">
-              <div><Eye className="h-4 w-4 inline mr-1" />{currentChallenge.englishDefinition}</div>
-              <div className="font-noto-sans-tc">{currentChallenge.chineseDefinition}</div>
-            </div>
+            {definitionsRevealed && (
+              <div className="text-sm text-muted-foreground text-center space-y-1">
+                <div><Eye className="h-4 w-4 inline mr-1" />{currentChallenge.englishDefinition}</div>
+                <div className="font-noto-sans-tc">{currentChallenge.chineseDefinition}</div>
+              </div>
+            )}
 
             <input
               ref={inputRef}
