@@ -40,17 +40,21 @@
         "flashcard": "Flashcard Review - Flip cards to learn, rate difficulty, and track your progress",
         "quiz": "Vocabulary Quiz - Test your knowledge with multiple-choice and fill-in-the-blank questions",
         "spelling": "Spelling Challenge - 4 exciting game modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed!",
-        "tts": "Text-to-Speech - Perfect your pronunciation by listening to words and sentences"
+        "tts": "Text-to-Speech - Perfect your pronunciation by listening to words and sentences",
+        "sentenceAnalysis": "Sentence Analysis - AI breaks down complex sentences into grammar, meaning, and usage tips"
       },
       "workflow": {
         "title": "Your Learning Journey",
         "upload": "Upload - Snap or upload photos of your reading material",
-        "extract": "Extract - AI instantly recognizes and extracts the text",
-        "summarize": "Summarize - Get a quick overview of what you're reading",
-        "visualize": "Visualize - Explore concepts with an interactive mind map",
+        "summary": "Summary - Get a quick overview of what you're reading",
         "adapt": "Adapt - Read at your level with AI-adapted text",
+        "mindmap": "Mind Map - Explore concepts with an interactive visual diagram",
         "test": "Test - Challenge yourself with comprehension questions",
-        "learn": "Play & Learn - Master vocabulary with Flashcards, Quizzes, and Spelling Games!"
+        "analyze": "Analyze - Select any sentence for AI-powered grammar and meaning breakdown",
+        "highlight": "Highlight - Mark important words to build your vocabulary list",
+        "glossary": "Glossary - Learn words with bilingual definitions and examples",
+        "spelling": "Spelling - Practice spelling through fun interactive games",
+        "vocabQuiz": "Quiz - Test your vocabulary with flashcards and quizzes"
       },
       "builtWith": "Built with ❤️ by Mr.🆖 for students learning English"
     }
