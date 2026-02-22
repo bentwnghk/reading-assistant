@@ -346,6 +346,12 @@ function ExtractedText() {
         {t("reading.extractedText.title")}
       </h3>
 
+      <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-md">
+        <p className="text-sm text-blue-700 dark:text-blue-300">
+          💡 {t("reading.extractedText.highlightTip")}
+        </p>
+      </div>
+
       {highlightedWords.length > 0 && (
         <div className="mb-4 p-3 bg-muted/50 rounded-md">
           <p className="text-sm font-medium mb-2">
@@ -448,10 +454,6 @@ function ExtractedText() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <p className="text-xs text-muted-foreground mt-4">
-        {t("reading.extractedText.highlightTip")}
-      </p>
     </section>
   );
 }
