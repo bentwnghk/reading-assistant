@@ -730,24 +730,24 @@ function Setting({ open, onClose }: SettingProps) {
               </TabsContent>
             </Tabs>
 
-            <DialogFooter className="flex-col gap-2">
-              <Button type="submit" className="w-full">
-                {t("setting.save")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleReset}
-              >
-                {t("setting.resetAllSettings")}
-              </Button>
-              <p className="text-xs text-center text-muted-foreground">
-                {t("setting.version")}: v{VERSION}
-              </p>
-            </DialogFooter>
           </form>
         </Form>
+        <DialogFooter className="flex-col gap-2">
+          <Button type="button" className="w-full" onClick={form.handleSubmit(handleSubmit)}>
+            {t("setting.save")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleReset}
+          >
+            {t("setting.resetAllSettings")}
+          </Button>
+          <p className="text-xs text-center text-muted-foreground">
+            {t("setting.version")}: v{VERSION}
+          </p>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
