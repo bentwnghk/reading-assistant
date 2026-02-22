@@ -482,7 +482,6 @@ function ExtractedText() {
                 value={activeAnalysis.analysis}
                 onChange={() => {}}
                 hideTools
-                disableMath
               />
             ) : null}
           </div>
