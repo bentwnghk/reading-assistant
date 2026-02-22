@@ -241,7 +241,8 @@
       "adapt": "Adapt",
       "mindmap": "Mind Map",
       "test": "Test",
-      "highlight": "Highlight",
+      "analyze": "Analyze Sentence",
+      "highlight": "Highlight Word",
       "glossary": "Glossary"
     }
   },
