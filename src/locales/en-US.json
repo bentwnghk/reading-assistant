@@ -80,7 +80,7 @@
       "title": "Extracted Text",
       "highlightedWords": "Vocabulary List",
       "clickToRemove": "Click to remove",
-      "highlightTip": "Tip: Select words or phrases in the text above, then click [+ Add to vocabulary], [🔊 Read aloud], or [🧠 Analyze]. Click underlined sentences to see their analysis.",
+      "highlightTip": "Tip: Select words or phrases in the text above, then click [+ Add to vocabulary], [🔊 Read aloud], or [🧠 Analyze sentence]. Click underlined sentences to see their analysis.",
       "addWord": "Add to vocabulary",
       "readAloud": "Read aloud",
       "analyze": "Analyze sentence",
