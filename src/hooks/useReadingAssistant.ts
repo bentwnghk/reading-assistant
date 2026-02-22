@@ -32,7 +32,16 @@ function handleError(error: unknown) {
 }
 
 function useReadingAssistant() {
-  const { smoothTextStreamType, model, visionModel: visionModelName } = useSettingStore();
+  const { 
+    smoothTextStreamType, 
+    visionModel: visionModelName,
+    summaryModel,
+    mindMapModel,
+    adaptedTextModel,
+    simplifyModel,
+    readingTestModel,
+    glossaryModel,
+  } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
   const [status, setStatus] = useState<ReadingStatus>("idle");
@@ -107,7 +116,7 @@ function useReadingAssistant() {
     setStatus("summarizing");
 
     try {
-      const thinkingModel = await createModelProvider(model);
+      const thinkingModel = await createModelProvider(summaryModel);
       
       const result = streamText({
         model: thinkingModel,
@@ -152,7 +161,7 @@ function useReadingAssistant() {
     setStatus("adapting");
 
     try {
-      const thinkingModel = await createModelProvider(model);
+      const thinkingModel = await createModelProvider(adaptedTextModel);
       
       const result = streamText({
         model: thinkingModel,
@@ -199,7 +208,7 @@ function useReadingAssistant() {
     setStatus("simplifying");
 
     try {
-      const thinkingModel = await createModelProvider(model);
+      const thinkingModel = await createModelProvider(simplifyModel);
       
       const result = streamText({
         model: thinkingModel,
@@ -244,7 +253,7 @@ function useReadingAssistant() {
     setStatus("mindmap");
 
     try {
-      const thinkingModel = await createModelProvider(model);
+      const thinkingModel = await createModelProvider(mindMapModel);
       
       const result = streamText({
         model: thinkingModel,
@@ -289,7 +298,7 @@ function useReadingAssistant() {
     setStatus("testing");
 
     try {
-      const thinkingModel = await createModelProvider(model);
+      const thinkingModel = await createModelProvider(readingTestModel);
       
       const result = await generateText({
         model: thinkingModel,
@@ -342,7 +351,7 @@ function useReadingAssistant() {
     setStatus("glossary");
 
     try {
-      const thinkingModel = await createModelProvider(model);
+      const thinkingModel = await createModelProvider(glossaryModel);
       
       const result = await generateText({
         model: thinkingModel,

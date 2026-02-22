@@ -23,6 +23,13 @@ export interface SettingStore {
   mode: string;
   model: AvailableModel;
   visionModel: VisionModel;
+  summaryModel: AvailableModel;
+  mindMapModel: AvailableModel;
+  adaptedTextModel: AvailableModel;
+  simplifyModel: AvailableModel;
+  readingTestModel: AvailableModel;
+  glossaryModel: AvailableModel;
+  sentenceAnalysisModel: AvailableModel;
   ttsVoice: TTSVoice;
   autoSpeakFlashcard: boolean;
   openAIApiKey: string;
@@ -46,6 +53,13 @@ export const defaultValues: SettingStore = {
   mode: "",
   model: "gpt-5-mini",
   visionModel: "gpt-4.1-mini",
+  summaryModel: "gpt-5-mini",
+  mindMapModel: "gpt-5-mini",
+  adaptedTextModel: "gpt-5-mini",
+  simplifyModel: "gpt-5-mini",
+  readingTestModel: "gpt-5-mini",
+  glossaryModel: "gpt-5-mini",
+  sentenceAnalysisModel: "gpt-5-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
   openAIApiKey: "",

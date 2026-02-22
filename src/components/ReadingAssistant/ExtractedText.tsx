@@ -95,7 +95,7 @@ function ExtractedText() {
     setSentenceAnalysis,
     getSentenceAnalysis
   } = useReadingStore();
-  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, model } = useSettingStore();
+  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, sentenceAnalysisModel } = useSettingStore();
   const { createModelProvider } = useModelProvider();
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -253,7 +253,7 @@ function ExtractedText() {
 
     try {
       const context = getContextAround(extractedText, sentence, 150);
-      const provider = await createModelProvider(model);
+      const provider = await createModelProvider(sentenceAnalysisModel);
       
       const result = await generateText({
         model: provider,
@@ -269,7 +269,7 @@ function ExtractedText() {
     } finally {
       setIsAnalysisLoading(false);
     }
-  }, [selection, extractedText, studentAge, model, createModelProvider, setSentenceAnalysis, getSentenceAnalysis]);
+  }, [selection, extractedText, studentAge, sentenceAnalysisModel, createModelProvider, setSentenceAnalysis, getSentenceAnalysis]);
 
   const handleMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
     const target = e.target as HTMLElement;
