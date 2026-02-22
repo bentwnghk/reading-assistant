@@ -286,7 +286,7 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
-      version: 1,
+      version: 2,
       partialize: (state) => pick(state, Object.keys(defaultValues) as (keyof ReadingStore)[]) as ReadingStore & ReadingActions,
     }
   )
