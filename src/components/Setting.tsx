@@ -169,7 +169,7 @@ function Setting({ open, onClose }: SettingProps) {
           <DialogDescription>{t("setting.description")}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+          <div className="space-y-4">
             <Tabs defaultValue="general" className="w-full">
               <TabsList className="w-full">
                 <TabsTrigger value="general" className="flex-1 gap-1">
@@ -730,7 +730,7 @@ function Setting({ open, onClose }: SettingProps) {
               </TabsContent>
             </Tabs>
 
-          </form>
+          </div>
         </Form>
         <DialogFooter className="flex-col gap-2">
           <Button type="button" className="w-full" onClick={form.handleSubmit(handleSubmit)}>
