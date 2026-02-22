@@ -2,13 +2,19 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { Plus, Volume2, Loader2, Brain, X } from "lucide-react";
+import { Plus, Volume2, Loader2, Brain } from "lucide-react";
 import { generateText } from "ai";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
 
@@ -91,7 +97,7 @@ function ExtractedText() {
   const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
-  const [activePopover, setActivePopover] = useState<{ sentence: string; x: number; y: number } | null>(null);
+  const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const isTouchDeviceRef = useRef(false);
 
   const handleSelectionChange = useCallback(() => {
@@ -231,12 +237,7 @@ function ExtractedText() {
 
     const cached = getSentenceAnalysis(sentence);
     if (cached) {
-      const rect = selectionObj?.getRangeAt(0)?.getBoundingClientRect();
-      setActivePopover({
-        sentence,
-        x: rect ? rect.left + rect.width / 2 : window.innerWidth / 2,
-        y: rect ? rect.bottom + 8 : 100,
-      });
+      setActiveSentence(sentence);
       setSelection(null);
       selectionObj?.removeAllRanges();
       return;
@@ -254,13 +255,7 @@ function ExtractedText() {
       });
 
       setSentenceAnalysis(sentence, result.text);
-      
-      const rect = selectionObj?.getRangeAt(0)?.getBoundingClientRect();
-      setActivePopover({
-        sentence,
-        x: rect ? rect.left + rect.width / 2 : window.innerWidth / 2,
-        y: rect ? rect.bottom + 8 : 100,
-      });
+      setActiveSentence(sentence);
       setSelection(null);
       selectionObj?.removeAllRanges();
     } catch (error) {
@@ -272,29 +267,8 @@ function ExtractedText() {
 
   const handleMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
     const target = e.target as HTMLElement;
-    if (!target.closest(".selection-popup") && !target.closest("[data-radix-popper-content-wrapper]")) {
+    if (!target.closest(".selection-popup") && !target.closest("[role='dialog']")) {
       setSelection(null);
-    }
-    if (!target.closest(".analyzed-sentence") && !target.closest("[data-radix-popper-content-wrapper]")) {
-      setActivePopover(null);
-    }
-  }, []);
-
-  const handleAnalyzedSentenceClick = useCallback((e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    const analyzedSpan = target.closest(".analyzed-sentence") as HTMLElement | null;
-    
-    if (analyzedSpan) {
-      e.stopPropagation();
-      const sentence = analyzedSpan.getAttribute("data-sentence");
-      if (sentence) {
-        const rect = analyzedSpan.getBoundingClientRect();
-        setActivePopover({
-          sentence,
-          x: rect.left + rect.width / 2,
-          y: rect.bottom + 8,
-        });
-      }
     }
   }, []);
 
@@ -326,15 +300,29 @@ function ExtractedText() {
 
   useEffect(() => {
     const container = containerRef.current;
-    if (container) {
-      container.addEventListener("click", handleAnalyzedSentenceClick);
-      return () => {
-        container.removeEventListener("click", handleAnalyzedSentenceClick);
-      };
-    }
-  }, [handleAnalyzedSentenceClick]);
+    if (!container) return;
 
-  const activeAnalysis = activePopover ? getSentenceAnalysis(activePopover.sentence) : null;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const analyzedSpan = target.closest(".analyzed-sentence") as HTMLElement | null;
+      
+      if (analyzedSpan) {
+        e.stopPropagation();
+        e.preventDefault();
+        const sentence = analyzedSpan.getAttribute("data-sentence");
+        if (sentence) {
+          setActiveSentence(sentence);
+        }
+      }
+    };
+
+    container.addEventListener("click", handleClick, true);
+    return () => {
+      container.removeEventListener("click", handleClick, true);
+    };
+  }, []);
+
+  const activeAnalysis = activeSentence ? getSentenceAnalysis(activeSentence) : null;
 
   if (!extractedText) {
     return null;
@@ -423,31 +411,28 @@ function ExtractedText() {
         </div>
       )}
 
-      {activePopover && activeAnalysis?.analysis && (
-        <div
-          className="fixed z-[10000] bg-popover text-popover-foreground border rounded-lg shadow-lg p-4 w-[90vw] max-w-lg max-h-[70vh] overflow-y-auto"
-          style={{ 
-            left: activePopover.x, 
-            top: activePopover.y, 
-            transform: "translateX(-50%)" 
-          }}
-        >
-          <button 
-            className="absolute top-2 right-2 p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
-            onClick={() => setActivePopover(null)}
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <div className="prose prose-sm dark:prose-invert max-w-full pr-6">
-            <MagicDown
-              value={activeAnalysis.analysis}
-              onChange={() => {}}
-              hideTools
-              disableMath
-            />
+      <Dialog open={!!activeSentence} onOpenChange={(open) => !open && setActiveSentence(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t("reading.extractedText.analysisTitle")}</DialogTitle>
+          </DialogHeader>
+          <div className="prose prose-sm dark:prose-invert max-w-full">
+            {isAnalysisLoading && !activeAnalysis ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                <span>{t("reading.extractedText.analyzing")}</span>
+              </div>
+            ) : activeAnalysis?.analysis ? (
+              <MagicDown
+                value={activeAnalysis.analysis}
+                onChange={() => {}}
+                hideTools
+                disableMath
+              />
+            ) : null}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <p className="text-xs text-muted-foreground mt-4">
         {t("reading.extractedText.highlightTip")}

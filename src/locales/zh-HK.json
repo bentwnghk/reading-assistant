@@ -84,7 +84,8 @@
       "addWord": "加入詞彙表",
       "readAloud": "朗讀",
       "analyze": "分析句子",
-      "analyzing": "分析中..."
+      "analyzing": "分析中...",
+      "analysisTitle": "句子分析"
     },
     "summary": {
       "title": "摘要",
