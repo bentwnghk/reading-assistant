@@ -6,14 +6,14 @@ import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
   const { t } = useTranslation();
-  const { extractedText, summary, adaptedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore } = useReadingStore();
+  const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted } = useReadingStore();
 
   const steps = [
     { key: "upload", label: t("reading.workflow.upload"), completed: !!extractedText },
     { key: "summary", label: t("reading.workflow.summary"), completed: !!summary },
     { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap },
     { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText },
-    { key: "test", label: t("reading.workflow.test"), completed: readingTest.length > 0 },
+    { key: "test", label: t("reading.workflow.test"), completed: testCompleted },
     { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0 },
     { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0 },
     { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0 },
