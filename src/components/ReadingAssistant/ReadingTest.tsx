@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Trophy,
   Eye,
-  BarChart3
+  BarChart3,
+  Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -59,7 +60,7 @@ function ReadingTest() {
     setTestShowChinese,
     setTestMode,
   } = useReadingStore();
-  const { status, generateReadingTest, calculateTestScore, evaluateShortAnswer } = useReadingAssistant();
+  const { status, generateReadingTest, generateTargetedPractice, calculateTestScore, evaluateShortAnswer } = useReadingAssistant();
   
   const [quizState, setQuizState] = useState<QuizState>("idle");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -203,6 +204,26 @@ function ReadingTest() {
     });
     return stats;
   }, [readingTest]);
+
+  const missedSkills = useMemo(() => {
+    const skills: ReadingTestSkill[] = [];
+    Object.entries(skillStats).forEach(([skill, stats]) => {
+      const percentage = stats.total > 0 ? (stats.earned / stats.total) * 100 : 0;
+      if (percentage < 100) {
+        skills.push(skill as ReadingTestSkill);
+      }
+    });
+    return skills;
+  }, [skillStats]);
+
+  const handleTargetedPractice = async () => {
+    if (missedSkills.length === 0) return;
+    
+    setQuizState("idle");
+    setRetryMissedIds(new Set());
+    
+    await generateTargetedPractice(missedSkills);
+  };
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600 dark:text-green-400";
@@ -518,6 +539,25 @@ function ReadingTest() {
               <Eye className="h-4 w-4 mr-2" />
               {showReview ? t("reading.readingTest.hideReview") : t("reading.readingTest.reviewAnswers")}
             </Button>
+            {missedSkills.length > 0 && (
+              <Button 
+                variant="secondary" 
+                onClick={handleTargetedPractice}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
+                    {t("reading.readingTest.generating")}
+                  </>
+                ) : (
+                  <>
+                    <Target className="h-4 w-4 mr-2" />
+                    {t("reading.readingTest.practiceMissedSkills", { count: missedSkills.length })}
+                  </>
+                )}
+              </Button>
+            )}
             {missedQuestions.length > 0 && (
               <Button variant="secondary" onClick={handleRetryMissed}>
                 <RotateCcw className="h-4 w-4 mr-2" />

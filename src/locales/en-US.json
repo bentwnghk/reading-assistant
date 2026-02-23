@@ -159,6 +159,7 @@
       "reviewAnswers": "Review Answers",
       "hideReview": "Hide Review",
       "retryMissed": "Retry Missed ({{count}})",
+      "practiceMissedSkills": "Practice Missed Skills ({{count}})",
       "paragraph": "Para. {{num}}",
       "skills": {
         "mainIdea": "Main Idea",

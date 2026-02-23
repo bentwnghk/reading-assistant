@@ -159,6 +159,7 @@
       "reviewAnswers": "查看答案",
       "hideReview": "隱藏答案",
       "retryMissed": "重做錯題 ({{count}})",
+      "practiceMissedSkills": "針對性練習 ({{count}} 項技能)",
       "paragraph": "第 {{num}} 段",
       "skills": {
         "mainIdea": "主旨",

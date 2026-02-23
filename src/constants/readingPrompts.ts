@@ -289,6 +289,82 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
 **Respond with ONLY the JSON array, no markdown, no code blocks.**`;
 }
 
+export function generateTargetedPracticePrompt(
+  text: string, 
+  age: number, 
+  missedSkills: ReadingTestSkill[],
+  count: number = 5
+) {
+  const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
+  const difficultyLevel = age <= 11 ? "foundation" : age <= 15 ? "intermediate" : "advanced";
+  
+  const skillDescriptions: Record<ReadingTestSkill, string> = {
+    "main-idea": "questions testing understanding of the main idea or central theme",
+    "detail": "questions testing comprehension of specific details or pronoun references",
+    "inference": "questions requiring logical inference from the text",
+    "vocabulary": "questions testing understanding of vocabulary in context",
+    "purpose": "questions about the author's purpose or intent",
+    "sequencing": "questions about the order of events or ideas"
+  };
+
+  const skillQuestionTypes: Record<ReadingTestSkill, string[]> = {
+    "main-idea": ["multiple-choice", "short-answer"],
+    "detail": ["multiple-choice", "true-false-not-given", "referencing"],
+    "inference": ["inference", "multiple-choice"],
+    "vocabulary": ["vocab-context"],
+    "purpose": ["referencing", "multiple-choice"],
+    "sequencing": ["multiple-choice"]
+  };
+
+  return `Create ${count} targeted practice questions for a ${age}-year-old Hong Kong ${schoolLevel} student.
+
+The student needs more practice in these specific skills:
+${missedSkills.map(s => `- ${s}: ${skillDescriptions[s]}`).join("\n")}
+
+<text>
+${text}
+</text>
+
+Generate ${count} questions focusing ONLY on the skills listed above. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "Question text here?",
+    "questionZh": "問題中文翻譯",
+    "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
+    "optionsZh": ["A) 第一個選項", "B) 第二個選項", "C) 第三個選項", "D) 第四個選項"],
+    "correctAnswer": "A",
+    "explanation": "Brief explanation in English",
+    "explanationZh": "簡短中文解釋",
+    "skillTested": "detail",
+    "paragraphRef": 1,
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 1
+  }
+]
+
+**Question Type to Skill Mapping:**
+${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${types.join(" or ")}`).join("\n")}
+
+**Guidelines:**
+- Distribute questions evenly across the missed skills
+- Use age-appropriate language
+- Make questions clear and unambiguous
+- For true-false-not-given: "True", "False", or "Not Given"
+- For referencing: ask what a pronoun or phrase refers to
+- For vocabulary-in-context: choose words understandable from surrounding text
+- For inference: answer should be logically deducible but not explicitly stated
+- Include ALL required metadata fields
+- paragraphRef should be 1-indexed
+- Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3
+- Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED
+- Use Traditional Chinese (繁體中文) for all Chinese text
+
+**Respond with ONLY the JSON array, no markdown, no code blocks.**`;
+}
+
 export function generateGlossaryPrompt(text: string, highlightedWords: string[]) {
   return `Create a bilingual glossary for these highlighted words from the text.
 

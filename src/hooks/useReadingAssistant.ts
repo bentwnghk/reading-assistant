@@ -13,6 +13,7 @@ import {
   simplifyTextPrompt,
   generateMindMapPrompt,
   generateReadingTestPrompt,
+  generateTargetedPracticePrompt,
   generateGlossaryPrompt,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
@@ -499,6 +500,59 @@ Guidelines:
     }
   }
 
+  async function generateTargetedPractice(missedSkills: ReadingTestSkill[]) {
+    const { studentAge, extractedText, setReadingTest, setStatus: setStoreStatus, setError } = readingStore;
+    
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return [];
+    }
+
+    if (missedSkills.length === 0) {
+      toast.error("No missed skills to practice.");
+      return [];
+    }
+
+    setStoreStatus("testing");
+    setStatus("testing");
+
+    try {
+      const thinkingModel = await createModelProvider(readingTestModel);
+      
+      const result = await generateText({
+        model: thinkingModel,
+        system: getSystemPrompt(),
+        prompt: generateTargetedPracticePrompt(extractedText, studentAge, missedSkills, 5),
+      });
+
+      let text = result.text.trim();
+      
+      if (text.startsWith("```json")) {
+        text = text.slice(7);
+      }
+      if (text.startsWith("```")) {
+        text = text.slice(3);
+      }
+      if (text.endsWith("```")) {
+        text = text.slice(0, -3);
+      }
+      text = text.trim();
+
+      const questions: ReadingTestQuestion[] = JSON.parse(text);
+      setReadingTest(questions);
+
+      setStoreStatus("idle");
+      setStatus("idle");
+      return questions;
+    } catch (error) {
+      const msg = handleError(error);
+      setError(msg);
+      setStoreStatus("error");
+      setStatus("idle");
+      return [];
+    }
+  }
+
   function saveSession() {
     const { backup } = readingStore;
     const { save } = useHistoryStore.getState();
@@ -524,6 +578,7 @@ Guidelines:
     simplifyText,
     generateMindMap,
     generateReadingTest,
+    generateTargetedPractice,
     generateGlossary,
     calculateTestScore,
     evaluateShortAnswer,
