@@ -312,7 +312,7 @@ export function generateTargetedPracticePrompt(
     "detail": ["multiple-choice", "true-false-not-given", "referencing"],
     "inference": ["inference", "multiple-choice"],
     "vocabulary": ["vocab-context"],
-    "purpose": ["referencing", "multiple-choice"],
+    "purpose": ["inference", "multiple-choice"],
     "sequencing": ["multiple-choice"]
   };
 
