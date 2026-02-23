@@ -388,33 +388,114 @@ function useReadingAssistant() {
   }
 
   function calculateTestScore() {
-    const { readingTest, setTestScore, setTestCompleted } = readingStore;
+    const { readingTest, setTestScore, setTestCompleted, setTestPoints } = readingStore;
     
-    let correct = 0;
-    const totalQuestions = readingTest.filter(q => q.type !== "short-answer").length;
+    let earnedPoints = 0;
+    let totalPoints = 0;
     
     for (const question of readingTest) {
-      if (question.type === "short-answer") continue;
+      totalPoints += question.points;
+      
+      if (question.type === "short-answer") {
+        if (question.earnedPoints !== undefined) {
+          earnedPoints += question.earnedPoints;
+        }
+        continue;
+      }
       
       const userAnswer = question.userAnswer?.toLowerCase().trim();
       const correctAnswer = question.correctAnswer.toLowerCase().trim();
       
-      if (question.type === "multiple-choice") {
+      if (question.type === "multiple-choice" || 
+          question.type === "inference" || 
+          question.type === "vocab-context" || 
+          question.type === "referencing") {
         if (userAnswer === correctAnswer || userAnswer === correctAnswer.charAt(0)) {
-          correct++;
+          earnedPoints += question.points;
         }
-      } else if (question.type === "true-false") {
+      } else if (question.type === "true-false-not-given") {
         if (userAnswer === correctAnswer) {
-          correct++;
+          earnedPoints += question.points;
         }
       }
     }
     
-    const score = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
+    const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
     setTestScore(score);
     setTestCompleted(true);
+    setTestPoints(earnedPoints, totalPoints);
     
     return score;
+  }
+
+  async function evaluateShortAnswer(
+    questionId: string,
+    question: string,
+    correctAnswer: string,
+    userAnswer: string,
+    maxPoints: number
+  ) {
+    const { readingTestModel } = useSettingStore.getState();
+    const { setQuestionEarnedPoints } = readingStore;
+    
+    if (!userAnswer.trim()) {
+      setQuestionEarnedPoints(questionId, 0);
+      return { earnedPoints: 0, feedback: "No answer provided." };
+    }
+    
+    try {
+      const thinkingModel = await createModelProvider(readingTestModel);
+      
+      const result = await generateText({
+        model: thinkingModel,
+        system: getSystemPrompt(),
+        prompt: `Evaluate this short-answer question response for a Hong Kong student learning English.
+
+Question: ${question}
+
+Expected key points: ${correctAnswer}
+
+Student's answer: ${userAnswer}
+
+Maximum points: ${maxPoints}
+
+Evaluate how well the student's answer addresses the expected key points.
+Respond with ONLY a JSON object (no markdown, no code blocks):
+{
+  "earnedPoints": <number 0 to ${maxPoints}>,
+  "feedback": "<brief feedback in English explaining what was good and what was missing>"
+}
+
+Guidelines:
+- Award partial points if some key points are mentioned
+- Award 0 if answer is completely wrong or irrelevant
+- Award full points if all key points are covered
+- Keep feedback brief and encouraging`,
+      });
+
+      let text = result.text.trim();
+      if (text.startsWith("```json")) {
+        text = text.slice(7);
+      }
+      if (text.startsWith("```")) {
+        text = text.slice(3);
+      }
+      if (text.endsWith("```")) {
+        text = text.slice(0, -3);
+      }
+      text = text.trim();
+
+      const evaluation = JSON.parse(text);
+      const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
+      
+      setQuestionEarnedPoints(questionId, earnedPoints);
+      
+      return { earnedPoints, feedback: evaluation.feedback };
+    } catch (error) {
+      console.error("Error evaluating short answer:", error);
+      setQuestionEarnedPoints(questionId, 0);
+      return { earnedPoints: 0, feedback: "Could not evaluate answer." };
+    }
   }
 
   function saveSession() {
@@ -444,6 +525,7 @@ function useReadingAssistant() {
     generateReadingTest,
     generateGlossary,
     calculateTestScore,
+    evaluateShortAnswer,
     saveSession,
     loadSession,
   };

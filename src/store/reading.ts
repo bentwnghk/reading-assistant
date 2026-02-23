@@ -26,6 +26,8 @@ export type ReadingStatus =
   | "glossary"
   | "error";
 
+type ReadingTestMode = "all-at-once" | "question-by-question";
+
 export interface ReadingStore {
   id: string;
   studentAge: number;
@@ -42,6 +44,10 @@ export interface ReadingStore {
   glossaryRatings: Record<string, GlossaryRating>;
   testScore: number;
   testCompleted: boolean;
+  testEarnedPoints: number;
+  testTotalPoints: number;
+  testShowChinese: boolean;
+  testMode: ReadingTestMode;
   vocabularyQuizScore: number;
   spellingGameBestScore: number;
   status: ReadingStatus;
@@ -68,10 +74,14 @@ interface ReadingActions {
   setMindMap: (mermaidCode: string) => void;
   setReadingTest: (questions: ReadingTestQuestion[]) => void;
   setUserAnswer: (questionId: string, answer: string) => void;
+  setQuestionEarnedPoints: (questionId: string, points: number) => void;
   setGlossary: (entries: GlossaryEntry[]) => void;
   setGlossaryRating: (word: string, rating: GlossaryRating) => void;
   setTestScore: (score: number) => void;
   setTestCompleted: (completed: boolean) => void;
+  setTestPoints: (earned: number, total: number) => void;
+  setTestShowChinese: (show: boolean) => void;
+  setTestMode: (mode: ReadingTestMode) => void;
   setVocabularyQuizScore: (score: number) => void;
   setSpellingGameBestScore: (score: number) => void;
   setStatus: (status: ReadingStatus) => void;
@@ -97,6 +107,10 @@ const defaultValues: ReadingStore = {
   glossaryRatings: {},
   testScore: 0,
   testCompleted: false,
+  testEarnedPoints: 0,
+  testTotalPoints: 0,
+  testShowChinese: false,
+  testMode: "all-at-once",
   vocabularyQuizScore: 0,
   spellingGameBestScore: 0,
   status: "idle",
@@ -222,12 +236,21 @@ export const useReadingStore = create(
           readingTest: questions,
           testCompleted: false,
           testScore: 0,
+          testEarnedPoints: 0,
+          testTotalPoints: questions.reduce((sum, q) => sum + q.points, 0),
           updatedAt: Date.now(),
         })),
       setUserAnswer: (questionId, answer) =>
         set((state) => ({
           readingTest: state.readingTest.map((q) =>
             q.id === questionId ? { ...q, userAnswer: answer } : q
+          ),
+          updatedAt: Date.now(),
+        })),
+      setQuestionEarnedPoints: (questionId, points) =>
+        set((state) => ({
+          readingTest: state.readingTest.map((q) =>
+            q.id === questionId ? { ...q, earnedPoints: points } : q
           ),
           updatedAt: Date.now(),
         })),
@@ -248,6 +271,19 @@ export const useReadingStore = create(
       setTestCompleted: (completed) =>
         set(() => ({
           testCompleted: completed,
+        })),
+      setTestPoints: (earned, total) =>
+        set(() => ({
+          testEarnedPoints: earned,
+          testTotalPoints: total,
+        })),
+      setTestShowChinese: (show) =>
+        set(() => ({
+          testShowChinese: show,
+        })),
+      setTestMode: (mode) =>
+        set(() => ({
+          testMode: mode,
         })),
       setVocabularyQuizScore: (score) =>
         set(() => ({

@@ -3,14 +3,34 @@ interface ImageSource {
   description?: string;
 }
 
+type ReadingTestQuestionType = 
+  | "multiple-choice" 
+  | "true-false-not-given" 
+  | "short-answer" 
+  | "inference" 
+  | "vocab-context" 
+  | "referencing";
+
+type ReadingTestSkill = "main-idea" | "detail" | "inference" | "vocabulary" | "purpose" | "sequencing";
+
+type DifficultyLevel = "foundation" | "intermediate" | "advanced";
+
 interface ReadingTestQuestion {
   id: string;
-  type: "multiple-choice" | "true-false" | "short-answer";
+  type: ReadingTestQuestionType;
   question: string;
+  questionZh?: string;
   options?: string[];
+  optionsZh?: string[];
   correctAnswer: string;
   userAnswer?: string;
   explanation?: string;
+  explanationZh?: string;
+  skillTested: ReadingTestSkill;
+  paragraphRef?: number;
+  difficultyLevel: DifficultyLevel;
+  points: number;
+  earnedPoints?: number;
 }
 
 interface GlossaryEntry {

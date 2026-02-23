@@ -133,50 +133,158 @@ mindmap
 }
 
 export function generateReadingTestPrompt(text: string, age: number) {
-  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
+  const difficultyLevel = age <= 11 ? "foundation" : age <= 15 ? "intermediate" : "advanced";
+  
+  const questionDistribution = {
+    primary: {
+      multipleChoice: 4,
+      trueFalseNotGiven: 2,
+      vocabContext: 2,
+      referencing: 1,
+      shortAnswer: 1,
+    },
+    secondary: {
+      multipleChoice: 2,
+      trueFalseNotGiven: 2,
+      vocabContext: 2,
+      inference: 2,
+      referencing: 1,
+      shortAnswer: 1,
+    },
+    dse: {
+      multipleChoice: 2,
+      trueFalseNotGiven: 1,
+      vocabContext: 2,
+      inference: 3,
+      referencing: 1,
+      shortAnswer: 1,
+    },
+  };
+
   return `Create a reading comprehension test for a ${age}-year-old Hong Kong ${schoolLevel} student based on this text.
 
 <text>
 ${text}
 </text>
 
-Generate 8 questions in JSON format. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
 
 [
   {
     "id": "q1",
     "type": "multiple-choice",
     "question": "Question text here?",
+    "questionZh": "問題中文翻譯",
     "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
+    "optionsZh": ["A) 第一個選項", "B) 第二個選項", "C) 第三個選項", "D) 第四個選項"],
     "correctAnswer": "A",
-    "explanation": "Brief explanation of why this is the correct answer"
+    "explanation": "Brief explanation in English",
+    "explanationZh": "簡短中文解釋",
+    "skillTested": "detail",
+    "paragraphRef": 1,
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 1
   },
   {
     "id": "q2",
-    "type": "true-false",
-    "question": "Statement to evaluate",
-    "correctAnswer": "true",
-    "explanation": "Brief explanation"
+    "type": "true-false-not-given",
+    "question": "Statement to evaluate against the text",
+    "questionZh": "需要判斷的陳述",
+    "options": ["True", "False", "Not Given"],
+    "correctAnswer": "True",
+    "explanation": "Why this is True/False/Not Given with text reference",
+    "explanationZh": "中文解釋為何是True/False/Not Given",
+    "skillTested": "detail",
+    "paragraphRef": 2,
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 1
   },
   {
     "id": "q3",
+    "type": "inference",
+    "question": "What can we infer from paragraph X?",
+    "questionZh": "我們可以從第X段推斷出什麼？",
+    "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
+    "optionsZh": ["A) 選項一", "B) 選項二", "C) 選項三", "D) 選項四"],
+    "correctAnswer": "B",
+    "explanation": "Explanation of the inference",
+    "explanationZh": "推論解釋",
+    "skillTested": "inference",
+    "paragraphRef": 3,
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 2
+  },
+  {
+    "id": "q4",
+    "type": "vocab-context",
+    "question": "In paragraph X, what does the word '___' most likely mean?",
+    "questionZh": "在第X段，'___'這個詞最可能是什麼意思？",
+    "options": ["A) Meaning 1", "B) Meaning 2", "C) Meaning 3", "D) Meaning 4"],
+    "optionsZh": ["A) 意思一", "B) 意思二", "C) 意思三", "D) 意思四"],
+    "correctAnswer": "C",
+    "explanation": "Explanation using context clues",
+    "explanationZh": "根據上下文的解釋",
+    "skillTested": "vocabulary",
+    "paragraphRef": 2,
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 1
+  },
+  {
+    "id": "q5",
+    "type": "referencing",
+    "question": "What does 'they' in line X refer to?",
+    "questionZh": "第X行的'they'指的是什麼？",
+    "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
+    "optionsZh": ["A) 選項一", "B) 選項二", "C) 選項三", "D) 選項四"],
+    "correctAnswer": "A",
+    "explanation": "What the pronoun/phrase refers to in context",
+    "explanationZh": "該代詞/短語在上下文中指的是什麼",
+    "skillTested": "detail",
+    "paragraphRef": 2,
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 1
+  },
+  {
+    "id": "q6",
     "type": "short-answer",
-    "question": "Open-ended question that requires understanding",
-    "correctAnswer": "Key points that should be mentioned in a good answer",
-    "explanation": "What to look for in the answer"
+    "question": "Open-ended question requiring 2-3 sentences",
+    "questionZh": "需要2-3句回答的開放式問題",
+    "correctAnswer": "Key points that must be included: point 1, point 2, point 3",
+    "explanation": "What a good answer should include",
+    "explanationZh": "好的答案應該包含什麼",
+    "skillTested": "main-idea",
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 3
   }
 ]
 
-**Question Distribution:**
-- 5 multiple-choice questions (test comprehension and details)
-- 2 true/false questions (test factual understanding)
-- 1 short-answer question (test deeper understanding)
+**Question Distribution for this student (${age} years old, ${schoolLevel}):**
+${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
 
 **Guidelines:**
 - Questions should test comprehension, not just memory.
 - Use age-appropriate language.
 - Make questions clear and unambiguous.
 - For multiple-choice, ensure only one answer is clearly correct.
+- For true-false-not-given: 
+  - "True" = statement agrees with the text
+  - "False" = statement contradicts the text  
+  - "Not Given" = text does not provide enough information
+- For vocabulary-in-context: choose words that can be understood from surrounding text.
+- For inference questions: answer should be logically deducible but not explicitly stated.
+- For referencing questions:
+  - Identify pronouns (it, they, them, this, that, these, those, he, she, etc.)
+  - Or noun phrases with definite articles that refer to previously mentioned concepts
+  - Ask what the word/phrase refers to in the surrounding context
+  - Options should be noun phrases from the text
+  - Choose words where the reference is clear from context but requires careful reading
+- For short-answer: provide key points that must be mentioned, comma-separated
+- Include ALL required metadata fields for each question.
+- paragraphRef should be 1-indexed (first paragraph = 1).
+- Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3.
+- Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED for all questions.
+- Use Traditional Chinese (繁體中文) for all Chinese text.
 
 **Respond with ONLY the JSON array, no markdown, no code blocks.**`;
 }
