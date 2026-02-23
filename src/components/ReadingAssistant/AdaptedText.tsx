@@ -40,8 +40,9 @@ function AdaptedText() {
               <span>{t("reading.adaptedText.adaptedTab")}</span>
               {isAdapting && <LoaderCircle className="ml-1.5 h-3 w-3 animate-spin" />}
             </TabsTrigger>
-            <TabsTrigger value="simplified" className="flex-1" disabled={!adaptedText}>
-              {t("reading.adaptedText.simplifiedTab")}
+            <TabsTrigger value="simplified" className="flex-1" disabled={!adaptedText && !isSimplifying}>
+              <span>{t("reading.adaptedText.simplifiedTab")}</span>
+              {isSimplifying && <LoaderCircle className="ml-1.5 h-3 w-3 animate-spin" />}
             </TabsTrigger>
           </TabsList>
 
@@ -96,8 +97,8 @@ function AdaptedText() {
                   <div className="mt-4 pt-4 border-t">
                     <Button
                       onClick={() => {
-                        simplifyText();
                         setActiveTab("simplified");
+                        simplifyText();
                       }}
                       disabled={isSimplifying}
                       variant="secondary"
@@ -145,50 +146,47 @@ function AdaptedText() {
                     disableMath
                   />
                 </div>
-                <div className="mt-4 pt-4 border-t">
-                  <Button
-                    onClick={() => simplifyText()}
-                    disabled={isSimplifying}
-                    variant="secondary"
-                    className="w-full"
-                  >
-                    {isSimplifying ? (
-                      <>
-                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                        <span>{t("reading.adaptedText.simplifying")}</span>
-                      </>
-                    ) : (
-                      <>
-                        <ArrowDown className="h-4 w-4" />
-                        <span>{t("reading.adaptedText.simplifyFurther")}</span>
-                      </>
-                    )}
-                  </Button>
-                </div>
+                {isSimplifying ? (
+                  <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                    <span>{t("reading.adaptedText.simplifying")}</span>
+                  </div>
+                ) : (
+                  <div className="mt-4 pt-4 border-t">
+                    <Button
+                      onClick={() => simplifyText()}
+                      disabled={isSimplifying}
+                      variant="secondary"
+                      className="w-full"
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                      <span>{t("reading.adaptedText.simplifyFurther")}</span>
+                    </Button>
+                  </div>
+                )}
               </>
+            ) : isSimplifying ? (
+              <div className="space-y-3 animate-pulse">
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-11/12" />
+                <div className="h-4 bg-muted rounded w-4/5" />
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-3/4" />
+              </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>{t("reading.adaptedText.simplifiedEmptyTip")}</p>
                 <Button
                   onClick={() => {
-                    simplifyText();
                     setActiveTab("simplified");
+                    simplifyText();
                   }}
                   disabled={isSimplifying}
                   variant="secondary"
                   className="mt-4"
                 >
-                  {isSimplifying ? (
-                    <>
-                      <LoaderCircle className="h-4 w-4 animate-spin" />
-                      <span>{t("reading.adaptedText.simplifying")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <ArrowDown className="h-4 w-4" />
-                      <span>{t("reading.adaptedText.generateSimplified")}</span>
-                    </>
-                  )}
+                  <ArrowDown className="h-4 w-4" />
+                  <span>{t("reading.adaptedText.generateSimplified")}</span>
                 </Button>
               </div>
             )}
