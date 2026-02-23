@@ -219,10 +219,15 @@ function ReadingTest() {
   const handleTargetedPractice = async () => {
     if (missedSkills.length === 0) return;
     
-    setQuizState("idle");
     setRetryMissedIds(new Set());
+    setCurrentQuestionIndex(0);
+    setShowReview(false);
     
-    await generateTargetedPractice(missedSkills);
+    const questions = await generateTargetedPractice(missedSkills);
+    
+    if (questions && questions.length > 0) {
+      setQuizState("in-progress");
+    }
   };
 
   const getScoreColor = (score: number) => {
