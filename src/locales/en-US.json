@@ -104,6 +104,7 @@
       "title": "Adapted Text",
       "adapt": "Adapt",
       "adapting": "Adapting...",
+      "originalTab": "Original",
       "adaptedTab": "Adapted",
       "simplifiedTab": "Simplified",
       "emptyTip": "Click the button above to adapt the text to your level",

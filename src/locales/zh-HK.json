@@ -104,6 +104,7 @@
       "title": "改寫文字",
       "adapt": "改寫",
       "adapting": "正在改寫...",
+      "originalTab": "原文",
       "adaptedTab": "改寫版本",
       "simplifiedTab": "簡化版本",
       "emptyTip": "點擊上方按鈕將文字改寫至你的程度",
