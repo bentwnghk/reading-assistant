@@ -285,6 +285,7 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
 - Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3.
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED for all questions.
 - Use Traditional Chinese (繁體中文) for all Chinese text.
+- **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose", "sequencing". No other values are permitted.**
 
 **Respond with ONLY the JSON array, no markdown, no code blocks.**`;
 }
@@ -363,6 +364,7 @@ ${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${
 - Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED
 - Use Traditional Chinese (繁體中文) for all Chinese text
+- **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose", "sequencing". No other values are permitted.**
 
 **Respond with ONLY the JSON array, no markdown, no code blocks.**`;
 }
