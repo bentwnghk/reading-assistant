@@ -15,7 +15,6 @@ const History = dynamic(() => import("@/components/History"));
 const StudentInfo = dynamic(() => import("@/components/ReadingAssistant/StudentInfo"));
 const ImageUpload = dynamic(() => import("@/components/ReadingAssistant/ImageUpload"));
 const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/WorkflowProgress"));
-const ExtractedText = dynamic(() => import("@/components/ReadingAssistant/ExtractedText"));
 const Summary = dynamic(() => import("@/components/ReadingAssistant/Summary"));
 const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedText"));
 const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
@@ -48,7 +47,6 @@ function Home() {
         <StudentInfo />
         <ImageUpload />
         <WorkflowProgress />
-        <ExtractedText />
         <Summary />
         <MindMap />
         <AdaptedText />
