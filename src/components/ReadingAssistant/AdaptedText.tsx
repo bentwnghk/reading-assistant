@@ -36,8 +36,9 @@ function AdaptedText() {
             <TabsTrigger value="original" className="flex-1">
               {t("reading.adaptedText.originalTab")}
             </TabsTrigger>
-            <TabsTrigger value="adapted" className="flex-1" disabled={!adaptedText}>
-              {t("reading.adaptedText.adaptedTab")}
+            <TabsTrigger value="adapted" className="flex-1" disabled={!adaptedText && !isAdapting}>
+              <span>{t("reading.adaptedText.adaptedTab")}</span>
+              {isAdapting && <LoaderCircle className="ml-1.5 h-3 w-3 animate-spin" />}
             </TabsTrigger>
             <TabsTrigger value="simplified" className="flex-1" disabled={!adaptedText}>
               {t("reading.adaptedText.simplifiedTab")}
@@ -52,8 +53,8 @@ function AdaptedText() {
               <div className="mt-4 pt-4 border-t flex justify-center">
                 <Button
                   onClick={() => {
-                    adaptText();
                     setActiveTab("adapted");
+                    adaptText();
                   }}
                   disabled={isAdapting}
                   size="sm"
@@ -86,7 +87,12 @@ function AdaptedText() {
                   />
                 </div>
 
-                {!simplifiedText && (
+                {isAdapting ? (
+                  <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                    <span>{t("reading.adaptedText.adapting")}</span>
+                  </div>
+                ) : !simplifiedText && (
                   <div className="mt-4 pt-4 border-t">
                     <Button
                       onClick={() => {
@@ -112,6 +118,14 @@ function AdaptedText() {
                   </div>
                 )}
               </>
+            ) : isAdapting ? (
+              <div className="space-y-3 animate-pulse">
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-11/12" />
+                <div className="h-4 bg-muted rounded w-4/5" />
+                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-4 bg-muted rounded w-3/4" />
+              </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
