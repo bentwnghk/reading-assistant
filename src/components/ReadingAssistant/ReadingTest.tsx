@@ -35,13 +35,14 @@ const QUESTION_TYPE_LABELS: Record<ReadingTestQuestionType, string> = {
   "referencing": "referencing",
 };
 
-const SKILL_LABELS: Record<ReadingTestSkill, string> = {
+const SKILL_LABELS: Record<string, string> = {
   "main-idea": "mainIdea",
   "detail": "detail",
   "inference": "inference",
   "vocabulary": "vocabulary",
   "purpose": "purpose",
   "sequencing": "sequencing",
+  "referencing": "detail",
 };
 
 function ReadingTest() {
@@ -64,6 +65,7 @@ function ReadingTest() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showReview, setShowReview] = useState(false);
   const [evaluatingShortAnswer, setEvaluatingShortAnswer] = useState(false);
+  const [retryMissedIds, setRetryMissedIds] = useState<Set<string>>(new Set());
 
   const isGenerating = status === "testing";
 
@@ -116,10 +118,35 @@ function ReadingTest() {
     setQuizState("idle");
     setShowReview(false);
     setCurrentQuestionIndex(0);
+    setRetryMissedIds(new Set());
   };
 
+  const handleRetryMissed = () => {
+    const missedIds = new Set(missedQuestions.map(q => q.id));
+    missedQuestions.forEach((q) => {
+      useReadingStore.getState().setUserAnswer(q.id, "");
+      if (q.type === "short-answer") {
+        useReadingStore.getState().setQuestionEarnedPoints(q.id, 0);
+      }
+    });
+    useReadingStore.getState().setTestCompleted(false);
+    useReadingStore.getState().setTestScore(0);
+    useReadingStore.getState().setTestPoints(0, 0);
+    setRetryMissedIds(missedIds);
+    setQuizState("in-progress");
+    setShowReview(false);
+    setCurrentQuestionIndex(0);
+  };
+
+  const questionsToDisplay = useMemo(() => {
+    if (retryMissedIds.size > 0) {
+      return readingTest.filter(q => retryMissedIds.has(q.id));
+    }
+    return readingTest;
+  }, [readingTest, retryMissedIds]);
+
   const goToNext = () => {
-    if (currentQuestionIndex < readingTest.length - 1) {
+    if (currentQuestionIndex < questionsToDisplay.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
@@ -135,8 +162,8 @@ function ReadingTest() {
       if (q.type === "short-answer") {
         return (q.earnedPoints ?? 0) < q.points;
       }
-      const userAnswer = q.userAnswer?.toLowerCase().trim();
-      const correctAnswer = q.correctAnswer.toLowerCase().trim();
+      const userAnswer = q.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-");
+      const correctAnswer = q.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-");
       if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing") {
         return userAnswer !== correctAnswer && userAnswer !== correctAnswer.charAt(0);
       }
@@ -160,8 +187,8 @@ function ReadingTest() {
           stats[skill].correct += 1;
         }
       } else {
-        const userAnswer = q.userAnswer?.toLowerCase().trim();
-        const correctAnswer = q.correctAnswer.toLowerCase().trim();
+        const userAnswer = q.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-");
+        const correctAnswer = q.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-");
         let isCorrect = false;
         if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing") {
           isCorrect = userAnswer === correctAnswer || userAnswer === correctAnswer.charAt(0);
@@ -188,8 +215,8 @@ function ReadingTest() {
     if (question.type === "short-answer") {
       isCorrect = (question.earnedPoints ?? 0) >= question.points;
     } else {
-      const userAnswer = question.userAnswer?.toLowerCase().trim();
-      const correctAnswer = question.correctAnswer.toLowerCase().trim();
+      const userAnswer = question.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-");
+      const correctAnswer = question.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-");
       if (question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing") {
         isCorrect = userAnswer === correctAnswer || userAnswer === correctAnswer.charAt(0);
       } else {
@@ -197,8 +224,8 @@ function ReadingTest() {
       }
     }
 
-    const typeLabelKey = QUESTION_TYPE_LABELS[question.type];
-    const skillLabelKey = SKILL_LABELS[question.skillTested];
+    const typeLabelKey = QUESTION_TYPE_LABELS[question.type] || question.type;
+    const skillLabelKey = SKILL_LABELS[question.skillTested] || question.skillTested;
 
     return (
       <div
@@ -492,7 +519,7 @@ function ReadingTest() {
               {showReview ? t("reading.readingTest.hideReview") : t("reading.readingTest.reviewAnswers")}
             </Button>
             {missedQuestions.length > 0 && (
-              <Button variant="secondary" onClick={handleReset}>
+              <Button variant="secondary" onClick={handleRetryMissed}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 {t("reading.readingTest.retryMissed", { count: missedQuestions.length })}
               </Button>
@@ -510,9 +537,9 @@ function ReadingTest() {
   }
 
   if (testMode === "question-by-question" && quizState === "in-progress") {
-    const currentQuestion = readingTest[currentQuestionIndex];
-    const currentAnswer = currentQuestion.userAnswer;
-    const allAnswered = readingTest.every((q) => q.userAnswer && q.userAnswer.trim() !== "");
+    const currentQuestion = questionsToDisplay[currentQuestionIndex];
+    const currentAnswer = currentQuestion?.userAnswer;
+    const allAnswered = questionsToDisplay.every((q) => q.userAnswer && q.userAnswer.trim() !== "");
 
     return (
       <section className="p-4 border rounded-md mt-4">
@@ -536,16 +563,16 @@ function ReadingTest() {
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>
                 {t("reading.readingTest.question")} {currentQuestionIndex + 1}{" "}
-                {t("reading.readingTest.of")} {readingTest.length}
+                {t("reading.readingTest.of")} {questionsToDisplay.length}
               </span>
               <span>
                 {t("reading.readingTest.pressKey")} →/←
               </span>
             </div>
-            <Progress value={((currentQuestionIndex + 1) / readingTest.length) * 100} className="h-2" />
+            <Progress value={((currentQuestionIndex + 1) / questionsToDisplay.length) * 100} className="h-2" />
           </div>
 
-          {renderQuestion(currentQuestion, currentQuestionIndex, false)}
+          {currentQuestion && renderQuestion(currentQuestion, currentQuestionIndex, false)}
 
           <div className="flex items-center justify-between">
             <Button
@@ -557,7 +584,7 @@ function ReadingTest() {
               {t("reading.glossary.flashcard.previous")}
             </Button>
 
-            {currentQuestionIndex === readingTest.length - 1 ? (
+            {currentQuestionIndex === questionsToDisplay.length - 1 ? (
               <Button 
                 onClick={handleSubmit} 
                 disabled={!allAnswered || evaluatingShortAnswer}
@@ -621,7 +648,7 @@ function ReadingTest() {
       </div>
 
       <div className="space-y-6">
-        {readingTest.map((question, index) => renderQuestion(question, index, false))}
+        {questionsToDisplay.map((question, index) => renderQuestion(question, index, false))}
       </div>
     </section>
   );

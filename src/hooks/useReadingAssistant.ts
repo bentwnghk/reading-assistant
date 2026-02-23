@@ -403,8 +403,8 @@ function useReadingAssistant() {
         continue;
       }
       
-      const userAnswer = question.userAnswer?.toLowerCase().trim();
-      const correctAnswer = question.correctAnswer.toLowerCase().trim();
+      const userAnswer = question.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-");
+      const correctAnswer = question.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-");
       
       if (question.type === "multiple-choice" || 
           question.type === "inference" || 
