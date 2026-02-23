@@ -149,6 +149,8 @@
       "hideChinese": "隱藏中文",
       "chineseDesc": "顯示問題和解釋的中文翻譯",
       "questionsAvailable": "{{count}} 題已準備好",
+      "completedTip": "生成新的10題測驗以繼續練習",
+      "generateNew": "生成新測驗",
       "lastScore": "上次分數：",
       "question": "問題",
       "of": "/",

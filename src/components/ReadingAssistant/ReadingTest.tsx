@@ -455,13 +455,36 @@ function ReadingTest() {
           </div>
 
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">
-              {t("reading.readingTest.questionsAvailable", { count: readingTest.length })}
-            </p>
-            <Button onClick={startTest} size="lg">
-              <ClipboardCheck className="h-5 w-5 mr-2" />
-              {t("reading.readingTest.startTest")}
-            </Button>
+            {testCompleted ? (
+              <>
+                <p className="text-muted-foreground mb-4">
+                  {t("reading.readingTest.completedTip")}
+                </p>
+                <Button onClick={() => generateReadingTest()} disabled={isGenerating} size="lg">
+                  {isGenerating ? (
+                    <>
+                      <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
+                      {t("reading.readingTest.generating")}
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardCheck className="h-5 w-5 mr-2" />
+                      {t("reading.readingTest.generateNew")}
+                    </>
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-muted-foreground mb-4">
+                  {t("reading.readingTest.questionsAvailable", { count: readingTest.length })}
+                </p>
+                <Button onClick={startTest} size="lg">
+                  <ClipboardCheck className="h-5 w-5 mr-2" />
+                  {t("reading.readingTest.startTest")}
+                </Button>
+              </>
+            )}
             {testCompleted && testScore > 0 && (
               <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
                 <Trophy className="h-4 w-4 text-yellow-500" />

@@ -522,7 +522,7 @@ Guidelines:
       const result = await generateText({
         model: thinkingModel,
         system: getSystemPrompt(),
-        prompt: generateTargetedPracticePrompt(extractedText, studentAge, missedSkills, 5),
+        prompt: generateTargetedPracticePrompt(extractedText, studentAge, missedSkills),
       });
 
       let text = result.text.trim();

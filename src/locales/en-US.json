@@ -149,6 +149,8 @@
       "hideChinese": "Hide Chinese",
       "chineseDesc": "Display Chinese translations for questions and explanations",
       "questionsAvailable": "{{count}} questions ready",
+      "completedTip": "Generate a new set of 10 questions to practice more",
+      "generateNew": "Generate New Test",
       "lastScore": "Last Score:",
       "question": "Question",
       "of": "of",

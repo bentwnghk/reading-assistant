@@ -292,11 +292,13 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
 export function generateTargetedPracticePrompt(
   text: string, 
   age: number, 
-  missedSkills: ReadingTestSkill[],
-  count: number = 5
+  missedSkills: ReadingTestSkill[]
 ) {
   const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
   const difficultyLevel = age <= 11 ? "foundation" : age <= 15 ? "intermediate" : "advanced";
+  
+  const questionCount = Math.min(10, Math.max(5, missedSkills.length * 2));
+  const questionsPerSkill = Math.ceil(questionCount / missedSkills.length);
   
   const skillDescriptions: Record<ReadingTestSkill, string> = {
     "main-idea": "questions testing understanding of the main idea or central theme",
@@ -316,16 +318,16 @@ export function generateTargetedPracticePrompt(
     "sequencing": ["multiple-choice"]
   };
 
-  return `Create ${count} targeted practice questions for a ${age}-year-old Hong Kong ${schoolLevel} student.
+  return `Create ${questionCount} targeted practice questions for a ${age}-year-old Hong Kong ${schoolLevel} student.
 
-The student needs more practice in these specific skills:
+The student needs more practice in these specific skills (generate ${questionsPerSkill} questions for each skill):
 ${missedSkills.map(s => `- ${s}: ${skillDescriptions[s]}`).join("\n")}
 
 <text>
 ${text}
 </text>
 
-Generate ${count} questions focusing ONLY on the skills listed above. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+Generate ${questionCount} questions focusing ONLY on the skills listed above. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
 
 [
   {
