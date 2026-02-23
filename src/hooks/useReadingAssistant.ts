@@ -388,7 +388,8 @@ function useReadingAssistant() {
   }
 
   function calculateTestScore() {
-    const { readingTest, setTestScore, setTestCompleted, setTestPoints } = readingStore;
+    const { setTestScore, setTestCompleted, setTestPoints } = readingStore;
+    const { readingTest } = useReadingStore.getState();
     
     let earnedPoints = 0;
     let totalPoints = 0;
