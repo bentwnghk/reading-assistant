@@ -68,7 +68,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   }, []);
 
   const handleShuffle = () => {
-    setIsShuffled(true);
+    setIsShuffled((prev) => !prev);
     setCurrentIndex(0);
     setIsFlipped(false);
   };
@@ -410,23 +410,23 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           <span className="hidden sm:inline">{t("reading.glossary.prioritizeHard")}</span>
         </Button>
 
-        {isShuffled || isPrioritized ? (
+        <Button
+          variant={isShuffled ? "default" : "secondary"}
+          size="sm"
+          onClick={handleShuffle}
+        >
+          <Shuffle className="h-4 w-4" />
+          <span className="hidden sm:inline">{t("reading.glossary.flashcard.shuffle")}</span>
+        </Button>
+
+        {(isShuffled || isPrioritized) && (
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
             onClick={handleResetOrder}
           >
             <RotateCcw className="h-4 w-4" />
             <span className="hidden sm:inline">{t("reading.glossary.regenerate")}</span>
-          </Button>
-        ) : (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleShuffle}
-          >
-            <Shuffle className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("reading.glossary.flashcard.shuffle")}</span>
           </Button>
         )}
 
