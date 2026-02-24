@@ -102,15 +102,17 @@
 
 ```mermaid
 flowchart LR
-    A[📷 Upload Image] --> B[📝 Extract Text]
-    B --> C[📋 Generate Summary]
-    B --> D[🧠 Create Mind Map]
-    B --> E[✏️ Adapt Text]
-    B --> F[❓ Generate Test]
-    B --> G[📖 Build Glossary]
+    A[📸 Upload] --> B[📝 Extract]
+    B --> C[📋 Summarize]
+    C --> D[🧠 Mind Map]
+    D --> E[✏️ Adapt]
+    E --> F[❓ Reading Test]
+    F --> G[🔬 Analyze]
+    G --> H[🖍️ Highlight]
+    H --> I[📖 Glossary]
+    I --> J[🎮 Practice]
     
-    E --> E2[⬇️ Simplify Further]
-    F --> F2[📊 Submit & Score]
+    E --> E2[⬇️ Simplify]
 ```
 
 ### Step-by-Step Process
