@@ -239,7 +239,7 @@ function AdaptedText() {
   const isSimplifying = status === "simplifying";
 
   // ── interactive-text state ──
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [selection, setSelection] = useState<{
     text: string;
@@ -609,36 +609,43 @@ function AdaptedText() {
     };
   }, [handleSelectionChange, handleMouseDown]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  const handleSentenceClick = useCallback((e: Event) => {
+    const mouseEvent = e as MouseEvent;
+    const target = mouseEvent.target as HTMLElement;
+    const analyzedSpan = target.closest(
+      ".analyzed-sentence"
+    ) as HTMLElement | null;
 
-    const handleClick = (e: Event) => {
-      const mouseEvent = e as MouseEvent;
-      const target = mouseEvent.target as HTMLElement;
-      const analyzedSpan = target.closest(
-        ".analyzed-sentence"
-      ) as HTMLElement | null;
-
-      if (analyzedSpan) {
-        e.stopPropagation();
-        e.preventDefault();
-        const idxAttr = analyzedSpan.getAttribute("data-idx");
-        if (idxAttr !== null) {
-          const idx = parseInt(idxAttr, 10);
-          const sentence = sentenceListRef.current[idx];
-          if (sentence) {
-            setActiveSentence(sentence);
-          }
+    if (analyzedSpan) {
+      e.stopPropagation();
+      e.preventDefault();
+      const idxAttr = analyzedSpan.getAttribute("data-idx");
+      if (idxAttr !== null) {
+        const idx = parseInt(idxAttr, 10);
+        const sentence = sentenceListRef.current[idx];
+        if (sentence) {
+          setActiveSentence(sentence);
         }
       }
-    };
+    }
+  }, []);
 
-    container.addEventListener("click", handleClick, true);
-    return () => {
-      container.removeEventListener("click", handleClick, true);
-    };
-  }, [analyzedSentences, activeTab]);
+  const setContainerRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (containerRef.current) {
+        containerRef.current.removeEventListener(
+          "click",
+          handleSentenceClick,
+          true
+        );
+      }
+      containerRef.current = node;
+      if (node) {
+        node.addEventListener("click", handleSentenceClick, true);
+      }
+    },
+    [handleSentenceClick]
+  );
 
   const activeAnalysis = activeSentence
     ? getSentenceAnalysis(activeSentence)
@@ -768,7 +775,7 @@ function AdaptedText() {
           {/* Interactive text body */}
           <div
             className="prose prose-slate dark:prose-invert max-w-full"
-            ref={containerRef}
+            ref={setContainerRef}
           >
             <MagicDown
               value={highlightedText}
