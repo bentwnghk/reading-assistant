@@ -223,7 +223,7 @@
         "pressKey": "Press",
         "wordsAvailable": "{{count}} words available",
         "scoreFormat": "{{correct}} / {{total}} Correct",
-        "lastScore": "Last score"
+        "lastScore": "Last Score:"
       },
       "spelling": {
         "title": "Spelling Challenge",
@@ -240,7 +240,7 @@
         "correctWords": "Correct Words",
         "maxStreak": "Best Streak",
         "score": "Score",
-        "bestScore": "Best Score",
+        "bestScore": "Best Score:",
         "useHint": "Use Hint (Ctrl+Space)",
         "clickToHear": "Click to hear the word",
         "typeAnswer": "Type the word you hear...",

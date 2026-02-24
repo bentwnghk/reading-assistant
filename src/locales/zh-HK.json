@@ -152,7 +152,7 @@
       "questionsAvailable": "{{count}} 題已準備好",
       "completedTip": "生成新的10題測驗以繼續練習",
       "generateNew": "生成新測驗",
-      "lastScore": "上次分數：",
+      "lastScore": "上次得分：",
       "question": "問題",
       "of": "/",
       "pressKey": "按鍵",
@@ -223,7 +223,7 @@
         "pressKey": "按",
         "wordsAvailable": "有 {{count}} 個生字",
         "scoreFormat": "{{correct}} / {{total}} 正確",
-        "lastScore": "上次得分"
+        "lastScore": "上次得分："
       },
       "spelling": {
         "title": "拼字挑戰",
@@ -240,7 +240,7 @@
         "correctWords": "正確生字",
         "maxStreak": "最佳連勝",
         "score": "分數",
-        "bestScore": "最佳得分",
+        "bestScore": "最佳得分：",
         "useHint": "使用提示 (Ctrl+Space)",
         "clickToHear": "點擊聽取生字",
         "typeAnswer": "輸入你聽到的生字...",
