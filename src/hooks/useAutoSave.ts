@@ -5,6 +5,7 @@ import { useHistoryStore } from "@/store/history";
 function useAutoSave() {
   const { 
     id, 
+    docTitle,
     originalImages, 
     extractedText, 
     summary, 
@@ -40,7 +41,7 @@ function useAutoSave() {
     }
 
     prevIdRef.current = id;
-  }, [id, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences]);
+  }, [id, docTitle, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences]);
 }
 
 export default useAutoSave;

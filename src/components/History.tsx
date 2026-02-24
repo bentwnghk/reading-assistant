@@ -37,6 +37,7 @@ const PAGE_SIZE = 20;
 
 const readingSessionSchema = z.object({
   id: z.string(),
+  docTitle: z.string().optional(),
   studentAge: z.number(),
   originalImage: z.string().optional(),
   extractedText: z.string(),

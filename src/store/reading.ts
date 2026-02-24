@@ -127,10 +127,14 @@ export const useReadingStore = create(
     (set, get) => ({
       ...defaultValues,
       setDocTitle: (title) =>
-        set(() => ({
-          docTitle: title,
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            docTitle: title,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setStudentAge: (age) =>
         set(() => ({
           studentAge: Math.max(8, Math.min(18, age)),
