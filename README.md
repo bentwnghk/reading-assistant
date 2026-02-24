@@ -102,26 +102,29 @@
 
 ```mermaid
 flowchart LR
-    A[📸 Upload] --> B[📝 Extract]
-    B --> C[📋 Summarize]
-    C --> D[🧠 Mind Map]
-    D --> E[✏️ Adapt]
-    E --> F[❓ Reading Test]
-    F --> G[🔬 Analyze]
-    G --> H[🖍️ Highlight]
-    H --> I[📖 Glossary]
-    I --> J[🎮 Practice]
+    A[📷 Upload Image] --> B[📝 Extract Text]
+    B --> C[📋 Generate Summary]
+    B --> D[🧠 Create Mind Map]
+    B --> E[✏️ Adapt Text]
+    B --> F[❓ Generate Test]
+    B --> G[📖 Build Glossary]
     
-    E --> E2[⬇️ Simplify]
+    E --> E2[⬇️ Simplify Further]
+    E --> E3[🖍️ Highlight Words]
+    E --> E4[🔬 Analyze Sentence]
+    E --> E5[🔊 Read Aloud]
+    F --> F2[📊 Submit & Score]
+    G --> G2[🎮 Spelling Game]
+    G --> G3[📝 Vocabulary Quiz]
 ```
 
 ### Step-by-Step Process
 1. **📸 Upload** - Take or upload photos of reading materials
 2. **📝 Extract** - AI extracts text from images via OCR
 3. **📋 Summarize** - Get a quick summary of the content
-4. **🧠 Visualize** - Generate an interactive mind map
+4. **🧠 Mind Map** - Generate an interactive mind map
 5. **✏️ Adapt** - Text is rewritten for the student's level
-6. **❓ Test** - Take a comprehension quiz
+6. **❓ Reading Test** - Take a comprehension quiz
 7. **🔬 Analyze** - Select sentences for detailed analysis
 8. **🖍️ Highlight** - Select words to build vocabulary
 9. **📖 Glossary** - Review bilingual word definitions with examples
