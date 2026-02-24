@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy } from "lucide-react";
+import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
 import { nanoid } from "nanoid";
+import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
 
 interface VocabularyQuizProps {
   glossary: GlossaryEntry[];
@@ -29,12 +30,11 @@ function formatBilingualDefinition(entry: GlossaryEntry): string {
   return `${entry.englishDefinition} (${entry.chineseDefinition})`;
 }
 
-function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestion[] {
+function generateQuizQuestions(sortedGlossary: GlossaryEntry[]): VocabularyQuizQuestion[] {
   const questions: VocabularyQuizQuestion[] = [];
-  const shuffledGlossary = shuffleArray(glossary);
 
-  for (const entry of shuffledGlossary) {
-    const otherEntries = glossary.filter((e) => e.word !== entry.word);
+  for (const entry of sortedGlossary) {
+    const otherEntries = sortedGlossary.filter((e) => e.word !== entry.word);
     const type = ["word-to-definition", "definition-to-word", "fill-blank"][
       Math.floor(Math.random() * 3)
     ] as VocabularyQuizQuestion["type"];
@@ -115,7 +115,7 @@ function generateQuizQuestions(glossary: GlossaryEntry[]): VocabularyQuizQuestio
 
 function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
-  const { id, vocabularyQuizScore, setVocabularyQuizScore, backup } = useReadingStore();
+  const { id, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
 
   const [quizState, setQuizState] = useState<QuizState>("idle");
@@ -123,15 +123,24 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showReview, setShowReview] = useState(false);
+  const [prioritizeHardWords, setPrioritizeHardWords] = useState(false);
+
+  const wordStats = useMemo(() => {
+    return getWordStats(glossary, glossaryRatings);
+  }, [glossary, glossaryRatings]);
 
   const startQuiz = useCallback(() => {
-    const generatedQuestions = generateQuizQuestions(glossary);
+    const sortedGlossary = sortGlossaryByPriority(glossary, glossaryRatings, {
+      prioritize: prioritizeHardWords,
+      shuffle: true,
+    });
+    const generatedQuestions = generateQuizQuestions(sortedGlossary);
     setQuestions(generatedQuestions);
     setAnswers({});
     setCurrentQuestionIndex(0);
     setQuizState("in-progress");
     setShowReview(false);
-  }, [glossary]);
+  }, [glossary, glossaryRatings, prioritizeHardWords]);
 
   const handleAnswer = (answer: string) => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -184,9 +193,12 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
 
   const retryMissed = () => {
     if (missedQuestions.length === 0) return;
-    const newQuestions = generateQuizQuestions(
-      glossary.filter((e) => missedQuestions.some((q) => q.wordRef === e.word))
-    );
+    const missedWords = glossary.filter((e) => missedQuestions.some((q) => q.wordRef === e.word));
+    const sortedMissed = sortGlossaryByPriority(missedWords, glossaryRatings, {
+      prioritize: prioritizeHardWords,
+      shuffle: true,
+    });
+    const newQuestions = generateQuizQuestions(sortedMissed);
     setQuestions(newQuestions);
     setAnswers({});
     setCurrentQuestionIndex(0);
@@ -202,12 +214,42 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     );
   }
 
+  const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
+
   if (quizState === "idle") {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground mb-6">
           {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
         </p>
+
+        {hasRatings && (
+          <div className="flex justify-center mb-4">
+            <button
+              onClick={() => setPrioritizeHardWords(!prioritizeHardWords)}
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all",
+                prioritizeHardWords
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:border-primary/50"
+              )}
+            >
+              <Target className="h-4 w-4" />
+              <span className="text-sm">{t("reading.glossary.prioritizeHard")}</span>
+            </button>
+          </div>
+        )}
+
+        {prioritizeHardWords && hasRatings && (
+          <p className="text-xs text-muted-foreground mb-4">
+            {t("reading.glossary.wordStats", { 
+              hard: wordStats.hard, 
+              medium: wordStats.medium, 
+              easy: wordStats.easy 
+            })}
+          </p>
+        )}
+
         <Button onClick={startQuiz} size="lg">
           <Play className="h-5 w-5 mr-2" />
           {t("reading.glossary.quiz.startQuiz")}

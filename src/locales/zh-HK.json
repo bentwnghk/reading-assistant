@@ -237,6 +237,9 @@
       "tabFlashcard": "生字卡",
       "tabQuiz": "測驗",
       "tabSpelling": "拼字",
+      "prioritizeHard": "優先複習難字",
+      "prioritizeHardDesc": "先練習你標記為困難的詞彙",
+      "wordStats": "{{hard}} 個難，{{medium}} 個中，{{easy}} 個易",
       "flashcard": {
         "flip": "翻轉",
         "previous": "上一個",

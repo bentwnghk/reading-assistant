@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
@@ -9,6 +9,7 @@ import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
+import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
 
 interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
@@ -22,16 +23,22 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [shuffledGlossary, setShuffledGlossary] = useState<GlossaryEntry[]>([]);
   const [isShuffled, setIsShuffled] = useState(false);
+  const [isPrioritized, setIsPrioritized] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    setShuffledGlossary(glossary);
-  }, [glossary]);
+  const currentGlossary = useMemo(() => {
+    return sortGlossaryByPriority(glossary, glossaryRatings, {
+      prioritize: isPrioritized,
+      shuffle: isShuffled,
+    });
+  }, [glossary, glossaryRatings, isPrioritized, isShuffled]);
 
-  const currentGlossary = isShuffled ? shuffledGlossary : glossary;
+  const wordStats = useMemo(() => {
+    return getWordStats(glossary, glossaryRatings);
+  }, [glossary, glossaryRatings]);
+
   const currentEntry = currentGlossary[currentIndex];
   const totalCount = currentGlossary.length;
 
@@ -61,15 +68,20 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   }, []);
 
   const handleShuffle = () => {
-    const shuffled = [...glossary].sort(() => Math.random() - 0.5);
-    setShuffledGlossary(shuffled);
     setIsShuffled(true);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
+
+  const handlePrioritize = () => {
+    setIsPrioritized((prev) => !prev);
     setCurrentIndex(0);
     setIsFlipped(false);
   };
 
   const handleResetOrder = () => {
     setIsShuffled(false);
+    setIsPrioritized(false);
     setCurrentIndex(0);
     setIsFlipped(false);
   };
@@ -176,7 +188,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
     if (autoSpeakFlashcard && currentEntry?.word) {
       speakWord(currentEntry.word);
     }
-  }, [currentIndex, isShuffled, autoSpeakFlashcard, currentEntry, speakWord]);
+  }, [currentIndex, isShuffled, isPrioritized, autoSpeakFlashcard, currentEntry, speakWord]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -212,9 +224,20 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   }
 
   const currentRating = glossaryRatings[currentEntry.word];
+  const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
 
   return (
     <div className="flex flex-col items-center gap-6 py-4">
+      {isPrioritized && hasRatings && (
+        <div className="text-xs text-muted-foreground">
+          {t("reading.glossary.wordStats", { 
+            hard: wordStats.hard, 
+            medium: wordStats.medium, 
+            easy: wordStats.easy 
+          })}
+        </div>
+      )}
+
       <div className="w-full max-w-md space-y-2">
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{currentIndex + 1} / {totalCount}</span>
@@ -368,7 +391,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
         </div>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap justify-center">
         <Button
           variant="outline"
           size="sm"
@@ -378,7 +401,16 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           <span className="hidden sm:inline">{t("reading.glossary.flashcard.previous")}</span>
         </Button>
 
-        {isShuffled ? (
+        <Button
+          variant={isPrioritized ? "default" : "secondary"}
+          size="sm"
+          onClick={handlePrioritize}
+        >
+          <Target className="h-4 w-4" />
+          <span className="hidden sm:inline">{t("reading.glossary.prioritizeHard")}</span>
+        </Button>
+
+        {isShuffled || isPrioritized ? (
           <Button
             variant="secondary"
             size="sm"

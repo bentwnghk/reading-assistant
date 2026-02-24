@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Volume2,
@@ -19,6 +19,7 @@ import {
   Info,
   Headphones,
   Sparkles,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
@@ -27,6 +28,7 @@ import { useHistoryStore } from "@/store/history";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
+import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
 
 interface VocabularySpellingProps {
   glossary: GlossaryEntry[];
@@ -50,13 +52,14 @@ const MODE_ICONS: Record<SpellingGameMode, React.ReactNode> = {
 function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
-  const { id, spellingGameBestScore, setSpellingGameBestScore, backup } = useReadingStore();
+  const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
 
   const [gameStatus, setGameStatus] = useState<GameStatus>("setup");
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
   const [isTimed, setIsTimed] = useState(true);
+  const [prioritizeHardWords, setPrioritizeHardWords] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -90,6 +93,12 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   challengeRef.current = currentChallenge;
   const config = DIFFICULTY_CONFIG[difficulty];
 
+  const wordStats = useMemo(() => {
+    return getWordStats(glossary, glossaryRatings);
+  }, [glossary, glossaryRatings]);
+
+  const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
+
   const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -122,8 +131,11 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   }, [config.blankRatio]);
 
   const startGame = useCallback(() => {
-    const shuffledGlossary = shuffleArray(glossary);
-    const gameChallenges = shuffledGlossary.map((entry) => {
+    const sortedGlossary = sortGlossaryByPriority(glossary, glossaryRatings, {
+      prioritize: prioritizeHardWords,
+      shuffle: true,
+    });
+    const gameChallenges = sortedGlossary.map((entry) => {
       const actualMode = gameMode === "mixed" 
         ? (["listen-type", "scramble", "fill-blanks"] as SpellingGameMode[])[Math.floor(Math.random() * 3)]
         : gameMode;
@@ -151,7 +163,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     setShowFeedback(false);
     setGameStatus("playing");
     setCurrentMode(initialMode);
-  }, [glossary, gameMode, config, generateChallenge]);
+  }, [glossary, glossaryRatings, prioritizeHardWords, gameMode, config, generateChallenge]);
 
   useEffect(() => {
     if (gameStatus === "playing" && isTimed && !showFeedback) {
@@ -590,6 +602,34 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
               ))}
             </div>
           </div>
+
+          {hasRatings && (
+            <div className="space-y-2">
+              <button
+                onClick={() => setPrioritizeHardWords(!prioritizeHardWords)}
+                className={cn(
+                  "w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all",
+                  prioritizeHardWords
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-primary/50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  <span className="text-sm">{t("reading.glossary.prioritizeHard")}</span>
+                </div>
+                {prioritizeHardWords && (
+                  <span className="text-xs text-muted-foreground">
+                    {t("reading.glossary.wordStats", { 
+                      hard: wordStats.hard, 
+                      medium: wordStats.medium, 
+                      easy: wordStats.easy 
+                    })}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <div className="flex items-center gap-2">

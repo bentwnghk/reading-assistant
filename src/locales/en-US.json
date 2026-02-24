@@ -237,6 +237,9 @@
       "tabFlashcard": "Flashcard",
       "tabQuiz": "Quiz",
       "tabSpelling": "Spelling",
+      "prioritizeHard": "Prioritize hard words",
+      "prioritizeHardDesc": "Focus on words you rated as hard first",
+      "wordStats": "{{hard}} hard, {{medium}} medium, {{easy}} easy",
       "flashcard": {
         "flip": "Flip",
         "previous": "Previous",
