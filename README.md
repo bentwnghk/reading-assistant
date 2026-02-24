@@ -28,7 +28,7 @@ Transform any English reading material into an interactive learning experience w
 ## 🚀 Your Learning Journey
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph INPUT["📷 Start"]
         A[Upload Image]
     end
@@ -56,10 +56,20 @@ flowchart LR
         L[Word Document]
     end
     
-    A --> B --> C & D & E
-    B --> F & G
-    B --> H --> I & J & K
-    B & E & G & H --> L
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    B --> F
+    B --> G
+    B --> H
+    H --> I
+    H --> J
+    H --> K
+    B --> L
+    E --> L
+    G --> L
+    H --> L
 ```
 
 ---
