@@ -22,39 +22,83 @@
     },
     "about": {
       "title": "About Mr.🆖 ProReader",
-      "description": "Your AI-Powered English Learning Adventure! 🚀 Master reading through personalized guidance, interactive games, and gamified vocabulary practice. Learning English has never been this fun!",
-      "objectives": {
-        "title": "Learning Goals",
-        "personalized": "Adaptive Learning - Content tailored to your age (8-18 years old)",
-        "comprehension": "Deep Understanding - Build comprehension through summaries, mind maps, and interactive tests",
-        "vocabulary": "Vocabulary Mastery - Learn with bilingual definitions, flashcards, quizzes, and spelling games!",
-        "gamification": "Learn Through Play - Earn streaks, beat the clock, and track your progress with fun challenges",
-        "privacy": "Privacy First - All your progress is saved locally in your browser"
+      "tagline": "Snap. Learn. Master.",
+      "description": "Transform any English reading material into an interactive learning experience! 🚀 With AI-powered tools, personalized content, and fun games, mastering English reading has never been this exciting.",
+      "whyLove": {
+        "title": "Why You'll Love It",
+        "personalized": {
+          "title": "🎯 Personalized",
+          "desc": "Adapts to your age & level (8-18)"
+        },
+        "gamified": {
+          "title": "🎮 Gamified",
+          "desc": "Learn through fun games & challenges"
+        },
+        "private": {
+          "title": "🔒 Private",
+          "desc": "All data stays in your browser"
+        }
       },
       "features": {
         "title": "Powerful Features",
-        "ocr": "Smart OCR - Snap a photo and extract text from any reading material",
-        "adaptation": "Level Adaptation - AI rewrites text to match your reading level",
-        "visual": "Visual Learning - Auto-generate summaries and interactive mind maps",
-        "glossary": "Smart Glossary - Bilingual definitions with real-world examples",
-        "flashcard": "Flashcard Review - Flip cards to learn, rate difficulty, and track your progress",
-        "quiz": "Vocabulary Quiz - Test your knowledge with multiple-choice and fill-in-the-blank questions",
-        "spelling": "Spelling Challenge - 4 exciting game modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed!",
-        "tts": "Text-to-Speech - Perfect your pronunciation by listening to words and sentences",
-        "sentenceAnalysis": "Sentence Analysis - AI breaks down complex sentences into grammar, meaning, and usage tips"
+        "ocr": {
+          "title": "📷 Smart OCR",
+          "desc": "Snap a photo or upload images to extract text from any reading material - textbooks, worksheets, articles, and more!"
+        },
+        "adaptation": {
+          "title": "✏️ Level Adaptation",
+          "desc": "AI rewrites text to match YOUR reading level. Switch between Original, Adapted, and Simplified versions instantly."
+        },
+        "visual": {
+          "title": "🧠 Visual Learning",
+          "desc": "Auto-generate quick summaries and interactive mind maps to understand key concepts and relationships."
+        },
+        "sentenceAnalysis": {
+          "title": "💬 Sentence Analysis",
+          "desc": "Click any sentence for a complete AI breakdown: meaning, vocabulary, grammar structure, and learning tips!"
+        },
+        "test": {
+          "title": "📝 Reading Test",
+          "desc": "Challenge yourself with comprehension questions - multiple choice, true/false, short answer, inference, and more!"
+        },
+        "glossary": {
+          "title": "📖 Smart Glossary",
+          "desc": "Get bilingual definitions (English + Chinese) with real-world example sentences for every word you highlight."
+        },
+        "flashcard": {
+          "title": "🃏 Flashcard Review",
+          "desc": "Flip through interactive cards to learn vocabulary. Rate each word (Easy/Medium/Hard) to track your progress."
+        },
+        "spelling": {
+          "title": "🎮 Spelling Games",
+          "desc": "4 exciting modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed! Earn streaks and beat your best score!"
+        },
+        "tts": {
+          "title": "🔊 Text-to-Speech",
+          "desc": "Perfect your pronunciation! Listen to any word or sentence read aloud in natural voice."
+        }
       },
       "workflow": {
         "title": "Your Learning Journey",
-        "upload": "Upload - Snap or upload photos of your reading material",
-        "summary": "Summary - Get a quick overview of what you're reading",
-        "adapt": "Adapt - Read at your level with AI-adapted text",
-        "mindmap": "Mind Map - Explore concepts with an interactive visual diagram",
-        "test": "Test - Challenge yourself with comprehension questions",
-        "analyze": "Analyze - Select any sentence for AI-powered grammar and meaning breakdown",
-        "highlight": "Highlight - Mark important words to build your vocabulary list",
-        "glossary": "Glossary - Learn words with bilingual definitions and examples",
-        "spelling": "Spelling - Practice spelling through fun interactive games",
-        "vocabQuiz": "Quiz - Test your vocabulary with flashcards and quizzes"
+        "upload": "Upload photos of your reading material",
+        "summary": "Get a quick summary of the content",
+        "mindmap": "Explore with an interactive mind map",
+        "adapt": "Read text adapted to your level",
+        "test": "Take the reading comprehension test",
+        "analyze": "Analyze any sentence in detail",
+        "highlight": "Highlight words to build vocabulary",
+        "glossary": "Learn with bilingual definitions",
+        "spelling": "Practice with spelling games",
+        "vocabQuiz": "Test your vocabulary knowledge"
+      },
+      "skills": {
+        "title": "Reading Skills You'll Master",
+        "mainIdea": "🎯 Main Idea",
+        "detail": "🔍 Detail",
+        "inference": "🧩 Inference",
+        "vocabulary": "📚 Vocabulary",
+        "purpose": "✍️ Author's Purpose",
+        "sequencing": "📑 Sequencing"
       },
       "builtWith": "Built with ❤️ by Mr.🆖 for students learning English"
     }

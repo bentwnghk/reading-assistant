@@ -6,7 +6,6 @@ import {
   History,
   Keyboard,
   Info,
-  GraduationCap,
   BookOpen,
   PenTool,
   Volume2,
@@ -16,6 +15,16 @@ import {
   Gamepad2,
   Layers,
   ClipboardList,
+  Upload,
+  FileText,
+  Target,
+  MessageSquareText,
+  Zap,
+  Shield,
+  Trophy,
+  CheckCircle2,
+  Star,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import {
@@ -226,86 +235,198 @@ function Header() {
         </DialogContent>
       </Dialog>
       <Dialog open={openAbout} onOpenChange={setOpenAbout}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-xl">
               <span className="text-2xl">📚</span>
               {t("header.about.title")}
             </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 text-sm">
-            <p className="text-muted-foreground">
-              {t("header.about.description")}
+            <p className="text-muted-foreground text-sm mt-1">
+              {t("header.about.tagline")}
             </p>
-
-            <div>
-              <h3 className="font-semibold flex items-center gap-2 mb-2">
-                <GraduationCap className="h-4 w-4" />
-                {t("header.about.objectives.title")}
-              </h3>
-              <ul className="space-y-1 text-muted-foreground ml-6">
-                <li>🎯 {t("header.about.objectives.personalized")}</li>
-                <li>🧠 {t("header.about.objectives.comprehension")}</li>
-                <li>📚 {t("header.about.objectives.vocabulary")}</li>
-                <li>🎮 {t("header.about.objectives.gamification")}</li>
-                <li>🔒 {t("header.about.objectives.privacy")}</li>
-              </ul>
+          </DialogHeader>
+          <div className="space-y-5 text-sm">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-lg p-4 border">
+              <p className="text-center font-medium text-base">
+                {t("header.about.description")}
+              </p>
             </div>
 
             <div>
-              <h3 className="font-semibold flex items-center gap-2 mb-2">
-                <Sparkles className="h-4 w-4" />
+              <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
+                <Star className="h-4 w-4 text-yellow-500" />
+                {t("header.about.whyLove.title")}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-card border rounded-lg p-3 text-center">
+                  <Target className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+                  <div className="font-medium text-xs">{t("header.about.whyLove.personalized.title")}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.personalized.desc")}</div>
+                </div>
+                <div className="bg-card border rounded-lg p-3 text-center">
+                  <Trophy className="h-5 w-5 mx-auto mb-1 text-amber-500" />
+                  <div className="font-medium text-xs">{t("header.about.whyLove.gamified.title")}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.gamified.desc")}</div>
+                </div>
+                <div className="bg-card border rounded-lg p-3 text-center">
+                  <Shield className="h-5 w-5 mx-auto mb-1 text-green-500" />
+                  <div className="font-medium text-xs">{t("header.about.whyLove.private.title")}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.private.desc")}</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
+                <Sparkles className="h-4 w-4 text-purple-500" />
                 {t("header.about.features.title")}
               </h3>
-              <ul className="space-y-1 text-muted-foreground ml-6">
-                <li className="flex items-center gap-1">
-                  <Camera className="h-3 w-3" /> {t("header.about.features.ocr")}
-                </li>
-                <li className="flex items-center gap-1">
-                  <PenTool className="h-3 w-3" /> {t("header.about.features.adaptation")}
-                </li>
-                <li className="flex items-center gap-1">
-                  <Brain className="h-3 w-3" /> {t("header.about.features.visual")}
-                </li>
-                <li className="flex items-center gap-1">
-                  <BookOpen className="h-3 w-3" /> {t("header.about.features.glossary")}
-                </li>
-                <li className="flex items-center gap-1">
-                  <Layers className="h-3 w-3" /> {t("header.about.features.flashcard")}
-                </li>
-                <li className="flex items-center gap-1">
-                  <ClipboardList className="h-3 w-3" /> {t("header.about.features.quiz")}
-                </li>
-                <li className="flex items-center gap-1">
-                  <Gamepad2 className="h-3 w-3" /> {t("header.about.features.spelling")}
-                </li>
-                <li className="flex items-center gap-1">
-                  <Volume2 className="h-3 w-3" /> {t("header.about.features.tts")}
-                </li>
-              </ul>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Camera className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.ocr.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.ocr.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <PenTool className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.adaptation.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.adaptation.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Brain className="h-4 w-4 mt-0.5 text-purple-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.visual.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.visual.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <MessageSquareText className="h-4 w-4 mt-0.5 text-orange-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.sentenceAnalysis.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.sentenceAnalysis.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <ClipboardList className="h-4 w-4 mt-0.5 text-red-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.test.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.test.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <BookOpen className="h-4 w-4 mt-0.5 text-indigo-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.glossary.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.glossary.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Layers className="h-4 w-4 mt-0.5 text-cyan-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.flashcard.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.flashcard.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Gamepad2 className="h-4 w-4 mt-0.5 text-pink-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.spelling.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.spelling.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2 sm:col-span-2">
+                  <Volume2 className="h-4 w-4 mt-0.5 text-teal-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.tts.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.tts.desc")}</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div>
-              <h3 className="font-semibold flex items-center gap-2 mb-2">
-                <span className="text-base">🔄</span>
+              <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
+                <Rocket className="h-4 w-4 text-blue-500" />
                 {t("header.about.workflow.title")}
               </h3>
-              <ol className="space-y-1 text-muted-foreground ml-6 list-decimal list-inside">
-                <li>{t("header.about.workflow.upload")}</li>
-                <li>{t("header.about.workflow.summary")}</li>
-                <li>{t("header.about.workflow.adapt")}</li>
-                <li>{t("header.about.workflow.mindmap")}</li>
-                <li>{t("header.about.workflow.test")}</li>
-                <li>{t("header.about.workflow.analyze")}</li>
-                <li>{t("header.about.workflow.highlight")}</li>
-                <li>{t("header.about.workflow.glossary")}</li>
-                <li>{t("header.about.workflow.spelling")}</li>
-                <li>{t("header.about.workflow.vocabQuiz")}</li>
-              </ol>
+              <div className="bg-card border rounded-lg p-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs font-bold">1</span>
+                    <Upload className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.upload")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs font-bold">2</span>
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.summary")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 text-xs font-bold">3</span>
+                    <Brain className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.mindmap")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 text-xs font-bold">4</span>
+                    <PenTool className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.adapt")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-xs font-bold">5</span>
+                    <Target className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.test")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-xs font-bold">6</span>
+                    <MessageSquareText className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.analyze")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 text-xs font-bold">7</span>
+                    <Zap className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.highlight")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 text-xs font-bold">8</span>
+                    <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.glossary")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300 text-xs font-bold">9</span>
+                    <Gamepad2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.spelling")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300 text-xs font-bold">10</span>
+                    <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.vocabQuiz")}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="pt-2 border-t text-center text-muted-foreground text-xs">
-              {t("header.about.builtWith")}
+            <div>
+              <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                {t("header.about.skills.title")}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {["mainIdea", "detail", "inference", "vocabulary", "purpose", "sequencing"].map((skill) => (
+                  <span key={skill} className="inline-flex items-center gap-1 bg-muted px-2 py-1 rounded-full text-xs">
+                    <span>{t(`header.about.skills.${skill}`)}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t text-center">
+              <p className="text-muted-foreground text-xs">
+                {t("header.about.builtWith")}
+              </p>
             </div>
           </div>
         </DialogContent>
