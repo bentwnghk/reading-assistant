@@ -55,7 +55,7 @@
         },
         "sentenceAnalysis": {
           "title": "💬 Sentence Analysis",
-          "desc": "Click any sentence for a complete AI breakdown: meaning, vocabulary, grammar, pragmatics (purpose & tone), and learning tips!"
+          "desc": "Click any sentence for a complete AI breakdown: meaning, vocabulary, grammar, language in use, and learning tips!"
         },
         "test": {
           "title": "📝 Reading Test",
@@ -67,15 +67,15 @@
         },
         "flashcard": {
           "title": "🃏 Flashcard Review",
-          "desc": "Flip through interactive cards to learn vocabulary. Rate each word (Easy/Medium/Hard) to track your progress. Prioritize hard words for focused practice!"
+          "desc": "Flip through interactive cards to learn vocabulary. Rate each word (Easy/Medium/Hard) to track your progress. Prioritize hard words for focused review!"
         },
         "spelling": {
           "title": "🎮 Spelling Games",
-          "desc": "4 exciting modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed! Earn streaks, beat your best score, and prioritize hard words!"
+          "desc": "4 exciting modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed! Earn streaks and beat your best score!"
         },
         "quiz": {
           "title": "📋 Vocabulary Quiz",
-          "desc": "Test your knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions. Prioritize hard words for targeted review!"
+          "desc": "Test your knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions."
         },
         "tts": {
           "title": "🔊 Text-to-Speech",
