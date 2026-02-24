@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   Star,
   Rocket,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import {
@@ -311,7 +312,7 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <ClipboardList className="h-4 w-4 mt-0.5 text-red-500 shrink-0" />
+                  <Target className="h-4 w-4 mt-0.5 text-red-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.test.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.test.desc")}</div>
@@ -338,11 +339,25 @@ function Header() {
                     <div className="text-xs text-muted-foreground">{t("header.about.features.spelling.desc")}</div>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2 sm:col-span-2">
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <ClipboardList className="h-4 w-4 mt-0.5 text-violet-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.quiz.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.quiz.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <Volume2 className="h-4 w-4 mt-0.5 text-teal-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.tts.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.tts.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Download className="h-4 w-4 mt-0.5 text-rose-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.wordExport.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.wordExport.desc")}</div>
                   </div>
                 </div>
               </div>

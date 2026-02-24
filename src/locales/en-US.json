@@ -59,7 +59,7 @@
         },
         "test": {
           "title": "📝 Reading Test",
-          "desc": "Challenge yourself with comprehension questions - multiple choice, true/false, short answer, inference, and more!"
+          "desc": "6 question types, 6 skills tested, skill breakdown, retry missed questions, and targeted practice for weak areas!"
         },
         "glossary": {
           "title": "📖 Smart Glossary",
@@ -67,15 +67,23 @@
         },
         "flashcard": {
           "title": "🃏 Flashcard Review",
-          "desc": "Flip through interactive cards to learn vocabulary. Rate each word (Easy/Medium/Hard) to track your progress."
+          "desc": "Flip through interactive cards to learn vocabulary. Rate each word (Easy/Medium/Hard) to track your progress. Prioritize hard words for focused practice!"
         },
         "spelling": {
           "title": "🎮 Spelling Games",
-          "desc": "4 exciting modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed! Earn streaks and beat your best score!"
+          "desc": "4 exciting modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed! Earn streaks, beat your best score, and prioritize hard words!"
+        },
+        "quiz": {
+          "title": "📋 Vocabulary Quiz",
+          "desc": "Test your knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions. Prioritize hard words for targeted review!"
         },
         "tts": {
           "title": "🔊 Text-to-Speech",
           "desc": "Perfect your pronunciation! Listen to any word or sentence read aloud in natural voice."
+        },
+        "wordExport": {
+          "title": "📄 Word Export",
+          "desc": "Download your text, glossary, and sentence analysis as a Word document for offline study and printing."
         }
       },
       "workflow": {

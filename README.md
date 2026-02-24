@@ -52,9 +52,14 @@ flowchart LR
         K[Vocab Quiz]
     end
     
+    subgraph EXPORT["📄 Export"]
+        L[Word Document]
+    end
+    
     A --> B --> C & D & E
     B --> F & G
     B --> H --> I & J & K
+    B & E & G & H --> L
 ```
 
 ---
@@ -164,9 +169,9 @@ Build your word power with interactive tools.
 | Mode | Description |
 |------|-------------|
 | 📋 **Table View** | Browse all words with definitions |
-| 🃏 **Flashcards** | Flip cards to learn, rate difficulty (Easy/Medium/Hard) |
-| 📝 **Vocabulary Quiz** | Word-to-definition, definition-to-word, fill-in-blank |
-| 🎮 **Spelling Games** | 4 exciting game modes! |
+| 🃏 **Flashcards** | Flip cards to learn, rate difficulty, prioritize hard words |
+| 📝 **Vocabulary Quiz** | Test your knowledge (see Section 8) |
+| 🎮 **Spelling Games** | 4 exciting game modes (see Section 7) |
 
 ---
 
@@ -185,10 +190,27 @@ Build your word power with interactive tools.
 - 💡 **Hints**: Reveal letters (reduces score)
 - 📊 **Difficulty Levels**: Easy / Medium / Hard
 - 🏆 **Best Score Tracking**: Beat your personal record
+- 🎯 **Prioritize Hard Words**: Focus practice on words you rated as hard
 
 ---
 
-### 🔊 **8. Text-to-Speech**
+### 📋 **8. Vocabulary Quiz**
+Test your vocabulary knowledge with interactive quizzes.
+
+| Question Type | Description |
+|---------------|-------------|
+| 🔤 **Word-to-Definition** | Match words to their meanings |
+| 📖 **Definition-to-Word** | Find the word that matches the definition |
+| ✏️ **Fill-in-the-Blank** | Complete sentences with the right word |
+
+#### Quiz Features
+- 🔄 **Retry Missed**: Practice only the questions you got wrong
+- 🎯 **Prioritize Hard Words**: Focus on words you rated as difficult
+- 📊 **Score Tracking**: See your progress over time
+
+---
+
+### 🔊 **9. Text-to-Speech**
 Perfect your pronunciation with natural voice reading.
 
 | Feature | Description |
@@ -197,6 +219,18 @@ Perfect your pronunciation with natural voice reading.
 | 📖 **Read Sentences** | Listen to full sentences |
 | 🎙️ **Voice Selection** | Choose your preferred voice |
 | 🔄 **Auto-Speak** | Flashcards can auto-read on load |
+
+---
+
+### 📄 **10. Word Export**
+Download your learning materials for offline study.
+
+| Feature | Description |
+|---------|-------------|
+| 📝 **Export Text** | Original, adapted, and simplified text |
+| 📖 **Include Glossary** | Bilingual word definitions with examples |
+| 💬 **Sentence Analysis** | AI breakdown of analyzed sentences |
+| 🖨️ **Print Ready** | Format optimized for printing |
 
 ---
 
