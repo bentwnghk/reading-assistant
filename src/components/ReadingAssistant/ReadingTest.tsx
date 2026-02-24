@@ -486,12 +486,14 @@ function ReadingTest() {
               </>
             )}
             {testCompleted && testScore > 0 && (
-              <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
-                <Trophy className="h-4 w-4 text-yellow-500" />
-                <span className="text-sm font-medium">{t("reading.readingTest.lastScore")}</span>
-                <span className={cn("text-lg font-bold", getScoreColor(testScore))}>
-                  {testScore}%
-                </span>
+              <div className="flex justify-center mt-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                  <Trophy className="h-4 w-4 text-yellow-500" />
+                  <span className="text-sm font-medium">{t("reading.readingTest.lastScore")}</span>
+                  <span className={cn("text-lg font-bold", getScoreColor(testScore))}>
+                    {testScore}%
+                  </span>
+                </div>
               </div>
             )}
           </div>

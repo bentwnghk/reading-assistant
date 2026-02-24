@@ -213,10 +213,12 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
           {t("reading.glossary.quiz.startQuiz")}
         </Button>
         {vocabularyQuizScore > 0 && (
-          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
-            <Trophy className="h-4 w-4 text-yellow-500" />
-            <span className="text-sm font-medium">{t("reading.glossary.quiz.lastScore")}</span>
-            <span className="text-lg font-bold text-primary">{vocabularyQuizScore}%</span>
+          <div className="flex justify-center mt-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+              <Trophy className="h-4 w-4 text-yellow-500" />
+              <span className="text-sm font-medium">{t("reading.glossary.quiz.lastScore")}</span>
+              <span className="text-lg font-bold text-primary">{vocabularyQuizScore}%</span>
+            </div>
           </div>
         )}
       </div>
