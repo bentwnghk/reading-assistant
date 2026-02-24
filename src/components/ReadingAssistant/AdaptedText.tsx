@@ -638,7 +638,7 @@ function AdaptedText() {
     return () => {
       container.removeEventListener("click", handleClick, true);
     };
-  }, [analyzedSentences]);
+  }, [analyzedSentences, activeTab]);
 
   const activeAnalysis = activeSentence
     ? getSentenceAnalysis(activeSentence)
