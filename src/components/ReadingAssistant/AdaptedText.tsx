@@ -234,6 +234,7 @@ function AdaptedText() {
   // tab state
   const [activeTab, setActiveTab] = useState<string>("original");
   const [includeGlossary, setIncludeGlossary] = useState(false);
+  const [includeSentenceAnalysis, setIncludeSentenceAnalysis] = useState(false);
 
   const isAdapting = status === "adapting";
   const isSimplifying = status === "simplifying";
@@ -364,6 +365,33 @@ function AdaptedText() {
         );
       }
 
+      if (includeSentenceAnalysis && Object.keys(analyzedSentences).length > 0) {
+        children.push(new Paragraph({ text: "", children: [] }));
+        children.push(
+          new Paragraph({
+            text: t("reading.extractedText.analysisTitle"),
+            heading: HeadingLevel.HEADING_1,
+          })
+        );
+
+        Object.values(analyzedSentences).forEach((entry) => {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: entry.sentence, bold: true })],
+            })
+          );
+          const analysisLines = entry.analysis.split(/\n/);
+          analysisLines.forEach((line) => {
+            children.push(
+              new Paragraph({
+                children: [new TextRun({ text: line })],
+              })
+            );
+          });
+          children.push(new Paragraph({ text: "", children: [] }));
+        });
+      }
+
       if (adaptedText) {
         children.push(new Paragraph({ text: "", children: [] }));
         children.push(
@@ -406,7 +434,7 @@ function AdaptedText() {
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [extractedText, highlightedWords, analyzedSentences, adaptedText, simplifiedText, includeGlossary, glossary, t]);
+  }, [extractedText, highlightedWords, analyzedSentences, adaptedText, simplifiedText, includeGlossary, glossary, includeSentenceAnalysis, t]);
 
   const handleReadAloud = useCallback(
     async (e?: React.MouseEvent | React.TouchEvent) => {
@@ -671,6 +699,17 @@ function AdaptedText() {
             />
             <Label htmlFor="include-glossary" className="text-sm cursor-pointer">
               {t("reading.extractedText.includeGlossary")}
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              id="include-sentence-analysis"
+              checked={includeSentenceAnalysis}
+              onCheckedChange={setIncludeSentenceAnalysis}
+              disabled={Object.keys(analyzedSentences).length === 0}
+            />
+            <Label htmlFor="include-sentence-analysis" className="text-sm cursor-pointer">
+              {t("reading.extractedText.includeSentenceAnalysis")}
             </Label>
           </div>
           <Button onClick={handleDownloadWord} variant="outline" size="sm">
