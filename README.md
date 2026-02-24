@@ -119,10 +119,11 @@ flowchart LR
 3. **📋 Summarize** - Get a quick summary of the content
 4. **🧠 Visualize** - Generate an interactive mind map
 5. **✏️ Adapt** - Text is rewritten for the student's level
-6. **🔬 Analyze** - Select sentences for detailed analysis
-7. **❓ Test** - Take a comprehension quiz
-8. **📖 Learn** - Build vocabulary from highlighted words
-9. **📤 Export** - Export text and analysis to Word for offline study
+6. **❓ Test** - Take a comprehension quiz
+7. **🔬 Analyze** - Select sentences for detailed analysis
+8. **🖍️ Highlight** - Select words to build vocabulary
+9. **📖 Glossary** - Review bilingual word definitions with examples
+10. **🎮 Practice** - Spelling games and vocabulary quizzes
 
 ---
 
