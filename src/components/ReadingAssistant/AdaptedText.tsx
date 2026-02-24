@@ -10,7 +10,10 @@ import {
   Volume2,
   Loader2,
   Brain,
+  Download,
 } from "lucide-react";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import { saveAs } from "file-saver";
 import { generateText } from "ai";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -99,6 +102,98 @@ function highlightTextAndSentences(
   }
 
   return { html: result, sentenceList };
+}
+
+function createDocxWithHighlights(
+  text: string,
+  words: string[],
+  analyzedSentences: Record<string, SentenceAnalysis>
+): Paragraph[] {
+  const paragraphs: Paragraph[] = [];
+  const lines = text.split(/\n/);
+
+  const analyzedSet = new Set(
+    Object.values(analyzedSentences).map((s) => s.sentence)
+  );
+  const wordSet = new Set(words.map((w) => w.toLowerCase()));
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      paragraphs.push(new Paragraph({ children: [] }));
+      continue;
+    }
+
+    const segments: { text: string; isHighlighted: boolean; isUnderlined: boolean }[] = [];
+    let remaining = line;
+
+    while (remaining.length > 0) {
+      let earliestMatch: { index: number; length: number; type: "word" | "sentence" } | null = null;
+
+      for (const sentence of analyzedSet) {
+        const idx = remaining.indexOf(sentence);
+        if (idx !== -1 && (!earliestMatch || idx < earliestMatch.index)) {
+          earliestMatch = { index: idx, length: sentence.length, type: "sentence" };
+        }
+      }
+
+      for (const word of wordSet) {
+        const regex = new RegExp(`^${escapeRegExp(word)}$`, "i");
+        for (let i = 0; i <= remaining.length - word.length; i++) {
+          const substr = remaining.slice(i, i + word.length);
+          const prevChar = i > 0 ? remaining[i - 1] : " ";
+          const nextChar = i + word.length < remaining.length ? remaining[i + word.length] : " ";
+          const isWordBoundary = !/\w/.test(prevChar) && !/\w/.test(nextChar);
+          
+          if (isWordBoundary && regex.test(substr)) {
+            if (!earliestMatch || i < earliestMatch.index) {
+              earliestMatch = { index: i, length: word.length, type: "word" };
+            }
+            break;
+          }
+        }
+      }
+
+      if (earliestMatch) {
+        if (earliestMatch.index > 0) {
+          segments.push({
+            text: remaining.slice(0, earliestMatch.index),
+            isHighlighted: false,
+            isUnderlined: false,
+          });
+        }
+        const matchedText = remaining.slice(
+          earliestMatch.index,
+          earliestMatch.index + earliestMatch.length
+        );
+        segments.push({
+          text: matchedText,
+          isHighlighted: earliestMatch.type === "word",
+          isUnderlined: earliestMatch.type === "sentence",
+        });
+        remaining = remaining.slice(earliestMatch.index + earliestMatch.length);
+      } else {
+        segments.push({ text: remaining, isHighlighted: false, isUnderlined: false });
+        break;
+      }
+    }
+
+    const children = segments.map((seg) => {
+      let textRunProps: ConstructorParameters<typeof TextRun>[0] = {
+        text: seg.text,
+      };
+      if (seg.isHighlighted) {
+        textRunProps = { ...textRunProps, highlight: "yellow" };
+      }
+      if (seg.isUnderlined) {
+        textRunProps = { ...textRunProps, underline: { type: "single" }, color: "0000FF" };
+      }
+      return new TextRun(textRunProps);
+    });
+
+    paragraphs.push(new Paragraph({ children }));
+  }
+
+  return paragraphs;
 }
 
 // ─── component ──────────────────────────────────────────────────────────────
@@ -201,6 +296,30 @@ function AdaptedText() {
     },
     [selection, addHighlightedWord]
   );
+
+  const handleDownloadWord = useCallback(async () => {
+    try {
+      const paragraphs = createDocxWithHighlights(
+        extractedText,
+        highlightedWords,
+        analyzedSentences
+      );
+
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: paragraphs,
+          },
+        ],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, "extracted-text.docx");
+    } catch (error) {
+      console.error("Failed to generate Word document:", error);
+    }
+  }, [extractedText, highlightedWords, analyzedSentences]);
 
   const handleReadAloud = useCallback(
     async (e?: React.MouseEvent | React.TouchEvent) => {
@@ -484,6 +603,14 @@ function AdaptedText() {
             <p className="text-sm text-green-800 dark:text-green-200">
               💡 {t("reading.extractedText.highlightTip")}
             </p>
+          </div>
+
+          {/* Download Word button */}
+          <div className="mb-4 flex justify-end">
+            <Button onClick={handleDownloadWord} variant="outline" size="sm">
+              <Download className="h-4 w-4" />
+              <span>{t("reading.extractedText.downloadWord")}</span>
+            </Button>
           </div>
 
           {/* Vocabulary list chips */}
