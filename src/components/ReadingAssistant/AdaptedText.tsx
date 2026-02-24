@@ -12,11 +12,13 @@ import {
   Brain,
   Download,
 } from "lucide-react";
-import { Document, Packer, Paragraph, TextRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } from "docx";
 import { saveAs } from "file-saver";
 import { generateText } from "ai";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -209,6 +211,7 @@ function AdaptedText() {
     studentAge,
     highlightedWords,
     analyzedSentences,
+    glossary,
     addHighlightedWord,
     removeHighlightedWord,
     removeSentenceAnalysis,
@@ -230,6 +233,7 @@ function AdaptedText() {
 
   // tab state
   const [activeTab, setActiveTab] = useState<string>("original");
+  const [includeGlossary, setIncludeGlossary] = useState(false);
 
   const isAdapting = status === "adapting";
   const isSimplifying = status === "simplifying";
@@ -299,27 +303,110 @@ function AdaptedText() {
 
   const handleDownloadWord = useCallback(async () => {
     try {
-      const paragraphs = createDocxWithHighlights(
-        extractedText,
-        highlightedWords,
-        analyzedSentences
+      const children: (Paragraph | Table)[] = [];
+
+      children.push(
+        new Paragraph({
+          text: t("reading.adaptedText.originalTab"),
+          heading: HeadingLevel.HEADING_1,
+        })
       );
+      children.push(...createDocxWithHighlights(extractedText, highlightedWords, analyzedSentences));
+
+      if (includeGlossary && glossary.length > 0) {
+        children.push(new Paragraph({ text: "", children: [] }));
+        children.push(
+          new Paragraph({
+            text: t("reading.glossary.title"),
+            heading: HeadingLevel.HEADING_1,
+          })
+        );
+
+        const headerRow = new TableRow({
+          children: [
+            t("reading.glossary.word"),
+            t("reading.glossary.partOfSpeech"),
+            t("reading.glossary.englishDefinition"),
+            t("reading.glossary.chineseDefinition"),
+            t("reading.glossary.example"),
+          ].map(
+            (header) =>
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun({ text: header, bold: true })] })],
+                width: { size: 20, type: WidthType.PERCENTAGE },
+              })
+          ),
+        });
+
+        const dataRows = glossary.map(
+          (entry) =>
+            new TableRow({
+              children: [
+                entry.word,
+                entry.partOfSpeech || "",
+                entry.englishDefinition,
+                entry.chineseDefinition,
+                entry.example || "",
+              ].map(
+                (cellText) =>
+                  new TableCell({
+                    children: [new Paragraph({ children: [new TextRun({ text: cellText })] })],
+                    width: { size: 20, type: WidthType.PERCENTAGE },
+                  })
+              ),
+            })
+        );
+
+        children.push(
+          new Table({
+            rows: [headerRow, ...dataRows],
+          })
+        );
+      }
+
+      if (adaptedText) {
+        children.push(new Paragraph({ text: "", children: [] }));
+        children.push(
+          new Paragraph({
+            text: t("reading.adaptedText.adaptedTab"),
+            heading: HeadingLevel.HEADING_1,
+          })
+        );
+        const adaptedParagraphs = adaptedText.split(/\n/).map(
+          (line) => new Paragraph({ children: [new TextRun({ text: line })] })
+        );
+        children.push(...adaptedParagraphs);
+      }
+
+      if (simplifiedText) {
+        children.push(new Paragraph({ text: "", children: [] }));
+        children.push(
+          new Paragraph({
+            text: t("reading.adaptedText.simplifiedTab"),
+            heading: HeadingLevel.HEADING_1,
+          })
+        );
+        const simplifiedParagraphs = simplifiedText.split(/\n/).map(
+          (line) => new Paragraph({ children: [new TextRun({ text: line })] })
+        );
+        children.push(...simplifiedParagraphs);
+      }
 
       const doc = new Document({
         sections: [
           {
             properties: {},
-            children: paragraphs,
+            children,
           },
         ],
       });
 
       const blob = await Packer.toBlob(doc);
-      saveAs(blob, "extracted-text.docx");
+      saveAs(blob, "reading-content.docx");
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [extractedText, highlightedWords, analyzedSentences]);
+  }, [extractedText, highlightedWords, analyzedSentences, adaptedText, simplifiedText, includeGlossary, glossary, t]);
 
   const handleReadAloud = useCallback(
     async (e?: React.MouseEvent | React.TouchEvent) => {
@@ -563,10 +650,27 @@ function AdaptedText() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <div className="border-b mb-4">
-        <h3 className="font-semibold text-lg leading-10">
+      <div className="flex items-center justify-between border-b pb-4 mb-4">
+        <h3 className="font-semibold text-lg">
           {t("reading.adaptedText.title")}
         </h3>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="include-glossary"
+              checked={includeGlossary}
+              onCheckedChange={setIncludeGlossary}
+              disabled={glossary.length === 0}
+            />
+            <Label htmlFor="include-glossary" className="text-sm cursor-pointer">
+              {t("reading.extractedText.includeGlossary")}
+            </Label>
+          </div>
+          <Button onClick={handleDownloadWord} variant="outline" size="sm">
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">{t("reading.extractedText.downloadWord")}</span>
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -603,14 +707,6 @@ function AdaptedText() {
             <p className="text-sm text-green-800 dark:text-green-200">
               💡 {t("reading.extractedText.highlightTip")}
             </p>
-          </div>
-
-          {/* Download Word button */}
-          <div className="mb-4 flex justify-end">
-            <Button onClick={handleDownloadWord} variant="outline" size="sm">
-              <Download className="h-4 w-4" />
-              <span>{t("reading.extractedText.downloadWord")}</span>
-            </Button>
           </div>
 
           {/* Vocabulary list chips */}
