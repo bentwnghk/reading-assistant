@@ -12,7 +12,22 @@ import {
   Brain,
   Download,
 } from "lucide-react";
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } from "docx";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  AlignmentType,
+  BorderStyle,
+  ShadingType,
+  convertInchesToTwip,
+  PageOrientation,
+} from "docx";
 import { saveAs } from "file-saver";
 import { generateText } from "ai";
 import { Button } from "@/components/ui/button";
@@ -198,6 +213,80 @@ function createDocxWithHighlights(
   return paragraphs;
 }
 
+/**
+ * Converts the AI-generated markdown analysis string into an array of rich
+ * docx Paragraphs, preserving:
+ *   - ## headings  → HeadingLevel.HEADING_2
+ *   - **bold** spans inline (including "- **label**: rest" bullet lines)
+ *   - "- " bullet lines → bulleted paragraph
+ *   - blank lines → spacer paragraphs
+ *   - plain prose → plain paragraphs
+ */
+function parseAnalysisMarkdown(markdown: string): Paragraph[] {
+  const paragraphs: Paragraph[] = [];
+
+  /** Split a line into TextRun segments, converting **...** to bold runs. */
+  function parseInline(text: string): TextRun[] {
+    const runs: TextRun[] = [];
+    // Regex splits on **...**
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    for (const part of parts) {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        runs.push(new TextRun({ text: part.slice(2, -2), bold: true }));
+      } else if (part) {
+        runs.push(new TextRun({ text: part }));
+      }
+    }
+    return runs.length > 0 ? runs : [new TextRun({ text: "" })];
+  }
+
+  for (const rawLine of markdown.split(/\n/)) {
+    const line = rawLine.trimEnd();
+
+    // ## Section heading
+    if (/^#{1,3}\s/.test(line)) {
+      const headingText = line.replace(/^#{1,3}\s+/, "");
+      paragraphs.push(
+        new Paragraph({
+          children: parseInline(headingText),
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 160, after: 60 },
+        })
+      );
+      continue;
+    }
+
+    // Bullet line: "- ..." (with or without leading bold label)
+    if (/^-\s/.test(line)) {
+      const bulletContent = line.replace(/^-\s+/, "");
+      paragraphs.push(
+        new Paragraph({
+          children: parseInline(bulletContent),
+          bullet: { level: 0 },
+          spacing: { before: 40, after: 40 },
+        })
+      );
+      continue;
+    }
+
+    // Blank line → spacer
+    if (!line.trim()) {
+      paragraphs.push(new Paragraph({ children: [new TextRun({ text: "" })] }));
+      continue;
+    }
+
+    // Plain prose (including the opening **sentence** bold line)
+    paragraphs.push(
+      new Paragraph({
+        children: parseInline(line),
+        spacing: { before: 60, after: 60 },
+      })
+    );
+  }
+
+  return paragraphs;
+}
+
 // ─── component ──────────────────────────────────────────────────────────────
 
 function AdaptedText() {
@@ -226,6 +315,7 @@ function AdaptedText() {
     accessPassword,
     openaicompatibleApiProxy,
     sentenceAnalysisModel,
+    summaryModel,
   } = useSettingStore();
 
   const { status, adaptText, simplifyText } = useReadingAssistant();
@@ -303,138 +393,229 @@ function AdaptedText() {
   );
 
   const handleDownloadWord = useCallback(async () => {
+    // ── Shared style constants ───────────────────────────────────────────────
+    const HEADING1_SPACING = { before: 240, after: 120 };
+    const PROSE_SPACING    = { before: 0,   after: 80  };
+    // Header row shading: steel-blue background, white text
+    const HEADER_SHADING = {
+      type: ShadingType.SOLID,
+      color: "FFFFFF",
+      fill: "2E74B5",
+    } as const;
+    // Alternating row shading: very light grey
+    const ALT_ROW_SHADING = {
+      type: ShadingType.SOLID,
+      color: "000000",
+      fill: "F2F7FC",
+    } as const;
+    // Thin border used on table cells
+    const THIN_BORDER = { style: BorderStyle.SINGLE, size: 4, color: "C0C0C0" } as const;
+    const CELL_BORDERS = {
+      top:    THIN_BORDER,
+      bottom: THIN_BORDER,
+      left:   THIN_BORDER,
+      right:  THIN_BORDER,
+    };
+
+    /** Wraps a section heading (H1) with generous before/after spacing. */
+    const sectionHeading = (text: string) =>
+      new Paragraph({
+        text,
+        heading: HeadingLevel.HEADING_1,
+        spacing: HEADING1_SPACING,
+        pageBreakBefore: false,
+      });
+
+    /** Plain text lines for Adapted / Simplified text sections. */
+    const plainLines = (raw: string) =>
+      raw.split(/\n/).map(
+        (line) =>
+          new Paragraph({
+            children: [new TextRun({ text: line })],
+            spacing: PROSE_SPACING,
+          })
+      );
+
     try {
       const children: (Paragraph | Table)[] = [];
 
+      // ── Title & subtitle ─────────────────────────────────────────────────
+      // Ask the summary model for a concise title, falling back to the first
+      // non-empty line of the text if the LLM call fails.
+      let docTitle = extractedText.split(/\n/).find((l) => l.trim()) ?? t("reading.adaptedText.originalTab");
+      try {
+        const titleModel = await createModelProvider(summaryModel);
+        const { text: llmTitle } = await generateText({
+          model: titleModel,
+          prompt: `You are a helpful assistant. Read the following text and reply with ONLY a concise, descriptive title for it (5–10 words, no punctuation at the end, no quotation marks).\n\n${extractedText.slice(0, 2000)}`,
+        });
+        const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
+        if (cleaned) docTitle = cleaned;
+      } catch {
+        // silently keep the fallback title
+      }
+      const generatedAt = new Date().toLocaleString(undefined, {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      });
       children.push(
         new Paragraph({
-          text: t("reading.adaptedText.originalTab"),
-          heading: HeadingLevel.HEADING_1,
+          text: docTitle.trim(),
+          heading: HeadingLevel.TITLE,
+          alignment: AlignmentType.CENTER,
         })
       );
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `Generated by Mr.\uD83C\uDD96 ProReader on ${generatedAt}`,
+              italics: true,
+              color: "595959",
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          style: "Subtitle",
+          spacing: { after: 320 },
+        })
+      );
+
+      // ── Section 1: Original Text ─────────────────────────────────────────
+      children.push(sectionHeading(t("reading.adaptedText.originalTab")));
       children.push(...createDocxWithHighlights(extractedText, highlightedWords, analyzedSentences));
 
+      // ── Section 2: Vocabulary Glossary ───────────────────────────────────
       if (includeGlossary && glossary.length > 0) {
-        children.push(new Paragraph({ text: "", children: [] }));
-        children.push(
-          new Paragraph({
-            text: t("reading.glossary.title"),
-            heading: HeadingLevel.HEADING_1,
-          })
-        );
+        children.push(sectionHeading(t("reading.glossary.title")));
+
+        const colHeaders = [
+          t("reading.glossary.word"),
+          t("reading.glossary.partOfSpeech"),
+          t("reading.glossary.englishDefinition"),
+          t("reading.glossary.chineseDefinition"),
+          t("reading.glossary.example"),
+        ];
 
         const headerRow = new TableRow({
-          children: [
-            t("reading.glossary.word"),
-            t("reading.glossary.partOfSpeech"),
-            t("reading.glossary.englishDefinition"),
-            t("reading.glossary.chineseDefinition"),
-            t("reading.glossary.example"),
-          ].map(
+          tableHeader: true,
+          children: colHeaders.map(
             (header) =>
               new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text: header, bold: true })] })],
+                shading: HEADER_SHADING,
+                borders: CELL_BORDERS,
+                children: [
+                  new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                      new TextRun({ text: header, bold: true, color: "FFFFFF" }),
+                    ],
+                    spacing: { before: 60, after: 60 },
+                  }),
+                ],
                 width: { size: 20, type: WidthType.PERCENTAGE },
               })
           ),
         });
 
-        const dataRows = glossary.map(
-          (entry) =>
-            new TableRow({
-              children: [
-                entry.word,
-                entry.partOfSpeech || "",
-                entry.englishDefinition,
-                entry.chineseDefinition,
-                entry.example || "",
-              ].map(
-                (cellText) =>
-                  new TableCell({
-                    children: [new Paragraph({ children: [new TextRun({ text: cellText })] })],
-                    width: { size: 20, type: WidthType.PERCENTAGE },
-                  })
-              ),
-            })
-        );
+        const dataRows = glossary.map((entry, rowIdx) => {
+          const isAlt = rowIdx % 2 === 1;
+          return new TableRow({
+            children: [
+              entry.word,
+              entry.partOfSpeech || "",
+              entry.englishDefinition,
+              entry.chineseDefinition,
+              entry.example || "",
+            ].map(
+              (cellText) =>
+                new TableCell({
+                  ...(isAlt ? { shading: ALT_ROW_SHADING } : {}),
+                  borders: CELL_BORDERS,
+                  children: [
+                    new Paragraph({
+                      children: [new TextRun({ text: cellText })],
+                      spacing: { before: 60, after: 60 },
+                    }),
+                  ],
+                  width: { size: 20, type: WidthType.PERCENTAGE },
+                })
+            ),
+          });
+        });
 
         children.push(
           new Table({
             rows: [headerRow, ...dataRows],
+            width: { size: 100, type: WidthType.PERCENTAGE },
           })
         );
       }
 
+      // ── Section 3: Sentence Analysis ─────────────────────────────────────
       if (includeSentenceAnalysis && Object.keys(analyzedSentences).length > 0) {
-        children.push(new Paragraph({ text: "", children: [] }));
-        children.push(
-          new Paragraph({
-            text: t("reading.extractedText.analysisTitle"),
-            heading: HeadingLevel.HEADING_1,
-          })
-        );
+        children.push(sectionHeading(t("reading.extractedText.analysisTitle")));
 
-        Object.values(analyzedSentences).forEach((entry) => {
+        const entries = Object.values(analyzedSentences);
+        entries.forEach((entry, idx) => {
+          // Sentence as a styled heading-3 paragraph with a bottom rule
           children.push(
             new Paragraph({
-              children: [new TextRun({ text: entry.sentence, bold: true })],
+              children: [new TextRun({ text: entry.sentence, bold: true, size: 24 })],
+              heading: HeadingLevel.HEADING_3,
+              spacing: { before: idx === 0 ? 0 : 240, after: 100 },
+              border: {
+                bottom: { style: BorderStyle.SINGLE, size: 6, color: "2E74B5" },
+              },
             })
           );
-          const analysisLines = entry.analysis.split(/\n/);
-          analysisLines.forEach((line) => {
-            children.push(
-              new Paragraph({
-                children: [new TextRun({ text: line })],
-              })
-            );
-          });
-          children.push(new Paragraph({ text: "", children: [] }));
+          // Rich markdown content
+          children.push(...parseAnalysisMarkdown(entry.analysis));
         });
       }
 
+      // ── Section 4: Adapted Text ──────────────────────────────────────────
       if (adaptedText) {
-        children.push(new Paragraph({ text: "", children: [] }));
-        children.push(
-          new Paragraph({
-            text: t("reading.adaptedText.adaptedTab"),
-            heading: HeadingLevel.HEADING_1,
-          })
-        );
-        const adaptedParagraphs = adaptedText.split(/\n/).map(
-          (line) => new Paragraph({ children: [new TextRun({ text: line })] })
-        );
-        children.push(...adaptedParagraphs);
+        children.push(sectionHeading(t("reading.adaptedText.adaptedTab")));
+        children.push(...plainLines(adaptedText));
       }
 
+      // ── Section 5: Simplified Text ───────────────────────────────────────
       if (simplifiedText) {
-        children.push(new Paragraph({ text: "", children: [] }));
-        children.push(
-          new Paragraph({
-            text: t("reading.adaptedText.simplifiedTab"),
-            heading: HeadingLevel.HEADING_1,
-          })
-        );
-        const simplifiedParagraphs = simplifiedText.split(/\n/).map(
-          (line) => new Paragraph({ children: [new TextRun({ text: line })] })
-        );
-        children.push(...simplifiedParagraphs);
+        children.push(sectionHeading(t("reading.adaptedText.simplifiedTab")));
+        children.push(...plainLines(simplifiedText));
       }
 
+      // ── Assemble document ────────────────────────────────────────────────
       const doc = new Document({
         sections: [
           {
-            properties: {},
+            properties: {
+              page: {
+                margin: {
+                  top:    convertInchesToTwip(1),
+                  bottom: convertInchesToTwip(1),
+                  left:   convertInchesToTwip(1.1),
+                  right:  convertInchesToTwip(1.1),
+                },
+                size: { orientation: PageOrientation.PORTRAIT },
+              },
+            },
             children,
           },
         ],
       });
 
       const blob = await Packer.toBlob(doc);
-      saveAs(blob, "reading-content.docx");
+      const safeFileName = docTitle
+        .replace(/[\\/:*?"<>|]/g, "")   // strip filesystem-illegal chars
+        .replace(/\s+/g, " ")            // collapse whitespace
+        .trim()
+        .slice(0, 80);                   // cap length
+      saveAs(blob, `${safeFileName}.docx`);
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [extractedText, highlightedWords, analyzedSentences, adaptedText, simplifiedText, includeGlossary, glossary, includeSentenceAnalysis, t]);
+  }, [extractedText, highlightedWords, analyzedSentences, adaptedText, simplifiedText, includeGlossary, glossary, includeSentenceAnalysis, summaryModel, createModelProvider, t]);
 
   const handleReadAloud = useCallback(
     async (e?: React.MouseEvent | React.TouchEvent) => {
