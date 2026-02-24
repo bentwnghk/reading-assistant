@@ -48,7 +48,7 @@ function useReadingAssistant() {
   const [status, setStatus] = useState<ReadingStatus>("idle");
 
   async function extractTextFromImage(imageData: string) {
-    const { setStatus: setStoreStatus, setExtractedText, setError, addOriginalImage } = readingStore;
+    const { setStatus: setStoreStatus, setExtractedText, setDocTitle, setError, addOriginalImage } = readingStore;
     setStoreStatus("extracting");
     setStatus("extracting");
     addOriginalImage(imageData);
@@ -91,6 +91,26 @@ function useReadingAssistant() {
       for await (const textPart of result.textStream) {
         text += textPart;
         setExtractedText(text);
+      }
+
+      // Generate title using LLM
+      const titleModel = await createModelProvider(summaryModel);
+      const titleText = text.slice(0, 2000);
+      try {
+        const { text: llmTitle } = await generateText({
+          model: titleModel,
+          prompt: `You are a helpful assistant. Read the following text and reply with ONLY a concise, descriptive title for it (5–10 words, no punctuation at the end, no quotation marks).\n\n${titleText}`,
+        });
+        const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
+        if (cleaned) {
+          setDocTitle(cleaned);
+        } else {
+          const fallbackTitle = text.split(/\n/).find((l) => l.trim()) ?? "";
+          if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
+        }
+      } catch {
+        const fallbackTitle = text.split(/\n/).find((l) => l.trim()) ?? "";
+        if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
       }
 
       setStoreStatus("idle");

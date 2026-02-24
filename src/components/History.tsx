@@ -104,7 +104,7 @@ function History({ open, onClose }: HistoryProps) {
   function downloadSession(id: string) {
     const data = load(id);
     if (data) {
-      const title = data.extractedText?.slice(0, 50) || "reading-session";
+      const title = data.docTitle || data.extractedText?.slice(0, 50) || "reading-session";
       downloadFile(
         JSON.stringify(data, null, 4),
         `${title}.json`,
@@ -196,10 +196,10 @@ function History({ open, onClose }: HistoryProps) {
                       <TableCell>
                         <p
                           className="truncate w-96 max-lg:max-w-72 max-sm:max-w-52 cursor-pointer hover:text-blue-500"
-                          title={item.extractedText?.slice(0, 100)}
+                          title={item.docTitle || item.extractedText?.slice(0, 100)}
                           onClick={() => loadHistory(item.id)}
                         >
-                          {item.extractedText?.slice(0, 50) || "Untitled Session"}
+                          {item.docTitle || item.extractedText?.slice(0, 50) || "Untitled Session"}
                         </p>
                       </TableCell>
                       <TableCell className="text-center whitespace-nowrap max-sm:hidden">

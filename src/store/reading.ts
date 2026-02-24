@@ -30,6 +30,7 @@ type ReadingTestMode = "all-at-once" | "question-by-question";
 
 export interface ReadingStore {
   id: string;
+  docTitle: string;
   studentAge: number;
   originalImages: string[];
   extractedText: string;
@@ -57,6 +58,7 @@ export interface ReadingStore {
 }
 
 interface ReadingActions {
+  setDocTitle: (title: string) => void;
   setStudentAge: (age: number) => void;
   setOriginalImages: (images: string[]) => void;
   addOriginalImage: (image: string) => void;
@@ -93,6 +95,7 @@ interface ReadingActions {
 
 const defaultValues: ReadingStore = {
   id: "",
+  docTitle: "",
   studentAge: 13,
   originalImages: [],
   extractedText: "",
@@ -123,6 +126,11 @@ export const useReadingStore = create(
   persist<ReadingStore & ReadingActions>(
     (set, get) => ({
       ...defaultValues,
+      setDocTitle: (title) =>
+        set(() => ({
+          docTitle: title,
+          updatedAt: Date.now(),
+        })),
       setStudentAge: (age) =>
         set(() => ({
           studentAge: Math.max(8, Math.min(18, age)),
@@ -322,7 +330,7 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
-      version: 2,
+      version: 3,
       partialize: (state) => pick(state, Object.keys(defaultValues) as (keyof ReadingStore)[]) as ReadingStore & ReadingActions,
     }
   )

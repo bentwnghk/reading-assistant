@@ -81,7 +81,7 @@ export const useHistoryStore = create(
     }),
     {
       name: "historyStore",
-      version: 4,
+      version: 5,
       migrate: (persistedState, version) => {
         const state = persistedState as HistoryStore & HistoryActions;
         if (version < 3) {
@@ -95,6 +95,12 @@ export const useHistoryStore = create(
           state.history = state.history?.map((item) => ({
             ...item,
             analyzedSentences: item.analyzedSentences ?? {},
+          })) || [];
+        }
+        if (version < 5) {
+          state.history = state.history?.map((item) => ({
+            ...item,
+            docTitle: item.docTitle ?? "",
           })) || [];
         }
         return state;
