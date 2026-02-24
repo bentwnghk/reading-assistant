@@ -396,17 +396,19 @@ function AdaptedText() {
     // ── Shared style constants ───────────────────────────────────────────────
     const HEADING1_SPACING = { before: 240, after: 120 };
     const PROSE_SPACING    = { before: 0,   after: 80  };
-    // Header row shading: steel-blue background, white text
+    // Header row shading: steel-blue background.
+    // Use ShadingType.CLEAR so fill is applied as a plain solid background with
+    // no foreground pattern overlay (color:"auto" = no pattern color).
     const HEADER_SHADING = {
-      type: ShadingType.SOLID,
-      color: "FFFFFF",
+      type: ShadingType.CLEAR,
       fill: "2E74B5",
+      color: "auto",
     } as const;
-    // Alternating row shading: very light grey
+    // Alternating row shading: light blue tint.
     const ALT_ROW_SHADING = {
-      type: ShadingType.SOLID,
-      color: "000000",
-      fill: "F2F7FC",
+      type: ShadingType.CLEAR,
+      fill: "EAF2FB",
+      color: "auto",
     } as const;
     // Thin border used on table cells
     const THIN_BORDER = { style: BorderStyle.SINGLE, size: 4, color: "C0C0C0" } as const;
@@ -557,10 +559,14 @@ function AdaptedText() {
 
         const entries = Object.values(analyzedSentences);
         entries.forEach((entry, idx) => {
-          // Sentence as a styled heading-3 paragraph with a bottom rule
+          // Sentence as a styled heading-3 paragraph with a bottom rule,
+          // prefixed with a sequential number for clarity.
           children.push(
             new Paragraph({
-              children: [new TextRun({ text: entry.sentence, bold: true, size: 24 })],
+              children: [
+                new TextRun({ text: `${idx + 1}. `, bold: true, size: 24, color: "2E74B5" }),
+                new TextRun({ text: entry.sentence, bold: true, size: 24 }),
+              ],
               heading: HeadingLevel.HEADING_3,
               spacing: { before: idx === 0 ? 0 : 240, after: 100 },
               border: {
