@@ -294,6 +294,7 @@ function AdaptedText() {
 
   // store
   const {
+    docTitle: storedDocTitle,
     extractedText,
     adaptedText,
     simplifiedText,
@@ -315,7 +316,6 @@ function AdaptedText() {
     accessPassword,
     openaicompatibleApiProxy,
     sentenceAnalysisModel,
-    summaryModel,
   } = useSettingStore();
 
   const { status, adaptText, simplifyText } = useReadingAssistant();
@@ -442,20 +442,8 @@ function AdaptedText() {
       const children: (Paragraph | Table)[] = [];
 
       // ── Title & subtitle ─────────────────────────────────────────────────
-      // Ask the summary model for a concise title, falling back to the first
-      // non-empty line of the text if the LLM call fails.
-      let docTitle = extractedText.split(/\n/).find((l) => l.trim()) ?? t("reading.adaptedText.originalTab");
-      try {
-        const titleModel = await createModelProvider(summaryModel);
-        const { text: llmTitle } = await generateText({
-          model: titleModel,
-          prompt: `You are a helpful assistant. Read the following text and reply with ONLY a concise, descriptive title for it (5–10 words, no punctuation at the end, no quotation marks).\n\n${extractedText.slice(0, 2000)}`,
-        });
-        const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
-        if (cleaned) docTitle = cleaned;
-      } catch {
-        // silently keep the fallback title
-      }
+      // Use stored docTitle (generated during extraction) with fallback to first line
+      const docTitle = storedDocTitle || (extractedText.split(/\n/).find((l) => l.trim()) ?? t("reading.adaptedText.originalTab"));
       const generatedAt = new Date().toLocaleString(undefined, {
         year: "numeric", month: "short", day: "numeric",
         hour: "2-digit", minute: "2-digit",
@@ -621,7 +609,7 @@ function AdaptedText() {
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [extractedText, highlightedWords, analyzedSentences, adaptedText, simplifiedText, includeGlossary, glossary, includeSentenceAnalysis, summaryModel, createModelProvider, t]);
+  }, [storedDocTitle, extractedText, highlightedWords, analyzedSentences, adaptedText, simplifiedText, includeGlossary, glossary, includeSentenceAnalysis, t]);
 
   const handleReadAloud = useCallback(
     async (e?: React.MouseEvent | React.TouchEvent) => {
