@@ -2,7 +2,11 @@
 
 # 📚 Mr.🆖 ProReader
 
-**AI-Powered Reading Companion for Students**
+### **Your AI-Powered English Reading Adventure! 🚀**
+
+*Snap. Learn. Master.*
+
+Transform any English reading material into an interactive learning experience with AI-powered comprehension tools, vocabulary games, and personalized practice.
 
 ![Next.js](https://img.shields.io/badge/Next.js-111111?style=flat&logo=nextdotjs&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
@@ -13,175 +17,238 @@
 
 ---
 
-## 🎯 Objectives
+## 🌟 Why Students Love Mr.🆖 ProReader
 
-**Mr.🆖 ProReader** is designed to help students master English reading through personalized, AI-powered learning experiences. The app adapts to each student's age and reading level, making English comprehension accessible and engaging.
-
-### Core Goals
-- 🎓 **Personalized Learning** - Content adapted to student's age (8-18 years old)
-- 📖 **Reading Comprehension** - Build understanding through summaries, mind maps, and tests
-- 📝 **Vocabulary Building** - Interactive glossary with bilingual definitions
-- 🔊 **Text-to-Speech** - Listen to words and passages for better pronunciation
-- 🔒 **Privacy First** - All data stored locally in the browser
+| 🎯 **Personalized** | 🎮 **Gamified** | 🔒 **Private** |
+|:---:|:---:|:---:|
+| Adapts to your age & level (8-18) | Learn through fun games & challenges | All data stays in your browser |
 
 ---
 
-## ✨ Features
-
-### 📷 Image to Text (OCR)
-- Upload images of English reading materials
-- Supports PNG, JPG, JPEG, WEBP formats
-- Multi-image processing with progress tracking
-- Extract text from textbooks, worksheets, or any reading material
-
-### 📄 Smart Text Adaptation
-- **Age-Appropriate Adaptation** - Rewrites text to match student's reading level
-- **Simplification** - Further simplifies complex passages
-- **Level Estimation** - Automatically estimates reading level (Primary 3-6, Secondary 1-3, Secondary 4-6)
-- **Tabbed Display** - Switch between adapted and original text easily
-- **Sentence Analysis** - Select any sentence for detailed bilingual analysis including:
-  - Sentence meaning summary
-  - Vocabulary analysis with definitions and examples
-  - Syntax analysis (sentence structure, clauses, grammar)
-  - Pragmatic analysis (purpose, figures of speech, tone)
-  - Learning suggestions for similar sentences
-- **Word Export** - Export extracted, adapted, and simplified text with:
-  - Glossary table (word, part of speech, definitions, examples)
-  - Sentence analysis section
-
-### 🧠 Visual Learning Tools
-- **Summary Generation** - Quick overview of the main content
-- **Mind Map** - Visual representation of key concepts and relationships
-- **Mermaid Diagrams** - Interactive, zoomable mind maps
-
-### ✏️ Interactive Assessment
-- **Reading Tests** - Auto-generated comprehension questions based on student's age and level
-- **Reading Skills Tested**:
-  - 🎯 Main Idea - Understanding the central theme
-  - 🔍 Detail - Comprehension of specific details
-  - 🧩 Inference - Logical deduction from text
-  - 📚 Vocabulary - Understanding words in context
-  - ✍️ Purpose - Author's intent and style
-  - 📑 Sequencing - Order of events and ideas
-- **Paragraph References** - Each question indicates which paragraph it relates to
-- **Difficulty Levels** - Questions tailored to student's level:
-  - **Foundation** (Primary): More multiple-choice, fewer inference questions
-  - **Intermediate** (Secondary 1-3): Balanced mix with inference
-  - **Advanced** (Secondary 4-6/DSE): More inference-focused, fewer true/false
-- **Multiple Question Types**:
-  - 📌 Multiple Choice
-  - ✅ True/False/Not Given
-  - ✍️ Short Answer (AI-evaluated)
-  - 🔮 Inference
-  - 📖 Vocabulary in Context
-  - 👆 Referencing (pronoun resolution)
-- **Question Modes** - Choose between question-by-question or all-at-once
-- **Targeted Practice** - Generate new questions focusing on missed skills
-- **Retry Missed Questions** - Practice only the questions answered incorrectly
-- **Generate New Test** - On-demand generation of fresh questions after completion
-- **Instant Scoring** - Immediate feedback with explanations in English and Chinese
-- **Skill Breakdown** - View performance by reading skill after completion
-- **Bilingual Support** - Toggle Chinese translations for questions and explanations
-
-### 📖 Vocabulary Builder
-- **Word Highlighting** - Select words to add to vocabulary list
-- **Bilingual Glossary** - English definitions with Chinese translations
-- **Context Examples** - Example sentences for each word
-- **CSV Export** - Download vocabulary for offline study
-- **Vocabulary Quiz** - Test your vocabulary knowledge
-- **Vocabulary Spelling** - Practice spelling words
-
-### 🗣️ Text-to-Speech
-- **Read Aloud** - Listen to highlighted words or passages
-- **Voice Selection** - Choose from available TTS voices
-- **Pronunciation Practice** - Improve speaking skills
-
----
-
-## 🔄 Workflow
+## 🚀 Your Learning Journey
 
 ```mermaid
 flowchart LR
-    A[📷 Upload Image] --> B[📝 Extract Text]
-    B --> C[📋 Generate Summary]
-    B --> D[🧠 Create Mind Map]
-    B --> E[✏️ Adapt Text]
-    B --> F[❓ Generate Test]
-    B --> G[📖 Build Glossary]
+    subgraph INPUT["📷 Start"]
+        A[Upload Image]
+    end
     
-    E --> E2[⬇️ Simplify Further]
-    E --> E3[🖍️ Highlight Words]
-    E --> E4[🔬 Analyze Sentence]
-    E --> E5[🔊 Read Aloud]
-    F --> F2[📊 Submit & Score]
-    G --> G2[🎮 Spelling Game]
-    G --> G3[📝 Vocabulary Quiz]
+    subgraph UNDERSTAND["🧠 Understand"]
+        B[Extract Text]
+        C[Generate Summary]
+        D[Create Mind Map]
+        E[Adapt to Your Level]
+    end
+    
+    subgraph PRACTICE["✏️ Practice"]
+        F[Reading Test]
+        G[Sentence Analysis]
+    end
+    
+    subgraph MASTER["📖 Master"]
+        H[Build Vocabulary]
+        I[Flashcards]
+        J[Spelling Games]
+        K[Vocab Quiz]
+    end
+    
+    A --> B --> C & D & E
+    B --> F & G
+    B --> H --> I & J & K
 ```
-
-### Step-by-Step Process
-1. **📸 Upload** - Take or upload photos of reading materials
-2. **📝 Extract** - AI extracts text from images via OCR
-3. **📋 Summarize** - Get a quick summary of the content
-4. **🧠 Mind Map** - Generate an interactive mind map
-5. **✏️ Adapt** - Text is rewritten for the student's level
-6. **❓ Reading Test** - Take a comprehension quiz
-7. **🔬 Analyze** - Select sentences for detailed analysis
-8. **🖍️ Highlight** - Select words to build vocabulary
-9. **📖 Glossary** - Review bilingual word definitions with examples
-10. **🎮 Practice** - Spelling games and vocabulary quizzes
 
 ---
 
-## 🤖 Supported AI Models
+## ✨ Core Features
 
-The app works with various AI providers:
+### 📷 **1. Smart OCR - Snap & Extract**
+Transform physical reading materials into digital text instantly.
 
-| Provider | AI Models |
-|----------|-------------|
+| Feature | Description |
+|---------|-------------|
+| 📸 **Multi-Image Upload** | Upload multiple pages at once |
+| 🖼️ **Format Support** | PNG, JPG, JPEG, WEBP |
+| 📊 **Progress Tracking** | Real-time extraction progress |
+| 📚 **Any Material** | Textbooks, worksheets, articles, novels |
+
+---
+
+### 📄 **2. AI Text Adaptation**
+Read at YOUR level, not the author's.
+
+| Mode | Description |
+|------|-------------|
+| 🔄 **Age-Adapted** | AI rewrites text matching your reading level |
+| ⬇️ **Simplified** | Even simpler version for challenging passages |
+| 📏 **Level Detection** | Auto-detects: Primary 3-6 / Secondary 1-3 / Secondary 4-6 |
+| 🔄 **Tab Switching** | Compare original vs. adapted vs. simplified |
+
+---
+
+### 🧠 **3. Sentence Analysis**
+Click any sentence for a complete AI breakdown:
+
+| Analysis Type | What You Learn |
+|--------------|----------------|
+| 📝 **Meaning** | Summary of what the sentence means |
+| 📖 **Vocabulary** | Key words with definitions & examples |
+| 🔤 **Syntax** | Grammar structure, clauses, sentence type |
+| 💡 **Pragmatics** | Purpose, tone, figures of speech |
+| 🎯 **Tips** | How to understand similar sentences |
+
+---
+
+### 🗺️ **4. Visual Learning Tools**
+
+| Tool | Purpose |
+|------|---------|
+| 📋 **Summary** | Quick 2-3 sentence overview |
+| 🧩 **Mind Map** | Interactive Mermaid diagram showing key concepts & relationships |
+| 🔍 **Zoom & Pan** | Explore mind maps in detail |
+
+---
+
+### ❓ **5. Reading Comprehension Test**
+Test your understanding with AI-generated questions tailored to YOUR level.
+
+#### Question Types
+| Type | Description |
+|------|-------------|
+| 📌 **Multiple Choice** | Select the best answer |
+| ✅ **True/False/Not Given** | Evaluate statements |
+| ✍️ **Short Answer** | Type your response (AI-evaluated) |
+| 🔮 **Inference** | Read between the lines |
+| 📖 **Vocabulary in Context** | Understand words from context |
+| 👆 **Pronoun Reference** | Identify what pronouns refer to |
+
+#### Skills Tested
+| Skill | Focus |
+|-------|-------|
+| 🎯 **Main Idea** | Central theme & message |
+| 🔍 **Detail** | Specific information |
+| 🧩 **Inference** | Logical deductions |
+| 📚 **Vocabulary** | Word meanings in context |
+| ✍️ **Purpose** | Author's intent |
+| 📑 **Sequencing** | Order of events |
+
+#### Test Features
+- 📊 **Difficulty Levels**: Foundation → Intermediate → Advanced
+- 🔄 **Two Modes**: All-at-once or Question-by-question
+- 🏷️ **Paragraph References**: Know which paragraph each question relates to
+- 🇨🇳 **Bilingual Support**: Toggle Chinese translations
+- 📈 **Skill Breakdown**: See performance by skill after completion
+- 🔁 **Retry Missed**: Practice only incorrect answers
+- 🎯 **Targeted Practice**: Generate new questions focusing on weak skills
+
+---
+
+### 📖 **6. Vocabulary Builder**
+Build your word power with interactive tools.
+
+#### Step 1: Highlight Words
+- 🖍️ Select any word in the text
+- ➕ Add to your vocabulary list
+- 🔊 Listen to pronunciation
+
+#### Step 2: Generate Glossary
+| Field | Content |
+|-------|---------|
+| 📝 **Word** | The vocabulary word |
+| 🏷️ **Part of Speech** | Noun, verb, adjective, etc. |
+| 🇬🇧 **English Definition** | Clear English explanation |
+| 🇨🇳 **Chinese Definition** | 繁體中文解釋 |
+| 💬 **Example Sentence** | Real-world usage context |
+
+#### Step 3: Practice & Master
+
+| Mode | Description |
+|------|-------------|
+| 📋 **Table View** | Browse all words with definitions |
+| 🃏 **Flashcards** | Flip cards to learn, rate difficulty (Easy/Medium/Hard) |
+| 📝 **Vocabulary Quiz** | Word-to-definition, definition-to-word, fill-in-blank |
+| 🎮 **Spelling Games** | 4 exciting game modes! |
+
+---
+
+### 🎮 **7. Spelling Challenge - 4 Game Modes!**
+
+| Mode | How It Works | Best For |
+|------|--------------|----------|
+| 🎧 **Listen & Type** | Hear the word, type what you hear | Auditory learners |
+| 🔀 **Letter Scramble** | Unscramble jumbled letters | Visual puzzle lovers |
+| ➖ **Fill Blanks** | Type missing letters (shown as _ ) | Pattern recognition |
+| 🎲 **Mixed Mode** | Random mix of all modes | Comprehensive practice |
+
+#### Game Features
+- ⏱️ **Time Challenge**: Beat the clock for bonus points
+- 🔥 **Streak Bonus**: +10% per 3 consecutive correct answers
+- 💡 **Hints**: Reveal letters (reduces score)
+- 📊 **Difficulty Levels**: Easy / Medium / Hard
+- 🏆 **Best Score Tracking**: Beat your personal record
+
+---
+
+### 🔊 **8. Text-to-Speech**
+Perfect your pronunciation with natural voice reading.
+
+| Feature | Description |
+|---------|-------------|
+| 🗣️ **Read Words** | Click any word to hear it |
+| 📖 **Read Sentences** | Listen to full sentences |
+| 🎙️ **Voice Selection** | Choose your preferred voice |
+| 🔄 **Auto-Speak** | Flashcards can auto-read on load |
+
+---
+
+## 📁 Data & Privacy
+
+| Feature | Details |
+|---------|---------|
+| 💾 **Local Storage** | All data stored in your browser only |
+| 📤 **Export Sessions** | Download as JSON for backup |
+| 📥 **Import Sessions** | Restore previous sessions |
+| 📚 **History** | Automatic session tracking |
+| 🗑️ **Delete Anytime** | Full control over your data |
+
+---
+
+## 🤖 AI Models Supported
+
+| Provider | Models |
+|----------|--------|
 | 🟢 **Google Gemini** | gemini-3-flash-preview |
 | 🔵 **OpenAI** | gpt-5-mini, gpt-4.1-mini |
 | 🟠 **DeepSeek** | deepseek-chat |
 | ⚡ **zAI** | glm-4.7 |
 
-### API Modes
-- **💰 Paid Mode** - Use your own API key, pay for your usage
-- **🎓 EDU Mode** - Free access provided by Mr.🆖 (password required)
+### Access Modes
+| Mode | Description |
+|------|-------------|
+| 💰 **Paid Mode** | Use your own API key, pay per usage |
+| 🎓 **EDU Mode** | Free access provided by Mr.🆖 (password required) |
 
 ---
 
-## 💾 Data & Privacy
-
-### Local Storage
-- ✅ All reading sessions stored locally in browser
-- ✅ Export/Import sessions for backup
-
-### History Management
-- 📚 Automatic session history
-- 📥 Export sessions as JSON
-- 📤 Import previous sessions
-- 🗑️ Delete individual or all history
-
----
-
-## 🌐 Multi-Language Support
+## 🌐 Languages
 
 | Language | Code |
 |----------|------|
-| English | en-US |
-| 繁體中文 | zh-HK |
+| 🇬🇧 English | en-US |
+| 🇭🇰 繁體中文 | zh-HK |
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **UI Components**: Shadcn UI
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **AI Integration**: Vercel AI SDK
-- **Icons**: Lucide React
-- **Diagrams**: Mermaid
-- **i18n**: react-i18next
+| Category | Technology |
+|----------|------------|
+| ⚡ **Framework** | Next.js 15 (App Router) |
+| 🎨 **UI** | Shadcn UI + Tailwind CSS |
+| 📦 **State** | Zustand (with persistence) |
+| 🤖 **AI** | Vercel AI SDK |
+| 🎭 **Icons** | Lucide React |
+| 📊 **Diagrams** | Mermaid |
+| 🌍 **i18n** | react-i18next |
 
 ---
 
@@ -193,6 +260,8 @@ The app works with various AI providers:
 
 <div align="center">
 
-**Built with ❤️ for students learning English**
+### Built with ❤️ by Mr.🆖 for students learning English
+
+**Start your reading adventure today! 🚀**
 
 </div>
