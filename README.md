@@ -38,6 +38,16 @@
 - **Age-Appropriate Adaptation** - Rewrites text to match student's reading level
 - **Simplification** - Further simplifies complex passages
 - **Level Estimation** - Automatically estimates reading level (Primary 3-6, Secondary 1-3, Secondary 4-6)
+- **Tabbed Display** - Switch between adapted and original text easily
+- **Sentence Analysis** - Select any sentence for detailed bilingual analysis including:
+  - Sentence meaning summary
+  - Vocabulary analysis with definitions and examples
+  - Syntax analysis (sentence structure, clauses, grammar)
+  - Pragmatic analysis (purpose, figures of speech, tone)
+  - Learning suggestions for similar sentences
+- **Word Export** - Export extracted, adapted, and simplified text with:
+  - Glossary table (word, part of speech, definitions, examples)
+  - Sentence analysis section
 
 ### 🧠 Visual Learning Tools
 - **Summary Generation** - Quick overview of the main content
@@ -45,19 +55,41 @@
 - **Mermaid Diagrams** - Interactive, zoomable mind maps
 
 ### ✏️ Interactive Assessment
-- **Reading Tests** - Auto-generated comprehension questions
+- **Reading Tests** - Auto-generated comprehension questions based on student's age and level
+- **Reading Skills Tested**:
+  - 🎯 Main Idea - Understanding the central theme
+  - 🔍 Detail - Comprehension of specific details
+  - 🧩 Inference - Logical deduction from text
+  - 📚 Vocabulary - Understanding words in context
+  - ✍️ Purpose - Author's intent and style
+  - 📑 Sequencing - Order of events and ideas
+- **Paragraph References** - Each question indicates which paragraph it relates to
+- **Difficulty Levels** - Questions tailored to student's level:
+  - **Foundation** (Primary): More multiple-choice, fewer inference questions
+  - **Intermediate** (Secondary 1-3): Balanced mix with inference
+  - **Advanced** (Secondary 4-6/DSE): More inference-focused, fewer true/false
 - **Multiple Question Types**:
   - 📌 Multiple Choice
-  - ✅ True/False
-  - ✍️ Short Answer
-- **Instant Scoring** - Immediate feedback with explanations
-- **Retry Support** - Practice until mastery
+  - ✅ True/False/Not Given
+  - ✍️ Short Answer (AI-evaluated)
+  - 🔮 Inference
+  - 📖 Vocabulary in Context
+  - 👆 Referencing (pronoun resolution)
+- **Question Modes** - Choose between question-by-question or all-at-once
+- **Targeted Practice** - Generate new questions focusing on missed skills
+- **Retry Missed Questions** - Practice only the questions answered incorrectly
+- **Generate New Test** - On-demand generation of fresh questions after completion
+- **Instant Scoring** - Immediate feedback with explanations in English and Chinese
+- **Skill Breakdown** - View performance by reading skill after completion
+- **Bilingual Support** - Toggle Chinese translations for questions and explanations
 
 ### 📖 Vocabulary Builder
 - **Word Highlighting** - Select words to add to vocabulary list
 - **Bilingual Glossary** - English definitions with Chinese translations
 - **Context Examples** - Example sentences for each word
 - **CSV Export** - Download vocabulary for offline study
+- **Vocabulary Quiz** - Test your vocabulary knowledge
+- **Vocabulary Spelling** - Practice spelling words
 
 ### 🗣️ Text-to-Speech
 - **Read Aloud** - Listen to highlighted words or passages
@@ -87,8 +119,10 @@ flowchart LR
 3. **📋 Summarize** - Get a quick summary of the content
 4. **🧠 Visualize** - Generate an interactive mind map
 5. **✏️ Adapt** - Text is rewritten for the student's level
-6. **❓ Test** - Take a comprehension quiz
-7. **📖 Learn** - Build vocabulary from highlighted words
+6. **🔬 Analyze** - Select sentences for detailed analysis
+7. **❓ Test** - Take a comprehension quiz
+8. **📖 Learn** - Build vocabulary from highlighted words
+9. **📤 Export** - Export text and analysis to Word for offline study
 
 ---
 
