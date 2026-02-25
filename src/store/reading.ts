@@ -16,6 +16,24 @@ function syncToHistoryIfNeeded(state: ReadingStore) {
   }
 }
 
+export async function saveImagesToIndexedDB(sessionId: string, images: string[]) {
+  if (sessionId) {
+    await readingImagesStore.setItem(`images_${sessionId}`, images);
+  }
+}
+
+export async function loadImagesFromIndexedDB(sessionId: string): Promise<string[]> {
+  if (!sessionId) return [];
+  const images = await readingImagesStore.getItem<string[]>(`images_${sessionId}`);
+  return images && Array.isArray(images) ? images : [];
+}
+
+export async function removeImagesFromIndexedDB(sessionId: string) {
+  if (sessionId) {
+    await readingImagesStore.removeItem(`images_${sessionId}`);
+  }
+}
+
 export type ReadingStatus =
   | "idle"
   | "extracting"
@@ -91,7 +109,7 @@ interface ReadingActions {
   setError: (error: string | null) => void;
   reset: () => void;
   backup: () => ReadingStore;
-  restore: (session: ReadingStore) => void;
+  restore: (session: ReadingStore) => Promise<void>;
 }
 
 const defaultValues: ReadingStore = {
@@ -142,7 +160,10 @@ export const useReadingStore = create(
           updatedAt: Date.now(),
         })),
       setOriginalImages: (images) => {
-        readingImagesStore.setItem("images", images);
+        const sessionId = useReadingStore.getState().id;
+        if (sessionId) {
+          saveImagesToIndexedDB(sessionId, images);
+        }
         set(() => ({
           originalImages: images,
           updatedAt: Date.now(),
@@ -151,7 +172,9 @@ export const useReadingStore = create(
       addOriginalImage: (image) =>
         set((state) => {
           const newImages = [...state.originalImages, image];
-          readingImagesStore.setItem("images", newImages);
+          if (state.id) {
+            saveImagesToIndexedDB(state.id, newImages);
+          }
           return {
             originalImages: newImages,
             updatedAt: Date.now(),
@@ -160,19 +183,27 @@ export const useReadingStore = create(
       removeOriginalImage: (index) =>
         set((state) => {
           const newImages = state.originalImages.filter((_, i) => i !== index);
-          readingImagesStore.setItem("images", newImages);
+          if (state.id) {
+            saveImagesToIndexedDB(state.id, newImages);
+          }
           return {
             originalImages: newImages,
             updatedAt: Date.now(),
           };
         }),
       setExtractedText: (text) =>
-        set(() => ({
-          extractedText: text,
-          id: get().id || nanoid(),
-          createdAt: get().createdAt || Date.now(),
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newId = state.id || nanoid();
+          if (state.originalImages.length > 0) {
+            saveImagesToIndexedDB(newId, state.originalImages);
+          }
+          return {
+            extractedText: text,
+            id: newId,
+            createdAt: state.createdAt || Date.now(),
+            updatedAt: Date.now(),
+          };
+        }),
       setSummary: (summary) =>
         set(() => ({
           summary,
@@ -329,21 +360,39 @@ export const useReadingStore = create(
           status: error ? "error" : get().status,
         })),
       reset: () => {
-        readingImagesStore.removeItem("images");
+        const sessionId = useReadingStore.getState().id;
+        if (sessionId) {
+          removeImagesFromIndexedDB(sessionId);
+        }
         set(() => ({
           ...defaultValues,
         }));
       },
       backup: () => {
+        const state = get();
+        const sessionId = state.id;
+        if (sessionId && state.originalImages.length > 0) {
+          saveImagesToIndexedDB(sessionId, state.originalImages);
+        }
         return {
-          ...pick(get(), Object.keys(defaultValues) as (keyof ReadingStore)[]),
+          ...pick(state, Object.keys(defaultValues) as (keyof ReadingStore)[]),
         } as ReadingStore;
       },
-      restore: (session) =>
+      restore: async (session) => {
+        const sessionId = session.id;
+        let images = session.originalImages;
+        if (sessionId) {
+          const storedImages = await loadImagesFromIndexedDB(sessionId);
+          if (storedImages.length > 0) {
+            images = storedImages;
+          }
+        }
         set(() => ({
           ...defaultValues,
           ...session,
-        })),
+          originalImages: images,
+        }));
+      },
     }),
     {
       name: "reading",
@@ -355,10 +404,10 @@ export const useReadingStore = create(
         return pick(state, keysToPersist) as ReadingStore & ReadingActions;
       },
       onRehydrateStorage: () => async (state) => {
-        if (!state) return;
+        if (!state || !state.id) return;
         try {
-          const images = await readingImagesStore.getItem<string[]>("images");
-          if (images && Array.isArray(images)) {
+          const images = await loadImagesFromIndexedDB(state.id);
+          if (images.length > 0) {
             state.originalImages = images;
           }
         } catch (error) {

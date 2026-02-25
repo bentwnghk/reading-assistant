@@ -89,7 +89,7 @@ function History({ open, onClose }: HistoryProps) {
     }
   }
 
-  function loadHistory(id: string) {
+  async function loadHistory(id: string) {
     const { id: currentId } = useReadingStore.getState();
     const data = load(id);
     if (data) {
@@ -97,7 +97,7 @@ function History({ open, onClose }: HistoryProps) {
         update(currentId, backup());
       }
       reset();
-      restore(data);
+      await restore(data);
     }
     onClose();
   }

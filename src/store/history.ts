@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, type StorageValue } from "zustand/middleware";
 import type { ReadingStore } from "./reading";
+import { removeImagesFromIndexedDB } from "./reading";
 import { readingStore } from "@/utils/storage";
 import { customAlphabet } from "nanoid";
 import { clone, pick } from "radash";
@@ -59,6 +60,7 @@ export const useHistoryStore = create(
         return true;
       },
       remove: (id) => {
+        removeImagesFromIndexedDB(id);
         set((state) => ({
           history: state.history.filter((item) => item.id !== id),
         }));

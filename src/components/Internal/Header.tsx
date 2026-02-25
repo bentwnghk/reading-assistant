@@ -124,7 +124,7 @@ function Header() {
         const text = await file.text();
         const session = JSON.parse(text);
         const { restore } = useReadingStore.getState();
-        restore(session);
+        await restore(session);
       } catch (error) {
         console.error(error);
       }

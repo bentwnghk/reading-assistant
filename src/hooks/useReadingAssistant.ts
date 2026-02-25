@@ -580,11 +580,11 @@ Guidelines:
     return save(session);
   }
 
-  function loadSession(id: string) {
+  async function loadSession(id: string) {
     const { load } = useHistoryStore.getState();
     const session = load(id);
     if (session) {
-      readingStore.restore(session);
+      await readingStore.restore(session);
       return true;
     }
     return false;
