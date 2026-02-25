@@ -4,6 +4,10 @@
   "openSource": "Mr.🆖 AI Hub",
   "copyright": "Built with ❤️ by Mr.🆖 for students learning English. Powered by {{name}}",
   "searchPlaceholder": "Please enter keywords",
+  "settingsBanner": {
+    "message": "Please configure your API Key or Access Password in Settings to use this app.",
+    "openSettings": "Open Settings"
+  },
   "header": {
     "session": {
       "export": "Export Session",

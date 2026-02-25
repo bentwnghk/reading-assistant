@@ -10,6 +10,7 @@ import { setHistorySyncFn } from "@/store/reading";
 import useAutoSave from "@/hooks/useAutoSave";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
+const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
 const Setting = dynamic(() => import("@/components/Setting"));
 const History = dynamic(() => import("@/components/History"));
 const StudentInfo = dynamic(() => import("@/components/ReadingAssistant/StudentInfo"));
@@ -43,6 +44,7 @@ function Home() {
   return (
     <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
       <Header />
+      <SettingsBanner />
       <main>
         <StudentInfo />
         <ImageUpload />
