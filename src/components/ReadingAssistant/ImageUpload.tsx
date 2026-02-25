@@ -1,7 +1,7 @@
 "use client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Upload, Image as ImageIcon, LoaderCircle, X } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -21,9 +21,19 @@ function ImageUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
   const { originalImages, extractedText } = useReadingStore();
   const { status, extractTextFromImage } = useReadingAssistant();
   const isExtracting = status === "extracting";
+  const prevExtractingRef = useRef(isExtracting);
+
+  useEffect(() => {
+    if (prevExtractingRef.current && !isExtracting && extractedText) {
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    }
+    prevExtractingRef.current = isExtracting;
+  }, [isExtracting, extractedText]);
 
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
@@ -102,31 +112,40 @@ function ImageUpload() {
   };
 
   return (
-    <section className="p-4 border rounded-md mt-4">
+    <section className="section-card section-header-accent mt-4">
       <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
         {t("reading.imageUpload.title")}
         {(originalImages.length > 0 || extractedText) && (
-          <Button variant="outline" size="sm" onClick={clearAllImages}>
+          <Button variant="outline" size="sm" onClick={clearAllImages} className="transition-transform active:scale-95">
             <X className="h-4 w-4 mr-1" />
             {t("reading.imageUpload.clearAll")}
           </Button>
         )}
       </h3>
 
+      {showSuccess && (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2 animate-fade-in-scale">
+          <CheckCircle className="h-5 w-5 text-green-500 animate-checkmark" />
+          <span className="text-sm font-medium text-green-700 dark:text-green-300">
+            {t("reading.imageUpload.extractSuccess")}
+          </span>
+        </div>
+      )}
+
       {originalImages.length > 0 && extractedText ? (
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
             {originalImages.map((image, index) => (
-              <div key={index} className="relative group">
+              <div key={index} className="relative group animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                 <img
                   src={image}
                   alt={`Uploaded ${index + 1}`}
-                  className="max-h-40 rounded-lg border object-contain"
+                  className="max-h-40 rounded-lg border object-contain transition-transform group-hover:scale-105"
                 />
                 <Button
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all duration-200 h-6 w-6 scale-90 group-hover:scale-100"
                   onClick={() => clearImage(index)}
                 >
                   <X className="h-3 w-3" />
@@ -138,14 +157,14 @@ function ImageUpload() {
             {t("reading.imageUpload.uploadNew")}
           </p>
           {isExtracting && (
-            <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg animate-pulse">
               <LoaderCircle className="h-4 w-4 animate-spin text-primary" />
               <p className="text-sm font-medium text-primary">{getExtractionMessage()}</p>
             </div>
           )}
           <div
             className={cn(
-              "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
+              "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all duration-300",
               "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
               isExtracting && "pointer-events-none opacity-50"
             )}
@@ -168,9 +187,9 @@ function ImageUpload() {
       ) : (
         <div
           className={cn(
-            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300",
             isDragging
-              ? "border-primary bg-primary/5"
+              ? "drag-active border-primary scale-[1.02]"
               : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
             isExtracting && "pointer-events-none opacity-50"
           )}
@@ -189,10 +208,18 @@ function ImageUpload() {
           />
 
           {isExtracting ? (
-            <div className="flex flex-col items-center gap-2">
-              <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
-              <p className="text-lg font-medium">
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative">
+                <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
+                {extractionProgress && (
+                  <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-primary">
+                    {extractionProgress.current}/{extractionProgress.total}
+                  </span>
+                )}
+              </div>
+              <p className="text-lg font-medium loading-message">
                 {getExtractionMessage()}
+                <span className="loading-dots" />
               </p>
             </div>
           ) : (
