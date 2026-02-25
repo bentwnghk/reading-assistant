@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "deep-research",
+      "name": "reading-assistant",
       "dependencies": {
         "@ai-sdk/anthropic": "^1.2.10",
         "@ai-sdk/azure": "^1.3.23",

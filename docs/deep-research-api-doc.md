@@ -133,7 +133,7 @@ interface InforEvent {
 
 ```text
 event: infor
-data: {"name":"deep-research","version":"0.1.0"}
+data: {"name":"reading-assistant","version":"0.1.0"}
 
 ```
 

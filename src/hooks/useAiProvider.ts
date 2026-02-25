@@ -2,7 +2,7 @@ import { useSettingStore } from "@/store/setting";
 import {
   createAIProvider,
   type AIProviderOptions,
-} from "@/utils/deep-research/provider";
+} from "@/utils/reading-assistant/provider";
 import {
   OPENAI_BASE_URL,
 } from "@/constants/urls";

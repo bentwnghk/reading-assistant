@@ -2,7 +2,7 @@
 
 1. Log in to the Cloudflare dashboard and select your account.
 2. Select Compute(Workers) > Create > Pages.
-3. Click Connect to Git > deep-research > Begin Setup
+3. Click Connect to Git > reading-assistant > Begin Setup
 4. Framework preset > `Next.js` > Set Environment Variables (optional) > Save and Deploy
 5. Deploy > Redeploy
 

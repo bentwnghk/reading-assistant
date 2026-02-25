@@ -1,11 +1,11 @@
 version: "3.9"
 services:
-  deep-research:
+  reading-assistant:
     build:
       context: .
       dockerfile: Dockerfile
-    image: deep-research
-    container_name: deep-research
+    image: reading-assistant
+    container_name: reading-assistant
     env_file:
       - .env
     ports:
