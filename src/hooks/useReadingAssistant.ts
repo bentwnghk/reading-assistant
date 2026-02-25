@@ -106,7 +106,7 @@ function useReadingAssistant() {
   }
 
   async function generateTitle() {
-    const { extractedText, setDocTitle, setStatus: setStoreStatus } = readingStore;
+    const { extractedText, setDocTitle, setStatus: setStoreStatus } = useReadingStore.getState();
     
     if (!extractedText) return "";
 
