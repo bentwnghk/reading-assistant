@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { pick } from "radash";
 import { nanoid } from "nanoid";
+import { readingImagesStore } from "@/utils/storage";
 
 let syncToHistoryFn: ((store: ReadingStore) => void) | null = null;
 
@@ -140,21 +141,31 @@ export const useReadingStore = create(
           studentAge: Math.max(8, Math.min(18, age)),
           updatedAt: Date.now(),
         })),
-      setOriginalImages: (images) =>
+      setOriginalImages: (images) => {
+        readingImagesStore.setItem("images", images);
         set(() => ({
           originalImages: images,
           updatedAt: Date.now(),
-        })),
+        }));
+      },
       addOriginalImage: (image) =>
-        set((state) => ({
-          originalImages: [...state.originalImages, image],
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newImages = [...state.originalImages, image];
+          readingImagesStore.setItem("images", newImages);
+          return {
+            originalImages: newImages,
+            updatedAt: Date.now(),
+          };
+        }),
       removeOriginalImage: (index) =>
-        set((state) => ({
-          originalImages: state.originalImages.filter((_, i) => i !== index),
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newImages = state.originalImages.filter((_, i) => i !== index);
+          readingImagesStore.setItem("images", newImages);
+          return {
+            originalImages: newImages,
+            updatedAt: Date.now(),
+          };
+        }),
       setExtractedText: (text) =>
         set(() => ({
           extractedText: text,
@@ -317,10 +328,12 @@ export const useReadingStore = create(
           error,
           status: error ? "error" : get().status,
         })),
-      reset: () =>
+      reset: () => {
+        readingImagesStore.removeItem("images");
         set(() => ({
           ...defaultValues,
-        })),
+        }));
+      },
       backup: () => {
         return {
           ...pick(get(), Object.keys(defaultValues) as (keyof ReadingStore)[]),
@@ -334,8 +347,24 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
-      version: 3,
-      partialize: (state) => pick(state, Object.keys(defaultValues) as (keyof ReadingStore)[]) as ReadingStore & ReadingActions,
+      version: 4,
+      partialize: (state) => {
+        const keysToPersist = (Object.keys(defaultValues) as (keyof ReadingStore)[]).filter(
+          (key) => key !== "originalImages"
+        );
+        return pick(state, keysToPersist) as ReadingStore & ReadingActions;
+      },
+      onRehydrateStorage: () => async (state) => {
+        if (!state) return;
+        try {
+          const images = await readingImagesStore.getItem<string[]>("images");
+          if (images && Array.isArray(images)) {
+            state.originalImages = images;
+          }
+        } catch (error) {
+          console.error("Failed to rehydrate images from IndexedDB:", error);
+        }
+      },
     }
   )
 );
