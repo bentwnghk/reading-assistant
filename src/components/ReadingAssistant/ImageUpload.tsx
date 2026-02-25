@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Upload, Image as ImageIcon, LoaderCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,44 @@ function ImageUpload() {
   const { originalImages, extractedText } = useReadingStore();
   const { status, extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = status === "extracting";
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+  // Acquire a Screen Wake Lock while extracting to prevent iOS from suspending
+  // the page (which would kill the in-flight streaming request and leave the
+  // extracted text incomplete). The lock is released when extraction finishes.
+  const acquireWakeLock = useCallback(async () => {
+    if (!("wakeLock" in navigator)) return;
+    try {
+      wakeLockRef.current = await navigator.wakeLock.request("screen");
+    } catch {
+      // Wake Lock is a best-effort API; ignore failures silently.
+    }
+  }, []);
+
+  const releaseWakeLock = useCallback(async () => {
+    if (wakeLockRef.current) {
+      try {
+        await wakeLockRef.current.release();
+      } catch {
+        // ignore
+      }
+      wakeLockRef.current = null;
+    }
+  }, []);
+
+  // Re-acquire the wake lock if the page becomes visible again while still
+  // extracting (iOS may release it automatically on visibilitychange).
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === "visible" && isExtracting) {
+        await acquireWakeLock();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isExtracting, acquireWakeLock]);
 
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
@@ -33,18 +71,22 @@ function ImageUpload() {
       if (imageFiles.length === 0) return;
 
       setExtractionProgress({ current: 1, total: imageFiles.length });
+      await acquireWakeLock();
 
-      for (let i = 0; i < imageFiles.length; i++) {
-        setExtractionProgress({ current: i + 1, total: imageFiles.length });
-        const imageData = await readFileAsDataURL(imageFiles[i]);
-        await extractTextFromImage(imageData);
+      try {
+        for (let i = 0; i < imageFiles.length; i++) {
+          setExtractionProgress({ current: i + 1, total: imageFiles.length });
+          const imageData = await readFileAsDataURL(imageFiles[i]);
+          await extractTextFromImage(imageData);
+        }
+
+        await generateTitle();
+      } finally {
+        setExtractionProgress(null);
+        await releaseWakeLock();
       }
-
-      await generateTitle();
-
-      setExtractionProgress(null);
     },
-    [extractTextFromImage, generateTitle]
+    [extractTextFromImage, generateTitle, acquireWakeLock, releaseWakeLock]
   );
 
   const handleDrop = useCallback(

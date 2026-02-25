@@ -1,13 +1,14 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
 import { useHistoryStore } from "@/store/history";
-import { setHistorySyncFn } from "@/store/reading";
+import { setHistorySyncFn, useReadingStore } from "@/store/reading";
 import useAutoSave from "@/hooks/useAutoSave";
+import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
 const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
@@ -27,6 +28,8 @@ function Home() {
   const { openSetting, setOpenSetting, openHistory, setOpenHistory } = useGlobalStore();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
+  const { extractedText, docTitle } = useReadingStore();
+  const { generateTitle } = useReadingAssistant();
 
   useAutoSave();
 
@@ -34,6 +37,18 @@ function Home() {
     setHistorySyncFn((readingStore) => {
       useHistoryStore.getState().syncToHistory(readingStore);
     });
+  }, []);
+
+  // Recover title generation after an iOS PWA page refresh that interrupted the
+  // extraction flow. If the store has extracted text but no title (because the
+  // async chain in ImageUpload was killed before generateTitle() ran), re-run it.
+  useEffect(() => {
+    if (extractedText && !docTitle) {
+      generateTitle();
+    }
+    // Run only once on mount — intentionally omitting generateTitle from deps
+    // to avoid re-running when the function reference changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useLayoutEffect(() => {

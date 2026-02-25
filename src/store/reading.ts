@@ -406,7 +406,14 @@ export const useReadingStore = create(
         return pick(state, keysToPersist) as ReadingStore & ReadingActions;
       },
       onRehydrateStorage: () => async (state) => {
-        if (!state || !state.id) return;
+        if (!state) return;
+        // Reset any in-progress status that was interrupted (e.g. iOS PWA page refresh
+        // during streaming). Without this, the store rehydrates with status="extracting"
+        // but no operation is actually running, leaving the UI stuck.
+        if (state.status !== "idle" && state.status !== "error") {
+          state.status = "idle";
+        }
+        if (!state.id) return;
         try {
           const images = await loadImagesFromIndexedDB(state.id);
           if (images.length > 0) {
