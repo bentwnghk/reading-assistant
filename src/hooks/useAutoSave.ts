@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useReadingStore } from "@/store/reading";
+import { useReadingStore, isStreamingActive } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 
 function useAutoSave() {
@@ -25,6 +25,13 @@ function useAutoSave() {
     const { save, update, history } = useHistoryStore.getState();
 
     if (!extractedText) {
+      return;
+    }
+
+    // Skip history saves while a stream is active — extractedText changes on
+    // every token, which would trigger a localforage (IndexedDB) write storm
+    // and crash iOS Safari. The final save runs when the flag is cleared.
+    if (isStreamingActive()) {
       return;
     }
 

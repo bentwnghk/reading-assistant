@@ -15,6 +15,9 @@ let _isStreaming = false;
 export function setStreamingFlag(value: boolean) {
   _isStreaming = value;
 }
+export function isStreamingActive() {
+  return _isStreaming;
+}
 
 let syncToHistoryFn: ((store: ReadingStore) => void) | null = null;
 
@@ -209,9 +212,10 @@ export const useReadingStore = create(
       setExtractedText: (text) =>
         set((state) => {
           const newId = state.id || nanoid();
-          if (state.originalImages.length > 0) {
-            saveImagesToIndexedDB(newId, state.originalImages);
-          }
+          // Do NOT call saveImagesToIndexedDB here — this action is called on
+          // every streamed token and would hammer IndexedDB hundreds of times
+          // per second, crashing iOS Safari. Images are saved once explicitly
+          // by the caller after the stream completes.
           return {
             extractedText: text,
             id: newId,
