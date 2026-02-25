@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
@@ -9,7 +10,19 @@ function SettingsBanner() {
   const { t } = useTranslation();
   const { openaicompatibleApiKey, accessPassword } = useSettingStore();
   const { setOpenSetting } = useGlobalStore();
+  const [isHydrated, setIsHydrated] = useState(false);
 
+  useEffect(() => {
+    const unsubHydrate = useSettingStore.persist.onFinishHydration(() => {
+      setIsHydrated(true);
+    });
+    if (useSettingStore.persist.hasHydrated()) {
+      setIsHydrated(true);
+    }
+    return unsubHydrate;
+  }, []);
+
+  if (!isHydrated) return null;
   if (openaicompatibleApiKey || accessPassword) return null;
 
   return (
