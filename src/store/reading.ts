@@ -1,8 +1,20 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, StorageValue } from "zustand/middleware";
 import { pick } from "radash";
 import { nanoid } from "nanoid";
 import { readingImagesStore } from "@/utils/storage";
+
+// Module-level flag that gates localStorage writes during active streaming.
+// Using a plain variable (not Zustand state) avoids triggering re-renders and,
+// crucially, avoids re-entering the persist middleware while it is already
+// deciding whether to write. Set to true before a stream loop starts and back
+// to false when the loop ends so that only the final complete value is flushed
+// to localStorage — preventing the iOS Safari crash caused by hundreds of rapid
+// synchronous localStorage.setItem calls during token streaming.
+let _isStreaming = false;
+export function setStreamingFlag(value: boolean) {
+  _isStreaming = value;
+}
 
 let syncToHistoryFn: ((store: ReadingStore) => void) | null = null;
 
@@ -109,6 +121,7 @@ interface ReadingActions {
   setSpellingGameBestScore: (score: number) => void;
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
+  setStreaming: (value: boolean) => void;
   reset: () => void;
   backup: () => ReadingStore;
   restore: (session: ReadingStore) => Promise<void>;
@@ -361,6 +374,9 @@ export const useReadingStore = create(
           error,
           status: error ? "error" : get().status,
         })),
+      setStreaming: (value) => {
+        setStreamingFlag(value);
+      },
       reset: () => {
         const sessionId = useReadingStore.getState().id;
         if (sessionId) {
@@ -399,6 +415,23 @@ export const useReadingStore = create(
     {
       name: "reading",
       version: 4,
+      // Intercept storage writes so that rapid per-token calls during streaming
+      // do NOT hit localStorage. iOS Safari crashes / reloads the page when
+      // localStorage.setItem is hammered hundreds of times per second from
+      // inside the streamText token loop. We suppress all writes while
+      // _isStreaming is true; the final write after the loop completes will
+      // flush the full, complete text in one shot.
+      storage: {
+        getItem: (name) => {
+          const value = localStorage.getItem(name);
+          return value ? (JSON.parse(value) as StorageValue<ReadingStore & ReadingActions>) : null;
+        },
+        setItem: (name, value) => {
+          if (_isStreaming) return; // skip all writes during active token stream
+          localStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => localStorage.removeItem(name),
+      },
       partialize: (state) => {
         const keysToPersist = (Object.keys(defaultValues) as (keyof ReadingStore)[]).filter(
           (key) => key !== "originalImages"

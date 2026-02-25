@@ -2,7 +2,7 @@ import { useState } from "react";
 import { streamText, smoothStream, generateText } from "ai";
 import { toast } from "sonner";
 import { useSettingStore } from "@/store/setting";
-import { useReadingStore, type ReadingStatus } from "@/store/reading";
+import { useReadingStore, setStreamingFlag, type ReadingStatus } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import useModelProvider from "@/hooks/useAiProvider";
 import {
@@ -88,15 +88,28 @@ function useReadingAssistant() {
       if (text) {
         text += "\n\n";
       }
-      for await (const textPart of result.textStream) {
-        text += textPart;
-        setExtractedText(text);
+      // Suppress per-token localStorage writes on iOS Safari — each
+      // setExtractedText call would otherwise trigger persist → localStorage.setItem
+      // synchronously, crashing/reloading the page. The flag is cleared in
+      // `finally` so the last setExtractedText call (after the loop) is
+      // persisted normally.
+      setStreamingFlag(true);
+      try {
+        for await (const textPart of result.textStream) {
+          text += textPart;
+          setExtractedText(text);
+        }
+      } finally {
+        setStreamingFlag(false);
       }
+      // One final write with the complete text is now persisted.
+      setExtractedText(text);
 
       setStoreStatus("idle");
       setStatus("idle");
       return text;
     } catch (error) {
+      setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
@@ -170,15 +183,22 @@ function useReadingAssistant() {
       });
 
       let text = "";
-      for await (const textPart of result.textStream) {
-        text += textPart;
-        setSummary(text);
+      setStreamingFlag(true);
+      try {
+        for await (const textPart of result.textStream) {
+          text += textPart;
+          setSummary(text);
+        }
+      } finally {
+        setStreamingFlag(false);
       }
+      setSummary(text);
 
       setStoreStatus("idle");
       setStatus("idle");
       return text;
     } catch (error) {
+      setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
@@ -215,15 +235,22 @@ function useReadingAssistant() {
       });
 
       let text = "";
-      for await (const textPart of result.textStream) {
-        text += textPart;
-        setAdaptedText(text);
+      setStreamingFlag(true);
+      try {
+        for await (const textPart of result.textStream) {
+          text += textPart;
+          setAdaptedText(text);
+        }
+      } finally {
+        setStreamingFlag(false);
       }
+      setAdaptedText(text);
 
       setStoreStatus("idle");
       setStatus("idle");
       return text;
     } catch (error) {
+      setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
@@ -262,15 +289,22 @@ function useReadingAssistant() {
       });
 
       let text = "";
-      for await (const textPart of result.textStream) {
-        text += textPart;
-        setSimplifiedText(text);
+      setStreamingFlag(true);
+      try {
+        for await (const textPart of result.textStream) {
+          text += textPart;
+          setSimplifiedText(text);
+        }
+      } finally {
+        setStreamingFlag(false);
       }
+      setSimplifiedText(text);
 
       setStoreStatus("idle");
       setStatus("idle");
       return text;
     } catch (error) {
+      setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
@@ -307,15 +341,22 @@ function useReadingAssistant() {
       });
 
       let text = "";
-      for await (const textPart of result.textStream) {
-        text += textPart;
-        setMindMap(text);
+      setStreamingFlag(true);
+      try {
+        for await (const textPart of result.textStream) {
+          text += textPart;
+          setMindMap(text);
+        }
+      } finally {
+        setStreamingFlag(false);
       }
+      setMindMap(text);
 
       setStoreStatus("idle");
       setStatus("idle");
       return text;
     } catch (error) {
+      setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
