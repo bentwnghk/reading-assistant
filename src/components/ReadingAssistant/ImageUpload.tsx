@@ -32,7 +32,6 @@ function ImageUpload() {
       
       if (imageFiles.length === 0) return;
 
-      const hadExistingText = !!extractedText;
       setExtractionProgress({ current: 1, total: imageFiles.length });
 
       for (let i = 0; i < imageFiles.length; i++) {
@@ -41,13 +40,11 @@ function ImageUpload() {
         await extractTextFromImage(imageData);
       }
 
-      if (!hadExistingText) {
-        await generateTitle();
-      }
+      await generateTitle();
 
       setExtractionProgress(null);
     },
-    [extractTextFromImage, generateTitle, extractedText]
+    [extractTextFromImage, generateTitle]
   );
 
   const handleDrop = useCallback(
