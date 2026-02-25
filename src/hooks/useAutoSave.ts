@@ -15,7 +15,11 @@ function useAutoSave() {
     readingTest, 
     glossary,
     highlightedWords,
-    analyzedSentences
+    analyzedSentences,
+    testScore,
+    testCompleted,
+    testEarnedPoints,
+    testTotalPoints
   } = useReadingStore();
   const prevIdRef = useRef<string>(id);
   const hasInitializedRef = useRef(false);
@@ -48,7 +52,7 @@ function useAutoSave() {
     }
 
     prevIdRef.current = id;
-  }, [id, docTitle, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences]);
+  }, [id, docTitle, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences, testScore, testCompleted, testEarnedPoints, testTotalPoints]);
 }
 
 export default useAutoSave;
