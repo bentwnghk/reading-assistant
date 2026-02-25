@@ -12,7 +12,9 @@ export function setHistorySyncFn(fn: (store: ReadingStore) => void) {
 
 function syncToHistoryIfNeeded(state: ReadingStore) {
   if (syncToHistoryFn && state.id && state.extractedText) {
-    syncToHistoryFn(state);
+    const dataKeys = Object.keys(defaultValues) as (keyof ReadingStore)[];
+    const dataOnly = pick(state, dataKeys);
+    syncToHistoryFn(dataOnly);
   }
 }
 

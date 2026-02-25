@@ -22,7 +22,7 @@ function ImageUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
   const { originalImages, extractedText } = useReadingStore();
-  const { status, extractTextFromImage } = useReadingAssistant();
+  const { status, extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = status === "extracting";
 
   const handleFiles = useCallback(
@@ -32,6 +32,7 @@ function ImageUpload() {
       
       if (imageFiles.length === 0) return;
 
+      const hadExistingText = !!extractedText;
       setExtractionProgress({ current: 1, total: imageFiles.length });
 
       for (let i = 0; i < imageFiles.length; i++) {
@@ -40,9 +41,13 @@ function ImageUpload() {
         await extractTextFromImage(imageData);
       }
 
+      if (!hadExistingText) {
+        await generateTitle();
+      }
+
       setExtractionProgress(null);
     },
-    [extractTextFromImage]
+    [extractTextFromImage, generateTitle, extractedText]
   );
 
   const handleDrop = useCallback(

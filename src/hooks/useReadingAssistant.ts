@@ -48,7 +48,7 @@ function useReadingAssistant() {
   const [status, setStatus] = useState<ReadingStatus>("idle");
 
   async function extractTextFromImage(imageData: string) {
-    const { setStatus: setStoreStatus, setExtractedText, setDocTitle, setError, addOriginalImage } = readingStore;
+    const { setStatus: setStoreStatus, setExtractedText, setError, addOriginalImage } = readingStore;
     setStoreStatus("extracting");
     setStatus("extracting");
     addOriginalImage(imageData);
@@ -93,26 +93,6 @@ function useReadingAssistant() {
         setExtractedText(text);
       }
 
-      // Generate title using LLM
-      const titleModel = await createModelProvider(summaryModel);
-      const titleText = text.slice(0, 2000);
-      try {
-        const { text: llmTitle } = await generateText({
-          model: titleModel,
-          prompt: `You are a helpful assistant. Read the following text and reply with ONLY a concise, descriptive title for it (5–10 words, no punctuation at the end, no quotation marks).\n\n${titleText}`,
-        });
-        const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
-        if (cleaned) {
-          setDocTitle(cleaned);
-        } else {
-          const fallbackTitle = text.split(/\n/).find((l) => l.trim()) ?? "";
-          if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
-        }
-      } catch {
-        const fallbackTitle = text.split(/\n/).find((l) => l.trim()) ?? "";
-        if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
-      }
-
       setStoreStatus("idle");
       setStatus("idle");
       return text;
@@ -122,6 +102,43 @@ function useReadingAssistant() {
       setStoreStatus("error");
       setStatus("idle");
       return "";
+    }
+  }
+
+  async function generateTitle() {
+    const { extractedText, setDocTitle, setStatus: setStoreStatus } = readingStore;
+    
+    if (!extractedText) return "";
+
+    setStoreStatus("summarizing");
+    setStatus("summarizing");
+
+    try {
+      const titleModel = await createModelProvider(summaryModel);
+      const titleText = extractedText.slice(0, 2000);
+      
+      const { text: llmTitle } = await generateText({
+        model: titleModel,
+        prompt: `You are a helpful assistant. Read the following text and reply with ONLY a concise, descriptive title for it (5–10 words, no punctuation at the end, no quotation marks).\n\n${titleText}`,
+      });
+      
+      const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
+      if (cleaned) {
+        setDocTitle(cleaned);
+      } else {
+        const fallbackTitle = extractedText.split(/\n/).find((l) => l.trim()) ?? "";
+        if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
+      }
+
+      setStoreStatus("idle");
+      setStatus("idle");
+      return cleaned;
+    } catch {
+      const fallbackTitle = extractedText.split(/\n/).find((l) => l.trim()) ?? "";
+      if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
+      setStoreStatus("idle");
+      setStatus("idle");
+      return fallbackTitle.slice(0, 80);
     }
   }
 
@@ -593,6 +610,7 @@ Guidelines:
   return {
     status,
     extractTextFromImage,
+    generateTitle,
     generateSummary,
     adaptText,
     simplifyText,
