@@ -48,10 +48,10 @@ function useReadingAssistant() {
   const [status, setStatus] = useState<ReadingStatus>("idle");
 
   async function extractTextFromImage(imageData: string) {
-    const store = useReadingStore.getState();
-    store.setStatus("extracting");
+    const { setStatus: setStoreStatus, setExtractedText, setDocTitle, setError, addOriginalImage } = readingStore;
+    setStoreStatus("extracting");
     setStatus("extracting");
-    store.addOriginalImage(imageData);
+    addOriginalImage(imageData);
 
     try {
       const visionModel = await createModelProvider(visionModelName);
@@ -77,8 +77,8 @@ function useReadingAssistant() {
         experimental_transform: smoothTextStream(smoothTextStreamType),
         onError: (error) => {
           const msg = handleError(error);
-          useReadingStore.getState().setError(msg);
-          useReadingStore.getState().setStatus("error");
+          setError(msg);
+          setStoreStatus("error");
           setStatus("idle");
         },
       });
@@ -90,7 +90,7 @@ function useReadingAssistant() {
       }
       for await (const textPart of result.textStream) {
         text += textPart;
-        useReadingStore.getState().setExtractedText(text);
+        setExtractedText(text);
       }
 
       // Generate title using LLM
@@ -103,23 +103,23 @@ function useReadingAssistant() {
         });
         const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
         if (cleaned) {
-          useReadingStore.getState().setDocTitle(cleaned);
+          setDocTitle(cleaned);
         } else {
           const fallbackTitle = text.split(/\n/).find((l) => l.trim()) ?? "";
-          if (fallbackTitle) useReadingStore.getState().setDocTitle(fallbackTitle.slice(0, 80));
+          if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
         }
       } catch {
         const fallbackTitle = text.split(/\n/).find((l) => l.trim()) ?? "";
-        if (fallbackTitle) useReadingStore.getState().setDocTitle(fallbackTitle.slice(0, 80));
+        if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
       }
 
-      useReadingStore.getState().setStatus("idle");
+      setStoreStatus("idle");
       setStatus("idle");
       return text;
     } catch (error) {
       const msg = handleError(error);
-      useReadingStore.getState().setError(msg);
-      useReadingStore.getState().setStatus("error");
+      setError(msg);
+      setStoreStatus("error");
       setStatus("idle");
       return "";
     }
