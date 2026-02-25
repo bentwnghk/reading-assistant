@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2, Target, PartyPopper } from "lucide-react";
+import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
@@ -15,42 +15,6 @@ interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
 }
 
-function CircularProgress({ value, max, size = 48, strokeWidth = 4 }: { value: number; max: number; size?: number; strokeWidth?: number }) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const percent = (value / max) * 100;
-  const offset = circumference - (percent / 100) * circumference;
-
-  return (
-    <svg width={size} height={size} className="progress-ring">
-      <circle
-        className="text-muted"
-        strokeWidth={strokeWidth}
-        stroke="currentColor"
-        fill="transparent"
-        r={radius}
-        cx={size / 2}
-        cy={size / 2}
-      />
-      <circle
-        className="progress-ring-circle text-primary transition-all duration-300"
-        strokeWidth={strokeWidth}
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        stroke="currentColor"
-        fill="transparent"
-        r={radius}
-        cx={size / 2}
-        cy={size / 2}
-      />
-      <text x="50%" y="50%" textAnchor="middle" dy=".3em" className="text-xs font-medium fill-current">
-        {value}/{max}
-      </text>
-    </svg>
-  );
-}
-
 function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
   const { id, glossaryRatings, setGlossaryRating, backup } = useReadingStore();
@@ -62,8 +26,6 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const [isShuffled, setIsShuffled] = useState(false);
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
-  const [ratingAnimation, setRatingAnimation] = useState<string | null>(null);
-  const [showCompletion, setShowCompletion] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const currentGlossary = useMemo(() => {
@@ -127,8 +89,6 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const handleRate = (rating: GlossaryRating) => {
     if (currentEntry) {
       setGlossaryRating(currentEntry.word, rating);
-      setRatingAnimation(rating);
-      setTimeout(() => setRatingAnimation(null), 300);
       if (id) {
         const session = backup();
         const updated = update(id, session);
@@ -136,10 +96,6 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           save(session);
         }
       }
-    }
-    if (currentIndex === totalCount - 1) {
-      setShowCompletion(true);
-      setTimeout(() => setShowCompletion(false), 3000);
     }
     handleNext();
   };
@@ -271,19 +227,9 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
 
   return (
-    <div className="flex flex-col items-center gap-6 py-4 relative">
-      {showCompletion && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-10 animate-fade-in-scale">
-          <div className="text-center p-6">
-            <PartyPopper className="h-16 w-16 mx-auto mb-3 text-green-500 animate-bounce" />
-            <p className="font-semibold text-lg">{t("reading.glossary.flashcard.complete")}</p>
-            <p className="text-sm text-muted-foreground mt-1">{t("reading.glossary.flashcard.reviewed")}</p>
-          </div>
-        </div>
-      )}
-      
+    <div className="flex flex-col items-center gap-6 py-4">
       {isPrioritized && hasRatings && (
-        <div className="text-xs text-muted-foreground animate-fade-in-up">
+        <div className="text-xs text-muted-foreground">
           {t("reading.glossary.wordStats", { 
             hard: wordStats.hard, 
             medium: wordStats.medium, 
@@ -292,29 +238,34 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-4">
-        <CircularProgress value={currentIndex + 1} max={totalCount} size={56} strokeWidth={4} />
+      <div className="w-full max-w-md space-y-2">
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{currentIndex + 1} / {totalCount}</span>
+          <span>{Math.round(((currentIndex + 1) / totalCount) * 100)}%</span>
+        </div>
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300 rounded-full"
+            style={{ width: `${((currentIndex + 1) / totalCount) * 100}%` }}
+          />
+        </div>
       </div>
 
       <div
-        className={cn(
-          "relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000",
-          isFlipped && "card-shadow-hover shadow-2xl"
-        )}
+        className="relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000"
         onClick={handleFlip}
       >
         <div
           className={cn(
-            "absolute inset-0 transition-all duration-500 transform-style-preserve-3d",
-            isFlipped && "rotate-y-180",
-            isFlipped && "shadow-2xl"
+            "absolute inset-0 transition-transform duration-500 transform-style-preserve-3d",
+            isFlipped && "rotate-y-180"
           )}
         >
           <div
             className={cn(
               "absolute inset-0 backface-hidden",
               "bg-gradient-to-br from-card via-card to-primary/5 border-2 rounded-xl shadow-lg",
-              "hover:shadow-xl transition-all duration-500",
+              "hover:shadow-xl transition-shadow duration-300",
               "flex flex-col items-center justify-center p-6"
             )}
           >
@@ -398,7 +349,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
       </div>
 
       {isFlipped && (
-        <div className="w-full max-w-md space-y-3 animate-fade-in-up">
+        <div className="w-full max-w-md space-y-3">
           <div className="text-center text-sm text-muted-foreground mb-2">
             {t("reading.glossary.flashcard.rateCard")}
           </div>
@@ -410,10 +361,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 e.stopPropagation();
                 handleRate("easy");
               }}
-              className={cn(
-                "flex-1 transition-all duration-200",
-                ratingAnimation === "easy" && "scale-110 bg-green-500 hover:bg-green-600"
-              )}
+              className="flex-1"
             >
               {t("reading.glossary.flashcard.easy")}
             </Button>
@@ -424,10 +372,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 e.stopPropagation();
                 handleRate("medium");
               }}
-              className={cn(
-                "flex-1 transition-all duration-200",
-                ratingAnimation === "medium" && "scale-110 bg-yellow-500 hover:bg-yellow-600"
-              )}
+              className="flex-1"
             >
               {t("reading.glossary.flashcard.medium")}
             </Button>
@@ -438,10 +383,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 e.stopPropagation();
                 handleRate("hard");
               }}
-              className={cn(
-                "flex-1 transition-all duration-200",
-                ratingAnimation === "hard" && "scale-110 bg-red-500 hover:bg-red-600"
-              )}
+              className="flex-1"
             >
               {t("reading.glossary.flashcard.hard")}
             </Button>

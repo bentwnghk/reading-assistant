@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SkeletonGlossary } from "@/components/ui/skeleton";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { downloadFile } from "@/utils/file";
@@ -60,28 +59,16 @@ function Glossary() {
   const renderContent = () => {
     if (highlightedWords.length === 0) {
       return (
-        <div className="text-center py-8 text-muted-foreground animate-fade-in-up">
+        <div className="text-center py-8 text-muted-foreground">
           <BookMarked className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p>{t("reading.glossary.noHighlightedWords")}</p>
         </div>
       );
     }
 
-    if (isGenerating) {
-      return (
-        <div className="space-y-4 animate-fade-in-up">
-          <SkeletonGlossary count={4} />
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-            <span className="loading-dots">{t("reading.glossary.analyzingVocab")}</span>
-          </div>
-        </div>
-      );
-    }
-
     if (glossary.length === 0) {
       return (
-        <div className="text-center py-8 text-muted-foreground animate-fade-in-up">
+        <div className="text-center py-8 text-muted-foreground">
           <BookMarked className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p>{t("reading.glossary.emptyTip", { count: highlightedWords.length })}</p>
         </div>
@@ -97,7 +84,7 @@ function Glossary() {
         return <VocabularySpelling glossary={glossary} />;
       default:
         return (
-          <div className="overflow-x-auto animate-fade-in-up">
+          <div className="overflow-x-auto">
             <DataTable>
               <TableHeader>
                 <TableRow>
@@ -109,12 +96,8 @@ function Glossary() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {glossary.map((entry, index) => (
-                  <TableRow 
-                    key={entry.word}
-                    className="animate-fade-in-up"
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                  >
+                {glossary.map((entry) => (
+                  <TableRow key={entry.word}>
                     <TableCell className="font-medium">{entry.word}</TableCell>
                     <TableCell className="text-muted-foreground italic text-xs">{entry.partOfSpeech || "-"}</TableCell>
                     <TableCell>{entry.englishDefinition}</TableCell>
@@ -132,7 +115,7 @@ function Glossary() {
   };
 
   return (
-    <section className="section-card section-header-accent mt-4">
+    <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b pb-4 mb-4">
         <h3 className="font-semibold text-lg">
           {t("reading.glossary.title")}
@@ -143,7 +126,6 @@ function Glossary() {
               onClick={handleDownloadCSV}
               variant="secondary"
               size="sm"
-              className="transition-transform active:scale-95"
             >
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">{t("reading.glossary.download")}</span>
@@ -154,7 +136,6 @@ function Glossary() {
             disabled={isGenerating || highlightedWords.length === 0}
             size="sm"
             variant={glossary.length > 0 ? "secondary" : "default"}
-            className="transition-transform active:scale-95"
           >
             {isGenerating ? (
               <>
@@ -183,11 +164,11 @@ function Glossary() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200",
+                "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
                 "border-b-2 -mb-px",
                 activeTab === tab.key
                   ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               )}
             >
               {tab.icon}

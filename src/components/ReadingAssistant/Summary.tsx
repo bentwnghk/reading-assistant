@@ -3,32 +3,10 @@ import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { FileText, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown"));
-
-function SummarySkeleton() {
-  return (
-    <div className="space-y-4 animate-fade-in-up">
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-      </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-2/3" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-4/5" />
-      </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-4 w-3/4" />
-      </div>
-    </div>
-  );
-}
 
 function Summary() {
   const { t } = useTranslation();
@@ -41,7 +19,7 @@ function Summary() {
   }
 
   return (
-    <section className="section-card section-header-accent mt-4">
+    <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b mb-4">
         <h3 className="font-semibold text-lg leading-10">
           {t("reading.summary.title")}
@@ -51,7 +29,6 @@ function Summary() {
             onClick={() => generateSummary()}
             disabled={isGenerating}
             size="sm"
-            className="transition-transform active:scale-95"
           >
             {isGenerating ? (
               <>
@@ -68,16 +45,8 @@ function Summary() {
         )}
       </div>
 
-      {isGenerating ? (
-        <div className="space-y-4">
-          <SummarySkeleton />
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-            <span className="loading-dots">{t("reading.summary.analyzing")}</span>
-          </div>
-        </div>
-      ) : summary ? (
-        <div className="prose prose-slate dark:prose-invert max-w-full animate-fade-in-up">
+      {summary ? (
+        <div className="prose prose-slate dark:prose-invert max-w-full">
           <MagicDown
             value={summary}
             onChange={() => {}}

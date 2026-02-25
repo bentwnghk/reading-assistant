@@ -34,7 +34,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -1076,20 +1075,12 @@ function AdaptedText() {
               )}
             </>
           ) : isAdapting ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-11/12" />
-                <Skeleton className="h-4 w-4/5" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-                <span className="loading-dots">{t("reading.adaptedText.adaptingText")}</span>
-              </div>
+            <div className="space-y-3 animate-pulse">
+              <div className="h-4 bg-muted rounded w-full" />
+              <div className="h-4 bg-muted rounded w-11/12" />
+              <div className="h-4 bg-muted rounded w-4/5" />
+              <div className="h-4 bg-muted rounded w-full" />
+              <div className="h-4 bg-muted rounded w-3/4" />
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
@@ -1131,20 +1122,12 @@ function AdaptedText() {
               )}
             </>
           ) : isSimplifying ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-11/12" />
-                <Skeleton className="h-4 w-4/5" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-                <span className="loading-dots">{t("reading.adaptedText.simplifyingText")}</span>
-              </div>
+            <div className="space-y-3 animate-pulse">
+              <div className="h-4 bg-muted rounded w-full" />
+              <div className="h-4 bg-muted rounded w-11/12" />
+              <div className="h-4 bg-muted rounded w-4/5" />
+              <div className="h-4 bg-muted rounded w-full" />
+              <div className="h-4 bg-muted rounded w-3/4" />
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">

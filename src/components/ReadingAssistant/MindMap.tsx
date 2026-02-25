@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { Waypoints, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SkeletonMindMap } from "@/components/ui/skeleton";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
@@ -20,7 +19,7 @@ function MindMap() {
   }
 
   return (
-    <section className="section-card section-header-accent mt-4">
+    <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b mb-4">
         <h3 className="font-semibold text-lg leading-10">
           {t("reading.mindMap.title")}
@@ -30,7 +29,6 @@ function MindMap() {
           disabled={isGenerating}
           size="sm"
           variant={mindMap ? "secondary" : "default"}
-          className="transition-transform active:scale-95"
         >
           {isGenerating ? (
             <>
@@ -51,16 +49,8 @@ function MindMap() {
         </Button>
       </div>
 
-      {isGenerating ? (
-        <div className="space-y-4">
-          <SkeletonMindMap />
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-            <span className="loading-dots">{t("reading.mindMap.creating")}</span>
-          </div>
-        </div>
-      ) : mindMap ? (
-        <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto animate-fade-in-up">
+      {mindMap ? (
+        <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
           <MagicDown>{mindMap}</MagicDown>
         </div>
       ) : (

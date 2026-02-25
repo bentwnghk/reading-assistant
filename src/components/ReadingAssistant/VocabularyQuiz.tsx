@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,47 +16,6 @@ interface VocabularyQuizProps {
 }
 
 type QuizState = "idle" | "in-progress" | "completed";
-
-function AnimatedScore({ value, duration = 1000 }: { value: number; duration?: number }) {
-  const [displayValue, setDisplayValue] = useState(0);
-  
-  useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
-    
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      setDisplayValue(Math.round(value * easeOut));
-      
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-    
-    animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [value, duration]);
-  
-  return <span>{displayValue}</span>;
-}
-
-function RippleEffect({ x, y }: { x: number; y: number }) {
-  return (
-    <span
-      className="ripple-effect"
-      style={{
-        left: x,
-        top: y,
-        width: 20,
-        height: 20,
-        marginLeft: -10,
-        marginTop: -10,
-      }}
-    />
-  );
-}
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -165,8 +124,6 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showReview, setShowReview] = useState(false);
   const [prioritizeHardWords, setPrioritizeHardWords] = useState(false);
-  const [ripple, setRipple] = useState<{ x: number; y: number } | null>(null);
-  const optionRef = useRef<HTMLDivElement>(null);
 
   const wordStats = useMemo(() => {
     return getWordStats(glossary, glossaryRatings);
@@ -185,21 +142,12 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     setShowReview(false);
   }, [glossary, glossaryRatings, prioritizeHardWords]);
 
-  const handleAnswer = (answer: string, event?: React.MouseEvent) => {
+  const handleAnswer = (answer: string) => {
     const currentQuestion = questions[currentQuestionIndex];
     setAnswers((prev) => ({
       ...prev,
       [currentQuestion.id]: answer,
     }));
-    
-    if (event && optionRef.current) {
-      const rect = optionRef.current.getBoundingClientRect();
-      setRipple({ 
-        x: event.clientX - rect.left, 
-        y: event.clientY - rect.top 
-      });
-      setTimeout(() => setRipple(null), 600);
-    }
   };
 
   const goToNext = () => {
@@ -324,32 +272,26 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
 
     return (
       <div className="py-6 space-y-6">
-        <div className="text-center animate-fade-in-up">
+        <div className="text-center">
           <h4 className="text-xl font-bold mb-2">{t("reading.glossary.quiz.quizComplete")}</h4>
           <div
             className={cn(
-              "text-5xl font-bold mb-2 animate-count-up",
+              "text-5xl font-bold mb-2",
               percentage >= 80
-                ? "score-excellent"
+                ? "text-green-600 dark:text-green-400"
                 : percentage >= 60
-                ? "score-good"
-                : "score-needs-work"
+                ? "text-yellow-600 dark:text-yellow-400"
+                : "text-red-600 dark:text-red-400"
             )}
           >
-            <AnimatedScore value={percentage} />%
+            {percentage}%
           </div>
           <p className="text-muted-foreground">
             {t("reading.glossary.quiz.scoreFormat", { correct: getScore.correct, total: getScore.total })}
           </p>
-          {percentage >= 80 && (
-            <div className="mt-2 text-green-500 flex items-center justify-center gap-1 animate-fade-in-scale">
-              <Trophy className="h-4 w-4" />
-              <span className="text-sm font-medium">{t("reading.glossary.quiz.excellent")}</span>
-            </div>
-          )}
         </div>
 
-        <div className="flex gap-2 justify-center flex-wrap animate-fade-in-up stagger-1">
+        <div className="flex gap-2 justify-center flex-wrap">
           <Button variant="outline" onClick={() => setShowReview(!showReview)}>
             <Eye className="h-4 w-4 mr-2" />
             {t("reading.glossary.quiz.reviewAnswers")}
@@ -476,21 +418,18 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
 
         <RadioGroup
           value={currentAnswer || ""}
-          onValueChange={(value) => handleAnswer(value)}
+          onValueChange={handleAnswer}
           className="space-y-3"
         >
           {currentQuestion.options.map((option, index) => (
             <div
               key={option}
-              ref={optionRef}
               className={cn(
-                "relative overflow-hidden flex items-center space-x-3 p-3 border rounded-lg transition-all duration-200 cursor-pointer",
-                "hover:border-primary/50 hover:bg-accent/50",
-                currentAnswer === option && "option-selected"
+                "flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent transition-colors cursor-pointer",
+                currentAnswer === option && "border-primary bg-accent"
               )}
-              onClick={(e) => handleAnswer(option, e)}
+              onClick={() => handleAnswer(option)}
             >
-              {ripple && <RippleEffect x={ripple.x} y={ripple.y} />}
               <RadioGroupItem value={option} id={`option-${index}`} />
               <Label htmlFor={`option-${index}`} className="cursor-pointer flex-1">
                 {option}

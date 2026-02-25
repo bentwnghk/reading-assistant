@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { 
   ClipboardCheck, 
@@ -13,8 +13,7 @@ import {
   Trophy,
   Eye,
   BarChart3,
-  Target,
-  PartyPopper
+  Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -27,31 +26,6 @@ import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
 
 type QuizState = "idle" | "in-progress" | "completed";
-
-function AnimatedScore({ value, duration = 1000 }: { value: number; duration?: number }) {
-  const [displayValue, setDisplayValue] = useState(0);
-  
-  useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
-    
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      setDisplayValue(Math.round(value * easeOut));
-      
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-    
-    animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [value, duration]);
-  
-  return <span>{displayValue}</span>;
-}
 
 const QUESTION_TYPE_LABELS: Record<ReadingTestQuestionType, string> = {
   "multiple-choice": "multipleChoice",
@@ -70,12 +44,6 @@ const SKILL_LABELS: Record<string, string> = {
   "purpose": "purpose",
   "sequencing": "sequencing",
   "referencing": "detail",
-};
-
-const _DIFFICULTY_COLORS: Record<string, string> = {
-  "easy": "bg-green-500",
-  "medium": "bg-yellow-500",
-  "hard": "bg-red-500",
 };
 
 function ReadingTest() {
@@ -554,25 +522,17 @@ function ReadingTest() {
         </div>
 
         <div className="space-y-6">
-          <div className="p-4 bg-muted rounded-lg text-center animate-fade-in-up">
+          <div className="p-4 bg-muted rounded-lg text-center">
             <p className="text-lg font-medium mb-2">
               {t("reading.readingTest.yourScore")}
             </p>
-            <div className="flex items-center justify-center gap-2">
-              <p className={cn("text-4xl font-bold animate-count-up", getScoreColor(testScore))}>
-                <AnimatedScore value={testScore} />%
-              </p>
-              {testScore >= 80 && (
-                <PartyPopper className="h-8 w-8 text-green-500 animate-bounce" />
-              )}
-            </div>
+            <p className={cn("text-4xl font-bold", getScoreColor(testScore))}>
+              {testScore}%
+            </p>
             <p className="text-sm text-muted-foreground mt-1">
               {t("reading.readingTest.pointsFormat", { earned: testEarnedPoints, total: testTotalPoints })}
             </p>
-            <p className={cn(
-              "text-sm font-medium mt-2 animate-fade-in-scale",
-              testScore >= 80 ? "text-green-500" : testScore >= 60 ? "text-yellow-500" : "text-muted-foreground"
-            )}>
+            <p className="text-sm text-muted-foreground mt-2">
               {testScore >= 80
                 ? t("reading.readingTest.excellent")
                 : testScore >= 60
@@ -581,7 +541,7 @@ function ReadingTest() {
             </p>
           </div>
 
-          <div className="p-4 bg-muted rounded-lg animate-fade-in-up stagger-1">
+          <div className="p-4 bg-muted rounded-lg">
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="h-4 w-4" />
               <h4 className="font-medium">{t("reading.readingTest.skillBreakdown")}</h4>
@@ -604,7 +564,7 @@ function ReadingTest() {
             </div>
           </div>
 
-          <div className="flex gap-2 justify-center flex-wrap animate-fade-in-up stagger-2">
+          <div className="flex gap-2 justify-center flex-wrap">
             <Button variant="outline" onClick={() => setShowReview(!showReview)}>
               <Eye className="h-4 w-4 mr-2" />
               {showReview ? t("reading.readingTest.hideReview") : t("reading.readingTest.reviewAnswers")}
