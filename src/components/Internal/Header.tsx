@@ -65,7 +65,47 @@ function Header() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
   const [openAbout, setOpenAbout] = useState<boolean>(false);
-  const { setOpenSetting, setOpenHistory } = useGlobalStore();
+  const { setOpenSetting, setOpenHistory, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
+  const {
+    extractedText,
+    summary,
+    mindMap,
+    adaptedText,
+    testCompleted,
+    analyzedSentences,
+    highlightedWords,
+    glossary,
+    spellingGameBestScore,
+    vocabularyQuizScore,
+  } = useReadingStore();
+
+  const isWorkflowComplete = useMemo(
+    () =>
+      !!extractedText &&
+      !!summary &&
+      !!mindMap &&
+      !!adaptedText &&
+      testCompleted &&
+      Object.keys(analyzedSentences).length > 0 &&
+      highlightedWords.length > 0 &&
+      glossary.length > 0 &&
+      spellingGameBestScore > 0 &&
+      vocabularyQuizScore > 0,
+    [
+      extractedText,
+      summary,
+      mindMap,
+      adaptedText,
+      testCompleted,
+      analyzedSentences,
+      highlightedWords,
+      glossary,
+      spellingGameBestScore,
+      vocabularyQuizScore,
+    ]
+  );
+
+  const showPulseAnimation = !hasOpenedAbout || !isWorkflowComplete;
 
   const exportSnapshot = useCallback(() => {
     const { backup } = useReadingStore.getState();
@@ -178,11 +218,14 @@ function Header() {
         </h1>
         <div className="flex">
           <Button
-            className="h-8 w-8"
+            className={`h-8 w-8 ${showPulseAnimation ? "animate-pulse-ring" : ""}`}
             variant="ghost"
             size="icon"
             title={t("header.about.title")}
-            onClick={() => setOpenAbout(true)}
+            onClick={() => {
+              setOpenAbout(true);
+              setHasOpenedAbout(true);
+            }}
           >
             <Info className="h-5 w-5" />
           </Button>
