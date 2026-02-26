@@ -460,19 +460,41 @@ function ReadingTest() {
                 <p className="text-muted-foreground mb-4">
                   {t("reading.readingTest.completedTip")}
                 </p>
-                <Button onClick={() => generateReadingTest()} disabled={isGenerating} size="lg">
-                  {isGenerating ? (
-                    <>
-                      <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
-                      {t("reading.readingTest.generating")}
-                    </>
-                  ) : (
-                    <>
-                      <ClipboardCheck className="h-5 w-5 mr-2" />
-                      {t("reading.readingTest.generateNew")}
-                    </>
+                <div className="flex flex-col gap-3 items-center">
+                  <Button onClick={() => generateReadingTest()} disabled={isGenerating} size="lg">
+                    {isGenerating ? (
+                      <>
+                        <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
+                        {t("reading.readingTest.generating")}
+                      </>
+                    ) : (
+                      <>
+                        <ClipboardCheck className="h-5 w-5 mr-2" />
+                        {t("reading.readingTest.generateNew")}
+                      </>
+                    )}
+                  </Button>
+                  {missedSkills.length > 0 && (
+                    <Button 
+                      variant="secondary" 
+                      onClick={handleTargetedPractice}
+                      disabled={isGenerating}
+                      size="lg"
+                    >
+                      {isGenerating ? (
+                        <>
+                          <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
+                          {t("reading.readingTest.generating")}
+                        </>
+                      ) : (
+                        <>
+                          <Target className="h-5 w-5 mr-2" />
+                          {t("reading.readingTest.practiceMissedSkills", { count: missedSkills.length })}
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
+                </div>
               </>
             ) : (
               <>
