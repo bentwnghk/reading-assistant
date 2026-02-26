@@ -10,20 +10,18 @@ function WorkflowProgress() {
   const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted } = useReadingStore();
 
   const hasExtractedText = !!extractedText;
-  const hasAdaptedText = !!adaptedText;
-  const hasGlossary = glossary.length > 0;
 
   const steps = [
     { key: "upload", label: t("reading.workflow.upload"), completed: hasExtractedText, accessible: true, sectionId: "section-upload" },
     { key: "summary", label: t("reading.workflow.summary"), completed: !!summary, accessible: hasExtractedText, sectionId: "section-summary" },
     { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap, accessible: hasExtractedText, sectionId: "section-mindmap" },
-    { key: "adapt", label: t("reading.workflow.adapt"), completed: hasAdaptedText, accessible: hasExtractedText, sectionId: "section-adapted" },
-    { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasAdaptedText, sectionId: "section-test" },
-    { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0, accessible: hasAdaptedText, sectionId: "section-adapted" },
-    { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0, accessible: hasAdaptedText, sectionId: "section-adapted" },
-    { key: "glossary", label: t("reading.workflow.glossary"), completed: hasGlossary, accessible: hasAdaptedText, sectionId: "section-glossary" },
-    { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, accessible: hasGlossary, sectionId: "section-glossary" },
-    { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, accessible: hasGlossary, sectionId: "section-glossary" },
+    { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText, accessible: hasExtractedText, sectionId: "section-adapted" },
+    { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasExtractedText, sectionId: "section-test" },
+    { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0, accessible: hasExtractedText, sectionId: "section-adapted" },
+    { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0, accessible: hasExtractedText, sectionId: "section-adapted" },
+    { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
+    { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
+    { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
   ];
 
   const handleStepClick = useCallback((sectionId: string, accessible: boolean) => {
