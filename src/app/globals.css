@@ -183,3 +183,16 @@
     box-shadow: 0 0 0 0 rgba(var(--pulse-color), 0);
   }
 }
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite;
+}
