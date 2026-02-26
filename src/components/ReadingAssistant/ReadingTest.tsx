@@ -457,23 +457,25 @@ function ReadingTest() {
           <div className="text-center">
             {testCompleted ? (
               <>
-                <p className="text-muted-foreground mb-4">
-                  {t("reading.readingTest.completedTip")}
-                </p>
                 <div className="flex flex-col gap-3 items-center">
-                  <Button onClick={() => generateReadingTest()} disabled={isGenerating} size="lg">
-                    {isGenerating ? (
-                      <>
-                        <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
-                        {t("reading.readingTest.generating")}
-                      </>
-                    ) : (
-                      <>
-                        <ClipboardCheck className="h-5 w-5 mr-2" />
-                        {t("reading.readingTest.generateNew")}
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-muted-foreground">
+                      {t("reading.readingTest.completedTip")}
+                    </p>
+                    <Button onClick={() => generateReadingTest()} disabled={isGenerating} size="lg">
+                      {isGenerating ? (
+                        <>
+                          <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
+                          {t("reading.readingTest.generating")}
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardCheck className="h-5 w-5 mr-2" />
+                          {t("reading.readingTest.generateNew")}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                   {missedSkills.length > 0 && (
                     <div className="flex flex-col items-center gap-2">
                       <p className="text-muted-foreground">
