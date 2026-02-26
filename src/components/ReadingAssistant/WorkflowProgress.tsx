@@ -1,4 +1,5 @@
 "use client";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Check } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
@@ -9,17 +10,24 @@ function WorkflowProgress() {
   const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted } = useReadingStore();
 
   const steps = [
-    { key: "upload", label: t("reading.workflow.upload"), completed: !!extractedText },
-    { key: "summary", label: t("reading.workflow.summary"), completed: !!summary },
-    { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap },
-    { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText },
-    { key: "test", label: t("reading.workflow.test"), completed: testCompleted },
-    { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0 },
-    { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0 },
-    { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0 },
-    { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0 },
-    { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0 },
+    { key: "upload", label: t("reading.workflow.upload"), completed: !!extractedText, sectionId: "section-upload" },
+    { key: "summary", label: t("reading.workflow.summary"), completed: !!summary, sectionId: "section-summary" },
+    { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap, sectionId: "section-mindmap" },
+    { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText, sectionId: "section-adapted" },
+    { key: "test", label: t("reading.workflow.test"), completed: testCompleted, sectionId: "section-test" },
+    { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0, sectionId: "section-adapted" },
+    { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0, sectionId: "section-adapted" },
+    { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0, sectionId: "section-glossary" },
+    { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, sectionId: "section-glossary" },
+    { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, sectionId: "section-glossary" },
   ];
+
+  const handleStepClick = useCallback((sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
 
   const completedCount = steps.filter((s) => s.completed).length;
   const progress = Math.round((completedCount / steps.length) * 100);
@@ -46,8 +54,9 @@ function WorkflowProgress() {
         {steps.map((step, index) => (
           <div
             key={step.key}
+            onClick={() => handleStepClick(step.sectionId)}
             className={cn(
-              "flex-1 flex flex-col items-center",
+              "flex-1 flex flex-col items-center cursor-pointer",
             )}
           >
             <div
