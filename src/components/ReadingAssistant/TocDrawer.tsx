@@ -32,6 +32,7 @@ const sections = [
     icon: User,
     labelKey: "toc.studentInfo",
     checkCompleted: () => true,
+    isAccessible: () => true,
   },
   {
     id: "section-upload",
@@ -39,6 +40,7 @@ const sections = [
     labelKey: "toc.upload",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.extractedText,
+    isAccessible: () => true,
   },
   {
     id: "section-summary",
@@ -46,6 +48,8 @@ const sections = [
     labelKey: "toc.summary",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.summary,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
   },
   {
     id: "section-mindmap",
@@ -53,6 +57,8 @@ const sections = [
     labelKey: "toc.mindmap",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.mindMap,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
   },
   {
     id: "section-adapted",
@@ -60,6 +66,8 @@ const sections = [
     labelKey: "toc.adapted",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.adaptedText,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
   },
   {
     id: "section-test",
@@ -67,6 +75,8 @@ const sections = [
     labelKey: "toc.test",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       store.testCompleted,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
   },
   {
     id: "section-glossary",
@@ -74,6 +84,8 @@ const sections = [
     labelKey: "toc.glossary",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       store.glossary.length > 0,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
   },
 ];
 
@@ -81,7 +93,8 @@ function TocDrawer({ open, onClose }: TocDrawerProps) {
   const { t } = useTranslation();
   const store = useReadingStore();
 
-  function handleSectionClick(id: string) {
+  function handleSectionClick(id: string, accessible: boolean) {
+    if (!accessible) return;
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -105,14 +118,17 @@ function TocDrawer({ open, onClose }: TocDrawerProps) {
             {sections.map((section) => {
               const Icon = section.icon;
               const isCompleted = section.checkCompleted(store);
+              const isAccessible = section.isAccessible(store);
               return (
                 <button
                   key={section.id}
-                  onClick={() => handleSectionClick(section.id)}
+                  onClick={() => handleSectionClick(section.id, isAccessible)}
+                  disabled={!isAccessible}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
                     "hover:bg-accent hover:text-accent-foreground",
-                    "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    !isAccessible && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
