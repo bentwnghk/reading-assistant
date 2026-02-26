@@ -4,6 +4,17 @@
   "openSource": "Mr.🆖 AI Hub",
   "copyright": "Built with ❤️ by Mr.🆖 for students learning English. Powered by {{name}}",
   "searchPlaceholder": "Please enter keywords",
+  "toc": {
+    "title": "Table of Contents",
+    "description": "Jump to any section",
+    "studentInfo": "Student Info",
+    "upload": "Upload",
+    "summary": "Summary",
+    "mindmap": "Mind Map",
+    "adapted": "Adapted Text",
+    "test": "Reading Test",
+    "glossary": "Glossary"
+  },
   "settingsBanner": {
     "message": "Please configure your API Key or Access Password in Settings to use this app.",
     "openSettings": "Open Settings"

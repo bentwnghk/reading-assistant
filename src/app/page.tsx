@@ -22,6 +22,7 @@ const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedT
 const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
 const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
+const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 
 function Home() {
   const { t } = useTranslation();
@@ -61,15 +62,30 @@ function Home() {
       <Header />
       <SettingsBanner />
       <main>
-        <StudentInfo />
-        <ImageUpload />
+        <section id="section-student-info">
+          <StudentInfo />
+        </section>
+        <section id="section-upload">
+          <ImageUpload />
+        </section>
         <WorkflowProgress />
-        <Summary />
-        <MindMap />
-        <AdaptedText />
-        <ReadingTest />
-        <Glossary />
+        <section id="section-summary">
+          <Summary />
+        </section>
+        <section id="section-mindmap">
+          <MindMap />
+        </section>
+        <section id="section-adapted">
+          <AdaptedText />
+        </section>
+        <section id="section-test">
+          <ReadingTest />
+        </section>
+        <section id="section-glossary">
+          <Glossary />
+        </section>
       </main>
+      <TocFab />
       <footer className="my-4 text-center text-sm text-gray-600 print:hidden">
         <a href="https://api.mr5ai.com/" target="_blank">
           {t("copyright", {
