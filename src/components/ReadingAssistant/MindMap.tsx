@@ -2,7 +2,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { Waypoints, LoaderCircle, Maximize2, Minimize2 } from "lucide-react";
+import { Waypoints, LoaderCircle, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -72,7 +72,7 @@ function MindMap() {
         </div>
 
         {mindMap ? (
-          <div className="w-full h-[500px] border rounded-md overflow-hidden">
+          <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto min-h-[300px]">
             <MagicDown>{mindMap}</MagicDown>
           </div>
         ) : (
@@ -84,21 +84,14 @@ function MindMap() {
       </section>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-2 flex flex-row items-center justify-between">
+        <DialogContent className="max-w-[95vw] w-full h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <Waypoints className="h-5 w-5 text-muted-foreground" />
               {t("reading.mindMap.title")}
             </DialogTitle>
-            <Button
-              onClick={() => setIsModalOpen(false)}
-              size="sm"
-              variant="ghost"
-            >
-              <Minimize2 className="h-4 w-4" />
-            </Button>
           </DialogHeader>
-          <div className="flex-1 w-full overflow-hidden">
+          <div className="flex-1 overflow-auto prose prose-slate dark:prose-invert max-w-none">
             {mindMap && <MagicDown>{mindMap}</MagicDown>}
           </div>
         </DialogContent>

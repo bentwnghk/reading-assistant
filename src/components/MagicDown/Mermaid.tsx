@@ -10,13 +10,13 @@ import {
   ZoomIn,
   ZoomOut,
   RefreshCcw,
+  Map,
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import { downloadFile } from "@/utils/file";
 
 type Props = {
   children: ReactNode;
-  className?: string;
 };
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
@@ -32,12 +32,15 @@ async function loadMermaid(element: HTMLElement, code: string) {
   }
 }
 
-function Mermaid({ children, className }: Props) {
+function Mermaid({ children }: Props) {
   const { t } = useTranslation();
   const mermaidContainerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<string>("");
-  const [waitingCopy, setWaitingCopy] = useState(false);
+  const [waitingCopy, setWaitingCopy] = useState<boolean>(false);
+  const [showMinimap, setShowMinimap] = useState<boolean>(false);
+  const [initialScale, setInitialScale] = useState<number>(1);
+  const [svgDimensions, setSvgDimensions] = useState<{ width: number; height: number } | null>(null);
 
   function downloadSvg() {
     const target = mermaidContainerRef.current;
@@ -66,38 +69,38 @@ function Mermaid({ children, className }: Props) {
     const svgWidth = svgElement.getBBox?.()?.width || svgElement.clientWidth || 800;
     const svgHeight = svgElement.getBBox?.()?.height || svgElement.clientHeight || 600;
 
-    const padding = 60;
+    setSvgDimensions({ width: svgWidth, height: svgHeight });
+
+    const padding = 40;
     const scaleX = (containerRect.width - padding) / svgWidth;
     const scaleY = (containerRect.height - padding) / svgHeight;
 
-    return Math.max(0.1, Math.min(scaleX, scaleY, 2));
+    return Math.min(scaleX, scaleY, 1);
   }, []);
 
   useEffect(() => {
     const target = mermaidContainerRef.current;
     if (target) {
       setContent(target.innerText);
-      loadMermaid(target, target.innerText);
+      loadMermaid(target, target.innerText).then(() => {
+        setTimeout(() => {
+          const scale = calculateFitScale();
+          setInitialScale(scale);
+        }, 100);
+      });
     }
-  }, [children]);
+  }, [children, calculateFitScale]);
 
   return (
-    <div
-      ref={wrapperRef}
-      className={`relative cursor-pointer justify-center w-full h-full overflow-hidden rounded ${className || ""}`}
-    >
-      <TransformWrapper
-        initialScale={1}
-        minScale={0.1}
-        maxScale={4}
-        smooth
-        centerOnInit
-      >
-        {({ zoomIn, zoomOut, setTransform }) => {
+    <div ref={wrapperRef} className="relative cursor-pointer justify-center w-full overflow-auto rounded min-h-[300px]">
+      <TransformWrapper initialScale={initialScale} minScale={0.1} maxScale={3} smooth centerOnInit>
+        {({ zoomIn, zoomOut, setTransform, instance }) => {
           const handleFitToContainer = () => {
             const scale = calculateFitScale();
             setTransform(0, 0, scale);
           };
+
+          const viewportState = instance.transformState;
 
           return (
             <>
@@ -148,16 +151,42 @@ function Mermaid({ children, className }: Props) {
                   className="w-6 h-6"
                   size="icon"
                   variant="ghost"
-                  title={t("editor.mermaid.fitView")}
+                  title={t("editor.mermaid.resize")}
                   onClick={handleFitToContainer}
                 >
                   <RefreshCcw />
                 </Button>
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
+                  title={t("editor.mermaid.toggleMinimap")}
+                  onClick={() => setShowMinimap(!showMinimap)}
+                >
+                  <Map className={showMinimap ? "h-full w-full text-primary" : "h-full w-full"} />
+                </Button>
               </div>
-              <TransformComponent
-                wrapperStyle={{ width: "100%", height: "100%" }}
-                contentStyle={{ display: "flex", justifyContent: "center", alignItems: "center" }}
-              >
+              {showMinimap && svgDimensions && (
+                <div className="absolute bottom-10 left-2 z-40 p-2 bg-background/80 border rounded shadow-lg print:hidden">
+                  <div className="relative w-32 h-24 overflow-hidden rounded bg-muted">
+                    <div
+                      className="mermaid-preview scale-[0.1] origin-top-left"
+                      style={{ width: svgDimensions.width, height: svgDimensions.height }}
+                      dangerouslySetInnerHTML={{ __html: mermaidContainerRef.current?.innerHTML || "" }}
+                    />
+                    <div
+                      className="absolute border-2 border-primary bg-primary/10 pointer-events-none"
+                      style={{
+                        left: `${Math.max(0, Math.min(70, ((-viewportState.positionX / svgDimensions.width) * 100)))}%`,
+                        top: `${Math.max(0, Math.min(70, ((-viewportState.positionY / svgDimensions.height) * 100)))}%`,
+                        width: `${Math.min(100, (1 / viewportState.scale) * 100)}%`,
+                        height: `${Math.min(100, (1 / viewportState.scale) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              <TransformComponent>
                 <div className="mermaid" ref={mermaidContainerRef}>
                   {children}
                 </div>
