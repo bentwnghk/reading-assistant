@@ -449,8 +449,7 @@
       "copyText": "Copy Text",
       "zoomIn": "Zoom In",
       "zoomOut": "Zoom Out",
-      "resize": "Fit to View",
-      "toggleMinimap": "Toggle Minimap"
+      "fitView": "Fit to View"
     },
     "tooltip": {
       "bold": "Bold",

@@ -449,8 +449,7 @@
       "copyText": "複製文字",
       "zoomIn": "放大",
       "zoomOut": "縮小",
-      "resize": "適合視窗",
-      "toggleMinimap": "切換小地圖"
+      "fitView": "適合視窗"
     },
     "tooltip": {
       "bold": "粗體",
