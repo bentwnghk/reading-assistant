@@ -222,6 +222,7 @@
       "hideReview": "Hide Review",
       "retryMissed": "Retry Missed ({{count}})",
       "practiceMissedSkills": "Practice Missed Skills ({{count}})",
+      "practiceMissedSkillsDesc": "Generate new questions targeting skills you missed",
       "paragraph": "Para. {{num}}",
       "skills": {
         "mainIdea": "Main Idea",

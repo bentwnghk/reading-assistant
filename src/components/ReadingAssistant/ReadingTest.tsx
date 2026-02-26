@@ -475,24 +475,29 @@ function ReadingTest() {
                     )}
                   </Button>
                   {missedSkills.length > 0 && (
-                    <Button 
-                      variant="secondary" 
-                      onClick={handleTargetedPractice}
-                      disabled={isGenerating}
-                      size="lg"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
-                          {t("reading.readingTest.generating")}
-                        </>
-                      ) : (
-                        <>
-                          <Target className="h-5 w-5 mr-2" />
-                          {t("reading.readingTest.practiceMissedSkills", { count: missedSkills.length })}
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-sm text-muted-foreground">
+                        {t("reading.readingTest.practiceMissedSkillsDesc")}
+                      </p>
+                      <Button 
+                        variant="secondary" 
+                        onClick={handleTargetedPractice}
+                        disabled={isGenerating}
+                        size="lg"
+                      >
+                        {isGenerating ? (
+                          <>
+                            <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
+                            {t("reading.readingTest.generating")}
+                          </>
+                        ) : (
+                          <>
+                            <Target className="h-5 w-5 mr-2" />
+                            {t("reading.readingTest.practiceMissedSkills", { count: missedSkills.length })}
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   )}
                 </div>
               </>
