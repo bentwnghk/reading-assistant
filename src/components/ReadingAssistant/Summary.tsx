@@ -21,7 +21,8 @@ function Summary() {
   return (
     <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b mb-4">
-        <h3 className="font-semibold text-lg leading-10">
+        <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
+          <FileText className="h-5 w-5 text-muted-foreground" />
           {t("reading.summary.title")}
         </h3>
         {!summary && (

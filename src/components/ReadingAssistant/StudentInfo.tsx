@@ -1,5 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
+import { User } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -17,7 +18,8 @@ function StudentInfo() {
 
   return (
     <section className="p-4 border rounded-md">
-      <h3 className="font-semibold text-lg border-b mb-4 leading-10">
+      <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center gap-2">
+        <User className="h-5 w-5 text-muted-foreground" />
         {t("reading.studentInfo.title")}
       </h3>
       <div className="space-y-4">

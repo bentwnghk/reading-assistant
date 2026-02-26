@@ -11,6 +11,7 @@ import {
   Loader2,
   Brain,
   Download,
+  PenTool,
 } from "lucide-react";
 import {
   Document,
@@ -861,7 +862,8 @@ function AdaptedText() {
   return (
     <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b pb-4 mb-4">
-        <h3 className="font-semibold text-lg">
+        <h3 className="font-semibold text-lg flex items-center gap-2">
+          <PenTool className="h-5 w-5 text-muted-foreground" />
           {t("reading.adaptedText.title")}
         </h3>
         <div className="flex items-center gap-4">

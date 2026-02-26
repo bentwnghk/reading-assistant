@@ -148,7 +148,10 @@ function ImageUpload() {
   return (
     <section className="p-4 border rounded-md mt-4">
       <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
-        {t("reading.imageUpload.title")}
+        <span className="flex items-center gap-2">
+          <Upload className="h-5 w-5 text-muted-foreground" />
+          {t("reading.imageUpload.title")}
+        </span>
         {(originalImages.length > 0 || extractedText) && (
           <Button variant="outline" size="sm" onClick={clearAllImages}>
             <X className="h-4 w-4 mr-1" />
