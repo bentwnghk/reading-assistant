@@ -84,7 +84,7 @@ function Mermaid({ children, className }: Props) {
   return (
     <div
       ref={wrapperRef}
-      className={`relative cursor-pointer justify-center w-full h-full overflow-hidden rounded ${className || ""}`}
+      className={`relative w-full h-full overflow-hidden rounded [&_.react-transform-wrapper]:!w-full [&_.react-transform-wrapper]:!h-full ${className ?? ""}`}
     >
       <TransformWrapper
         initialScale={1}
