@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { Waypoints, LoaderCircle, Brain } from "lucide-react";
+import { Waypoints, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -22,7 +22,7 @@ function MindMap() {
     <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b mb-4">
         <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
-          <Brain className="h-5 w-5 text-muted-foreground" />
+          <Waypoints className="h-5 w-5 text-muted-foreground" />
           {t("reading.mindMap.title")}
         </h3>
         <Button

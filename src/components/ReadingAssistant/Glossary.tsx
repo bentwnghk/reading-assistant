@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, Download, Table, Layers, ClipboardList, SpellCheck, BookOpen } from "lucide-react";
+import { BookMarked, LoaderCircle, Download, Table, Layers, ClipboardList, SpellCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table as DataTable,
@@ -118,7 +118,7 @@ function Glossary() {
     <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b pb-4 mb-4">
         <h3 className="font-semibold text-lg flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-muted-foreground" />
+          <BookMarked className="h-5 w-5 text-muted-foreground" />
           {t("reading.glossary.title")}
         </h3>
         <div className="flex gap-2">

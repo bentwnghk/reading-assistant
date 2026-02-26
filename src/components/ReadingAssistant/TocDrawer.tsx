@@ -4,10 +4,10 @@ import {
   User,
   Upload,
   FileText,
-  Brain,
-  PenTool,
-  Target,
+  Waypoints,
   BookOpen,
+  ClipboardCheck,
+  BookMarked,
   Check,
 } from "lucide-react";
 import {
@@ -53,7 +53,7 @@ const sections = [
   },
   {
     id: "section-mindmap",
-    icon: Brain,
+    icon: Waypoints,
     labelKey: "toc.mindmap",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.mindMap,
@@ -62,7 +62,7 @@ const sections = [
   },
   {
     id: "section-adapted",
-    icon: PenTool,
+    icon: BookOpen,
     labelKey: "toc.adapted",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.adaptedText,
@@ -71,7 +71,7 @@ const sections = [
   },
   {
     id: "section-test",
-    icon: Target,
+    icon: ClipboardCheck,
     labelKey: "toc.test",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       store.testCompleted,
@@ -80,7 +80,7 @@ const sections = [
   },
   {
     id: "section-glossary",
-    icon: BookOpen,
+    icon: BookMarked,
     labelKey: "toc.glossary",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       store.glossary.length > 0,
