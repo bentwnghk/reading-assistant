@@ -474,7 +474,7 @@ function AdaptedText() {
       children.push(sectionHeading(t("reading.adaptedText.originalTab")));
       children.push(...createDocxWithHighlights(extractedText, highlightedWords, analyzedSentences));
 
-      // ── Section 2: Vocabulary Glossary ───────────────────────────────────
+      // ── Section 2: Vocabulary ───────────────────────────────────
       if (includeGlossary && glossary.length > 0) {
         children.push(sectionHeading(t("reading.glossary.title")));
 
