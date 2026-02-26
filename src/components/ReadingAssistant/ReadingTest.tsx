@@ -476,7 +476,7 @@ function ReadingTest() {
                   </Button>
                   {missedSkills.length > 0 && (
                     <div className="flex flex-col items-center gap-2">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground">
                         {t("reading.readingTest.practiceMissedSkillsDesc")}
                       </p>
                       <Button 
