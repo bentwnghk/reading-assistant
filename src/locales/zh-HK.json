@@ -448,7 +448,8 @@
       "copyText": "複製文字",
       "zoomIn": "放大",
       "zoomOut": "縮小",
-      "resize": "重設大小"
+      "resize": "重設大小",
+      "fullscreen": "全螢幕"
     },
     "tooltip": {
       "bold": "粗體",

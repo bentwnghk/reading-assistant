@@ -10,8 +10,14 @@ import {
   ZoomIn,
   ZoomOut,
   RefreshCcw,
+  Maximize2,
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { downloadFile } from "@/utils/file";
 
 type Props = {
@@ -34,8 +40,11 @@ async function loadMermaid(element: HTMLElement, code: string) {
 function Mermaid({ children }: Props) {
   const { t } = useTranslation();
   const mermaidContainerRef = useRef<HTMLDivElement>(null);
+  const modalMermaidRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<string>("");
   const [waitingCopy, setWaitingCopy] = useState<boolean>(false);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState<boolean>(false);
+  const [modalSvg, setModalSvg] = useState<string>("");
 
   function downloadSvg() {
     const target = mermaidContainerRef.current;
@@ -55,6 +64,20 @@ function Mermaid({ children }: Props) {
     }
   };
 
+  const openFullscreen = () => {
+    const target = mermaidContainerRef.current;
+    if (target) {
+      setModalSvg(target.innerHTML);
+      setIsFullscreenOpen(true);
+    }
+  };
+
+  const downloadModalSvg = () => {
+    if (modalSvg) {
+      downloadFile(modalSvg, Date.now() + ".svg", "image/svg+xml");
+    }
+  };
+
   useEffect(() => {
     const target = mermaidContainerRef.current;
     if (target) {
@@ -64,72 +87,153 @@ function Mermaid({ children }: Props) {
   }, [children]);
 
   return (
-    <div className="relative cursor-pointer justify-center w-full overflow-auto rounded">
-      <TransformWrapper initialScale={2} smooth>
-        {({ zoomIn, zoomOut, resetTransform }) => (
-          <>
-            <div className="absolute top-0 right-0 z-50 flex gap-1 print:hidden">
-              <Button
-                className="w-6 h-6"
-                size="icon"
-                variant="ghost"
-                title={t("editor.mermaid.downloadSvg")}
-                onClick={() => downloadSvg()}
-              >
-                <Download />
-              </Button>
-              <Button
-                className="w-6 h-6"
-                size="icon"
-                variant="ghost"
-                title={t("editor.mermaid.copyText")}
-                onClick={() => handleCopy()}
-              >
-                {waitingCopy ? (
-                  <CopyCheck className="h-full w-full text-green-500" />
-                ) : (
-                  <Copy className="h-full w-full" />
-                )}
-              </Button>
-            </div>
-            <div className="absolute bottom-0 right-0 z-50 flex gap-1 print:hidden">
-              <Button
-                className="w-6 h-6"
-                size="icon"
-                variant="ghost"
-                title={t("editor.mermaid.zoomIn")}
-                onClick={() => zoomIn()}
-              >
-                <ZoomIn />
-              </Button>
-              <Button
-                className="w-6 h-6"
-                size="icon"
-                variant="ghost"
-                title={t("editor.mermaid.zoomOut")}
-                onClick={() => zoomOut()}
-              >
-                <ZoomOut />
-              </Button>
-              <Button
-                className="w-6 h-6"
-                size="icon"
-                variant="ghost"
-                title={t("editor.mermaid.resize")}
-                onClick={() => resetTransform()}
-              >
-                <RefreshCcw />
-              </Button>
-            </div>
-            <TransformComponent>
-              <div className="mermaid" ref={mermaidContainerRef}>
-                {children}
+    <>
+      <div className="relative cursor-pointer justify-center w-full overflow-auto rounded">
+        <TransformWrapper initialScale={2} smooth>
+          {({ zoomIn, zoomOut, resetTransform }) => (
+            <>
+              <div className="absolute top-0 right-0 z-50 flex gap-1 print:hidden">
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
+                  title={t("editor.mermaid.fullscreen")}
+                  onClick={() => openFullscreen()}
+                >
+                  <Maximize2 />
+                </Button>
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
+                  title={t("editor.mermaid.downloadSvg")}
+                  onClick={() => downloadSvg()}
+                >
+                  <Download />
+                </Button>
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
+                  title={t("editor.mermaid.copyText")}
+                  onClick={() => handleCopy()}
+                >
+                  {waitingCopy ? (
+                    <CopyCheck className="h-full w-full text-green-500" />
+                  ) : (
+                    <Copy className="h-full w-full" />
+                  )}
+                </Button>
               </div>
-            </TransformComponent>
-          </>
-        )}
-      </TransformWrapper>
-    </div>
+              <div className="absolute bottom-0 right-0 z-50 flex gap-1 print:hidden">
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
+                  title={t("editor.mermaid.zoomIn")}
+                  onClick={() => zoomIn()}
+                >
+                  <ZoomIn />
+                </Button>
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
+                  title={t("editor.mermaid.zoomOut")}
+                  onClick={() => zoomOut()}
+                >
+                  <ZoomOut />
+                </Button>
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
+                  title={t("editor.mermaid.resize")}
+                  onClick={() => resetTransform()}
+                >
+                  <RefreshCcw />
+                </Button>
+              </div>
+              <TransformComponent>
+                <div className="mermaid" ref={mermaidContainerRef}>
+                  {children}
+                </div>
+              </TransformComponent>
+            </>
+          )}
+        </TransformWrapper>
+      </div>
+
+      <Dialog open={isFullscreenOpen} onOpenChange={setIsFullscreenOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-background/95 backdrop-blur-sm">
+          <DialogTitle className="sr-only">
+            {t("editor.mermaid.fullscreen")}
+          </DialogTitle>
+          <TransformWrapper
+            initialScale={1}
+            minScale={0.1}
+            maxScale={5}
+            centerOnInit
+            smooth
+          >
+            {({ zoomIn, zoomOut, resetTransform, centerView }) => (
+              <div className="relative w-full h-full flex flex-col">
+                <div className="absolute top-2 right-2 z-50 flex gap-1">
+                  <Button
+                    className="w-8 h-8"
+                    size="icon"
+                    variant="secondary"
+                    title={t("editor.mermaid.downloadSvg")}
+                    onClick={() => downloadModalSvg()}
+                  >
+                    <Download />
+                  </Button>
+                </div>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-2 bg-background/80 rounded-lg p-2 backdrop-blur-sm">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    title={t("editor.mermaid.zoomIn")}
+                    onClick={() => zoomIn()}
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    title={t("editor.mermaid.zoomOut")}
+                    onClick={() => zoomOut()}
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    title={t("editor.mermaid.resize")}
+                    onClick={() => {
+                      resetTransform();
+                      centerView();
+                    }}
+                  >
+                    <RefreshCcw className="h-4 w-4" />
+                  </Button>
+                </div>
+                <TransformComponent
+                  wrapperStyle={{ width: "100%", height: "100%" }}
+                  contentStyle={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}
+                >
+                  <div
+                    ref={modalMermaidRef}
+                    className="mermaid"
+                    dangerouslySetInnerHTML={{ __html: modalSvg }}
+                  />
+                </TransformComponent>
+              </div>
+            )}
+          </TransformWrapper>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

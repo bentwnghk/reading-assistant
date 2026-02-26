@@ -448,7 +448,8 @@
       "copyText": "Copy Text",
       "zoomIn": "Zoom In",
       "zoomOut": "Zoom Out",
-      "resize": "Resize"
+      "resize": "Resize",
+      "fullscreen": "Fullscreen"
     },
     "tooltip": {
       "bold": "Bold",
