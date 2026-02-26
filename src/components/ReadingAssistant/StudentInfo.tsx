@@ -11,9 +11,26 @@ function StudentInfo() {
   const { studentAge, setStudentAge } = useReadingStore();
 
   function getFormLevel(age: number): string {
-    if (age <= 11) return t("reading.primary3to6");
-    if (age <= 14) return t("reading.form1to3");
-    return t("reading.form4to6");
+    const levelMap: Record<number, string> = {
+      8: t("reading.levels.primary3"),
+      9: t("reading.levels.primary4"),
+      10: t("reading.levels.primary5"),
+      11: t("reading.levels.primary6"),
+      12: t("reading.levels.form1"),
+      13: t("reading.levels.form2"),
+      14: t("reading.levels.form3"),
+      15: t("reading.levels.form4"),
+      16: t("reading.levels.form5"),
+      17: t("reading.levels.form6"),
+      18: t("reading.levels.dse"),
+    };
+    return levelMap[age] || t("reading.levels.form6");
+  }
+
+  function getLevelColor(age: number): string {
+    if (age <= 11) return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
+    if (age <= 14) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+    return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
   }
 
   return (
@@ -53,9 +70,7 @@ function StudentInfo() {
           </span>
           <span className={cn(
             "px-2 py-1 rounded text-sm font-medium",
-            studentAge <= 11 ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" :
-            studentAge <= 14 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
-            "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+            getLevelColor(studentAge)
           )}>
             {getFormLevel(studentAge)}
           </span>

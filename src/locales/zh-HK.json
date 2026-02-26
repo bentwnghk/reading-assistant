@@ -130,6 +130,19 @@
     "primary3to6": "小三至小六",
     "form1to3": "中一至中三",
     "form4to6": "中四至中六",
+    "levels": {
+      "primary3": "小三",
+      "primary4": "小四",
+      "primary5": "小五",
+      "primary6": "小六",
+      "form1": "中一",
+      "form2": "中二",
+      "form3": "中三",
+      "form4": "中四",
+      "form5": "中五",
+      "form6": "中六",
+      "dse": "DSE程度"
+    },
     "studentInfo": {
       "title": "學生資料",
       "ageLabel": "你的年齡",

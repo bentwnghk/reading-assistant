@@ -130,6 +130,19 @@
     "primary3to6": "Primary 3-6",
     "form1to3": "Secondary 1-3",
     "form4to6": "Secondary 4-6",
+    "levels": {
+      "primary3": "Primary 3",
+      "primary4": "Primary 4",
+      "primary5": "Primary 5",
+      "primary6": "Primary 6",
+      "form1": "Secondary 1",
+      "form2": "Secondary 2",
+      "form3": "Secondary 3",
+      "form4": "Secondary 4",
+      "form5": "Secondary 5",
+      "form6": "Secondary 6",
+      "dse": "DSE Level"
+    },
     "studentInfo": {
       "title": "Student Information",
       "ageLabel": "Your Age",
