@@ -98,7 +98,7 @@ function MindMap() {
               <Minimize2 className="h-4 w-4" />
             </Button>
           </DialogHeader>
-          <div className="flex-1 w-full overflow-hidden">
+          <div className="flex-1 w-full h-full overflow-hidden">
             {mindMap && <MagicDown>{mindMap}</MagicDown>}
           </div>
         </DialogContent>

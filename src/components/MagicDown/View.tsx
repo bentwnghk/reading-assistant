@@ -49,18 +49,20 @@ function MarkdownBlock({ children: content, disableMath, ...rest }: MarkdownProp
       ];
 
   return (
-    <ReactMarkdown
-      {...rest}
-      remarkPlugins={baseRemarkPlugins}
-      rehypePlugins={baseRehypePlugins}
-      disallowedElements={["script", "form"]}
-      components={{
+    <div className="w-full h-full">
+      <ReactMarkdown
+        {...rest}
+        remarkPlugins={baseRemarkPlugins}
+        rehypePlugins={baseRehypePlugins}
+        disallowedElements={["script", "form"]}
+        components={{
         pre: (props) => {
           const { children, className, ...rest } = props;
+          const isMermaid = className?.includes("language-mermaid");
           return (
             <pre
               {...omit(rest, ["node"])}
-              className={clsx("my-4 not-prose", className)}
+              className={clsx("my-4 not-prose", isMermaid && "h-full my-0", className)}
             >
               {children}
             </pre>
@@ -169,6 +171,7 @@ function MarkdownBlock({ children: content, disableMath, ...rest }: MarkdownProp
     >
       {content}
     </ReactMarkdown>
+    </div>
   );
 }
 
