@@ -6,23 +6,23 @@ This document provides essential guidelines and technical references for AI agen
 
 ## 🚀 Development Workflow & Commands
 
-The project uses **pnpm** as the primary package manager.
+The project uses **npm** as the primary package manager.
 
 ### Core Commands
 
-- **Install Dependencies**: `pnpm install`
-- **Development Server**: `pnpm dev` (Runs at `http://localhost:3000` with Turbopack)
-- **Build Project**: `pnpm build`
-- **Static Export**: `pnpm build:export` (Generates `out/` directory)
-- **Standalone Build**: `pnpm build:standalone`
-- **Start Production**: `pnpm start`
-- **Linting**: `pnpm lint`
+- **Install Dependencies**: `npm install`
+- **Development Server**: `npm run dev` (Runs at `http://localhost:3000` with Turbopack)
+- **Build Project**: `npm run build`
+- **Static Export**: `npm run build:export` (Generates `out/` directory)
+- **Standalone Build**: `npm run build:standalone`
+- **Start Production**: `npm run start`
+- **Linting**: `npm run lint`
 
 ### Testing
 
 - **Status**: Currently, there are no automated tests in the codebase.
 - **Guideline**: If adding tests, use **Vitest** or **Jest** following standard Next.js patterns. Place test files next to the code they test (e.g., `ComponentName.test.tsx`) or in a `__tests__` directory.
-- **Single Test**: To run a single test (if added), use `pnpm vitest run path/to/file.test.ts`.
+- **Single Test**: To run a single test (if added), use `npm run vitest run path/to/file.test.ts`.
 
 ---
 
@@ -119,7 +119,7 @@ The project uses **pnpm** as the primary package manager.
 - **Read First**: Always read the relevant file and its neighbors before proposing edits.
 - **Follow Patterns**: If adding a new component, look at existing components in `src/components/ReadingAssistant/` for reference implementations.
 - **Keep it Focused**: Make small, cohesive changes. Avoid unrelated refactors.
-- **Validate**: Run `pnpm lint` and `pnpm build` to ensure your changes don't break the build.
+- **Validate**: Run `npm run lint` and `npm run build` to ensure your changes don't break the build.
 - **Communication**: Summarize what changed, where, and why. Call out tradeoffs, assumptions, and known limitations. If validation could not be run, say so explicitly.
 - **Clarity**: Prefer clarity and simplicity over cleverness. Preserve existing behavior unless the task explicitly requires changes.
 - **UI Consistency**: Ensure all new UI elements support both light and dark modes using Tailwind `dark:` classes.
