@@ -1,7 +1,7 @@
 "use client";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Check } from "lucide-react";
+import { Check, Rocket } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { cn } from "@/utils/style";
 
@@ -40,7 +40,8 @@ function WorkflowProgress() {
   return (
     <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-lg">
+        <h3 className="font-semibold text-lg flex items-center gap-2">
+          <Rocket className="h-5 w-5 text-muted-foreground" />
           {t("reading.workflow.title")}
         </h3>
         <span className="text-sm text-muted-foreground">
