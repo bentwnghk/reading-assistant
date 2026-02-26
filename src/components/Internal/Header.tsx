@@ -7,6 +7,7 @@ import {
   Keyboard,
   Info,
   BookOpen,
+  BookCopy,
   PenTool,
   Volume2,
   Camera,
@@ -213,12 +214,12 @@ function Header() {
     <>
       <header className="flex justify-between items-center my-6 max-sm:my-4 print:hidden">
         <h1 className="text-left text-xl font-semibold flex items-center gap-1.5 relative overflow-hidden group">
-          <BookOpen className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
+          <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
           <span className="text-blue-600 dark:text-blue-400">Mr.</span>
           <span className="text-2xl leading-none">🆖</span>
           <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative">
             ProReader
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 dark:via-white/20 to-transparent animate-shimmer" />
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent animate-shimmer" />
           </span>
           <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-normal">v{VERSION}</span>
         </h1>
@@ -288,7 +289,7 @@ function Header() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <span className="text-2xl">📚</span>
+              <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400" />
               {t("header.about.title")}
             </DialogTitle>
             <p className="text-muted-foreground text-sm mt-1">
