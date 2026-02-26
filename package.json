@@ -1,7 +1,7 @@
 {
   "name": "reading-assistant",
   "description": "Use any LLMs (Large Language Models) for assisting students with English reading.",
-  "version": "1.0",
+  "version": "1.1",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/u14app/reading-assistant"
