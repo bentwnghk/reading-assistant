@@ -2,7 +2,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { Waypoints, LoaderCircle, Maximize2 } from "lucide-react";
+import { Waypoints, LoaderCircle, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,13 +13,7 @@ import {
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
-const Mermaid = dynamic(() => import("@/components/MagicDown/Mermaid"));
-
-/** Extract the raw diagram code from a fenced mermaid block. */
-function extractMermaidCode(markdown: string): string {
-  const match = markdown.match(/```mermaid\s*([\s\S]*?)```/);
-  return match ? match[1].trim() : markdown.trim();
-}
+const MagicDown = dynamic(() => import("@/components/MagicDown/View"));
 
 function MindMap() {
   const { t } = useTranslation();
@@ -32,8 +26,6 @@ function MindMap() {
     return null;
   }
 
-  const mermaidCode = mindMap ? extractMermaidCode(mindMap) : null;
-
   return (
     <>
       <section className="p-4 border rounded-md mt-4">
@@ -43,7 +35,7 @@ function MindMap() {
             {t("reading.mindMap.title")}
           </h3>
           <div className="flex items-center gap-2">
-            {mermaidCode && (
+            {mindMap && (
               <Button
                 onClick={() => setIsModalOpen(true)}
                 size="sm"
@@ -79,9 +71,9 @@ function MindMap() {
           </div>
         </div>
 
-        {mermaidCode ? (
+        {mindMap ? (
           <div className="w-full h-[500px] border rounded-md overflow-hidden">
-            <Mermaid>{mermaidCode}</Mermaid>
+            <MagicDown>{mindMap}</MagicDown>
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
@@ -92,15 +84,22 @@ function MindMap() {
       </section>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] flex flex-col p-4 gap-2">
-          <DialogHeader className="flex-shrink-0">
+        <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-2 flex flex-row items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <Waypoints className="h-5 w-5 text-muted-foreground" />
               {t("reading.mindMap.title")}
             </DialogTitle>
+            <Button
+              onClick={() => setIsModalOpen(false)}
+              size="sm"
+              variant="ghost"
+            >
+              <Minimize2 className="h-4 w-4" />
+            </Button>
           </DialogHeader>
-          <div className="flex-1 min-h-0 overflow-hidden rounded-md border">
-            {mermaidCode && <Mermaid>{mermaidCode}</Mermaid>}
+          <div className="flex-1 w-full overflow-hidden">
+            {mindMap && <MagicDown>{mindMap}</MagicDown>}
           </div>
         </DialogContent>
       </Dialog>
