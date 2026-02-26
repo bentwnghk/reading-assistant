@@ -201,8 +201,7 @@
       "generate": "生成思維導圖",
       "generating": "正在生成...",
       "regenerate": "重新生成",
-      "emptyTip": "點擊上方按鈕生成視覺化思維導圖",
-      "expand": "全螢幕"
+      "emptyTip": "點擊上方按鈕生成視覺化思維導圖"
     },
     "readingTest": {
       "title": "閱讀測驗",
@@ -449,8 +448,7 @@
       "copyText": "複製文字",
       "zoomIn": "放大",
       "zoomOut": "縮小",
-      "resize": "適合視窗",
-      "toggleMinimap": "切換小地圖"
+      "resize": "重設大小"
     },
     "tooltip": {
       "bold": "粗體",
