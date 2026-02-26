@@ -201,7 +201,8 @@
       "generate": "Generate Mind Map",
       "generating": "Generating...",
       "regenerate": "Regenerate",
-      "emptyTip": "Click the button above to generate a visual mind map"
+      "emptyTip": "Click the button above to generate a visual mind map",
+      "expand": "Fullscreen"
     },
     "readingTest": {
       "title": "Reading Test",
@@ -448,7 +449,8 @@
       "copyText": "Copy Text",
       "zoomIn": "Zoom In",
       "zoomOut": "Zoom Out",
-      "resize": "Resize"
+      "resize": "Fit to View",
+      "toggleMinimap": "Toggle Minimap"
     },
     "tooltip": {
       "bold": "Bold",
