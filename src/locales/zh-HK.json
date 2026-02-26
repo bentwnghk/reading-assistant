@@ -13,7 +13,7 @@
     "mindmap": "思維導圖",
     "adapted": "改寫文字",
     "test": "閱讀測驗",
-    "glossary": "詞彙表"
+    "glossary": "詞彙"
   },
   "settingsBanner": {
     "message": "請在設定中配置你的 API 金鑰或訪問密碼以使用此應用程式。",
@@ -258,7 +258,7 @@
       }
     },
     "glossary": {
-      "title": "詞彙表",
+      "title": "詞彙",
       "generate": "生成詞彙表",
       "generating": "正在生成...",
       "regenerate": "重新生成",
@@ -368,7 +368,7 @@
       "test": "閱讀測驗",
       "analyze": "分析句子",
       "highlight": "標記生字",
-      "glossary": "詞彙表",
+      "glossary": "詞彙",
       "spelling": "拼字遊戲",
       "vocabQuiz": "詞彙測驗"
     }
