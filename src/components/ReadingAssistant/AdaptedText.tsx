@@ -358,9 +358,6 @@ function AdaptedText() {
       selectedText.length > 4096
     ) {
       setSelection(null);
-      if (activeTab === "original") {
-        setTutorChatSelectedText("");
-      }
       return;
     }
 
@@ -380,9 +377,6 @@ function AdaptedText() {
         }
       } else {
         setSelection(null);
-        if (activeTab === "original") {
-          setTutorChatSelectedText("");
-        }
       }
     }
   }, [activeTab, setTutorChatSelectedText]);
