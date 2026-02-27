@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dialog";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
+import { useGlobalStore } from "@/store/global";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -309,6 +310,8 @@ function AdaptedText() {
     getSentenceAnalysis,
   } = useReadingStore();
 
+  const { setTutorChatSelectedText } = useGlobalStore();
+
   const {
     ttsVoice,
     mode,
@@ -355,6 +358,9 @@ function AdaptedText() {
       selectedText.length > 4096
     ) {
       setSelection(null);
+      if (activeTab === "original") {
+        setTutorChatSelectedText("");
+      }
       return;
     }
 
@@ -369,11 +375,17 @@ function AdaptedText() {
           x: rect.left + rect.width / 2,
           y: rect.bottom + 8,
         });
+        if (activeTab === "original") {
+          setTutorChatSelectedText(selectedText);
+        }
       } else {
         setSelection(null);
+        if (activeTab === "original") {
+          setTutorChatSelectedText("");
+        }
       }
     }
-  }, []);
+  }, [activeTab, setTutorChatSelectedText]);
 
   const handleAddWord = useCallback(
     (e?: React.MouseEvent | React.TouchEvent) => {

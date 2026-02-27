@@ -12,7 +12,7 @@ const ReadingTutorChat = dynamic(() => import("./ReadingTutorChat"), {
 });
 
 function TutorChatFab() {
-  const { openTutorChat, setOpenTutorChat, tutorChatSelectedText, setTutorChatSelectedText } = useGlobalStore();
+  const { openTutorChat, setOpenTutorChat, setTutorChatSelectedText } = useGlobalStore();
   const { extractedText } = useReadingStore();
   const [mounted, setMounted] = useState(false);
 
@@ -53,10 +53,7 @@ function TutorChatFab() {
       </Button>
 
       {openTutorChat && (
-        <ReadingTutorChat
-          initialSelectedText={tutorChatSelectedText}
-          onClose={handleClose}
-        />
+        <ReadingTutorChat onClose={handleClose} />
       )}
     </>
   );

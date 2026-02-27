@@ -6,19 +6,20 @@ import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle } from "l
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useReadingStore } from "@/store/reading";
+import { useGlobalStore } from "@/store/global";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import ChatMessageBubble from "./ChatMessageBubble";
 import QuickQuestions from "./QuickQuestions";
 import { cn } from "@/utils/style";
 
 interface ReadingTutorChatProps {
-  initialSelectedText?: string;
   onClose?: () => void;
 }
 
-function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProps) {
+function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const { t } = useTranslation();
   const { chatHistory, addChatMessage, clearChatHistory, extractedText } = useReadingStore();
+  const { tutorChatSelectedText, setTutorChatSelectedText } = useGlobalStore();
   const { askTutor } = useReadingAssistant();
   
   const [input, setInput] = useState("");
@@ -40,32 +41,35 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
   }, [chatHistory, streamingContent, scrollToBottom]);
 
   useEffect(() => {
-    if (initialSelectedText && inputRef.current) {
+    if (tutorChatSelectedText && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [initialSelectedText]);
+  }, [tutorChatSelectedText]);
 
   const handleSend = async (question?: string, selectedText?: string) => {
     const messageText = question || input.trim();
     if (!messageText || isLoading) return;
+
+    const contextText = selectedText || tutorChatSelectedText;
 
     const userMessage: ChatMessage = {
       id: nanoid(),
       role: "user",
       content: messageText,
       timestamp: Date.now(),
-      selectedText: selectedText || initialSelectedText,
+      selectedText: contextText,
     };
 
     addChatMessage(userMessage);
     setInput("");
     setIsLoading(true);
     setStreamingContent("");
+    setTutorChatSelectedText("");
 
     const response = await askTutor(
       messageText,
       chatHistory,
-      selectedText || initialSelectedText,
+      contextText,
       (chunk) => setStreamingContent(chunk)
     );
 
@@ -220,9 +224,9 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
             )}
           </div>
         </div>
-        {initialSelectedText && (
+        {tutorChatSelectedText && (
           <div className="mt-2 text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 truncate">
-            {t("reading.tutor.aboutSelection")}: &ldquo;{initialSelectedText}&rdquo;
+            {t("reading.tutor.aboutSelection")}: &ldquo;{tutorChatSelectedText}&rdquo;
           </div>
         )}
       </div>
