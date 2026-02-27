@@ -334,6 +334,8 @@ function AdaptedText() {
 
   // ── interactive-text state ──
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const adaptedContainerRef = useRef<HTMLDivElement | null>(null);
+  const simplifiedContainerRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [selection, setSelection] = useState<{
     text: string;
@@ -364,6 +366,8 @@ function AdaptedText() {
     if (selectionObj && selectionObj.rangeCount > 0) {
       const range = selectionObj.getRangeAt(0);
       const container = containerRef.current;
+      const adaptedContainer = adaptedContainerRef.current;
+      const simplifiedContainer = simplifiedContainerRef.current;
 
       if (container && container.contains(range.commonAncestorContainer)) {
         const rect = range.getBoundingClientRect();
@@ -372,14 +376,16 @@ function AdaptedText() {
           x: rect.left + rect.width / 2,
           y: rect.bottom + 8,
         });
-        if (activeTab === "original") {
-          setTutorChatSelectedText(selectedText);
-        }
+        setTutorChatSelectedText(selectedText);
+      } else if (adaptedContainer && adaptedContainer.contains(range.commonAncestorContainer)) {
+        setTutorChatSelectedText(selectedText);
+      } else if (simplifiedContainer && simplifiedContainer.contains(range.commonAncestorContainer)) {
+        setTutorChatSelectedText(selectedText);
       } else {
         setSelection(null);
       }
     }
-  }, [activeTab, setTutorChatSelectedText]);
+  }, [setTutorChatSelectedText]);
 
   const handleAddWord = useCallback(
     (e?: React.MouseEvent | React.TouchEvent) => {
@@ -1039,7 +1045,10 @@ function AdaptedText() {
         <TabsContent value="adapted" className="mt-4">
           {adaptedText ? (
             <>
-              <div className="prose prose-slate dark:prose-invert max-w-full">
+              <div
+                ref={adaptedContainerRef}
+                className="prose prose-slate dark:prose-invert max-w-full"
+              >
                 <MagicDown
                   value={adaptedText}
                   onChange={() => {}}
@@ -1101,7 +1110,10 @@ function AdaptedText() {
         <TabsContent value="simplified" className="mt-4">
           {simplifiedText ? (
             <>
-              <div className="prose prose-slate dark:prose-invert max-w-full">
+              <div
+                ref={simplifiedContainerRef}
+                className="prose prose-slate dark:prose-invert max-w-full"
+              >
                 <MagicDown
                   value={simplifiedText}
                   onChange={() => {}}
