@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - dev
+      - aitutor
     tags:
       # Push events matching v*, such as v1.0, v20.15.10, etc. to trigger workflows
       - "v*"
