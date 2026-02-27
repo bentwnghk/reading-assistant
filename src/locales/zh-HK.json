@@ -295,6 +295,8 @@
         "clickFlip": "點擊翻轉"
       },
       "quiz": {
+        "title": "詞彙測驗",
+        "answerKeyTitle": "詞彙測驗答案",
         "startQuiz": "開始測驗",
         "submitQuiz": "提交",
         "retryQuiz": "全部重試",
@@ -314,7 +316,11 @@
         "pressKey": "按",
         "wordsAvailable": "有 {{count}} 個生字",
         "scoreFormat": "{{correct}} / {{total}} 正確",
-        "lastScore": "上次得分："
+        "lastScore": "上次得分：",
+        "downloadWord": "下載 Word",
+        "downloadBlank": "下載空白試卷",
+        "downloadWithAnswers": "下載含答案",
+        "correctAnswer": "正確答案"
       },
       "spelling": {
         "title": "拼字挑戰",

@@ -1,10 +1,27 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target } from "lucide-react";
+import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target, FileDown, ChevronDown } from "lucide-react";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  AlignmentType,
+  convertInchesToTwip,
+  PageOrientation,
+} from "docx";
+import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
@@ -115,7 +132,7 @@ function generateQuizQuestions(sortedGlossary: GlossaryEntry[]): VocabularyQuizQ
 
 function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
-  const { id, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
+  const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
 
   const [quizState, setQuizState] = useState<QuizState>("idle");
@@ -206,6 +223,140 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     setShowReview(false);
   };
 
+  const downloadWord = useCallback(async (includeAnswers: boolean = false) => {
+    const sortedGlossary = sortGlossaryByPriority(glossary, glossaryRatings, {
+      prioritize: prioritizeHardWords,
+      shuffle: true,
+    });
+    const questionsToExport = questions.length > 0 ? questions : generateQuizQuestions(sortedGlossary);
+    
+    if (!questionsToExport.length) return;
+
+    const title = docTitle || extractedText.split(/\n/).find((l) => l.trim()) || "Vocabulary Quiz";
+    const generatedAt = new Date().toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const children: Paragraph[] = [];
+
+    children.push(
+      new Paragraph({
+        text: title,
+        heading: HeadingLevel.TITLE,
+        alignment: AlignmentType.CENTER,
+      })
+    );
+
+    const subtitle = includeAnswers 
+      ? t("reading.glossary.quiz.answerKeyTitle")
+      : t("reading.glossary.quiz.title");
+
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `${subtitle} - Generated on ${generatedAt}`,
+            italics: true,
+            color: "595959",
+          }),
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 },
+      })
+    );
+
+    questionsToExport.forEach((question, index) => {
+      const typeLabel = question.type === "word-to-definition"
+        ? t("reading.glossary.quiz.chooseDefinition")
+        : question.type === "definition-to-word"
+        ? t("reading.glossary.quiz.chooseWord")
+        : t("reading.glossary.quiz.fillBlank");
+
+      children.push(
+        new Paragraph({
+          text: `${index + 1}. ${question.question}`,
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 300, after: 100 },
+        })
+      );
+
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: `[${typeLabel}]`, color: "666666", size: 20 }),
+          ],
+          spacing: { after: 100 },
+        })
+      );
+
+      question.options.forEach((option) => {
+        const isCorrect = option === question.correctAnswer;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `   ${option}`,
+                bold: isCorrect && includeAnswers,
+                color: isCorrect && includeAnswers ? "22C55E" : "000000",
+              }),
+            ],
+            spacing: { after: 50 },
+          })
+        );
+      });
+
+      if (includeAnswers) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${t("reading.glossary.quiz.correctAnswer")}: `, bold: true }),
+              new TextRun({ text: question.correctAnswer, color: "22C55E" }),
+            ],
+            spacing: { before: 100, after: 200 },
+          })
+        );
+      }
+    });
+
+    try {
+      const doc = new Document({
+        sections: [
+          {
+            properties: {
+              page: {
+                margin: {
+                  top: convertInchesToTwip(1),
+                  bottom: convertInchesToTwip(1),
+                  left: convertInchesToTwip(1.1),
+                  right: convertInchesToTwip(1.1),
+                },
+                size: { orientation: PageOrientation.PORTRAIT },
+              },
+            },
+            children,
+          },
+        ],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const safeFileName = title
+        .replace(/[\\/:*?"<>|]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 80);
+      const fileSuffix = includeAnswers 
+        ? " - Vocabulary Quiz Answer Key.docx"
+        : " - Vocabulary Quiz.docx";
+      saveAs(blob, `${safeFileName}${fileSuffix}`);
+    } catch (error) {
+      console.error("Failed to generate Word document:", error);
+    }
+  }, [questions, extractedText, docTitle, glossary, glossaryRatings, prioritizeHardWords, t]);
+
   if (glossary.length < 4) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -218,51 +369,75 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
 
   if (quizState === "idle") {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground mb-6">
-          {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
-        </p>
-
-        {hasRatings && (
-          <div className="flex justify-center mb-4">
-            <button
-              onClick={() => setPrioritizeHardWords(!prioritizeHardWords)}
-              className={cn(
-                "inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all",
-                prioritizeHardWords
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border hover:border-primary/50"
+      <div className="py-4 space-y-6">
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("reading.glossary.quiz.downloadWord")}</span>
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => downloadWord(false)}>
+                {t("reading.glossary.quiz.downloadBlank")}
+              </DropdownMenuItem>
+              {vocabularyQuizScore > 0 && (
+                <DropdownMenuItem onClick={() => downloadWord(true)}>
+                  {t("reading.glossary.quiz.downloadWithAnswers")}
+                </DropdownMenuItem>
               )}
-            >
-              <Target className="h-4 w-4" />
-              <span className="text-sm">{t("reading.glossary.prioritizeHard")}</span>
-            </button>
-          </div>
-        )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        {prioritizeHardWords && hasRatings && (
-          <p className="text-xs text-muted-foreground mb-4">
-            {t("reading.glossary.wordStats", { 
-              hard: wordStats.hard, 
-              medium: wordStats.medium, 
-              easy: wordStats.easy 
-            })}
+        <div className="text-center">
+          <p className="text-muted-foreground mb-6">
+            {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
           </p>
-        )}
 
-        <Button onClick={startQuiz} size="lg">
-          <Play className="h-5 w-5 mr-2" />
-          {t("reading.glossary.quiz.startQuiz")}
-        </Button>
-        {vocabularyQuizScore > 0 && (
-          <div className="flex justify-center mt-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
-              <Trophy className="h-4 w-4 text-yellow-500" />
-              <span className="text-sm font-medium">{t("reading.glossary.quiz.lastScore")}</span>
-              <span className="text-lg font-bold text-primary">{vocabularyQuizScore}%</span>
+          {hasRatings && (
+            <div className="flex justify-center mb-4">
+              <button
+                onClick={() => setPrioritizeHardWords(!prioritizeHardWords)}
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all",
+                  prioritizeHardWords
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-primary/50"
+                )}
+              >
+                <Target className="h-4 w-4" />
+                <span className="text-sm">{t("reading.glossary.prioritizeHard")}</span>
+              </button>
             </div>
-          </div>
-        )}
+          )}
+
+          {prioritizeHardWords && hasRatings && (
+            <p className="text-xs text-muted-foreground mb-4">
+              {t("reading.glossary.wordStats", { 
+                hard: wordStats.hard, 
+                medium: wordStats.medium, 
+                easy: wordStats.easy 
+              })}
+            </p>
+          )}
+
+          <Button onClick={startQuiz} size="lg">
+            <Play className="h-5 w-5 mr-2" />
+            {t("reading.glossary.quiz.startQuiz")}
+          </Button>
+          {vocabularyQuizScore > 0 && (
+            <div className="flex justify-center mt-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                <Trophy className="h-4 w-4 text-yellow-500" />
+                <span className="text-sm font-medium">{t("reading.glossary.quiz.lastScore")}</span>
+                <span className="text-lg font-bold text-primary">{vocabularyQuizScore}%</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -292,6 +467,23 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
         </div>
 
         <div className="flex gap-2 justify-center flex-wrap">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("reading.glossary.quiz.downloadWord")}</span>
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => downloadWord(false)}>
+                {t("reading.glossary.quiz.downloadBlank")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => downloadWord(true)}>
+                {t("reading.glossary.quiz.downloadWithAnswers")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" onClick={() => setShowReview(!showReview)}>
             <Eye className="h-4 w-4 mr-2" />
             {t("reading.glossary.quiz.reviewAnswers")}

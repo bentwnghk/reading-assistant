@@ -295,6 +295,8 @@
         "clickFlip": "Click to flip"
       },
       "quiz": {
+        "title": "Vocabulary Quiz",
+        "answerKeyTitle": "Vocabulary Quiz Answer Key",
         "startQuiz": "Start Quiz",
         "submitQuiz": "Submit",
         "retryQuiz": "Retry All",
@@ -314,7 +316,11 @@
         "pressKey": "Press",
         "wordsAvailable": "{{count}} words available",
         "scoreFormat": "{{correct}} / {{total}} Correct",
-        "lastScore": "Last Score:"
+        "lastScore": "Last Score:",
+        "downloadWord": "Download Word",
+        "downloadBlank": "Download Blank Quiz",
+        "downloadWithAnswers": "Download with Answers",
+        "correctAnswer": "Correct Answer"
       },
       "spelling": {
         "title": "Spelling Challenge",
