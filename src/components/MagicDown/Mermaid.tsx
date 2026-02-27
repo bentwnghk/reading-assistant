@@ -101,10 +101,14 @@ function Mermaid({ children }: Props) {
                   className="w-6 h-6"
                   size="icon"
                   variant="ghost"
-                  title={t("editor.mermaid.fullscreen")}
-                  onClick={() => openFullscreen()}
+                  title={t("editor.mermaid.copyText")}
+                  onClick={() => handleCopy()}
                 >
-                  <Maximize2 />
+                  {waitingCopy ? (
+                    <CopyCheck className="h-full w-full text-green-500" />
+                  ) : (
+                    <Copy className="h-full w-full" />
+                  )}
                 </Button>
                 <Button
                   className="w-6 h-6"
@@ -119,14 +123,10 @@ function Mermaid({ children }: Props) {
                   className="w-6 h-6"
                   size="icon"
                   variant="ghost"
-                  title={t("editor.mermaid.copyText")}
-                  onClick={() => handleCopy()}
+                  title={t("editor.mermaid.fullscreen")}
+                  onClick={() => openFullscreen()}
                 >
-                  {waitingCopy ? (
-                    <CopyCheck className="h-full w-full text-green-500" />
-                  ) : (
-                    <Copy className="h-full w-full" />
-                  )}
+                  <Maximize2 />
                 </Button>
               </div>
               <div className="absolute bottom-0 right-0 z-50 flex gap-1 print:hidden">
