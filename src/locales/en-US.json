@@ -395,7 +395,7 @@
       "imageOnly": "[Image]",
       "quickQuestions": {
         "title": "Quick Questions:",
-        "mainIdea": "Main idea?",
+        "mainIdea": "Main idea",
         "mainIdeaQuestion": "What is the main idea of this text?",
         "summarize": "Summarize",
         "summarizeQuestion": "Can you summarize this text in a few sentences?",

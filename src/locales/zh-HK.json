@@ -395,7 +395,7 @@
       "imageOnly": "[圖片]",
       "quickQuestions": {
         "title": "快捷問題：",
-        "mainIdea": "主旨？",
+        "mainIdea": "主旨",
         "mainIdeaQuestion": "這些文字的主旨是什麼？",
         "summarize": "摘要",
         "summarizeQuestion": "你可以用幾句話總結這些文字嗎？",
