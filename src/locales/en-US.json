@@ -98,7 +98,7 @@
         },
         "wordExport": {
           "title": "📄 Word Export",
-          "desc": "Download your text, glossary, and sentence analysis as a Word document for offline study and printing."
+          "desc": "Export your work as Word documents: adapted text with vocabulary & sentence analysis, glossary, vocabulary quiz, and reading comprehension test (with optional answer keys)."
         }
       },
       "workflow": {
