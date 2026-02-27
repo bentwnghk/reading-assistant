@@ -5,7 +5,6 @@ import { nanoid } from "nanoid";
 import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import ChatMessageBubble from "./ChatMessageBubble";
@@ -138,7 +137,7 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
         </div>
       </div>
 
-      <ScrollArea className="flex-1 overflow-auto" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto" ref={scrollRef}>
         {chatHistory.length === 0 && !isLoading ? (
           <div className="flex flex-col items-center justify-center h-full p-6 text-center">
             <MessageCircle className="w-12 h-12 text-muted-foreground/50 mb-3" />
@@ -173,7 +172,7 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
             )}
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       <QuickQuestions
         onSelectQuestion={(q) => handleSend(q)}
