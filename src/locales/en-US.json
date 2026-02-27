@@ -396,6 +396,7 @@
       "imageOnly": "[Image]",
       "quickQuestions": {
         "title": "Quick Questions:",
+        "imageHelpTitle": "Answer Help:",
         "mainIdea": "Main idea",
         "mainIdeaQuestion": "What is the main idea of this text?",
         "summarize": "Summarize",

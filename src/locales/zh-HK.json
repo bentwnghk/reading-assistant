@@ -396,6 +396,7 @@
       "imageOnly": "[圖片]",
       "quickQuestions": {
         "title": "快捷問題：",
+        "imageHelpTitle": "答題 / 解題協助：",
         "mainIdea": "主旨",
         "mainIdeaQuestion": "這些文字的主旨是什麼？",
         "summarize": "摘要",
