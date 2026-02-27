@@ -5,7 +5,6 @@ import { nanoid } from "nanoid";
 import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import ChatMessageBubble from "./ChatMessageBubble";
@@ -27,12 +26,12 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
   const [streamingContent, setStreamingContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = useCallback(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollViewportRef.current) {
+      scrollViewportRef.current.scrollTop = scrollViewportRef.current.scrollHeight;
     }
   }, []);
 
@@ -65,6 +64,7 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
 
     const response = await askTutor(
       messageText,
+      chatHistory,
       selectedText || initialSelectedText,
       (chunk) => setStreamingContent(chunk)
     );
@@ -138,7 +138,10 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
         </div>
       </div>
 
-      <ScrollArea className="flex-1" ref={scrollRef}>
+      <div 
+        ref={scrollViewportRef}
+        className="flex-1 overflow-y-auto"
+      >
         {chatHistory.length === 0 && !isLoading ? (
           <div className="flex flex-col items-center justify-center h-full p-6 text-center">
             <MessageCircle className="w-12 h-12 text-muted-foreground/50 mb-3" />
@@ -173,7 +176,7 @@ function ReadingTutorChat({ initialSelectedText, onClose }: ReadingTutorChatProp
             )}
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       <QuickQuestions
         onSelectQuestion={(q) => handleSend(q)}

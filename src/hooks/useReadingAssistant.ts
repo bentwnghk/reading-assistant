@@ -641,10 +641,11 @@ Guidelines:
 
   async function askTutor(
     question: string,
+    history: ChatMessage[],
     selectedText?: string,
     onChunk?: (chunk: string) => void
   ): Promise<string> {
-    const { studentAge, extractedText, highlightedWords } = useReadingStore.getState();
+    const { studentAge, extractedText } = useReadingStore.getState();
     const { summaryModel } = useSettingStore.getState();
     
     if (!extractedText) {
@@ -654,17 +655,27 @@ Guidelines:
 
     const thinkingModel = await createModelProvider(summaryModel);
     
-    const contextQuestion = selectedText
-      ? `The student is asking about this text: "${selectedText}"\n\nQuestion: ${question}`
+    const messages: Array<{ role: "user" | "assistant"; content: string }> = history
+      .slice(-20)
+      .map((msg) => ({
+        role: msg.role,
+        content: msg.selectedText 
+          ? `${msg.content}\n\n[Context: The student is asking about this text: "${msg.selectedText}"]`
+          : msg.content,
+      }));
+
+    const userContent = selectedText
+      ? `${question}\n\n[Context: The student is asking about this text: "${selectedText}"]`
       : question;
+    messages.push({ role: "user", content: userContent });
 
     let fullResponse = "";
 
     try {
       const result = streamText({
         model: thinkingModel,
-        system: readingTutorSystemPrompt(studentAge, extractedText, highlightedWords),
-        prompt: contextQuestion,
+        system: readingTutorSystemPrompt(studentAge, extractedText),
+        messages,
         experimental_transform: smoothTextStream(smoothTextStreamType),
       });
 

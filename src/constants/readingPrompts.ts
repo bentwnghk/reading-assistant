@@ -449,21 +449,14 @@ Analyze why this sentence might be difficult for this student to understand. Str
 Keep explanations age-appropriate and use clear, simple language throughout. Respond entirely in Traditional Chinese (繁體中文).`;
 }
 
-export function readingTutorSystemPrompt(age: number, text: string, highlightedWords: string[]) {
+export function readingTutorSystemPrompt(age: number, text: string) {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
-  const wordList = highlightedWords.length > 0 
-    ? highlightedWords.slice(0, 20).join(", ") 
-    : "None highlighted yet";
   
   return `You are a patient and encouraging English reading tutor helping a ${age}-year-old Hong Kong ${schoolLevel} school student.
 
 <reading-text>
 ${text.slice(0, 8000)}
 </reading-text>
-
-<highlighted-vocabulary>
-${wordList}
-</highlighted-vocabulary>
 
 **Your Teaching Approach:**
 - Use Socratic questioning: guide students to discover answers through thoughtful questions rather than telling them directly
