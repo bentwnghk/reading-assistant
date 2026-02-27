@@ -13,8 +13,20 @@ import {
   Trophy,
   Eye,
   BarChart3,
-  Target
+  Target,
+  FileDown
 } from "lucide-react";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  AlignmentType,
+  convertInchesToTwip,
+  PageOrientation,
+} from "docx";
+import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -50,6 +62,7 @@ function ReadingTest() {
   const { t } = useTranslation();
   const {
     extractedText,
+    docTitle,
     readingTest,
     testScore,
     testCompleted,
@@ -235,6 +248,225 @@ function ReadingTest() {
     if (score >= 60) return "text-yellow-600 dark:text-yellow-400";
     return "text-red-600 dark:text-red-400";
   };
+
+  const downloadWord = useCallback(async () => {
+    if (!readingTest.length) return;
+
+    const title = docTitle || extractedText.split(/\n/).find((l) => l.trim()) || "Reading Test";
+    const generatedAt = new Date().toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const children: Paragraph[] = [];
+
+    children.push(
+      new Paragraph({
+        text: title,
+        heading: HeadingLevel.TITLE,
+        alignment: AlignmentType.CENTER,
+      })
+    );
+
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `${t("reading.readingTest.title")} - Generated on ${generatedAt}`,
+            italics: true,
+            color: "595959",
+          }),
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 },
+      })
+    );
+
+    if (testCompleted && testScore !== undefined) {
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${t("reading.readingTest.yourScore")}: `,
+              bold: true,
+            }),
+            new TextRun({
+              text: `${testScore}%`,
+              bold: true,
+              color: testScore >= 80 ? "22C55E" : testScore >= 60 ? "EAB308" : "EF4444",
+            }),
+          ],
+          spacing: { after: 200 },
+        })
+      );
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: t("reading.readingTest.pointsFormat", { earned: testEarnedPoints, total: testTotalPoints }),
+            }),
+          ],
+          spacing: { after: 400 },
+        })
+      );
+    }
+
+    readingTest.forEach((question, index) => {
+      const skillLabelKey = SKILL_LABELS[question.skillTested] || question.skillTested;
+      const skillLabel = t(`reading.readingTest.skills.${skillLabelKey}`);
+
+      children.push(
+        new Paragraph({
+          text: `${index + 1}. ${question.question}`,
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 300, after: 100 },
+        })
+      );
+
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: `${t(`reading.readingTest.skills.${skillLabelKey}`)}: `, bold: true }),
+            new TextRun({ text: skillLabel }),
+          ],
+          spacing: { after: 100 },
+        })
+      );
+
+      if (question.paragraphRef) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${t("reading.readingTest.paragraph", { num: question.paragraphRef })}` }),
+            ],
+            spacing: { after: 100 },
+          })
+        );
+      }
+
+      if ((question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing") && question.options) {
+        question.options.forEach((option, _optIndex) => {
+          const isCorrect = option.charAt(0) === question.correctAnswer;
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `   ${option}`,
+                  bold: isCorrect && testCompleted,
+                  color: isCorrect && testCompleted ? "22C55E" : "000000",
+                }),
+              ],
+              spacing: { after: 50 },
+            })
+          );
+        });
+      }
+
+      if (question.type === "true-false-not-given") {
+        const options = [
+          { label: t("reading.readingTest.true"), value: "true" },
+          { label: t("reading.readingTest.false"), value: "false" },
+          { label: t("reading.readingTest.notGiven"), value: "not-given" },
+        ];
+        options.forEach((opt) => {
+          const isCorrect = opt.value === question.correctAnswer;
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `   ${opt.label}`,
+                  bold: isCorrect && testCompleted,
+                  color: isCorrect && testCompleted ? "22C55E" : "000000",
+                }),
+              ],
+              spacing: { after: 50 },
+            })
+          );
+        });
+      }
+
+      if (question.type === "short-answer") {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `   ${t("reading.readingTest.shortAnswerPlaceholder")}`, italics: true, color: "888888" }),
+            ],
+            spacing: { after: 100 },
+          })
+        );
+      }
+
+      if (testCompleted) {
+        if (question.type === "short-answer") {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${t("reading.readingTest.suggestedAnswer")}: `, bold: true }),
+                new TextRun({ text: question.correctAnswer }),
+              ],
+              spacing: { before: 100, after: 100 },
+            })
+          );
+        } else {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${t("reading.readingTest.suggestedAnswer")}: `, bold: true }),
+                new TextRun({ text: question.correctAnswer, color: "22C55E" }),
+              ],
+              spacing: { before: 100, after: 100 },
+            })
+          );
+        }
+
+        if (question.explanation) {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${t("reading.readingTest.explanation")}: `, bold: true }),
+                new TextRun({ text: question.explanation }),
+              ],
+              spacing: { after: 200 },
+            })
+          );
+        }
+      }
+    });
+
+    try {
+      const doc = new Document({
+        sections: [
+          {
+            properties: {
+              page: {
+                margin: {
+                  top: convertInchesToTwip(1),
+                  bottom: convertInchesToTwip(1),
+                  left: convertInchesToTwip(1.1),
+                  right: convertInchesToTwip(1.1),
+                },
+                size: { orientation: PageOrientation.PORTRAIT },
+              },
+            },
+            children,
+          },
+        ],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const safeFileName = title
+        .replace(/[\\/:*?"<>|]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 80);
+      saveAs(blob, `${safeFileName} - Reading Test.docx`);
+    } catch (error) {
+      console.error("Failed to generate Word document:", error);
+    }
+  }, [readingTest, extractedText, docTitle, testCompleted, testScore, testEarnedPoints, testTotalPoints, t]);
 
   const renderQuestion = (question: ReadingTestQuestion, index: number, showResult: boolean = false) => {
     let isCorrect = false;
@@ -542,6 +774,14 @@ function ReadingTest() {
             {t("reading.readingTest.title")}
           </h3>
           <div className="flex gap-2">
+            <Button
+              onClick={downloadWord}
+              variant="outline"
+              size="sm"
+            >
+              <FileDown className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("reading.readingTest.downloadWord")}</span>
+            </Button>
             <Button
               onClick={handleReset}
               variant="secondary"

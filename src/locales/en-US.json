@@ -247,6 +247,7 @@
       "retryMissed": "Retry Missed ({{count}})",
       "practiceMissedSkills": "Practice Missed Skills ({{count}})",
       "practiceMissedSkillsDesc": "Generate new questions targeting skills you missed",
+      "downloadWord": "Download Word",
       "paragraph": "Para. {{num}}",
       "skills": {
         "mainIdea": "Main Idea",
