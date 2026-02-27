@@ -139,9 +139,9 @@ export function getCefrColor(level: CEFRLevel): string {
 
 export function getCefrBadgeColor(level: CEFRLevel): string {
   const colors: Record<CEFRLevel, string> = {
-    A1: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    A2: "bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-200",
-    B1: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+    A1: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
+    A2: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    B1: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
     B2: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
     C1: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     C2: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
