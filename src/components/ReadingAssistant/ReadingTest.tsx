@@ -326,6 +326,7 @@ function ReadingTest() {
       const skillLabelKey = SKILL_LABELS[question.skillTested] || question.skillTested;
       const typeLabel = t(`reading.readingTest.${typeLabelKey}`);
       const skillLabel = t(`reading.readingTest.skills.${skillLabelKey}`);
+      const paragraphLabel = question.paragraphRef ? t("reading.readingTest.paragraph", { num: question.paragraphRef }) : null;
 
       children.push(
         new Paragraph({
@@ -335,25 +336,18 @@ function ReadingTest() {
         })
       );
 
+      const metaText = paragraphLabel 
+        ? `[${typeLabel}] [${skillLabel}] [${paragraphLabel}]`
+        : `[${typeLabel}] [${skillLabel}]`;
+
       children.push(
         new Paragraph({
           children: [
-            new TextRun({ text: `${typeLabel}: ${skillLabel}`, italics: true, color: "666666" }),
+            new TextRun({ text: metaText, color: "666666", size: 20 }),
           ],
           spacing: { after: 100 },
         })
       );
-
-      if (question.paragraphRef) {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: `${t("reading.readingTest.paragraph", { num: question.paragraphRef })}` }),
-            ],
-            spacing: { after: 100 },
-          })
-        );
-      }
 
       if ((question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing") && question.options) {
         question.options.forEach((option, _optIndex) => {
