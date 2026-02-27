@@ -1,8 +1,8 @@
 <div align="center">
 
-# 📚 Mr.🆖 ProReader
+# Mr.🆖 ProReader
 
-### **Your AI-Powered English Reading Adventure! 🚀**
+### **Your AI-Powered English Reading Tutor**
 
 *Snap. Learn. Master.*
 
@@ -17,15 +17,15 @@ Transform any English reading material into an interactive learning experience w
 
 ---
 
-## 🌟 Why Students Love Mr.🆖 ProReader
+## Why Students Love Mr.🆖 ProReader
 
-| 🎯 **Personalized** | 🎮 **Gamified** | 🔒 **Private** |
+| **Personalized** | **Gamified** | **Private** |
 |:---:|:---:|:---:|
 | Adapts to your age & level (8-18) | Learn through fun games & challenges | All data stays in your browser |
 
 ---
 
-## 🚀 Your Learning Journey
+## Your Learning Journey
 
 ```mermaid
 flowchart TD
@@ -38,6 +38,12 @@ flowchart TD
         C[Generate Summary]
         D[Create Mind Map]
         E[Adapt to Your Level]
+    end
+    
+    subgraph TUTOR["🤖 AI Tutor"]
+        M[Ask Questions]
+        N[Get Hints]
+        O[Upload Questions]
     end
     
     subgraph PRACTICE["✏️ Practice"]
@@ -63,6 +69,9 @@ flowchart TD
     B --> F
     B --> G
     B --> H
+    B --> M
+    M --> N
+    M --> O
     H --> I
     H --> J
     H --> K
@@ -74,9 +83,30 @@ flowchart TD
 
 ---
 
-## ✨ Core Features
+## Core Features
 
-### 📷 **1. Smart OCR - Snap & Extract**
+### 🤖 1. AI Tutor - Your Personal Reading Coach
+
+Got stuck on a passage? The AI Tutor is here to help! This interactive chat assistant understands your reading material and provides personalized guidance.
+
+| Feature | Description |
+|---------|-------------|
+| 💬 **Natural Conversations** | Ask anything about the text in your own words |
+| 🎯 **Context-Aware** | Select any text and ask questions specifically about it |
+| 📷 **Image Upload** | Snap a photo of a comprehension question and get help |
+| 💡 **Hint Mode** | Get guided hints instead of direct answers (learn, don't cheat!) |
+| 📝 **Step-by-Step Explanations** | Understand how to approach reading questions |
+
+#### Quick Question Shortcuts
+- **"What's the main idea?"** - Get a quick overview
+- **"Vocab help"** - Understand difficult words or phrases
+- **"Explain this"** - Get a clear explanation of any passage
+- **Upload a question image** - Get guided help solving it
+
+---
+
+### 📷 2. Smart OCR - Snap & Extract
+
 Transform physical reading materials into digital text instantly.
 
 | Feature | Description |
@@ -88,7 +118,8 @@ Transform physical reading materials into digital text instantly.
 
 ---
 
-### 📄 **2. AI Text Adaptation**
+### 📄 3. AI Text Adaptation
+
 Read at YOUR level, not the author's.
 
 | Mode | Description |
@@ -100,7 +131,8 @@ Read at YOUR level, not the author's.
 
 ---
 
-### 🧠 **3. Sentence Analysis**
+### 🧠 4. Sentence Analysis
+
 Click any sentence for a complete AI breakdown:
 
 | Analysis Type | What You Learn |
@@ -113,7 +145,7 @@ Click any sentence for a complete AI breakdown:
 
 ---
 
-### 🗺️ **4. Visual Learning Tools**
+### 🗺️ 5. Visual Learning Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -123,7 +155,8 @@ Click any sentence for a complete AI breakdown:
 
 ---
 
-### ❓ **5. Reading Comprehension Test**
+### ❓ 6. Reading Comprehension Test
+
 Test your understanding with AI-generated questions tailored to YOUR level.
 
 #### Question Types
@@ -157,7 +190,8 @@ Test your understanding with AI-generated questions tailored to YOUR level.
 
 ---
 
-### 📖 **6. Vocabulary Builder**
+### 📖 7. Vocabulary Builder
+
 Build your word power with interactive tools.
 
 #### Step 1: Highlight Words
@@ -180,12 +214,12 @@ Build your word power with interactive tools.
 |------|-------------|
 | 📋 **Table View** | Browse all words with definitions |
 | 🃏 **Flashcards** | Flip cards to learn, rate difficulty, prioritize hard words |
-| 📝 **Vocabulary Quiz** | Test your knowledge (see Section 8) |
-| 🎮 **Spelling Games** | 4 exciting game modes (see Section 7) |
+| 📝 **Vocabulary Quiz** | Test your knowledge |
+| 🎮 **Spelling Games** | 4 exciting game modes |
 
 ---
 
-### 🎮 **7. Spelling Challenge - 4 Game Modes!**
+### 🎮 8. Spelling Challenge - 4 Game Modes!
 
 | Mode | How It Works | Best For |
 |------|--------------|----------|
@@ -204,7 +238,8 @@ Build your word power with interactive tools.
 
 ---
 
-### 📋 **8. Vocabulary Quiz**
+### 📋 9. Vocabulary Quiz
+
 Test your vocabulary knowledge with interactive quizzes.
 
 | Question Type | Description |
@@ -220,7 +255,8 @@ Test your vocabulary knowledge with interactive quizzes.
 
 ---
 
-### 🔊 **9. Text-to-Speech**
+### 🔊 10. Text-to-Speech
+
 Perfect your pronunciation with natural voice reading.
 
 | Feature | Description |
@@ -232,7 +268,8 @@ Perfect your pronunciation with natural voice reading.
 
 ---
 
-### 📄 **10. Word Export**
+### 📄 11. Word Export
+
 Download your learning materials for offline study.
 
 | Export Type | Description |
@@ -245,7 +282,7 @@ Download your learning materials for offline study.
 
 ---
 
-## 📁 Data & Privacy
+## Data & Privacy
 
 | Feature | Details |
 |---------|---------|
@@ -257,7 +294,7 @@ Download your learning materials for offline study.
 
 ---
 
-## 🤖 AI Models Supported
+## AI Models Supported
 
 | Provider | Models |
 |----------|--------|
@@ -274,7 +311,7 @@ Download your learning materials for offline study.
 
 ---
 
-## 🌐 Languages
+## Languages
 
 | Language | Code |
 |----------|------|
@@ -283,7 +320,7 @@ Download your learning materials for offline study.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technology |
 |----------|------------|
@@ -297,7 +334,7 @@ Download your learning materials for offline study.
 
 ---
 
-## 📝 License
+## License
 
 [MIT License](LICENSE) - Free for personal and commercial use.
 

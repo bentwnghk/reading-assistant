@@ -56,6 +56,10 @@
       },
       "features": {
         "title": "Powerful Features",
+        "tutor": {
+          "title": "🤖 AI Tutor",
+          "desc": "Your personal reading coach! Ask questions, get hints, upload reading comprehension questions for guided help, and learn at your own pace."
+        },
         "ocr": {
           "title": "📷 Smart OCR",
           "desc": "Snap a photo or upload images to extract text from any reading material - textbooks, worksheets, articles, and more!"
@@ -107,6 +111,7 @@
         "summary": "Get a quick summary of the content",
         "mindmap": "Explore with an interactive mind map",
         "adapt": "Read text adapted to your level",
+        "tutor": "Ask the AI Tutor for help",
         "test": "Take the reading comprehension test",
         "analyze": "Analyze any sentence in detail",
         "highlight": "Highlight words to build vocabulary",
