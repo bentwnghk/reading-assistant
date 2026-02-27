@@ -23,6 +23,7 @@ const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
 const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
 const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
+const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
 
 function Home() {
   const { t } = useTranslation();
@@ -86,6 +87,7 @@ function Home() {
         </section>
       </main>
       <TocFab />
+      <TutorChatFab />
       <footer className="my-4 text-center text-sm text-gray-600 print:hidden">
         <a href="https://api.mr5ai.com/" target="_blank">
           {t("copyright", {

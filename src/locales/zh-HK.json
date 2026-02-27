@@ -382,6 +382,26 @@
       "glossary": "詞彙",
       "spelling": "拼字遊戲",
       "vocabQuiz": "詞彙測驗"
+    },
+    "tutor": {
+      "title": "AI 導師",
+      "welcome": "你好！我是你的閱讀導師。有任何關於文章的問題都可以問我！",
+      "welcomeHint": "試試問文章的主旨、詞彙，或任何你不明白的句子。",
+      "thinking": "思考中...",
+      "inputPlaceholder": "輸入你的問題...",
+      "clearHistory": "清除對話記錄",
+      "aboutSelection": "關於選取文字",
+      "quickQuestions": {
+        "title": "快捷問題：",
+        "mainIdea": "主旨？",
+        "mainIdeaQuestion": "這篇文章的主旨是什麼？",
+        "summarize": "摘要",
+        "summarizeQuestion": "你可以用幾句話總結這篇文章嗎？",
+        "vocabHelp": "詞彙幫助",
+        "vocabHelpQuestion": "這篇文章中最重要的詞彙有哪些？",
+        "explain": "解釋",
+        "explainQuestion": "你可以解釋這篇文章在講什麼嗎？"
+      }
     }
   },
   "history": {

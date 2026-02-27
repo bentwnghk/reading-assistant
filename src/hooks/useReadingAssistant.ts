@@ -15,6 +15,7 @@ import {
   generateReadingTestPrompt,
   generateTargetedPracticePrompt,
   generateGlossaryPrompt,
+  readingTutorSystemPrompt,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
 
@@ -638,6 +639,49 @@ Guidelines:
     }
   }
 
+  async function askTutor(
+    question: string,
+    selectedText?: string,
+    onChunk?: (chunk: string) => void
+  ): Promise<string> {
+    const { studentAge, extractedText, highlightedWords } = useReadingStore.getState();
+    const { summaryModel } = useSettingStore.getState();
+    
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return "";
+    }
+
+    const thinkingModel = await createModelProvider(summaryModel);
+    
+    const contextQuestion = selectedText
+      ? `The student is asking about this text: "${selectedText}"\n\nQuestion: ${question}`
+      : question;
+
+    let fullResponse = "";
+
+    try {
+      const result = streamText({
+        model: thinkingModel,
+        system: readingTutorSystemPrompt(studentAge, extractedText, highlightedWords),
+        prompt: contextQuestion,
+        experimental_transform: smoothTextStream(smoothTextStreamType),
+      });
+
+      for await (const textPart of result.textStream) {
+        fullResponse += textPart;
+        if (onChunk) {
+          onChunk(fullResponse);
+        }
+      }
+
+      return fullResponse;
+    } catch (error) {
+      handleError(error);
+      return "";
+    }
+  }
+
   function saveSession() {
     const { backup } = readingStore;
     const { save } = useHistoryStore.getState();
@@ -668,6 +712,7 @@ Guidelines:
     generateGlossary,
     calculateTestScore,
     evaluateShortAnswer,
+    askTutor,
     saveSession,
     loadSession,
   };

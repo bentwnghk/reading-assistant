@@ -112,3 +112,11 @@ interface PartialJson {
     | "repaired-parse"
     | "failed-parse";
 }
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: number;
+  selectedText?: string;
+}

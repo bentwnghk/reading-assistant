@@ -87,6 +87,7 @@ export interface ReadingStore {
   testMode: ReadingTestMode;
   vocabularyQuizScore: number;
   spellingGameBestScore: number;
+  chatHistory: ChatMessage[];
   status: ReadingStatus;
   error: string | null;
   createdAt: number;
@@ -122,6 +123,8 @@ interface ReadingActions {
   setTestMode: (mode: ReadingTestMode) => void;
   setVocabularyQuizScore: (score: number) => void;
   setSpellingGameBestScore: (score: number) => void;
+  addChatMessage: (message: ChatMessage) => void;
+  clearChatHistory: () => void;
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
   setStreaming: (value: boolean) => void;
@@ -153,6 +156,7 @@ const defaultValues: ReadingStore = {
   testMode: "all-at-once",
   vocabularyQuizScore: 0,
   spellingGameBestScore: 0,
+  chatHistory: [],
   status: "idle",
   error: null,
   createdAt: 0,
@@ -368,6 +372,16 @@ export const useReadingStore = create(
           spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
           updatedAt: Date.now(),
         })),
+      addChatMessage: (message) =>
+        set((state) => ({
+          chatHistory: [...state.chatHistory, message],
+          updatedAt: Date.now(),
+        })),
+      clearChatHistory: () =>
+        set(() => ({
+          chatHistory: [],
+          updatedAt: Date.now(),
+        })),
       setStatus: (status) =>
         set(() => ({
           status,
@@ -418,7 +432,7 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
-      version: 4,
+      version: 5,
       // Intercept storage writes so that rapid per-token calls during streaming
       // do NOT hit localStorage. iOS Safari crashes / reloads the page when
       // localStorage.setItem is hammered hundreds of times per second from

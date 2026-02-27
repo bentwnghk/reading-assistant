@@ -382,6 +382,26 @@
       "glossary": "Vocabulary",
       "spelling": "Spelling Game",
       "vocabQuiz": "Vocab Quiz"
+    },
+    "tutor": {
+      "title": "AI Tutor",
+      "welcome": "Hi! I'm your reading tutor. Ask me anything about the text!",
+      "welcomeHint": "Try asking about the main idea, vocabulary, or any sentence you don't understand.",
+      "thinking": "Thinking...",
+      "inputPlaceholder": "Type your question...",
+      "clearHistory": "Clear chat history",
+      "aboutSelection": "About selected text",
+      "quickQuestions": {
+        "title": "Quick Questions:",
+        "mainIdea": "Main idea?",
+        "mainIdeaQuestion": "What is the main idea of this text?",
+        "summarize": "Summarize",
+        "summarizeQuestion": "Can you summarize this text in a few sentences?",
+        "vocabHelp": "Vocab help",
+        "vocabHelpQuestion": "What are the most important vocabulary words I should learn?",
+        "explain": "Explain",
+        "explainQuestion": "Can you explain what this text is about?"
+      }
     }
   },
   "history": {
