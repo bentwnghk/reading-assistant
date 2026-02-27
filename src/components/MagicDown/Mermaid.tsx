@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, type ReactNode } from "react";
+import { useRef, useEffect, useState, useCallback, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import copy from "copy-to-clipboard";
@@ -37,14 +37,25 @@ async function loadMermaid(element: HTMLElement, code: string) {
   }
 }
 
+function stripSvgDimensions(svgString: string): string {
+  return svgString
+    .replace(/width="[^"]*"/g, 'width="100%"')
+    .replace(/height="[^"]*"/g, 'height="100%"')
+    .replace(/style="[^"]*"/g, (match) => {
+      return match.replace(/max-width:\s*[^;]+;?/g, '').replace(/max-height:\s*[^;]+;?/g, '');
+    });
+}
+
 function Mermaid({ children }: Props) {
   const { t } = useTranslation();
   const mermaidContainerRef = useRef<HTMLDivElement>(null);
   const modalMermaidRef = useRef<HTMLDivElement>(null);
+  const transformRef = useRef<any>(null);
   const [content, setContent] = useState<string>("");
   const [waitingCopy, setWaitingCopy] = useState<boolean>(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState<boolean>(false);
   const [modalSvg, setModalSvg] = useState<string>("");
+  const [transformKey, setTransformKey] = useState(0);
 
   function downloadSvg() {
     const target = mermaidContainerRef.current;
@@ -67,16 +78,43 @@ function Mermaid({ children }: Props) {
   const openFullscreen = () => {
     const target = mermaidContainerRef.current;
     if (target) {
-      setModalSvg(target.innerHTML);
+      const svgWithResponsiveDimensions = stripSvgDimensions(target.innerHTML);
+      setModalSvg(svgWithResponsiveDimensions);
       setIsFullscreenOpen(true);
+      setTransformKey(prev => prev + 1);
     }
   };
 
   const downloadModalSvg = () => {
-    if (modalSvg) {
-      downloadFile(modalSvg, Date.now() + ".svg", "image/svg+xml");
+    const target = mermaidContainerRef.current;
+    if (target) {
+      downloadFile(target.innerHTML, Date.now() + ".svg", "image/svg+xml");
     }
   };
+
+  const fitToContainer = useCallback(() => {
+    if (!modalMermaidRef.current || !transformRef.current) return;
+    
+    const svg = modalMermaidRef.current.querySelector('svg');
+    if (!svg) return;
+
+    const container = modalMermaidRef.current.parentElement?.parentElement;
+    if (!container) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const svgBBox = svg.getBBox();
+    
+    const scaleX = containerRect.width / svgBBox.width;
+    const scaleY = containerRect.height / svgBBox.height;
+    const scale = Math.min(scaleX, scaleY) * 0.9;
+
+    transformRef.current.resetTransform();
+    transformRef.current.setTransform(
+      (containerRect.width - svgBBox.width * scale) / 2,
+      (containerRect.height - svgBBox.height * scale) / 2,
+      scale
+    );
+  }, []);
 
   useEffect(() => {
     const target = mermaidContainerRef.current;
@@ -85,6 +123,15 @@ function Mermaid({ children }: Props) {
       loadMermaid(target, target.innerText);
     }
   }, [children]);
+
+  useEffect(() => {
+    if (isFullscreenOpen && modalSvg) {
+      const timer = setTimeout(() => {
+        fitToContainer();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isFullscreenOpen, modalSvg, fitToContainer]);
 
   return (
     <>
@@ -165,28 +212,21 @@ function Mermaid({ children }: Props) {
       </div>
 
       <Dialog open={isFullscreenOpen} onOpenChange={setIsFullscreenOpen}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 bg-background/95 backdrop-blur-sm">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-[95vw] h-[95vh] p-0 bg-background/95 backdrop-blur-sm">
           <DialogTitle className="sr-only">
             {t("editor.mermaid.fullscreen")}
           </DialogTitle>
           <TransformWrapper
+            key={transformKey}
+            ref={transformRef}
             initialScale={1}
             minScale={0.1}
             maxScale={5}
-            centerOnInit
+            centerOnInit={false}
             smooth
             limitToBounds={false}
           >
-            {({ zoomIn, zoomOut, resetTransform, centerView, zoomToElement }) => {
-              const handleReset = () => {
-                resetTransform();
-                centerView();
-                if (modalMermaidRef.current) {
-                  zoomToElement(modalMermaidRef.current, 1);
-                }
-              };
-
-              return (
+            {({ zoomIn, zoomOut }) => (
               <div className="relative w-full h-full flex flex-col">
                 <div className="absolute top-2 right-2 z-50 flex gap-1">
                   <Button
@@ -220,23 +260,23 @@ function Mermaid({ children }: Props) {
                     size="sm"
                     variant="secondary"
                     title={t("editor.mermaid.resize")}
-                    onClick={handleReset}
+                    onClick={fitToContainer}
                   >
                     <RefreshCcw className="h-4 w-4" />
                   </Button>
                 </div>
                 <TransformComponent
                   wrapperStyle={{ width: "100%", height: "100%" }}
-                  contentStyle={{ width: "100%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}
+                  contentStyle={{ display: "flex", justifyContent: "center", alignItems: "center" }}
                 >
                   <div
                     ref={modalMermaidRef}
-                    className="mermaid [&>svg]:!w-full [&>svg]:!h-full [&>svg]:!max-w-none [&>svg]:object-contain"
+                    className="mermaid"
                     dangerouslySetInnerHTML={{ __html: modalSvg }}
                   />
                 </TransformComponent>
               </div>
-            )}}
+            )}
           </TransformWrapper>
         </DialogContent>
       </Dialog>
