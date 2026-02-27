@@ -134,6 +134,15 @@ function Mermaid({ children }: Props) {
                   className="w-6 h-6"
                   size="icon"
                   variant="ghost"
+                  title={t("editor.mermaid.resize")}
+                  onClick={() => resetTransform()}
+                >
+                  <RefreshCcw />
+                </Button>
+                <Button
+                  className="w-6 h-6"
+                  size="icon"
+                  variant="ghost"
                   title={t("editor.mermaid.zoomIn")}
                   onClick={() => zoomIn()}
                 >
@@ -147,15 +156,6 @@ function Mermaid({ children }: Props) {
                   onClick={() => zoomOut()}
                 >
                   <ZoomOut />
-                </Button>
-                <Button
-                  className="w-6 h-6"
-                  size="icon"
-                  variant="ghost"
-                  title={t("editor.mermaid.resize")}
-                  onClick={() => resetTransform()}
-                >
-                  <RefreshCcw />
                 </Button>
               </div>
               <TransformComponent>
