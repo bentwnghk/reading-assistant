@@ -188,6 +188,11 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       />
 
       <div className="p-3 border-t border-border">
+        {tutorChatSelectedText && (
+          <div className="mb-2 text-xs text-primary bg-primary/10 border border-primary/20 rounded px-2 py-1.5 truncate font-medium">
+            {t("reading.tutor.aboutSelection")}: &ldquo;{tutorChatSelectedText}&rdquo;
+          </div>
+        )}
         <div className="flex gap-2">
           <Textarea
             ref={inputRef}
@@ -224,11 +229,6 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             )}
           </div>
         </div>
-        {tutorChatSelectedText && (
-          <div className="mt-2 text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1 truncate">
-            {t("reading.tutor.aboutSelection")}: &ldquo;{tutorChatSelectedText}&rdquo;
-          </div>
-        )}
       </div>
     </div>
   );
