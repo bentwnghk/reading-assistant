@@ -448,6 +448,8 @@
     "ttsVoice": "語音選擇",
     "autoSpeakFlashcard": "自動朗讀生字卡",
     "autoSpeakFlashcardTip": "當生字卡載入時自動朗讀生字",
+    "cheatMode": "作弊模式",
+    "cheatModeTip": "顯示協助回答上傳閱讀理解題目的快捷問題",
     "general": "系統",
     "provider": "AI 供應商",
     "providerTip": "AI 服務供應商",

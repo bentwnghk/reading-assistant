@@ -2,6 +2,7 @@
 import { useTranslation } from "react-i18next";
 import { Lightbulb, BookOpen, MessageSquareQuote, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSettingStore } from "@/store/setting";
 
 interface QuickQuestionItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -17,8 +18,9 @@ interface QuickQuestionsProps {
 
 function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
   const { t } = useTranslation();
+  const { cheatMode } = useSettingStore();
 
-  const quickQuestions: QuickQuestionItem[] = [
+  const allQuickQuestions: QuickQuestionItem[] = [
     {
       icon: Lightbulb,
       label: t("reading.tutor.quickQuestions.mainIdea"),
@@ -53,6 +55,10 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
       action: "upload-image",
     },
   ];
+
+  const quickQuestions = cheatMode
+    ? allQuickQuestions
+    : allQuickQuestions.filter((q) => q.action !== "upload-image");
 
   return (
     <div className="flex flex-wrap gap-2 p-3 border-t border-border bg-muted/30">

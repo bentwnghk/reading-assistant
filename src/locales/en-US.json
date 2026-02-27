@@ -448,6 +448,8 @@
     "ttsVoice": "TTS Voice",
     "autoSpeakFlashcard": "Auto-speak Flashcard",
     "autoSpeakFlashcardTip": "Automatically read the word aloud when a flashcard loads",
+    "cheatMode": "Cheat Mode",
+    "cheatModeTip": "Show Quick Questions that help answer uploaded reading comprehension questions",
     "general": "System",
     "provider": "AI Provider",
     "providerTip": "AI service provider",

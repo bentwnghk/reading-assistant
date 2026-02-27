@@ -41,6 +41,7 @@ export interface SettingStore {
   tutorModel: TutorModel;
   ttsVoice: TTSVoice;
   autoSpeakFlashcard: boolean;
+  cheatMode: boolean;
   openAIApiKey: string;
   openAIApiProxy: string;
   openaicompatibleApiKey: string;
@@ -72,6 +73,7 @@ export const defaultValues: SettingStore = {
   tutorModel: "gpt-5-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
+  cheatMode: false,
   openAIApiKey: "",
   openAIApiProxy: "https://api.mr5ai.com",
   openaicompatibleApiKey: "",
