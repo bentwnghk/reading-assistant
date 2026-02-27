@@ -11,6 +11,7 @@ import {
   ZoomOut,
   RefreshCcw,
   Maximize2,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import {
@@ -44,6 +45,7 @@ function Mermaid({ children }: Props) {
   const [waitingCopy, setWaitingCopy] = useState<boolean>(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState<boolean>(false);
   const [modalSvg, setModalSvg] = useState<string>("");
+  const [modalKey, setModalKey] = useState(0);
 
   function downloadSvg() {
     const target = mermaidContainerRef.current;
@@ -67,8 +69,17 @@ function Mermaid({ children }: Props) {
     const target = mermaidContainerRef.current;
     if (target) {
       setModalSvg(target.innerHTML);
+      setModalKey(prev => prev + 1);
       setIsFullscreenOpen(true);
     }
+  };
+
+  const closeModal = () => {
+    setIsFullscreenOpen(false);
+  };
+
+  const resetModal = () => {
+    setModalKey(prev => prev + 1);
   };
 
   useEffect(() => {
@@ -148,7 +159,11 @@ function Mermaid({ children }: Props) {
                 </Button>
               </div>
               <TransformComponent>
-                <div className="mermaid" ref={mermaidContainerRef}>
+                <div
+                  className="mermaid cursor-pointer"
+                  ref={mermaidContainerRef}
+                  onClick={() => openFullscreen()}
+                >
                   {children}
                 </div>
               </TransformComponent>
@@ -163,13 +178,14 @@ function Mermaid({ children }: Props) {
             {t("editor.mermaid.fullscreen")}
           </DialogTitle>
           <TransformWrapper
+            key={modalKey}
             initialScale={1}
             minScale={0.1}
             maxScale={5}
             centerOnInit
             smooth
           >
-            {({ zoomIn, zoomOut, resetTransform, centerView }) => (
+            {({ zoomIn, zoomOut }) => (
               <div className="relative w-full h-full">
                 <div className="absolute top-2 right-2 z-50 flex gap-1">
                   <Button
@@ -180,6 +196,15 @@ function Mermaid({ children }: Props) {
                     onClick={() => downloadSvg()}
                   >
                     <Download />
+                  </Button>
+                  <Button
+                    className="w-8 h-8"
+                    size="icon"
+                    variant="secondary"
+                    title={t("editor.mermaid.close")}
+                    onClick={() => closeModal()}
+                  >
+                    <X />
                   </Button>
                 </div>
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex gap-2 bg-background/80 rounded-lg p-2 backdrop-blur-sm">
@@ -203,10 +228,7 @@ function Mermaid({ children }: Props) {
                     size="sm"
                     variant="secondary"
                     title={t("editor.mermaid.resize")}
-                    onClick={() => {
-                      resetTransform();
-                      centerView();
-                    }}
+                    onClick={() => resetModal()}
                   >
                     <RefreshCcw className="h-4 w-4" />
                   </Button>

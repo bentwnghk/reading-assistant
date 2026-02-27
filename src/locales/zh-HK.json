@@ -449,7 +449,8 @@
       "zoomIn": "放大",
       "zoomOut": "縮小",
       "resize": "重設大小",
-      "fullscreen": "全螢幕"
+      "fullscreen": "全螢幕",
+      "close": "關閉"
     },
     "tooltip": {
       "bold": "粗體",

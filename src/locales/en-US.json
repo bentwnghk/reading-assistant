@@ -449,7 +449,8 @@
       "zoomIn": "Zoom In",
       "zoomOut": "Zoom Out",
       "resize": "Resize",
-      "fullscreen": "Fullscreen"
+      "fullscreen": "Fullscreen",
+      "close": "Close"
     },
     "tooltip": {
       "bold": "Bold",
