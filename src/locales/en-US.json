@@ -450,6 +450,8 @@
     "autoSpeakFlashcardTip": "Automatically read the word aloud when a flashcard loads",
     "cheatMode": "Cheat Mode",
     "cheatModeTip": "Show Quick Questions that help answer uploaded reading comprehension questions",
+    "showGiveAnswer": "Show 'Give Answer'",
+    "showGiveAnswerTip": "Show the 'Give Answer' Quick Question (requires Cheat Mode)",
     "general": "System",
     "provider": "AI Provider",
     "providerTip": "AI service provider",

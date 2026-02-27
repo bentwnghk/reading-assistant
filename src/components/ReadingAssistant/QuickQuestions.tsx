@@ -9,6 +9,8 @@ interface QuickQuestionItem {
   label: string;
   question: string;
   action?: "text" | "upload-image";
+  requiresCheatMode?: boolean;
+  requiresShowGiveAnswer?: boolean;
 }
 
 interface QuickQuestionsProps {
@@ -18,7 +20,7 @@ interface QuickQuestionsProps {
 
 function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
   const { t } = useTranslation();
-  const { cheatMode } = useSettingStore();
+  const { cheatMode, showGiveAnswer } = useSettingStore();
 
   const allQuickQuestions: QuickQuestionItem[] = [
     {
@@ -47,18 +49,27 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
       label: t("reading.tutor.quickQuestions.helpWithImageStepByStep"),
       question: t("reading.tutor.quickQuestions.helpWithImageStepByStepQuestion"),
       action: "upload-image",
+      requiresCheatMode: true,
     },
     {
       icon: ImagePlus,
       label: t("reading.tutor.quickQuestions.helpWithImageAnswer"),
       question: t("reading.tutor.quickQuestions.helpWithImageAnswerQuestion"),
       action: "upload-image",
+      requiresCheatMode: true,
+      requiresShowGiveAnswer: true,
     },
   ];
 
-  const quickQuestions = cheatMode
-    ? allQuickQuestions
-    : allQuickQuestions.filter((q) => q.action !== "upload-image");
+  const quickQuestions = allQuickQuestions.filter((q) => {
+    if (q.requiresShowGiveAnswer) {
+      return cheatMode && showGiveAnswer;
+    }
+    if (q.requiresCheatMode) {
+      return cheatMode;
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-wrap gap-2 p-3 border-t border-border bg-muted/30">

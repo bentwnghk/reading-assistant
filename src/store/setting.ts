@@ -42,6 +42,7 @@ export interface SettingStore {
   ttsVoice: TTSVoice;
   autoSpeakFlashcard: boolean;
   cheatMode: boolean;
+  showGiveAnswer: boolean;
   openAIApiKey: string;
   openAIApiProxy: string;
   openaicompatibleApiKey: string;
@@ -74,6 +75,7 @@ export const defaultValues: SettingStore = {
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
   cheatMode: false,
+  showGiveAnswer: false,
   openAIApiKey: "",
   openAIApiProxy: "https://api.mr5ai.com",
   openaicompatibleApiKey: "",
