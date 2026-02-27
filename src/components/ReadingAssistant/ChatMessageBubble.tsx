@@ -22,7 +22,7 @@ function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
         className={cn(
           "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
           isUser
-            ? "bg-primary text-primary-foreground"
+            ? "bg-blue-500 text-white dark:bg-blue-600"
             : "bg-muted border border-border"
         )}
       >
@@ -37,7 +37,7 @@ function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
         className={cn(
           "flex-1 max-w-[85%] rounded-2xl px-4 py-3",
           isUser
-            ? "bg-primary text-primary-foreground rounded-tr-sm"
+            ? "bg-blue-500 text-white rounded-tr-sm dark:bg-blue-600"
             : "bg-muted border border-border rounded-tl-sm"
         )}
       >
@@ -46,7 +46,7 @@ function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
             className={cn(
               "text-xs mb-2 pb-2 border-b",
               isUser
-                ? "border-primary-foreground/20 text-primary-foreground/70"
+                ? "border-white/20 text-white/70"
                 : "border-border text-muted-foreground"
             )}
           >
@@ -57,7 +57,7 @@ function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
           className={cn(
             "text-sm prose prose-sm max-w-none",
             isUser
-              ? "prose-invert"
+              ? "prose-invert [&_*]:text-white"
               : "dark:prose-invert"
           )}
         >
