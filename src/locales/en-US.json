@@ -248,6 +248,8 @@
       "practiceMissedSkills": "Practice Missed Skills ({{count}})",
       "practiceMissedSkillsDesc": "Generate new questions targeting skills you missed",
       "downloadWord": "Download Word",
+      "downloadBlank": "Download Blank Test",
+      "downloadWithAnswers": "Download with Answers",
       "paragraph": "Para. {{num}}",
       "skills": {
         "mainIdea": "Main Idea",

@@ -14,7 +14,8 @@ import {
   Eye,
   BarChart3,
   Target,
-  FileDown
+  FileDown,
+  ChevronDown
 } from "lucide-react";
 import {
   Document,
@@ -33,6 +34,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
@@ -249,7 +256,7 @@ function ReadingTest() {
     return "text-red-600 dark:text-red-400";
   };
 
-  const downloadWord = useCallback(async () => {
+  const downloadWord = useCallback(async (includeAnswers: boolean = false) => {
     if (!readingTest.length) return;
 
     const title = docTitle || extractedText.split(/\n/).find((l) => l.trim()) || "Reading Test";
@@ -285,7 +292,7 @@ function ReadingTest() {
       })
     );
 
-    if (testCompleted && testScore !== undefined) {
+    if (includeAnswers && testCompleted && testScore !== undefined) {
       children.push(
         new Paragraph({
           children: [
@@ -331,17 +338,7 @@ function ReadingTest() {
       children.push(
         new Paragraph({
           children: [
-            new TextRun({ text: `${typeLabel}`, italics: true, color: "666666" }),
-          ],
-          spacing: { after: 100 },
-        })
-      );
-
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: `${t(`reading.readingTest.skills.${skillLabelKey}`)}: `, bold: true }),
-            new TextRun({ text: skillLabel }),
+            new TextRun({ text: `${typeLabel}: ${skillLabel}`, italics: true, color: "666666" }),
           ],
           spacing: { after: 100 },
         })
@@ -366,8 +363,8 @@ function ReadingTest() {
               children: [
                 new TextRun({
                   text: `   ${option}`,
-                  bold: isCorrect && testCompleted,
-                  color: isCorrect && testCompleted ? "22C55E" : "000000",
+                  bold: isCorrect && includeAnswers,
+                  color: isCorrect && includeAnswers ? "22C55E" : "000000",
                 }),
               ],
               spacing: { after: 50 },
@@ -389,8 +386,8 @@ function ReadingTest() {
               children: [
                 new TextRun({
                   text: `   ${opt.label}`,
-                  bold: isCorrect && testCompleted,
-                  color: isCorrect && testCompleted ? "22C55E" : "000000",
+                  bold: isCorrect && includeAnswers,
+                  color: isCorrect && includeAnswers ? "22C55E" : "000000",
                 }),
               ],
               spacing: { after: 50 },
@@ -410,7 +407,7 @@ function ReadingTest() {
         );
       }
 
-      if (testCompleted) {
+      if (includeAnswers) {
         if (question.type === "short-answer") {
           children.push(
             new Paragraph({
@@ -671,14 +668,25 @@ function ReadingTest() {
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
           </h3>
-          <Button
-            onClick={downloadWord}
-            variant="outline"
-            size="sm"
-          >
-            <FileDown className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("reading.readingTest.downloadWord")}</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("reading.readingTest.downloadWord")}</span>
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => downloadWord(false)}>
+                {t("reading.readingTest.downloadBlank")}
+              </DropdownMenuItem>
+              {testCompleted && (
+                <DropdownMenuItem onClick={() => downloadWord(true)}>
+                  {t("reading.readingTest.downloadWithAnswers")}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="space-y-6 py-4">
@@ -793,14 +801,23 @@ function ReadingTest() {
             {t("reading.readingTest.title")}
           </h3>
           <div className="flex gap-2">
-            <Button
-              onClick={downloadWord}
-              variant="outline"
-              size="sm"
-            >
-              <FileDown className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("reading.readingTest.downloadWord")}</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <FileDown className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t("reading.readingTest.downloadWord")}</span>
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => downloadWord(false)}>
+                  {t("reading.readingTest.downloadBlank")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => downloadWord(true)}>
+                  {t("reading.readingTest.downloadWithAnswers")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               onClick={handleReset}
               variant="secondary"

@@ -248,6 +248,8 @@
       "practiceMissedSkills": "針對性練習 ({{count}} 項技能)",
       "practiceMissedSkillsDesc": "針對未掌握的技能生成新的練習題",
       "downloadWord": "下載 Word",
+      "downloadBlank": "下載空白試卷",
+      "downloadWithAnswers": "下載含答案",
       "paragraph": "第 {{num}} 段",
       "skills": {
         "mainIdea": "主旨",
