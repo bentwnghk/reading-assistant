@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Lightbulb, HelpCircle, BookOpen, MessageSquareQuote, ImagePlus, LightbulbIcon, Target } from "lucide-react";
+import { Lightbulb, BookOpen, MessageSquareQuote, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface QuickQuestionItem {
@@ -25,11 +25,6 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
       question: t("reading.tutor.quickQuestions.mainIdeaQuestion"),
     },
     {
-      icon: HelpCircle,
-      label: t("reading.tutor.quickQuestions.summarize"),
-      question: t("reading.tutor.quickQuestions.summarizeQuestion"),
-    },
-    {
       icon: BookOpen,
       label: t("reading.tutor.quickQuestions.vocabHelp"),
       question: t("reading.tutor.quickQuestions.vocabHelpQuestion"),
@@ -41,18 +36,18 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
     },
     {
       icon: ImagePlus,
-      label: t("reading.tutor.quickQuestions.helpWithImageStepByStep"),
-      question: t("reading.tutor.quickQuestions.helpWithImageStepByStepQuestion"),
-      action: "upload-image",
-    },
-    {
-      icon: LightbulbIcon,
       label: t("reading.tutor.quickQuestions.helpWithImageHint"),
       question: t("reading.tutor.quickQuestions.helpWithImageHintQuestion"),
       action: "upload-image",
     },
     {
-      icon: Target,
+      icon: ImagePlus,
+      label: t("reading.tutor.quickQuestions.helpWithImageStepByStep"),
+      question: t("reading.tutor.quickQuestions.helpWithImageStepByStepQuestion"),
+      action: "upload-image",
+    },
+    {
+      icon: ImagePlus,
       label: t("reading.tutor.quickQuestions.helpWithImageAnswer"),
       question: t("reading.tutor.quickQuestions.helpWithImageAnswerQuestion"),
       action: "upload-image",
