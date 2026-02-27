@@ -250,6 +250,7 @@
       "downloadWord": "下載 Word",
       "downloadBlank": "下載空白試卷",
       "downloadWithAnswers": "下載含答案",
+      "answerKey": "閱讀測試答案",
       "paragraph": "第 {{num}} 段",
       "skills": {
         "mainIdea": "主旨",

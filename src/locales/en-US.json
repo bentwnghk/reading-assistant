@@ -250,6 +250,7 @@
       "downloadWord": "Download Word",
       "downloadBlank": "Download Blank Test",
       "downloadWithAnswers": "Download with Answers",
+      "answerKey": "Reading Test Answer Key",
       "paragraph": "Para. {{num}}",
       "skills": {
         "mainIdea": "Main Idea",
