@@ -315,7 +315,9 @@ function ReadingTest() {
     }
 
     readingTest.forEach((question, index) => {
+      const typeLabelKey = QUESTION_TYPE_LABELS[question.type] || question.type;
       const skillLabelKey = SKILL_LABELS[question.skillTested] || question.skillTested;
+      const typeLabel = t(`reading.readingTest.${typeLabelKey}`);
       const skillLabel = t(`reading.readingTest.skills.${skillLabelKey}`);
 
       children.push(
@@ -323,6 +325,15 @@ function ReadingTest() {
           text: `${index + 1}. ${question.question}`,
           heading: HeadingLevel.HEADING_2,
           spacing: { before: 300, after: 100 },
+        })
+      );
+
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: `${typeLabel}`, italics: true, color: "666666" }),
+          ],
+          spacing: { after: 100 },
         })
       );
 
@@ -660,6 +671,14 @@ function ReadingTest() {
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
           </h3>
+          <Button
+            onClick={downloadWord}
+            variant="outline"
+            size="sm"
+          >
+            <FileDown className="h-4 w-4" />
+            <span className="hidden sm:inline">{t("reading.readingTest.downloadWord")}</span>
+          </Button>
         </div>
 
         <div className="space-y-6 py-4">
