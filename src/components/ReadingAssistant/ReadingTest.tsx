@@ -321,8 +321,9 @@ function ReadingTest() {
       );
 
       if ((question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing") && question.options) {
+        const normalizedCorrectAnswer = question.correctAnswer.toUpperCase().trim();
         question.options.forEach((option, _optIndex) => {
-          const isCorrect = option.charAt(0) === question.correctAnswer;
+          const isCorrect = option.charAt(0).toUpperCase() === normalizedCorrectAnswer.charAt(0);
           children.push(
             new Paragraph({
               children: [
@@ -344,8 +345,9 @@ function ReadingTest() {
           { label: t("reading.readingTest.false"), value: "false" },
           { label: t("reading.readingTest.notGiven"), value: "not-given" },
         ];
+        const normalizedCorrectAnswer = question.correctAnswer.toLowerCase().trim();
         options.forEach((opt) => {
-          const isCorrect = opt.value === question.correctAnswer;
+          const isCorrect = opt.value === normalizedCorrectAnswer;
           children.push(
             new Paragraph({
               children: [
