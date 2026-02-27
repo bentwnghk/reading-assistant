@@ -221,7 +221,7 @@ function Header() {
             ProReader
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent animate-shimmer" />
           </span>
-          <span className="ml-1 text-[10px] px-2 py-0.5 bg-muted text-muted-foreground rounded-full font-normal">v{VERSION}</span>
+          <span className="ml-1 text-[10px] px-3 py-px bg-primary/10 rounded font-normal">v{VERSION}</span>
         </h1>
         <div className="flex">
           <Button
