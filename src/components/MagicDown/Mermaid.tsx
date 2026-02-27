@@ -175,8 +175,18 @@ function Mermaid({ children }: Props) {
             maxScale={5}
             centerOnInit
             smooth
+            limitToBounds={false}
           >
-            {({ zoomIn, zoomOut, resetTransform, centerView }) => (
+            {({ zoomIn, zoomOut, resetTransform, centerView, zoomToElement }) => {
+              const handleReset = () => {
+                resetTransform();
+                centerView();
+                if (modalMermaidRef.current) {
+                  zoomToElement(modalMermaidRef.current, 1);
+                }
+              };
+
+              return (
               <div className="relative w-full h-full flex flex-col">
                 <div className="absolute top-2 right-2 z-50 flex gap-1">
                   <Button
@@ -210,10 +220,7 @@ function Mermaid({ children }: Props) {
                     size="sm"
                     variant="secondary"
                     title={t("editor.mermaid.resize")}
-                    onClick={() => {
-                      resetTransform();
-                      centerView();
-                    }}
+                    onClick={handleReset}
                   >
                     <RefreshCcw className="h-4 w-4" />
                   </Button>
@@ -224,12 +231,12 @@ function Mermaid({ children }: Props) {
                 >
                   <div
                     ref={modalMermaidRef}
-                    className="mermaid"
+                    className="mermaid [&>svg]:!w-full [&>svg]:!h-full [&>svg]:!max-w-none [&>svg]:object-contain"
                     dangerouslySetInnerHTML={{ __html: modalSvg }}
                   />
                 </TransformComponent>
               </div>
-            )}
+            )}}
           </TransformWrapper>
         </DialogContent>
       </Dialog>
