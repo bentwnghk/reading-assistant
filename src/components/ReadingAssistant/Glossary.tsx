@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, Download, Table, Layers, ClipboardList, SpellCheck } from "lucide-react";
+import { BookMarked, LoaderCircle, Download, FileDown, Table, Layers, ClipboardList, SpellCheck } from "lucide-react";
 import {
   Document,
   Packer,
@@ -282,7 +282,7 @@ function Glossary() {
                 variant="secondary"
                 size="sm"
               >
-                <Download className="h-4 w-4" />
+                <FileDown className="h-4 w-4" />
                 <span className="hidden sm:inline">{t("reading.glossary.downloadWord")}</span>
               </Button>
               <Button
