@@ -402,7 +402,13 @@
         "vocabHelp": "Vocab help",
         "vocabHelpQuestion": "What does this word or phrase mean?",
         "explain": "Explain",
-        "explainQuestion": "Can you explain what this text is about?"
+        "explainQuestion": "Can you explain what this text is about?",
+        "helpWithImageStepByStep": "Step-by-step",
+        "helpWithImageStepByStepQuestion": "I've uploaded an image of a reading comprehension question. Based on the passage I'm reading, please help me understand and answer this question step by step.",
+        "helpWithImageHint": "Hint me",
+        "helpWithImageHintQuestion": "I've uploaded a reading question. Please guide me to find the answer myself by giving hints and asking guiding questions, without giving me the answer directly.",
+        "helpWithImageAnswer": "Give answer",
+        "helpWithImageAnswerQuestion": "Help me answer this reading comprehension question. Give me the answer with a clear explanation."
       }
     }
   },

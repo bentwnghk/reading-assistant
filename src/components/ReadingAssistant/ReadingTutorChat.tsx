@@ -27,6 +27,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const [streamingContent, setStreamingContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
+  const [pendingQuestionForImage, setPendingQuestionForImage] = useState<string | null>(null);
   
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -52,27 +53,93 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     const files = e.target.files;
     if (!files) return;
 
+    const questionForImage = pendingQuestionForImage;
+    if (questionForImage) {
+      setPendingQuestionForImage(null);
+    }
+
+    const newImages: string[] = [];
+    let loadedCount = 0;
+    const totalFiles = Array.from(files).filter((f) => f.type.startsWith("image/")).length;
+
+    if (totalFiles === 0) {
+      e.target.value = "";
+      return;
+    }
+
     Array.from(files).forEach((file) => {
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = (event) => {
           const base64 = event.target?.result as string;
-          setPendingImages((prev) => [...prev, base64]);
+          newImages.push(base64);
+          loadedCount++;
+
+          if (loadedCount === totalFiles) {
+            e.target.value = "";
+            if (questionForImage && !isLoading) {
+              handleSendWithImages(questionForImage, newImages);
+            } else {
+              setPendingImages((prev) => [...prev, ...newImages]);
+            }
+          }
         };
         reader.readAsDataURL(file);
       }
     });
 
-    e.target.value = "";
+    if (totalFiles === 0) {
+      e.target.value = "";
+    }
+  };
+
+  const handleSendWithImages = async (question: string, images: string[]) => {
+    const contextText = tutorChatSelectedText;
+
+    const userMessage: ChatMessage = {
+      id: nanoid(),
+      role: "user",
+      content: question,
+      timestamp: Date.now(),
+      selectedText: contextText,
+      images: images.length > 0 ? images : undefined,
+    };
+
+    addChatMessage(userMessage);
+    setIsLoading(true);
+    setStreamingContent("");
+    setTutorChatSelectedText("");
+
+    const response = await askTutor(
+      question,
+      chatHistory,
+      contextText,
+      images.length > 0 ? images : undefined,
+      (chunk) => setStreamingContent(chunk)
+    );
+
+    if (response) {
+      const assistantMessage: ChatMessage = {
+        id: nanoid(),
+        role: "assistant",
+        content: response,
+        timestamp: Date.now(),
+      };
+      addChatMessage(assistantMessage);
+    }
+
+    setIsLoading(false);
+    setStreamingContent("");
   };
 
   const removePendingImage = (index: number) => {
     setPendingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSend = async (question?: string, selectedText?: string) => {
+  const handleSend = async (question?: string, selectedText?: string, images?: string[]) => {
     const messageText = question || input.trim();
-    if ((!messageText && pendingImages.length === 0) || isLoading) return;
+    const imagesToUse = images || pendingImages;
+    if ((!messageText && imagesToUse.length === 0) || isLoading) return;
 
     const contextText = selectedText || tutorChatSelectedText;
 
@@ -82,13 +149,15 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       content: messageText || t("reading.tutor.imageOnly"),
       timestamp: Date.now(),
       selectedText: contextText,
-      images: pendingImages.length > 0 ? pendingImages : undefined,
+      images: imagesToUse.length > 0 ? imagesToUse : undefined,
     };
 
     addChatMessage(userMessage);
     setInput("");
-    const imagesToSend = [...pendingImages];
-    setPendingImages([]);
+    const imagesToSend = [...imagesToUse];
+    if (!images) {
+      setPendingImages([]);
+    }
     setIsLoading(true);
     setStreamingContent("");
     setTutorChatSelectedText("");
@@ -125,6 +194,15 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const handleClearHistory = () => {
     clearChatHistory();
     setPendingImages([]);
+  };
+
+  const handleQuickQuestionSelect = (question: string, action?: "text" | "upload-image") => {
+    if (action === "upload-image") {
+      setPendingQuestionForImage(question);
+      fileInputRef.current?.click();
+    } else {
+      handleSend(question);
+    }
   };
 
   if (!extractedText) {
@@ -212,7 +290,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       </div>
 
       <QuickQuestions
-        onSelectQuestion={(q) => handleSend(q)}
+        onSelectQuestion={handleQuickQuestionSelect}
         disabled={isLoading}
       />
 

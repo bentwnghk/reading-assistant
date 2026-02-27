@@ -402,7 +402,13 @@
         "vocabHelp": "詞彙幫助",
         "vocabHelpQuestion": "這個詞彙是什麼意思？",
         "explain": "解釋",
-        "explainQuestion": "你可以解釋這些文字在講什麼嗎？"
+        "explainQuestion": "你可以解釋這些文字在講什麼嗎？",
+        "helpWithImageStepByStep": "逐步指導",
+        "helpWithImageStepByStepQuestion": "我上傳了一張閱讀理解題目的圖片。根據我正在閱讀的文章，請逐步指導我理解並回答這道題目。",
+        "helpWithImageHint": "給我提示",
+        "helpWithImageHintQuestion": "我上傳了一道閱讀題目。請透過提示和引導性問題，引導我自己找出答案，不要直接告訴我答案。",
+        "helpWithImageAnswer": "直接解答",
+        "helpWithImageAnswerQuestion": "請幫我回答這道閱讀理解題，給我答案並清楚解釋。"
       }
     }
   },
