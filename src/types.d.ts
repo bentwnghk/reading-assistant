@@ -121,3 +121,23 @@ interface ChatMessage {
   selectedText?: string;
   images?: string[];
 }
+
+type CEFRLevel = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+
+interface TextDifficultyResult {
+  wordCount: number;
+  sentenceCount: number;
+  syllableCount: number;
+  avgSentenceLength: number;
+  avgWordLength: number;
+  fleschReadingEase: number;
+  fleschKincaidGrade: number;
+  automatedReadabilityIndex: number;
+  colemanLiauIndex: number;
+  smogIndex: number;
+  cefrLevel: CEFRLevel;
+  cefrScore: number;
+  cefrDistribution: Record<string, number>;
+  estimatedLexile: string;
+  analyzedAt: number;
+}

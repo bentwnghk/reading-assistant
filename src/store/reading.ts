@@ -90,6 +90,9 @@ export interface ReadingStore {
   chatHistory: ChatMessage[];
   status: ReadingStatus;
   error: string | null;
+  originalDifficulty: TextDifficultyResult | null;
+  adaptedDifficulty: TextDifficultyResult | null;
+  simplifiedDifficulty: TextDifficultyResult | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -128,6 +131,10 @@ interface ReadingActions {
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
   setStreaming: (value: boolean) => void;
+  setOriginalDifficulty: (result: TextDifficultyResult | null) => void;
+  setAdaptedDifficulty: (result: TextDifficultyResult | null) => void;
+  setSimplifiedDifficulty: (result: TextDifficultyResult | null) => void;
+  clearDifficultyAnalysis: () => void;
   reset: () => void;
   backup: () => ReadingStore;
   restore: (session: ReadingStore) => Promise<void>;
@@ -159,6 +166,9 @@ const defaultValues: ReadingStore = {
   chatHistory: [],
   status: "idle",
   error: null,
+  originalDifficulty: null,
+  adaptedDifficulty: null,
+  simplifiedDifficulty: null,
   createdAt: 0,
   updatedAt: 0,
 };
@@ -395,6 +405,28 @@ export const useReadingStore = create(
       setStreaming: (value) => {
         setStreamingFlag(value);
       },
+      setOriginalDifficulty: (result) =>
+        set(() => ({
+          originalDifficulty: result,
+          updatedAt: Date.now(),
+        })),
+      setAdaptedDifficulty: (result) =>
+        set(() => ({
+          adaptedDifficulty: result,
+          updatedAt: Date.now(),
+        })),
+      setSimplifiedDifficulty: (result) =>
+        set(() => ({
+          simplifiedDifficulty: result,
+          updatedAt: Date.now(),
+        })),
+      clearDifficultyAnalysis: () =>
+        set(() => ({
+          originalDifficulty: null,
+          adaptedDifficulty: null,
+          simplifiedDifficulty: null,
+          updatedAt: Date.now(),
+        })),
       reset: () => {
         const sessionId = useReadingStore.getState().id;
         if (sessionId) {

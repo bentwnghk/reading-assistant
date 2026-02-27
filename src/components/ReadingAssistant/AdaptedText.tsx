@@ -12,6 +12,7 @@ import {
   Brain,
   FileDown,
 } from "lucide-react";
+import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
 import {
   Document,
   Packer,
@@ -1257,6 +1258,8 @@ function AdaptedText() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <TextDifficultyAnalyzer />
     </section>
   );
 }

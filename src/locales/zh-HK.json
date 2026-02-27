@@ -188,6 +188,22 @@
       "generating": "正在生成...",
       "emptyTip": "點擊上方按鈕生成文字摘要"
     },
+    "difficulty": {
+      "title": "文本難度分析器",
+      "analyze": "分析難度",
+      "analyzing": "分析中...",
+      "noText": "無可用文本",
+      "notAnalyzed": "點擊「分析難度」開始分析",
+      "original": "原文",
+      "adapted": "改寫版本",
+      "simplified": "簡化版本",
+      "wordCount": "詞數",
+      "sentenceCount": "句子數",
+      "avgSentenceLength": "平均詞數/句子",
+      "fleschReadingEase": "Flesch 閱讀易度",
+      "gradeLevel": "年級水平",
+      "disclaimer": "註：Lexile是根據可讀性公式估算的。如需官方Lexile分數，請訪 lexile.com/analyzer"
+    },
     "adaptedText": {
       "title": "改寫文字",
       "adapt": "改寫",

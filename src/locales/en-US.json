@@ -188,6 +188,22 @@
       "generating": "Generating...",
       "emptyTip": "Click the button above to generate a summary of the text"
     },
+    "difficulty": {
+      "title": "Text Difficulty Analyzer",
+      "analyze": "Analyze Difficulty",
+      "analyzing": "Analyzing...",
+      "noText": "No text available",
+      "notAnalyzed": "Click 'Analyze' to analyze",
+      "original": "Original",
+      "adapted": "Adapted",
+      "simplified": "Simplified",
+      "wordCount": "Words",
+      "sentenceCount": "Sentences",
+      "avgSentenceLength": "Avg Words/Sentence",
+      "fleschReadingEase": "Flesch Reading Ease",
+      "gradeLevel": "Grade Level",
+      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer"
+    },
     "adaptedText": {
       "title": "Adapted Text",
       "adapt": "Adapt",
@@ -200,6 +216,38 @@
       "simplifying": "Simplifying...",
       "simplifiedEmptyTip": "Click the button below to create an even simpler version",
       "generateSimplified": "Generate Simplified Version"
+    },
+    "difficulty": {
+      "title": "Text Difficulty Analyzer",
+      "analyze": "Analyze Difficulty",
+      "analyzing": "Analyzing...",
+      "noText": "No text available",
+      "notAnalyzed": "Click 'Analyze' to analyze",
+      "original": "Original",
+      "adapted": "Adapted",
+      "simplified": "Simplified",
+      "wordCount": "Words",
+      "sentenceCount": "Sentences",
+      "avgSentenceLength": "Avg Words/Sentence",
+      "fleschReadingEase": "Flesch Reading Ease",
+      "gradeLevel": "Grade Level",
+      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer"
+    },
+    "difficulty": {
+      "title": "Text Difficulty Analyzer",
+      "analyze": "Analyze Difficulty",
+      "analyzing": "Analyzing...",
+      "original": "Original",
+      "adapted": "Adapted",
+      "simplified": "Simplified",
+      "noText": "No text available",
+      "notAnalyzed": "Click 'Analyze Difficulty' to analyze",
+      "wordCount": "Words",
+      "sentenceCount": "Sentences",
+      "avgSentenceLength": "Avg Words/Sentence",
+      "fleschReadingEase": "Flesch Reading Ease",
+      "gradeLevel": "Grade Level",
+      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer"
     },
     "mindMap": {
       "title": "Mind Map",
