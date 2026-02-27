@@ -394,13 +394,13 @@
       "quickQuestions": {
         "title": "快捷問題：",
         "mainIdea": "主旨？",
-        "mainIdeaQuestion": "這篇文章的主旨是什麼？",
+        "mainIdeaQuestion": "這些文字的主旨是什麼？",
         "summarize": "摘要",
-        "summarizeQuestion": "你可以用幾句話總結這篇文章嗎？",
+        "summarizeQuestion": "你可以用幾句話總結這些文字嗎？",
         "vocabHelp": "詞彙幫助",
-        "vocabHelpQuestion": "這篇文章中最重要的詞彙有哪些？",
+        "vocabHelpQuestion": "這個詞彙是什麼意思？",
         "explain": "解釋",
-        "explainQuestion": "你可以解釋這篇文章在講什麼嗎？"
+        "explainQuestion": "你可以解釋這些文字在講什麼嗎？"
       }
     }
   },

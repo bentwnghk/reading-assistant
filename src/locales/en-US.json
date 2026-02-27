@@ -398,7 +398,7 @@
         "summarize": "Summarize",
         "summarizeQuestion": "Can you summarize this text in a few sentences?",
         "vocabHelp": "Vocab help",
-        "vocabHelpQuestion": "What are the most important vocabulary words I should learn?",
+        "vocabHelpQuestion": "What does this word or phrase mean?",
         "explain": "Explain",
         "explainQuestion": "Can you explain what this text is about?"
       }
