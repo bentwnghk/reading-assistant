@@ -292,35 +292,6 @@ function ReadingTest() {
       })
     );
 
-    if (includeAnswers && testCompleted && testScore !== undefined) {
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `${t("reading.readingTest.yourScore")}: `,
-              bold: true,
-            }),
-            new TextRun({
-              text: `${testScore}%`,
-              bold: true,
-              color: testScore >= 80 ? "22C55E" : testScore >= 60 ? "EAB308" : "EF4444",
-            }),
-          ],
-          spacing: { after: 200 },
-        })
-      );
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: t("reading.readingTest.pointsFormat", { earned: testEarnedPoints, total: testTotalPoints }),
-            }),
-          ],
-          spacing: { after: 400 },
-        })
-      );
-    }
-
     readingTest.forEach((question, index) => {
       const typeLabelKey = QUESTION_TYPE_LABELS[question.type] || question.type;
       const skillLabelKey = SKILL_LABELS[question.skillTested] || question.skillTested;
@@ -468,7 +439,7 @@ function ReadingTest() {
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [readingTest, extractedText, docTitle, testCompleted, testScore, testEarnedPoints, testTotalPoints, t]);
+  }, [readingTest, extractedText, docTitle, t]);
 
   const renderQuestion = (question: ReadingTestQuestion, index: number, showResult: boolean = false) => {
     let isCorrect = false;
