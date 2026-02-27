@@ -235,12 +235,13 @@ Perfect your pronunciation with natural voice reading.
 ### 📄 **10. Word Export**
 Download your learning materials for offline study.
 
-| Feature | Description |
-|---------|-------------|
-| 📝 **Export Text** | Original, adapted, and simplified text |
-| 📖 **Include Glossary** | Bilingual word definitions with examples |
-| 💬 **Sentence Analysis** | AI breakdown of analyzed sentences |
-| 🖨️ **Print Ready** | Format optimized for printing |
+| Export Type | Description |
+|-------------|-------------|
+| 📝 **Adapted Text** | Original, adapted, simplified text with optional glossary & sentence analysis |
+| 📖 **Glossary** | Bilingual word definitions table with examples |
+| 📋 **Vocabulary Quiz** | Quiz questions (blank or with answer key) |
+| ❓ **Reading Test** | Comprehension questions (blank or with answer key) |
+| 🖨️ **Print Ready** | All exports formatted for printing |
 
 ---
 
