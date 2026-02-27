@@ -98,7 +98,7 @@
         },
         "wordExport": {
           "title": "📄 Word Export",
-          "desc": "Export your work as Word documents: adapted text with vocabulary & sentence analysis, glossary, vocabulary quiz, and reading comprehension test (with optional answer keys)."
+          "desc": "Export learning materials as Word documents: adapted text with vocabulary & sentence analysis, glossary, vocabulary quiz, and reading comprehension test (with optional answer keys)."
         }
       },
       "workflow": {
