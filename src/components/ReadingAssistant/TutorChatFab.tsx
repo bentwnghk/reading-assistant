@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGlobalStore } from "@/store/global";
@@ -12,6 +13,7 @@ const ReadingTutorChat = dynamic(() => import("./ReadingTutorChat"), {
 });
 
 function TutorChatFab() {
+  const { t } = useTranslation();
   const { openTutorChat, setOpenTutorChat, setTutorChatSelectedText } = useGlobalStore();
   const { extractedText } = useReadingStore();
   const [mounted, setMounted] = useState(false);
@@ -47,7 +49,7 @@ function TutorChatFab() {
           openTutorChat && "scale-0 opacity-0"
         )}
         size="icon"
-        title="AI Tutor"
+        title={t("reading.tutor.title")}
       >
         <MessageCircle className="w-5 h-5" />
       </Button>
