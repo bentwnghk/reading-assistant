@@ -296,8 +296,16 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
 
       <div className="p-3 border-t border-border">
         {tutorChatSelectedText && (
-          <div className="mb-2 text-xs text-primary bg-primary/10 border border-primary/20 rounded px-2 py-1.5 truncate font-medium">
-            {t("reading.tutor.aboutSelection")}: &ldquo;{tutorChatSelectedText}&rdquo;
+          <div className="mb-2 text-xs text-primary bg-primary/10 border border-primary/20 rounded px-2 py-1.5 font-medium flex items-center gap-1">
+            <span className="truncate">{t("reading.tutor.aboutSelection")}: &ldquo;{tutorChatSelectedText}&rdquo;</span>
+            <button
+              type="button"
+              onClick={() => setTutorChatSelectedText("")}
+              className="flex-shrink-0 hover:bg-primary/20 rounded p-0.5 transition-colors"
+              title={t("reading.tutor.removeSelection")}
+            >
+              <XIcon className="h-3 w-3" />
+            </button>
           </div>
         )}
         {pendingImages.length > 0 && (

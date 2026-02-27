@@ -391,6 +391,7 @@
       "inputPlaceholder": "Type your question...",
       "clearHistory": "Clear chat history",
       "aboutSelection": "About selected text",
+      "removeSelection": "Remove selected text from context",
       "addImage": "Add image",
       "imageOnly": "[Image]",
       "quickQuestions": {
