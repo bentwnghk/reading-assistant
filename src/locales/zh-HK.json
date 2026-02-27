@@ -391,6 +391,8 @@
       "inputPlaceholder": "輸入你的問題...",
       "clearHistory": "清除對話記錄",
       "aboutSelection": "關於選取文字",
+      "addImage": "添加圖片",
+      "imageOnly": "[圖片]",
       "quickQuestions": {
         "title": "快捷問題：",
         "mainIdea": "主旨？",
@@ -436,6 +438,7 @@
     "readingTestModel": "閱讀測驗模型",
     "glossaryModel": "詞彙表模型",
     "sentenceAnalysisModel": "句子分析模型",
+    "tutorModel": "AI 導師模型",
     "ttsVoice": "語音選擇",
     "autoSpeakFlashcard": "自動朗讀生字卡",
     "autoSpeakFlashcardTip": "當生字卡載入時自動朗讀生字",

@@ -41,6 +41,18 @@ function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
             : "bg-muted border border-border rounded-tl-sm"
         )}
       >
+        {message.images && message.images.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {message.images.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt={`Uploaded ${index + 1}`}
+                className="max-w-[120px] max-h-[120px] object-cover rounded border border-white/20"
+              />
+            ))}
+          </div>
+        )}
         {message.selectedText && (
           <div
             className={cn(

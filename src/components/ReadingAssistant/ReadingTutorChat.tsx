@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
-import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle } from "lucide-react";
+import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useReadingStore } from "@/store/reading";
@@ -26,9 +26,11 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [pendingImages, setPendingImages] = useState<string[]>([]);
   
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = useCallback(() => {
     if (scrollViewportRef.current) {
@@ -46,30 +48,56 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     }
   }, [tutorChatSelectedText]);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target?.result as string;
+          setPendingImages((prev) => [...prev, base64]);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    e.target.value = "";
+  };
+
+  const removePendingImage = (index: number) => {
+    setPendingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSend = async (question?: string, selectedText?: string) => {
     const messageText = question || input.trim();
-    if (!messageText || isLoading) return;
+    if ((!messageText && pendingImages.length === 0) || isLoading) return;
 
     const contextText = selectedText || tutorChatSelectedText;
 
     const userMessage: ChatMessage = {
       id: nanoid(),
       role: "user",
-      content: messageText,
+      content: messageText || t("reading.tutor.imageOnly"),
       timestamp: Date.now(),
       selectedText: contextText,
+      images: pendingImages.length > 0 ? pendingImages : undefined,
     };
 
     addChatMessage(userMessage);
     setInput("");
+    const imagesToSend = [...pendingImages];
+    setPendingImages([]);
     setIsLoading(true);
     setStreamingContent("");
     setTutorChatSelectedText("");
 
     const response = await askTutor(
-      messageText,
+      messageText || "What is in this image?",
       chatHistory,
       contextText,
+      imagesToSend.length > 0 ? imagesToSend : undefined,
       (chunk) => setStreamingContent(chunk)
     );
 
@@ -96,6 +124,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
 
   const handleClearHistory = () => {
     clearChatHistory();
+    setPendingImages([]);
   };
 
   if (!extractedText) {
@@ -193,7 +222,46 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             {t("reading.tutor.aboutSelection")}: &ldquo;{tutorChatSelectedText}&rdquo;
           </div>
         )}
+        {pendingImages.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {pendingImages.map((img, index) => (
+              <div key={index} className="relative group">
+                <img
+                  src={img}
+                  alt={`Pending ${index + 1}`}
+                  className="h-16 w-16 object-cover rounded border border-border"
+                />
+                <button
+                  type="button"
+                  onClick={() => removePendingImage(index)}
+                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <XIcon className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+            className="h-10 w-10 flex-shrink-0"
+            title={t("reading.tutor.addImage")}
+          >
+            <ImagePlus className="h-4 w-4" />
+          </Button>
           <Textarea
             ref={inputRef}
             value={input}
@@ -207,7 +275,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             <Button
               size="icon"
               onClick={() => handleSend()}
-              disabled={!input.trim() || isLoading}
+              disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
               className="h-10 w-10"
             >
               {isLoading ? (

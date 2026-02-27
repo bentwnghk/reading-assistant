@@ -119,4 +119,5 @@ interface ChatMessage {
   content: string;
   timestamp: number;
   selectedText?: string;
+  images?: string[];
 }

@@ -14,6 +14,14 @@ export const VISION_MODELS = ["gpt-4.1-mini", "gpt-5-mini"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
+export const TUTOR_MODELS = [
+  "gpt-5-mini",
+  "gemini-3-flash-preview",
+  "gpt-5.1",
+] as const;
+
+export type TutorModel = (typeof TUTOR_MODELS)[number];
+
 export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] as const;
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
@@ -30,6 +38,7 @@ export interface SettingStore {
   readingTestModel: AvailableModel;
   glossaryModel: AvailableModel;
   sentenceAnalysisModel: AvailableModel;
+  tutorModel: TutorModel;
   ttsVoice: TTSVoice;
   autoSpeakFlashcard: boolean;
   openAIApiKey: string;
@@ -60,6 +69,7 @@ export const defaultValues: SettingStore = {
   readingTestModel: "deepseek-chat",
   glossaryModel: "deepseek-chat",
   sentenceAnalysisModel: "deepseek-chat",
+  tutorModel: "gpt-5-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
   openAIApiKey: "",

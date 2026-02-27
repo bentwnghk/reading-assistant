@@ -391,6 +391,8 @@
       "inputPlaceholder": "Type your question...",
       "clearHistory": "Clear chat history",
       "aboutSelection": "About selected text",
+      "addImage": "Add image",
+      "imageOnly": "[Image]",
       "quickQuestions": {
         "title": "Quick Questions:",
         "mainIdea": "Main idea?",
@@ -436,6 +438,7 @@
     "readingTestModel": "Reading Test Model",
     "glossaryModel": "Glossary Model",
     "sentenceAnalysisModel": "Sentence Analysis Model",
+    "tutorModel": "AI Tutor Model",
     "ttsVoice": "TTS Voice",
     "autoSpeakFlashcard": "Auto-speak Flashcard",
     "autoSpeakFlashcardTip": "Automatically read the word aloud when a flashcard loads",

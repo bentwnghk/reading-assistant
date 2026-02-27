@@ -643,37 +643,62 @@ Guidelines:
     question: string,
     history: ChatMessage[],
     selectedText?: string,
+    images?: string[],
     onChunk?: (chunk: string) => void
   ): Promise<string> {
     const { studentAge, extractedText } = useReadingStore.getState();
-    const { summaryModel } = useSettingStore.getState();
+    const { tutorModel } = useSettingStore.getState();
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return "";
     }
 
-    const thinkingModel = await createModelProvider(summaryModel);
+    const visionModel = await createModelProvider(tutorModel);
     
-    const messages: Array<{ role: "user" | "assistant"; content: string }> = history
+    const messages: any[] = history
       .slice(-20)
-      .map((msg) => ({
-        role: msg.role,
-        content: msg.selectedText 
+      .map((msg) => {
+        const textContent = msg.selectedText 
           ? `${msg.content}\n\n[Context: The student is asking about this text: "${msg.selectedText}"]`
-          : msg.content,
-      }));
+          : msg.content;
+        
+        if (msg.role === "user" && msg.images && msg.images.length > 0) {
+          return {
+            role: "user",
+            content: [
+              { type: "text", text: textContent },
+              ...msg.images.map((img) => ({ type: "image", image: img }))
+            ]
+          };
+        }
+        return { role: msg.role, content: textContent };
+      });
 
-    const userContent = selectedText
-      ? `${question}\n\n[Context: The student is asking about this text: "${selectedText}"]`
-      : question;
-    messages.push({ role: "user", content: userContent });
+    const hasImages = images && images.length > 0;
+    if (hasImages) {
+      messages.push({
+        role: "user",
+        content: [
+          { type: "text", text: selectedText 
+            ? `${question}\n\n[Context: The student is asking about this text: "${selectedText}"]`
+            : question 
+          },
+          ...images.map((img) => ({ type: "image", image: img }))
+        ]
+      });
+    } else {
+      const userContent = selectedText
+        ? `${question}\n\n[Context: The student is asking about this text: "${selectedText}"]`
+        : question;
+      messages.push({ role: "user", content: userContent });
+    }
 
     let fullResponse = "";
 
     try {
       const result = streamText({
-        model: thinkingModel,
+        model: visionModel,
         system: readingTutorSystemPrompt(studentAge, extractedText),
         messages,
         experimental_transform: smoothTextStream(smoothTextStreamType),
