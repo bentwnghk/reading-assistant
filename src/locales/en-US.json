@@ -218,7 +218,9 @@
       "disclaimer": "CEFR levels and word highlights are analyzed using vocabulary frequency data. Flesch Reading Ease and Grade Level are calculated using standard readability formulas.",
       "cefrHighlight": "CEFR Word Highlight",
       "showHighlight": "Highlight Words",
-      "hideHighlight": "Hide"
+      "hideHighlight": "Hide",
+      "clickToHideWords": "Click to hide {{level}} words",
+      "clickToShowWords": "Click to show {{level}} words"
     },
     "mindMap": {
       "title": "Mind Map",

@@ -218,7 +218,9 @@
       "disclaimer": "CEFR等級和詞彙高亮是根據詞彙頻率數據分析的。Flesch閱讀易度和年級水平使用標準可讀性公式計算。",
       "cefrHighlight": "CEFR 詞彙高亮",
       "showHighlight": "高亮詞彙",
-      "hideHighlight": "隱藏"
+      "hideHighlight": "隱藏",
+      "clickToHideWords": "點擊隱藏 {{level}} 詞彙",
+      "clickToShowWords": "點擊顯示 {{level}} 詞彙"
     },
     "mindMap": {
       "title": "思維導圖",

@@ -149,7 +149,7 @@ export default function CefrTextHighlighter({
                       ? "opacity-100 hover:scale-105"
                       : "opacity-40 hover:opacity-60"
                   }`}
-                  title={isSelected ? `Click to hide ${level} words` : `Click to show ${level} words`}
+                  title={isSelected ? t("reading.difficulty.clickToHideWords", { level }) : t("reading.difficulty.clickToShowWords", { level })}
                 >
                   <span
                     className={`w-3 h-3 rounded ${
