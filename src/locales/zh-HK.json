@@ -487,7 +487,7 @@
     "autoSpeakFlashcard": "自動朗讀生字卡",
     "autoSpeakFlashcardTip": "當生字卡載入時自動朗讀生字",
     "cheatMode": "越獄模式",
-    "cheatModeTip": "顯示答題和解題協助",
+    "cheatModeTip": "顯示進階答題和解題協助",
     "showGiveAnswer": "顯示「直接解答」",
     "showGiveAnswerTip": "顯示「直接解答」按鈕（需開啟越獄模式）",
     "general": "系統",

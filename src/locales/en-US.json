@@ -487,7 +487,7 @@
     "autoSpeakFlashcard": "Auto-speak Flashcard",
     "autoSpeakFlashcardTip": "Automatically read the word aloud when a flashcard loads",
     "cheatMode": "Jailbreak Mode",
-    "cheatModeTip": "Show Answer Help",
+    "cheatModeTip": "Show advanced Answer Help",
     "showGiveAnswer": "Show 'Give Answer'",
     "showGiveAnswerTip": "Show the 'Give Answer' button (requires Jailbreak Mode)",
     "general": "System",
