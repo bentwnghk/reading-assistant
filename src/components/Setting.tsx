@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES, DIFFICULTY_ANALYSIS_MODELS } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2 } from "lucide-react";
@@ -65,7 +65,6 @@ const formSchema = z.object({
   glossaryModel: z.enum(AVAILABLE_MODELS),
   sentenceAnalysisModel: z.enum(AVAILABLE_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
-  difficultyAnalysisModel: z.enum(DIFFICULTY_ANALYSIS_MODELS),
   ttsVoice: z.enum(TTS_VOICES),
   autoSpeakFlashcard: z.boolean().optional(),
   cheatMode: z.boolean().optional(),
@@ -765,37 +764,6 @@ function Setting({ open, onClose }: SettingProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {TUTOR_MODELS.map((m) => (
-                              <SelectItem key={m} value={m}>
-                                {m}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="difficultyAnalysisModel"
-                  render={({ field }) => (
-                    <FormItem className="from-item">
-                      <FormLabel className="from-label">
-                        {t("setting.difficultyAnalysisModel")}
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            updateSetting("difficultyAnalysisModel", value);
-                          }}
-                        >
-                          <SelectTrigger className="form-field">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {DIFFICULTY_ANALYSIS_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>

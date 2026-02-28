@@ -8,7 +8,7 @@ import useModelProvider from "@/hooks/useAiProvider";
 import {
   getSystemPrompt,
   extractTextFromImagePrompt,
- generateSummaryPrompt,
+  generateSummaryPrompt,
   adaptTextPrompt,
   simplifyTextPrompt,
   generateMindMapPrompt,
@@ -16,7 +16,6 @@ import {
   generateTargetedPracticePrompt,
   generateGlossaryPrompt,
   readingTutorSystemPrompt,
-  analyzeTextDifficultyPrompt,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
 
@@ -44,7 +43,6 @@ function useReadingAssistant() {
     simplifyModel,
     readingTestModel,
     glossaryModel,
-    difficultyAnalysisModel,
   } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
@@ -720,42 +718,6 @@ Guidelines:
     }
   }
 
-   async function analyzeTextDifficultyAI(text: string): Promise<AIDifficultyResult | null> {
-    if (!text || !text.trim()) {
-      return null;
-    }
-
-    try {
-      const model = await createModelProvider(difficultyAnalysisModel);
-      
-      const result = await generateText({
-        model,
-        prompt: analyzeTextDifficultyPrompt(text),
-      });
-
-      let responseText = result.text.trim();
-      
-      if (responseText.startsWith("```json")) {
-        responseText = responseText.slice(7);
-      }
-      if (responseText.startsWith("```")) {
-        responseText = responseText.slice(3);
-      }
-      if (responseText.endsWith("```")) {
-        responseText = responseText.slice(0, -3);
-      }
-      responseText = responseText.trim();
-
-      const analysis: AIDifficultyResult = JSON.parse(responseText);
-      return analysis;
-    } catch (error) {
-      console.error("AI difficulty analysis error:", error);
-      const errorMessage = parseError(error);
-      toast.error(errorMessage);
-      return null;
-    }
-  }
-
   function saveSession() {
     const { backup } = readingStore;
     const { save } = useHistoryStore.getState();
@@ -789,7 +751,6 @@ Guidelines:
     askTutor,
     saveSession,
     loadSession,
-    analyzeTextDifficultyAI,
   };
 }
 

@@ -190,13 +190,10 @@
     },
     "difficulty": {
       "title": "文本難度分析器",
-      "analyze": "分析",
+      "analyze": "分析難度",
       "analyzing": "分析中...",
-      "aiAnalyze": "AI 分析",
-      "aiAnalyzing": "AI 分析中...",
       "noText": "無可用文本",
-      "notAnalyzed": "點擊「分析」開始分析",
-      "aiNotAnalyzed": "點擊「AI 分析」獲取詳細分析",
+      "notAnalyzed": "點擊「分析難度」開始分析",
       "original": "原文",
       "adapted": "改寫版本",
       "simplified": "簡化版本",
@@ -205,11 +202,7 @@
       "avgSentenceLength": "平均詞數/句子",
       "fleschReadingEase": "Flesch 閱讀易度",
       "gradeLevel": "年級水平",
-      "disclaimer": "註：Lexile是根據可讀性公式估算的。如需官方Lexile分數，請訪 lexile.com/analyzer",
-      "aiDisclaimer": "AI分析提供估算的Lexile和CEFR級別及推理說明。",
-      "showAlgorithmic": "顯示算法分析",
-      "suitableFor": "適合對象",
-      "reasoning": "AI推理"
+      "disclaimer": "註：Lexile是根據可讀性公式估算的。如需官方Lexile分數，請訪 lexile.com/analyzer"
     },
     "adaptedText": {
       "title": "改寫文字",
@@ -475,7 +468,6 @@
     "glossaryModel": "詞彙表模型",
     "sentenceAnalysisModel": "句子分析模型",
     "tutorModel": "AI 導師模型",
-    "difficultyAnalysisModel": "難度分析模型",
     "ttsVoice": "語音選擇",
     "autoSpeakFlashcard": "自動朗讀生字卡",
     "autoSpeakFlashcardTip": "當生字卡載入時自動朗讀生字",

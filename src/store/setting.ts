@@ -22,16 +22,6 @@ export const TUTOR_MODELS = [
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
 
-export const DIFFICULTY_ANALYSIS_MODELS = [
-  "gpt-5.1",
-  "gemini-3-flash-preview",
-  "gpt-5-mini",
-  "deepseek-reasoner",
-  "glm-4.7",
-] as const;
-
-export type DifficultyAnalysisModel = (typeof DIFFICULTY_ANALYSIS_MODELS)[number];
-
 export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] as const;
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
@@ -49,7 +39,6 @@ export interface SettingStore {
   glossaryModel: AvailableModel;
   sentenceAnalysisModel: AvailableModel;
   tutorModel: TutorModel;
-  difficultyAnalysisModel: DifficultyAnalysisModel;
   ttsVoice: TTSVoice;
   autoSpeakFlashcard: boolean;
   cheatMode: boolean;
@@ -83,7 +72,6 @@ export const defaultValues: SettingStore = {
   glossaryModel: "deepseek-chat",
   sentenceAnalysisModel: "deepseek-chat",
   tutorModel: "gpt-5-mini",
-  difficultyAnalysisModel: "gpt-5-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
   cheatMode: false,

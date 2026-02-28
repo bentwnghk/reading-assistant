@@ -141,22 +141,3 @@ interface TextDifficultyResult {
   estimatedLexile: string;
   analyzedAt: number;
 }
-
-interface AIDifficultyResult {
-  lexileLevel: string;
-  cefrLevel: string;
-  reasoning: {
-    vocabulary: string;
-    sentenceStructure: string;
-    overallAssessment: string;
-  };
-  suitableFor: {
-    ageRange: string;
-    gradeLevel: string;
-    description: string;
-  };
-  wordCount: number;
-  sentenceCount: number;
-  avgSentenceLength: number;
-  analyzedAt: number;
-}

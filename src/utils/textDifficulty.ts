@@ -150,11 +150,11 @@ export function getCefrBadgeColor(level: CEFRLevel): string {
 }
 
 export function getFleschDescription(score: number): string {
-  if (score >= 90) return "Very Easy (P4-P5)";
-  if (score >= 80) return "Easy (P5-P6)";
-  if (score >= 70) return "Fairly Easy (S1-S2)";
-  if (score >= 60) return "Standard (S2-S3)";
-  if (score >= 50) return "Fairly Difficult (S4-S5)";
-  if (score >= 30) return "Difficult (S6/DSE)";
-  return "Very Difficult (University)";
+  if (score >= 90) return "Very Easy (5th grade)";
+  if (score >= 80) return "Easy (6th grade)";
+  if (score >= 70) return "Fairly Easy (7th grade)";
+  if (score >= 60) return "Standard (8th-9th grade)";
+  if (score >= 50) return "Fairly Difficult (10th-12th grade)";
+  if (score >= 30) return "Difficult (College)";
+  return "Very Difficult (Graduate)";
 }

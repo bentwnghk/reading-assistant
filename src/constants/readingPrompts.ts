@@ -488,60 +488,6 @@ ${text.slice(0, 8000)}
 Remember: Your goal is to help the student understand and learn from THIS text, not just to give answers.`;
 }
 
-export function analyzeTextDifficultyPrompt(text: string): string {
-  return `Analyze the reading difficulty level of this English text.
-
-<text>
-${text}
-</text>
-
-Provide a comprehensive difficulty analysis in JSON format. You MUST respond with ONLY valid JSON, no markdown, no additional text.
-
-{
-  "lexileLevel": "estimated Lexile measure (e.g., '850L' or '1100L-1200L' for a range)",
-  "cefrLevel": "CEFR level (A1, A2, B1, B2, C1, or C2)",
-  "reasoning": {
-    "vocabulary": "Brief analysis of vocabulary complexity (2-3 sentences)",
-    "sentenceStructure": "Brief analysis of sentence complexity (2-3 sentences)",
-    "overallAssessment": "Summary of why this text fits this level (2-3 sentences)"
-  },
-  "suitableFor": {
-    "ageRange": "e.g., '10-12 years old'",
-    "gradeLevel": "Hong Kong grade level using P1-P6 (Primary) or S1-S6 (Secondary), e.g., 'P4-P5' or 'S3-S4'",
-    "description": "Brief description of who would benefit from this text"
-  },
-  "wordCount": <number of words>,
-  "sentenceCount": <number of sentences>,
-  "avgSentenceLength": <average words per sentence, rounded to 1 decimal>
-}
-
-**Guidelines for Lexile estimation:**
-- 200L-400L: Very simple texts (A1 level) - basic vocabulary, short sentences
-- 400L-600L: Simple texts (A2 level) - common vocabulary, straightforward sentences
-- 600L-800L: Moderate texts (B1 level) - some complex vocabulary, varied sentence structure
-- 800L-1000L: Challenging texts (B2 level) - academic vocabulary, complex sentences
-- 1000L-1200L: Difficult texts (C1 level) - sophisticated vocabulary, nuanced expression
-- 1200L+: Very difficult texts (C2 level) - complex academic/literary language
-
-**Guidelines for Hong Kong grade levels:**
-- P1-P2 (Primary 1-2): Ages 6-7, very basic vocabulary, simple sentences
-- P3-P4 (Primary 3-4): Ages 8-9, common vocabulary, straightforward sentences
-- P5-P6 (Primary 5-6): Ages 10-11, varied vocabulary, some complex sentences
-- S1-S2 (Secondary 1-2): Ages 12-13, broader vocabulary, varied sentence structure
-- S3-S4 (Secondary 3-4): Ages 14-15, academic vocabulary, complex sentences
-- S5-S6 (Secondary 5-6): Ages 16-17, HKDSE level, sophisticated vocabulary and expression
-
-**Guidelines for CEFR:**
-- A1: Very basic vocabulary, simple present tense, short sentences
-- A2: Common vocabulary, basic tenses, simple compound sentences
-- B1: Everyday topics, varied tenses, some complex sentences
-- B2: Abstract topics, wide vocabulary, complex grammar
-- C1: Sophisticated vocabulary, nuanced expression, complex structures
-- C2: Near-native complexity, literary/academic language
-
-**Respond with ONLY the JSON object.`;
-}
-
 export function getSystemPrompt(): string {
   return systemInstruction.replace("{now}", new Date().toLocaleDateString());
 }
