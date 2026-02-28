@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Highlighter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,10 @@ const LEVEL_COLORS: Record<CEFRLevel, { bg: string; dot: string }> = {
 interface HighlightedTextProps {
   text: string;
   cefrResult: CefrHighlightResult | null;
+  selectedLevels: CEFRLevel[];
 }
 
-function HighlightedText({ text, cefrResult }: HighlightedTextProps) {
+function HighlightedText({ text, cefrResult, selectedLevels }: HighlightedTextProps) {
   const highlightedContent = useMemo(() => {
     if (!cefrResult) {
       return <span>{text}</span>;
@@ -48,7 +49,7 @@ function HighlightedText({ text, cefrResult }: HighlightedTextProps) {
       const lowerWord = word.toLowerCase();
       const level = cefrResult.wordMap.get(lowerWord);
 
-      if (level) {
+      if (level && selectedLevels.includes(level)) {
         const colorClass = getCefrHighlightColor(level);
         parts.push(
           <span
@@ -71,7 +72,7 @@ function HighlightedText({ text, cefrResult }: HighlightedTextProps) {
     }
 
     return parts;
-  }, [text, cefrResult]);
+  }, [text, cefrResult, selectedLevels]);
 
   return <>{highlightedContent}</>;
 }
@@ -88,6 +89,15 @@ export default function CefrTextHighlighter({
   onToggle,
 }: CefrTextHighlighterProps) {
   const { t } = useTranslation();
+  const [selectedLevels, setSelectedLevels] = useState<CEFRLevel[]>(CEFR_LEVELS);
+
+  const toggleLevel = (level: CEFRLevel) => {
+    setSelectedLevels((prev) =>
+      prev.includes(level)
+        ? prev.filter((l) => l !== level)
+        : [...prev, level]
+    );
+  };
 
   const cefrResult = useMemo(() => {
     if (!showHighlighter || !text) return null;
@@ -129,24 +139,33 @@ export default function CefrTextHighlighter({
           <div className="flex flex-wrap gap-2 mb-3 pb-3 border-b">
             {CEFR_LEVELS.map((level) => {
               const count = cefrResult?.distribution[level] || 0;
+              const isSelected = selectedLevels.includes(level);
               return (
-                <div
+                <button
                   key={level}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+                  onClick={() => toggleLevel(level)}
+                  className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-all cursor-pointer ${
+                    isSelected
+                      ? "opacity-100 hover:scale-105"
+                      : "opacity-40 hover:opacity-60"
+                  }`}
+                  title={isSelected ? `Click to hide ${level} words` : `Click to show ${level} words`}
                 >
                   <span
-                    className={`w-3 h-3 rounded ${LEVEL_COLORS[level].dot}`}
+                    className={`w-3 h-3 rounded ${
+                      isSelected ? LEVEL_COLORS[level].dot : "bg-gray-400"
+                    }`}
                   />
                   <span className="font-medium">{level}</span>
                   <span className="text-muted-foreground">({count})</span>
-                </div>
+                </button>
               );
             })}
           </div>
 
           <div className="prose prose-sm dark:prose-invert max-w-full max-h-[300px] overflow-y-auto">
             <p className="whitespace-pre-wrap leading-relaxed">
-              <HighlightedText text={text} cefrResult={cefrResult} />
+              <HighlightedText text={text} cefrResult={cefrResult} selectedLevels={selectedLevels} />
             </p>
           </div>
         </>
