@@ -174,19 +174,6 @@ export function analyzeTextDifficulty(text: string): TextDifficultyResult | null
     console.warn("CEFR analysis failed:", e);
   }
 
-  const validGrades = [fleschKincaidGrade, ari, colemanLiauIndex].filter(
-    (g) => g > 0 && g < 20
-  );
-  const avgGrade =
-    validGrades.length > 0
-      ? validGrades.reduce((a, b) => a + b, 0) / validGrades.length
-      : 5;
-
-  const lexileMin = Math.round(Math.max(200, (avgGrade + 3) * 100));
-  const lexileMax = Math.round(Math.min(1700, (avgGrade + 5) * 100));
-  const estimatedLexile =
-    lexileMin === lexileMax ? `${lexileMin}L` : `${lexileMin}L-${lexileMax}L`;
-
   return {
     wordCount: counts.word,
     sentenceCount: counts.sentence,
@@ -201,7 +188,6 @@ export function analyzeTextDifficulty(text: string): TextDifficultyResult | null
     cefrLevel,
     cefrScore: Math.round(cefrScore * 100) / 100,
     cefrDistribution,
-    estimatedLexile,
     analyzedAt: Date.now(),
   };
 }

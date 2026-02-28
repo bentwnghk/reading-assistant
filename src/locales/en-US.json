@@ -201,8 +201,7 @@
       "sentenceCount": "Sentences",
       "avgSentenceLength": "Avg Words/Sentence",
       "fleschReadingEase": "Flesch Reading Ease",
-      "gradeLevel": "Grade Level",
-      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer"
+      "gradeLevel": "Grade Level"
     },
     "adaptedText": {
       "title": "Adapted Text",

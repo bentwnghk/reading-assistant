@@ -138,6 +138,5 @@ interface TextDifficultyResult {
   cefrLevel: CEFRLevel;
   cefrScore: number;
   cefrDistribution: Record<string, number>;
-  estimatedLexile: string;
   analyzedAt: number;
 }
