@@ -188,6 +188,19 @@
       "generating": "正在生成...",
       "emptyTip": "點擊上方按鈕生成文字摘要"
     },
+    "adaptedText": {
+      "title": "改寫文字",
+      "adapt": "改寫",
+      "adapting": "正在改寫...",
+      "originalTab": "原文",
+      "adaptedTab": "改寫版本",
+      "simplifiedTab": "簡化版本",
+      "emptyTip": "點擊上方按鈕將文字改寫至你的程度",
+      "simplifyFurther": "進一步簡化",
+      "simplifying": "正在簡化...",
+      "simplifiedEmptyTip": "點擊下方按鈕創建更簡單的版本",
+      "generateSimplified": "生成簡化版本"
+    },
     "difficulty": {
       "title": "文本難度分析器",
       "analyze": "分析難度",
@@ -203,23 +216,9 @@
       "fleschReadingEase": "Flesch 閱讀易度",
       "gradeLevel": "年級水平",
       "disclaimer": "CEFR等級和詞彙高亮是根據詞彙頻率數據分析的。Flesch閱讀易度和年級水平使用標準可讀性公式計算。",
-
       "cefrHighlight": "CEFR 詞彙高亮",
       "showHighlight": "高亮詞彙",
       "hideHighlight": "隱藏"
-    },
-    "adaptedText": {
-      "title": "改寫文字",
-      "adapt": "改寫",
-      "adapting": "正在改寫...",
-      "originalTab": "原文",
-      "adaptedTab": "改寫版本",
-      "simplifiedTab": "簡化版本",
-      "emptyTip": "點擊上方按鈕將文字改寫至你的程度",
-      "simplifyFurther": "進一步簡化",
-      "simplifying": "正在簡化...",
-      "simplifiedEmptyTip": "點擊下方按鈕創建更簡單的版本",
-      "generateSimplified": "生成簡化版本"
     },
     "mindMap": {
       "title": "思維導圖",
