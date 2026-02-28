@@ -76,7 +76,64 @@ flowchart LR
 
 ## Core Features
 
-### 🤖 1. AI Tutor - Your Personal Reading Coach
+### 📊 1. Text Difficulty Analyzer
+
+**Know your text before you read.** Get a comprehensive analysis of any reading material's complexity with scientific readability metrics.
+
+| Metric | What It Tells You |
+|--------|-------------------|
+| 🎯 **CEFR Level** | Overall difficulty (A1-Beginner → C2-Mastery) |
+| 📖 **Flesch Reading Ease** | How easy the text is to read (0-100 scale) |
+| 📚 **Grade Level** | U.S. school grade equivalent |
+| 📏 **Sentence Length** | Average words per sentence |
+| 🔢 **Word Stats** | Total words, sentences, syllables |
+
+#### Multi-Formula Analysis
+The analyzer uses **5 scientific readability formulas** for accuracy:
+
+| Formula | Best For |
+|---------|----------|
+| **Flesch-Kincaid** | General readability |
+| **Automated Readability (ARI)** | Technical documents |
+| **Coleman-Liau** | Academic texts |
+| **SMOG** | Health & safety materials |
+| **CEFR Complexity** | Language learners |
+
+#### Compare Versions Side-by-Side
+Analyze original, adapted, and simplified versions simultaneously to see exactly how AI simplification affects readability.
+
+---
+
+### 🎨 2. CEFR Word Highlight
+
+**See vocabulary difficulty at a glance.** Every word is color-coded by its CEFR level, making it easy to identify challenging vocabulary instantly.
+
+| Level | Description | Color |
+|-------|-------------|-------|
+| **A1** | Beginner | 🔵 Cyan |
+| **A2** | Elementary | 🟢 Green |
+| **B1** | Intermediate | 🟡 Amber |
+| **B2** | Upper-Intermediate | 🟠 Orange |
+| **C1** | Advanced | 🔴 Red |
+| **C2** | Mastery | 🟣 Purple |
+
+#### Interactive Features
+- **Toggle Levels On/Off**: Focus on specific difficulty levels (e.g., show only C1/C2 words to identify advanced vocabulary)
+- **Word Count Per Level**: See exactly how many words exist at each CEFR level
+- **Hover Tooltips**: Hover any highlighted word to see its CEFR level
+- **Three Text Versions**: Highlight original, adapted, or simplified text
+
+#### Perfect For
+| Use Case | How It Helps |
+|----------|--------------|
+| 🎯 **Target Practice** | Focus on words at your level |
+| 📈 **Track Progress** | See more A1-A2 words = improving! |
+| 👨‍🏫 **Teachers** | Quickly assess text suitability |
+| 📚 **Self-Learners** | Identify vocabulary gaps |
+
+---
+
+### 🤖 3. AI Tutor - Your Personal Reading Coach
 
 Got stuck on a passage? The AI Tutor is here to help! This interactive chat assistant understands your reading material and provides personalized guidance.
 
@@ -96,7 +153,7 @@ Got stuck on a passage? The AI Tutor is here to help! This interactive chat assi
 
 ---
 
-### 📷 2. Smart OCR - Snap & Extract
+### 📷 4. Smart OCR - Snap & Extract
 
 Transform physical reading materials into digital text instantly.
 
@@ -109,7 +166,7 @@ Transform physical reading materials into digital text instantly.
 
 ---
 
-### 📄 3. AI Text Adaptation
+### 📄 5. AI Text Adaptation
 
 Read at YOUR level, not the author's.
 
@@ -122,7 +179,7 @@ Read at YOUR level, not the author's.
 
 ---
 
-### 🧠 4. Sentence Analysis
+### 🧠 6. Sentence Analysis
 
 Click any sentence for a complete AI breakdown:
 
@@ -136,7 +193,7 @@ Click any sentence for a complete AI breakdown:
 
 ---
 
-### 🗺️ 5. Visual Learning Tools
+### 🗺️ 7. Visual Learning Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -146,7 +203,7 @@ Click any sentence for a complete AI breakdown:
 
 ---
 
-### ❓ 6. Reading Comprehension Test
+### ❓ 8. Reading Comprehension Test
 
 Test your understanding with AI-generated questions tailored to YOUR level.
 
@@ -181,7 +238,7 @@ Test your understanding with AI-generated questions tailored to YOUR level.
 
 ---
 
-### 📖 7. Vocabulary Builder
+### 📖 9. Vocabulary Builder
 
 Build your word power with interactive tools.
 
@@ -210,7 +267,7 @@ Build your word power with interactive tools.
 
 ---
 
-### 🎮 8. Spelling Challenge - 4 Game Modes!
+### 🎮 10. Spelling Challenge - 4 Game Modes!
 
 | Mode | How It Works | Best For |
 |------|--------------|----------|
@@ -229,7 +286,7 @@ Build your word power with interactive tools.
 
 ---
 
-### 📋 9. Vocabulary Quiz
+### 📋 11. Vocabulary Quiz
 
 Test your vocabulary knowledge with interactive quizzes.
 
@@ -246,7 +303,7 @@ Test your vocabulary knowledge with interactive quizzes.
 
 ---
 
-### 🔊 10. Text-to-Speech
+### 🔊 12. Text-to-Speech
 
 Perfect your pronunciation with natural voice reading.
 
@@ -259,7 +316,7 @@ Perfect your pronunciation with natural voice reading.
 
 ---
 
-### 📄 11. Word Export
+### 📄 13. Word Export
 
 Download your learning materials for offline study.
 

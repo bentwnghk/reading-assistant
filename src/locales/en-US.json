@@ -56,6 +56,14 @@
       },
       "features": {
         "title": "Powerful Features",
+        "difficulty": {
+          "title": "📊 Difficulty Analyzer",
+          "desc": "Know your text before reading! Get CEFR levels, Flesch Reading Ease, grade level, and 5 scientific readability metrics. Compare original vs adapted vs simplified versions side-by-side!"
+        },
+        "cefrHighlight": {
+          "title": "🎨 CEFR Word Highlight",
+          "desc": "See vocabulary difficulty at a glance! Every word color-coded by CEFR level (A1-C2). Toggle levels on/off, see word counts per level, and identify challenging vocabulary instantly."
+        },
         "tutor": {
           "title": "🤖 AI Tutor",
           "desc": "Your personal reading coach! Ask questions, get hints, upload reading comprehension questions for guided help, and learn at your own pace."
@@ -111,6 +119,8 @@
         "summary": "Get a quick summary of the content",
         "mindmap": "Explore with an interactive mind map",
         "adapt": "Read text adapted to your level",
+        "difficulty": "Analyze text difficulty metrics",
+        "cefrHighlight": "See word difficulty color-coded",
         "tutor": "Ask the AI Tutor for help",
         "test": "Take the reading comprehension test",
         "analyze": "Analyze any sentence in detail",
