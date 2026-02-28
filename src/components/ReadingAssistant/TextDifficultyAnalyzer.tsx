@@ -5,6 +5,7 @@ import { BarChart3, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { analyzeTextDifficulty, getCefrBadgeColor } from "@/utils/textDifficulty";
+import CefrTextHighlighter from "./CefrTextHighlighter";
 
 function getFleschDescription(score: number): string {
   if (score >= 90) return "Very Easy (5th grade)";
@@ -117,6 +118,8 @@ export default function TextDifficultyAnalyzer() {
   } = useReadingStore();
 
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [showCefrHighlight, setShowCefrHighlight] = React.useState(false);
+  const [highlightTextType, setHighlightTextType] = React.useState<"original" | "adapted" | "simplified">("original");
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
@@ -139,6 +142,17 @@ export default function TextDifficultyAnalyzer() {
   };
 
   const hasAnyText = extractedText || adaptedText || simplifiedText;
+
+  const getActiveHighlightText = () => {
+    switch (highlightTextType) {
+      case "adapted":
+        return adaptedText;
+      case "simplified":
+        return simplifiedText;
+      default:
+        return extractedText;
+    }
+  };
 
   return (
     <section className="p-4 border rounded-md mt-4">
@@ -184,6 +198,41 @@ export default function TextDifficultyAnalyzer() {
           isAnalyzing={isAnalyzing}
         />
       </div>
+
+      {showCefrHighlight && (
+        <div className="flex gap-2 mt-4 mb-2">
+          <Button
+            size="sm"
+            variant={highlightTextType === "original" ? "default" : "outline"}
+            onClick={() => setHighlightTextType("original")}
+            disabled={!extractedText}
+          >
+            {t("reading.difficulty.original")}
+          </Button>
+          <Button
+            size="sm"
+            variant={highlightTextType === "adapted" ? "default" : "outline"}
+            onClick={() => setHighlightTextType("adapted")}
+            disabled={!adaptedText}
+          >
+            {t("reading.difficulty.adapted")}
+          </Button>
+          <Button
+            size="sm"
+            variant={highlightTextType === "simplified" ? "default" : "outline"}
+            onClick={() => setHighlightTextType("simplified")}
+            disabled={!simplifiedText}
+          >
+            {t("reading.difficulty.simplified")}
+          </Button>
+        </div>
+      )}
+
+      <CefrTextHighlighter
+        text={getActiveHighlightText()}
+        showHighlighter={showCefrHighlight}
+        onToggle={() => setShowCefrHighlight(!showCefrHighlight)}
+      />
 
       <p className="text-xs text-muted-foreground mt-4 text-center">
         {t("reading.difficulty.disclaimer")}

@@ -202,7 +202,10 @@
       "avgSentenceLength": "平均詞數/句子",
       "fleschReadingEase": "Flesch 閱讀易度",
       "gradeLevel": "年級水平",
-      "disclaimer": "註：Lexile是根據可讀性公式估算的。如需官方Lexile分數，請訪 lexile.com/analyzer"
+      "disclaimer": "註：Lexile是根據可讀性公式估算的。如需官方Lexile分數，請訪 lexile.com/analyzer",
+      "cefrHighlight": "CEFR 詞彙高亮",
+      "showHighlight": "高亮詞彙",
+      "hideHighlight": "隱藏"
     },
     "adaptedText": {
       "title": "改寫文字",

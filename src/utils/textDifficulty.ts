@@ -6,6 +6,87 @@ import { colemanLiau } from "coleman-liau";
 import { smogFormula } from "smog-formula";
 import { syllable } from "syllable";
 
+export interface CefrWordHighlight {
+  word: string;
+  lemma: string;
+  level: CEFRLevel;
+}
+
+export interface CefrHighlightResult {
+  wordMap: Map<string, CEFRLevel>;
+  highlights: CefrWordHighlight[];
+  distribution: Record<CEFRLevel, number>;
+}
+
+export function getCefrWordHighlights(text: string): CefrHighlightResult | null {
+  if (!text || !text.trim()) {
+    return null;
+  }
+
+  try {
+    const result = cefrAnalyzer.analyze(text, { includeUnknownWords: false });
+    const wordMap = new Map<string, CEFRLevel>();
+    const highlights: CefrWordHighlight[] = [];
+    const distribution: Record<CEFRLevel, number> = {
+      A1: 0,
+      A2: 0,
+      B1: 0,
+      B2: 0,
+      C1: 0,
+      C2: 0,
+    };
+
+    const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
+    for (const level of levels) {
+      const lowerLevel = level.toLowerCase() as Lowercase<CEFRLevel>;
+      const wordsAtLevel = result.wordsAtLevel[lowerLevel] || [];
+      distribution[level] = wordsAtLevel.length;
+
+      for (const wordInfo of wordsAtLevel) {
+        const lowerWord = wordInfo.word.toLowerCase();
+        if (!wordMap.has(lowerWord)) {
+          wordMap.set(lowerWord, level);
+          highlights.push({
+            word: wordInfo.word,
+            lemma: wordInfo.lemma,
+            level,
+          });
+        }
+      }
+    }
+
+    return { wordMap, highlights, distribution };
+  } catch (e) {
+    console.warn("CEFR word highlight analysis failed:", e);
+    return null;
+  }
+}
+
+export function getCefrHighlightColor(level: CEFRLevel): string {
+  const colors: Record<CEFRLevel, string> = {
+    A1: "bg-emerald-200 dark:bg-emerald-800",
+    A2: "bg-green-200 dark:bg-green-800",
+    B1: "bg-amber-200 dark:bg-amber-800",
+    B2: "bg-orange-200 dark:bg-orange-800",
+    C1: "bg-red-200 dark:bg-red-800",
+    C2: "bg-purple-200 dark:bg-purple-800",
+  };
+  return colors[level] || "";
+}
+
+export function getCefrUnderlineColor(level: CEFRLevel): string {
+  const colors: Record<CEFRLevel, string> = {
+    A1: "border-b-2 border-emerald-500",
+    A2: "border-b-2 border-green-500",
+    B1: "border-b-2 border-amber-500",
+    B2: "border-b-2 border-orange-500",
+    C1: "border-b-2 border-red-500",
+    C2: "border-b-2 border-purple-500",
+  };
+  return colors[level] || "";
+}
+
 export function analyzeTextDifficulty(text: string): TextDifficultyResult | null {
   if (!text || !text.trim()) {
     return null;

@@ -231,23 +231,10 @@
       "avgSentenceLength": "Avg Words/Sentence",
       "fleschReadingEase": "Flesch Reading Ease",
       "gradeLevel": "Grade Level",
-      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer"
-    },
-    "difficulty": {
-      "title": "Text Difficulty Analyzer",
-      "analyze": "Analyze Difficulty",
-      "analyzing": "Analyzing...",
-      "original": "Original",
-      "adapted": "Adapted",
-      "simplified": "Simplified",
-      "noText": "No text available",
-      "notAnalyzed": "Click 'Analyze Difficulty' to analyze",
-      "wordCount": "Words",
-      "sentenceCount": "Sentences",
-      "avgSentenceLength": "Avg Words/Sentence",
-      "fleschReadingEase": "Flesch Reading Ease",
-      "gradeLevel": "Grade Level",
-      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer"
+      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer",
+      "cefrHighlight": "CEFR Word Highlight",
+      "showHighlight": "Highlight Words",
+      "hideHighlight": "Hide"
     },
     "mindMap": {
       "title": "Mind Map",
