@@ -336,13 +336,6 @@ function Header() {
                 {t("header.about.features.title")}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="flex items-start gap-2 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-md p-2">
-                  <MessageCircle className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                  <div>
-                    <div className="font-medium">{t("header.about.features.tutor.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.tutor.desc")}</div>
-                  </div>
-                </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <BarChart3 className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
                   <div>
@@ -355,6 +348,13 @@ function Header() {
                   <div>
                     <div className="font-medium">{t("header.about.features.cefrHighlight.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.cefrHighlight.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <MessageCircle className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.tutor.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.tutor.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
