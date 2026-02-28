@@ -265,7 +265,7 @@ Download your learning materials for offline study.
 
 | Export Type | Description |
 |-------------|-------------|
-| 📝 **Adapted Text** | Original, adapted, simplified text with optional glossary & sentence analysis |
+| 📝 **Text Analysis & Adaptation** | Original, adapted, simplified text with optional glossary & sentence analysis |
 | 📖 **Glossary** | Bilingual word definitions table with examples |
 | 📋 **Vocabulary Quiz** | Quiz questions (blank or with answer key) |
 | ❓ **Reading Test** | Comprehension questions (blank or with answer key) |
