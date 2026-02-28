@@ -224,7 +224,7 @@
       "sentenceCount": "句子數",
       "avgSentenceLength": "平均詞數/句子",
       "fleschReadingEase": "Flesch 閱讀易度",
-      "gradeLevel": "年級水平",
+      "gradeLevel": "年級水平 (美國)",
       "disclaimer": "CEFR等級和詞彙高亮是根據詞彙頻率數據分析的。Flesch閱讀易度和年級水平使用標準可讀性公式計算。",
       "cefrHighlight": "CEFR 詞彙高亮",
       "showHighlight": "高亮詞彙",

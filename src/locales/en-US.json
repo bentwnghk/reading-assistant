@@ -224,7 +224,7 @@
       "sentenceCount": "Sentences",
       "avgSentenceLength": "Avg Words/Sentence",
       "fleschReadingEase": "Flesch Reading Ease",
-      "gradeLevel": "Grade Level",
+      "gradeLevel": "Grade Level (US)",
       "disclaimer": "CEFR levels and word highlights are analyzed using vocabulary frequency data. Flesch Reading Ease and Grade Level are calculated using standard readability formulas.",
       "cefrHighlight": "CEFR Word Highlight",
       "showHighlight": "Highlight Words",
