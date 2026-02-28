@@ -188,21 +188,6 @@
       "generating": "Generating...",
       "emptyTip": "Click the button above to generate a summary of the text"
     },
-    "difficulty": {
-      "title": "Text Difficulty Analyzer",
-      "analyze": "Analyze Difficulty",
-      "analyzing": "Analyzing...",
-      "noText": "No text available",
-      "notAnalyzed": "Click 'Analyze' to analyze",
-      "original": "Original",
-      "adapted": "Adapted",
-      "simplified": "Simplified",
-      "wordCount": "Words",
-      "sentenceCount": "Sentences",
-      "avgSentenceLength": "Avg Words/Sentence",
-      "fleschReadingEase": "Flesch Reading Ease",
-      "gradeLevel": "Grade Level"
-    },
     "adaptedText": {
       "title": "Adapted Text",
       "adapt": "Adapt",
