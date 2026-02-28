@@ -231,7 +231,7 @@
       "avgSentenceLength": "Avg Words/Sentence",
       "fleschReadingEase": "Flesch Reading Ease",
       "gradeLevel": "Grade Level",
-      "disclaimer": "Note: Lexile is estimated from readability formulas. For official Lexile scores, visit lexile.com/analyzer",
+      "disclaimer": "CEFR levels and word highlights are analyzed using vocabulary frequency data. Flesch Reading Ease and Grade Level are calculated using standard readability formulas.",
       "cefrHighlight": "CEFR Word Highlight",
       "showHighlight": "Highlight Words",
       "hideHighlight": "Hide"

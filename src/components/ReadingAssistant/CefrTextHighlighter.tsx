@@ -12,7 +12,7 @@ import {
 const CEFR_LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 const LEVEL_COLORS: Record<CEFRLevel, { bg: string; dot: string }> = {
-  A1: { bg: "bg-emerald-200 dark:bg-emerald-800", dot: "bg-emerald-500" },
+  A1: { bg: "bg-cyan-200 dark:bg-cyan-800", dot: "bg-cyan-500" },
   A2: { bg: "bg-green-200 dark:bg-green-800", dot: "bg-green-500" },
   B1: { bg: "bg-amber-200 dark:bg-amber-800", dot: "bg-amber-500" },
   B2: { bg: "bg-orange-200 dark:bg-orange-800", dot: "bg-orange-500" },

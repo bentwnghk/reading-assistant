@@ -202,7 +202,8 @@
       "avgSentenceLength": "平均詞數/句子",
       "fleschReadingEase": "Flesch 閱讀易度",
       "gradeLevel": "年級水平",
-      "disclaimer": "註：Lexile是根據可讀性公式估算的。如需官方Lexile分數，請訪 lexile.com/analyzer",
+      "disclaimer": "CEFR等級和詞彙高亮是根據詞彙頻率數據分析的。Flesch閱讀易度和年級水平使用標準可讀性公式計算。",
+
       "cefrHighlight": "CEFR 詞彙高亮",
       "showHighlight": "高亮詞彙",
       "hideHighlight": "隱藏"

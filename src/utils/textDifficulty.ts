@@ -65,7 +65,7 @@ export function getCefrWordHighlights(text: string): CefrHighlightResult | null 
 
 export function getCefrHighlightColor(level: CEFRLevel): string {
   const colors: Record<CEFRLevel, string> = {
-    A1: "bg-emerald-200 dark:bg-emerald-800",
+    A1: "bg-cyan-200 dark:bg-cyan-800",
     A2: "bg-green-200 dark:bg-green-800",
     B1: "bg-amber-200 dark:bg-amber-800",
     B2: "bg-orange-200 dark:bg-orange-800",
@@ -77,7 +77,7 @@ export function getCefrHighlightColor(level: CEFRLevel): string {
 
 export function getCefrUnderlineColor(level: CEFRLevel): string {
   const colors: Record<CEFRLevel, string> = {
-    A1: "border-b-2 border-emerald-500",
+    A1: "border-b-2 border-cyan-500",
     A2: "border-b-2 border-green-500",
     B1: "border-b-2 border-amber-500",
     B2: "border-b-2 border-orange-500",

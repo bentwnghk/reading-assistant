@@ -61,11 +61,6 @@ function DifficultyCard({
 
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <span className="text-xs text-muted-foreground">Lexile</span>
-          <span className="font-mono text-sm font-semibold">{difficulty.estimatedLexile}</span>
-        </div>
-
-        <div className="flex justify-between items-center">
           <span className="text-xs text-muted-foreground">CEFR</span>
           <span className={`px-2 py-0.5 rounded text-xs font-medium ${getCefrBadgeColor(difficulty.cefrLevel)}`}>
             {difficulty.cefrLevel}
