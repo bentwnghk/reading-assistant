@@ -312,7 +312,7 @@
       "chineseDefinition": "中文解釋",
       "example": "例句",
       "emptyTip": "點擊上方按鈕為 {{count}} 個已標記生字生成解釋",
-      "noHighlightedWords": "請先在提取的文字中標記生字",
+      "noHighlightedWords": "請先在原文中標記生字",
       "tabTable": "表格",
       "tabFlashcard": "生字卡",
       "tabQuiz": "測驗",
