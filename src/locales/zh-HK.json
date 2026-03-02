@@ -57,7 +57,7 @@
       "features": {
         "title": "強大功能",
         "difficulty": {
-          "title": "📊 難度分析器",
+          "title": "📊 難度分析",
           "desc": "閱讀前先了解文章！獲取CEFR等級、Flesch閱讀易度、年級水平和5種科學可讀性指標。並排比較原文、改寫版本和簡化版本！"
         },
         "cefrHighlight": {

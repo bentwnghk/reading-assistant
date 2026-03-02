@@ -57,7 +57,7 @@
       "features": {
         "title": "Powerful Features",
         "difficulty": {
-          "title": "📊 Difficulty Analyzer",
+          "title": "📊 Difficulty Analysis",
           "desc": "Know your text before reading! Get CEFR levels, Flesch Reading Ease, grade level, and 5 scientific readability metrics. Compare original vs adapted vs simplified versions side-by-side!"
         },
         "cefrHighlight": {
