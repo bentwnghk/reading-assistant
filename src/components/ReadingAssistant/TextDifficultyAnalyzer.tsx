@@ -167,7 +167,7 @@ export default function TextDifficultyAnalyzer() {
         <div className="flex items-center gap-2">
           <Button
             onClick={handleAnalyze}
-            disabled={!hasAnyText || isAnalyzing}
+            disabled={!hasAnyText || isAnalyzing || !showCards}
             size="sm"
             variant="outline"
           >
