@@ -42,8 +42,6 @@ import { useGlobalStore } from "@/store/global";
 import { useReadingStore } from "@/store/reading";
 import { downloadFile } from "@/utils/file";
 
-const VERSION = process.env.NEXT_PUBLIC_VERSION;
-
 function getSafeFilename(value: string): string {
   return (
     value
@@ -224,7 +222,6 @@ function Header() {
             ProReader
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent animate-shimmer" />
           </span>
-          <span className="ml-1 text-[10px] px-3 py-px bg-primary/10 rounded font-normal">v{VERSION}</span>
         </h1>
         <div className="flex">
           <Button
