@@ -212,7 +212,7 @@
       "generateSimplified": "Generate Simplified Version"
     },
     "difficulty": {
-      "title": "Text Difficulty Analyzer",
+      "title": "Text Difficulty Analysis",
       "analyze": "Analyze Difficulty",
       "analyzing": "Analyzing...",
       "noText": "No text available",

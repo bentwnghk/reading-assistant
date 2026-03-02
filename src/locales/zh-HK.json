@@ -212,7 +212,7 @@
       "generateSimplified": "生成簡化版本"
     },
     "difficulty": {
-      "title": "文本難度分析器",
+      "title": "文本難度分析",
       "analyze": "分析難度",
       "analyzing": "分析中...",
       "noText": "無可用文本",
