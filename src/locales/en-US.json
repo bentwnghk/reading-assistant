@@ -229,6 +229,8 @@
       "cefrHighlight": "CEFR Word Highlight",
       "showHighlight": "Highlight Words",
       "hideHighlight": "Hide",
+      "hideCards": "Hide",
+      "showCards": "Show Cards",
       "clickToHideWords": "Click to hide {{level}} words",
       "clickToShowWords": "Click to show {{level}} words"
     },

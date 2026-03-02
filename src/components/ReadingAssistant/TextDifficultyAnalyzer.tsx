@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { BarChart3, Loader2 } from "lucide-react";
+import { BarChart3, Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { analyzeTextDifficulty, getCefrBadgeColor } from "@/utils/textDifficulty";
@@ -120,6 +120,7 @@ export default function TextDifficultyAnalyzer() {
   } = useReadingStore();
 
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [showCards, setShowCards] = React.useState(true);
   const [showCefrHighlight, setShowCefrHighlight] = React.useState(false);
   const [highlightTextType, setHighlightTextType] = React.useState<"original" | "adapted" | "simplified">("original");
 
@@ -163,43 +164,64 @@ export default function TextDifficultyAnalyzer() {
           <BarChart3 className="h-5 w-5 text-muted-foreground" />
           {t("reading.difficulty.title")}
         </h3>
-        <Button
-          onClick={handleAnalyze}
-          disabled={!hasAnyText || isAnalyzing}
-          size="sm"
-          variant="outline"
-        >
-          {isAnalyzing ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin mr-1" />
-              <span>{t("reading.difficulty.analyzing")}</span>
-            </>
-          ) : (
-            <span>{t("reading.difficulty.analyze")}</span>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleAnalyze}
+            disabled={!hasAnyText || isAnalyzing}
+            size="sm"
+            variant="outline"
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                <span>{t("reading.difficulty.analyzing")}</span>
+              </>
+            ) : (
+              <span>{t("reading.difficulty.analyze")}</span>
+            )}
+          </Button>
+          <Button
+            onClick={() => setShowCards(!showCards)}
+            size="sm"
+            variant={showCards ? "default" : "outline"}
+          >
+            {showCards ? (
+              <>
+                <EyeOff className="h-3 w-3 mr-1" />
+                {t("reading.difficulty.hideCards")}
+              </>
+            ) : (
+              <>
+                <Eye className="h-3 w-3 mr-1" />
+                {t("reading.difficulty.showCards")}
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <DifficultyCard
-          title={t("reading.difficulty.original")}
-          text={extractedText}
-          difficulty={originalDifficulty}
-          isAnalyzing={isAnalyzing}
-        />
-        <DifficultyCard
-          title={t("reading.difficulty.adapted")}
-          text={adaptedText}
-          difficulty={adaptedDifficulty}
-          isAnalyzing={isAnalyzing}
-        />
-        <DifficultyCard
-          title={t("reading.difficulty.simplified")}
-          text={simplifiedText}
-          difficulty={simplifiedDifficulty}
-          isAnalyzing={isAnalyzing}
-        />
-      </div>
+      {showCards && (
+        <div className="flex flex-col md:flex-row gap-4">
+          <DifficultyCard
+            title={t("reading.difficulty.original")}
+            text={extractedText}
+            difficulty={originalDifficulty}
+            isAnalyzing={isAnalyzing}
+          />
+          <DifficultyCard
+            title={t("reading.difficulty.adapted")}
+            text={adaptedText}
+            difficulty={adaptedDifficulty}
+            isAnalyzing={isAnalyzing}
+          />
+          <DifficultyCard
+            title={t("reading.difficulty.simplified")}
+            text={simplifiedText}
+            difficulty={simplifiedDifficulty}
+            isAnalyzing={isAnalyzing}
+          />
+        </div>
+      )}
 
       {showCefrHighlight && (
         <div className="flex gap-2 mt-4 mb-2">

@@ -229,6 +229,8 @@
       "cefrHighlight": "CEFR 詞彙高亮",
       "showHighlight": "高亮詞彙",
       "hideHighlight": "隱藏",
+      "hideCards": "隱藏",
+      "showCards": "顯示卡片",
       "clickToHideWords": "點擊隱藏 {{level}} 詞彙",
       "clickToShowWords": "點擊顯示 {{level}} 詞彙"
     },
