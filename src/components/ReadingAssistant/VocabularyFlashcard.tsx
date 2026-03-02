@@ -11,6 +11,9 @@ import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
 import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
 
+const SWIPE_THRESHOLD = 50;
+const SWIPE_VELOCITY_THRESHOLD = 0.3;
+
 interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
 }
@@ -26,7 +29,10 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const [isShuffled, setIsShuffled] = useState(false);
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const currentGlossary = useMemo(() => {
     return sortGlossaryByPriority(glossary, glossaryRatings, {
@@ -66,6 +72,54 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const handleFlip = useCallback(() => {
     setIsFlipped((prev) => !prev);
   }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    };
+    setIsSwiping(true);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      e.preventDefault();
+      setSwipeOffset(deltaX * 0.5);
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    const deltaTime = Date.now() - touchStartRef.current.time;
+    const velocity = Math.abs(deltaX) / deltaTime;
+    
+    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
+    const isSwipeAction = (Math.abs(deltaX) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD);
+    
+    if (isHorizontalSwipe && isSwipeAction) {
+      if (deltaX > 0) {
+        handlePrevious();
+      } else {
+        handleNext();
+      }
+    }
+    
+    setSwipeOffset(0);
+    setIsSwiping(false);
+    touchStartRef.current = null;
+  }, [handlePrevious, handleNext]);
 
   const handleShuffle = () => {
     setIsShuffled((prev) => !prev);
@@ -252,14 +306,38 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
       </div>
 
       <div
-        className="relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000"
-        onClick={handleFlip}
+        className="relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000 touch-pan-y"
+        onClick={() => {
+          if (!isSwiping && Math.abs(swipeOffset) < 10) {
+            handleFlip();
+          }
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          touchAction: 'pan-y',
+        }}
       >
+        {swipeOffset > 20 && (
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 text-primary/60 pointer-events-none">
+            <ChevronLeft className="h-12 w-12" />
+          </div>
+        )}
+        {swipeOffset < -20 && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 text-primary/60 pointer-events-none">
+            <ChevronRight className="h-12 w-12" />
+          </div>
+        )}
         <div
           className={cn(
             "absolute inset-0 transition-transform duration-500 transform-style-preserve-3d",
             isFlipped && "rotate-y-180"
           )}
+          style={{
+            transform: `${isFlipped ? 'rotateY(180deg)' : ''} translateX(${swipeOffset}px)`,
+            transitionProperty: isSwiping ? 'none' : 'transform',
+          }}
         >
           <div
             className={cn(
@@ -295,7 +373,8 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               </div>
             )}
             <div className="absolute bottom-4 text-xs text-muted-foreground">
-              {t("reading.glossary.flashcard.clickFlip")}
+              <span className="hidden sm:inline">{t("reading.glossary.flashcard.clickFlip")}</span>
+              <span className="sm:hidden">Tap to flip</span>
             </div>
           </div>
 
@@ -444,9 +523,11 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
       </div>
 
       <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1"><ChevronLeft className="h-3 w-3" /> Prev</span>
-        <span className="flex items-center gap-1"><ChevronRight className="h-3 w-3" /> Next</span>
-        <span>Space: Flip</span>
+        <span className="hidden sm:flex items-center gap-1"><ChevronLeft className="h-3 w-3" /> Prev</span>
+        <span className="hidden sm:flex items-center gap-1"><ChevronRight className="h-3 w-3" /> Next</span>
+        <span className="hidden sm:inline">Space: Flip</span>
+        <span className="sm:hidden">← Swipe to navigate →</span>
+        <span className="sm:hidden">Tap to flip</span>
       </div>
     </div>
   );
