@@ -354,7 +354,7 @@ function ReadingTest() {
             new Paragraph({
               children: [
                 new TextRun({
-                  text: `   ${opt.label}`,
+                  text: `   ◯ ${opt.label}`,
                   bold: isCorrect && includeAnswers,
                   color: isCorrect && includeAnswers ? "22C55E" : "000000",
                 }),

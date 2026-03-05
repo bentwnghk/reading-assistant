@@ -297,7 +297,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `   ${option}`,
+                text: `   ◯ ${option}`,
                 bold: isCorrect && includeAnswers,
                 color: isCorrect && includeAnswers ? "22C55E" : "000000",
               }),
