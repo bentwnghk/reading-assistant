@@ -32,7 +32,7 @@ export function extractTextFromImagePrompt() {
 
 **Instructions:**
 - Preserve the original paragraph structure and formatting exactly.
-- **Remove all line numbers (e.g., 1, 2, 3) alongside the left margin** - do not include them in the extracted text.
+- **Remove all line numbers (e.g., 1, 5, 10) alongside the left margin** - do not include them in the extracted text.
 - **Preserve the original paragraph numbers (e.g., [1], [2], [3]) as is** - do not remove them.
 - If the text is unclear, make your best guess.
 - Do not add any commentary or explanations.
