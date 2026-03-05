@@ -238,15 +238,23 @@ export const useReadingStore = create(
           };
         }),
       setSummary: (summary) =>
-        set(() => ({
-          summary,
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            summary,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setAdaptedText: (text) =>
-        set(() => ({
-          adaptedText: text,
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            adaptedText: text,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setSimplifiedText: (text) =>
         set(() => ({
           simplifiedText: text,
@@ -314,10 +322,14 @@ export const useReadingStore = create(
         return get().analyzedSentences[key] || null;
       },
       setMindMap: (mermaidCode) =>
-        set(() => ({
-          mindMap: mermaidCode,
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            mindMap: mermaidCode,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setReadingTest: (questions) =>
         set(() => ({
           readingTest: questions,
@@ -342,10 +354,14 @@ export const useReadingStore = create(
           updatedAt: Date.now(),
         })),
       setGlossary: (entries) =>
-        set(() => ({
-          glossary: entries,
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            glossary: entries,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setGlossaryRating: (word, rating) =>
         set((state) => ({
           glossaryRatings: { ...state.glossaryRatings, [word]: rating },
@@ -356,9 +372,14 @@ export const useReadingStore = create(
           testScore: score,
         })),
       setTestCompleted: (completed) =>
-        set(() => ({
-          testCompleted: completed,
-        })),
+        set((state) => {
+          const newState = {
+            testCompleted: completed,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setTestPoints: (earned, total) =>
         set(() => ({
           testEarnedPoints: earned,
@@ -373,15 +394,23 @@ export const useReadingStore = create(
           testMode: mode,
         })),
       setVocabularyQuizScore: (score) =>
-        set(() => ({
-          vocabularyQuizScore: score,
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            vocabularyQuizScore: score,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       setSpellingGameBestScore: (score) =>
-        set((state) => ({
-          spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          return newState;
+        }),
       addChatMessage: (message) =>
         set((state) => ({
           chatHistory: [...state.chatHistory, message],
