@@ -347,7 +347,7 @@ Download your learning materials for offline study.
 | Provider | Models |
 |----------|--------|
 | 🟢 **Google Gemini** | gemini-3-flash-preview |
-| 🔵 **OpenAI** | gpt-5-mini, gpt-4.1-mini |
+| 🔵 **OpenAI** | gpt-5.1, gpt-5-mini, gpt-5-nano, gpt-4.1-mini |
 | 🟠 **DeepSeek** | deepseek-chat |
 | ⚡ **zAI** | glm-4.7 |
 
