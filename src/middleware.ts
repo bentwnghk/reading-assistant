@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { getCustomModelList, multiApiKeyPolling } from "@/utils/model";
-import { verifySignature } from "@/utils/signature";
+import { verifySignature, parseAccessPasswords, verifyDirectPassword } from "@/utils/signature";
 import { generateAuthToken } from "@/utils/vertexAuth";
 
 const NODE_ENV = process.env.NODE_ENV;
-const accessPassword = process.env.ACCESS_PASSWORD || "";
+const accessPasswords = parseAccessPasswords(process.env.ACCESS_PASSWORD || "");
 // AI provider API key
 const GOOGLE_GENERATIVE_AI_API_KEY =
   process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
@@ -91,7 +91,7 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("x-goog-api-key") || "";
     const isDisabledGeminiModel = hasDisabledGeminiModel();
     if (
-      !verifySignature(authorization, accessPassword, Date.now()) ||
+      !verifySignature(authorization, accessPasswords, Date.now()) ||
       disabledAIProviders.includes("google") ||
       isDisabledGeminiModel
     ) {
@@ -133,7 +133,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("openrouter") ||
@@ -173,7 +173,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("openaicompatible") ||
@@ -214,7 +214,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("openai") ||
@@ -252,7 +252,7 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("x-api-key") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(authorization, accessPassword, Date.now()) ||
+      !verifySignature(authorization, accessPasswords, Date.now()) ||
       disabledAIProviders.includes("anthropic") ||
       isDisabledModel
     ) {
@@ -294,7 +294,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("deepseek") ||
@@ -334,7 +334,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("xai") ||
@@ -374,7 +374,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("mistral") ||
@@ -412,7 +412,7 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("api-key") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(authorization, accessPassword, Date.now()) ||
+      !verifySignature(authorization, accessPasswords, Date.now()) ||
       disabledAIProviders.includes("azure") ||
       isDisabledModel
     ) {
@@ -450,7 +450,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("google-vertex") ||
@@ -496,7 +496,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("pollinations") ||
@@ -526,7 +526,7 @@ export async function middleware(request: NextRequest) {
     if (
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledAIProviders.includes("ollama") ||
@@ -555,7 +555,7 @@ export async function middleware(request: NextRequest) {
       request.method.toUpperCase() !== "POST" ||
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledSearchProviders.includes("tavily")
@@ -594,7 +594,7 @@ export async function middleware(request: NextRequest) {
       request.method.toUpperCase() !== "POST" ||
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledSearchProviders.includes("firecrawl")
@@ -633,7 +633,7 @@ export async function middleware(request: NextRequest) {
       request.method.toUpperCase() !== "POST" ||
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledSearchProviders.includes("exa")
@@ -672,7 +672,7 @@ export async function middleware(request: NextRequest) {
       request.method.toUpperCase() !== "POST" ||
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledSearchProviders.includes("bocha")
@@ -711,7 +711,7 @@ export async function middleware(request: NextRequest) {
       request.method.toUpperCase() !== "POST" ||
       !verifySignature(
         authorization.substring(7),
-        accessPassword,
+        accessPasswords,
         Date.now()
       ) ||
       disabledSearchProviders.includes("searxng")
@@ -738,7 +738,7 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     if (
       request.method.toUpperCase() !== "POST" ||
-      !verifySignature(authorization.substring(7), accessPassword, Date.now())
+      !verifySignature(authorization.substring(7), accessPasswords, Date.now())
     ) {
       return NextResponse.json(
         { error: ERRORS.NO_PERMISSIONS },
@@ -765,7 +765,7 @@ export async function middleware(request: NextRequest) {
     } else if (request.method.toUpperCase() === "GET") {
       authorization = request.nextUrl.searchParams.get("password") || "";
     }
-    if (authorization !== accessPassword) {
+    if (!verifyDirectPassword(authorization, process.env.ACCESS_PASSWORD || "")) {
       return NextResponse.json(
         { error: ERRORS.NO_PERMISSIONS },
         { status: 403 }
@@ -786,7 +786,7 @@ export async function middleware(request: NextRequest) {
   }
   if (request.nextUrl.pathname.startsWith("/api/mcp")) {
     const authorization = request.headers.get("authorization") || "";
-    if (authorization.substring(7) !== accessPassword) {
+    if (!verifyDirectPassword(authorization.substring(7), process.env.ACCESS_PASSWORD || "")) {
       const responseHeaders = new Headers();
       responseHeaders.set("WWW-Authenticate", ERRORS.NO_PERMISSIONS.message);
       return NextResponse.json(

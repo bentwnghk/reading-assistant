@@ -23,14 +23,21 @@ function generateSignature(key: string, timestamp: number): string {
   return Md5.hashStr(data);
 }
 
-function verifySignature(signature: string, key: string): boolean {
+function parseAccessPasswords(passwordEnv: string): string[] {
+  if (!passwordEnv || passwordEnv.trim() === "") return [];
+  return passwordEnv.split(",").map((p) => p.trim()).filter((p) => p.length > 0);
+}
+
+function verifySignature(signature: string, keys: string[]): boolean {
   const now = Date.now();
   
-  for (let offset = -1; offset <= 1; offset++) {
-    const checkTime = now + (offset * 10000);
-    const expected = generateSignature(key, checkTime);
-    if (signature === expected) {
-      return true;
+  for (const key of keys) {
+    for (let offset = -1; offset <= 1; offset++) {
+      const checkTime = now + (offset * 10000);
+      const expected = generateSignature(key, checkTime);
+      if (signature === expected) {
+        return true;
+      }
     }
   }
   
@@ -63,8 +70,9 @@ async function handler(req: NextRequest) {
     authorization = clientAuth;
   } else if (ACCESS_PASSWORD && API_KEY) {
     const token = clientAuth.replace("Bearer ", "");
+    const validPasswords = parseAccessPasswords(ACCESS_PASSWORD);
     
-    if (!token || !verifySignature(token, ACCESS_PASSWORD)) {
+    if (!token || !verifySignature(token, validPasswords)) {
       return NextResponse.json(
         { error: { code: 403, message: "No permissions", status: "FORBIDDEN" } },
         { status: 403 }

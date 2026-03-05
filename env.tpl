@@ -1,4 +1,5 @@
 # (Optional) Server API Access Password for enhanced security
+# Supports multiple passwords separated by commas (e.g., pass1,pass2,pass3)
 ACCESS_PASSWORD=
 
 # (Deprecated) Server-side Gemini API Proxy URL. Default, `https://generativelanguage.googleapis.com`
