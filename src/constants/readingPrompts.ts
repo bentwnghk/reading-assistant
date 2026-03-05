@@ -32,8 +32,8 @@ export function extractTextFromImagePrompt() {
 
 **Instructions:**
 - Preserve the original paragraph structure and formatting exactly.
-- **Keep paragraph numbers (e.g., [1], [2], [3]) in square brackets** - do not remove them.
-- **Remove all line numbers (numbers not surrounded by square brackets) from the left margin** - do not include them in the extracted text.
+- **Remove all line numbers (e.g., 1, 2, 3) alongside the left margin** - do not include them in the extracted text.
+- **Preserve the original paragraph numbers (e.g., [1], [2], [3]) as is** - do not remove them.
 - If the text is unclear, make your best guess.
 - Do not add any commentary or explanations.
 - Respond with ONLY the extracted text.`;
