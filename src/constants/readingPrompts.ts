@@ -205,8 +205,8 @@ Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON ar
   {
     "id": "q3",
     "type": "inference",
-    "question": "What can we infer from paragraph X?",
-    "questionZh": "我們可以從第X段推斷出什麼？",
+    "question": "What can we infer from paragraph [X]?",
+    "questionZh": "我們可以從第[X]段推斷出什麼？",
     "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
     "optionsZh": ["A) 選項一", "B) 選項二", "C) 選項三", "D) 選項四"],
     "correctAnswer": "B",
@@ -220,8 +220,8 @@ Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON ar
   {
     "id": "q4",
     "type": "vocab-context",
-    "question": "In paragraph X, what does the word '___' most likely mean?",
-    "questionZh": "在第X段，'___'這個詞最可能是什麼意思？",
+    "question": "In paragraph [X], what does the word '___' most likely mean?",
+    "questionZh": "在第[X]段，'___'這個詞最可能是什麼意思？",
     "options": ["A) Meaning 1", "B) Meaning 2", "C) Meaning 3", "D) Meaning 4"],
     "optionsZh": ["A) 意思一", "B) 意思二", "C) 意思三", "D) 意思四"],
     "correctAnswer": "C",
@@ -235,8 +235,8 @@ Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON ar
   {
     "id": "q5",
     "type": "referencing",
-    "question": "What does 'they' in line X refer to?",
-    "questionZh": "第X行的'they'指的是什麼？",
+    "question": "In paragraph [2], what does 'they' refer to in '...they went to the store...'?",
+    "questionZh": "在第[2]段，'...they went to the store...'中的'they'指的是什麼？",
     "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
     "optionsZh": ["A) 選項一", "B) 選項二", "C) 選項三", "D) 選項四"],
     "correctAnswer": "A",
@@ -281,8 +281,10 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
   - Ask what the word/phrase refers to in the surrounding context
   - Options should be noun phrases from the text
   - Choose words where the reference is clear from context but requires careful reading
+  - **CRITICAL: If the same pronoun appears multiple times in the paragraph, include surrounding context (5-8 words before and after) to uniquely identify which occurrence. Format: "In paragraph [X], what does 'they' refer to in '...they went to the store...'?"**
 - For short-answer: provide key points that must be mentioned, comma-separated
 - Include ALL required metadata fields for each question.
+- **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
 - paragraphRef should be 1-indexed (first paragraph = 1).
 - Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3.
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED for all questions.
@@ -358,10 +360,13 @@ ${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${
 - Use age-appropriate language
 - Make questions clear and unambiguous
 - For true-false-not-given: "True", "False", or "Not Given"
-- For referencing: ask what a pronoun or phrase refers to
+- For referencing: 
+  - Ask what a pronoun or phrase refers to
+  - **If the same pronoun appears multiple times in the paragraph, include surrounding context (5-8 words before and after) to uniquely identify which occurrence. Format: "In paragraph [X], what does 'they' refer to in '...they went to the store...'?"**
 - For vocabulary-in-context: choose words understandable from surrounding text
 - For inference: answer should be logically deducible but not explicitly stated
 - Include ALL required metadata fields
+- **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
 - paragraphRef should be 1-indexed
 - Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED
