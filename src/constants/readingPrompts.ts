@@ -102,8 +102,11 @@ Make this text even simpler while preserving its core meaning.
 **Respond with ONLY the simplified text.**`;
 }
 
-export function generateMindMapPrompt(age: number, text: string) {
+export function generateMindMapPrompt(age: number, text: string, useChinese: boolean = false) {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
+  const languageInstruction = useChinese 
+    ? "Use Traditional Chinese (繁體中文) for all text in the mind map." 
+    : "Use the same language as the original text.";
   return `Create a mind map for this text to help a ${age}-year-old Hong Kong ${schoolLevel} student visualize and connect the main ideas.
 
 <text>
@@ -129,7 +132,7 @@ mindmap
 3. Include 3-5 main branches for key themes or sections.
 4. Each branch should have 2-4 sub-topics.
 5. Keep text concise (max 5-6 words per node).
-6. Use the same language as the original text.
+6. ${languageInstruction}
 
 **Respond with ONLY the Mermaid code block, no additional text.**`;
 }

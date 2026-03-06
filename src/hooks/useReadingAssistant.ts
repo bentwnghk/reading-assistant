@@ -321,7 +321,7 @@ function useReadingAssistant() {
     }
   }
 
-  async function generateMindMap() {
+  async function generateMindMap(useChinese: boolean = false) {
     const { studentAge, extractedText, setMindMap, setStatus: setStoreStatus, setError } = readingStore;
     
     if (!extractedText) {
@@ -338,7 +338,7 @@ function useReadingAssistant() {
       const result = streamText({
         model: thinkingModel,
         system: getSystemPrompt(),
-        prompt: generateMindMapPrompt(studentAge, extractedText),
+        prompt: generateMindMapPrompt(studentAge, extractedText, useChinese),
         experimental_transform: smoothTextStream(smoothTextStreamType),
         onError: (error) => {
           const msg = handleError(error);

@@ -239,7 +239,8 @@
       "generate": "生成思維導圖",
       "generating": "正在生成...",
       "regenerate": "重新生成",
-      "emptyTip": "點擊上方按鈕生成視覺化思維導圖"
+      "emptyTip": "點擊上方按鈕生成視覺化思維導圖",
+      "chineseLabel": "中文"
     },
     "readingTest": {
       "title": "閱讀測驗",

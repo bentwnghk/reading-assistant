@@ -1,8 +1,10 @@
 "use client";
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Waypoints, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
@@ -13,6 +15,7 @@ function MindMap() {
   const { extractedText, mindMap } = useReadingStore();
   const { status, generateMindMap } = useReadingAssistant();
   const isGenerating = status === "mindmap";
+  const [useChinese, setUseChinese] = useState(false);
 
   if (!extractedText) {
     return null;
@@ -25,29 +28,41 @@ function MindMap() {
           <Waypoints className="h-5 w-5 text-muted-foreground" />
           {t("reading.mindMap.title")}
         </h3>
-        <Button
-          onClick={() => generateMindMap()}
-          disabled={isGenerating}
-          size="sm"
-          variant={mindMap ? "secondary" : "default"}
-        >
-          {isGenerating ? (
-            <>
-              <LoaderCircle className="h-4 w-4 animate-spin" />
-              <span>{t("reading.mindMap.generating")}</span>
-            </>
-          ) : mindMap ? (
-            <>
-              <Waypoints className="h-4 w-4" />
-              <span>{t("reading.mindMap.regenerate")}</span>
-            </>
-          ) : (
-            <>
-              <Waypoints className="h-4 w-4" />
-              <span>{t("reading.mindMap.generate")}</span>
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={useChinese}
+              onCheckedChange={setUseChinese}
+              disabled={isGenerating}
+            />
+            <span className="text-sm text-muted-foreground">
+              {t("reading.mindMap.chineseLabel")}
+            </span>
+          </div>
+          <Button
+            onClick={() => generateMindMap(useChinese)}
+            disabled={isGenerating}
+            size="sm"
+            variant={mindMap ? "secondary" : "default"}
+          >
+            {isGenerating ? (
+              <>
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+                <span>{t("reading.mindMap.generating")}</span>
+              </>
+            ) : mindMap ? (
+              <>
+                <Waypoints className="h-4 w-4" />
+                <span>{t("reading.mindMap.regenerate")}</span>
+              </>
+            ) : (
+              <>
+                <Waypoints className="h-4 w-4" />
+                <span>{t("reading.mindMap.generate")}</span>
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {mindMap ? (

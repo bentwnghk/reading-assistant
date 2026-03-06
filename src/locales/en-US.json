@@ -239,7 +239,8 @@
       "generate": "Generate Mind Map",
       "generating": "Generating...",
       "regenerate": "Regenerate",
-      "emptyTip": "Click the button above to generate a visual mind map"
+      "emptyTip": "Click the button above to generate a visual mind map",
+      "chineseLabel": "Chinese"
     },
     "readingTest": {
       "title": "Reading Test",
