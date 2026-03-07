@@ -370,7 +370,7 @@ function AdaptedText() {
           targetElement.classList.add("ring-2", "ring-primary", "ring-offset-2", "rounded");
           setTimeout(() => {
             targetElement.classList.remove("ring-2", "ring-primary", "ring-offset-2", "rounded");
-          }, 2000);
+          }, 10000);
         }
       }, 100);
     },
