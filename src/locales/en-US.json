@@ -291,7 +291,13 @@
       "generating": "Generating...",
       "regenerate": "Regenerate",
       "emptyTip": "Click the button above to generate a visual mind map",
-      "chineseLabel": "Chinese"
+      "chineseLabel": "Chinese",
+      "help": {
+        "title": "Mind Map Guide",
+        "purpose": "Purpose: The Mind Map section visually organizes the key concepts and relationships from your reading material, helping you understand the structure and connections between ideas.",
+        "features": "Features: AI generates an interactive mind map with main topics, subtopics, and their relationships. Toggle 'Chinese' to generate the mind map in Chinese for bilingual learning support.",
+        "usage": "Usage: Click 'Generate Mind Map' to create a visual representation. Use the 'Chinese' toggle to switch between English and Chinese versions. Review the mind map to quickly grasp the text's structure."
+      }
     },
     "readingTest": {
       "title": "Reading Test",
