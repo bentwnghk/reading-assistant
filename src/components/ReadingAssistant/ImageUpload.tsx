@@ -160,10 +160,9 @@ function ImageUpload() {
                 <div className="space-y-3 text-sm">
                   <h4 className="font-semibold text-base">{t("reading.imageUpload.help.title")}</h4>
                   <div className="space-y-2">
-                    <p className="text-muted-foreground">{t("reading.imageUpload.help.upload")}</p>
-                    <p className="text-muted-foreground">{t("reading.imageUpload.help.multi")}</p>
-                    <p className="text-muted-foreground">{t("reading.imageUpload.help.process")}</p>
-                    <p className="text-muted-foreground">{t("reading.imageUpload.help.clear")}</p>
+                    <p className="text-muted-foreground">{t("reading.imageUpload.help.purpose")}</p>
+                    <p className="text-muted-foreground">{t("reading.imageUpload.help.features")}</p>
+                    <p className="text-muted-foreground">{t("reading.imageUpload.help.usage")}</p>
                   </div>
                 </div>
               </PopoverContent>

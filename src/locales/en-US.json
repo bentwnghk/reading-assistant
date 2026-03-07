@@ -182,10 +182,9 @@
       "addMore": "Add more images",
       "help": {
         "title": "Image Upload Guide",
-        "upload": "Upload: Drag and drop images or click to select from any reading material - textbooks, worksheets, articles, and more. Supported formats: PNG, JPG, JPEG, WEBP.",
-        "multi": "Multiple Images: You may upload multiple images at once, each corresponding to one page of the reading material.",
-        "process": "Processing: AI extracts text from images using OCR (Optical Character Recognition). The extracted text appears in the 'Text Analysis & Adaptation' section below.",
-        "clear": "Clear All: Click the 'Clear All' button to remove all images and start fresh."
+        "purpose": "Purpose: Upload images of any reading material - textbooks, worksheets, articles, and more. AI extracts text from images using OCR (Optical Character Recognition), making it available for vocabulary building, text analysis, and reading practice.",
+        "features": "Features: Supports PNG, JPG, JPEG, and WEBP formats. You can upload multiple images at once (one per page), and the extracted text appears in the 'Text Analysis & Adaptation' section for further processing.",
+        "usage": "Usage: Drag and drop images or click to select files. Click 'Clear All' to remove all images and start fresh. The extracted text can then be used for vocabulary lists, sentence analysis, and reading comprehension exercises."
       }
     },
     "extractedText": {
