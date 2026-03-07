@@ -90,7 +90,7 @@ ${text}
 Make this text even simpler while preserving its core meaning.
 
 **CRITICAL REQUIREMENTS:**
-- **Preserve the exact same paragraph structure.**
+- **Preserve the exact same paragraph structure** - same number of paragraphs in the same order.
 - **Do not merge, split, or rearrange paragraphs.**
 - Use the simplest possible vocabulary (basic English words).
 - Make sentences very short and clear (6-10 words max per sentence).
@@ -99,7 +99,7 @@ Make this text even simpler while preserving its core meaning.
 - Use simple sentence structures (subject-verb-object).
 - Keep the same meaning but make it extremely easy to read.
 
-**Respond with ONLY the simplified text.**`;
+**Respond with ONLY the simplified text, maintaining the paragraph structure.**`;
 }
 
 export function generateMindMapPrompt(age: number, text: string, useChinese: boolean = false) {
