@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, Download, FileDown, Table, Layers, ClipboardList, SpellCheck } from "lucide-react";
+import { BookMarked, LoaderCircle, Download, FileDown, Table, Layers, ClipboardList, SpellCheck, HelpCircle } from "lucide-react";
 import {
   Document,
   Packer,
@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { downloadFile } from "@/utils/file";
@@ -273,6 +274,21 @@ function Glossary() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <BookMarked className="h-5 w-5 text-muted-foreground" />
           {t("reading.glossary.title")}
+          <Popover>
+            <PopoverTrigger asChild>
+              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px]" align="start">
+              <div className="space-y-3 text-sm">
+                <h4 className="font-semibold text-base">{t("reading.glossary.help.title")}</h4>
+                <div className="space-y-2">
+                  <p className="text-muted-foreground">{t("reading.glossary.help.purpose")}</p>
+                  <p className="text-muted-foreground">{t("reading.glossary.help.features")}</p>
+                  <p className="text-muted-foreground">{t("reading.glossary.help.usage")}</p>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </h3>
         <div className="flex gap-2">
           {glossary.length > 0 && (

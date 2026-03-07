@@ -425,6 +425,12 @@
         "downloadWithAnswers": "Download with Answers",
         "correctAnswer": "Correct Answer"
       },
+      "help": {
+        "title": "Vocabulary Guide",
+        "purpose": "Purpose: The Vocabulary section helps you learn and master new words from your reading material through multiple interactive learning modes.",
+        "features": "Features: AI generates bilingual definitions (English + Chinese) with example sentences. Four learning modes: Table (view all words), Flashcard (flip cards with ratings), Spelling (4 game modes), and Quiz (test your knowledge). Download as CSV or Word document.",
+        "usage": "Usage: First, highlight words in the 'Original' text tab. Then click 'Generate Glossary' to create definitions. Use the tabs to switch between learning modes. Rate flashcards (Easy/Medium/Hard) to track progress. Play spelling games and take quizzes to reinforce learning."
+      },
       "spelling": {
         "title": "Spelling Challenge",
         "subtitle": "Practice spelling {{count}} words",
