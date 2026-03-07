@@ -209,7 +209,13 @@
       "title": "Summary",
       "generate": "Generate Summary",
       "generating": "Generating...",
-      "emptyTip": "Click the button above to generate a summary of the text"
+      "emptyTip": "Click the button above to generate a summary of the text",
+      "help": {
+        "title": "Summary Guide",
+        "purpose": "Purpose: The Summary section provides a quick overview of the main ideas and key points from your reading material, helping you understand the content before diving into details.",
+        "features": "Features: AI generates a concise summary that captures the essence of the text, including main themes, important details, and the overall message. The summary is displayed in an easy-to-read format.",
+        "usage": "Usage: Click the 'Generate Summary' button to create a summary. Once generated, you can read through it to quickly grasp the content. Use it as a preview before reading the full text or as a review after reading."
+      }
     },
 "adaptedText": {
       "title": "Text Analysis & Adaptation",
