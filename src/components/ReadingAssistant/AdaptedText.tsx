@@ -11,6 +11,7 @@ import {
   Loader2,
   Brain,
   FileDown,
+  HelpCircle,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
 import {
@@ -35,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -915,6 +917,51 @@ function AdaptedText() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-muted-foreground" />
           {t("reading.adaptedText.title")}
+          <Popover>
+            <PopoverTrigger asChild>
+              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+            </PopoverTrigger>
+            <PopoverContent className="w-[480px] max-h-[70vh] overflow-y-auto" align="start">
+              <div className="space-y-4 text-sm">
+                <h4 className="font-semibold text-base">{t("reading.adaptedText.help.title")}</h4>
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.tabs.title")}</h5>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
+                      <li>{t("reading.adaptedText.help.tabs.original")}</li>
+                      <li>{t("reading.adaptedText.help.tabs.adapted")}</li>
+                      <li>{t("reading.adaptedText.help.tabs.simplified")}</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.features.title")}</h5>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
+                      <li>{t("reading.adaptedText.help.features.highlight")}</li>
+                      <li>{t("reading.adaptedText.help.features.sentenceAnalysis")}</li>
+                      <li>{t("reading.adaptedText.help.features.paragraphNav")}</li>
+                      <li>{t("reading.adaptedText.help.features.tts")}</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.difficulty.title")}</h5>
+                    <p className="text-muted-foreground mt-1">{t("reading.adaptedText.help.difficulty.desc")}</p>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
+                      <li>{t("reading.adaptedText.help.difficulty.metrics")}</li>
+                      <li>{t("reading.adaptedText.help.difficulty.cefr")}</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.export.title")}</h5>
+                    <p className="text-muted-foreground mt-1">{t("reading.adaptedText.help.export.desc")}</p>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
+                      <li>{t("reading.adaptedText.help.export.glossary")}</li>
+                      <li>{t("reading.adaptedText.help.export.analysis")}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </h3>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">

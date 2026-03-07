@@ -213,7 +213,35 @@
       "goToOriginal": "跳轉到原文",
       "goToAdapted": "跳轉到改寫版本",
       "goToSimplified": "跳轉到簡化版本",
-      "paragraphMismatch": "段落數量不同"
+      "paragraphMismatch": "段落數量不同",
+      "help": {
+        "title": "文本分析與改寫指南",
+        "tabs": {
+          "title": "三個文本版本",
+          "original": "原文：從你上傳的圖片中提取的原始文本",
+          "adapted": "改寫版本：AI根據你的閱讀水平（基於你的年齡）重寫的文本",
+          "simplified": "簡化版本：更簡單的版本，便於理解"
+        },
+        "features": {
+          "title": "互動功能",
+          "highlight": "詞彙高亮：在「原文」標籤中選擇任何單詞，將其添加到詞彙表。高亮的單詞會以黃色背景顯示",
+          "sentenceAnalysis": "句子分析：選擇任何句子並點擊「分析句子」，獲取詳細的AI解析，包括意思、詞彙、語法和學習提示。已分析的句子會以藍色下劃線顯示——點擊可查看分析",
+          "paragraphNav": "段落導航：使用 O/A/S 按鈕跳轉到對應段落（O=原文，A=改寫版本，S=簡化版本）",
+          "tts": "語音朗讀：選擇任何文本並點擊「朗讀」，聽取自然發音"
+        },
+        "difficulty": {
+          "title": "難度分析",
+          "desc": "比較三個版本的可讀性指標：",
+          "metrics": "詞數、句子數、平均句子長度、Flesch閱讀易度和年級水平",
+          "cefr": "CEFR詞彙高亮：查看按難度等級（A1-C2）以顏色編碼的單詞"
+        },
+        "export": {
+          "title": "Word文檔導出",
+          "desc": "將學習材料下載為Word文檔，包含：",
+          "glossary": "包含詞彙表：添加你高亮詞彙的定義",
+          "analysis": "包含句子分析：添加已分析句子的詳細解析"
+        }
+      }
     },
     "difficulty": {
       "title": "文本難度分析",
