@@ -15,7 +15,8 @@ import {
   BarChart3,
   Target,
   FileDown,
-  ChevronDown
+  ChevronDown,
+  HelpCircle
 } from "lucide-react";
 import {
   Document,
@@ -40,6 +41,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
@@ -603,6 +605,21 @@ function ReadingTest() {
           <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" align="start">
+                <div className="space-y-3 text-sm">
+                  <h4 className="font-semibold text-base">{t("reading.readingTest.help.title")}</h4>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.purpose")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.features")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.usage")}</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </h3>
           <Button
             onClick={() => generateReadingTest()}
@@ -637,6 +654,21 @@ function ReadingTest() {
           <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" align="start">
+                <div className="space-y-3 text-sm">
+                  <h4 className="font-semibold text-base">{t("reading.readingTest.help.title")}</h4>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.purpose")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.features")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.usage")}</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </h3>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -769,6 +801,21 @@ function ReadingTest() {
           <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" align="start">
+                <div className="space-y-3 text-sm">
+                  <h4 className="font-semibold text-base">{t("reading.readingTest.help.title")}</h4>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.purpose")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.features")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.usage")}</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </h3>
           <div className="flex gap-2">
             <DropdownMenu>
@@ -895,6 +942,21 @@ function ReadingTest() {
           <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" align="start">
+                <div className="space-y-3 text-sm">
+                  <h4 className="font-semibold text-base">{t("reading.readingTest.help.title")}</h4>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.purpose")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.features")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.usage")}</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </h3>
           <div className="flex items-center gap-2">
             <Button
@@ -965,37 +1027,52 @@ function ReadingTest() {
   return (
     <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b mb-4">
-        <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
-          <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
-          {t("reading.readingTest.title")}
-        </h3>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTestShowChinese(!testShowChinese)}
-          >
-            <Languages className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            size="sm"
-            disabled={evaluatingShortAnswer}
-          >
-            {evaluatingShortAnswer ? (
-              <>
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-                <span>{t("reading.readingTest.evaluating")}</span>
-              </>
-            ) : (
-              <>
-                <CheckCircle className="h-4 w-4" />
-                <span>{t("reading.readingTest.submit")}</span>
-              </>
-            )}
-          </Button>
+          <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
+            <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
+            {t("reading.readingTest.title")}
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" align="start">
+                <div className="space-y-3 text-sm">
+                  <h4 className="font-semibold text-base">{t("reading.readingTest.help.title")}</h4>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.purpose")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.features")}</p>
+                    <p className="text-muted-foreground">{t("reading.readingTest.help.usage")}</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </h3>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTestShowChinese(!testShowChinese)}
+            >
+              <Languages className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              size="sm"
+              disabled={evaluatingShortAnswer}
+            >
+              {evaluatingShortAnswer ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                  <span>{t("reading.readingTest.evaluating")}</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  <span>{t("reading.readingTest.submit")}</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
 
       <div className="space-y-6">
         {questionsToDisplay.map((question, index) => renderQuestion(question, index, false))}
