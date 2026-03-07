@@ -1,8 +1,9 @@
-"use client";
+ "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Upload, Image as ImageIcon, LoaderCircle, X } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
@@ -147,18 +148,34 @@ function ImageUpload() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
-        <span className="flex items-center gap-2">
-          <Upload className="h-5 w-5 text-muted-foreground" />
-          {t("reading.imageUpload.title")}
-        </span>
-        {(originalImages.length > 0 || extractedText) && (
-          <Button variant="outline" size="sm" onClick={clearAllImages}>
-            <X className="h-4 w-4 mr-1" />
-            {t("reading.imageUpload.clearAll")}
-          </Button>
-        )}
-      </h3>
+        <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <Upload className="h-5 w-5 text-muted-foreground" />
+            {t("reading.imageUpload.title")}
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" align="start">
+                <div className="space-y-3 text-sm">
+                  <h4 className="font-semibold text-base">{t("reading.imageUpload.help.title")}</h4>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">{t("reading.imageUpload.help.upload")}</p>
+                    <p className="text-muted-foreground">{t("reading.imageUpload.help.multi")}</p>
+                    <p className="text-muted-foreground">{t("reading.imageUpload.help.process")}</p>
+                    <p className="text-muted-foreground">{t("reading.imageUpload.help.clear")}</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </span>
+          {(originalImages.length > 0 || extractedText) && (
+            <Button variant="outline" size="sm" onClick={clearAllImages}>
+              <X className="h-4 w-4 mr-1" />
+              {t("reading.imageUpload.clearAll")}
+            </Button>
+          )}
+        </h3>
 
       {originalImages.length > 0 && extractedText ? (
         <div className="space-y-4">

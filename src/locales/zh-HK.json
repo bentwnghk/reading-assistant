@@ -162,7 +162,13 @@
       "title": "學生資料",
       "ageLabel": "你的年齡",
       "yearsOld": "歲",
-      "estimatedLevel": "預計程度"
+      "estimatedLevel": "預計程度",
+      "help": {
+        "title": "學生資料指南",
+        "ageSlider": "年齡滑桿：拖動以選擇你的年齡（8-18歲）。這有助於AI將文本改寫至你的閱讀水平。",
+        "estimatedLevel": "預計程度：根據你的年齡顯示對應的香港學校級別（小學三年級至DSE）。",
+        "usage": "你的年齡用於決定改寫版本和簡化版本的複雜程度，使內容變得更容易或更具挑戰性。"
+      }
     },
     "imageUpload": {
       "title": "上傳圖片",
@@ -173,7 +179,14 @@
       "extractingProgress": "正在提取文字（{{current}}/{{total}}）...",
       "uploadNew": "點擊上方 [x 清除全部] 按鈕以重新開始",
       "clearAll": "清除全部",
-      "addMore": "添加更多圖片"
+      "addMore": "添加更多圖片",
+      "help": {
+        "title": "圖片上傳指南",
+        "upload": "上傳方式：拖放圖片或點擊選擇。支援格式：PNG、JPG、JPEG、WEBP。",
+        "multi": "多頁上傳：可上傳多頁文件，每張圖片會按順序處理並顯示進度。",
+        "process": "處理中：AI 使用 OCR（光學字符識別）從圖片中提取文字，提取的文字會顯示在下方。",
+        "clear": "清除重來：點擊 [x 清除全部] 按鈕可重新開始上傳新圖片。"
+      }
     },
     "extractedText": {
       "title": "提取的文字",

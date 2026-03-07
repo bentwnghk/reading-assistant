@@ -162,7 +162,13 @@
       "title": "Student Information",
       "ageLabel": "Your Age",
       "yearsOld": "years old",
-      "estimatedLevel": "Estimated Level"
+      "estimatedLevel": "Estimated Level",
+      "help": {
+        "title": "Student Information Guide",
+        "ageSlider": "Age Slider: Drag to select your age (8-18). This helps the AI adapt the text to your reading level.",
+        "estimatedLevel": "Estimated Level: Shows the corresponding Hong Kong school level (Primary 3 to DSE) based on your age.",
+        "usage": "Your age is used to determine the complexity of the Adapted and Simplified text versions, making the content easier or more challenging as appropriate."
+      }
     },
     "imageUpload": {
       "title": "Upload Image",
@@ -173,7 +179,14 @@
       "extractingProgress": "Extracting text ({{current}}/{{total}})...",
       "uploadNew": "Click the [x Clear All] button above to start over",
       "clearAll": "Clear All",
-      "addMore": "Add more images"
+      "addMore": "Add more images",
+      "help": {
+        "title": "Image Upload Guide",
+        "upload": "Upload: Drag and drop images or click to select. Supported formats: PNG, JPG, JPEG, WEBP.",
+        "multi": "Multiple Images: Upload multiple pages of a document. Each image is processed sequentially with progress shown.",
+        "process": "Processing: AI extracts text from images using OCR (Optical Character Recognition). The extracted text appears in the 'Text Analysis & Adaptation' section below.",
+        "clear": "Clear All: Click the 'Clear All' button to remove all images and start fresh."
+      }
     },
     "extractedText": {
       "title": "Extracted Text",
