@@ -465,7 +465,19 @@
       "highlight": "Highlight Word",
       "glossary": "Vocabulary",
       "spelling": "Spelling Game",
-      "vocabQuiz": "Vocab Quiz"
+      "vocabQuiz": "Vocab Quiz",
+      "help": {
+        "title": "Learning Progress Guide",
+        "intro": "Track your learning journey through 10 interactive steps. Each completed step shows a checkmark. Click any step to jump to that section.",
+        "navigation": {
+          "title": "Quick Navigation",
+          "desc": "Click on any step to jump directly to that section. Grayed-out steps unlock after uploading your reading material."
+        },
+        "progress": {
+          "title": "Progress Tracking",
+          "desc": "The progress bar shows your overall completion percentage."
+        }
+      }
     },
     "tutor": {
       "title": "AI Tutor",
