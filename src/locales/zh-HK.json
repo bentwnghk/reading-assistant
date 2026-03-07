@@ -209,7 +209,11 @@
       "simplifyFurther": "進一步簡化",
       "simplifying": "正在簡化...",
       "simplifiedEmptyTip": "點擊下方按鈕創建更簡單的版本",
-      "generateSimplified": "生成簡化版本"
+      "generateSimplified": "生成簡化版本",
+      "goToOriginal": "跳轉到原文",
+      "goToAdapted": "跳轉到改寫版本",
+      "goToSimplified": "跳轉到簡化版本",
+      "paragraphMismatch": "段落數量不同"
     },
     "difficulty": {
       "title": "文本難度分析",

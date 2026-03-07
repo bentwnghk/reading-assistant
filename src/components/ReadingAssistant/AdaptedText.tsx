@@ -52,6 +52,7 @@ import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown"));
+import ParagraphWithNav from "./ParagraphWithNav";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -325,7 +326,7 @@ function AdaptedText() {
   const { status, adaptText, simplifyText } = useReadingAssistant();
   const { createModelProvider } = useModelProvider();
 
-  // tab state
+// tab state
   const [activeTab, setActiveTab] = useState<string>("original");
   const [includeGlossary, setIncludeGlossary] = useState(false);
   const [includeSentenceAnalysis, setIncludeSentenceAnalysis] = useState(false);
@@ -338,6 +339,43 @@ function AdaptedText() {
   const adaptedContainerRef = useRef<HTMLDivElement | null>(null);
   const simplifiedContainerRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const paragraphCounts = useMemo(
+    () => ({
+      original: extractedText ? extractedText.split(/\n\s*\n/).filter((p) => p.trim()).length : 0,
+      adapted: adaptedText ? adaptedText.split(/\n\s*\n/).filter((p) => p.trim()).length : 0,
+      simplified: simplifiedText ? simplifiedText.split(/\n\s*\n/).filter((p) => p.trim()).length : 0,
+    }),
+    [extractedText, adaptedText, simplifiedText]
+  );
+
+  const handleNavigateToParagraph = useCallback(
+    (targetTab: "original" | "adapted" | "simplified", paragraphIndex: number) => {
+      setActiveTab(targetTab);
+
+      setTimeout(() => {
+        const containerMap = {
+          original: containerRef,
+          adapted: adaptedContainerRef,
+          simplified: simplifiedContainerRef,
+        };
+        const container = containerMap[targetTab].current;
+        if (!container) return;
+
+        const targetElement = container.querySelector(
+          `[data-paragraph-index="${paragraphIndex}"]`
+        );
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          targetElement.classList.add("ring-2", "ring-primary", "ring-offset-2", "rounded");
+          setTimeout(() => {
+            targetElement.classList.remove("ring-2", "ring-primary", "ring-offset-2", "rounded");
+          }, 2000);
+        }
+      }, 100);
+    },
+    []
+  );
   const [selection, setSelection] = useState<{
     text: string;
     x: number;
@@ -1005,11 +1043,14 @@ function AdaptedText() {
             className="prose prose-slate dark:prose-invert max-w-full"
             ref={setContainerRef}
           >
-            <MagicDown
-              value={highlightedText}
-              onChange={() => {}}
-              hideTools
-              disableMath
+            <ParagraphWithNav
+              text={extractedText}
+              currentTab="original"
+              onNavigate={handleNavigateToParagraph}
+              paragraphCounts={paragraphCounts}
+              hasAdaptedText={!!adaptedText}
+              hasSimplifiedText={!!simplifiedText}
+              highlightHtml={highlightedText}
             />
           </div>
 
@@ -1050,11 +1091,13 @@ function AdaptedText() {
                 ref={adaptedContainerRef}
                 className="prose prose-slate dark:prose-invert max-w-full"
               >
-                <MagicDown
-                  value={adaptedText}
-                  onChange={() => {}}
-                  hideTools
-                  disableMath
+                <ParagraphWithNav
+                  text={adaptedText}
+                  currentTab="adapted"
+                  onNavigate={handleNavigateToParagraph}
+                  paragraphCounts={paragraphCounts}
+                  hasAdaptedText={!!adaptedText}
+                  hasSimplifiedText={!!simplifiedText}
                 />
               </div>
 
@@ -1115,11 +1158,13 @@ function AdaptedText() {
                 ref={simplifiedContainerRef}
                 className="prose prose-slate dark:prose-invert max-w-full"
               >
-                <MagicDown
-                  value={simplifiedText}
-                  onChange={() => {}}
-                  hideTools
-                  disableMath
+                <ParagraphWithNav
+                  text={simplifiedText}
+                  currentTab="simplified"
+                  onNavigate={handleNavigateToParagraph}
+                  paragraphCounts={paragraphCounts}
+                  hasAdaptedText={!!adaptedText}
+                  hasSimplifiedText={!!simplifiedText}
                 />
               </div>
               {isSimplifying ? (

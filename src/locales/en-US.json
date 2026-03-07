@@ -198,7 +198,7 @@
       "generating": "Generating...",
       "emptyTip": "Click the button above to generate a summary of the text"
     },
-    "adaptedText": {
+"adaptedText": {
       "title": "Text Analysis & Adaptation",
       "adapt": "Adapt",
       "adapting": "Adapting...",
@@ -209,7 +209,11 @@
       "simplifyFurther": "Simplify Further",
       "simplifying": "Simplifying...",
       "simplifiedEmptyTip": "Click the button below to create an even simpler version",
-      "generateSimplified": "Generate Simplified Version"
+      "generateSimplified": "Generate Simplified Version",
+      "goToOriginal": "Go to Original",
+      "goToAdapted": "Go to Adapted",
+      "goToSimplified": "Go to Simplified",
+      "paragraphMismatch": "Paragraph count differs"
     },
     "difficulty": {
       "title": "Text Difficulty Analysis",
