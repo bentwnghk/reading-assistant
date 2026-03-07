@@ -514,6 +514,12 @@
       "removeSelection": "Remove selected text from context",
       "addImage": "Add image",
       "imageOnly": "[Image]",
+      "help": {
+        "title": "AI Tutor Guide",
+        "purpose": "Purpose: The AI Tutor is your personal reading assistant that helps you understand any text through interactive conversations. Ask questions, get explanations, and deepen your comprehension.",
+        "features": "Features: Context-aware answers based on your current reading material. Support for text selection - highlight any passage to ask about it. Image upload for homework help - upload questions and get step-by-step guidance. Quick question buttons for common queries.",
+        "usage": "Usage: Click the chat icon to open. Type your question or use quick question buttons. Select text in the reader first to ask about specific passages. Upload images of reading questions for guided help. The tutor remembers your conversation for follow-up questions."
+      },
       "quickQuestions": {
         "title": "Quick Questions:",
         "imageHelpTitle": "Answer Help:",
