@@ -182,7 +182,7 @@
       "addMore": "Add more images",
       "help": {
         "title": "Image Upload Guide",
-        "upload": "Upload: Drag and drop images or click to select. Supported formats: PNG, JPG, JPEG, WEBP.",
+        "upload": "Upload: Drag and drop images or click to select from any reading material - textbooks, worksheets, articles, and more. Supported formats: PNG, JPG, JPEG, WEBP.",
         "multi": "Multiple Images: Upload multiple pages of a document. Each image is processed sequentially with progress shown.",
         "process": "Processing: AI extracts text from images using OCR (Optical Character Recognition). The extracted text appears in the 'Text Analysis & Adaptation' section below.",
         "clear": "Clear All: Click the 'Clear All' button to remove all images and start fresh."
