@@ -209,11 +209,15 @@
       "generate": "Generate Summary",
       "generating": "Generating...",
       "emptyTip": "Click the button above to generate a summary of the text",
+      "oneSentence": "TL;DR",
+      "mainPoints": "Main Points",
+      "keyWords": "Key Words",
+      "thinkAbout": "Something to Think About",
       "help": {
         "title": "Summary Guide",
-        "purpose": "Purpose: The Summary section provides a quick overview of the main ideas and key points from your reading material, helping you understand the content before diving into details.",
-        "features": "Features: AI generates a concise summary that captures the essence of the text, including main themes, important details, and the overall message. The summary is displayed in an easy-to-read format.",
-        "usage": "Usage: Click the 'Generate Summary' button to create a summary. Once generated, you can read through it to quickly grasp the content. Use it as a preview before reading the full text or as a review after reading."
+        "purpose": "Purpose: The Summary section provides a structured overview with a one-sentence TL;DR, main points as bullet points, key vocabulary with bilingual definitions, and a reflection question to help you quickly grasp the content.",
+        "features": "Features: AI generates a structured summary with TL;DR, main points with emojis, key vocabulary (English + Chinese), and an engaging question. Designed for different student levels from Primary to DSE.",
+        "usage": "Usage: Click 'Generate Summary' to create a summary. Use TL;DR for quick understanding, main points for overview, key words for vocabulary building, and the question to think deeper about the text."
       }
     },
 "adaptedText": {

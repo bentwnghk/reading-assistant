@@ -63,7 +63,14 @@ function Summary() {
       </div>
 
       {summary ? (
-        <div className="prose prose-slate dark:prose-invert max-w-full">
+        <div className="prose prose-slate dark:prose-invert max-w-full 
+          prose-headings:mt-6 prose-headings:mb-3 prose-headings:text-base prose-headings:font-semibold
+          prose-p:my-2 prose-p:leading-relaxed
+          prose-li:my-1 prose-li:leading-relaxed
+          prose-ul:my-2 prose-ol:my-2
+          prose-strong:text-foreground prose-strong:font-semibold
+          prose-hr:my-4
+          text-[15px]">
           <MagicDown
             value={summary}
             onChange={() => {}}

@@ -41,21 +41,73 @@ export function extractTextFromImagePrompt() {
 
 export function generateSummaryPrompt(age: number, text: string) {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
-  return `You are helping a ${age}-year-old Hong Kong ${schoolLevel} student understand a text.
+  
+  const levelGuidance = age <= 11 ? `
+**For Primary Students (ages 8-11):**
+- Use very simple sentences (8-12 words max per sentence)
+- Include 1-2 relevant emojis per bullet point
+- Use friendly words like "story," "character," "happened"
+- Connect to things students know (school, family, friends, daily life)
+- Make it feel like telling a friend about something interesting
+- Keep vocabulary very basic - avoid difficult words
+` : age <= 15 ? `
+**For Junior Secondary Students (ages 12-15):**
+- Use clear, direct sentences (10-15 words average)
+- Include 1 emoji per bullet point
+- Focus on main themes, events, and character actions
+- Be concise but capture important details
+- Use moderate vocabulary with simple explanations when needed
+` : `
+**For Senior Secondary/DSE Students (ages 16-18):**
+- Use sophisticated but clear language
+- Include minimal emojis (1-2 total, optional)
+- Focus on themes, arguments, perspectives, and deeper insights
+- Capture nuance and complexity
+- Use academic vocabulary appropriately
+`;
+
+  return `You are helping a ${age}-year-old Hong Kong ${schoolLevel} student understand a text. Create an engaging, accessible summary with a clear structure.
 
 <text>
 ${text}
 </text>
 
-Write a brief summary (3-5 sentences) that captures the main ideas.
+**REQUIRED STRUCTURE - Follow this exact format:**
 
-**Guidelines:**
-- Use simple vocabulary appropriate for a ${age}-year-old student.
-- Focus on the key points and general ideas.
-- Keep the same language as the original text.
-- Be concise but informative.
+## 🎯 TL;DR
+[Write ONE super simple sentence (10-15 words max) that captures the MAIN idea. This is for students who find reading difficult. Make it the simplest possible explanation.]
 
-**Respond with ONLY the summary, no additional text.**`;
+## 📝 Main Points
+[3-5 bullet points with emojis. Each bullet should be ONE clear sentence.]
+
+• [emoji] [First main point]
+• [emoji] [Second main point]
+• [emoji] [Third main point]
+• [emoji] [Fourth main point - if needed]
+• [emoji] [Fifth main point - if needed]
+
+## 🔑 Key Words
+[List 4-6 important or challenging vocabulary words from the text that students should learn]
+
+• **word** - simple English definition (繁體中文: 中文解釋)
+• **word2** - simple English definition (繁體中文: 中文解釋)
+...
+
+## 💡 Something to Think About
+[End with ONE engaging question or interesting fact that connects the text to the student's life or encourages deeper thinking. Make it personal and relatable.]
+
+${levelGuidance}
+
+**CRITICAL FORMATTING RULES:**
+- Use exactly the markdown headers (##) as shown above
+- Use bullet points (•) for all lists - NOT dashes or asterisks
+- Add relevant emojis: 📖🎯📝🔑💡⭐💭🌟📌🏠👥❤️🎓🌍🎭💪🏆🌈
+- **Bold** key vocabulary words inline using double asterisks
+- Include Traditional Chinese (繁體中文) translations for ALL key words
+- Keep the same language as the original text for the main content
+- Make sure TL;DR is truly the simplest possible summary
+
+**Respond with ONLY the formatted summary, no introduction or additional text.**`;
 }
 
 export function adaptTextPrompt(age: number, text: string) {
