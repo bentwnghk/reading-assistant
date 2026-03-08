@@ -208,6 +208,7 @@
       "title": "摘要",
       "generate": "生成摘要",
       "generating": "正在生成...",
+      "regenerate": "重新生成",
       "emptyTip": "點擊上方按鈕生成文本摘要",
       "oneSentence": "一句話總結",
       "mainPoints": "主要重點",

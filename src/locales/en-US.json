@@ -208,6 +208,7 @@
       "title": "Summary",
       "generate": "Generate Summary",
       "generating": "Generating...",
+      "regenerate": "Regenerate",
       "emptyTip": "Click the button above to generate a summary of the text",
       "oneSentence": "TL;DR",
       "mainPoints": "Main Points",

@@ -41,25 +41,29 @@ function Summary() {
             </PopoverContent>
           </Popover>
         </h3>
-        {!summary && (
-          <Button
-            onClick={() => generateSummary()}
-            disabled={isGenerating}
-            size="sm"
-          >
-            {isGenerating ? (
-              <>
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-                <span>{t("reading.summary.generating")}</span>
-              </>
-            ) : (
-              <>
-                <FileText className="h-4 w-4" />
-                <span>{t("reading.summary.generate")}</span>
-              </>
-            )}
-          </Button>
-        )}
+        <Button
+          onClick={() => generateSummary()}
+          disabled={isGenerating}
+          size="sm"
+          variant={summary ? "secondary" : "default"}
+        >
+          {isGenerating ? (
+            <>
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+              <span>{t("reading.summary.generating")}</span>
+            </>
+          ) : summary ? (
+            <>
+              <FileText className="h-4 w-4" />
+              <span>{t("reading.summary.regenerate")}</span>
+            </>
+          ) : (
+            <>
+              <FileText className="h-4 w-4" />
+              <span>{t("reading.summary.generate")}</span>
+            </>
+          )}
+        </Button>
       </div>
 
       {summary ? (
