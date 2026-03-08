@@ -359,7 +359,7 @@
         "title": "Reading Test Guide",
         "purpose": "Purpose: The Reading Test section assesses your comprehension of the reading material through various question types, helping you identify areas of strength and weakness in your reading skills.",
         "features": "Features: AI generates 10 questions covering 6 types (Multiple Choice, True/False/Not Given, Short Answer, Inference, Vocabulary in Context, Pronoun Reference) and 6 skills (Main Idea, Detail, Inference, Vocabulary, Author's Purpose, Sequencing). Get detailed explanations, skill breakdown, and download as Word document.",
-        "usage": "Usage: Click 'Generate Test' to create questions. Choose 'One Question at a Time' mode for focused practice or answer all at once. Toggle 'Show Chinese' for translations. After submitting, review answers, retry missed questions, or practice weak skills with targeted questions."
+        "usage": "Usage: Click 'Generate Test' to create questions. Choose 'One Question at a Time' mode for focused practice or answer all at once. Toggle 'Show Chinese' for translations. After submitting, review answers, retry missed questions, or practice weak skills with additional targeted questions."
       }
     },
     "glossary": {
