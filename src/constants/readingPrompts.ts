@@ -89,12 +89,12 @@ ${text}
 ## 🔑 Key Words
 [List 4-6 important or challenging vocabulary words from the text that students should learn]
 
-• **word** - simple English definition (繁體中文: 中文解釋)
-• **word2** - simple English definition (繁體中文: 中文解釋)
+• **word** - simple English definition (中文解釋)
+• **word2** - simple English definition (中文解釋)
 ...
 
 ## 💡 Something to Think About
-[End with ONE engaging question or interesting fact that connects the text to the student's life or encourages deeper thinking. Make it personal and relatable.]
+[End with ONE engaging question or interesting fact that encourages students to think deeper about the text. Make it personal and relatable.]
 
 ${levelGuidance}
 
