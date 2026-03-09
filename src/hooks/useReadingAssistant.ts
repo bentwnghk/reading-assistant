@@ -440,6 +440,8 @@ function useReadingAssistant() {
     setStoreStatus("glossary");
     setStatus("glossary");
 
+    toast.info(i18next.t("reading.glossary.generatingWait"), { duration: 20000 });
+
     try {
       const thinkingModel = await createModelProvider(glossaryModel);
       
