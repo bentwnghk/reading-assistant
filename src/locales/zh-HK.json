@@ -348,6 +348,7 @@
       "retryMissed": "重做錯題 ({{count}})",
       "practiceMissedSkills": "針對性練習 ({{count}} 項技能)",
       "practiceMissedSkillsDesc": "針對未掌握的技能生成新的練習題",
+      "practiceGeneratingWait": "正在生成針對性練習...通常需要 1-2 分鐘，請稍候。",
       "downloadWord": "下載 Word",
       "downloadBlank": "下載空白試卷",
       "downloadWithAnswers": "下載含答案",

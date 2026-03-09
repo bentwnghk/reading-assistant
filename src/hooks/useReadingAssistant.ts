@@ -382,7 +382,7 @@ function useReadingAssistant() {
       return [];
     }
 
-    toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: 20000 });
+    toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: 30000 });
 
     setStoreStatus("testing");
     setStatus("testing");
@@ -606,6 +606,8 @@ Guidelines:
 
     setStoreStatus("testing");
     setStatus("testing");
+
+    toast.info(i18next.t("reading.readingTest.practiceGeneratingWait"), { duration: 30000 });
 
     try {
       const thinkingModel = await createModelProvider(readingTestModel);
