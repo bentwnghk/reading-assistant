@@ -937,9 +937,9 @@ function AdaptedText() {
                     <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.features.title")}</h5>
                     <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
                       <li>{t("reading.adaptedText.help.features.highlight")}</li>
+                      <li>{t("reading.adaptedText.help.features.tts")}</li>
                       <li>{t("reading.adaptedText.help.features.sentenceAnalysis")}</li>
                       <li>{t("reading.adaptedText.help.features.paragraphNav")}</li>
-                      <li>{t("reading.adaptedText.help.features.tts")}</li>
                     </ul>
                   </div>
                   <div>
