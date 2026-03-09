@@ -382,7 +382,7 @@ function useReadingAssistant() {
       return [];
     }
 
-    toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: 6000 });
+    toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: 20000 });
 
     setStoreStatus("testing");
     setStatus("testing");
