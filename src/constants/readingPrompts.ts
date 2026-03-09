@@ -31,6 +31,7 @@ export function extractTextFromImagePrompt() {
   return `Extract all text from this image.
 
 **Instructions:**
+- Preserve the original title exactly.
 - Preserve the original paragraph structure and formatting exactly.
 - **Remove all line numbers (e.g., 1, 5, 10) alongside the left margin** - do not include them in the extracted text.
 - **Preserve the original paragraph numbers (e.g., [1], [2], [3]) as is** - do not remove them.
@@ -121,6 +122,7 @@ ${text}
 Rewrite this text to match the student's English level.
 
 **CRITICAL REQUIREMENTS:**
+- **Preserve the exact same title.**
 - **Preserve the exact same paragraph structure** - same number of paragraphs in the same order.
 - **Do not merge, split, or rearrange paragraphs.**
 - Simplify complex vocabulary to age-appropriate words.
@@ -142,6 +144,7 @@ ${text}
 Make this text even simpler while preserving its core meaning.
 
 **CRITICAL REQUIREMENTS:**
+- **Preserve the exact same title.**
 - **Preserve the exact same paragraph structure** - same number of paragraphs in the same order.
 - **Do not merge, split, or rearrange paragraphs.**
 - Use the simplest possible vocabulary (basic English words).
