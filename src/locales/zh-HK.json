@@ -307,6 +307,7 @@
       "title": "閱讀測驗",
       "generate": "生成測驗",
       "generating": "正在生成...",
+      "generatingWait": "正在生成閱讀測驗...通常需要 1-2 分鐘，請稍候。",
       "submit": "提交答案",
       "retry": "重新作答",
       "emptyTip": "點擊上方按鈕生成閱讀理解測驗",

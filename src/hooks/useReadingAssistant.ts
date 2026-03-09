@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { streamText, smoothStream, generateText } from "ai";
 import { toast } from "sonner";
+import i18next from "i18next";
 import { useSettingStore } from "@/store/setting";
 import { useReadingStore, setStreamingFlag, saveImagesToIndexedDB, type ReadingStatus } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
@@ -380,6 +381,8 @@ function useReadingAssistant() {
       toast.error("Please extract text from an image first.");
       return [];
     }
+
+    toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: 6000 });
 
     setStoreStatus("testing");
     setStatus("testing");
