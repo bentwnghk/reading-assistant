@@ -502,8 +502,7 @@ function useReadingAssistant() {
       if (question.type === "multiple-choice" || 
           question.type === "inference" || 
           question.type === "vocab-context" || 
-          question.type === "referencing" ||
-          question.type === "sequencing") {
+          question.type === "referencing") {
         if (userAnswer === correctAnswer || userAnswer === correctAnswer.charAt(0)) {
           earnedPoints += question.points;
         }

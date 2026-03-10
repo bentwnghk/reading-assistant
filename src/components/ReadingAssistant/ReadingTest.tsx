@@ -55,7 +55,6 @@ const QUESTION_TYPE_LABELS: Record<ReadingTestQuestionType, string> = {
   "inference": "inference",
   "vocab-context": "vocabContext",
   "referencing": "referencing",
-  "sequencing": "sequencing",
 };
 
 const SKILL_LABELS: Record<string, string> = {
@@ -188,7 +187,7 @@ function ReadingTest() {
       }
       const userAnswer = q.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-");
       const correctAnswer = q.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-");
-      if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing" || q.type === "sequencing") {
+      if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing") {
         return userAnswer !== correctAnswer && userAnswer !== correctAnswer.charAt(0);
       }
       return userAnswer !== correctAnswer;
@@ -214,7 +213,7 @@ function ReadingTest() {
         const userAnswer = q.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-");
         const correctAnswer = q.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-");
         let isCorrect = false;
-        if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing" || q.type === "sequencing") {
+        if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing") {
           isCorrect = userAnswer === correctAnswer || userAnswer === correctAnswer.charAt(0);
         } else {
           isCorrect = userAnswer === correctAnswer;
@@ -325,7 +324,7 @@ function ReadingTest() {
         })
       );
 
-      if ((question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing" || question.type === "sequencing") && question.options) {
+      if ((question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing") && question.options) {
         const normalizedCorrectAnswer = question.correctAnswer.toUpperCase().trim();
         question.options.forEach((option, _optIndex) => {
           const isCorrect = option.charAt(0).toUpperCase() === normalizedCorrectAnswer.charAt(0);
@@ -456,7 +455,7 @@ function ReadingTest() {
     } else {
       const userAnswer = question.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-");
       const correctAnswer = question.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-");
-      if (question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing" || question.type === "sequencing") {
+      if (question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing") {
         isCorrect = userAnswer === correctAnswer || userAnswer === correctAnswer.charAt(0);
       } else {
         isCorrect = userAnswer === correctAnswer;
@@ -517,7 +516,7 @@ function ReadingTest() {
           )}
         </div>
 
-        {(question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing" || question.type === "sequencing") && question.options && (
+        {(question.type === "multiple-choice" || question.type === "inference" || question.type === "vocab-context" || question.type === "referencing") && question.options && (
           <RadioGroup
             value={question.userAnswer || ""}
             onValueChange={(value) => handleAnswerChange(question.id, value)}

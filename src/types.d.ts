@@ -9,8 +9,7 @@ type ReadingTestQuestionType =
   | "short-answer" 
   | "inference" 
   | "vocab-context" 
-  | "referencing"
-  | "sequencing";
+  | "referencing";
 
 type ReadingTestSkill = "main-idea" | "detail" | "inference" | "vocabulary" | "purpose" | "sequencing";
 
