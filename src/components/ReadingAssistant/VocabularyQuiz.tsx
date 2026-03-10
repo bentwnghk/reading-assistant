@@ -493,6 +493,16 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
                   </div>
                 </div>
               </div>
+              <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 mb-1">
+                  <Target className="h-3 w-3 text-primary" />
+                  <span>{t("reading.glossary.quiz.tipDifficulty")}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Timer className="h-3 w-3 text-blue-500" />
+                  <span>{t("reading.glossary.quiz.tipTime")}</span>
+                </div>
+              </div>
             </div>
           )}
 
