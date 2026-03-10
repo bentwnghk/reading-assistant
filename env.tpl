@@ -2,6 +2,19 @@
 # Supports multiple passwords separated by commas (e.g., pass1,pass2,pass3)
 ACCESS_PASSWORD=
 
+# PostgreSQL Configuration
+POSTGRES_PASSWORD=your_secure_password_here
+
+# Auth.js Configuration
+# Generate AUTH_SECRET with: npx auth secret
+AUTH_SECRET=
+# Get Google OAuth credentials from: https://console.cloud.google.com/apis/credentials
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+
+# Database URL (for Docker Compose)
+DATABASE_URL=postgresql://reading_user:your_secure_password_here@postgres:5432/reading_assistant
+
 # (Deprecated) Server-side Gemini API Proxy URL. Default, `https://generativelanguage.googleapis.com`
 API_PROXY_BASE_URL=
 

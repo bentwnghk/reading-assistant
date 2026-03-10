@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist, type StorageValue } from "zustand/middleware";
 import type { ReadingStore } from "./reading";
-import { removeImagesFromIndexedDB } from "./reading";
 import { readingStore } from "@/utils/storage";
 import { customAlphabet } from "nanoid";
 import { clone, pick } from "radash";
@@ -21,9 +20,18 @@ interface HistoryActions {
   update: (id: string, readingStore: ReadingStore) => boolean;
   remove: (id: string) => boolean;
   syncToHistory: (readingStore: ReadingStore) => void;
+  loadFromAPI: () => Promise<void>;
 }
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 12);
+
+let isAuthenticated = false;
+let currentUserId: string | null = null;
+
+export function setAuthState(authenticated: boolean, userId?: string | null) {
+  isAuthenticated = authenticated;
+  currentUserId = userId || null;
+}
 
 export const useHistoryStore = create(
   persist<HistoryStore & HistoryActions>(
@@ -60,7 +68,6 @@ export const useHistoryStore = create(
         return true;
       },
       remove: (id) => {
-        removeImagesFromIndexedDB(id);
         set((state) => ({
           history: state.history.filter((item) => item.id !== id),
         }));
@@ -80,10 +87,23 @@ export const useHistoryStore = create(
         } as ReadingHistory;
         set(() => ({ history: newHistory }));
       },
+      loadFromAPI: async () => {
+        if (!isAuthenticated || !currentUserId) return;
+        
+        try {
+          const response = await fetch("/api/sessions");
+          if (response.ok) {
+            const sessions = await response.json();
+            set(() => ({ history: sessions }));
+          }
+        } catch (error) {
+          console.error("Failed to load sessions from API:", error);
+        }
+      },
     }),
     {
       name: "historyStore",
-      version: 5,
+      version: 6,
       migrate: (persistedState, version) => {
         const state = persistedState as HistoryStore & HistoryActions;
         if (version < 3) {
@@ -117,6 +137,9 @@ export const useHistoryStore = create(
           key: string,
           store: StorageValue<HistoryStore & HistoryActions>
         ) => {
+          if (isAuthenticated) {
+            return;
+          }
           return await readingStore.setItem(key, {
             state: pick(store.state, ["history"]),
             version: store.version,
