@@ -63,7 +63,6 @@ const SKILL_LABELS: Record<string, string> = {
   "inference": "inference",
   "vocabulary": "vocabulary",
   "purpose": "purpose",
-  "sequencing": "sequencing",
   "referencing": "detail",
 };
 

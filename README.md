@@ -225,7 +225,6 @@ Test your understanding with AI-generated questions tailored to YOUR level.
 | 🧩 **Inference** | Logical deductions |
 | 📚 **Vocabulary** | Word meanings in context |
 | ✍️ **Purpose** | Author's intent |
-| 📑 **Sequencing** | Order of events |
 
 #### Test Features
 - 📊 **Difficulty Levels**: Foundation → Intermediate → Advanced

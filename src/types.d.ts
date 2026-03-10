@@ -11,7 +11,7 @@ type ReadingTestQuestionType =
   | "vocab-context" 
   | "referencing";
 
-type ReadingTestSkill = "main-idea" | "detail" | "inference" | "vocabulary" | "purpose" | "sequencing";
+type ReadingTestSkill = "main-idea" | "detail" | "inference" | "vocabulary" | "purpose";
 
 type DifficultyLevel = "foundation" | "intermediate" | "advanced";
 

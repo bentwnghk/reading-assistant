@@ -516,7 +516,7 @@ function Header() {
                 {t("header.about.skills.title")}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {["mainIdea", "detail", "inference", "vocabulary", "purpose", "sequencing"].map((skill) => (
+                {["mainIdea", "detail", "inference", "vocabulary", "purpose"].map((skill) => (
                   <span key={skill} className="inline-flex items-center gap-1 bg-muted px-2 py-1 rounded-full text-xs">
                     <span>{t(`header.about.skills.${skill}`)}</span>
                   </span>

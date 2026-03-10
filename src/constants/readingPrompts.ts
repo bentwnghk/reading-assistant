@@ -95,7 +95,7 @@ ${text}
 ...
 
 ## 💡 Something to Think About
-[End with ONE engaging question or interesting fact that encourages students to think deeper about the text. Make it personal and relatable.]
+[End with ONE engaging question that encourages students to think deeper about the text. Make it personal and relatable.]
 
 ${levelGuidance}
 
@@ -347,7 +347,7 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
 - Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3.
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED for all questions.
 - Use Traditional Chinese (繁體中文) for all Chinese text.
-- **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose", "sequencing". No other values are permitted.**
+- **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose". No other values are permitted.**
 
 **Respond with ONLY the JSON array, no markdown, no code blocks.**`;
 }
@@ -368,8 +368,7 @@ export function generateTargetedPracticePrompt(
     "detail": "questions testing comprehension of specific details or pronoun references",
     "inference": "questions requiring logical inference from the text",
     "vocabulary": "questions testing understanding of vocabulary in context",
-    "purpose": "questions about the author's purpose or intent",
-    "sequencing": "questions about the order of events or ideas"
+    "purpose": "questions about the author's purpose or intent"
   };
 
   const skillQuestionTypes: Record<ReadingTestSkill, string[]> = {
@@ -377,8 +376,7 @@ export function generateTargetedPracticePrompt(
     "detail": ["multiple-choice", "true-false-not-given", "referencing"],
     "inference": ["inference", "multiple-choice"],
     "vocabulary": ["vocab-context"],
-    "purpose": ["inference", "multiple-choice"],
-    "sequencing": ["multiple-choice"]
+    "purpose": ["inference", "multiple-choice"]
   };
 
   return `Create ${questionCount} targeted practice questions for a ${age}-year-old Hong Kong ${schoolLevel} student.
@@ -429,7 +427,7 @@ ${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${
 - Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED
 - Use Traditional Chinese (繁體中文) for all Chinese text
-- **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose", "sequencing". No other values are permitted.**
+- **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose". No other values are permitted.**
 
 **Respond with ONLY the JSON array, no markdown, no code blocks.**`;
 }
