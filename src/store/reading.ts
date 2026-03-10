@@ -1,8 +1,741 @@
 import { create } from "zustand";
-import { persist, StorageValue } from "zustand/middleware";
+import { persist, createJSONStorage, StorageValue } from "zustand/middleware";
 import { pick } from "radash";
 import { nanoid } from "nanoid";
-import { readingImagesStore } from "@/utils/storage";
+
+let _isStreaming = false;
+export function setStreamingFlag(value: boolean) {
+  _isStreaming = value;
+}
+export function isStreamingActive() {
+  return _isStreaming;
+}
+
+let userId: string | null = null
+export function setUserId(id: string | null) {
+  userId = id;
+}
+
+let syncToHistoryFn: ((store: ReadingStore) => ReadingActions) => void) | null = null;
+  const sessionId = useReadingStore.getState().id;
+  if (sessionId && userId) {
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...sessionData, id }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+let _isStreaming = false
+export function setStreamingFlag(value: boolean) {
+  _isStreaming = value
+}
+export function isStreamingActive() {
+  return _isStreaming
+}
+
+let userId: string | null = null
+export function setUserId(id: string | null) {
+  userId = id
+}
+
+let syncToHistoryFn: ((store: ReadingStore) & ReadingActions) => void) | null = null
+    const sessionId = useReadingStore.getState().id
+    if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...sessionData, id }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  private async syncToDatabase(sessionData: Partial<ReadingStore>) {
+    const sessionId = useReadingStore.getState().id
+    if (!sessionId || !userId) return
+
+    const dataKeys = Object.keys(defaultValues) as (keyof ReadingStore)[]
+    const dataOnly = pick(sessionData, dataKeys)
+    syncToHistoryFn(dataOnly)
+  }
+  }
+
+  const setOriginalImages: (images: images) => {
+    if (userId) {
+      await updateReadingSession(userId, sessionId, { originalImages: images })
+    }
+  }
+
+  const setStreaming = (value) => setStreamingFlag(value)
+  }
+
+  const addOriginalImage: (image: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId) return
+    }
+    
+    const newImages = [...state.originalImages, image]
+    if (userId) {
+      await updateReadingSession(userId, sessionId, { originalImages: newImages })
+    }
+    set(() => ({
+      originalImages: newImages,
+      updatedAt: Date.now(),
+    }))
+  }
+
+  const removeOriginalImage: (index: number) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId) return
+    }
+    
+    const newImages = state.originalImages.filter((_, i) => i !== index)
+    if (userId) {
+      await updateReadingSession(userId, sessionId, { originalImages: newImages })
+    }
+    set(() => ({
+      originalImages: newImages,
+      updatedAt: Date.now(),
+    }))
+  }
+
+  const setExtractedText: (text: string) => {
+    if (userId) {
+      const response = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setSummary: (summary: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ summary }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setAdaptedText: (text: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adaptedText: text }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setSimplifiedText: (text: string) => {
+    set(() => ({
+      simplifiedText: text,
+      updatedAt: Date.now(),
+    }))
+  }
+
+  const addHighlightedWord: (word: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ highlightedWords: [...state.highlightedWords, normalizedWord] }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const removeHighlightedWord: (word: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ highlightedWords: state.highlightedWords.filter((w) => w !== word.toLowerCase().trim()) }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setHighlightedWords: (words) string) => {
+    set(() => ({
+      highlightedWords: words.map((w) => w.toLowerCase().trim()),
+      updatedAt: Date.now(),
+    }))
+  }
+
+  const setSentenceAnalysis: (sentence: string, analysis: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence, sentence, analysis }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const removeSentenceAnalysis: (sentence: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const getSentenceAnalysis: (sentence: string) => {
+    const key = sentence.trim().toLowerCase()
+    return get().analyzedSentences[key] || null
+  }
+
+  const setMindMap: (mermaidCode: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mindMap: mermaidCode }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setReadingTest: (questions: ReadingTestQuestion[]) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ readingTest: questions }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setUserAnswer: (questionId: string, answer: string) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ readingTest: state.readingTest.map((q) =>
+            q.id === questionId ? { ...q, userAnswer: answer } : q
+          }),
+        }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setQuestionEarnedPoints: (questionId: string, points: number) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ readingTest: state.readingTest.map((q) =>
+            q.id === questionId ? { ...q, earnedPoints: points } : q
+          }),
+        }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setGlossary: (entries: GlossaryEntry[]) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ glossary: entries }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync session to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setGlossaryRating: (word: string, rating: GlossaryRating) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ glossaryRatings: { ...state.glossaryRatings, [word]: rating } }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync glossary rating to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setTestScore: (score: number) => {
+    set(() => ({ testScore: score }))
+  }
+
+  const setTestCompleted: (completed: boolean) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testCompleted: completed }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync test completed to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setTestPoints: (earned: number, total: number) => {
+    set(() => ({
+      testEarnedPoints: earned,
+      testTotalPoints: total,
+    }))
+  }
+
+  const setTestShowChinese: (show: boolean) => {
+    set(() => ({ testShowChinese: show }))
+  }
+
+  const setTestMode: (mode: ReadingTestMode) => {
+    set(() => ({ testMode: mode }))
+  }
+
+  const setVocabularyQuizScore: (score: number) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vocabularyQuizScore: score }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync vocabulary quiz score to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setSpellingGameBestScore: (score: number) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ spellingGameBestScore: score }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync spelling game best score to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const addChatMessage: (message: ChatMessage) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatHistory: [...state.chatHistory, message] }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync chat message to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const clearChatHistory: () => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatHistory: [] }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to clear chat history in API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setStatus: (status: ReadingStatus) => {
+    set(() => ({
+      status,
+      error: status === "error" ? get().error : null,
+    }))
+  }
+
+  const setError: (error: string | null) => {
+    set(() => ({
+      error,
+      status: error ? "error" : get().status,
+    }))
+  }
+
+  const setStreaming: (value: boolean) => setStreamingFlag(value)
+  }
+
+  const setOriginalDifficulty: (result: TextDifficultyResult | null) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ originalDifficulty: result }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync original difficulty to API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setAdaptedDifficulty: (result: TextDifficultyResult | null) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adaptedDifficulty: result }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync adapted difficulty in API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const setSimplifiedDifficulty: (result: TextDifficultyResult | null) => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ simplifiedDifficulty: result }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to sync simplified difficulty in API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const clearDifficultyAnalysis: () => {
+    if (userId) {
+      const sessionId = useReadingStore.getState().id
+      if (!sessionId || !userId) return
+
+    try {
+      const response = await fetch("/api/sessions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          originalDifficulty: null,
+          adaptedDifficulty: null,
+          simplifiedDifficulty: null,
+        }),
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        useReadingStore.getState().restore(data)
+      } else {
+        console.error("Failed to clear difficulty analysis in API:", error)
+        throw error
+      }
+    } finally {
+  }
+
+  const reset: () => {
+    set(() => ({
+      ...defaultValues,
+    }))
+  }
+
+  const backup: () => {
+    const state = get()
+    const sessionId = state.id
+    if (sessionId && state.originalImages.length > 0) {
+      saveImagesToIndexedDB(sessionId, state.originalImages)
+    }
+    return {
+      ...pick(state, Object.keys(defaultValues) as (keyof ReadingStore)[]),
+    } as ReadingStore
+ }
+
+  const restore: async (session: ReadingStore) => {
+    const sessionId = session.id
+    let images = session.originalImages
+    if (sessionId) {
+      try {
+        const storedImages = await loadImagesFromIndexedDB(sessionId)
+        if (storedImages.length > 0) {
+          images = storedImages
+        }
+      } catch (error) {
+        console.error("Failed to load images from IndexedDB:", error)
+      }
+    }
+    set(() => ({
+      ...defaultValues,
+      ...session,
+      originalImages: images,
+    }))
+  },
+  }),
+  {
+      name: "reading",
+      version: 6,
+      storage: {
+        getItem: (name) => {
+          const value = localStorage.getItem(name)
+          return value ? (JSON.parse(value) as StorageValue<ReadingStore & ReadingActions>) : null
+        },
+        setItem: (name, value) => {
+          if (_isStreaming) return
+          if (userId) {
+            return
+          }
+          localStorage.setItem(name, JSON.stringify(value))
+        },
+        removeItem: (name) => localStorage.removeItem(name),
+      },
+      partialize: (state) => {
+        const keysToPersist = (Object.keys(defaultValues) as (keyof ReadingStore)[]).filter(
+          (key) => key !== "originalImages"
+        )
+        return pick(state, keysToPersist) as ReadingStore & ReadingActions
+      },
+      onRehydrateStorage: () => async (state) => {
+        if (!state) return
+        if (state.status !== "idle" && state.status !== "error") {
+          state.status = "idle"
+        }
+      },
+    }
+  )
+)
+
 
 // Module-level flag that gates localStorage writes during active streaming.
 // Using a plain variable (not Zustand state) avoids triggering re-renders and,

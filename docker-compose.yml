@@ -1,5 +1,32 @@
 version: "3.9"
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: reading-assistant-db
+    environment:
+      POSTGRES_DB: reading_assistant
+      POSTGRES_USER: reading_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reading_user -d reading_assistant"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "work_mem=4MB"
+
   reading-assistant:
     build:
       context: .
@@ -10,3 +37,11 @@ services:
       - .env
     ports:
       - "3333:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://reading_user:${POSTGRES_PASSWORD}@postgres:5432/reading_assistant
+
+volumes:
+  postgres_data:
