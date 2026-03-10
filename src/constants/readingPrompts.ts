@@ -310,7 +310,7 @@ Generate 11 questions in JSON format. You MUST respond with ONLY a valid JSON ar
   },
   {
     "id": "q6",
-    "type": "multiple-choice",
+    "type": "sequencing",
     "question": "According to the text, what is the correct order of events?",
     "questionZh": "根據文章，事件的正確順序是什麼？",
     "options": ["A) First → Second → Third", "B) Second → First → Third", "C) Third → First → Second", "D) First → Third → Second"],
@@ -362,13 +362,14 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
 - For short-answer: provide key points that must be mentioned, comma-separated
 - For sequencing: 
   - Events may span multiple paragraphs; set paragraphRef to the first paragraph where the sequence begins
+  - Use question type "sequencing"
   - MUST include exactly 4 options with different orderings (A/B/C/D format)
   - Each option should show a sequence using arrows (e.g., "A) Event 1 → Event 2 → Event 3")
   - Options must be mutually exclusive with only ONE correct ordering
 - Include ALL required metadata fields for each question.
 - **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
 - paragraphRef should be 1-indexed (first paragraph = 1).
-- Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3.
+- Points: MC/TFNG/Vocab/Referencing/Sequencing = 1, Inference = 2, Short-answer = 3.
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED for all questions.
 - Use Traditional Chinese (繁體中文) for all Chinese text.
 - **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose", "sequencing". No other values are permitted.**
@@ -402,7 +403,7 @@ export function generateTargetedPracticePrompt(
     "inference": ["inference", "multiple-choice"],
     "vocabulary": ["vocab-context"],
     "purpose": ["inference", "multiple-choice"],
-    "sequencing": ["multiple-choice"]
+    "sequencing": ["sequencing", "multiple-choice"]
   };
 
   return `Create ${questionCount} targeted practice questions for a ${age}-year-old Hong Kong ${schoolLevel} student.
@@ -449,13 +450,14 @@ ${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${
 - For inference: answer should be logically deducible but not explicitly stated
 - For sequencing:
   - Events may span multiple paragraphs; set paragraphRef to the first paragraph where the sequence begins
+  - Use question type "sequencing"
   - MUST include exactly 4 options with different orderings (A/B/C/D format)
   - Each option should show a sequence using arrows (e.g., "A) Event 1 → Event 2 → Event 3")
   - Options must be mutually exclusive with only ONE correct ordering
 - Include ALL required metadata fields
 - **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
 - paragraphRef should be 1-indexed
-- Points: MC/TFNG/Vocab/Referencing = 1, Inference = 2, Short-answer = 3
+- Points: MC/TFNG/Vocab/Referencing/Sequencing = 1, Inference = 2, Short-answer = 3
 - Chinese translations (questionZh, optionsZh, explanationZh) are REQUIRED
 - Use Traditional Chinese (繁體中文) for all Chinese text
 - **skillTested MUST be one of these exact values: "main-idea", "detail", "inference", "vocabulary", "purpose", "sequencing". No other values are permitted.**
