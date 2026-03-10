@@ -318,6 +318,7 @@
       "inference": "Inference",
       "vocabContext": "Vocabulary in Context",
       "referencing": "Pronoun Reference",
+      "sequencing": "Sequencing",
       "true": "True",
       "false": "False",
       "notGiven": "Not Given",
