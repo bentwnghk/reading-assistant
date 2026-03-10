@@ -1,7 +1,7 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target, FileDown, ChevronDown } from "lucide-react";
+import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target, FileDown, ChevronDown, Info, Sparkles, HelpCircle, PenLine, Timer } from "lucide-react";
 import {
   Document,
   Packer,
@@ -130,6 +130,14 @@ function generateQuizQuestions(sortedGlossary: GlossaryEntry[]): VocabularyQuizQ
   return questions;
 }
 
+type QuizDifficulty = "easy" | "medium" | "hard";
+
+const DIFFICULTY_CONFIG: Record<QuizDifficulty, { timeLimit: number }> = {
+  easy: { timeLimit: 30 },
+  medium: { timeLimit: 20 },
+  hard: { timeLimit: 12 },
+};
+
 function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
   const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
@@ -141,6 +149,14 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showReview, setShowReview] = useState(false);
   const [prioritizeHardWords, setPrioritizeHardWords] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [isTimed, setIsTimed] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(20);
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>("medium");
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const config = DIFFICULTY_CONFIG[difficulty];
 
   const wordStats = useMemo(() => {
     return getWordStats(glossary, glossaryRatings);
@@ -157,7 +173,8 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     setCurrentQuestionIndex(0);
     setQuizState("in-progress");
     setShowReview(false);
-  }, [glossary, glossaryRatings, prioritizeHardWords]);
+    setTimeRemaining(config.timeLimit);
+  }, [glossary, glossaryRatings, prioritizeHardWords, config.timeLimit]);
 
   const handleAnswer = (answer: string) => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -170,6 +187,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const goToNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
+      setTimeRemaining(config.timeLimit);
     } else {
       const correct = questions.filter(
         (q) => answers[q.id] === q.correctAnswer
@@ -203,6 +221,44 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     }
     return { correct, total: questions.length };
   }, [questions, answers]);
+
+  useEffect(() => {
+    if (quizState === "in-progress" && isTimed) {
+      timerRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            if (currentQuestionIndex < questions.length - 1) {
+              setCurrentQuestionIndex((idx) => idx + 1);
+              return config.timeLimit;
+            } else {
+              const correct = questions.filter(
+                (q) => answers[q.id] === q.correctAnswer
+              ).length;
+              const percentage = Math.round((correct / questions.length) * 100);
+              setVocabularyQuizScore(percentage);
+              setQuizState("completed");
+              
+              if (id) {
+                const session = backup();
+                const updated = update(id, session);
+                if (!updated) {
+                  save(session);
+                }
+              }
+            }
+            return config.timeLimit;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, id, backup, update, save, setVocabularyQuizScore]);
 
   const missedQuestions = useMemo(() => {
     return questions.filter((q) => answers[q.id] !== q.correctAnswer);
@@ -390,10 +446,55 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
           </DropdownMenu>
         </div>
 
-        <div className="text-center">
+        <div className="text-center relative">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h3 className="text-xl font-semibold">{t("reading.glossary.quiz.title")}</h3>
+            <button
+              onClick={() => setShowInfo(!showInfo)}
+              className="p-1 rounded-full hover:bg-muted transition-colors"
+              title={t("reading.glossary.quiz.aboutTitle")}
+            >
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
           <p className="text-muted-foreground mb-6">
             {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
           </p>
+
+          {showInfo && (
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 bg-popover border rounded-lg shadow-lg p-4 z-50 text-left">
+              <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                {t("reading.glossary.quiz.aboutTitle")}
+              </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                {t("reading.glossary.quiz.aboutDesc")}
+              </p>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <HelpCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.chooseDefinition")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.chooseDefinition")}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Target className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.chooseWord")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.chooseWord")}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <PenLine className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.fillBlank")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.fillBlank")}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {hasRatings && (
             <div className="flex justify-center mb-4">
@@ -421,6 +522,44 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
               })}
             </p>
           )}
+
+          <div className="flex justify-center gap-2 mb-4">
+            {(["easy", "medium", "hard"] as QuizDifficulty[]).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={cn(
+                  "px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
+                  difficulty === d
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border hover:border-primary/50"
+                )}
+              >
+                {t(`reading.glossary.quiz.difficulty.${d}`)}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex items-center gap-2">
+              <Timer className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{t("reading.glossary.quiz.timeChallenge")}</span>
+            </div>
+            <button
+              onClick={() => setIsTimed(!isTimed)}
+              className={cn(
+                "w-12 h-6 rounded-full transition-colors relative",
+                isTimed ? "bg-primary" : "bg-muted"
+              )}
+            >
+              <div
+                className={cn(
+                  "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                  isTimed ? "translate-x-7" : "translate-x-1"
+                )}
+              />
+            </button>
+          </div>
 
           <Button onClick={startQuiz} size="lg">
             <Play className="h-5 w-5 mr-2" />
@@ -568,6 +707,9 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const currentQuestion = questions[currentQuestionIndex];
   const currentAnswer = answers[currentQuestion.id];
 
+  const timerColor =
+    timeRemaining <= 3 ? "text-red-500" : timeRemaining <= 7 ? "text-yellow-500" : "text-foreground";
+
   return (
     <div className="py-4 space-y-6">
       <div className="space-y-2">
@@ -576,9 +718,17 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
             {t("reading.glossary.quiz.question")} {currentQuestionIndex + 1}{" "}
             {t("reading.glossary.quiz.of")} {questions.length}
           </span>
-          <span>
-            {t("reading.glossary.quiz.pressKey")} →/←
-          </span>
+          <div className="flex items-center gap-3">
+            {isTimed && (
+              <div className={cn("flex items-center gap-1 text-sm font-medium", timerColor)}>
+                <Timer className="h-4 w-4" />
+                {timeRemaining}s
+              </div>
+            )}
+            <span>
+              {t("reading.glossary.quiz.pressKey")} →/←
+            </span>
+          </div>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div

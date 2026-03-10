@@ -417,6 +417,26 @@
         "fillBlank": "Fill in the blank:",
         "reviewAnswers": "Review Answers",
         "noQuizWords": "Need at least 4 words for quiz",
+        "title": "Vocabulary Quiz",
+        "aboutTitle": "How It Works",
+        "aboutDesc": "Test your vocabulary knowledge with AI-generated questions in multiple formats.",
+        "modes": {
+          "chooseDefinition": "Choose Definition",
+          "chooseWord": "Choose Word",
+          "fillBlank": "Fill in the Blank"
+        },
+        "modeDesc": {
+          "chooseDefinition": "Select the correct definition for a given word.",
+          "chooseWord": "Select the word that matches a given definition.",
+          "fillBlank": "Fill in the missing word to complete the sentence."
+        },
+        "selectDifficulty": "Select Difficulty",
+        "difficulty": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard"
+        },
+        "timeChallenge": "Time Challenge",
         "correct": "Correct",
         "incorrect": "Incorrect",
         "scoreBreakdown": "Score Breakdown",

@@ -417,6 +417,26 @@
         "fillBlank": "填空：",
         "reviewAnswers": "查看答案",
         "noQuizWords": "至少需要4個生字才能測驗",
+        "title": "詞彙測驗",
+        "aboutTitle": "運作方式",
+        "aboutDesc": "通過 AI 生成的多種題型測試你的詞彙知識。",
+        "modes": {
+          "chooseDefinition": "選擇釋義",
+          "chooseWord": "選擇生字",
+          "fillBlank": "填空"
+        },
+        "modeDesc": {
+          "chooseDefinition": "為給定的生字選擇正確的釋義。",
+          "chooseWord": "選擇符合給定釋義的生字。",
+          "fillBlank": "填入缺失的生字以完成句子。"
+        },
+        "selectDifficulty": "選擇難度",
+        "difficulty": {
+          "easy": "簡單",
+          "medium": "中等",
+          "hard": "困難"
+        },
+        "timeChallenge": "限時挑戰",
         "correct": "正確",
         "incorrect": "錯誤",
         "scoreBreakdown": "得分詳情",
