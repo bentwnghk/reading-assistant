@@ -422,7 +422,7 @@
         "scoreBreakdown": "得分詳情",
         "of": "/",
         "pressKey": "按",
-        "wordsAvailable": "有 {{count}} 個生字",
+        "wordsAvailable": "測試你對 {{count}} 個生字的理解",
         "scoreFormat": "{{correct}} / {{total}} 正確",
         "lastScore": "上次得分：",
         "downloadWord": "下載 Word",

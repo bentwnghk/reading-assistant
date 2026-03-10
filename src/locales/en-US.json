@@ -422,7 +422,7 @@
         "scoreBreakdown": "Score Breakdown",
         "of": "of",
         "pressKey": "Press",
-        "wordsAvailable": "{{count}} words available",
+        "wordsAvailable": "Test your understanding of {{count}} words",
         "scoreFormat": "{{correct}} / {{total}} Correct",
         "lastScore": "Last Score:",
         "downloadWord": "Download Word",
