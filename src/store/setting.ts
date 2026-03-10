@@ -68,7 +68,7 @@ export const defaultValues: SettingStore = {
   mindMapModel: "deepseek-chat",
   adaptedTextModel: "deepseek-chat",
   simplifyModel: "deepseek-chat",
-  readingTestModel: "deepseek-chat",
+  readingTestModel: "gpt-5-mini",
   glossaryModel: "deepseek-chat",
   sentenceAnalysisModel: "deepseek-chat",
   tutorModel: "gpt-5-mini",
