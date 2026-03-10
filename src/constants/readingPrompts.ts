@@ -360,11 +360,7 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
   - Choose words where the reference is clear from context but requires careful reading
   - **CRITICAL: If the same pronoun appears multiple times in the paragraph, include surrounding context (5-8 words before and after) to uniquely identify which occurrence. Format: "In paragraph [X], what does 'they' refer to in '...they went to the store...'?"**
 - For short-answer: provide key points that must be mentioned, comma-separated
-- For sequencing: 
-  - Events may span multiple paragraphs; set paragraphRef to the first paragraph where the sequence begins
-  - MUST include exactly 4 options with different orderings (A/B/C/D format)
-  - Each option should show a sequence using arrows (e.g., "A) Event 1 → Event 2 → Event 3")
-  - Options must be mutually exclusive with only ONE correct ordering
+- For sequencing: events may span multiple paragraphs; set paragraphRef to the first paragraph where the sequence begins
 - Include ALL required metadata fields for each question.
 - **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
 - paragraphRef should be 1-indexed (first paragraph = 1).
@@ -447,11 +443,6 @@ ${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${
   - **If the same pronoun appears multiple times in the paragraph, include surrounding context (5-8 words before and after) to uniquely identify which occurrence. Format: "In paragraph [X], what does 'they' refer to in '...they went to the store...'?"**
 - For vocabulary-in-context: choose words understandable from surrounding text
 - For inference: answer should be logically deducible but not explicitly stated
-- For sequencing:
-  - Events may span multiple paragraphs; set paragraphRef to the first paragraph where the sequence begins
-  - MUST include exactly 4 options with different orderings (A/B/C/D format)
-  - Each option should show a sequence using arrows (e.g., "A) Event 1 → Event 2 → Event 3")
-  - Options must be mutually exclusive with only ONE correct ordering
 - Include ALL required metadata fields
 - **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
 - paragraphRef should be 1-indexed
