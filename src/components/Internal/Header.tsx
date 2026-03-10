@@ -32,6 +32,7 @@ import {
   Highlighter,
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
+import { LoginButton } from "@/components/Auth/LoginButton";
 import {
   Dialog,
   DialogContent,
@@ -263,6 +264,7 @@ function Header() {
           >
             <Settings className="h-5 w-5" />
           </Button>
+          <LoginButton />
         </div>
       </header>
       <Dialog open={openShortcuts} onOpenChange={setOpenShortcuts}>
