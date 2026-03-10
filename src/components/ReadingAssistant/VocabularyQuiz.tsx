@@ -424,8 +424,8 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   if (quizState === "idle") {
     return (
       <div className="flex flex-col gap-6 py-8">
-        <div className="flex justify-between items-start gap-4">
-          <div className="text-center relative flex-1">
+        <div className="flex justify-center items-start gap-4 relative">
+          <div className="text-center relative">
             <div className="flex items-center justify-center gap-2 mb-2">
               <h3 className="text-xl font-semibold">{t("reading.glossary.quiz.title")}</h3>
               <button
@@ -488,7 +488,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="absolute right-0 top-0">
                 <FileDown className="h-4 w-4" />
                 <span className="hidden sm:inline ml-1">{t("reading.glossary.quiz.downloadWord")}</span>
                 <ChevronDown className="h-3 w-3 ml-1" />
