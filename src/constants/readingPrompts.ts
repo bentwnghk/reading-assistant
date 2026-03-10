@@ -95,7 +95,7 @@ ${text}
 ...
 
 ## 💡 Something to Think About
-[End with ONE engaging question or interesting fact that encourages students to think deeper about the text. Make it personal and relatable.]
+[End with ONE engaging question that encourages students to think deeper about the text. Make it personal and relatable.]
 
 ${levelGuidance}
 
@@ -202,6 +202,7 @@ export function generateReadingTestPrompt(text: string, age: number) {
       trueFalseNotGiven: 2,
       vocabContext: 2,
       referencing: 1,
+      sequencing: 1,
       shortAnswer: 1,
     },
     secondary: {
@@ -210,6 +211,7 @@ export function generateReadingTestPrompt(text: string, age: number) {
       vocabContext: 2,
       inference: 2,
       referencing: 1,
+      sequencing: 1,
       shortAnswer: 1,
     },
     dse: {
@@ -218,6 +220,7 @@ export function generateReadingTestPrompt(text: string, age: number) {
       vocabContext: 2,
       inference: 3,
       referencing: 1,
+      sequencing: 1,
       shortAnswer: 1,
     },
   };
@@ -228,7 +231,7 @@ export function generateReadingTestPrompt(text: string, age: number) {
 ${text}
 </text>
 
-Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+Generate 11 questions in JSON format. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
 
 [
   {
@@ -307,6 +310,21 @@ Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON ar
   },
   {
     "id": "q6",
+    "type": "multiple-choice",
+    "question": "According to the text, what is the correct order of events?",
+    "questionZh": "根據文章，事件的正確順序是什麼？",
+    "options": ["A) First → Second → Third", "B) Second → First → Third", "C) Third → First → Second", "D) First → Third → Second"],
+    "optionsZh": ["A) 第一 → 第二 → 第三", "B) 第二 → 第一 → 第三", "C) 第三 → 第一 → 第二", "D) 第一 → 第三 → 第二"],
+    "correctAnswer": "A",
+    "explanation": "Explanation of the correct sequence based on the text",
+    "explanationZh": "根據文章內容解釋正確順序",
+    "skillTested": "sequencing",
+    "paragraphRef": 1,
+    "difficultyLevel": "${difficultyLevel}",
+    "points": 1
+  },
+  {
+    "id": "q11",
     "type": "short-answer",
     "question": "Open-ended question requiring 2-3 sentences",
     "questionZh": "需要2-3句回答的開放式問題",
@@ -323,6 +341,7 @@ Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON ar
 ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
 
 **Guidelines:**
+- **QUESTION ORDERING: The short-answer question MUST be the last question (id: "q11"). All other question types should come before it.**
 - Questions should test comprehension, not just memory.
 - Use age-appropriate language.
 - Make questions clear and unambiguous.
@@ -341,6 +360,7 @@ ${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
   - Choose words where the reference is clear from context but requires careful reading
   - **CRITICAL: If the same pronoun appears multiple times in the paragraph, include surrounding context (5-8 words before and after) to uniquely identify which occurrence. Format: "In paragraph [X], what does 'they' refer to in '...they went to the store...'?"**
 - For short-answer: provide key points that must be mentioned, comma-separated
+- For sequencing: events may span multiple paragraphs; set paragraphRef to the first paragraph where the sequence begins
 - Include ALL required metadata fields for each question.
 - **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
 - paragraphRef should be 1-indexed (first paragraph = 1).
