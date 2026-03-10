@@ -423,21 +423,22 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
 
   if (quizState === "idle") {
     return (
-      <div className="flex flex-col items-center gap-6 py-8">
-        <div className="text-center relative">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <h3 className="text-xl font-semibold">{t("reading.glossary.quiz.title")}</h3>
-            <button
-              onClick={() => setShowInfo(!showInfo)}
-              className="p-1 rounded-full hover:bg-muted transition-colors"
-              title={t("reading.glossary.quiz.aboutTitle")}
-            >
-              <Info className="h-4 w-4 text-muted-foreground" />
-            </button>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
-          </p>
+      <div className="flex flex-col gap-6 py-8">
+        <div className="flex justify-between items-start gap-4">
+          <div className="text-center relative flex-1">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <h3 className="text-xl font-semibold">{t("reading.glossary.quiz.title")}</h3>
+              <button
+                onClick={() => setShowInfo(!showInfo)}
+                className="p-1 rounded-full hover:bg-muted transition-colors"
+                title={t("reading.glossary.quiz.aboutTitle")}
+              >
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
+            </p>
 
           {showInfo && (
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 bg-popover border rounded-lg shadow-lg p-4 z-50 text-left">
@@ -483,9 +484,30 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
               </div>
             </div>
           )}
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1">{t("reading.glossary.quiz.downloadWord")}</span>
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => downloadWord(false)}>
+                {t("reading.glossary.quiz.downloadBlank")}
+              </DropdownMenuItem>
+              {vocabularyQuizScore > 0 && (
+                <DropdownMenuItem onClick={() => downloadWord(true)}>
+                  {t("reading.glossary.quiz.downloadWithAnswers")}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-md mx-auto space-y-6">
           <div className="border rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -559,29 +581,10 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
             </button>
           )}
 
-          <div className="flex gap-2">
-            <Button onClick={startQuiz} className="flex-1" size="lg">
-              <Play className="h-5 w-5 mr-2" />
-              {t("reading.glossary.quiz.startQuiz")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="lg">
-                  <FileDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => downloadWord(false)}>
-                  {t("reading.glossary.quiz.downloadBlank")}
-                </DropdownMenuItem>
-                {vocabularyQuizScore > 0 && (
-                  <DropdownMenuItem onClick={() => downloadWord(true)}>
-                    {t("reading.glossary.quiz.downloadWithAnswers")}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <Button onClick={startQuiz} className="w-full" size="lg">
+            <Play className="h-5 w-5 mr-2" />
+            {t("reading.glossary.quiz.startQuiz")}
+          </Button>
 
           {vocabularyQuizScore > 0 && (
             <div className="flex justify-center">
