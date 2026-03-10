@@ -3,7 +3,7 @@ import { streamText, smoothStream, generateText } from "ai";
 import { toast } from "sonner";
 import i18next from "i18next";
 import { useSettingStore } from "@/store/setting";
-import { useReadingStore, setStreamingFlag, saveImagesToIndexedDB, type ReadingStatus } from "@/store/reading";
+import { useReadingStore, setStreamingFlag, type ReadingStatus } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import useModelProvider from "@/hooks/useAiProvider";
 import {
@@ -107,12 +107,7 @@ function useReadingAssistant() {
       // One final write with the complete text is now persisted.
       setExtractedText(text);
 
-      // Save images to IndexedDB once after the stream completes. We removed
-      // the per-token save from inside setExtractedText to stop the write storm.
-      const { id: sessionId, originalImages } = useReadingStore.getState();
-      if (sessionId && originalImages.length > 0) {
-        await saveImagesToIndexedDB(sessionId, originalImages);
-      }
+
 
       setStoreStatus("idle");
       setStatus("idle");

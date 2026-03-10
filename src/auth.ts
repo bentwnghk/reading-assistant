@@ -20,7 +20,7 @@ export const config: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
+    session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id
       }
