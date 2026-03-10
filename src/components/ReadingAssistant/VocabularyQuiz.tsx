@@ -423,102 +423,80 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
 
   if (quizState === "idle") {
     return (
-      <div className="py-4 space-y-6">
-        <div className="flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <FileDown className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("reading.glossary.quiz.downloadWord")}</span>
-                <ChevronDown className="h-3 w-3 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => downloadWord(false)}>
-                {t("reading.glossary.quiz.downloadBlank")}
-              </DropdownMenuItem>
-              {vocabularyQuizScore > 0 && (
-                <DropdownMenuItem onClick={() => downloadWord(true)}>
-                  {t("reading.glossary.quiz.downloadWithAnswers")}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <div className="flex flex-col items-center gap-6 py-8">
+        <div className="text-center relative">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h3 className="text-xl font-semibold">{t("reading.glossary.quiz.title")}</h3>
+            <button
+              onClick={() => setShowInfo(!showInfo)}
+              className="p-1 rounded-full hover:bg-muted transition-colors"
+              title={t("reading.glossary.quiz.aboutTitle")}
+            >
+              <Info className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
+          </p>
 
-        <div className="text-center">
-          <div className="relative inline-block">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <h3 className="text-xl font-semibold">{t("reading.glossary.quiz.title")}</h3>
-              <button
-                onClick={() => setShowInfo(!showInfo)}
-                className="p-1 rounded-full hover:bg-muted transition-colors"
-                title={t("reading.glossary.quiz.aboutTitle")}
-              >
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
-            <p className="text-muted-foreground mb-6">
-              {t("reading.glossary.quiz.wordsAvailable", { count: glossary.length })}
-            </p>
-
-            {showInfo && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 bg-popover border rounded-lg shadow-lg p-4 z-50 text-left">
-                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  {t("reading.glossary.quiz.aboutTitle")}
-                </h4>
-                <p className="text-xs text-muted-foreground mb-3">
-                  {t("reading.glossary.quiz.aboutDesc")}
-                </p>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <HelpCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.chooseDefinition")}</div>
-                      <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.chooseDefinition")}</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Target className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.chooseWord")}</div>
-                      <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.chooseWord")}</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <PenLine className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <div>
-                      <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.fillBlank")}</div>
-                      <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.fillBlank")}</div>
-                    </div>
+          {showInfo && (
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-80 bg-popover border rounded-lg shadow-lg p-4 z-50 text-left">
+              <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                {t("reading.glossary.quiz.aboutTitle")}
+              </h4>
+              <p className="text-xs text-muted-foreground mb-3">
+                {t("reading.glossary.quiz.aboutDesc")}
+              </p>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <HelpCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.chooseDefinition")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.chooseDefinition")}</div>
                   </div>
                 </div>
-                <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Target className="h-3 w-3 text-primary" />
-                    <span>{t("reading.glossary.quiz.tipDifficulty")}</span>
+                <div className="flex gap-2">
+                  <Target className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.chooseWord")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.chooseWord")}</div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Timer className="h-3 w-3 text-blue-500" />
-                    <span>{t("reading.glossary.quiz.tipTime")}</span>
+                </div>
+                <div className="flex gap-2">
+                  <PenLine className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-medium">{t("reading.glossary.quiz.modes.fillBlank")}</div>
+                    <div className="text-xs text-muted-foreground">{t("reading.glossary.quiz.modeDesc.fillBlank")}</div>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+              <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 mb-1">
+                  <Target className="h-3 w-3 text-primary" />
+                  <span>{t("reading.glossary.quiz.tipDifficulty")}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Timer className="h-3 w-3 text-blue-500" />
+                  <span>{t("reading.glossary.quiz.tipTime")}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-          <div className="mb-4">
+        <div className="w-full max-w-md space-y-6">
+          <div>
             <label className="text-sm font-medium mb-3 block">
               {t("reading.glossary.quiz.selectDifficulty")}
             </label>
-            <div className="flex justify-center gap-2">
+            <div className="flex gap-2">
               {(["easy", "medium", "hard"] as QuizDifficulty[]).map((d) => (
                 <button
                   key={d}
                   onClick={() => setDifficulty(d)}
                   className={cn(
-                    "px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
+                    "flex-1 px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
                     difficulty === d
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border hover:border-primary/50"
@@ -531,32 +509,32 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
           </div>
 
           {hasRatings && (
-            <div className="flex justify-center mb-4">
-              <button
-                onClick={() => setPrioritizeHardWords(!prioritizeHardWords)}
-                className={cn(
-                  "inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all",
-                  prioritizeHardWords
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border hover:border-primary/50"
-                )}
-              >
+            <button
+              onClick={() => setPrioritizeHardWords(!prioritizeHardWords)}
+              className={cn(
+                "w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all",
+                prioritizeHardWords
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:border-primary/50"
+              )}
+            >
+              <div className="flex items-center gap-2">
                 <Target className="h-4 w-4" />
                 <span className="text-sm">{t("reading.glossary.prioritizeHard")}</span>
-                {prioritizeHardWords && (
-                  <span className="text-xs text-muted-foreground">
-                    {t("reading.glossary.wordStats", { 
-                      hard: wordStats.hard, 
-                      medium: wordStats.medium, 
-                      easy: wordStats.easy 
-                    })}
-                  </span>
-                )}
-              </button>
-            </div>
+              </div>
+              {prioritizeHardWords && (
+                <span className="text-xs text-muted-foreground">
+                  {t("reading.glossary.wordStats", { 
+                    hard: wordStats.hard, 
+                    medium: wordStats.medium, 
+                    easy: wordStats.easy 
+                  })}
+                </span>
+              )}
+            </button>
           )}
 
-          <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
             <div className="flex items-center gap-2">
               <Timer className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">{t("reading.glossary.quiz.timeChallenge")}</span>
@@ -577,12 +555,32 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
             </button>
           </div>
 
-          <Button onClick={startQuiz} size="lg">
-            <Play className="h-5 w-5 mr-2" />
-            {t("reading.glossary.quiz.startQuiz")}
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={startQuiz} className="flex-1" size="lg">
+              <Play className="h-5 w-5 mr-2" />
+              {t("reading.glossary.quiz.startQuiz")}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="lg">
+                  <FileDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => downloadWord(false)}>
+                  {t("reading.glossary.quiz.downloadBlank")}
+                </DropdownMenuItem>
+                {vocabularyQuizScore > 0 && (
+                  <DropdownMenuItem onClick={() => downloadWord(true)}>
+                    {t("reading.glossary.quiz.downloadWithAnswers")}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           {vocabularyQuizScore > 0 && (
-            <div className="flex justify-center mt-6">
+            <div className="flex justify-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
                 <Trophy className="h-4 w-4 text-yellow-500" />
                 <span className="text-sm font-medium">{t("reading.glossary.quiz.lastScore")}</span>
