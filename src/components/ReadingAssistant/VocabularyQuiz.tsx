@@ -133,9 +133,9 @@ function generateQuizQuestions(sortedGlossary: GlossaryEntry[]): VocabularyQuizQ
 type QuizDifficulty = "easy" | "medium" | "hard";
 
 const DIFFICULTY_CONFIG: Record<QuizDifficulty, { timeLimit: number }> = {
-  easy: { timeLimit: 30 },
-  medium: { timeLimit: 20 },
-  hard: { timeLimit: 12 },
+  easy: { timeLimit: 20 },
+  medium: { timeLimit: 15 },
+  hard: { timeLimit: 10 },
 };
 
 function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
