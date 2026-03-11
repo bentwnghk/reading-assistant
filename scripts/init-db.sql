@@ -1,22 +1,22 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Auth.js required tables (camelCase column names for @auth/pg-adapter compatibility)
+-- Auth.js required tables (quoted camelCase column names for @auth/pg-adapter compatibility)
 CREATE TABLE users (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT,
   email TEXT UNIQUE,
-  emailVerified TIMESTAMP WITH TIME ZONE,
+  "emailVerified" TIMESTAMP WITH TIME ZONE,
   image TEXT,
-  createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE accounts (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-  userId TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  "userId" TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type TEXT NOT NULL,
   provider TEXT NOT NULL,
-  providerAccountId TEXT NOT NULL,
+  "providerAccountId" TEXT NOT NULL,
   refresh_token TEXT,
   access_token TEXT,
   expires_at INTEGER,
@@ -24,16 +24,16 @@ CREATE TABLE accounts (
   scope TEXT,
   id_token TEXT,
   session_state TEXT,
-  createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(provider, providerAccountId)
+  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(provider, "providerAccountId")
 );
 
 CREATE TABLE sessions (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-  sessionToken TEXT UNIQUE NOT NULL,
-  userId TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  "sessionToken" TEXT UNIQUE NOT NULL,
+  "userId" TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   expires TIMESTAMP WITH TIME ZONE NOT NULL,
-  createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE verification_tokens (
