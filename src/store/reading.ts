@@ -594,6 +594,7 @@ export const useReadingStore = create(
         set(() => ({
           ...defaultValues,
           ...session,
+          originalImages: session.originalImages || [],
         }));
       },
     }),

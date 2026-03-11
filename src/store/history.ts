@@ -43,6 +43,7 @@ export const useHistoryStore = create(
           const newHistory: ReadingHistory = {
             ...clone(session),
             id,
+            originalImages: session.originalImages || [],
             createdAt: session.createdAt || Date.now(),
           };
           set((state) => ({ history: [newHistory, ...state.history] }));
@@ -62,6 +63,7 @@ export const useHistoryStore = create(
         const newHistory = [...history];
         newHistory[index] = {
           ...clone(session),
+          originalImages: session.originalImages || [],
           updatedAt: Date.now(),
         } as ReadingHistory;
         set(() => ({ history: newHistory }));
@@ -78,14 +80,24 @@ export const useHistoryStore = create(
         
         const history = get().history;
         const index = history.findIndex((item) => item.id === session.id);
-        if (index === -1) return;
         
-        const newHistory = [...history];
-        newHistory[index] = {
-          ...clone(session),
-          updatedAt: Date.now(),
-        } as ReadingHistory;
-        set(() => ({ history: newHistory }));
+        if (index === -1) {
+          const newHistory: ReadingHistory = {
+            ...clone(session),
+            originalImages: session.originalImages || [],
+            createdAt: session.createdAt || Date.now(),
+            updatedAt: Date.now(),
+          };
+          set((state) => ({ history: [newHistory, ...state.history] }));
+        } else {
+          const newHistory = [...history];
+          newHistory[index] = {
+            ...clone(session),
+            originalImages: session.originalImages || [],
+            updatedAt: Date.now(),
+          } as ReadingHistory;
+          set(() => ({ history: newHistory }));
+        }
       },
       loadFromAPI: async () => {
         if (!isAuthenticated || !currentUserId) return;
