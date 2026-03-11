@@ -1,4 +1,5 @@
 "use client";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { User, HelpCircle } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
@@ -9,6 +10,7 @@ import { cn } from "@/utils/style";
 
 function StudentInfo() {
   const { t } = useTranslation();
+  const { data: session, status } = useSession();
   const { studentAge, setStudentAge } = useReadingStore();
 
   function getFormLevel(age: number): string {
@@ -39,6 +41,9 @@ function StudentInfo() {
       <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center gap-2">
         <User className="h-5 w-5 text-muted-foreground" />
         {t("reading.studentInfo.title")}
+        {status === "authenticated" && session?.user?.name && (
+          <span className="text-muted-foreground font-normal">({session.user.name})</span>
+        )}
         <Popover>
           <PopoverTrigger asChild>
             <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
