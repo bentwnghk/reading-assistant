@@ -20,12 +20,28 @@ export async function getClient(): Promise<PoolClient> {
 }
 
 export function base64ToBuffer(base64String: string): Buffer {
-  const base64Data = base64String.replace(/^data:image\/\w+;base64,/, "")
+  const base64Data = base64String.replace(/^data:[^;]+;base64,/, "")
   return Buffer.from(base64Data, "base64")
 }
 
-export function bufferToBase64(buffer: Buffer, contentType: string = "image/png"): string {
-  return `data:${contentType};base64,${buffer.toString("base64")}`
+export function bufferToBase64(
+  input: Buffer | string,
+  contentType: string = "image/png"
+): string {
+  if (typeof input === "string") {
+    if (input.startsWith("data:")) {
+      return input
+    }
+
+    if (input.startsWith("\\x")) {
+      const hexData = input.slice(2)
+      return `data:${contentType};base64,${Buffer.from(hexData, "hex").toString("base64")}`
+    }
+
+    return `data:${contentType};base64,${input}`
+  }
+
+  return `data:${contentType};base64,${input.toString("base64")}`
 }
 
 process.on("SIGINT", async () => {
