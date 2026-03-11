@@ -2,7 +2,7 @@ import { useState } from "react";
 import { streamText, smoothStream, generateText } from "ai";
 import { toast } from "sonner";
 import i18next from "i18next";
-import { useSettingStore } from "@/store/setting";
+import { markLastOpenedSession, useSettingStore } from "@/store/setting";
 import { useReadingStore, setStreamingFlag, type ReadingStatus } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import useModelProvider from "@/hooks/useAiProvider";
@@ -106,6 +106,11 @@ function useReadingAssistant() {
       }
       // One final write with the complete text is now persisted.
       setExtractedText(text);
+
+      const { id } = useReadingStore.getState();
+      if (id) {
+        markLastOpenedSession(id);
+      }
 
 
 
@@ -732,6 +737,7 @@ Guidelines:
     const session = load(id);
     if (session) {
       await readingStore.restore(session);
+      markLastOpenedSession(session.id);
       return true;
     }
     return false;

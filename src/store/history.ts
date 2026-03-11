@@ -20,7 +20,7 @@ interface HistoryActions {
   update: (id: string, readingStore: ReadingStore) => boolean;
   remove: (id: string) => Promise<boolean>;
   syncToHistory: (readingStore: ReadingStore) => void;
-  loadFromAPI: () => Promise<void>;
+  loadFromAPI: () => Promise<ReadingHistory[]>;
 }
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 12);
@@ -130,16 +130,19 @@ export const useHistoryStore = create(
         }
       },
       loadFromAPI: async () => {
-        if (!isAuthenticated || !currentUserId) return;
+        if (!isAuthenticated || !currentUserId) return [];
         
         try {
           const response = await fetch("/api/sessions");
           if (response.ok) {
-            const sessions = await response.json();
+            const sessions = (await response.json()) as ReadingHistory[];
             set(() => ({ history: sessions }));
+            return sessions;
           }
+          return [];
         } catch (error) {
           console.error("Failed to load sessions from API:", error);
+          return [];
         }
       },
     }),

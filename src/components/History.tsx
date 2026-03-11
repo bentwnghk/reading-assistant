@@ -26,6 +26,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore, type ReadingStore } from "@/store/reading";
 import { useHistoryStore, type ReadingHistory } from "@/store/history";
+import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
 
 interface HistoryProps {
@@ -98,6 +99,7 @@ function History({ open, onClose }: HistoryProps) {
       }
       reset();
       await restore(data);
+      markLastOpenedSession(data.id);
     }
     onClose();
   }

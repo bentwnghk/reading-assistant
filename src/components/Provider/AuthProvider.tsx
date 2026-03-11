@@ -1,15 +1,23 @@
 "use client"
 
 import { SessionProvider, useSession } from "next-auth/react"
+import { useTranslation } from "react-i18next"
 import { useEffect, useRef } from "react"
-import { setUserId } from "@/store/reading"
+import { toast } from "sonner"
+import { setUserId, useReadingStore } from "@/store/reading"
 import { setAuthState } from "@/store/history"
-import { setSettingUserId, loadSettingsFromAPI, useSettingStore } from "@/store/setting"
+import {
+  setSettingUserId,
+  loadSettingsFromAPI,
+  markLastOpenedSession,
+  useSettingStore,
+} from "@/store/setting"
 
 import { useHistoryStore } from "@/store/history"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
+  const { t } = useTranslation()
   const syncedUserIdRef = useRef<string | null>(null)
   
   useEffect(() => {
@@ -32,17 +40,46 @@ function AuthStateManager() {
     syncedUserIdRef.current = userId
     const expectedUserId = userId
     
-    useHistoryStore.getState().loadFromAPI?.()
-    loadSettingsFromAPI().then((settings) => {
-      if (syncedUserIdRef.current !== expectedUserId) {
-        return
-      }
+    const sessionsPromise = useHistoryStore.getState().loadFromAPI?.() ?? Promise.resolve([])
+    const settingsPromise = loadSettingsFromAPI()
 
-      if (settings && Object.keys(settings).length > 0) {
-        useSettingStore.getState().loadFromServer(settings)
-      }
-    })
-  }, [session?.user?.id, status])
+    Promise.all([sessionsPromise, settingsPromise]).then(([sessions, settings]) => {
+        if (syncedUserIdRef.current !== expectedUserId) {
+          return
+        }
+
+        if (settings && Object.keys(settings).length > 0) {
+          useSettingStore.getState().loadFromServer(settings)
+        }
+
+        const currentReading = useReadingStore.getState()
+        const hasActiveSession = Boolean(currentReading.id && currentReading.extractedText)
+
+        if (hasActiveSession) {
+          markLastOpenedSession(currentReading.id)
+          return
+        }
+
+        if (sessions.length === 0) {
+          return
+        }
+
+        const preferredSessionId = settings?.lastOpenedSessionId
+        const sessionToRestore =
+          sessions.find((item) => item.id === preferredSessionId) ?? sessions[0]
+
+        if (sessionToRestore) {
+          useReadingStore.getState().restore(sessionToRestore)
+          markLastOpenedSession(sessionToRestore.id)
+
+          const sessionTitle =
+            sessionToRestore.docTitle ||
+            sessionToRestore.extractedText.slice(0, 40) ||
+            sessionToRestore.id
+          toast.message(t("history.restored", { title: sessionTitle }))
+        }
+      })
+  }, [session?.user?.id, status, t])
   
   return null
 }

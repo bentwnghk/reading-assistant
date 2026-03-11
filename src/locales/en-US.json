@@ -582,7 +582,8 @@
     "export": "Export",
     "delete": "Delete",
     "loadMore": "Load More History",
-    "noHistory": "No history records"
+    "noHistory": "No history records",
+    "restored": "Restored session: {{title}}"
   },
   "setting": {
     "title": "Settings",

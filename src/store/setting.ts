@@ -52,6 +52,7 @@ export interface SettingStore {
   theme: string;
   debug: "enable" | "disable";
   smoothTextStreamType: "character" | "word" | "line";
+  lastOpenedSessionId: string;
 }
 
 interface SettingActions {
@@ -146,6 +147,7 @@ export const defaultValues: SettingStore = {
   theme: "system",
   debug: "disable",
   smoothTextStreamType: "word",
+  lastOpenedSessionId: "",
 };
 
 export const useSettingStore = create(
@@ -192,3 +194,12 @@ export const useSettingStore = create(
     }
   )
 );
+
+export function markLastOpenedSession(sessionId: string) {
+  if (!sessionId) return;
+
+  const { lastOpenedSessionId, update } = useSettingStore.getState();
+  if (lastOpenedSessionId === sessionId) return;
+
+  update({ lastOpenedSessionId: sessionId });
+}

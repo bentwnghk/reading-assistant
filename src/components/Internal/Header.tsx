@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dialog";
 import { useGlobalStore } from "@/store/global";
 import { useReadingStore } from "@/store/reading";
+import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
 
 function getSafeFilename(value: string): string {
@@ -128,6 +129,9 @@ function Header() {
         const session = JSON.parse(text);
         const { restore } = useReadingStore.getState();
         await restore(session);
+        if (session?.id) {
+          markLastOpenedSession(session.id);
+        }
       } catch (error) {
         console.error(error);
       }

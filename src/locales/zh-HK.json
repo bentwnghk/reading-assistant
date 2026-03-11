@@ -582,7 +582,8 @@
     "export": "匯出",
     "delete": "刪除",
     "loadMore": "載入更多記錄",
-    "noHistory": "沒有記錄"
+    "noHistory": "沒有記錄",
+    "restored": "已恢復工作階段：{{title}}"
   },
   "setting": {
     "title": "設定",
