@@ -84,14 +84,31 @@ async function syncToAPI(settings: Partial<SettingStore>) {
   if (!currentUserId) return;
   
   try {
-    await fetch("/api/settings", {
+    const response = await fetch("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(settings),
     });
+
+    if (!response.ok) {
+      console.error("Failed to sync settings to API:", response.status);
+    }
   } catch (error) {
     console.error("Failed to sync settings to API:", error);
   }
+}
+
+function toSyncPayload(
+  settings: Partial<SettingStore & SettingActions>
+): Partial<SettingStore> {
+  const {
+    update: _update,
+    reset: _reset,
+    loadFromServer: _loadFromServer,
+    ...payload
+  } = settings;
+
+  return payload;
 }
 
 function debouncedSync(settings: Partial<SettingStore>) {
@@ -139,7 +156,7 @@ export const useSettingStore = create(
         set((state) => {
           const newState = { ...state, ...values };
           if (currentUserId) {
-            debouncedSync(newState);
+            debouncedSync(toSyncPayload(newState));
           }
           return newState;
         });
