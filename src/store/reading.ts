@@ -108,6 +108,8 @@ export interface ReadingStore {
   originalDifficulty: TextDifficultyResult | null;
   adaptedDifficulty: TextDifficultyResult | null;
   simplifiedDifficulty: TextDifficultyResult | null;
+  includeGlossary: boolean;
+  includeSentenceAnalysis: boolean;
   createdAt: number;
   updatedAt: number;
 }
@@ -150,6 +152,8 @@ interface ReadingActions {
   setAdaptedDifficulty: (result: TextDifficultyResult | null) => void;
   setSimplifiedDifficulty: (result: TextDifficultyResult | null) => void;
   clearDifficultyAnalysis: () => void;
+  setIncludeGlossary: (include: boolean) => void;
+  setIncludeSentenceAnalysis: (include: boolean) => void;
   reset: () => void;
   backup: () => ReadingStore;
   restore: (session: ReadingStore) => Promise<void>;
@@ -184,6 +188,8 @@ const defaultValues: ReadingStore = {
   originalDifficulty: null,
   adaptedDifficulty: null,
   simplifiedDifficulty: null,
+  includeGlossary: true,
+  includeSentenceAnalysis: true,
   createdAt: 0,
   updatedAt: 1,
 };
@@ -642,6 +648,30 @@ export const useReadingStore = create(
           }
           return newState;
         }),
+      setIncludeGlossary: (include) =>
+        set((state) => {
+          const newState = {
+            includeGlossary: include,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setIncludeSentenceAnalysis: (include) =>
+        set((state) => {
+          const newState = {
+            includeSentenceAnalysis: include,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       reset: () => {
         set(() => ({
           ...defaultValues,
@@ -663,7 +693,7 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
-      version: 6,
+      version: 7,
       storage: {
         getItem: (name) => {
           const value = localStorage.getItem(name);

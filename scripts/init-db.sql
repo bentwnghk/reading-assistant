@@ -94,6 +94,8 @@ CREATE TABLE reading_sessions (
   original_difficulty JSONB,
   adapted_difficulty JSONB,
   simplified_difficulty JSONB,
+  include_glossary BOOLEAN DEFAULT true,
+  include_sentence_analysis BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT fk_user_session UNIQUE(id, user_id)

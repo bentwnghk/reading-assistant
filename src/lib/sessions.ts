@@ -21,8 +21,9 @@ export async function createReadingSession(
         mind_map, reading_test, glossary, glossary_ratings, test_score,
         test_completed, test_earned_points, test_total_points, test_show_chinese,
         test_mode, vocabulary_quiz_score, spelling_game_best_score, chat_history,
-        original_difficulty, adapted_difficulty, simplified_difficulty, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)`,
+        original_difficulty, adapted_difficulty, simplified_difficulty,
+        include_glossary, include_sentence_analysis, created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)`,
       [
         sessionData.id,
         userId,
@@ -50,6 +51,8 @@ export async function createReadingSession(
         sessionData.originalDifficulty ? JSON.stringify(sessionData.originalDifficulty) : null,
         sessionData.adaptedDifficulty ? JSON.stringify(sessionData.adaptedDifficulty) : null,
         sessionData.simplifiedDifficulty ? JSON.stringify(sessionData.simplifiedDifficulty) : null,
+        sessionData.includeGlossary ?? true,
+        sessionData.includeSentenceAnalysis ?? true,
         new Date(sessionData.createdAt || Date.now()),
       ]
     )
@@ -130,6 +133,8 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       originalDifficulty: row.original_difficulty,
       adaptedDifficulty: row.adapted_difficulty,
       simplifiedDifficulty: row.simplified_difficulty,
+      includeGlossary: row.include_glossary ?? true,
+      includeSentenceAnalysis: row.include_sentence_analysis ?? true,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -201,6 +206,8 @@ export async function getReadingSession(
       originalDifficulty: row.original_difficulty,
       adaptedDifficulty: row.adapted_difficulty,
       simplifiedDifficulty: row.simplified_difficulty,
+      includeGlossary: row.include_glossary ?? true,
+      includeSentenceAnalysis: row.include_sentence_analysis ?? true,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -249,6 +256,8 @@ export async function updateReadingSession(
       originalDifficulty: "original_difficulty",
       adaptedDifficulty: "adapted_difficulty",
       simplifiedDifficulty: "simplified_difficulty",
+      includeGlossary: "include_glossary",
+      includeSentenceAnalysis: "include_sentence_analysis",
     }
     
     for (const [key, dbColumn] of Object.entries(fieldMappings)) {

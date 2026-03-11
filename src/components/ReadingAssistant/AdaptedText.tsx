@@ -307,11 +307,15 @@ function AdaptedText() {
     highlightedWords,
     analyzedSentences,
     glossary,
+    includeGlossary,
+    includeSentenceAnalysis,
     addHighlightedWord,
     removeHighlightedWord,
     removeSentenceAnalysis,
     setSentenceAnalysis,
     getSentenceAnalysis,
+    setIncludeGlossary,
+    setIncludeSentenceAnalysis,
   } = useReadingStore();
 
   const { setTutorChatSelectedText } = useGlobalStore();
@@ -330,8 +334,6 @@ function AdaptedText() {
 
 // tab state
   const [activeTab, setActiveTab] = useState<string>("original");
-  const [includeGlossary, setIncludeGlossary] = useState(false);
-  const [includeSentenceAnalysis, setIncludeSentenceAnalysis] = useState(false);
 
   const isAdapting = status === "adapting";
   const isSimplifying = status === "simplifying";
