@@ -205,10 +205,17 @@ export const useReadingStore = create(
           return newState;
         }),
       setStudentAge: (age) =>
-        set(() => ({
-          studentAge: Math.max(8, Math.min(18, age)),
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            studentAge: Math.max(8, Math.min(18, age)),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       setOriginalImages: (images) => {
         const sessionId = useReadingStore.getState().id;
         const newState = {
@@ -297,6 +304,7 @@ export const useReadingStore = create(
             simplifiedText: text,
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -338,6 +346,7 @@ export const useReadingStore = create(
             highlightedWords: words.map((w) => w.toLowerCase().trim()),
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -403,6 +412,7 @@ export const useReadingStore = create(
             testTotalPoints: questions.reduce((sum, q) => sum + q.points, 0),
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -416,6 +426,7 @@ export const useReadingStore = create(
           ),
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -429,6 +440,7 @@ export const useReadingStore = create(
             ),
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -452,15 +464,24 @@ export const useReadingStore = create(
             glossaryRatings: { ...state.glossaryRatings, [word]: rating },
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
           return newState;
         }),
       setTestScore: (score) =>
-        set(() => ({
-          testScore: score,
-        })),
+        set((state) => {
+          const newState = {
+            testScore: score,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       setTestCompleted: (completed) =>
         set((state) => {
           const newState = {
@@ -474,18 +495,42 @@ export const useReadingStore = create(
           return newState;
         }),
       setTestPoints: (earned, total) =>
-        set(() => ({
-          testEarnedPoints: earned,
-          testTotalPoints: total,
-        })),
+        set((state) => {
+          const newState = {
+            testEarnedPoints: earned,
+            testTotalPoints: total,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       setTestShowChinese: (show) =>
-        set(() => ({
-          testShowChinese: show,
-        })),
+        set((state) => {
+          const newState = {
+            testShowChinese: show,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       setTestMode: (mode) =>
-        set(() => ({
-          testMode: mode,
-        })),
+        set((state) => {
+          const newState = {
+            testMode: mode,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       setVocabularyQuizScore: (score) =>
         set((state) => {
           const newState = {
@@ -511,15 +556,29 @@ export const useReadingStore = create(
           return newState;
         }),
       addChatMessage: (message) =>
-        set((state) => ({
-          chatHistory: [...state.chatHistory, message],
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            chatHistory: [...state.chatHistory, message],
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       clearChatHistory: () =>
-        set(() => ({
-          chatHistory: [],
-          updatedAt: Date.now(),
-        })),
+        set((state) => {
+          const newState = {
+            chatHistory: [],
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       setStatus: (status) =>
         set(() => ({
           status,
@@ -539,6 +598,7 @@ export const useReadingStore = create(
             originalDifficulty: result,
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -550,6 +610,7 @@ export const useReadingStore = create(
             adaptedDifficulty: result,
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -561,6 +622,7 @@ export const useReadingStore = create(
             simplifiedDifficulty: result,
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
@@ -574,6 +636,7 @@ export const useReadingStore = create(
             simplifiedDifficulty: null,
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
