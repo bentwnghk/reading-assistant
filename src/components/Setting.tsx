@@ -1,6 +1,7 @@
 "use client";
 import {
   useState,
+  useEffect,
   useLayoutEffect,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -110,17 +111,26 @@ function Setting({ open, onClose }: SettingProps) {
   const { t } = useTranslation();
   const { mode, provider, update } = useSettingStore();
 
+  function getFormValues(): z.infer<typeof formSchema> {
+    const state = useSettingStore.getState();
+    const { update: _u, reset: _r, loadFromServer: _l, ...rest } = state;
+    return rest as z.infer<typeof formSchema>;
+  }
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: async () => {
-      return new Promise((resolve) => {
-        const state = useSettingStore.getState();
-        const rest = { ...state };
-        delete (rest as any).update;
-        resolve(rest as z.infer<typeof formSchema>);
-      });
-    },
+    defaultValues: getFormValues(),
   });
+
+  // Reset the form from the store every time the dialog opens so that
+  // server-loaded settings (from AuthProvider → loadFromServer) are
+  // always reflected, regardless of when they arrived relative to mount.
+  useEffect(() => {
+    if (open) {
+      form.reset(getFormValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   function handleClose(open: boolean) {
     if (!open) onClose();

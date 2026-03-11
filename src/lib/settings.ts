@@ -1,6 +1,32 @@
 import { getClient } from "./db"
 import type { SettingStore } from "@/store/setting"
 
+// Run once per process lifetime so GET/PUT routes don't pay DDL overhead.
+let tableEnsured = false
+
+export async function ensureSettingsTable(): Promise<boolean> {
+  if (tableEnsured) return true
+  const client = await getClient()
+
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS user_settings (
+        user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `)
+    tableEnsured = true
+    return true
+  } catch (error) {
+    console.error("Failed to ensure settings table:", error)
+    return false
+  } finally {
+    client.release()
+  }
+}
+
 export async function getUserSettings(
   userId: string
 ): Promise<Partial<SettingStore> | null> {
@@ -33,8 +59,8 @@ export async function upsertUserSettings(
     await client.query(
       `INSERT INTO user_settings (user_id, settings)
        VALUES ($1, $2)
-       ON CONFLICT (user_id) 
-       DO UPDATE SET settings = $2`,
+       ON CONFLICT (user_id)
+       DO UPDATE SET settings = $2, updated_at = NOW()`,
       [userId, JSON.stringify(settings)]
     )
     
@@ -47,23 +73,4 @@ export async function upsertUserSettings(
   }
 }
 
-export async function ensureSettingsTable(): Promise<boolean> {
-  const client = await getClient()
-  
-  try {
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS user_settings (
-        user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-        settings JSONB NOT NULL DEFAULT '{}'::jsonb,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `)
-    return true
-  } catch (error) {
-    console.error("Failed to ensure settings table:", error)
-    return false
-  } finally {
-    client.release()
-  }
-}
+
