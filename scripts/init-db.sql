@@ -1,6 +1,15 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Function to automatically update updated_at timestamp (must be created before tables that use it)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 -- Auth.js required tables (quoted camelCase column names for @auth/pg-adapter compatibility)
 CREATE TABLE users (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -117,15 +126,6 @@ CREATE INDEX idx_reading_sessions_updated_at ON reading_sessions(updated_at DESC
 CREATE INDEX idx_reading_images_session_id ON reading_images(session_id);
 CREATE INDEX idx_reading_images_user_id ON reading_images(user_id);
 CREATE INDEX idx_reading_images_session_order ON reading_images(session_id, image_order);
-
--- Function to automatically update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
 
 -- Trigger to update updated_at on reading_sessions
 CREATE TRIGGER update_reading_sessions_updated_at 
