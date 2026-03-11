@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, StorageValue } from "zustand/middleware";
 
 export const AVAILABLE_MODELS = [
   "gpt-5-mini",
@@ -57,6 +57,50 @@ export interface SettingStore {
 interface SettingActions {
   update: (values: Partial<SettingStore>) => void;
   reset: () => void;
+  loadFromServer: (settings: Partial<SettingStore>) => void;
+}
+
+let currentUserId: string | null = null;
+let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+
+export function setSettingUserId(id: string | null) {
+  currentUserId = id;
+}
+
+export async function loadSettingsFromAPI(): Promise<Partial<SettingStore> | null> {
+  if (!currentUserId) return null;
+  
+  try {
+    const response = await fetch("/api/settings");
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to load settings from API:", error);
+    return null;
+  }
+}
+
+async function syncToAPI(settings: Partial<SettingStore>) {
+  if (!currentUserId) return;
+  
+  try {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settings),
+    });
+  } catch (error) {
+    console.error("Failed to sync settings to API:", error);
+  }
+}
+
+function debouncedSync(settings: Partial<SettingStore>) {
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+  }
+  syncTimeout = setTimeout(() => {
+    syncToAPI(settings);
+  }, 500);
 }
 
 export const defaultValues: SettingStore = {
@@ -91,9 +135,43 @@ export const useSettingStore = create(
   persist<SettingStore & SettingActions>(
     (set) => ({
       ...defaultValues,
-      update: (values) => set(values),
-      reset: () => set(defaultValues),
+      update: (values) => {
+        set((state) => {
+          const newState = { ...state, ...values };
+          if (currentUserId) {
+            debouncedSync(newState);
+          }
+          return newState;
+        });
+      },
+      reset: () => {
+        set(() => {
+          if (currentUserId) {
+            debouncedSync(defaultValues);
+          }
+          return defaultValues;
+        });
+      },
+      loadFromServer: (settings) => {
+        set(() => ({
+          ...defaultValues,
+          ...settings,
+        }));
+      },
     }),
-    { name: "setting" }
+    {
+      name: "setting",
+      storage: {
+        getItem: (name) => {
+          const value = localStorage.getItem(name);
+          return value ? (JSON.parse(value) as StorageValue<SettingStore & SettingActions>) : null;
+        },
+        setItem: (name, value) => {
+          if (currentUserId) return;
+          localStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => localStorage.removeItem(name),
+      },
+    }
   )
 );
