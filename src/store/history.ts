@@ -15,10 +15,10 @@ export interface HistoryStore {
 }
 
 interface HistoryActions {
-  save: (readingStore: ReadingStore) => string;
+  save: (readingStore: ReadingStore) => Promise<string>;
   load: (id: string) => ReadingHistory | void;
   update: (id: string, readingStore: ReadingStore) => boolean;
-  remove: (id: string) => boolean;
+  remove: (id: string) => Promise<boolean>;
   syncToHistory: (readingStore: ReadingStore) => void;
   loadFromAPI: () => Promise<void>;
 }
@@ -37,7 +37,7 @@ export const useHistoryStore = create(
   persist<HistoryStore & HistoryActions>(
     (set, get) => ({
       history: [],
-      save: (session) => {
+      save: async (session) => {
         if (session.extractedText) {
           const id = session.id || nanoid();
           const newHistory: ReadingHistory = {
@@ -46,6 +46,22 @@ export const useHistoryStore = create(
             originalImages: session.originalImages || [],
             createdAt: session.createdAt || Date.now(),
           };
+          
+          if (isAuthenticated) {
+            try {
+              const response = await fetch("/api/sessions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newHistory),
+              });
+              if (!response.ok) {
+                console.error("Failed to save session to server");
+              }
+            } catch (error) {
+              console.error("Failed to save session to server:", error);
+            }
+          }
+          
           set((state) => ({ history: [newHistory, ...state.history] }));
           return id;
         }
@@ -69,7 +85,21 @@ export const useHistoryStore = create(
         set(() => ({ history: newHistory }));
         return true;
       },
-      remove: (id) => {
+      remove: async (id) => {
+        if (isAuthenticated) {
+          try {
+            const response = await fetch(`/api/sessions/${id}`, {
+              method: "DELETE",
+            });
+            if (!response.ok) {
+              console.error("Failed to delete session from server");
+              return false;
+            }
+          } catch (error) {
+            console.error("Failed to delete session from server:", error);
+            return false;
+          }
+        }
         set((state) => ({
           history: state.history.filter((item) => item.id !== id),
         }));
