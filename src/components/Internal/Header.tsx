@@ -228,46 +228,48 @@ function Header() {
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent animate-shimmer" />
           </span>
         </h1>
-        <div className="flex">
-          <Button
-            className={`h-8 w-8 ${showPulseAnimation ? "animate-pulse-ring" : ""}`}
-            variant="ghost"
-            size="icon"
-            title={t("header.about.title")}
-            onClick={() => {
-              setOpenAbout(true);
-              setHasOpenedAbout(true);
-            }}
-          >
-            <Info className="h-5 w-5" />
-          </Button>
-          <Button
-            className="h-8 w-8"
-            variant="ghost"
-            size="icon"
-            title={t("header.shortcuts.title")}
-            onClick={() => setOpenShortcuts(true)}
-          >
-            <Keyboard className="h-5 w-5" />
-          </Button>
-          <Button
-            className="h-8 w-8"
-            variant="ghost"
-            size="icon"
-            title={t("history.title")}
-            onClick={() => setOpenHistory(true)}
-          >
-            <History className="h-5 w-5" />
-          </Button>
-          <Button
-            className="h-8 w-8"
-            title={t("setting.title")}
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpenSetting(true)}
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex">
+            <Button
+              className={`h-8 w-8 ${showPulseAnimation ? "animate-pulse-ring" : ""}`}
+              variant="ghost"
+              size="icon"
+              title={t("header.about.title")}
+              onClick={() => {
+                setOpenAbout(true);
+                setHasOpenedAbout(true);
+              }}
+            >
+              <Info className="h-5 w-5" />
+            </Button>
+            <Button
+              className="h-8 w-8"
+              variant="ghost"
+              size="icon"
+              title={t("header.shortcuts.title")}
+              onClick={() => setOpenShortcuts(true)}
+            >
+              <Keyboard className="h-5 w-5" />
+            </Button>
+            <Button
+              className="h-8 w-8"
+              variant="ghost"
+              size="icon"
+              title={t("history.title")}
+              onClick={() => setOpenHistory(true)}
+            >
+              <History className="h-5 w-5" />
+            </Button>
+            <Button
+              className="h-8 w-8"
+              title={t("setting.title")}
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpenSetting(true)}
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+          </div>
           <LoginButton />
         </div>
       </header>

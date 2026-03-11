@@ -27,6 +27,11 @@
       "importSuccess": "Session imported successfully.",
       "importFailed": "Failed to import session snapshot."
     },
+    "auth": {
+      "signIn": "Sign in with Google",
+      "signOut": "Sign Out",
+      "loading": "Loading..."
+    },
     "shortcuts": {
       "title": "Keyboard Shortcuts",
       "openSetting": "Open settings",

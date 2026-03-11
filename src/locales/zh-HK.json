@@ -27,6 +27,11 @@
       "importSuccess": "成功匯入工作階段",
       "importFailed": "匯入工作階段失敗"
     },
+    "auth": {
+      "signIn": "使用 Google 登入",
+      "signOut": "登出",
+      "loading": "載入中..."
+    },
     "shortcuts": {
       "title": "鍵盤快捷鍵",
       "openSetting": "開啟設定",
