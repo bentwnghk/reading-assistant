@@ -15,6 +15,9 @@ export async function getUserSettings(
     if (result.rows.length === 0) return null
     
     return result.rows[0].settings as Partial<SettingStore>
+  } catch (error) {
+    console.error("Failed to get user settings:", error)
+    return null
   } finally {
     client.release()
   }
@@ -38,6 +41,27 @@ export async function upsertUserSettings(
     return true
   } catch (error) {
     console.error("Failed to upsert user settings:", error)
+    return false
+  } finally {
+    client.release()
+  }
+}
+
+export async function ensureSettingsTable(): Promise<boolean> {
+  const client = await getClient()
+  
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS user_settings (
+        user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        settings JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `)
+    return true
+  } catch (error) {
+    console.error("Failed to ensure settings table:", error)
     return false
   } finally {
     client.release()

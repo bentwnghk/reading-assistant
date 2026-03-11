@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { getUserSettings, upsertUserSettings } from "@/lib/settings"
+import { getUserSettings, upsertUserSettings, ensureSettingsTable } from "@/lib/settings"
 import { NextResponse } from "next/server"
 import type { SettingStore } from "@/store/setting"
 
@@ -10,6 +10,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    await ensureSettingsTable()
     const settings = await getUserSettings(session.user.id)
     return NextResponse.json(settings || {})
   } catch (error) {
@@ -28,6 +29,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    await ensureSettingsTable()
     const settings = (await request.json()) as Partial<SettingStore>
     const success = await upsertUserSettings(session.user.id, settings)
     
