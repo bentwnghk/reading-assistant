@@ -211,38 +211,45 @@ export const useReadingStore = create(
         })),
       setOriginalImages: (images) => {
         const sessionId = useReadingStore.getState().id;
+        const newState = {
+          originalImages: images,
+          updatedAt: Date.now(),
+        };
+        syncToHistoryIfNeeded({ ...useReadingStore.getState(), ...newState });
         if (currentUserId && sessionId) {
           syncToAPI(sessionId, { originalImages: images });
         }
-        set(() => ({
-          originalImages: images,
-          updatedAt: Date.now(),
-        }));
+        set(() => newState);
       },
       addOriginalImage: (image) =>
         set((state) => {
           const newImages = [...state.originalImages, image];
-          if (currentUserId && state.id) {
-            syncToAPI(state.id, { originalImages: newImages });
-          }
-          return {
+          const newState = {
             originalImages: newImages,
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, { originalImages: newImages });
+          }
+          return newState;
         }),
       removeOriginalImage: (index) =>
         set((state) => {
           const newImages = state.originalImages.filter((_, i) => i !== index);
-          if (currentUserId && state.id) {
-            syncToAPI(state.id, { originalImages: newImages });
-          }
-          return {
+          const newState = {
             originalImages: newImages,
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, { originalImages: newImages });
+          }
+          return newState;
         }),
       setExtractedText: (text) =>
         set((state) => {
+          const isNewSession = !state.id;
           const newId = state.id || nanoid();
           const newState = {
             extractedText: text,
@@ -250,8 +257,13 @@ export const useReadingStore = create(
             createdAt: state.createdAt || Date.now(),
             updatedAt: Date.now(),
           };
+          syncToHistoryIfNeeded({ ...state, ...newState });
           if (currentUserId) {
-            createSessionInAPI({ ...state, ...newState });
+            if (isNewSession) {
+              createSessionInAPI({ ...state, ...newState });
+            } else {
+              syncToAPI(state.id, { extractedText: text });
+            }
           }
           return newState;
         }),
