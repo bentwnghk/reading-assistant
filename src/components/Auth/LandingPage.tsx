@@ -107,7 +107,7 @@ export function LandingPage() {
           <h2 className="text-3xl font-bold tracking-tight">{t("header.about.whyLove.title")}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 group relative overflow-hidden bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[2.5rem] p-10 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+          <div className="md:col-span-1 group relative overflow-hidden bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[2.5rem] p-10 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
             <div className="absolute -top-10 -right-10 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500 group-hover:opacity-20">
               <Target className="h-48 w-48 text-emerald-500" />
             </div>
@@ -115,7 +115,7 @@ export function LandingPage() {
             <h3 className="relative z-10 text-2xl font-bold mb-3">{t("header.about.whyLove.personalized.title")}</h3>
             <p className="relative z-10 text-lg text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">{t("header.about.whyLove.personalized.desc")}</p>
           </div>
-          <div className="group relative overflow-hidden bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[2.5rem] p-10 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+          <div className="md:col-span-1 group relative overflow-hidden bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[2.5rem] p-10 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
             <div className="absolute -top-10 -right-10 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500 group-hover:opacity-20">
               <Trophy className="h-40 w-40 text-amber-500" />
             </div>
