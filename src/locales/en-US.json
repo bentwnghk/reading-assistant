@@ -574,7 +574,7 @@
   "history": {
     "title": "Reading History",
     "description": "Your reading sessions are stored locally in your browser.",
-    "name": "Text Preview",
+    "name": "Reading Text",
     "emptyTip": "No history records",
     "date": "Date",
     "actions": "Action",

@@ -574,7 +574,7 @@
   "history": {
     "title": "閱讀記錄",
     "description": "你的閱讀工作階段儲存在瀏覽器中。",
-    "name": "文本預覽",
+    "name": "閱讀文本",
     "emptyTip": "沒有記錄",
     "date": "日期",
     "actions": "操作",
