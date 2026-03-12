@@ -744,7 +744,7 @@
       "name": "Class Name",
       "namePlaceholder": "Enter class name",
       "nameRequired": "Class name is required",
-      "description": "Description",
+      "descriptionLabel": "Description",
       "descriptionPlaceholder": "Enter class description (optional)",
       "teacher": "Teacher",
       "selectTeacher": "Select a teacher",

@@ -259,7 +259,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
               />
             </div>
             <div>
-              <label className="text-sm font-medium">{t("userManagement.classes.description")}</label>
+              <label className="text-sm font-medium">{t("userManagement.classes.descriptionLabel")}</label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
