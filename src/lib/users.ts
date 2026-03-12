@@ -406,17 +406,13 @@ export async function getClassesForSchool(schoolId: string): Promise<ClassInfo[]
   }
 }
 
-/** Classes taught by a teacher — scoped to the teacher's own school */
+/** Classes taught by a teacher — only classes where they are the assigned teacher */
 export async function getClassesForTeacher(teacherId: string): Promise<ClassInfo[]> {
   const client = await getClient()
   try {
-    // Get all classes in the teacher's school where they are the assigned teacher,
-    // plus any classes in their school regardless of teacher (so they can see all
-    // school classes when they are an admin-equivalent within that school).
-    // Per requirements: teachers see classes from THEIR school only.
     const result = await client.query(
       `${CLASS_SELECT}
-       WHERE c.school_id = (SELECT school_id FROM users WHERE id = $1)
+       WHERE c.teacher_id = $1
        ORDER BY c.created_at DESC`,
       [teacherId]
     )
