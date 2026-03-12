@@ -735,7 +735,10 @@
       "class": "Class",
       "actions": "Actions",
       "noName": "No name",
-      "noUsers": "No users found"
+      "noUsers": "No users found",
+      "allRoles": "All Roles",
+      "allClasses": "All Classes",
+      "showing": "Showing {{count}} users"
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",

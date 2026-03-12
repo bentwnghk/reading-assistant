@@ -735,7 +735,10 @@
       "class": "班別",
       "actions": "操作",
       "noName": "無名稱",
-      "noUsers": "沒有用戶"
+      "noUsers": "沒有用戶",
+      "allRoles": "所有角色",
+      "allClasses": "所有班別",
+      "showing": "顯示 {{count}} 個用戶"
     },
     "roleUpdated": "角色已更新",
     "roleUpdateFailed": "更新角色失敗",

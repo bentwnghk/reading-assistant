@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -23,10 +24,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "sonner"
 import type { UserWithRole, UserRole } from "@/lib/users"
 
+type SortField = "name" | "email" | "className"
+type SortOrder = "asc" | "desc"
+
 export default function UserList() {
   const { t } = useTranslation()
   const [users, setUsers] = useState<UserWithRole[]>([])
   const [loading, setLoading] = useState(true)
+  const [sortField, setSortField] = useState<SortField>("name")
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
+  const [roleFilter, setRoleFilter] = useState<string>("all")
+  const [classFilter, setClassFilter] = useState<string>("all")
 
   const loadUsers = useCallback(async () => {
     try {
@@ -46,6 +54,53 @@ export default function UserList() {
   useEffect(() => {
     loadUsers()
   }, [loadUsers])
+
+  const uniqueClasses = useMemo(() => {
+    const classes = new Set<string>()
+    users.forEach(u => {
+      if (u.className) classes.add(u.className)
+    })
+    return Array.from(classes).sort()
+  }, [users])
+
+  const filteredAndSortedUsers = useMemo(() => {
+    let result = [...users]
+
+    if (roleFilter !== "all") {
+      result = result.filter(u => u.role === roleFilter)
+    }
+
+    if (classFilter !== "all") {
+      result = result.filter(u => u.className === classFilter)
+    }
+
+    result.sort((a, b) => {
+      let comparison = 0
+      switch (sortField) {
+        case "name":
+          comparison = (a.name || "").localeCompare(b.name || "")
+          break
+        case "email":
+          comparison = (a.email || "").localeCompare(b.email || "")
+          break
+        case "className":
+          comparison = (a.className || "").localeCompare(b.className || "")
+          break
+      }
+      return sortOrder === "asc" ? comparison : -comparison
+    })
+
+    return result
+  }, [users, sortField, sortOrder, roleFilter, classFilter])
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortField(field)
+      setSortOrder("asc")
+    }
+  }
 
   const handleRoleChange = async (userId: string, role: UserRole) => {
     try {
@@ -100,18 +155,62 @@ export default function UserList() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">{t("userManagement.users.description")}</p>
+      <div className="flex flex-wrap gap-3 items-center">
+        <Select value={roleFilter} onValueChange={setRoleFilter}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder={t("userManagement.users.role")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("userManagement.users.allRoles")}</SelectItem>
+            <SelectItem value="admin">{t("userManagement.roles.admin")}</SelectItem>
+            <SelectItem value="teacher">{t("userManagement.roles.teacher")}</SelectItem>
+            <SelectItem value="student">{t("userManagement.roles.student")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={classFilter} onValueChange={setClassFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder={t("userManagement.users.class")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("userManagement.users.allClasses")}</SelectItem>
+            {uniqueClasses.map((className) => (
+              <SelectItem key={className} value={className}>
+                {className}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="text-sm text-muted-foreground">
+          {t("userManagement.users.showing", { count: filteredAndSortedUsers.length })}
+        </div>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t("userManagement.users.name")}</TableHead>
-            <TableHead>{t("userManagement.users.email")}</TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => handleSort("name")}>
+                {t("userManagement.users.name")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => handleSort("email")}>
+                {t("userManagement.users.email")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
             <TableHead>{t("userManagement.users.role")}</TableHead>
-            <TableHead>{t("userManagement.users.class")}</TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => handleSort("className")}>
+                {t("userManagement.users.class")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
             <TableHead>{t("userManagement.users.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
+          {filteredAndSortedUsers.map((user) => (
             <TableRow key={user.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
@@ -170,7 +269,7 @@ export default function UserList() {
           ))}
         </TableBody>
       </Table>
-      {users.length === 0 && (
+      {filteredAndSortedUsers.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           {t("userManagement.users.noUsers")}
         </div>
