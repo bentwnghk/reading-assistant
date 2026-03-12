@@ -77,7 +77,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
 
   const openCreateDialog = () => {
     setSelectedClass(null)
-    setFormData({ name: "", description: "", teacherId: "" })
+    setFormData({ name: "", description: "", teacherId: "__none__" })
     setEditDialogOpen(true)
   }
 
@@ -86,7 +86,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
     setFormData({
       name: classInfo.name,
       description: classInfo.description || "",
-      teacherId: classInfo.teacherId || "",
+      teacherId: classInfo.teacherId || "__none__",
     })
     setEditDialogOpen(true)
   }
@@ -112,7 +112,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
         body: JSON.stringify({
           name: formData.name.trim(),
           description: formData.description.trim(),
-          teacherId: formData.teacherId || null,
+          teacherId: formData.teacherId === "__none__" ? null : formData.teacherId,
         }),
       })
 
@@ -277,13 +277,13 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                   <SelectValue placeholder={t("userManagement.classes.selectTeacher")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("userManagement.classes.noTeacher")}</SelectItem>
-                  {teachers.map((teacher) => (
-                    <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.name || teacher.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                   <SelectItem value="__none__">{t("userManagement.classes.noTeacher")}</SelectItem>
+                   {teachers.map((teacher) => (
+                     <SelectItem key={teacher.id} value={teacher.id}>
+                       {teacher.name || teacher.email}
+                     </SelectItem>
+                   ))}
+                 </SelectContent>
               </Select>
             </div>
           </div>
