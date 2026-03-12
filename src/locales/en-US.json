@@ -742,7 +742,8 @@
     "tabs": {
       "users": "Users",
       "classes": "Classes",
-      "studentData": "Student Data"
+      "studentData": "Student Data",
+      "schools": "Schools"
     },
     "roles": {
       "admin": "Admin",
@@ -760,10 +761,15 @@
       "noUsers": "No users found",
       "allRoles": "All Roles",
       "allClasses": "All Classes",
+      "school": "School",
+      "allSchools": "All Schools",
+      "noSchool": "No School",
       "showing": "Showing {{count}} users"
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",
+    "schoolUpdated": "School updated successfully",
+    "schoolUpdateFailed": "Failed to update school",
     "classes": {
       "description": "Manage classes. Assign teachers to classes and add students.",
       "name": "Class Name",
@@ -826,6 +832,24 @@
       "spelling": "Spelling Challenge",
       "quiz": "Vocabulary Quiz",
       "date": "Last Update"
+    },
+    "schools": {
+      "description": "Schools are automatically created from user email domains when users sign in.",
+      "name": "School Name",
+      "domain": "Email Domain",
+      "domainReadOnly": "Domain is auto-detected and cannot be changed",
+      "users": "Users",
+      "actions": "Actions",
+      "edit": "Edit School",
+      "delete": "Delete School",
+      "namePlaceholder": "Enter school name",
+      "nameRequired": "School name is required",
+      "updated": "School updated successfully",
+      "deleted": "School deleted successfully",
+      "saveFailed": "Failed to save school",
+      "deleteFailed": "Failed to delete school",
+      "deleteConfirm": "Delete school \"{{name}}\"? Users from this school will become unassigned.",
+      "noSchools": "No schools found. Schools are created automatically when users sign in."
     },
     "cancel": "Cancel",
     "save": "Save"

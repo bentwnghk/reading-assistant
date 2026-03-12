@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -22,26 +22,33 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "sonner"
-import type { UserWithRole, UserRole } from "@/lib/users"
+import type { UserWithRole, UserRole, SchoolInfo } from "@/lib/users"
 
-type SortField = "name" | "email" | "className"
+type SortField = "name" | "email" | "className" | "schoolName"
 type SortOrder = "asc" | "desc"
 
 export default function UserList() {
   const { t } = useTranslation()
   const [users, setUsers] = useState<UserWithRole[]>([])
+  const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
   const [roleFilter, setRoleFilter] = useState<string>("all")
   const [classFilter, setClassFilter] = useState<string>("all")
+  const [schoolFilter, setSchoolFilter] = useState<string>("all")
 
-  const loadUsers = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
-      const response = await fetch("/api/users")
-      if (response.ok) {
-        const data = await response.json()
-        setUsers(data)
+      const [usersRes, schoolsRes] = await Promise.all([
+        fetch("/api/users"),
+        fetch("/api/schools"),
+      ])
+      if (usersRes.ok) {
+        setUsers(await usersRes.json())
+      }
+      if (schoolsRes.ok) {
+        setSchools(await schoolsRes.json())
       }
     } catch (error) {
       console.error("Failed to load users:", error)
@@ -52,8 +59,8 @@ export default function UserList() {
   }, [t])
 
   useEffect(() => {
-    loadUsers()
-  }, [loadUsers])
+    loadData()
+  }, [loadData])
 
   const uniqueClasses = useMemo(() => {
     const classes = new Set<string>()
@@ -74,6 +81,14 @@ export default function UserList() {
       result = result.filter(u => u.className === classFilter)
     }
 
+    if (schoolFilter !== "all") {
+      if (schoolFilter === "__none__") {
+        result = result.filter(u => !u.schoolId)
+      } else {
+        result = result.filter(u => u.schoolId === schoolFilter)
+      }
+    }
+
     result.sort((a, b) => {
       let comparison = 0
       switch (sortField) {
@@ -86,12 +101,15 @@ export default function UserList() {
         case "className":
           comparison = (a.className || "").localeCompare(b.className || "")
           break
+        case "schoolName":
+          comparison = (a.schoolName || "").localeCompare(b.schoolName || "")
+          break
       }
       return sortOrder === "asc" ? comparison : -comparison
     })
 
     return result
-  }, [users, sortField, sortOrder, roleFilter, classFilter])
+  }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -122,6 +140,32 @@ export default function UserList() {
     }
   }
 
+  const handleSchoolChange = async (userId: string, schoolId: string) => {
+    const resolvedSchoolId = schoolId === "__none__" ? null : schoolId
+    try {
+      const response = await fetch(`/api/users/${userId}/school`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ schoolId: resolvedSchoolId }),
+      })
+
+      if (response.ok) {
+        const matchingSchool = schools.find(s => s.id === resolvedSchoolId)
+        setUsers(users.map(u =>
+          u.id === userId
+            ? { ...u, schoolId: resolvedSchoolId ?? undefined, schoolName: matchingSchool?.name }
+            : u
+        ))
+        toast.success(t("userManagement.schoolUpdated"))
+      } else {
+        toast.error(t("userManagement.schoolUpdateFailed"))
+      }
+    } catch (error) {
+      console.error("Failed to update school:", error)
+      toast.error(t("userManagement.schoolUpdateFailed"))
+    }
+  }
+
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case "admin":
@@ -136,11 +180,11 @@ export default function UserList() {
   const getRoleBadgeVariant = (role: UserRole) => {
     switch (role) {
       case "admin":
-        return "destructive"
+        return "destructive" as const
       case "teacher":
-        return "default"
+        return "default" as const
       default:
-        return "secondary"
+        return "secondary" as const
     }
   }
 
@@ -180,6 +224,20 @@ export default function UserList() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={schoolFilter} onValueChange={setSchoolFilter}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder={t("userManagement.users.school")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("userManagement.users.allSchools")}</SelectItem>
+            <SelectItem value="__none__">{t("userManagement.users.noSchool")}</SelectItem>
+            {schools.map((school) => (
+              <SelectItem key={school.id} value={school.id}>
+                {school.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="text-sm text-muted-foreground">
           {t("userManagement.users.showing", { count: filteredAndSortedUsers.length })}
         </div>
@@ -203,6 +261,12 @@ export default function UserList() {
             <TableHead>
               <Button variant="ghost" size="sm" onClick={() => handleSort("className")}>
                 {t("userManagement.users.class")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => handleSort("schoolName")}>
+                {t("userManagement.users.school")}
                 <ArrowUpDown className="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
@@ -236,34 +300,68 @@ export default function UserList() {
                 )}
               </TableCell>
               <TableCell>
-                <Select
-                  value={user.role}
-                  onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">
-                      <div className="flex items-center">
-                        <User className="h-3 w-3 mr-1" />
-                        {t("userManagement.roles.student")}
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="teacher">
-                      <div className="flex items-center">
-                        <GraduationCap className="h-3 w-3 mr-1" />
-                        {t("userManagement.roles.teacher")}
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="admin">
-                      <div className="flex items-center">
-                        <Shield className="h-3 w-3 mr-1" />
-                        {t("userManagement.roles.admin")}
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                {user.schoolName ? (
+                  <div className="flex items-center gap-1">
+                    <School className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="text-sm truncate max-w-32">{user.schoolName}</span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
+              <TableCell>
+                <div className="flex flex-col gap-1">
+                  {/* Role selector */}
+                  <Select
+                    value={user.role}
+                    onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">
+                        <div className="flex items-center">
+                          <User className="h-3 w-3 mr-1" />
+                          {t("userManagement.roles.student")}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="teacher">
+                        <div className="flex items-center">
+                          <GraduationCap className="h-3 w-3 mr-1" />
+                          {t("userManagement.roles.teacher")}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="admin">
+                        <div className="flex items-center">
+                          <Shield className="h-3 w-3 mr-1" />
+                          {t("userManagement.roles.admin")}
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {/* School selector — admin override */}
+                  {schools.length > 0 && (
+                    <Select
+                      value={user.schoolId ?? "__none__"}
+                      onValueChange={(value) => handleSchoolChange(user.id, value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder={t("userManagement.users.noSchool")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">
+                          <span className="text-muted-foreground">{t("userManagement.users.noSchool")}</span>
+                        </SelectItem>
+                        {schools.map((school) => (
+                          <SelectItem key={school.id} value={school.id}>
+                            {school.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               </TableCell>
             </TableRow>
           ))}

@@ -143,6 +143,14 @@ interface TextDifficultyResult {
 
 type UserRole = 'admin' | 'teacher' | 'student';
 
+interface SchoolInfo {
+  id: string;
+  name: string;
+  domain: string;
+  userCount?: number;
+  createdAt: number;
+}
+
 interface UserWithRole {
   id: string;
   name?: string | null;
@@ -151,6 +159,8 @@ interface UserWithRole {
   role: UserRole;
   classId?: string;
   className?: string;
+  schoolId?: string;
+  schoolName?: string;
   createdAt?: number;
 }
 

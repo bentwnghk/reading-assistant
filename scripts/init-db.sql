@@ -178,6 +178,27 @@ CREATE TABLE class_members (
 
 CREATE INDEX idx_class_members_class_id ON class_members(class_id);
 
+-- Schools table (auto-created from user email domains)
+CREATE TABLE schools (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  domain TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_schools_domain ON schools(domain);
+
+CREATE TRIGGER update_schools_updated_at
+    BEFORE UPDATE ON schools
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Add school reference to users
+ALTER TABLE users ADD COLUMN school_id TEXT REFERENCES schools(id) ON DELETE SET NULL;
+
+CREATE INDEX idx_users_school_id ON users(school_id);
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;

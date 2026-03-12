@@ -3,7 +3,7 @@ import Google from "next-auth/providers/google"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
 import type { NextAuthConfig } from "next-auth"
-import { ensureUserRole, type UserRole } from "@/lib/users"
+import { ensureUserRole, ensureUserSchool, type UserRole } from "@/lib/users"
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -41,6 +41,10 @@ export const config: NextAuthConfig = {
         session.user.id = user.id
         const role = await ensureUserRole(user.id, user.email)
         session.user.role = role
+        // Auto-assign school based on email domain (only if not already assigned)
+        if (user.email) {
+          await ensureUserSchool(user.id, user.email)
+        }
       }
       return session
     },

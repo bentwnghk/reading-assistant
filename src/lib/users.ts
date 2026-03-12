@@ -2,6 +2,14 @@ import { getClient } from "./db"
 
 export type UserRole = 'admin' | 'teacher' | 'student'
 
+export interface SchoolInfo {
+  id: string
+  name: string
+  domain: string
+  userCount?: number
+  createdAt: number
+}
+
 export interface UserWithRole {
   id: string
   name?: string | null
@@ -10,6 +18,8 @@ export interface UserWithRole {
   role: UserRole
   classId?: string
   className?: string
+  schoolId?: string
+  schoolName?: string
   createdAt?: number
 }
 
@@ -137,11 +147,14 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
         u.id, u.name, u.email, u.image, u."createdAt",
         COALESCE(ur.role, 'student') as role,
         cm.class_id as "classId",
-        c.name as "className"
+        c.name as "className",
+        u.school_id as "schoolId",
+        s.name as "schoolName"
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN class_members cm ON u.id = cm.student_id
        LEFT JOIN classes c ON cm.class_id = c.id
+       LEFT JOIN schools s ON u.school_id = s.id
        ORDER BY u."createdAt" DESC`
     )
     
@@ -153,8 +166,139 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       role: row.role as UserRole,
       classId: row.classId,
       className: row.className,
+      schoolId: row.schoolId,
+      schoolName: row.schoolName,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
+  } finally {
+    client.release()
+  }
+}
+
+// ─── School CRUD ───────────────────────────────────────────────────────────────
+
+export async function getOrCreateSchoolByDomain(domain: string): Promise<SchoolInfo> {
+  const client = await getClient()
+  try {
+    // Upsert: insert if not present, return existing otherwise
+    const result = await client.query(
+      `INSERT INTO schools (name, domain)
+       VALUES ($1, $2)
+       ON CONFLICT (domain) DO UPDATE SET domain = EXCLUDED.domain
+       RETURNING id, name, domain, created_at`,
+      [domain, domain]
+    )
+    const row = result.rows[0]
+    return {
+      id: row.id,
+      name: row.name,
+      domain: row.domain,
+      createdAt: new Date(row.created_at).getTime(),
+    }
+  } finally {
+    client.release()
+  }
+}
+
+export async function ensureUserSchool(userId: string, email: string): Promise<void> {
+  const atIndex = email.indexOf('@')
+  if (atIndex === -1) return
+  const domain = email.slice(atIndex + 1).toLowerCase()
+  if (!domain) return
+
+  const school = await getOrCreateSchoolByDomain(domain)
+
+  const client = await getClient()
+  try {
+    // Only assign if the user has no school yet (preserves Admin manual overrides)
+    await client.query(
+      `UPDATE users SET school_id = $1 WHERE id = $2 AND school_id IS NULL`,
+      [school.id, userId]
+    )
+  } finally {
+    client.release()
+  }
+}
+
+export async function getAllSchools(): Promise<SchoolInfo[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT
+        s.id, s.name, s.domain, s.created_at,
+        COUNT(u.id) AS user_count
+       FROM schools s
+       LEFT JOIN users u ON u.school_id = s.id
+       GROUP BY s.id, s.name, s.domain, s.created_at
+       ORDER BY s.created_at DESC`
+    )
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      domain: row.domain,
+      userCount: parseInt(row.user_count) || 0,
+      createdAt: new Date(row.created_at).getTime(),
+    }))
+  } finally {
+    client.release()
+  }
+}
+
+export async function getSchoolById(schoolId: string): Promise<SchoolInfo | null> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT id, name, domain, created_at FROM schools WHERE id = $1`,
+      [schoolId]
+    )
+    if (result.rows.length === 0) return null
+    const row = result.rows[0]
+    return {
+      id: row.id,
+      name: row.name,
+      domain: row.domain,
+      createdAt: new Date(row.created_at).getTime(),
+    }
+  } finally {
+    client.release()
+  }
+}
+
+export async function updateSchoolName(schoolId: string, name: string): Promise<boolean> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `UPDATE schools SET name = $1 WHERE id = $2`,
+      [name, schoolId]
+    )
+    return (result.rowCount ?? 0) > 0
+  } finally {
+    client.release()
+  }
+}
+
+export async function deleteSchool(schoolId: string): Promise<boolean> {
+  const client = await getClient()
+  try {
+    // FK ON DELETE SET NULL will un-assign users automatically
+    const result = await client.query(
+      `DELETE FROM schools WHERE id = $1`,
+      [schoolId]
+    )
+    return (result.rowCount ?? 0) > 0
+  } finally {
+    client.release()
+  }
+}
+
+export async function assignUserSchool(userId: string, schoolId: string | null): Promise<boolean> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `UPDATE users SET school_id = $1 WHERE id = $2`,
+      [schoolId, userId]
+    )
+    return (result.rowCount ?? 0) > 0
   } finally {
     client.release()
   }

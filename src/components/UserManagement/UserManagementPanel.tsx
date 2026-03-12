@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import UserList from "./UserList"
 import ClassList from "./ClassList"
 import StudentDataView from "./StudentDataView"
+import SchoolList from "./SchoolList"
 
 interface UserManagementPanelProps {
   open: boolean
@@ -44,6 +45,9 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isAdmin || isTeacher) && (
               <TabsTrigger value="students">{t("userManagement.tabs.studentData")}</TabsTrigger>
             )}
+            {isAdmin && (
+              <TabsTrigger value="schools">{t("userManagement.tabs.schools")}</TabsTrigger>
+            )}
           </TabsList>
           <div className="flex-1 overflow-auto mt-4">
             {isAdmin && (
@@ -57,6 +61,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
                 <StudentDataView isAdmin={isAdmin} currentUserId={session?.user?.id} />
+              </TabsContent>
+            )}
+            {isAdmin && (
+              <TabsContent value="schools" className="mt-0">
+                <SchoolList />
               </TabsContent>
             )}
           </div>
