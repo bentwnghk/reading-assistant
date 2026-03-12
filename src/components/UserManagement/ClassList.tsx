@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Plus, Pencil, Trash2, Users } from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Users, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -38,6 +38,9 @@ interface ClassListProps {
   currentUserId?: string
 }
 
+type SortField = "name" | "teacherName"
+type SortOrder = "asc" | "desc"
+
 export default function ClassList({ isAdmin, currentUserId: _currentUserId }: ClassListProps) {
   const { t } = useTranslation()
   const [classes, setClasses] = useState<ClassInfo[]>([])
@@ -47,6 +50,8 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
   const [membersDialogOpen, setMembersDialogOpen] = useState(false)
   const [selectedClass, setSelectedClass] = useState<ClassInfo | null>(null)
   const [formData, setFormData] = useState({ name: "", description: "", teacherId: "" })
+  const [sortField, setSortField] = useState<SortField>("name")
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -74,6 +79,30 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortField(field)
+      setSortOrder("asc")
+    }
+  }
+
+  const sortedClasses = useMemo(() => {
+    return [...classes].sort((a, b) => {
+      let comparison = 0
+      switch (sortField) {
+        case "name":
+          comparison = a.name.localeCompare(b.name)
+          break
+        case "teacherName":
+          comparison = (a.teacherName || "").localeCompare(b.teacherName || "")
+          break
+      }
+      return sortOrder === "asc" ? comparison : -comparison
+    })
+  }, [classes, sortField, sortOrder])
 
   const openCreateDialog = () => {
     setSelectedClass(null)
@@ -169,14 +198,24 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t("userManagement.classes.name")}</TableHead>
-            <TableHead>{t("userManagement.classes.teacher")}</TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => handleSort("name")}>
+                {t("userManagement.classes.name")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={() => handleSort("teacherName")}>
+                {t("userManagement.classes.teacher")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
             <TableHead className="text-center">{t("userManagement.classes.students")}</TableHead>
             <TableHead>{t("userManagement.classes.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {classes.map((classInfo) => (
+          {sortedClasses.map((classInfo) => (
             <TableRow key={classInfo.id}>
               <TableCell>
                 <div>

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Plus, Trash2, Search } from "lucide-react"
+import { Loader2, Plus, Trash2, Search, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -24,6 +24,8 @@ interface ClassMembersProps {
   onMembersChange?: () => void
 }
 
+type SortOrder = "asc" | "desc"
+
 export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChange }: ClassMembersProps) {
   const { t } = useTranslation()
   const [members, setMembers] = useState<ClassMember[]>([])
@@ -32,6 +34,7 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
   const [searchQuery, setSearchQuery] = useState("")
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [addingStudentId, setAddingStudentId] = useState("")
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
 
   const loadMembers = useCallback(async () => {
     try {
@@ -64,6 +67,17 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
   useEffect(() => {
     loadMembers()
   }, [loadMembers])
+
+  const handleSort = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+  }
+
+  const sortedMembers = useMemo(() => {
+    return [...members].sort((a, b) => {
+      const comparison = (a.studentName || "").localeCompare(b.studentName || "")
+      return sortOrder === "asc" ? comparison : -comparison
+    })
+  }, [members, sortOrder])
 
   useEffect(() => {
     if (showAddDialog) {
@@ -203,13 +217,18 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t("userManagement.members.student")}</TableHead>
+            <TableHead>
+              <Button variant="ghost" size="sm" onClick={handleSort}>
+                {t("userManagement.members.student")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
             <TableHead>{t("userManagement.members.joinedAt")}</TableHead>
             <TableHead>{t("userManagement.members.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {members.map((member) => (
+          {sortedMembers.map((member) => (
             <TableRow key={member.studentId}>
               <TableCell>
                 <div className="flex items-center gap-2">
