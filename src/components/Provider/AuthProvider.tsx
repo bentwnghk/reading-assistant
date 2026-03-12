@@ -11,7 +11,6 @@ import {
   loadSettingsFromAPI,
   markLastOpenedSession,
   useSettingStore,
-  defaultValues,
 } from "@/store/setting"
 
 import { useHistoryStore } from "@/store/history"
@@ -31,9 +30,6 @@ function AuthStateManager() {
 
     if (!isAuthenticated || !userId) {
       syncedUserIdRef.current = null
-      // Reset in-memory settings back to defaults so a logged-out (or
-      // different) user doesn't see the previous authenticated user's data.
-      useSettingStore.getState().loadFromServer(defaultValues)
       return
     }
 
