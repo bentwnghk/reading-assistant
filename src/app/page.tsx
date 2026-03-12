@@ -3,12 +3,14 @@ import dynamic from "next/dynamic";
 import { useLayoutEffect, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
+import { useSession } from "next-auth/react";
 import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
 import { useHistoryStore } from "@/store/history";
 import { setHistorySyncFn, useReadingStore } from "@/store/reading";
 import useAutoSave from "@/hooks/useAutoSave";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
+import { LandingPage } from "@/components/Auth/LandingPage";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
 const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
@@ -27,6 +29,7 @@ const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorCh
 
 function Home() {
   const { t } = useTranslation();
+  const { data: session, status } = useSession();
   const { openSetting, setOpenSetting, openHistory, setOpenHistory } = useGlobalStore();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
@@ -57,6 +60,21 @@ function Home() {
     const settingStore = useSettingStore.getState();
     setTheme(settingStore.theme);
   }, [theme, setTheme]);
+
+  // Show landing page for unauthenticated users. While session status is
+  // loading we render nothing to avoid a flash of the landing page for
+  // already-authenticated users.
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">

@@ -11,13 +11,4 @@ export const authConfig: NextAuthConfig = {
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
   ],
-  pages: {
-    signIn: "/signin",
-  },
-  callbacks: {
-    authorized({ auth }) {
-      // Return true only when there is an active session.
-      return !!auth
-    },
-  },
 }
