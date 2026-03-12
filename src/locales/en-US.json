@@ -573,7 +573,7 @@
   },
   "history": {
     "title": "Reading History",
-    "description": "Your reading sessions are stored locally in your browser.",
+    "description": "View your reading sessions with learning progress, vocabulary count, and test scores.",
     "name": "Reading Text",
     "emptyTip": "No history records",
     "date": "Date",
@@ -590,7 +590,7 @@
     "restored": "Restored session: {{title}}",
     "progress": "Learning Progress",
     "testScore": "Reading Test Score",
-    "glossaryWords": "Vocabulary Size",
+    "glossaryWords": "Vocabulary Count",
     "spellingScore": "Spelling Challenge Score",
     "quizScore": "Vocabulary Quiz Score"
   },

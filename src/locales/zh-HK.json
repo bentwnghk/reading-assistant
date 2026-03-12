@@ -573,7 +573,7 @@
   },
   "history": {
     "title": "閱讀記錄",
-    "description": "你的閱讀工作階段儲存在瀏覽器中。",
+    "description": "查看你的閱讀工作階段的學習進度、詞彙量及測驗得分。",
     "name": "閱讀文本",
     "emptyTip": "沒有記錄",
     "date": "日期",
