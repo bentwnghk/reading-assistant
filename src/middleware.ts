@@ -3,6 +3,10 @@ import { NextRequest } from "next/server";
 import { getCustomModelList, multiApiKeyPolling } from "@/utils/model";
 import { verifySignature, parseAccessPasswords, verifyDirectPassword } from "@/utils/signature";
 import { generateAuthToken } from "@/utils/vertexAuth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
+
+const { auth } = NextAuth(authConfig);
 
 const NODE_ENV = process.env.NODE_ENV;
 const accessPasswords = parseAccessPasswords(process.env.ACCESS_PASSWORD || "");
@@ -31,9 +35,13 @@ const DISABLED_SEARCH_PROVIDER =
   process.env.NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER || "";
 const MODEL_LIST = process.env.NEXT_PUBLIC_MODEL_LIST || "";
 
-// Limit the middleware to paths starting with `/api/`
+// Run middleware on API routes and all page routes (excluding Next.js internals
+// and static assets which don't need auth).
 export const config = {
-  matcher: "/api/:path*",
+  matcher: [
+    "/api/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|logo.png|manifest.json|sw.js|workbox-.*\\.js).*)",
+  ],
 };
 
 const ERRORS = {
@@ -51,6 +59,28 @@ const ERRORS = {
 
 export async function middleware(request: NextRequest) {
   if (NODE_ENV === "production") console.debug(request);
+
+  // Auth gate: require Google sign-in for all page routes.
+  // API routes handle their own auth; NextAuth's own /api/auth/* callbacks
+  // and the /signin page must remain publicly accessible.
+  const { pathname } = request.nextUrl;
+  const isApiRoute = pathname.startsWith("/api/");
+  const isAuthCallback = pathname.startsWith("/api/auth/");
+  const isSignInPage = pathname.startsWith("/signin");
+
+  if (!isApiRoute && !isSignInPage) {
+    const session = await auth();
+    if (!session) {
+      const signInUrl = new URL("/signin", request.url);
+      signInUrl.searchParams.set("callbackUrl", request.url);
+      return NextResponse.redirect(signInUrl);
+    }
+  }
+
+  // Allow NextAuth's own callback routes through without further checks.
+  if (isAuthCallback) {
+    return NextResponse.next();
+  }
 
   const disabledAIProviders =
     DISABLED_AI_PROVIDER.length > 0 ? DISABLED_AI_PROVIDER.split(",") : [];

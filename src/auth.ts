@@ -1,9 +1,9 @@
 import NextAuth from "next-auth"
-import Google from "next-auth/providers/google"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
 import type { NextAuthConfig } from "next-auth"
 import { ensureUserRole, ensureUserSchool, type UserRole } from "@/lib/users"
+import { authConfig } from "@/auth.config"
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -28,13 +28,8 @@ declare module "next-auth" {
 }
 
 export const config: NextAuthConfig = {
+  ...authConfig,
   adapter: PostgresAdapter(pool),
-  providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-  ],
   callbacks: {
     async session({ session, user }) {
       if (session.user && user) {
