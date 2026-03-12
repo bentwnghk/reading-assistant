@@ -36,8 +36,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
         <DialogHeader>
           <DialogTitle>{t("userManagement.title")}</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="classes" className="flex-1 overflow-hidden flex flex-col">
+        <Tabs defaultValue="students" className="flex-1 overflow-hidden flex flex-col">
           <TabsList className="w-full justify-start">
+            {isAdmin && (
+              <TabsTrigger value="schools">{t("userManagement.tabs.schools")}</TabsTrigger>
+            )}
             {isAdmin && (
               <TabsTrigger value="users">{t("userManagement.tabs.users")}</TabsTrigger>
             )}
@@ -45,11 +48,13 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isAdmin || isTeacher) && (
               <TabsTrigger value="students">{t("userManagement.tabs.studentData")}</TabsTrigger>
             )}
-            {isAdmin && (
-              <TabsTrigger value="schools">{t("userManagement.tabs.schools")}</TabsTrigger>
-            )}
           </TabsList>
           <div className="flex-1 overflow-auto mt-4">
+            {isAdmin && (
+              <TabsContent value="schools" className="mt-0">
+                <SchoolList />
+              </TabsContent>
+            )}
             {isAdmin && (
               <TabsContent value="users" className="mt-0">
                 <UserList />
@@ -61,11 +66,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
                 <StudentDataView isAdmin={isAdmin} currentUserId={session?.user?.id} />
-              </TabsContent>
-            )}
-            {isAdmin && (
-              <TabsContent value="schools" className="mt-0">
-                <SchoolList />
               </TabsContent>
             )}
           </div>

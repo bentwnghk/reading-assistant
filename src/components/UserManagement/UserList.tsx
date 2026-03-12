@@ -303,7 +303,7 @@ export default function UserList() {
                 {user.schoolName ? (
                   <div className="flex items-center gap-1">
                     <School className="h-3 w-3 text-muted-foreground shrink-0" />
-                    <span className="text-sm truncate max-w-32">{user.schoolName}</span>
+                    <span className="text-sm max-w-32 break-words">{user.schoolName}</span>
                   </div>
                 ) : (
                   <span className="text-muted-foreground">-</span>
