@@ -136,9 +136,9 @@ export function LandingPage() {
                 <span className="font-semibold">{t("header.about.roles.admin.title")}</span>
               </div>
               <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• {t("header.about.roles.admin.manageSchools")}</li>
                 <li>• {t("header.about.roles.admin.manageUsers")}</li>
-                <li>• {t("header.about.roles.admin.assignTeachers")}</li>
-                <li>• {t("header.about.roles.admin.createClasses")}</li>
+                <li>• {t("header.about.roles.admin.manageClasses")}</li>
               </ul>
             </div>
             <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border rounded-xl p-4">
@@ -147,8 +147,8 @@ export function LandingPage() {
                 <span className="font-semibold">{t("header.about.roles.teacher.title")}</span>
               </div>
               <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• {t("header.about.roles.teacher.createClass")}</li>
                 <li>• {t("header.about.roles.teacher.manageStudents")}</li>
-                <li>• {t("header.about.roles.teacher.trackProgress")}</li>
                 <li>• {t("header.about.roles.teacher.exportData")}</li>
               </ul>
             </div>
@@ -252,7 +252,6 @@ export function LandingPage() {
 
         {/* Bottom CTA */}
         <div className="text-center py-12 border-t">
-          <p className="text-muted-foreground text-sm mb-8">{t("header.about.builtWith")}</p>
           <button
             onClick={handleSignIn}
             disabled={loading}
@@ -276,6 +275,7 @@ export function LandingPage() {
             )}
             {loading ? t("header.auth.loading") : t("header.auth.signIn")}
           </button>
+          <p className="text-muted-foreground text-sm mt-8">{t("header.about.builtWith")}</p>
         </div>
       </div>
     </div>

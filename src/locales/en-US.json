@@ -56,29 +56,29 @@
         },
         "private": {
           "title": "🔒 Private & Synced",
-          "desc": "Cloud sync when signed in, local otherwise"
+          "desc": "Your data stays yours—secure cloud sync with every sign-in"
         }
       },
       "roles": {
         "title": "For Schools & Teachers",
-        "intro": "Powerful user management for classrooms and schools. Three roles with different permissions:",
+        "intro": "Complete user management for classrooms and schools! Organize students into classes, assign teachers, track learning progress in real-time, and export detailed reports. Three roles with tailored permissions:",
         "admin": {
           "title": "👑 Admin",
-          "manageUsers": "Manage all users & roles",
-          "assignTeachers": "Assign teachers to classes",
-          "createClasses": "Create & organize classes"
+          "manageSchools": "Create & manage schools",
+          "manageUsers": "Assign roles to any user",
+          "manageClasses": "Oversee all classes & teachers"
         },
         "teacher": {
           "title": "🎓 Teacher",
-          "manageStudents": "Add students to classes",
-          "trackProgress": "Track student learning data",
-          "exportData": "Export progress reports (CSV)"
+          "createClass": "Create your own classes",
+          "manageStudents": "Add students & track progress",
+          "exportData": "Export detailed reports (CSV)"
         },
         "student": {
           "title": "👥 Student",
           "learn": "Full access to all features",
-          "cloudSync": "Cloud sync learning history",
-          "history": "View personal progress"
+          "cloudSync": "Automatic cloud sync",
+          "history": "Track your learning journey"
         }
       },
       "features": {

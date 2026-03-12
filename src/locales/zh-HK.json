@@ -56,29 +56,29 @@
         },
         "private": {
           "title": "🔒 私隱與同步",
-          "desc": "登入時雲端同步，否則本地儲存"
+          "desc": "你的資料只屬於你——每次登入都安全雲端同步"
         }
       },
       "roles": {
         "title": "學校與老師專區",
-        "intro": "為課堂和學校提供強大的用戶管理功能。三種角色，不同權限：",
+        "intro": "完整的用戶管理系統，專為課堂和學校設計！將學生分班、指派老師、即時追蹤學習進度，並匯出詳細報告。三種角色，權限各異：",
         "admin": {
           "title": "👑 管理員",
-          "manageUsers": "管理所有用戶和角色",
-          "assignTeachers": "指派老師到班別",
-          "createClasses": "創建和管理班別"
+          "manageSchools": "創建與管理學校",
+          "manageUsers": "指派用戶角色",
+          "manageClasses": "監管所有班別與老師"
         },
         "teacher": {
           "title": "🎓 老師",
-          "manageStudents": "添加學生到班別",
-          "trackProgress": "追蹤學生學習數據",
-          "exportData": "導出進度報告（CSV）"
+          "createClass": "創建自己的班別",
+          "manageStudents": "添加學生並追蹤進度",
+          "exportData": "匯出詳細報告（CSV）"
         },
         "student": {
           "title": "👥 學生",
           "learn": "完整使用所有功能",
-          "cloudSync": "雲端同步學習記錄",
-          "history": "查看個人學習進度"
+          "cloudSync": "自動雲端同步",
+          "history": "追蹤你的學習歷程"
         }
       },
       "features": {

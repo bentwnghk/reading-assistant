@@ -358,9 +358,9 @@ function Header() {
                     <span className="font-medium text-sm">{t("header.about.roles.admin.title")}</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• {t("header.about.roles.admin.manageSchools")}</li>
                     <li>• {t("header.about.roles.admin.manageUsers")}</li>
-                    <li>• {t("header.about.roles.admin.assignTeachers")}</li>
-                    <li>• {t("header.about.roles.admin.createClasses")}</li>
+                    <li>• {t("header.about.roles.admin.manageClasses")}</li>
                   </ul>
                 </div>
                 <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border rounded-lg p-3">
@@ -369,8 +369,8 @@ function Header() {
                     <span className="font-medium text-sm">{t("header.about.roles.teacher.title")}</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• {t("header.about.roles.teacher.createClass")}</li>
                     <li>• {t("header.about.roles.teacher.manageStudents")}</li>
-                    <li>• {t("header.about.roles.teacher.trackProgress")}</li>
                     <li>• {t("header.about.roles.teacher.exportData")}</li>
                   </ul>
                 </div>
