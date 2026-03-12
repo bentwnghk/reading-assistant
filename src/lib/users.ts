@@ -29,6 +29,8 @@ export interface ClassInfo {
   description?: string
   teacherId?: string
   teacherName?: string
+  schoolId?: string
+  schoolName?: string
   studentCount?: number
   createdAt: number
 }
@@ -304,14 +306,14 @@ export async function assignUserSchool(userId: string, schoolId: string | null):
   }
 }
 
-export async function createClass(name: string, description: string, teacherId?: string): Promise<ClassInfo | null> {
+export async function createClass(name: string, description: string, teacherId?: string, schoolId?: string): Promise<ClassInfo | null> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `INSERT INTO classes (name, description, teacher_id) 
-       VALUES ($1, $2, $3) 
-       RETURNING id, name, description, teacher_id, created_at`,
-      [name, description, teacherId || null]
+      `INSERT INTO classes (name, description, teacher_id, school_id) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING id, name, description, teacher_id, school_id, created_at`,
+      [name, description, teacherId || null, schoolId || null]
     )
     
     const row = result.rows[0]
@@ -320,6 +322,7 @@ export async function createClass(name: string, description: string, teacherId?:
       name: row.name,
       description: row.description,
       teacherId: row.teacher_id,
+      schoolId: row.school_id,
       createdAt: new Date(row.created_at).getTime(),
     }
   } catch {
@@ -329,12 +332,12 @@ export async function createClass(name: string, description: string, teacherId?:
   }
 }
 
-export async function updateClass(classId: string, name: string, description: string, teacherId?: string): Promise<boolean> {
+export async function updateClass(classId: string, name: string, description: string, teacherId?: string, schoolId?: string): Promise<boolean> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `UPDATE classes SET name = $1, description = $2, teacher_id = $3 WHERE id = $4`,
-      [name, description, teacherId || null, classId]
+      `UPDATE classes SET name = $1, description = $2, teacher_id = $3, school_id = $4 WHERE id = $5`,
+      [name, description, teacherId || null, schoolId || null, classId]
     )
     return (result.rowCount ?? 0) > 0
   } finally {
@@ -352,57 +355,150 @@ export async function deleteClass(classId: string): Promise<boolean> {
   }
 }
 
+const CLASS_SELECT = `
+  SELECT 
+    c.id, c.name, c.description, c.teacher_id, c.school_id, c.created_at,
+    u.name as teacher_name,
+    s.name as school_name,
+    (SELECT COUNT(*) FROM class_members WHERE class_id = c.id) as student_count
+  FROM classes c
+  LEFT JOIN users u ON c.teacher_id = u.id
+  LEFT JOIN schools s ON c.school_id = s.id
+`
+
+function mapClassRow(row: Record<string, unknown>): ClassInfo {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    description: row.description as string | undefined,
+    teacherId: row.teacher_id as string | undefined,
+    teacherName: row.teacher_name as string | undefined,
+    schoolId: row.school_id as string | undefined,
+    schoolName: row.school_name as string | undefined,
+    studentCount: parseInt(row.student_count as string) || 0,
+    createdAt: new Date(row.created_at as string).getTime(),
+  }
+}
+
 export async function getAllClasses(): Promise<ClassInfo[]> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `SELECT 
-        c.id, c.name, c.description, c.teacher_id, c.created_at,
-        u.name as teacher_name,
-        (SELECT COUNT(*) FROM class_members WHERE class_id = c.id) as student_count
-       FROM classes c
-       LEFT JOIN users u ON c.teacher_id = u.id
-       ORDER BY c.created_at DESC`
+      `${CLASS_SELECT} ORDER BY c.created_at DESC`
     )
-    
+    return result.rows.map(mapClassRow)
+  } finally {
+    client.release()
+  }
+}
+
+/** All classes that belong to a given school */
+export async function getClassesForSchool(schoolId: string): Promise<ClassInfo[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `${CLASS_SELECT} WHERE c.school_id = $1 ORDER BY c.created_at DESC`,
+      [schoolId]
+    )
+    return result.rows.map(mapClassRow)
+  } finally {
+    client.release()
+  }
+}
+
+/** Classes taught by a teacher — scoped to the teacher's own school */
+export async function getClassesForTeacher(teacherId: string): Promise<ClassInfo[]> {
+  const client = await getClient()
+  try {
+    // Get all classes in the teacher's school where they are the assigned teacher,
+    // plus any classes in their school regardless of teacher (so they can see all
+    // school classes when they are an admin-equivalent within that school).
+    // Per requirements: teachers see classes from THEIR school only.
+    const result = await client.query(
+      `${CLASS_SELECT}
+       WHERE c.school_id = (SELECT school_id FROM users WHERE id = $1)
+       ORDER BY c.created_at DESC`,
+      [teacherId]
+    )
+    return result.rows.map(mapClassRow)
+  } finally {
+    client.release()
+  }
+}
+
+/** Lookup a user's school_id directly from the DB */
+export async function getSchoolForUser(userId: string): Promise<string | null> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT school_id FROM users WHERE id = $1`,
+      [userId]
+    )
+    return result.rows.length > 0 ? (result.rows[0].school_id ?? null) : null
+  } finally {
+    client.release()
+  }
+}
+
+/** All users (of any role) belonging to a given school */
+export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT 
+        u.id, u.name, u.email, u.image, u."createdAt",
+        COALESCE(ur.role, 'student') as role,
+        u.school_id as "schoolId",
+        s.name as "schoolName",
+        cm.class_id as "classId",
+        c.name as "className"
+       FROM users u
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN schools s ON u.school_id = s.id
+       LEFT JOIN class_members cm ON u.id = cm.student_id
+       LEFT JOIN classes c ON cm.class_id = c.id
+       WHERE u.school_id = $1
+       ORDER BY u."createdAt" DESC`,
+      [schoolId]
+    )
     return result.rows.map(row => ({
       id: row.id,
       name: row.name,
-      description: row.description,
-      teacherId: row.teacher_id,
-      teacherName: row.teacher_name,
-      studentCount: parseInt(row.student_count) || 0,
-      createdAt: new Date(row.created_at).getTime(),
+      email: row.email,
+      image: row.image,
+      role: row.role as UserRole,
+      schoolId: row.schoolId,
+      schoolName: row.schoolName,
+      classId: row.classId,
+      className: row.className,
+      createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
     client.release()
   }
 }
 
-export async function getClassesForTeacher(teacherId: string): Promise<ClassInfo[]> {
+/**
+ * Returns true if the teacher belongs to the same school as the class,
+ * or if role is admin (admins bypass school scoping).
+ */
+export async function canAccessClass(userId: string, userRole: string, classId: string): Promise<boolean> {
+  if (userRole === 'admin') return true
+  if (userRole !== 'teacher') return false
+
   const client = await getClient()
   try {
+    // Verify both the teacher and the class share the same school_id
     const result = await client.query(
-      `SELECT 
-        c.id, c.name, c.description, c.teacher_id, c.created_at,
-        u.name as teacher_name,
-        (SELECT COUNT(*) FROM class_members WHERE class_id = c.id) as student_count
+      `SELECT 1
        FROM classes c
-       LEFT JOIN users u ON c.teacher_id = u.id
-       WHERE c.teacher_id = $1
-       ORDER BY c.created_at DESC`,
-      [teacherId]
+       JOIN users u ON u.id = $1
+       WHERE c.id = $2
+         AND c.school_id IS NOT NULL
+         AND c.school_id = u.school_id`,
+      [userId, classId]
     )
-    
-    return result.rows.map(row => ({
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      teacherId: row.teacher_id,
-      teacherName: row.teacher_name,
-      studentCount: parseInt(row.student_count) || 0,
-      createdAt: new Date(row.created_at).getTime(),
-    }))
+    return result.rows.length > 0
   } finally {
     client.release()
   }

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Plus, Pencil, Trash2, Users, ArrowUpDown } from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Users, ArrowUpDown, School } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -38,11 +39,14 @@ interface ClassListProps {
   currentUserId?: string
 }
 
-type SortField = "name" | "teacherName"
+type SortField = "name" | "teacherName" | "schoolName"
 type SortOrder = "asc" | "desc"
 
 export default function ClassList({ isAdmin, currentUserId: _currentUserId }: ClassListProps) {
   const { t } = useTranslation()
+  const { data: session } = useSession()
+  const isTeacher = session?.user?.role === "teacher"
+
   const [classes, setClasses] = useState<ClassInfo[]>([])
   const [teachers, setTeachers] = useState<UserWithRole[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,17 +60,17 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const [classesRes, usersRes] = await Promise.all([
-        fetch("/api/classes"),
-        isAdmin ? fetch("/api/users") : Promise.resolve(null),
-      ])
-
+      // Classes are already school-scoped by the API for teachers
+      const classesRes = await fetch("/api/classes")
       if (classesRes.ok) {
         setClasses(await classesRes.json())
       }
+
+      // Load users to populate teacher selector (admin+teacher roles only)
+      const usersRes = await fetch("/api/users")
       if (usersRes?.ok) {
-        const users = await usersRes.json()
-        setTeachers(users.filter((u: UserWithRole) => u.role === "teacher" || u.role === "admin"))
+        const users: UserWithRole[] = await usersRes.json()
+        setTeachers(users.filter(u => u.role === "teacher" || u.role === "admin"))
       }
     } catch (error) {
       console.error("Failed to load data:", error)
@@ -74,11 +78,20 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
     } finally {
       setLoading(false)
     }
-  }, [isAdmin, t])
+  }, [t])
 
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // For teachers, only show teachers from their own school in the selector
+  const filteredTeachers = useMemo(() => {
+    if (!isTeacher || !session?.user?.id) return teachers
+    const currentUserEntry = teachers.find(u => u.id === session.user.id)
+    const mySchoolId = currentUserEntry?.schoolId
+    if (!mySchoolId) return teachers
+    return teachers.filter(u => u.schoolId === mySchoolId)
+  }, [teachers, isTeacher, session?.user?.id])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -98,6 +111,9 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
           break
         case "teacherName":
           comparison = (a.teacherName || "").localeCompare(b.teacherName || "")
+          break
+        case "schoolName":
+          comparison = (a.schoolName || "").localeCompare(b.schoolName || "")
           break
       }
       return sortOrder === "asc" ? comparison : -comparison
@@ -187,7 +203,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">{t("userManagement.classes.description")}</p>
-        {isAdmin && (
+        {(isAdmin || isTeacher) && (
           <Button onClick={openCreateDialog} size="sm">
             <Plus className="h-4 w-4 mr-1" />
             {t("userManagement.classes.create")}
@@ -204,6 +220,14 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                 <ArrowUpDown className="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
+            {isAdmin && (
+              <TableHead>
+                <Button variant="ghost" size="sm" onClick={() => handleSort("schoolName")}>
+                  {t("userManagement.classes.school")}
+                  <ArrowUpDown className="ml-1 h-3 w-3" />
+                </Button>
+              </TableHead>
+            )}
             <TableHead>
               <Button variant="ghost" size="sm" onClick={() => handleSort("teacherName")}>
                 {t("userManagement.classes.teacher")}
@@ -227,6 +251,18 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                   )}
                 </div>
               </TableCell>
+              {isAdmin && (
+                <TableCell>
+                  {classInfo.schoolName ? (
+                    <div className="flex items-center gap-1">
+                      <School className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <span className="text-sm truncate max-w-32">{classInfo.schoolName}</span>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
+                </TableCell>
+              )}
               <TableCell>
                 {classInfo.teacherName ? (
                   <Badge variant="outline">{classInfo.teacherName}</Badge>
@@ -247,26 +283,28 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                   >
                     <Users className="h-4 w-4" />
                   </Button>
+                  {/* Teachers can edit classes from their school; admins can edit any */}
+                  {(isAdmin || isTeacher) && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEditDialog(classInfo)}
+                      title={t("userManagement.classes.edit")}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {/* Only admins can delete classes */}
                   {isAdmin && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(classInfo)}
-                        title={t("userManagement.classes.edit")}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-500 hover:text-red-600"
-                        onClick={() => handleDelete(classInfo.id)}
-                        title={t("userManagement.classes.delete")}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+                      onClick={() => handleDelete(classInfo.id)}
+                      title={t("userManagement.classes.delete")}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   )}
                 </div>
               </TableCell>
@@ -316,13 +354,13 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                   <SelectValue placeholder={t("userManagement.classes.selectTeacher")} />
                 </SelectTrigger>
                 <SelectContent>
-                   <SelectItem value="__none__">{t("userManagement.classes.noTeacher")}</SelectItem>
-                   {teachers.map((teacher) => (
-                     <SelectItem key={teacher.id} value={teacher.id}>
-                       {teacher.name || teacher.email}
-                     </SelectItem>
-                   ))}
-                 </SelectContent>
+                  <SelectItem value="__none__">{t("userManagement.classes.noTeacher")}</SelectItem>
+                  {filteredTeachers.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.name || teacher.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -340,6 +378,11 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
           <DialogHeader>
             <DialogTitle>
               {t("userManagement.classes.membersTitle", { name: selectedClass?.name })}
+              {selectedClass?.schoolName && (
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  — {selectedClass.schoolName}
+                </span>
+              )}
             </DialogTitle>
           </DialogHeader>
           {selectedClass && (

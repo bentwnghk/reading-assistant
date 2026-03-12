@@ -150,35 +150,7 @@ CREATE TRIGGER update_user_roles_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Classes table
-CREATE TABLE classes (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  description TEXT DEFAULT '',
-  teacher_id TEXT REFERENCES users(id) ON DELETE SET NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_classes_teacher_id ON classes(teacher_id);
-CREATE INDEX idx_classes_name ON classes(name);
-
-CREATE TRIGGER update_classes_updated_at
-    BEFORE UPDATE ON classes
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Class memberships (one student can only be in one class)
-CREATE TABLE class_members (
-  class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
-  student_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  PRIMARY KEY (student_id)
-);
-
-CREATE INDEX idx_class_members_class_id ON class_members(class_id);
-
--- Schools table (auto-created from user email domains)
+-- Schools table (auto-created from user email domains; defined before classes so classes can FK-reference it)
 CREATE TABLE schools (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -198,6 +170,36 @@ CREATE TRIGGER update_schools_updated_at
 ALTER TABLE users ADD COLUMN school_id TEXT REFERENCES schools(id) ON DELETE SET NULL;
 
 CREATE INDEX idx_users_school_id ON users(school_id);
+
+-- Classes table (belongs to a school)
+CREATE TABLE classes (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  teacher_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  school_id TEXT REFERENCES schools(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_classes_teacher_id ON classes(teacher_id);
+CREATE INDEX idx_classes_school_id ON classes(school_id);
+CREATE INDEX idx_classes_name ON classes(name);
+
+CREATE TRIGGER update_classes_updated_at
+    BEFORE UPDATE ON classes
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Class memberships (one student can only be in one class)
+CREATE TABLE class_members (
+  class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  student_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  PRIMARY KEY (student_id)
+);
+
+CREATE INDEX idx_class_members_class_id ON class_members(class_id);
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;

@@ -58,5 +58,19 @@ WHERE SPLIT_PART(u.email, '@', 2) = s.domain
   AND u.email IS NOT NULL
   AND u.school_id IS NULL;
 
--- 5. Grant permissions (adjust role name if your setup differs)
+-- 5. Add school_id column to classes (if not already present)
+ALTER TABLE classes ADD COLUMN IF NOT EXISTS school_id TEXT REFERENCES schools(id) ON DELETE SET NULL;
+
+CREATE INDEX IF NOT EXISTS idx_classes_school_id ON classes(school_id);
+
+-- 6. Back-fill: assign each class to a school based on its teacher's school
+--    Classes with no teacher remain unassigned (school_id = NULL).
+UPDATE classes c
+SET school_id = u.school_id
+FROM users u
+WHERE c.teacher_id = u.id
+  AND u.school_id IS NOT NULL
+  AND c.school_id IS NULL;
+
+-- 7. Grant permissions (adjust role name if your setup differs)
 GRANT ALL PRIVILEGES ON TABLE schools TO reading_user;

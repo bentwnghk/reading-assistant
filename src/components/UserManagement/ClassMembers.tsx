@@ -51,18 +51,16 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
 
   const loadAvailableStudents = useCallback(async () => {
     try {
-      const response = await fetch("/api/users")
+      // Returns only students from the same school who are not yet in this class
+      const response = await fetch(`/api/classes/${classId}/available-students`)
       if (response.ok) {
-        const users: UserWithRole[] = await response.json()
-        const memberIds = new Set(members.map(m => m.studentId))
-        setAvailableStudents(
-          users.filter(u => u.role === "student" && !memberIds.has(u.id))
-        )
+        const students: UserWithRole[] = await response.json()
+        setAvailableStudents(students)
       }
     } catch (error) {
       console.error("Failed to load students:", error)
     }
-  }, [members])
+  }, [classId])
 
   useEffect(() => {
     loadMembers()

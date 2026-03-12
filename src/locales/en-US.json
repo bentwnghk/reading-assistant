@@ -771,8 +771,9 @@
     "schoolUpdated": "School updated successfully",
     "schoolUpdateFailed": "Failed to update school",
     "classes": {
-      "description": "Manage classes. Assign teachers to classes and add students.",
+      "description": "Manage classes. Teachers can create and edit classes within their school.",
       "name": "Class Name",
+      "school": "School",
       "namePlaceholder": "Enter class name",
       "nameRequired": "Class name is required",
       "descriptionLabel": "Description",

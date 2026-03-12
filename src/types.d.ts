@@ -170,6 +170,8 @@ interface ClassInfo {
   description?: string;
   teacherId?: string;
   teacherName?: string;
+  schoolId?: string;
+  schoolName?: string;
   studentCount?: number;
   createdAt: number;
 }
