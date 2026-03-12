@@ -818,6 +818,9 @@
     "studentData": {
       "description": "View reading session data for students in your classes.",
       "selectClass": "Select a class",
+      "selectSchool": "Select a school",
+      "allSchools": "All Schools",
+      "allClasses": "All Classes",
       "students": "students",
       "search": "Search by student or reading text...",
       "export": "Export CSV",
@@ -825,6 +828,7 @@
       "noSessions": "No reading sessions found for this class",
       "noResults": "No sessions match your search",
       "showing": "Showing {{count}} sessions",
+      "school": "School",
       "student": "Student",
       "title": "Reading Text",
       "progress": "Learning Progress",

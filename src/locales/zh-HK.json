@@ -818,6 +818,9 @@
     "studentData": {
       "description": "查看班別中學生的閱讀記錄數據。",
       "selectClass": "選擇班別",
+      "selectSchool": "選擇學校",
+      "allSchools": "所有學校",
+      "allClasses": "所有班別",
       "students": "名學生",
       "search": "搜索學生或閱讀文本...",
       "export": "導出 CSV",
@@ -825,6 +828,7 @@
       "noSessions": "此班別沒有閱讀記錄",
       "noResults": "沒有符合搜索條件的記錄",
       "showing": "顯示 {{count}} 條記錄",
+      "school": "學校",
       "student": "學生",
       "title": "閱讀文本",
       "progress": "學習進度",

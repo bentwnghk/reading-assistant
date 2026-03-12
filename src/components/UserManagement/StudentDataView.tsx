@@ -23,68 +23,94 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import dayjs from "dayjs"
-import type { ClassInfo, StudentSessionData } from "@/lib/users"
+import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 
 interface StudentDataViewProps {
   isAdmin: boolean
   currentUserId?: string
 }
 
-type SortField = "date" | "student" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore"
+type SortField = "date" | "student" | "school" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore"
 type SortOrder = "asc" | "desc"
 
-export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
+interface SessionWithSchool extends StudentSessionData {
+  schoolName?: string
+}
+
+export default function StudentDataView({ isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
   const { t } = useTranslation()
+  const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("")
   const [selectedClassId, setSelectedClassId] = useState<string>("")
-  const [sessions, setSessions] = useState<StudentSessionData[]>([])
+  const [sessions, setSessions] = useState<SessionWithSchool[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingSessions, setLoadingSessions] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [sortField, setSortField] = useState<SortField>("date")
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
 
-  const loadClasses = useCallback(async () => {
+  const loadClassesAndSchools = useCallback(async () => {
     try {
-      const response = await fetch("/api/classes")
-      if (response.ok) {
-        const data: ClassInfo[] = await response.json()
+      const classesResponse = await fetch("/api/classes")
+      if (classesResponse.ok) {
+        const data: ClassInfo[] = await classesResponse.json()
         setClasses(data)
         if (data.length > 0 && !selectedClassId) {
-          setSelectedClassId(data[0].id)
+          if (isAdmin) {
+            setSelectedClassId("all")
+          } else {
+            setSelectedClassId(data[0].id)
+          }
+        }
+      }
+
+      if (isAdmin) {
+        const schoolsResponse = await fetch("/api/schools")
+        if (schoolsResponse.ok) {
+          setSchools(await schoolsResponse.json())
         }
       }
     } catch (error) {
-      console.error("Failed to load classes:", error)
+      console.error("Failed to load data:", error)
       toast.error(t("userManagement.loadFailed"))
     } finally {
       setLoading(false)
     }
-  }, [selectedClassId, t])
+  }, [selectedClassId, t, isAdmin])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return
 
     setLoadingSessions(true)
     try {
-      const response = await fetch(`/api/classes/${selectedClassId}/members`)
-      if (!response.ok) {
-        toast.error(t("userManagement.loadFailed"))
-        setLoadingSessions(false)
-        return
+      const classesToLoad = selectedClassId === "all"
+        ? classes.filter(c => !selectedSchoolId || c.schoolId === selectedSchoolId)
+        : classes.filter(c => c.id === selectedClassId)
+
+      const allSessions: SessionWithSchool[] = []
+
+      for (const cls of classesToLoad) {
+        const response = await fetch(`/api/classes/${cls.id}/members`)
+        if (!response.ok) continue
+
+        const members = await response.json()
+        const sessionPromises = members.map(async (member: { studentId: string }) => {
+          const res = await fetch(`/api/classes/${cls.id}/students/${member.studentId}/sessions`)
+          if (res.ok) {
+            const sessions = await res.json()
+            return sessions.map((s: StudentSessionData) => ({
+              ...s,
+              schoolName: cls.schoolName
+            }))
+          }
+          return []
+        })
+
+        const sessionArrays = await Promise.all(sessionPromises)
+        allSessions.push(...sessionArrays.flat())
       }
 
-      const members = await response.json()
-      const sessionPromises = members.map(async (member: { studentId: string }) => {
-        const res = await fetch(`/api/classes/${selectedClassId}/students/${member.studentId}/sessions`)
-        if (res.ok) {
-          return res.json()
-        }
-        return []
-      })
-
-      const sessionArrays = await Promise.all(sessionPromises)
-      const allSessions = sessionArrays.flat()
       setSessions(allSessions)
     } catch (error) {
       console.error("Failed to load sessions:", error)
@@ -92,17 +118,17 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
     } finally {
       setLoadingSessions(false)
     }
-  }, [selectedClassId, t])
+  }, [selectedClassId, selectedSchoolId, classes, t])
 
   useEffect(() => {
-    loadClasses()
-  }, [loadClasses])
+    loadClassesAndSchools()
+  }, [loadClassesAndSchools])
 
   useEffect(() => {
-    if (selectedClassId) {
+    if (selectedClassId && classes.length > 0) {
       loadSessions()
     }
-  }, [selectedClassId, loadSessions])
+  }, [selectedClassId, selectedSchoolId, classes.length, loadSessions])
 
   const filteredAndSortedSessions = useMemo(() => {
     let result = [...sessions]
@@ -124,6 +150,9 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
           break
         case "student":
           comparison = (a.userName || "").localeCompare(b.userName || "")
+          break
+        case "school":
+          comparison = (a.schoolName || "").localeCompare(b.schoolName || "")
           break
         case "progress":
           comparison = b.progress - a.progress
@@ -157,19 +186,27 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
   }
 
   const exportData = () => {
+    const headers = isAdmin
+      ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"]
+      : ["Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"]
+
     const csvContent = [
-      ["Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"].join(","),
-      ...filteredAndSortedSessions.map(s => [
-        s.userName || "",
-        s.userEmail || "",
-        `"${s.docTitle.replace(/"/g, '""')}"`,
-        `${s.progress}%`,
-        s.testCompleted ? `${s.testScore}%` : "-",
-        s.glossaryCount,
-        s.spellingGameBestScore || 0,
-        s.vocabularyQuizScore || 0,
-        dayjs(s.updatedAt).format("YYYY-MM-DD HH:mm"),
-      ].join(","))
+      headers.join(","),
+      ...filteredAndSortedSessions.map(s => {
+        const row = isAdmin
+          ? [s.schoolName || "", s.userName || "", s.userEmail || ""]
+          : [s.userName || "", s.userEmail || ""]
+        return [
+          ...row,
+          `"${s.docTitle.replace(/"/g, '""')}"`,
+          `${s.progress}%`,
+          s.testCompleted ? `${s.testScore}%` : "-",
+          s.glossaryCount,
+          s.spellingGameBestScore || 0,
+          s.vocabularyQuizScore || 0,
+          dayjs(s.updatedAt).format("YYYY-MM-DD HH:mm"),
+        ].join(",")
+      })
     ].join("\n")
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
@@ -180,6 +217,11 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
     link.click()
     URL.revokeObjectURL(url)
   }
+
+  const filteredClasses = useMemo(() => {
+    if (!isAdmin || !selectedSchoolId) return classes
+    return classes.filter(c => c.schoolId === selectedSchoolId)
+  }, [classes, selectedSchoolId, isAdmin])
 
   if (loading) {
     return (
@@ -201,12 +243,33 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <div className="flex gap-3 items-center">
+          {isAdmin && (
+            <Select value={selectedSchoolId} onValueChange={(v) => {
+              setSelectedSchoolId(v)
+              setSelectedClassId("all")
+            }}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder={t("userManagement.studentData.selectSchool")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">{t("userManagement.studentData.allSchools")}</SelectItem>
+                {schools.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder={t("userManagement.studentData.selectClass")} />
             </SelectTrigger>
             <SelectContent>
-              {classes.map((c) => (
+              {isAdmin && (
+                <SelectItem value="all">{t("userManagement.studentData.allClasses")}</SelectItem>
+              )}
+              {filteredClasses.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.name} ({c.studentCount || 0} {t("userManagement.studentData.students")})
                 </SelectItem>
@@ -241,6 +304,14 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
           <Table>
             <TableHeader>
               <TableRow>
+                {isAdmin && (
+                  <TableHead>
+                    <Button variant="ghost" size="sm" onClick={() => handleSort("school")}>
+                      {t("userManagement.studentData.school")}
+                      <ArrowUpDown className="ml-1 h-3 w-3" />
+                    </Button>
+                  </TableHead>
+                )}
                 <TableHead>
                   <Button variant="ghost" size="sm" onClick={() => handleSort("student")}>
                     {t("userManagement.studentData.student")}
@@ -289,6 +360,11 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
             <TableBody>
               {filteredAndSortedSessions.map((session) => (
                 <TableRow key={session.id}>
+                  {isAdmin && (
+                    <TableCell>
+                      <span className="text-sm">{session.schoolName || "-"}</span>
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div>
                       <div className="font-medium">{session.userName || t("userManagement.users.noName")}</div>
