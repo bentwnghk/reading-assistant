@@ -30,7 +30,7 @@ interface StudentDataViewProps {
   currentUserId?: string
 }
 
-type SortField = "date" | "student" | "progress" | "testScore" | "spellingScore" | "quizScore"
+type SortField = "date" | "student" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore"
 type SortOrder = "asc" | "desc"
 
 export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
@@ -130,6 +130,9 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
           break
         case "testScore":
           comparison = (b.testScore || 0) - (a.testScore || 0)
+          break
+        case "vocabularyCount":
+          comparison = (b.glossaryCount || 0) - (a.glossaryCount || 0)
           break
         case "spellingScore":
           comparison = (b.spellingGameBestScore || 0) - (a.spellingGameBestScore || 0)
@@ -245,27 +248,32 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
                   </Button>
                 </TableHead>
                 <TableHead>{t("userManagement.studentData.title")}</TableHead>
-                <TableHead className="text-center">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort("progress")}>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("progress")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.progress")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-center">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort("testScore")}>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("testScore")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.testScore")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-center">{t("userManagement.studentData.vocabulary")}</TableHead>
-                <TableHead className="text-center">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort("spellingScore")}>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("vocabularyCount")} className="h-auto py-1 whitespace-normal">
+                    {t("userManagement.studentData.vocabulary")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("spellingScore")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.spelling")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-center">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort("quizScore")}>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("quizScore")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.quiz")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
