@@ -59,6 +59,28 @@
           "desc": "Cloud sync when signed in, local otherwise"
         }
       },
+      "roles": {
+        "title": "For Schools & Teachers",
+        "intro": "Powerful user management for classrooms and schools. Three roles with different permissions:",
+        "admin": {
+          "title": "👑 Admin",
+          "manageUsers": "Manage all users & roles",
+          "assignTeachers": "Assign teachers to classes",
+          "createClasses": "Create & organize classes"
+        },
+        "teacher": {
+          "title": "🎓 Teacher",
+          "manageStudents": "Add students to classes",
+          "trackProgress": "Track student learning data",
+          "exportData": "Export progress reports (CSV)"
+        },
+        "student": {
+          "title": "👥 Student",
+          "learn": "Full access to all features",
+          "cloudSync": "Cloud sync learning history",
+          "history": "View personal progress"
+        }
+      },
       "features": {
         "title": "Powerful Features",
         "difficulty": {
