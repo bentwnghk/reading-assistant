@@ -155,16 +155,16 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
 
   const exportData = () => {
     const csvContent = [
-      ["Student", "Email", "Title", "Progress", "Test Score", "Spelling", "Quiz", "Vocabulary", "Date"].join(","),
+      ["Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"].join(","),
       ...filteredAndSortedSessions.map(s => [
         s.userName || "",
         s.userEmail || "",
         `"${s.docTitle.replace(/"/g, '""')}"`,
         `${s.progress}%`,
         s.testCompleted ? `${s.testScore}%` : "-",
+        s.glossaryCount,
         s.spellingGameBestScore || 0,
         s.vocabularyQuizScore || 0,
-        s.glossaryCount,
         dayjs(s.updatedAt).format("YYYY-MM-DD HH:mm"),
       ].join(","))
     ].join("\n")
@@ -173,7 +173,7 @@ export default function StudentDataView({ isAdmin: _isAdmin, currentUserId: _cur
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
-    link.download = `student-data-${dayjs().format("YYYY-MM-DD")}.csv`
+    link.download = `ProReader-student-data-${dayjs().format("YYYY-MM-DD")}.csv`
     link.click()
     URL.revokeObjectURL(url)
   }
