@@ -422,7 +422,6 @@
         "fillBlank": "Fill in the blank:",
         "reviewAnswers": "Review Answers",
         "noQuizWords": "Need at least 4 words for quiz",
-        "title": "Vocabulary Quiz",
         "aboutTitle": "How It Works",
         "aboutDesc": "Test your vocabulary knowledge with AI-generated questions in multiple formats.",
         "modes": {
@@ -588,7 +587,12 @@
     "delete": "Delete",
     "loadMore": "Load More History",
     "noHistory": "No history records",
-    "restored": "Restored session: {{title}}"
+    "restored": "Restored session: {{title}}",
+    "progress": "Learning Progress",
+    "testScore": "Reading Test Score",
+    "glossaryWords": "Vocabulary Size",
+    "spellingScore": "Spelling Challenge Score",
+    "quizScore": "Vocabulary Quiz Score"
   },
   "setting": {
     "title": "Settings",

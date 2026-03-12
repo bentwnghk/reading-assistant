@@ -60,6 +60,24 @@ function formatDate(timestamp: number) {
   return dayjs(timestamp).format("YYYY-MM-DD HH:mm");
 }
 
+function calculateProgress(item: ReadingHistory): number {
+  const hasExtractedText = !!item.extractedText;
+  const steps = [
+    hasExtractedText,
+    !!item.summary,
+    !!item.mindMap,
+    !!item.adaptedText,
+    item.testCompleted,
+    Object.keys(item.analyzedSentences || {}).length > 0,
+    (item.highlightedWords || []).length > 0,
+    (item.glossary || []).length > 0,
+    (item.spellingGameBestScore || 0) > 0,
+    (item.vocabularyQuizScore || 0) > 0,
+  ];
+  const completedCount = steps.filter(Boolean).length;
+  return Math.round((completedCount / steps.length) * 100);
+}
+
 function History({ open, onClose }: HistoryProps) {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -156,7 +174,7 @@ function History({ open, onClose }: HistoryProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-md gap-2">
+      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-lg gap-2">
         <DialogHeader>
           <DialogTitle>{t("history.title")}</DialogTitle>
           <DialogDescription>{t("history.description")}</DialogDescription>
@@ -185,6 +203,21 @@ function History({ open, onClose }: HistoryProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("history.name")}</TableHead>
+                    <TableHead className="text-center max-xl:hidden">
+                      {t("history.progress")}
+                    </TableHead>
+                    <TableHead className="text-center max-lg:hidden">
+                      {t("history.testScore")}
+                    </TableHead>
+                    <TableHead className="text-center max-xl:hidden">
+                      {t("history.glossaryWords")}
+                    </TableHead>
+                    <TableHead className="text-center max-lg:hidden">
+                      {t("history.spellingScore")}
+                    </TableHead>
+                    <TableHead className="text-center max-xl:hidden">
+                      {t("history.quizScore")}
+                    </TableHead>
                     <TableHead className="text-center max-sm:hidden">
                       {t("history.date")}
                     </TableHead>
@@ -198,12 +231,29 @@ function History({ open, onClose }: HistoryProps) {
                     <TableRow key={item.id}>
                       <TableCell>
                         <p
-                          className="truncate w-96 max-lg:max-w-72 max-sm:max-w-52 cursor-pointer hover:text-blue-500"
+                          className="truncate w-48 max-lg:max-w-40 max-sm:max-w-28 cursor-pointer hover:text-blue-500"
                           title={item.docTitle || item.extractedText?.slice(0, 100)}
                           onClick={() => loadHistory(item.id)}
                         >
                           {item.docTitle || item.extractedText?.slice(0, 50) || "Untitled Session"}
                         </p>
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap max-xl:hidden">
+                        <span className={calculateProgress(item) === 100 ? "text-green-600 dark:text-green-400" : ""}>
+                          {calculateProgress(item)}%
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap max-lg:hidden">
+                        {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap max-xl:hidden">
+                        {item.glossary?.length || 0}
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap max-lg:hidden">
+                        {item.spellingGameBestScore || 0}
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap max-xl:hidden">
+                        {item.vocabularyQuizScore || 0}
                       </TableCell>
                       <TableCell className="text-center whitespace-nowrap max-sm:hidden">
                         {formatDate(item.updatedAt || item.createdAt)}

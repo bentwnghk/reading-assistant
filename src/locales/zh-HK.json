@@ -422,7 +422,6 @@
         "fillBlank": "填空：",
         "reviewAnswers": "查看答案",
         "noQuizWords": "至少需要4個生字才能測驗",
-        "title": "詞彙測驗",
         "aboutTitle": "運作方式",
         "aboutDesc": "通過 AI 生成的多種題型測試你的詞彙知識。",
         "modes": {
@@ -588,7 +587,12 @@
     "delete": "刪除",
     "loadMore": "載入更多記錄",
     "noHistory": "沒有記錄",
-    "restored": "已恢復工作階段：{{title}}"
+    "restored": "已恢復工作階段：{{title}}",
+    "progress": "學習進度",
+    "testScore": "閱讀測驗得分",
+    "glossaryWords": "詞彙量",
+    "spellingScore": "拼字挑戰得分",
+    "quizScore": "詞彙測驗得分"
   },
   "setting": {
     "title": "設定",
