@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     const classInfo = await createClass(
       name.trim(),
       description?.trim() || "",
-      teacherId || (session.user.role === "teacher" ? session.user.id : undefined),
+      teacherId === null ? undefined : (teacherId || (session.user.role === "teacher" ? session.user.id : undefined)),
       schoolId
     )
 
