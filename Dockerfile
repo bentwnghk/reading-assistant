@@ -7,9 +7,8 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json pnpm-lock.yaml ./
-RUN yarn global add pnpm && pnpm install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -26,7 +25,7 @@ ENV NEXT_PUBLIC_DISABLED_AI_PROVIDER=google,openai,anthropic,deepseek,xai,mistra
 ENV NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER=firecrawl,exa,bocha,searxng
 # ENV NEXT_PUBLIC_MODEL_LIST=-all,+claude-sonnet-4-5,+deepseek-chat,+deepseek-reasoner,+gemini-2.0-flash-exp,+gemini-2.5-flash-lite,+gemini-2.5-flash,+gemini-2.5-pro,+gpt-5-mini,+gpt-5-chat,+glm-4.6,+kimi-k2-thinking
 
-RUN yarn run build:standalone
+RUN npm run build:standalone
 
 # Production image, copy all the files and run next
 FROM base AS runner
