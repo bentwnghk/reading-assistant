@@ -41,7 +41,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
   const { t } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
-  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("")
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all")
   const [selectedClassId, setSelectedClassId] = useState<string>("")
   const [sessions, setSessions] = useState<SessionWithSchool[]>([])
   const [loading, setLoading] = useState(true)
@@ -85,7 +85,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
     setLoadingSessions(true)
     try {
       const classesToLoad = selectedClassId === "all"
-        ? classes.filter(c => !selectedSchoolId || c.schoolId === selectedSchoolId)
+        ? classes.filter(c => selectedSchoolId === "all" || c.schoolId === selectedSchoolId)
         : classes.filter(c => c.id === selectedClassId)
 
       const allSessions: SessionWithSchool[] = []
@@ -219,7 +219,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
   }
 
   const filteredClasses = useMemo(() => {
-    if (!isAdmin || !selectedSchoolId) return classes
+    if (!isAdmin || selectedSchoolId === "all") return classes
     return classes.filter(c => c.schoolId === selectedSchoolId)
   }, [classes, selectedSchoolId, isAdmin])
 
@@ -252,7 +252,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
                 <SelectValue placeholder={t("userManagement.studentData.selectSchool")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t("userManagement.studentData.allSchools")}</SelectItem>
+                <SelectItem value="all">{t("userManagement.studentData.allSchools")}</SelectItem>
                 {schools.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}
