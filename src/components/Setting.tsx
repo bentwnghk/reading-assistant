@@ -51,7 +51,6 @@ type SettingProps = {
 };
 
 const BUILD_MODE = process.env.NEXT_PUBLIC_BUILD_MODE;
-const VERSION = process.env.NEXT_PUBLIC_VERSION;
 
 const formSchema = z.object({
   provider: z.string(),
@@ -868,9 +867,6 @@ function Setting({ open, onClose }: SettingProps) {
               >
                 {t("setting.resetAllSettings")}
               </Button>
-              <p className="text-xs text-center text-muted-foreground">
-                {t("setting.version")}: v{VERSION}
-              </p>
             </DialogFooter>
           </form>
         </Form>
