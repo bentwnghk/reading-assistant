@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import { LoginButton } from "@/components/Auth/LoginButton";
+import { UserManagementButton } from "@/components/UserManagement/UserManagementButton";
 import {
   Dialog,
   DialogContent,
@@ -270,7 +271,10 @@ function Header() {
               <Settings className="h-5 w-5" />
             </Button>
           </div>
-          <LoginButton />
+          <div className="flex items-center gap-2">
+            <UserManagementButton />
+            <LoginButton />
+          </div>
         </div>
       </header>
       <Dialog open={openShortcuts} onOpenChange={setOpenShortcuts}>

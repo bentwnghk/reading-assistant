@@ -713,5 +713,96 @@
       }
     },
     "placeholder": "Enter text, or type \"/\" for commands"
+  },
+  "userManagement": {
+    "title": "User Management",
+    "loadFailed": "Failed to load data",
+    "tabs": {
+      "users": "Users",
+      "classes": "Classes",
+      "studentData": "Student Data"
+    },
+    "roles": {
+      "admin": "Admin",
+      "teacher": "Teacher",
+      "student": "Student"
+    },
+    "users": {
+      "description": "Manage user roles. Admins can assign teachers, teachers can manage students.",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "class": "Class",
+      "actions": "Actions",
+      "noName": "No name",
+      "noUsers": "No users found"
+    },
+    "roleUpdated": "Role updated successfully",
+    "roleUpdateFailed": "Failed to update role",
+    "classes": {
+      "description": "Manage classes. Assign teachers to classes and add students.",
+      "name": "Class Name",
+      "namePlaceholder": "Enter class name",
+      "nameRequired": "Class name is required",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter class description (optional)",
+      "teacher": "Teacher",
+      "selectTeacher": "Select a teacher",
+      "noTeacher": "No teacher assigned",
+      "students": "Students",
+      "actions": "Actions",
+      "create": "Create Class",
+      "edit": "Edit Class",
+      "delete": "Delete Class",
+      "manageMembers": "Manage Members",
+      "created": "Class created successfully",
+      "updated": "Class updated successfully",
+      "deleted": "Class deleted successfully",
+      "saveFailed": "Failed to save class",
+      "deleteFailed": "Failed to delete class",
+      "deleteConfirm": "Are you sure you want to delete this class? This will remove all student assignments.",
+      "noClasses": "No classes found",
+      "membersTitle": "Members of {{name}}"
+    },
+    "members": {
+      "description": "Manage students in this class. Each student can only be in one class.",
+      "student": "Student",
+      "joinedAt": "Joined",
+      "actions": "Actions",
+      "addStudent": "Add Student",
+      "searchStudents": "Search students...",
+      "select": "Select",
+      "selected": "Selected",
+      "confirmAdd": "Add Selected Student",
+      "remove": "Remove",
+      "removeConfirm": "Are you sure you want to remove this student from the class?",
+      "studentAdded": "Student added to class",
+      "studentRemoved": "Student removed from class",
+      "addFailed": "Failed to add student",
+      "removeFailed": "Failed to remove student",
+      "noMembers": "No students in this class",
+      "noAvailableStudents": "No available students to add"
+    },
+    "studentData": {
+      "description": "View reading session data for students in your classes.",
+      "selectClass": "Select a class",
+      "students": "students",
+      "search": "Search by student or title...",
+      "export": "Export CSV",
+      "noClasses": "No classes available. Please contact an administrator.",
+      "noSessions": "No reading sessions found for this class",
+      "noResults": "No sessions match your search",
+      "showing": "Showing {{count}} sessions",
+      "student": "Student",
+      "title": "Title",
+      "progress": "Progress",
+      "testScore": "Test",
+      "vocabulary": "Vocab",
+      "spelling": "Spelling",
+      "quiz": "Quiz",
+      "date": "Date"
+    },
+    "cancel": "Cancel",
+    "save": "Save"
   }
 }

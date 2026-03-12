@@ -135,6 +135,49 @@ CREATE TRIGGER update_reading_sessions_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
+-- User roles table (extends Auth.js users)
+CREATE TABLE user_roles (
+  user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('admin', 'teacher', 'student')),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX idx_user_roles_role ON user_roles(role);
+
+CREATE TRIGGER update_user_roles_updated_at
+    BEFORE UPDATE ON user_roles
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Classes table
+CREATE TABLE classes (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  teacher_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_classes_teacher_id ON classes(teacher_id);
+CREATE INDEX idx_classes_name ON classes(name);
+
+CREATE TRIGGER update_classes_updated_at
+    BEFORE UPDATE ON classes
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Class memberships (one student can only be in one class)
+CREATE TABLE class_members (
+  class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  student_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  PRIMARY KEY (student_id)
+);
+
+CREATE INDEX idx_class_members_class_id ON class_members(class_id);
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;

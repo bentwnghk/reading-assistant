@@ -140,3 +140,53 @@ interface TextDifficultyResult {
   cefrDistribution: Record<string, number>;
   analyzedAt: number;
 }
+
+type UserRole = 'admin' | 'teacher' | 'student';
+
+interface UserWithRole {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role: UserRole;
+  classId?: string;
+  className?: string;
+  createdAt?: number;
+}
+
+interface ClassInfo {
+  id: string;
+  name: string;
+  description?: string;
+  teacherId?: string;
+  teacherName?: string;
+  studentCount?: number;
+  createdAt: number;
+}
+
+interface ClassMember {
+  studentId: string;
+  studentName?: string;
+  studentEmail?: string;
+  studentImage?: string;
+  joinedAt: number;
+}
+
+interface StudentSessionData {
+  id: string;
+  userId: string;
+  userName?: string;
+  userEmail?: string;
+  docTitle: string;
+  studentAge: number;
+  extractedText: string;
+  summary?: string;
+  testScore?: number;
+  testCompleted?: boolean;
+  vocabularyQuizScore?: number;
+  spellingGameBestScore?: number;
+  glossaryCount: number;
+  progress: number;
+  createdAt: number;
+  updatedAt: number;
+}

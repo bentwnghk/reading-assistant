@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
 import type { NextAuthConfig } from "next-auth"
+import { ensureUserRole, type UserRole } from "@/lib/users"
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -10,6 +11,21 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 })
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+      name?: string | null
+      email?: string | null
+      image?: string | null
+      role: UserRole
+    }
+  }
+  interface User {
+    role?: UserRole
+  }
+}
 
 export const config: NextAuthConfig = {
   adapter: PostgresAdapter(pool),
@@ -20,9 +36,11 @@ export const config: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    session({ session, user }) {
+    async session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id
+        const role = await ensureUserRole(user.id, user.email)
+        session.user.role = role
       }
       return session
     },

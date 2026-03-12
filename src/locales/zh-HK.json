@@ -713,5 +713,95 @@
       }
     },
     "placeholder": "輸入文字，或輸入 \"/\" 使用命令"
+  },
+  "userManagement": {
+    "title": "用戶管理",
+    "loadFailed": "載入資料失敗",
+    "tabs": {
+      "users": "用戶",
+      "classes": "班別",
+      "studentData": "學生數據"
+    },
+    "roles": {
+      "admin": "管理員",
+      "teacher": "老師",
+      "student": "學生"
+    },
+    "users": {
+      "description": "管理用戶角色。管理員可以指派老師，老師可以管理學生。",
+      "name": "姓名",
+      "email": "電郵",
+      "role": "角色",
+      "class": "班別",
+      "actions": "操作",
+      "noName": "無名稱",
+      "noUsers": "沒有用戶"
+    },
+    "roleUpdated": "角色已更新",
+    "roleUpdateFailed": "更新角色失敗",
+    "classes": {
+      "description": "管理班別。管理員可以創建班別並指派老師。",
+      "name": "班別名稱",
+      "namePlaceholder": "輸入班別名稱",
+      "description": "描述",
+      "descriptionPlaceholder": "輸入班別描述（可選）",
+      "teacher": "負責老師",
+      "selectTeacher": "選擇老師",
+      "noTeacher": "無負責老師",
+      "students": "學生",
+      "create": "創建班別",
+      "edit": "編輯",
+      "delete": "刪除",
+      "manageMembers": "管理學生",
+      "created": "班別已創建",
+      "updated": "班別已更新",
+      "deleted": "班別已刪除",
+      "saveFailed": "保存班別失敗",
+      "deleteFailed": "刪除班別失敗",
+      "deleteConfirm": "確定要刪除此班別嗎？這將移除所有學生的分配。",
+      "noClasses": "沒有班別",
+      "nameRequired": "班別名稱為必填項",
+      "membersTitle": "{{name}} 的學生"
+    },
+    "members": {
+      "description": "管理此班別的學生。",
+      "student": "學生",
+      "joinedAt": "加入日期",
+      "actions": "操作",
+      "addStudent": "添加學生",
+      "searchStudents": "搜索學生...",
+      "select": "選擇",
+      "selected": "已選擇",
+      "confirmAdd": "確認添加",
+      "remove": "移除",
+      "studentAdded": "學生已添加",
+      "studentRemoved": "學生已移除",
+      "addFailed": "添加學生失敗",
+      "removeFailed": "移除學生失敗",
+      "removeConfirm": "確定要移除此學生嗎？",
+      "noMembers": "沒有學生",
+      "noAvailableStudents": "沒有可添加的學生"
+    },
+    "studentData": {
+      "description": "查看班別中學生的閱讀記錄數據。",
+      "selectClass": "選擇班別",
+      "students": "名學生",
+      "search": "搜索學生或標題...",
+      "export": "導出 CSV",
+      "noClasses": "沒有可用的班別。請聯繫管理員。",
+      "noSessions": "此班別沒有閱讀記錄",
+      "noResults": "沒有符合搜索條件的記錄",
+      "showing": "顯示 {{count}} 條記錄",
+      "student": "學生",
+      "title": "標題",
+      "progress": "進度",
+      "testScore": "測驗",
+      "vocabulary": "詞彙",
+      "spelling": "拼寫",
+      "quiz": "問答",
+      "date": "日期"
+    },
+    "cancel": "取消",
+    "save": "保存"
   }
 }

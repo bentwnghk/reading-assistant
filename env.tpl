@@ -11,6 +11,8 @@ AUTH_SECRET=
 # Get Google OAuth credentials from: https://console.cloud.google.com/apis/credentials
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
+# Admin email addresses (comma-separated, case-insensitive)
+ADMIN_EMAILS=admin@example.com,admin2@example.com
 
 # Database URL (for Docker Compose)
 DATABASE_URL=postgresql://reading_user:your_secure_password_here@postgres:5432/reading_assistant
