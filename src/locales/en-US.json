@@ -34,8 +34,8 @@
     },
     "shortcuts": {
       "title": "Keyboard Shortcuts",
-      "openSetting": "Open settings",
-      "openHistory": "Open history",
+      "openSetting": "Open Settings",
+      "openHistory": "Open Reading History",
       "exportSession": "Export current session",
       "importSession": "Import session snapshot",
       "toggleHelp": "Toggle shortcut help"

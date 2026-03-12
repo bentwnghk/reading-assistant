@@ -35,7 +35,7 @@
     "shortcuts": {
       "title": "鍵盤快捷鍵",
       "openSetting": "開啟設定",
-      "openHistory": "開啟歷史記錄",
+      "openHistory": "開啟閱讀記錄",
       "exportSession": "匯出目前工作階段",
       "importSession": "匯入工作階段",
       "toggleHelp": "切換快捷鍵說明"
