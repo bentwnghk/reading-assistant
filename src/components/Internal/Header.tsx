@@ -383,6 +383,7 @@ function Header() {
                     <li>• {t("header.about.roles.teacher.createClass")}</li>
                     <li>• {t("header.about.roles.teacher.manageStudents")}</li>
                     <li>• {t("header.about.roles.teacher.exportData")}</li>
+                    <li>• {t("header.about.roles.teacher.viewLeaderboard")}</li>
                   </ul>
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border rounded-lg p-3">
@@ -394,6 +395,7 @@ function Header() {
                     <li>• {t("header.about.roles.student.learn")}</li>
                     <li>• {t("header.about.roles.student.cloudSync")}</li>
                     <li>• {t("header.about.roles.student.history")}</li>
+                    <li>• {t("header.about.roles.student.leaderboard")}</li>
                   </ul>
                 </div>
               </div>

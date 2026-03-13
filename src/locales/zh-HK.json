@@ -52,7 +52,7 @@
         },
         "gamified": {
           "title": "🎮 遊戲化",
-          "desc": "透過有趣的遊戲和挑戰學習"
+          "desc": "透過有趣遊戲、挑戰和每週排行榜學習"
         },
         "private": {
           "title": "☁️ 雲端同步",
@@ -72,13 +72,15 @@
           "title": "🎓 老師",
           "createClass": "創建自己的班別",
           "manageStudents": "添加學生並追蹤進度",
-          "exportData": "匯出詳細報告（CSV）"
+          "exportData": "匯出詳細報告（CSV）",
+          "viewLeaderboard": "查看班別排行榜"
         },
         "student": {
           "title": "👥 學生",
           "learn": "完整使用所有功能",
           "cloudSync": "自動雲端同步",
-          "history": "追蹤你的學習歷程"
+          "history": "追蹤你的學習歷程",
+          "leaderboard": "參加每週排行榜"
         }
       },
       "features": {

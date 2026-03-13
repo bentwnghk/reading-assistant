@@ -52,7 +52,7 @@
         },
         "gamified": {
           "title": "🎮 Gamified",
-          "desc": "Learn through fun games & challenges"
+          "desc": "Learn through fun games, challenges & weekly leaderboards"
         },
         "private": {
           "title": "☁️ Cloud Sync",
@@ -72,13 +72,15 @@
           "title": "🎓 Teacher",
           "createClass": "Create your own classes",
           "manageStudents": "Add students & track progress",
-          "exportData": "Export detailed reports (CSV)"
+          "exportData": "Export detailed reports (CSV)",
+          "viewLeaderboard": "Monitor class leaderboards"
         },
         "student": {
           "title": "👥 Student",
           "learn": "Full access to all features",
           "cloudSync": "Automatic cloud sync",
-          "history": "Track your learning journey"
+          "history": "Track your learning journey",
+          "leaderboard": "Compete in weekly leaderboards"
         }
       },
       "features": {
