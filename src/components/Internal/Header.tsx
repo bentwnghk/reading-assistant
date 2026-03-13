@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import {
   Settings,
   History,
-  Keyboard,
   Info,
   BookOpen,
   BookCopy,
@@ -247,15 +246,6 @@ function Header() {
               }}
             >
               <Info className="h-5 w-5" />
-            </Button>
-            <Button
-              className="h-8 w-8"
-              variant="ghost"
-              size="icon"
-              title={t("header.shortcuts.title")}
-              onClick={() => setOpenShortcuts(true)}
-            >
-              <Keyboard className="h-5 w-5" />
             </Button>
             <Button
               className="h-8 w-8"
