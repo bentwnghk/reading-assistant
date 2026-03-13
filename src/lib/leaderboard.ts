@@ -317,21 +317,33 @@ export async function getLeaderboard(
 
     const result = await client.query(sql, params)
 
-    // Prior-week ranks for delta display
+    // Prior-week ranks for delta display.
+    // Build a fresh join/where with $2 (not $3) because this query only needs
+    // [weekDate, scopeId] — it has no LIMIT param like the main query.
     const priorWeekStart = new Date(weekStart)
     priorWeekStart.setDate(priorWeekStart.getDate() - 7)
+
+    let priorScopeJoin  = ""
+    let priorScopeWhere = ""
+    const priorParams: unknown[] = [priorWeekStart.toISOString().slice(0, 10)]
+
+    if (options.scope === "class" && options.classId) {
+      priorScopeJoin  = `JOIN class_members cm ON cm.student_id = ws.user_id`
+      priorScopeWhere = `AND cm.class_id = $2`
+      priorParams.push(options.classId)
+    } else if (options.scope === "school" && options.schoolId) {
+      priorScopeJoin  = `JOIN users su ON su.id = ws.user_id`
+      priorScopeWhere = `AND su.school_id = $2`
+      priorParams.push(options.schoolId)
+    }
 
     const priorSql = `
       SELECT ws.user_id,
              RANK() OVER (ORDER BY ws.${sortBy} DESC NULLS LAST) AS prior_rank
       FROM weekly_stats ws
-      ${scopeJoin}
+      ${priorScopeJoin}
       WHERE ws.week_start_date = $1
-        ${scopeWhere}`
-
-    const priorParams: unknown[] = [priorWeekStart.toISOString().slice(0, 10)]
-    if (options.scope === "class" && options.classId) priorParams.push(options.classId)
-    else if (options.scope === "school" && options.schoolId) priorParams.push(options.schoolId)
+        ${priorScopeWhere}`
 
     const priorResult = await client.query(priorSql, priorParams)
     const priorRankMap = new Map<string, number>(
@@ -370,7 +382,28 @@ export async function getLeaderboard(
       rankings.find(r => r.userId === requestingUserId) ?? null
 
     if (!currentUserRank) {
-      // Fetch their row individually
+      // Fetch their row individually with their rank computed inline.
+      // Params: $1 = weekDate, $2 = userId, $3 = scopeId (optional)
+      let userScopeJoin       = ""
+      let userScopeWhere      = ""
+      let userSubScopeJoin    = ""
+      let userSubScopeWhere   = ""
+      const userParams: unknown[] = [weekStart.toISOString().slice(0, 10), requestingUserId]
+
+      if (options.scope === "class" && options.classId) {
+        userScopeJoin     = `JOIN class_members cm ON cm.student_id = ws.user_id`
+        userScopeWhere    = `AND cm.class_id = $3`
+        userSubScopeJoin  = `JOIN class_members cm3 ON cm3.student_id = ws2.user_id`
+        userSubScopeWhere = `AND cm3.class_id = $3`
+        userParams.push(options.classId)
+      } else if (options.scope === "school" && options.schoolId) {
+        userScopeJoin     = `JOIN users su ON su.id = ws.user_id`
+        userScopeWhere    = `AND su.school_id = $3`
+        userSubScopeJoin  = `JOIN users su2 ON su2.id = ws2.user_id`
+        userSubScopeWhere = `AND su2.school_id = $3`
+        userParams.push(options.schoolId)
+      }
+
       const userSql = `
         SELECT
           ws.*,
@@ -381,24 +414,20 @@ export async function getLeaderboard(
           u.school_id     AS school_id,
           s.name          AS school_name,
           (SELECT COUNT(*) + 1 FROM weekly_stats ws2
-           ${scopeJoin.replace("ws.", "ws2.")}
+           ${userSubScopeJoin}
            WHERE ws2.week_start_date = $1
              AND ws2.${sortBy} > ws.${sortBy}
-             ${scopeWhere.replace("$3", "$3")}
+             ${userSubScopeWhere}
           ) AS rank
         FROM weekly_stats ws
         JOIN users u ON u.id = ws.user_id
         LEFT JOIN class_members cm2 ON cm2.student_id = ws.user_id
         LEFT JOIN classes c ON c.id = cm2.class_id
         LEFT JOIN schools s ON s.id = u.school_id
-        ${scopeJoin}
+        ${userScopeJoin}
         WHERE ws.week_start_date = $1
           AND ws.user_id = $2
-          ${scopeWhere}`
-
-      const userParams: unknown[] = [weekStart.toISOString().slice(0, 10), requestingUserId]
-      if (options.scope === "class" && options.classId) userParams.push(options.classId)
-      else if (options.scope === "school" && options.schoolId) userParams.push(options.schoolId)
+          ${userScopeWhere}`
 
       const userResult = await client.query(userSql, userParams)
       if (userResult.rows.length > 0) {

@@ -52,6 +52,20 @@ export default async function Config(phase: string) {
       NEXT_PUBLIC_VERSION: pkg.version,
     },
     transpilePackages: ["pdfjs-dist", "mermaid"],
+    images: {
+      remotePatterns: [
+        // Google OAuth profile pictures
+        {
+          protocol: "https",
+          hostname: "lh3.googleusercontent.com",
+        },
+        // GitHub OAuth profile pictures
+        {
+          protocol: "https",
+          hostname: "avatars.githubusercontent.com",
+        },
+      ],
+    },
   };
 
   if (BUILD_MODE === "export") {
