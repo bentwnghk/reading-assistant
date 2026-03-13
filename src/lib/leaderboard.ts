@@ -456,36 +456,110 @@ export async function getPersonalStats(
   weekStart: Date = getWeekStart()
 ): Promise<PersonalStats> {
   const client = await getClient()
+  const weekDateStr = weekStart.toISOString().slice(0, 10)
 
   try {
     const priorWeekStart = new Date(weekStart)
     priorWeekStart.setDate(priorWeekStart.getDate() - 7)
+    const priorWeekDateStr = priorWeekStart.toISOString().slice(0, 10)
 
-    const [currResult, priorResult, allTimeResult] = await Promise.all([
-      client.query(
-        `SELECT * FROM weekly_stats WHERE user_id = $1 AND week_start_date = $2`,
-        [userId, weekStart.toISOString().slice(0, 10)]
-      ),
-      client.query(
-        `SELECT * FROM weekly_stats WHERE user_id = $1 AND week_start_date = $2`,
-        [userId, priorWeekStart.toISOString().slice(0, 10)]
-      ),
-      client.query(
-        `SELECT
-           COUNT(DISTINCT rs.id)::int                                  AS total_sessions,
-           COALESCE(AVG(NULLIF(rs.test_score, 0)), 0)                 AS avg_test_score,
-           COALESCE(SUM(jsonb_array_length(rs.glossary)), 0)           AS total_vocab,
-           COALESCE(
-             SUM(CASE WHEN al.activity_type = 'flashcard_review'
-                      THEN (al.details->>'cardsReviewed')::int ELSE 0 END), 0
-           ) AS total_flashcard_reviews
-         FROM reading_sessions rs
-         JOIN users u ON u.id = rs.user_id
-         LEFT JOIN activity_logs al ON al.user_id = rs.user_id
-         WHERE rs.user_id = $1`,
-        [userId]
-      ),
-    ])
+    // ── Current & prior week stats from weekly_stats ──
+    const currResult = await client.query(
+      `SELECT * FROM weekly_stats WHERE user_id = $1 AND week_start_date = $2`,
+      [userId, weekDateStr]
+    )
+    const priorResult = await client.query(
+      `SELECT * FROM weekly_stats WHERE user_id = $1 AND week_start_date = $2`,
+      [userId, priorWeekDateStr]
+    )
+
+    // ── All-time: sessions and vocab from reading_sessions only ──
+    const sessionStatsResult = await client.query(
+      `SELECT
+         COUNT(id)::int                                     AS total_sessions,
+         COALESCE(AVG(NULLIF(test_score, 0)), 0)           AS avg_test_score,
+         COALESCE(SUM(jsonb_array_length(glossary)), 0)    AS total_vocab
+       FROM reading_sessions
+       WHERE user_id = $1`,
+      [userId]
+    )
+
+    // ── All-time: flashcard reviews from activity_logs separately ──
+    const flashcardResult = await client.query(
+      `SELECT COALESCE(
+         SUM((details->>'cardsReviewed')::int), 0
+       )::int AS total_flashcard_reviews
+       FROM activity_logs
+       WHERE user_id = $1 AND activity_type = 'flashcard_review'
+         AND details->>'cardsReviewed' IS NOT NULL`,
+      [userId]
+    )
+
+    // ── Longest streak via gap-and-islands on activity_logs ──
+    // Standard approach: date - rank::int produces an identical "group" constant
+    // for consecutive dates, so MAX(count per group) = longest streak.
+    const streakResult = await client.query(
+      `SELECT COALESCE(MAX(cnt), 0) AS longest_streak
+       FROM (
+         SELECT COUNT(*) AS cnt
+         FROM (
+           SELECT
+             activity_date,
+             activity_date - (RANK() OVER (ORDER BY activity_date))::int * INTERVAL '1 day' AS grp
+           FROM (
+             SELECT DISTINCT
+               date_trunc('day', created_at AT TIME ZONE 'UTC')::date AS activity_date
+             FROM activity_logs
+             WHERE user_id = $1
+           ) distinct_days
+         ) grouped
+         GROUP BY grp
+       ) streaks`,
+      [userId]
+    )
+    const longestStreak = parseInt(streakResult.rows[0]?.longest_streak ?? "0") || 0
+
+    // ── Rank in class ──
+    const rankClassResult = await client.query(
+      `SELECT (COUNT(*) + 1)::int AS rank
+       FROM weekly_stats ws2
+       JOIN class_members cm2 ON cm2.student_id = ws2.user_id
+       WHERE cm2.class_id = (
+           SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1
+         )
+         AND ws2.week_start_date = $2
+         AND ws2.weekly_score > COALESCE(
+           (SELECT weekly_score FROM weekly_stats
+            WHERE user_id = $1 AND week_start_date = $2), 0
+         )`,
+      [userId, weekDateStr]
+    )
+
+    // ── Rank in school ──
+    const rankSchoolResult = await client.query(
+      `SELECT (COUNT(*) + 1)::int AS rank
+       FROM weekly_stats ws2
+       JOIN users u2 ON u2.id = ws2.user_id
+       WHERE u2.school_id = (SELECT school_id FROM users WHERE id = $1)
+         AND ws2.week_start_date = $2
+         AND ws2.weekly_score > COALESCE(
+           (SELECT weekly_score FROM weekly_stats
+            WHERE user_id = $1 AND week_start_date = $2), 0
+         )`,
+      [userId, weekDateStr]
+    )
+
+    // ── Global rank ──
+    const rankGlobalResult = await client.query(
+      `SELECT (COUNT(*) + 1)::int AS rank
+       FROM weekly_stats
+       WHERE week_start_date = $1
+         AND weekly_score > COALESCE(
+           (SELECT weekly_score FROM weekly_stats
+            WHERE user_id = $2 AND week_start_date = $1), 0
+         )`,
+      [weekDateStr, userId]
+    )
 
     const mapWeekRow = (row: Record<string, unknown>): WeeklyStatsRow => ({
       userId:                  row.user_id as string,
@@ -504,74 +578,24 @@ export async function getPersonalStats(
       improvementScore:        parseFloat(row.improvement_score as string) || 0,
     })
 
-    // Longest streak: check the activity_logs for the longest run
-    const streakResult = await client.query(
-      `SELECT MAX(streak_len) AS longest_streak FROM (
-         SELECT
-           ROW_NUMBER() OVER (ORDER BY activity_date) -
-           ROW_NUMBER() OVER (PARTITION BY grp ORDER BY activity_date) AS streak_len
-         FROM (
-           SELECT
-             activity_date,
-             activity_date - (ROW_NUMBER() OVER (ORDER BY activity_date))::integer * interval '1 day' AS grp
-           FROM (
-             SELECT DISTINCT date_trunc('day', created_at AT TIME ZONE 'UTC')::date AS activity_date
-             FROM activity_logs WHERE user_id = $1
-           ) t
-         ) grouped
-       ) streaks`,
-      [userId]
-    )
-    const longestStreak = parseInt(streakResult.rows[0]?.longest_streak ?? "0") || 0
-
-    // Ranks
-    const rankClassResult = await client.query(
-      `SELECT COUNT(*) + 1 AS rank
-       FROM weekly_stats ws2
-       JOIN class_members cm2 ON cm2.student_id = ws2.user_id
-       WHERE cm2.class_id = (SELECT class_id FROM class_members WHERE student_id = $1)
-         AND ws2.week_start_date = $2
-         AND ws2.weekly_score > COALESCE(
-           (SELECT weekly_score FROM weekly_stats WHERE user_id = $1 AND week_start_date = $2), 0
-         )`,
-      [userId, weekStart.toISOString().slice(0, 10)]
-    )
-    const rankSchoolResult = await client.query(
-      `SELECT COUNT(*) + 1 AS rank
-       FROM weekly_stats ws2
-       JOIN users u2 ON u2.id = ws2.user_id
-       WHERE u2.school_id = (SELECT school_id FROM users WHERE id = $1)
-         AND ws2.week_start_date = $2
-         AND ws2.weekly_score > COALESCE(
-           (SELECT weekly_score FROM weekly_stats WHERE user_id = $1 AND week_start_date = $2), 0
-         )`,
-      [userId, weekStart.toISOString().slice(0, 10)]
-    )
-    const rankGlobalResult = await client.query(
-      `SELECT COUNT(*) + 1 AS rank
-       FROM weekly_stats
-       WHERE week_start_date = $1
-         AND weekly_score > COALESCE(
-           (SELECT weekly_score FROM weekly_stats WHERE user_id = $2 AND week_start_date = $1), 0
-         )`,
-      [weekStart.toISOString().slice(0, 10), userId]
-    )
-
-    const allTime = allTimeResult.rows[0]
+    const sessionStats = sessionStatsResult.rows[0]
+    const rankClass  = parseInt(rankClassResult.rows[0]?.rank  ?? "0") || null
+    const rankSchool = parseInt(rankSchoolResult.rows[0]?.rank ?? "0") || null
+    const rankGlobal = parseInt(rankGlobalResult.rows[0]?.rank ?? "0") || null
 
     return {
-      currentWeek: currResult.rows.length > 0 ? mapWeekRow(currResult.rows[0]) : null,
+      currentWeek: currResult.rows.length  > 0 ? mapWeekRow(currResult.rows[0])  : null,
       priorWeek:   priorResult.rows.length > 0 ? mapWeekRow(priorResult.rows[0]) : null,
       allTime: {
-        totalSessions:         parseInt(allTime.total_sessions) || 0,
+        totalSessions:         parseInt(sessionStats.total_sessions) || 0,
         longestStreak,
-        totalVocabWords:       parseInt(allTime.total_vocab) || 0,
-        avgAllTimeTestScore:   Math.round(parseFloat(allTime.avg_test_score) || 0),
-        totalFlashcardReviews: parseInt(allTime.total_flashcard_reviews) || 0,
+        totalVocabWords:       parseInt(sessionStats.total_vocab) || 0,
+        avgAllTimeTestScore:   Math.round(parseFloat(sessionStats.avg_test_score) || 0),
+        totalFlashcardReviews: parseInt(flashcardResult.rows[0]?.total_flashcard_reviews ?? "0") || 0,
       },
-      rankInClass:  parseInt(rankClassResult.rows[0]?.rank ?? "0") || null,
-      rankInSchool: parseInt(rankSchoolResult.rows[0]?.rank ?? "0") || null,
-      rankGlobal:   parseInt(rankGlobalResult.rows[0]?.rank ?? "0") || null,
+      rankInClass:  rankClass,
+      rankInSchool: rankSchool,
+      rankGlobal,
     }
   } finally {
     client.release()
