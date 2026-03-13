@@ -614,7 +614,8 @@
     "testScore": "Reading Test Score",
     "glossaryWords": "Vocabulary Count",
     "spellingScore": "Spelling Challenge Score",
-    "quizScore": "Vocabulary Quiz Score"
+    "quizScore": "Vocabulary Quiz Score",
+    "totalVocabulary": "Total Vocabulary"
   },
   "setting": {
     "title": "Settings",

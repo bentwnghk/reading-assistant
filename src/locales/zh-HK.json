@@ -614,7 +614,8 @@
     "testScore": "閱讀測驗得分",
     "glossaryWords": "詞彙量",
     "spellingScore": "拼字挑戰得分",
-    "quizScore": "詞彙測驗得分"
+    "quizScore": "詞彙測驗得分",
+    "totalVocabulary": "總詞彙量"
   },
   "setting": {
     "title": "設定",

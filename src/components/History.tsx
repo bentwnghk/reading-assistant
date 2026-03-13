@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { TrashIcon, FileOutput, Download } from "lucide-react";
+import { TrashIcon, FileOutput, Download, BookOpen } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
@@ -90,6 +90,10 @@ function History({ open, onClose }: HistoryProps) {
     return history.length > currentPage * PAGE_SIZE;
   }, [history, currentPage]);
 
+  const totalVocabularyCount = useMemo(() => {
+    return history.reduce((total, item) => total + (item.glossary?.length || 0), 0);
+  }, [history]);
+
   async function importSession(file: File) {
     try {
       const text = await file.text();
@@ -177,7 +181,14 @@ function History({ open, onClose }: HistoryProps) {
       <DialogContent className="max-lg:max-w-screen-sm max-w-screen-lg gap-2">
         <DialogHeader>
           <DialogTitle>{t("history.title")}</DialogTitle>
-          <DialogDescription>{t("history.description")}</DialogDescription>
+          <DialogDescription>
+            {t("history.description")}
+            {totalVocabularyCount > 0 && (
+              <span className="ml-2 inline-flex items-center gap-1 text-primary font-medium">
+                • <BookOpen className="h-3.5 w-3.5" /> {t("history.totalVocabulary")}: {totalVocabularyCount}
+              </span>
+            )}
+          </DialogDescription>
         </DialogHeader>
         <div className="flex justify-between mt-2">
           <Button
