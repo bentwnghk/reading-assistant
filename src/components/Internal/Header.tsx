@@ -21,7 +21,7 @@ import {
   Target,
   MessageSquareText,
   Zap,
-  Shield,
+  Cloud,
   Trophy,
   CheckCircle2,
   Star,
@@ -336,7 +336,7 @@ function Header() {
                   <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.gamified.desc")}</div>
                 </div>
                 <div className="bg-card border rounded-lg p-3 text-center">
-                  <Shield className="h-5 w-5 mx-auto mb-1 text-green-500" />
+                  <Cloud className="h-5 w-5 mx-auto mb-1 text-blue-500" />
                   <div className="font-medium text-xs">{t("header.about.whyLove.private.title")}</div>
                   <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.private.desc")}</div>
                 </div>
