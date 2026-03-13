@@ -907,7 +907,8 @@
       "improvement": "較上週",
       "sessions": "學習次數",
       "testsCompleted": "完成測試",
-      "quizzesCompleted": "完成測驗"
+      "quizzesCompleted": "完成測驗",
+      "spellingGamesCompleted": "遊戲場次"
     },
     "personal": {
       "title": "你的進度",

@@ -907,7 +907,8 @@
       "improvement": "vs Last Week",
       "sessions": "Sessions",
       "testsCompleted": "Tests Completed",
-      "quizzesCompleted": "Quizzes Done"
+      "quizzesCompleted": "Quizzes Done",
+      "spellingGamesCompleted": "Games Played"
     },
     "personal": {
       "title": "Your Progress",

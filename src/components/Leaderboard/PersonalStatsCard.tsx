@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal } from "lucide-react";
+import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2 } from "lucide-react";
 import { cn } from "@/utils/style";
 import { ImprovementIndicator } from "./ImprovementIndicator";
 import type { PersonalStats } from "./types";
@@ -123,6 +123,14 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
             : undefined}
         />
         <StatItem
+          icon={<Gamepad2 className="h-3.5 w-3.5" />}
+          label={t("leaderboard.stats.spellingScore")}
+          value={Math.round(cw?.avgSpellingScore ?? 0)}
+          sub={cw?.spellingGamesCompleted
+            ? `${cw.spellingGamesCompleted} ${t("leaderboard.stats.spellingGamesCompleted")}`
+            : undefined}
+        />
+        <StatItem
           icon={<Layers className="h-3.5 w-3.5" />}
           label={t("leaderboard.stats.flashcards")}
           value={cw?.totalFlashcardReviews ?? 0}
@@ -139,7 +147,7 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
           {t("leaderboard.personal.allTime")}
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3 text-sm">
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.totalSessions")}</div>
             <div className="font-bold text-lg tabular-nums">{stats.allTime.totalSessions}</div>
@@ -154,7 +162,11 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
           </div>
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgTestScore")}</div>
-            <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeTestScore}%</div>
+            <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeTestScore}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground text-xs">{t("leaderboard.personal.totalFlashcards")}</div>
+            <div className="font-bold text-lg tabular-nums">{stats.allTime.totalFlashcardReviews}</div>
           </div>
         </div>
       </div>
