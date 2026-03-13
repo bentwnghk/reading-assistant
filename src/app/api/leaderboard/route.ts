@@ -6,7 +6,7 @@ import {
   type SortColumn,
 } from "@/lib/leaderboard"
 import { getWeekStart } from "@/lib/activity"
-import { getUserRole, getStudentClassId } from "@/lib/users"
+import { getStudentClassId, getSchoolForUser } from "@/lib/users"
 import { NextResponse } from "next/server"
 
 // GET /api/leaderboard?scope=class|school|global&classId=...&schoolId=...&week=YYYY-MM-DD&sortBy=...&limit=50
@@ -27,24 +27,29 @@ export async function GET(request: Request) {
 
     const weekStart = weekParam ? new Date(weekParam) : getWeekStart()
 
-    const userId   = session.user.id
-    const userRole = await getUserRole(userId, session.user.email)
+    const userId = session.user.id
 
     // Always refresh the requesting user's own weekly stats so their latest
     // activity (quiz, test, spelling, flashcards) shows up immediately.
     await refreshWeeklyStatsForUser(userId, weekStart)
 
-    // Students can only see their own class scope unless they explicitly
-    // choose school or global scope. Teachers/admins can query any scope.
     let resolvedClassId  = classId
-    const resolvedSchoolId = schoolId
+    let resolvedSchoolId = schoolId
     let resolvedScope    = scopeParam
 
-    if (userRole === "student" && resolvedScope === "class" && !resolvedClassId) {
-      // Auto-resolve the student's class
+    // Auto-resolve class for students who haven't supplied one explicitly
+    if (resolvedScope === "class" && !resolvedClassId) {
       resolvedClassId = (await getStudentClassId(userId)) ?? undefined
       if (!resolvedClassId) {
-        // Student has no class — fall back to global
+        resolvedScope = "global"
+      }
+    }
+
+    // Auto-resolve school from the user's own profile when no schoolId is supplied
+    if (resolvedScope === "school" && !resolvedSchoolId) {
+      resolvedSchoolId = (await getSchoolForUser(userId)) ?? undefined
+      if (!resolvedSchoolId) {
+        // User has no school — fall back to global
         resolvedScope = "global"
       }
     }
