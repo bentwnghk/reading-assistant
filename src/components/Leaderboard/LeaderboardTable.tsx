@@ -7,6 +7,16 @@ import { StreakBadge } from "./StreakBadge";
 import { ImprovementIndicator } from "./ImprovementIndicator";
 import type { LeaderboardEntry, SortColumn } from "./types";
 
+/** A tiny labelled stat chip shown inline under the player name on all screen sizes. */
+function StatChip({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-0.5 text-xs bg-muted rounded-full px-2 py-0.5">
+      <span className="text-muted-foreground">{label}:</span>
+      <span className="font-medium">{children}</span>
+    </span>
+  );
+}
+
 const MEDAL_COLORS = ["text-yellow-400", "text-gray-400", "text-amber-600"];
 const MEDAL_BG     = ["bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800",
                       "bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700",
@@ -135,7 +145,7 @@ export function LeaderboardTable({
               )}
             </div>
 
-            {/* Name + class */}
+            {/* Name + class + inline stat chips */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className={cn(
@@ -179,66 +189,69 @@ export function LeaderboardTable({
               {rankDelta === null && entry.priorWeekRank === null && (
                 <span className="text-xs text-muted-foreground">{t("leaderboard.rank.new")}</span>
               )}
-            </div>
 
-            {/* Score */}
-            <div className="text-right shrink-0">
-              <div className={cn(
-                "text-base font-black tabular-nums",
-                isCurrentUser ? "text-primary" : isMedal ? MEDAL_COLORS[entry.rank - 1] : ""
-              )}>
-                {entry.weeklyScore}
-              </div>
-              <div className="text-xs text-muted-foreground">{t("leaderboard.columns.score")}</div>
-            </div>
+              {/* Inline stat chips — always visible on every screen size */}
+              <div className="flex flex-wrap gap-1 mt-1">
+                {/* Streak — always shown */}
+                <StatChip label={t("leaderboard.columns.streak")}>
+                  <StreakBadge days={entry.streakDays} size="sm" />
+                </StatChip>
 
-            {/* Streak */}
-            <div className="shrink-0 hidden sm:block text-center min-w-[40px]">
-              <StreakBadge days={entry.streakDays} />
-              <div className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.columns.streak")}</div>
-            </div>
-
-            {/* Dynamic highlighted stat based on sortBy */}
-            {sortBy !== "weekly_score" && sortBy !== "reading_streak_days" && (
-              <div className="shrink-0 hidden md:block text-center min-w-[52px]">
+                {/* Secondary stat: whichever column is currently sorted, if not score/streak */}
                 {sortBy === "avg_test_score" && (
-                  <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.avgTestScore}</div>
-                    <div className="text-xs text-muted-foreground">{t("leaderboard.columns.test")}</div>
-                  </>
+                  <StatChip label={t("leaderboard.columns.test")}>{entry.avgTestScore}</StatChip>
                 )}
                 {sortBy === "avg_quiz_score" && (
-                  <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.avgQuizScore}</div>
-                    <div className="text-xs text-muted-foreground">{t("leaderboard.columns.quiz")}</div>
-                  </>
+                  <StatChip label={t("leaderboard.columns.quiz")}>{entry.avgQuizScore}</StatChip>
                 )}
                 {sortBy === "avg_spelling_score" && (
-                  <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.avgSpellingScore}</div>
-                    <div className="text-xs text-muted-foreground">{t("leaderboard.columns.spelling")}</div>
-                  </>
+                  <StatChip label={t("leaderboard.columns.spelling")}>{entry.avgSpellingScore}</StatChip>
                 )}
                 {sortBy === "total_vocabulary_words" && (
-                  <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.totalVocabWords}</div>
-                    <div className="text-xs text-muted-foreground">{t("leaderboard.columns.vocab")}</div>
-                  </>
+                  <StatChip label={t("leaderboard.columns.vocab")}>{entry.totalVocabWords}</StatChip>
                 )}
                 {sortBy === "total_flashcard_reviews" && (
-                  <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.flashcardReviews}</div>
-                    <div className="text-xs text-muted-foreground">{t("leaderboard.columns.flashcards")}</div>
-                  </>
+                  <StatChip label={t("leaderboard.columns.flashcards")}>{entry.flashcardReviews}</StatChip>
                 )}
                 {sortBy === "improvement_score" && (
-                  <>
-                    <ImprovementIndicator value={entry.improvementScore} />
-                    <div className="text-xs text-muted-foreground">{t("leaderboard.columns.improvement")}</div>
-                  </>
+                  <StatChip label={t("leaderboard.columns.improvement")}>
+                    <ImprovementIndicator value={entry.improvementScore} size="sm" />
+                  </StatChip>
                 )}
               </div>
-            )}
+            </div>
+
+            {/* Primary stat — right side, always visible */}
+            <div className="text-right shrink-0">
+              {sortBy === "improvement_score" ? (
+                <>
+                  <ImprovementIndicator value={entry.improvementScore} />
+                  <div className="text-xs text-muted-foreground">{t("leaderboard.columns.improvement")}</div>
+                </>
+              ) : (
+                <>
+                  <div className={cn(
+                    "text-base font-black tabular-nums",
+                    isCurrentUser ? "text-primary" : isMedal ? MEDAL_COLORS[entry.rank - 1] : ""
+                  )}>
+                    {sortBy === "avg_test_score" ? entry.avgTestScore :
+                     sortBy === "avg_quiz_score" ? entry.avgQuizScore :
+                     sortBy === "avg_spelling_score" ? entry.avgSpellingScore :
+                     sortBy === "total_vocabulary_words" ? entry.totalVocabWords :
+                     sortBy === "total_flashcard_reviews" ? entry.flashcardReviews :
+                     entry.weeklyScore}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {sortBy === "avg_test_score" ? t("leaderboard.columns.test") :
+                     sortBy === "avg_quiz_score" ? t("leaderboard.columns.quiz") :
+                     sortBy === "avg_spelling_score" ? t("leaderboard.columns.spelling") :
+                     sortBy === "total_vocabulary_words" ? t("leaderboard.columns.vocab") :
+                     sortBy === "total_flashcard_reviews" ? t("leaderboard.columns.flashcards") :
+                     t("leaderboard.columns.score")}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         );
       })}
