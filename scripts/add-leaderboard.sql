@@ -36,16 +36,16 @@ CREATE TABLE IF NOT EXISTS weekly_stats (
   week_start_date           DATE NOT NULL,
   total_sessions            INTEGER   DEFAULT 0,
   reading_streak_days       INTEGER   DEFAULT 0,
-  avg_test_score            NUMERIC(5,2) DEFAULT 0,
-  total_flashcard_reviews   INTEGER   DEFAULT 0,
-  avg_quiz_score            NUMERIC(5,2) DEFAULT 0,
-  avg_spelling_score        NUMERIC(5,2) DEFAULT 0,
-  total_vocabulary_words    INTEGER   DEFAULT 0,
-  tests_completed           INTEGER   DEFAULT 0,
-  quizzes_completed         INTEGER   DEFAULT 0,
-  spelling_games_completed  INTEGER   DEFAULT 0,
-  weekly_score              NUMERIC(8,2) DEFAULT 0,  -- composite score
-  improvement_score         NUMERIC(5,2) DEFAULT 0,  -- week-over-week delta
+  avg_test_score            NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
+  total_flashcard_reviews   INTEGER       DEFAULT 0,
+  avg_quiz_score            NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
+  avg_spelling_score        NUMERIC(10,2) DEFAULT 0,  -- raw game points, unbounded
+  total_vocabulary_words    INTEGER       DEFAULT 0,
+  tests_completed           INTEGER       DEFAULT 0,
+  quizzes_completed         INTEGER       DEFAULT 0,
+  spelling_games_completed  INTEGER       DEFAULT 0,
+  weekly_score              NUMERIC(10,2) DEFAULT 0,  -- composite score, unbounded
+  improvement_score         NUMERIC(10,2) DEFAULT 0,  -- week-over-week delta, can be negative/large
   created_at                TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at                TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE (user_id, week_start_date)
