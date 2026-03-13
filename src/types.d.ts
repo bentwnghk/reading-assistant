@@ -202,3 +202,45 @@ interface StudentSessionData {
   createdAt: number;
   updatedAt: number;
 }
+
+// ─── Leaderboard types ────────────────────────────────────────────────────────
+
+type LeaderboardActivityType =
+  | "session_create"
+  | "test_complete"
+  | "quiz_complete"
+  | "spelling_complete"
+  | "flashcard_review";
+
+interface ActivityLogEntry {
+  id: string;
+  userId: string;
+  activityType: LeaderboardActivityType;
+  sessionId?: string | null;
+  score?: number | null;
+  details: {
+    cardsReviewed?: number;
+    wordCount?: number;
+    mode?: string;
+    difficulty?: string;
+    streak?: number;
+  };
+  createdAt: number;
+}
+
+interface LeaderboardWeeklyStats {
+  userId: string;
+  weekStartDate: string;
+  totalSessions: number;
+  readingStreakDays: number;
+  avgTestScore: number;
+  totalFlashcardReviews: number;
+  avgQuizScore: number;
+  avgSpellingScore: number;
+  totalVocabularyWords: number;
+  testsCompleted: number;
+  quizzesCompleted: number;
+  spellingGamesCompleted: number;
+  weeklyScore: number;
+  improvementScore: number;
+}

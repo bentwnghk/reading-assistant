@@ -35,6 +35,7 @@ import {
   Crown,
   School,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/Internal/Button";
 import { LoginButton } from "@/components/Auth/LoginButton";
 import { UserManagementButton } from "@/components/UserManagement/UserManagementButton";
@@ -265,6 +266,16 @@ function Header() {
             >
               <History className="h-5 w-5" />
             </Button>
+            <Link href="/leaderboard" prefetch={false}>
+              <Button
+                className="h-8 w-8"
+                variant="ghost"
+                size="icon"
+                title={t("leaderboard.title")}
+              >
+                <Trophy className="h-5 w-5" />
+              </Button>
+            </Link>
             <Button
               className="h-8 w-8"
               title={t("setting.title")}

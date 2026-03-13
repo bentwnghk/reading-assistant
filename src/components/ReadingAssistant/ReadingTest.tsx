@@ -45,6 +45,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
+import { logActivity } from "@/utils/activityLogger";
 
 type QuizState = "idle" | "in-progress" | "completed";
 
@@ -125,6 +126,9 @@ function ReadingTest() {
     calculateTestScore();
     setQuizState("completed");
     setShowReview(true);
+    // Log test completion for leaderboard
+    const { id: sessionId, testScore } = useReadingStore.getState();
+    logActivity("test_complete", { sessionId: sessionId || undefined, score: testScore });
   };
 
   const handleReset = () => {

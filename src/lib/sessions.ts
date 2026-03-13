@@ -1,4 +1,5 @@
 import { getClient, base64ToBuffer, bufferToBase64 } from "./db"
+import { logActivity } from "./activity"
 import type { ReadingStore } from "@/store/reading"
 
 export interface SessionWithImages extends ReadingStore {
@@ -67,6 +68,13 @@ export async function createReadingSession(
     }
     
     await client.query("COMMIT")
+
+    // Log session creation for leaderboard (non-blocking)
+    logActivity(userId, "session_create", {
+      sessionId: sessionData.id,
+      details: { wordCount: sessionData.glossary?.length ?? 0 },
+    }).catch(() => {})
+
     return sessionData.id
   } catch (error) {
     await client.query("ROLLBACK")

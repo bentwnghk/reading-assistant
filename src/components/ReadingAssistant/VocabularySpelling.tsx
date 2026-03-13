@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
+import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
@@ -463,6 +464,11 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   useEffect(() => {
     if (gameStatus === "completed" && score > 0) {
       setSpellingGameBestScore(score);
+      logActivity("spelling_complete", {
+        sessionId: id || undefined,
+        score,
+        details: { mode: gameMode, difficulty, streak: maxStreak },
+      });
       
       if (id) {
         const session = backup();
@@ -472,7 +478,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
         }
       }
     }
-  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save]);
+  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak]);
 
   if (glossary.length < 3) {
     return (

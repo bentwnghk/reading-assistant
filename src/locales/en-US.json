@@ -859,5 +859,84 @@
     },
     "cancel": "Cancel",
     "save": "Save"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "See how you compare with your classmates",
+    "myStats": "My Stats",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "scope": {
+      "class": "My Class",
+      "school": "My School",
+      "global": "Global"
+    },
+    "sortBy": {
+      "weekly_score": "Score",
+      "reading_streak_days": "Streak",
+      "avg_test_score": "Test",
+      "avg_quiz_score": "Quiz",
+      "avg_spelling_score": "Spelling",
+      "total_vocabulary_words": "Vocab",
+      "improvement_score": "Improvement",
+      "total_flashcard_reviews": "Flashcards"
+    },
+    "columns": {
+      "rank": "Rank",
+      "student": "Student",
+      "score": "Weekly Score",
+      "streak": "Streak",
+      "test": "Avg Test",
+      "quiz": "Avg Quiz",
+      "spelling": "Avg Spelling",
+      "vocab": "Vocab Words",
+      "flashcards": "Flashcards",
+      "improvement": "Improvement",
+      "class": "Class"
+    },
+    "stats": {
+      "weeklyScore": "Weekly Score",
+      "streak": "Reading Streak",
+      "streakDays": "{{count}} day",
+      "streakDays_plural": "{{count}} days",
+      "testScore": "Avg Test Score",
+      "quizScore": "Avg Quiz Score",
+      "spellingScore": "Avg Spelling",
+      "vocabWords": "Vocab Words",
+      "flashcards": "Flashcards Reviewed",
+      "improvement": "vs Last Week",
+      "sessions": "Sessions",
+      "testsCompleted": "Tests Completed",
+      "quizzesCompleted": "Quizzes Done"
+    },
+    "personal": {
+      "title": "Your Progress",
+      "rankInClass": "Rank in Class",
+      "rankInSchool": "Rank in School",
+      "rankGlobal": "Global Rank",
+      "allTime": "All-Time Stats",
+      "totalSessions": "Total Sessions",
+      "longestStreak": "Longest Streak",
+      "totalVocab": "Total Vocabulary",
+      "avgTestScore": "Avg Test Score",
+      "totalFlashcards": "Total Flashcards",
+      "noStats": "Complete learning activities this week to appear on the leaderboard!"
+    },
+    "rank": {
+      "up": "up {{count}}",
+      "down": "down {{count}}",
+      "same": "same",
+      "new": "new",
+      "you": "You"
+    },
+    "empty": {
+      "title": "No data yet this week",
+      "description": "Complete reading sessions, tests, quizzes, and spelling games to earn points and appear on the leaderboard.",
+      "noClass": "You are not in a class yet. Ask your teacher to add you, or switch to School or Global view."
+    },
+    "loading": "Loading leaderboard...",
+    "refresh": "Refresh",
+    "selectClass": "Select class",
+    "selectSchool": "Select school"
   }
 }

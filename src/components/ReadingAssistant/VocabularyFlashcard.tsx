@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2, Target
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
+import { logActivity } from "@/utils/activityLogger";
 import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
@@ -143,6 +144,10 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const handleRate = (rating: GlossaryRating) => {
     if (currentEntry) {
       setGlossaryRating(currentEntry.word, rating);
+      logActivity("flashcard_review", {
+        sessionId: id || undefined,
+        details: { cardsReviewed: 1, wordCount: glossary.length },
+      });
       if (id) {
         const session = backup();
         const updated = update(id, session);

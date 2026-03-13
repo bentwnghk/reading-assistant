@@ -25,6 +25,7 @@ import {
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
+import { logActivity } from "@/utils/activityLogger";
 import { nanoid } from "nanoid";
 import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
 
@@ -195,6 +196,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
       const percentage = Math.round((correct / questions.length) * 100);
       setVocabularyQuizScore(percentage);
       setQuizState("completed");
+      logActivity("quiz_complete", { sessionId: id || undefined, score: percentage });
       
       if (id) {
         const session = backup();
@@ -237,6 +239,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
               const percentage = Math.round((correct / questions.length) * 100);
               setVocabularyQuizScore(percentage);
               setQuizState("completed");
+              logActivity("quiz_complete", { sessionId: id || undefined, score: percentage });
               
               if (id) {
                 const session = backup();

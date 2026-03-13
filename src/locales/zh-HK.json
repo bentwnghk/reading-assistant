@@ -859,5 +859,84 @@
     },
     "cancel": "取消",
     "save": "保存"
+  },
+  "leaderboard": {
+    "title": "排行榜",
+    "subtitle": "看看你與同學的比較",
+    "myStats": "我的統計",
+    "thisWeek": "本週",
+    "lastWeek": "上週",
+    "scope": {
+      "class": "我的班級",
+      "school": "我的學校",
+      "global": "全球"
+    },
+    "sortBy": {
+      "weekly_score": "分數",
+      "reading_streak_days": "連續天數",
+      "avg_test_score": "閱讀測試",
+      "avg_quiz_score": "詞彙測驗",
+      "avg_spelling_score": "拼字遊戲",
+      "total_vocabulary_words": "詞彙量",
+      "improvement_score": "進步幅度",
+      "total_flashcard_reviews": "字卡複習"
+    },
+    "columns": {
+      "rank": "名次",
+      "student": "學生",
+      "score": "本週分數",
+      "streak": "連續天數",
+      "test": "平均測試",
+      "quiz": "平均測驗",
+      "spelling": "平均拼字",
+      "vocab": "詞彙量",
+      "flashcards": "字卡",
+      "improvement": "進步幅度",
+      "class": "班級"
+    },
+    "stats": {
+      "weeklyScore": "本週分數",
+      "streak": "閱讀連續天數",
+      "streakDays": "{{count}} 天",
+      "streakDays_plural": "{{count}} 天",
+      "testScore": "平均測試分數",
+      "quizScore": "平均測驗分數",
+      "spellingScore": "平均拼字分數",
+      "vocabWords": "詞彙量",
+      "flashcards": "字卡複習次數",
+      "improvement": "較上週",
+      "sessions": "學習次數",
+      "testsCompleted": "完成測試",
+      "quizzesCompleted": "完成測驗"
+    },
+    "personal": {
+      "title": "你的進度",
+      "rankInClass": "班級排名",
+      "rankInSchool": "學校排名",
+      "rankGlobal": "全球排名",
+      "allTime": "歷史統計",
+      "totalSessions": "學習總次數",
+      "longestStreak": "最長連續天數",
+      "totalVocab": "累積詞彙量",
+      "avgTestScore": "平均測試分數",
+      "totalFlashcards": "字卡複習總次數",
+      "noStats": "完成本週的學習活動，即可出現在排行榜上！"
+    },
+    "rank": {
+      "up": "上升 {{count}}",
+      "down": "下降 {{count}}",
+      "same": "不變",
+      "new": "新上榜",
+      "you": "你"
+    },
+    "empty": {
+      "title": "本週暫無數據",
+      "description": "完成閱讀、測試、測驗和拼字遊戲即可獲得積分並出現在排行榜上。",
+      "noClass": "你尚未加入班級。請聯繫老師，或切換至學校或全球視圖。"
+    },
+    "loading": "正在載入排行榜...",
+    "refresh": "重新整理",
+    "selectClass": "選擇班級",
+    "selectSchool": "選擇學校"
   }
 }
