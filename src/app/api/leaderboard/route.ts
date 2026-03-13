@@ -45,9 +45,9 @@ export async function GET(request: Request) {
         const teacherClasses = await getClassesForTeacher(userId)
         resolvedClassId = teacherClasses[0]?.id ?? undefined
       }
-      if (!resolvedClassId) {
-        resolvedScope = "global"
-      }
+      // No class found — keep scope as "class" with no classId.
+      // getLeaderboard will return empty rankings rather than falling through
+      // to a global result and showing unrelated students.
     }
 
     // Auto-resolve school from the user's own profile when no schoolId is supplied

@@ -279,6 +279,18 @@ export async function getLeaderboard(
   const limit   = Math.min(options.limit ?? 50, 200)
 
   try {
+    // A class scope with no resolved classId means the user is not in any class yet.
+    // Return empty rankings rather than leaking other users' data.
+    if (options.scope === "class" && !options.classId) {
+      return {
+        rankings: [],
+        currentUserRank: null,
+        weekStartDate: weekStart.toISOString().slice(0, 10),
+        weekEndDate:   new Date(weekEnd.getTime() - 1).toISOString().slice(0, 10),
+        scope: "class",
+      }
+    }
+
     // Scope-specific JOIN/WHERE clauses
     let scopeJoin   = ""
     let scopeWhere  = ""
