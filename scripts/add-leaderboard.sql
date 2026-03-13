@@ -58,6 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_weekly_stats_week
 CREATE INDEX IF NOT EXISTS idx_weekly_stats_score
   ON weekly_stats (week_start_date DESC, weekly_score DESC);
 
+DROP TRIGGER IF EXISTS update_weekly_stats_updated_at ON weekly_stats;
 CREATE TRIGGER update_weekly_stats_updated_at
   BEFORE UPDATE ON weekly_stats
   FOR EACH ROW
