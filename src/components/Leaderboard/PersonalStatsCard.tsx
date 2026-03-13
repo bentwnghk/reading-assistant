@@ -109,7 +109,7 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
         <StatItem
           icon={<Target className="h-3.5 w-3.5" />}
           label={t("leaderboard.stats.testScore")}
-          value={`${Math.round(cw?.avgTestScore ?? 0)}%`}
+          value={Math.round(cw?.avgTestScore ?? 0)}
           sub={cw?.testsCompleted
             ? `${cw.testsCompleted} ${t("leaderboard.stats.testsCompleted")}`
             : undefined}
@@ -117,7 +117,7 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
         <StatItem
           icon={<BookOpen className="h-3.5 w-3.5" />}
           label={t("leaderboard.stats.quizScore")}
-          value={`${Math.round(cw?.avgQuizScore ?? 0)}%`}
+          value={Math.round(cw?.avgQuizScore ?? 0)}
           sub={cw?.quizzesCompleted
             ? `${cw.quizzesCompleted} ${t("leaderboard.stats.quizzesCompleted")}`
             : undefined}

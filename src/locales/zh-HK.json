@@ -936,6 +936,7 @@
     },
     "loading": "正在載入排行榜...",
     "refresh": "重新整理",
+    "close": "返回應用程式",
     "selectClass": "選擇班級",
     "selectSchool": "選擇學校"
   }

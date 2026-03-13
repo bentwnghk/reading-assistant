@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import {
   getLeaderboard,
+  refreshWeeklyStatsForUser,
   type LeaderboardScope,
   type SortColumn,
 } from "@/lib/leaderboard"
@@ -28,6 +29,10 @@ export async function GET(request: Request) {
 
     const userId   = session.user.id
     const userRole = await getUserRole(userId, session.user.email)
+
+    // Always refresh the requesting user's own weekly stats so their latest
+    // activity (quiz, test, spelling, flashcards) shows up immediately.
+    await refreshWeeklyStatsForUser(userId, weekStart)
 
     // Students can only see their own class scope unless they explicitly
     // choose school or global scope. Teachers/admins can query any scope.

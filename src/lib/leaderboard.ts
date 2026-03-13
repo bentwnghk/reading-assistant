@@ -284,14 +284,20 @@ export async function getLeaderboard(
     let scopeWhere  = ""
     const params: unknown[] = [weekStart.toISOString().slice(0, 10), limit]
 
+    // class scope: members are already students by definition — no role filter needed
     if (options.scope === "class" && options.classId) {
       scopeJoin  = `JOIN class_members cm ON cm.student_id = ws.user_id`
       scopeWhere = `AND cm.class_id = $3`
       params.push(options.classId)
     } else if (options.scope === "school" && options.schoolId) {
-      scopeJoin  = `JOIN users su ON su.id = ws.user_id`
+      scopeJoin  = `JOIN users su ON su.id = ws.user_id
+                    JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
       scopeWhere = `AND su.school_id = $3`
       params.push(options.schoolId)
+    } else if (options.scope === "global") {
+      // global: restrict to students only
+      scopeJoin  = `JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
+      scopeWhere = ``
     }
 
     const sql = `
@@ -332,9 +338,13 @@ export async function getLeaderboard(
       priorScopeWhere = `AND cm.class_id = $2`
       priorParams.push(options.classId)
     } else if (options.scope === "school" && options.schoolId) {
-      priorScopeJoin  = `JOIN users su ON su.id = ws.user_id`
+      priorScopeJoin  = `JOIN users su ON su.id = ws.user_id
+                         JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
       priorScopeWhere = `AND su.school_id = $2`
       priorParams.push(options.schoolId)
+    } else if (options.scope === "global") {
+      priorScopeJoin  = `JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
+      priorScopeWhere = ``
     }
 
     const priorSql = `
@@ -397,11 +407,18 @@ export async function getLeaderboard(
         userSubScopeWhere = `AND cm3.class_id = $3`
         userParams.push(options.classId)
       } else if (options.scope === "school" && options.schoolId) {
-        userScopeJoin     = `JOIN users su ON su.id = ws.user_id`
+        userScopeJoin     = `JOIN users su ON su.id = ws.user_id
+                             JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
         userScopeWhere    = `AND su.school_id = $3`
-        userSubScopeJoin  = `JOIN users su2 ON su2.id = ws2.user_id`
+        userSubScopeJoin  = `JOIN users su2 ON su2.id = ws2.user_id
+                             JOIN user_roles ur2 ON ur2.user_id = ws2.user_id AND ur2.role = 'student'`
         userSubScopeWhere = `AND su2.school_id = $3`
         userParams.push(options.schoolId)
+      } else if (options.scope === "global") {
+        userScopeJoin     = `JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
+        userScopeWhere    = ``
+        userSubScopeJoin  = `JOIN user_roles ur2 ON ur2.user_id = ws2.user_id AND ur2.role = 'student'`
+        userSubScopeWhere = ``
       }
 
       const userSql = `

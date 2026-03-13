@@ -936,6 +936,7 @@
     },
     "loading": "Loading leaderboard...",
     "refresh": "Refresh",
+    "close": "Back to app",
     "selectClass": "Select class",
     "selectSchool": "Select school"
   }

@@ -198,19 +198,19 @@ export function LeaderboardTable({
               <div className="shrink-0 hidden md:block text-center min-w-[52px]">
                 {sortBy === "avg_test_score" && (
                   <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.avgTestScore}%</div>
+                    <div className="font-semibold text-sm tabular-nums">{entry.avgTestScore}</div>
                     <div className="text-xs text-muted-foreground">{t("leaderboard.columns.test")}</div>
                   </>
                 )}
                 {sortBy === "avg_quiz_score" && (
                   <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.avgQuizScore}%</div>
+                    <div className="font-semibold text-sm tabular-nums">{entry.avgQuizScore}</div>
                     <div className="text-xs text-muted-foreground">{t("leaderboard.columns.quiz")}</div>
                   </>
                 )}
                 {sortBy === "avg_spelling_score" && (
                   <>
-                    <div className="font-semibold text-sm tabular-nums">{entry.avgSpellingScore}%</div>
+                    <div className="font-semibold text-sm tabular-nums">{entry.avgSpellingScore}</div>
                     <div className="text-xs text-muted-foreground">{t("leaderboard.columns.spelling")}</div>
                   </>
                 )}

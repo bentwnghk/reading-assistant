@@ -2,10 +2,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Trophy,
   RefreshCw,
   ChevronLeft,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/style";
@@ -36,6 +38,7 @@ function formatWeekLabel(weekStart: string): string {
 export function LeaderboardPage() {
   const { t } = useTranslation();
   const { data: authSession } = useSession();
+  const router = useRouter();
   const userId = authSession?.user?.id ?? "";
 
   const [scope, setScope]     = useState<LeaderboardScope>("class");
@@ -114,15 +117,25 @@ export function LeaderboardPage() {
             <p className="text-xs text-muted-foreground">{t("leaderboard.subtitle")}</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleRefresh}
-          disabled={refreshing}
-          title={t("leaderboard.refresh")}
-        >
-          <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            title={t("leaderboard.refresh")}
+          >
+            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push("/")}
+            title={t("leaderboard.close")}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* ── Week picker ── */}
