@@ -7,16 +7,6 @@ import { StreakBadge } from "./StreakBadge";
 import { ImprovementIndicator } from "./ImprovementIndicator";
 import type { LeaderboardEntry, SortColumn } from "./types";
 
-/** A tiny labelled stat chip shown inline under the player name on all screen sizes. */
-function StatChip({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-0.5 text-xs bg-muted rounded-full px-2 py-0.5">
-      <span className="text-muted-foreground">{label}:</span>
-      <span className="font-medium">{children}</span>
-    </span>
-  );
-}
-
 const MEDAL_COLORS = ["text-yellow-400", "text-gray-400", "text-amber-600"];
 const MEDAL_BG     = ["bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800",
                       "bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700",
@@ -190,35 +180,7 @@ export function LeaderboardTable({
                 <span className="text-xs text-muted-foreground">{t("leaderboard.rank.new")}</span>
               )}
 
-              {/* Inline stat chips — always visible on every screen size */}
-              <div className="flex flex-wrap gap-1 mt-1">
-                {/* Streak — always shown */}
-                <StatChip label={t("leaderboard.columns.streak")}>
-                  <StreakBadge days={entry.streakDays} size="sm" />
-                </StatChip>
 
-                {/* Secondary stat: whichever column is currently sorted, if not score/streak */}
-                {sortBy === "avg_test_score" && (
-                  <StatChip label={t("leaderboard.columns.test")}>{entry.avgTestScore}</StatChip>
-                )}
-                {sortBy === "avg_quiz_score" && (
-                  <StatChip label={t("leaderboard.columns.quiz")}>{entry.avgQuizScore}</StatChip>
-                )}
-                {sortBy === "avg_spelling_score" && (
-                  <StatChip label={t("leaderboard.columns.spelling")}>{entry.avgSpellingScore}</StatChip>
-                )}
-                {sortBy === "total_vocabulary_words" && (
-                  <StatChip label={t("leaderboard.columns.vocab")}>{entry.totalVocabWords}</StatChip>
-                )}
-                {sortBy === "total_flashcard_reviews" && (
-                  <StatChip label={t("leaderboard.columns.flashcards")}>{entry.flashcardReviews}</StatChip>
-                )}
-                {sortBy === "improvement_score" && (
-                  <StatChip label={t("leaderboard.columns.improvement")}>
-                    <ImprovementIndicator value={entry.improvementScore} size="sm" />
-                  </StatChip>
-                )}
-              </div>
             </div>
 
             {/* Primary stat — right side, always visible */}
@@ -227,6 +189,13 @@ export function LeaderboardTable({
                 <>
                   <ImprovementIndicator value={entry.improvementScore} />
                   <div className="text-xs text-muted-foreground">{t("leaderboard.columns.improvement")}</div>
+                </>
+              ) : sortBy === "reading_streak_days" ? (
+                <>
+                  <div className="flex justify-end">
+                    <StreakBadge days={entry.streakDays} />
+                  </div>
+                  <div className="text-xs text-muted-foreground">{t("leaderboard.columns.streak")}</div>
                 </>
               ) : (
                 <>
