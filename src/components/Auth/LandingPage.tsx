@@ -7,7 +7,7 @@ import {
   BookCopy,
   Target,
   Trophy,
-  Shield,
+  Cloud,
   Sparkles,
   Star,
   Camera,
@@ -125,9 +125,9 @@ export function LandingPage() {
           </div>
           <div className="md:col-span-2 group relative overflow-hidden bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[2.5rem] p-10 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
             <div className="absolute -bottom-20 -right-10 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500 group-hover:opacity-20">
-              <Shield className="h-64 w-64 text-blue-500" />
+              <Cloud className="h-64 w-64 text-blue-500" />
             </div>
-            <Shield className="relative z-10 h-12 w-12 mb-6 text-blue-600 dark:text-blue-400" />
+            <Cloud className="relative z-10 h-12 w-12 mb-6 text-blue-600 dark:text-blue-400" />
             <h3 className="relative z-10 text-3xl font-bold mb-3">{t("header.about.whyLove.private.title")}</h3>
             <p className="relative z-10 text-xl text-slate-600 dark:text-slate-400 max-w-3xl leading-relaxed">{t("header.about.whyLove.private.desc")}</p>
           </div>
