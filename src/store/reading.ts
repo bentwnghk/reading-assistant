@@ -721,6 +721,7 @@ export const useReadingStore = create(
           state.status = "idle";
         }
       },
+      migrate: (persistedState) => persistedState as ReadingStore & ReadingActions,
     }
   )
 );

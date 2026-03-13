@@ -33,7 +33,9 @@ function AuthStateManager() {
       syncedUserIdRef.current = null
       // Reset in-memory settings back to defaults so a logged-out (or
       // different) user doesn't see the previous authenticated user's data.
-      useSettingStore.getState().loadFromServer(defaultValues)
+      // Preserve the user's language preference from localStorage.
+      const currentLanguage = useSettingStore.getState().language
+      useSettingStore.getState().loadFromServer({ ...defaultValues, language: currentLanguage })
       return
     }
 
