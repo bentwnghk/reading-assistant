@@ -549,18 +549,25 @@ export async function getPersonalStats(
     const longestStreak = parseInt(streakResult.rows[0]?.longest_streak ?? "0") || 0
 
     // ── Rank in class ──
+    // Return NULL (not 1) when the user has no class membership yet.
     const rankClassResult = await client.query(
-      `SELECT (COUNT(*) + 1)::int AS rank
-       FROM weekly_stats ws2
-       JOIN class_members cm2 ON cm2.student_id = ws2.user_id
-       WHERE cm2.class_id = (
-           SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1
+      `SELECT CASE
+         WHEN (SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1) IS NULL
+         THEN NULL
+         ELSE (
+           SELECT (COUNT(*) + 1)::int
+           FROM weekly_stats ws2
+           JOIN class_members cm2 ON cm2.student_id = ws2.user_id
+           WHERE cm2.class_id = (
+               SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1
+             )
+             AND ws2.week_start_date = $2
+             AND ws2.weekly_score > COALESCE(
+               (SELECT weekly_score FROM weekly_stats
+                WHERE user_id = $1 AND week_start_date = $2), 0
+             )
          )
-         AND ws2.week_start_date = $2
-         AND ws2.weekly_score > COALESCE(
-           (SELECT weekly_score FROM weekly_stats
-            WHERE user_id = $1 AND week_start_date = $2), 0
-         )`,
+       END AS rank`,
       [userId, weekDateStr]
     )
 
@@ -608,7 +615,7 @@ export async function getPersonalStats(
     })
 
     const sessionStats = sessionStatsResult.rows[0]
-    const rankClass  = parseInt(rankClassResult.rows[0]?.rank  ?? "0") || null
+    const rankClass  = rankClassResult.rows[0]?.rank != null ? parseInt(rankClassResult.rows[0].rank) : null
     const rankSchool = parseInt(rankSchoolResult.rows[0]?.rank ?? "0") || null
     const rankGlobal = parseInt(rankGlobalResult.rows[0]?.rank ?? "0") || null
 
