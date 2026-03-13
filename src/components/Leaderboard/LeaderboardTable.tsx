@@ -42,7 +42,7 @@ interface LeaderboardTableProps {
   currentUserId: string;
   sortBy: SortColumn;
   onSortChange: (col: SortColumn) => void;
-  showClass?: boolean;
+  scope: "class" | "school" | "global";
 }
 
 export function LeaderboardTable({
@@ -50,7 +50,7 @@ export function LeaderboardTable({
   currentUserId,
   sortBy,
   onSortChange,
-  showClass = false,
+  scope,
 }: LeaderboardTableProps) {
   const { t } = useTranslation();
 
@@ -150,8 +150,13 @@ export function LeaderboardTable({
                   </span>
                 )}
               </div>
-              {showClass && entry.className && (
+              {scope === "school" && entry.className && (
                 <div className="text-xs text-muted-foreground truncate">{entry.className}</div>
+              )}
+              {scope === "global" && (entry.className || entry.schoolName) && (
+                <div className="text-xs text-muted-foreground truncate">
+                  {[entry.className, entry.schoolName].filter(Boolean).join(" · ")}
+                </div>
               )}
               {/* Rank trend */}
               {rankDelta !== null && (

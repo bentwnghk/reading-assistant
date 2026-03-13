@@ -58,6 +58,7 @@ export interface WeeklyStatsRow {
 }
 
 export interface PersonalStats {
+  isTeacher?: boolean
   currentWeek: WeeklyStatsRow | null
   priorWeek: WeeklyStatsRow | null
   allTime: {

@@ -258,7 +258,7 @@ export function LeaderboardPage() {
               currentUserId={userId}
               sortBy={sortBy}
               onSortChange={setSortBy}
-              showClass={scope !== "class"}
+              scope={scope}
             />
           )}
         </div>

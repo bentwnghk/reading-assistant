@@ -6,7 +6,7 @@ import {
   type SortColumn,
 } from "@/lib/leaderboard"
 import { getWeekStart } from "@/lib/activity"
-import { getStudentClassId, getSchoolForUser } from "@/lib/users"
+import { getStudentClassId, getClassesForTeacher, getSchoolForUser } from "@/lib/users"
 import { NextResponse } from "next/server"
 
 // GET /api/leaderboard?scope=class|school|global&classId=...&schoolId=...&week=YYYY-MM-DD&sortBy=...&limit=50
@@ -37,9 +37,14 @@ export async function GET(request: Request) {
     let resolvedSchoolId = schoolId
     let resolvedScope    = scopeParam
 
-    // Auto-resolve class for students who haven't supplied one explicitly
+    // Auto-resolve class when none is supplied explicitly.
+    // Try student membership first; fall back to the teacher's own class.
     if (resolvedScope === "class" && !resolvedClassId) {
       resolvedClassId = (await getStudentClassId(userId)) ?? undefined
+      if (!resolvedClassId) {
+        const teacherClasses = await getClassesForTeacher(userId)
+        resolvedClassId = teacherClasses[0]?.id ?? undefined
+      }
       if (!resolvedClassId) {
         resolvedScope = "global"
       }

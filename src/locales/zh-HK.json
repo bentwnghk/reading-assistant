@@ -921,7 +921,9 @@
       "totalVocab": "累積詞彙量",
       "avgTestScore": "平均測試分數",
       "totalFlashcards": "字卡複習總次數",
-      "noStats": "完成本週的學習活動，即可出現在排行榜上！"
+      "noStats": "完成本週的學習活動，即可出現在排行榜上！",
+      "teacherTitle": "教師視圖",
+      "teacherMessage": "「我的統計」頁面追蹤學生的學習進度。請切換至「排行榜」頁面查看學生的表現。"
     },
     "rank": {
       "up": "上升 {{count}}",

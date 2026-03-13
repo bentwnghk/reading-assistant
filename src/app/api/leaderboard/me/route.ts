@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { getPersonalStats, refreshWeeklyStatsForUser } from "@/lib/leaderboard"
 import { getWeekStart } from "@/lib/activity"
+import { getUserRole } from "@/lib/users"
 import { NextResponse } from "next/server"
 
 // GET /api/leaderboard/me?week=YYYY-MM-DD
@@ -11,15 +12,24 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const userId = session.user.id
+    const role   = await getUserRole(userId, session.user.email)
+
+    // Teachers and admins are not learners — return a flag so the UI can
+    // show an appropriate message instead of a stats card full of zeros.
+    if (role === "teacher" || role === "admin") {
+      return NextResponse.json({ isTeacher: true })
+    }
+
     const { searchParams } = new URL(request.url)
     const weekParam = searchParams.get("week")
     const weekStart = weekParam ? new Date(weekParam) : getWeekStart()
 
-    // Always refresh current user's stats on this endpoint so data stays current
-    await refreshWeeklyStatsForUser(session.user.id, weekStart)
+    // Refresh the student's own weekly stats so data is always current
+    await refreshWeeklyStatsForUser(userId, weekStart)
 
-    const stats = await getPersonalStats(session.user.id, weekStart)
-    return NextResponse.json(stats)
+    const stats = await getPersonalStats(userId, weekStart)
+    return NextResponse.json({ isTeacher: false, ...stats })
   } catch (error) {
     console.error("[leaderboard/me] GET error:", error)
     return NextResponse.json(

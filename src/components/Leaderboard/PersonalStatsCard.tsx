@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2 } from "lucide-react";
+import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2, GraduationCap } from "lucide-react";
 import { cn } from "@/utils/style";
 import { ImprovementIndicator } from "./ImprovementIndicator";
 import type { PersonalStats } from "./types";
@@ -46,6 +46,16 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
 
   const scoreDelta = cw && pw ? cw.weeklyScore - pw.weeklyScore : null;
   const streakDelta = cw && pw ? cw.readingStreakDays - pw.readingStreakDays : null;
+
+  if (stats.isTeacher) {
+    return (
+      <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
+        <GraduationCap className="h-10 w-10 mx-auto mb-3 opacity-40" />
+        <p className="font-medium text-foreground">{t("leaderboard.personal.teacherTitle")}</p>
+        <p className="text-sm mt-1">{t("leaderboard.personal.teacherMessage")}</p>
+      </div>
+    );
+  }
 
   if (!cw && !stats.allTime.totalSessions) {
     return (

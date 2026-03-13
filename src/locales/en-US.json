@@ -921,7 +921,9 @@
       "totalVocab": "Total Vocabulary",
       "avgTestScore": "Avg Test Score",
       "totalFlashcards": "Total Flashcards",
-      "noStats": "Complete learning activities this week to appear on the leaderboard!"
+      "noStats": "Complete learning activities this week to appear on the leaderboard!",
+      "teacherTitle": "Teacher View",
+      "teacherMessage": "The My Stats tab tracks student learning progress. Switch to the Leaderboard tab to see how your students are doing."
     },
     "rank": {
       "up": "up {{count}}",
