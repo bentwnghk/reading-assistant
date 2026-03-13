@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useTranslation } from "react-i18next";
+import { useSettingStore } from "@/store/setting";
+import locales from "@/constants/locales";
 import {
   BookCopy,
   Target,
@@ -33,10 +35,20 @@ import {
   GraduationCap,
   Users,
   ArrowRight,
+  Globe,
+  Check,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export function LandingPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language, update } = useSettingStore();
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
@@ -44,8 +56,44 @@ export function LandingPage() {
     await signIn("google");
   };
 
+  const handleLocaleChange = (locale: string) => {
+    update({ language: locale });
+    i18n.changeLanguage(locale);
+    document.documentElement.setAttribute("lang", locale);
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#0D1117] text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900 overflow-hidden">
+      {/* Locale Switcher */}
+      <div className="fixed top-4 right-4 z-50">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              <Globe className="h-5 w-5" />
+              <span className="sr-only">{t("settings.language")}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {Object.entries(locales).map(([code, name]) => (
+              <DropdownMenuItem
+                key={code}
+                onClick={() => handleLocaleChange(code)}
+                className="flex items-center justify-between gap-4"
+              >
+                <span>{name}</span>
+                {(language === code || (language === "system" && i18n.language === code)) && (
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       {/* Organic Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 blur-3xl animate-pulse duration-[10000ms]" />

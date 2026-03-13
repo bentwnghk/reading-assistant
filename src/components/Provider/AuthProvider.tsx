@@ -44,6 +44,8 @@ function AuthStateManager() {
     syncedUserIdRef.current = userId
     const expectedUserId = userId
     
+    const preSignInLanguage = useSettingStore.getState().language
+
     const sessionsPromise = useHistoryStore.getState().loadFromAPI?.() ?? Promise.resolve([])
     const settingsPromise = loadSettingsFromAPI()
 
@@ -54,6 +56,8 @@ function AuthStateManager() {
 
         if (settings && Object.keys(settings).length > 0) {
           useSettingStore.getState().loadFromServer(settings)
+        } else {
+          useSettingStore.getState().update({ language: preSignInLanguage })
         }
 
         const currentReading = useReadingStore.getState()
