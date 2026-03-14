@@ -209,7 +209,7 @@ function History({ open, onClose }: HistoryProps) {
               {t("history.noHistory")}
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -312,7 +312,7 @@ function History({ open, onClose }: HistoryProps) {
               >
                 {t("history.loadMore")}
               </div>
-            </div>
+            </>
           )}
         </ScrollArea>
         <input
