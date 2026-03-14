@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore, type ReadingStore } from "@/store/reading";
 import { useHistoryStore, type ReadingHistory } from "@/store/history";
 import { markLastOpenedSession } from "@/store/setting";
@@ -178,7 +177,7 @@ function History({ open, onClose }: HistoryProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-lg gap-2">
+      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-lg gap-2 max-sm:p-3">
         <DialogHeader>
           <DialogTitle>{t("history.title")}</DialogTitle>
           <DialogDescription>
@@ -203,14 +202,14 @@ function History({ open, onClose }: HistoryProps) {
             onClear={() => setHistoryList(history.slice(0, PAGE_SIZE))}
           />
         </div>
-        <ScrollArea className="max-h-[65vh]">
+        <div className="max-h-[65vh] overflow-y-auto">
           {historyList.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               {t("history.noHistory")}
             </div>
           ) : (
             <>
-              <Table>
+              <Table className="min-w-[640px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("history.name")}</TableHead>
@@ -242,7 +241,7 @@ function History({ open, onClose }: HistoryProps) {
                     <TableRow key={item.id}>
                        <TableCell>
                          <p
-                           className="truncate w-48 max-lg:max-w-40 max-sm:max-w-28 cursor-pointer hover:text-blue-500"
+                            className="truncate w-48 max-lg:max-w-40 max-sm:w-28 cursor-pointer hover:text-blue-500"
                            title={item.docTitle || item.extractedText?.slice(0, 100)}
                            onClick={() => loadHistory(item.id)}
                          >
@@ -314,7 +313,7 @@ function History({ open, onClose }: HistoryProps) {
               </div>
             </>
           )}
-        </ScrollArea>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
