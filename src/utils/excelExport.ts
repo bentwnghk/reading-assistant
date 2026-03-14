@@ -36,7 +36,8 @@ interface SummaryStats {
   avgTestScore: number
   testCompletedCount: number
   passRate: number
-  totalVocabulary: number
+  avgVocabulary: number
+  vocabularyCompletedCount: number
   avgSpellingScore: number
   spellingCompletedCount: number
   avgQuizScore: number
@@ -54,7 +55,8 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       avgTestScore: 0,
       testCompletedCount: 0,
       passRate: 0,
-      totalVocabulary: 0,
+      avgVocabulary: 0,
+      vocabularyCompletedCount: 0,
       avgSpellingScore: 0,
       spellingCompletedCount: 0,
       avgQuizScore: 0,
@@ -67,7 +69,9 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
   const testCompletedSessions = sessions.filter(s => s.testCompleted && s.testScore !== undefined)
   const totalTestScore = testCompletedSessions.reduce((sum, s) => sum + (s.testScore || 0), 0)
   const passedTests = testCompletedSessions.filter(s => (s.testScore || 0) >= 70).length
-  const totalVocabulary = sessions.reduce((sum, s) => sum + s.glossaryCount, 0)
+
+  const vocabularySessions = sessions.filter(s => s.glossaryCount > 0)
+  const totalVocabulary = vocabularySessions.reduce((sum, s) => sum + s.glossaryCount, 0)
 
   const spellingCompletedSessions = sessions.filter(s => s.spellingGameBestScore !== undefined && s.spellingGameBestScore > 0)
   const totalSpellingScore = spellingCompletedSessions.reduce((sum, s) => sum + (s.spellingGameBestScore || 0), 0)
@@ -103,7 +107,8 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
     avgTestScore: testCompletedSessions.length > 0 ? Math.round(totalTestScore / testCompletedSessions.length) : 0,
     testCompletedCount: testCompletedSessions.length,
     passRate: testCompletedSessions.length > 0 ? Math.round((passedTests / testCompletedSessions.length) * 100) : 0,
-    totalVocabulary,
+    avgVocabulary: vocabularySessions.length > 0 ? Math.round(totalVocabulary / vocabularySessions.length) : 0,
+    vocabularyCompletedCount: vocabularySessions.length,
     avgSpellingScore: spellingCompletedSessions.length > 0 ? Math.round(totalSpellingScore / spellingCompletedSessions.length) : 0,
     spellingCompletedCount: spellingCompletedSessions.length,
     avgQuizScore: quizCompletedSessions.length > 0 ? Math.round(totalQuizScore / quizCompletedSessions.length) : 0,
@@ -336,13 +341,14 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
 
   summarySheet.addRow([])
 
-  const statsData: [string, string | number][] = [
+ const statsData: [string, string | number][] = [
     ["Total Reading Sessions", stats.totalSessions],
     ["Average Learning Progress", `${stats.avgProgress}%`],
     ["Reading Tests Completed", stats.testCompletedCount],
     ["Average Reading Test Score (Completed)", `${stats.avgTestScore}%`],
     ["Reading Test Pass Rate (≥70%)", `${stats.passRate}%`],
-    ["Total Vocabulary Collected", stats.totalVocabulary],
+    ["Sessions with Vocabulary", stats.vocabularyCompletedCount],
+    ["Average Vocabulary Collected", stats.avgVocabulary],
     ["Spelling Challenges Completed", stats.spellingCompletedCount],
     ["Average Spelling Challenge Score (Completed)", stats.avgSpellingScore],
     ["Vocabulary Quizzes Completed", stats.quizCompletedCount],
