@@ -119,7 +119,7 @@
         },
         "glossary": {
           "title": "📖 Smart Glossary",
-          "desc": "Get bilingual definitions (English + Chinese) with real-world example sentences for every word you highlight."
+          "desc": "Get bilingual definitions (English + Chinese), syllabification, and real-world example sentences for every word you highlight."
         },
         "flashcard": {
           "title": "🃏 Flashcard Review",
@@ -154,7 +154,7 @@
         "test": "Take the reading comprehension test",
         "analyze": "Analyze any sentence in detail",
         "highlight": "Highlight words to build vocabulary",
-        "glossary": "Learn with bilingual definitions",
+        "glossary": "Learn new words with bilingual definitions",
         "spelling": "Practice with spelling games",
         "vocabQuiz": "Test your vocabulary knowledge"
       },
