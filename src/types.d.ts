@@ -35,6 +35,7 @@ interface ReadingTestQuestion {
 
 interface GlossaryEntry {
   word: string;
+  syllabification?: string;
   partOfSpeech: string;
   englishDefinition: string;
   chineseDefinition: string;

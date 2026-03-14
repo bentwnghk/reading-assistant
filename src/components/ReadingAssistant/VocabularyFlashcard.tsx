@@ -372,6 +372,11 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 )}
               </button>
             </div>
+            {currentEntry.syllabification && (
+              <div className="text-muted-foreground text-sm mb-2">
+                {currentEntry.syllabification}
+              </div>
+            )}
             {currentEntry.partOfSpeech && (
               <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-medium">
                 {currentEntry.partOfSpeech}
@@ -408,6 +413,11 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 )}
               </button>
             </div>
+            {currentEntry.syllabification && (
+              <div className="text-muted-foreground text-sm mb-1">
+                {currentEntry.syllabification}
+              </div>
+            )}
             {currentEntry.partOfSpeech && (
               <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-medium mb-4">
                 {currentEntry.partOfSpeech}

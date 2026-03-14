@@ -448,6 +448,7 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 [
   {
     "word": "example",
+    "syllabification": "ex·**am**·ple",
     "partOfSpeech": "noun",
     "englishDefinition": "A clear, simple English definition appropriate for students",
     "chineseDefinition": "繁體中文解釋",
@@ -456,6 +457,7 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 ]
 
 **Requirements:**
+- Syllabification: Break down the word into syllables separated by middle dots (·). Use **bold** to mark the stressed syllable (e.g., "beau·**ti**·ful", "**im**·por·tant", "ex·**cep**·tion·al").
 - Part of speech should be: noun, verb, adjective, adverb, preposition, conjunction, interjection, pronoun, or phrase.
 - English definitions should be simple and clear for students.
 - Chinese translations MUST be in Traditional Chinese (繁體中文), not Simplified.

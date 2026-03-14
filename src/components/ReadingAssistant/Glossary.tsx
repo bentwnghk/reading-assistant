@@ -50,9 +50,10 @@ function Glossary() {
   const handleDownloadCSV = () => {
     if (glossary.length === 0) return;
 
-    const headers = ["Word", "PoS", "English Definition", "Chinese Definition", "Example"];
+    const headers = ["Word", "Syllabification", "PoS", "English Definition", "Chinese Definition", "Example"];
     const rows = glossary.map((entry) => [
       entry.word,
+      entry.syllabification || "",
       entry.partOfSpeech || "",
       `"${entry.englishDefinition.replace(/"/g, '""')}"`,
       `"${entry.chineseDefinition.replace(/"/g, '""')}"`,
@@ -93,6 +94,7 @@ function Glossary() {
 
       const colHeaders = [
         t("reading.glossary.word"),
+        t("reading.glossary.syllabification"),
         t("reading.glossary.partOfSpeech"),
         t("reading.glossary.englishDefinition"),
         t("reading.glossary.chineseDefinition"),
@@ -115,7 +117,7 @@ function Glossary() {
                   spacing: { before: 60, after: 60 },
                 }),
               ],
-              width: { size: 20, type: WidthType.PERCENTAGE },
+              width: { size: 100 / 6, type: WidthType.PERCENTAGE },
             })
         ),
       });
@@ -125,6 +127,7 @@ function Glossary() {
         return new DocxTableRow({
           children: [
             entry.word,
+            entry.syllabification || "",
             entry.partOfSpeech || "",
             entry.englishDefinition,
             entry.chineseDefinition,
@@ -140,7 +143,7 @@ function Glossary() {
                     spacing: { before: 60, after: 60 },
                   }),
                 ],
-                width: { size: 20, type: WidthType.PERCENTAGE },
+                width: { size: 100 / 6, type: WidthType.PERCENTAGE },
               })
           ),
         });
@@ -243,7 +246,8 @@ function Glossary() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[120px]">{t("reading.glossary.word")}</TableHead>
-                  <TableHead className="w-[100px]">{t("reading.glossary.partOfSpeech")}</TableHead>
+                  <TableHead className="w-[100px]">{t("reading.glossary.syllabification")}</TableHead>
+                  <TableHead className="w-[80px]">{t("reading.glossary.partOfSpeech")}</TableHead>
                   <TableHead>{t("reading.glossary.englishDefinition")}</TableHead>
                   <TableHead className="w-[200px]">{t("reading.glossary.chineseDefinition")}</TableHead>
                   <TableHead>{t("reading.glossary.example")}</TableHead>
@@ -253,6 +257,7 @@ function Glossary() {
                 {glossary.map((entry) => (
                   <TableRow key={entry.word}>
                     <TableCell className="font-medium">{entry.word}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{entry.syllabification || "-"}</TableCell>
                     <TableCell className="text-muted-foreground italic text-xs">{entry.partOfSpeech || "-"}</TableCell>
                     <TableCell>{entry.englishDefinition}</TableCell>
                     <TableCell className="font-noto-sans-tc">{entry.chineseDefinition}</TableCell>
