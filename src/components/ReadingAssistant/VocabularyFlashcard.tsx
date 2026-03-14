@@ -355,7 +355,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
             <div className="flex items-center justify-center gap-2 mb-4">
               <div className={cn(
                 "font-extrabold text-center",
-                (currentEntry.syllabification || currentEntry.word).length > 17 ? "text-3xl" : (currentEntry.syllabification || currentEntry.word).length > 11 ? "text-4xl" : "text-5xl"
+                (currentEntry.syllabification || currentEntry.word).length > 18 ? "text-3xl" : (currentEntry.syllabification || currentEntry.word).length > 12 ? "text-4xl" : "text-5xl"
               )}>
                 {currentEntry.syllabification || currentEntry.word}
               </div>
