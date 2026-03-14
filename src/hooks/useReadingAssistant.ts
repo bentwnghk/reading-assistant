@@ -382,7 +382,7 @@ function useReadingAssistant() {
       return [];
     }
 
-    toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: 30000 });
+    const toastId = toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: Infinity });
 
     setStoreStatus("testing");
     setStatus("testing");
@@ -412,10 +412,12 @@ function useReadingAssistant() {
       const questions: ReadingTestQuestion[] = JSON.parse(text);
       setReadingTest(questions);
 
+      toast.dismiss(toastId);
       setStoreStatus("idle");
       setStatus("idle");
       return questions;
     } catch (error) {
+      toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
@@ -440,7 +442,7 @@ function useReadingAssistant() {
     setStoreStatus("glossary");
     setStatus("glossary");
 
-    toast.info(i18next.t("reading.glossary.generatingWait"), { duration: 20000 });
+    const toastId = toast.info(i18next.t("reading.glossary.generatingWait"), { duration: Infinity });
 
     try {
       const thinkingModel = await createModelProvider(glossaryModel);
@@ -467,10 +469,12 @@ function useReadingAssistant() {
       const entries: GlossaryEntry[] = JSON.parse(text);
       setGlossary(entries);
 
+      toast.dismiss(toastId);
       setStoreStatus("idle");
       setStatus("idle");
       return entries;
     } catch (error) {
+      toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
@@ -607,7 +611,7 @@ Guidelines:
     setStoreStatus("testing");
     setStatus("testing");
 
-    toast.info(i18next.t("reading.readingTest.practiceGeneratingWait"), { duration: 30000 });
+    const toastId = toast.info(i18next.t("reading.readingTest.practiceGeneratingWait"), { duration: Infinity });
 
     try {
       const thinkingModel = await createModelProvider(readingTestModel);
@@ -634,10 +638,12 @@ Guidelines:
       const questions: ReadingTestQuestion[] = JSON.parse(text);
       setReadingTest(questions);
 
+      toast.dismiss(toastId);
       setStoreStatus("idle");
       setStatus("idle");
       return questions;
     } catch (error) {
+      toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
