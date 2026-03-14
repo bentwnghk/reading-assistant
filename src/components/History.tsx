@@ -210,7 +210,7 @@ function History({ open, onClose }: HistoryProps) {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[800px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("history.name")}</TableHead>
