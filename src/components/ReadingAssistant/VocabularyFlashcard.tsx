@@ -355,9 +355,9 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
             <div className="flex items-center justify-center gap-2 mb-4">
               <div className={cn(
                 "font-extrabold text-center",
-                currentEntry.word.length > 18 ? "text-3xl" : currentEntry.word.length > 12 ? "text-4xl" : "text-5xl"
+                (currentEntry.syllabification || currentEntry.word).length > 18 ? "text-3xl" : (currentEntry.syllabification || currentEntry.word).length > 12 ? "text-4xl" : "text-5xl"
               )}>
-                {currentEntry.word}
+                {currentEntry.syllabification || currentEntry.word}
               </div>
               <button
                 onClick={handleSpeak}
@@ -372,11 +372,6 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 )}
               </button>
             </div>
-            {currentEntry.syllabification && (
-              <div className="text-muted-foreground text-sm mb-2">
-                {currentEntry.syllabification}
-              </div>
-            )}
             {currentEntry.partOfSpeech && (
               <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-medium">
                 {currentEntry.partOfSpeech}
@@ -398,7 +393,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
           >
             <div className="flex items-center justify-center gap-2 mb-2">
               <div className="text-3xl font-extrabold text-center">
-                {currentEntry.word}
+                {currentEntry.syllabification || currentEntry.word}
               </div>
               <button
                 onClick={handleSpeak}
@@ -413,11 +408,6 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 )}
               </button>
             </div>
-            {currentEntry.syllabification && (
-              <div className="text-muted-foreground text-sm mb-1">
-                {currentEntry.syllabification}
-              </div>
-            )}
             {currentEntry.partOfSpeech && (
               <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-medium mb-4">
                 {currentEntry.partOfSpeech}
