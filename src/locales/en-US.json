@@ -72,7 +72,7 @@
           "title": "🎓 Teacher",
           "createClass": "Create your own classes",
           "manageStudents": "Add students & track progress",
-          "exportData": "Export detailed reports (CSV)",
+          "exportData": "Export detailed Excel reports",
           "viewLeaderboard": "Monitor class leaderboards"
         },
         "student": {

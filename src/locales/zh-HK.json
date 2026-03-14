@@ -72,7 +72,7 @@
           "title": "🎓 老師",
           "createClass": "創建自己的班別",
           "manageStudents": "添加學生並追蹤進度",
-          "exportData": "匯出詳細報告（CSV）",
+          "exportData": "匯出詳細 Excel 試算表報告",
           "viewLeaderboard": "查看班別排行榜"
         },
         "student": {
@@ -87,11 +87,11 @@
         "title": "強大功能",
         "difficulty": {
           "title": "📊 難度分析",
-          "desc": "閱讀前先了解文章！獲取CEFR等級、Flesch閱讀易度、年級水平和5種科學可讀性指標。並排比較原文、改寫版本和簡化版本！"
+          "desc": "閱讀前先了解文章！獲取 CEFR 等級、Flesch 閱讀易度、年級水平和5種科學可讀性指標。並排比較原文、改寫版本和簡化版本！"
         },
         "cefrHighlight": {
-          "title": "🎨 CEFR詞彙高亮",
-          "desc": "一眼看清詞彙難度！每個詞彙按CEFR等級（A1-C2）以顏色標示。開關等級顯示、查看每個等級的詞彙數量，即時識別高難度詞彙。"
+          "title": "🎨 CEFR 詞彙高亮",
+          "desc": "一眼看清詞彙難度！每個詞彙按 CEFR 等級（A1-C2）以顏色標示。開關等級顯示、查看每個等級的詞彙數量，即時識別高難度詞彙。"
         },
         "tutor": {
           "title": "🤖 AI 導師",
