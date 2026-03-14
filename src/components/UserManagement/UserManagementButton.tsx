@@ -28,8 +28,8 @@ export function UserManagementButton() {
         size="sm"
         className="mr-2"
       >
-        <Users className="h-4 w-4 mr-1" />
-        {t("userManagement.title")}
+        <Users className="h-4 w-4 sm:mr-1" />
+        <span className="hidden sm:inline">{t("userManagement.title")}</span>
       </Button>
       <UserManagementPanel open={open} onClose={() => setOpen(false)} />
     </>

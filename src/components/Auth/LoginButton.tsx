@@ -15,17 +15,17 @@ export function LoginButton() {
 
   if (session) {
     return (
-      <Button onClick={() => signOut()} variant="outline">
-        <LogOut className="mr-2 h-4 w-4" />
-        {t("header.auth.signOut")}
+      <Button onClick={() => signOut()} variant="outline" size="sm">
+        <LogOut className="h-4 w-4 sm:mr-2" />
+        <span className="hidden sm:inline">{t("header.auth.signOut")}</span>
       </Button>
     )
   }
 
-  return (
-    <Button onClick={() => signIn("google")}>
-      <LogIn className="mr-2 h-4 w-4" />
-      {t("header.auth.signIn")}
+    return (
+      <Button onClick={() => signIn("google")} size="sm">
+        <LogIn className="h-4 w-4 sm:mr-2" />
+        <span className="hidden sm:inline">{t("header.auth.signIn")}</span>
     </Button>
   )
 }
