@@ -26,6 +26,8 @@ interface ExportOptions {
   sessions: SessionWithSchool[]
   isAdmin: boolean
   filename?: string
+  schoolName?: string
+  className?: string
 }
 
 interface SummaryStats {
@@ -36,13 +38,15 @@ interface SummaryStats {
   passRate: number
   totalVocabulary: number
   avgSpellingScore: number
+  spellingCompletedCount: number
   avgQuizScore: number
+  quizCompletedCount: number
   schoolBreakdown: Map<string, { count: number; avgProgress: number; avgTestScore: number }>
 }
 
 function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
   const totalSessions = sessions.length
-  
+
   if (totalSessions === 0) {
     return {
       totalSessions: 0,
@@ -52,7 +56,9 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       passRate: 0,
       totalVocabulary: 0,
       avgSpellingScore: 0,
+      spellingCompletedCount: 0,
       avgQuizScore: 0,
+      quizCompletedCount: 0,
       schoolBreakdown: new Map(),
     }
   }
@@ -62,8 +68,12 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
   const totalTestScore = testCompletedSessions.reduce((sum, s) => sum + (s.testScore || 0), 0)
   const passedTests = testCompletedSessions.filter(s => (s.testScore || 0) >= 70).length
   const totalVocabulary = sessions.reduce((sum, s) => sum + s.glossaryCount, 0)
-  const totalSpellingScore = sessions.reduce((sum, s) => sum + (s.spellingGameBestScore || 0), 0)
-  const totalQuizScore = sessions.reduce((sum, s) => sum + (s.vocabularyQuizScore || 0), 0)
+
+  const spellingCompletedSessions = sessions.filter(s => s.spellingGameBestScore !== undefined && s.spellingGameBestScore > 0)
+  const totalSpellingScore = spellingCompletedSessions.reduce((sum, s) => sum + (s.spellingGameBestScore || 0), 0)
+
+  const quizCompletedSessions = sessions.filter(s => s.vocabularyQuizScore !== undefined && s.vocabularyQuizScore > 0)
+  const totalQuizScore = quizCompletedSessions.reduce((sum, s) => sum + (s.vocabularyQuizScore || 0), 0)
 
   const schoolBreakdown = new Map<string, { count: number; totalProgress: number; totalTestScore: number; testCount: number }>()
   sessions.forEach(s => {
@@ -94,17 +104,19 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
     testCompletedCount: testCompletedSessions.length,
     passRate: testCompletedSessions.length > 0 ? Math.round((passedTests / testCompletedSessions.length) * 100) : 0,
     totalVocabulary,
-    avgSpellingScore: Math.round(totalSpellingScore / totalSessions),
-    avgQuizScore: Math.round(totalQuizScore / totalSessions),
+    avgSpellingScore: spellingCompletedSessions.length > 0 ? Math.round(totalSpellingScore / spellingCompletedSessions.length) : 0,
+    spellingCompletedCount: spellingCompletedSessions.length,
+    avgQuizScore: quizCompletedSessions.length > 0 ? Math.round(totalQuizScore / quizCompletedSessions.length) : 0,
+    quizCompletedCount: quizCompletedSessions.length,
     schoolBreakdown: schoolBreakdownFinal,
   }
 }
 
 export async function exportStudentDataToExcel(options: ExportOptions): Promise<void> {
-  const { sessions, isAdmin, filename } = options
+  const { sessions, isAdmin, filename, schoolName, className } = options
 
   const workbook = new ExcelJS.Workbook()
-  workbook.creator = "ProReader"
+  workbook.creator = "Mr.🆖 ProReader"
   workbook.created = new Date()
 
   const dataSheet = workbook.addWorksheet("Student Data", {
@@ -178,8 +190,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.progress,
           session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           session.glossaryCount,
-          session.spellingGameBestScore || 0,
-          session.vocabularyQuizScore || 0,
+          session.spellingGameBestScore || "-",
+          session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
       : [
@@ -189,8 +201,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.progress,
           session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           session.glossaryCount,
-          session.spellingGameBestScore || 0,
-          session.vocabularyQuizScore || 0,
+          session.spellingGameBestScore || "-",
+          session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
 
@@ -218,6 +230,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
 
       const progressColIndex = isAdmin ? 5 : 4
       const testColIndex = isAdmin ? 6 : 5
+      const quizColIndex = isAdmin ? 9 : 8
 
       if (colNumber === progressColIndex && typeof cell.value === "number") {
         cell.numFmt = "0\"%\""
@@ -231,6 +244,17 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
       }
 
       if (colNumber === testColIndex && typeof cell.value === "number") {
+        cell.numFmt = "0\"%\""
+        if (cell.value >= 70) {
+          cell.fill = greenFill
+          cell.font = { ...cell.font as ExcelJS.Font, ...greenFont }
+        } else {
+          cell.fill = redFill
+          cell.font = { ...cell.font as ExcelJS.Font, ...redFont }
+        }
+      }
+
+      if (colNumber === quizColIndex && typeof cell.value === "number") {
         cell.numFmt = "0\"%\""
         if (cell.value >= 70) {
           cell.fill = greenFill
@@ -266,11 +290,11 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   const stats = calculateSummaryStats(sessions)
 
   summarySheet.columns = [
-    { width: 35 },
-    { width: 20 },
+    { width: 40 },
+    { width: 25 },
   ]
 
-  const titleRow = summarySheet.addRow(["ProReader Student Data Report"])
+  const titleRow = summarySheet.addRow(["Mr.🆖 ProReader Student Data Report"])
   titleRow.height = 32
   titleRow.getCell(1).font = {
     bold: true,
@@ -281,6 +305,19 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   titleRow.getCell(1).alignment = { vertical: "middle" }
 
   summarySheet.addRow([])
+  if (schoolName || className) {
+    if (schoolName) {
+      const schoolRow = summarySheet.addRow(["School:", schoolName])
+      schoolRow.getCell(1).font = { bold: true, size: 11, color: { argb: "FF666666" } }
+      schoolRow.getCell(2).font = { size: 11, color: { argb: "FF333333" } }
+    }
+    if (className) {
+      const classRow = summarySheet.addRow(["Class:", className])
+      classRow.getCell(1).font = { bold: true, size: 11, color: { argb: "FF666666" } }
+      classRow.getCell(2).font = { size: 11, color: { argb: "FF333333" } }
+    }
+    summarySheet.addRow([])
+  }
   const dateRow = summarySheet.addRow(["Generated:", dayjs().format("YYYY-MM-DD HH:mm:ss")])
   dateRow.getCell(1).font = { bold: true, size: 10, color: { argb: "FF666666" } }
   dateRow.getCell(2).font = { size: 10, color: { argb: "FF666666" } }
@@ -302,12 +339,14 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   const statsData: [string, string | number][] = [
     ["Total Reading Sessions", stats.totalSessions],
     ["Average Learning Progress", `${stats.avgProgress}%`],
-    ["Tests Completed", stats.testCompletedCount],
-    ["Average Test Score (Completed)", `${stats.avgTestScore}%`],
-    ["Pass Rate (≥70%)", `${stats.passRate}%`],
+    ["Reading Tests Completed", stats.testCompletedCount],
+    ["Average Reading Test Score (Completed)", `${stats.avgTestScore}%`],
+    ["Reading Test Pass Rate (≥70%)", `${stats.passRate}%`],
     ["Total Vocabulary Collected", stats.totalVocabulary],
-    ["Average Spelling Challenge Score", stats.avgSpellingScore],
-    ["Average Vocabulary Quiz Score", stats.avgQuizScore],
+    ["Spelling Challenges Completed", stats.spellingCompletedCount],
+    ["Average Spelling Challenge Score (Completed)", stats.avgSpellingScore],
+    ["Vocabulary Quizzes Completed", stats.quizCompletedCount],
+    ["Average Vocabulary Quiz Score (Completed)", `${stats.avgQuizScore}%`],
   ]
 
   statsData.forEach(([label, value]) => {
@@ -367,7 +406,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
 
   summarySheet.addRow([])
   summarySheet.addRow([])
-  const footerRow = summarySheet.addRow(["Report generated by ProReader - Reading Assistant Platform"])
+  const footerRow = summarySheet.addRow(["Report generated by Mr.🆖 ProReader - Reading Assistant Platform"])
   footerRow.getCell(1).font = {
     italic: true,
     size: 9,
@@ -375,7 +414,10 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
     name: "Calibri",
   }
 
-  const exportFilename = filename || `ProReader-student-data-${dayjs().format("YYYY-MM-DD-HHmmss")}.xlsx`
+  const baseFilename = className 
+    ? `Mr.NG-ProReader-${className.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "-")}-${dayjs().format("YYYY-MM-DD-HHmmss")}`
+    : `Mr.NG-ProReader-student-data-${dayjs().format("YYYY-MM-DD-HHmmss")}`
+  const exportFilename = filename || `${baseFilename}.xlsx`
 
   const buffer = await workbook.xlsx.writeBuffer()
   const blob = new Blob([buffer], {

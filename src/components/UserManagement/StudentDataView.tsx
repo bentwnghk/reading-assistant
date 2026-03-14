@@ -192,9 +192,18 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
     
     setExporting(true)
     try {
+      const selectedSchool = selectedSchoolId !== "all" 
+        ? schools.find(s => s.id === selectedSchoolId)?.name 
+        : undefined
+      const selectedClass = selectedClassId !== "all" 
+        ? classes.find(c => c.id === selectedClassId)?.name 
+        : undefined
+      
       await exportStudentDataToExcel({
         sessions: filteredAndSortedSessions,
         isAdmin,
+        schoolName: selectedSchool,
+        className: selectedClass,
       })
     } catch (error) {
       console.error("Failed to export Excel:", error)
