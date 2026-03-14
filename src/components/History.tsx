@@ -214,22 +214,22 @@ function History({ open, onClose }: HistoryProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("history.name")}</TableHead>
-                    <TableHead className="text-center max-xl:hidden">
+                    <TableHead className="w-16 text-center whitespace-normal break-words">
                       {t("history.progress")}
                     </TableHead>
-                    <TableHead className="text-center max-lg:hidden">
+                    <TableHead className="w-16 text-center whitespace-normal break-words">
                       {t("history.testScore")}
                     </TableHead>
-                    <TableHead className="text-center max-xl:hidden">
+                    <TableHead className="w-16 text-center whitespace-normal break-words">
                       {t("history.glossaryWords")}
                     </TableHead>
-                    <TableHead className="text-center max-lg:hidden">
+                    <TableHead className="w-16 text-center whitespace-normal break-words">
                       {t("history.spellingScore")}
                     </TableHead>
-                    <TableHead className="text-center max-xl:hidden">
+                    <TableHead className="w-16 text-center whitespace-normal break-words">
                       {t("history.quizScore")}
                     </TableHead>
-                    <TableHead className="text-center max-sm:hidden">
+                    <TableHead className="text-center whitespace-normal break-words">
                       {t("history.date")}
                     </TableHead>
                     <TableHead className="text-center w-32">
@@ -240,65 +240,65 @@ function History({ open, onClose }: HistoryProps) {
                 <TableBody>
                   {historyList.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell>
-                        <p
-                          className="truncate w-48 max-lg:max-w-40 max-sm:max-w-28 cursor-pointer hover:text-blue-500"
-                          title={item.docTitle || item.extractedText?.slice(0, 100)}
-                          onClick={() => loadHistory(item.id)}
-                        >
-                          {item.docTitle || item.extractedText?.slice(0, 50) || "Untitled Session"}
-                        </p>
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap max-xl:hidden">
-                        <span className={calculateProgress(item) === 100 ? "text-green-600 dark:text-green-400" : ""}>
-                          {calculateProgress(item)}%
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap max-lg:hidden">
-                        {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap max-xl:hidden">
-                        {item.glossary?.length || 0}
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap max-lg:hidden">
-                        {item.spellingGameBestScore || 0}
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap max-xl:hidden">
-                        {item.vocabularyQuizScore || 0}
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap max-sm:hidden">
-                        {formatDate(item.updatedAt || item.createdAt)}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex justify-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title={t("history.load")}
-                            onClick={() => loadHistory(item.id)}
-                          >
-                            <FileOutput className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title={t("history.export")}
-                            onClick={() => downloadSession(item.id)}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            className="text-red-500 hover:text-red-600"
-                            variant="ghost"
-                            size="icon"
-                            title={t("history.delete")}
-                            onClick={() => removeHistory(item.id)}
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                       <TableCell>
+                         <p
+                           className="truncate w-48 max-lg:max-w-40 max-sm:max-w-28 cursor-pointer hover:text-blue-500"
+                           title={item.docTitle || item.extractedText?.slice(0, 100)}
+                           onClick={() => loadHistory(item.id)}
+                         >
+                           {item.docTitle || item.extractedText?.slice(0, 50) || "Untitled Session"}
+                         </p>
+                       </TableCell>
+                       <TableCell className="text-center whitespace-nowrap">
+                         <span className={calculateProgress(item) === 100 ? "text-green-600 dark:text-green-400" : ""}>
+                           {calculateProgress(item)}%
+                         </span>
+                       </TableCell>
+                       <TableCell className="text-center whitespace-nowrap">
+                         {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
+                       </TableCell>
+                       <TableCell className="text-center whitespace-nowrap">
+                         {item.glossary?.length || 0}
+                       </TableCell>
+                       <TableCell className="text-center whitespace-nowrap">
+                         {item.spellingGameBestScore || 0}
+                       </TableCell>
+                       <TableCell className="text-center whitespace-nowrap">
+                         {item.vocabularyQuizScore || 0}
+                       </TableCell>
+                       <TableCell className="text-center whitespace-nowrap">
+                         {formatDate(item.updatedAt || item.createdAt)}
+                       </TableCell>
+                       <TableCell className="text-center">
+                         <div className="flex justify-center">
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             title={t("history.load")}
+                             onClick={() => loadHistory(item.id)}
+                           >
+                             <FileOutput className="h-4 w-4" />
+                           </Button>
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             title={t("history.export")}
+                             onClick={() => downloadSession(item.id)}
+                           >
+                             <Download className="h-4 w-4" />
+                           </Button>
+                           <Button
+                             className="text-red-500 hover:text-red-600"
+                             variant="ghost"
+                             size="icon"
+                             title={t("history.delete")}
+                             onClick={() => removeHistory(item.id)}
+                           >
+                             <TrashIcon className="h-4 w-4" />
+                           </Button>
+                         </div>
+                       </TableCell>
+                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
