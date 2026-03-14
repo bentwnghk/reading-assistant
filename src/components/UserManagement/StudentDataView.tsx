@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import dayjs from "dayjs"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
+import { exportStudentDataToExcel } from "@/utils/excelExport"
 
 interface StudentDataViewProps {
   isAdmin: boolean
@@ -49,6 +50,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
   const [searchQuery, setSearchQuery] = useState("")
   const [sortField, setSortField] = useState<SortField>("date")
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
+  const [exporting, setExporting] = useState(false)
 
   const loadClassesAndSchools = useCallback(async () => {
     try {
@@ -185,37 +187,21 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
     }
   }
 
-  const exportData = () => {
-    const headers = isAdmin
-      ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"]
-      : ["Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"]
-
-    const csvContent = [
-      headers.join(","),
-      ...filteredAndSortedSessions.map(s => {
-        const row = isAdmin
-          ? [s.schoolName || "", s.userName || "", s.userEmail || ""]
-          : [s.userName || "", s.userEmail || ""]
-        return [
-          ...row,
-          `"${s.docTitle.replace(/"/g, '""')}"`,
-          `${s.progress}%`,
-          s.testCompleted ? `${s.testScore}%` : "-",
-          s.glossaryCount,
-          s.spellingGameBestScore || 0,
-          s.vocabularyQuizScore || 0,
-          dayjs(s.updatedAt).format("YYYY-MM-DD HH:mm"),
-        ].join(",")
+  const exportData = async () => {
+    if (exporting) return
+    
+    setExporting(true)
+    try {
+      await exportStudentDataToExcel({
+        sessions: filteredAndSortedSessions,
+        isAdmin,
       })
-    ].join("\n")
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `ProReader-student-data-${dayjs().format("YYYY-MM-DD")}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Failed to export Excel:", error)
+      toast.error(t("userManagement.studentData.exportFailed"))
+    } finally {
+      setExporting(false)
+    }
   }
 
   const filteredClasses = useMemo(() => {
@@ -286,9 +272,9 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
             />
           </div>
         </div>
-        <Button onClick={exportData} variant="outline" size="sm" disabled={filteredAndSortedSessions.length === 0}>
-          <Download className="h-4 w-4 mr-1" />
-          {t("userManagement.studentData.export")}
+        <Button onClick={exportData} variant="outline" size="sm" disabled={filteredAndSortedSessions.length === 0 || exporting}>
+          {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
+          {exporting ? t("userManagement.studentData.exporting") : t("userManagement.studentData.export")}
         </Button>
       </div>
 

@@ -58,6 +58,7 @@
     "copy-to-clipboard": "^3.3.3",
     "dayjs": "^1.11.13",
     "docx": "^9.6.0",
+    "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "flesch": "^2.0.1",
     "flesch-kincaid": "^2.0.1",
