@@ -535,6 +535,7 @@ function AdaptedText() {
 
         const colHeaders = [
           t("reading.glossary.word"),
+          t("reading.glossary.syllabification"),
           t("reading.glossary.partOfSpeech"),
           t("reading.glossary.englishDefinition"),
           t("reading.glossary.chineseDefinition"),
@@ -557,7 +558,7 @@ function AdaptedText() {
                     spacing: { before: 60, after: 60 },
                   }),
                 ],
-                width: { size: 20, type: WidthType.PERCENTAGE },
+                width: { size: 100 / 6, type: WidthType.PERCENTAGE },
               })
           ),
         });
@@ -567,6 +568,7 @@ function AdaptedText() {
           return new TableRow({
             children: [
               entry.word,
+              entry.syllabification || "",
               entry.partOfSpeech || "",
               entry.englishDefinition,
               entry.chineseDefinition,
@@ -582,7 +584,7 @@ function AdaptedText() {
                       spacing: { before: 60, after: 60 },
                     }),
                   ],
-                  width: { size: 20, type: WidthType.PERCENTAGE },
+                  width: { size: 100 / 6, type: WidthType.PERCENTAGE },
                 })
             ),
           });
