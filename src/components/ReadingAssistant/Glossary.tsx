@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, Download, FileDown, Table, Layers, ClipboardList, SpellCheck, HelpCircle } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, Table, Layers, ClipboardList, SpellCheck, HelpCircle } from "lucide-react";
 import {
   Document,
   Packer,
@@ -31,7 +31,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
-import { downloadFile } from "@/utils/file";
+
 import { cn } from "@/utils/style";
 import VocabularyFlashcard from "./VocabularyFlashcard";
 import VocabularyQuiz from "./VocabularyQuiz";
@@ -46,23 +46,6 @@ function Glossary() {
   const [activeTab, setActiveTab] = useState<TabType>("table");
   
   const isGenerating = status === "glossary";
-
-  const handleDownloadCSV = () => {
-    if (glossary.length === 0) return;
-
-    const headers = ["Word", "Syllabification", "PoS", "English Definition", "Chinese Definition", "Example"];
-    const rows = glossary.map((entry) => [
-      entry.word,
-      entry.syllabification || "",
-      entry.partOfSpeech || "",
-      `"${entry.englishDefinition.replace(/"/g, '""')}"`,
-      `"${entry.chineseDefinition.replace(/"/g, '""')}"`,
-      `"${(entry.example || "").replace(/"/g, '""')}"`,
-    ]);
-
-    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-    downloadFile(csv, "glossary.csv", "text/csv;charset=utf-8");
-  };
 
   const handleDownloadWord = useCallback(async () => {
     if (glossary.length === 0) return;
@@ -306,14 +289,7 @@ function Glossary() {
                 <FileDown className="h-4 w-4" />
                 <span className="hidden sm:inline">{t("reading.glossary.downloadWord")}</span>
               </Button>
-              <Button
-                onClick={handleDownloadCSV}
-                variant="secondary"
-                size="sm"
-              >
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("reading.glossary.download")}</span>
-              </Button>
+
             </>
           )}
           <Button
