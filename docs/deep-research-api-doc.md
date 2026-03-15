@@ -1,8 +1,8 @@
-# Deep Research API Documentation
+# Mr.🆖 ProReader API Documentation
 
 ## Overview
 
-The Deep Research API provides a real-time interface for initiating and monitoring complex research tasks. Leveraging Server-Sent Events (SSE), it delivers updates, information, message, progress, and errors as they occur, allowing clients to receive continuous streams of data without polling.
+The Mr.🆖 ProReader API provides a real-time interface for initiating and monitoring complex research tasks. Leveraging Server-Sent Events (SSE), it delivers updates, information, message, progress, and errors as they occur, allowing clients to receive continuous streams of data without polling.
 
 ## Protocol
 
