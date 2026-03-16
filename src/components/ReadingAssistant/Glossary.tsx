@@ -263,30 +263,17 @@ function Glossary() {
       const columnWidths = [20, 18, 14, 40, 30, 45];
       const calculateRequiredLines = (text: string, colWidth: number): number => {
         if (!text) return 1;
-        const lines = text.split("\n");
-        let totalLines = 0;
-        const charsPerLine = colWidth * 1.8;
-        for (const line of lines) {
-          if (line.trim().length === 0) {
-            totalLines += 1;
-          } else {
-            const charCount = line.length;
-            totalLines += Math.max(1, Math.ceil(charCount / charsPerLine));
-          }
-        }
-        return totalLines;
+        const lineBreaks = (text.match(/\n/g) || []).length;
+        const avgCharsPerLine = colWidth * 1.8;
+        const wrappedLines = Math.ceil(text.replace(/\n/g, "").length / avgCharsPerLine);
+        return Math.max(1, lineBreaks + wrappedLines);
       };
 
       worksheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return;
         let maxLines = 1;
         row.eachCell((cell, colNumber) => {
-          let cellText = "";
-          if (cell.value && typeof cell.value === "object" && "richText" in cell.value) {
-            cellText = cell.value.richText.map((rt: { text: string }) => rt.text).join("");
-          } else {
-            cellText = cell.value?.toString() || "";
-          }
+          const cellText = cell.value?.toString() || "";
           const lines = calculateRequiredLines(cellText, columnWidths[colNumber - 1]);
           maxLines = Math.max(maxLines, lines);
           cell.alignment = { vertical: "middle", wrapText: true };
@@ -309,7 +296,7 @@ function Glossary() {
             cell.font = { size: 11 };
           }
         });
-        row.height = Math.max(20, maxLines * 18);
+        row.height = Math.max(20, maxLines * 16);
       });
 
       worksheet.views = [{ state: "frozen", ySplit: 1 }];
