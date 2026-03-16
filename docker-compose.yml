@@ -3,45 +3,74 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: reading-assistant-db
+    restart: always
     environment:
-      POSTGRES_DB: reading_assistant
-      POSTGRES_USER: reading_user
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_INITDB_ARGS: "--data-checksums"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - reading-assistant_postgres_data:/var/lib/postgresql/data
+      - /home/user/reading-assistant/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U reading_user -d reading_assistant"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 24g
+        reservations:
+          memory: 12g
     command:
       - "postgres"
       - "-c"
       - "max_connections=200"
       - "-c"
-      - "shared_buffers=256MB"
+      - "shared_buffers=6GB"
       - "-c"
-      - "work_mem=4MB"
+      - "work_mem=32MB"
+      - "-c"
+      - "effective_cache_size=18GB"
+      - "-c"
+      - "maintenance_work_mem=512MB"
+      - "-c"
+      - "wal_buffers=32MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
 
   reading-assistant:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: reading-assistant
+    image: 
     container_name: reading-assistant
-    env_file:
-      - .env
+    restart: always
     ports:
-      - "3333:3000"
+      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+        reservations:
+          memory: 1g
     environment:
-      DATABASE_URL: postgresql://reading_user:${POSTGRES_PASSWORD}@postgres:5432/reading_assistant
+      # Access Password (comma-separated, case-sensitive)
+      ACCESS_PASSWORD: ""
+      OPENAI_COMPATIBLE_API_BASE_URL: "https://api.mr5ai.com"
+      OPENAI_COMPATIBLE_API_KEY: ""
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      AUTH_SECRET: ""
+      # Get Google OAuth credentials from: https://console.cloud.google.com/apis/credentials
+      AUTH_GOOGLE_ID: ""
+      AUTH_GOOGLE_SECRET: ""
+      AUTH_TRUST_HOST: "true"
+      AUTH_URL: "https://read.mr5ai.com"
+      # Admin email addresses (comma-separated, case-insensitive)
+      ADMIN_EMAILS: ""
 
 volumes:
-  postgres_data:
+  reading-assistant_postgres_data:
