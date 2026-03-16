@@ -34,20 +34,23 @@ export async function GET(request: Request) {
     await refreshWeeklyStatsForUser(userId, weekStart)
 
     let resolvedClassId  = classId
+    let resolvedClassIds: string[] | undefined
     let resolvedSchoolId = schoolId
     let resolvedScope    = scopeParam
 
     // Auto-resolve class when none is supplied explicitly.
-    // Try student membership first; fall back to the teacher's own class.
+    // For students: use their class membership.
+    // For teachers: use ALL classes they teach.
     if (resolvedScope === "class" && !resolvedClassId) {
-      resolvedClassId = (await getStudentClassId(userId)) ?? undefined
-      if (!resolvedClassId) {
+      const studentClassId = await getStudentClassId(userId)
+      if (studentClassId) {
+        resolvedClassId = studentClassId
+      } else {
         const teacherClasses = await getClassesForTeacher(userId)
-        resolvedClassId = teacherClasses[0]?.id ?? undefined
+        if (teacherClasses.length > 0) {
+          resolvedClassIds = teacherClasses.map(c => c.id)
+        }
       }
-      // No class found — keep scope as "class" with no classId.
-      // getLeaderboard will return empty rankings rather than falling through
-      // to a global result and showing unrelated students.
     }
 
     // Auto-resolve school from the user's own profile when no schoolId is supplied
@@ -62,6 +65,7 @@ export async function GET(request: Request) {
     const data = await getLeaderboard(userId, {
       scope:    resolvedScope,
       classId:  resolvedClassId,
+      classIds: resolvedClassIds,
       schoolId: resolvedSchoolId,
       weekStart,
       sortBy:   sortByParam,

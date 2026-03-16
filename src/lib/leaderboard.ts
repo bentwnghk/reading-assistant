@@ -264,6 +264,7 @@ export async function getLeaderboard(
   options: {
     scope: LeaderboardScope
     classId?: string
+    classIds?: string[]
     schoolId?: string
     weekStart?: Date
     sortBy?: SortColumn
@@ -278,10 +279,10 @@ export async function getLeaderboard(
   const sortBy  = options.sortBy ?? "weekly_score"
   const limit   = Math.min(options.limit ?? 50, 200)
 
+  const effectiveClassIds = options.classIds?.length ? options.classIds : (options.classId ? [options.classId] : [])
+
   try {
-    // A class scope with no resolved classId means the user is not in any class yet.
-    // Return empty rankings rather than leaking other users' data.
-    if (options.scope === "class" && !options.classId) {
+    if (options.scope === "class" && effectiveClassIds.length === 0) {
       return {
         rankings: [],
         currentUserRank: null,
@@ -291,16 +292,20 @@ export async function getLeaderboard(
       }
     }
 
-    // Scope-specific JOIN/WHERE clauses
     let scopeJoin   = ""
     let scopeWhere  = ""
     const params: unknown[] = [weekStart.toISOString().slice(0, 10), limit]
 
-    // class scope: members are already students by definition — no role filter needed
-    if (options.scope === "class" && options.classId) {
+    if (options.scope === "class" && effectiveClassIds.length > 0) {
       scopeJoin  = `JOIN class_members cm ON cm.student_id = ws.user_id`
-      scopeWhere = `AND cm.class_id = $3`
-      params.push(options.classId)
+      if (effectiveClassIds.length === 1) {
+        scopeWhere = `AND cm.class_id = $3`
+        params.push(effectiveClassIds[0])
+      } else {
+        const placeholders = effectiveClassIds.map((_, i) => `$${i + 3}`).join(", ")
+        scopeWhere = `AND cm.class_id IN (${placeholders})`
+        params.push(...effectiveClassIds)
+      }
     } else if (options.scope === "school" && options.schoolId) {
       scopeJoin  = `JOIN users su ON su.id = ws.user_id
                     JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
@@ -345,10 +350,16 @@ export async function getLeaderboard(
     let priorScopeWhere = ""
     const priorParams: unknown[] = [priorWeekStart.toISOString().slice(0, 10)]
 
-    if (options.scope === "class" && options.classId) {
+    if (options.scope === "class" && effectiveClassIds.length > 0) {
       priorScopeJoin  = `JOIN class_members cm ON cm.student_id = ws.user_id`
-      priorScopeWhere = `AND cm.class_id = $2`
-      priorParams.push(options.classId)
+      if (effectiveClassIds.length === 1) {
+        priorScopeWhere = `AND cm.class_id = $2`
+        priorParams.push(effectiveClassIds[0])
+      } else {
+        const placeholders = effectiveClassIds.map((_, i) => `$${i + 2}`).join(", ")
+        priorScopeWhere = `AND cm.class_id IN (${placeholders})`
+        priorParams.push(...effectiveClassIds)
+      }
     } else if (options.scope === "school" && options.schoolId) {
       priorScopeJoin  = `JOIN users su ON su.id = ws.user_id
                          JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
@@ -404,20 +415,25 @@ export async function getLeaderboard(
       rankings.find(r => r.userId === requestingUserId) ?? null
 
     if (!currentUserRank) {
-      // Fetch their row individually with their rank computed inline.
-      // Params: $1 = weekDate, $2 = userId, $3 = scopeId (optional)
       let userScopeJoin       = ""
       let userScopeWhere      = ""
       let userSubScopeJoin    = ""
       let userSubScopeWhere   = ""
       const userParams: unknown[] = [weekStart.toISOString().slice(0, 10), requestingUserId]
 
-      if (options.scope === "class" && options.classId) {
+      if (options.scope === "class" && effectiveClassIds.length > 0) {
         userScopeJoin     = `JOIN class_members cm ON cm.student_id = ws.user_id`
-        userScopeWhere    = `AND cm.class_id = $3`
         userSubScopeJoin  = `JOIN class_members cm3 ON cm3.student_id = ws2.user_id`
-        userSubScopeWhere = `AND cm3.class_id = $3`
-        userParams.push(options.classId)
+        if (effectiveClassIds.length === 1) {
+          userScopeWhere    = `AND cm.class_id = $3`
+          userSubScopeWhere = `AND cm3.class_id = $3`
+          userParams.push(effectiveClassIds[0])
+        } else {
+          const placeholders = effectiveClassIds.map((_, i) => `$${i + 3}`).join(", ")
+          userScopeWhere    = `AND cm.class_id IN (${placeholders})`
+          userSubScopeWhere = `AND cm3.class_id IN (${placeholders})`
+          userParams.push(...effectiveClassIds)
+        }
       } else if (options.scope === "school" && options.schoolId) {
         userScopeJoin     = `JOIN users su ON su.id = ws.user_id
                              JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
