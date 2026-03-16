@@ -484,7 +484,7 @@
       "help": {
         "title": "Vocabulary Guide",
         "purpose": "Purpose: The Vocabulary section helps you learn and master new words from your reading material through multiple interactive learning modes.",
-        "features": "Features: AI generates bilingual definitions (English + Chinese), syllable divisions, and example sentences.. Four learning modes: Table (view all words), Flashcard (flip cards with ratings), Spelling (4 game modes), and Quiz (test your knowledge). Both Spelling and Quiz support difficulty levels and Time Challenge mode. Download Glossary Table and Vocabulary Quiz as Word document.",
+        "features": "Features: AI generates bilingual definitions (English + Chinese), syllable divisions, and example sentences.. Four learning modes: Table (view all words), Flashcard (flip cards with ratings), Spelling (4 game modes), and Quiz (test your knowledge). Both Spelling and Quiz support difficulty levels and Time Challenge mode. Download Glossary Table as Word or Excel file; Download Vocabulary Quiz as Word file.",
         "usage": "Usage: First, highlight words in the 'Original' text tab. Then click 'Generate Glossary' to create definitions. Use the tabs to switch between learning modes. Rate flashcards (Easy/Medium/Hard) to track progress. Select difficulty and enable Time Challenge for spelling games and quizzes."
       },
       "spelling": {
