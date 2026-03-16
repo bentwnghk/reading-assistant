@@ -282,6 +282,7 @@
         },
         "features": {
           "title": "Interactive Features",
+          "edit": "Edit Original Text: Click the edit button in the Original tab to modify the extracted text. You can correct OCR errors or paste new text. Note: Saving changes will clear all derived content (adapted text, simplified text, vocabulary highlights, sentence analyses, and glossary) as they may no longer match the updated text",
           "highlight": "Vocabulary Highlighting: Select any word in the Original tab to add it to your vocabulary list. Highlighted words appear with a yellow background",
           "tts": "Text-to-Speech: Select any word, sentence, or paragraph and click 'Read aloud' to hear natural pronunciation",
           "sentenceAnalysis": "Sentence Analysis: Select any sentence and click 'Analyze sentence' for detailed AI breakdown including meaning, vocabulary, grammar, and learning tips. Analyzed sentences appear with a blue underline - click them to see the analysis",
