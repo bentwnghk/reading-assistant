@@ -260,10 +260,22 @@ function Glossary() {
         };
       });
 
+      const columnWidths = [20, 18, 14, 40, 30, 45];
+      const calculateRequiredLines = (text: string, colWidth: number): number => {
+        if (!text) return 1;
+        const lineBreaks = (text.match(/\n/g) || []).length;
+        const avgCharsPerLine = colWidth * 1.8;
+        const wrappedLines = Math.ceil(text.replace(/\n/g, "").length / avgCharsPerLine);
+        return Math.max(1, lineBreaks + wrappedLines);
+      };
+
       worksheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return;
-        row.height = 24;
+        let maxLines = 1;
         row.eachCell((cell, colNumber) => {
+          const cellText = cell.value?.toString() || "";
+          const lines = calculateRequiredLines(cellText, columnWidths[colNumber - 1]);
+          maxLines = Math.max(maxLines, lines);
           cell.alignment = { vertical: "middle", wrapText: true };
           cell.border = {
             top: { style: "thin", color: { argb: "C0C0C0" } },
@@ -284,6 +296,7 @@ function Glossary() {
             cell.font = { size: 11 };
           }
         });
+        row.height = Math.max(20, maxLines * 16);
       });
 
       worksheet.views = [{ state: "frozen", ySplit: 1 }];
