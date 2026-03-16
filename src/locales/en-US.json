@@ -223,6 +223,7 @@
       "clickToRemoveAnalysis": "Click to remove sentence",
       "highlightTip": "Tip: Select a word or phrase in the text below, then click [+ Add to vocabulary] or [🔊 Read aloud]; or select a sentence, then click [🧠 Analyze sentence]. Click an underlined sentence to see its analysis.",
       "downloadWord": "Download Word",
+      "downloadExcel": "Download Excel",
       "includeGlossary": "Include Glossary",
       "includeSentenceAnalysis": "Include Sentence Analysis",
       "addWord": "Add to vocabulary",
