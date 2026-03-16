@@ -1,6 +1,6 @@
 {
   "name": "reading-assistant",
-  "description": "Use any LLMs (Large Language Models) for assisting students with English reading.",
+  "description": "Transform any English text into an interactive learning experience with AI-powered comprehension tools and gamified vocabulary practice.",
   "version": "1.1",
   "license": "MIT",
   "repository": {
