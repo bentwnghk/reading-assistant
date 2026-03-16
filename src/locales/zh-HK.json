@@ -265,6 +265,13 @@
       "goToAdapted": "跳轉到改寫版本",
       "goToSimplified": "跳轉到簡化版本",
       "paragraphMismatch": "段落數量不同",
+      "edit": "編輯",
+      "save": "保存",
+      "cancel": "取消",
+      "editPlaceholder": "在此輸入或貼上文本...",
+      "editWarningTitle": "清除衍生資料？",
+      "editWarningDesc": "保存對原文的修改將會清除改寫版本、簡化版本、詞彙高亮、句子分析和詞彙表，因為它們可能不再與新文本匹配。",
+      "confirmClear": "確認",
       "help": {
         "title": "文本分析與改寫指南",
         "tabs": {

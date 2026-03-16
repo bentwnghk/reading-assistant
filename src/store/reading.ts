@@ -154,6 +154,7 @@ interface ReadingActions {
   clearDifficultyAnalysis: () => void;
   setIncludeGlossary: (include: boolean) => void;
   setIncludeSentenceAnalysis: (include: boolean) => void;
+  clearDerivedData: () => void;
   reset: () => void;
   backup: () => ReadingStore;
   restore: (session: ReadingStore) => Promise<void>;
@@ -664,6 +665,22 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             includeSentenceAnalysis: include,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      clearDerivedData: () =>
+        set((state) => {
+          const newState = {
+            adaptedText: "",
+            simplifiedText: "",
+            highlightedWords: [],
+            analyzedSentences: {},
+            glossary: [],
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

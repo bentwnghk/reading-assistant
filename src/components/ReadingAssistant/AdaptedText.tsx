@@ -12,6 +12,9 @@ import {
   Brain,
   FileDown,
   HelpCircle,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
 import {
@@ -37,10 +40,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -316,6 +321,8 @@ function AdaptedText() {
     getSentenceAnalysis,
     setIncludeGlossary,
     setIncludeSentenceAnalysis,
+    setExtractedText,
+    clearDerivedData,
   } = useReadingStore();
 
   const { setTutorChatSelectedText } = useGlobalStore();
@@ -334,6 +341,9 @@ function AdaptedText() {
 
 // tab state
   const [activeTab, setActiveTab] = useState<string>("original");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState("");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const isAdapting = status === "adapting";
   const isSimplifying = status === "simplifying";
@@ -392,6 +402,40 @@ function AdaptedText() {
   const sentenceListRef = useRef<string[]>([]);
 
   // ── handlers ──
+
+  const handleStartEdit = useCallback(() => {
+    setEditText(extractedText);
+    setIsEditing(true);
+  }, [extractedText]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+    setEditText("");
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    const hasChanges = editText !== extractedText;
+    const hasDerivedData = adaptedText || simplifiedText || highlightedWords.length > 0 || Object.keys(analyzedSentences).length > 0 || glossary.length > 0;
+    
+    if (hasChanges && hasDerivedData) {
+      setShowClearConfirm(true);
+    } else if (hasChanges) {
+      setExtractedText(editText);
+      setIsEditing(false);
+      setEditText("");
+    } else {
+      setIsEditing(false);
+      setEditText("");
+    }
+  }, [editText, extractedText, adaptedText, simplifiedText, highlightedWords, analyzedSentences, glossary, setExtractedText]);
+
+  const confirmClearAndSave = useCallback(() => {
+    setExtractedText(editText);
+    clearDerivedData();
+    setIsEditing(false);
+    setEditText("");
+    setShowClearConfirm(false);
+  }, [editText, setExtractedText, clearDerivedData]);
 
   const handleSelectionChange = useCallback(() => {
     const selectionObj = window.getSelection();
@@ -1026,84 +1070,128 @@ function AdaptedText() {
 
         {/* ── Original tab ─────────────────────────────────────────────── */}
         <TabsContent value="original" className="mt-4">
-          {/* Tip banner */}
-          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 rounded-md">
-            <p className="text-sm text-green-800 dark:text-green-200">
-              💡 {t("reading.extractedText.highlightTip")}
-            </p>
+          {/* Edit controls */}
+          <div className="mb-4 flex justify-end gap-2">
+            {!isEditing ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleStartEdit}
+                disabled={!extractedText}
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                {t("reading.adaptedText.edit")}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancelEdit}
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  {t("reading.adaptedText.cancel")}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSaveEdit}
+                >
+                  <Check className="h-4 w-4 mr-1" />
+                  {t("reading.adaptedText.save")}
+                </Button>
+              </>
+            )}
           </div>
 
-          {/* Vocabulary list chips */}
-          {highlightedWords.length > 0 && (
-            <div className="mb-4 p-3 bg-muted/50 rounded-md">
-              <p className="text-sm font-medium mb-2">
-                {t("reading.extractedText.highlightedWords")} (
-                {highlightedWords.length}):
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {highlightedWords.map((word) => (
-                  <span
-                    key={word}
-                    className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-sm cursor-pointer hover:opacity-75"
-                    onClick={() => removeHighlightedWord(word)}
-                    title={t("reading.extractedText.clickToRemove")}
-                  >
-                    {word}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Analyzed sentences chips */}
-          {analyzedSentencesKeys.length > 0 && (
-            <div className="mb-4 p-3 bg-muted/50 rounded-md">
-              <p className="text-sm font-medium mb-2">
-                {t("reading.extractedText.analyzedSentences")} (
-                {analyzedSentencesKeys.length}):
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {analyzedSentencesKeys.map((key) => {
-                  const item = analyzedSentences[key];
-                  const displayText =
-                    item.sentence.length > 40
-                      ? item.sentence.slice(0, 40) + "..."
-                      : item.sentence;
-                  return (
-                    <span
-                      key={key}
-                      className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm cursor-pointer hover:opacity-75 border-b-2 border-blue-500 dark:border-blue-400"
-                      onClick={() => {
-                        if (activeSentence === item.sentence) {
-                          setActiveSentence(null);
-                        }
-                        removeSentenceAnalysis(item.sentence);
-                      }}
-                      title={t("reading.extractedText.clickToRemoveAnalysis")}
-                    >
-                      {displayText}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Interactive text body */}
-          <div
-            className="prose prose-slate dark:prose-invert max-w-full"
-            ref={setContainerRef}
-          >
-            <ParagraphWithNav
-              text={extractedText}
-              currentTab="original"
-              onNavigate={handleNavigateToParagraph}
-              paragraphCounts={paragraphCounts}
-              hasAdaptedText={!!adaptedText}
-              hasSimplifiedText={!!simplifiedText}
-              highlightHtml={highlightedText}
+          {isEditing ? (
+            <Textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              className="min-h-[400px] font-mono text-sm"
+              placeholder={t("reading.adaptedText.editPlaceholder")}
             />
-          </div>
+          ) : (
+            <>
+              {/* Tip banner */}
+              <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 rounded-md">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  💡 {t("reading.extractedText.highlightTip")}
+                </p>
+              </div>
+
+              {/* Vocabulary list chips */}
+              {highlightedWords.length > 0 && (
+                <div className="mb-4 p-3 bg-muted/50 rounded-md">
+                  <p className="text-sm font-medium mb-2">
+                    {t("reading.extractedText.highlightedWords")} (
+                    {highlightedWords.length}):
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {highlightedWords.map((word) => (
+                      <span
+                        key={word}
+                        className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-sm cursor-pointer hover:opacity-75"
+                        onClick={() => removeHighlightedWord(word)}
+                        title={t("reading.extractedText.clickToRemove")}
+                      >
+                        {word}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Analyzed sentences chips */}
+              {analyzedSentencesKeys.length > 0 && (
+                <div className="mb-4 p-3 bg-muted/50 rounded-md">
+                  <p className="text-sm font-medium mb-2">
+                    {t("reading.extractedText.analyzedSentences")} (
+                    {analyzedSentencesKeys.length}):
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {analyzedSentencesKeys.map((key) => {
+                      const item = analyzedSentences[key];
+                      const displayText =
+                        item.sentence.length > 40
+                          ? item.sentence.slice(0, 40) + "..."
+                          : item.sentence;
+                      return (
+                        <span
+                          key={key}
+                          className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm cursor-pointer hover:opacity-75 border-b-2 border-blue-500 dark:border-blue-400"
+                          onClick={() => {
+                            if (activeSentence === item.sentence) {
+                              setActiveSentence(null);
+                            }
+                            removeSentenceAnalysis(item.sentence);
+                          }}
+                          title={t("reading.extractedText.clickToRemoveAnalysis")}
+                        >
+                          {displayText}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Interactive text body */}
+              <div
+                className="prose prose-slate dark:prose-invert max-w-full"
+                ref={setContainerRef}
+              >
+                <ParagraphWithNav
+                  text={extractedText}
+                  currentTab="original"
+                  onNavigate={handleNavigateToParagraph}
+                  paragraphCounts={paragraphCounts}
+                  hasAdaptedText={!!adaptedText}
+                  hasSimplifiedText={!!simplifiedText}
+                  highlightHtml={highlightedText}
+                />
+              </div>
+            </>
+          )}
 
           {/* Adapt button (shown when adapted text not yet generated) */}
           {!adaptedText && (
@@ -1352,6 +1440,28 @@ function AdaptedText() {
               />
             ) : null}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Clear confirmation dialog ─────────────────────────────────────── */}
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("reading.adaptedText.editWarningTitle")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("reading.adaptedText.editWarningDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
+              {t("reading.adaptedText.cancel")}
+            </Button>
+            <Button onClick={confirmClearAndSave}>
+              {t("reading.adaptedText.confirmClear")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

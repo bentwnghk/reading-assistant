@@ -265,6 +265,13 @@
       "goToAdapted": "Go to Adapted",
       "goToSimplified": "Go to Simplified",
       "paragraphMismatch": "Paragraph count differs",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "editPlaceholder": "Enter or paste your text here...",
+      "editWarningTitle": "Clear derived data?",
+      "editWarningDesc": "Saving changes to the original text will clear the adapted text, simplified text, vocabulary highlights, sentence analyses, and glossary as they may no longer match the new text.",
+      "confirmClear": "Confirm",
       "help": {
         "title": "Text Analysis & Adaptation Guide",
         "tabs": {
