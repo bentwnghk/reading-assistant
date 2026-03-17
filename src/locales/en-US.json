@@ -953,6 +953,48 @@
     "refresh": "Refresh",
     "close": "Back to app",
     "selectClass": "Select class",
-    "selectSchool": "Select school"
+    "selectSchool": "Select school",
+    "help": {
+      "title": "How the Leaderboard Works",
+      "subtitle": "Learn how to climb the ranks and become a top learner!",
+      "categories": {
+        "weeklyScore": {
+          "title": "Weekly Score",
+          "desc": "Your overall performance score combining all activities. Earn points by reading, completing tests, quizzes, and games. The more you practice, the higher you climb!"
+        },
+        "streak": {
+          "title": "Reading Streak",
+          "desc": "Practice every day to build your streak! Consecutive days of learning keep your streak alive. Miss a day and it resets to zero."
+        },
+        "testScore": {
+          "title": "Reading Test Score",
+          "desc": "Average score from your reading comprehension tests. Read carefully and answer questions accurately to boost this score."
+        },
+        "quizScore": {
+          "title": "Vocab Quiz Score",
+          "desc": "Average score from vocabulary quizzes. Learn new words and review them regularly to ace your quizzes."
+        },
+        "spelling": {
+          "title": "Spelling Score",
+          "desc": "Average score from spelling games. Practice spelling challenging words to improve your accuracy."
+        },
+        "vocabulary": {
+          "title": "Vocabulary Words",
+          "desc": "Total new vocabulary words you've learned. Read diverse texts and add words to your glossary to expand your word bank."
+        },
+        "improvement": {
+          "title": "Improvement Score",
+          "desc": "How much you've grown compared to last week. Focus on steady progress and you'll see this number rise!"
+        },
+        "flashcards": {
+          "title": "Flashcard Reviews",
+          "desc": "Number of flashcard reviews completed. Click the difficulty buttons (Easy, Good, Hard) during review to count your sessions and strengthen your memory."
+        }
+      },
+      "tip": {
+        "title": "Pro Tip:",
+        "content": "Consistency beats intensity! A little practice every day will help you climb faster than cramming once a week."
+      }
+    }
   }
 }
