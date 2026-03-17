@@ -127,12 +127,8 @@ function generateMilestones(
   const maxMilestones = 7
 
   for (let i = 0; i < maxMilestones; i++) {
-    const isUnlocked = unlockedMilestones.includes(target)
-    const unlockedAt = isUnlocked
-      ? unlockedMilestones.indexOf(target) >= 0
-        ? Date.now()
-        : undefined
-      : undefined
+    const isUnlocked = currentProgress >= target || unlockedMilestones.includes(target)
+    const unlockedAt = isUnlocked ? Date.now() : undefined
 
     milestones.push({
       target,
