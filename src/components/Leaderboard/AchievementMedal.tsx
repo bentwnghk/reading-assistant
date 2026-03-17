@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
-  Search, FileCheck, Target, PenTool, Brain, Lock, CheckCircle2,
+  Search, FileCheck, Target, PenTool, Brain, Sparkles, Lock, CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import type { AchievementState } from "@/store/achievements";
@@ -11,7 +11,7 @@ import type { AchievementState } from "@/store/achievements";
 // ─── Icon map ─────────────────────────────────────────────────────────────────
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
-  Search, FileCheck, Target, PenTool, Brain,
+  Search, FileCheck, Target, PenTool, Brain, Sparkles,
 };
 
 // ─── Color maps ───────────────────────────────────────────────────────────────
@@ -24,6 +24,7 @@ const COLOR_BG: Record<string, string> = {
   teal:   "bg-teal-500",
   pink:   "bg-pink-500",
   red:    "bg-red-500",
+  cyan:   "bg-cyan-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -35,6 +36,7 @@ const COLOR_GLOW: Record<string, string> = {
   teal:   "shadow-teal-400/50",
   pink:   "shadow-pink-400/50",
   red:    "shadow-red-400/50",
+  cyan:   "shadow-cyan-400/50",
 };
 
 const COLOR_RING: Record<string, string> = {
@@ -46,6 +48,7 @@ const COLOR_RING: Record<string, string> = {
   teal:   "stroke-teal-500",
   pink:   "stroke-pink-500",
   red:    "stroke-red-500",
+  cyan:   "stroke-cyan-500",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -57,6 +60,7 @@ const COLOR_TEXT: Record<string, string> = {
   teal:   "text-teal-600 dark:text-teal-400",
   pink:   "text-pink-600 dark:text-pink-400",
   red:    "text-red-600 dark:text-red-400",
+  cyan:   "text-cyan-600 dark:text-cyan-400",
 };
 
 // ─── Progress ring SVG ────────────────────────────────────────────────────────

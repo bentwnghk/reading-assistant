@@ -117,7 +117,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
     initialMilestone: 5,
   },
   ai_tutor_questions: {
-    icon: "MessageCircleQuestion",
+    icon: "Sparkles",
     color: "cyan",
     activityTypes: ["ai_tutor_question"],
     initialMilestone: 5,

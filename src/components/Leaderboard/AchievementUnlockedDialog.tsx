@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
-  Search, FileCheck, Target, PenTool, Brain, Trophy,
+  Search, FileCheck, Target, PenTool, Brain, Sparkles, Trophy,
 } from "lucide-react";
 import {
   Dialog,
@@ -18,7 +18,7 @@ import type { NewlyUnlockedAchievement } from "@/utils/activityLogger";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
-  Search, FileCheck, Target, PenTool, Brain,
+  Search, FileCheck, Target, PenTool, Brain, Sparkles,
 };
 
 const COLOR_BG: Record<string, string> = {
@@ -30,6 +30,7 @@ const COLOR_BG: Record<string, string> = {
   teal:   "bg-teal-500",
   pink:   "bg-pink-500",
   red:    "bg-red-500",
+  cyan:   "bg-cyan-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -41,6 +42,7 @@ const COLOR_GLOW: Record<string, string> = {
   teal:   "shadow-teal-400/60",
   pink:   "shadow-pink-400/60",
   red:    "shadow-red-400/60",
+  cyan:   "shadow-cyan-400/60",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -52,6 +54,7 @@ const COLOR_TEXT: Record<string, string> = {
   teal:   "text-teal-600 dark:text-teal-300",
   pink:   "text-pink-600 dark:text-pink-300",
   red:    "text-red-600 dark:text-red-300",
+  cyan:   "text-cyan-600 dark:text-cyan-300",
 };
 
 const COLOR_FROM: Record<string, string> = {
@@ -63,6 +66,7 @@ const COLOR_FROM: Record<string, string> = {
   teal:   "from-teal-500/10",
   pink:   "from-pink-500/10",
   red:    "from-red-500/10",
+  cyan:   "from-cyan-500/10",
 };
 
 interface MedalDisplayProps {
