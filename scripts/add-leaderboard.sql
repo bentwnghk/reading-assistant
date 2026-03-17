@@ -2,6 +2,8 @@
 -- Run this after init-db.sql has been applied
 
 -- Activity log table: records every scoreable learning event
+-- NOTE: If you already ran an earlier version of this script, run
+--       add-achievements.sql instead to upgrade the CHECK constraint.
 CREATE TABLE IF NOT EXISTS activity_logs (
   id          TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -11,7 +13,13 @@ CREATE TABLE IF NOT EXISTS activity_logs (
       'test_complete',
       'quiz_complete',
       'spelling_complete',
-      'flashcard_review'
+      'flashcard_review',
+      'mindmap_generate',
+      'adapted_text_generate',
+      'simplified_text_generate',
+      'sentence_analyze',
+      'targeted_practice_complete',
+      'glossary_add'
     )),
   session_id  TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
   score       INTEGER,           -- raw score/percentage for the activity (0-100 for tests; raw points for spelling)

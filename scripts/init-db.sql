@@ -213,7 +213,13 @@ CREATE TABLE activity_logs (
       'test_complete',
       'quiz_complete',
       'spelling_complete',
-      'flashcard_review'
+      'flashcard_review',
+      'mindmap_generate',
+      'adapted_text_generate',
+      'simplified_text_generate',
+      'sentence_analyze',
+      'targeted_practice_complete',
+      'glossary_add'
     )),
   session_id    TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
   score         INTEGER,          -- raw score/percentage (0-100 for tests; raw points for spelling)
@@ -264,6 +270,41 @@ CREATE TRIGGER update_weekly_stats_updated_at
   BEFORE UPDATE ON weekly_stats
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
+
+-- ─── Achievements tables ──────────────────────────────────────────────────────
+
+-- Stores each milestone a user has unlocked for each achievement type.
+-- Achievement types mirror the activity_type vocabulary but at a higher level
+-- (e.g. "sessions_read" aggregates 'session_create' events).
+-- New milestones are generated dynamically by doubling the previous target,
+-- so only completed milestones are persisted here.
+CREATE TABLE user_achievements (
+  id               SERIAL PRIMARY KEY,
+  user_id          TEXT        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  achievement_type TEXT        NOT NULL
+    CHECK (achievement_type IN (
+      'sessions_read',
+      'vocabulary_collected',
+      'flashcard_reviews',
+      'mindmaps_generated',
+      'adapted_texts',
+      'simplified_texts',
+      'sentences_analyzed',
+      'tests_completed',
+      'targeted_practices',
+      'spelling_challenges',
+      'vocabulary_quizzes'
+    )),
+  milestone        INTEGER     NOT NULL,   -- the target that was reached (e.g. 5, 10, 20 …)
+  unlocked_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at       TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (user_id, achievement_type, milestone)
+);
+
+CREATE INDEX idx_user_achievements_user
+  ON user_achievements (user_id);
+CREATE INDEX idx_user_achievements_type
+  ON user_achievements (user_id, achievement_type);
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
