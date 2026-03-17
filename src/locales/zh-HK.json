@@ -1086,6 +1086,11 @@
         "name": "詞彙測驗高手",
         "description": "完成 {{count}} 次詞彙測驗",
         "hint": "進行詞彙測驗以測試你的單詞知識"
+      },
+      "ai_tutor_questions": {
+        "name": "好奇學習者",
+        "description": "向 AI 導師提問 {{count}} 個問題",
+        "hint": "向 AI 導師提問有關閱讀材料的問題"
       }
     }
   }

@@ -219,7 +219,8 @@ CREATE TABLE activity_logs (
       'simplified_text_generate',
       'sentence_analyze',
       'targeted_practice_complete',
-      'glossary_add'
+      'glossary_add',
+      'ai_tutor_question'
     )),
   session_id    TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
   score         INTEGER,          -- raw score/percentage (0-100 for tests; raw points for spelling)

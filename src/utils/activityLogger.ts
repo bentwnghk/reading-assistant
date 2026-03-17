@@ -10,6 +10,7 @@ type ActivityType =
   | "sentence_analyze"
   | "targeted_practice_complete"
   | "glossary_add"
+  | "ai_tutor_question"
 
 interface ActivityDetails {
   cardsReviewed?: number

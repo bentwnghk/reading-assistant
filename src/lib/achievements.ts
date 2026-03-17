@@ -12,6 +12,7 @@ export type AchievementType =
   | "targeted_practices"
   | "spelling_challenges"
   | "vocabulary_quizzes"
+  | "ai_tutor_questions"
 
 export interface AchievementMilestone {
   target: number
@@ -113,6 +114,12 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
     icon: "Brain",
     color: "purple",
     activityTypes: ["quiz_complete"],
+    initialMilestone: 5,
+  },
+  ai_tutor_questions: {
+    icon: "MessageCircleQuestion",
+    color: "cyan",
+    activityTypes: ["ai_tutor_question"],
     initialMilestone: 5,
   },
 }

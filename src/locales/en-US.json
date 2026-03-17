@@ -1086,6 +1086,11 @@
         "name": "Quiz Wizard",
         "description": "Complete {{count}} vocabulary quizzes",
         "hint": "Take vocabulary quizzes to test your word knowledge"
+      },
+      "ai_tutor_questions": {
+        "name": "Curious Learner",
+        "description": "Ask AI Tutor {{count}} questions",
+        "hint": "Ask the AI Tutor questions about your reading materials"
       }
     }
   }

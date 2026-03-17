@@ -14,6 +14,7 @@ import ChatMessageBubble from "./ChatMessageBubble";
 import QuickQuestions from "./QuickQuestions";
 import { cn } from "@/utils/style";
 import { logChatQuestion } from "@/utils/chatQuestionLogger";
+import { logActivity } from "@/utils/activityLogger";
 
 interface ReadingTutorChatProps {
   onClose?: () => void;
@@ -138,6 +139,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
           sessionId: sessionId || undefined,
           docTitle: docTitle || undefined,
         });
+        logActivity("ai_tutor_question", { sessionId: sessionId || undefined });
       }
     }
 
@@ -199,6 +201,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
           sessionId: sessionId || undefined,
           docTitle: docTitle || undefined,
         });
+        logActivity("ai_tutor_question", { sessionId: sessionId || undefined });
       }
     }
 

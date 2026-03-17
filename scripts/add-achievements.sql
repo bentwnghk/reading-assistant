@@ -22,7 +22,8 @@ ALTER TABLE activity_logs
       'simplified_text_generate',
       'sentence_analyze',
       'targeted_practice_complete',
-      'glossary_add'
+      'glossary_add',
+      'ai_tutor_question'
     ));
 
 -- ─── 2. Create the user_achievements table ────────────────────────────────────
@@ -41,7 +42,8 @@ CREATE TABLE IF NOT EXISTS user_achievements (
       'tests_completed',
       'targeted_practices',
       'spelling_challenges',
-      'vocabulary_quizzes'
+      'vocabulary_quizzes',
+      'ai_tutor_questions'
     )),
   milestone        INTEGER     NOT NULL,   -- the target that was reached (e.g. 5, 10, 20 …)
   unlocked_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

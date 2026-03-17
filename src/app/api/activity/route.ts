@@ -18,6 +18,7 @@ const ActivitySchema = z.object({
     "sentence_analyze",
     "targeted_practice_complete",
     "glossary_add",
+    "ai_tutor_question",
   ]),
   sessionId: z.string().optional(),
   score:     z.number().min(0).max(10000).optional(),
