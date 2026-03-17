@@ -137,7 +137,7 @@ export async function getAggregatedQuestions(options: {
     const result = await client.query(
       `SELECT 
         cq.question_hash,
-        cq.question_text,
+        MAX(cq.question_text) as question_text,
         COUNT(*) as frequency,
         MAX(cq.created_at) as last_asked,
         COUNT(DISTINCT cq.user_id) as unique_user_count
@@ -145,7 +145,7 @@ export async function getAggregatedQuestions(options: {
        LEFT JOIN users u ON cq.user_id = u.id
        LEFT JOIN class_members cm ON u.id = cm.student_id
        ${whereClause}
-       GROUP BY cq.question_hash, cq.normalized_text
+       GROUP BY cq.question_hash
        ORDER BY frequency DESC, last_asked DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, limit, offset]
