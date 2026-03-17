@@ -420,7 +420,7 @@
       "chineseDefinition": "中文解釋",
       "example": "例句",
       "emptyTip": "點擊上方按鈕為 {{count}} 個已標記生字生成解釋 (請稍候 30-60 秒)",
-      "noHighlightedWords": "請先在原文中標記生字",
+      "noHighlightedWords": "請先在原文中標記生字。為獲得最佳效果，請標記 10-30 個生字。",
       "tabTable": "表格",
       "tabFlashcard": "生字卡",
       "tabQuiz": "測驗",
