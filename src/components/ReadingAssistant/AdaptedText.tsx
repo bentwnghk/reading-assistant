@@ -1418,7 +1418,7 @@ function AdaptedText() {
         open={!!activeSentence}
         onOpenChange={(open) => !open && setActiveSentence(null)}
       >
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
             <DialogTitle>
               {t("reading.extractedText.analysisTitle")}
