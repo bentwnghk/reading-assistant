@@ -62,8 +62,14 @@ export async function POST(request: Request) {
       console.error("[activity] Failed to refresh weekly stats:", err)
     )
 
-    // Check for newly unlocked achievements
-    const newlyUnlocked = await checkAndUnlockAchievements(session.user.id, activityType)
+    // Check for newly unlocked achievements — non-blocking so any DB error
+    // (e.g. migration not yet applied) never causes a 500 on this endpoint.
+    let newlyUnlocked: Awaited<ReturnType<typeof checkAndUnlockAchievements>> = []
+    try {
+      newlyUnlocked = await checkAndUnlockAchievements(session.user.id, activityType)
+    } catch (err) {
+      console.error("[activity] Achievement check failed (non-fatal):", err)
+    }
 
     return NextResponse.json({ ok: true, newlyUnlocked }, { status: 201 })
   } catch (error) {

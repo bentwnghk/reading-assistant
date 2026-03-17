@@ -150,12 +150,23 @@ export async function getAchievementProgress(userId: string): Promise<Achievemen
   const client = await getClient()
 
   try {
-    const unlockedResult = await client.query(
-      `SELECT achievement_type, milestone, unlocked_at
-       FROM user_achievements
-       WHERE user_id = $1`,
-      [userId]
-    )
+    let unlockedResult: { rows: { achievement_type: string; milestone: number }[] } = { rows: [] }
+    try {
+      unlockedResult = await client.query(
+        `SELECT achievement_type, milestone, unlocked_at
+         FROM user_achievements
+         WHERE user_id = $1`,
+        [userId]
+      )
+    } catch (error: unknown) {
+      const pgCode = (error as { code?: string })?.code
+      if (pgCode === "42P01") {
+        console.warn("[achievements] user_achievements table not found — run add-achievements.sql migration")
+        // Fall through with empty rows — will return 0 unlocked milestones
+      } else {
+        throw error
+      }
+    }
 
     const unlockedMap = new Map<AchievementType, number[]>()
     for (const row of unlockedResult.rows) {
@@ -229,24 +240,27 @@ export async function checkAndUnlockAchievements(
   userId: string,
   activityType: string
 ): Promise<NewlyUnlockedAchievement[]> {
+  const config = Object.entries(ACHIEVEMENT_CONFIG).find(([, cfg]) =>
+    cfg.activityTypes.includes(activityType)
+  )
+
+  // No achievement tracks this activity type — skip entirely, no DB call needed
+  if (!config) return []
+
   const client = await getClient()
 
   try {
-    const config = Object.entries(ACHIEVEMENT_CONFIG).find(([, cfg]) =>
-      cfg.activityTypes.includes(activityType)
-    )
-
-    if (!config) return []
-
     const [achievementType, achievementConfig] = config as [AchievementType, typeof ACHIEVEMENT_CONFIG[AchievementType]]
 
     let currentProgress: number
     if (achievementConfig.countField) {
+      // Use a quoted identifier-safe approach — countField is internal/trusted
+      const fieldName = achievementConfig.countField
       const progressResult = await client.query(
-        `SELECT COALESCE(SUM((details->>${achievementConfig.countField})::int), 0) as total
+        `SELECT COALESCE(SUM((details->>$3)::int), 0) as total
          FROM activity_logs
          WHERE user_id = $1 AND activity_type = ANY($2::text[])`,
-        [userId, achievementConfig.activityTypes]
+        [userId, achievementConfig.activityTypes, fieldName]
       )
       currentProgress = parseInt(progressResult.rows[0]?.total) || 0
     } else {
@@ -265,7 +279,7 @@ export async function checkAndUnlockAchievements(
       [userId, achievementType]
     )
 
-    const unlockedMilestones = unlockedResult.rows.map(r => r.milestone)
+    const unlockedMilestones = unlockedResult.rows.map((r: { milestone: number }) => r.milestone)
     const newlyUnlocked: NewlyUnlockedAchievement[] = []
 
     let target = achievementConfig.initialMilestone
@@ -289,6 +303,15 @@ export async function checkAndUnlockAchievements(
     }
 
     return newlyUnlocked
+  } catch (error: unknown) {
+    // Gracefully handle the case where the migration hasn't been applied yet
+    // (e.g. "relation user_achievements does not exist" — PostgreSQL code 42P01)
+    const pgCode = (error as { code?: string })?.code
+    if (pgCode === "42P01") {
+      console.warn("[achievements] user_achievements table not found — run add-achievements.sql migration")
+      return []
+    }
+    throw error
   } finally {
     client.release()
   }
