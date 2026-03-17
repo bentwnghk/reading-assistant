@@ -19,6 +19,7 @@ import {
   readingTutorSystemPrompt,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
+import { logActivity } from "@/utils/activityLogger";
 
 function smoothTextStream(type: "character" | "word" | "line") {
   return smoothStream({
@@ -90,11 +91,6 @@ function useReadingAssistant() {
       if (text) {
         text += "\n\n";
       }
-      // Suppress per-token localStorage writes on iOS Safari — each
-      // setExtractedText call would otherwise trigger persist → localStorage.setItem
-      // synchronously, crashing/reloading the page. The flag is cleared in
-      // `finally` so the last setExtractedText call (after the loop) is
-      // persisted normally.
       setStreamingFlag(true);
       try {
         for await (const textPart of result.textStream) {
@@ -104,15 +100,12 @@ function useReadingAssistant() {
       } finally {
         setStreamingFlag(false);
       }
-      // One final write with the complete text is now persisted.
       setExtractedText(text);
 
       const { id } = useReadingStore.getState();
       if (id) {
         markLastOpenedSession(id);
       }
-
-
 
       setStoreStatus("idle");
       setStatus("idle");
@@ -255,6 +248,9 @@ function useReadingAssistant() {
       }
       setAdaptedText(text);
 
+      // Log for achievements
+      logActivity("adapted_text_generate", { sessionId: readingStore.id || undefined });
+
       setStoreStatus("idle");
       setStatus("idle");
       return text;
@@ -309,6 +305,9 @@ function useReadingAssistant() {
       }
       setSimplifiedText(text);
 
+      // Log for achievements
+      logActivity("simplified_text_generate", { sessionId: readingStore.id || undefined });
+
       setStoreStatus("idle");
       setStatus("idle");
       return text;
@@ -360,6 +359,9 @@ function useReadingAssistant() {
         setStreamingFlag(false);
       }
       setMindMap(text);
+
+      // Log for achievements
+      logActivity("mindmap_generate", { sessionId: readingStore.id || undefined });
 
       setStoreStatus("idle");
       setStatus("idle");
@@ -468,6 +470,12 @@ function useReadingAssistant() {
 
       const entries: GlossaryEntry[] = JSON.parse(text);
       setGlossary(entries);
+
+      // Log for achievements — count of vocabulary items added
+      logActivity("glossary_add", {
+        sessionId: readingStore.id || undefined,
+        details: { wordCount: entries.length },
+      });
 
       toast.dismiss(toastId);
       setStoreStatus("idle");
@@ -637,6 +645,9 @@ Guidelines:
 
       const questions: ReadingTestQuestion[] = JSON.parse(text);
       setReadingTest(questions);
+
+      // Log for achievements
+      logActivity("targeted_practice_complete", { sessionId: readingStore.id || undefined });
 
       toast.dismiss(toastId);
       setStoreStatus("idle");

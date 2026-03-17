@@ -6,6 +6,7 @@ import { Plus, Volume2, Loader2, Brain } from "lucide-react";
 import { generateText } from "ai";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
+import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { Button } from "@/components/ui/button";
@@ -264,6 +265,9 @@ function ExtractedText() {
       setActiveSentence(sentence);
       setSelection(null);
       selectionObj?.removeAllRanges();
+      // Log for achievements
+      const { id: sessionId } = useReadingStore.getState();
+      logActivity("sentence_analyze", { sessionId: sessionId || undefined });
     } catch (error) {
       console.error("Analysis error:", error);
     } finally {

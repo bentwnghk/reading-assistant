@@ -57,6 +57,7 @@ import { completePath } from "@/utils/url";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
+import { logActivity } from "@/utils/activityLogger";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown"));
 import ParagraphWithNav from "./ParagraphWithNav";
@@ -846,6 +847,9 @@ function AdaptedText() {
         setActiveSentence(sentence);
         setSelection(null);
         selectionObj?.removeAllRanges();
+        // Log for achievements
+        const { id: sessionId } = useReadingStore.getState();
+        logActivity("sentence_analyze", { sessionId: sessionId || undefined });
       } catch (error) {
         console.error("Analysis error:", error);
       } finally {

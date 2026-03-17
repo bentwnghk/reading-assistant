@@ -6,6 +6,12 @@ export type ActivityType =
   | "quiz_complete"
   | "spelling_complete"
   | "flashcard_review"
+  | "mindmap_generate"
+  | "adapted_text_generate"
+  | "simplified_text_generate"
+  | "sentence_analyze"
+  | "targeted_practice_complete"
+  | "glossary_add"
 
 export interface ActivityDetails {
   cardsReviewed?: number

@@ -1,15 +1,15 @@
-/**
- * Client-side activity logger.
- * Calls POST /api/activity – fire-and-forget, errors are silently swallowed
- * so they never disrupt the main learning flow.
- */
-
 type ActivityType =
   | "session_create"
   | "test_complete"
   | "quiz_complete"
   | "spelling_complete"
   | "flashcard_review"
+  | "mindmap_generate"
+  | "adapted_text_generate"
+  | "simplified_text_generate"
+  | "sentence_analyze"
+  | "targeted_practice_complete"
+  | "glossary_add"
 
 interface ActivityDetails {
   cardsReviewed?: number
@@ -25,17 +25,37 @@ interface LogActivityOptions {
   details?: ActivityDetails
 }
 
+export interface NewlyUnlockedAchievement {
+  type: string
+  milestone: number
+  icon: string
+  color: string
+}
+
+type AchievementUnlockCallback = (achievements: NewlyUnlockedAchievement[]) => void
+
+let achievementCallback: AchievementUnlockCallback | null = null
+
+export function setAchievementUnlockCallback(callback: AchievementUnlockCallback | null): void {
+  achievementCallback = callback
+}
+
 export function logActivity(
   activityType: ActivityType,
   options: LogActivityOptions = {}
 ): void {
-  // Only log for authenticated users (the API will 401 otherwise, which is fine,
-  // but we save the network round-trip by not calling it at all for unauthenticated users)
   fetch("/api/activity", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ activityType, ...options }),
-  }).catch(() => {
-    // Intentionally silent – leaderboard tracking must never break core UX
   })
+    .then(res => res.json())
+    .then(data => {
+      if (data.newlyUnlocked && data.newlyUnlocked.length > 0 && achievementCallback) {
+        achievementCallback(data.newlyUnlocked as NewlyUnlockedAchievement[])
+      }
+    })
+    .catch(() => {
+      // Intentionally silent – leaderboard tracking must never break core UX
+    })
 }

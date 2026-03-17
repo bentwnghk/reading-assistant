@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { logActivity, type ActivityType, type ActivityDetails, getWeekStart } from "@/lib/activity"
 import { refreshWeeklyStatsForUser } from "@/lib/leaderboard"
+import { checkAndUnlockAchievements } from "@/lib/achievements"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
@@ -11,6 +12,12 @@ const ActivitySchema = z.object({
     "quiz_complete",
     "spelling_complete",
     "flashcard_review",
+    "mindmap_generate",
+    "adapted_text_generate",
+    "simplified_text_generate",
+    "sentence_analyze",
+    "targeted_practice_complete",
+    "glossary_add",
   ]),
   sessionId: z.string().optional(),
   score:     z.number().min(0).max(10000).optional(),
@@ -55,7 +62,10 @@ export async function POST(request: Request) {
       console.error("[activity] Failed to refresh weekly stats:", err)
     )
 
-    return NextResponse.json({ ok: true }, { status: 201 })
+    // Check for newly unlocked achievements
+    const newlyUnlocked = await checkAndUnlockAchievements(session.user.id, activityType)
+
+    return NextResponse.json({ ok: true, newlyUnlocked }, { status: 201 })
   } catch (error) {
     console.error("[activity] POST error:", error)
     return NextResponse.json(

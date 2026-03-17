@@ -211,7 +211,13 @@ type LeaderboardActivityType =
   | "test_complete"
   | "quiz_complete"
   | "spelling_complete"
-  | "flashcard_review";
+  | "flashcard_review"
+  | "mindmap_generate"
+  | "adapted_text_generate"
+  | "simplified_text_generate"
+  | "sentence_analyze"
+  | "targeted_practice_complete"
+  | "glossary_add";
 
 interface ActivityLogEntry {
   id: string;
@@ -244,4 +250,49 @@ interface LeaderboardWeeklyStats {
   spellingGamesCompleted: number;
   weeklyScore: number;
   improvementScore: number;
+}
+
+// ─── Achievement types ────────────────────────────────────────────────────────
+
+type AchievementType =
+  | "sessions_read"
+  | "vocabulary_collected"
+  | "flashcard_reviews"
+  | "mindmaps_generated"
+  | "adapted_texts"
+  | "simplified_texts"
+  | "sentences_analyzed"
+  | "tests_completed"
+  | "targeted_practices"
+  | "spelling_challenges"
+  | "vocabulary_quizzes";
+
+interface AchievementMilestone {
+  target: number;
+  unlocked: boolean;
+  unlockedAt?: number;
+}
+
+interface Achievement {
+  type: AchievementType;
+  currentProgress: number;
+  milestones: AchievementMilestone[];
+  icon: string;
+  color: string;
+  name: string;
+  description: string;
+}
+
+interface UserAchievement {
+  id: number;
+  userId: string;
+  achievementType: AchievementType;
+  milestone: number;
+  unlockedAt: number;
+}
+
+interface AchievementsResponse {
+  achievements: Achievement[];
+  totalUnlocked: number;
+  totalMilestones: number;
 }

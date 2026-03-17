@@ -1014,5 +1014,78 @@
         "content": "持之以恆比臨急抱佛腳更有效！每天花一點時間練習，比一週一次大量練習能更快提升排名。"
       }
     }
+  },
+  "achievements": {
+    "title": "成就",
+    "subtitle": "慶祝你的學習里程碑",
+    "tabLabel": "成就",
+    "unlocked": "已解鎖！",
+    "locked": "未解鎖",
+    "progress": "{{current}} / {{target}}",
+    "progressShort": "{{current}}/{{target}}",
+    "nextGoal": "下一目標：{{target}}",
+    "unlockedCount": "已解鎖 {{count}} 個",
+    "totalProgress": "已解鎖 {{unlocked}} / {{total}} 個里程碑",
+    "congratulations": "成就解鎖！",
+    "keepGoing": "繼續努力，解鎖下一個等級！",
+    "loading": "正在載入成就...",
+    "empty": "開始學習以獲得成就！",
+    "types": {
+      "sessions_read": {
+        "name": "熱愛閱讀",
+        "description": "閱讀 {{count}} 篇文章",
+        "hint": "上傳並提取閱讀材料中的文字"
+      },
+      "vocabulary_collected": {
+        "name": "詞彙收藏家",
+        "description": "收集 {{count}} 個詞彙",
+        "hint": "高亮單詞並生成詞彙表條目"
+      },
+      "flashcard_reviews": {
+        "name": "記憶大師",
+        "description": "完成 {{count}} 次字卡複習",
+        "hint": "定期複習詞彙字卡"
+      },
+      "mindmaps_generated": {
+        "name": "思維導圖達人",
+        "description": "生成 {{count}} 個思維導圖",
+        "hint": "從閱讀文章生成思維導圖"
+      },
+      "adapted_texts": {
+        "name": "文字改編師",
+        "description": "生成 {{count}} 篇改編文章",
+        "hint": "將文章改編成適合你閱讀水平的版本"
+      },
+      "simplified_texts": {
+        "name": "簡化高手",
+        "description": "生成 {{count}} 篇簡化文章",
+        "hint": "將複雜文章簡化以便閱讀"
+      },
+      "sentences_analyzed": {
+        "name": "句子偵探",
+        "description": "分析 {{count}} 個句子",
+        "hint": "選取文字並分析個別句子"
+      },
+      "tests_completed": {
+        "name": "測驗冠軍",
+        "description": "完成 {{count}} 次閱讀測驗",
+        "hint": "進行閱讀理解測驗"
+      },
+      "targeted_practices": {
+        "name": "技能磨練師",
+        "description": "完成 {{count}} 次針對性練習",
+        "hint": "練習閱讀測驗中的弱項技能"
+      },
+      "spelling_challenges": {
+        "name": "拼字達人",
+        "description": "完成 {{count}} 次拼字挑戰",
+        "hint": "用詞彙單詞進行拼字遊戲"
+      },
+      "vocabulary_quizzes": {
+        "name": "詞彙測驗高手",
+        "description": "完成 {{count}} 次詞彙測驗",
+        "hint": "進行詞彙測驗以測試你的單詞知識"
+      }
+    }
   }
 }

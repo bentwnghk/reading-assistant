@@ -1014,5 +1014,78 @@
         "content": "Consistency beats intensity! A little practice every day will help you climb faster than cramming once a week."
       }
     }
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Celebrate your learning milestones",
+    "tabLabel": "Achievements",
+    "unlocked": "Unlocked!",
+    "locked": "Locked",
+    "progress": "{{current}} / {{target}}",
+    "progressShort": "{{current}}/{{target}}",
+    "nextGoal": "Next goal: {{target}}",
+    "unlockedCount": "{{count}} unlocked",
+    "totalProgress": "{{unlocked}} / {{total}} milestones unlocked",
+    "congratulations": "Achievement Unlocked!",
+    "keepGoing": "Keep going to unlock the next level!",
+    "loading": "Loading achievements...",
+    "empty": "Start learning to earn achievements!",
+    "types": {
+      "sessions_read": {
+        "name": "Avid Reader",
+        "description": "Read {{count}} texts",
+        "hint": "Upload and extract text from reading materials"
+      },
+      "vocabulary_collected": {
+        "name": "Word Collector",
+        "description": "Collect {{count}} vocabulary items",
+        "hint": "Highlight words and generate glossary entries"
+      },
+      "flashcard_reviews": {
+        "name": "Memory Master",
+        "description": "Complete {{count}} flashcard reviews",
+        "hint": "Review vocabulary flashcards regularly"
+      },
+      "mindmaps_generated": {
+        "name": "Visual Thinker",
+        "description": "Generate {{count}} mind maps",
+        "hint": "Generate mind maps from your reading texts"
+      },
+      "adapted_texts": {
+        "name": "Text Adapter",
+        "description": "Generate {{count}} adapted texts",
+        "hint": "Adapt texts to your reading level"
+      },
+      "simplified_texts": {
+        "name": "Simplifier",
+        "description": "Generate {{count}} simplified texts",
+        "hint": "Simplify complex texts for easier reading"
+      },
+      "sentences_analyzed": {
+        "name": "Sentence Detective",
+        "description": "Analyze {{count}} sentences",
+        "hint": "Select text and analyze individual sentences"
+      },
+      "tests_completed": {
+        "name": "Test Champion",
+        "description": "Complete {{count}} reading tests",
+        "hint": "Take reading comprehension tests"
+      },
+      "targeted_practices": {
+        "name": "Skill Sharpener",
+        "description": "Complete {{count}} targeted practices",
+        "hint": "Practice the skills you missed in reading tests"
+      },
+      "spelling_challenges": {
+        "name": "Spelling Bee",
+        "description": "Complete {{count}} spelling challenges",
+        "hint": "Play spelling games with your vocabulary words"
+      },
+      "vocabulary_quizzes": {
+        "name": "Quiz Wizard",
+        "description": "Complete {{count}} vocabulary quizzes",
+        "hint": "Take vocabulary quizzes to test your word knowledge"
+      }
+    }
   }
 }

@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Layers,
   Sparkles,
+  Medal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,9 @@ import { cn } from "@/utils/style";
 import { LeaderboardTable } from "./LeaderboardTable";
 import { PersonalStatsCard } from "./PersonalStatsCard";
 import { LeaderboardSkeleton, PersonalStatsSkeleton } from "./LeaderboardSkeleton";
+import { AchievementsTab } from "./AchievementsTab";
+import { AchievementUnlockedDialog } from "./AchievementUnlockedDialog";
+import { initAchievementCallbacks } from "@/store/achievements";
 import type { LeaderboardResponse, PersonalStats, LeaderboardScope, SortColumn } from "./types";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -59,8 +63,8 @@ export function LeaderboardPage() {
 
   const [scope, setScope]     = useState<LeaderboardScope>("class");
   const [sortBy, setSortBy]   = useState<SortColumn>("weekly_score");
-  const [weekOffset, setWeekOffset] = useState(0);   // 0 = current, -1 = last week
-  const [tab, setTab]         = useState<"board" | "me">("board");
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [tab, setTab]         = useState<"board" | "me" | "achievements">("board");
 
   const [boardData,   setBoardData]   = useState<LeaderboardResponse | null>(null);
   const [personalData, setPersonalData] = useState<PersonalStats | null>(null);
@@ -72,6 +76,11 @@ export function LeaderboardPage() {
   const [showHelp, setShowHelp] = useState(false);
 
   const weekStart = getWeekStart(weekOffset);
+
+  // Wire up achievement unlock callback once on mount
+  useEffect(() => {
+    initAchievementCallbacks();
+  }, []);
 
   // ── Fetch leaderboard ──
   const fetchBoard = useCallback(async () => {
@@ -125,6 +134,9 @@ export function LeaderboardPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
 
+      {/* ── Achievement unlock celebration dialog ── */}
+      <AchievementUnlockedDialog />
+
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -166,34 +178,36 @@ export function LeaderboardPage() {
         </div>
       </div>
 
-      {/* ── Week picker ── */}
-      <div className="flex items-center justify-between text-sm">
-        <button
-          onClick={() => setWeekOffset(w => w - 1)}
-          className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {t("leaderboard.lastWeek")}
-        </button>
-        <span className="font-medium tabular-nums">
-          {weekOffset === 0 ? t("leaderboard.thisWeek") : formatWeekLabel(weekStart)}
-        </span>
-        <button
-          onClick={() => setWeekOffset(w => Math.min(w + 1, 0))}
-          disabled={weekOffset >= 0}
-          className={cn(
-            "flex items-center gap-1 transition-colors",
-            weekOffset >= 0
-              ? "text-muted-foreground/40 cursor-not-allowed"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {t("leaderboard.thisWeek")}
-          <ChevronLeft className="h-4 w-4 rotate-180" />
-        </button>
-      </div>
+      {/* ── Week picker (hidden on achievements tab) ── */}
+      {tab !== "achievements" && (
+        <div className="flex items-center justify-between text-sm">
+          <button
+            onClick={() => setWeekOffset(w => w - 1)}
+            className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {t("leaderboard.lastWeek")}
+          </button>
+          <span className="font-medium tabular-nums">
+            {weekOffset === 0 ? t("leaderboard.thisWeek") : formatWeekLabel(weekStart)}
+          </span>
+          <button
+            onClick={() => setWeekOffset(w => Math.min(w + 1, 0))}
+            disabled={weekOffset >= 0}
+            className={cn(
+              "flex items-center gap-1 transition-colors",
+              weekOffset >= 0
+                ? "text-muted-foreground/40 cursor-not-allowed"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {t("leaderboard.thisWeek")}
+            <ChevronLeft className="h-4 w-4 rotate-180" />
+          </button>
+        </div>
+      )}
 
-      {/* ── Tabs: Board vs My Stats ── */}
+      {/* ── Tabs: Board / My Stats / Achievements ── */}
       <div className="flex gap-1 p-1 bg-muted rounded-lg">
         <button
           onClick={() => setTab("board")}
@@ -216,6 +230,18 @@ export function LeaderboardPage() {
           )}
         >
           {t("leaderboard.myStats")}
+        </button>
+        <button
+          onClick={() => setTab("achievements")}
+          className={cn(
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
+            tab === "achievements"
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Medal className="h-3.5 w-3.5" />
+          {t("achievements.tabLabel")}
         </button>
       </div>
 
@@ -303,6 +329,11 @@ export function LeaderboardPage() {
             <PersonalStatsCard stats={personalData} />
           )}
         </div>
+      )}
+
+      {/* ── Achievements tab ── */}
+      {tab === "achievements" && (
+        <AchievementsTab />
       )}
 
       {/* ── Help Dialog ── */}
@@ -395,6 +426,16 @@ export function LeaderboardPage() {
               <div>
                 <h4 className="font-semibold text-sm">{t("leaderboard.help.categories.improvement.title")}</h4>
                 <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.categories.improvement.desc")}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                <Medal className="h-5 w-5 text-yellow-500" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm">{t("achievements.title")}</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("achievements.subtitle")}</p>
               </div>
             </div>
 
