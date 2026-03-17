@@ -372,6 +372,7 @@ function Header() {
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• {t("header.about.roles.teacher.createClass")}</li>
                     <li>• {t("header.about.roles.teacher.manageStudents")}</li>
+                    <li>• {t("header.about.roles.teacher.viewAiQuestions")}</li>
                     <li>• {t("header.about.roles.teacher.exportData")}</li>
                     <li>• {t("header.about.roles.teacher.viewLeaderboard")}</li>
                   </ul>

@@ -73,7 +73,8 @@
           "createClass": "創建自己的班別",
           "manageStudents": "添加學生並追蹤進度",
           "exportData": "匯出詳細 Excel 試算表報告",
-          "viewLeaderboard": "查看班別排行榜"
+          "viewLeaderboard": "查看班別排行榜",
+          "viewAiQuestions": "追蹤學生向 AI 導師的提問"
         },
         "student": {
           "title": "👥 學生",

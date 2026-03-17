@@ -196,7 +196,7 @@ export function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: Crown, title: "admin", color: "text-amber-400", items: ["manageSchools", "manageUsers", "manageClasses"] },
-              { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["createClass", "manageStudents", "exportData", "viewLeaderboard"] },
+              { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["createClass", "manageStudents", "viewAiQuestions", "exportData", "viewLeaderboard"] },
               { icon: Users, title: "student", color: "text-emerald-400", items: ["learn", "cloudSync", "history", "leaderboard"] }
             ].map((role) => (
               <div key={role.title} className="group bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-[2.5rem] p-8 hover:bg-slate-800 hover:-translate-y-2 transition-all duration-300">
