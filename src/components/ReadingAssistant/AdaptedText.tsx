@@ -1418,7 +1418,7 @@ function AdaptedText() {
         open={!!activeSentence}
         onOpenChange={(open) => !open && setActiveSentence(null)}
       >
-        <DialogContent className="left-4 right-4 w-auto translate-x-0 max-w-md sm:left-[50%] sm:right-auto sm:w-full sm:translate-x-[-50%] max-h-[80vh] overflow-x-hidden overflow-y-auto p-4 sm:p-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <DialogContent className="dialog-safe-width max-h-[80vh] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader className="pr-6">
             <DialogTitle>
               {t("reading.extractedText.analysisTitle")}
@@ -1427,7 +1427,7 @@ function AdaptedText() {
               {t("reading.extractedText.analysisDescription")}
             </DialogDescription>
           </DialogHeader>
-          <div className="prose prose-sm dark:prose-invert w-full max-w-none">
+          <div className="prose prose-sm dark:prose-invert w-full max-w-none overflow-x-hidden">
             {isAnalysisLoading && !activeAnalysis ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin mr-2" />

@@ -118,6 +118,11 @@
   size: "A4";
 }
 
+.dialog-safe-width {
+  max-width: min(28rem, calc(100dvw - 2rem));
+  width: calc(100dvw - 2rem);
+}
+
 .float-menu-button {
   @apply w-8 h-8 hover:bg-transparent text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-slate-50;
 }
