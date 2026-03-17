@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
 import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon, HelpCircle } from "lucide-react";
@@ -12,6 +13,7 @@ import useReadingAssistant from "@/hooks/useReadingAssistant";
 import ChatMessageBubble from "./ChatMessageBubble";
 import QuickQuestions from "./QuickQuestions";
 import { cn } from "@/utils/style";
+import { logChatQuestion } from "@/utils/chatQuestionLogger";
 
 interface ReadingTutorChatProps {
   onClose?: () => void;
@@ -19,7 +21,8 @@ interface ReadingTutorChatProps {
 
 function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const { t } = useTranslation();
-  const { chatHistory, addChatMessage, clearChatHistory, extractedText } = useReadingStore();
+  const { data: session } = useSession();
+  const { chatHistory, addChatMessage, clearChatHistory, extractedText, id: sessionId, docTitle } = useReadingStore();
   const { tutorChatSelectedText, setTutorChatSelectedText } = useGlobalStore();
   const { askTutor } = useReadingAssistant();
   
@@ -127,6 +130,15 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
         timestamp: Date.now(),
       };
       addChatMessage(assistantMessage);
+      
+      if (session?.user?.id && question.trim()) {
+        logChatQuestion({
+          questionText: question,
+          responseText: response,
+          sessionId: sessionId || undefined,
+          docTitle: docTitle || undefined,
+        });
+      }
     }
 
     setIsLoading(false);
@@ -179,6 +191,15 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
         timestamp: Date.now(),
       };
       addChatMessage(assistantMessage);
+      
+      if (session?.user?.id && messageText?.trim()) {
+        logChatQuestion({
+          questionText: messageText,
+          responseText: response,
+          sessionId: sessionId || undefined,
+          docTitle: docTitle || undefined,
+        });
+      }
     }
 
     setIsLoading(false);

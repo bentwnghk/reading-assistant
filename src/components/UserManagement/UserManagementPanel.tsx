@@ -13,6 +13,7 @@ import UserList from "./UserList"
 import ClassList from "./ClassList"
 import StudentDataView from "./StudentDataView"
 import SchoolList from "./SchoolList"
+import AiQuestionsView from "./AiQuestionsView"
 
 interface UserManagementPanelProps {
   open: boolean
@@ -48,6 +49,9 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isAdmin || isTeacher) && (
               <TabsTrigger value="students">{t("userManagement.tabs.studentData")}</TabsTrigger>
             )}
+            {(isAdmin || isTeacher) && (
+              <TabsTrigger value="aiQuestions">{t("userManagement.tabs.aiQuestions")}</TabsTrigger>
+            )}
           </TabsList>
           <div className="flex-1 overflow-auto mt-4">
             {isAdmin && (
@@ -66,6 +70,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
                 <StudentDataView isAdmin={isAdmin} currentUserId={session?.user?.id} />
+              </TabsContent>
+            )}
+            {(isAdmin || isTeacher) && (
+              <TabsContent value="aiQuestions" className="mt-0">
+                <AiQuestionsView isAdmin={isAdmin} />
               </TabsContent>
             )}
           </div>

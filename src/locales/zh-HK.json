@@ -755,7 +755,8 @@
       "users": "用戶",
       "classes": "班別",
       "studentData": "學生數據",
-      "schools": "學校"
+      "schools": "學校",
+      "aiQuestions": "AI 問題"
     },
     "roles": {
       "admin": "管理員",
@@ -868,6 +869,22 @@
       "deleteFailed": "刪除學校失敗",
       "deleteConfirm": "確定要刪除學校「{{name}}」嗎？該學校的用戶將變為未分配狀態。",
       "noSchools": "沒有學校記錄。學校會在用戶登入時自動建立。"
+    },
+    "aiQuestions": {
+      "description": "追蹤學生向 AI 導師提出的問題。",
+      "selectSchool": "選擇學校",
+      "selectClass": "選擇班別",
+      "allSchools": "所有學校",
+      "allClasses": "所有班別",
+      "search": "搜尋問題...",
+      "question": "問題",
+      "frequency": "提問次數",
+      "users": "用戶數",
+      "lastAsked": "最後提問",
+      "showing": "顯示 {{count}} 個不重複問題（共 {{total}} 個）",
+      "noQuestions": "尚未記錄 AI 導師問題",
+      "noResults": "沒有符合搜尋條件的問題",
+      "noInstances": "沒有找到記錄"
     },
     "cancel": "取消",
     "save": "保存"

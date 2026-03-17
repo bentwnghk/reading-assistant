@@ -755,7 +755,8 @@
       "users": "Users",
       "classes": "Classes",
       "studentData": "Student Data",
-      "schools": "Schools"
+      "schools": "Schools",
+      "aiQuestions": "AI Questions"
     },
     "roles": {
       "admin": "Admin",
@@ -868,6 +869,22 @@
       "deleteFailed": "Failed to delete school",
       "deleteConfirm": "Delete school \"{{name}}\"? Users from this school will become unassigned.",
       "noSchools": "No schools found. Schools are created automatically when users sign in."
+    },
+    "aiQuestions": {
+      "description": "Track questions students ask the AI tutor.",
+      "selectSchool": "Select a school",
+      "selectClass": "Select a class",
+      "allSchools": "All Schools",
+      "allClasses": "All Classes",
+      "search": "Search questions...",
+      "question": "Question",
+      "frequency": "Times Asked",
+      "users": "Users",
+      "lastAsked": "Last Asked",
+      "showing": "Showing {{count}} unique questions ({{total}} total)",
+      "noQuestions": "No AI tutor questions recorded yet",
+      "noResults": "No questions match your search",
+      "noInstances": "No instances found"
     },
     "cancel": "Cancel",
     "save": "Save"
