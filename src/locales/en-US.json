@@ -1030,6 +1030,7 @@
     "keepGoing": "Keep going to unlock the next level!",
     "loading": "Loading achievements...",
     "empty": "Start learning to earn achievements!",
+    "milestones": "milestones",
     "types": {
       "sessions_read": {
         "name": "Avid Reader",

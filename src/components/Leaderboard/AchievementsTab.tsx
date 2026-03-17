@@ -103,7 +103,7 @@ export function AchievementsTab() {
               />
             ))}
           </div>
-          <span>= milestones</span>
+          <span>= {t("achievements.milestones")}</span>
         </div>
       </div>
     </div>

@@ -1030,6 +1030,7 @@
     "keepGoing": "繼續努力，解鎖下一個等級！",
     "loading": "正在載入成就...",
     "empty": "開始學習以獲得成就！",
+    "milestones": "里程碑",
     "types": {
       "sessions_read": {
         "name": "熱愛閱讀",
