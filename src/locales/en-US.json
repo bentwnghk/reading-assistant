@@ -52,7 +52,7 @@
         },
         "gamified": {
           "title": "🎮 Gamified",
-          "desc": "Learn through fun games, challenges & weekly leaderboards"
+          "desc": "Learn through fun games, weekly leaderboards & unlock achievements as you progress!"
         },
         "private": {
           "title": "☁️ Cloud Sync",
@@ -81,11 +81,15 @@
           "learn": "Full access to all features",
           "cloudSync": "Automatic cloud sync",
           "history": "Track your learning journey",
-          "leaderboard": "Compete in weekly leaderboards"
+          "leaderboard": "Compete in leaderboards & unlock achievements"
         }
       },
       "features": {
         "title": "Powerful Features",
+        "ocr": {
+          "title": "📷 Smart OCR",
+          "desc": "Snap a photo or upload images to extract text from any reading material - textbooks, worksheets, articles, and more!"
+        },
         "difficulty": {
           "title": "📊 Difficulty Analysis",
           "desc": "Know your text before reading! Get CEFR levels, Flesch Reading Ease, grade level, and 5 scientific readability metrics. Compare original vs adapted vs simplified versions side-by-side!"
@@ -93,14 +97,6 @@
         "cefrHighlight": {
           "title": "🎨 CEFR Word Highlight",
           "desc": "See vocabulary difficulty at a glance! Every word color-coded by CEFR level (A1-C2). Toggle levels on/off, see word counts per level, and identify challenging vocabulary instantly."
-        },
-        "tutor": {
-          "title": "🤖 AI Tutor",
-          "desc": "Your personal reading coach! Ask questions, get hints, upload reading comprehension questions for guided help, and learn at your own pace."
-        },
-        "ocr": {
-          "title": "📷 Smart OCR",
-          "desc": "Snap a photo or upload images to extract text from any reading material - textbooks, worksheets, articles, and more!"
         },
         "adaptation": {
           "title": "✏️ Level Adaptation",
@@ -110,13 +106,13 @@
           "title": "🧠 Visual Learning",
           "desc": "Auto-generate quick summaries and interactive mind maps to understand key concepts and relationships."
         },
+        "tutor": {
+          "title": "🤖 AI Tutor",
+          "desc": "Your personal reading coach! Ask questions, get hints, upload reading comprehension questions for guided help, and learn at your own pace."
+        },
         "sentenceAnalysis": {
           "title": "💬 Sentence Analysis",
           "desc": "Click any sentence for a complete AI breakdown: meaning, vocabulary, grammar, language in use, and learning tips!"
-        },
-        "test": {
-          "title": "📝 Reading Test",
-          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and targeted practice for weak areas!"
         },
         "glossary": {
           "title": "📖 Smart Glossary",
@@ -133,6 +129,14 @@
         "quiz": {
           "title": "📋 Vocabulary Quiz",
           "desc": "Test your knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions."
+        },
+        "test": {
+          "title": "📝 Reading Test",
+          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and targeted practice for weak areas!"
+        },
+        "achievements": {
+          "title": "🏆 Achievements",
+          "desc": "Unlock badges and milestones as you learn! Track your progress across 12 achievement types—from reading sessions to vocabulary quizzes. Every step counts!"
         },
         "tts": {
           "title": "🔊 Text-to-Speech",
@@ -892,6 +896,7 @@
   },
   "leaderboard": {
     "title": "Leaderboard & Achievements",
+    "tabLabel": "Leaderboard",
     "subtitle": "Compete for top ranks and unlock learning milestones",
     "myStats": "My Stats",
     "thisWeek": "This Week",

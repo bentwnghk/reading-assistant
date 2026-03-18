@@ -28,6 +28,7 @@ import {
   Download,
   MessageCircle,
   BarChart3,
+  Medal,
   Highlighter,
   Users,
   GraduationCap,
@@ -399,6 +400,13 @@ function Header() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Camera className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.ocr.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.ocr.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <BarChart3 className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.difficulty.title")}</div>
@@ -410,20 +418,6 @@ function Header() {
                   <div>
                     <div className="font-medium">{t("header.about.features.cefrHighlight.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.cefrHighlight.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <MessageCircle className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                  <div>
-                    <div className="font-medium">{t("header.about.features.tutor.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.tutor.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Camera className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
-                  <div>
-                    <div className="font-medium">{t("header.about.features.ocr.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.ocr.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
@@ -441,17 +435,17 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <MessageCircle className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.tutor.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.tutor.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <MessageSquareText className="h-4 w-4 mt-0.5 text-orange-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.sentenceAnalysis.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.sentenceAnalysis.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Target className="h-4 w-4 mt-0.5 text-red-500 shrink-0" />
-                  <div>
-                    <div className="font-medium">{t("header.about.features.test.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.test.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
@@ -480,6 +474,20 @@ function Header() {
                   <div>
                     <div className="font-medium">{t("header.about.features.quiz.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.quiz.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Target className="h-4 w-4 mt-0.5 text-red-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.test.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.test.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Medal className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.achievements.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.achievements.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">

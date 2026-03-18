@@ -214,7 +214,7 @@ export function LeaderboardPage() {
               : "text-muted-foreground hover:text-foreground"
           )}
         >
-          {t("leaderboard.title")}
+          {t("leaderboard.tabLabel")}
         </button>
         <button
           onClick={() => setTab("me")}
