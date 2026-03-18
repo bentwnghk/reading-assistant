@@ -1,11 +1,12 @@
  "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, History as HistoryIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useReadingStore } from "@/store/reading";
+import { useGlobalStore } from "@/store/global";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
 import dynamic from "next/dynamic";
@@ -30,6 +31,7 @@ function ImageUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
   const { originalImages, extractedText } = useReadingStore();
+  const { setOpenHistory } = useGlobalStore();
   const { status, extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = status === "extracting";
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -177,12 +179,18 @@ function ImageUpload() {
             </PopoverContent>
           </Popover>
         </span>
-        {hasContent && (
-          <Button variant="outline" size="sm" onClick={clearAllImages}>
-            <X className="h-4 w-4 mr-1" />
-            {t("reading.imageUpload.clearAll")}
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={() => setOpenHistory(true)}>
+            <HistoryIcon className="h-4 w-4 mr-1" />
+            {t("history.title")}
           </Button>
-        )}
+          {hasContent && (
+            <Button variant="outline" size="sm" onClick={clearAllImages}>
+              <X className="h-4 w-4 mr-1" />
+              {t("reading.imageUpload.clearAll")}
+            </Button>
+          )}
+        </div>
       </h3>
 
       <Tabs defaultValue="upload">
