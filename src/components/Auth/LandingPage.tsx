@@ -226,10 +226,11 @@ export function LandingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { icon: Camera, key: "ocr", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/30" },
+            { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-950/30" },
             { icon: BarChart3, key: "difficulty", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
             { icon: Highlighter, key: "cefrHighlight", color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-950/30" },
             { icon: PenTool, key: "adaptation", color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/30" },
-            { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-950/30" },
+            { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30" },
             { icon: MessageCircle, key: "tutor", color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
             { icon: MessageSquareText, key: "sentenceAnalysis", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-950/30" },
             { icon: BookOpen, key: "glossary", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30" },
@@ -238,7 +239,6 @@ export function LandingPage() {
             { icon: ClipboardList, key: "quiz", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/30" },
             { icon: Target, key: "test", color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-950/30" },
             { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/30" },
-            { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/30" },
             { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/30" },
           ].map(({ icon: Icon, key, color, bg }) => (
             <div key={key} className={`group flex flex-col p-8 rounded-[2.5rem] bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2`}>

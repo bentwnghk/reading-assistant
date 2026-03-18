@@ -407,6 +407,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Brain className="h-4 w-4 mt-0.5 text-purple-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.visual.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.visual.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <BarChart3 className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.difficulty.title")}</div>
@@ -428,10 +435,10 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Brain className="h-4 w-4 mt-0.5 text-purple-500 shrink-0" />
+                  <Volume2 className="h-4 w-4 mt-0.5 text-teal-500 shrink-0" />
                   <div>
-                    <div className="font-medium">{t("header.about.features.visual.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.visual.desc")}</div>
+                    <div className="font-medium">{t("header.about.features.tts.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.tts.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
@@ -488,13 +495,6 @@ function Header() {
                   <div>
                     <div className="font-medium">{t("header.about.features.achievements.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.achievements.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Volume2 className="h-4 w-4 mt-0.5 text-teal-500 shrink-0" />
-                  <div>
-                    <div className="font-medium">{t("header.about.features.tts.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.tts.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
