@@ -58,6 +58,7 @@ function RepositoryUploadDialog({
   const [phase, setPhase] = useState<Phase>("idle");
   const [images, setImages] = useState<string[]>([]); // base64 data URLs
   const [extractedText, setExtractedText] = useState("");
+  const extractedTextRef = useRef("");
   const [generatedTitle, setGeneratedTitle] = useState("");
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
 
@@ -68,6 +69,7 @@ function RepositoryUploadDialog({
     setIsPublic(false);
     setPhase("idle");
     setImages([]);
+    extractedTextRef.current = "";
     setExtractedText("");
     setGeneratedTitle("");
     setProgress(null);
@@ -85,10 +87,10 @@ function RepositoryUploadDialog({
       if (imageFiles.length === 0) return;
 
       setPhase("extracting");
-      setExtractedText("");
       setGeneratedTitle("");
       const dataURLs: string[] = [];
-      let combinedText = "";
+      // Seed with any text already extracted from previous uploads
+      let combinedText = extractedTextRef.current;
 
       try {
         const visionModel = await createModelProvider(visionModelName);
@@ -115,6 +117,7 @@ function RepositoryUploadDialog({
           if (combinedText) combinedText += "\n\n";
           for await (const part of result.textStream) {
             combinedText += part;
+            extractedTextRef.current = combinedText;
             setExtractedText(combinedText);
           }
         }
