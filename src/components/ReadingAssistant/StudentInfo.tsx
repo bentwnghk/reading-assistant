@@ -71,7 +71,7 @@ function StudentInfo() {
             </PopoverContent>
           </Popover>
         </h3>
-        <Button asChild size="sm" variant="secondary">
+        <Button asChild size="sm">
           <Link href="/leaderboard">
             <Trophy className="h-4 w-4" />
             <span className="hidden sm:inline">{t("leaderboard.title")}</span>
