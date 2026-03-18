@@ -203,7 +203,7 @@ export function LeaderboardPage() {
         </div>
       )}
 
-      {/* ── Tabs: Achievements / Leaderboard / My Stats ── */}
+      {/* ── Tabs: Achievements / My Stats / Leaderboard ── */}
       <div className="flex gap-1 p-1 bg-muted rounded-lg">
         <button
           onClick={() => setTab("achievements")}
@@ -218,17 +218,6 @@ export function LeaderboardPage() {
           {t("achievements.tabLabel")}
         </button>
         <button
-          onClick={() => setTab("board")}
-          className={cn(
-            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
-            tab === "board"
-              ? "bg-background shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {t("leaderboard.tabLabel")}
-        </button>
-        <button
           onClick={() => setTab("me")}
           className={cn(
             "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
@@ -239,11 +228,35 @@ export function LeaderboardPage() {
         >
           {t("leaderboard.myStats")}
         </button>
+        <button
+          onClick={() => setTab("board")}
+          className={cn(
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
+            tab === "board"
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {t("leaderboard.tabLabel")}
+        </button>
       </div>
 
       {/* ── Achievements tab ── */}
       {tab === "achievements" && (
         <AchievementsTab />
+      )}
+
+      {/* ── My Stats tab ── */}
+      {tab === "me" && (
+        <div>
+          {personalLoading && <PersonalStatsSkeleton />}
+          {!personalLoading && personalError && (
+            <div className="text-center py-12 text-muted-foreground text-sm">{personalError}</div>
+          )}
+          {!personalLoading && !personalError && personalData && (
+            <PersonalStatsCard stats={personalData} />
+          )}
+        </div>
       )}
 
       {/* ── Board tab ── */}
@@ -317,24 +330,6 @@ export function LeaderboardPage() {
             />
           )}
         </div>
-      )}
-
-      {/* ── My Stats tab ── */}
-      {tab === "me" && (
-        <div>
-          {personalLoading && <PersonalStatsSkeleton />}
-          {!personalLoading && personalError && (
-            <div className="text-center py-12 text-muted-foreground text-sm">{personalError}</div>
-          )}
-          {!personalLoading && !personalError && personalData && (
-            <PersonalStatsCard stats={personalData} />
-          )}
-        </div>
-      )}
-
-      {/* ── Achievements tab ── */}
-      {tab === "achievements" && (
-        <AchievementsTab />
       )}
 
       {/* ── Help Dialog ── */}
