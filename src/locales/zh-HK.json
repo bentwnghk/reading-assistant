@@ -1094,6 +1094,8 @@
     "nextGoal": "下一目標：{{target}}",
     "unlockedCount": "已解鎖 {{count}} 個",
     "totalProgress": "已解鎖 {{unlocked}} / {{total}} 個里程碑",
+    "totalEarned": "已獲得 {{count}} 個里程碑",
+    "milestonesEarned": "個里程碑已獲得",
     "congratulations": "成就解鎖！",
     "keepGoing": "繼續努力，解鎖下一個等級！",
     "loading": "正在載入成就...",

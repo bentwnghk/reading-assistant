@@ -1094,6 +1094,8 @@
     "nextGoal": "Next goal: {{target}}",
     "unlockedCount": "{{count}} unlocked",
     "totalProgress": "{{unlocked}} / {{total}} milestones unlocked",
+    "totalEarned": "{{count}} milestones earned",
+    "milestonesEarned": "milestones earned",
     "congratulations": "Achievement Unlocked!",
     "keepGoing": "Keep going to unlock the next level!",
     "loading": "Loading achievements...",

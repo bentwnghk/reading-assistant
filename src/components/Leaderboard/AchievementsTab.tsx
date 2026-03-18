@@ -3,14 +3,13 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import { Medal, Loader2 } from "lucide-react";
-import { cn } from "@/utils/style";
 import { useAchievementsStore } from "@/store/achievements";
 import { AchievementMedal } from "./AchievementMedal";
 
 export function AchievementsTab() {
   const { t } = useTranslation();
   const { data: authSession } = useSession();
-  const { achievements, totalUnlocked, totalMilestones, loading, fetchAchievements } =
+  const { achievements, totalUnlocked, loading, fetchAchievements } =
     useAchievementsStore();
 
   useEffect(() => {
@@ -19,7 +18,7 @@ export function AchievementsTab() {
     }
   }, [authSession?.user?.id, fetchAchievements]);
 
-  const pct = totalMilestones > 0 ? Math.round((totalUnlocked / totalMilestones) * 100) : 0;
+
 
   if (loading && achievements.length === 0) {
     return (
@@ -56,22 +55,10 @@ export function AchievementsTab() {
           <div className="text-right">
             <p className="font-bold text-lg text-yellow-600 dark:text-yellow-400 tabular-nums">
               {totalUnlocked}
-              <span className="text-sm font-normal text-muted-foreground">/{totalMilestones}</span>
             </p>
-            <p className="text-xs text-muted-foreground">{pct}%</p>
+            <p className="text-xs text-muted-foreground">{t("achievements.milestonesEarned")}</p>
           </div>
         </div>
-
-        {/* Master progress bar */}
-        <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full transition-all duration-700"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground mt-1.5">
-          {t("achievements.totalProgress", { unlocked: totalUnlocked, total: totalMilestones })}
-        </p>
       </div>
 
       {/* ── Grid of medals ── */}
@@ -79,32 +66,6 @@ export function AchievementsTab() {
         {achievements.map((achievement) => (
           <AchievementMedal key={achievement.type} achievement={achievement} />
         ))}
-      </div>
-
-      {/* ── Legend ── */}
-      <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 pb-2">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-primary/40" />
-          <span>{t("achievements.locked")}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-green-500" />
-          <span>{t("achievements.unlocked")}</span>
-        </div>
-        <div className={cn("flex items-center gap-1.5 ml-auto")}>
-          <div className="flex gap-0.5">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  i < 2 ? "bg-primary" : "bg-muted-foreground/30"
-                )}
-              />
-            ))}
-          </div>
-          <span>= {t("achievements.milestones")}</span>
-        </div>
       </div>
     </div>
   );
