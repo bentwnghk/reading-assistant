@@ -296,3 +296,35 @@ interface AchievementsResponse {
   totalUnlocked: number;
   totalMilestones: number;
 }
+
+// ─── Text Repository types ────────────────────────────────────────────────────
+
+interface RepositoryText {
+  id: string;
+  name: string;
+  title: string;
+  extractedText: string;
+  originalImages: string[];
+  schoolId: string | null;
+  isPublic: boolean;
+  createdBy: string;
+  createdByName?: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface RepositoryTextListItem {
+  id: string;
+  name: string;
+  title: string;
+  /** First ~200 chars of extracted text for preview */
+  previewText: string;
+  imageCount: number;
+  schoolId: string | null;
+  schoolName?: string | null;
+  isPublic: boolean;
+  createdBy: string;
+  createdByName?: string | null;
+  createdAt: number;
+  updatedAt: number;
+}

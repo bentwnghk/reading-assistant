@@ -155,6 +155,7 @@ interface ReadingActions {
   setIncludeGlossary: (include: boolean) => void;
   setIncludeSentenceAnalysis: (include: boolean) => void;
   clearDerivedData: () => void;
+  loadFromRepository: (text: RepositoryText) => void;
   reset: () => void;
   backup: () => ReadingStore;
   restore: (session: ReadingStore) => Promise<void>;
@@ -689,6 +690,24 @@ export const useReadingStore = create(
           }
           return newState;
         }),
+      loadFromRepository: (text) => {
+        const newId = nanoid();
+        const now = Date.now();
+        const newState: Partial<ReadingStore> = {
+          ...defaultValues,
+          id: newId,
+          docTitle: text.title || text.name,
+          extractedText: text.extractedText,
+          originalImages: text.originalImages,
+          createdAt: now,
+          updatedAt: now,
+          status: "idle",
+        };
+        set(() => newState as ReadingStore);
+        if (currentUserId) {
+          createSessionInAPI({ ...newState } as ReadingStore);
+        }
+      },
       reset: () => {
         set(() => ({
           ...defaultValues,

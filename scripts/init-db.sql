@@ -328,6 +328,46 @@ CREATE INDEX idx_chat_questions_user ON chat_questions(user_id);
 CREATE INDEX idx_chat_questions_created ON chat_questions(created_at DESC);
 CREATE INDEX idx_chat_questions_session ON chat_questions(session_id);
 
+-- ─── Text Repository tables ───────────────────────────────────────────────────
+
+-- Stores shared reading texts uploaded by admins.
+-- Texts can be scoped to a school (school_id) or made globally public (is_public = TRUE).
+CREATE TABLE text_repository (
+  id           TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name         TEXT NOT NULL,                          -- Admin-given display name (renameable)
+  title        TEXT DEFAULT '',                        -- AI-generated title
+  extracted_text TEXT NOT NULL,
+  school_id    TEXT REFERENCES schools(id) ON DELETE SET NULL,
+  is_public    BOOLEAN NOT NULL DEFAULT FALSE,          -- TRUE = visible to users of all schools
+  created_by   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_text_repository_school_id  ON text_repository(school_id);
+CREATE INDEX idx_text_repository_is_public  ON text_repository(is_public);
+CREATE INDEX idx_text_repository_created_by ON text_repository(created_by);
+CREATE INDEX idx_text_repository_updated_at ON text_repository(updated_at DESC);
+
+CREATE TRIGGER update_text_repository_updated_at
+  BEFORE UPDATE ON text_repository
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Stores the images associated with each repository text entry.
+CREATE TABLE text_repository_images (
+  id           TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  text_id      TEXT NOT NULL REFERENCES text_repository(id) ON DELETE CASCADE,
+  image_data   BYTEA NOT NULL,
+  image_order  INTEGER NOT NULL DEFAULT 0,
+  content_type TEXT DEFAULT 'image/png',
+  file_size    INTEGER,
+  created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT unique_repo_image_order UNIQUE (text_id, image_order)
+);
+
+CREATE INDEX idx_text_repository_images_text_id ON text_repository_images(text_id);
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;

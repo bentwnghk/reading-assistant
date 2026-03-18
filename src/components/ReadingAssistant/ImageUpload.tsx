@@ -4,9 +4,16 @@ import { useTranslation } from "react-i18next";
 import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
+import dynamic from "next/dynamic";
+
+const TextRepository = dynamic(
+  () => import("@/components/ReadingAssistant/TextRepository"),
+  { ssr: false }
+);
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -146,142 +153,159 @@ function ImageUpload() {
     });
   };
 
+  const hasContent = originalImages.length > 0 || !!extractedText;
+
   return (
     <section className="p-4 border rounded-md mt-4">
-        <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <Upload className="h-5 w-5 text-muted-foreground" />
-            {t("reading.imageUpload.title")}
-            <Popover>
-              <PopoverTrigger asChild>
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-              </PopoverTrigger>
-              <PopoverContent className="w-[400px]" align="start">
-                <div className="space-y-3 text-sm">
-                  <h4 className="font-semibold text-base">{t("reading.imageUpload.help.title")}</h4>
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground">{t("reading.imageUpload.help.purpose")}</p>
-                    <p className="text-muted-foreground">{t("reading.imageUpload.help.features")}</p>
-                    <p className="text-muted-foreground">{t("reading.imageUpload.help.usage")}</p>
-                  </div>
+      <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
+        <span className="flex items-center gap-2">
+          <Upload className="h-5 w-5 text-muted-foreground" />
+          {t("reading.imageUpload.title")}
+          <Popover>
+            <PopoverTrigger asChild>
+              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px]" align="start">
+              <div className="space-y-3 text-sm">
+                <h4 className="font-semibold text-base">{t("reading.imageUpload.help.title")}</h4>
+                <div className="space-y-2">
+                  <p className="text-muted-foreground">{t("reading.imageUpload.help.purpose")}</p>
+                  <p className="text-muted-foreground">{t("reading.imageUpload.help.features")}</p>
+                  <p className="text-muted-foreground">{t("reading.imageUpload.help.usage")}</p>
                 </div>
-              </PopoverContent>
-            </Popover>
-          </span>
-          {(originalImages.length > 0 || extractedText) && (
-            <Button variant="outline" size="sm" onClick={clearAllImages}>
-              <X className="h-4 w-4 mr-1" />
-              {t("reading.imageUpload.clearAll")}
-            </Button>
-          )}
-        </h3>
-
-      {originalImages.length > 0 && extractedText ? (
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {originalImages.map((image, index) => (
-              <div key={index} className="relative group">
-                <img
-                  src={image}
-                  alt={`Uploaded ${index + 1}`}
-                  className="max-h-40 rounded-lg border object-contain"
-                />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-                  onClick={() => clearImage(index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
               </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {t("reading.imageUpload.uploadNew")}
-          </p>
-          {isExtracting && (
-            <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
-              <LoaderCircle className="h-4 w-4 animate-spin text-primary" />
-              <p className="text-sm font-medium text-primary">{getExtractionMessage()}</p>
-            </div>
-          )}
-          <div
-            className={cn(
-              "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
-              "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
-              isExtracting && "pointer-events-none opacity-50"
-            )}
-            onClick={handleClick}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handleFileInput}
-            />
-            <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mt-1">
-              {t("reading.imageUpload.addMore")}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-            isDragging
-              ? "border-primary bg-primary/5"
-              : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
-            isExtracting && "pointer-events-none opacity-50"
-          )}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={handleClick}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleFileInput}
-          />
+            </PopoverContent>
+          </Popover>
+        </span>
+        {hasContent && (
+          <Button variant="outline" size="sm" onClick={clearAllImages}>
+            <X className="h-4 w-4 mr-1" />
+            {t("reading.imageUpload.clearAll")}
+          </Button>
+        )}
+      </h3>
 
-          {isExtracting ? (
-            <div className="flex flex-col items-center gap-2">
-              <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
-              <p className="text-lg font-medium">
-                {getExtractionMessage()}
+      <Tabs defaultValue="upload">
+        <TabsList className="mb-4">
+          <TabsTrigger value="upload">{t("reading.imageUpload.tabUpload")}</TabsTrigger>
+          <TabsTrigger value="repository">{t("reading.imageUpload.tabRepository")}</TabsTrigger>
+        </TabsList>
+
+        {/* ── Tab: Upload Image ── */}
+        <TabsContent value="upload">
+          {originalImages.length > 0 && extractedText ? (
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {originalImages.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={image}
+                      alt={`Uploaded ${index + 1}`}
+                      className="max-h-40 rounded-lg border object-contain"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
+                      onClick={() => clearImage(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t("reading.imageUpload.uploadNew")}
               </p>
+              {isExtracting && (
+                <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
+                  <LoaderCircle className="h-4 w-4 animate-spin text-primary" />
+                  <p className="text-sm font-medium text-primary">{getExtractionMessage()}</p>
+                </div>
+              )}
+              <div
+                className={cn(
+                  "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
+                  "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
+                  isExtracting && "pointer-events-none opacity-50"
+                )}
+                onClick={handleClick}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileInput}
+                />
+                <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t("reading.imageUpload.addMore")}
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <div className="p-4 rounded-full bg-muted">
-                {isDragging ? (
-                  <ImageIcon className="h-8 w-8 text-primary" />
-                ) : (
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                )}
-              </div>
-              <div>
-                <p className="text-lg font-medium">
-                  {t("reading.imageUpload.dropHere")}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {t("reading.imageUpload.orClick")}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t("reading.imageUpload.supportedFormats")}
-              </p>
+            <div
+              className={cn(
+                "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+                isDragging
+                  ? "border-primary bg-primary/5"
+                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
+                isExtracting && "pointer-events-none opacity-50"
+              )}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={handleClick}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileInput}
+              />
+
+              {isExtracting ? (
+                <div className="flex flex-col items-center gap-2">
+                  <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
+                  <p className="text-lg font-medium">
+                    {getExtractionMessage()}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="p-4 rounded-full bg-muted">
+                    {isDragging ? (
+                      <ImageIcon className="h-8 w-8 text-primary" />
+                    ) : (
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-lg font-medium">
+                      {t("reading.imageUpload.dropHere")}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t("reading.imageUpload.orClick")}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t("reading.imageUpload.supportedFormats")}
+                  </p>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
+        </TabsContent>
+
+        {/* ── Tab: Text Repository ── */}
+        <TabsContent value="repository">
+          <TextRepository onTextLoaded={clearAllImages} />
+        </TabsContent>
+      </Tabs>
     </section>
   );
 }
