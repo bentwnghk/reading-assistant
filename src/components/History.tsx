@@ -217,9 +217,6 @@ function History({ open, onClose }: HistoryProps) {
                       {t("history.progress")}
                     </TableHead>
                     <TableHead className="w-16 text-center whitespace-normal break-words">
-                      {t("history.testScore")}
-                    </TableHead>
-                    <TableHead className="w-16 text-center whitespace-normal break-words">
                       {t("history.glossaryWords")}
                     </TableHead>
                     <TableHead className="w-16 text-center whitespace-normal break-words">
@@ -227,6 +224,9 @@ function History({ open, onClose }: HistoryProps) {
                     </TableHead>
                     <TableHead className="w-16 text-center whitespace-normal break-words">
                       {t("history.quizScore")}
+                    </TableHead>
+                    <TableHead className="w-16 text-center whitespace-normal break-words">
+                      {t("history.testScore")}
                     </TableHead>
                     <TableHead className="text-center whitespace-normal break-words">
                       {t("history.date")}
@@ -249,22 +249,22 @@ function History({ open, onClose }: HistoryProps) {
                          </p>
                        </TableCell>
                        <TableCell className="text-center whitespace-nowrap">
-                         <span className={calculateProgress(item) === 100 ? "text-green-600 dark:text-green-400" : ""}>
-                           {calculateProgress(item)}%
-                         </span>
-                       </TableCell>
-                       <TableCell className="text-center whitespace-nowrap">
-                         {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
-                       </TableCell>
-                       <TableCell className="text-center whitespace-nowrap">
-                         {item.glossary?.length || 0}
-                       </TableCell>
-                       <TableCell className="text-center whitespace-nowrap">
-                         {item.spellingGameBestScore || 0}
-                       </TableCell>
-                       <TableCell className="text-center whitespace-nowrap">
-                         {item.vocabularyQuizScore || 0}
-                       </TableCell>
+                          <span className={calculateProgress(item) === 100 ? "text-green-600 dark:text-green-400" : ""}>
+                            {calculateProgress(item)}%
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center whitespace-nowrap">
+                          {item.glossary?.length || 0}
+                        </TableCell>
+                        <TableCell className="text-center whitespace-nowrap">
+                          {item.spellingGameBestScore || 0}
+                        </TableCell>
+                        <TableCell className="text-center whitespace-nowrap">
+                          {item.vocabularyQuizScore || 0}
+                        </TableCell>
+                        <TableCell className="text-center whitespace-nowrap">
+                          {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
+                        </TableCell>
                        <TableCell className="text-center whitespace-nowrap">
                          {formatDate(item.updatedAt || item.createdAt)}
                        </TableCell>
