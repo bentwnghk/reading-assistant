@@ -303,7 +303,7 @@ function ImageUpload() {
 
         {/* ── Tab: Text Repository ── */}
         <TabsContent value="repository">
-          <TextRepository onTextLoaded={clearAllImages} />
+          <TextRepository />
         </TabsContent>
       </Tabs>
     </section>
