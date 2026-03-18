@@ -243,18 +243,12 @@ export async function checkAndUnlockAchievements(
   userId: string,
   activityType: string
 ): Promise<NewlyUnlockedAchievement[]> {
-  console.log("[achievements] checkAndUnlockAchievements called for userId:", userId, "activityType:", activityType);
-  
   const config = Object.entries(ACHIEVEMENT_CONFIG).find(([, cfg]) =>
     cfg.activityTypes.includes(activityType)
   )
 
-  
-  if (!config) {
-    console.log("[achievements] No config found for activityType:", activityType);
-    return []
-  }
-
+  // No achievement tracks this activity type — skip entirely, no DB call needed
+  if (!config) return []
 
   const client = await getClient()
 
@@ -263,8 +257,8 @@ export async function checkAndUnlockAchievements(
 
     let currentProgress: number
     if (achievementConfig.countField) {
+      // Use a quoted identifier-safe approach — countField is internal/trusted
       const fieldName = achievementConfig.countField
-      console.log("[achievements] Querying progress with countField:", fieldName);
       const progressResult = await client.query(
         `SELECT COALESCE(SUM((details->>$3)::int), 0) as total
          FROM activity_logs
@@ -272,9 +266,7 @@ export async function checkAndUnlockAchievements(
         [userId, achievementConfig.activityTypes, fieldName]
       )
       currentProgress = parseInt(progressResult.rows[0]?.total) || 0
-      console.log("[achievements] Progress result:", { total: currentProgress, row: progressResult.rows[0] });
     } else {
-      console.log("[achievements] Counting activities for activityTypes:", achievementConfig.activityTypes);
       const progressResult = await client.query(
         `SELECT COUNT(*) as count
          FROM activity_logs
@@ -282,7 +274,6 @@ export async function checkAndUnlockAchievements(
         [userId, achievementConfig.activityTypes]
       )
       currentProgress = parseInt(progressResult.rows[0]?.count) || 0
-      console.log("[achievements] Count result:", { count: currentProgress });
     }
 
     const unlockedResult = await client.query(
@@ -292,14 +283,11 @@ export async function checkAndUnlockAchievements(
     )
 
     const unlockedMilestones = unlockedResult.rows.map((r: { milestone: number }) => r.milestone)
-    console.log("[achievements] Already unlocked milestones:", unlockedMilestones);
     const newlyUnlocked: NewlyUnlockedAchievement[] = []
 
     let target = achievementConfig.initialMilestone
-    console.log("[achievements] Checking target:", target, "currentProgress:", currentProgress);
     while (target <= currentProgress) {
       if (!unlockedMilestones.includes(target)) {
-        console.log("[achievements] Unlocking milestone:", target, "for achievementType:", achievementType);
         await client.query(
           `INSERT INTO user_achievements (user_id, achievement_type, milestone, unlocked_at)
            VALUES ($1, $2, $3, NOW())
@@ -317,7 +305,6 @@ export async function checkAndUnlockAchievements(
       target *= 2
     }
 
-    console.log("[achievements] Newly unlocked achievements:", newlyUnlocked);
     return newlyUnlocked
   } catch (error: unknown) {
     // Gracefully handle the case where the migration hasn't been applied yet
