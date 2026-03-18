@@ -48,12 +48,13 @@ export async function PUT(request: Request, { params }: Params) {
 
     const { id } = await params
     const body = await request.json()
-    const { name, isPublic, title } = body
+    const { name, isPublic, title, extractedText } = body
 
     const updated = await updateRepositoryText(id, session.user.id, session.user.role, {
       ...(name !== undefined && { name: String(name).trim() }),
       ...(isPublic !== undefined && { isPublic: Boolean(isPublic) }),
       ...(title !== undefined && { title: String(title) }),
+      ...(extractedText !== undefined && { extractedText: String(extractedText) }),
     })
 
     if (!updated) {

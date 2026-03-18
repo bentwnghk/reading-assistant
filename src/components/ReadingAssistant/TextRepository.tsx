@@ -15,10 +15,13 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -93,16 +96,149 @@ function SortButton({
   );
 }
 
-// ─── Row-level action dialogs ─────────────────────────────────────────────────
+// ─── Edit-text dialog ─────────────────────────────────────────────────────────
+
+interface EditTextDialogProps {
+  item: RepositoryTextListItem;
+  onUpdated: (id: string, patch: Partial<Pick<RepositoryTextListItem, "isPublic">>) => void;
+}
+
+function EditTextDialog({ item, onUpdated }: EditTextDialogProps) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  // Dialog-local state
+  const [extractedText, setExtractedText] = useState("");
+  const [isPublic, setIsPublic] = useState(item.isPublic);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Fetch full text when dialog opens
+  useEffect(() => {
+    if (!open) return;
+    setIsFetching(true);
+    fetch(`/api/repository/${item.id}`)
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json() as Promise<RepositoryText>;
+      })
+      .then((data) => {
+        setExtractedText(data.extractedText);
+        setIsPublic(data.isPublic);
+      })
+      .catch(() => toast.error(t("reading.repository.loadError")))
+      .finally(() => setIsFetching(false));
+  }, [open, item.id, t]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/repository/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ extractedText, isPublic }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(t("reading.repository.editSuccess"));
+      onUpdated(item.id, { isPublic });
+      setOpen(false);
+    } catch {
+      toast.error(t("reading.repository.editError"));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          title={t("reading.repository.editTitle")}
+        >
+          <FileText className="h-3.5 w-3.5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>{t("reading.repository.editTitle")}</DialogTitle>
+          <DialogDescription>
+            {item.name}
+            {item.title && item.title !== item.name && (
+              <span className="text-muted-foreground"> — {item.title}</span>
+            )}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto space-y-4 py-2 min-h-0">
+          {/* Extracted text */}
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-extracted-text">
+              {t("reading.repository.editExtractedText")}
+            </Label>
+            {isFetching ? (
+              <div className="flex items-center gap-2 py-6 justify-center text-muted-foreground">
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+                <span className="text-sm">{t("reading.repository.loading")}</span>
+              </div>
+            ) : (
+              <Textarea
+                id="edit-extracted-text"
+                value={extractedText}
+                onChange={(e) => setExtractedText(e.target.value)}
+                disabled={isSaving}
+                className="min-h-[280px] resize-y text-sm leading-relaxed"
+              />
+            )}
+          </div>
+
+          {/* Public toggle */}
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div className="flex items-center gap-1.5 text-sm font-medium">
+              {isPublic ? (
+                <Globe className="h-4 w-4 text-blue-500" />
+              ) : (
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+              )}
+              {t("reading.repository.isPublic")}
+            </div>
+            <Switch
+              checked={isPublic}
+              onCheckedChange={setIsPublic}
+              disabled={isFetching || isSaving}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={isSaving}>
+            {t("reading.repository.cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={isFetching || isSaving || !extractedText.trim()}>
+            {isSaving && <LoaderCircle className="h-4 w-4 animate-spin mr-1.5" />}
+            {isSaving
+              ? t("reading.repository.editSaving")
+              : t("reading.repository.editSave")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Row-level action buttons ─────────────────────────────────────────────────
 
 interface RowActionsProps {
   item: RepositoryTextListItem;
   isAdmin: boolean;
   onDeleted: (id: string) => void;
   onRenamed: (id: string, newName: string) => void;
+  onUpdated: (id: string, patch: Partial<Pick<RepositoryTextListItem, "isPublic">>) => void;
 }
 
-function RowActions({ item, isAdmin, onDeleted, onRenamed }: RowActionsProps) {
+function RowActions({ item, isAdmin, onDeleted, onRenamed, onUpdated }: RowActionsProps) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -162,6 +298,9 @@ function RowActions({ item, isAdmin, onDeleted, onRenamed }: RowActionsProps) {
     <div className="flex items-center gap-1 justify-end">
       {isAdmin && (
         <>
+          {/* Edit extracted text + visibility */}
+          <EditTextDialog item={item} onUpdated={onUpdated} />
+
           {/* Rename */}
           <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
             <DialogTrigger asChild>
@@ -305,6 +444,15 @@ function TextRepository() {
     );
   };
 
+  const handleUpdated = (
+    id: string,
+    patch: Partial<Pick<RepositoryTextListItem, "isPublic">>
+  ) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, ...patch } : item))
+    );
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -345,7 +493,6 @@ function TextRepository() {
       } else if (sortField === "createdAt") {
         cmp = a.createdAt - b.createdAt;
       } else if (sortField === "isPublic") {
-        // public (true=1) before school-only (false=0) when asc
         cmp = (a.isPublic ? 1 : 0) - (b.isPublic ? 1 : 0);
       }
       return sortDir === "asc" ? cmp : -cmp;
@@ -411,109 +558,110 @@ function TextRepository() {
         </div>
       ) : (
         <div className="rounded-md border max-h-[480px] overflow-y-auto">
-        <Table>
-          <TableHeader className="sticky top-0 z-10 bg-background">
-            <TableRow>
-              <TableHead className="min-w-[160px]">
-                <SortButton
-                  field="name"
-                  current={sortField}
-                  dir={sortDir}
-                  label={t("reading.repository.colName")}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead className="w-[130px]">
-                <SortButton
-                  field="createdByName"
-                  current={sortField}
-                  dir={sortDir}
-                  label={t("reading.repository.colCreator")}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead className="w-[110px]">
-                <SortButton
-                  field="createdAt"
-                  current={sortField}
-                  dir={sortDir}
-                  label={t("reading.repository.colDate")}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead className="w-[110px]">
-                <SortButton
-                  field="isPublic"
-                  current={sortField}
-                  dir={sortDir}
-                  label={t("reading.repository.colVisibility")}
-                  onSort={handleSort}
-                />
-              </TableHead>
-              <TableHead className="w-[1%] text-right">
-                {t("reading.repository.colActions")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {processedItems.map((item) => (
-              <TableRow key={item.id}>
-                {/* Name + AI title */}
-                <TableCell>
-                  <p className="font-medium text-sm leading-snug">{item.name}</p>
-                  {item.title && item.title !== item.name && (
-                    <p
-                      className="text-xs text-muted-foreground truncate max-w-[240px]"
-                      title={item.title}
-                    >
-                      {item.title}
-                    </p>
-                  )}
-                </TableCell>
-
-                {/* Creator */}
-                <TableCell className="text-sm text-muted-foreground">
-                  {item.createdByName ?? "—"}
-                </TableCell>
-
-                {/* Created date */}
-                <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </TableCell>
-
-                {/* Visibility */}
-                <TableCell>
-                  {item.isPublic ? (
-                    <Badge variant="secondary" className="gap-1 text-xs">
-                      <Globe className="h-3 w-3" />
-                      {t("reading.repository.public")}
-                    </Badge>
-                  ) : item.schoolName ? (
-                    <Badge variant="outline" className="gap-1 text-xs">
-                      <Building2 className="h-3 w-3" />
-                      {item.schoolName}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="gap-1 text-xs">
-                      <Building2 className="h-3 w-3" />
-                      {t("reading.repository.school")}
-                    </Badge>
-                  )}
-                </TableCell>
-
-                {/* Actions */}
-                <TableCell className="text-right">
-                  <RowActions
-                    item={item}
-                    isAdmin={isAdmin}
-                    onDeleted={handleDeleted}
-                    onRenamed={handleRenamed}
+          <Table>
+            <TableHeader className="sticky top-0 z-10 bg-background">
+              <TableRow>
+                <TableHead className="min-w-[160px]">
+                  <SortButton
+                    field="name"
+                    current={sortField}
+                    dir={sortDir}
+                    label={t("reading.repository.colName")}
+                    onSort={handleSort}
                   />
-                </TableCell>
+                </TableHead>
+                <TableHead className="w-[130px]">
+                  <SortButton
+                    field="createdByName"
+                    current={sortField}
+                    dir={sortDir}
+                    label={t("reading.repository.colCreator")}
+                    onSort={handleSort}
+                  />
+                </TableHead>
+                <TableHead className="w-[110px]">
+                  <SortButton
+                    field="createdAt"
+                    current={sortField}
+                    dir={sortDir}
+                    label={t("reading.repository.colDate")}
+                    onSort={handleSort}
+                  />
+                </TableHead>
+                <TableHead className="w-[110px]">
+                  <SortButton
+                    field="isPublic"
+                    current={sortField}
+                    dir={sortDir}
+                    label={t("reading.repository.colVisibility")}
+                    onSort={handleSort}
+                  />
+                </TableHead>
+                <TableHead className="w-[1%] text-right">
+                  {t("reading.repository.colActions")}
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {processedItems.map((item) => (
+                <TableRow key={item.id}>
+                  {/* Name + AI title */}
+                  <TableCell>
+                    <p className="font-medium text-sm leading-snug">{item.name}</p>
+                    {item.title && item.title !== item.name && (
+                      <p
+                        className="text-xs text-muted-foreground truncate max-w-[240px]"
+                        title={item.title}
+                      >
+                        {item.title}
+                      </p>
+                    )}
+                  </TableCell>
+
+                  {/* Creator */}
+                  <TableCell className="text-sm text-muted-foreground">
+                    {item.createdByName ?? "—"}
+                  </TableCell>
+
+                  {/* Created date */}
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                    {new Date(item.createdAt).toLocaleDateString()}
+                  </TableCell>
+
+                  {/* Visibility */}
+                  <TableCell>
+                    {item.isPublic ? (
+                      <Badge variant="secondary" className="gap-1 text-xs">
+                        <Globe className="h-3 w-3" />
+                        {t("reading.repository.public")}
+                      </Badge>
+                    ) : item.schoolName ? (
+                      <Badge variant="outline" className="gap-1 text-xs">
+                        <Building2 className="h-3 w-3" />
+                        {item.schoolName}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="gap-1 text-xs">
+                        <Building2 className="h-3 w-3" />
+                        {t("reading.repository.school")}
+                      </Badge>
+                    )}
+                  </TableCell>
+
+                  {/* Actions */}
+                  <TableCell className="text-right">
+                    <RowActions
+                      item={item}
+                      isAdmin={isAdmin}
+                      onDeleted={handleDeleted}
+                      onRenamed={handleRenamed}
+                      onUpdated={handleUpdated}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
 

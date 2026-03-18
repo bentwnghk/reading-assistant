@@ -274,7 +274,14 @@
       "colActions": "Actions",
       "filterAll": "All",
       "filterPublic": "Public only",
-      "filterSchool": "School only"
+      "filterSchool": "School only",
+      "editTitle": "Edit Text",
+      "editDesc": "Edit the extracted text and visibility for this entry.",
+      "editExtractedText": "Extracted Text",
+      "editSave": "Save Changes",
+      "editSaving": "Saving...",
+      "editSuccess": "Text updated successfully",
+      "editError": "Failed to update text"
     },
     "extractedText": {
       "title": "Extracted Text",

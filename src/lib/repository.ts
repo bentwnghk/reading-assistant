@@ -196,6 +196,7 @@ export async function updateRepositoryText(
     name?: string
     isPublic?: boolean
     title?: string
+    extractedText?: string
   }
 ): Promise<boolean> {
   const client = await getClient()
@@ -215,6 +216,10 @@ export async function updateRepositoryText(
     if (data.title !== undefined) {
       fields.push(`title = $${p++}`)
       values.push(data.title)
+    }
+    if (data.extractedText !== undefined) {
+      fields.push(`extracted_text = $${p++}`)
+      values.push(data.extractedText)
     }
 
     if (fields.length === 0) return true

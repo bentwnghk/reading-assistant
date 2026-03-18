@@ -274,7 +274,14 @@
       "colActions": "操作",
       "filterAll": "全部",
       "filterPublic": "僅公開",
-      "filterSchool": "僅本校"
+      "filterSchool": "僅本校",
+      "editTitle": "編輯文本",
+      "editDesc": "編輯此條目的提取文字及可見範圍。",
+      "editExtractedText": "提取文字",
+      "editSave": "儲存更改",
+      "editSaving": "儲存中...",
+      "editSuccess": "文本已成功更新",
+      "editError": "更新文本失敗"
     },
     "extractedText": {
       "title": "提取的文字",
