@@ -67,7 +67,7 @@ export function LeaderboardPage() {
   const [scope, setScope]     = useState<LeaderboardScope>("class");
   const [sortBy, setSortBy]   = useState<SortColumn>("weekly_score");
   const [weekOffset, setWeekOffset] = useState(0);
-  const [tab, setTab]         = useState<"board" | "me" | "achievements">("board");
+  const [tab, setTab]         = useState<"achievements" | "board" | "me">("achievements");
 
   const [boardData,   setBoardData]   = useState<LeaderboardResponse | null>(null);
   const [personalData, setPersonalData] = useState<PersonalStats | null>(null);
@@ -77,7 +77,7 @@ export function LeaderboardPage() {
   const [personalError, setPersonalError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [helpTab, setHelpTab] = useState<"leaderboard" | "achievements">("leaderboard");
+  const [helpTab, setHelpTab] = useState<"achievements" | "leaderboard">("achievements");
 
   const weekStart = getWeekStart(weekOffset);
 
@@ -203,8 +203,20 @@ export function LeaderboardPage() {
         </div>
       )}
 
-      {/* ── Tabs: Board / My Stats / Achievements ── */}
+      {/* ── Tabs: Achievements / Leaderboard / My Stats ── */}
       <div className="flex gap-1 p-1 bg-muted rounded-lg">
+        <button
+          onClick={() => setTab("achievements")}
+          className={cn(
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
+            tab === "achievements"
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Medal className="h-3.5 w-3.5" />
+          {t("achievements.tabLabel")}
+        </button>
         <button
           onClick={() => setTab("board")}
           className={cn(
@@ -227,19 +239,12 @@ export function LeaderboardPage() {
         >
           {t("leaderboard.myStats")}
         </button>
-        <button
-          onClick={() => setTab("achievements")}
-          className={cn(
-            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
-            tab === "achievements"
-              ? "bg-background shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Medal className="h-3.5 w-3.5" />
-          {t("achievements.tabLabel")}
-        </button>
       </div>
+
+      {/* ── Achievements tab ── */}
+      {tab === "achievements" && (
+        <AchievementsTab />
+      )}
 
       {/* ── Board tab ── */}
       {tab === "board" && (
@@ -345,17 +350,6 @@ export function LeaderboardPage() {
           {/* Tab buttons */}
           <div className="flex gap-1 p-1 bg-muted rounded-lg">
             <button
-              onClick={() => setHelpTab("leaderboard")}
-              className={cn(
-                "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
-                helpTab === "leaderboard"
-                  ? "bg-background shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {t("leaderboard.help.tabs.leaderboard")}
-            </button>
-            <button
               onClick={() => setHelpTab("achievements")}
               className={cn(
                 "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
@@ -366,103 +360,18 @@ export function LeaderboardPage() {
             >
               {t("leaderboard.help.tabs.achievements")}
             </button>
+            <button
+              onClick={() => setHelpTab("leaderboard")}
+              className={cn(
+                "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
+                helpTab === "leaderboard"
+                  ? "bg-background shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {t("leaderboard.help.tabs.leaderboard")}
+            </button>
           </div>
-
-          {/* Leaderboard Tab Content */}
-          {helpTab === "leaderboard" && (
-            <div className="space-y-4 pt-2">
-              <p className="text-sm text-muted-foreground">
-                {t("leaderboard.help.leaderboard.intro")}
-              </p>
-              
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.weeklyScore.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.weeklyScore.desc")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-                  <Flame className="h-5 w-5 text-orange-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.streak.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.streak.desc")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-blue-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.testScore.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.testScore.desc")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                  <Brain className="h-5 w-5 text-purple-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.quizScore.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.quizScore.desc")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center">
-                  <PenTool className="h-5 w-5 text-pink-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.spelling.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.spelling.desc")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                  <BookText className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.vocabulary.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.vocabulary.desc")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                  <Layers className="h-5 w-5 text-indigo-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.flashcards.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.flashcards.desc")}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-cyan-500" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.improvement.title")}</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.improvement.desc")}</p>
-                </div>
-              </div>
-
-              <div className="mt-4 p-3 rounded-lg border border-primary/20 bg-primary/5">
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">{t("leaderboard.help.leaderboard.tip.title")}</span>{" "}
-                  {t("leaderboard.help.leaderboard.tip.content")}
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Achievements Tab Content */}
           {helpTab === "achievements" && (
@@ -595,6 +504,102 @@ export function LeaderboardPage() {
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">{t("leaderboard.help.achievements.tip.title")}</span>{" "}
                   {t("leaderboard.help.achievements.tip.content")}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Leaderboard Tab Content */}
+          {helpTab === "leaderboard" && (
+            <div className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">
+                {t("leaderboard.help.leaderboard.intro")}
+              </p>
+              
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.weeklyScore.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.weeklyScore.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <Flame className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.streak.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.streak.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.testScore.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.testScore.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-purple-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.quizScore.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.quizScore.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center">
+                  <PenTool className="h-5 w-5 text-pink-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.spelling.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.spelling.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <BookText className="h-5 w-5 text-green-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.vocabulary.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.vocabulary.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
+                  <Layers className="h-5 w-5 text-indigo-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.flashcards.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.flashcards.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-cyan-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.improvement.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.improvement.desc")}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 rounded-lg border border-primary/20 bg-primary/5">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{t("leaderboard.help.leaderboard.tip.title")}</span>{" "}
+                  {t("leaderboard.help.leaderboard.tip.content")}
                 </p>
               </div>
             </div>

@@ -895,9 +895,9 @@
     "save": "保存"
   },
   "leaderboard": {
-    "title": "排行榜與成就",
+    "title": "成就與排行榜",
     "tabLabel": "排行榜",
-    "subtitle": "爭奪排名，解鎖學習里程碑",
+    "subtitle": "解鎖學習里程碑，爭奪排名",
     "myStats": "我的統計",
     "thisWeek": "本週",
     "lastWeek": "上週",

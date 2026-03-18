@@ -895,9 +895,9 @@
     "save": "Save"
   },
   "leaderboard": {
-    "title": "Leaderboard & Achievements",
+    "title": "Achievements & Leaderboard",
     "tabLabel": "Leaderboard",
-    "subtitle": "Compete for top ranks and unlock learning milestones",
+    "subtitle": "Unlock learning milestones and compete for top ranks",
     "myStats": "My Stats",
     "thisWeek": "This Week",
     "lastWeek": "Last Week",
