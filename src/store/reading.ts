@@ -704,6 +704,10 @@ export const useReadingStore = create(
           status: "idle",
         };
         set(() => newState as ReadingStore);
+        // Sync to the in-memory history store immediately so that useAutoSave
+        // sees the session as already existing and does not issue a duplicate
+        // POST /api/sessions alongside the one fired below.
+        syncToHistoryIfNeeded(newState as ReadingStore);
         if (currentUserId) {
           createSessionInAPI({ ...newState } as ReadingStore);
         }
