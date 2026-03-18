@@ -344,15 +344,15 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
  const statsData: [string, string | number][] = [
     ["Total Reading Sessions", stats.totalSessions],
     ["Average Learning Progress", `${stats.avgProgress}%`],
-    ["Reading Tests Completed", stats.testCompletedCount],
-    ["Average Reading Test Score (Completed)", `${stats.avgTestScore}%`],
-    ["Reading Test Pass Rate (≥70%)", `${stats.passRate}%`],
     ["Sessions with Vocabulary", stats.vocabularyCompletedCount],
     ["Average Vocabulary Collected", stats.avgVocabulary],
     ["Spelling Challenges Completed", stats.spellingCompletedCount],
     ["Average Spelling Challenge Score (Completed)", stats.avgSpellingScore],
     ["Vocabulary Quizzes Completed", stats.quizCompletedCount],
     ["Average Vocabulary Quiz Score (Completed)", `${stats.avgQuizScore}%`],
+    ["Reading Tests Completed", stats.testCompletedCount],
+    ["Average Reading Test Score (Completed)", `${stats.avgTestScore}%`],
+    ["Reading Test Pass Rate (≥70%)", `${stats.passRate}%`],
   ]
 
   statsData.forEach(([label, value]) => {
