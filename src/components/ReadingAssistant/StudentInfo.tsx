@@ -1,8 +1,10 @@
 "use client";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { User, HelpCircle } from "lucide-react";
+import { User, HelpCircle, Trophy } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -46,28 +48,36 @@ function StudentInfo() {
 
   return (
     <section className="p-4 border rounded-md">
-      <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center gap-2">
-        <User className="h-5 w-5 text-muted-foreground" />
-        {t("reading.studentInfo.title")}
-        {status === "authenticated" && session?.user?.name && (
-          <span className="text-muted-foreground font-normal">({formatName(session.user.name)})</span>
-        )}
-        <Popover>
-          <PopoverTrigger asChild>
-            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-          </PopoverTrigger>
-          <PopoverContent className="w-[400px]" align="start">
-            <div className="space-y-3 text-sm">
-              <h4 className="font-semibold text-base">{t("reading.studentInfo.help.title")}</h4>
-              <div className="space-y-2">
-                <p className="text-muted-foreground">{t("reading.studentInfo.help.ageSlider")}</p>
-                <p className="text-muted-foreground">{t("reading.studentInfo.help.estimatedLevel")}</p>
-                <p className="text-muted-foreground">{t("reading.studentInfo.help.usage")}</p>
+      <div className="flex items-center justify-between border-b pb-4 mb-4">
+        <h3 className="font-semibold text-lg flex items-center gap-2">
+          <User className="h-5 w-5 text-muted-foreground" />
+          {t("reading.studentInfo.title")}
+          {status === "authenticated" && session?.user?.name && (
+            <span className="text-muted-foreground font-normal">({formatName(session.user.name)})</span>
+          )}
+          <Popover>
+            <PopoverTrigger asChild>
+              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px]" align="start">
+              <div className="space-y-3 text-sm">
+                <h4 className="font-semibold text-base">{t("reading.studentInfo.help.title")}</h4>
+                <div className="space-y-2">
+                  <p className="text-muted-foreground">{t("reading.studentInfo.help.ageSlider")}</p>
+                  <p className="text-muted-foreground">{t("reading.studentInfo.help.estimatedLevel")}</p>
+                  <p className="text-muted-foreground">{t("reading.studentInfo.help.usage")}</p>
+                </div>
               </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </h3>
+            </PopoverContent>
+          </Popover>
+        </h3>
+        <Button asChild size="sm" variant="secondary">
+          <Link href="/leaderboard">
+            <Trophy className="h-4 w-4" />
+            <span className="hidden sm:inline">{t("leaderboard.title")}</span>
+          </Link>
+        </Button>
+      </div>
       <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex justify-between items-center">
