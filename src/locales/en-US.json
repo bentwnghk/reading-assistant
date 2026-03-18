@@ -8,7 +8,7 @@
     "title": "Navigation",
     "description": "Jump to any section",
     "studentInfo": "Student Info",
-    "upload": "Upload Image",
+    "upload": "Select Text",
     "summary": "Summary",
     "mindmap": "Mind Map",
     "adapted": "Text Analysis & Adaptation",
@@ -204,7 +204,7 @@
       }
     },
     "imageUpload": {
-      "title": "Upload Image",
+      "title": "Select Text",
       "tabUpload": "Upload Image",
       "tabRepository": "Text Repository",
       "dropHere": "Drop image here",
@@ -597,7 +597,7 @@
     "workflow": {
       "title": "Learning Progress",
       "progress": "{{percent}}% complete",
-      "upload": "Upload",
+      "upload": "Select Text",
       "summary": "Summary",
       "adapt": "Adapt Text",
       "mindmap": "Mind Map",

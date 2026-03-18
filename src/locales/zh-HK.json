@@ -8,7 +8,7 @@
     "title": "導航",
     "description": "跳轉到任何區域",
     "studentInfo": "學生資料",
-    "upload": "上傳圖片",
+    "upload": "選擇文本",
     "summary": "摘要",
     "mindmap": "思維導圖",
     "adapted": "文本分析和改寫",
@@ -204,7 +204,7 @@
       }
     },
     "imageUpload": {
-      "title": "上傳圖片",
+      "title": "選擇文本",
       "tabUpload": "上傳圖片",
       "tabRepository": "文本庫",
       "dropHere": "拖放圖片到這裡",
@@ -597,7 +597,7 @@
     "workflow": {
       "title": "學習進度",
       "progress": "已完成 {{percent}}%",
-      "upload": "上傳",
+      "upload": "選擇文本",
       "summary": "摘要",
       "adapt": "文本改寫",
       "mindmap": "思維導圖",
