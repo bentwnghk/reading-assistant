@@ -45,6 +45,7 @@ export function logActivity(
   activityType: ActivityType,
   options: LogActivityOptions = {}
 ): void {
+  console.log("[activityLogger] logActivity called with:", { activityType, options });
   fetch("/api/activity", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -52,11 +53,13 @@ export function logActivity(
   })
     .then(res => res.json())
     .then(data => {
+      console.log("[activityLogger] Response from API:", { newlyUnlocked: data.newlyUnlocked, callbackExists: !!achievementCallback });
       if (data.newlyUnlocked && data.newlyUnlocked.length > 0 && achievementCallback) {
+        console.log("[activityLogger] Calling achievementCallback with:", data.newlyUnlocked);
         achievementCallback(data.newlyUnlocked as NewlyUnlockedAchievement[])
       }
     })
-    .catch(() => {
-      // Intentionally silent – leaderboard tracking must never break core UX
+    .catch((err) => {
+      console.error("[activityLogger] Error:", err);
     })
 }

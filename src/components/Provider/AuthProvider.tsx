@@ -15,11 +15,16 @@ import {
 } from "@/store/setting"
 
 import { useHistoryStore } from "@/store/history"
+import { initAchievementCallbacks } from "@/store/achievements"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
   const { t } = useTranslation()
   const syncedUserIdRef = useRef<string | null>(null)
+  
+  useEffect(() => {
+    initAchievementCallbacks()
+  }, [])
   
   useEffect(() => {
     const isAuthenticated = status === "authenticated"

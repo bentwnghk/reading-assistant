@@ -82,10 +82,16 @@ export const useAchievementsStore = create<AchievementsStoreState>((set, get) =>
 // Wire up the activity logger callback so unlock dialogs fire automatically
 // when any logActivity() call returns newly-unlocked achievements from the API.
 export function initAchievementCallbacks() {
+  console.log("[achievements store] initAchievementCallbacks called, setting up callback");
   setAchievementUnlockCallback((unlocked: NewlyUnlockedAchievement[]) => {
+    console.log("[achievements store] Achievement unlock callback triggered with:", unlocked);
     if (!unlocked || unlocked.length === 0) return;
 
     const store = useAchievementsStore.getState();
+    console.log("[achievements store] Current store state:", { 
+      showUnlockDialog: store.showUnlockDialog, 
+      pendingUnlocksCount: store.pendingUnlocks.length 
+    });
     const allPending = [...store.pendingUnlocks, ...unlocked];
 
     if (!store.showUnlockDialog) {

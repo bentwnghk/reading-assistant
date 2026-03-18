@@ -3,6 +3,7 @@ import Script from "next/script";
 import ThemeProvider from "@/components/Provider/Theme";
 import I18Provider from "@/components/Provider/I18n";
 import { AuthProvider } from "@/components/Provider/AuthProvider";
+import { AchievementUnlockedDialog } from "@/components/Leaderboard/AchievementUnlockedDialog";
 import Debugger from "@/components/Internal/Debugger";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -85,7 +86,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <I18Provider>{children}</I18Provider>
+            <I18Provider>
+              {children}
+              <AchievementUnlockedDialog />
+            </I18Provider>
           </AuthProvider>
         </ThemeProvider>
         <Toaster richColors toastOptions={{ duration: 3000 }} />

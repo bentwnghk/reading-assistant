@@ -32,8 +32,6 @@ import { LeaderboardTable } from "./LeaderboardTable";
 import { PersonalStatsCard } from "./PersonalStatsCard";
 import { LeaderboardSkeleton, PersonalStatsSkeleton } from "./LeaderboardSkeleton";
 import { AchievementsTab } from "./AchievementsTab";
-import { AchievementUnlockedDialog } from "./AchievementUnlockedDialog";
-import { initAchievementCallbacks } from "@/store/achievements";
 import type { LeaderboardResponse, PersonalStats, LeaderboardScope, SortColumn } from "./types";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -76,11 +74,6 @@ export function LeaderboardPage() {
   const [showHelp, setShowHelp] = useState(false);
 
   const weekStart = getWeekStart(weekOffset);
-
-  // Wire up achievement unlock callback once on mount
-  useEffect(() => {
-    initAchievementCallbacks();
-  }, []);
 
   // ── Fetch leaderboard ──
   const fetchBoard = useCallback(async () => {
@@ -133,9 +126,6 @@ export function LeaderboardPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-
-      {/* ── Achievement unlock celebration dialog ── */}
-      <AchievementUnlockedDialog />
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
