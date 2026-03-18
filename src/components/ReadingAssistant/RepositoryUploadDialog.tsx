@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/utils/style";
 import { useSettingStore } from "@/store/setting";
 import { extractTextFromImagePrompt, getSystemPrompt } from "@/constants/readingPrompts";
@@ -341,15 +342,22 @@ function RepositoryUploadDialog({
             )}
           </div>
 
-          {/* Extracted text preview */}
+          {/* Extracted text — editable */}
           {hasContent && (
             <div className="space-y-1.5">
-              <Label>{t("reading.extractedText.title")}</Label>
-              <div className="border rounded-md p-3 max-h-40 overflow-y-auto bg-muted/30">
-                <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                  {extractedText}
-                </p>
-              </div>
+              <Label htmlFor="repo-extracted-text">
+                {t("reading.extractedText.title")}
+              </Label>
+              <Textarea
+                id="repo-extracted-text"
+                value={extractedText}
+                onChange={(e) => {
+                  setExtractedText(e.target.value);
+                  extractedTextRef.current = e.target.value;
+                }}
+                disabled={isProcessing}
+                className="min-h-[120px] max-h-60 resize-y text-xs leading-relaxed"
+              />
               {generatedTitle && (
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium">
