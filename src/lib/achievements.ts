@@ -131,14 +131,9 @@ function generateMilestones(
 ): AchievementMilestone[] {
   const milestones: AchievementMilestone[] = []
   let target = initialMilestone
-  const bufferMilestones = 3
+  const maxMilestones = 7
 
-  const highestUnlocked = unlockedMilestones.length > 0
-    ? Math.max(...unlockedMilestones)
-    : 0
-
-  let count = 0
-  while (count < bufferMilestones) {
+  for (let i = 0; i < maxMilestones; i++) {
     const isUnlocked = currentProgress >= target || unlockedMilestones.includes(target)
     const unlockedAt = isUnlocked ? Date.now() : undefined
 
@@ -147,10 +142,6 @@ function generateMilestones(
       unlocked: isUnlocked,
       unlockedAt,
     })
-
-    if (target > Math.max(currentProgress, highestUnlocked)) {
-      count++
-    }
 
     target *= 2
   }

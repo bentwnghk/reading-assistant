@@ -114,7 +114,32 @@ function ProgressRing({
   );
 }
 
-
+// ─── Milestone dots ───────────────────────────────────────────────────────────
+function MilestoneDots({
+  milestones,
+  color,
+}: {
+  milestones: AchievementState["milestones"];
+  color: string;
+}) {
+  // Show only up to 7 dots
+  const visible = milestones.slice(0, 7);
+  return (
+    <div className="flex gap-1 justify-center mt-2">
+      {visible.map((m) => (
+        <div
+          key={m.target}
+          className={cn(
+            "w-1.5 h-1.5 rounded-full transition-all",
+            m.unlocked
+              ? (COLOR_BG[color] ?? "bg-primary")
+              : "bg-muted-foreground/30"
+          )}
+        />
+      ))}
+    </div>
+  );
+}
 
 // ─── Main component ───────────────────────────────────────────────────────────
 interface AchievementMedalProps {
@@ -263,6 +288,9 @@ export function AchievementMedal({ achievement }: AchievementMedalProps) {
           {t("achievements.unlockedCount", { count: milestones.filter((m) => m.unlocked).length })}
         </p>
       )}
+
+      {/* Milestone dots */}
+      <MilestoneDots milestones={milestones} color={color} />
 
       {/* Hint tooltip on hover */}
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-popover border rounded-lg text-xs text-muted-foreground max-w-[180px] text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-md">
