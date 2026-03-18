@@ -266,7 +266,15 @@
       "renameSuccess": "文本已成功重新命名",
       "renameError": "重新命名文本失敗",
       "loadError": "載入文本失敗",
-      "fetchError": "載入文本庫失敗"
+      "fetchError": "載入文本庫失敗",
+      "colName": "名稱",
+      "colCreator": "建立者",
+      "colDate": "建立日期",
+      "colVisibility": "可見範圍",
+      "colActions": "操作",
+      "filterAll": "全部",
+      "filterPublic": "僅公開",
+      "filterSchool": "僅本校"
     },
     "extractedText": {
       "title": "提取的文字",

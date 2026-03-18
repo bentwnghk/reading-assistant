@@ -266,7 +266,15 @@
       "renameSuccess": "Text renamed successfully",
       "renameError": "Failed to rename text",
       "loadError": "Failed to load text",
-      "fetchError": "Failed to load repository"
+      "fetchError": "Failed to load repository",
+      "colName": "Name",
+      "colCreator": "Creator",
+      "colDate": "Created",
+      "colVisibility": "Visibility",
+      "colActions": "Actions",
+      "filterAll": "All",
+      "filterPublic": "Public only",
+      "filterSchool": "School only"
     },
     "extractedText": {
       "title": "Extracted Text",
