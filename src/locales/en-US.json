@@ -87,8 +87,8 @@
       "features": {
         "title": "Powerful Features",
         "ocr": {
-          "title": "📷 Smart OCR",
-          "desc": "Snap a photo or upload images to extract text from any reading material - textbooks, worksheets, articles, and more!"
+          "title": "📷 Smart OCR & Text Repository",
+          "desc": "Upload images to extract text using OCR, or browse the Text Repository to select pre-saved texts shared by teachers!"
         },
         "difficulty": {
           "title": "📊 Difficulty Analysis",
@@ -149,7 +149,7 @@
       },
       "workflow": {
         "title": "Your Learning Journey",
-        "upload": "Upload photos of your reading material",
+        "upload": "Select text via image upload or Text Repository",
         "summary": "Get a quick summary of the content",
         "mindmap": "Explore with an interactive mind map",
         "adapt": "Read text adapted to your level",
@@ -216,10 +216,10 @@
       "clearAll": "Clear All",
       "addMore": "Add more images",
       "help": {
-        "title": "Image Upload Guide",
-        "purpose": "Purpose: Upload images of any reading material - textbooks, worksheets, articles, and more. AI extracts text from images using OCR (Optical Character Recognition), making it available for vocabulary building, text analysis, and reading practice.",
-        "features": "Features: Supports PNG, JPG, JPEG, and WEBP formats. You can upload multiple images at once (one per page), and the extracted text appears in the 'Text Analysis & Adaptation' section for further processing.",
-        "usage": "Usage: Drag and drop images or click to select files. Click 'Clear All' to remove all images and start all over."
+        "title": "Select Text Guide",
+        "purpose": "Purpose: Choose how you want to load your reading material. You can either upload images for AI text extraction or select from pre-saved texts in the Text Repository.",
+        "features": "Features: Two options available - (1) Upload Image: Upload photos of textbooks, worksheets, or articles. AI uses OCR to extract text. Supports PNG, JPG, JPEG, and WEBP. Upload multiple images (one per page). (2) Text Repository: Browse and select texts saved by teachers or shared across schools. Teachers can upload and manage texts for students.",
+        "usage": "Usage: Switch between tabs to choose your method. For Upload Image: drag and drop or click to select files, then wait for text extraction. For Text Repository: browse available texts and click to load. Use 'Clear All' to start over."
       }
     },
     "repository": {
