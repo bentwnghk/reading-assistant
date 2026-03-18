@@ -294,7 +294,8 @@ CREATE TABLE user_achievements (
       'tests_completed',
       'targeted_practices',
       'spelling_challenges',
-      'vocabulary_quizzes'
+      'vocabulary_quizzes',
+      'ai_tutor_questions'
     )),
   milestone        INTEGER     NOT NULL,   -- the target that was reached (e.g. 5, 10, 20 …)
   unlocked_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -306,6 +307,26 @@ CREATE INDEX idx_user_achievements_user
   ON user_achievements (user_id);
 CREATE INDEX idx_user_achievements_type
   ON user_achievements (user_id, achievement_type);
+
+-- ─── Chat Questions table ──────────────────────────────────────────────────────
+
+-- Tracks AI tutor questions for analytics and activity logging
+CREATE TABLE chat_questions (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  question_hash TEXT NOT NULL,
+  question_text TEXT NOT NULL,
+  normalized_text TEXT NOT NULL,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  session_id TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
+  doc_title TEXT,
+  response_text TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_chat_questions_hash ON chat_questions(question_hash);
+CREATE INDEX idx_chat_questions_user ON chat_questions(user_id);
+CREATE INDEX idx_chat_questions_created ON chat_questions(created_at DESC);
+CREATE INDEX idx_chat_questions_session ON chat_questions(session_id);
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
