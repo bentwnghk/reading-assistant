@@ -321,12 +321,6 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
                   </Button>
                 </TableHead>
                 <TableHead className="w-20 text-center whitespace-normal break-words">
-                  <Button variant="ghost" size="sm" onClick={() => handleSort("testScore")} className="h-auto py-1 whitespace-normal">
-                    {t("userManagement.studentData.testScore")}
-                    <ArrowUpDown className="ml-1 h-3 w-3" />
-                  </Button>
-                </TableHead>
-                <TableHead className="w-20 text-center whitespace-normal break-words">
                   <Button variant="ghost" size="sm" onClick={() => handleSort("vocabularyCount")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.vocabulary")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -341,6 +335,12 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
                 <TableHead className="w-20 text-center whitespace-normal break-words">
                   <Button variant="ghost" size="sm" onClick={() => handleSort("quizScore")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.quiz")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("testScore")} className="h-auto py-1 whitespace-normal">
+                    {t("userManagement.studentData.testScore")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
@@ -377,15 +377,6 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    {session.testCompleted && session.testScore !== undefined ? (
-                      <Badge variant={session.testScore >= 70 ? "default" : "destructive"}>
-                        {session.testScore}%
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
                     <Badge variant="outline">{session.glossaryCount}</Badge>
                   </TableCell>
                   <TableCell className="text-center">
@@ -393,6 +384,15 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
                   </TableCell>
                   <TableCell className="text-center">
                     {session.vocabularyQuizScore || 0}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {session.testCompleted && session.testScore !== undefined ? (
+                      <Badge variant={session.testScore >= 70 ? "default" : "destructive"}>
+                        {session.testScore}%
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">
                     {dayjs(session.updatedAt).format("MM/DD HH:mm")}

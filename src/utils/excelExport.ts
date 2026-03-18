@@ -129,8 +129,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   })
 
   const headers = isAdmin
-    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"]
-    : ["Student", "Email", "Reading Text", "Learning Progress", "Reading Test", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Last Update"]
+    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Reading Test", "Last Update"]
+    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Reading Test", "Last Update"]
 
   dataSheet.columns = headers.map(header => ({
     header,
@@ -193,10 +193,10 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.userEmail || "-",
           session.docTitle,
           session.progress,
-          session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           session.glossaryCount,
           session.spellingGameBestScore || "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
+          session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
       : [
@@ -204,10 +204,10 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.userEmail || "-",
           session.docTitle,
           session.progress,
-          session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           session.glossaryCount,
           session.spellingGameBestScore || "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
+          session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
 
@@ -234,8 +234,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
       }
 
       const progressColIndex = isAdmin ? 5 : 4
-      const testColIndex = isAdmin ? 6 : 5
-      const quizColIndex = isAdmin ? 9 : 8
+      const quizColIndex = isAdmin ? 8 : 7
+      const testColIndex = isAdmin ? 9 : 8
 
       if (colNumber === progressColIndex && typeof cell.value === "number") {
         cell.numFmt = "0\"%\""
