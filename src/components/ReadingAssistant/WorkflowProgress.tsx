@@ -17,12 +17,12 @@ function WorkflowProgress() {
     { key: "summary", label: t("reading.workflow.summary"), completed: !!summary, accessible: hasExtractedText, sectionId: "section-summary" },
     { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap, accessible: hasExtractedText, sectionId: "section-mindmap" },
     { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText, accessible: hasExtractedText, sectionId: "section-adapted" },
-    { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasExtractedText, sectionId: "section-test" },
     { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0, accessible: hasExtractedText, sectionId: "section-adapted" },
     { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0, accessible: hasExtractedText, sectionId: "section-adapted" },
     { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
+    { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasExtractedText, sectionId: "section-test" },
   ];
 
   const handleStepClick = useCallback((sectionId: string, accessible: boolean) => {

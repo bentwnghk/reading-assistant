@@ -70,20 +70,20 @@ const sections = [
       !!store.extractedText,
   },
   {
-    id: "section-test",
-    icon: ClipboardCheck,
-    labelKey: "toc.test",
-    checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
-      store.testCompleted,
-    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
-      !!store.extractedText,
-  },
-  {
     id: "section-glossary",
     icon: BookMarked,
     labelKey: "toc.glossary",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       store.glossary.length > 0,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
+  },
+  {
+    id: "section-test",
+    icon: ClipboardCheck,
+    labelKey: "toc.test",
+    checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
+      store.testCompleted,
     isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.extractedText,
   },

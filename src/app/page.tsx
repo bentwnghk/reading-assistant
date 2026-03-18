@@ -97,11 +97,11 @@ function Home() {
         <section id="section-adapted">
           <AdaptedText />
         </section>
-        <section id="section-test">
-          <ReadingTest />
-        </section>
         <section id="section-glossary">
           <Glossary />
+        </section>
+        <section id="section-test">
+          <ReadingTest />
         </section>
       </main>
       <TocFab />
