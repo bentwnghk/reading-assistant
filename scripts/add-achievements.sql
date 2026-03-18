@@ -26,7 +26,29 @@ ALTER TABLE activity_logs
       'ai_tutor_question'
     ));
 
--- ─── 2. Create the user_achievements table ────────────────────────────────────
+-- ─── 2. Expand the user_achievements CHECK constraint ────────────────────────
+-- Drop and recreate so the constraint picks up any newly added achievement types.
+ALTER TABLE user_achievements
+  DROP CONSTRAINT IF EXISTS user_achievements_achievement_type_check;
+
+ALTER TABLE user_achievements
+  ADD CONSTRAINT user_achievements_achievement_type_check
+    CHECK (achievement_type IN (
+      'sessions_read',
+      'vocabulary_collected',
+      'flashcard_reviews',
+      'mindmaps_generated',
+      'adapted_texts',
+      'simplified_texts',
+      'sentences_analyzed',
+      'tests_completed',
+      'targeted_practices',
+      'spelling_challenges',
+      'vocabulary_quizzes',
+      'ai_tutor_questions'
+    ));
+
+-- ─── 3. Create the user_achievements table (fresh installs) ──────────────────
 CREATE TABLE IF NOT EXISTS user_achievements (
   id               SERIAL PRIMARY KEY,
   user_id          TEXT        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -56,6 +78,6 @@ CREATE INDEX IF NOT EXISTS idx_user_achievements_user
 CREATE INDEX IF NOT EXISTS idx_user_achievements_type
   ON user_achievements (user_id, achievement_type);
 
--- ─── 3. Grant permissions ─────────────────────────────────────────────────────
+-- ─── 4. Grant permissions ─────────────────────────────────────────────────────
 GRANT ALL PRIVILEGES ON TABLE user_achievements TO reading_user;
 GRANT ALL PRIVILEGES ON SEQUENCE user_achievements_id_seq TO reading_user;
