@@ -891,8 +891,8 @@
     "save": "Save"
   },
   "leaderboard": {
-    "title": "Leaderboard",
-    "subtitle": "See how you compare with your classmates and other students",
+    "title": "Leaderboard & Achievements",
+    "subtitle": "Compete for top ranks and unlock learning milestones",
     "myStats": "My Stats",
     "thisWeek": "This Week",
     "lastWeek": "Last Week",
@@ -973,45 +973,108 @@
     "selectClass": "Select class",
     "selectSchool": "Select school",
     "help": {
-      "title": "How the Leaderboard Works",
-      "subtitle": "Learn how to climb the ranks and become a top learner!",
-      "categories": {
-        "weeklyScore": {
-          "title": "Weekly Score",
-          "desc": "Your overall performance score combining all activities. Earn points by reading, completing tests, quizzes, and games. The more you practice, the higher you climb!"
+      "title": "How It Works",
+      "tabs": {
+        "leaderboard": "Leaderboard",
+        "achievements": "Achievements"
+      },
+      "leaderboard": {
+        "intro": "Climb the ranks by earning points across all learning activities. The more you practice, the higher you soar!",
+        "categories": {
+          "weeklyScore": {
+            "title": "Weekly Score",
+            "desc": "Your all-around performance metric. Every reading session, test, quiz, and game contributes points to your weekly total."
+          },
+          "streak": {
+            "title": "Reading Streak",
+            "desc": "Learn every day to keep your streak alive! Consecutive days of practice build momentum—miss a day and you start fresh."
+          },
+          "testScore": {
+            "title": "Reading Test",
+            "desc": "Your average comprehension test score. Read thoughtfully and answer questions carefully to boost this number."
+          },
+          "quizScore": {
+            "title": "Vocab Quiz",
+            "desc": "Average score from vocabulary quizzes. Expand your word knowledge and review regularly to ace these."
+          },
+          "spelling": {
+            "title": "Spelling",
+            "desc": "Average spelling game score. Practice those tricky words to sharpen your spelling skills."
+          },
+          "vocabulary": {
+            "title": "Vocabulary",
+            "desc": "Total words you've collected. Explore diverse texts and add new words to your glossary to grow this count."
+          },
+          "improvement": {
+            "title": "Improvement",
+            "desc": "Your growth compared to last week. Small, steady gains add up to big results over time!"
+          },
+          "flashcards": {
+            "title": "Flashcards",
+            "desc": "Flashcard reviews completed. Rate each card (Easy, Good, Hard) to strengthen your memory and rack up reviews."
+          }
         },
-        "streak": {
-          "title": "Reading Streak",
-          "desc": "Practice every day to build your streak! Consecutive days of learning keep your streak alive. Miss a day and it resets to zero."
-        },
-        "testScore": {
-          "title": "Reading Test Score",
-          "desc": "Average score from your reading comprehension tests. Read carefully and answer questions accurately to boost this score."
-        },
-        "quizScore": {
-          "title": "Vocab Quiz Score",
-          "desc": "Average score from vocabulary quizzes. Learn new words and review them regularly to ace your quizzes."
-        },
-        "spelling": {
-          "title": "Spelling Score",
-          "desc": "Average score from spelling games. Practice spelling challenging words to improve your accuracy."
-        },
-        "vocabulary": {
-          "title": "Vocabulary Words",
-          "desc": "Total new vocabulary words you've learned. Read diverse texts and add words to your glossary to expand your word bank."
-        },
-        "improvement": {
-          "title": "Improvement Score",
-          "desc": "How much you've grown compared to last week. Focus on steady progress and you'll see this number rise!"
-        },
-        "flashcards": {
-          "title": "Flashcard Reviews",
-          "desc": "Number of flashcard reviews completed. Click the difficulty buttons (Easy, Good, Hard) during review to count your sessions and strengthen your memory."
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Consistency beats cramming! A little practice every day will take you further than one big session per week."
         }
       },
-      "tip": {
-        "title": "Pro Tip:",
-        "content": "Consistency beats intensity! A little practice every day will help you climb faster than cramming once a week."
+      "achievements": {
+        "intro": "Unlock badges and milestones as you progress on your learning journey. Each achievement marks a meaningful step forward!",
+        "types": {
+          "sessions_read": {
+            "name": "Avid Reader",
+            "desc": "Upload and extract text from reading materials. Every text you process counts toward your progress!"
+          },
+          "vocabulary_collected": {
+            "name": "Word Collector",
+            "desc": "Highlight words and generate glossary entries. The more words you gather, the more badges you earn!"
+          },
+          "flashcard_reviews": {
+            "name": "Memory Master",
+            "desc": "Swipe through your flashcards daily. Short, frequent sessions beat long cramming—rate each card honestly for best results!"
+          },
+          "mindmaps_generated": {
+            "name": "Visual Thinker",
+            "desc": "After reading a new text, click 'Generate Mind Map' to visualize key concepts. Each mind map counts toward your badge!"
+          },
+          "adapted_texts": {
+            "name": "Text Adapter",
+            "desc": "Struggling with a passage? Use 'Adapt Text' to adjust it to your level. Every adaptation brings you closer to this badge!"
+          },
+          "simplified_texts": {
+            "name": "Simplifier",
+            "desc": "When text feels too complex, hit 'Simplify' for a clearer version. The more you simplify, the faster you unlock!"
+          },
+          "sentences_analyzed": {
+            "name": "Sentence Detective",
+            "desc": "Highlight any sentence and choose 'Analyze' to break it down. Pick tricky sentences to rack up analyses quickly!"
+          },
+          "tests_completed": {
+            "name": "Test Champion",
+            "desc": "Finish reading? Take a reading test right after while it's fresh. Each completed test adds to your count!"
+          },
+          "targeted_practices": {
+            "name": "Skill Sharpener",
+            "desc": "Review your reading test results and practice weak areas. Each targeted practice session speeds up your progress!"
+          },
+          "spelling_challenges": {
+            "name": "Spelling Bee",
+            "desc": "Play spelling games with words from your glossary. Quick rounds add up—challenge yourself daily!"
+          },
+          "vocabulary_quizzes": {
+            "name": "Quiz Wizard",
+            "desc": "Test your word knowledge with vocabulary quizzes. Take quizzes right after adding new words while they're fresh!"
+          },
+          "ai_tutor_questions": {
+            "name": "Curious Learner",
+            "desc": "Stuck on something? Ask the AI Tutor! Every question you ask counts—there are no silly questions here!"
+          }
+        },
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Focus on variety! Mixing different activities helps you unlock achievements faster and keeps learning fun."
+        }
       }
     }
   },
@@ -1074,7 +1137,7 @@
       },
       "targeted_practices": {
         "name": "Skill Sharpener",
-        "description": "Complete {{count}} targeted practices",
+        "description": "Complete {{count}} targeted reading practices",
         "hint": "Practice the skills you missed in reading tests"
       },
       "spelling_challenges": {
