@@ -604,8 +604,8 @@ function ReadingTest() {
   if (!readingTest.length) {
     return (
       <section className="p-4 border rounded-md mt-4">
-        <div className="flex items-center justify-between border-b mb-4">
-          <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
+        <div className="flex items-center justify-between border-b pb-4 mb-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
             <Popover>
@@ -653,8 +653,8 @@ function ReadingTest() {
   if (quizState === "idle") {
     return (
       <section className="p-4 border rounded-md mt-4">
-        <div className="flex items-center justify-between border-b mb-4">
-          <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
+        <div className="flex items-center justify-between border-b pb-4 mb-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
             <Popover>
@@ -800,8 +800,8 @@ function ReadingTest() {
   if (quizState === "completed") {
     return (
       <section className="p-4 border rounded-md mt-4">
-        <div className="flex items-center justify-between border-b mb-4">
-          <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
+        <div className="flex items-center justify-between border-b pb-4 mb-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
             <Popover>
@@ -941,8 +941,8 @@ function ReadingTest() {
 
     return (
       <section className="p-4 border rounded-md mt-4">
-        <div className="flex items-center justify-between border-b mb-4">
-          <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
+        <div className="flex items-center justify-between border-b pb-4 mb-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
             <Popover>
@@ -1029,8 +1029,8 @@ function ReadingTest() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <div className="flex items-center justify-between border-b mb-4">
-          <h3 className="font-semibold text-lg leading-10 flex items-center gap-2">
+      <div className="flex items-center justify-between border-b pb-4 mb-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             {t("reading.readingTest.title")}
             <Popover>

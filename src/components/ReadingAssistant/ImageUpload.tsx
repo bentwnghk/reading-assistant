@@ -159,8 +159,8 @@ function ImageUpload() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <h3 className="font-semibold text-lg border-b mb-4 leading-10 flex items-center justify-between">
-        <span className="flex items-center gap-2">
+      <div className="flex items-center justify-between border-b pb-4 mb-4">
+        <h3 className="font-semibold text-lg flex items-center gap-2">
           <Upload className="h-5 w-5 text-muted-foreground" />
           {t("reading.imageUpload.title")}
           <Popover>
@@ -178,7 +178,7 @@ function ImageUpload() {
               </div>
             </PopoverContent>
           </Popover>
-        </span>
+        </h3>
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={() => setOpenHistory(true)}>
             <HistoryIcon className="h-4 w-4 mr-1" />
@@ -191,7 +191,7 @@ function ImageUpload() {
             </Button>
           )}
         </div>
-      </h3>
+      </div>
 
       <Tabs defaultValue="upload">
         <TabsList className="mb-4">

@@ -349,7 +349,7 @@ function ExtractedText() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <h3 className="font-semibold text-lg border-b mb-4 leading-10">
+      <h3 className="font-semibold text-lg border-b pb-4 mb-4">
         {t("reading.extractedText.title")}
       </h3>
 
