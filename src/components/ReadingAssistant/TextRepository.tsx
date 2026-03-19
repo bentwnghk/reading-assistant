@@ -557,7 +557,7 @@ function TextRepository() {
           </p>
         </div>
       ) : (
-        <div className="rounded-md border max-h-[480px] overflow-y-auto">
+        <div className="rounded-md border max-h-[360px] overflow-y-auto">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-background">
               <TableRow>
