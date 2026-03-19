@@ -212,14 +212,14 @@
       "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP",
       "extracting": "Extracting text...",
       "extractingProgress": "Extracting text ({{current}}/{{total}})...",
-      "uploadNew": "Click the [x Clear All] button above to start over",
-      "clearAll": "Clear All",
+      "uploadNew": "Click the [x New Text] button above to start over",
+      "clearAll": "New Text",
       "addMore": "Add more images",
       "help": {
         "title": "Select Text Guide",
         "purpose": "Purpose: Choose how you want to load your reading material. You can either upload images for AI text extraction or select from pre-saved texts in the Text Repository.",
         "features": "Features: Two options available - (1) Upload Image: Upload photos of textbooks, worksheets, or articles. AI uses OCR to extract text. Supports PNG, JPG, JPEG, and WEBP. Upload multiple images (one per page). (2) Text Repository: Browse and select texts saved by teachers or shared across schools. Teachers can upload and manage texts for students.",
-        "usage": "Usage: Switch between tabs to choose your method. For Upload Image: drag and drop or click to select files, then wait for text extraction. For Text Repository: browse available texts and click to load. Use 'Clear All' to start over."
+        "usage": "Usage: Switch between tabs to choose your method. For Upload Image: drag and drop or click to select files, then wait for text extraction. For Text Repository: browse available texts and click to load. Click 'New Text' to start over."
       }
     },
     "repository": {
