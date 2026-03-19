@@ -66,7 +66,8 @@
           "title": "👑 管理員",
           "manageSchools": "創建與管理學校",
           "manageUsers": "指派用戶角色",
-          "manageClasses": "監管所有班別與老師"
+          "manageClasses": "監管所有班別與老師",
+          "uploadTexts": "上傳閱讀文本至文本庫"
         },
         "teacher": {
           "title": "🎓 老師",

@@ -66,7 +66,8 @@
           "title": "👑 Admin",
           "manageSchools": "Create & manage schools",
           "manageUsers": "Assign roles to any user",
-          "manageClasses": "Oversee all classes & teachers"
+          "manageClasses": "Oversee all classes & teachers",
+          "uploadTexts": "Upload reading texts to Text Repository"
         },
         "teacher": {
           "title": "🎓 Teacher",
