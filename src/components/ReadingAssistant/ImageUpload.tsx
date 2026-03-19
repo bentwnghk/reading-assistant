@@ -1,7 +1,7 @@
  "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, History as HistoryIcon } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, History as HistoryIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -186,7 +186,7 @@ function ImageUpload() {
           </Button>
           {hasContent && (
             <Button variant="outline" size="sm" onClick={clearAllImages}>
-              <X className="h-4 w-4 mr-1" />
+              <Plus className="h-4 w-4 mr-1" />
               {t("reading.imageUpload.clearAll")}
             </Button>
           )}

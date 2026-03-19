@@ -212,7 +212,7 @@
       "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP",
       "extracting": "Extracting text...",
       "extractingProgress": "Extracting text ({{current}}/{{total}})...",
-      "uploadNew": "Click the [x New Text] button above to start over",
+      "uploadNew": "Click the [+ New Text] button above to start over",
       "clearAll": "New Text",
       "addMore": "Add more images",
       "help": {
