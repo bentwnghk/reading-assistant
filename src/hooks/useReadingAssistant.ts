@@ -447,7 +447,8 @@ function useReadingAssistant() {
     const toastId = toast.info(i18next.t("reading.glossary.generatingWait"), { duration: Infinity });
 
     try {
-      const thinkingModel = await createModelProvider(glossaryModel);
+      const effectiveModel = highlightedWords.length > 25 ? "gemini-3-flash-preview" : glossaryModel;
+      const thinkingModel = await createModelProvider(effectiveModel);
       
       const result = await generateText({
         model: thinkingModel,
