@@ -579,6 +579,9 @@ function TextRepository() {
                     onSort={handleSort}
                   />
                 </TableHead>
+                <TableHead className="w-[1%] text-right">
+                  {t("reading.repository.colActions")}
+                </TableHead>
                 <TableHead className="w-[110px]">
                   <SortButton
                     field="createdAt"
@@ -596,9 +599,6 @@ function TextRepository() {
                     label={t("reading.repository.colVisibility")}
                     onSort={handleSort}
                   />
-                </TableHead>
-                <TableHead className="w-[1%] text-right">
-                  {t("reading.repository.colActions")}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -621,6 +621,17 @@ function TextRepository() {
                   {/* Creator */}
                   <TableCell className="text-sm text-muted-foreground">
                     {item.createdByName ?? "—"}
+                  </TableCell>
+
+                  {/* Actions */}
+                  <TableCell className="text-right">
+                    <RowActions
+                      item={item}
+                      isAdmin={isAdmin}
+                      onDeleted={handleDeleted}
+                      onRenamed={handleRenamed}
+                      onUpdated={handleUpdated}
+                    />
                   </TableCell>
 
                   {/* Created date */}
@@ -646,17 +657,6 @@ function TextRepository() {
                         {t("reading.repository.school")}
                       </Badge>
                     )}
-                  </TableCell>
-
-                  {/* Actions */}
-                  <TableCell className="text-right">
-                    <RowActions
-                      item={item}
-                      isAdmin={isAdmin}
-                      onDeleted={handleDeleted}
-                      onRenamed={handleRenamed}
-                      onUpdated={handleUpdated}
-                    />
                   </TableCell>
                 </TableRow>
               ))}
