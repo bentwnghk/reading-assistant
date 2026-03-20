@@ -236,10 +236,9 @@ interface RowActionsProps {
   onDeleted: (id: string) => void;
   onRenamed: (id: string, newName: string) => void;
   onUpdated: (id: string, patch: Partial<Pick<RepositoryTextListItem, "isPublic">>) => void;
-  onTextLoaded?: () => void;
 }
 
-function RowActions({ item, isAdmin, onDeleted, onRenamed, onUpdated, onTextLoaded }: RowActionsProps) {
+function RowActions({ item, isAdmin, onDeleted, onRenamed, onUpdated }: RowActionsProps) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -255,7 +254,6 @@ function RowActions({ item, isAdmin, onDeleted, onRenamed, onUpdated, onTextLoad
       if (!res.ok) throw new Error("Failed to load");
       const text: RepositoryText = await res.json();
       loadFromRepository(text);
-      onTextLoaded?.();
     } catch {
       toast.error(t("reading.repository.loadError"));
     } finally {
@@ -397,11 +395,7 @@ function RowActions({ item, isAdmin, onDeleted, onRenamed, onUpdated, onTextLoad
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-interface TextRepositoryProps {
-  onTextLoaded?: () => void;
-}
-
-function TextRepository({ onTextLoaded }: TextRepositoryProps) {
+function TextRepository() {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
@@ -632,7 +626,6 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
                       onDeleted={handleDeleted}
                       onRenamed={handleRenamed}
                       onUpdated={handleUpdated}
-                      onTextLoaded={onTextLoaded}
                     />
                   </TableCell>
 
