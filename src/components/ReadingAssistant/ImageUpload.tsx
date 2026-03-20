@@ -30,6 +30,7 @@ function ImageUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
+  const [activeTab, setActiveTab] = useState<"upload" | "repository">("upload");
   const { originalImages, extractedText } = useReadingStore();
   const { setOpenHistory } = useGlobalStore();
   const { status, extractTextFromImage, generateTitle } = useReadingAssistant();
@@ -193,7 +194,7 @@ function ImageUpload() {
         </div>
       </div>
 
-      <Tabs defaultValue="upload">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "upload" | "repository")}>
         <TabsList className="mb-4">
           <TabsTrigger value="upload">{t("reading.imageUpload.tabUpload")}</TabsTrigger>
           <TabsTrigger value="repository">{t("reading.imageUpload.tabRepository")}</TabsTrigger>
@@ -311,7 +312,7 @@ function ImageUpload() {
 
         {/* ── Tab: Text Repository ── */}
         <TabsContent value="repository">
-          <TextRepository />
+          <TextRepository onTextLoaded={() => setActiveTab("upload")} />
         </TabsContent>
       </Tabs>
     </section>
