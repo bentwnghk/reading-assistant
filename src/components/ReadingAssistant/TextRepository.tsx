@@ -570,6 +570,9 @@ function TextRepository() {
                     onSort={handleSort}
                   />
                 </TableHead>
+                <TableHead className="w-[1%] text-right">
+                  {t("reading.repository.colActions")}
+                </TableHead>
                 <TableHead className="w-[130px]">
                   <SortButton
                     field="createdByName"
@@ -578,9 +581,6 @@ function TextRepository() {
                     label={t("reading.repository.colCreator")}
                     onSort={handleSort}
                   />
-                </TableHead>
-                <TableHead className="w-[1%] text-right">
-                  {t("reading.repository.colActions")}
                 </TableHead>
                 <TableHead className="w-[110px]">
                   <SortButton
@@ -618,11 +618,6 @@ function TextRepository() {
                     )}
                   </TableCell>
 
-                  {/* Creator */}
-                  <TableCell className="text-sm text-muted-foreground">
-                    {item.createdByName ?? "—"}
-                  </TableCell>
-
                   {/* Actions */}
                   <TableCell className="text-right">
                     <RowActions
@@ -632,6 +627,11 @@ function TextRepository() {
                       onRenamed={handleRenamed}
                       onUpdated={handleUpdated}
                     />
+                  </TableCell>
+
+                  {/* Creator */}
+                  <TableCell className="text-sm text-muted-foreground">
+                    {item.createdByName ?? "—"}
                   </TableCell>
 
                   {/* Created date */}
