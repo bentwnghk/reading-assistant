@@ -966,7 +966,20 @@
       "noInstances": "沒有找到記錄"
     },
     "cancel": "取消",
-    "save": "保存"
+    "save": "保存",
+    "exportImport": {
+      "export": "匯出",
+      "exporting": "匯出中...",
+      "exportSuccess": "資料匯出成功",
+      "exportFailed": "匯出失敗",
+      "import": "匯入",
+      "importing": "匯入中...",
+      "importSuccess": "匯入完成：{{schools}} 所學校、{{users}} 位用戶、{{classes}} 個班別、{{memberships}} 條成員記錄已恢復",
+      "importFailed": "匯入失敗",
+      "importInvalidFile": "檔案無效：請選擇有效的匯出 JSON 檔案",
+      "importConfirm": "此操作將以檔案中的資料覆蓋現有學校名稱、用戶角色、學校分配、班別資料及班別成員。不存在於本系統的用戶將被跳過。確定繼續？",
+      "tooltip": "將所有學校、用戶及班別資料匯出或匯入為單一 JSON 備份檔案"
+    }
   },
   "leaderboard": {
     "title": "成就與排行榜",

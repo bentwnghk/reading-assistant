@@ -966,7 +966,20 @@
       "noInstances": "No instances found"
     },
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "exportImport": {
+      "export": "Export",
+      "exporting": "Exporting...",
+      "exportSuccess": "Data exported successfully",
+      "exportFailed": "Export failed",
+      "import": "Import",
+      "importing": "Importing...",
+      "importSuccess": "Import complete: {{schools}} schools, {{users}} users, {{classes}} classes, {{memberships}} memberships restored",
+      "importFailed": "Import failed",
+      "importInvalidFile": "Invalid file: please select a valid export JSON",
+      "importConfirm": "This will overwrite existing school names, user roles, school assignments, class data, and class memberships with data from the file. Users not present in this system will be skipped. Continue?",
+      "tooltip": "Export or import all schools, users, and classes as a single JSON backup file"
+    }
   },
   "leaderboard": {
     "title": "Achievements & Leaderboard",
