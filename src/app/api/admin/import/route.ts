@@ -6,7 +6,8 @@ import { Uint8ArrayReader, TextWriter, ZipReader, configure as zipConfigure } fr
 import type { FileEntry } from "@zip.js/zip.js"
 
 // Disable Web Workers — they are unavailable in the Next.js Node.js runtime.
-zipConfigure({ useWebWorkers: false })
+// Disable CompressionStream — Next.js polyfills it incorrectly in some Node environments.
+zipConfigure({ useWebWorkers: false, useCompressionStream: false })
 
 // ── Zod schemas ──────────────────────────────────────────────────────────────
 
