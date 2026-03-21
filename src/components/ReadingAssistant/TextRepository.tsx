@@ -512,7 +512,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
       const dateStr = new Date().toISOString().slice(0, 10);
       downloadFile(
         JSON.stringify(exportData, null, 2),
-        `text-repository-export-${dateStr}.json`,
+        `mrng-proreader-text-repository-export-${dateStr}.json`,
         "application/json;charset=utf-8"
       );
 
