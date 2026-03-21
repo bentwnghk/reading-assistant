@@ -54,16 +54,18 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
         toast.error(t("userManagement.exportImport.exportFailed"))
         return
       }
-      const data = await res.json()
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      })
-      const url = URL.createObjectURL(blob)
+      // Server returns a ZIP blob; derive filename from Content-Disposition.
+      const disposition = res.headers.get("content-disposition") ?? ""
+      const nameMatch = disposition.match(/filename="([^"]+)"/)
       const now = new Date()
       const ts = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+      const filename = nameMatch?.[1] ?? `mrng-proreader-full-backup-${ts}.zip`
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
-      a.download = `user-management-backup-${ts}.json`
+      a.download = filename
       a.click()
       URL.revokeObjectURL(url)
       toast.success(t("userManagement.exportImport.exportSuccess"))
@@ -85,12 +87,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     e.target.value = ""
     if (!file) return
 
-    let payload: unknown
-    try {
-      const text = await file.text()
-      payload = JSON.parse(text)
-    } catch {
-      toast.error(t("userManagement.exportImport.importInvalidFile"))
+    const isZip = file.name.endsWith(".zip") || file.type === "application/zip"
+    const isJson = file.name.endsWith(".json") || file.type === "application/json"
+
+    if (!isZip && !isJson) {
+      toast.error(t("userManagement.exportImport.wrongFileType"))
       return
     }
 
@@ -98,11 +99,32 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
 
     setImporting(true)
     try {
-      const res = await fetch("/api/admin/import", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
+      let res: Response
+
+      if (isZip) {
+        // v2 full backup: send ZIP as multipart/form-data
+        const formData = new FormData()
+        formData.append("file", file)
+        res = await fetch("/api/admin/import", {
+          method: "POST",
+          body: formData,
+        })
+      } else {
+        // Legacy v1: parse JSON and post as application/json
+        let payload: unknown
+        try {
+          const text = await file.text()
+          payload = JSON.parse(text)
+        } catch {
+          toast.error(t("userManagement.exportImport.importInvalidFile"))
+          return
+        }
+        res = await fetch("/api/admin/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+      }
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
@@ -113,14 +135,27 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
 
       const result = await res.json()
       const s = result.summary
-      toast.success(
-        t("userManagement.exportImport.importSuccess", {
-          schools: s.schoolsUpserted,
-          users: s.usersUpserted,
-          classes: s.classesUpserted,
-          memberships: s.membershipsUpserted,
-        })
-      )
+      if (s.sessionsUpserted !== undefined) {
+        // v2 full backup — show reading-history counts
+        toast.success(
+          t("userManagement.exportImport.importSuccessFull", {
+            schools: s.schoolsUpserted,
+            users: s.usersUpserted,
+            classes: s.classesUpserted,
+            sessions: s.sessionsUpserted,
+          })
+        )
+      } else {
+        // v1 user-management only
+        toast.success(
+          t("userManagement.exportImport.importSuccess", {
+            schools: s.schoolsUpserted,
+            users: s.usersUpserted,
+            classes: s.classesUpserted,
+            memberships: s.membershipsUpserted,
+          })
+        )
+      }
     } catch {
       toast.error(t("userManagement.exportImport.importFailed"))
     } finally {
@@ -173,11 +208,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                           : t("userManagement.exportImport.import")}
                       </Button>
 
-                      {/* Hidden file input */}
+                      {/* Hidden file input — accepts v2 ZIP or legacy JSON */}
                       <input
                         ref={importFileRef}
                         type="file"
-                        accept="application/json,.json"
+                        accept=".zip,application/zip,.json,application/json"
                         className="hidden"
                         onChange={handleFileSelected}
                       />

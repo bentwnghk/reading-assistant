@@ -970,15 +970,17 @@
     "exportImport": {
       "export": "Export",
       "exporting": "Exporting...",
-      "exportSuccess": "Data exported successfully",
+      "exportSuccess": "Full backup exported successfully",
       "exportFailed": "Export failed",
       "import": "Import",
       "importing": "Importing...",
       "importSuccess": "Import complete: {{schools}} schools, {{users}} users, {{classes}} classes, {{memberships}} memberships restored",
+      "importSuccessFull": "Import complete: {{schools}} schools, {{users}} users, {{classes}} classes, {{sessions}} reading sessions restored",
       "importFailed": "Import failed",
-      "importInvalidFile": "Invalid file: please select a valid export JSON",
-      "importConfirm": "This will overwrite existing school names, user roles, school assignments, class data, and class memberships with data from the file. Users not present in this system will be skipped. Continue?",
-      "tooltip": "Export or import all schools, users, and classes as a single JSON backup file"
+      "importInvalidFile": "Invalid file: please select a valid backup file",
+      "wrongFileType": "Please select a .zip or .json backup file",
+      "importConfirm": "This will merge the backup data with existing records. Reading sessions and images will be fully restored. Continue?",
+      "tooltip": "Export or import a full system backup (.zip) including all users, classes, and reading history with images"
     }
   },
   "leaderboard": {
