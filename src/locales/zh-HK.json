@@ -282,7 +282,17 @@
       "editSave": "儲存更改",
       "editSaving": "儲存中...",
       "editSuccess": "文本已成功更新",
-      "editError": "更新文本失敗"
+      "editError": "更新文本失敗",
+      "export": "匯出",
+      "exporting": "匯出中...",
+      "exportSuccess": "已成功匯出 {{count}} 篇文本",
+      "exportError": "匯出文本失敗",
+      "import": "匯入",
+      "importing": "匯入中...",
+      "importSuccess": "已匯入 {{count}} / {{total}} 篇文本",
+      "importError": "匯入文本失敗",
+      "importInvalid": "匯入檔案格式無效",
+      "importNoTexts": "匯入檔案中未找到文本"
     },
     "extractedText": {
       "title": "提取的文字",

@@ -1,8 +1,9 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { z } from "zod";
 import {
   Plus,
   Search,
@@ -16,6 +17,8 @@ import {
   ChevronDown,
   ChevronsUpDown,
   FileText,
+  Download,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,12 +51,27 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useReadingStore } from "@/store/reading";
+import { downloadFile } from "@/utils/file";
 import dynamic from "next/dynamic";
 
 const RepositoryUploadDialog = dynamic(
   () => import("@/components/ReadingAssistant/RepositoryUploadDialog"),
   { ssr: false }
 );
+
+const repositoryExportSchema = z.object({
+  version: z.string(),
+  exportedAt: z.number().optional(),
+  texts: z.array(
+    z.object({
+      name: z.string().min(1),
+      title: z.string().optional().default(""),
+      extractedText: z.string().min(1),
+      originalImages: z.array(z.string()).optional().default([]),
+      isPublic: z.boolean().optional().default(false),
+    })
+  ),
+});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -403,6 +421,9 @@ function TextRepository() {
   const [items, setItems] = useState<RepositoryTextListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Filter state
   const [search, setSearch] = useState("");
@@ -451,6 +472,115 @@ function TextRepository() {
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, ...patch } : item))
     );
+  };
+
+  const handleExport = async () => {
+    if (processedItems.length === 0) {
+      toast.error(t("reading.repository.exportError"));
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const texts: z.infer<typeof repositoryExportSchema>["texts"] = [];
+
+      for (const item of processedItems) {
+        const res = await fetch(`/api/repository/${item.id}`);
+        if (!res.ok) continue;
+        const text: RepositoryText = await res.json();
+        texts.push({
+          name: text.name,
+          title: text.title || "",
+          extractedText: text.extractedText,
+          originalImages: text.originalImages || [],
+          isPublic: text.isPublic,
+        });
+      }
+
+      const exportData = {
+        version: "1.0",
+        exportedAt: Date.now(),
+        texts,
+      };
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      downloadFile(
+        JSON.stringify(exportData, null, 2),
+        `text-repository-export-${dateStr}.json`,
+        "application/json;charset=utf-8"
+      );
+
+      toast.success(t("reading.repository.exportSuccess", { count: texts.length }));
+    } catch {
+      toast.error(t("reading.repository.exportError"));
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImport = async (file: File) => {
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const result = repositoryExportSchema.safeParse(parsed);
+
+      if (!result.success) {
+        toast.error(t("reading.repository.importInvalid"));
+        return;
+      }
+
+      const { texts } = result.data;
+
+      if (texts.length === 0) {
+        toast.error(t("reading.repository.importNoTexts"));
+        return;
+      }
+
+      let successCount = 0;
+      for (const textItem of texts) {
+        try {
+          const res = await fetch("/api/repository", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: textItem.name,
+              title: textItem.title,
+              extractedText: textItem.extractedText,
+              isPublic: textItem.isPublic,
+              images: textItem.originalImages,
+            }),
+          });
+          if (res.ok) successCount++;
+        } catch {
+          // Continue with next item
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(
+          t("reading.repository.importSuccess", {
+            count: successCount,
+            total: texts.length,
+          })
+        );
+        fetchItems();
+      } else {
+        toast.error(t("reading.repository.importError"));
+      }
+    } catch {
+      toast.error(t("reading.repository.importInvalid"));
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImport(file);
+      e.target.value = "";
+    }
   };
 
   const handleSort = (field: SortField) => {
@@ -530,14 +660,48 @@ function TextRepository() {
         </Select>
 
         {isAdmin && (
-          <Button
-            size="sm"
-            onClick={() => setUploadOpen(true)}
-            className="gap-1.5 shrink-0"
-          >
-            <Plus className="h-4 w-4" />
-            {t("reading.repository.uploadNew")}
-          </Button>
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isImporting}
+              className="gap-1.5 shrink-0"
+            >
+              {isImporting ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
+              {isImporting
+                ? t("reading.repository.importing")
+                : t("reading.repository.import")}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleExport}
+              disabled={isExporting || processedItems.length === 0}
+              className="gap-1.5 shrink-0"
+            >
+              {isExporting ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {isExporting
+                ? t("reading.repository.exporting")
+                : t("reading.repository.export")}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setUploadOpen(true)}
+              className="gap-1.5 shrink-0"
+            >
+              <Plus className="h-4 w-4" />
+              {t("reading.repository.uploadNew")}
+            </Button>
+          </>
         )}
       </div>
 
@@ -673,6 +837,15 @@ function TextRepository() {
           onUploaded={handleUploaded}
         />
       )}
+
+      {/* Hidden file input for import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json"
+        className="hidden"
+        onChange={handleFileChange}
+      />
     </div>
   );
 }

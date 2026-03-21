@@ -282,7 +282,17 @@
       "editSave": "Save Changes",
       "editSaving": "Saving...",
       "editSuccess": "Text updated successfully",
-      "editError": "Failed to update text"
+      "editError": "Failed to update text",
+      "export": "Export",
+      "exporting": "Exporting...",
+      "exportSuccess": "Exported {{count}} texts successfully",
+      "exportError": "Failed to export texts",
+      "import": "Import",
+      "importing": "Importing...",
+      "importSuccess": "Imported {{count}} of {{total}} texts",
+      "importError": "Failed to import texts",
+      "importInvalid": "Invalid import file format",
+      "importNoTexts": "No texts found in import file"
     },
     "extractedText": {
       "title": "Extracted Text",
