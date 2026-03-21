@@ -43,12 +43,12 @@
     "about": {
       "title": "關於 Mr.🆖 ProReader",
       "tagline": "拍照。學習。精通。",
-      "description": "將任何英語閱讀材料轉化為互動學習體驗！🚀 透過 AI 智能工具、個人化內容和有趣遊戲，掌握英語閱讀從未如此令人興奮！",
+      "description": "將任何英語閱讀材料轉化為互動學習體驗！🚀 透過 AI 智能工具、個人化內容和遊戲化學習，掌握英語閱讀從未如此令人興奮！",
       "whyLove": {
         "title": "為什麼你會愛上它",
         "personalized": {
           "title": "🎯 個人化",
-          "desc": "根據你的年齡和程度調整（8-18歲）"
+          "desc": "AI 根據你的年齡和程度調整內容（8-18歲）"
         },
         "gamified": {
           "title": "🎮 遊戲化",
@@ -67,13 +67,13 @@
           "manageSchools": "創建與管理學校",
           "manageUsers": "指派用戶角色",
           "manageClasses": "監管所有班別與老師",
-          "uploadTexts": "上傳閱讀文本至文本庫"
+          "uploadTexts": "上傳閱讀材料至文本庫"
         },
         "teacher": {
           "title": "🎓 老師",
           "createClass": "創建自己的班別",
           "manageStudents": "添加學生並追蹤進度",
-          "exportData": "匯出詳細 Excel 試算表報告",
+          "exportData": "匯出詳細 Excel 報告",
           "viewLeaderboard": "查看班別排行榜",
           "viewAiQuestions": "追蹤學生向 AI 導師的提問"
         },
@@ -89,7 +89,7 @@
         "title": "強大功能",
         "ocr": {
           "title": "📷 智能 OCR 與文本庫",
-          "desc": "上傳圖片使用 OCR 提取文字，或瀏覽文本庫選擇由老師分享的預存文本！"
+          "desc": "上傳圖片使用 AI 提取文字，或瀏覽文本庫選擇由老師分享的閱讀材料！"
         },
         "difficulty": {
           "title": "📊 難度分析",
@@ -105,7 +105,7 @@
         },
         "visual": {
           "title": "🧠 視覺學習",
-          "desc": "自動生成快速摘要和互動思維導圖，理解關鍵概念和關係。"
+          "desc": "AI 生成快速摘要和互動思維導圖，幫助你理解關鍵概念和關係。"
         },
         "tutor": {
           "title": "🤖 AI 導師",
@@ -117,7 +117,7 @@
         },
         "glossary": {
           "title": "📖 智能詞彙表",
-          "desc": "為你標記的每個生字提供雙語定義（英文 + 中文）、音節劃分和真實例句。"
+          "desc": "AI 為你標記的每個生字提供雙語定義（英文 + 中文）、音節劃分和真實例句。"
         },
         "flashcard": {
           "title": "🃏 生字卡複習",
@@ -488,7 +488,7 @@
       "chineseDefinition": "中文解釋",
       "example": "例句",
       "emptyTip": "點擊上方按鈕為 {{count}} 個已標記生字生成解釋 (請稍候 1-2 分鐘)",
-      "noHighlightedWords": "請先在原文中標記生字。為獲得最佳效果，請標記 10-30 個生字。",
+      "noHighlightedWords": "請先在原文中標記生字。為獲得最佳效果，建議標記 10-30 個生字。",
       "tabTable": "表格",
       "tabFlashcard": "生字卡",
       "tabQuiz": "測驗",
