@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getClient, bufferToBase64 } from "@/lib/db"
-import { BlobWriter, TextReader, ZipWriter, configure as zipConfigure } from "@zip.js/zip.js"
+import { Uint8ArrayWriter, TextReader, ZipWriter, configure as zipConfigure } from "@zip.js/zip.js"
 
 // Disable Web Workers — they are unavailable in the Next.js Node.js runtime.
 zipConfigure({ useWebWorkers: false })
@@ -309,10 +309,11 @@ export async function GET() {
     }
 
     // ── Compress into a ZIP ──────────────────────────────────────────────────
-    const zipWriter = new ZipWriter(new BlobWriter("application/zip"))
+    // Use Uint8ArrayWriter (not BlobWriter) — Blob is a browser API and
+    // unavailable in the Next.js Node.js server runtime.
+    const zipWriter = new ZipWriter(new Uint8ArrayWriter())
     await zipWriter.add("backup.json", new TextReader(JSON.stringify(payload)))
-    const zipBlob = await zipWriter.close()
-    const zipBuffer = await zipBlob.arrayBuffer()
+    const zipBuffer = await zipWriter.close()
 
     const now = new Date()
     const ts = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
