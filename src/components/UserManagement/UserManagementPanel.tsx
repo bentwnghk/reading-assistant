@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -115,7 +116,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
       toast.success(
         t("userManagement.exportImport.importSuccess", {
           schools: s.schoolsUpserted,
-          users: s.usersUpdated,
+          users: s.usersUpserted,
           classes: s.classesUpserted,
           memberships: s.membershipsUpserted,
         })
@@ -134,57 +135,59 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           <div className="flex items-center justify-between gap-2">
             <DialogTitle>{t("userManagement.title")}</DialogTitle>
             {isAdmin && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 pr-6">
-                    {/* Export */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleExport}
-                      disabled={exporting || importing}
-                    >
-                      {exporting ? (
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      ) : (
-                        <Download className="h-4 w-4 mr-1" />
-                      )}
-                      {exporting
-                        ? t("userManagement.exportImport.exporting")
-                        : t("userManagement.exportImport.export")}
-                    </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 pr-6">
+                      {/* Export */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExport}
+                        disabled={exporting || importing}
+                      >
+                        {exporting ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4 mr-1" />
+                        )}
+                        {exporting
+                          ? t("userManagement.exportImport.exporting")
+                          : t("userManagement.exportImport.export")}
+                      </Button>
 
-                    {/* Import */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleImportClick}
-                      disabled={exporting || importing}
-                    >
-                      {importing ? (
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      ) : (
-                        <Upload className="h-4 w-4 mr-1" />
-                      )}
-                      {importing
-                        ? t("userManagement.exportImport.importing")
-                        : t("userManagement.exportImport.import")}
-                    </Button>
+                      {/* Import */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleImportClick}
+                        disabled={exporting || importing}
+                      >
+                        {importing ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-1" />
+                        )}
+                        {importing
+                          ? t("userManagement.exportImport.importing")
+                          : t("userManagement.exportImport.import")}
+                      </Button>
 
-                    {/* Hidden file input */}
-                    <input
-                      ref={importFileRef}
-                      type="file"
-                      accept="application/json,.json"
-                      className="hidden"
-                      onChange={handleFileSelected}
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-64 text-center">
-                  {t("userManagement.exportImport.tooltip")}
-                </TooltipContent>
-              </Tooltip>
+                      {/* Hidden file input */}
+                      <input
+                        ref={importFileRef}
+                        type="file"
+                        accept="application/json,.json"
+                        className="hidden"
+                        onChange={handleFileSelected}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-64 text-center">
+                    {t("userManagement.exportImport.tooltip")}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </DialogHeader>
