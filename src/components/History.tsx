@@ -131,7 +131,7 @@ function History({ open, onClose }: HistoryProps) {
       const title = data.docTitle || data.extractedText?.slice(0, 50) || "reading-session";
       downloadFile(
         JSON.stringify(data, null, 4),
-        `${title}.json`,
+        `mrng-proreader-${title}.json`,
         "application/json;charset=utf-8"
       );
     }
