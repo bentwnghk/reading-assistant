@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { z } from "zod";
 import {
   Plus,
   Search,
@@ -51,27 +50,12 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useReadingStore } from "@/store/reading";
-import { downloadFile } from "@/utils/file";
 import dynamic from "next/dynamic";
 
 const RepositoryUploadDialog = dynamic(
   () => import("@/components/ReadingAssistant/RepositoryUploadDialog"),
   { ssr: false }
 );
-
-const repositoryExportSchema = z.object({
-  version: z.string(),
-  exportedAt: z.number().optional(),
-  texts: z.array(
-    z.object({
-      name: z.string().min(1),
-      title: z.string().optional().default(""),
-      extractedText: z.string().min(1),
-      originalImages: z.array(z.string()).optional().default([]),
-      isPublic: z.boolean().optional().default(false),
-    })
-  ),
-});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -481,42 +465,29 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
   };
 
   const handleExport = async () => {
-    if (processedItems.length === 0) {
-      toast.error(t("reading.repository.exportError"));
-      return;
-    }
-
     setIsExporting(true);
     try {
-      const texts: z.infer<typeof repositoryExportSchema>["texts"] = [];
-
-      for (const item of processedItems) {
-        const res = await fetch(`/api/repository/${item.id}`);
-        if (!res.ok) continue;
-        const text: RepositoryText = await res.json();
-        texts.push({
-          name: text.name,
-          title: text.title || "",
-          extractedText: text.extractedText,
-          originalImages: text.originalImages || [],
-          isPublic: text.isPublic,
-        });
+      const res = await fetch("/api/repository/export");
+      if (!res.ok) {
+        toast.error(t("reading.repository.exportError"));
+        return;
       }
+      // Server returns a ZIP blob; derive filename from Content-Disposition.
+      const disposition = res.headers.get("content-disposition") ?? "";
+      const nameMatch = disposition.match(/filename="([^"]+)"/);
+      const now = new Date();
+      const ts = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      const filename = nameMatch?.[1] ?? `text-repository-export-${ts}.zip`;
 
-      const exportData = {
-        version: "1.0",
-        exportedAt: Date.now(),
-        texts,
-      };
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
 
-      const dateStr = new Date().toISOString().slice(0, 10);
-      downloadFile(
-        JSON.stringify(exportData, null, 2),
-        `text-repository-export-${dateStr}.json`,
-        "application/json;charset=utf-8"
-      );
-
-      toast.success(t("reading.repository.exportSuccess", { count: texts.length }));
+      toast.success(t("reading.repository.exportSuccess"));
     } catch {
       toast.error(t("reading.repository.exportError"));
     } finally {
@@ -525,55 +496,56 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
   };
 
   const handleImport = async (file: File) => {
+    const isZip = file.name.endsWith(".zip") || file.type === "application/zip";
+    const isJson = file.name.endsWith(".json") || file.type === "application/json";
+
+    if (!isZip && !isJson) {
+      toast.error(t("reading.repository.importInvalid"));
+      return;
+    }
+
     setIsImporting(true);
     try {
-      const text = await file.text();
-      const parsed = JSON.parse(text);
-      const result = repositoryExportSchema.safeParse(parsed);
+      let res: Response;
 
-      if (!result.success) {
-        toast.error(t("reading.repository.importInvalid"));
-        return;
-      }
-
-      const { texts } = result.data;
-
-      if (texts.length === 0) {
-        toast.error(t("reading.repository.importNoTexts"));
-        return;
-      }
-
-      let successCount = 0;
-      for (const textItem of texts) {
-        try {
-          const res = await fetch("/api/repository", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: textItem.name,
-              title: textItem.title,
-              extractedText: textItem.extractedText,
-              isPublic: textItem.isPublic,
-              images: textItem.originalImages,
-            }),
-          });
-          if (res.ok) successCount++;
-        } catch {
-          // Continue with next item
-        }
-      }
-
-      if (successCount > 0) {
-        toast.success(
-          t("reading.repository.importSuccess", {
-            count: successCount,
-            total: texts.length,
-          })
-        );
-        fetchItems();
+      if (isZip) {
+        // v2 ZIP backup: send as multipart/form-data
+        const formData = new FormData();
+        formData.append("file", file);
+        res = await fetch("/api/repository/import", {
+          method: "POST",
+          body: formData,
+        });
       } else {
-        toast.error(t("reading.repository.importError"));
+        // Legacy plain JSON: parse and post as application/json
+        let payload: unknown;
+        try {
+          const text = await file.text();
+          payload = JSON.parse(text);
+        } catch {
+          toast.error(t("reading.repository.importInvalid"));
+          return;
+        }
+        res = await fetch("/api/repository/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
       }
+
+      if (!res.ok) {
+        toast.error(t("reading.repository.importError"));
+        return;
+      }
+
+      const data = await res.json() as { success: boolean; summary: { imported: number; total: number } };
+      toast.success(
+        t("reading.repository.importSuccess", {
+          count: data.summary.imported,
+          total: data.summary.total,
+        })
+      );
+      fetchItems();
     } catch {
       toast.error(t("reading.repository.importInvalid"));
     } finally {
@@ -687,7 +659,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
               size="sm"
               variant="outline"
               onClick={handleExport}
-              disabled={isExporting || processedItems.length === 0}
+              disabled={isExporting}
               className="gap-1.5 shrink-0"
             >
               {isExporting ? (
@@ -849,7 +821,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="application/json"
+        accept=".zip,application/zip,.json,application/json"
         className="hidden"
         onChange={handleFileChange}
       />
