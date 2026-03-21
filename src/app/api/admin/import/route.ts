@@ -55,15 +55,16 @@ const ImportPayloadSchema = z.object({
  *
  * What is restored / merged:
  *  - schools       → upsert on id (name + domain updated if changed)
- *  - users         → school_id assignment updated (we never overwrite OAuth
- *                    credentials — name/email/image come from the auth provider)
+ *  - users         → upsert on id using exported name/email/image so users can
+ *                    sign in immediately on a fresh server. The @auth/pg-adapter
+ *                    matches by email on first OAuth sign-in and links the
+ *                    account to the pre-populated row. "emailVerified" is left
+ *                    NULL and will be set by the auth provider on sign-in.
  *  - user_roles    → upsert role on user_id
  *  - classes       → upsert on id (name, description, teacher_id, school_id)
  *  - class_members → upsert on student_id (one class per student constraint)
  *
- * Note: users that do not yet exist in the local `users` table are SKIPPED
- * (we cannot create NextAuth user records — they are created on first sign-in).
- * The response includes counts of what was applied vs skipped.
+ * The response includes counts of what was upserted.
  */
 export async function POST(request: Request) {
   const session = await auth()
@@ -112,23 +113,23 @@ export async function POST(request: Request) {
       schoolsUpserted++
     }
 
-    // ── 2. Users — update school_id + role only; skip missing users ────────
-    // First build the set of user IDs that actually exist in this DB.
-    const existingUsersResult = await client.query(
-      `SELECT id FROM users WHERE id = ANY($1::text[])`,
-      [users.map((u) => u.id)]
-    )
-    const existingUserIds = new Set<string>(
-      existingUsersResult.rows.map((r) => r.id as string)
-    )
-
-    let usersUpdated = 0
-    let usersSkipped = 0
+    // ── 2. Users — upsert user rows, then apply school_id + role ──────────
+    // We pre-populate missing user rows using the exported name/email/image so
+    // that users can sign in immediately on a fresh server without a cold-start
+    // first sign-in. The @auth/pg-adapter matches by email on first OAuth
+    // sign-in, finds the pre-populated row, and links the account to it.
+    // "emailVerified" is intentionally left NULL; the auth provider will set it.
+    let usersUpserted = 0
     for (const user of users) {
-      if (!existingUserIds.has(user.id)) {
-        usersSkipped++
-        continue
-      }
+      await client.query(
+        `INSERT INTO users (id, name, email, image, "emailVerified")
+         VALUES ($1, $2, $3, $4, NULL)
+         ON CONFLICT (id) DO UPDATE
+           SET name  = EXCLUDED.name,
+               email = EXCLUDED.email,
+               image = EXCLUDED.image`,
+        [user.id, user.name ?? null, user.email ?? null, user.image ?? null]
+      )
       // Update school assignment
       await client.query(
         `UPDATE users SET school_id = $1 WHERE id = $2`,
@@ -141,8 +142,11 @@ export async function POST(request: Request) {
          ON CONFLICT (user_id) DO UPDATE SET role = EXCLUDED.role`,
         [user.id, user.role]
       )
-      usersUpdated++
+      usersUpserted++
     }
+
+    // Build the set of user IDs for membership filtering (all users now exist)
+    const existingUserIds = new Set<string>(users.map((u) => u.id))
 
     // ── 3. Classes ─────────────────────────────────────────────────────────
     let classesUpserted = 0
@@ -198,8 +202,7 @@ export async function POST(request: Request) {
       success: true,
       summary: {
         schoolsUpserted,
-        usersUpdated,
-        usersSkipped,
+        usersUpserted,
         classesUpserted,
         membershipsUpserted,
         membershipsSkipped,
