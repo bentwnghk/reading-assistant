@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-// import { auth } from "@/auth"
+import { auth } from "@/auth"
 import { getClient, bufferToBase64 } from "@/lib/db"
 import { Uint8ArrayWriter, TextReader, ZipWriter, configure as zipConfigure } from "@zip.js/zip.js"
 
@@ -27,10 +27,15 @@ zipConfigure({ useWebWorkers: false, useCompressionStream: false })
  * }
  */
 export async function GET() {
-  // Bypassing auth for local debug
-  // const session = await auth()
-  // if (!session?.user?.id) { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }) }
-  // if (session.user.role !== "admin") { return NextResponse.json({ error: "Forbidden" }, { status: 403 }) }
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  if (session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
 
   const client = await getClient()
   try {
@@ -324,8 +329,7 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Export failed:", error)
-    const detail = error instanceof Error ? error.stack || error.message : String(error)
-    return NextResponse.json({ error: "Export failed", detail }, { status: 500 })
+    return NextResponse.json({ error: "Export failed" }, { status: 500 })
   } finally {
     client.release()
   }
