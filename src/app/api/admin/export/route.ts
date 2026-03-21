@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getClient, bufferToBase64 } from "@/lib/db"
-import { BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js"
+import { BlobWriter, TextReader, ZipWriter, configure as zipConfigure } from "@zip.js/zip.js"
+
+// Disable Web Workers — they are unavailable in the Next.js Node.js runtime.
+zipConfigure({ useWebWorkers: false })
 
 /**
  * GET /api/admin/export

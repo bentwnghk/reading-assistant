@@ -2,8 +2,11 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getClient, base64ToBuffer } from "@/lib/db"
 import { z } from "zod"
-import { BlobReader, TextWriter, ZipReader } from "@zip.js/zip.js"
+import { BlobReader, TextWriter, ZipReader, configure as zipConfigure } from "@zip.js/zip.js"
 import type { FileEntry } from "@zip.js/zip.js"
+
+// Disable Web Workers — they are unavailable in the Next.js Node.js runtime.
+zipConfigure({ useWebWorkers: false })
 
 // ── Zod schemas ──────────────────────────────────────────────────────────────
 
