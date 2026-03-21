@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { TrashIcon, FileOutput, Download, BookOpen } from "lucide-react";
+import { TrashIcon, FileOutput, Download, BookOpen, Upload } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
@@ -195,6 +195,7 @@ function History({ open, onClose }: HistoryProps) {
             title={t("history.importTip")}
             onClick={() => fileInputRef.current?.click()}
           >
+            <Upload className="h-4 w-4 mr-1" />
             {t("history.import")}
           </Button>
           <SearchArea
