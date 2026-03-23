@@ -115,33 +115,6 @@ export async function readTextFromPDF(file: File): Promise<string> {
   });
 }
 
-export async function processPdfFile(
-  file: File
-): Promise<{ text: string; images: string[]; isScanned: boolean }> {
-  try {
-    const text = await readTextFromPDF(file);
-    const cleanedText = text.trim();
-
-    if (cleanedText.length > 50) {
-      return {
-        text: cleanedText,
-        images: [],
-        isScanned: false,
-      };
-    }
-
-    const images = await renderPdfPagesAsImages(file);
-    return {
-      text: "",
-      images,
-      isScanned: true,
-    };
-  } catch {
-    const images = await renderPdfPagesAsImages(file);
-    return {
-      text: "",
-      images,
-      isScanned: true,
-    };
-  }
+export async function processPdfFile(file: File): Promise<string[]> {
+  return renderPdfPagesAsImages(file);
 }

@@ -99,19 +99,11 @@ function ImageUpload() {
           setExtractionProgress({ current: currentFile, total: totalFiles });
           setIsProcessingPdf(true);
 
-          const result = await processPdfFile(pdfFile);
+          const images = await processPdfFile(pdfFile);
+          setIsProcessingPdf(false);
 
-          if (result.isScanned) {
-            setIsProcessingPdf(false);
-            for (let i = 0; i < result.images.length; i++) {
-              setExtractionProgress({ current: currentFile, total: totalFiles });
-              await extractTextFromImage(result.images[i]);
-            }
-          } else {
-            const { setExtractedText, setOriginalImages } = useReadingStore.getState();
-            setOriginalImages(result.images);
-            setExtractedText(result.text);
-            setIsProcessingPdf(false);
+          for (const imageData of images) {
+            await extractTextFromImage(imageData);
           }
         }
 
