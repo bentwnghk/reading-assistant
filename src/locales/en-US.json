@@ -210,16 +210,17 @@
       "tabRepository": "Text Repository",
       "dropHere": "Drop image here",
       "orClick": "or click to select",
-      "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP",
+      "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP, PDF",
       "extracting": "Extracting text...",
       "extractingProgress": "Extracting text ({{current}}/{{total}})...",
+      "processingPdf": "Processing PDF...",
       "uploadNew": "Click the [+ New Text] button above to start over",
       "clearAll": "New Text",
       "addMore": "Add more images",
       "help": {
         "title": "Select Text Guide",
-        "purpose": "Purpose: Choose how you want to load your reading material. You can either upload images for AI text extraction or select from pre-saved texts in the Text Repository.",
-        "features": "Features: Two options available - (1) Upload Image: Upload photos of textbooks, worksheets, or articles. AI uses OCR to extract text. Supports PNG, JPG, JPEG, and WEBP. Upload multiple images (one per page). (2) Text Repository: Browse and select texts saved by teachers or shared across schools. Teachers can upload and manage texts for students.",
+        "purpose": "Purpose: Choose how you want to load your reading material. You can either upload images or PDFs for AI text extraction or select from pre-saved texts in the Text Repository.",
+        "features": "Features: Two options available - (1) Upload Image/PDF: Upload photos, PDFs of textbooks, worksheets, or articles. AI uses OCR to extract text from images and scanned PDFs. Supports PNG, JPG, JPEG, WEBP, and PDF. Upload multiple files (one per page). (2) Text Repository: Browse and select texts saved by teachers or shared across schools. Teachers can upload and manage texts for students.",
         "usage": "Usage: Switch between tabs to choose your method. For Upload Image: drag and drop or click to select files, then wait for text extraction. For Text Repository: browse available texts and click to load. Click 'New Text' to start over."
       }
     },

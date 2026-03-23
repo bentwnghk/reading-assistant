@@ -210,16 +210,17 @@
       "tabRepository": "文本庫",
       "dropHere": "拖放圖片到這裡",
       "orClick": "或點擊選擇",
-      "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP",
+      "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP、PDF",
       "extracting": "正在提取文字...",
       "extractingProgress": "正在提取文字（{{current}}/{{total}}）...",
+      "processingPdf": "正在處理 PDF...",
       "uploadNew": "點擊上方 [+ 新文本] 按鈕以重新開始",
       "clearAll": "新文本",
       "addMore": "添加更多圖片",
       "help": {
         "title": "選擇文本指南",
-        "purpose": "功能說明：選擇載入閱讀材料的方式。你可以上傳圖片讓 AI 提取文字，或從文本庫中選擇預存的文本。",
-        "features": "功能特色：提供兩種方式 - (1) 上傳圖片：上傳課本、工作紙或文章的照片，AI 使用 OCR 技術提取文字。支援 PNG、JPG、JPEG、WEBP 格式，可上傳多張圖片（每頁一張）。(2) 文本庫：瀏覽並選擇由老師儲存或跨校共享的文本。老師可以上傳和管理供學生使用的文本。",
+        "purpose": "功能說明：選擇載入閱讀材料的方式。你可以上傳圖片或 PDF 讓 AI 提取文字，或從文本庫中選擇預存的文本。",
+        "features": "功能特色：提供兩種方式 - (1) 上傳圖片/PDF：上傳課本、工作紙或文章的照片或 PDF，AI 使用 OCR 技術提取文字。支援 PNG、JPG、JPEG、WEBP 和 PDF 格式，可上傳多個檔案（每頁一個）。(2) 文本庫：瀏覽並選擇由老師儲存或跨校共享的文本。老師可以上傳和管理供學生使用的文本。",
         "usage": "使用方法：切換標籤頁選擇方式。「上傳圖片」：拖放或點擊選擇檔案，等待文字提取完成。「文本庫」：瀏覽可用文本並點擊載入。點擊「新文本」可重新開始。"
       }
     },

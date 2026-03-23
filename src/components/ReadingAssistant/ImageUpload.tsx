@@ -9,6 +9,7 @@ import { useReadingStore } from "@/store/reading";
 import { useGlobalStore } from "@/store/global";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
+import { processPdfFile } from "@/utils/parser/pdfParser";
 import dynamic from "next/dynamic";
 
 const TextRepository = dynamic(
@@ -30,11 +31,13 @@ function ImageUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
+  const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "repository">("upload");
   const { originalImages, extractedText } = useReadingStore();
   const { setOpenHistory } = useGlobalStore();
   const { status, extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = status === "extracting";
+  const isBusy = isExtracting || isProcessingPdf;
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
   // Acquire a Screen Wake Lock while extracting to prevent iOS from suspending
@@ -64,7 +67,7 @@ function ImageUpload() {
   // extracting (iOS may release it automatically on visibilitychange).
   useEffect(() => {
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === "visible" && isExtracting) {
+      if (document.visibilityState === "visible" && isBusy) {
         await acquireWakeLock();
       }
     };
@@ -72,28 +75,57 @@ function ImageUpload() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [isExtracting, acquireWakeLock]);
+  }, [isBusy, acquireWakeLock]);
 
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
       const fileArray = Array.from(files);
       const imageFiles = fileArray.filter((file) => file.type.startsWith("image/"));
-      
-      if (imageFiles.length === 0) return;
+      const pdfFiles = fileArray.filter(
+        (file) => file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")
+      );
 
-      setExtractionProgress({ current: 1, total: imageFiles.length });
+      if (imageFiles.length === 0 && pdfFiles.length === 0) return;
+
+      const totalFiles = imageFiles.length + pdfFiles.length;
+      setExtractionProgress({ current: 1, total: totalFiles });
       await acquireWakeLock();
 
       try {
-        for (let i = 0; i < imageFiles.length; i++) {
-          setExtractionProgress({ current: i + 1, total: imageFiles.length });
-          const imageData = await readFileAsDataURL(imageFiles[i]);
+        let currentFile = 0;
+
+        for (const pdfFile of pdfFiles) {
+          currentFile++;
+          setExtractionProgress({ current: currentFile, total: totalFiles });
+          setIsProcessingPdf(true);
+
+          const result = await processPdfFile(pdfFile);
+
+          if (result.isScanned) {
+            setIsProcessingPdf(false);
+            for (let i = 0; i < result.images.length; i++) {
+              setExtractionProgress({ current: currentFile, total: totalFiles });
+              await extractTextFromImage(result.images[i]);
+            }
+          } else {
+            const { setExtractedText, setOriginalImages } = useReadingStore.getState();
+            setOriginalImages(result.images);
+            setExtractedText(result.text);
+            setIsProcessingPdf(false);
+          }
+        }
+
+        for (const imageFile of imageFiles) {
+          currentFile++;
+          setExtractionProgress({ current: currentFile, total: totalFiles });
+          const imageData = await readFileAsDataURL(imageFile);
           await extractTextFromImage(imageData);
         }
 
         await generateTitle();
       } finally {
         setExtractionProgress(null);
+        setIsProcessingPdf(false);
         await releaseWakeLock();
       }
     },
@@ -149,6 +181,7 @@ function ImageUpload() {
   };
 
   const getExtractionMessage = () => {
+    if (isProcessingPdf) return t("reading.imageUpload.processingPdf");
     if (!extractionProgress) return t("reading.imageUpload.extracting");
     return t("reading.imageUpload.extractingProgress", {
       current: extractionProgress.current,
@@ -226,7 +259,7 @@ function ImageUpload() {
               <p className="text-sm text-muted-foreground">
                 {t("reading.imageUpload.uploadNew")}
               </p>
-              {isExtracting && (
+              {isBusy && (
                 <div className="flex items-center justify-center gap-2 p-3 bg-muted/50 rounded-lg">
                   <LoaderCircle className="h-4 w-4 animate-spin text-primary" />
                   <p className="text-sm font-medium text-primary">{getExtractionMessage()}</p>
@@ -236,14 +269,14 @@ function ImageUpload() {
                 className={cn(
                   "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
                   "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
-                  isExtracting && "pointer-events-none opacity-50"
+                  isBusy && "pointer-events-none opacity-50"
                 )}
                 onClick={handleClick}
               >
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.pdf,application/pdf"
                   multiple
                   className="hidden"
                   onChange={handleFileInput}
@@ -261,7 +294,7 @@ function ImageUpload() {
                 isDragging
                   ? "border-primary bg-primary/5"
                   : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
-                isExtracting && "pointer-events-none opacity-50"
+                isBusy && "pointer-events-none opacity-50"
               )}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -271,13 +304,13 @@ function ImageUpload() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.pdf,application/pdf"
                 multiple
                 className="hidden"
                 onChange={handleFileInput}
               />
 
-              {isExtracting ? (
+              {isBusy ? (
                 <div className="flex flex-col items-center gap-2">
                   <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
                   <p className="text-lg font-medium">
