@@ -383,7 +383,13 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
                     {session.spellingGameBestScore || 0}
                   </TableCell>
                   <TableCell className="text-center">
-                    {session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore !== null ? `${session.vocabularyQuizScore}%` : "0%"}
+                    {session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore !== null ? (
+                      <Badge variant={session.vocabularyQuizScore >= 70 ? "default" : "destructive"}>
+                        {session.vocabularyQuizScore}%
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     {session.testCompleted && session.testScore !== undefined ? (
