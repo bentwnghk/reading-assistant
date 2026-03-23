@@ -89,7 +89,7 @@
         "title": "Powerful Features",
         "ocr": {
           "title": "📷 Smart OCR & Text Repository",
-          "desc": "Upload images to extract text using AI, or browse the Text Repository to select reading materials shared by teachers!"
+          "desc": "Upload images or PDFs to extract text using AI, or browse the Text Repository to select reading materials shared by teachers!"
         },
         "difficulty": {
           "title": "📊 Difficulty Analysis",
@@ -150,7 +150,7 @@
       },
       "workflow": {
         "title": "Your Learning Journey",
-        "upload": "Select text via image upload or Text Repository",
+        "upload": "Select text via image/PDF upload or Text Repository",
         "summary": "Get a quick summary of the content",
         "mindmap": "Explore with an interactive mind map",
         "adapt": "Read text adapted to your level",
@@ -206,9 +206,9 @@
     },
     "imageUpload": {
       "title": "Select Text",
-      "tabUpload": "Upload Image",
+      "tabUpload": "Upload Image/PDF",
       "tabRepository": "Text Repository",
-      "dropHere": "Drop image here",
+      "dropHere": "Drop image or PDF here",
       "orClick": "or click to select",
       "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP, PDF",
       "extracting": "Extracting text...",
@@ -216,12 +216,12 @@
       "processingPdf": "Processing PDF...",
       "uploadNew": "Click the [+ New Text] button above to start over",
       "clearAll": "New Text",
-      "addMore": "Add more images",
+      "addMore": "Add more images/PDFs",
       "help": {
         "title": "Select Text Guide",
         "purpose": "Purpose: Choose how you want to load your reading material. You can either upload images or PDFs for AI text extraction or select from pre-saved texts in the Text Repository.",
         "features": "Features: Two options available - (1) Upload Image/PDF: Upload photos, PDFs of textbooks, worksheets, or articles. AI uses OCR to extract text from images and scanned PDFs. Supports PNG, JPG, JPEG, WEBP, and PDF. Upload multiple files (one per page). (2) Text Repository: Browse and select texts saved by teachers or shared across schools. Teachers can upload and manage texts for students.",
-        "usage": "Usage: Switch between tabs to choose your method. For Upload Image: drag and drop or click to select files, then wait for text extraction. For Text Repository: browse available texts and click to load. Click 'New Text' to start over."
+        "usage": "Usage: Switch between tabs to choose your method. For Upload Image/PDF: drag and drop or click to select files, then wait for text extraction. For Text Repository: browse available texts and click to load. Click 'New Text' to start over."
       }
     },
     "repository": {
