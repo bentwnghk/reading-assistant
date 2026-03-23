@@ -261,7 +261,7 @@ function History({ open, onClose }: HistoryProps) {
                           {item.spellingGameBestScore || 0}
                         </TableCell>
                         <TableCell className="text-center whitespace-nowrap">
-                          {item.vocabularyQuizScore || 0}
+                          {item.vocabularyQuizScore !== undefined && item.vocabularyQuizScore !== null ? `${item.vocabularyQuizScore}%` : "0%"}
                         </TableCell>
                         <TableCell className="text-center whitespace-nowrap">
                           {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
