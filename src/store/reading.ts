@@ -16,6 +16,14 @@ export function setUserId(id: string | null) {
   currentUserId = id;
 }
 
+const sessionCreatedInApi: Set<string> = new Set();
+export function markSessionCreated(sessionId: string) {
+  sessionCreatedInApi.add(sessionId);
+}
+export function isSessionCreatedInApi(sessionId: string) {
+  return sessionCreatedInApi.has(sessionId);
+}
+
 let syncToHistoryFn: ((store: ReadingStore) => void) | null = null;
 
 export function setHistorySyncFn(fn: (store: ReadingStore) => void) {
@@ -32,6 +40,7 @@ function syncToHistoryIfNeeded(state: ReadingStore) {
 
 async function syncToAPI(sessionId: string, data: Partial<ReadingStore>) {
   if (!currentUserId || !sessionId) return;
+  if (!isSessionCreatedInApi(sessionId)) return;
   
   try {
     const response = await fetch(`/api/sessions/${sessionId}`, {
@@ -60,6 +69,8 @@ async function createSessionInAPI(sessionData: ReadingStore) {
     
     if (!response.ok) {
       console.error("Failed to create session in API:", await response.text());
+    } else {
+      markSessionCreated(sessionData.id);
     }
   } catch (error) {
     console.error("Failed to create session in API:", error);
