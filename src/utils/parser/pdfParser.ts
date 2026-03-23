@@ -1,14 +1,23 @@
 import * as pdfjsLib from "pdfjs-dist";
 
-function initPdfWorker() {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `./scripts/pdf.worker.min.mjs`;
+const WORKER_SRC = "./scripts/pdf.worker.min.mjs";
+
+function getPdfDocumentParams(source: string | ArrayBuffer) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_SRC;
+  
+  return {
+    data: typeof source === "string" ? undefined : source,
+    url: typeof source === "string" ? source : undefined,
+    standardFontDataUrl: "./standard_fonts/",
+    wasmUrl: "./scripts/wasm/",
+    useWorkerFetch: false,
+    useSystemFonts: true,
+  };
 }
 
 async function getTextContent(file: string | ArrayBuffer) {
   try {
-    initPdfWorker();
-
-    const loadingTask = pdfjsLib.getDocument(file);
+    const loadingTask = pdfjsLib.getDocument(getPdfDocumentParams(file));
     const pdfDocument = await loadingTask.promise;
 
     let fullText = "";
@@ -42,9 +51,7 @@ export async function renderPdfPagesAsImages(file: File): Promise<string[]> {
       }
 
       try {
-        initPdfWorker();
-
-        const loadingTask = pdfjsLib.getDocument(reader.result);
+        const loadingTask = pdfjsLib.getDocument(getPdfDocumentParams(reader.result));
         const pdfDocument = await loadingTask.promise;
         const images: string[] = [];
         const scale = 2;
