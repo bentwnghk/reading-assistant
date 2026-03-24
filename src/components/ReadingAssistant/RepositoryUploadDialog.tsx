@@ -93,13 +93,12 @@ function RepositoryUploadDialog({
       let combinedText = extractedTextRef.current;
 
       try {
-        const visionModel = await createModelProvider(visionModelName);
-
         for (let i = 0; i < imageDataUrls.length; i++) {
           setProgress({ current: i + 1, total: imageDataUrls.length });
           const dataURL = imageDataUrls[i];
           dataURLs.push(dataURL);
 
+          const visionModel = await createModelProvider(visionModelName);
           const result = streamText({
             model: visionModel,
             system: getSystemPrompt(),
