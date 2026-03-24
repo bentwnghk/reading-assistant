@@ -21,6 +21,7 @@ import { cn } from "@/utils/style";
 import { useSettingStore } from "@/store/setting";
 import { extractTextFromImagePrompt, getSystemPrompt } from "@/constants/readingPrompts";
 import useModelProvider from "@/hooks/useAiProvider";
+import { processPdfFile } from "@/utils/parser/pdfParser";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -83,22 +84,20 @@ function RepositoryUploadDialog({
   };
 
   const processImages = useCallback(
-    async (files: File[]) => {
-      const imageFiles = files.filter((f) => f.type.startsWith("image/"));
-      if (imageFiles.length === 0) return;
+    async (imageDataUrls: string[]) => {
+      if (imageDataUrls.length === 0) return;
 
       setPhase("extracting");
       setGeneratedTitle("");
       const dataURLs: string[] = [];
-      // Seed with any text already extracted from previous uploads
       let combinedText = extractedTextRef.current;
 
       try {
         const visionModel = await createModelProvider(visionModelName);
 
-        for (let i = 0; i < imageFiles.length; i++) {
-          setProgress({ current: i + 1, total: imageFiles.length });
-          const dataURL = await readFileAsDataURL(imageFiles[i]);
+        for (let i = 0; i < imageDataUrls.length; i++) {
+          setProgress({ current: i + 1, total: imageDataUrls.length });
+          const dataURL = imageDataUrls[i];
           dataURLs.push(dataURL);
 
           const result = streamText({
@@ -126,7 +125,6 @@ function RepositoryUploadDialog({
         setImages((prev) => [...prev, ...dataURLs]);
         setProgress(null);
 
-        // Generate title
         setPhase("generating-title");
         try {
           const titleModel = await createModelProvider(summaryModel);
@@ -137,7 +135,6 @@ function RepositoryUploadDialog({
           const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
           setGeneratedTitle(cleaned);
         } catch {
-          // Title generation is non-critical; use first line as fallback
           const fallback = combinedText.split(/\n/).find((l) => l.trim()) ?? "";
           setGeneratedTitle(fallback.slice(0, 80));
         }
@@ -154,12 +151,39 @@ function RepositoryUploadDialog({
   );
 
   const handleFiles = useCallback(
-    (fileList: FileList | File[]) => {
-      const files = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
-      if (files.length === 0) return;
-      processImages(files);
+    async (fileList: FileList | File[]) => {
+      const fileArray = Array.from(fileList);
+      const imageFiles = fileArray.filter((f) => f.type.startsWith("image/"));
+      const pdfFiles = fileArray.filter(
+        (f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf")
+      );
+
+      if (imageFiles.length === 0 && pdfFiles.length === 0) return;
+
+      const allImageData: string[] = [];
+
+      for (const pdfFile of pdfFiles) {
+        try {
+          const pdfImages = await processPdfFile(pdfFile);
+          allImageData.push(...pdfImages);
+        } catch (error) {
+          console.error("PDF processing error:", error);
+          toast.error(t("reading.repository.pdfError", { name: pdfFile.name }));
+        }
+      }
+
+      if (imageFiles.length > 0) {
+        for (const file of imageFiles) {
+          const dataURL = await readFileAsDataURL(file);
+          allImageData.push(dataURL);
+        }
+      }
+
+      if (allImageData.length > 0) {
+        processImages(allImageData);
+      }
     },
-    [processImages]
+    [processImages, t]
   );
 
   const handleDrop = useCallback(
@@ -270,7 +294,7 @@ function RepositoryUploadDialog({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.pdf,application/pdf"
                 multiple
                 className="hidden"
                 onChange={(e) => {
