@@ -171,10 +171,10 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             <DialogTitle>{t("userManagement.title")}</DialogTitle>
             {isAdmin && (
               <div className="flex items-center gap-1 pr-6">
-                <TooltipProvider>
+                <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button className="p-1 rounded hover:bg-muted">
+                      <button tabIndex={-1} className="p-1 rounded hover:bg-muted cursor-pointer">
                         <Info className="h-4 w-4 text-muted-foreground" />
                       </button>
                     </TooltipTrigger>
