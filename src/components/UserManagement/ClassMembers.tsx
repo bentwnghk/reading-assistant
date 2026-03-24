@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Plus, Trash2, Search, ArrowUpDown } from "lucide-react"
+import { Loader2, Plus, Trash2, Search, ArrowUpDown, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -33,7 +33,7 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [showAddDialog, setShowAddDialog] = useState(false)
-  const [addingStudentId, setAddingStudentId] = useState("")
+  const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set())
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
 
   const loadMembers = useCallback(async () => {
@@ -83,19 +83,19 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
     }
   }, [showAddDialog, loadAvailableStudents])
 
-  const handleAddStudent = async () => {
-    if (!addingStudentId) return
+  const handleAddStudents = async () => {
+    if (selectedStudentIds.size === 0) return
 
     try {
       const response = await fetch(`/api/classes/${classId}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId: addingStudentId }),
+        body: JSON.stringify({ studentIds: Array.from(selectedStudentIds) }),
       })
 
       if (response.ok) {
         toast.success(t("userManagement.members.studentAdded"))
-        setAddingStudentId("")
+        setSelectedStudentIds(new Set())
         setShowAddDialog(false)
         loadMembers()
         onMembersChange?.()
@@ -106,6 +106,18 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
       console.error("Failed to add student:", error)
       toast.error(t("userManagement.members.addFailed"))
     }
+  }
+
+  const toggleStudentSelection = (studentId: string) => {
+    setSelectedStudentIds(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(studentId)) {
+        newSet.delete(studentId)
+      } else {
+        newSet.add(studentId)
+      }
+      return newSet
+    })
   }
 
   const handleRemoveStudent = async (studentId: string) => {
@@ -167,36 +179,39 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
                 className="pl-8"
               />
             </div>
-            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setSelectedStudentIds(new Set())
+              setShowAddDialog(false)
+            }}>
               {t("userManagement.cancel")}
             </Button>
           </div>
           {filteredStudents.length > 0 && (
             <div className="max-h-48 overflow-auto border rounded">
-              {filteredStudents.map((student) => (
-                <div
-                  key={student.id}
-                  className="flex items-center justify-between p-2 hover:bg-muted cursor-pointer border-b last:border-b-0"
-                  onClick={() => setAddingStudentId(student.id)}
-                >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={student.image || undefined} />
-                      <AvatarFallback>{student.name?.[0] || student.email?.[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="text-sm">{student.name || t("userManagement.users.noName")}</div>
-                      <div className="text-xs text-muted-foreground">{student.email}</div>
+              {filteredStudents.map((student) => {
+                const isSelected = selectedStudentIds.has(student.id)
+                return (
+                  <div
+                    key={student.id}
+                    className={`flex items-center justify-between p-2 hover:bg-muted cursor-pointer border-b last:border-b-0 ${isSelected ? "bg-muted" : ""}`}
+                    onClick={() => toggleStudentSelection(student.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-4 h-4 border rounded flex items-center justify-center ${isSelected ? "bg-primary border-primary" : "border-muted-foreground"}`}>
+                        {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                      </div>
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={student.image || undefined} />
+                        <AvatarFallback>{student.name?.[0] || student.email?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="text-sm">{student.name || t("userManagement.users.noName")}</div>
+                        <div className="text-xs text-muted-foreground">{student.email}</div>
+                      </div>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant={addingStudentId === student.id ? "default" : "ghost"}
-                  >
-                    {addingStudentId === student.id ? t("userManagement.members.selected") : t("userManagement.members.select")}
-                  </Button>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
           {filteredStudents.length === 0 && (
@@ -204,9 +219,9 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
               {t("userManagement.members.noAvailableStudents")}
             </div>
           )}
-          {addingStudentId && (
-            <Button onClick={handleAddStudent} className="w-full">
-              {t("userManagement.members.confirmAdd")}
+          {selectedStudentIds.size > 0 && (
+            <Button onClick={handleAddStudents} className="w-full">
+              {t("userManagement.members.confirmAdd")} ({selectedStudentIds.size})
             </Button>
           )}
         </div>

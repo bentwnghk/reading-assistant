@@ -59,28 +59,31 @@ export async function POST(
 
   try {
     const body = await request.json()
-    const { studentId } = body
+    const { studentId, studentIds } = body
 
-    if (!studentId) {
+    const idsToAdd = studentIds || (studentId ? [studentId] : [])
+    if (idsToAdd.length === 0) {
       return NextResponse.json({ error: "Student ID is required" }, { status: 400 })
     }
 
-    // Verify the student belongs to the same school as the caller
     const callerSchoolId = await getSchoolForUser(session.user.id)
     if (callerSchoolId) {
-      const studentSchoolId = await getSchoolForUser(studentId)
-      if (studentSchoolId !== callerSchoolId) {
-        return NextResponse.json(
-          { error: "Student does not belong to the same school as this class" },
-          { status: 403 }
-        )
+      for (const sid of idsToAdd) {
+        const studentSchoolId = await getSchoolForUser(sid)
+        if (studentSchoolId !== callerSchoolId) {
+          return NextResponse.json(
+            { error: "Student does not belong to the same school as this class" },
+            { status: 403 }
+          )
+        }
       }
     }
 
-    const success = await addStudentToClass(id, studentId)
-
-    if (!success) {
-      return NextResponse.json({ error: "Failed to add student to class" }, { status: 500 })
+    for (const sid of idsToAdd) {
+      const success = await addStudentToClass(id, sid)
+      if (!success) {
+        return NextResponse.json({ error: "Failed to add student to class" }, { status: 500 })
+      }
     }
 
     return NextResponse.json({ success: true })
