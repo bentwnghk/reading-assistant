@@ -118,7 +118,7 @@ MCP_AI_PROVIDER=
 # (Optional) MCP Server search provider. Default, `model`
 # Possible values ​​include: model, tavily, firecrawl, exa, bocha, searxng
 MCP_SEARCH_PROVIDER=
-# (Optional) MCP Server thinking model id, the core model used in deep research.
+# (Optional) MCP Server thinking model id, the core model used
 MCP_THINKING_MODEL=
 # (Optional) MCP Server task model id, used for secondary tasks, high output models are recommended.
 MCP_TASK_MODEL=
