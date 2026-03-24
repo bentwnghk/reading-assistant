@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
+import { getClient } from "@/lib/db"
 import {
   canAccessClass,
   getClassMembers,
@@ -8,12 +9,23 @@ import {
   getAllUsers,
 } from "@/lib/users"
 
+async function getAssignedStudentIds(): Promise<Set<string>> {
+  const client = await getClient()
+  try {
+    const result = await client.query('SELECT DISTINCT student_id FROM class_members')
+    return new Set(result.rows.map(r => r.student_id))
+  } finally {
+    client.release()
+  }
+}
+
 /**
  * GET /api/classes/[id]/available-students
  *
  * Returns students who can be added to this class:
  * - For teachers/admins with a school: students from the same school who are not already members
  * - For admins without a school (edge case): all students not already members
+ * - Excludes students who are already assigned to any other class
  */
 export async function GET(
   _request: Request,
@@ -36,9 +48,10 @@ export async function GET(
   }
 
   try {
-    const [members, callerSchoolId] = await Promise.all([
+    const [members, callerSchoolId, assignedStudentIds] = await Promise.all([
       getClassMembers(id),
       getSchoolForUser(session.user.id),
+      getAssignedStudentIds(),
     ])
 
     const memberIds = new Set(members.map(m => m.studentId))
@@ -51,7 +64,11 @@ export async function GET(
       candidates = await getAllUsers()
     }
 
-    const available = candidates.filter(u => u.role === "student" && !memberIds.has(u.id))
+    const available = candidates.filter(u => 
+      u.role === "student" && 
+      !memberIds.has(u.id) &&
+      !assignedStudentIds.has(u.id)
+    )
     return NextResponse.json(available)
   } catch (error) {
     console.error("Failed to get available students:", error)
