@@ -212,56 +212,58 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
         </div>
       )}
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>
-              <Button variant="ghost" size="sm" onClick={handleSort}>
-                {t("userManagement.members.student")}
-                <ArrowUpDown className="ml-1 h-3 w-3" />
-              </Button>
-            </TableHead>
-            <TableHead>{t("userManagement.members.joinedAt")}</TableHead>
-            <TableHead>{t("userManagement.members.actions")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedMembers.map((member) => (
-            <TableRow key={member.studentId}>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={member.studentImage || undefined} />
-                    <AvatarFallback>
-                      {member.studentName?.[0] || member.studentEmail?.[0] || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{member.studentName || t("userManagement.users.noName")}</div>
-                    <div className="text-sm text-muted-foreground">{member.studentEmail}</div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline">
-                  {new Date(member.joinedAt).toLocaleDateString()}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-500 hover:text-red-600"
-                  onClick={() => handleRemoveStudent(member.studentId)}
-                  title={t("userManagement.members.remove")}
-                >
-                  <Trash2 className="h-4 w-4" />
+      <div className="max-h-80 overflow-auto border rounded">
+        <Table>
+          <TableHeader className="sticky top-0 bg-background z-10">
+            <TableRow>
+              <TableHead>
+                <Button variant="ghost" size="sm" onClick={handleSort}>
+                  {t("userManagement.members.student")}
+                  <ArrowUpDown className="ml-1 h-3 w-3" />
                 </Button>
-              </TableCell>
+              </TableHead>
+              <TableHead>{t("userManagement.members.joinedAt")}</TableHead>
+              <TableHead>{t("userManagement.members.actions")}</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {sortedMembers.map((member) => (
+              <TableRow key={member.studentId}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={member.studentImage || undefined} />
+                      <AvatarFallback>
+                        {member.studentName?.[0] || member.studentEmail?.[0] || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{member.studentName || t("userManagement.users.noName")}</div>
+                      <div className="text-sm text-muted-foreground">{member.studentEmail}</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {new Date(member.joinedAt).toLocaleDateString()}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500 hover:text-red-600"
+                    onClick={() => handleRemoveStudent(member.studentId)}
+                    title={t("userManagement.members.remove")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {members.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
