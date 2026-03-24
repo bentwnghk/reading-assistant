@@ -220,7 +220,7 @@
       "help": {
         "title": "Select Text Guide",
         "purpose": "Purpose: Choose how you want to load your reading material. You can either upload images or PDFs for AI text extraction or select from pre-saved texts in the Text Repository.",
-        "features": "Features: Two options available - (1) Upload Image/PDF: Upload photos, PDFs of textbooks, worksheets, or articles. AI uses OCR to extract text from images and scanned PDFs. Supports PNG, JPG, JPEG, WEBP, and PDF. Upload multiple files (one per page). (2) Text Repository: Browse and select texts saved by teachers or shared across schools. Teachers can upload and manage texts for students.",
+        "features": "Features: Two options available - (1) Upload Image/PDF: Upload photos or PDFs of textbooks, worksheets, or articles. AI uses OCR to extract text from images and PDFs. Image files support PNG, JPG, JPEG, and WEBP; you can upload multiple images (one per page). (2) Text Repository: Browse and select texts saved by teachers or shared across schools. Teachers can upload and manage texts for students.",
         "usage": "Usage: Switch between tabs to choose your method. For Upload Image/PDF: drag and drop or click to select files, then wait for text extraction. For Text Repository: browse available texts and click to load. Click 'New Text' to start over."
       }
     },
