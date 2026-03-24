@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Download, Loader2, Upload } from "lucide-react"
+import { Download, Info, Loader2, Upload } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -170,59 +170,60 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           <div className="flex items-center justify-between gap-2">
             <DialogTitle>{t("userManagement.title")}</DialogTitle>
             {isAdmin && (
-              <TooltipProvider delayDuration={300}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1 pr-6">
-                      {/* Export */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleExport}
-                        disabled={exporting || importing}
-                      >
-                        {exporting ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : (
-                          <Download className="h-4 w-4 mr-1" />
-                        )}
-                        {exporting
-                          ? t("userManagement.exportImport.exporting")
-                          : t("userManagement.exportImport.export")}
-                      </Button>
+              <div className="flex items-center gap-1 pr-6">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="p-1 rounded hover:bg-muted">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-64 text-center">
+                      {t("userManagement.exportImport.tooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
-                      {/* Import */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleImportClick}
-                        disabled={exporting || importing}
-                      >
-                        {importing ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : (
-                          <Upload className="h-4 w-4 mr-1" />
-                        )}
-                        {importing
-                          ? t("userManagement.exportImport.importing")
-                          : t("userManagement.exportImport.import")}
-                      </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExport}
+                  disabled={exporting || importing}
+                >
+                  {exporting ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-1" />
+                  )}
+                  {exporting
+                    ? t("userManagement.exportImport.exporting")
+                    : t("userManagement.exportImport.export")}
+                </Button>
 
-                      {/* Hidden file input — accepts v2 ZIP or legacy JSON */}
-                      <input
-                        ref={importFileRef}
-                        type="file"
-                        accept=".zip,application/zip,.json,application/json"
-                        className="hidden"
-                        onChange={handleFileSelected}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-64 text-center">
-                    {t("userManagement.exportImport.tooltip")}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleImportClick}
+                  disabled={exporting || importing}
+                >
+                  {importing ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4 mr-1" />
+                  )}
+                  {importing
+                    ? t("userManagement.exportImport.importing")
+                    : t("userManagement.exportImport.import")}
+                </Button>
+
+                <input
+                  ref={importFileRef}
+                  type="file"
+                  accept=".zip,application/zip,.json,application/json"
+                  className="hidden"
+                  onChange={handleFileSelected}
+                />
+              </div>
             )}
           </div>
         </DialogHeader>
