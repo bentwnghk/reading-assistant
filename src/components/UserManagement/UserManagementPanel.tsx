@@ -170,7 +170,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           <div className="flex items-center justify-between gap-2">
             <DialogTitle>{t("userManagement.title")}</DialogTitle>
             {isAdmin && (
-              <TooltipProvider>
+              <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-1 pr-6">
