@@ -858,12 +858,15 @@
       "school": "學校",
       "allSchools": "所有學校",
       "noSchool": "無學校",
+      "noClass": "無班別",
       "showing": "顯示 {{count}} 個用戶"
     },
     "roleUpdated": "角色已更新",
     "roleUpdateFailed": "更新角色失敗",
     "schoolUpdated": "學校已更新",
     "schoolUpdateFailed": "更新學校失敗",
+    "classUpdated": "班別已更新",
+    "classUpdateFailed": "更新班別失敗",
     "classes": {
       "description": "管理班別。老師可在其所屬學校內創建和編輯班別。",
       "name": "班別名稱",

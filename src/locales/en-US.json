@@ -858,12 +858,15 @@
       "school": "School",
       "allSchools": "All Schools",
       "noSchool": "No School",
+      "noClass": "No Class",
       "showing": "Showing {{count}} users"
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",
     "schoolUpdated": "School updated successfully",
     "schoolUpdateFailed": "Failed to update school",
+    "classUpdated": "Class updated successfully",
+    "classUpdateFailed": "Failed to update class",
     "classes": {
       "description": "Manage classes. Teachers can create and edit classes within their school.",
       "name": "Class Name",

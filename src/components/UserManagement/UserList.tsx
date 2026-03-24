@@ -22,7 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "sonner"
-import type { UserWithRole, UserRole, SchoolInfo } from "@/lib/users"
+import type { UserWithRole, UserRole, SchoolInfo, ClassInfo } from "@/lib/users"
 
 type SortField = "name" | "email" | "className" | "schoolName"
 type SortOrder = "asc" | "desc"
@@ -31,6 +31,7 @@ export default function UserList() {
   const { t } = useTranslation()
   const [users, setUsers] = useState<UserWithRole[]>([])
   const [schools, setSchools] = useState<SchoolInfo[]>([])
+  const [classes, setClasses] = useState<ClassInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
@@ -40,15 +41,19 @@ export default function UserList() {
 
   const loadData = useCallback(async () => {
     try {
-      const [usersRes, schoolsRes] = await Promise.all([
+      const [usersRes, schoolsRes, classesRes] = await Promise.all([
         fetch("/api/users"),
         fetch("/api/schools"),
+        fetch("/api/classes"),
       ])
       if (usersRes.ok) {
         setUsers(await usersRes.json())
       }
       if (schoolsRes.ok) {
         setSchools(await schoolsRes.json())
+      }
+      if (classesRes.ok) {
+        setClasses(await classesRes.json())
       }
     } catch (error) {
       console.error("Failed to load users:", error)
@@ -163,6 +168,32 @@ export default function UserList() {
     } catch (error) {
       console.error("Failed to update school:", error)
       toast.error(t("userManagement.schoolUpdateFailed"))
+    }
+  }
+
+  const handleClassChange = async (userId: string, classId: string) => {
+    const resolvedClassId = classId === "__none__" ? null : classId
+    try {
+      const response = await fetch(`/api/users/${userId}/class`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classId: resolvedClassId }),
+      })
+
+      if (response.ok) {
+        const matchingClass = classes.find(c => c.id === resolvedClassId)
+        setUsers(users.map(u =>
+          u.id === userId
+            ? { ...u, classId: resolvedClassId ?? undefined, className: matchingClass?.name }
+            : u
+        ))
+        toast.success(t("userManagement.classUpdated"))
+      } else {
+        toast.error(t("userManagement.classUpdateFailed"))
+      }
+    } catch (error) {
+      console.error("Failed to update class:", error)
+      toast.error(t("userManagement.classUpdateFailed"))
     }
   }
 
@@ -293,11 +324,24 @@ export default function UserList() {
                 </Badge>
               </TableCell>
               <TableCell>
-                {user.className ? (
-                  <Badge variant="outline">{user.className}</Badge>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
+                <Select
+                  value={user.classId ?? "__none__"}
+                  onValueChange={(value) => handleClassChange(user.id, value)}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder={t("userManagement.users.noClass")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">
+                      <span className="text-muted-foreground">{t("userManagement.users.noClass")}</span>
+                    </SelectItem>
+                    {classes.map((cls) => (
+                      <SelectItem key={cls.id} value={cls.id}>
+                        {cls.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </TableCell>
               <TableCell>
                 {user.schoolName ? (
