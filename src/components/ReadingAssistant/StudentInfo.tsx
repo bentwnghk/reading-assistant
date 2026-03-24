@@ -38,14 +38,6 @@ function StudentInfo() {
     return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
   }
 
-  function formatName(name: string): string {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length < 2) return name;
-    const surname = parts[parts.length - 1];
-    const firstName = parts.slice(0, -1).join(" ");
-    return `${surname}, ${firstName}`;
-  }
-
   return (
     <section className="p-4 border rounded-md">
       <div className="flex items-center justify-between border-b pb-4 mb-4">
@@ -53,7 +45,7 @@ function StudentInfo() {
           <User className="h-5 w-5 text-muted-foreground" />
           {t("reading.studentInfo.title")}
           {status === "authenticated" && session?.user?.name && (
-            <span className="text-muted-foreground font-normal">({formatName(session.user.name)})</span>
+            <span className="text-muted-foreground font-normal">({session.user.name})</span>
           )}
           <Popover>
             <PopoverTrigger asChild>
