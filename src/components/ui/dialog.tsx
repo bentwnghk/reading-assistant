@@ -39,8 +39,8 @@ const DialogContent = React.forwardRef<
       ref={ref}
       aria-describedby={undefined}
       onPointerDownOutside={(e) => {
-        const hasOpenSelect = document.querySelector("[data-state='open'][role='listbox']")
-        if (hasOpenSelect) {
+        const target = e.target as HTMLElement
+        if (target.closest("[data-radix-select-viewport]")) {
           e.preventDefault()
         }
       }}
