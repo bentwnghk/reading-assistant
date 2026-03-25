@@ -197,7 +197,7 @@ export function LeaderboardPage() {
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {t("leaderboard.thisWeek")}
+            {weekOffset === -1 ? t("leaderboard.thisWeek") : t("leaderboard.nextWeek")}
             <ChevronLeft className="h-4 w-4 rotate-180" />
           </button>
         </div>
