@@ -1123,7 +1123,7 @@
         "intro": "在學習旅程中解鎖徽章和里程碑。每個成就都標誌著向前邁進的重要一步！",
         "types": {
           "sessions_read": {
-            "name": "熱愛閱讀",
+            "name": "閱讀狂人",
             "desc": "上傳並提取閱讀材料中的文字。每處理一篇文章都算數！"
           },
           "vocabulary_collected": {
@@ -1196,7 +1196,7 @@
     "milestones": "里程碑",
     "types": {
       "sessions_read": {
-        "name": "熱愛閱讀",
+        "name": "閱讀狂人",
         "description": "閱讀 {{count}} 篇文章",
         "hint": "上傳並提取閱讀材料中的文字"
       },
