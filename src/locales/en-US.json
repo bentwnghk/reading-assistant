@@ -357,7 +357,7 @@
         "title": "Text Analysis & Adaptation Guide",
         "tabs": {
           "title": "Three Text Versions",
-          "original": "Original: The extracted text from your uploaded image(s)",
+          "original": "Original: The extracted text from your uploaded image(s)/PDF(s)",
           "adapted": "Adapted: AI-rewritten text matching your reading level (based on your age)",
           "simplified": "Simplified: An even simpler version for easier understanding"
         },

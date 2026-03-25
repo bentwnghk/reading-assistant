@@ -357,7 +357,7 @@
         "title": "文本分析與改寫指南",
         "tabs": {
           "title": "三個文本版本",
-          "original": "原文：從你上傳的圖片中提取的原始文本",
+          "original": "原文：從你上傳的圖片/PDF檔案中提取的原始文本",
           "adapted": "改寫版本：AI根據你的閱讀水平（基於你的年齡）重寫的文本",
           "simplified": "簡化版本：更簡單的版本，便於理解"
         },
@@ -397,7 +397,7 @@
       "avgSentenceLength": "平均詞數/句子",
       "fleschReadingEase": "Flesch 閱讀易度",
       "gradeLevel": "年級水平 (美國)",
-      "disclaimer": "CEFR等級和詞彙高亮是根據詞彙頻率數據分析的。Flesch閱讀易度和年級水平使用標準可讀性公式計算。",
+      "disclaimer": "CEFR 等級和詞彙高亮是根據詞彙頻率數據分析的。Flesch 閱讀易度和年級水平使用標準可讀性公式計算。",
       "cefrHighlight": "CEFR 詞彙高亮",
       "showHighlight": "高亮詞彙",
       "hideHighlight": "隱藏",
