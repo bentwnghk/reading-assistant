@@ -112,7 +112,7 @@ export function LandingPage() {
 
         <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-8 max-w-4xl text-slate-900 dark:text-white leading-[1.1]">
           <span className="inline-block hover:-translate-y-2 transition-transform duration-300">Mr.</span>
-          <span className="inline-block mx-2 hover:rotate-12 transition-transform duration-300 text-5xl sm:text-7xl">🆖</span>
+          <span className="inline-block mx-2 rotate-12 hover:rotate-0 transition-transform duration-300 text-5xl sm:text-7xl">🆖</span>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">
             ProReader
           </span>
