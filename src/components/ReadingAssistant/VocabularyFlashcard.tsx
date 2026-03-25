@@ -352,7 +352,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               "flex flex-col items-center justify-center p-6"
             )}
           >
-            <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="flex items-center justify-center gap-2 mb-2">
               <div className={cn(
                 "font-extrabold text-center",
                 (currentEntry.syllabification || currentEntry.word).length > 18 ? "text-3xl" : (currentEntry.syllabification || currentEntry.word).length > 12 ? "text-4xl" : "text-5xl"
@@ -372,6 +372,11 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
                 )}
               </button>
             </div>
+            {currentEntry.syllabification && currentEntry.syllabification !== currentEntry.word && (
+              <div className="text-base text-muted-foreground mb-2">
+                ({currentEntry.word})
+              </div>
+            )}
             {currentEntry.partOfSpeech && (
               <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-base font-medium">
                 {currentEntry.partOfSpeech}
