@@ -373,8 +373,8 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
               </button>
             </div>
             {currentEntry.syllabification && currentEntry.syllabification !== currentEntry.word && (
-              <div className="text-base text-muted-foreground mb-2">
-                ({currentEntry.word})
+              <div className="text-base font-medium text-muted-foreground mb-2">
+                [ {currentEntry.word} ]
               </div>
             )}
             {currentEntry.partOfSpeech && (
