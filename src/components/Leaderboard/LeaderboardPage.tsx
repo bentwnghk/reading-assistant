@@ -94,6 +94,8 @@ export function LeaderboardPage() {
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>("all");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all");
 
   const weekStart = getWeekStart(weekOffset);
 
@@ -117,6 +119,22 @@ export function LeaderboardPage() {
     setIsSuperAdmin(authSession?.user?.role === "super-admin");
   }, [authSession?.user?.role]);
 
+  useEffect(() => {
+    async function fetchSchools() {
+      if (!isSuperAdmin) return;
+      try {
+        const res = await fetch("/api/schools");
+        if (res.ok) {
+          const schoolsData = await res.json() as { id: string; name: string }[];
+          setSchools(schoolsData);
+        }
+      } catch {
+        // Silently fail
+      }
+    }
+    fetchSchools();
+  }, [isSuperAdmin]);
+
   // ── Fetch leaderboard ──
   const fetchBoard = useCallback(async () => {
     if (!userId) return;
@@ -127,6 +145,9 @@ export function LeaderboardPage() {
       if (scope === "class" && selectedClassId && selectedClassId !== "all") {
         params.set("classId", selectedClassId);
       }
+      if (scope === "school" && selectedSchoolId && selectedSchoolId !== "all") {
+        params.set("schoolId", selectedSchoolId);
+      }
       const res = await fetch(`/api/leaderboard?${params}`);
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json() as LeaderboardResponse;
@@ -136,7 +157,7 @@ export function LeaderboardPage() {
     } finally {
       setBoardLoading(false);
     }
-  }, [userId, scope, sortBy, weekStart, selectedClassId, t]);
+  }, [userId, scope, sortBy, weekStart, selectedClassId, selectedSchoolId, t]);
 
   // ── Fetch personal stats ──
   const fetchPersonal = useCallback(async () => {
@@ -330,6 +351,23 @@ export function LeaderboardPage() {
                 {teacherClasses.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}{isSuperAdmin && c.schoolName ? ` (${c.schoolName})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* School filter for super-admins */}
+          {scope === "school" && isSuperAdmin && schools.length > 0 && (
+            <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
+              <SelectTrigger className="w-full text-sm">
+                <SelectValue placeholder={t("leaderboard.selectSchool")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("leaderboard.allSchools")}</SelectItem>
+                {schools.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
                   </SelectItem>
                 ))}
               </SelectContent>
