@@ -6,7 +6,7 @@ import {
   type SortColumn,
 } from "@/lib/leaderboard"
 import { getWeekStart } from "@/lib/activity"
-import { getStudentClassId, getClassesForTeacher, getSchoolForUser } from "@/lib/users"
+import { getStudentClassId, getClassesForTeacher, getClassesForSchool, getSchoolForUser } from "@/lib/users"
 import { NextResponse } from "next/server"
 
 // GET /api/leaderboard?scope=class|school|global&classId=...&schoolId=...&week=YYYY-MM-DD&sortBy=...&limit=50
@@ -28,6 +28,7 @@ export async function GET(request: Request) {
     const weekStart = weekParam ? new Date(weekParam) : getWeekStart()
 
     const userId = session.user.id
+    const userRole = session.user.role
 
     // Always refresh the requesting user's own weekly stats so their latest
     // activity (quiz, test, spelling, flashcards) shows up immediately.
@@ -41,10 +42,19 @@ export async function GET(request: Request) {
     // Auto-resolve class when none is supplied explicitly.
     // For students: use their class membership.
     // For teachers: use ALL classes they teach.
+    // For admins: use ALL classes in their school.
     if (resolvedScope === "class" && !resolvedClassId) {
       const studentClassId = await getStudentClassId(userId)
       if (studentClassId) {
         resolvedClassId = studentClassId
+      } else if (userRole === "admin") {
+        const adminSchoolId = await getSchoolForUser(userId)
+        if (adminSchoolId) {
+          const schoolClasses = await getClassesForSchool(adminSchoolId)
+          if (schoolClasses.length > 0) {
+            resolvedClassIds = schoolClasses.map(c => c.id)
+          }
+        }
       } else {
         const teacherClasses = await getClassesForTeacher(userId)
         if (teacherClasses.length > 0) {

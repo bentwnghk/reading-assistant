@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getAllClasses, createClass, getClassesForTeacher, getSchoolForUser } from "@/lib/users"
+import { createClass, getClassesForTeacher, getClassesForSchool, getSchoolForUser } from "@/lib/users"
 
 export async function GET() {
   const session = await auth()
@@ -16,9 +16,9 @@ export async function GET() {
   try {
     let classes
     if (session.user.role === "admin") {
-      classes = await getAllClasses()
+      const schoolId = await getSchoolForUser(session.user.id)
+      classes = schoolId ? await getClassesForSchool(schoolId) : []
     } else {
-      // Teachers see all classes in their school
       classes = await getClassesForTeacher(session.user.id)
     }
     return NextResponse.json(classes)
