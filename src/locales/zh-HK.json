@@ -841,6 +841,7 @@
     },
     "roles": {
       "superAdmin": "超級管理員",
+      "super-admin": "超級管理員",
       "admin": "管理員",
       "teacher": "老師",
       "student": "學生"

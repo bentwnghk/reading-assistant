@@ -841,6 +841,7 @@
     },
     "roles": {
       "superAdmin": "Super Admin",
+      "super-admin": "Super Admin",
       "admin": "Admin",
       "teacher": "Teacher",
       "student": "Student"
