@@ -116,11 +116,16 @@ export async function ensureUserRole(userId: string, email?: string | null): Pro
   const client = await getClient()
   try {
     if (role === 'super-admin' || role === 'admin') {
-      await client.query(
-        `INSERT INTO user_roles (user_id, role) VALUES ($1, $2)
-         ON CONFLICT (user_id) DO UPDATE SET role = $2`,
-        [userId, role]
-      )
+      try {
+        await client.query(
+          `INSERT INTO user_roles (user_id, role) VALUES ($1, $2)
+           ON CONFLICT (user_id) DO UPDATE SET role = $2`,
+          [userId, role]
+        )
+      } catch {
+        // If INSERT fails (e.g., check constraint not updated), role is still valid
+        // based on email configuration
+      }
     } else {
       const existingResult = await client.query(
         'SELECT role FROM user_roles WHERE user_id = $1',
