@@ -138,7 +138,7 @@ CREATE TRIGGER update_reading_sessions_updated_at
 -- User roles table (extends Auth.js users)
 CREATE TABLE user_roles (
   user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('admin', 'teacher', 'student')),
+  role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('super-admin', 'admin', 'teacher', 'student')),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
