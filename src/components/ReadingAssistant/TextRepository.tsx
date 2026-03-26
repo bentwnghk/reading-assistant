@@ -422,7 +422,7 @@ interface TextRepositoryProps {
 function TextRepository({ onTextLoaded }: TextRepositoryProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const isAdmin = session?.user?.role === "admin";
+  const isAdmin = session?.user?.role === "admin" || session?.user?.role === "super-admin";
 
   const [items, setItems] = useState<RepositoryTextListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);

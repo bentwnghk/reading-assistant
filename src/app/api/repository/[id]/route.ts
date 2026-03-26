@@ -42,7 +42,7 @@ export async function PUT(request: Request, { params }: Params) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "admin") {
+    if (session.user.role !== "super-admin" && session.user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -77,7 +77,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "admin") {
+    if (session.user.role !== "super-admin" && session.user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

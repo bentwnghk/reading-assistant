@@ -57,7 +57,7 @@ function visibilityClause(
   schoolId: string | null | undefined,
   startParam: number
 ): { sql: string; values: unknown[] } {
-  if (role === "admin") {
+  if (role === "super-admin" || role === "admin") {
     return { sql: "1=1", values: [] }
   }
   if (schoolId) {
@@ -225,9 +225,10 @@ export async function updateRepositoryText(
     if (fields.length === 0) return true
 
     values.push(id)
-    // Admins can edit any text; others can only edit their own
-    const ownerCheck = role === "admin" ? "" : ` AND created_by = $${p + 1}`
-    if (role !== "admin") values.push(createdBy)
+    // Admins and super-admins can edit any text; others can only edit their own
+    const isPrivileged = role === "super-admin" || role === "admin"
+    const ownerCheck = isPrivileged ? "" : ` AND created_by = $${p + 1}`
+    if (!isPrivileged) values.push(createdBy)
 
     const result = await client.query(
       `UPDATE text_repository SET ${fields.join(", ")} WHERE id = $${p}${ownerCheck}`,
@@ -246,9 +247,10 @@ export async function deleteRepositoryText(
 ): Promise<boolean> {
   const client = await getClient()
   try {
-    // Admins can delete any text; others only their own
-    const ownerCheck = role === "admin" ? "" : " AND created_by = $2"
-    const values: unknown[] = role === "admin" ? [id] : [id, createdBy]
+    // Admins and super-admins can delete any text; others only their own
+    const isPrivileged = role === "super-admin" || role === "admin"
+    const ownerCheck = isPrivileged ? "" : " AND created_by = $2"
+    const values: unknown[] = isPrivileged ? [id] : [id, createdBy]
     const result = await client.query(
       `DELETE FROM text_repository WHERE id = $1${ownerCheck}`,
       values
