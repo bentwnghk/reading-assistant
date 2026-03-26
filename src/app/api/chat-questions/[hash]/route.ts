@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { getQuestionInstances } from "@/lib/chatQuestions"
+import { getClassesForTeacher, getSchoolForUser } from "@/lib/users"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
@@ -20,10 +21,12 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const isAdmin = session.user.role === "admin"
-    const isTeacher = session.user.role === "teacher"
+    const role = session.user.role
+    const isSuperAdmin = role === "super-admin"
+    const isAdmin = role === "admin"
+    const isTeacher = role === "teacher"
 
-    if (!isAdmin && !isTeacher) {
+    if (!isSuperAdmin && !isAdmin && !isTeacher) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -44,9 +47,32 @@ export async function GET(
     const startDate = query.startDate ? new Date(query.startDate) : undefined
     const endDate = query.endDate ? new Date(query.endDate) : undefined
 
+    let effectiveSchoolId = query.schoolId
+    const classId = query.classId
+    let classIds: string[] | undefined
+
+    if (isTeacher) {
+      const teacherClasses = await getClassesForTeacher(session.user.id)
+      const teacherClassIds = teacherClasses.map(c => c.id)
+      
+      if (classId && !teacherClassIds.includes(classId)) {
+        return NextResponse.json({ instances: [] })
+      }
+      
+      if (!classId && teacherClassIds.length > 0) {
+        classIds = teacherClassIds
+      }
+    } else if (isAdmin) {
+      const adminSchoolId = await getSchoolForUser(session.user.id)
+      if (adminSchoolId && !effectiveSchoolId) {
+        effectiveSchoolId = adminSchoolId
+      }
+    }
+
     const instances = await getQuestionInstances(hash, {
-      schoolId: query.schoolId,
-      classId: query.classId,
+      schoolId: effectiveSchoolId,
+      classId,
+      classIds,
       startDate,
       endDate,
     })

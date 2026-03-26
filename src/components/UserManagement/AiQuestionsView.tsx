@@ -53,6 +53,8 @@ interface AiQuestionsViewProps {
 
 export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsViewProps) {
   const { t } = useTranslation()
+  const isTeacher = !isSuperAdmin && !isAdmin
+  
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all")
@@ -64,8 +66,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   const [expandedHashes, setExpandedHashes] = useState<Set<string>>(new Set())
   const [instancesCache, setInstancesCache] = useState<Map<string, QuestionInstance[]>>(new Map())
   const [loadingInstances, setLoadingInstances] = useState<Set<string>>(new Set())
-
-  const _isTeacher = !isSuperAdmin && !isAdmin
+  const [initializedTeacherClass, setInitializedTeacherClass] = useState(false)
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -77,6 +78,11 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
       if (classesRes.ok) {
         const data: ClassInfo[] = await classesRes.json()
         setClasses(data)
+        
+        if (isTeacher && data.length > 0 && !initializedTeacherClass) {
+          setSelectedClassId(data[0].id)
+          setInitializedTeacherClass(true)
+        }
       }
 
       if (schoolsRes && schoolsRes.ok) {
@@ -86,7 +92,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
       console.error("Failed to load data:", error)
       toast.error(t("userManagement.loadFailed"))
     }
-  }, [t, isSuperAdmin])
+  }, [t, isSuperAdmin, isTeacher, initializedTeacherClass])
 
   const loadQuestions = useCallback(async () => {
     setLoading(true)

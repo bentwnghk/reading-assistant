@@ -81,6 +81,7 @@ export async function logChatQuestion(
 export async function getAggregatedQuestions(options: {
   schoolId?: string
   classId?: string
+  classIds?: string[]
   startDate?: Date
   endDate?: Date
   limit?: number
@@ -89,7 +90,7 @@ export async function getAggregatedQuestions(options: {
   const client = await getClient()
   try {
     const conditions: string[] = []
-    const params: (string | Date | number)[] = []
+    const params: (string | Date | number | string[])[] = []
     let paramIndex = 1
 
     if (options.startDate) {
@@ -113,6 +114,10 @@ export async function getAggregatedQuestions(options: {
     if (options.classId) {
       conditions.push(`cm.class_id = $${paramIndex}`)
       params.push(options.classId)
+      paramIndex++
+    } else if (options.classIds && options.classIds.length > 0) {
+      conditions.push(`cm.class_id = ANY($${paramIndex})`)
+      params.push(options.classIds)
       paramIndex++
     }
 
@@ -170,6 +175,7 @@ export async function getQuestionInstances(
   options: {
     schoolId?: string
     classId?: string
+    classIds?: string[]
     startDate?: Date
     endDate?: Date
   } = {}
@@ -177,7 +183,7 @@ export async function getQuestionInstances(
   const client = await getClient()
   try {
     const conditions: string[] = ["cq.question_hash = $1"]
-    const params: (string | Date)[] = [questionHash]
+    const params: (string | Date | string[])[] = [questionHash]
     let paramIndex = 2
 
     if (options.startDate) {
@@ -201,6 +207,10 @@ export async function getQuestionInstances(
     if (options.classId) {
       conditions.push(`cm.class_id = $${paramIndex}`)
       params.push(options.classId)
+      paramIndex++
+    } else if (options.classIds && options.classIds.length > 0) {
+      conditions.push(`cm.class_id = ANY($${paramIndex})`)
+      params.push(options.classIds)
       paramIndex++
     }
 
