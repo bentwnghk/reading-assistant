@@ -79,11 +79,15 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
     return Array.from(classSet).sort()
   }, [users])
 
+  const currentUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
+
   const filteredAndSortedUsers = useMemo(() => {
     let result = [...users]
 
     if (!isSuperAdmin) {
-      result = result.filter(u => u.role !== "super-admin")
+      result = result.filter(u => u.role !== "super-admin" && u.role !== "admin")
+    } else {
+      result = result.filter(u => u.role !== "super-admin" || u.id === currentUserId)
     }
 
     if (roleFilter !== "all") {
@@ -122,7 +126,7 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
     })
 
     return result
-  }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter, isSuperAdmin])
+  }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter, isSuperAdmin, currentUserId])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -253,9 +257,6 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("userManagement.users.allRoles")}</SelectItem>
-            {isSuperAdmin && (
-              <SelectItem value="super-admin">{t("userManagement.roles.superAdmin")}</SelectItem>
-            )}
             <SelectItem value="admin">{t("userManagement.roles.admin")}</SelectItem>
             <SelectItem value="teacher">{t("userManagement.roles.teacher")}</SelectItem>
             <SelectItem value="student">{t("userManagement.roles.student")}</SelectItem>
@@ -392,8 +393,8 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
               )}
               <TableCell>
                 <div className="flex flex-col gap-1">
-                  {(user.role === "super-admin" || user.role === "admin") && !isSuperAdmin ? (
-                    <Badge variant={user.role === "super-admin" ? "destructive" : "default"} className="flex items-center w-fit">
+                  {user.role === "super-admin" ? (
+                    <Badge variant="destructive" className="flex items-center w-fit">
                       {getRoleIcon(user.role)}
                       {t(`userManagement.roles.${user.role}`)}
                     </Badge>
@@ -419,25 +420,17 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                           </div>
                         </SelectItem>
                         {isSuperAdmin && (
-                          <>
-                            <SelectItem value="admin">
-                              <div className="flex items-center">
-                                <Shield className="h-3 w-3 mr-1" />
-                                {t("userManagement.roles.admin")}
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="super-admin">
-                              <div className="flex items-center">
-                                <Crown className="h-3 w-3 mr-1" />
-                                {t("userManagement.roles.superAdmin")}
-                              </div>
-                            </SelectItem>
-                          </>
-                        )}
+                           <SelectItem value="admin">
+                             <div className="flex items-center">
+                               <Shield className="h-3 w-3 mr-1" />
+                               {t("userManagement.roles.admin")}
+                             </div>
+                           </SelectItem>
+                         )}
                       </SelectContent>
                     </Select>
                   )}
-                  {isSuperAdmin && schools.length > 0 && (
+                  {isSuperAdmin && schools.length > 0 && user.role !== "super-admin" && (
                     <Select
                       value={user.schoolId ?? "__none__"}
                       onValueChange={(value) => handleSchoolChange(user.id, value)}

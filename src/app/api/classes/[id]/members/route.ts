@@ -18,7 +18,7 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  if (session.user.role !== "super-admin" && session.user.role !== "admin" && session.user.role !== "teacher") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -47,7 +47,7 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  if (session.user.role !== "super-admin" && session.user.role !== "admin" && session.user.role !== "teacher") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -103,7 +103,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  if (session.user.role !== "super-admin" && session.user.role !== "admin" && session.user.role !== "teacher") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
