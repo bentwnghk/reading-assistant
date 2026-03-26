@@ -82,6 +82,10 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
   const filteredAndSortedUsers = useMemo(() => {
     let result = [...users]
 
+    if (!isSuperAdmin) {
+      result = result.filter(u => u.role !== "super-admin")
+    }
+
     if (roleFilter !== "all") {
       result = result.filter(u => u.role === roleFilter)
     }
@@ -118,7 +122,7 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
     })
 
     return result
-  }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter])
+  }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter, isSuperAdmin])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -388,42 +392,49 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
               )}
               <TableCell>
                 <div className="flex flex-col gap-1">
-                  <Select
-                    value={user.role}
-                    onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="student">
-                        <div className="flex items-center">
-                          <User className="h-3 w-3 mr-1" />
-                          {t("userManagement.roles.student")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="teacher">
-                        <div className="flex items-center">
-                          <GraduationCap className="h-3 w-3 mr-1" />
-                          {t("userManagement.roles.teacher")}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="admin">
-                        <div className="flex items-center">
-                          <Shield className="h-3 w-3 mr-1" />
-                          {t("userManagement.roles.admin")}
-                        </div>
-                      </SelectItem>
-                      {isSuperAdmin && (
-                        <SelectItem value="super-admin">
+                  {user.role === "super-admin" && !isSuperAdmin ? (
+                    <Badge variant="destructive" className="flex items-center w-fit">
+                      {getRoleIcon(user.role)}
+                      {t(`userManagement.roles.${user.role}`)}
+                    </Badge>
+                  ) : (
+                    <Select
+                      value={user.role}
+                      onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">
                           <div className="flex items-center">
-                            <Crown className="h-3 w-3 mr-1" />
-                            {t("userManagement.roles.superAdmin")}
+                            <User className="h-3 w-3 mr-1" />
+                            {t("userManagement.roles.student")}
                           </div>
                         </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                        <SelectItem value="teacher">
+                          <div className="flex items-center">
+                            <GraduationCap className="h-3 w-3 mr-1" />
+                            {t("userManagement.roles.teacher")}
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="admin">
+                          <div className="flex items-center">
+                            <Shield className="h-3 w-3 mr-1" />
+                            {t("userManagement.roles.admin")}
+                          </div>
+                        </SelectItem>
+                        {isSuperAdmin && (
+                          <SelectItem value="super-admin">
+                            <div className="flex items-center">
+                              <Crown className="h-3 w-3 mr-1" />
+                              {t("userManagement.roles.superAdmin")}
+                            </div>
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
                   {isSuperAdmin && schools.length > 0 && (
                     <Select
                       value={user.schoolId ?? "__none__"}
