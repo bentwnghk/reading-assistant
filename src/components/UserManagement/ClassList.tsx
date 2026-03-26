@@ -371,25 +371,27 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                 rows={3}
               />
             </div>
-            <div>
-              <label className="text-sm font-medium">{t("userManagement.classes.teacher")}</label>
-              <Select
-                value={formData.teacherId}
-                onValueChange={(value) => setFormData({ ...formData, teacherId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("userManagement.classes.selectTeacher")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">{t("userManagement.classes.noTeacher")}</SelectItem>
-                  {filteredTeachers.map((teacher) => (
-                    <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.name || teacher.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!(isTeacher && selectedClass?.teacherId === session?.user?.id) && (
+              <div>
+                <label className="text-sm font-medium">{t("userManagement.classes.teacher")}</label>
+                <Select
+                  value={formData.teacherId}
+                  onValueChange={(value) => setFormData({ ...formData, teacherId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("userManagement.classes.selectTeacher")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("userManagement.classes.noTeacher")}</SelectItem>
+                    {filteredTeachers.map((teacher) => (
+                      <SelectItem key={teacher.id} value={teacher.id}>
+                        {teacher.name || teacher.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
