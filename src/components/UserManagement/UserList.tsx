@@ -324,24 +324,36 @@ export default function UserList() {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Select
-                  value={user.classId ?? "__none__"}
-                  onValueChange={(value) => handleClassChange(user.id, value)}
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder={t("userManagement.users.noClass")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">
-                      <span className="text-muted-foreground">{t("userManagement.users.noClass")}</span>
-                    </SelectItem>
-                    {classes.map((cls) => (
-                      <SelectItem key={cls.id} value={cls.id}>
-                        {cls.name}
-                      </SelectItem>
+                {user.role === "teacher" && user.taughtClassNames && user.taughtClassNames.length > 0 ? (
+                  <div className="flex flex-wrap gap-1 max-w-48">
+                    {user.taughtClassNames.map((name, idx) => (
+                      <Badge key={user.taughtClassIds?.[idx] || idx} variant="outline" className="text-xs">
+                        {name}
+                      </Badge>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                ) : user.role === "student" ? (
+                  <Select
+                    value={user.classId ?? "__none__"}
+                    onValueChange={(value) => handleClassChange(user.id, value)}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder={t("userManagement.users.noClass")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">
+                        <span className="text-muted-foreground">{t("userManagement.users.noClass")}</span>
+                      </SelectItem>
+                      {classes.map((cls) => (
+                        <SelectItem key={cls.id} value={cls.id}>
+                          {cls.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </TableCell>
               <TableCell>
                 {user.schoolName ? (

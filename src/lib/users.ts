@@ -18,6 +18,8 @@ export interface UserWithRole {
   role: UserRole
   classId?: string
   className?: string
+  taughtClassIds?: string[]
+  taughtClassNames?: string[]
   schoolId?: string
   schoolName?: string
   createdAt?: number
@@ -151,7 +153,17 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
         cm.class_id as "classId",
         c.name as "className",
         u.school_id as "schoolId",
-        s.name as "schoolName"
+        s.name as "schoolName",
+        (
+          SELECT COALESCE(json_agg(c2.id), '[]'::json)
+          FROM classes c2
+          WHERE c2.teacher_id = u.id
+        ) as "taughtClassIds",
+        (
+          SELECT COALESCE(json_agg(c3.name), '[]'::json)
+          FROM classes c3
+          WHERE c3.teacher_id = u.id
+        ) as "taughtClassNames"
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN class_members cm ON u.id = cm.student_id
@@ -168,6 +180,8 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       role: row.role as UserRole,
       classId: row.classId,
       className: row.className,
+      taughtClassIds: row.taughtClassIds || [],
+      taughtClassNames: row.taughtClassNames || [],
       schoolId: row.schoolId,
       schoolName: row.schoolName,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
@@ -447,7 +461,17 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
         u.school_id as "schoolId",
         s.name as "schoolName",
         cm.class_id as "classId",
-        c.name as "className"
+        c.name as "className",
+        (
+          SELECT COALESCE(json_agg(c2.id), '[]'::json)
+          FROM classes c2
+          WHERE c2.teacher_id = u.id
+        ) as "taughtClassIds",
+        (
+          SELECT COALESCE(json_agg(c3.name), '[]'::json)
+          FROM classes c3
+          WHERE c3.teacher_id = u.id
+        ) as "taughtClassNames"
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN schools s ON u.school_id = s.id
@@ -467,6 +491,8 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       schoolName: row.schoolName,
       classId: row.classId,
       className: row.className,
+      taughtClassIds: row.taughtClassIds || [],
+      taughtClassNames: row.taughtClassNames || [],
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
