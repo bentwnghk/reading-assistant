@@ -2,8 +2,22 @@ import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import { getRepositoryTexts, createRepositoryText } from "@/lib/repository"
 import { getSchoolForUser } from "@/lib/users"
+import { getClient } from "@/lib/db"
 
 type TextVisibility = 'class' | 'school' | 'public'
+
+async function getTeacherClasses(teacherId: string): Promise<{ id: string; name: string }[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT id, name FROM classes WHERE teacher_id = $1 ORDER BY name`,
+      [teacherId]
+    )
+    return result.rows.map(r => ({ id: r.id, name: r.name }))
+  } finally {
+    client.release()
+  }
+}
 
 export async function GET() {
   try {
@@ -37,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, title, extractedText, visibility, images } = body
+    const { name, title, extractedText, visibility, classId, images } = body
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json({ error: "name is required" }, { status: 400 })
@@ -49,8 +63,17 @@ export async function POST(request: Request) {
     const schoolId = await getSchoolForUser(session.user.id)
     
     let finalVisibility: TextVisibility
+    let finalClassId: string | null = null
+    
     if (role === "teacher") {
       finalVisibility = "class"
+      if (classId) {
+        const teacherClasses = await getTeacherClasses(session.user.id)
+        const validClass = teacherClasses.find(c => c.id === classId)
+        if (validClass) {
+          finalClassId = classId
+        }
+      }
     } else if (role === "admin") {
       finalVisibility = (visibility as TextVisibility) || "school"
       if (finalVisibility === "public") {
@@ -65,10 +88,11 @@ export async function POST(request: Request) {
       title: title ?? "",
       extractedText,
       visibility: finalVisibility,
+      classId: finalClassId,
       images: Array.isArray(images) ? images : [],
     })
 
-    return NextResponse.json({ id, visibility: finalVisibility }, { status: 201 })
+    return NextResponse.json({ id, visibility: finalVisibility, classId: finalClassId }, { status: 201 })
   } catch (error) {
     console.error("Error creating repository text:", error)
     return NextResponse.json(

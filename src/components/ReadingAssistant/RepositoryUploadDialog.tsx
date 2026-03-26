@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -31,6 +31,11 @@ import useModelProvider from "@/hooks/useAiProvider";
 import { processPdfFile } from "@/utils/parser/pdfParser";
 
 type TextVisibility = 'class' | 'school' | 'public'
+
+interface TeacherClass {
+  id: string;
+  name: string;
+}
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -65,6 +70,9 @@ function RepositoryUploadDialog({
 
   const [name, setName] = useState("");
   const [visibility, setVisibility] = useState<TextVisibility>("class");
+  const [selectedClassId, setSelectedClassId] = useState<string>("all");
+  const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(false);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [images, setImages] = useState<string[]>([]);
@@ -84,9 +92,25 @@ function RepositoryUploadDialog({
 
   const defaultVisibility = isTeacher ? "class" : "school";
 
+  useEffect(() => {
+    if (open && isTeacher) {
+      setIsLoadingClasses(true);
+      fetch("/api/classes")
+        .then((r) => r.json())
+        .then((data) => {
+          setTeacherClasses(data || []);
+        })
+        .catch(() => {
+          setTeacherClasses([]);
+        })
+        .finally(() => setIsLoadingClasses(false));
+    }
+  }, [open, isTeacher]);
+
   const reset = useCallback(() => {
     setName("");
     setVisibility(defaultVisibility);
+    setSelectedClassId("all");
     setPhase("idle");
     setImages([]);
     extractedTextRef.current = "";
@@ -233,6 +257,7 @@ function RepositoryUploadDialog({
           title: generatedTitle,
           extractedText,
           visibility,
+          classId: selectedClassId !== "all" ? selectedClassId : null,
           images,
         }),
       });
@@ -241,8 +266,10 @@ function RepositoryUploadDialog({
         throw new Error("Save failed");
       }
 
-      const { id, visibility: actualVisibility } = await res.json();
+      const { id, visibility: actualVisibility, classId: actualClassId } = await res.json();
       toast.success(t("reading.repository.uploadSuccess"));
+
+      const selectedClass = teacherClasses.find(c => c.id === actualClassId);
 
       const newItem: RepositoryTextListItem = {
         id,
@@ -252,6 +279,8 @@ function RepositoryUploadDialog({
         imageCount: images.length,
         schoolId: null,
         schoolName: null,
+        classId: actualClassId || null,
+        className: selectedClass?.name || null,
         visibility: actualVisibility || visibility,
         createdBy: session?.user?.id || "",
         createdByName: session?.user?.name || null,
@@ -406,7 +435,7 @@ function RepositoryUploadDialog({
             </div>
           )}
 
-          <div className="rounded-lg border p-3 space-y-2">
+          <div className="rounded-lg border p-3 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-sm font-medium">
                 {visibility === "public" ? (
@@ -459,6 +488,45 @@ function RepositoryUploadDialog({
                   ? t("reading.repository.visibilitySchoolHint")
                   : t("reading.repository.visibilityClassHint")}
             </p>
+
+            {isTeacher && visibility === "class" && (
+              <div className="pt-2 border-t">
+                <Label className="text-sm font-medium mb-1.5 block">
+                  {t("reading.repository.selectClass")}
+                </Label>
+                {isLoadingClasses ? (
+                  <div className="flex items-center gap-2 py-2 text-muted-foreground">
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">{t("reading.repository.loadingClasses")}</span>
+                  </div>
+                ) : (
+                  <Select
+                    value={selectedClassId}
+                    onValueChange={setSelectedClassId}
+                    disabled={isProcessing}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">
+                        {t("reading.repository.allMyClasses")}
+                      </SelectItem>
+                      {teacherClasses.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  {selectedClassId === "all"
+                    ? t("reading.repository.selectClassAllHint")
+                    : t("reading.repository.selectClassHint")}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

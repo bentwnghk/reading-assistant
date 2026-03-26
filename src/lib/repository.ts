@@ -11,6 +11,8 @@ function rowToListItem(row: Record<string, unknown>): RepositoryTextListItem {
     imageCount: Number(row.image_count ?? 0),
     schoolId: (row.school_id as string) || null,
     schoolName: (row.school_name as string) || null,
+    classId: (row.class_id as string) || null,
+    className: (row.class_name as string) || null,
     visibility: (row.visibility as TextVisibility) || "school",
     createdBy: row.created_by as string,
     createdByName: (row.created_by_name as string) || null,
@@ -33,6 +35,7 @@ function rowToFull(
       .sort((a, b) => a.image_order - b.image_order)
       .map((img) => bufferToBase64(img.image_data as Buffer, img.content_type)),
     schoolId: (row.school_id as string) || null,
+    classId: (row.class_id as string) || null,
     visibility: (row.visibility as TextVisibility) || "school",
     createdBy: row.created_by as string,
     createdByName: (row.created_by_name as string) || null,
@@ -124,7 +127,7 @@ function buildVisibilityClause(
       conditions.push(`
         (tr.visibility = 'class' AND tr.created_by IN (
           SELECT teacher_id FROM classes WHERE id = $${paramIdx}
-        ))
+        ) AND (tr.class_id IS NULL OR tr.class_id = $${paramIdx}))
       `)
       values.push(studentClassId)
       paramIdx++
@@ -155,20 +158,23 @@ export async function getRepositoryTexts(
          tr.extracted_text,
          tr.school_id,
          tr.visibility,
+         tr.class_id,
          tr.created_by,
          tr.created_at,
          tr.updated_at,
-         u.name  AS created_by_name,
-         ur.role AS created_by_role,
-         s.name  AS school_name,
+         u.name   AS created_by_name,
+         ur.role  AS created_by_role,
+         s.name   AS school_name,
+         c.name   AS class_name,
          COUNT(tri.id)::int AS image_count
        FROM text_repository tr
        LEFT JOIN users      u  ON tr.created_by = u.id
        LEFT JOIN user_roles ur ON tr.created_by = ur.user_id
        LEFT JOIN schools    s  ON tr.school_id = s.id
+       LEFT JOIN classes    c  ON tr.class_id = c.id
        LEFT JOIN text_repository_images tri ON tri.text_id = tr.id
        WHERE ${vis}
-       GROUP BY tr.id, u.name, ur.role, s.name
+       GROUP BY tr.id, u.name, ur.role, s.name, c.name
        ORDER BY tr.updated_at DESC`,
       values
     )
@@ -222,6 +228,7 @@ export async function createRepositoryText(
     title: string
     extractedText: string
     visibility: TextVisibility
+    classId?: string | null
     images: string[]
   }
 ): Promise<string> {
@@ -230,10 +237,10 @@ export async function createRepositoryText(
     await client.query("BEGIN")
 
     const result = await client.query(
-      `INSERT INTO text_repository (name, title, extracted_text, school_id, visibility, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO text_repository (name, title, extracted_text, school_id, visibility, class_id, created_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [data.name, data.title, data.extractedText, schoolId, data.visibility, createdBy]
+      [data.name, data.title, data.extractedText, schoolId, data.visibility, data.classId || null, createdBy]
     )
     const textId: string = result.rows[0].id
 

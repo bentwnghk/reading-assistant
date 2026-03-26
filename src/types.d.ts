@@ -308,6 +308,7 @@ interface RepositoryText {
   extractedText: string;
   originalImages: string[];
   schoolId: string | null;
+  classId?: string | null;
   visibility: TextVisibility;
   createdBy: string;
   createdByName?: string | null;
@@ -323,6 +324,8 @@ interface RepositoryTextListItem {
   imageCount: number;
   schoolId: string | null;
   schoolName?: string | null;
+  classId?: string | null;
+  className?: string | null;
   visibility: TextVisibility;
   createdBy: string;
   createdByName?: string | null;

@@ -111,9 +111,10 @@ function SortButton({
   );
 }
 
-function VisibilityBadge({ visibility, schoolName, t }: { 
+function VisibilityBadge({ visibility, schoolName, className, t }: { 
   visibility: TextVisibility; 
   schoolName?: string | null;
+  className?: string | null;
   t: (key: string) => string;
 }) {
   if (visibility === "public") {
@@ -135,7 +136,7 @@ function VisibilityBadge({ visibility, schoolName, t }: {
   return (
     <Badge variant="outline" className="gap-1 text-xs bg-muted">
       <Users className="h-3 w-3" />
-      {t("reading.repository.visibilityClass")}
+      {className || t("reading.repository.visibilityClass")}
     </Badge>
   );
 }
@@ -908,6 +909,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
                       <VisibilityBadge 
                         visibility={item.visibility} 
                         schoolName={item.schoolName}
+                        className={item.className}
                         t={t}
                       />
                     </TableCell>
