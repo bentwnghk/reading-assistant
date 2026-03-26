@@ -86,26 +86,32 @@ function RepositoryUploadDialog({
   const isTeacher = userRole === "teacher";
   const isAdmin = userRole === "admin";
   const isSuperAdmin = userRole === "super-admin";
+  const hasTeacherClasses = teacherClasses.length > 0;
 
   const canSetSchool = isAdmin || isSuperAdmin;
   const canSetPublic = isSuperAdmin;
+  const canSetClass = isTeacher || (isAdmin && hasTeacherClasses);
 
-  const defaultVisibility = isTeacher ? "class" : "school";
+  const defaultVisibility = canSetClass ? "class" : "school";
 
   useEffect(() => {
-    if (open && isTeacher) {
+    if (open && (isTeacher || isAdmin)) {
       setIsLoadingClasses(true);
       fetch("/api/classes")
         .then((r) => r.json())
         .then((data) => {
-          setTeacherClasses(data || []);
+          const classes = data || [];
+          setTeacherClasses(classes);
+          if (isAdmin && classes.length > 0) {
+            setVisibility("class");
+          }
         })
         .catch(() => {
           setTeacherClasses([]);
         })
         .finally(() => setIsLoadingClasses(false));
     }
-  }, [open, isTeacher]);
+  }, [open, isTeacher, isAdmin]);
 
   const reset = useCallback(() => {
     setName("");
@@ -456,12 +462,14 @@ function RepositoryUploadDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="class">
-                    <div className="flex items-center gap-1.5">
-                      <Users className="h-3.5 w-3.5" />
-                      {t("reading.repository.visibilityClass")}
-                    </div>
-                  </SelectItem>
+                  {canSetClass && (
+                    <SelectItem value="class">
+                      <div className="flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5" />
+                        {t("reading.repository.visibilityClass")}
+                      </div>
+                    </SelectItem>
+                  )}
                   {canSetSchool && (
                     <SelectItem value="school">
                       <div className="flex items-center gap-1.5">
@@ -489,7 +497,7 @@ function RepositoryUploadDialog({
                   : t("reading.repository.visibilityClassHint")}
             </p>
 
-            {isTeacher && visibility === "class" && (
+            {canSetClass && visibility === "class" && (
               <div className="pt-2 border-t">
                 <Label className="text-sm font-medium mb-1.5 block">
                   {t("reading.repository.selectClass")}

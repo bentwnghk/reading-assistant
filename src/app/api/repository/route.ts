@@ -64,23 +64,37 @@ export async function POST(request: Request) {
     
     let finalVisibility: TextVisibility
     let finalClassId: string | null = null
+
+    const userClasses = await getTeacherClasses(session.user.id)
+    const hasClasses = userClasses.length > 0
     
-    if (role === "teacher") {
+    if (role === "super-admin") {
+      finalVisibility = (visibility as TextVisibility) || "school"
+    } else if (role === "admin") {
+      if (hasClasses && visibility === "class") {
+        finalVisibility = "class"
+        if (classId) {
+          const validClass = userClasses.find(c => c.id === classId)
+          if (validClass) {
+            finalClassId = classId
+          }
+        }
+      } else {
+        finalVisibility = (visibility as TextVisibility) || "school"
+        if (finalVisibility === "public") {
+          finalVisibility = "school"
+        }
+      }
+    } else if (role === "teacher") {
       finalVisibility = "class"
       if (classId) {
-        const teacherClasses = await getTeacherClasses(session.user.id)
-        const validClass = teacherClasses.find(c => c.id === classId)
+        const validClass = userClasses.find(c => c.id === classId)
         if (validClass) {
           finalClassId = classId
         }
       }
-    } else if (role === "admin") {
-      finalVisibility = (visibility as TextVisibility) || "school"
-      if (finalVisibility === "public") {
-        finalVisibility = "school"
-      }
     } else {
-      finalVisibility = (visibility as TextVisibility) || "school"
+      finalVisibility = "school"
     }
 
     const id = await createRepositoryText(session.user.id, schoolId, {
