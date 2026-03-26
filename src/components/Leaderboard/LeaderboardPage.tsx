@@ -49,6 +49,7 @@ import type { LeaderboardResponse, PersonalStats, LeaderboardScope, SortColumn }
 interface TeacherClass {
   id: string;
   name: string;
+  schoolName?: string;
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -92,6 +93,7 @@ export function LeaderboardPage() {
   const [helpTab, setHelpTab] = useState<"achievements" | "leaderboard">("achievements");
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>("all");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const weekStart = getWeekStart(weekOffset);
 
@@ -110,6 +112,10 @@ export function LeaderboardPage() {
     }
     fetchTeacherClasses();
   }, [userId]);
+
+  useEffect(() => {
+    setIsSuperAdmin(authSession?.user?.role === "super-admin");
+  }, [authSession?.user?.role]);
 
   // ── Fetch leaderboard ──
   const fetchBoard = useCallback(async () => {
@@ -313,8 +319,8 @@ export function LeaderboardPage() {
             ))}
           </div>
 
-          {/* Class filter for teachers */}
-          {scope === "class" && teacherClasses.length > 1 && (
+          {/* Class filter for teachers and super-admins */}
+          {scope === "class" && (teacherClasses.length > 1 || (isSuperAdmin && teacherClasses.length > 0)) && (
             <Select value={selectedClassId} onValueChange={setSelectedClassId}>
               <SelectTrigger className="w-full text-sm">
                 <SelectValue placeholder={t("leaderboard.selectClass")} />
@@ -323,7 +329,7 @@ export function LeaderboardPage() {
                 <SelectItem value="all">{t("leaderboard.allClasses")}</SelectItem>
                 {teacherClasses.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.name}
+                    {c.name}{isSuperAdmin && c.schoolName ? ` (${c.schoolName})` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>

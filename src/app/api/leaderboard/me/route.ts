@@ -1,7 +1,6 @@
 import { auth } from "@/auth"
 import { getPersonalStats, refreshWeeklyStatsForUser } from "@/lib/leaderboard"
 import { getWeekStart } from "@/lib/activity"
-import { getUserRole } from "@/lib/users"
 import { NextResponse } from "next/server"
 
 // GET /api/leaderboard/me?week=YYYY-MM-DD
@@ -13,13 +12,6 @@ export async function GET(request: Request) {
     }
 
     const userId = session.user.id
-    const role   = await getUserRole(userId, session.user.email)
-
-    // Teachers and admins are not learners — return a flag so the UI can
-    // show an appropriate message instead of a stats card full of zeros.
-    if (role === "teacher" || role === "admin") {
-      return NextResponse.json({ isTeacher: true })
-    }
 
     const { searchParams } = new URL(request.url)
     const weekParam = searchParams.get("week")
