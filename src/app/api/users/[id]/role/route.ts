@@ -32,7 +32,7 @@ export async function PUT(
     
     const validRoles = role === "super-admin" 
       ? ["super-admin", "admin", "teacher", "student"]
-      : ["admin", "teacher", "student"]
+      : ["teacher", "student"]
     
     if (!validRoles.includes(newRole)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 })

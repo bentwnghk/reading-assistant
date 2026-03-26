@@ -392,8 +392,8 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
               )}
               <TableCell>
                 <div className="flex flex-col gap-1">
-                  {user.role === "super-admin" && !isSuperAdmin ? (
-                    <Badge variant="destructive" className="flex items-center w-fit">
+                  {(user.role === "super-admin" || user.role === "admin") && !isSuperAdmin ? (
+                    <Badge variant={user.role === "super-admin" ? "destructive" : "default"} className="flex items-center w-fit">
                       {getRoleIcon(user.role)}
                       {t(`userManagement.roles.${user.role}`)}
                     </Badge>
@@ -418,19 +418,21 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                             {t("userManagement.roles.teacher")}
                           </div>
                         </SelectItem>
-                        <SelectItem value="admin">
-                          <div className="flex items-center">
-                            <Shield className="h-3 w-3 mr-1" />
-                            {t("userManagement.roles.admin")}
-                          </div>
-                        </SelectItem>
                         {isSuperAdmin && (
-                          <SelectItem value="super-admin">
-                            <div className="flex items-center">
-                              <Crown className="h-3 w-3 mr-1" />
-                              {t("userManagement.roles.superAdmin")}
-                            </div>
-                          </SelectItem>
+                          <>
+                            <SelectItem value="admin">
+                              <div className="flex items-center">
+                                <Shield className="h-3 w-3 mr-1" />
+                                {t("userManagement.roles.admin")}
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="super-admin">
+                              <div className="flex items-center">
+                                <Crown className="h-3 w-3 mr-1" />
+                                {t("userManagement.roles.superAdmin")}
+                              </div>
+                            </SelectItem>
+                          </>
                         )}
                       </SelectContent>
                     </Select>

@@ -791,7 +791,7 @@ export async function canManageUser(actorId: string, actorRole: string, targetUs
        WHERE u1.id = $1 AND u2.id = $2 
        AND u1.school_id = u2.school_id 
        AND u1.school_id IS NOT NULL
-       AND u2.role != 'super-admin'`,
+       AND u2.role NOT IN ('super-admin', 'admin')`,
       [actorId, targetUserId]
     )
     return result.rows.length > 0
