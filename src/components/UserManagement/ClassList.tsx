@@ -66,10 +66,12 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
         setClasses(await classesRes.json())
       }
 
-      const usersRes = await fetch("/api/users")
-      if (usersRes?.ok) {
-        const users: UserWithRole[] = await usersRes.json()
-        setTeachers(users.filter(u => u.role === "teacher" || u.role === "admin" || u.role === "super-admin"))
+      if (!isTeacher) {
+        const usersRes = await fetch("/api/users")
+        if (usersRes?.ok) {
+          const users: UserWithRole[] = await usersRes.json()
+          setTeachers(users.filter(u => u.role === "teacher" || u.role === "admin" || u.role === "super-admin"))
+        }
       }
     } catch (error) {
       console.error("Failed to load data:", error)
@@ -77,7 +79,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, isTeacher])
 
   useEffect(() => {
     loadData()
@@ -85,12 +87,8 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
 
   const filteredTeachers = useMemo(() => {
     if (isSuperAdmin) return teachers
-    if (!isTeacher || !session?.user?.id) return teachers
-    const currentUserEntry = teachers.find(u => u.id === session.user.id)
-    const mySchoolId = currentUserEntry?.schoolId
-    if (!mySchoolId) return teachers
-    return teachers.filter(u => u.schoolId === mySchoolId)
-  }, [teachers, isSuperAdmin, isTeacher, session?.user?.id])
+    return teachers
+  }, [teachers, isSuperAdmin])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
