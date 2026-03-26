@@ -35,6 +35,7 @@ import type { ClassInfo, UserWithRole } from "@/lib/users"
 import ClassMembers from "./ClassMembers"
 
 interface ClassListProps {
+  isSuperAdmin: boolean
   isAdmin: boolean
   currentUserId?: string
 }
@@ -42,7 +43,7 @@ interface ClassListProps {
 type SortField = "name" | "teacherName" | "schoolName"
 type SortOrder = "asc" | "desc"
 
-export default function ClassList({ isAdmin, currentUserId: _currentUserId }: ClassListProps) {
+export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _currentUserId }: ClassListProps) {
   const { t } = useTranslation()
   const { data: session } = useSession()
   const isTeacher = session?.user?.role === "teacher"
@@ -60,17 +61,15 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      // Classes are already school-scoped by the API for teachers
       const classesRes = await fetch("/api/classes")
       if (classesRes.ok) {
         setClasses(await classesRes.json())
       }
 
-      // Load users to populate teacher selector (admin+teacher roles only)
       const usersRes = await fetch("/api/users")
       if (usersRes?.ok) {
         const users: UserWithRole[] = await usersRes.json()
-        setTeachers(users.filter(u => u.role === "teacher" || u.role === "admin"))
+        setTeachers(users.filter(u => u.role === "teacher" || u.role === "admin" || u.role === "super-admin"))
       }
     } catch (error) {
       console.error("Failed to load data:", error)
@@ -84,14 +83,14 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
     loadData()
   }, [loadData])
 
-  // For teachers, only show teachers from their own school in the selector
   const filteredTeachers = useMemo(() => {
+    if (isSuperAdmin) return teachers
     if (!isTeacher || !session?.user?.id) return teachers
     const currentUserEntry = teachers.find(u => u.id === session.user.id)
     const mySchoolId = currentUserEntry?.schoolId
     if (!mySchoolId) return teachers
     return teachers.filter(u => u.schoolId === mySchoolId)
-  }, [teachers, isTeacher, session?.user?.id])
+  }, [teachers, isSuperAdmin, isTeacher, session?.user?.id])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -119,6 +118,28 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
       return sortOrder === "asc" ? comparison : -comparison
     })
   }, [classes, sortField, sortOrder])
+
+  const canEditClass = (classInfo: ClassInfo) => {
+    if (isSuperAdmin) return true
+    if (isAdmin) return true
+    if (isTeacher && session?.user?.id) {
+      return classInfo.teacherId === session.user.id
+    }
+    return false
+  }
+
+  const canDeleteClass = () => {
+    return isSuperAdmin || isAdmin
+  }
+
+  const canManageMembers = (classInfo: ClassInfo) => {
+    if (isSuperAdmin) return true
+    if (isAdmin) return true
+    if (isTeacher && session?.user?.id) {
+      return classInfo.teacherId === session.user.id
+    }
+    return false
+  }
 
   const openCreateDialog = () => {
     setSelectedClass(null)
@@ -202,13 +223,17 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">{t("userManagement.classes.description")}</p>
-        {(isAdmin || isTeacher) && (
-          <Button onClick={openCreateDialog} size="sm">
-            <Plus className="h-4 w-4 mr-1" />
-            {t("userManagement.classes.create")}
-          </Button>
-        )}
+        <p className="text-sm text-muted-foreground">
+          {isSuperAdmin 
+            ? t("userManagement.classes.descriptionSuperAdmin")
+            : isAdmin
+              ? t("userManagement.classes.descriptionAdmin")
+              : t("userManagement.classes.descriptionTeacher")}
+        </p>
+        <Button onClick={openCreateDialog} size="sm">
+          <Plus className="h-4 w-4 mr-1" />
+          {t("userManagement.classes.create")}
+        </Button>
       </div>
 
       <Table>
@@ -220,7 +245,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                 <ArrowUpDown className="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            {isAdmin && (
+            {isSuperAdmin && (
               <TableHead>
                 <Button variant="ghost" size="sm" onClick={() => handleSort("schoolName")}>
                   {t("userManagement.classes.school")}
@@ -251,7 +276,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                   )}
                 </div>
               </TableCell>
-              {isAdmin && (
+              {isSuperAdmin && (
                 <TableCell>
                   {classInfo.schoolName ? (
                     <div className="flex items-center gap-1">
@@ -275,16 +300,17 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
               </TableCell>
               <TableCell>
                 <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openMembersDialog(classInfo)}
-                    title={t("userManagement.classes.manageMembers")}
-                  >
-                    <Users className="h-4 w-4" />
-                  </Button>
-                  {/* Teachers can edit classes from their school; admins can edit any */}
-                  {(isAdmin || isTeacher) && (
+                  {canManageMembers(classInfo) && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openMembersDialog(classInfo)}
+                      title={t("userManagement.classes.manageMembers")}
+                    >
+                      <Users className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {canEditClass(classInfo) && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -294,8 +320,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
                       <Pencil className="h-4 w-4" />
                     </Button>
                   )}
-                  {/* Only admins can delete classes */}
-                  {isAdmin && (
+                  {canDeleteClass() && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -378,7 +403,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
           <DialogHeader>
             <DialogTitle>
               {t("userManagement.classes.membersTitle", { name: selectedClass?.name })}
-              {selectedClass?.schoolName && (
+              {isSuperAdmin && selectedClass?.schoolName && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   — {selectedClass.schoolName}
                 </span>
@@ -388,7 +413,7 @@ export default function ClassList({ isAdmin, currentUserId: _currentUserId }: Cl
           {selectedClass && (
             <ClassMembers
               classId={selectedClass.id}
-              isAdmin={isAdmin}
+              isAdmin={isSuperAdmin || isAdmin}
               onMembersChange={loadData}
             />
           )}

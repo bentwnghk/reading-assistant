@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { updateClass, deleteClass, getAllClasses, getClassesForTeacher, canAccessClass, getSchoolForUser } from "@/lib/users"
+import { updateClass, deleteClass, getAllClasses, getClassesForSchool, getClassesForTeacher, canAccessClass, canManageClass, getSchoolForUser } from "@/lib/users"
 
 export async function GET(
   _request: Request,
@@ -12,16 +12,23 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id } = await params
 
   try {
-    const classes = session.user.role === "admin"
-      ? await getAllClasses()
-      : await getClassesForTeacher(session.user.id)
+    let classes
+    if (role === "super-admin") {
+      classes = await getAllClasses()
+    } else if (role === "admin") {
+      const schoolId = await getSchoolForUser(session.user.id)
+      classes = schoolId ? await getClassesForSchool(schoolId) : []
+    } else {
+      classes = await getClassesForTeacher(session.user.id)
+    }
 
     const classInfo = classes.find(c => c.id === id)
 
@@ -46,15 +53,14 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Both admins and teachers can update classes, but only within their school
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id } = await params
 
-  // Verify the caller belongs to the same school as this class
-  if (!await canAccessClass(session.user.id, session.user.role, id)) {
+  if (!await canAccessClass(session.user.id, role, id)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -66,9 +72,8 @@ export async function PUT(
       return NextResponse.json({ error: "Class name is required" }, { status: 400 })
     }
 
-    // schoolId: admin may change it explicitly; teacher always stays in their own school
     let schoolId: string | undefined
-    if (session.user.role === "admin") {
+    if (role === "super-admin") {
       if (body.schoolId) {
         schoolId = body.schoolId
       } else if (teacherId) {
@@ -76,8 +81,8 @@ export async function PUT(
         schoolId = teacherSchool ?? undefined
       }
     } else {
-      const teacherSchool = await getSchoolForUser(session.user.id)
-      schoolId = teacherSchool ?? undefined
+      const userSchool = await getSchoolForUser(session.user.id)
+      schoolId = userSchool ?? undefined
     }
 
     const success = await updateClass(id, name.trim(), description?.trim() || "", teacherId, schoolId)
@@ -103,12 +108,19 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Only admins can delete classes
-  if (session.user.role !== "admin") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id } = await params
+
+  if (role === "admin") {
+    const canManage = await canManageClass(session.user.id, role, id)
+    if (!canManage) {
+      return NextResponse.json({ error: "Forbidden - can only delete classes in your school" }, { status: 403 })
+    }
+  }
 
   try {
     const success = await deleteClass(id)

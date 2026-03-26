@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -27,7 +27,11 @@ import type { UserWithRole, UserRole, SchoolInfo, ClassInfo } from "@/lib/users"
 type SortField = "name" | "email" | "className" | "schoolName"
 type SortOrder = "asc" | "desc"
 
-export default function UserList() {
+interface UserListProps {
+  isSuperAdmin: boolean
+}
+
+export default function UserList({ isSuperAdmin }: UserListProps) {
   const { t } = useTranslation()
   const [users, setUsers] = useState<UserWithRole[]>([])
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -43,13 +47,13 @@ export default function UserList() {
     try {
       const [usersRes, schoolsRes, classesRes] = await Promise.all([
         fetch("/api/users"),
-        fetch("/api/schools"),
+        isSuperAdmin ? fetch("/api/schools") : null,
         fetch("/api/classes"),
       ])
       if (usersRes.ok) {
         setUsers(await usersRes.json())
       }
-      if (schoolsRes.ok) {
+      if (schoolsRes && schoolsRes.ok) {
         setSchools(await schoolsRes.json())
       }
       if (classesRes.ok) {
@@ -61,18 +65,18 @@ export default function UserList() {
     } finally {
       setLoading(false)
     }
-  }, [t])
+  }, [t, isSuperAdmin])
 
   useEffect(() => {
     loadData()
   }, [loadData])
 
   const uniqueClasses = useMemo(() => {
-    const classes = new Set<string>()
+    const classSet = new Set<string>()
     users.forEach(u => {
-      if (u.className) classes.add(u.className)
+      if (u.className) classSet.add(u.className)
     })
-    return Array.from(classes).sort()
+    return Array.from(classSet).sort()
   }, [users])
 
   const filteredAndSortedUsers = useMemo(() => {
@@ -199,6 +203,8 @@ export default function UserList() {
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
+      case "super-admin":
+        return <Crown className="h-3 w-3 mr-1" />
       case "admin":
         return <Shield className="h-3 w-3 mr-1" />
       case "teacher":
@@ -210,12 +216,14 @@ export default function UserList() {
 
   const getRoleBadgeVariant = (role: UserRole) => {
     switch (role) {
-      case "admin":
+      case "super-admin":
         return "destructive" as const
-      case "teacher":
+      case "admin":
         return "default" as const
-      default:
+      case "teacher":
         return "secondary" as const
+      default:
+        return "outline" as const
     }
   }
 
@@ -229,7 +237,11 @@ export default function UserList() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{t("userManagement.users.description")}</p>
+      <p className="text-sm text-muted-foreground">
+        {isSuperAdmin 
+          ? t("userManagement.users.descriptionSuperAdmin")
+          : t("userManagement.users.descriptionAdmin")}
+      </p>
       <div className="flex flex-wrap gap-3 items-center">
         <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-32">
@@ -237,6 +249,9 @@ export default function UserList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("userManagement.users.allRoles")}</SelectItem>
+            {isSuperAdmin && (
+              <SelectItem value="super-admin">{t("userManagement.roles.superAdmin")}</SelectItem>
+            )}
             <SelectItem value="admin">{t("userManagement.roles.admin")}</SelectItem>
             <SelectItem value="teacher">{t("userManagement.roles.teacher")}</SelectItem>
             <SelectItem value="student">{t("userManagement.roles.student")}</SelectItem>
@@ -255,20 +270,22 @@ export default function UserList() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={schoolFilter} onValueChange={setSchoolFilter}>
-          <SelectTrigger className="w-44">
-            <SelectValue placeholder={t("userManagement.users.school")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("userManagement.users.allSchools")}</SelectItem>
-            <SelectItem value="__none__">{t("userManagement.users.noSchool")}</SelectItem>
-            {schools.map((school) => (
-              <SelectItem key={school.id} value={school.id}>
-                {school.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {isSuperAdmin && (
+          <Select value={schoolFilter} onValueChange={setSchoolFilter}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder={t("userManagement.users.school")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("userManagement.users.allSchools")}</SelectItem>
+              <SelectItem value="__none__">{t("userManagement.users.noSchool")}</SelectItem>
+              {schools.map((school) => (
+                <SelectItem key={school.id} value={school.id}>
+                  {school.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <div className="text-sm text-muted-foreground">
           {t("userManagement.users.showing", { count: filteredAndSortedUsers.length })}
         </div>
@@ -295,12 +312,14 @@ export default function UserList() {
                 <ArrowUpDown className="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>
-              <Button variant="ghost" size="sm" onClick={() => handleSort("schoolName")}>
-                {t("userManagement.users.school")}
-                <ArrowUpDown className="ml-1 h-3 w-3" />
-              </Button>
-            </TableHead>
+            {isSuperAdmin && (
+              <TableHead>
+                <Button variant="ghost" size="sm" onClick={() => handleSort("schoolName")}>
+                  {t("userManagement.users.school")}
+                  <ArrowUpDown className="ml-1 h-3 w-3" />
+                </Button>
+              </TableHead>
+            )}
             <TableHead>{t("userManagement.users.actions")}</TableHead>
           </TableRow>
         </TableHeader>
@@ -355,19 +374,20 @@ export default function UserList() {
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-              <TableCell>
-                {user.schoolName ? (
-                  <div className="flex items-center gap-1">
-                    <School className="h-3 w-3 text-muted-foreground shrink-0" />
-                    <span className="text-sm max-w-32 break-words">{user.schoolName}</span>
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </TableCell>
+              {isSuperAdmin && (
+                <TableCell>
+                  {user.schoolName ? (
+                    <div className="flex items-center gap-1">
+                      <School className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <span className="text-sm max-w-32 break-words">{user.schoolName}</span>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+              )}
               <TableCell>
                 <div className="flex flex-col gap-1">
-                  {/* Role selector */}
                   <Select
                     value={user.role}
                     onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
@@ -394,10 +414,17 @@ export default function UserList() {
                           {t("userManagement.roles.admin")}
                         </div>
                       </SelectItem>
+                      {isSuperAdmin && (
+                        <SelectItem value="super-admin">
+                          <div className="flex items-center">
+                            <Crown className="h-3 w-3 mr-1" />
+                            {t("userManagement.roles.superAdmin")}
+                          </div>
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
-                  {/* School selector — admin override */}
-                  {schools.length > 0 && (
+                  {isSuperAdmin && schools.length > 0 && (
                     <Select
                       value={user.schoolId ?? "__none__"}
                       onValueChange={(value) => handleSchoolChange(user.id, value)}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { addStudentToClass, removeStudentFromClass } from "@/lib/users"
+import { addStudentToClass, removeStudentFromClass, canManageUser } from "@/lib/users"
 
 export async function PUT(
   request: Request,
@@ -12,11 +12,19 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   const { id } = await params
+
+  if (role === "admin") {
+    const canManage = await canManageUser(session.user.id, role, id)
+    if (!canManage) {
+      return NextResponse.json({ error: "Forbidden - can only manage users in your school" }, { status: 403 })
+    }
+  }
 
   try {
     const body = await request.json()

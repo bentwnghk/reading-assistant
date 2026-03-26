@@ -16,7 +16,8 @@ export function UserManagementButton() {
     return null
   }
 
-  if (session.user.role === "student") {
+  const role = session.user.role
+  if (role === "student") {
     return null
   }
 

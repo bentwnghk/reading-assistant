@@ -840,11 +840,14 @@
       "aiQuestions": "AI Questions"
     },
     "roles": {
+      "superAdmin": "Super Admin",
       "admin": "Admin",
       "teacher": "Teacher",
       "student": "Student"
     },
     "users": {
+      "descriptionSuperAdmin": "Manage all users across all schools. Super-admins can assign any role including admin.",
+      "descriptionAdmin": "Manage users within your school. Admins can assign teacher and student roles.",
       "description": "Manage user roles. Admins can assign teachers, teachers can manage students.",
       "name": "Name",
       "email": "Email",
@@ -868,6 +871,9 @@
     "classUpdated": "Class updated successfully",
     "classUpdateFailed": "Failed to update class",
     "classes": {
+      "descriptionSuperAdmin": "Manage all classes across all schools. Create, edit, delete classes and manage members.",
+      "descriptionAdmin": "Manage classes within your school. Create, edit, delete classes and manage members.",
+      "descriptionTeacher": "Manage your own classes. Edit class details and manage student members.",
       "description": "Manage classes. Teachers can create and edit classes within their school.",
       "name": "Class Name",
       "school": "School",
@@ -913,6 +919,9 @@
       "noAvailableStudents": "No available students to add"
     },
     "studentData": {
+      "descriptionSuperAdmin": "View reading session data for all students across all schools. Filter by school and class.",
+      "descriptionAdmin": "View reading session data for all students within your school. Filter by class.",
+      "descriptionTeacher": "View reading session data for students in your classes. Filter by your classes.",
       "description": "View reading session data for students in your classes.",
       "selectClass": "Select a class",
       "selectSchool": "Select a school",
@@ -937,7 +946,7 @@
       "date": "Last Update"
     },
     "schools": {
-      "description": "Schools are automatically created from user email domains when users sign in.",
+      "description": "Manage all schools. Super-admins can view, edit, and delete schools. Schools are automatically created from user email domains.",
       "name": "School Name",
       "domain": "Email Domain",
       "domainReadOnly": "Domain is auto-detected and cannot be changed",
@@ -955,6 +964,9 @@
       "noSchools": "No schools found. Schools are created automatically when users sign in."
     },
     "aiQuestions": {
+      "descriptionSuperAdmin": "Track questions students ask the AI tutor across all schools. Filter by school and class.",
+      "descriptionAdmin": "Track questions students ask the AI tutor within your school. Filter by class.",
+      "descriptionTeacher": "Track questions students ask the AI tutor in your classes. Filter by your classes.",
       "description": "Track questions students ask the AI tutor.",
       "selectSchool": "Select a school",
       "selectClass": "Select a class",

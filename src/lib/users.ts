@@ -1,6 +1,6 @@
 import { getClient } from "./db"
 
-export type UserRole = 'admin' | 'teacher' | 'student'
+export type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student'
 
 export interface SchoolInfo {
   id: string
@@ -74,7 +74,21 @@ export function isAdminEmail(email: string): boolean {
   return adminEmails.includes(email.toLowerCase())
 }
 
+export function getSuperAdminEmails(): string[] {
+  const superAdminEmails = process.env.SUPER_ADMIN_EMAILS || ''
+  return superAdminEmails.split(',').map(email => email.trim().toLowerCase()).filter(Boolean)
+}
+
+export function isSuperAdminEmail(email: string): boolean {
+  const superAdminEmails = getSuperAdminEmails()
+  return superAdminEmails.includes(email.toLowerCase())
+}
+
 export async function getUserRole(userId: string, email?: string | null): Promise<UserRole> {
+  if (email && isSuperAdminEmail(email)) {
+    return 'super-admin'
+  }
+  
   if (email && isAdminEmail(email)) {
     return 'admin'
   }
@@ -101,11 +115,11 @@ export async function ensureUserRole(userId: string, email?: string | null): Pro
   
   const client = await getClient()
   try {
-    if (role === 'admin') {
+    if (role === 'super-admin' || role === 'admin') {
       await client.query(
-        `INSERT INTO user_roles (user_id, role) VALUES ($1, 'admin')
-         ON CONFLICT (user_id) DO UPDATE SET role = 'admin'`,
-        [userId]
+        `INSERT INTO user_roles (user_id, role) VALUES ($1, $2)
+         ON CONFLICT (user_id) DO UPDATE SET role = $2`,
+        [userId, role]
       )
     } else {
       const existingResult = await client.query(
@@ -505,12 +519,12 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
  * or if role is admin (admins bypass school scoping).
  */
 export async function canAccessClass(userId: string, userRole: string, classId: string): Promise<boolean> {
+  if (userRole === 'super-admin') return true
   if (userRole === 'admin') return true
   if (userRole !== 'teacher') return false
 
   const client = await getClient()
   try {
-    // Verify both the teacher and the class share the same school_id
     const result = await client.query(
       `SELECT 1
        FROM classes c
@@ -699,6 +713,119 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
     }))
+  } finally {
+    client.release()
+  }
+}
+
+export async function getUsersForAdmin(adminSchoolId: string): Promise<UserWithRole[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT 
+        u.id, u.name, u.email, u.image, u."createdAt",
+        COALESCE(ur.role, 'student') as role,
+        u.school_id as "schoolId",
+        s.name as "schoolName",
+        cm.class_id as "classId",
+        c.name as "className",
+        (
+          SELECT COALESCE(json_agg(c2.id), '[]'::json)
+          FROM classes c2
+          WHERE c2.teacher_id = u.id
+        ) as "taughtClassIds",
+        (
+          SELECT COALESCE(json_agg(c3.name), '[]'::json)
+          FROM classes c3
+          WHERE c3.teacher_id = u.id
+        ) as "taughtClassNames"
+       FROM users u
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN schools s ON u.school_id = s.id
+       LEFT JOIN class_members cm ON u.id = cm.student_id
+       LEFT JOIN classes c ON cm.class_id = c.id
+       WHERE u.school_id = $1
+       ORDER BY u."createdAt" DESC`,
+      [adminSchoolId]
+    )
+    return result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      image: row.image,
+      role: row.role as UserRole,
+      schoolId: row.schoolId,
+      schoolName: row.schoolName,
+      classId: row.classId,
+      className: row.className,
+      taughtClassIds: row.taughtClassIds || [],
+      taughtClassNames: row.taughtClassNames || [],
+      createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
+    }))
+  } finally {
+    client.release()
+  }
+}
+
+export async function getClassesForAdmin(adminSchoolId: string): Promise<ClassInfo[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `${CLASS_SELECT} WHERE c.school_id = $1 ORDER BY c.created_at DESC`,
+      [adminSchoolId]
+    )
+    return result.rows.map(mapClassRow)
+  } finally {
+    client.release()
+  }
+}
+
+export async function canManageUser(actorId: string, actorRole: string, targetUserId: string): Promise<boolean> {
+  if (actorRole === 'super-admin') return true
+  if (actorRole !== 'admin') return false
+  
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT 1 FROM users u1, users u2 
+       WHERE u1.id = $1 AND u2.id = $2 
+       AND u1.school_id = u2.school_id 
+       AND u1.school_id IS NOT NULL`,
+      [actorId, targetUserId]
+    )
+    return result.rows.length > 0
+  } finally {
+    client.release()
+  }
+}
+
+export async function canManageClass(actorId: string, actorRole: string, classId: string): Promise<boolean> {
+  if (actorRole === 'super-admin') return true
+  if (actorRole !== 'admin') return false
+  
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT 1 FROM classes c, users u 
+       WHERE c.id = $1 AND u.id = $2 
+       AND c.school_id = u.school_id 
+       AND c.school_id IS NOT NULL`,
+      [classId, actorId]
+    )
+    return result.rows.length > 0
+  } finally {
+    client.release()
+  }
+}
+
+export async function isTeacherOfClass(teacherId: string, classId: string): Promise<boolean> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT 1 FROM classes WHERE id = $1 AND teacher_id = $2`,
+      [classId, teacherId]
+    )
+    return result.rows.length > 0
   } finally {
     client.release()
   }

@@ -12,7 +12,11 @@ AUTH_SECRET=
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
 # Admin email addresses (comma-separated, case-insensitive)
+# Admins are school-scoped and can only manage users/classes within their school
 ADMIN_EMAILS=admin@example.com,admin2@example.com
+# Super-admin email addresses (comma-separated, case-insensitive)
+# Super-admins have full system access across all schools (can manage schools, export/import backups)
+SUPER_ADMIN_EMAILS=
 
 # Database URL (for Docker Compose)
 DATABASE_URL=postgresql://reading_user:your_secure_password_here@postgres:5432/reading_assistant

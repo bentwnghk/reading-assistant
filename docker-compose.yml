@@ -71,6 +71,9 @@ services:
       AUTH_URL: "https://read.mr5ai.com"
       # Admin email addresses (comma-separated, case-insensitive)
       ADMIN_EMAILS: ""
+      # Super-admin email addresses (comma-separated, case-insensitive)
+      # Super-admins have full system access across all schools
+      SUPER_ADMIN_EMAILS: ""
 
 volumes:
   reading-assistant_postgres_data:

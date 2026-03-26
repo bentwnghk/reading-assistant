@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { setUserRole, type UserRole } from "@/lib/users"
+import { setUserRole, canManageUser, type UserRole } from "@/lib/users"
 
 export async function PUT(
   request: Request,
@@ -12,21 +12,33 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   
-  if (session.user.role !== "admin") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
   
   const { id } = await params
   
+  if (role === "admin") {
+    const canManage = await canManageUser(session.user.id, role, id)
+    if (!canManage) {
+      return NextResponse.json({ error: "Forbidden - can only manage users in your school" }, { status: 403 })
+    }
+  }
+  
   try {
     const body = await request.json()
-    const { role } = body as { role: UserRole }
+    const { role: newRole } = body as { role: UserRole }
     
-    if (!["admin", "teacher", "student"].includes(role)) {
+    const validRoles = role === "super-admin" 
+      ? ["super-admin", "admin", "teacher", "student"]
+      : ["admin", "teacher", "student"]
+    
+    if (!validRoles.includes(newRole)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 })
     }
     
-    const success = await setUserRole(id, role)
+    const success = await setUserRole(id, newRole)
     
     if (!success) {
       return NextResponse.json({ error: "Failed to update role" }, { status: 500 })

@@ -12,7 +12,7 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin") {
+  if (session.user.role !== "super-admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -20,7 +20,6 @@ export async function PUT(
 
   try {
     const body = await request.json()
-    // schoolId may be null to un-assign
     const { schoolId } = body as { schoolId: string | null }
 
     const success = await assignUserSchool(id, schoolId ?? null)

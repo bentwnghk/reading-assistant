@@ -47,10 +47,11 @@ interface QuestionInstance {
 }
 
 interface AiQuestionsViewProps {
+  isSuperAdmin: boolean
   isAdmin: boolean
 }
 
-export default function AiQuestionsView({ isAdmin }: AiQuestionsViewProps) {
+export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsViewProps) {
   const { t } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
@@ -64,11 +65,13 @@ export default function AiQuestionsView({ isAdmin }: AiQuestionsViewProps) {
   const [instancesCache, setInstancesCache] = useState<Map<string, QuestionInstance[]>>(new Map())
   const [loadingInstances, setLoadingInstances] = useState<Set<string>>(new Set())
 
+  const _isTeacher = !isSuperAdmin && !isAdmin
+
   const loadInitialData = useCallback(async () => {
     try {
       const [classesRes, schoolsRes] = await Promise.all([
         fetch("/api/classes"),
-        isAdmin ? fetch("/api/schools") : null,
+        isSuperAdmin ? fetch("/api/schools") : null,
       ])
 
       if (classesRes.ok) {
@@ -83,7 +86,7 @@ export default function AiQuestionsView({ isAdmin }: AiQuestionsViewProps) {
       console.error("Failed to load data:", error)
       toast.error(t("userManagement.loadFailed"))
     }
-  }, [t, isAdmin])
+  }, [t, isSuperAdmin])
 
   const loadQuestions = useCallback(async () => {
     setLoading(true)
@@ -136,9 +139,9 @@ export default function AiQuestionsView({ isAdmin }: AiQuestionsViewProps) {
   }, [questions, searchQuery])
 
   const filteredClasses = useMemo(() => {
-    if (!isAdmin || selectedSchoolId === "all") return classes
+    if (!isSuperAdmin || selectedSchoolId === "all") return classes
     return classes.filter(c => c.schoolId === selectedSchoolId)
-  }, [classes, selectedSchoolId, isAdmin])
+  }, [classes, selectedSchoolId, isSuperAdmin])
 
   const toggleExpand = async (hash: string) => {
     const newExpanded = new Set(expandedHashes)
@@ -199,8 +202,15 @@ export default function AiQuestionsView({ isAdmin }: AiQuestionsViewProps) {
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {isSuperAdmin 
+          ? t("userManagement.aiQuestions.descriptionSuperAdmin")
+          : isAdmin
+            ? t("userManagement.aiQuestions.descriptionAdmin")
+            : t("userManagement.aiQuestions.descriptionTeacher")}
+      </p>
       <div className="flex flex-wrap gap-3 items-center">
-        {isAdmin && (
+        {isSuperAdmin && (
           <Select value={selectedSchoolId} onValueChange={(v) => {
             setSelectedSchoolId(v)
             setSelectedClassId("all")
@@ -223,7 +233,9 @@ export default function AiQuestionsView({ isAdmin }: AiQuestionsViewProps) {
             <SelectValue placeholder={t("userManagement.aiQuestions.selectClass")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t("userManagement.aiQuestions.allClasses")}</SelectItem>
+            {(isSuperAdmin || isAdmin) && (
+              <SelectItem value="all">{t("userManagement.aiQuestions.allClasses")}</SelectItem>
+            )}
             {filteredClasses.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}

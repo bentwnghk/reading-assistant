@@ -27,6 +27,7 @@ import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
 
 interface StudentDataViewProps {
+  isSuperAdmin: boolean
   isAdmin: boolean
   currentUserId?: string
 }
@@ -38,7 +39,7 @@ interface SessionWithSchool extends StudentSessionData {
   schoolName?: string
 }
 
-export default function StudentDataView({ isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
+export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
   const { t } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
@@ -52,6 +53,8 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
   const [exporting, setExporting] = useState(false)
 
+  const _isTeacher = !isSuperAdmin && !isAdmin
+
   const loadClassesAndSchools = useCallback(async () => {
     try {
       const classesResponse = await fetch("/api/classes")
@@ -59,7 +62,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
         const data: ClassInfo[] = await classesResponse.json()
         setClasses(data)
         if (data.length > 0 && !selectedClassId) {
-          if (isAdmin) {
+          if (isSuperAdmin || isAdmin) {
             setSelectedClassId("all")
           } else {
             setSelectedClassId(data[0].id)
@@ -67,7 +70,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
         }
       }
 
-      if (isAdmin) {
+      if (isSuperAdmin) {
         const schoolsResponse = await fetch("/api/schools")
         if (schoolsResponse.ok) {
           setSchools(await schoolsResponse.json())
@@ -79,7 +82,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
     } finally {
       setLoading(false)
     }
-  }, [selectedClassId, t, isAdmin])
+  }, [selectedClassId, t, isSuperAdmin, isAdmin])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return
@@ -201,7 +204,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
       
       await exportStudentDataToExcel({
         sessions: filteredAndSortedSessions,
-        isAdmin,
+        isAdmin: isSuperAdmin || isAdmin,
         schoolName: selectedSchool,
         className: selectedClass,
       })
@@ -214,9 +217,9 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
   }
 
   const filteredClasses = useMemo(() => {
-    if (!isAdmin || selectedSchoolId === "all") return classes
+    if (!isSuperAdmin || selectedSchoolId === "all") return classes
     return classes.filter(c => c.schoolId === selectedSchoolId)
-  }, [classes, selectedSchoolId, isAdmin])
+  }, [classes, selectedSchoolId, isSuperAdmin])
 
   if (loading) {
     return (
@@ -236,9 +239,16 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {isSuperAdmin 
+          ? t("userManagement.studentData.descriptionSuperAdmin")
+          : isAdmin
+            ? t("userManagement.studentData.descriptionAdmin")
+            : t("userManagement.studentData.descriptionTeacher")}
+      </p>
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <div className="flex gap-3 items-center">
-          {isAdmin && (
+          {isSuperAdmin && (
             <Select value={selectedSchoolId} onValueChange={(v) => {
               setSelectedSchoolId(v)
               setSelectedClassId("all")
@@ -261,7 +271,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
               <SelectValue placeholder={t("userManagement.studentData.selectClass")} />
             </SelectTrigger>
             <SelectContent>
-              {isAdmin && (
+              {(isSuperAdmin || isAdmin) && (
                 <SelectItem value="all">{t("userManagement.studentData.allClasses")}</SelectItem>
               )}
               {filteredClasses.map((c) => (
@@ -299,7 +309,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
           <Table>
             <TableHeader>
               <TableRow>
-                {isAdmin && (
+                {isSuperAdmin && (
                   <TableHead>
                     <Button variant="ghost" size="sm" onClick={() => handleSort("school")}>
                       {t("userManagement.studentData.school")}
@@ -355,7 +365,7 @@ export default function StudentDataView({ isAdmin, currentUserId: _currentUserId
             <TableBody>
               {filteredAndSortedSessions.map((session) => (
                 <TableRow key={session.id}>
-                  {isAdmin && (
+                  {isSuperAdmin && (
                     <TableCell>
                       <span className="text-sm">{session.schoolName || "-"}</span>
                     </TableCell>

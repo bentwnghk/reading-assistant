@@ -840,11 +840,14 @@
       "aiQuestions": "AI 提問"
     },
     "roles": {
+      "superAdmin": "超級管理員",
       "admin": "管理員",
       "teacher": "老師",
       "student": "學生"
     },
     "users": {
+      "descriptionSuperAdmin": "管理所有學校的用戶。超級管理員可以指派任何角色，包括管理員。",
+      "descriptionAdmin": "管理您學校內的用戶。管理員可以指派老師和學生角色。",
       "description": "管理用戶角色。管理員可以指派老師，老師可以管理學生。",
       "name": "姓名",
       "email": "電郵",
@@ -868,6 +871,9 @@
     "classUpdated": "班別已更新",
     "classUpdateFailed": "更新班別失敗",
     "classes": {
+      "descriptionSuperAdmin": "管理所有學校的班別。創建、編輯、刪除班別及管理成員。",
+      "descriptionAdmin": "管理您學校內的班別。創建、編輯、刪除班別及管理成員。",
+      "descriptionTeacher": "管理您的班別。編輯班別詳情及管理學生成員。",
       "description": "管理班別。老師可在其所屬學校內創建和編輯班別。",
       "name": "班別名稱",
       "school": "學校",
@@ -913,6 +919,9 @@
       "noAvailableStudents": "沒有可添加的學生"
     },
     "studentData": {
+      "descriptionSuperAdmin": "查看所有學校學生的閱讀記錄數據。可按學校和班別篩選。",
+      "descriptionAdmin": "查看您學校內所有學生的閱讀記錄數據。可按班別篩選。",
+      "descriptionTeacher": "查看您班別中學生的閱讀記錄數據。可按您的班別篩選。",
       "description": "查看班別中學生的閱讀記錄數據。",
       "selectClass": "選擇班別",
       "selectSchool": "選擇學校",
@@ -937,7 +946,7 @@
       "date": "最後更新"
     },
     "schools": {
-      "description": "學校會在用戶登入時根據電郵域名自動建立。",
+      "description": "管理所有學校。超級管理員可以查看、編輯和刪除學校。學校會在用戶登入時根據電郵域名自動建立。",
       "name": "學校名稱",
       "domain": "電郵域名",
       "domainReadOnly": "域名由系統自動識別，不可更改",
@@ -955,6 +964,9 @@
       "noSchools": "沒有學校記錄。學校會在用戶登入時自動建立。"
     },
     "aiQuestions": {
+      "descriptionSuperAdmin": "追蹤所有學校學生向 AI 導師提出的問題。可按學校和班別篩選。",
+      "descriptionAdmin": "追蹤您學校內學生向 AI 導師提出的問題。可按班別篩選。",
+      "descriptionTeacher": "追蹤您班別中學生向 AI 導師提出的問題。可按您的班別篩選。",
       "description": "追蹤學生向 AI 導師提出的問題。",
       "selectSchool": "選擇學校",
       "selectClass": "選擇班別",

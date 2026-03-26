@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { Download, Info, Loader2, Upload } from "lucide-react"
@@ -34,18 +34,26 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const { t } = useTranslation()
   const { data: session } = useSession()
 
-  const isAdmin = session?.user?.role === "admin"
-  const isTeacher = session?.user?.role === "teacher"
+  const role = session?.user?.role
+  const isSuperAdmin = role === "super-admin"
+  const isAdmin = role === "admin"
+  const isTeacher = role === "teacher"
+  const currentUserId = session?.user?.id
 
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
   const importFileRef = useRef<HTMLInputElement>(null)
 
+  const defaultTab = useMemo(() => {
+    if (isSuperAdmin) return "schools"
+    if (isAdmin) return "users"
+    return "students"
+  }, [isSuperAdmin, isAdmin])
+
   const handleClose = (open: boolean) => {
     if (!open) onClose()
   }
 
-  // ── Export ────────────────────────────────────────────────────────────────
   const handleExport = async () => {
     setExporting(true)
     try {
@@ -54,7 +62,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
         toast.error(t("userManagement.exportImport.exportFailed"))
         return
       }
-      // Server returns a ZIP blob; derive filename from Content-Disposition.
       const disposition = res.headers.get("content-disposition") ?? ""
       const nameMatch = disposition.match(/filename="([^"]+)"/)
       const now = new Date()
@@ -76,14 +83,12 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     }
   }
 
-  // ── Import ────────────────────────────────────────────────────────────────
   const handleImportClick = () => {
     importFileRef.current?.click()
   }
 
   const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    // Reset input so the same file can be re-selected if needed
     e.target.value = ""
     if (!file) return
 
@@ -102,7 +107,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
       let res: Response
 
       if (isZip) {
-        // v2 full backup: send ZIP as multipart/form-data
         const formData = new FormData()
         formData.append("file", file)
         res = await fetch("/api/admin/import", {
@@ -110,7 +114,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           body: formData,
         })
       } else {
-        // Legacy v1: parse JSON and post as application/json
         let payload: unknown
         try {
           const text = await file.text()
@@ -136,7 +139,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
       const result = await res.json()
       const s = result.summary
       if (s.sessionsUpserted !== undefined) {
-        // v2 full backup — show reading-history counts
         toast.success(
           t("userManagement.exportImport.importSuccessFull", {
             schools: s.schoolsUpserted,
@@ -146,7 +148,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           })
         )
       } else {
-        // v1 user-management only
         toast.success(
           t("userManagement.exportImport.importSuccess", {
             schools: s.schoolsUpserted,
@@ -169,7 +170,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
         <DialogHeader>
           <div className="flex items-center justify-between gap-2">
             <DialogTitle>{t("userManagement.title")}</DialogTitle>
-            {isAdmin && (
+            {isSuperAdmin && (
               <div className="flex items-center gap-1 pr-6">
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
@@ -227,44 +228,44 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             )}
           </div>
         </DialogHeader>
-        <Tabs defaultValue="students" className="flex-1 overflow-hidden flex flex-col">
+        <Tabs defaultValue={defaultTab} className="flex-1 overflow-hidden flex flex-col">
           <TabsList className="w-full justify-start">
-            {isAdmin && (
+            {isSuperAdmin && (
               <TabsTrigger value="schools">{t("userManagement.tabs.schools")}</TabsTrigger>
             )}
-            {isAdmin && (
+            {(isSuperAdmin || isAdmin) && (
               <TabsTrigger value="users">{t("userManagement.tabs.users")}</TabsTrigger>
             )}
             <TabsTrigger value="classes">{t("userManagement.tabs.classes")}</TabsTrigger>
-            {(isAdmin || isTeacher) && (
+            {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsTrigger value="students">{t("userManagement.tabs.studentData")}</TabsTrigger>
             )}
-            {(isAdmin || isTeacher) && (
+            {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsTrigger value="aiQuestions">{t("userManagement.tabs.aiQuestions")}</TabsTrigger>
             )}
           </TabsList>
           <div className="flex-1 overflow-auto mt-4">
-            {isAdmin && (
+            {isSuperAdmin && (
               <TabsContent value="schools" className="mt-0">
                 <SchoolList />
               </TabsContent>
             )}
-            {isAdmin && (
+            {(isSuperAdmin || isAdmin) && (
               <TabsContent value="users" className="mt-0">
-                <UserList />
+                <UserList isSuperAdmin={isSuperAdmin} />
               </TabsContent>
             )}
             <TabsContent value="classes" className="mt-0">
-              <ClassList isAdmin={isAdmin} currentUserId={session?.user?.id} />
+              <ClassList isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} />
             </TabsContent>
-            {(isAdmin || isTeacher) && (
+            {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
-                <StudentDataView isAdmin={isAdmin} currentUserId={session?.user?.id} />
+                <StudentDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} />
               </TabsContent>
             )}
-            {(isAdmin || isTeacher) && (
+            {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="aiQuestions" className="mt-0">
-                <AiQuestionsView isAdmin={isAdmin} />
+                <AiQuestionsView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} />
               </TabsContent>
             )}
           </div>

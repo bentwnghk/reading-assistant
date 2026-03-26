@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getAllUsers } from "@/lib/users"
+import { getAllUsers, getUsersInSchool, getSchoolForUser } from "@/lib/users"
 
 export async function GET() {
   const session = await auth()
@@ -9,12 +9,24 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
   
   try {
-    const users = await getAllUsers()
+    let users
+    
+    if (role === "super-admin") {
+      users = await getAllUsers()
+    } else {
+      const schoolId = await getSchoolForUser(session.user.id)
+      if (!schoolId) {
+        return NextResponse.json([])
+      }
+      users = await getUsersInSchool(schoolId)
+    }
+    
     return NextResponse.json(users)
   } catch (error) {
     console.error("Failed to get users:", error)

@@ -23,7 +23,7 @@ const UserSchema = z.object({
   name: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
-  role: z.enum(["admin", "teacher", "student"]),
+  role: z.enum(["super-admin", "admin", "teacher", "student"]),
   schoolId: z.string().nullable().optional(),
   createdAt: z.number().nullable().optional(),
 })
@@ -194,7 +194,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin") {
+  if (session.user.role !== "super-admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

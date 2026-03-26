@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { createClass, getClassesForTeacher, getClassesForSchool, getSchoolForUser } from "@/lib/users"
+import { createClass, getClassesForTeacher, getClassesForSchool, getSchoolForUser, getAllClasses } from "@/lib/users"
 
 export async function GET() {
   const session = await auth()
@@ -9,13 +9,16 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
   try {
     let classes
-    if (session.user.role === "admin") {
+    if (role === "super-admin") {
+      classes = await getAllClasses()
+    } else if (role === "admin") {
       const schoolId = await getSchoolForUser(session.user.id)
       classes = schoolId ? await getClassesForSchool(schoolId) : []
     } else {
@@ -35,8 +38,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  // Both admins and teachers can create classes
-  if (session.user.role !== "admin" && session.user.role !== "teacher") {
+  const role = session.user.role
+  if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -48,19 +51,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Class name is required" }, { status: 400 })
     }
 
-    // Determine which school this class belongs to:
-    // - Admin: may pass an explicit schoolId in the body, or it derives from the teacherId's school
-    // - Teacher: always uses their own school
     let schoolId: string | undefined
-    if (session.user.role === "admin") {
+    if (role === "super-admin") {
       if (body.schoolId) {
         schoolId = body.schoolId
       } else if (teacherId) {
         const teacherSchool = await getSchoolForUser(teacherId)
         schoolId = teacherSchool ?? undefined
       }
+    } else if (role === "admin") {
+      const adminSchool = await getSchoolForUser(session.user.id)
+      schoolId = adminSchool ?? undefined
     } else {
-      // Teacher: use their own school
       const teacherSchool = await getSchoolForUser(session.user.id)
       schoolId = teacherSchool ?? undefined
     }
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
     const classInfo = await createClass(
       name.trim(),
       description?.trim() || "",
-      teacherId === null ? undefined : (teacherId || (session.user.role === "teacher" ? session.user.id : undefined)),
+      teacherId === null ? undefined : (teacherId || (role === "teacher" ? session.user.id : undefined)),
       schoolId
     )
 
