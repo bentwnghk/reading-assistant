@@ -299,6 +299,8 @@ interface AchievementsResponse {
 
 // ─── Text Repository types ────────────────────────────────────────────────────
 
+type TextVisibility = 'class' | 'school' | 'public';
+
 interface RepositoryText {
   id: string;
   name: string;
@@ -306,7 +308,7 @@ interface RepositoryText {
   extractedText: string;
   originalImages: string[];
   schoolId: string | null;
-  isPublic: boolean;
+  visibility: TextVisibility;
   createdBy: string;
   createdByName?: string | null;
   createdAt: number;
@@ -317,12 +319,11 @@ interface RepositoryTextListItem {
   id: string;
   name: string;
   title: string;
-  /** First ~200 chars of extracted text for preview */
   previewText: string;
   imageCount: number;
   schoolId: string | null;
   schoolName?: string | null;
-  isPublic: boolean;
+  visibility: TextVisibility;
   createdBy: string;
   createdByName?: string | null;
   createdAt: number;

@@ -20,7 +20,7 @@ export async function GET(_request: Request, { params }: Params) {
 
     const { id } = await params
     const schoolId = await getSchoolForUser(session.user.id)
-    const text = await getRepositoryText(id, session.user.role, schoolId)
+    const text = await getRepositoryText(id, session.user.role, session.user.id, schoolId)
 
     if (!text) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
@@ -42,23 +42,26 @@ export async function PUT(request: Request, { params }: Params) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "super-admin" && session.user.role !== "admin") {
+    
+    const role = session.user.role
+    if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     const { id } = await params
     const body = await request.json()
-    const { name, isPublic, title, extractedText } = body
+    const { name, visibility, title, extractedText } = body
+    const schoolId = await getSchoolForUser(session.user.id)
 
-    const updated = await updateRepositoryText(id, session.user.id, session.user.role, {
+    const result = await updateRepositoryText(id, session.user.id, role, schoolId, {
       ...(name !== undefined && { name: String(name).trim() }),
-      ...(isPublic !== undefined && { isPublic: Boolean(isPublic) }),
+      ...(visibility !== undefined && { visibility }),
       ...(title !== undefined && { title: String(title) }),
       ...(extractedText !== undefined && { extractedText: String(extractedText) }),
     })
 
-    if (!updated) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 })
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || "Not found" }, { status: result.error === "Not found" ? 404 : 403 })
     }
 
     return NextResponse.json({ success: true })
@@ -77,15 +80,18 @@ export async function DELETE(_request: Request, { params }: Params) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    if (session.user.role !== "super-admin" && session.user.role !== "admin") {
+    
+    const role = session.user.role
+    if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     const { id } = await params
-    const deleted = await deleteRepositoryText(id, session.user.id, session.user.role)
+    const schoolId = await getSchoolForUser(session.user.id)
+    const result = await deleteRepositoryText(id, session.user.id, role, schoolId)
 
-    if (!deleted) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 })
+    if (!result.success) {
+      return NextResponse.json({ error: result.error || "Not found" }, { status: result.error === "Not found" ? 404 : 403 })
     }
 
     return NextResponse.json({ success: true })

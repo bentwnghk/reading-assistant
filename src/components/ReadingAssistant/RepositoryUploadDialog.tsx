@@ -1,9 +1,10 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { streamText, generateText } from "ai";
-import { Upload, Image as ImageIcon, X, LoaderCircle, Globe, Building2 } from "lucide-react";
+import { Upload, Image as ImageIcon, X, LoaderCircle, Globe, Building2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,13 +16,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/utils/style";
 import { useSettingStore } from "@/store/setting";
 import { extractTextFromImagePrompt, getSystemPrompt } from "@/constants/readingPrompts";
 import useModelProvider from "@/hooks/useAiProvider";
 import { processPdfFile } from "@/utils/parser/pdfParser";
+
+type TextVisibility = 'class' | 'school' | 'public'
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -46,19 +55,19 @@ function RepositoryUploadDialog({
   onUploaded,
 }: RepositoryUploadDialogProps) {
   const { t } = useTranslation();
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || "student";
   const { visionModel: visionModelName, summaryModel } = useSettingStore();
   const { createModelProvider } = useModelProvider();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Form state
   const [name, setName] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
+  const [visibility, setVisibility] = useState<TextVisibility>("class");
 
-  // Upload state
   const [phase, setPhase] = useState<Phase>("idle");
-  const [images, setImages] = useState<string[]>([]); // base64 data URLs
+  const [images, setImages] = useState<string[]>([]);
   const [extractedText, setExtractedText] = useState("");
   const extractedTextRef = useRef("");
   const [generatedTitle, setGeneratedTitle] = useState("");
@@ -66,16 +75,25 @@ function RepositoryUploadDialog({
 
   const isProcessing = phase !== "idle";
 
+  const isTeacher = userRole === "teacher";
+  const isAdmin = userRole === "admin";
+  const isSuperAdmin = userRole === "super-admin";
+
+  const canSetSchool = isAdmin || isSuperAdmin;
+  const canSetPublic = isSuperAdmin;
+
+  const defaultVisibility = isTeacher ? "class" : "school";
+
   const reset = useCallback(() => {
     setName("");
-    setIsPublic(false);
+    setVisibility(defaultVisibility);
     setPhase("idle");
     setImages([]);
     extractedTextRef.current = "";
     setExtractedText("");
     setGeneratedTitle("");
     setProgress(null);
-  }, []);
+  }, [defaultVisibility]);
 
   const handleClose = () => {
     if (isProcessing) return;
@@ -214,7 +232,7 @@ function RepositoryUploadDialog({
           name: name.trim(),
           title: generatedTitle,
           extractedText,
-          isPublic,
+          visibility,
           images,
         }),
       });
@@ -223,7 +241,7 @@ function RepositoryUploadDialog({
         throw new Error("Save failed");
       }
 
-      const { id } = await res.json();
+      const { id, visibility: actualVisibility } = await res.json();
       toast.success(t("reading.repository.uploadSuccess"));
 
       const newItem: RepositoryTextListItem = {
@@ -234,9 +252,9 @@ function RepositoryUploadDialog({
         imageCount: images.length,
         schoolId: null,
         schoolName: null,
-        isPublic,
-        createdBy: "",
-        createdByName: null,
+        visibility: actualVisibility || visibility,
+        createdBy: session?.user?.id || "",
+        createdByName: session?.user?.name || null,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -262,7 +280,6 @@ function RepositoryUploadDialog({
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* Display name */}
           <div className="space-y-1.5">
             <Label htmlFor="repo-name">{t("reading.repository.name")}</Label>
             <Input
@@ -274,7 +291,6 @@ function RepositoryUploadDialog({
             />
           </div>
 
-          {/* Image drop zone */}
           <div className="space-y-2">
             <Label>{t("reading.imageUpload.tabUpload")}</Label>
             <div
@@ -341,7 +357,6 @@ function RepositoryUploadDialog({
               )}
             </div>
 
-            {/* Image thumbnails */}
             {images.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {images.map((src, i) => (
@@ -365,7 +380,6 @@ function RepositoryUploadDialog({
             )}
           </div>
 
-          {/* Extracted text — editable */}
           {hasContent && (
             <div className="space-y-1.5">
               <Label htmlFor="repo-extracted-text">
@@ -392,26 +406,59 @@ function RepositoryUploadDialog({
             </div>
           )}
 
-          {/* Public toggle */}
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div className="space-y-0.5">
+          <div className="rounded-lg border p-3 space-y-2">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-sm font-medium">
-                {isPublic ? (
+                {visibility === "public" ? (
                   <Globe className="h-4 w-4 text-blue-500" />
-                ) : (
+                ) : visibility === "school" ? (
                   <Building2 className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 )}
-                {t("reading.repository.isPublic")}
+                {t("reading.repository.visibility")}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {t("reading.repository.isPublicHint")}
-              </p>
+              <Select
+                value={visibility}
+                onValueChange={(v) => setVisibility(v as TextVisibility)}
+                disabled={isProcessing}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="class">
+                    <div className="flex items-center gap-1.5">
+                      <Users className="h-3.5 w-3.5" />
+                      {t("reading.repository.visibilityClass")}
+                    </div>
+                  </SelectItem>
+                  {canSetSchool && (
+                    <SelectItem value="school">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="h-3.5 w-3.5" />
+                        {t("reading.repository.visibilitySchool")}
+                      </div>
+                    </SelectItem>
+                  )}
+                  {canSetPublic && (
+                    <SelectItem value="public">
+                      <div className="flex items-center gap-1.5">
+                        <Globe className="h-3.5 w-3.5" />
+                        {t("reading.repository.visibilityPublic")}
+                      </div>
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
-            <Switch
-              checked={isPublic}
-              onCheckedChange={setIsPublic}
-              disabled={isProcessing}
-            />
+            <p className="text-xs text-muted-foreground">
+              {visibility === "public" 
+                ? t("reading.repository.visibilityPublicHint")
+                : visibility === "school"
+                  ? t("reading.repository.visibilitySchoolHint")
+                  : t("reading.repository.visibilityClassHint")}
+            </p>
           </div>
         </div>
 
