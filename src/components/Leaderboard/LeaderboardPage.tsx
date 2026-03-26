@@ -32,12 +32,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/utils/style";
 import { LeaderboardTable } from "./LeaderboardTable";
 import { PersonalStatsCard } from "./PersonalStatsCard";
 import { LeaderboardSkeleton, PersonalStatsSkeleton } from "./LeaderboardSkeleton";
 import { AchievementsTab } from "./AchievementsTab";
 import type { LeaderboardResponse, PersonalStats, LeaderboardScope, SortColumn } from "./types";
+
+interface TeacherClass {
+  id: string;
+  name: string;
+}
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function getWeekStart(offsetWeeks = 0): string {
@@ -78,8 +90,26 @@ export function LeaderboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [helpTab, setHelpTab] = useState<"achievements" | "leaderboard">("achievements");
+  const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<string>("all");
 
   const weekStart = getWeekStart(weekOffset);
+
+  useEffect(() => {
+    async function fetchTeacherClasses() {
+      if (!userId) return;
+      try {
+        const res = await fetch("/api/classes");
+        if (res.ok) {
+          const classes = await res.json() as TeacherClass[];
+          setTeacherClasses(classes);
+        }
+      } catch {
+        // Silently fail - teacher may not have classes
+      }
+    }
+    fetchTeacherClasses();
+  }, [userId]);
 
   // ── Fetch leaderboard ──
   const fetchBoard = useCallback(async () => {
@@ -88,6 +118,9 @@ export function LeaderboardPage() {
     setBoardError(null);
     try {
       const params = new URLSearchParams({ scope, sortBy, week: weekStart, limit: "50" });
+      if (scope === "class" && selectedClassId && selectedClassId !== "all") {
+        params.set("classId", selectedClassId);
+      }
       const res = await fetch(`/api/leaderboard?${params}`);
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json() as LeaderboardResponse;
@@ -97,7 +130,7 @@ export function LeaderboardPage() {
     } finally {
       setBoardLoading(false);
     }
-  }, [userId, scope, sortBy, weekStart, t]);
+  }, [userId, scope, sortBy, weekStart, selectedClassId, t]);
 
   // ── Fetch personal stats ──
   const fetchPersonal = useCallback(async () => {
@@ -279,6 +312,23 @@ export function LeaderboardPage() {
               </button>
             ))}
           </div>
+
+          {/* Class filter for teachers */}
+          {scope === "class" && teacherClasses.length > 1 && (
+            <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+              <SelectTrigger className="w-full text-sm">
+                <SelectValue placeholder={t("leaderboard.selectClass")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("leaderboard.allClasses")}</SelectItem>
+                {teacherClasses.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
           {/* "You" banner when outside top 50 */}
           {boardData?.currentUserRank && !boardData.rankings.some(r => r.userId === userId) && (

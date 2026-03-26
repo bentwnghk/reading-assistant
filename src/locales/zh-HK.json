@@ -1072,6 +1072,7 @@
     "close": "返回應用程式",
     "selectClass": "選擇班級",
     "selectSchool": "選擇學校",
+    "allClasses": "所有班級",
     "help": {
       "title": "功能說明",
       "tabs": {
