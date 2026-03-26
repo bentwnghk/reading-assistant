@@ -333,21 +333,25 @@ CREATE INDEX idx_chat_questions_session ON chat_questions(session_id);
 -- Stores shared reading texts uploaded by admins.
 -- Texts can be scoped to a school (school_id) or made globally public (is_public = TRUE).
 CREATE TABLE text_repository (
-  id           TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-  name         TEXT NOT NULL,                          -- Admin-given display name (renameable)
-  title        TEXT DEFAULT '',                        -- AI-generated title
+  id             TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name           TEXT NOT NULL,                          -- Admin-given display name (renameable)
+  title          TEXT DEFAULT '',                        -- AI-generated title
   extracted_text TEXT NOT NULL,
-  school_id    TEXT REFERENCES schools(id) ON DELETE SET NULL,
-  is_public    BOOLEAN NOT NULL DEFAULT FALSE,          -- TRUE = visible to users of all schools
-  created_by   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  school_id      TEXT REFERENCES schools(id) ON DELETE SET NULL,
+  is_public      BOOLEAN NOT NULL DEFAULT FALSE,          -- TRUE = visible to users of all schools
+  visibility     TEXT NOT NULL DEFAULT 'school' CHECK (visibility IN ('class', 'school', 'public')),
+  class_id       TEXT REFERENCES classes(id) ON DELETE SET NULL,
+  created_by     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_text_repository_school_id  ON text_repository(school_id);
-CREATE INDEX idx_text_repository_is_public  ON text_repository(is_public);
-CREATE INDEX idx_text_repository_created_by ON text_repository(created_by);
-CREATE INDEX idx_text_repository_updated_at ON text_repository(updated_at DESC);
+CREATE INDEX idx_text_repository_school_id   ON text_repository(school_id);
+CREATE INDEX idx_text_repository_is_public   ON text_repository(is_public);
+CREATE INDEX idx_text_repository_visibility  ON text_repository(visibility);
+CREATE INDEX idx_text_repository_class_id    ON text_repository(class_id);
+CREATE INDEX idx_text_repository_created_by  ON text_repository(created_by);
+CREATE INDEX idx_text_repository_updated_at  ON text_repository(updated_at DESC);
 
 CREATE TRIGGER update_text_repository_updated_at
   BEFORE UPDATE ON text_repository
