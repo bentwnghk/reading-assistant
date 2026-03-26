@@ -230,10 +230,12 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
               ? t("userManagement.classes.descriptionAdmin")
               : t("userManagement.classes.descriptionTeacher")}
         </p>
-        <Button onClick={openCreateDialog} size="sm">
-          <Plus className="h-4 w-4 mr-1" />
-          {t("userManagement.classes.create")}
-        </Button>
+        {(isSuperAdmin || isAdmin) && (
+          <Button onClick={openCreateDialog} size="sm">
+            <Plus className="h-4 w-4 mr-1" />
+            {t("userManagement.classes.create")}
+          </Button>
+        )}
       </div>
 
       <Table>
