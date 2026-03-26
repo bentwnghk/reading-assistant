@@ -326,6 +326,7 @@ interface RepositoryTextListItem {
   visibility: TextVisibility;
   createdBy: string;
   createdByName?: string | null;
+  createdByRole?: string | null;
   createdAt: number;
   updatedAt: number;
 }

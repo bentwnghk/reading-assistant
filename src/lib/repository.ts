@@ -14,6 +14,7 @@ function rowToListItem(row: Record<string, unknown>): RepositoryTextListItem {
     visibility: (row.visibility as TextVisibility) || "school",
     createdBy: row.created_by as string,
     createdByName: (row.created_by_name as string) || null,
+    createdByRole: (row.created_by_role as string) || null,
     createdAt: new Date(row.created_at as string).getTime(),
     updatedAt: new Date(row.updated_at as string).getTime(),
   }
@@ -158,6 +159,7 @@ export async function getRepositoryTexts(
          tr.created_at,
          tr.updated_at,
          u.name  AS created_by_name,
+         u.role  AS created_by_role,
          s.name  AS school_name,
          COUNT(tri.id)::int AS image_count
        FROM text_repository tr
@@ -165,7 +167,7 @@ export async function getRepositoryTexts(
        LEFT JOIN schools s ON tr.school_id = s.id
        LEFT JOIN text_repository_images tri ON tri.text_id = tr.id
        WHERE ${vis}
-       GROUP BY tr.id, u.name, s.name
+       GROUP BY tr.id, u.name, u.role, s.name
        ORDER BY tr.updated_at DESC`,
       values
     )
@@ -268,7 +270,10 @@ export async function updateRepositoryText(
   const client = await getClient()
   try {
     const checkResult = await client.query(
-      `SELECT created_by, school_id, visibility FROM text_repository WHERE id = $1`,
+      `SELECT tr.created_by, tr.school_id, tr.visibility, u.role as creator_role
+       FROM text_repository tr
+       LEFT JOIN users u ON tr.created_by = u.id
+       WHERE tr.id = $1`,
       [id]
     )
     
@@ -280,8 +285,12 @@ export async function updateRepositoryText(
     const isOwner = text.created_by === userId
     const isSuperAdmin = role === "super-admin"
     const isAdmin = role === "admin"
+    const creatorIsSuperAdmin = text.creator_role === "super-admin"
     
     if (data.visibility !== undefined) {
+      if (!isSuperAdmin && creatorIsSuperAdmin) {
+        return { success: false, error: "Cannot modify visibility of super-admin texts" }
+      }
       if (isSuperAdmin) {
         // Can set any visibility
       } else if (isAdmin && schoolId && text.school_id === schoolId) {
@@ -417,6 +426,34 @@ export async function canEditText(
     if (role === "admin" && schoolId && text.school_id === schoolId) return true
     
     return false
+  } finally {
+    client.release()
+  }
+}
+
+export async function canModifyVisibility(
+  textId: string,
+  userId: string,
+  role: string
+): Promise<boolean> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT tr.created_by, u.role as creator_role
+       FROM text_repository tr
+       LEFT JOIN users u ON tr.created_by = u.id
+       WHERE tr.id = $1`,
+      [textId]
+    )
+    
+    if (result.rows.length === 0) return false
+    
+    const text = result.rows[0]
+    
+    if (role === "super-admin") return true
+    if (text.creator_role === "super-admin") return false
+    
+    return true
   } finally {
     client.release()
   }

@@ -166,10 +166,15 @@ function EditTextDialog({ item, userRole, userId, onUpdated }: EditTextDialogPro
   const [isFetching, setIsFetching] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const creatorIsSuperAdmin = item.createdByRole === "super-admin";
+  const isSuperAdmin = userRole === "super-admin";
+
   const canChangeVisibility = 
-    userRole === "super-admin" || 
-    (userRole === "admin" && item.schoolId) ||
-    (item.createdBy === userId);
+    isSuperAdmin || 
+    (!creatorIsSuperAdmin && (
+      (userRole === "admin" && item.schoolId) ||
+      (item.createdBy === userId)
+    ));
 
   const canSetPublic = userRole === "super-admin";
   const canSetSchool = userRole === "super-admin" || userRole === "admin";
