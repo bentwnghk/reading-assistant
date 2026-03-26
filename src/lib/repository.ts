@@ -268,7 +268,10 @@ export async function updateRepositoryText(
   const client = await getClient()
   try {
     const checkResult = await client.query(
-      `SELECT created_by, school_id, visibility FROM text_repository WHERE id = $1`,
+      `SELECT tr.created_by, tr.school_id, tr.visibility, u.role as creator_role 
+       FROM text_repository tr 
+       LEFT JOIN users u ON tr.created_by = u.id 
+       WHERE tr.id = $1`,
       [id]
     )
     
@@ -280,15 +283,22 @@ export async function updateRepositoryText(
     const isOwner = text.created_by === userId
     const isSuperAdmin = role === "super-admin"
     const isAdmin = role === "admin"
+    const isTeacher = role === "teacher"
+    
+    const isCreatedByTeacherInSameSchool = 
+      isAdmin && 
+      schoolId && 
+      text.school_id === schoolId && 
+      text.creator_role === 'teacher'
     
     if (data.visibility !== undefined) {
       if (isSuperAdmin) {
         // Can set any visibility
-      } else if (isAdmin && schoolId && text.school_id === schoolId) {
+      } else if (isCreatedByTeacherInSameSchool) {
         if (data.visibility === 'public') {
           return { success: false, error: "Only super-admin can make texts public" }
         }
-      } else if (isOwner) {
+      } else if (isOwner && (isTeacher || isAdmin)) {
         if (data.visibility === 'public') {
           return { success: false, error: "Only super-admin can make texts public" }
         }
@@ -300,20 +310,20 @@ export async function updateRepositoryText(
       }
     }
     
-    if (!isOwner && !isSuperAdmin && !isAdmin) {
+    const canEditContent = isOwner || isSuperAdmin || isCreatedByTeacherInSameSchool
+    
+    if (!canEditContent) {
       return { success: false, error: "Forbidden" }
     }
     
-    if (isAdmin && !isOwner && text.school_id !== schoolId) {
-      return { success: false, error: "Forbidden" }
-    }
+    const canModifyFields = isOwner || isSuperAdmin
     
     const fields: string[] = []
     const values: unknown[] = []
     let p = 1
 
     if (data.name !== undefined) {
-      if (!isOwner && !isSuperAdmin) {
+      if (!canModifyFields) {
         return { success: false, error: "Only owner or super-admin can rename" }
       }
       fields.push(`name = $${p++}`)
@@ -324,14 +334,14 @@ export async function updateRepositoryText(
       values.push(data.visibility)
     }
     if (data.title !== undefined) {
-      if (!isOwner && !isSuperAdmin) {
+      if (!canModifyFields) {
         return { success: false, error: "Only owner or super-admin can edit title" }
       }
       fields.push(`title = $${p++}`)
       values.push(data.title)
     }
     if (data.extractedText !== undefined) {
-      if (!isOwner && !isSuperAdmin) {
+      if (!canModifyFields) {
         return { success: false, error: "Only owner or super-admin can edit text" }
       }
       fields.push(`extracted_text = $${p++}`)
@@ -360,7 +370,10 @@ export async function deleteRepositoryText(
   const client = await getClient()
   try {
     const checkResult = await client.query(
-      `SELECT created_by, school_id FROM text_repository WHERE id = $1`,
+      `SELECT tr.created_by, tr.school_id, u.role as creator_role 
+       FROM text_repository tr 
+       LEFT JOIN users u ON tr.created_by = u.id 
+       WHERE tr.id = $1`,
       [id]
     )
     
@@ -373,15 +386,13 @@ export async function deleteRepositoryText(
     const isSuperAdmin = role === "super-admin"
     const isAdmin = role === "admin"
     
-    if (isOwner || isSuperAdmin) {
-      const result = await client.query(
-        `DELETE FROM text_repository WHERE id = $1`,
-        [id]
-      )
-      return { success: (result.rowCount ?? 0) > 0 }
-    }
+    const isCreatedByTeacherInSameSchool = 
+      isAdmin && 
+      schoolId && 
+      text.school_id === schoolId && 
+      text.creator_role === 'teacher'
     
-    if (isAdmin && schoolId && text.school_id === schoolId) {
+    if (isOwner || isSuperAdmin || isCreatedByTeacherInSameSchool) {
       const result = await client.query(
         `DELETE FROM text_repository WHERE id = $1`,
         [id]
@@ -404,7 +415,10 @@ export async function canEditText(
   const client = await getClient()
   try {
     const result = await client.query(
-      `SELECT created_by, school_id FROM text_repository WHERE id = $1`,
+      `SELECT tr.created_by, tr.school_id, u.role as creator_role 
+       FROM text_repository tr 
+       LEFT JOIN users u ON tr.created_by = u.id 
+       WHERE tr.id = $1`,
       [textId]
     )
     
@@ -414,7 +428,7 @@ export async function canEditText(
     
     if (text.created_by === userId) return true
     if (role === "super-admin") return true
-    if (role === "admin" && schoolId && text.school_id === schoolId) return true
+    if (role === "admin" && schoolId && text.school_id === schoolId && text.creator_role === 'teacher') return true
     
     return false
   } finally {
