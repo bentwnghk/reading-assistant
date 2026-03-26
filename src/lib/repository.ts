@@ -159,15 +159,16 @@ export async function getRepositoryTexts(
          tr.created_at,
          tr.updated_at,
          u.name  AS created_by_name,
-         u.role  AS created_by_role,
+         ur.role AS created_by_role,
          s.name  AS school_name,
          COUNT(tri.id)::int AS image_count
        FROM text_repository tr
-       LEFT JOIN users  u ON tr.created_by = u.id
-       LEFT JOIN schools s ON tr.school_id = s.id
+       LEFT JOIN users      u  ON tr.created_by = u.id
+       LEFT JOIN user_roles ur ON tr.created_by = ur.user_id
+       LEFT JOIN schools    s  ON tr.school_id = s.id
        LEFT JOIN text_repository_images tri ON tri.text_id = tr.id
        WHERE ${vis}
-       GROUP BY tr.id, u.name, u.role, s.name
+       GROUP BY tr.id, u.name, ur.role, s.name
        ORDER BY tr.updated_at DESC`,
       values
     )
@@ -270,9 +271,9 @@ export async function updateRepositoryText(
   const client = await getClient()
   try {
     const checkResult = await client.query(
-      `SELECT tr.created_by, tr.school_id, tr.visibility, u.role as creator_role
+      `SELECT tr.created_by, tr.school_id, tr.visibility, ur.role as creator_role
        FROM text_repository tr
-       LEFT JOIN users u ON tr.created_by = u.id
+       LEFT JOIN user_roles ur ON tr.created_by = ur.user_id
        WHERE tr.id = $1`,
       [id]
     )
@@ -439,9 +440,9 @@ export async function canModifyVisibility(
   const client = await getClient()
   try {
     const result = await client.query(
-      `SELECT tr.created_by, u.role as creator_role
+      `SELECT tr.created_by, ur.role as creator_role
        FROM text_repository tr
-       LEFT JOIN users u ON tr.created_by = u.id
+       LEFT JOIN user_roles ur ON tr.created_by = ur.user_id
        WHERE tr.id = $1`,
       [textId]
     )
