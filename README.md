@@ -15,7 +15,7 @@ Transform any English reading material into an interactive learning experience w
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-default.svg)
 
-[Live Demo](https://read.mr5ai.com) · [Report Bug](https://github.com/u14app/reading-assistant/issues) · [Request Feature](https://github.com/u14app/reading-assistant/issues)
+[Live Demo](https://read.mr5ai.com)
 
 </div>
 
