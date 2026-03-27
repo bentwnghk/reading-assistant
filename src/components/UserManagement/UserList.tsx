@@ -337,7 +337,7 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                     <AvatarImage src={user.image || undefined} />
                     <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
                   </Avatar>
-                  <span className="truncate max-w-32">{user.name || t("userManagement.users.noName")}</span>
+                  <span className="truncate max-w-32" title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
                 </div>
               </TableCell>
               <TableCell className="truncate max-w-48">{user.email}</TableCell>

@@ -281,7 +281,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                   {classInfo.schoolName ? (
                     <div className="flex items-center gap-1">
                       <School className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <span className="text-sm truncate max-w-32">{classInfo.schoolName}</span>
+                      <span className="text-sm truncate max-w-32" title={classInfo.schoolName}>{classInfo.schoolName}</span>
                     </div>
                   ) : (
                     <span className="text-muted-foreground text-sm">-</span>
