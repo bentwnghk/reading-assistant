@@ -64,15 +64,15 @@
         "intro": "完整的用戶管理系統，專為課堂和學校設計！將學生分班、指派老師、即時追蹤學習進度，並匯出詳細報告。三種角色，權限各異：",
         "admin": {
           "title": "👑 管理員",
-          "manageSchools": "創建與管理學校",
+          "manageSchools": "管理學校",
           "manageUsers": "指派用戶角色",
           "manageClasses": "監管所有班別與老師",
           "uploadTexts": "上傳閱讀材料至文本庫"
         },
         "teacher": {
           "title": "🎓 老師",
-          "createClass": "創建自己的班別",
           "manageStudents": "添加學生並追蹤進度",
+          "uploadTexts": "上傳閱讀材料至文本庫與班別分享",
           "exportData": "匯出詳細 Excel 報告",
           "viewLeaderboard": "查看班別排行榜",
           "viewAiQuestions": "追蹤學生向 AI 導師的提問"

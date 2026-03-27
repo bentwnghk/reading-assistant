@@ -372,8 +372,8 @@ function Header() {
                     <span className="font-medium text-sm">{t("header.about.roles.teacher.title")}</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• {t("header.about.roles.teacher.createClass")}</li>
                     <li>• {t("header.about.roles.teacher.manageStudents")}</li>
+                    <li>• {t("header.about.roles.teacher.uploadTexts")}</li>
                     <li>• {t("header.about.roles.teacher.viewAiQuestions")}</li>
                     <li>• {t("header.about.roles.teacher.exportData")}</li>
                     <li>• {t("header.about.roles.teacher.viewLeaderboard")}</li>

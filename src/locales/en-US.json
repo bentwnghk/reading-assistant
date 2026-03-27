@@ -64,15 +64,15 @@
         "intro": "Complete user management for classrooms and schools! Organize students into classes, assign teachers, track learning progress in real-time, and export detailed reports. Three roles with tailored permissions:",
         "admin": {
           "title": "👑 Admin",
-          "manageSchools": "Create & manage schools",
+          "manageSchools": "Manage schools",
           "manageUsers": "Assign roles to any user",
           "manageClasses": "Oversee all classes & teachers",
           "uploadTexts": "Upload reading materials to Text Repository"
         },
         "teacher": {
           "title": "🎓 Teacher",
-          "createClass": "Create your own classes",
           "manageStudents": "Add students & track progress",
+          "uploadTexts": "Upload reading materials to Text Repository to share with your classes",
           "exportData": "Export detailed Excel reports",
           "viewLeaderboard": "Monitor class leaderboards",
           "viewAiQuestions": "Track questions students ask AI Tutor"
