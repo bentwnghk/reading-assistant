@@ -23,9 +23,9 @@ Transform any English reading material into an interactive learning experience w
 
 ## Why Students & Teachers Love Mr.🆖 ProReader
 
-| **Personalized** | **Gamified** | **Private** | **Collaborative** |
+| **Personalized** | **Gamified** | **Cloud Sync** | **Collaborative** |
 |:---:|:---:|:---:|:---:|
-| Adapts to your age & level (8-18) | Learn through games & achievements | All data stays in your browser | Share texts with classes & schools |
+| Adapts to your age & level (8-18) | Learn through games & achievements | Your progress syncs automatically—access your data from any device with every sign-in | Share texts with classes & schools |
 
 ---
 
@@ -415,36 +415,18 @@ Install Mr.🆖 ProReader as a native app on your device!
 
 ---
 
-## Data & Privacy
-
-| Feature | Details |
-|---------|---------|
-| 💾 **Local Storage** | All data stored in your browser only (guest mode) |
-| 📤 **Export Sessions** | Download as JSON for backup |
-| 📥 **Import Sessions** | Restore previous sessions |
-| 📚 **History** | Automatic session tracking |
-| 🗑️ **Delete Anytime** | Full control over your data |
-
----
-
 ## AI Models Supported
 
 | Provider | Models |
 |----------|--------|
-| 🟢 **Google Gemini** | gemini-2.5-flash, gemini-2.5-pro |
-| 🔵 **OpenAI** | gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, o3, o4-mini |
-| 🟠 **Anthropic** | claude-4-sonnet, claude-4-opus |
-| 🟣 **DeepSeek** | deepseek-chat, deepseek-reasoner |
-| ⚡ **XAI** | grok-3, grok-3-mini |
-| 🔷 **Mistral** | mistral-large, codestral |
-| 🌐 **OpenRouter** | 300+ models from various providers |
-| 🐳 **Ollama** | Local LLM support (llama3, qwen, etc.) |
-| ☁️ **Azure OpenAI** | Enterprise Azure deployment |
+| 🟢 **Google Gemini** | gemini-3-flash |
+| 🔵 **OpenAI** | gpt-5.1, gpt-5-mini, gpt-5-nano |
+| 🟣 **DeepSeek** | deepseek-chat |
 
 ### Access Modes
 | Mode | Description |
 |------|-------------|
-| 💰 **Self-Hosted** | Use your own API keys, pay per usage |
+| 💰 **Paid Mode** | Use your own API keys, pay per usage |
 | 🎓 **EDU Mode** | Free access provided by Mr.🆖 (password required) |
 
 ---
@@ -477,61 +459,6 @@ Install Mr.🆖 ProReader as a native app on your device!
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18.18.0 or later
-- npm 9.8.0 or later
-- PostgreSQL database (for multi-user features)
-
-### Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/u14app/reading-assistant.git
-cd reading-assistant
-
-# Install dependencies
-npm install
-
-# Copy environment template
-cp env.tpl .env.local
-
-# Configure your AI provider keys in .env.local
-# At minimum, set one of: GOOGLE_GENERATIVE_AI_API_KEY, OPENAI_API_KEY, etc.
-
-# Start development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to start learning!
-
-### Docker Deployment
-
-```bash
-# Build the image
-docker build -t reading-assistant .
-
-# Or use docker-compose (includes PostgreSQL)
-docker-compose up -d
-```
-
-### Environment Variables
-
-See `env.tpl` for all available configuration options. Key variables:
-
-| Variable | Description |
-|----------|-------------|
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key |
-| `OPENAI_API_KEY` | OpenAI API key |
-| `ANTHROPIC_API_KEY` | Anthropic API key |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `AUTH_SECRET` | Auth.js secret (generate with `npx auth secret`) |
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth credentials |
-
----
-
 ## Project Structure
 
 ```
@@ -556,21 +483,9 @@ src/
 
 ---
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
 ## License
 
-[MIT License](LICENSE) - Free for personal and commercial use.
+[MIT License](LICENSE) - Free for personal use.
 
 ---
 
@@ -589,6 +504,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 **Start your reading adventure today! 🚀**
 
-[Get Started](https://read.mr5ai.com) · [Documentation](https://github.com/u14app/reading-assistant#readme) · [Report Bug](https://github.com/u14app/reading-assistant/issues)
+[Get Started](https://read.mr5ai.com) · [AI API Provider](https://api.mr5ai.com)
 
 </div>
