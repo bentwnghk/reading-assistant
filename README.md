@@ -8,20 +8,24 @@
 
 Transform any English reading material into an interactive learning experience with AI-powered comprehension tools, vocabulary games, and personalized practice.
 
-![Next.js](https://img.shields.io/badge/Next.js-111111?style=flat&logo=nextdotjs&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js_15-111111?style=flat&logo=nextdotjs&logoColor=white)
+![React 19](https://img.shields.io/badge/React_19-61DAFB?style=flat&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
-![shadcn/ui](https://img.shields.io/badge/shadcn/ui-111111?style=flat&logo=shadcnui&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-default.svg)
+
+[Live Demo](https://read.mr5ai.com) · [Report Bug](https://github.com/u14app/reading-assistant/issues) · [Request Feature](https://github.com/u14app/reading-assistant/issues)
 
 </div>
 
 ---
 
-## Why Students Love Mr.🆖 ProReader
+## Why Students & Teachers Love Mr.🆖 ProReader
 
-| **Personalized** | **Gamified** | **Private** |
-|:---:|:---:|:---:|
-| Adapts to your age & level (8-18) | Learn through fun games & challenges | All data stays in your browser |
+| **Personalized** | **Gamified** | **Private** | **Collaborative** |
+|:---:|:---:|:---:|:---:|
+| Adapts to your age & level (8-18) | Learn through games & achievements | All data stays in your browser | Share texts with classes & schools |
 
 ---
 
@@ -30,7 +34,7 @@ Transform any English reading material into an interactive learning experience w
 ```mermaid
 flowchart LR
     subgraph INPUT["📷 Start"]
-        A[Upload Image]
+        A[Upload Image/PDF]
     end
     
     subgraph UNDERSTAND["🧠 Understand"]
@@ -118,18 +122,10 @@ Analyze original, adapted, and simplified versions simultaneously to see exactly
 | **C2** | Mastery | 🟣 Purple |
 
 #### Interactive Features
-- **Toggle Levels On/Off**: Focus on specific difficulty levels (e.g., show only C1/C2 words to identify advanced vocabulary)
+- **Toggle Levels On/Off**: Focus on specific difficulty levels
 - **Word Count Per Level**: See exactly how many words exist at each CEFR level
 - **Hover Tooltips**: Hover any highlighted word to see its CEFR level
 - **Three Text Versions**: Highlight original, adapted, or simplified text
-
-#### Perfect For
-| Use Case | How It Helps |
-|----------|--------------|
-| 🎯 **Target Practice** | Focus on words at your level |
-| 📈 **Track Progress** | See more A1-A2 words = improving! |
-| 👨‍🏫 **Teachers** | Quickly assess text suitability |
-| 📚 **Self-Learners** | Identify vocabulary gaps |
 
 ---
 
@@ -145,12 +141,6 @@ Got stuck on a passage? The AI Tutor is here to help! This interactive chat assi
 | 💡 **Hint Mode** | Get guided hints instead of direct answers (learn, don't cheat!) |
 | 📝 **Step-by-Step Explanations** | Understand how to approach reading questions |
 
-#### Quick Question Shortcuts
-- **"What's the main idea?"** - Get a quick overview
-- **"Vocab help"** - Understand difficult words or phrases
-- **"Explain this"** - Get a clear explanation of any passage
-- **Upload a question image** - Get guided help solving it
-
 ---
 
 ### 📷 4. Smart OCR - Snap & Extract
@@ -160,7 +150,7 @@ Transform physical reading materials into digital text instantly.
 | Feature | Description |
 |---------|-------------|
 | 📸 **Multi-Image Upload** | Upload multiple pages at once |
-| 🖼️ **Format Support** | PNG, JPG, JPEG, WEBP |
+| 🖼️ **Format Support** | PNG, JPG, JPEG, WEBP, PDF |
 | 📊 **Progress Tracking** | Real-time extraction progress |
 | 📚 **Any Material** | Textbooks, worksheets, articles, novels |
 
@@ -295,11 +285,6 @@ Test your vocabulary knowledge with interactive quizzes.
 | 📖 **Definition-to-Word** | Find the word that matches the definition |
 | ✏️ **Fill-in-the-Blank** | Complete sentences with the right word |
 
-#### Quiz Features
-- 🔄 **Retry Missed**: Practice only the questions you got wrong
-- 🎯 **Prioritize Hard Words**: Focus on words you rated as difficult
-- 📊 **Score Tracking**: See your progress over time
-
 ---
 
 ### 🔊 12. Text-to-Speech
@@ -329,11 +314,112 @@ Download your learning materials for offline study.
 
 ---
 
+## 🆕 New Features
+
+### 🏆 14. Leaderboard & Achievements
+
+Compete with classmates and track your learning journey!
+
+#### Weekly Leaderboard
+| Feature | Description |
+|---------|-------------|
+| 📊 **Class Rankings** | See where you stand among classmates |
+| 🔥 **Reading Streaks** | Track consecutive days of reading |
+| 📈 **Weekly Score** | Points for sessions, tests, quizzes, and games |
+| ⬆️ **Improvement Indicator** | See your progress compared to last week |
+
+#### Personal Statistics
+| Stat | What It Shows |
+|------|---------------|
+| 📚 **Total Sessions** | Reading materials completed |
+| 📝 **Tests Completed** | Comprehension tests taken |
+| 🎯 **Average Test Score** | Your overall performance |
+| 🃏 **Flashcard Reviews** | Vocabulary cards reviewed |
+| 🎮 **Spelling Games** | Games played |
+| 📖 **Vocabulary Words** | Words in your collection |
+
+#### Achievement System
+Unlock medals by reaching learning milestones:
+
+| Achievement Type | Milestones |
+|-----------------|------------|
+| 📚 **Sessions Read** | 1, 5, 10, 25, 50, 100 sessions |
+| 📖 **Vocabulary Collected** | 10, 50, 100, 250, 500 words |
+| 🃏 **Flashcard Reviews** | 50, 200, 500, 1000 reviews |
+| 📝 **Tests Completed** | 5, 15, 30, 50 tests |
+| 🎮 **Spelling Challenges** | 10, 30, 50, 100 games |
+| 📋 **Quizzes Completed** | 5, 15, 30, 50 quizzes |
+
+---
+
+### 📚 15. Text Repository
+
+Share and reuse reading materials across your school or class.
+
+| Feature | Description |
+|---------|-------------|
+| 📤 **Upload Texts** | Save reading materials for future use |
+| 🏫 **School Sharing** | Share texts with your entire school |
+| 👥 **Class Sharing** | Share texts with specific classes |
+| 🌍 **Public Library** | Access publicly shared materials |
+| 🔍 **Search & Filter** | Find texts by name, date, or visibility |
+| 📥 **Import/Export** | Backup and restore text collections |
+
+---
+
+### 🏫 16. School & Class Management
+
+Built for educational institutions with multi-tenant support.
+
+#### For Teachers
+| Feature | Description |
+|---------|-------------|
+| 👨‍🏫 **Class Creation** | Create and manage classes |
+| 👥 **Student Management** | Add/remove students from classes |
+| 📊 **Progress Monitoring** | Track student activity and scores |
+| 📚 **Shared Materials** | Distribute reading texts to classes |
+
+#### For Administrators
+| Feature | Description |
+|---------|-------------|
+| 🏫 **School Management** | Create and configure schools |
+| 👥 **User Management** | Manage teachers and students |
+| 📊 **Data Export** | Export data for analysis |
+| 🔐 **Access Control** | Manage roles and permissions |
+
+---
+
+### 🔐 17. Authentication & Security
+
+Secure login with Google OAuth integration.
+
+| Feature | Description |
+|---------|-------------|
+| 🔑 **Google Sign-In** | One-click login with Google |
+| 👤 **Role-Based Access** | Student, Teacher, Admin roles |
+| 🏫 **School Scoping** | Data isolated by school |
+| 🔒 **Secure Sessions** | Auth.js powered authentication |
+
+---
+
+### 📱 18. PWA Support
+
+Install Mr.🆖 ProReader as a native app on your device!
+
+| Feature | Description |
+|---------|-------------|
+| 📲 **Installable** | Add to home screen on mobile/desktop |
+| 🔄 **Offline Ready** | Works without internet connection |
+| 🚀 **Fast Loading** | Cached assets for instant startup |
+| 📱 **Native Feel** | Full-screen, app-like experience |
+
+---
+
 ## Data & Privacy
 
 | Feature | Details |
 |---------|---------|
-| 💾 **Local Storage** | All data stored in your browser only |
+| 💾 **Local Storage** | All data stored in your browser only (guest mode) |
 | 📤 **Export Sessions** | Download as JSON for backup |
 | 📥 **Import Sessions** | Restore previous sessions |
 | 📚 **History** | Automatic session tracking |
@@ -345,25 +431,30 @@ Download your learning materials for offline study.
 
 | Provider | Models |
 |----------|--------|
-| 🟢 **Google Gemini** | gemini-3-flash-preview |
-| 🔵 **OpenAI** | gpt-5.1, gpt-5-mini, gpt-5-nano, gpt-4.1-mini |
-| 🟠 **DeepSeek** | deepseek-chat |
-| ⚡ **zAI** | glm-4.7 |
+| 🟢 **Google Gemini** | gemini-2.5-flash, gemini-2.5-pro |
+| 🔵 **OpenAI** | gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, o3, o4-mini |
+| 🟠 **Anthropic** | claude-4-sonnet, claude-4-opus |
+| 🟣 **DeepSeek** | deepseek-chat, deepseek-reasoner |
+| ⚡ **XAI** | grok-3, grok-3-mini |
+| 🔷 **Mistral** | mistral-large, codestral |
+| 🌐 **OpenRouter** | 300+ models from various providers |
+| 🐳 **Ollama** | Local LLM support (llama3, qwen, etc.) |
+| ☁️ **Azure OpenAI** | Enterprise Azure deployment |
 
 ### Access Modes
 | Mode | Description |
 |------|-------------|
-| 💰 **Paid Mode** | Use your own API key, pay per usage |
+| 💰 **Self-Hosted** | Use your own API keys, pay per usage |
 | 🎓 **EDU Mode** | Free access provided by Mr.🆖 (password required) |
 
 ---
 
 ## Languages
 
-| Language | Code |
-|----------|------|
-| 🇬🇧 English | en-US |
-| 🇭🇰 繁體中文 | zh-HK |
+| Language | Code | Status |
+|----------|------|--------|
+| 🇬🇧 English | en-US | ✅ Full Support |
+| 🇭🇰 繁體中文 | zh-HK | ✅ Full Support |
 
 ---
 
@@ -372,12 +463,108 @@ Download your learning materials for offline study.
 | Category | Technology |
 |----------|------------|
 | ⚡ **Framework** | Next.js 15 (App Router) |
-| 🎨 **UI** | Shadcn UI + Tailwind CSS |
+| ⚛️ **UI Library** | React 19 |
+| 🔷 **Language** | TypeScript |
+| 🎨 **Styling** | Tailwind CSS + Shadcn UI |
 | 📦 **State** | Zustand (with persistence) |
+| 🗄️ **Database** | PostgreSQL |
+| 🔐 **Auth** | Auth.js (NextAuth v5) |
 | 🤖 **AI** | Vercel AI SDK |
 | 🎭 **Icons** | Lucide React |
 | 📊 **Diagrams** | Mermaid |
+| 📝 **Markdown** | react-markdown + KaTeX |
 | 🌍 **i18n** | react-i18next |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18.18.0 or later
+- npm 9.8.0 or later
+- PostgreSQL database (for multi-user features)
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/u14app/reading-assistant.git
+cd reading-assistant
+
+# Install dependencies
+npm install
+
+# Copy environment template
+cp env.tpl .env.local
+
+# Configure your AI provider keys in .env.local
+# At minimum, set one of: GOOGLE_GENERATIVE_AI_API_KEY, OPENAI_API_KEY, etc.
+
+# Start development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to start learning!
+
+### Docker Deployment
+
+```bash
+# Build the image
+docker build -t reading-assistant .
+
+# Or use docker-compose (includes PostgreSQL)
+docker-compose up -d
+```
+
+### Environment Variables
+
+See `env.tpl` for all available configuration options. Key variables:
+
+| Variable | Description |
+|----------|-------------|
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `AUTH_SECRET` | Auth.js secret (generate with `npx auth secret`) |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth credentials |
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes (AI, auth, admin)
+│   ├── leaderboard/       # Leaderboard page
+│   └── page.tsx           # Main application
+├── components/
+│   ├── ui/                # Shadcn UI primitives
+│   ├── Internal/          # Shared components
+│   ├── ReadingAssistant/  # Core feature components
+│   ├── Leaderboard/       # Leaderboard & achievements
+│   └── Provider/          # Context providers
+├── hooks/                 # Custom React hooks
+├── store/                 # Zustand state stores
+├── utils/                 # Helper functions
+├── constants/             # App constants
+├── locales/               # i18n translations
+└── types.d.ts            # TypeScript interfaces
+```
+
+---
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
@@ -387,10 +574,21 @@ Download your learning materials for offline study.
 
 ---
 
+## Acknowledgments
+
+- [Shadcn UI](https://ui.shadcn.com/) for beautiful components
+- [Vercel AI SDK](https://sdk.vercel.ai/) for AI integration
+- [Mermaid](https://mermaid.js.org/) for mind maps
+- All the amazing open-source libraries that make this possible
+
+---
+
 <div align="center">
 
 ### Built with ❤️ by Mr.🆖 for students learning English
 
 **Start your reading adventure today! 🚀**
+
+[Get Started](https://read.mr5ai.com) · [Documentation](https://github.com/u14app/reading-assistant#readme) · [Report Bug](https://github.com/u14app/reading-assistant/issues)
 
 </div>
