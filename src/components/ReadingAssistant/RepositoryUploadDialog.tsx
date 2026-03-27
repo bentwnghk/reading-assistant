@@ -92,26 +92,26 @@ function RepositoryUploadDialog({
   const canSetPublic = isSuperAdmin;
   const canSetClass = isTeacher || (isAdmin && hasTeacherClasses);
 
-  const defaultVisibility = canSetClass ? "class" : "school";
+  const defaultVisibility = isSuperAdmin ? "public" : canSetClass ? "class" : "school";
 
   useEffect(() => {
-    if (open && (isTeacher || isAdmin)) {
-      setIsLoadingClasses(true);
-      fetch("/api/classes")
-        .then((r) => r.json())
-        .then((data) => {
-          const classes = data || [];
-          setTeacherClasses(classes);
-          if (isAdmin && classes.length > 0) {
-            setVisibility("class");
-          }
-        })
-        .catch(() => {
-          setTeacherClasses([]);
-        })
-        .finally(() => setIsLoadingClasses(false));
+    if (open) {
+      setVisibility(defaultVisibility);
+      if (isTeacher || isAdmin) {
+        setIsLoadingClasses(true);
+        fetch("/api/classes")
+          .then((r) => r.json())
+          .then((data) => {
+            const classes = data || [];
+            setTeacherClasses(classes);
+          })
+          .catch(() => {
+            setTeacherClasses([]);
+          })
+          .finally(() => setIsLoadingClasses(false));
+      }
     }
-  }, [open, isTeacher, isAdmin]);
+  }, [open, isTeacher, isAdmin, defaultVisibility]);
 
   const reset = useCallback(() => {
     setName("");
