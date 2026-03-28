@@ -740,6 +740,9 @@ export const useReadingStore = create(
           ...session,
           originalImages: session.originalImages || [],
         }));
+        if (currentUserId && session.id) {
+          markSessionCreated(session.id);
+        }
       },
     }),
     {

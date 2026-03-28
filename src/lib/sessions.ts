@@ -285,6 +285,7 @@ export async function updateReadingSession(
     }
     
     if (updateFields.length > 0) {
+      updateFields.push(`updated_at = NOW()`)
       values.push(sessionId, userId)
       await client.query(
         `UPDATE reading_sessions 
