@@ -241,7 +241,7 @@ function ImageUpload() {
                       <Button
                         variant="secondary"
                         size="icon"
-                        className="h-6 w-6"
+                        className="h-6 w-6 bg-green-100 dark:bg-secondary hover:bg-green-200 dark:hover:bg-secondary/80 text-green-800 dark:text-green-200"
                         title={t("reading.imageUpload.openInNewTab")}
                         onClick={() => {
                           const win = window.open();
