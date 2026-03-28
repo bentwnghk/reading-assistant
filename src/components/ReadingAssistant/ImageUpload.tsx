@@ -1,7 +1,7 @@
  "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, History as HistoryIcon, Plus } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, History as HistoryIcon, Plus, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -237,14 +237,31 @@ function ImageUpload() {
                       alt={`Uploaded ${index + 1}`}
                       className="max-h-40 rounded-lg border object-contain"
                     />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-                      onClick={() => clearImage(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+                    <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-6 w-6"
+                        title={t("reading.imageUpload.openInNewTab")}
+                        onClick={() => {
+                          const win = window.open();
+                          if (win) {
+                            win.document.write(`<html><head><title>Image ${index + 1}</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000;}</style></head><body><img src="${image}" style="max-width:100%;max-height:100vh;object-fit:contain;" /></body></html>`);
+                            win.document.close();
+                          }
+                        }}
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => clearImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

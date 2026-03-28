@@ -217,6 +217,7 @@
       "uploadNew": "Click the [+ New Text] button above to start over",
       "clearAll": "New Text",
       "addMore": "Add more images/PDFs",
+      "openInNewTab": "Open image in new tab",
       "help": {
         "title": "Select Text Guide",
         "purpose": "Purpose: Choose how you want to load your reading material. You can either upload images or PDFs for AI text extraction or select from pre-saved texts in the Text Repository.",
