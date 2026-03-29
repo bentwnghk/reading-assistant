@@ -74,8 +74,6 @@ export async function middleware(request: NextRequest) {
   };
   const hasDisabledAIModel = async () => {
     if (request.method.toUpperCase() === "GET") return false;
-    const contentType = request.headers.get("Content-Type") || "";
-    if (contentType.startsWith("multipart/")) return false;
     const { model = "" } = await request.clone().json();
     const { availableModelList, disabledModelList } = getCustomModelList(
       MODEL_LIST.length > 0 ? MODEL_LIST.split(",") : []
