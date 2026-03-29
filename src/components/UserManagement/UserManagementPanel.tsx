@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Download, Info, Loader2, Upload } from "lucide-react"
+import { Download, Info, Loader2, Mail, Upload } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -42,6 +42,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
 
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [sendingTest, setSendingTest] = useState(false)
   const importFileRef = useRef<HTMLInputElement>(null)
 
   const defaultTab = useMemo(() => {
@@ -164,6 +165,23 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     }
   }
 
+  const handleSendTestReminder = async () => {
+    setSendingTest(true)
+    try {
+      const res = await fetch("/api/reminders/test", { method: "POST" })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || t("reminder.testSendFailed"))
+        return
+      }
+      toast.success(t("reminder.testSent", { email: data.sentTo }))
+    } catch {
+      toast.error(t("reminder.testSendFailed"))
+    } finally {
+      setSendingTest(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
@@ -224,6 +242,29 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                   className="hidden"
                   onChange={handleFileSelected}
                 />
+
+                <TooltipProvider delayDuration={300}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSendTestReminder}
+                        disabled={exporting || importing || sendingTest}
+                      >
+                        {sendingTest ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Mail className="h-4 w-4 mr-1" />
+                        )}
+                        {t("reminder.sendTest")}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-64 text-center">
+                      {t("reminder.sendTestTip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             )}
           </div>

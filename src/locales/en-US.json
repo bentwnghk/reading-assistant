@@ -786,7 +786,11 @@
     "days": "days",
     "saved": "Reminder preferences saved",
     "loginRequired": "Sign in to manage email reminder preferences",
-    "unsubscribeSuccess": "You have been unsubscribed from reminder emails."
+    "unsubscribeSuccess": "You have been unsubscribed from reminder emails.",
+    "sendTest": "Test Email",
+    "sendTestTip": "Send a test reminder email to yourself to preview how it looks",
+    "testSent": "Test reminder sent to {{email}}",
+    "testSendFailed": "Failed to send test reminder email"
   },
   "editor": {
     "copy": "Copy",

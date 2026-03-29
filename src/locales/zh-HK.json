@@ -786,7 +786,11 @@
     "days": "天",
     "saved": "提醒設定已儲存",
     "loginRequired": "請登入以管理電郵提醒設定",
-    "unsubscribeSuccess": "你已取消訂閱提醒電郵。"
+    "unsubscribeSuccess": "你已取消訂閱提醒電郵。",
+    "sendTest": "測試電郵",
+    "sendTestTip": "向自己發送測試提醒電郵，預覽電郵的外觀",
+    "testSent": "測試提醒已發送至 {{email}}",
+    "testSendFailed": "發送測試提醒電郵失敗"
   },
   "editor": {
     "copy": "複製",
