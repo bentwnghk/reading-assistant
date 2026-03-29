@@ -145,7 +145,6 @@ export async function GET() {
       simplifiedDifficulty: r.simplified_difficulty ?? null,
       includeGlossary: r.include_glossary as boolean,
       includeSentenceAnalysis: r.include_sentence_analysis as boolean,
-      pronunciationAttempts: r.pronunciation_attempts ?? [],
       createdAt: new Date(r.created_at as string).getTime(),
       updatedAt: new Date(r.updated_at as string).getTime(),
     }))

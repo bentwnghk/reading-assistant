@@ -83,27 +83,6 @@ interface VocabularyQuizQuestion {
   wordRef: string;
 }
 
-type PronunciationWordStatus = "correct" | "mispronounced" | "missed" | "extra";
-
-interface PronunciationWord {
-  original: string;
-  heard?: string;
-  status: PronunciationWordStatus;
-}
-
-interface PronunciationResult {
-  words: PronunciationWord[];
-  accuracy: number;
-  correctCount: number;
-  mispronouncedCount: number;
-  missedCount: number;
-  extraCount: number;
-  totalWords: number;
-  transcript: string;
-  paragraphIndex: number;
-  timestamp: number;
-}
-
 interface ReadingSession {
   id: string;
   title: string;
@@ -238,8 +217,7 @@ type LeaderboardActivityType =
   | "simplified_text_generate"
   | "sentence_analyze"
   | "targeted_practice_complete"
-  | "glossary_add"
-  | "reading_aloud";
+  | "glossary_add";
 
 interface ActivityLogEntry {
   id: string;

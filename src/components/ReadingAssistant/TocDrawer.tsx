@@ -8,7 +8,6 @@ import {
   BookOpen,
   ClipboardCheck,
   BookMarked,
-  Mic,
   Check,
 } from "lucide-react";
 import {
@@ -67,15 +66,6 @@ const sections = [
     labelKey: "toc.adapted",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.adaptedText,
-    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
-      !!store.extractedText,
-  },
-  {
-    id: "section-reading-aloud",
-    icon: Mic,
-    labelKey: "toc.readingAloud",
-    checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
-      store.pronunciationAttempts.length > 0,
     isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.extractedText,
   },

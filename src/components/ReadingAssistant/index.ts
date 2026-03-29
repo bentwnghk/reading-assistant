@@ -4,7 +4,6 @@ export { default as ExtractedText } from "./ExtractedText";
 export { default as Summary } from "./Summary";
 export { default as AdaptedText } from "./AdaptedText";
 export { default as MindMap } from "./MindMap";
-export { default as ReadingAloud } from "./ReadingAloud";
 export { default as ReadingTest } from "./ReadingTest";
 export { default as Glossary } from "./Glossary";
 export { default as WorkflowProgress } from "./WorkflowProgress";

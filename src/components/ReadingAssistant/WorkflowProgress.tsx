@@ -8,7 +8,7 @@ import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
   const { t } = useTranslation();
-  const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, pronunciationAttempts } = useReadingStore();
+  const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted } = useReadingStore();
 
   const hasExtractedText = !!extractedText;
 
@@ -22,7 +22,6 @@ function WorkflowProgress() {
     { key: "glossary", label: t("reading.workflow.glossary"), completed: glossary.length > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
-    { key: "readAloud", label: t("reading.workflow.readAloud"), completed: pronunciationAttempts.length > 0, accessible: hasExtractedText, sectionId: "section-reading-aloud" },
     { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasExtractedText, sectionId: "section-test" },
   ];
 

@@ -54,7 +54,6 @@ export async function createReadingSession(
         sessionData.simplifiedDifficulty ? JSON.stringify(sessionData.simplifiedDifficulty) : null,
         sessionData.includeGlossary ?? true,
         sessionData.includeSentenceAnalysis ?? true,
-        JSON.stringify(sessionData.pronunciationAttempts ?? []),
         new Date(sessionData.createdAt || Date.now()),
       ]
     )
@@ -144,7 +143,6 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       simplifiedDifficulty: row.simplified_difficulty,
       includeGlossary: row.include_glossary ?? true,
       includeSentenceAnalysis: row.include_sentence_analysis ?? true,
-      pronunciationAttempts: row.pronunciation_attempts ?? [],
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -218,7 +216,6 @@ export async function getReadingSession(
       simplifiedDifficulty: row.simplified_difficulty,
       includeGlossary: row.include_glossary ?? true,
       includeSentenceAnalysis: row.include_sentence_analysis ?? true,
-      pronunciationAttempts: row.pronunciation_attempts ?? [],
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -269,7 +266,6 @@ export async function updateReadingSession(
       simplifiedDifficulty: "simplified_difficulty",
       includeGlossary: "include_glossary",
       includeSentenceAnalysis: "include_sentence_analysis",
-      pronunciationAttempts: "pronunciation_attempts",
     }
     
     for (const [key, dbColumn] of Object.entries(fieldMappings)) {
@@ -279,7 +275,7 @@ export async function updateReadingSession(
         
         if (["highlightedWords", "analyzedSentences", "readingTest", "glossary", 
              "glossaryRatings", "chatHistory", "originalDifficulty", 
-             "adaptedDifficulty", "simplifiedDifficulty", "pronunciationAttempts"].includes(key)) {
+             "adaptedDifficulty", "simplifiedDifficulty"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else {
           values.push(value)

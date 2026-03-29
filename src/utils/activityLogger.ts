@@ -11,7 +11,6 @@ type ActivityType =
   | "targeted_practice_complete"
   | "glossary_add"
   | "ai_tutor_question"
-  | "reading_aloud"
 
 interface ActivityDetails {
   cardsReviewed?: number

@@ -121,7 +121,6 @@ export interface ReadingStore {
   simplifiedDifficulty: TextDifficultyResult | null;
   includeGlossary: boolean;
   includeSentenceAnalysis: boolean;
-  pronunciationAttempts: PronunciationResult[];
   createdAt: number;
   updatedAt: number;
 }
@@ -166,7 +165,6 @@ interface ReadingActions {
   clearDifficultyAnalysis: () => void;
   setIncludeGlossary: (include: boolean) => void;
   setIncludeSentenceAnalysis: (include: boolean) => void;
-  addPronunciationAttempt: (result: PronunciationResult) => void;
   clearDerivedData: () => void;
   loadFromRepository: (text: RepositoryText) => void;
   reset: () => void;
@@ -205,7 +203,6 @@ const defaultValues: ReadingStore = {
   simplifiedDifficulty: null,
   includeGlossary: true,
   includeSentenceAnalysis: true,
-  pronunciationAttempts: [],
   createdAt: 0,
   updatedAt: 1,
 };
@@ -688,18 +685,6 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      addPronunciationAttempt: (pronunciationResult) =>
-        set((state) => {
-          const newState = {
-            pronunciationAttempts: [...state.pronunciationAttempts, pronunciationResult],
-            updatedAt: Date.now(),
-          };
-          syncToHistoryIfNeeded({ ...state, ...newState });
-          if (currentUserId && state.id) {
-            syncToAPI(state.id, newState);
-          }
-          return newState;
-        }),
       clearDerivedData: () =>
         set((state) => {
           const newState = {
@@ -708,7 +693,6 @@ export const useReadingStore = create(
             highlightedWords: [],
             analyzedSentences: {},
             glossary: [],
-            pronunciationAttempts: [],
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
