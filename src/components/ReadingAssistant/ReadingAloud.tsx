@@ -97,10 +97,8 @@ export default function ReadingAloud() {
 
   const wordStatusStyle: Record<string, string> = {
     correct: "text-green-700 dark:text-green-400",
-    uncertain: "text-orange-600 dark:text-orange-400 underline decoration-dotted underline-offset-2",
     missed: "text-red-600 dark:text-red-400 line-through opacity-70",
     extra: "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-0.5 rounded",
-    mispronounced: "text-red-600 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-900/20 px-0.5 rounded",
   };
 
   return (
@@ -284,20 +282,8 @@ export default function ReadingAloud() {
                       <CheckCircle className="h-3.5 w-3.5 text-green-600" />
                       {result.correctCount} {t("reading.readingAloud.correct")}
                     </span>
-                    {result.uncertainCount > 0 && (
-                      <span className="flex items-center gap-1">
-                        <HelpCircle className="h-3.5 w-3.5 text-orange-600" />
-                        {result.uncertainCount} {t("reading.readingAloud.uncertain")}
-                      </span>
-                    )}
-                    {result.mispronouncedCount > 0 && (
-                      <span className="flex items-center gap-1">
-                        <XCircle className="h-3.5 w-3.5 text-red-600" />
-                        {result.mispronouncedCount} {t("reading.readingAloud.mispronounced")}
-                      </span>
-                    )}
                     <span className="flex items-center gap-1">
-                      <XCircle className="h-3.5 w-3.5 text-red-400" />
+                      <XCircle className="h-3.5 w-3.5 text-red-600" />
                       {result.missedCount} {t("reading.readingAloud.missed")}
                     </span>
                     {result.extraCount > 0 && (
@@ -315,12 +301,9 @@ export default function ReadingAloud() {
                     <p className="text-sm leading-relaxed">
                       {result.words.map((w, i) => {
                         const isExtra = w.status === "extra";
-                        const isMispronounced = w.status === "mispronounced";
                         const displayText = isExtra
                           ? `[${w.heard || ""}]`
-                          : isMispronounced
-                            ? `${w.original}→${w.heard || "?"}`
-                            : w.original;
+                          : w.original;
                         const space = i > 0 ? " " : "";
                         return (
                           <span key={i} className={wordStatusStyle[w.status]}>
@@ -330,10 +313,6 @@ export default function ReadingAloud() {
                       })}
                     </p>
                   </div>
-
-                  <p className="text-xs text-muted-foreground italic">
-                    {t("reading.readingAloud.disclaimer")}
-                  </p>
                 </div>
               )}
 
