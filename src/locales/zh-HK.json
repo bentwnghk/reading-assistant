@@ -777,6 +777,17 @@
     "cancel": "取消",
     "save": "儲存"
   },
+  "reminder": {
+    "tabNotifications": "通知",
+    "emailReminders": "電郵提醒",
+    "emailRemindersTip": "當你一段時間沒有學習時，收到提醒電郵",
+    "remindEvery": "每隔",
+    "day": "天",
+    "days": "天",
+    "saved": "提醒設定已儲存",
+    "loginRequired": "請登入以管理電郵提醒設定",
+    "unsubscribeSuccess": "你已取消訂閱提醒電郵。"
+  },
   "editor": {
     "copy": "複製",
     "mermaid": {

@@ -43,7 +43,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
-import { CircleHelp, Settings, Sparkles, Volume2 } from "lucide-react";
+import { CircleHelp, Settings, Sparkles, Volume2, Bell } from "lucide-react";
+import { useSession } from "next-auth/react";
+import ReminderPreferences from "@/components/ReminderPreferences";
 
 type SettingProps = {
   open: boolean;
@@ -109,6 +111,8 @@ function InfoTooltip({ content }: { content: string }) {
 function Setting({ open, onClose }: SettingProps) {
   const { t } = useTranslation();
   const { mode, provider, update } = useSettingStore();
+  const { status: authStatus } = useSession();
+  const isAuthenticated = authStatus === "authenticated";
 
   function getFormValues(): z.infer<typeof formSchema> {
     const state = useSettingStore.getState();
@@ -196,6 +200,12 @@ function Setting({ open, onClose }: SettingProps) {
                   <Volume2 className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">{t("setting.tabTTS")}</span>
                 </TabsTrigger>
+                {isAuthenticated && (
+                  <TabsTrigger value="notifications" className="flex-1 gap-1">
+                    <Bell className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{t("reminder.tabNotifications")}</span>
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="general" className="space-y-4 mt-4">
@@ -853,6 +863,12 @@ function Setting({ open, onClose }: SettingProps) {
                   )}
                 />
               </TabsContent>
+
+              {isAuthenticated && (
+                <TabsContent value="notifications" className="space-y-4 mt-4">
+                  <ReminderPreferences />
+                </TabsContent>
+              )}
             </Tabs>
 
             <DialogFooter className="flex-col gap-2">

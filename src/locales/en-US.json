@@ -777,6 +777,17 @@
     "cancel": "Cancel",
     "save": "Save"
   },
+  "reminder": {
+    "tabNotifications": "Notifications",
+    "emailReminders": "Email Reminders",
+    "emailRemindersTip": "Receive a reminder email when you haven't studied for a while",
+    "remindEvery": "Remind me every",
+    "day": "day",
+    "days": "days",
+    "saved": "Reminder preferences saved",
+    "loginRequired": "Sign in to manage email reminder preferences",
+    "unsubscribeSuccess": "You have been unsubscribed from reminder emails."
+  },
   "editor": {
     "copy": "Copy",
     "mermaid": {

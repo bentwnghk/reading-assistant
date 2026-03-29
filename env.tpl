@@ -138,3 +138,19 @@ NEXT_PUBLIC_MODEL_LIST=
 
 # (Optional) Injected script code can be used for statistics or error tracking.
 HEAD_SCRIPTS=
+
+# ─── Email Reminder Configuration ──────────────────────────────────────────
+# Mailtrap API token for sending reminder emails. Create one at https://mailtrap.io/api-tokens
+MAILTRAP_API_KEY=
+# Sender email address for reminder emails (must be a verified domain in Mailtrap)
+MAILTRAP_SENDER_EMAIL=noreply@your-domain.com
+# Display name for the sender
+MAILTRAP_SENDER_NAME=Reading Assistant
+# Set to "true" to use Mailtrap Sandbox for testing (emails won't be delivered to real inboxes)
+MAILTRAP_USE_SANDBOX=false
+# Required only when MAILTRAP_USE_SANDBOX=true — your Mailtrap inbox ID
+MAILTRAP_INBOX_ID=
+# Secret token to authenticate cron job requests to /api/reminders/cron
+CRON_SECRET=
+# (Optional) Public URL of the app, used for links in reminder emails. Auto-detected for Vercel deployments.
+NEXT_PUBLIC_APP_URL=
