@@ -83,18 +83,20 @@ interface VocabularyQuizQuestion {
   wordRef: string;
 }
 
-type PronunciationWordStatus = "correct" | "mispronounced" | "missed" | "extra";
+type PronunciationWordStatus = "correct" | "uncertain" | "mispronounced" | "missed" | "extra";
 
 interface PronunciationWord {
   original: string;
   heard?: string;
   status: PronunciationWordStatus;
+  confidence?: number;
 }
 
 interface PronunciationResult {
   words: PronunciationWord[];
   accuracy: number;
   correctCount: number;
+  uncertainCount: number;
   mispronouncedCount: number;
   missedCount: number;
   extraCount: number;

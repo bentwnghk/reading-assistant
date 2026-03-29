@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
 import { useReadingStore } from "@/store/reading";
-import { compareText, type PronunciationResult } from "@/utils/pronunciationScore";
+import { compareText, type PronunciationResult, type VerboseTranscriptionResponse } from "@/utils/pronunciationScore";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { logActivity } from "@/utils/activityLogger";
@@ -48,7 +48,7 @@ export function useReadingAloud(): UseReadingAloudReturn {
   }, [extractedText]);
 
   const transcribeAudio = useCallback(
-    async (audioBlob: Blob): Promise<string> => {
+    async (audioBlob: Blob): Promise<VerboseTranscriptionResponse> => {
       setIsTranscribing(true);
       setError(null);
 
@@ -57,6 +57,8 @@ export function useReadingAloud(): UseReadingAloudReturn {
         formData.append("file", audioBlob, "recording.webm");
         formData.append("model", "whisper");
         formData.append("language", "en");
+        formData.append("response_format", "verbose_json");
+        formData.append("timestamp_granularities[]", "word");
 
         const headers: HeadersInit = {};
         let url: string;
@@ -85,7 +87,7 @@ export function useReadingAloud(): UseReadingAloudReturn {
         }
 
         const data = await response.json();
-        return data.text || "";
+        return data as VerboseTranscriptionResponse;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         throw new Error(msg);
@@ -156,13 +158,14 @@ export function useReadingAloud(): UseReadingAloudReturn {
         chunksRef.current = [];
 
         try {
-          const transcript = await transcribeAudio(audioBlob);
+          const sttResponse = await transcribeAudio(audioBlob);
+          const transcript = sttResponse.text || "";
           if (!transcript.trim()) {
             setError(t("reading.readingAloud.emptyTranscript"));
             return;
           }
 
-          const pronunciationResult = compareText(original, transcript, paragraphIndex);
+          const pronunciationResult = compareText(original, transcript, paragraphIndex, sttResponse);
           setResult(pronunciationResult);
           addPronunciationAttempt(pronunciationResult);
 
