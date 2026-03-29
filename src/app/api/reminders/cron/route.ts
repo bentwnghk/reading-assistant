@@ -28,8 +28,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    const { searchParams } = new URL(request.url)
+    const days = Math.max(0, Number(searchParams.get("days")) || 3)
+
     await ensureReminderTables()
-    const result = await processReminders(3)
+    const result = await processReminders(days)
 
     console.log(
       `[reminders/cron] Processed: ${result.processed}, Sent: ${result.sent}, Errors: ${result.errors}`
