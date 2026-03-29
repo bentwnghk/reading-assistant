@@ -93,8 +93,7 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
         ORDER BY al.created_at DESC
         LIMIT 1
       ) last_act ON true
-      WHERE u."emailVerified" IS NOT NULL
-        AND u.email IS NOT NULL
+      WHERE u.email IS NOT NULL
         AND last_act.created_at < NOW() - $1::INTERVAL
         AND (
           NOT EXISTS (
