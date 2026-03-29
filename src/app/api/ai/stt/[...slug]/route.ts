@@ -30,7 +30,6 @@ function parseAccessPasswords(passwordEnv: string): string[] {
 
 function verifySignature(signature: string, keys: string[]): boolean {
   const now = Date.now();
-  
   for (const key of keys) {
     for (let offset = -1; offset <= 1; offset++) {
       const checkTime = now + (offset * 10000);
@@ -40,15 +39,10 @@ function verifySignature(signature: string, keys: string[]): boolean {
       }
     }
   }
-  
   return false;
 }
 
 async function handler(req: NextRequest) {
-  let body;
-  if (req.method.toUpperCase() !== "GET") {
-    body = await req.json();
-  }
   const searchParams = req.nextUrl.searchParams;
   const path = searchParams.getAll("slug");
   searchParams.delete("slug");
@@ -63,22 +57,22 @@ async function handler(req: NextRequest) {
 
   const clientAuth = req.headers.get("Authorization") || "";
   const authVerified = req.headers.get("X-Auth-Verified") === "true";
-  
+
   let authorization: string;
-  
+
   if (authVerified) {
     authorization = clientAuth;
   } else if (ACCESS_PASSWORD && API_KEY) {
     const token = clientAuth.replace("Bearer ", "");
     const validPasswords = parseAccessPasswords(ACCESS_PASSWORD);
-    
+
     if (!token || !verifySignature(token, validPasswords)) {
       return NextResponse.json(
         { error: { code: 403, message: "No permissions", status: "FORBIDDEN" } },
         { status: 403 }
       );
     }
-    
+
     authorization = `Bearer ${API_KEY}`;
   } else {
     authorization = clientAuth;
@@ -87,15 +81,16 @@ async function handler(req: NextRequest) {
   try {
     let url = `${API_PROXY_BASE_URL}/${decodeURIComponent(path.join("/"))}`;
     if (params) url += `?${params}`;
-    
+
     const payload: RequestInit = {
       method: req.method,
       headers: {
-        "Content-Type": req.headers.get("Content-Type") || "application/json",
         Authorization: authorization,
+        "Content-Type": req.headers.get("Content-Type") || "",
       },
+      body: req.body,
     };
-    if (body) payload.body = JSON.stringify(body);
+
     const response = await fetch(url, payload);
     return new NextResponse(response.body, response);
   } catch (error) {

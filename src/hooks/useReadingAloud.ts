@@ -55,7 +55,7 @@ export function useReadingAloud(): UseReadingAloudReturn {
       try {
         const formData = new FormData();
         formData.append("file", audioBlob, "recording.webm");
-        formData.append("model", "whisper");
+        formData.append("model", "whisper-1");
         formData.append("language", "en");
 
         const headers: HeadersInit = {};
@@ -67,7 +67,7 @@ export function useReadingAloud(): UseReadingAloudReturn {
             headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
           }
         } else {
-          url = "/api/ai/openaicompatible/v1/audio/transcriptions";
+          url = "/api/ai/stt/v1/audio/transcriptions";
           if (accessPassword) {
             headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
           }
