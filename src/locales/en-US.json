@@ -314,7 +314,7 @@
       "clickToRemove": "Click to remove word",
       "analyzedSentences": "Analyzed Sentences",
       "clickToRemoveAnalysis": "Click to remove sentence",
-      "highlightTip": "Tip: Select a word or phrase in the text below, then click [+ Add to vocabulary] or [🔊 Read aloud]; or select a sentence, then click [🧠 Analyze sentence]. Click an underlined sentence to see its analysis.",
+      "highlightTip": "Tip: Select a word or phrase in the text below, then click [+ Add to vocabulary]; or select a sentence, then click [🧠 Analyze sentence]; or select any vocabulary, sentence, or paragraph, then click [🔊 Read aloud].",
       "downloadWord": "Download Word",
       "includeGlossary": "Include Glossary",
       "includeSentenceAnalysis": "Include Sentence Analysis",
