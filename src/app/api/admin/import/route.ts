@@ -72,6 +72,7 @@ const ReadingSessionSchema = z.object({
   simplifiedDifficulty: z.unknown().nullable().default(null),
   includeGlossary: z.boolean().default(true),
   includeSentenceAnalysis: z.boolean().default(true),
+  pronunciationAttempts: z.array(z.unknown()).default([]),
   createdAt: z.number(),
   updatedAt: z.number(),
 })
@@ -425,6 +426,7 @@ export async function POST(request: Request) {
             s.adaptedDifficulty  ? JSON.stringify(s.adaptedDifficulty)  : null,
             s.simplifiedDifficulty ? JSON.stringify(s.simplifiedDifficulty) : null,
             s.includeGlossary, s.includeSentenceAnalysis,
+            JSON.stringify(s.pronunciationAttempts ?? []),
             createdTs, updatedTs,
           ]
         )

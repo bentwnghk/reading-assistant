@@ -12,6 +12,7 @@
     "summary": "摘要",
     "mindmap": "思維導圖",
     "adapted": "文本分析和改寫",
+    "readingAloud": "朗讀練習",
     "test": "閱讀測驗",
     "glossary": "詞彙"
   },
@@ -148,7 +149,45 @@
           "desc": "將學習材料匯出為 Word 文件：改寫文章（含詞彙表及句子分析）、詞彙表、詞彙測驗及閱讀理解測驗（可選附答案）。"
         }
       },
-      "workflow": {
+    "readingAloud": {
+      "title": "朗讀練習",
+      "noText": "請先上傳或選擇文本以開始朗讀練習",
+      "fullText": "全文",
+      "paragraph": "第 {{number}} 段",
+      "startRecording": "開始錄音",
+      "stopRecording": "停止錄音",
+      "recording": "錄音中...",
+      "transcribing": "轉錄中...",
+      "tryAgain": "再試一次",
+      "nextParagraph": "下一段",
+      "accuracy": "準確率",
+      "correct": "正確",
+      "mispronounced": "發音不準",
+      "missed": "遺漏",
+      "extra": "多餘",
+      "wordComparison": "詞語對比（綠色 = 正確，紅色 = 遺漏，橙色 = 多餘）",
+      "totalAttempts": "本次工作階段共 {{count}} 次朗讀",
+      "permissionDenied": "麥克風權限被拒絕。請在瀏覽器設定中允許麥克風存取。",
+      "noMicrophone": "麥克風不可用。請確保已連接麥克風。",
+      "emptyTranscript": "未能聽到任何語音。請再試一次並清晰朗讀。",
+      "recordingFailed": "錄音失敗。請再試一次。",
+      "processingFailed": "處理錄音失敗。請再試一次。",
+      "help": {
+        "title": "朗讀練習指南",
+        "purpose": "透過朗讀文本練習發音。應用程式會聆聽你的朗讀，並逐詞與原文比較。",
+        "howToUse": {
+          "title": "使用方法",
+          "desc": "1. 選擇一個段落或全文。2. 點擊「開始錄音」並朗讀文本。3. 完成後點擊「停止錄音」。4. 查看你的準確率分數和逐詞對比結果。"
+        },
+        "tips": {
+          "title": "貼士",
+          "tip1": "清晰朗讀，保持自然語速",
+          "tip2": "錄音將在 60 秒後自動停止",
+          "tip3": "嘗試朗讀完整段落以獲得最佳分數"
+        }
+      }
+    },
+    "workflow": {
         "title": "你的學習旅程",
         "upload": "透過上傳圖片/PDF 或文本庫選擇文本",
         "summary": "獲取內容的快速摘要",
@@ -647,6 +686,7 @@
       "glossary": "詞彙",
       "spelling": "拼字遊戲",
       "vocabQuiz": "詞彙測驗",
+      "readAloud": "朗讀練習",
       "help": {
         "title": "學習進度指南",
         "intro": "透過10個互動步驟追蹤你的學習旅程。完成的步驟會顯示勾號。點擊任何步驟可跳轉到該部分。",

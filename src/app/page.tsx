@@ -21,6 +21,7 @@ const ImageUpload = dynamic(() => import("@/components/ReadingAssistant/ImageUpl
 const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/WorkflowProgress"));
 const Summary = dynamic(() => import("@/components/ReadingAssistant/Summary"));
 const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedText"));
+const ReadingAloud = dynamic(() => import("@/components/ReadingAssistant/ReadingAloud"));
 const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
 const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
@@ -96,6 +97,9 @@ function Home() {
         </section>
         <section id="section-adapted">
           <AdaptedText />
+        </section>
+        <section id="section-reading-aloud">
+          <ReadingAloud />
         </section>
         <section id="section-glossary">
           <Glossary />

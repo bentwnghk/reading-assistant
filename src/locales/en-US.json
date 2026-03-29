@@ -12,6 +12,7 @@
     "summary": "Summary",
     "mindmap": "Mind Map",
     "adapted": "Text Analysis & Adaptation",
+    "readingAloud": "Reading Aloud",
     "test": "Reading Test",
     "glossary": "Vocabulary"
   },
@@ -148,7 +149,45 @@
           "desc": "Export learning materials as Word documents: adapted text with vocabulary & sentence analysis, glossary, vocabulary quiz, and reading comprehension test (with optional answer keys)."
         }
       },
-      "workflow": {
+    "readingAloud": {
+      "title": "Reading Aloud",
+      "noText": "Upload or select a text first to practice reading aloud",
+      "fullText": "Full Text",
+      "paragraph": "Paragraph {{number}}",
+      "startRecording": "Start Recording",
+      "stopRecording": "Stop Recording",
+      "recording": "Recording...",
+      "transcribing": "Transcribing...",
+      "tryAgain": "Try Again",
+      "nextParagraph": "Next Paragraph",
+      "accuracy": "Accuracy",
+      "correct": "correct",
+      "mispronounced": "mispronounced",
+      "missed": "missed",
+      "extra": "extra",
+      "wordComparison": "Word comparison (green = correct, red = missed, amber = extra)",
+      "totalAttempts": "{{count}} total attempt(s) this session",
+      "permissionDenied": "Microphone permission denied. Please allow microphone access in your browser settings.",
+      "noMicrophone": "Microphone not available. Please ensure you have a microphone connected.",
+      "emptyTranscript": "Could not hear any speech. Please try again and speak clearly.",
+      "recordingFailed": "Recording failed. Please try again.",
+      "processingFailed": "Failed to process recording. Please try again.",
+      "help": {
+        "title": "Reading Aloud Guide",
+        "purpose": "Practice your pronunciation by reading the text aloud. The app will listen to you and compare your speech word-by-word against the original text.",
+        "howToUse": {
+          "title": "How to Use",
+          "desc": "1. Select a paragraph or the full text. 2. Click 'Start Recording' and read the text aloud. 3. Click 'Stop Recording' when done. 4. View your accuracy score and word-by-word comparison."
+        },
+        "tips": {
+          "title": "Tips",
+          "tip1": "Speak clearly and at a natural pace",
+          "tip2": "Recording automatically stops after 60 seconds",
+          "tip3": "Try to read the entire paragraph for the best score"
+        }
+      }
+    },
+    "workflow": {
         "title": "Your Learning Journey",
         "upload": "Select text via image/PDF upload or Text Repository",
         "summary": "Get a quick summary of the content",
@@ -647,6 +686,7 @@
       "glossary": "Vocabulary",
       "spelling": "Spelling Game",
       "vocabQuiz": "Vocab Quiz",
+      "readAloud": "Read Aloud",
       "help": {
         "title": "Learning Progress Guide",
         "intro": "Track your learning journey through 10 interactive steps. Each completed step shows a checkmark. Click any step to jump to that section.",
