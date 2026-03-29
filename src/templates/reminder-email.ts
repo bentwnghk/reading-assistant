@@ -45,7 +45,7 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>We miss you! Come back to Reading Assistant</title>
+  <title>We miss you! Come back to Mr.🆖 ProReader</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f5f7;padding:32px 0;">
@@ -60,7 +60,7 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                 <tr>
                   <td style="text-align:center;">
                     <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">
-                      📚 Reading Assistant
+                      📚 Mr.🆖 ProReader
                     </h1>
                     <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:16px;">
                       Your learning companion
@@ -88,7 +88,7 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                 <tr>
                   <td style="padding-bottom:24px;">
                     <p style="margin:0;color:#4b5563;font-size:16px;line-height:1.6;">
-                      It's been a while since your last learning session. We noticed you haven't visited Reading Assistant recently, and we'd love to help you get back on track!
+                      It's been a while since your last learning session. We noticed you haven't visited Mr.🆖 ProReader recently, and we'd love to help you get back on track!
                     </p>
                   </td>
                 </tr>
@@ -229,7 +229,7 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
           <tr>
             <td style="background-color:#f9fafb;padding:24px 32px;border-radius:0 0 16px 16px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;">
               <p style="margin:0 0 12px;text-align:center;color:#9ca3af;font-size:12px;line-height:1.5;">
-                This reminder was sent because you have email notifications enabled in Reading Assistant.
+                This reminder was sent because you have email notifications enabled in Mr.🆖 ProReader.
               </p>
               <p style="margin:0;text-align:center;">
                 <a href="${unsubscribeUrl}"

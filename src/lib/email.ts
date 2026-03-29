@@ -24,11 +24,11 @@ function getClient(): MailtrapClient {
 }
 
 function getSenderEmail(): string {
-  return process.env.MAILTRAP_SENDER_EMAIL || "noreply@reading-assistant.app"
+  return process.env.MAILTRAP_SENDER_EMAIL || "read@mr5ai.com"
 }
 
 function getSenderName(): string {
-  return process.env.MAILTRAP_SENDER_NAME || "Reading Assistant"
+  return process.env.MAILTRAP_SENDER_NAME || "Mr.🆖 ProReader"
 }
 
 export interface SendEmailOptions {

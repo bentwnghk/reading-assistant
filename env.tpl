@@ -145,7 +145,7 @@ MAILTRAP_API_KEY=
 # Sender email address for reminder emails (must be a verified domain in Mailtrap)
 MAILTRAP_SENDER_EMAIL=noreply@your-domain.com
 # Display name for the sender
-MAILTRAP_SENDER_NAME=Reading Assistant
+MAILTRAP_SENDER_NAME=Mr.🆖 ProReader
 # Set to "true" to use Mailtrap Sandbox for testing (emails won't be delivered to real inboxes)
 MAILTRAP_USE_SANDBOX=false
 # Required only when MAILTRAP_USE_SANDBOX=true — your Mailtrap inbox ID
