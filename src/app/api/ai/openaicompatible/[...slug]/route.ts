@@ -45,8 +45,11 @@ function verifySignature(signature: string, keys: string[]): boolean {
 }
 
 async function handler(req: NextRequest) {
+  const contentType = req.headers.get("Content-Type") || "";
+  const isMultipart = contentType.startsWith("multipart/");
+
   let body;
-  if (req.method.toUpperCase() !== "GET") {
+  if (req.method.toUpperCase() !== "GET" && !isMultipart) {
     body = await req.json();
   }
   const searchParams = req.nextUrl.searchParams;
@@ -95,7 +98,11 @@ async function handler(req: NextRequest) {
         Authorization: authorization,
       },
     };
-    if (body) payload.body = JSON.stringify(body);
+    if (isMultipart) {
+      payload.body = req.body;
+    } else if (body) {
+      payload.body = JSON.stringify(body);
+    }
     const response = await fetch(url, payload);
     return new NextResponse(response.body, response);
   } catch (error) {
