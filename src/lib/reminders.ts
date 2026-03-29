@@ -4,6 +4,8 @@ import {
   buildReminderEmailHtml,
   buildReminderEmailText,
   getActivityDisplayName,
+  getEmailStrings,
+  resolveLocale,
 } from "@/templates/reminder-email"
 import crypto from "crypto"
 
@@ -14,6 +16,7 @@ export interface InactiveUser {
   lastActivityType: string | null
   lastActivityAt: Date | null
   daysInactive: number
+  locale: string
 }
 
 export interface ReminderPreference {
@@ -84,7 +87,8 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
         u.email,
         last_act.activity_type  AS last_activity_type,
         last_act.created_at     AS last_activity_at,
-        EXTRACT(DAY FROM NOW() - last_act.created_at)::INTEGER AS days_inactive
+        EXTRACT(DAY FROM NOW() - last_act.created_at)::INTEGER AS days_inactive,
+        COALESCE(us.settings->>'language', 'en-US') AS locale
       FROM users u
       INNER JOIN LATERAL (
         SELECT al.activity_type, al.created_at
@@ -93,6 +97,7 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
         ORDER BY al.created_at DESC
         LIMIT 1
       ) last_act ON true
+      LEFT JOIN user_settings us ON us.user_id = u.id
       WHERE u.email IS NOT NULL
         AND last_act.created_at < NOW() - $1::INTERVAL
         AND (
@@ -120,6 +125,7 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
       lastActivityType: row.last_activity_type,
       lastActivityAt: row.last_activity_at ? new Date(row.last_activity_at) : null,
       daysInactive: row.days_inactive || daysThreshold,
+      locale: row.locale || "en-US",
     }))
   } finally {
     client.release()
@@ -211,7 +217,7 @@ export async function sendReminderEmail(user: InactiveUser): Promise<boolean> {
   const unsubscribeUrl = `${appUrl}/api/reminders/preferences?unsubscribe=1&uid=${user.id}&token=${unsubscribeToken}`
 
   const lastActivityDate = user.lastActivityAt
-    ? user.lastActivityAt.toLocaleDateString("en-US", {
+    ? user.lastActivityAt.toLocaleDateString(resolveLocale(user.locale), {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -225,6 +231,7 @@ export async function sendReminderEmail(user: InactiveUser): Promise<boolean> {
     lastActivityType: user.lastActivityType || "session_create",
     appUrl,
     unsubscribeUrl,
+    locale: user.locale,
   })
 
   const text = buildReminderEmailText({
@@ -234,15 +241,17 @@ export async function sendReminderEmail(user: InactiveUser): Promise<boolean> {
     lastActivityType: user.lastActivityType || "session_create",
     appUrl,
     unsubscribeUrl,
+    locale: user.locale,
   })
 
-  const activityName = getActivityDisplayName(user.lastActivityType || "session_create")
-  const dayText = user.daysInactive === 1 ? "1 day" : `${user.daysInactive} days`
+  const s = getEmailStrings(user.locale)
+  const activityName = getActivityDisplayName(user.lastActivityType || "session_create", user.locale)
+  const dayText = s.day(user.daysInactive)
 
   try {
     await sendEmail({
       to: [{ email: user.email, name: user.name || undefined }],
-      subject: `We miss you! It's been ${dayText} since you ${activityName}`,
+      subject: s.subject(dayText, activityName),
       html,
       text,
       category: "reminder",
