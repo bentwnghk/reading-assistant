@@ -86,6 +86,7 @@ async function handler(req: NextRequest) {
       method: req.method,
       headers: {
         Authorization: authorization,
+        "Content-Type": req.headers.get("Content-Type") || "",
       },
       body: req.body,
     };
