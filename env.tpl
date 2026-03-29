@@ -152,5 +152,5 @@ MAILTRAP_USE_SANDBOX=false
 MAILTRAP_INBOX_ID=
 # Secret token to authenticate cron job requests to /api/reminders/cron
 CRON_SECRET=
-# (Optional) Public URL of the app, used for links in reminder emails. Note: Must be added in Dockerfile!
-NEXT_PUBLIC_APP_URL=
+# Public URL of the app, used for links in reminder emails (server-side runtime variable, not NEXT_PUBLIC_)
+APP_URL=https://your-domain.com

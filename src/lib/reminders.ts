@@ -205,9 +205,7 @@ export async function sendReminderEmail(user: InactiveUser): Promise<boolean> {
 
   if (!user.email) return false
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000"
+  const appUrl = process.env.APP_URL || "http://localhost:3000"
 
   const unsubscribeToken = generateUnsubscribeToken(user.id)
   const unsubscribeUrl = `${appUrl}/api/reminders/preferences?unsubscribe=1&uid=${user.id}&token=${unsubscribeToken}`

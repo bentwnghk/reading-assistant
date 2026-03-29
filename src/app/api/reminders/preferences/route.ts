@@ -31,9 +31,7 @@ export async function GET(request: Request) {
 
       await setReminderPreference(userId, false, 3)
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : new URL("/", request.url).origin
+      const appUrl = process.env.APP_URL || new URL("/", request.url).origin
 
       return NextResponse.redirect(
         new URL("/?unsubscribe=success", appUrl)
