@@ -29,7 +29,8 @@ export async function POST(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url)
-    const days = Math.max(0, Number(searchParams.get("days")) || 3)
+    const rawDays = searchParams.get("days")
+    const days = rawDays !== null ? Math.max(0, Number(rawDays)) : 3
 
     await ensureReminderTables()
     const result = await processReminders(days)

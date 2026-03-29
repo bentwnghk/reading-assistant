@@ -74,6 +74,8 @@ export async function ensureReminderTables(): Promise<boolean> {
 export async function getInactiveUsers(daysThreshold: number): Promise<InactiveUser[]> {
   const client = await getClient()
   try {
+    const intervalStr = `${daysThreshold} days`
+
     const result = await client.query(
       `
       SELECT
@@ -93,7 +95,7 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
       ) last_act ON true
       WHERE u."emailVerified" IS NOT NULL
         AND u.email IS NOT NULL
-        AND last_act.created_at < NOW() - ($1 || ' days')::INTERVAL
+        AND last_act.created_at < NOW() - $1::INTERVAL
         AND (
           NOT EXISTS (
             SELECT 1 FROM email_reminder_preferences erp
@@ -103,12 +105,14 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
         AND NOT EXISTS (
           SELECT 1 FROM email_reminder_logs erl
           WHERE erl.user_id = u.id
-            AND erl.sent_at > NOW() - ($1 || ' days')::INTERVAL
+            AND erl.sent_at > NOW() - $1::INTERVAL
         )
       ORDER BY last_act.created_at ASC
       `,
-      [daysThreshold]
+      [intervalStr]
     )
+
+    console.log(`[reminders] getInactiveUsers(${daysThreshold}): found ${result.rows.length} users`)
 
     return result.rows.map((row) => ({
       id: row.id,
