@@ -183,40 +183,6 @@ export function LandingPage() {
         </div>
       </div>
 
-      {/* For Schools & Teachers - Bold Contrast Section */}
-      <div className="relative z-10 bg-slate-900 dark:bg-slate-900/50 text-white py-32 rounded-[3rem] mx-4 sm:mx-8 my-12 overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-transparent to-transparent opacity-50 pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-6">
-          <div className="max-w-2xl mb-16">
-            <h2 className="text-4xl font-bold tracking-tight flex items-center gap-3 mb-6">
-              <School className="h-10 w-10 text-teal-400" />
-              {t("header.about.roles.title")}
-            </h2>
-            <p className="text-xl text-slate-400 leading-relaxed">{t("header.about.roles.intro")}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: Crown, title: "admin", color: "text-amber-400", items: ["manageSchools", "manageUsers", "manageClasses", "uploadTexts"] },
-              { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["manageStudents", "uploadTexts", "viewAiQuestions", "exportData", "viewLeaderboard"] },
-              { icon: Users, title: "student", color: "text-emerald-400", items: ["learn", "cloudSync", "history", "leaderboard"] }
-            ].map((role) => (
-              <div key={role.title} className="group bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-[2.5rem] p-8 hover:bg-slate-800 hover:-translate-y-2 transition-all duration-300">
-                <role.icon className={`h-10 w-10 mb-6 ${role.color} group-hover:scale-110 transition-transform duration-300`} />
-                <h3 className="text-2xl font-bold mb-6">{t(`header.about.roles.${role.title}.title`)}</h3>
-                <ul className="space-y-4 text-slate-300">
-                  {role.items.map(item => (
-                    <li key={item} className="flex items-start gap-3">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-slate-500 group-hover:bg-slate-400 transition-colors shrink-0" />
-                      <span className="text-lg">{t(`header.about.roles.${role.title}.${item}`)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Powerful Features - Dense but Organic Grid */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-24">
         <div className="flex items-center gap-3 mb-12">
@@ -249,6 +215,40 @@ export function LandingPage() {
               <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed">{t(`header.about.features.${key}.desc`)}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* For Schools & Teachers - Bold Contrast Section */}
+      <div className="relative z-10 bg-slate-900 dark:bg-slate-900/50 text-white py-32 rounded-[3rem] mx-4 sm:mx-8 my-12 overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-transparent to-transparent opacity-50 pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-6">
+          <div className="max-w-2xl mb-16">
+            <h2 className="text-4xl font-bold tracking-tight flex items-center gap-3 mb-6">
+              <School className="h-10 w-10 text-teal-400" />
+              {t("header.about.roles.title")}
+            </h2>
+            <p className="text-xl text-slate-400 leading-relaxed">{t("header.about.roles.intro")}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { icon: Crown, title: "admin", color: "text-amber-400", items: ["manageSchools", "manageUsers", "manageClasses", "uploadTexts"] },
+              { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["manageStudents", "uploadTexts", "viewAiQuestions", "exportData", "viewLeaderboard"] },
+              { icon: Users, title: "student", color: "text-emerald-400", items: ["learn", "cloudSync", "history", "leaderboard"] }
+            ].map((role) => (
+              <div key={role.title} className="group bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-[2.5rem] p-8 hover:bg-slate-800 hover:-translate-y-2 transition-all duration-300">
+                <role.icon className={`h-10 w-10 mb-6 ${role.color} group-hover:scale-110 transition-transform duration-300`} />
+                <h3 className="text-2xl font-bold mb-6">{t(`header.about.roles.${role.title}.title`)}</h3>
+                <ul className="space-y-4 text-slate-300">
+                  {role.items.map(item => (
+                    <li key={item} className="flex items-start gap-3">
+                      <div className="mt-1.5 h-2 w-2 rounded-full bg-slate-500 group-hover:bg-slate-400 transition-colors shrink-0" />
+                      <span className="text-lg">{t(`header.about.roles.${role.title}.${item}`)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

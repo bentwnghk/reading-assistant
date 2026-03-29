@@ -347,55 +347,6 @@ function Header() {
 
             <div>
               <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
-                <School className="h-4 w-4 text-indigo-500" />
-                {t("header.about.roles.title")}
-              </h3>
-              <p className="text-xs text-muted-foreground mb-3">
-                {t("header.about.roles.intro")}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Crown className="h-4 w-4 text-amber-500" />
-                    <span className="font-medium text-sm">{t("header.about.roles.admin.title")}</span>
-                  </div>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• {t("header.about.roles.admin.manageSchools")}</li>
-                    <li>• {t("header.about.roles.admin.manageUsers")}</li>
-                    <li>• {t("header.about.roles.admin.manageClasses")}</li>
-                    <li>• {t("header.about.roles.admin.uploadTexts")}</li>
-                  </ul>
-                </div>
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <GraduationCap className="h-4 w-4 text-blue-500" />
-                    <span className="font-medium text-sm">{t("header.about.roles.teacher.title")}</span>
-                  </div>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• {t("header.about.roles.teacher.manageStudents")}</li>
-                    <li>• {t("header.about.roles.teacher.uploadTexts")}</li>
-                    <li>• {t("header.about.roles.teacher.viewAiQuestions")}</li>
-                    <li>• {t("header.about.roles.teacher.exportData")}</li>
-                    <li>• {t("header.about.roles.teacher.viewLeaderboard")}</li>
-                  </ul>
-                </div>
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border rounded-lg p-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-4 w-4 text-green-500" />
-                    <span className="font-medium text-sm">{t("header.about.roles.student.title")}</span>
-                  </div>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• {t("header.about.roles.student.learn")}</li>
-                    <li>• {t("header.about.roles.student.cloudSync")}</li>
-                    <li>• {t("header.about.roles.student.history")}</li>
-                    <li>• {t("header.about.roles.student.leaderboard")}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
                 <Sparkles className="h-4 w-4 text-purple-500" />
                 {t("header.about.features.title")}
               </h3>
@@ -504,6 +455,55 @@ function Header() {
                     <div className="font-medium">{t("header.about.features.wordExport.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.wordExport.desc")}</div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
+                <School className="h-4 w-4 text-indigo-500" />
+                {t("header.about.roles.title")}
+              </h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                {t("header.about.roles.intro")}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className="h-4 w-4 text-amber-500" />
+                    <span className="font-medium text-sm">{t("header.about.roles.admin.title")}</span>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• {t("header.about.roles.admin.manageSchools")}</li>
+                    <li>• {t("header.about.roles.admin.manageUsers")}</li>
+                    <li>• {t("header.about.roles.admin.manageClasses")}</li>
+                    <li>• {t("header.about.roles.admin.uploadTexts")}</li>
+                  </ul>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <GraduationCap className="h-4 w-4 text-blue-500" />
+                    <span className="font-medium text-sm">{t("header.about.roles.teacher.title")}</span>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• {t("header.about.roles.teacher.manageStudents")}</li>
+                    <li>• {t("header.about.roles.teacher.uploadTexts")}</li>
+                    <li>• {t("header.about.roles.teacher.viewAiQuestions")}</li>
+                    <li>• {t("header.about.roles.teacher.exportData")}</li>
+                    <li>• {t("header.about.roles.teacher.viewLeaderboard")}</li>
+                  </ul>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-green-500" />
+                    <span className="font-medium text-sm">{t("header.about.roles.student.title")}</span>
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• {t("header.about.roles.student.learn")}</li>
+                    <li>• {t("header.about.roles.student.cloudSync")}</li>
+                    <li>• {t("header.about.roles.student.history")}</li>
+                    <li>• {t("header.about.roles.student.leaderboard")}</li>
+                  </ul>
                 </div>
               </div>
             </div>
