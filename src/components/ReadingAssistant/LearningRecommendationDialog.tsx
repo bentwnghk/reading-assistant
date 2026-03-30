@@ -294,6 +294,7 @@ export default function LearningRecommendationDialog() {
       );
       if (imageFiles.length === 0 && pdfFiles.length === 0) return;
 
+      useReadingStore.getState().reset();
       setOpen(false);
       try {
         for (const pdfFile of pdfFiles) {
