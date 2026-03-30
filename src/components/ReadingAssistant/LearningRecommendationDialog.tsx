@@ -412,6 +412,11 @@ export default function LearningRecommendationDialog() {
                 )}
               >
                 <div className="text-left space-y-2">
+                  {recommendedText.name && recommendedText.title && recommendedText.name !== recommendedText.title && (
+                    <p className="text-xs text-muted-foreground">
+                      {recommendedText.name}
+                    </p>
+                  )}
                   <p className="font-semibold text-foreground text-base">
                     {recommendedText.title || recommendedText.name}
                   </p>
