@@ -33,10 +33,10 @@ function ImageUpload() {
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "repository">("upload");
-  const { originalImages, extractedText } = useReadingStore();
+  const { originalImages, extractedText, status: storeStatus } = useReadingStore();
   const { setOpenHistory } = useGlobalStore();
   const { status, extractTextFromImage, generateTitle } = useReadingAssistant();
-  const isExtracting = status === "extracting";
+  const isExtracting = status === "extracting" || storeStatus === "extracting";
   const isBusy = isExtracting || isProcessingPdf;
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
