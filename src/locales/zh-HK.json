@@ -1324,7 +1324,7 @@
     "welcome": "歡迎！",
     "readyToRead": "準備好閱讀新文本了嗎？",
     "uploadFile": "上傳圖片 / PDF",
-    "uploadFileDesc": "上傳課本、工作紙或文章的照片或 PDF 讓 AI 提取文字",
+    "uploadFileDesc": "上傳文章的照片或 PDF 讓 AI 提取文字",
     "activities": {
       "readingTest": {
         "title": "完成你的閱讀理解測驗",
