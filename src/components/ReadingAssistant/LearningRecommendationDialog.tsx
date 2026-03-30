@@ -154,18 +154,23 @@ export default function LearningRecommendationDialog() {
     const recommended = hasSession ? pickRecommendedActivity(state) : null;
     const allIncomplete = hasSession ? getIncompleteActivities(state) : [];
 
-    if (recommended) {
-      setActivity(recommended);
-      setRemainingCount(allIncomplete.length);
-      setHasIncompleteActivities(true);
+    if (hasSession) {
+      if (recommended) {
+        setActivity(recommended);
+        setRemainingCount(allIncomplete.length);
+        setHasIncompleteActivities(true);
+      } else {
+        setHasIncompleteActivities(false);
+      }
       setStep("choices");
+      setOpen(true);
+      checkedRef.current = true;
     } else {
       setHasIncompleteActivities(false);
       setStep("choices");
+      setOpen(true);
+      checkedRef.current = true;
     }
-
-    setOpen(true);
-    checkedRef.current = true;
   }, [id, extractedText]);
 
   const handleContinueLearning = useCallback(() => {
