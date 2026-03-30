@@ -26,6 +26,7 @@ const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingT
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
 const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
+const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
 
 function Home() {
   const { t } = useTranslation();
@@ -116,6 +117,7 @@ function Home() {
       <aside className="print:hidden">
         <Setting open={openSetting} onClose={() => setOpenSetting(false)} />
         <History open={openHistory} onClose={() => setOpenHistory(false)} />
+        <LearningRecommendationDialog />
       </aside>
     </div>
   );

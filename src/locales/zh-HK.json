@@ -1305,5 +1305,42 @@
         "hint": "向 AI 導師提問有關閱讀材料的問題"
       }
     }
+  },
+  "recommendation": {
+    "welcomeBack": "歡迎回來！",
+    "readyToContinue": "準備好繼續學習了嗎？",
+    "letsGo": "開始吧！",
+    "maybeLater": "稍後再說",
+    "moreActivities": "你還有 {{count}} 個學習活動等著你！",
+    "activities": {
+      "readingTest": {
+        "title": "完成你的閱讀理解測驗",
+        "description": "通過理解問題測試你對文章的理解程度，看看你掌握了多少重點！"
+      },
+      "spellingGame": {
+        "title": "試試拼字挑戰",
+        "description": "用有趣互動的遊戲練習詞彙拼寫，連續答對可獲得額外獎勵！"
+      },
+      "vocabQuiz": {
+        "title": "挑戰詞彙測驗",
+        "description": "你對詞彙掌握得如何？參加測驗，鞏固你的單詞知識！"
+      },
+      "mindmap": {
+        "title": "生成思維導圖",
+        "description": "用互動思維導圖梳理文章的關鍵概念和關係！"
+      },
+      "summary": {
+        "title": "生成文章摘要",
+        "description": "用 AI 生成的摘要快速了解你的閱讀材料。"
+      },
+      "adaptedText": {
+        "title": "閱讀改編文本",
+        "description": "閱讀根據你的程度改編的文本版本，內建詞彙支援。"
+      },
+      "glossary": {
+        "title": "建立你的詞彙表",
+        "description": "從文章中生成重要詞彙表，開始學習新單詞！"
+      }
+    }
   }
 }

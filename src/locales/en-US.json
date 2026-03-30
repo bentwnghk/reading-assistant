@@ -1305,5 +1305,42 @@
         "hint": "Ask the AI Tutor questions about your reading materials"
       }
     }
+  },
+  "recommendation": {
+    "welcomeBack": "Welcome back!",
+    "readyToContinue": "Ready to continue learning?",
+    "letsGo": "Let's go!",
+    "maybeLater": "Maybe later",
+    "moreActivities": "You have {{count}} more activities to explore!",
+    "activities": {
+      "readingTest": {
+        "title": "Complete your reading comprehension test",
+        "description": "Test your understanding of the text with comprehension questions. See how well you grasped the key ideas!"
+      },
+      "spellingGame": {
+        "title": "Try the spelling challenge",
+        "description": "Practice spelling your vocabulary words with a fun, interactive game. Build streaks and earn bonus points!"
+      },
+      "vocabQuiz": {
+        "title": "Take the vocabulary quiz",
+        "description": "How well do you know your vocabulary? Take the quiz to find out and strengthen your word knowledge!"
+      },
+      "mindmap": {
+        "title": "Generate a mind map",
+        "description": "Visualize the key concepts and relationships in your text with an interactive mind map!"
+      },
+      "summary": {
+        "title": "Generate a summary",
+        "description": "Get a quick overview of your reading material with an AI-generated summary."
+      },
+      "adaptedText": {
+        "title": "Read the adapted text",
+        "description": "Read a version of the text adapted to your reading level, with vocabulary support built in."
+      },
+      "glossary": {
+        "title": "Build your vocabulary list",
+        "description": "Generate a glossary of important words from your text and start learning new vocabulary!"
+      }
+    }
   }
 }
