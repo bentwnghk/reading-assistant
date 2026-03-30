@@ -1340,6 +1340,14 @@
       "glossary": {
         "title": "Build your vocabulary list",
         "description": "Generate a glossary of important words from your text and start learning new vocabulary!"
+      },
+      "sentenceAnalysis": {
+        "title": "Analyze a sentence",
+        "description": "Select any sentence from the text to get a detailed grammatical analysis and explanation."
+      },
+      "highlightWords": {
+        "title": "Highlight key vocabulary",
+        "description": "Mark important words in the text to build your personalized vocabulary list."
       }
     }
   }

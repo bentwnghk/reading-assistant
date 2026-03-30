@@ -11,6 +11,8 @@ import {
   Brain,
   Sparkles,
   ArrowRight,
+  Search,
+  Highlighter,
 } from "lucide-react";
 import {
   Dialog,
@@ -35,6 +37,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText,
   BookOpen,
   BookMarked,
+  Search,
+  Highlighter,
 };
 
 const COLOR_BG: Record<string, string> = {
@@ -47,6 +51,7 @@ const COLOR_BG: Record<string, string> = {
   pink: "bg-pink-500",
   red: "bg-red-500",
   cyan: "bg-cyan-500",
+  yellow: "bg-yellow-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -59,6 +64,7 @@ const COLOR_GLOW: Record<string, string> = {
   pink: "shadow-pink-400/50",
   red: "shadow-red-400/50",
   cyan: "shadow-cyan-400/50",
+  yellow: "shadow-yellow-400/50",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -71,6 +77,7 @@ const COLOR_TEXT: Record<string, string> = {
   pink: "text-pink-600 dark:text-pink-300",
   red: "text-red-600 dark:text-red-300",
   cyan: "text-cyan-600 dark:text-cyan-300",
+  yellow: "text-yellow-600 dark:text-yellow-300",
 };
 
 const COLOR_FROM: Record<string, string> = {
@@ -83,6 +90,7 @@ const COLOR_FROM: Record<string, string> = {
   pink: "from-pink-500/10",
   red: "from-red-500/10",
   cyan: "from-cyan-500/10",
+  yellow: "from-yellow-500/10",
 };
 
 const COLOR_BORDER: Record<string, string> = {
@@ -95,6 +103,7 @@ const COLOR_BORDER: Record<string, string> = {
   pink: "border-pink-500/20",
   red: "border-red-500/20",
   cyan: "border-cyan-500/20",
+  yellow: "border-yellow-500/20",
 };
 
 function ActivityIcon({ activity }: { activity: LearningActivity }) {

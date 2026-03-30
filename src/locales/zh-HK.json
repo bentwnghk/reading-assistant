@@ -1340,6 +1340,14 @@
       "glossary": {
         "title": "建立你的詞彙表",
         "description": "從文章中生成重要詞彙表，開始學習新單詞！"
+      },
+      "sentenceAnalysis": {
+        "title": "分析句子",
+        "description": "選取文章中的任何句子，獲取詳細的語法分析和解釋。"
+      },
+      "highlightWords": {
+        "title": "標記關鍵詞彙",
+        "description": "在文章中標記重要單詞，建立你的個人化詞彙清單。"
       }
     }
   }
