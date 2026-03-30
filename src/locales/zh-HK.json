@@ -1315,7 +1315,7 @@
     "activities": {
       "readingTest": {
         "title": "完成你的閱讀理解測驗",
-        "description": "通過理解問題測試你對文章的理解程度，看看你掌握了多少重點！"
+        "description": "通過閱讀理解問題測試你對文章的理解程度，看看你掌握了多少重點！"
       },
       "spellingGame": {
         "title": "試試拼字挑戰",
@@ -1339,7 +1339,7 @@
       },
       "glossary": {
         "title": "建立你的詞彙表",
-        "description": "從文章中生成重要詞彙表，開始學習新單詞！"
+        "description": "從文章中生成重要詞彙表，開始學習新生詞！"
       },
       "sentenceAnalysis": {
         "title": "分析句子",
@@ -1347,7 +1347,7 @@
       },
       "highlightWords": {
         "title": "標記關鍵詞彙",
-        "description": "在文章中標記重要單詞，建立你的個人化詞彙清單。"
+        "description": "在文章中標記重要生詞，建立你的個人化詞彙清單。"
       }
     }
   }

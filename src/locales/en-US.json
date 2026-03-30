@@ -1315,7 +1315,7 @@
     "activities": {
       "readingTest": {
         "title": "Complete your reading comprehension test",
-        "description": "Test your understanding of the text with comprehension questions. See how well you grasped the key ideas!"
+        "description": "Test your understanding of the text with reading comprehension questions. See how well you grasped the key ideas!"
       },
       "spellingGame": {
         "title": "Try the spelling challenge",
