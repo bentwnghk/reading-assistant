@@ -18,6 +18,8 @@ import {
   RefreshCw,
   LoaderCircle,
   User,
+  Upload,
+  Camera,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -29,11 +31,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { cn } from "@/utils/style";
+import useReadingAssistant from "@/hooks/useReadingAssistant";
+import { processPdfFile } from "@/utils/parser/pdfParser";
 import {
   pickRecommendedActivity,
   getIncompleteActivities,
   type LearningActivity,
 } from "@/utils/learningActivities";
+
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 type DialogStep = "choices" | "repository-loading" | "repository-preview";
 
@@ -106,6 +119,7 @@ const COLOR_BORDER: Record<string, string> = {
 };
 
 const REPO_COLOR = "amber";
+const UPLOAD_COLOR = "teal";
 
 function ActivityIcon({ activity }: { activity: LearningActivity }) {
   const IconComp = ICON_MAP[activity.icon] ?? BookOpen;
@@ -144,9 +158,12 @@ export default function LearningRecommendationDialog() {
   const checkedRef = useRef(false);
   const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const allTextsRef = useRef<RepositoryTextListItem[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const { status } = useSession();
   const { id, extractedText } = useReadingStore();
+  const { extractTextFromImage, generateTitle } = useReadingAssistant();
 
   useEffect(() => {
     if (checkedRef.current) return;
@@ -267,6 +284,55 @@ export default function LearningRecommendationDialog() {
       dismissedSessionRef.current = id;
     }
   }, [id]);
+
+  const handleUploadFiles = useCallback(
+    async (files: FileList | File[]) => {
+      const fileArray = Array.from(files);
+      const imageFiles = fileArray.filter((f) => f.type.startsWith("image/"));
+      const pdfFiles = fileArray.filter(
+        (f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf")
+      );
+      if (imageFiles.length === 0 && pdfFiles.length === 0) return;
+
+      setOpen(false);
+      try {
+        for (const pdfFile of pdfFiles) {
+          const images = await processPdfFile(pdfFile);
+          for (const imageData of images) {
+            await extractTextFromImage(imageData);
+          }
+        }
+        for (const imageFile of imageFiles) {
+          const imageData = await readFileAsDataURL(imageFile);
+          await extractTextFromImage(imageData);
+        }
+        await generateTitle();
+      } catch {
+        toast.error(t("reading.imageUpload.extractionError"));
+      }
+    },
+    [extractTextFromImage, generateTitle, t]
+  );
+
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        handleUploadFiles(files);
+      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (cameraInputRef.current) cameraInputRef.current.value = "";
+    },
+    [handleUploadFiles]
+  );
+
+  const handleChooseUpload = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleChooseCamera = useCallback(() => {
+    cameraInputRef.current?.click();
+  }, []);
 
   const activityColor = activity?.color ?? "amber";
 
@@ -391,6 +457,54 @@ export default function LearningRecommendationDialog() {
                 </div>
               </button>
 
+              <div className="w-full flex gap-2">
+                <button
+                  type="button"
+                  className={cn(
+                    "flex-1 p-3 rounded-xl border text-left transition-all",
+                    "hover:scale-[1.02] active:scale-[0.98]",
+                    COLOR_BORDER[UPLOAD_COLOR],
+                    "bg-background/60 backdrop-blur-sm"
+                  )}
+                  onClick={handleChooseUpload}
+                >
+                  <div className="flex items-center gap-2">
+                    <Upload
+                      className={cn(
+                        "w-4 h-4 shrink-0",
+                        COLOR_TEXT[UPLOAD_COLOR]
+                      )}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm">
+                        {t("recommendation.uploadFile")}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {t("recommendation.uploadFileDesc")}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "p-3 rounded-xl border transition-all",
+                    "hover:scale-[1.02] active:scale-[0.98]",
+                    COLOR_BORDER[UPLOAD_COLOR],
+                    "bg-background/60 backdrop-blur-sm"
+                  )}
+                  onClick={handleChooseCamera}
+                  title={t("recommendation.takePhoto")}
+                >
+                  <Camera
+                    className={cn(
+                      "w-5 h-5",
+                      COLOR_TEXT[UPLOAD_COLOR]
+                    )}
+                  />
+                </button>
+              </div>
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -508,6 +622,22 @@ export default function LearningRecommendationDialog() {
           </>
         )}
       </DialogContent>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,.pdf,application/pdf"
+        multiple
+        className="hidden"
+        onChange={handleFileInput}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileInput}
+      />
     </Dialog>
   );
 }

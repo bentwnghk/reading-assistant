@@ -1323,6 +1323,9 @@
     "noTextsAvailable": "No texts available in the Text Repository right now.",
     "welcome": "Welcome!",
     "readyToRead": "Ready to read something new?",
+    "uploadFile": "Upload image / PDF",
+    "uploadFileDesc": "PNG, JPG, WEBP, PDF",
+    "takePhoto": "Take a photo",
     "activities": {
       "readingTest": {
         "title": "Complete your reading comprehension test",

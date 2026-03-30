@@ -1323,6 +1323,9 @@
     "noTextsAvailable": "文本庫中暫無可用文本。",
     "welcome": "歡迎！",
     "readyToRead": "準備好閱讀新文本了嗎？",
+    "uploadFile": "上傳圖片 / PDF",
+    "uploadFileDesc": "PNG、JPG、WEBP、PDF",
+    "takePhoto": "拍照",
     "activities": {
       "readingTest": {
         "title": "完成你的閱讀理解測驗",
