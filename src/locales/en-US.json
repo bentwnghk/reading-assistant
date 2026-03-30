@@ -1325,7 +1325,6 @@
     "readyToRead": "Ready to read something new?",
     "uploadFile": "Upload image / PDF",
     "uploadFileDesc": "Upload photos or PDFs of textbooks, worksheets, or articles for AI text extraction",
-    "takePhoto": "Take a photo",
     "activities": {
       "readingTest": {
         "title": "Complete your reading comprehension test",

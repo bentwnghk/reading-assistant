@@ -19,7 +19,6 @@ import {
   LoaderCircle,
   User,
   Upload,
-  Camera,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -159,7 +158,6 @@ export default function LearningRecommendationDialog() {
   const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const allTextsRef = useRef<RepositoryTextListItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const { status } = useSession();
   const { id, extractedText } = useReadingStore();
@@ -322,17 +320,12 @@ export default function LearningRecommendationDialog() {
         handleUploadFiles(files);
       }
       if (fileInputRef.current) fileInputRef.current.value = "";
-      if (cameraInputRef.current) cameraInputRef.current.value = "";
     },
     [handleUploadFiles]
   );
 
   const handleChooseUpload = useCallback(() => {
     fileInputRef.current?.click();
-  }, []);
-
-  const handleChooseCamera = useCallback(() => {
-    cameraInputRef.current?.click();
   }, []);
 
   const activityColor = activity?.color ?? "amber";
@@ -403,7 +396,7 @@ export default function LearningRecommendationDialog() {
                       <p className="font-semibold text-foreground">
                         {t("recommendation.continueLearning")}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
                         {t(activity.titleKey)}
                       </p>
                       {remainingCount > 1 && (
@@ -445,7 +438,7 @@ export default function LearningRecommendationDialog() {
                     <p className="font-semibold text-foreground">
                       {t("recommendation.readFromRepository")}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
                       {t("recommendation.readFromRepositoryDesc")}
                     </p>
                   </div>
@@ -458,53 +451,39 @@ export default function LearningRecommendationDialog() {
                 </div>
               </button>
 
-              <div className="w-full flex gap-2">
-                <button
-                  type="button"
-                  className={cn(
-                    "flex-1 p-3 rounded-xl border text-left transition-all",
-                    "hover:scale-[1.02] active:scale-[0.98]",
-                    COLOR_BORDER[UPLOAD_COLOR],
-                    "bg-background/60 backdrop-blur-sm"
-                  )}
-                  onClick={handleChooseUpload}
-                >
-                  <div className="flex items-center gap-2">
-                    <Upload
-                      className={cn(
-                        "w-4 h-4 shrink-0",
-                        COLOR_TEXT[UPLOAD_COLOR]
-                      )}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground text-sm">
-                        {t("recommendation.uploadFile")}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {t("recommendation.uploadFileDesc")}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  className={cn(
-                    "p-3 rounded-xl border transition-all",
-                    "hover:scale-[1.02] active:scale-[0.98]",
-                    COLOR_BORDER[UPLOAD_COLOR],
-                    "bg-background/60 backdrop-blur-sm"
-                  )}
-                  onClick={handleChooseCamera}
-                  title={t("recommendation.takePhoto")}
-                >
-                  <Camera
+              <button
+                type="button"
+                className={cn(
+                  "w-full p-4 rounded-xl border text-left transition-all",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                  COLOR_BORDER[UPLOAD_COLOR],
+                  "bg-background/60 backdrop-blur-sm"
+                )}
+                onClick={handleChooseUpload}
+              >
+                <div className="flex items-start gap-3">
+                  <Upload
                     className={cn(
-                      "w-5 h-5",
+                      "w-5 h-5 mt-0.5 shrink-0",
                       COLOR_TEXT[UPLOAD_COLOR]
                     )}
                   />
-                </button>
-              </div>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <p className="font-semibold text-foreground">
+                      {t("recommendation.uploadFile")}
+                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {t("recommendation.uploadFileDesc")}
+                    </p>
+                  </div>
+                  <ArrowRight
+                    className={cn(
+                      "w-4 h-4 mt-1 shrink-0",
+                      COLOR_TEXT[UPLOAD_COLOR]
+                    )}
+                  />
+                </div>
+              </button>
 
               <Button
                 variant="ghost"
@@ -628,14 +607,6 @@ export default function LearningRecommendationDialog() {
         type="file"
         accept="image/*,.pdf,application/pdf"
         multiple
-        className="hidden"
-        onChange={handleFileInput}
-      />
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleFileInput}
       />
