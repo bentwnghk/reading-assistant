@@ -13,7 +13,12 @@ import {
   ArrowRight,
   Search,
   Highlighter,
+  Library,
+  RefreshCw,
+  LoaderCircle,
+  User,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +33,8 @@ import {
   getIncompleteActivities,
   type LearningActivity,
 } from "@/utils/learningActivities";
+
+type DialogStep = "choices" | "repository-loading" | "repository-preview";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   ClipboardCheck,
@@ -52,6 +59,7 @@ const COLOR_BG: Record<string, string> = {
   red: "bg-red-500",
   cyan: "bg-cyan-500",
   yellow: "bg-yellow-500",
+  amber: "bg-amber-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -65,6 +73,7 @@ const COLOR_GLOW: Record<string, string> = {
   red: "shadow-red-400/50",
   cyan: "shadow-cyan-400/50",
   yellow: "shadow-yellow-400/50",
+  amber: "shadow-amber-400/50",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -78,19 +87,7 @@ const COLOR_TEXT: Record<string, string> = {
   red: "text-red-600 dark:text-red-300",
   cyan: "text-cyan-600 dark:text-cyan-300",
   yellow: "text-yellow-600 dark:text-yellow-300",
-};
-
-const COLOR_FROM: Record<string, string> = {
-  blue: "from-blue-500/10",
-  green: "from-green-500/10",
-  indigo: "from-indigo-500/10",
-  purple: "from-purple-500/10",
-  orange: "from-orange-500/10",
-  teal: "from-teal-500/10",
-  pink: "from-pink-500/10",
-  red: "from-red-500/10",
-  cyan: "from-cyan-500/10",
-  yellow: "from-yellow-500/10",
+  amber: "text-amber-600 dark:text-amber-300",
 };
 
 const COLOR_BORDER: Record<string, string> = {
@@ -104,7 +101,10 @@ const COLOR_BORDER: Record<string, string> = {
   red: "border-red-500/20",
   cyan: "border-cyan-500/20",
   yellow: "border-yellow-500/20",
+  amber: "border-amber-500/20",
 };
+
+const REPO_COLOR = "amber";
 
 function ActivityIcon({ activity }: { activity: LearningActivity }) {
   const IconComp = ICON_MAP[activity.icon] ?? BookOpen;
@@ -132,17 +132,21 @@ function ActivityIcon({ activity }: { activity: LearningActivity }) {
 export default function LearningRecommendationDialog() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState<DialogStep>("choices");
   const [activity, setActivity] = useState<LearningActivity | null>(null);
   const [remainingCount, setRemainingCount] = useState(0);
+  const [recommendedText, setRecommendedText] =
+    useState<RepositoryTextListItem | null>(null);
+  const [loadingStart, setLoadingStart] = useState(false);
   const dismissedSessionRef = useRef<string | null>(null);
   const checkedRef = useRef(false);
+  const allTextsRef = useRef<RepositoryTextListItem[]>([]);
 
   const { id, extractedText } = useReadingStore();
 
   useEffect(() => {
     if (checkedRef.current) return;
     if (!id || !extractedText) return;
-
     if (dismissedSessionRef.current === id) return;
 
     const state = useReadingStore.getState();
@@ -155,24 +159,76 @@ export default function LearningRecommendationDialog() {
     const allIncomplete = getIncompleteActivities(state);
     setActivity(recommended);
     setRemainingCount(allIncomplete.length);
+    setStep("choices");
     setOpen(true);
     checkedRef.current = true;
   }, [id, extractedText]);
 
-  const handleAccept = useCallback(() => {
+  const handleContinueLearning = useCallback(() => {
     if (!activity) return;
     setOpen(false);
-
     requestAnimationFrame(() => {
-      const element = document.getElementById(activity.sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = document.getElementById(activity.sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
   }, [activity]);
 
+  const handleChooseRepository = useCallback(async () => {
+    setStep("repository-loading");
+    try {
+      let texts = allTextsRef.current;
+      if (texts.length === 0) {
+        const res = await fetch("/api/repository");
+        if (!res.ok) throw new Error("Failed to fetch");
+        texts = await res.json();
+        allTextsRef.current = texts;
+      }
+      if (texts.length === 0) {
+        toast.info(t("recommendation.noTextsAvailable"));
+        setStep("choices");
+        return;
+      }
+      const randomText = texts[Math.floor(Math.random() * texts.length)];
+      setRecommendedText(randomText);
+      setStep("repository-preview");
+    } catch {
+      toast.error(t("reading.repository.fetchError"));
+      setStep("choices");
+    }
+  }, [t]);
+
+  const handlePickAnother = useCallback(() => {
+    const texts = allTextsRef.current;
+    if (texts.length <= 1) return;
+    let candidate: RepositoryTextListItem;
+    do {
+      candidate = texts[Math.floor(Math.random() * texts.length)];
+    } while (candidate.id === recommendedText?.id);
+    setRecommendedText(candidate);
+  }, [recommendedText]);
+
+  const handleStartReading = useCallback(async () => {
+    if (!recommendedText) return;
+    setLoadingStart(true);
+    try {
+      const res = await fetch(`/api/repository/${recommendedText.id}`);
+      if (!res.ok) throw new Error("Failed to load");
+      const fullText: RepositoryText = await res.json();
+      useReadingStore.getState().loadFromRepository(fullText);
+      setOpen(false);
+    } catch {
+      toast.error(t("reading.repository.loadError"));
+    } finally {
+      setLoadingStart(false);
+    }
+  }, [recommendedText, t]);
+
   const handleDismiss = useCallback(() => {
     setOpen(false);
+    setStep("choices");
+    setRecommendedText(null);
     if (id) {
       dismissedSessionRef.current = id;
     }
@@ -180,92 +236,223 @@ export default function LearningRecommendationDialog() {
 
   if (!activity) return null;
 
+  const activityColor = activity.color;
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
-      <DialogContent
-        className={cn(
-          "max-w-sm text-center overflow-hidden",
-          "bg-gradient-to-b",
-          COLOR_FROM[activity.color] ?? "from-primary/10",
-          "to-background",
-          "border",
-          COLOR_BORDER[activity.color] ?? ""
-        )}
-      >
-        <div
-          className={cn(
-            "absolute top-0 left-0 right-0 h-1",
-            COLOR_BG[activity.color] ?? "bg-primary"
-          )}
-        />
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) handleDismiss();
+      }}
+    >
+      <DialogContent className="max-w-sm text-center overflow-hidden">
+        {step === "choices" && (
+          <>
+            <div
+              className={cn(
+                "absolute top-0 left-0 right-0 h-1",
+                COLOR_BG[activityColor] ?? "bg-primary"
+              )}
+            />
 
-        <div className="flex flex-col items-center gap-4 pt-4 pb-2">
-          <ActivityIcon activity={activity} />
+            <div className="flex flex-col items-center gap-4 pt-4 pb-2">
+              <ActivityIcon activity={activity} />
 
-          <div className="space-y-1">
-            <DialogTitle className="text-xl font-bold text-foreground">
-              {t("recommendation.welcomeBack")}
-            </DialogTitle>
-            <DialogDescription className="text-base font-medium text-foreground/80">
-              {t("recommendation.readyToContinue")}
-            </DialogDescription>
-          </div>
+              <div className="space-y-1">
+                <DialogTitle className="text-xl font-bold text-foreground">
+                  {t("recommendation.welcomeBack")}
+                </DialogTitle>
+                <DialogDescription className="text-base font-medium text-foreground/80">
+                  {t("recommendation.readyToContinue")}
+                </DialogDescription>
+              </div>
 
-          <div
-            className={cn(
-              "w-full p-4 rounded-xl border",
-              COLOR_BORDER[activity.color] ?? "",
-              "bg-background/60 backdrop-blur-sm"
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <Sparkles
+              <button
+                type="button"
                 className={cn(
-                  "w-5 h-5 mt-0.5 shrink-0",
-                  COLOR_TEXT[activity.color] ?? "text-primary"
+                  "w-full p-4 rounded-xl border text-left transition-all",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                  COLOR_BORDER[activityColor] ?? "",
+                  "bg-background/60 backdrop-blur-sm"
                 )}
-              />
-              <div className="text-left space-y-1">
-                <p className="font-semibold text-foreground">
-                  {t(activity.titleKey)}
-                </p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {t(activity.descriptionKey)}
-                </p>
+                onClick={handleContinueLearning}
+              >
+                <div className="flex items-start gap-3">
+                  <Sparkles
+                    className={cn(
+                      "w-5 h-5 mt-0.5 shrink-0",
+                      COLOR_TEXT[activityColor] ?? "text-primary"
+                    )}
+                  />
+                  <div className="flex-1 space-y-1">
+                    <p className="font-semibold text-foreground">
+                      {t("recommendation.continueLearning")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t(activity.titleKey)}
+                    </p>
+                    {remainingCount > 1 && (
+                      <p className="text-xs text-muted-foreground">
+                        {t("recommendation.moreActivities", {
+                          count: remainingCount - 1,
+                        })}
+                      </p>
+                    )}
+                  </div>
+                  <ArrowRight
+                    className={cn(
+                      "w-4 h-4 mt-1 shrink-0",
+                      COLOR_TEXT[activityColor] ?? "text-primary"
+                    )}
+                  />
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className={cn(
+                  "w-full p-4 rounded-xl border text-left transition-all",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                  COLOR_BORDER[REPO_COLOR],
+                  "bg-background/60 backdrop-blur-sm"
+                )}
+                onClick={handleChooseRepository}
+              >
+                <div className="flex items-start gap-3">
+                  <Library
+                    className={cn(
+                      "w-5 h-5 mt-0.5 shrink-0",
+                      COLOR_TEXT[REPO_COLOR]
+                    )}
+                  />
+                  <div className="flex-1 space-y-1">
+                    <p className="font-semibold text-foreground">
+                      {t("recommendation.readFromRepository")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("recommendation.readFromRepositoryDesc")}
+                    </p>
+                  </div>
+                  <ArrowRight
+                    className={cn(
+                      "w-4 h-4 mt-1 shrink-0",
+                      COLOR_TEXT[REPO_COLOR]
+                    )}
+                  />
+                </div>
+              </button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={handleDismiss}
+              >
+                {t("recommendation.maybeLater")}
+              </Button>
+            </div>
+          </>
+        )}
+
+        {step === "repository-loading" && (
+          <div className="flex flex-col items-center gap-4 py-12">
+            <LoaderCircle className="w-8 h-8 animate-spin text-amber-500" />
+            <p className="text-sm text-muted-foreground">
+              {t("recommendation.loadingText")}
+            </p>
+          </div>
+        )}
+
+        {step === "repository-preview" && recommendedText && (
+          <>
+            <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
+
+            <div className="flex flex-col items-center gap-4 pt-4 pb-2">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute w-20 h-20 rounded-full opacity-20 blur-xl animate-pulse bg-amber-500" />
+                <div className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg bg-amber-500 shadow-amber-400/50">
+                  <Library className="w-8 h-8 text-white drop-shadow" />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <DialogTitle className="text-xl font-bold text-foreground">
+                  {t("recommendation.repositoryPicked")}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {t("recommendation.repositoryPickedDesc")}
+                </DialogDescription>
+              </div>
+
+              <div
+                className={cn(
+                  "w-full p-4 rounded-xl border",
+                  COLOR_BORDER[REPO_COLOR],
+                  "bg-background/60 backdrop-blur-sm"
+                )}
+              >
+                <div className="text-left space-y-2">
+                  <p className="font-semibold text-foreground text-base">
+                    {recommendedText.title || recommendedText.name}
+                  </p>
+                  {recommendedText.previewText && (
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {recommendedText.previewText}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
+                    {recommendedText.createdByName && (
+                      <span className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        {recommendedText.createdByName}
+                      </span>
+                    )}
+                    <span>
+                      {t("reading.repository.images", {
+                        count: recommendedText.imageCount,
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 w-full">
+                <Button
+                  className="w-full text-white font-semibold gap-2 bg-amber-500 hover:bg-amber-600"
+                  onClick={handleStartReading}
+                  disabled={loadingStart}
+                >
+                  {loadingStart ? (
+                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                  ) : (
+                    t("recommendation.startReading")
+                  )}
+                  {!loadingStart && <ArrowRight className="w-4 h-4" />}
+                </Button>
+                {allTextsRef.current.length > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={handlePickAnother}
+                    disabled={loadingStart}
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    {t("recommendation.pickAnother")}
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground"
+                  onClick={handleDismiss}
+                >
+                  {t("recommendation.maybeLater")}
+                </Button>
               </div>
             </div>
-          </div>
-
-          {remainingCount > 1 && (
-            <p className="text-xs text-muted-foreground">
-              {t("recommendation.moreActivities", {
-                count: remainingCount - 1,
-              })}
-            </p>
-          )}
-
-          <div className="flex flex-col gap-2 w-full">
-            <Button
-              className={cn(
-                "w-full text-white font-semibold gap-2",
-                COLOR_BG[activity.color] ?? "bg-primary",
-                "hover:opacity-90"
-              )}
-              onClick={handleAccept}
-            >
-              {t("recommendation.letsGo")}
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground"
-              onClick={handleDismiss}
-            >
-              {t("recommendation.maybeLater")}
-            </Button>
-          </div>
-        </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

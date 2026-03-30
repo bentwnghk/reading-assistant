@@ -1311,7 +1311,16 @@
     "readyToContinue": "Ready to continue learning?",
     "letsGo": "Let's go!",
     "maybeLater": "Maybe later",
-    "moreActivities": "You have {{count}} more activities to explore!",
+    "moreActivities": "+ {{count}} more activities to explore",
+    "continueLearning": "Continue your session",
+    "readFromRepository": "Read a new text",
+    "readFromRepositoryDesc": "Try a fresh text from the Text Repository!",
+    "repositoryPicked": "Here's a text for you!",
+    "repositoryPickedDesc": "A randomly selected text from the Text Repository",
+    "startReading": "Start reading!",
+    "pickAnother": "Pick another",
+    "loadingText": "Finding a text for you...",
+    "noTextsAvailable": "No texts available in the Text Repository right now.",
     "activities": {
       "readingTest": {
         "title": "Complete your reading comprehension test",

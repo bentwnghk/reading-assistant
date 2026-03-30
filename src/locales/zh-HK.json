@@ -1311,7 +1311,16 @@
     "readyToContinue": "準備好繼續學習了嗎？",
     "letsGo": "開始吧！",
     "maybeLater": "稍後再說",
-    "moreActivities": "你還有 {{count}} 個學習活動等著你！",
+    "moreActivities": "+ {{count}} 個學習活動等著你",
+    "continueLearning": "繼續目前的學習",
+    "readFromRepository": "閱讀新文本",
+    "readFromRepositoryDesc": "從文本庫中挑選一篇新文本！",
+    "repositoryPicked": "為你推薦這篇文本！",
+    "repositoryPickedDesc": "從文本庫中隨機挑選的一篇文本",
+    "startReading": "開始閱讀！",
+    "pickAnother": "換一篇",
+    "loadingText": "正在為你挑選文本...",
+    "noTextsAvailable": "文本庫中暫無可用文本。",
     "activities": {
       "readingTest": {
         "title": "完成你的閱讀理解測驗",
