@@ -723,7 +723,7 @@
   },
   "setting": {
     "title": "設定",
-    "description": "設定系統、AI 模型、語音和通知選項。",
+    "description": "設定一般、AI 模型、語音和通知選項。",
     "tabGeneral": "一般",
     "tabModels": "模型",
     "tabTTS": "語音",
