@@ -25,7 +25,7 @@ export async function GET(request: Request) {
 
       if (!verifyUnsubscribeToken(userId, token)) {
         return NextResponse.redirect(
-          new URL("/?unsubscribe=invalid", request.url)
+          new URL("/unsubscribe?status=invalid", request.url)
         )
       }
 
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
       const appUrl = process.env.APP_URL || new URL("/", request.url).origin
 
       return NextResponse.redirect(
-        new URL("/?unsubscribe=success", appUrl)
+        new URL("/unsubscribe?status=success", appUrl)
       )
     }
 

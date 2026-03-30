@@ -44,11 +44,11 @@ interface EmailStrings {
 
 const STRINGS: Record<LocaleKey, EmailStrings> = {
   "en-US": {
-    appName: "Mr.\u{1F9ED} ProReader",
+    appName: "Mr.\u{1F196} ProReader",
     appSubtitle: "Your learning companion",
-    htmlTitle: "We miss you! Come back to Mr.\u{1F9ED} ProReader",
+    htmlTitle: "We miss you! Come back to Mr.\u{1F196} ProReader",
     greeting: (name) => `Hi ${name}, we miss you! \u{1F44B}`,
-    intro: "It\u2019s been a while since your last learning session. We noticed you haven\u2019t visited Mr.\u{1F9ED} ProReader recently, and we\u2019d love to help you get back on track!",
+    intro: "It\u2019s been a while since your last learning session. We noticed you haven\u2019t visited Mr.\u{1F196} ProReader recently, and we\u2019d love to help you get back on track!",
     timeSinceLastActivity: "TIME SINCE LAST ACTIVITY",
     youLast: (activity, date) => `You last ${activity} on ${date}`,
     day: (n) => (n === 1 ? "1 day" : `${n} days`),
@@ -67,7 +67,7 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
     featureQuizDesc: "Test your reading comprehension and vocabulary knowledge",
     ctaButton: "Continue Learning \u2192",
     closingMessage: "Pick up right where you left off, or start something new. Your learning journey awaits!",
-    footerNote: "This reminder was sent because you have email notifications enabled in Mr.\u{1F9ED} ProReader.",
+    footerNote: "This reminder was sent because you have email notifications enabled in Mr.\u{1F196} ProReader.",
     unsubscribe: "Unsubscribe from reminder emails",
     managePreferences: "Manage preferences",
     subject: (days, activity) => `We miss you! It\u2019s been ${days} since you ${activity}`,
@@ -89,11 +89,11 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
       `It\u2019s been ${days} since you last ${activity} on ${date}.`,
   },
   "zh-HK": {
-    appName: "Mr.\u{1F9ED} ProReader",
+    appName: "Mr.\u{1F196} ProReader",
     appSubtitle: "\u{4F60}\u{7684}\u{5B78}\u{7FD2}\u{5925}\u{4F34}",
-    htmlTitle: "\u{6211}\u{5011}\u{60F3}\u{4F60}\u{4E86}\u{FF01}\u{56DE}\u{4F86} Mr.\u{1F9ED} ProReader \u{5427}",
+    htmlTitle: "\u{6211}\u{5011}\u{60F3}\u{4F60}\u{4E86}\u{FF01}\u{56DE}\u{4F86} Mr.\u{1F196} ProReader \u{5427}",
     greeting: (name) => `\u{55E8} ${name}\u{FF0C}\u{6211}\u{5011}\u{60F3}\u{4F60}\u{4E86}\u{FF01}\u{1F44B}`,
-    intro: "\u{8DDD}\u{96E2}\u{4E0A}\u{6B21}\u{5B78}\u{7FD2}\u{5DF2}\u{7D93}\u{6709}\u{4E00}\u{6BB5}\u{6642}\u{9593}\u{4E86}\u{3002}\u{6211}\u{5011}\u{767C}\u{73FE}\u{4F60}\u{8FD1}\u{671F}\u{6C92}\u{6709}\u{4F7F}\u{7528} Mr.\u{1F9ED} ProReader\u{FF0C}\u{5E0C}\u{671B}\u{5E6B}\u{52A9}\u{4F60}\u{91CD}\u{62FE}\u{5B78}\u{7FD2}\u{7BC0}\u{594F}\u{FF01}",
+    intro: "\u{8DDD}\u{96E2}\u{4E0A}\u{6B21}\u{5B78}\u{7FD2}\u{5DF2}\u{7D93}\u{6709}\u{4E00}\u{6BB5}\u{6642}\u{9593}\u{4E86}\u{3002}\u{6211}\u{5011}\u{767C}\u{73FE}\u{4F60}\u{8FD1}\u{671F}\u{6C92}\u{6709}\u{4F7F}\u{7528} Mr.\u{1F196} ProReader\u{FF0C}\u{5E0C}\u{671B}\u{5E6B}\u{52A9}\u{4F60}\u{91CD}\u{62FE}\u{5B78}\u{7FD2}\u{7BC0}\u{594F}\u{FF01}",
     timeSinceLastActivity: "\u{8DDD}\u{96E2}\u{4E0A}\u{6B21}\u{5B78}\u{7FD2}\u{6D3B}\u{52D5}",
     youLast: (activity, date) => `\u{4F60}\u{4E0A}\u{6B21}${activity}\u{662F}\u{5728} ${date}`,
     day: (n) => (n === 1 ? "1 \u{5929}" : `${n} \u{5929}`),
@@ -112,7 +112,7 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
     featureQuizDesc: "\u{6E2C}\u8A66\u{4F60}\u{7684}\u{95B1}\u{8B80}\u{7406}\u{89E3}\u{80FD}\u{529B}\u{548C}\u{8A5E}\u{5F59}\u{77E5}\u{8B58}",
     ctaButton: "\u{7E7C}\u{7E8C}\u{5B78}\u{7FD2} \u2192",
     closingMessage: "\u{5F9E}\u{4F60}\u{505C}\u{4E0B}\u{7684}\u{5730}\u{65B9}\u{7E7C}\u{7E8C}\u{FF0C}\u{6216}\u{8005}\u{958B}\u{59CB}\u{65B0}\u{7684}\u{5B78}\u{7FD2}\u{4E4B}\u{65C5}\u{FF01}",
-    footerNote: "\u{6B64}\u{63D0}\u{9192}\u{662F}\u{56E0}\u{70BA}\u{4F60}\u{5DF2}\u{5728} Mr.\u{1F9ED} ProReader \u{4E2D}\u{555F}\u{7528}\u{4E86}\u{96FB}\u{90F5}\u{901A}\u{77E5}\u{3002}",
+    footerNote: "\u{6B64}\u{63D0}\u{9192}\u{662F}\u{56E0}\u{70BA}\u{4F60}\u{5DF2}\u{5728} Mr.\u{1F196} ProReader \u{4E2D}\u{555F}\u{7528}\u{4E86}\u{96FB}\u{90F5}\u{901A}\u{77E5}\u{3002}",
     unsubscribe: "\u{53D6}\u{6D88}\u{8A02}\u{95B1}\u{63D0}\u{9192}\u{96FB}\u{90F5}",
     managePreferences: "\u{7BA1}\u{7406}\u{8A2D}\u{5B9A}",
     subject: (days, activity) => `\u{6211}\u{5011}\u{60F3}\u{4F60}\u{4E86}\u{FF01}\u{5DF2}\u{7D93} ${days} \u{6C92}\u{6709}${activity}\u{4E86}`,
@@ -182,19 +182,25 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
 
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);border-radius:16px 16px 0 0;padding:40px 32px;text-align:center;">
+            <td bgcolor="#6366f1" style="background-color:#6366f1;border-radius:16px 16px 0 0;padding:40px 32px;text-align:center;">
+              <!--[if mso]>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td bgcolor="#6366f1" style="padding:40px 32px;text-align:center;">
+              <![endif]-->
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td style="text-align:center;">
                     <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;letter-spacing:-0.5px;">
-                      📚 ${s.appName}
+                      &#128218; ${s.appName}
                     </h1>
-                    <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:16px;">
+                    <p style="margin:8px 0 0;color:#e0e7ff;font-size:16px;">
                       ${s.appSubtitle}
                     </p>
                   </td>
                 </tr>
               </table>
+              <!--[if mso]>
+              </td></tr></table>
+              <![endif]-->
             </td>
           </tr>
 
@@ -333,10 +339,16 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                 <!-- CTA Button -->
                 <tr>
                   <td align="center" style="padding-bottom:32px;">
-                    <a href="${appUrl}"
-                       style="display:inline-block;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);color:#ffffff;text-decoration:none;font-size:18px;font-weight:600;padding:16px 48px;border-radius:12px;box-shadow:0 4px 14px rgba(99,102,241,0.35);">
-                      ${s.ctaButton}
-                    </a>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td align="center" bgcolor="#6366f1" style="border-radius:12px;">
+                          <a href="${appUrl}"
+                             style="display:inline-block;background-color:#6366f1;color:#ffffff;text-decoration:none;font-size:18px;font-weight:600;padding:16px 48px;border-radius:12px;">
+                            ${s.ctaButton}
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
 

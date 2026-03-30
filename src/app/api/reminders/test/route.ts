@@ -9,6 +9,7 @@ import {
 } from "@/templates/reminder-email"
 import { getUserSettings } from "@/lib/settings"
 import { getClient } from "@/lib/db"
+import { generateUnsubscribeToken } from "@/lib/reminders"
 import { NextResponse } from "next/server"
 
 export async function POST() {
@@ -53,9 +54,9 @@ export async function POST() {
     }
 
     const settings = await getUserSettings(session.user.id)
-    const locale = settings?.language || "system"
+    const rawLocale = settings?.language || "zh-HK"
     const resolvedLocale =
-      locale === "system" || !locale ? "en-US" : locale
+      rawLocale === "system" || !rawLocale ? "zh-HK" : rawLocale
 
     const appUrl = process.env.APP_URL || "http://localhost:3000"
     const s = getEmailStrings(resolvedLocale)
@@ -75,13 +76,16 @@ export async function POST() {
           day: "numeric",
         })
 
+    const unsubscribeToken = generateUnsubscribeToken(session.user.id)
+    const unsubscribeUrl = `${appUrl}/api/reminders/preferences?unsubscribe=1&uid=${session.user.id}&token=${unsubscribeToken}`
+
     const html = buildReminderEmailHtml({
       userName: session.user.name || "",
       daysInactive,
       lastActivityDate,
       lastActivityType,
       appUrl,
-      unsubscribeUrl: `${appUrl}/settings`,
+      unsubscribeUrl,
       locale: resolvedLocale,
     })
 
@@ -91,7 +95,7 @@ export async function POST() {
       lastActivityDate,
       lastActivityType,
       appUrl,
-      unsubscribeUrl: `${appUrl}/settings`,
+      unsubscribeUrl,
       locale: resolvedLocale,
     })
 

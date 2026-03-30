@@ -790,7 +790,14 @@
     "sendTest": "Test Email",
     "sendTestTip": "Send a test reminder email to yourself to preview how it looks",
     "testSent": "Test reminder sent to {{email}}",
-    "testSendFailed": "Failed to send test reminder email"
+    "testSendFailed": "Failed to send test reminder email",
+    "unsubscribeSuccessTitle": "Unsubscribed",
+    "unsubscribeSuccessMessage": "You have been unsubscribed from reminder emails. You can re-enable them in Settings > Notifications.",
+    "unsubscribeInvalidTitle": "Invalid Link",
+    "unsubscribeInvalidMessage": "This unsubscribe link is invalid or has expired. Please check the email or manage your preferences in Settings.",
+    "unsubscribePageTitle": "Email Preferences",
+    "unsubscribePageMessage": "Manage your email notification preferences in Settings > Notifications.",
+    "backToHome": "Back to Home"
   },
   "editor": {
     "copy": "Copy",

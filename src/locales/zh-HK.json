@@ -790,7 +790,14 @@
     "sendTest": "測試電郵",
     "sendTestTip": "向自己發送測試提醒電郵，預覽電郵的外觀",
     "testSent": "測試提醒已發送至 {{email}}",
-    "testSendFailed": "發送測試提醒電郵失敗"
+    "testSendFailed": "發送測試提醒電郵失敗",
+    "unsubscribeSuccessTitle": "已取消訂閱",
+    "unsubscribeSuccessMessage": "你已取消訂閱提醒電郵。你可以在「設定 > 通知」中重新啟用。",
+    "unsubscribeInvalidTitle": "無效連結",
+    "unsubscribeInvalidMessage": "此取消訂閱連結無效或已過期。請檢查電郵或在「設定」中管理你的偏好設定。",
+    "unsubscribePageTitle": "電郵偏好設定",
+    "unsubscribePageMessage": "在「設定 > 通知」中管理你的電郵通知偏好設定。",
+    "backToHome": "返回首頁"
   },
   "editor": {
     "copy": "複製",
