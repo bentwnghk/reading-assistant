@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useSession } from "next-auth/react";
 import {
   BookOpen,
   BookMarked,
@@ -141,20 +142,28 @@ export default function LearningRecommendationDialog() {
   const [loadingStart, setLoadingStart] = useState(false);
   const dismissedSessionRef = useRef<string | null>(null);
   const checkedRef = useRef(false);
+  const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const allTextsRef = useRef<RepositoryTextListItem[]>([]);
 
+  const { status } = useSession();
   const { id, extractedText } = useReadingStore();
 
   useEffect(() => {
     if (checkedRef.current) return;
+    if (status !== "authenticated") return;
     if (dismissedSessionRef.current === id) return;
+
+    if (pendingTimerRef.current) {
+      clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = null;
+    }
 
     const state = useReadingStore.getState();
     const hasSession = !!(id && extractedText);
-    const recommended = hasSession ? pickRecommendedActivity(state) : null;
-    const allIncomplete = hasSession ? getIncompleteActivities(state) : [];
 
     if (hasSession) {
+      const recommended = pickRecommendedActivity(state);
+      const allIncomplete = getIncompleteActivities(state);
       if (recommended) {
         setActivity(recommended);
         setRemainingCount(allIncomplete.length);
@@ -165,13 +174,28 @@ export default function LearningRecommendationDialog() {
       setStep("choices");
       setOpen(true);
       checkedRef.current = true;
-    } else {
+      return;
+    }
+
+    pendingTimerRef.current = setTimeout(() => {
+      pendingTimerRef.current = null;
+      const current = useReadingStore.getState();
+      if (current.id && current.extractedText) {
+        return;
+      }
       setHasIncompleteActivities(false);
       setStep("choices");
       setOpen(true);
       checkedRef.current = true;
-    }
-  }, [id, extractedText]);
+    }, 2000);
+
+    return () => {
+      if (pendingTimerRef.current) {
+        clearTimeout(pendingTimerRef.current);
+        pendingTimerRef.current = null;
+      }
+    };
+  }, [id, extractedText, status]);
 
   const handleContinueLearning = useCallback(() => {
     if (!activity) return;
