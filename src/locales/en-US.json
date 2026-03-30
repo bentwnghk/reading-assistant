@@ -723,7 +723,7 @@
   },
   "setting": {
     "title": "Settings",
-    "description": "Configure general settings, AI models, and text-to-speech options.",
+    "description": "Configure general, AI models, text-to-speech, and notifications settings.",
     "tabGeneral": "General",
     "tabModels": "Models",
     "tabTTS": "TTS",
