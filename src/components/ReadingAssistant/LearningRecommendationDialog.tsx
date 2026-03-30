@@ -135,6 +135,7 @@ export default function LearningRecommendationDialog() {
   const [step, setStep] = useState<DialogStep>("choices");
   const [activity, setActivity] = useState<LearningActivity | null>(null);
   const [remainingCount, setRemainingCount] = useState(0);
+  const [hasIncompleteActivities, setHasIncompleteActivities] = useState(false);
   const [recommendedText, setRecommendedText] =
     useState<RepositoryTextListItem | null>(null);
   const [loadingStart, setLoadingStart] = useState(false);
@@ -146,20 +147,23 @@ export default function LearningRecommendationDialog() {
 
   useEffect(() => {
     if (checkedRef.current) return;
-    if (!id || !extractedText) return;
     if (dismissedSessionRef.current === id) return;
 
     const state = useReadingStore.getState();
-    const recommended = pickRecommendedActivity(state);
-    if (!recommended) {
-      checkedRef.current = true;
-      return;
+    const hasSession = !!(id && extractedText);
+    const recommended = hasSession ? pickRecommendedActivity(state) : null;
+    const allIncomplete = hasSession ? getIncompleteActivities(state) : [];
+
+    if (recommended) {
+      setActivity(recommended);
+      setRemainingCount(allIncomplete.length);
+      setHasIncompleteActivities(true);
+      setStep("choices");
+    } else {
+      setHasIncompleteActivities(false);
+      setStep("choices");
     }
 
-    const allIncomplete = getIncompleteActivities(state);
-    setActivity(recommended);
-    setRemainingCount(allIncomplete.length);
-    setStep("choices");
     setOpen(true);
     checkedRef.current = true;
   }, [id, extractedText]);
@@ -188,6 +192,7 @@ export default function LearningRecommendationDialog() {
       if (texts.length === 0) {
         toast.info(t("recommendation.noTextsAvailable"));
         setStep("choices");
+        setOpen(false);
         return;
       }
       const randomText = texts[Math.floor(Math.random() * texts.length)];
@@ -234,9 +239,7 @@ export default function LearningRecommendationDialog() {
     }
   }, [id]);
 
-  if (!activity) return null;
-
-  const activityColor = activity.color;
+  const activityColor = activity?.color ?? "amber";
 
   return (
     <Dialog
@@ -251,62 +254,79 @@ export default function LearningRecommendationDialog() {
             <div
               className={cn(
                 "absolute top-0 left-0 right-0 h-1",
-                COLOR_BG[activityColor] ?? "bg-primary"
+                hasIncompleteActivities
+                  ? (COLOR_BG[activityColor] ?? "bg-primary")
+                  : "bg-amber-500"
               )}
             />
 
             <div className="flex flex-col items-center gap-4 pt-4 pb-2">
-              <ActivityIcon activity={activity} />
+              {hasIncompleteActivities && activity ? (
+                <ActivityIcon activity={activity} />
+              ) : (
+                <div className="relative flex items-center justify-center">
+                  <div className="absolute w-20 h-20 rounded-full opacity-20 blur-xl animate-pulse bg-amber-500" />
+                  <div className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg bg-amber-500 shadow-amber-400/50">
+                    <Library className="w-8 h-8 text-white drop-shadow" />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-1">
                 <DialogTitle className="text-xl font-bold text-foreground">
-                  {t("recommendation.welcomeBack")}
+                  {hasIncompleteActivities
+                    ? t("recommendation.welcomeBack")
+                    : t("recommendation.welcome")}
                 </DialogTitle>
                 <DialogDescription className="text-base font-medium text-foreground/80">
-                  {t("recommendation.readyToContinue")}
+                  {hasIncompleteActivities
+                    ? t("recommendation.readyToContinue")
+                    : t("recommendation.readyToRead")}
                 </DialogDescription>
               </div>
 
-              <button
-                type="button"
-                className={cn(
-                  "w-full p-4 rounded-xl border text-left transition-all",
-                  "hover:scale-[1.02] active:scale-[0.98]",
-                  COLOR_BORDER[activityColor] ?? "",
-                  "bg-background/60 backdrop-blur-sm"
-                )}
-                onClick={handleContinueLearning}
-              >
-                <div className="flex items-start gap-3">
-                  <Sparkles
-                    className={cn(
-                      "w-5 h-5 mt-0.5 shrink-0",
-                      COLOR_TEXT[activityColor] ?? "text-primary"
-                    )}
-                  />
-                  <div className="flex-1 space-y-1">
-                    <p className="font-semibold text-foreground">
-                      {t("recommendation.continueLearning")}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {t(activity.titleKey)}
-                    </p>
-                    {remainingCount > 1 && (
-                      <p className="text-xs text-muted-foreground">
-                        {t("recommendation.moreActivities", {
-                          count: remainingCount - 1,
-                        })}
+              {hasIncompleteActivities && activity && (
+                <button
+                  type="button"
+                  className={cn(
+                    "w-full p-4 rounded-xl border text-left transition-all",
+                    "hover:scale-[1.02] active:scale-[0.98]",
+                    COLOR_BORDER[activityColor] ?? "",
+                    "bg-background/60 backdrop-blur-sm"
+                  )}
+                  onClick={handleContinueLearning}
+                >
+                  <div className="flex items-start gap-3">
+                    <Sparkles
+                      className={cn(
+                        "w-5 h-5 mt-0.5 shrink-0",
+                        COLOR_TEXT[activityColor] ?? "text-primary"
+                      )}
+                    />
+                    <div className="flex-1 space-y-1">
+                      <p className="font-semibold text-foreground">
+                        {t("recommendation.continueLearning")}
                       </p>
-                    )}
+                      <p className="text-sm text-muted-foreground">
+                        {t(activity.titleKey)}
+                      </p>
+                      {remainingCount > 1 && (
+                        <p className="text-xs text-muted-foreground">
+                          {t("recommendation.moreActivities", {
+                            count: remainingCount - 1,
+                          })}
+                        </p>
+                      )}
+                    </div>
+                    <ArrowRight
+                      className={cn(
+                        "w-4 h-4 mt-1 shrink-0",
+                        COLOR_TEXT[activityColor] ?? "text-primary"
+                      )}
+                    />
                   </div>
-                  <ArrowRight
-                    className={cn(
-                      "w-4 h-4 mt-1 shrink-0",
-                      COLOR_TEXT[activityColor] ?? "text-primary"
-                    )}
-                  />
-                </div>
-              </button>
+                </button>
+              )}
 
               <button
                 type="button"

@@ -1321,6 +1321,8 @@
     "pickAnother": "Pick another",
     "loadingText": "Finding a text for you...",
     "noTextsAvailable": "No texts available in the Text Repository right now.",
+    "welcome": "Welcome!",
+    "readyToRead": "Ready to read something new?",
     "activities": {
       "readingTest": {
         "title": "Complete your reading comprehension test",
