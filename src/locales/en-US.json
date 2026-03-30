@@ -1324,7 +1324,7 @@
     "welcome": "Welcome!",
     "readyToRead": "Ready to read something new?",
     "uploadFile": "Upload image / PDF",
-    "uploadFileDesc": "PNG, JPG, WEBP, PDF",
+    "uploadFileDesc": "Upload photos or PDFs of textbooks, worksheets, or articles for AI text extraction",
     "takePhoto": "Take a photo",
     "activities": {
       "readingTest": {
