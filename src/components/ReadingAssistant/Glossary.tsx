@@ -62,7 +62,7 @@ function Glossary() {
 
   const mergedGlossary = mergedResult.entries;
   const mergedRatings = mergedResult.ratings;
-  const addedCount = mergedResult.addedCount;
+  const _addedCount = mergedResult.addedCount;
 
   const handleDownloadWord = useCallback(async () => {
     if (mergedGlossary.length === 0) return;
