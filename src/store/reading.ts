@@ -11,6 +11,14 @@ export function isStreamingActive() {
   return _isStreaming;
 }
 
+let _restoreComplete = false;
+export function setRestoreComplete(value: boolean) {
+  _restoreComplete = value;
+}
+export function isRestoreComplete() {
+  return _restoreComplete;
+}
+
 let currentUserId: string | null = null;
 export function setUserId(id: string | null) {
   currentUserId = id;

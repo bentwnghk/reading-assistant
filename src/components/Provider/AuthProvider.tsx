@@ -4,7 +4,7 @@ import { SessionProvider, useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
-import { setUserId, useReadingStore } from "@/store/reading"
+import { setUserId, useReadingStore, setRestoreComplete } from "@/store/reading"
 import { setAuthState } from "@/store/history"
 import {
   setSettingUserId,
@@ -36,9 +36,7 @@ function AuthStateManager() {
 
     if (!isAuthenticated || !userId) {
       syncedUserIdRef.current = null
-      // Reset in-memory settings back to defaults so a logged-out (or
-      // different) user doesn't see the previous authenticated user's data.
-      // Preserve the user's language preference from localStorage.
+      setRestoreComplete(false)
       const currentLanguage = useSettingStore.getState().language
       useSettingStore.getState().loadFromServer({ ...defaultValues, language: currentLanguage })
       return
@@ -72,10 +70,12 @@ function AuthStateManager() {
 
         if (hasActiveSession) {
           markLastOpenedSession(currentReading.id)
+          setRestoreComplete(true)
           return
         }
 
         if (sessions.length === 0) {
+          setRestoreComplete(true)
           return
         }
 
@@ -93,6 +93,8 @@ function AuthStateManager() {
             sessionToRestore.id
           toast.message(t("history.restored", { title: sessionTitle }))
         }
+
+        setRestoreComplete(true)
       })
   }, [session?.user?.id, status, t])
   

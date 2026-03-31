@@ -28,7 +28,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useReadingStore } from "@/store/reading";
+import { useReadingStore, isRestoreComplete } from "@/store/reading";
 import { cn } from "@/utils/style";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { processPdfFile } from "@/utils/parser/pdfParser";
@@ -153,9 +153,9 @@ export default function LearningRecommendationDialog() {
   const [recommendedText, setRecommendedText] =
     useState<RepositoryTextListItem | null>(null);
   const [loadingStart, setLoadingStart] = useState(false);
+  const [restoreReady, setRestoreReady] = useState(false);
   const dismissedSessionRef = useRef<string | null>(null);
   const checkedRef = useRef(false);
-  const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const allTextsRef = useRef<RepositoryTextListItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -164,14 +164,25 @@ export default function LearningRecommendationDialog() {
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
 
   useEffect(() => {
+    if (status !== "authenticated") return;
+    if (isRestoreComplete()) {
+      setRestoreReady(true);
+      return;
+    }
+    const interval = setInterval(() => {
+      if (isRestoreComplete()) {
+        setRestoreReady(true);
+        clearInterval(interval);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [status]);
+
+  useEffect(() => {
     if (checkedRef.current) return;
     if (status !== "authenticated") return;
+    if (!restoreReady) return;
     if (dismissedSessionRef.current === id) return;
-
-    if (pendingTimerRef.current) {
-      clearTimeout(pendingTimerRef.current);
-      pendingTimerRef.current = null;
-    }
 
     const state = useReadingStore.getState();
     const hasSession = !!(id && extractedText);
@@ -192,25 +203,11 @@ export default function LearningRecommendationDialog() {
       return;
     }
 
-    pendingTimerRef.current = setTimeout(() => {
-      pendingTimerRef.current = null;
-      const current = useReadingStore.getState();
-      if (current.id && current.extractedText) {
-        return;
-      }
-      setHasIncompleteActivities(false);
-      setStep("choices");
-      setOpen(true);
-      checkedRef.current = true;
-    }, 2000);
-
-    return () => {
-      if (pendingTimerRef.current) {
-        clearTimeout(pendingTimerRef.current);
-        pendingTimerRef.current = null;
-      }
-    };
-  }, [id, extractedText, status]);
+    setHasIncompleteActivities(false);
+    setStep("choices");
+    setOpen(true);
+    checkedRef.current = true;
+  }, [id, extractedText, status, restoreReady]);
 
   const handleContinueLearning = useCallback(() => {
     if (!activity) return;
