@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, HelpCircle } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, HelpCircle, ArrowUpDown } from "lucide-react";
 import {
   Document,
   Packer,
@@ -42,6 +42,8 @@ import VocabularySpelling from "./VocabularySpelling";
 import SessionGlossarySelector from "./SessionGlossarySelector";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling";
+type SortField = "word" | "partOfSpeech";
+type SortOrder = "asc" | "desc";
 
 function Glossary() {
   const { t } = useTranslation();
@@ -50,6 +52,8 @@ function Glossary() {
   const { status, generateGlossary } = useReadingAssistant();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
+  const [sortField, setSortField] = useState<SortField>("word");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   const isGenerating = status === "glossary";
 
@@ -63,6 +67,29 @@ function Glossary() {
   const mergedGlossary = mergedResult.entries;
   const mergedRatings = mergedResult.ratings;
   const _addedCount = mergedResult.addedCount;
+
+  const sortedGlossary = useMemo(() => {
+    const sorted = [...mergedGlossary];
+    sorted.sort((a, b) => {
+      let comparison = 0;
+      if (sortField === "word") {
+        comparison = a.word.localeCompare(b.word);
+      } else if (sortField === "partOfSpeech") {
+        comparison = (a.partOfSpeech || "").localeCompare(b.partOfSpeech || "");
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+    return sorted;
+  }, [mergedGlossary, sortField, sortOrder]);
+
+  const handleSort = useCallback((field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  }, [sortField, sortOrder]);
 
   const handleDownloadWord = useCallback(async () => {
     if (mergedGlossary.length === 0) return;
@@ -366,16 +393,26 @@ function Glossary() {
             <DataTable>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[120px]">{t("reading.glossary.word")}</TableHead>
+                  <TableHead className="w-[120px]">
+                    <Button variant="ghost" size="sm" onClick={() => handleSort("word")} className="-ml-3">
+                      {t("reading.glossary.word")}
+                      <ArrowUpDown className="ml-1 h-3 w-3" />
+                    </Button>
+                  </TableHead>
                   <TableHead className="w-[100px]">{t("reading.glossary.syllabification")}</TableHead>
-                  <TableHead className="w-[80px]">{t("reading.glossary.partOfSpeech")}</TableHead>
+                  <TableHead className="w-[80px]">
+                    <Button variant="ghost" size="sm" onClick={() => handleSort("partOfSpeech")} className="-ml-3">
+                      {t("reading.glossary.partOfSpeech")}
+                      <ArrowUpDown className="ml-1 h-3 w-3" />
+                    </Button>
+                  </TableHead>
                   <TableHead>{t("reading.glossary.englishDefinition")}</TableHead>
                   <TableHead className="w-[200px]">{t("reading.glossary.chineseDefinition")}</TableHead>
                   <TableHead>{t("reading.glossary.example")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mergedGlossary.map((entry) => (
+                {sortedGlossary.map((entry) => (
                   <TableRow key={entry.word}>
                     <TableCell className="font-medium">{entry.word}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{entry.syllabification || "-"}</TableCell>
