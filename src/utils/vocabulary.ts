@@ -1,3 +1,5 @@
+import type { ReadingHistory } from "@/store/history";
+
 type PriorityRating = "hard" | "medium" | "easy" | "unrated";
 
 function getPriority(rating?: GlossaryRating): PriorityRating {
@@ -61,4 +63,67 @@ export function getWordStats(
   }
 
   return stats;
+}
+
+const RATING_PRIORITY: Record<string, number> = {
+  hard: 3,
+  medium: 2,
+  easy: 1,
+};
+
+export interface MergedGlossary {
+  entries: GlossaryEntry[];
+  ratings: Record<string, GlossaryRating>;
+  addedCount: number;
+}
+
+export function mergeGlossariesFromSessions(
+  currentGlossary: GlossaryEntry[],
+  currentRatings: Record<string, GlossaryRating>,
+  selectedSessionIds: string[],
+  history: ReadingHistory[]
+): MergedGlossary {
+  if (selectedSessionIds.length === 0) {
+    return { entries: currentGlossary, ratings: currentRatings, addedCount: 0 };
+  }
+
+  const allEntries: GlossaryEntry[] = [...currentGlossary];
+  const mergedRatings: Record<string, GlossaryRating> = { ...currentRatings };
+
+  for (const sessionId of selectedSessionIds) {
+    const session = history.find((h) => h.id === sessionId);
+    if (session?.glossary) {
+      allEntries.push(...session.glossary);
+    }
+    if (session?.glossaryRatings) {
+      for (const [word, rating] of Object.entries(session.glossaryRatings)) {
+        const existing = mergedRatings[word];
+        if (!existing || (RATING_PRIORITY[rating] ?? 0) > (RATING_PRIORITY[existing] ?? 0)) {
+          mergedRatings[word] = rating as GlossaryRating;
+        }
+      }
+    }
+  }
+
+  const seen = new Set<string>();
+  const uniqueEntries = allEntries.filter((entry) => {
+    const key = entry.word.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const currentWords = new Set(currentGlossary.map((e) => e.word.toLowerCase()));
+  const addedCount = uniqueEntries.filter((e) => !currentWords.has(e.word.toLowerCase())).length;
+
+  return { entries: uniqueEntries, ratings: mergedRatings, addedCount };
+}
+
+export function generateWordCountOptions(totalWords: number): number[] {
+  if (totalWords <= 20) return [];
+  const options: number[] = [];
+  for (let n = 10; n < totalWords; n += 10) {
+    options.push(n);
+  }
+  return options;
 }

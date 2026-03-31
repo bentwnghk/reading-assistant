@@ -27,10 +27,11 @@ import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
 import { logActivity } from "@/utils/activityLogger";
 import { nanoid } from "nanoid";
-import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
+import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
 
 interface VocabularyQuizProps {
   glossary: GlossaryEntry[];
+  mergedRatings?: Record<string, GlossaryRating>;
 }
 
 type QuizState = "idle" | "in-progress" | "completed";
@@ -139,10 +140,11 @@ const DIFFICULTY_CONFIG: Record<QuizDifficulty, { timeLimit: number }> = {
   hard: { timeLimit: 10 },
 };
 
-function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
+function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
   const { t } = useTranslation();
   const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
+  const effectiveRatings = mergedRatings ?? glossaryRatings;
 
   const [quizState, setQuizState] = useState<QuizState>("idle");
   const [questions, setQuestions] = useState<VocabularyQuizQuestion[]>([]);
@@ -154,20 +156,24 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const [isTimed, setIsTimed] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(20);
   const [difficulty, setDifficulty] = useState<QuizDifficulty>("medium");
+  const [questionCountLimit, setQuestionCountLimit] = useState<number | "all">("all");
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const config = DIFFICULTY_CONFIG[difficulty];
 
   const wordStats = useMemo(() => {
-    return getWordStats(glossary, glossaryRatings);
-  }, [glossary, glossaryRatings]);
+    return getWordStats(glossary, effectiveRatings);
+  }, [glossary, effectiveRatings]);
 
   const startQuiz = useCallback(() => {
-    const sortedGlossary = sortGlossaryByPriority(glossary, glossaryRatings, {
+    let sortedGlossary = sortGlossaryByPriority(glossary, effectiveRatings, {
       prioritize: prioritizeHardWords,
       shuffle: true,
     });
+    if (questionCountLimit !== "all" && sortedGlossary.length > questionCountLimit) {
+      sortedGlossary = sortedGlossary.slice(0, questionCountLimit);
+    }
     const generatedQuestions = generateQuizQuestions(sortedGlossary);
     setQuestions(generatedQuestions);
     setAnswers({});
@@ -175,7 +181,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     setQuizState("in-progress");
     setShowReview(false);
     setTimeRemaining(config.timeLimit);
-  }, [glossary, glossaryRatings, prioritizeHardWords, config.timeLimit]);
+  }, [glossary, effectiveRatings, prioritizeHardWords, config.timeLimit, questionCountLimit]);
 
   const handleAnswer = (answer: string) => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -270,7 +276,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   const retryMissed = () => {
     if (missedQuestions.length === 0) return;
     const missedWords = glossary.filter((e) => missedQuestions.some((q) => q.wordRef === e.word));
-    const sortedMissed = sortGlossaryByPriority(missedWords, glossaryRatings, {
+    const sortedMissed = sortGlossaryByPriority(missedWords, effectiveRatings, {
       prioritize: prioritizeHardWords,
       shuffle: true,
     });
@@ -283,7 +289,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
   };
 
   const downloadWord = useCallback(async (includeAnswers: boolean = false) => {
-    const sortedGlossary = sortGlossaryByPriority(glossary, glossaryRatings, {
+    const sortedGlossary = sortGlossaryByPriority(glossary, effectiveRatings, {
       prioritize: prioritizeHardWords,
       shuffle: true,
     });
@@ -412,7 +418,7 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [questions, extractedText, docTitle, glossary, glossaryRatings, prioritizeHardWords, t]);
+  }, [questions, extractedText, docTitle, glossary, effectiveRatings, prioritizeHardWords, t]);
 
   if (glossary.length < 4) {
     return (
@@ -582,6 +588,41 @@ function VocabularyQuiz({ glossary }: VocabularyQuizProps) {
                 </span>
               )}
             </button>
+          )}
+
+          {generateWordCountOptions(glossary.length).length > 0 && (
+            <div>
+              <label className="text-sm font-medium mb-3 block">
+                {t("reading.glossary.quiz.selectQuestionCount")}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {generateWordCountOptions(glossary.length).map((count) => (
+                  <button
+                    key={count}
+                    onClick={() => setQuestionCountLimit(count)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-medium",
+                      questionCountLimit === count
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    {count}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setQuestionCountLimit("all")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-medium",
+                    questionCountLimit === "all"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  {t("reading.glossary.allWords")}
+                </button>
+              </div>
+            </div>
           )}
 
           <Button onClick={startQuiz} className="w-full" size="lg">

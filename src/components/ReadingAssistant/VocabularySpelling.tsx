@@ -29,10 +29,11 @@ import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
-import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
+import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
 
 interface VocabularySpellingProps {
   glossary: GlossaryEntry[];
+  mergedRatings?: Record<string, GlossaryRating>;
 }
 
 type GameStatus = "setup" | "playing" | "completed";
@@ -50,17 +51,19 @@ const MODE_ICONS: Record<SpellingGameMode, React.ReactNode> = {
   mixed: <HelpCircle className="h-4 w-4" />,
 };
 
-function VocabularySpelling({ glossary }: VocabularySpellingProps) {
+function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
+  const effectiveRatings = mergedRatings ?? glossaryRatings;
 
   const [gameStatus, setGameStatus] = useState<GameStatus>("setup");
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
   const [isTimed, setIsTimed] = useState(true);
   const [prioritizeHardWords, setPrioritizeHardWords] = useState(false);
+  const [wordCountLimit, setWordCountLimit] = useState<number | "all">("all");
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -95,8 +98,8 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   const config = DIFFICULTY_CONFIG[difficulty];
 
   const wordStats = useMemo(() => {
-    return getWordStats(glossary, glossaryRatings);
-  }, [glossary, glossaryRatings]);
+    return getWordStats(glossary, effectiveRatings);
+  }, [glossary, effectiveRatings]);
 
   const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
 
@@ -132,10 +135,13 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
   }, [config.blankRatio]);
 
   const startGame = useCallback(() => {
-    const sortedGlossary = sortGlossaryByPriority(glossary, glossaryRatings, {
+    let sortedGlossary = sortGlossaryByPriority(glossary, effectiveRatings, {
       prioritize: prioritizeHardWords,
       shuffle: true,
     });
+    if (wordCountLimit !== "all" && sortedGlossary.length > wordCountLimit) {
+      sortedGlossary = sortedGlossary.slice(0, wordCountLimit);
+    }
     const gameChallenges = sortedGlossary.map((entry) => {
       const actualMode = gameMode === "mixed" 
         ? (["listen-type", "scramble", "fill-blanks"] as SpellingGameMode[])[Math.floor(Math.random() * 3)]
@@ -164,7 +170,7 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
     setShowFeedback(false);
     setGameStatus("playing");
     setCurrentMode(initialMode);
-  }, [glossary, glossaryRatings, prioritizeHardWords, gameMode, config, generateChallenge]);
+  }, [glossary, effectiveRatings, prioritizeHardWords, gameMode, config, generateChallenge, wordCountLimit]);
 
   useEffect(() => {
     if (gameStatus === "playing" && isTimed && !showFeedback) {
@@ -634,6 +640,41 @@ function VocabularySpelling({ glossary }: VocabularySpellingProps) {
                   </span>
                 )}
               </button>
+            </div>
+          )}
+
+          {generateWordCountOptions(glossary.length).length > 0 && (
+            <div>
+              <label className="text-sm font-medium mb-3 block">
+                {t("reading.glossary.spelling.selectWordCount")}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {generateWordCountOptions(glossary.length).map((count) => (
+                  <button
+                    key={count}
+                    onClick={() => setWordCountLimit(count)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-medium",
+                      wordCountLimit === count
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    {count}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setWordCountLimit("all")}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-medium",
+                    wordCountLimit === "all"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  {t("reading.glossary.allWords")}
+                </button>
+              </div>
             </div>
           )}
 

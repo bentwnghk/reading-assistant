@@ -17,11 +17,13 @@ const SWIPE_VELOCITY_THRESHOLD = 0.3;
 
 interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
+  mergedRatings?: Record<string, GlossaryRating>;
 }
 
-function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
+function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
   const { id, glossaryRatings, setGlossaryRating, backup } = useReadingStore();
+  const effectiveRatings = mergedRatings ?? glossaryRatings;
   const { update, save } = useHistoryStore();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
   
@@ -36,15 +38,15 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const currentGlossary = useMemo(() => {
-    return sortGlossaryByPriority(glossary, glossaryRatings, {
+    return sortGlossaryByPriority(glossary, effectiveRatings, {
       prioritize: isPrioritized,
       shuffle: isShuffled,
     });
-  }, [glossary, glossaryRatings, isPrioritized, isShuffled]);
+  }, [glossary, effectiveRatings, isPrioritized, isShuffled]);
 
   const wordStats = useMemo(() => {
-    return getWordStats(glossary, glossaryRatings);
-  }, [glossary, glossaryRatings]);
+    return getWordStats(glossary, effectiveRatings);
+  }, [glossary, effectiveRatings]);
 
   const currentEntry = currentGlossary[currentIndex];
   const totalCount = currentGlossary.length;
@@ -282,7 +284,7 @@ function VocabularyFlashcard({ glossary }: VocabularyFlashcardProps) {
     );
   }
 
-  const currentRating = glossaryRatings[currentEntry.word];
+  const currentRating = effectiveRatings[currentEntry.word];
   const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
 
   return (

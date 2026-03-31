@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, HelpCircle } from "lucide-react";
 import {
@@ -31,25 +31,41 @@ import {
 } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
+import { useHistoryStore } from "@/store/history";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 import { cn } from "@/utils/style";
+import { mergeGlossariesFromSessions } from "@/utils/vocabulary";
 import VocabularyFlashcard from "./VocabularyFlashcard";
 import VocabularyQuiz from "./VocabularyQuiz";
 import VocabularySpelling from "./VocabularySpelling";
+import SessionGlossarySelector from "./SessionGlossarySelector";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling";
 
 function Glossary() {
   const { t } = useTranslation();
-  const { extractedText, highlightedWords, glossary } = useReadingStore();
+  const { extractedText, highlightedWords, glossary, glossaryRatings } = useReadingStore();
+  const { history } = useHistoryStore();
   const { status, generateGlossary } = useReadingAssistant();
   const [activeTab, setActiveTab] = useState<TabType>("table");
-  
+  const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
+
   const isGenerating = status === "glossary";
 
+  const mergedResult = useMemo(() => {
+    if (selectedSessionIds.length === 0) {
+      return { entries: glossary, ratings: glossaryRatings, addedCount: 0 };
+    }
+    return mergeGlossariesFromSessions(glossary, glossaryRatings, selectedSessionIds, history);
+  }, [glossary, glossaryRatings, selectedSessionIds, history]);
+
+  const mergedGlossary = mergedResult.entries;
+  const mergedRatings = mergedResult.ratings;
+  const addedCount = mergedResult.addedCount;
+
   const handleDownloadWord = useCallback(async () => {
-    if (glossary.length === 0) return;
+    if (mergedGlossary.length === 0) return;
 
     const HEADER_SHADING = {
       type: ShadingType.CLEAR,
@@ -106,7 +122,7 @@ function Glossary() {
         ),
       });
 
-      const dataRows = glossary.map((entry, rowIdx) => {
+      const dataRows = mergedGlossary.map((entry, rowIdx) => {
         const isAlt = rowIdx % 2 === 1;
         return new DocxTableRow({
           children: [
@@ -184,10 +200,10 @@ function Glossary() {
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [glossary, t]);
+  }, [mergedGlossary, t]);
 
   const handleDownloadExcel = useCallback(async () => {
-    if (glossary.length === 0) return;
+    if (mergedGlossary.length === 0) return;
 
     try {
       const docTitle = useReadingStore.getState().docTitle || "Glossary";
@@ -231,7 +247,7 @@ function Glossary() {
         { header: colHeaders[5], key: "example", width: 45 },
       ];
 
-      glossary.forEach((entry) => {
+      mergedGlossary.forEach((entry) => {
         worksheet.addRow({
           word: entry.word,
           syllabification: entry.syllabification || "",
@@ -305,7 +321,7 @@ function Glossary() {
     } catch (error) {
       console.error("Failed to generate Excel document:", error);
     }
-  }, [glossary, t]);
+  }, [mergedGlossary, t]);
 
   if (!extractedText) {
     return null;
@@ -339,11 +355,11 @@ function Glossary() {
 
     switch (activeTab) {
       case "flashcard":
-        return <VocabularyFlashcard glossary={glossary} />;
+        return <VocabularyFlashcard glossary={mergedGlossary} mergedRatings={mergedRatings} />;
       case "quiz":
-        return <VocabularyQuiz glossary={glossary} />;
+        return <VocabularyQuiz glossary={mergedGlossary} mergedRatings={mergedRatings} />;
       case "spelling":
-        return <VocabularySpelling glossary={glossary} />;
+        return <VocabularySpelling glossary={mergedGlossary} mergedRatings={mergedRatings} />;
       default:
         return (
           <div className="overflow-x-auto">
@@ -359,7 +375,7 @@ function Glossary() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {glossary.map((entry) => (
+                {mergedGlossary.map((entry) => (
                   <TableRow key={entry.word}>
                     <TableCell className="font-medium">{entry.word}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{entry.syllabification || "-"}</TableCell>
@@ -449,7 +465,27 @@ function Glossary() {
       </div>
 
       {glossary.length > 0 && (
-        <div className="flex gap-1 mb-4 border-b">
+        <>
+          <div className="mb-4">
+            <SessionGlossarySelector
+              selectedSessionIds={selectedSessionIds}
+              onSelectionChange={setSelectedSessionIds}
+              currentGlossary={glossary}
+              currentRatings={glossaryRatings}
+            />
+          </div>
+
+          {addedCount > 0 && (
+            <div className="text-xs text-muted-foreground mb-4">
+              {t("reading.glossary.uniqueWordsCount", {
+                current: glossary.length,
+                added: addedCount,
+                total: mergedGlossary.length,
+              })}
+            </div>
+          )}
+
+          <div className="flex gap-1 mb-4 border-b">
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -467,6 +503,7 @@ function Glossary() {
             </button>
           ))}
         </div>
+        </>
       )}
 
       {renderContent()}
