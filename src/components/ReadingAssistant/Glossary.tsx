@@ -42,7 +42,7 @@ import VocabularySpelling from "./VocabularySpelling";
 import SessionGlossarySelector from "./SessionGlossarySelector";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling";
-type SortField = "word" | "partOfSpeech";
+type SortField = "word" | "partOfSpeech" | null;
 type SortOrder = "asc" | "desc";
 
 function Glossary() {
@@ -52,7 +52,7 @@ function Glossary() {
   const { status, generateGlossary } = useReadingAssistant();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
-  const [sortField, setSortField] = useState<SortField>("word");
+  const [sortField, setSortField] = useState<SortField>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   const isGenerating = status === "glossary";
@@ -69,6 +69,7 @@ function Glossary() {
   const _addedCount = mergedResult.addedCount;
 
   const sortedGlossary = useMemo(() => {
+    if (!sortField) return mergedGlossary;
     const sorted = [...mergedGlossary];
     sorted.sort((a, b) => {
       let comparison = 0;
@@ -92,7 +93,7 @@ function Glossary() {
   }, [sortField, sortOrder]);
 
   const handleDownloadWord = useCallback(async () => {
-    if (mergedGlossary.length === 0) return;
+    if (sortedGlossary.length === 0) return;
 
     const HEADER_SHADING = {
       type: ShadingType.CLEAR,
@@ -149,7 +150,7 @@ function Glossary() {
         ),
       });
 
-      const dataRows = mergedGlossary.map((entry, rowIdx) => {
+      const dataRows = sortedGlossary.map((entry, rowIdx) => {
         const isAlt = rowIdx % 2 === 1;
         return new DocxTableRow({
           children: [
@@ -227,7 +228,7 @@ function Glossary() {
     } catch (error) {
       console.error("Failed to generate Word document:", error);
     }
-  }, [mergedGlossary, t]);
+  }, [sortedGlossary, t]);
 
   const handleDownloadExcel = useCallback(async () => {
     if (mergedGlossary.length === 0) return;
