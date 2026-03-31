@@ -14,6 +14,7 @@ interface SessionGlossarySelectorProps {
   onSelectionChange: (ids: string[]) => void;
   currentGlossary: GlossaryEntry[];
   currentRatings: Record<string, GlossaryRating>;
+  currentSessionId: string;
 }
 
 const PAGE_SIZE = 10;
@@ -23,6 +24,7 @@ function SessionGlossarySelector({
   onSelectionChange,
   currentGlossary,
   currentRatings,
+  currentSessionId,
 }: SessionGlossarySelectorProps) {
   const { t } = useTranslation();
   const { history } = useHistoryStore();
@@ -32,9 +34,12 @@ function SessionGlossarySelector({
 
   const sessionsWithGlossary = useMemo(() => {
     return history.filter(
-      (session) => session.glossary && session.glossary.length > 0
+      (session) =>
+        session.glossary &&
+        session.glossary.length > 0 &&
+        session.id !== currentSessionId
     );
-  }, [history]);
+  }, [history, currentSessionId]);
 
   const filteredSessions = useMemo(() => {
     if (!searchQuery.trim()) return sessionsWithGlossary;
@@ -103,16 +108,6 @@ function SessionGlossarySelector({
           </span>
         )}
       </button>
-
-      {selectedSessionIds.length > 0 && (
-        <div className="text-xs text-muted-foreground pl-6">
-          {t("reading.glossary.uniqueWordsCount", {
-            current: currentCount,
-            added: addedCount,
-            total: totalUnique,
-          })}
-        </div>
-      )}
 
       {expanded && (
         <div className="border rounded-lg p-3 space-y-3 bg-muted/30">

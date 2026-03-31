@@ -45,7 +45,7 @@ type TabType = "table" | "flashcard" | "quiz" | "spelling";
 
 function Glossary() {
   const { t } = useTranslation();
-  const { extractedText, highlightedWords, glossary, glossaryRatings } = useReadingStore();
+  const { extractedText, highlightedWords, glossary, glossaryRatings, id: currentSessionId } = useReadingStore();
   const { history } = useHistoryStore();
   const { status, generateGlossary } = useReadingAssistant();
   const [activeTab, setActiveTab] = useState<TabType>("table");
@@ -472,18 +472,9 @@ function Glossary() {
               onSelectionChange={setSelectedSessionIds}
               currentGlossary={glossary}
               currentRatings={glossaryRatings}
+              currentSessionId={currentSessionId}
             />
           </div>
-
-          {addedCount > 0 && (
-            <div className="text-xs text-muted-foreground mb-4">
-              {t("reading.glossary.uniqueWordsCount", {
-                current: glossary.length,
-                added: addedCount,
-                total: mergedGlossary.length,
-              })}
-            </div>
-          )}
 
           <div className="flex gap-1 mb-4 border-b">
           {tabs.map((tab) => (
