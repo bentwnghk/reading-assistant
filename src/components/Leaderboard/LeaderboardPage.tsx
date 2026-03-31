@@ -102,6 +102,8 @@ export function LeaderboardPage() {
   useEffect(() => {
     async function fetchTeacherClasses() {
       if (!userId) return;
+      const role = authSession?.user?.role;
+      if (role !== "super-admin" && role !== "admin" && role !== "teacher") return;
       try {
         const res = await fetch("/api/classes");
         if (res.ok) {
@@ -113,7 +115,7 @@ export function LeaderboardPage() {
       }
     }
     fetchTeacherClasses();
-  }, [userId]);
+  }, [userId, authSession?.user?.role]);
 
   useEffect(() => {
     setIsSuperAdmin(authSession?.user?.role === "super-admin");
