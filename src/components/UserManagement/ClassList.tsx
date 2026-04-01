@@ -220,8 +220,8 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
+      <div className="flex justify-between items-center gap-2">
+        <p className="text-sm text-muted-foreground flex-1 min-w-0">
           {isSuperAdmin 
             ? t("userManagement.classes.descriptionSuperAdmin")
             : isAdmin
@@ -229,7 +229,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
               : t("userManagement.classes.descriptionTeacher")}
         </p>
         {(isSuperAdmin || isAdmin) && (
-          <Button onClick={openCreateDialog} size="sm">
+          <Button onClick={openCreateDialog} variant="outline" size="sm" className="shrink-0">
             <Plus className="h-4 w-4 mr-1" />
             {t("userManagement.classes.create")}
           </Button>
