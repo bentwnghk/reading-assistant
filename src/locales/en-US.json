@@ -129,7 +129,7 @@
         },
         "quiz": {
           "title": "📋 Vocabulary Quiz",
-          "desc": "Test your knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions."
+          "desc": "Test your vocabulary knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions."
         },
         "test": {
           "title": "📝 Reading Test",
@@ -141,7 +141,7 @@
         },
         "tts": {
           "title": "🔊 Text-to-Speech",
-          "desc": "Perfect your pronunciation! Listen to any word or sentence read aloud in natural voice."
+          "desc": "Perfect your pronunciation! Listen to any word, sentence, or paragraph read aloud in natural voice."
         },
         "wordExport": {
           "title": "📄 Word Export",
@@ -676,7 +676,7 @@
     "tutor": {
       "title": "AI Tutor",
       "welcome": "Hi! I'm your reading tutor. Ask me anything about the text!",
-      "welcomeHint": "Try asking about the main idea, vocabulary, or any sentence you don't understand.",
+      "welcomeHint": "Try selecting a specific word, sentence, or paragraph in the Text Analysis & Adaptation section, and ask about it.",
       "thinking": "Thinking...",
       "inputPlaceholder": "Type your question...",
       "clearHistory": "Clear chat history",
