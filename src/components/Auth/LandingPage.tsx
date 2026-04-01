@@ -401,7 +401,7 @@ export function LandingPage() {
              <motion.div
                key={key}
                variants={cardVariants}
-               whileHover={{ y: -8, rotate: 1, scale: 1.02 }}
+                whileHover={{ y: -8, scale: 1.02 }}
                className={`group flex flex-col p-8 rounded-[2rem] ${glassCard} transition-shadow duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden`}
              >
                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
