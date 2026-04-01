@@ -309,17 +309,17 @@ export function LandingPage() {
           <button
             onClick={handleSignIn}
             disabled={loading}
-            className="relative z-10 group inline-flex items-center gap-4 px-12 py-6 rounded-full text-xl font-bold transition-all duration-300
+            className="relative z-10 group inline-flex items-center gap-4 px-10 py-5 rounded-full text-lg font-bold transition-all duration-300
               bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl hover:shadow-2xl hover:shadow-emerald-500/30 hover:-translate-y-2 active:translate-y-0
               disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             {loading ? (
-              <svg className="h-7 w-7 animate-spin" viewBox="0 0 24 24" fill="none">
+              <svg className="h-6 w-6 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
             ) : (
-              <svg className="h-7 w-7" viewBox="0 0 24 24">
+              <svg className="h-6 w-6" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
@@ -327,7 +327,7 @@ export function LandingPage() {
               </svg>
             )}
             <span>{loading ? t("header.auth.loading") : t("header.auth.signIn")}</span>
-            <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform" />
+            <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </button>
           <p className="relative z-10 text-slate-500 dark:text-slate-400 text-base mt-10 font-medium tracking-wide uppercase">{t("header.about.builtWith")}</p>
         </div>
