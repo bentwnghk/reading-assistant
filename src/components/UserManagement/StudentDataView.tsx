@@ -34,6 +34,23 @@ interface StudentDataViewProps {
 
 type SortField = "date" | "student" | "school" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore"
 type SortOrder = "asc" | "desc"
+type DateRange = "7" | "30" | "90" | "180" | "360" | "all"
+
+const DATE_RANGES: { value: DateRange; labelKey: string }[] = [
+  { value: "7", labelKey: "userManagement.studentData.dateRange.7days" },
+  { value: "30", labelKey: "userManagement.studentData.dateRange.30days" },
+  { value: "90", labelKey: "userManagement.studentData.dateRange.90days" },
+  { value: "180", labelKey: "userManagement.studentData.dateRange.180days" },
+  { value: "360", labelKey: "userManagement.studentData.dateRange.360days" },
+  { value: "all", labelKey: "userManagement.studentData.dateRange.allTime" },
+]
+
+function getStartDate(range: DateRange): Date | null {
+  if (range === "all") return null
+  const d = new Date()
+  d.setDate(d.getDate() - parseInt(range, 10))
+  return d
+}
 
 interface SessionWithSchool extends StudentSessionData {
   schoolName?: string
@@ -52,6 +69,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [sortField, setSortField] = useState<SortField>("date")
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
   const [exporting, setExporting] = useState(false)
+  const [dateRange, setDateRange] = useState<DateRange>("7")
 
   const _isTeacher = !isSuperAdmin && !isAdmin
 
@@ -138,6 +156,12 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const filteredAndSortedSessions = useMemo(() => {
     let result = [...sessions]
 
+    const startDate = getStartDate(dateRange)
+    if (startDate) {
+      const startMs = startDate.getTime()
+      result = result.filter(s => s.updatedAt >= startMs)
+    }
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       result = result.filter(s =>
@@ -179,7 +203,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     })
 
     return result
-  }, [sessions, searchQuery, sortField, sortOrder])
+  }, [sessions, searchQuery, sortField, sortOrder, dateRange])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -246,51 +270,62 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             ? t("userManagement.studentData.descriptionAdmin")
             : t("userManagement.studentData.descriptionTeacher")}
       </p>
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div className="flex gap-3 items-center">
-          {isSuperAdmin && (
-            <Select value={selectedSchoolId} onValueChange={(v) => {
-              setSelectedSchoolId(v)
-              setSelectedClassId("all")
-            }}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder={t("userManagement.studentData.selectSchool")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("userManagement.studentData.allSchools")}</SelectItem>
-                {schools.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+      <div className="flex flex-wrap gap-3 items-center">
+        {isSuperAdmin && (
+          <Select value={selectedSchoolId} onValueChange={(v) => {
+            setSelectedSchoolId(v)
+            setSelectedClassId("all")
+          }}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder={t("userManagement.studentData.selectClass")} />
+              <SelectValue placeholder={t("userManagement.studentData.selectSchool")} />
             </SelectTrigger>
             <SelectContent>
-              {(isSuperAdmin || isAdmin) && (
-                <SelectItem value="all">{t("userManagement.studentData.allClasses")}</SelectItem>
-              )}
-              {filteredClasses.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name} ({c.studentCount || 0} {t("userManagement.studentData.students")})
+              <SelectItem value="all">{t("userManagement.studentData.allSchools")}</SelectItem>
+              {schools.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={t("userManagement.studentData.search")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 w-64"
-            />
-          </div>
+        )}
+        <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder={t("userManagement.studentData.selectClass")} />
+          </SelectTrigger>
+          <SelectContent>
+            {(isSuperAdmin || isAdmin) && (
+              <SelectItem value="all">{t("userManagement.studentData.allClasses")}</SelectItem>
+            )}
+            {filteredClasses.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name} ({c.studentCount || 0} {t("userManagement.studentData.students")})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("userManagement.studentData.search")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 w-64"
+          />
         </div>
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
+          <SelectTrigger className="w-36">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {DATE_RANGES.map((r) => (
+              <SelectItem key={r.value} value={r.value}>
+                {t(r.labelKey)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="flex-1" />
         <Button onClick={exportData} variant="outline" size="sm" disabled={filteredAndSortedSessions.length === 0 || exporting}>
           {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
           {exporting ? t("userManagement.studentData.exporting") : t("userManagement.studentData.export")}

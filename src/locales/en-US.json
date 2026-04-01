@@ -991,7 +991,15 @@
       "vocabulary": "Vocabulary Count",
       "spelling": "Spelling Challenge",
       "quiz": "Vocabulary Quiz",
-      "date": "Last Update"
+      "date": "Last Update",
+      "dateRange": {
+        "7days": "Last 7 days",
+        "30days": "Last 30 days",
+        "90days": "Last 90 days",
+        "180days": "Last 180 days",
+        "360days": "Last 360 days",
+        "allTime": "All time"
+      }
     },
     "schools": {
       "description": "Manage all schools. Super-admins can view, edit, and delete schools. Schools are automatically created from user email domains.",
