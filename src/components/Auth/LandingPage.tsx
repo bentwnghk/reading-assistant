@@ -129,16 +129,16 @@ function AnimatedSection({
 function GalaxyBackground() {
   const { stars, lines } = useMemo(() => {
     const s: { x: number; y: number; r: number; o: number }[] = [];
-    for (let i = 0; i < 70; i++) {
+    for (let i = 0; i < 140; i++) {
       s.push({
         x: Math.random() * 1000,
         y: Math.random() * 1000,
-        r: Math.random() * 2 + 0.8,
-        o: Math.random() * 0.35 + 0.1,
+        r: Math.random() * 2.5 + 1,
+        o: Math.random() * 0.5 + 0.15,
       });
     }
     const l: { x1: number; y1: number; x2: number; y2: number; o: number }[] = [];
-    const maxDist = 150;
+    const maxDist = 200;
     for (let i = 0; i < s.length; i++) {
       for (let j = i + 1; j < s.length; j++) {
         const dx = s[i].x - s[j].x;
@@ -150,7 +150,7 @@ function GalaxyBackground() {
             y1: s[i].y,
             x2: s[j].x,
             y2: s[j].y,
-            o: (1 - d / maxDist) * 0.12,
+            o: (1 - d / maxDist) * 0.3,
           });
         }
       }
@@ -161,7 +161,7 @@ function GalaxyBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
       <svg
-        className="absolute -top-[10%] -left-[10%] w-[120%] h-[120%] animate-float-1 opacity-70 dark:opacity-40"
+        className="absolute -top-[10%] -left-[10%] w-[120%] h-[120%] animate-float-3 opacity-100 dark:opacity-70"
         viewBox="0 0 1000 1000"
         preserveAspectRatio="xMidYMid slice"
       >
@@ -173,7 +173,7 @@ function GalaxyBackground() {
             x2={line.x2}
             y2={line.y2}
             stroke="currentColor"
-            strokeWidth={0.8}
+            strokeWidth={1}
             opacity={line.o}
             className="text-emerald-500 dark:text-emerald-400"
           />
@@ -354,16 +354,19 @@ export function LandingPage() {
             { icon: Trophy, Watermark: Trophy, title: "gamified", desc: "gamified", color: "text-amber-600 dark:text-amber-400", colSpan: "" },
             { icon: Cloud, Watermark: Cloud, title: "private", desc: "private", color: "text-blue-600 dark:text-blue-400", colSpan: "md:col-span-2" },
           ].map((card) => (
-            <motion.div
-              key={card.title}
-              variants={cardVariants}
-              whileHover={{ y: -8, scale: 1.01 }}
-              className={`${card.colSpan} group relative overflow-hidden ${glassCard} rounded-[2.5rem] p-10 transition-shadow duration-500 hover:shadow-2xl hover:shadow-emerald-500/10`}
-            >
-              <div className="absolute -top-10 -right-10 p-8 opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500">
-                <card.Watermark className="h-48 w-48 text-emerald-500" />
-              </div>
-              <card.icon className={`relative z-10 h-12 w-12 mb-6 ${card.color}`} />
+             <motion.div
+               key={card.title}
+               variants={cardVariants}
+               whileHover={{ y: -8, scale: 1.01 }}
+               className={`${card.colSpan} group relative overflow-hidden ${glassCard} rounded-[2.5rem] p-10 transition-shadow duration-500 hover:shadow-2xl hover:shadow-emerald-500/10`}
+             >
+               <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+               <div className="absolute -top-10 -right-10 p-8 opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500">
+                 <card.Watermark className="h-48 w-48 text-emerald-500" />
+               </div>
+               <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
+                 <card.icon className={`relative z-10 h-12 w-12 mb-6 ${card.color}`} />
+               </motion.div>
               <h3 className="relative z-10 text-3xl font-bold mb-3">{t(`header.about.whyLove.${card.title}.title`)}</h3>
               <p className="relative z-10 text-xl text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">{t(`header.about.whyLove.${card.desc}.desc`)}</p>
             </motion.div>
@@ -377,7 +380,7 @@ export function LandingPage() {
           <Sparkles className="h-8 w-8 text-purple-500" />
           <h2 className="text-4xl font-bold tracking-tight">{t("header.about.features.title")}</h2>
         </motion.div>
-        <motion.div variants={gridContainer(0.08)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div variants={gridContainer(0.5)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { icon: Camera, key: "ocr", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100/40 dark:bg-blue-900/30" },
             { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100/40 dark:bg-purple-900/30" },
@@ -395,16 +398,17 @@ export function LandingPage() {
             { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-100/40 dark:bg-amber-900/30" },
             { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-100/40 dark:bg-rose-900/30" },
           ].map(({ icon: Icon, key, color, bg }) => (
-            <motion.div
-              key={key}
-              variants={cardVariants}
-              whileHover={{ y: -8, rotate: 1, scale: 1.02 }}
-              className={`group flex flex-col p-8 rounded-[2rem] ${glassCard} transition-shadow duration-300 hover:shadow-2xl hover:shadow-emerald-500/10`}
-            >
+             <motion.div
+               key={key}
+               variants={cardVariants}
+               whileHover={{ y: -8, rotate: 1, scale: 1.02 }}
+               className={`group flex flex-col p-8 rounded-[2rem] ${glassCard} transition-shadow duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden`}
+             >
+               <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
               <motion.div
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${bg} transition-transform`}
-                whileHover={{ rotate: 12, scale: 1.15 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                whileHover={{ rotate: 25, scale: 1.35 }}
+                transition={{ type: "spring", stiffness: 200, damping: 10 }}
               >
                 <Icon className={`h-7 w-7 ${color}`} />
               </motion.div>
@@ -436,8 +440,9 @@ export function LandingPage() {
                 key={role.title}
                 variants={cardVariants}
                 whileHover={{ y: -8, scale: 1.02 }}
-                className="group bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] rounded-[2.5rem] p-8 hover:bg-white/[0.06] transition-colors duration-300 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
+                className="group bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] rounded-[2.5rem] p-8 hover:bg-white/[0.06] transition-colors duration-300 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] relative overflow-hidden"
               >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/8 via-emerald-500/4 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
                 <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
                   <role.icon className={`h-10 w-10 mb-6 ${role.color}`} />
                 </motion.div>
@@ -485,8 +490,9 @@ export function LandingPage() {
                 key={key}
                 variants={pillVariants}
                 whileHover={{ scale: 1.08, y: -4 }}
-                className={`group flex items-center gap-4 ${glassCard} rounded-full py-3 px-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-colors duration-300 cursor-default`}
+                className={`group flex items-center gap-4 ${glassCard} rounded-full py-3 px-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-colors duration-300 cursor-default relative overflow-hidden`}
               >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                 <motion.span
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
@@ -518,8 +524,9 @@ export function LandingPage() {
               key={skill}
               variants={pillVariants}
               whileHover={{ y: -6, scale: 1.05 }}
-              className={`px-8 py-4 ${glassCard} rounded-full text-lg font-bold hover:shadow-xl hover:shadow-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300 cursor-default`}
+              className={`px-8 py-4 ${glassCard} rounded-full text-lg font-bold hover:shadow-xl hover:shadow-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300 cursor-default relative overflow-hidden`}
             >
+              <span className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-full" />
               {t(`header.about.skills.${skill}`)}
             </motion.span>
           ))}
@@ -527,9 +534,9 @@ export function LandingPage() {
 
         <motion.div
           variants={cardVariants}
-          className={`relative max-w-3xl mx-auto text-center ${glassCard} rounded-[2rem] sm:rounded-[3rem] md:rounded-[4rem] px-6 py-10 sm:p-12 md:p-16 shadow-2xl overflow-hidden`}
+          className={`relative max-w-3xl mx-auto text-center ${glassCard} rounded-[2rem] sm:rounded-[3rem] md:rounded-[4rem] px-6 py-10 sm:p-12 md:p-16 shadow-2xl overflow-hidden group`}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-200/20 via-transparent to-transparent dark:from-emerald-900/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-200/20 via-transparent to-transparent dark:from-emerald-900/10 pointer-events-none group-hover:from-emerald-300/30 transition-all duration-500" />
 
           <h2 className="relative z-10 text-4xl font-extrabold mb-10 leading-tight">{t("header.about.tagline")}</h2>
           <motion.button
