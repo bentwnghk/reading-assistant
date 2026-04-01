@@ -309,7 +309,7 @@ export function LandingPage() {
           <button
             onClick={handleSignIn}
             disabled={loading}
-            className="relative z-10 group inline-flex items-center gap-4 px-10 py-5 rounded-full text-lg font-bold transition-all duration-300
+            className="relative z-10 group inline-flex items-center gap-4 px-10 py-5 rounded-full text-lg font-bold whitespace-nowrap transition-all duration-300
               bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl hover:shadow-2xl hover:shadow-emerald-500/30 hover:-translate-y-2 active:translate-y-0
               disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
