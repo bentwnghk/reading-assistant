@@ -382,22 +382,22 @@ export function LandingPage() {
         </motion.div>
         <motion.div variants={gridContainer(0.5)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { icon: Camera, key: "ocr", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100/40 dark:bg-blue-900/30" },
-            { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100/40 dark:bg-purple-900/30" },
-            { icon: BarChart3, key: "difficulty", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100/40 dark:bg-emerald-900/30" },
-            { icon: Highlighter, key: "cefrHighlight", color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-100/40 dark:bg-sky-900/30" },
-            { icon: PenTool, key: "adaptation", color: "text-green-600 dark:text-green-400", bg: "bg-green-100/40 dark:bg-green-900/30" },
-            { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-100/40 dark:bg-teal-900/30" },
-            { icon: MessageCircle, key: "tutor", color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-100/40 dark:bg-indigo-900/30" },
-            { icon: MessageSquareText, key: "sentenceAnalysis", color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-100/40 dark:bg-orange-900/30" },
-            { icon: BookOpen, key: "glossary", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-100/40 dark:bg-teal-900/30" },
-            { icon: Layers, key: "flashcard", color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-100/40 dark:bg-cyan-900/30" },
-            { icon: Gamepad2, key: "spelling", color: "text-pink-600 dark:text-pink-400", bg: "bg-pink-100/40 dark:bg-pink-900/30" },
-            { icon: ClipboardList, key: "quiz", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-100/40 dark:bg-violet-900/30" },
-            { icon: Target, key: "test", color: "text-red-600 dark:text-red-400", bg: "bg-red-100/40 dark:bg-red-900/30" },
-            { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-100/40 dark:bg-amber-900/30" },
-            { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-100/40 dark:bg-rose-900/30" },
-          ].map(({ icon: Icon, key, color, bg }) => (
+            { icon: Camera, key: "ocr", color: "text-blue-600 dark:text-blue-400" },
+            { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400" },
+            { icon: BarChart3, key: "difficulty", color: "text-emerald-600 dark:text-emerald-400" },
+            { icon: Highlighter, key: "cefrHighlight", color: "text-sky-600 dark:text-sky-400" },
+            { icon: PenTool, key: "adaptation", color: "text-green-600 dark:text-green-400" },
+            { icon: Volume2, key: "tts", color: "text-teal-600 dark:text-teal-400" },
+            { icon: MessageCircle, key: "tutor", color: "text-indigo-600 dark:text-indigo-400" },
+            { icon: MessageSquareText, key: "sentenceAnalysis", color: "text-orange-600 dark:text-orange-400" },
+            { icon: BookOpen, key: "glossary", color: "text-teal-600 dark:text-teal-400" },
+            { icon: Layers, key: "flashcard", color: "text-cyan-600 dark:text-cyan-400" },
+            { icon: Gamepad2, key: "spelling", color: "text-pink-600 dark:text-pink-400" },
+            { icon: ClipboardList, key: "quiz", color: "text-violet-600 dark:text-violet-400" },
+            { icon: Target, key: "test", color: "text-red-600 dark:text-red-400" },
+            { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400" },
+            { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400" },
+          ]          .map(({ icon: Icon, key, color }) => (
              <motion.div
                key={key}
                variants={cardVariants}
@@ -405,13 +405,9 @@ export function LandingPage() {
                className={`group flex flex-col p-8 rounded-[2rem] ${glassCard} transition-shadow duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden`}
              >
                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
-              <motion.div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${bg} transition-transform`}
-                whileHover={{ rotate: 25, scale: 1.35 }}
-                transition={{ type: "spring", stiffness: 200, damping: 10 }}
-              >
-                <Icon className={`h-7 w-7 ${color}`} />
-              </motion.div>
+              <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
+                 <Icon className={`h-7 w-7 mb-6 ${color}`} />
+               </motion.div>
               <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">{t(`header.about.features.${key}.title`)}</h3>
               <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed">{t(`header.about.features.${key}.desc`)}</p>
             </motion.div>
