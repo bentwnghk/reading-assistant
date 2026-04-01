@@ -1028,7 +1028,15 @@
       "showing": "Showing {{count}} unique questions ({{total}} total)",
       "noQuestions": "No AI tutor questions recorded yet",
       "noResults": "No questions match your search",
-      "noInstances": "No instances found"
+      "noInstances": "No instances found",
+      "dateRange": {
+        "7days": "Last 7 days",
+        "30days": "Last 30 days",
+        "90days": "Last 90 days",
+        "180days": "Last 180 days",
+        "360days": "Last 360 days",
+        "allTime": "All time"
+      }
     },
     "cancel": "Cancel",
     "save": "Save",

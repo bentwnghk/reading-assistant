@@ -12,6 +12,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
+type DateRange = "7" | "30" | "90" | "180" | "360" | "all"
+
+const DATE_RANGES: { value: DateRange; labelKey: string }[] = [
+  { value: "7", labelKey: "userManagement.aiQuestions.dateRange.7days" },
+  { value: "30", labelKey: "userManagement.aiQuestions.dateRange.30days" },
+  { value: "90", labelKey: "userManagement.aiQuestions.dateRange.90days" },
+  { value: "180", labelKey: "userManagement.aiQuestions.dateRange.180days" },
+  { value: "360", labelKey: "userManagement.aiQuestions.dateRange.360days" },
+  { value: "all", labelKey: "userManagement.aiQuestions.dateRange.allTime" },
+]
+
+function getStartDate(range: DateRange): Date | null {
+  if (range === "all") return null
+  const d = new Date()
+  d.setDate(d.getDate() - parseInt(range, 10))
+  return d
+}
 import {
   Table,
   TableBody,
@@ -59,6 +77,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   const [classes, setClasses] = useState<ClassInfo[]>([])
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all")
   const [selectedClassId, setSelectedClassId] = useState<string>("all")
+  const [dateRange, setDateRange] = useState<DateRange>("7")
   const [questions, setQuestions] = useState<AggregatedQuestion[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -106,9 +125,10 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
         params.set("classId", selectedClassId)
       }
 
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      params.set("startDate", sevenDaysAgo.toISOString())
+      const startDate = getStartDate(dateRange)
+      if (startDate) {
+        params.set("startDate", startDate.toISOString())
+      }
 
       const response = await fetch(`/api/chat-questions?${params.toString()}`)
       if (response.ok) {
@@ -124,7 +144,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
     } finally {
       setLoading(false)
     }
-  }, [selectedSchoolId, selectedClassId, t])
+  }, [selectedSchoolId, selectedClassId, dateRange, t])
 
   useEffect(() => {
     loadInitialData()
@@ -175,9 +195,10 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
           params.set("classId", selectedClassId)
         }
 
-        const sevenDaysAgo = new Date()
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-        params.set("startDate", sevenDaysAgo.toISOString())
+        const startDate = getStartDate(dateRange)
+        if (startDate) {
+          params.set("startDate", startDate.toISOString())
+        }
 
         const response = await fetch(`/api/chat-questions/${hash}?${params.toString()}`)
         if (response.ok) {
@@ -258,6 +279,18 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
             className="pl-8 w-64"
           />
         </div>
+        <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
+          <SelectTrigger className="w-36">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {DATE_RANGES.map((r) => (
+              <SelectItem key={r.value} value={r.value}>
+                {t(r.labelKey)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="text-sm text-muted-foreground">

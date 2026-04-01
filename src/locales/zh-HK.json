@@ -1028,7 +1028,15 @@
       "showing": "顯示 {{count}} 個不重複問題（共 {{total}} 個）",
       "noQuestions": "尚未記錄 AI 導師問題",
       "noResults": "沒有符合搜尋條件的問題",
-      "noInstances": "沒有找到記錄"
+      "noInstances": "沒有找到記錄",
+      "dateRange": {
+        "7days": "最近 7 天",
+        "30days": "最近 30 天",
+        "90days": "最近 90 天",
+        "180days": "最近 180 天",
+        "360days": "最近 360 天",
+        "allTime": "所有時間"
+      }
     },
     "cancel": "取消",
     "save": "保存",
