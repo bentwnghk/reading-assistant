@@ -302,7 +302,7 @@ export function LandingPage() {
           ))}
         </div>
 
-        <div className="relative max-w-3xl mx-auto bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-[4rem] p-16 shadow-2xl overflow-hidden">
+        <div className="relative max-w-3xl mx-auto text-center bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-[4rem] p-16 shadow-2xl overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-100/50 via-transparent to-transparent dark:from-emerald-900/20 pointer-events-none" />
           
           <h2 className="relative z-10 text-4xl font-extrabold mb-10 leading-tight">{t("header.about.tagline")}</h2>
