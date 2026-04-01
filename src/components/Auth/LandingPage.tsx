@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useMemo } from "react";
 import { signIn } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
 import locales from "@/constants/locales";
 import { motion, useInView } from "motion/react";
-import { useRef } from "react";
 import {
   BookCopy,
   Target,
@@ -49,14 +48,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
+const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
+
 const sectionVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.15 },
   },
 };
-
-const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.95 },
@@ -96,25 +95,30 @@ const pillVariants = {
   },
 };
 
+function gridContainer(stagger: number) {
+  return {
+    hidden: {},
+    visible: { transition: { staggerChildren: stagger } },
+  };
+}
+
 function AnimatedSection({
   children,
   className,
-  variants = sectionVariants,
-  staggerDelay = 0.08,
+  staggerDelay = 0.15,
 }: {
   children: React.ReactNode;
   className?: string;
-  variants?: typeof sectionVariants;
   staggerDelay?: number;
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useInView(ref, { once: false, margin: "-80px" });
   return (
     <motion.div
       ref={ref}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
-      variants={{ ...variants, visible: { transition: { staggerChildren: staggerDelay } } }}
+      variants={{ ...sectionVariants, visible: { transition: { staggerChildren: staggerDelay } } }}
       className={className}
     >
       {children}
@@ -122,51 +126,70 @@ function AnimatedSection({
   );
 }
 
-const floatingShapes = [
-  { type: "circle", size: 220, x: "5%", y: "10%", anim: "animate-float-1", color: "bg-emerald-300 dark:bg-emerald-600", opacity: "opacity-[0.06] dark:opacity-[0.04]" },
-  { type: "square", size: 160, x: "80%", y: "5%", anim: "animate-float-2", color: "bg-teal-300 dark:bg-teal-600", opacity: "opacity-[0.05] dark:opacity-[0.03]", rotate: "rotate-12" },
-  { type: "circle", size: 120, x: "70%", y: "30%", anim: "animate-float-3", color: "bg-amber-300 dark:bg-amber-600", opacity: "opacity-[0.05] dark:opacity-[0.03]" },
-  { type: "triangle", size: 180, x: "15%", y: "45%", anim: "animate-float-4", color: "bg-emerald-400 dark:bg-emerald-700", opacity: "opacity-[0.05] dark:opacity-[0.03]" },
-  { type: "circle", size: 90, x: "90%", y: "55%", anim: "animate-float-1", color: "bg-teal-200 dark:bg-teal-500", opacity: "opacity-[0.06] dark:opacity-[0.04]", delay: "animation-delay-[3s]" },
-  { type: "hexagon", size: 200, x: "40%", y: "65%", anim: "animate-float-2", color: "bg-emerald-200 dark:bg-emerald-700", opacity: "opacity-[0.04] dark:opacity-[0.03]", rotate: "rotate-45" },
-  { type: "circle", size: 140, x: "5%", y: "75%", anim: "animate-float-3", color: "bg-amber-200 dark:bg-amber-700", opacity: "opacity-[0.05] dark:opacity-[0.03]", delay: "animation-delay-[5s]" },
-  { type: "square", size: 100, x: "60%", y: "80%", anim: "animate-float-4", color: "bg-teal-300 dark:bg-teal-600", opacity: "opacity-[0.05] dark:opacity-[0.03]", rotate: "rotate-[30deg]" },
-  { type: "circle", size: 250, x: "25%", y: "20%", anim: "animate-float-2", color: "bg-emerald-200 dark:bg-emerald-600", opacity: "opacity-[0.04] dark:opacity-[0.03]", delay: "animation-delay-[2s]" },
-  { type: "triangle", size: 130, x: "85%", y: "70%", anim: "animate-float-1", color: "bg-amber-300 dark:bg-amber-600", opacity: "opacity-[0.04] dark:opacity-[0.03]", delay: "animation-delay-[7s]" },
-];
+function GalaxyBackground() {
+  const { stars, lines } = useMemo(() => {
+    const s: { x: number; y: number; r: number; o: number }[] = [];
+    for (let i = 0; i < 70; i++) {
+      s.push({
+        x: Math.random() * 1000,
+        y: Math.random() * 1000,
+        r: Math.random() * 2 + 0.8,
+        o: Math.random() * 0.35 + 0.1,
+      });
+    }
+    const l: { x1: number; y1: number; x2: number; y2: number; o: number }[] = [];
+    const maxDist = 150;
+    for (let i = 0; i < s.length; i++) {
+      for (let j = i + 1; j < s.length; j++) {
+        const dx = s[i].x - s[j].x;
+        const dy = s[i].y - s[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < maxDist) {
+          l.push({
+            x1: s[i].x,
+            y1: s[i].y,
+            x2: s[j].x,
+            y2: s[j].y,
+            o: (1 - d / maxDist) * 0.12,
+          });
+        }
+      }
+    }
+    return { stars: s, lines: l };
+  }, []);
 
-function FloatingBackground() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {floatingShapes.map((shape, i) => (
-        <div
-          key={i}
-          className={`absolute ${shape.color} ${shape.opacity} ${shape.anim} ${shape.delay || ""} ${shape.rotate || ""}`}
-          style={{
-            left: shape.x,
-            top: shape.y,
-            width: shape.size,
-            height: shape.size,
-          }}
-        >
-          {shape.type === "circle" && (
-            <div className="w-full h-full rounded-full" />
-          )}
-          {shape.type === "square" && (
-            <div className="w-full h-full rounded-[30%]" />
-          )}
-          {shape.type === "triangle" && (
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <polygon points="50,5 95,95 5,95" className="fill-current" />
-            </svg>
-          )}
-          {shape.type === "hexagon" && (
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <polygon points="50,3 97,25 97,75 50,97 3,75 3,25" className="fill-current" />
-            </svg>
-          )}
-        </div>
-      ))}
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      <svg
+        className="absolute -top-[10%] -left-[10%] w-[120%] h-[120%] animate-float-1 opacity-70 dark:opacity-40"
+        viewBox="0 0 1000 1000"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        {lines.map((line, i) => (
+          <line
+            key={`l${i}`}
+            x1={line.x1}
+            y1={line.y1}
+            x2={line.x2}
+            y2={line.y2}
+            stroke="currentColor"
+            strokeWidth={0.8}
+            opacity={line.o}
+            className="text-emerald-500 dark:text-emerald-400"
+          />
+        ))}
+        {stars.map((star, i) => (
+          <circle
+            key={`s${i}`}
+            cx={star.x}
+            cy={star.y}
+            r={star.r}
+            fill="currentColor"
+            opacity={star.o}
+            className="text-emerald-400 dark:text-emerald-300"
+          />
+        ))}
+      </svg>
     </div>
   );
 }
@@ -193,8 +216,8 @@ function WaveDivider({ flip = false }: { flip?: boolean }) {
   );
 }
 
-const glassBase = "bg-white/20 dark:bg-white/[0.04] backdrop-blur-xl border border-white/30 dark:border-white/[0.08] shadow-[inset_0_0_30px_rgba(255,255,255,0.08)]";
-const glassCard = `${glassBase} bg-emerald-50/[0.12] dark:bg-emerald-900/[0.08]`;
+const glassBase = "bg-white/[0.08] dark:bg-white/[0.02] backdrop-blur-xl border border-white/[0.15] dark:border-white/[0.05] shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]";
+const glassCard = `${glassBase} bg-emerald-50/[0.05] dark:bg-emerald-900/[0.04]`;
 
 function GoogleIcon() {
   return (
@@ -234,7 +257,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] dark:bg-[#0D1117] text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900 overflow-hidden">
-      <FloatingBackground />
+      <GalaxyBackground />
 
       {/* Locale Switcher */}
       <div className="fixed top-4 right-4 z-50">
@@ -243,7 +266,7 @@ export function LandingPage() {
             <Button
               variant="ghost"
               size="icon"
-              className={`${glassBase} hover:bg-white/30 dark:hover:bg-white/10`}
+              className={`${glassBase} hover:bg-white/20 dark:hover:bg-white/[0.06]`}
             >
               <Globe className="h-5 w-5" />
               <span className="sr-only">{t("settings.language")}</span>
@@ -271,7 +294,7 @@ export function LandingPage() {
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}
-        className="relative max-w-7xl mx-auto px-6 pt-32 pb-24 sm:pt-40 sm:pb-32 flex flex-col items-center text-center"
+        className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-24 sm:pt-40 sm:pb-32 flex flex-col items-center text-center"
       >
         <motion.div
           variants={heroItemVariants}
@@ -288,7 +311,7 @@ export function LandingPage() {
           className="text-5xl sm:text-7xl font-extrabold tracking-tight mb-8 max-w-4xl text-slate-900 dark:text-white leading-[1.1]"
         >
           <span className="inline-block hover:-translate-y-2 transition-transform duration-300">Mr.</span>
-          <span className="inline-block mx-2 rotate-12 hover:rotate-0 transition-transform duration-300 text-5xl sm:text-7xl">&#x1F19A;</span>
+          <span className="inline-block mx-2 rotate-12 hover:rotate-0 transition-transform duration-300 text-5xl sm:text-7xl">🆖</span>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 dark:from-emerald-400 dark:via-teal-300 dark:to-emerald-300 animate-gradient-shift">
             ProReader
           </span>
@@ -325,7 +348,7 @@ export function LandingPage() {
           <Star className="h-6 w-6 text-amber-500" />
           <h2 className="text-3xl font-bold tracking-tight">{t("header.about.whyLove.title")}</h2>
         </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div variants={gridContainer(0.12)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
             { icon: Target, Watermark: Target, title: "personalized", desc: "personalized", color: "text-emerald-600 dark:text-emerald-400", colSpan: "" },
             { icon: Trophy, Watermark: Trophy, title: "gamified", desc: "gamified", color: "text-amber-600 dark:text-amber-400", colSpan: "" },
@@ -345,16 +368,16 @@ export function LandingPage() {
               <p className="relative z-10 text-xl text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">{t(`header.about.whyLove.${card.desc}.desc`)}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </AnimatedSection>
 
       {/* Powerful Features - Glass Grid */}
-      <AnimatedSection className="relative z-10 max-w-7xl mx-auto px-6 py-24" staggerDelay={0.05}>
+      <AnimatedSection className="relative z-10 max-w-7xl mx-auto px-6 py-24" staggerDelay={0.2}>
         <motion.div variants={sectionTitleVariants} className="flex items-center gap-3 mb-12">
           <Sparkles className="h-8 w-8 text-purple-500" />
           <h2 className="text-4xl font-bold tracking-tight">{t("header.about.features.title")}</h2>
         </motion.div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div variants={gridContainer(0.08)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { icon: Camera, key: "ocr", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100/40 dark:bg-blue-900/30" },
             { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100/40 dark:bg-purple-900/30" },
@@ -389,13 +412,13 @@ export function LandingPage() {
               <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed">{t(`header.about.features.${key}.desc`)}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </AnimatedSection>
 
       {/* For Schools & Teachers - Dark Glass Section */}
       <div className="relative z-10 bg-slate-900/90 dark:bg-slate-900/50 backdrop-blur-xl text-white py-32 rounded-[3rem] mx-4 sm:mx-8 my-12 overflow-hidden shadow-2xl border border-white/[0.06]">
         <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-900/30 via-transparent to-transparent opacity-60 pointer-events-none" />
-        <AnimatedSection className="relative max-w-7xl mx-auto px-6" staggerDelay={0.12}>
+        <AnimatedSection className="relative max-w-7xl mx-auto px-6" staggerDelay={0.15}>
           <motion.div variants={sectionTitleVariants} className="max-w-2xl mb-16">
             <h2 className="text-4xl font-bold tracking-tight flex items-center gap-3 mb-6">
               <School className="h-10 w-10 text-teal-400" />
@@ -403,7 +426,7 @@ export function LandingPage() {
             </h2>
             <p className="text-xl text-slate-400 leading-relaxed">{t("header.about.roles.intro")}</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div variants={gridContainer(0.15)} className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: Crown, title: "admin", color: "text-amber-400", items: ["manageSchools", "manageUsers", "manageClasses", "uploadTexts"] },
               { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["manageStudents", "uploadTexts", "viewAiQuestions", "exportData", "viewLeaderboard"] },
@@ -413,7 +436,7 @@ export function LandingPage() {
                 key={role.title}
                 variants={cardVariants}
                 whileHover={{ y: -8, scale: 1.02 }}
-                className="group bg-white/[0.06] backdrop-blur-xl border border-white/[0.08] rounded-[2.5rem] p-8 hover:bg-white/[0.1] transition-colors duration-300 shadow-[inset_0_0_30px_rgba(255,255,255,0.03)]"
+                className="group bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] rounded-[2.5rem] p-8 hover:bg-white/[0.06] transition-colors duration-300 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
               >
                 <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
                   <role.icon className={`h-10 w-10 mb-6 ${role.color}`} />
@@ -429,20 +452,20 @@ export function LandingPage() {
                 </ul>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </AnimatedSection>
       </div>
 
       <WaveDivider />
 
       {/* Learning Journey - Flowing list */}
-      <AnimatedSection className="relative z-10 py-24" staggerDelay={0.04}>
+      <AnimatedSection className="relative z-10 py-24" staggerDelay={0.15}>
         <div className="max-w-7xl mx-auto px-6">
           <motion.div variants={sectionTitleVariants} className="flex items-center gap-3 mb-16">
             <Rocket className="h-8 w-8 text-blue-500" />
             <h2 className="text-4xl font-bold tracking-tight">{t("header.about.workflow.title")}</h2>
           </motion.div>
-          <div className="flex flex-wrap gap-4">
+          <motion.div variants={gridContainer(0.05)} className="flex flex-wrap gap-4">
             {[
               { num: 1, icon: Upload, key: "upload" },
               { num: 2, icon: FileText, key: "summary" },
@@ -477,19 +500,19 @@ export function LandingPage() {
                 <span className="text-base font-semibold group-hover:text-emerald-900 dark:group-hover:text-emerald-100 transition-colors">{t(`header.about.workflow.${key}`)}</span>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </AnimatedSection>
 
       <WaveDivider flip />
 
       {/* Reading Skills & Bottom CTA */}
-      <AnimatedSection className="relative z-10 max-w-7xl mx-auto px-6 py-32 text-center" staggerDelay={0.1}>
+      <AnimatedSection className="relative z-10 max-w-7xl mx-auto px-6 py-32 text-center" staggerDelay={0.15}>
         <motion.div variants={sectionTitleVariants} className="inline-flex items-center justify-center gap-3 mb-10">
           <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           <h2 className="text-3xl font-bold">{t("header.about.skills.title")}</h2>
         </motion.div>
-        <div className="flex flex-wrap justify-center gap-4 mb-24">
+        <motion.div variants={gridContainer(0.1)} className="flex flex-wrap justify-center gap-4 mb-24">
           {["mainIdea", "detail", "inference", "vocabulary", "purpose"].map((skill) => (
             <motion.span
               key={skill}
@@ -500,13 +523,13 @@ export function LandingPage() {
               {t(`header.about.skills.${skill}`)}
             </motion.span>
           ))}
-        </div>
+        </motion.div>
 
         <motion.div
           variants={cardVariants}
           className={`relative max-w-3xl mx-auto text-center ${glassCard} rounded-[2rem] sm:rounded-[3rem] md:rounded-[4rem] px-6 py-10 sm:p-12 md:p-16 shadow-2xl overflow-hidden`}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-200/30 via-transparent to-transparent dark:from-emerald-900/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-200/20 via-transparent to-transparent dark:from-emerald-900/10 pointer-events-none" />
 
           <h2 className="relative z-10 text-4xl font-extrabold mb-10 leading-tight">{t("header.about.tagline")}</h2>
           <motion.button
