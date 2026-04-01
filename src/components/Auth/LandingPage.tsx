@@ -239,6 +239,68 @@ function SpinnerIcon() {
   );
 }
 
+function LearningJourney() {
+  const { t } = useTranslation();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, margin: "-80px" });
+
+  const steps = [
+    { num: 1, icon: Upload, key: "upload" },
+    { num: 2, icon: FileText, key: "summary" },
+    { num: 3, icon: Brain, key: "mindmap" },
+    { num: 4, icon: BarChart3, key: "difficulty" },
+    { num: 5, icon: Highlighter, key: "cefrHighlight" },
+    { num: 6, icon: PenTool, key: "adapt" },
+    { num: 7, icon: MessageCircle, key: "tutor" },
+    { num: 8, icon: MessageSquareText, key: "analyze" },
+    { num: 9, icon: Zap, key: "highlight" },
+    { num: 10, icon: BookOpen, key: "glossary" },
+    { num: 11, icon: Gamepad2, key: "spelling" },
+    { num: 12, icon: Layers, key: "vocabQuiz" },
+    { num: 13, icon: Target, key: "test" },
+  ];
+
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={{ ...sectionVariants, visible: { transition: { staggerChildren: 0.15 } } }}
+      className="relative z-10 py-24"
+    >
+      <div className="max-w-7xl mx-auto px-6">
+        <motion.div variants={sectionTitleVariants} className="flex items-center gap-3 mb-16">
+          <Rocket className="h-8 w-8 text-blue-500" />
+          <h2 className="text-4xl font-bold tracking-tight">{t("header.about.workflow.title")}</h2>
+        </motion.div>
+        <motion.div variants={gridContainer(0.05)} className="flex flex-wrap gap-4">
+          {steps.map(({ num, icon: Icon, key }) => (
+            <motion.div
+              key={key}
+              variants={pillVariants}
+              whileHover={{ scale: 1.08, y: -4 }}
+              className={`group flex items-center gap-4 ${glassCard} rounded-full py-3 px-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-colors duration-300 cursor-default relative overflow-hidden`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <motion.span
+                key={isInView ? "in" : "out"}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, delay: num * 0.03 }}
+                className="text-sm font-bold text-emerald-500/70"
+              >
+                {num.toString().padStart(2, "0")}
+              </motion.span>
+              <Icon className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+              <span className="text-base font-semibold group-hover:text-emerald-900 dark:group-hover:text-emerald-100 transition-colors">{t(`header.about.workflow.${key}`)}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function LandingPage() {
   const { t, i18n } = useTranslation();
   const { language, update } = useSettingStore();
@@ -463,52 +525,7 @@ export function LandingPage() {
 
       <WaveDivider />
 
-      {/* Learning Journey - Flowing list */}
-      <AnimatedSection className="relative z-10 py-24" staggerDelay={0.15}>
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div variants={sectionTitleVariants} className="flex items-center gap-3 mb-16">
-            <Rocket className="h-8 w-8 text-blue-500" />
-            <h2 className="text-4xl font-bold tracking-tight">{t("header.about.workflow.title")}</h2>
-          </motion.div>
-          <motion.div variants={gridContainer(0.05)} className="flex flex-wrap gap-4">
-            {[
-              { num: 1, icon: Upload, key: "upload" },
-              { num: 2, icon: FileText, key: "summary" },
-              { num: 3, icon: Brain, key: "mindmap" },
-              { num: 4, icon: BarChart3, key: "difficulty" },
-              { num: 5, icon: Highlighter, key: "cefrHighlight" },
-              { num: 6, icon: PenTool, key: "adapt" },
-              { num: 7, icon: MessageCircle, key: "tutor" },
-              { num: 8, icon: MessageSquareText, key: "analyze" },
-              { num: 9, icon: Zap, key: "highlight" },
-              { num: 10, icon: BookOpen, key: "glossary" },
-              { num: 11, icon: Gamepad2, key: "spelling" },
-              { num: 12, icon: Layers, key: "vocabQuiz" },
-              { num: 13, icon: Target, key: "test" },
-            ].map(({ num, icon: Icon, key }) => (
-              <motion.div
-                key={key}
-                variants={pillVariants}
-                whileHover={{ scale: 1.08, y: -4 }}
-                className={`group flex items-center gap-4 ${glassCard} rounded-full py-3 px-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-colors duration-300 cursor-default relative overflow-hidden`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                <motion.span
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", stiffness: 400, delay: num * 0.03 }}
-                  className="text-sm font-bold text-emerald-500/70"
-                >
-                  {num.toString().padStart(2, "0")}
-                </motion.span>
-                <Icon className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
-                <span className="text-base font-semibold group-hover:text-emerald-900 dark:group-hover:text-emerald-100 transition-colors">{t(`header.about.workflow.${key}`)}</span>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </AnimatedSection>
+      <LearningJourney />
 
       <WaveDivider flip />
 
