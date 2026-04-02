@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { auth } from "@/auth";
 import { getSubscriptionStatus, ensureSubscriptionTable } from "@/lib/subscription";
 import { NextResponse } from "next/server";
