@@ -1,5 +1,3 @@
-export const runtime = "nodejs";
-
 import { auth } from "@/auth";
 import { verifySubscriptionAccess, ensureSubscriptionTable } from "@/lib/subscription";
 import { NextResponse, type NextRequest } from "next/server";

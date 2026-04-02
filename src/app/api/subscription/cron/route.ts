@@ -1,5 +1,3 @@
-export const runtime = "nodejs";
-
 import { ensureSubscriptionTable } from "@/lib/subscription"
 import { notifySubscriptionEvent } from "@/lib/subscription-email"
 import { getClient } from "@/lib/db"

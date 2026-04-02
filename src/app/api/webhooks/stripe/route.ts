@@ -1,5 +1,3 @@
-export const runtime = "nodejs";
-
 import Stripe from "stripe";
 import { handleWebhookEvent } from "@/lib/subscription";
 import { NextResponse } from "next/server";
