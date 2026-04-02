@@ -478,13 +478,17 @@ export async function getSubscriptionStatus(
   };
 }
 
-export async function verifySubscriptionAccess(
+export async function verifyIndividualSubscriptionAccess(
   userId: string
 ): Promise<boolean> {
   const sub = await getSubscriptionRecord(userId);
-  if (sub && (sub.status === "active" || sub.status === "trialing")) {
-    return true;
-  }
+  return !!(sub && (sub.status === "active" || sub.status === "trialing"));
+}
+
+export async function verifySubscriptionAccess(
+  userId: string
+): Promise<boolean> {
+  if (await verifyIndividualSubscriptionAccess(userId)) return true;
   try {
     const { verifySchoolSubscriptionAccess } = await import("./school-subscription");
     return await verifySchoolSubscriptionAccess(userId);

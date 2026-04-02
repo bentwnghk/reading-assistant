@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { verifySubscriptionAccess, ensureSubscriptionTable } from "@/lib/subscription";
+import { verifyIndividualSubscriptionAccess, ensureSubscriptionTable } from "@/lib/subscription";
 import { recordSeatUsage, ensureSchoolSubscriptionTables, verifySchoolSubscriptionAccess } from "@/lib/school-subscription";
 import { getSchoolForUser } from "@/lib/users";
 import { NextResponse, type NextRequest } from "next/server";
@@ -20,7 +20,7 @@ async function handleRequest(req: NextRequest) {
 
   let hasIndividualAccess = false;
   try {
-    hasIndividualAccess = await verifySubscriptionAccess(session.user.id);
+    hasIndividualAccess = await verifyIndividualSubscriptionAccess(session.user.id);
   } catch {
     // fall through to school check
   }

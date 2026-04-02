@@ -56,7 +56,7 @@ export async function ensureSchoolSubscriptionTables(): Promise<boolean> {
         stripe_customer_id TEXT NOT NULL,
         stripe_subscription_id TEXT UNIQUE,
         status TEXT NOT NULL DEFAULT 'inactive'
-          CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused')),
+          CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive')),
         plan TEXT CHECK (plan IN ('monthly', 'yearly')),
         quantity INTEGER NOT NULL DEFAULT ${MIN_SEAT_QUANTITY},
         current_period_start TIMESTAMP WITH TIME ZONE,
@@ -67,6 +67,18 @@ export async function ensureSchoolSubscriptionTables(): Promise<boolean> {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `);
+    // Migrate existing deployments: ensure 'inactive' is in the status check constraint.
+    // The original constraint omitted 'inactive', causing INSERT failures during checkout init.
+    await client.query(`
+      ALTER TABLE school_subscriptions
+        DROP CONSTRAINT IF EXISTS school_subscriptions_status_check
+    `);
+    await client.query(`
+      ALTER TABLE school_subscriptions
+        ADD CONSTRAINT school_subscriptions_status_check
+          CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive'))
+    `);
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_school_subscriptions_school_id ON school_subscriptions(school_id)
     `);
@@ -616,6 +628,9 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
         plan: plan || null,
         quantity: subData.quantity,
       });
+
+      // The admin always consumes one seat — record their usage at activation time.
+      await recordSeatUsage(adminUserId, schoolId).catch(() => {});
 
       try {
         const { notifySubscriptionEvent } = await import("./subscription-email");
