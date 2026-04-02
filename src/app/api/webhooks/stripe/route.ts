@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { handleWebhookEvent } from "@/lib/subscription";
+import { handleSchoolWebhookEvent } from "@/lib/school-subscription";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -34,7 +35,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    await handleWebhookEvent(event);
+    const raw = event.data.object as unknown;
+    const metadata = (raw as { metadata?: Record<string, string | undefined> | undefined })?.metadata;
+
+    if (metadata?.type === "school") {
+      await handleSchoolWebhookEvent(event);
+    } else {
+      await handleWebhookEvent(event);
+    }
   } catch (error) {
     console.error(`Error processing webhook ${event.type}:`, error);
     return NextResponse.json(

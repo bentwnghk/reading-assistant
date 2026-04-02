@@ -847,6 +847,31 @@
       "no": "No"
     }
   },
+  "schoolSubscription": {
+    "title": "School Subscription",
+    "description": "Admins can purchase a subscription for all users in the school.",
+    "seatInfo": "Bulk Seat Licensing",
+    "seatInfoDesc": "Purchase seats for your school. Each seat allows one user to access the app during the subscription period. Minimum {{min}} seats.",
+    "seats": "seats",
+    "seatUsage": "Seat Usage",
+    "seatsUsed": "seats used",
+    "available": "available",
+    "perUserMonth": "user/month",
+    "perUserYear": "user/year",
+    "perUser": "per user",
+    "billedMonthly": "Billed monthly",
+    "total": "Total",
+    "subscribeWithSeats": "{{plan}} - {{seats}} seats",
+    "activeSchoolSubscription": "Your school has an active subscription",
+    "managedByAdmin": "Managed by your school administrator",
+    "expires": "Expires",
+    "adminControls": "Admin Controls",
+    "updateSeats": "Update seat quantity",
+    "changeSeats": "Change seats",
+    "cancelConfirm": "Are you sure? All users from your school will lose access at the end of the billing period.",
+    "checkoutSuccess": "School subscription activated!",
+    "checkoutCanceled": "School subscription checkout was canceled."
+  },
   "reminder": {
     "tabNotifications": "Notifications",
     "emailReminders": "Email Reminders",

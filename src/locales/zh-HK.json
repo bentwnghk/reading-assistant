@@ -847,6 +847,31 @@
       "no": "否"
     }
   },
+  "schoolSubscription": {
+    "title": "學校訂閱",
+    "description": "管理員可為學校所有用戶購買訂閱。",
+    "seatInfo": "批量席位授權",
+    "seatInfoDesc": "為您的學校購買席位。每個席位允許一位用戶在訂閱期內使用應用程式。最少 {{min}} 個席位。",
+    "seats": "個席位",
+    "seatUsage": "席位使用情況",
+    "seatsUsed": "個席位已使用",
+    "available": "可用",
+    "perUserMonth": "用戶/月",
+    "perUserYear": "用戶/年",
+    "perUser": "每位用戶",
+    "billedMonthly": "按月計費",
+    "total": "總計",
+    "subscribeWithSeats": "{{plan}} - {{seats}} 個席位",
+    "activeSchoolSubscription": "您的學校已有生效中的訂閱",
+    "managedByAdmin": "由學校管理員管理",
+    "expires": "到期日",
+    "adminControls": "管理員控制",
+    "updateSeats": "更新席位數量",
+    "changeSeats": "更改席位",
+    "cancelConfirm": "確定嗎？您學校的所有用戶將在計費期結束後失去存取權限。",
+    "checkoutSuccess": "學校訂閱已啟用！",
+    "checkoutCanceled": "學校訂閱結帳已取消。"
+  },
   "reminder": {
     "tabNotifications": "通知",
     "emailReminders": "電郵提醒",

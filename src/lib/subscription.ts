@@ -40,7 +40,7 @@ export interface SubscriptionStatusResponse {
 
 let stripeInstance: Stripe | null = null;
 
-function getStripe(): Stripe {
+export function getStripe(): Stripe {
   if (!stripeInstance) {
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) throw new Error("STRIPE_SECRET_KEY is not configured");
@@ -63,7 +63,7 @@ function getCurrency(): string {
   return process.env.SUBSCRIPTION_CURRENCY || "usd";
 }
 
-function getAppUrl(): string {
+export function getAppUrl(): string {
   return process.env.APP_URL || process.env.AUTH_URL || "http://localhost:3000";
 }
 
@@ -226,7 +226,7 @@ async function getOrCreateStripeCustomer(
   return customer.id;
 }
 
-async function ensureStripePrices(): Promise<{
+export async function ensureStripePrices(): Promise<{
   monthlyPriceId: string;
   yearlyPriceId: string;
 }> {
@@ -482,8 +482,15 @@ export async function verifySubscriptionAccess(
   userId: string
 ): Promise<boolean> {
   const sub = await getSubscriptionRecord(userId);
-  if (!sub) return false;
-  return sub.status === "active" || sub.status === "trialing";
+  if (sub && (sub.status === "active" || sub.status === "trialing")) {
+    return true;
+  }
+  try {
+    const { verifySchoolSubscriptionAccess } = await import("./school-subscription");
+    return await verifySchoolSubscriptionAccess(userId);
+  } catch {
+    return false;
+  }
 }
 
 export async function getStripeCustomerIdBySubscriptionId(

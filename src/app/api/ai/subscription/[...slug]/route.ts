@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
 import { verifySubscriptionAccess, ensureSubscriptionTable } from "@/lib/subscription";
+import { recordSeatUsage, ensureSchoolSubscriptionTables, verifySchoolSubscriptionAccess } from "@/lib/school-subscription";
+import { getSchoolForUser } from "@/lib/users";
 import { NextResponse, type NextRequest } from "next/server";
 
 const API_PROXY_BASE_URL = process.env.OPENAI_COMPATIBLE_API_BASE_URL || "";
@@ -15,12 +17,28 @@ async function handleRequest(req: NextRequest) {
   }
 
   await ensureSubscriptionTable();
-  const hasAccess = await verifySubscriptionAccess(session.user.id);
-  if (!hasAccess) {
-    return NextResponse.json(
-      { error: { code: 403, message: "No active subscription", status: "FORBIDDEN" } },
-      { status: 403 }
-    );
+
+  let hasIndividualAccess = false;
+  try {
+    hasIndividualAccess = await verifySubscriptionAccess(session.user.id);
+  } catch {
+    // fall through to school check
+  }
+
+  if (!hasIndividualAccess) {
+    await ensureSchoolSubscriptionTables();
+    const hasSchoolAccess = await verifySchoolSubscriptionAccess(session.user.id);
+    if (!hasSchoolAccess) {
+      return NextResponse.json(
+        { error: { code: 403, message: "No active subscription", status: "FORBIDDEN" } },
+        { status: 403 }
+      );
+    }
+
+    const schoolId = await getSchoolForUser(session.user.id);
+    if (schoolId) {
+      await recordSeatUsage(session.user.id, schoolId).catch(() => {});
+    }
   }
 
   if (!API_PROXY_BASE_URL) {

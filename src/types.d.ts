@@ -204,6 +204,19 @@ interface StudentSessionData {
   updatedAt: number;
 }
 
+interface SchoolSubscriptionStatusResponse {
+  hasSubscription: boolean;
+  schoolName: string | null;
+  status: string;
+  plan: string | null;
+  quantity: number;
+  seatsUsed: number;
+  currentPeriodEnd: string | null;
+  currentPeriodStart: string | null;
+  cancelAtPeriodEnd: boolean;
+  trialEnd: string | null;
+}
+
 // ─── Leaderboard types ────────────────────────────────────────────────────────
 
 type LeaderboardActivityType =

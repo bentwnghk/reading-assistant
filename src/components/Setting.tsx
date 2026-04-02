@@ -47,6 +47,7 @@ import { CircleHelp, Settings, Sparkles, Volume2, Bell } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ReminderPreferences from "@/components/ReminderPreferences";
 import SubscriptionPanel from "@/components/Subscription/SubscriptionPanel";
+import SchoolSubscriptionPanel from "@/components/Subscription/SchoolSubscriptionPanel";
 
 type SettingProps = {
   open: boolean;
@@ -398,12 +399,22 @@ function Setting({ open, onClose }: SettingProps) {
                         {t("subscription.signInPrompt")}
                       </p>
                     </div>
-                  ) : pricingInfo ? (
-                    <SubscriptionPanel
-                      monthlyPrice={pricingInfo.monthly}
-                      currency={pricingInfo.currency}
-                    />
-                  ) : null}
+                  ) : (
+                    <>
+                      {pricingInfo && (
+                        <SchoolSubscriptionPanel
+                          monthlyPrice={pricingInfo.monthly}
+                          currency={pricingInfo.currency}
+                        />
+                      )}
+                      {pricingInfo && (
+                        <SubscriptionPanel
+                          monthlyPrice={pricingInfo.monthly}
+                          currency={pricingInfo.currency}
+                        />
+                      )}
+                    </>
+                  )}
                 </div>
                 <FormField
                   control={form.control}
