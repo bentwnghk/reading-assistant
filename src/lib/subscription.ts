@@ -303,28 +303,12 @@ export async function ensureStripePrices(): Promise<{
 }
 
 function subscriptionToRecordData(
-  sub: Stripe.Subscription
+  sub: Pick<Stripe.Subscription, "id" | "status" | "customer" | "start_date" | "trial_end" | "cancel_at_period_end">
 ) {
-  const firstItem = sub.items?.data?.[0];
-  const interval = firstItem?.price?.recurring?.interval || "month";
-  const intervalCount = firstItem?.price?.recurring?.interval_count || 1;
-  const anchor = sub.billing_cycle_anchor || sub.start_date;
-
-  const periodEnd = new Date(anchor * 1000);
-  if (interval === "year") {
-    periodEnd.setFullYear(periodEnd.getFullYear() + intervalCount);
-  } else if (interval === "month") {
-    periodEnd.setMonth(periodEnd.getMonth() + intervalCount);
-  } else if (interval === "week") {
-    periodEnd.setDate(periodEnd.getDate() + 7 * intervalCount);
-  } else {
-    periodEnd.setDate(periodEnd.getDate() + intervalCount);
-  }
-
   return {
     status: sub.status as SubscriptionStatus,
     currentPeriodStart: new Date(sub.start_date * 1000).toISOString(),
-    currentPeriodEnd: periodEnd.toISOString(),
+    currentPeriodEnd: new Date(sub.start_date * 1000).toISOString(),
     cancelAtPeriodEnd: sub.cancel_at_period_end,
     trialEnd: sub.trial_end
       ? new Date(sub.trial_end * 1000).toISOString()
@@ -471,55 +455,6 @@ export async function verifySubscriptionAccess(
   const sub = await getSubscriptionRecord(userId);
   if (!sub) return false;
   return sub.status === "active" || sub.status === "trialing";
-}
-
-export async function syncSubscriptionFromStripe(
-  userId: string
-): Promise<boolean> {
-  await ensureSubscriptionTable();
-  const record = await getSubscriptionRecord(userId);
-  if (!record?.stripe_customer_id) return false;
-
-  try {
-    const subscriptions = await getStripe().subscriptions.list({
-      customer: record.stripe_customer_id,
-      status: "all",
-      limit: 1,
-    });
-
-    const activeSub = subscriptions.data.find(
-      (s) => s.status === "active" || s.status === "trialing"
-    );
-
-    if (activeSub) {
-      const subData = subscriptionToRecordData(activeSub);
-      const plan = (activeSub.metadata?.plan as SubscriptionPlan) ||
-        (record.plan) ||
-        null;
-
-      await upsertSubscriptionRecord(userId, {
-        stripeCustomerId: record.stripe_customer_id,
-        stripeSubscriptionId: activeSub.id,
-        ...subData,
-        plan,
-      });
-      return true;
-    } else {
-      await upsertSubscriptionRecord(userId, {
-        stripeCustomerId: record.stripe_customer_id,
-        status: "inactive",
-        plan: null,
-        currentPeriodStart: null,
-        currentPeriodEnd: null,
-        cancelAtPeriodEnd: false,
-        trialEnd: null,
-      });
-      return false;
-    }
-  } catch (error) {
-    console.error("Failed to sync subscription from Stripe:", error);
-    return false;
-  }
 }
 
 export async function getStripeCustomerIdBySubscriptionId(
