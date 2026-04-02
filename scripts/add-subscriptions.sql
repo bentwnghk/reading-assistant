@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   stripe_customer_id TEXT NOT NULL,
   stripe_subscription_id TEXT UNIQUE,
   status TEXT NOT NULL DEFAULT 'inactive'
-    CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused')),
+    CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive')),
   plan TEXT CHECK (plan IN ('monthly', 'yearly')),
   current_period_start TIMESTAMP WITH TIME ZONE,
   current_period_end TIMESTAMP WITH TIME ZONE,
@@ -33,5 +33,17 @@ BEGIN
       BEFORE UPDATE ON subscriptions
       FOR EACH ROW
       EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'subscriptions_status_check'
+       AND conrelid = 'subscriptions'::regclass
+  ) THEN
+    ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_status_check;
+    ALTER TABLE subscriptions ADD CONSTRAINT subscriptions_status_check
+      CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive'));
   END IF;
 END $$;

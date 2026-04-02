@@ -33,10 +33,10 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
     const result = params.get("subscription");
     if (result === "success") {
       toast.success(t("subscription.checkoutSuccess"));
-      window.history.replaceState(null, "", "/settings");
+      window.history.replaceState(null, "", "/");
     } else if (result === "canceled") {
       toast.info(t("subscription.checkoutCanceled"));
-      window.history.replaceState(null, "", "/settings");
+      window.history.replaceState(null, "", "/");
     }
   }, [t]);
 

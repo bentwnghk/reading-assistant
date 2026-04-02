@@ -50,7 +50,7 @@ STRIPE_WEBHOOK_SECRET: "whsec_..."
    - **Payment methods** — allow customers to update their payment method
    - **Subscriptions** — allow customers to cancel and reactivate subscriptions
    - **Invoices** — allow customers to view and download invoices
-4. Set a **Return URL** to your settings page: `https://your-domain.com/settings`
+4. Set a **Return URL** to your home page: `https://your-domain.com/`
 5. Customize the branding (logo, colors) to match your app
 
 ## Step 4: Set Your Pricing
@@ -135,7 +135,7 @@ After completing the above steps, verify your integration:
 2. Open Settings, switch to "Subscription" mode
 3. Click "Subscribe" on the monthly or yearly plan
 4. Complete the Stripe Checkout with test card `4242 4242 4242 4242`
-5. You should be redirected to `/settings?subscription=success` with a success toast
+5. You should be redirected to `/?subscription=success` with a success toast
 6. Your subscription status should show as "Trial" with the correct plan
 7. Click "Manage Subscription" to verify the customer portal works
 8. Test cancellation and reactivation flows

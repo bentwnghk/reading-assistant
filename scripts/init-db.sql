@@ -411,7 +411,7 @@ CREATE TABLE subscriptions (
   stripe_customer_id TEXT NOT NULL,
   stripe_subscription_id TEXT UNIQUE,
   status TEXT NOT NULL DEFAULT 'inactive'
-    CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused')),
+    CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive')),
   plan TEXT CHECK (plan IN ('monthly', 'yearly')),
   current_period_start TIMESTAMP WITH TIME ZONE,
   current_period_end TIMESTAMP WITH TIME ZONE,

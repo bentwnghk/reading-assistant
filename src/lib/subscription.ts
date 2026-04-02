@@ -335,8 +335,8 @@ export async function createCheckoutSession(
       trial_period_days: 1,
       metadata: { userId },
     },
-    success_url: `${appUrl}/settings?subscription=success`,
-    cancel_url: `${appUrl}/settings?subscription=canceled`,
+    success_url: `${appUrl}/?subscription=success`,
+    cancel_url: `${appUrl}/?subscription=canceled`,
     metadata: { userId, plan },
   });
 
@@ -353,7 +353,7 @@ export async function createPortalSession(
 
   const session = await getStripe().billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${appUrl}/settings`,
+    return_url: `${appUrl}/`,
   });
 
   return session.url!;
