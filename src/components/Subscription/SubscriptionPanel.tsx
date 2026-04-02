@@ -24,6 +24,7 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
     openPortal,
     cancelSubscription,
     reactivateSubscription,
+    switchPlan,
   } = useSubscription();
   const [canceling, setCanceling] = useState(false);
 
@@ -49,44 +50,38 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
 
   if (!subscription) return null;
 
-  if (subscription.hasSubscription) {
-    return (
-      <div className="space-y-4">
-        <SubscriptionStatusCard
-          subscription={subscription}
-          onManage={openPortal}
-          onCancel={() => setCanceling(true)}
-          onReactivate={reactivateSubscription}
-        />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-3">
-      {subscription.status === "past_due" && (
-        <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md p-2">
-          {t("subscription.pastDueWarning")}
-          <Button size="sm" variant="outline" className="ml-auto" onClick={openPortal}>
-            {t("subscription.updatePayment")}
-          </Button>
+    <>
+      {subscription.hasSubscription ? (
+        <div className="space-y-4">
+          <SubscriptionStatusCard
+            subscription={subscription}
+            monthlyPrice={monthlyPrice}
+            currency={currency}
+            onManage={openPortal}
+            onCancel={() => setCanceling(true)}
+            onReactivate={reactivateSubscription}
+            onSwitchPlan={switchPlan}
+          />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {subscription.status === "past_due" && (
+            <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md p-2">
+              {t("subscription.pastDueWarning")}
+              <Button size="sm" variant="outline" className="ml-auto" onClick={openPortal}>
+                {t("subscription.updatePayment")}
+              </Button>
+            </div>
+          )}
+          <PricingCards
+            monthlyPrice={monthlyPrice}
+            currency={currency}
+            onSelect={(plan: SubscriptionPlan) => createCheckout(plan)}
+          />
         </div>
       )}
-      <PricingCards
-        monthlyPrice={monthlyPrice}
-        currency={currency}
-        onSelect={(plan: SubscriptionPlan) => createCheckout(plan)}
-      />
-      <div className="flex justify-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-destructive hover:text-destructive"
-          onClick={() => setCanceling(true)}
-        >
-          {t("subscription.cancelSubscription")}
-        </Button>
-      </div>
+
       {canceling && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-card border border-border rounded-lg p-6 max-w-sm mx-4 space-y-4">
@@ -109,7 +104,7 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

@@ -811,6 +811,13 @@
     "canceledInfo": "您的訂閱將於 {date} 結束。您可以隨時重新啟用。",
     "checkoutSuccess": "訂閱已啟用！歡迎使用 ProReader。",
     "checkoutCanceled": "結帳已取消。您可以隨時訂閱。",
+    "switchPlanTitle": "切換方案",
+    "switchToYearly": "切換至年付",
+    "switchToMonthly": "切換至月付",
+    "switchToYearlyDesc": "每年 {price}，省 2 個月費用。按比例計算差額。",
+    "switchToMonthlyDesc": "每月 {price}，按月計費。按比例計算差額。",
+    "switchPlanTrialWarning": "在試用期間切換方案將立即結束免費試用並向您收費。",
+    "switchPlanError": "切換方案失敗，請再試一次。",
     "status": {
       "active": "生效中",
       "trialing": "試用中",

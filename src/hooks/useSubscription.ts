@@ -14,6 +14,7 @@ interface UseSubscriptionReturn {
   openPortal: () => Promise<void>;
   cancelSubscription: () => Promise<void>;
   reactivateSubscription: () => Promise<void>;
+  switchPlan: (plan: SubscriptionPlan) => Promise<boolean>;
 }
 
 export default function useSubscription(): UseSubscriptionReturn {
@@ -100,6 +101,25 @@ export default function useSubscription(): UseSubscriptionReturn {
     }
   }, [fetchStatus]);
 
+  const switchPlan = useCallback(
+    async (plan: SubscriptionPlan): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/subscription/switch-plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan }),
+        });
+        if (!response.ok) return false;
+        await fetchStatus();
+        return true;
+      } catch (error) {
+        console.error("Failed to switch subscription plan:", error);
+        return false;
+      }
+    },
+    [fetchStatus]
+  );
+
   return {
     subscription,
     loading,
@@ -108,5 +128,6 @@ export default function useSubscription(): UseSubscriptionReturn {
     openPortal,
     cancelSubscription: cancelSubscriptionAction,
     reactivateSubscription: reactivateSubscriptionAction,
+    switchPlan,
   };
 }

@@ -811,6 +811,13 @@
     "canceledInfo": "Your subscription ends on {date}. You can reactivate anytime.",
     "checkoutSuccess": "Subscription activated! Welcome to ProReader.",
     "checkoutCanceled": "Checkout was canceled. You can subscribe anytime.",
+    "switchPlanTitle": "Switch plan",
+    "switchToYearly": "Switch to Yearly",
+    "switchToMonthly": "Switch to Monthly",
+    "switchToYearlyDesc": "Pay {price}/year and save 2 months. Prorated credit applied.",
+    "switchToMonthlyDesc": "Pay {price}/month, billed monthly. Prorated credit applied.",
+    "switchPlanTrialWarning": "Switching plans during a trial will end your free trial and charge you immediately.",
+    "switchPlanError": "Failed to switch plan. Please try again.",
     "status": {
       "active": "Active",
       "trialing": "Trial",

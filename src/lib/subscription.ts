@@ -321,6 +321,13 @@ function subscriptionToRecordData(
   };
 }
 
+function getPlanFromSubscription(sub: Stripe.Subscription): SubscriptionPlan | null {
+  const interval = sub.items.data[0]?.price?.recurring?.interval;
+  if (interval === "month") return "monthly";
+  if (interval === "year") return "yearly";
+  return null;
+}
+
 export async function createCheckoutSession(
   userId: string,
   email: string | null,
@@ -393,6 +400,50 @@ export async function reactivateSubscription(userId: string): Promise<boolean> {
     stripeCustomerId: sub.stripe_customer_id,
     status: sub.status,
     cancelAtPeriodEnd: false,
+  });
+
+  return true;
+}
+
+export async function switchSubscriptionPlan(
+  userId: string,
+  newPlan: SubscriptionPlan
+): Promise<boolean> {
+  const sub = await getSubscriptionRecord(userId);
+  if (!sub?.stripe_subscription_id) return false;
+
+  const stripe = getStripe();
+  const subscription = await stripe.subscriptions.retrieve(
+    sub.stripe_subscription_id
+  );
+
+  if (subscription.status !== "active" && subscription.status !== "trialing") {
+    return false;
+  }
+
+  const item = subscription.items.data[0];
+  if (!item) return false;
+
+  const { monthlyPriceId, yearlyPriceId } = await ensureStripePrices();
+  const newPriceId = newPlan === "yearly" ? yearlyPriceId : monthlyPriceId;
+
+  // If already on the requested plan, no-op
+  if (item.price.id === newPriceId) return true;
+
+  const updated = await stripe.subscriptions.update(
+    sub.stripe_subscription_id,
+    {
+      items: [{ id: item.id, price: newPriceId }],
+      proration_behavior: "create_prorations",
+    }
+  );
+
+  const subData = subscriptionToRecordData(updated);
+  await upsertSubscriptionRecord(userId, {
+    stripeCustomerId: sub.stripe_customer_id,
+    stripeSubscriptionId: sub.stripe_subscription_id,
+    ...subData,
+    plan: newPlan,
   });
 
   return true;
@@ -519,10 +570,12 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
 
       const prevData = event.data.previous_attributes as Record<string, unknown> | null;
       const subData = subscriptionToRecordData(subscription);
+      const detectedPlan = getPlanFromSubscription(subscription);
       await upsertSubscriptionRecord(userId, {
         stripeCustomerId: subscription.customer as string,
         stripeSubscriptionId: subscription.id,
         ...subData,
+        ...(detectedPlan ? { plan: detectedPlan } : {}),
       });
 
       try {

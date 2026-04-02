@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,14 +10,19 @@ import {
   RotateCcw,
   AlertTriangle,
   Calendar,
+  ArrowRightLeft,
+  Loader2,
 } from "lucide-react";
-import type { SubscriptionStatusResponse } from "@/lib/subscription";
+import type { SubscriptionStatusResponse, SubscriptionPlan } from "@/lib/subscription";
 
 interface SubscriptionStatusCardProps {
   subscription: SubscriptionStatusResponse;
+  monthlyPrice: number;
+  currency: string;
   onManage: () => void;
   onCancel: () => void;
   onReactivate: () => void;
+  onSwitchPlan: (plan: SubscriptionPlan) => Promise<boolean>;
 }
 
 const statusColors: Record<string, string> = {
@@ -35,13 +41,26 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
+function formatPrice(amount: number, currency: string): string {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: 2,
+  }).format(amount);
+}
+
 function SubscriptionStatusCard({
   subscription,
+  monthlyPrice,
+  currency,
   onManage,
   onCancel,
   onReactivate,
+  onSwitchPlan,
 }: SubscriptionStatusCardProps) {
   const { t } = useTranslation();
+  const [switching, setSwitching] = useState(false);
+  const [switchError, setSwitchError] = useState(false);
   const {
     status,
     plan,
@@ -51,6 +70,17 @@ function SubscriptionStatusCard({
   } = subscription;
 
   const statusLabel = t(`subscription.status.${status}`);
+  const canSwitch = (status === "active" || status === "trialing") && !cancelAtPeriodEnd;
+  const targetPlan: SubscriptionPlan = plan === "yearly" ? "monthly" : "yearly";
+  const yearlyPrice = monthlyPrice * 10;
+
+  const handleSwitchPlan = async () => {
+    setSwitching(true);
+    setSwitchError(false);
+    const ok = await onSwitchPlan(targetPlan);
+    setSwitching(false);
+    if (!ok) setSwitchError(true);
+  };
 
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-3">
@@ -100,6 +130,51 @@ function SubscriptionStatusCard({
         <p className="text-xs text-muted-foreground">
           {t("subscription.nextBillingDate")}: {formatDate(currentPeriodEnd)}
         </p>
+      )}
+
+      {/* Plan switch section */}
+      {canSwitch && plan && (
+        <div className="rounded-md border border-border bg-muted/40 p-3 space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">
+            {t("subscription.switchPlanTitle")}
+          </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              {targetPlan === "yearly"
+                ? t("subscription.switchToYearlyDesc", {
+                    price: formatPrice(yearlyPrice, currency),
+                  })
+                : t("subscription.switchToMonthlyDesc", {
+                    price: formatPrice(monthlyPrice, currency),
+                  })}
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="shrink-0"
+              onClick={handleSwitchPlan}
+              disabled={switching}
+            >
+              {switching ? (
+                <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+              ) : (
+                <ArrowRightLeft className="h-3.5 w-3.5 mr-1" />
+              )}
+              {targetPlan === "yearly"
+                ? t("subscription.switchToYearly")
+                : t("subscription.switchToMonthly")}
+            </Button>
+          </div>
+          {status === "trialing" && (
+            <p className="text-xs text-orange-600 dark:text-orange-400 flex items-start gap-1.5">
+              <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+              {t("subscription.switchPlanTrialWarning")}
+            </p>
+          )}
+          {switchError && (
+            <p className="text-xs text-destructive">{t("subscription.switchPlanError")}</p>
+          )}
+        </div>
       )}
 
       <div className="flex flex-wrap gap-2">
