@@ -1190,8 +1190,6 @@
       "avgTestScore": "Avg Test Score",
       "totalFlashcards": "Total Flashcards",
       "noStats": "Complete learning activities this week to appear on the leaderboard!",
-      "weeklyActivity": "Weekly Activity",
-      "activityBreakdown": "Activity Breakdown",
       "teacherTitle": "Teacher View",
       "teacherMessage": "The My Stats tab tracks student learning progress. Switch to the Leaderboard tab to see how your students are doing."
     },
@@ -1397,20 +1395,6 @@
         "description": "Ask AI Tutor {{count}} questions",
         "hint": "Ask the AI Tutor questions about your reading materials"
       }
-    },
-    "activityTypes": {
-      "session_create": "Reading Sessions",
-      "test_complete": "Tests",
-      "quiz_complete": "Vocabulary Quizzes",
-      "spelling_complete": "Spelling Games",
-      "flashcard_review": "Flashcard Reviews",
-      "mindmap_generate": "Mind Maps",
-      "adapted_text_generate": "Adapted Texts",
-      "simplified_text_generate": "Simplified Texts",
-      "sentence_analyze": "Sentence Analysis",
-      "targeted_practice_complete": "Targeted Practice",
-      "glossary_add": "Glossary Words",
-      "ai_tutor_question": "AI Tutor Questions"
     }
   },
   "recommendation": {

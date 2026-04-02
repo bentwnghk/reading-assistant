@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import useSubscription from "@/hooks/useSubscription";
 import PricingCards from "./PricingCards";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
+import UsageDashboard from "./UsageDashboard";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { SubscriptionPlan } from "@/lib/subscription";
@@ -51,12 +52,15 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
 
   if (subscription.hasSubscription) {
     return (
-      <SubscriptionStatusCard
-        subscription={subscription}
-        onManage={openPortal}
-        onCancel={() => setCanceling(true)}
-        onReactivate={reactivateSubscription}
-      />
+      <div className="space-y-4">
+        <SubscriptionStatusCard
+          subscription={subscription}
+          onManage={openPortal}
+          onCancel={() => setCanceling(true)}
+          onReactivate={reactivateSubscription}
+        />
+        <UsageDashboard />
+      </div>
     );
   }
 

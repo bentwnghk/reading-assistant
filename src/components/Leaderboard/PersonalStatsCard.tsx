@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2, BarChart3 } from "lucide-react";
+import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2 } from "lucide-react";
 import { cn } from "@/utils/style";
 import { ImprovementIndicator } from "./ImprovementIndicator";
 import type { PersonalStats } from "./types";
@@ -170,90 +170,6 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
           </div>
         </div>
       </div>
-
-      {/* Weekly activity chart */}
-      {stats.weeklyActivity && stats.weeklyActivity.daily.length > 0 && (
-        <div className="rounded-xl border bg-card p-4">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            <BarChart3 className="h-3.5 w-3.5" />
-            {t("leaderboard.personal.weeklyActivity")}
-          </div>
-          <div className="flex items-end gap-[2px] h-24">
-            {stats.weeklyActivity.daily.map((d) => {
-              const maxCount = Math.max(...stats.weeklyActivity!.daily.map((x) => x.count), 1);
-              const height = (d.count / maxCount) * 100;
-              return (
-                <div
-                  key={d.date}
-                  className="flex-1 bg-primary/80 rounded-t-sm min-w-[3px] transition-all hover:bg-primary"
-                  style={{ height: `${Math.max(height, 4)}%` }}
-                  title={`${d.date}: ${d.count}`}
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Activity breakdown */}
-      {stats.weeklyActivity && stats.weeklyActivity.breakdown.length > 0 && (
-        <div className="rounded-xl border bg-card p-4">
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {t("leaderboard.personal.activityBreakdown")}
-          </div>
-          <div className="space-y-1.5">
-            {stats.weeklyActivity.breakdown.map((item) => {
-              const pct = stats.weeklyActivity!.total > 0
-                ? Math.round((item.count / stats.weeklyActivity!.total) * 100)
-                : 0;
-              return (
-                <div key={item.activity_type} className="flex items-center gap-2">
-                  <span className="text-sm w-5 text-center">
-                    {getActivityIcon(item.activity_type)}
-                  </span>
-                  <span className="text-xs flex-1 truncate">
-                    {getActivityLabel(item.activity_type, t)}
-                  </span>
-                  <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-medium w-8 text-right tabular-nums">
-                    {item.count}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
-}
-
-const ACTIVITY_ICONS: Record<string, string> = {
-  session_create: "\u{1F4D6}",
-  test_complete: "\u{1F4DD}",
-  quiz_complete: "\u{1F9E0}",
-  spelling_complete: "\u{270F}\u{FE0F}",
-  flashcard_review: "\u{1F4DA}",
-  mindmap_generate: "\u{1F5FA}\u{FE0F}",
-  adapted_text_generate: "\u{270D}\u{FE0F}",
-  simplified_text_generate: "\u{270D}\u{FE0F}",
-  sentence_analyze: "\u{1F50D}",
-  targeted_practice_complete: "\u{1F3AF}",
-  glossary_add: "\u{1F4D2}",
-  ai_tutor_question: "\u{1F916}",
-};
-
-function getActivityIcon(type: string): string {
-  return ACTIVITY_ICONS[type] || "\u{1F4CB}";
-}
-
-function getActivityLabel(type: string, t: (key: string) => string): string {
-  const key = `leaderboard.activityTypes.${type}`;
-  const translated = t(key);
-  return translated !== key ? translated : type;
 }
