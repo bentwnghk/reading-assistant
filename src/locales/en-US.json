@@ -818,6 +818,7 @@
     "switchToMonthlyDesc": "Pay {{price}}/month, billed monthly. Prorated credit applied.",
     "switchPlanTrialWarning": "Switching plans during a trial will end your free trial and charge you immediately.",
     "switchPlanError": "Failed to switch plan. Please try again.",
+    "disabledBySchoolSubscription": "Personal subscription is not available because your school already has an active subscription.",
     "status": {
       "active": "Active",
       "trialing": "Trial",

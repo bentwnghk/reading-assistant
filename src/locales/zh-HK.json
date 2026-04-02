@@ -818,6 +818,7 @@
     "switchToMonthlyDesc": "每月 {{price}}，按月計費。按比例計算差額。",
     "switchPlanTrialWarning": "在試用期間切換方案將立即結束免費試用並向您收費。",
     "switchPlanError": "切換方案失敗，請再試一次。",
+    "disabledBySchoolSubscription": "個人訂閱不可用，因為您的學校已有生效中的訂閱。",
     "status": {
       "active": "生效中",
       "trialing": "試用中",

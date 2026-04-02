@@ -23,6 +23,7 @@ interface SubscriptionStatusCardProps {
   onCancel: () => void;
   onReactivate: () => void;
   onSwitchPlan: (plan: SubscriptionPlan) => Promise<boolean>;
+  disabled?: boolean;
 }
 
 const statusColors: Record<string, string> = {
@@ -57,6 +58,7 @@ function SubscriptionStatusCard({
   onCancel,
   onReactivate,
   onSwitchPlan,
+  disabled,
 }: SubscriptionStatusCardProps) {
   const { t } = useTranslation();
   const [switching, setSwitching] = useState(false);
@@ -70,7 +72,7 @@ function SubscriptionStatusCard({
   } = subscription;
 
   const statusLabel = t(`subscription.status.${status}`);
-  const canSwitch = (status === "active" || status === "trialing") && !cancelAtPeriodEnd;
+  const canSwitch = (status === "active" || status === "trialing") && !cancelAtPeriodEnd && !disabled;
   const targetPlan: SubscriptionPlan = plan === "yearly" ? "monthly" : "yearly";
   const yearlyPrice = monthlyPrice * 10;
 
@@ -178,16 +180,16 @@ function SubscriptionStatusCard({
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Button type="button" size="sm" variant="outline" onClick={onManage}>
+        <Button type="button" size="sm" variant="outline" onClick={onManage} disabled={disabled}>
           <ExternalLink className="h-3.5 w-3.5 mr-1" />
           {t("subscription.manageSubscription")}
         </Button>
-        {cancelAtPeriodEnd && (status === "active" || status === "trialing") ? (
+        {!disabled && cancelAtPeriodEnd && (status === "active" || status === "trialing") ? (
           <Button type="button" size="sm" variant="outline" onClick={onReactivate}>
             <RotateCcw className="h-3.5 w-3.5 mr-1" />
             {t("subscription.reactivate")}
           </Button>
-        ) : !cancelAtPeriodEnd && (status === "active" || status === "trialing") ? (
+        ) : !disabled && !cancelAtPeriodEnd && (status === "active" || status === "trialing") ? (
           <Button type="button" size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={onCancel}>
             {t("subscription.cancelSubscription")}
           </Button>

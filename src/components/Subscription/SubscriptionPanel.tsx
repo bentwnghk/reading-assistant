@@ -7,15 +7,16 @@ import useSubscription from "@/hooks/useSubscription";
 import PricingCards from "./PricingCards";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import type { SubscriptionPlan } from "@/lib/subscription";
 
 interface SubscriptionPanelProps {
   monthlyPrice: number;
   currency: string;
+  disabled?: boolean;
 }
 
-function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
+function SubscriptionPanel({ monthlyPrice, currency, disabled }: SubscriptionPanelProps) {
   const { t } = useTranslation();
   const {
     subscription,
@@ -50,6 +51,17 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
 
   if (!subscription) return null;
 
+  if (disabled && !subscription.hasSubscription) {
+    return (
+      <div className="rounded-lg border border-border bg-muted/50 p-4 flex items-center gap-3">
+        <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+        <p className="text-sm text-muted-foreground">
+          {t("subscription.disabledBySchoolSubscription")}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       {subscription.hasSubscription ? (
@@ -58,10 +70,11 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
             subscription={subscription}
             monthlyPrice={monthlyPrice}
             currency={currency}
-            onManage={openPortal}
-            onCancel={() => setCanceling(true)}
-            onReactivate={reactivateSubscription}
-            onSwitchPlan={switchPlan}
+            onManage={disabled ? () => {} : openPortal}
+            onCancel={disabled ? () => {} : () => setCanceling(true)}
+            onReactivate={disabled ? () => {} : reactivateSubscription}
+            onSwitchPlan={disabled ? async () => false : switchPlan}
+            disabled={disabled}
           />
         </div>
       ) : (

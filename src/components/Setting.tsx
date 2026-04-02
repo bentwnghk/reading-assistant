@@ -48,6 +48,7 @@ import { useSession } from "next-auth/react";
 import ReminderPreferences from "@/components/ReminderPreferences";
 import SubscriptionPanel from "@/components/Subscription/SubscriptionPanel";
 import SchoolSubscriptionPanel from "@/components/Subscription/SchoolSubscriptionPanel";
+import useSchoolSubscription from "@/hooks/useSchoolSubscription";
 
 type SettingProps = {
   open: boolean;
@@ -116,6 +117,10 @@ function Setting({ open, onClose }: SettingProps) {
   const { status: authStatus } = useSession();
   const isAuthenticated = authStatus === "authenticated";
   const [pricingInfo, setPricingInfo] = useState<{ monthly: number; currency: string } | null>(null);
+  const { subscription: schoolSub } = useSchoolSubscription();
+  const hasActiveSchoolSubscription =
+    schoolSub?.hasSubscription === true &&
+    (schoolSub.status === "active" || schoolSub.status === "trialing");
 
   useEffect(() => {
     fetch("/api/subscription/pricing")
@@ -411,6 +416,7 @@ function Setting({ open, onClose }: SettingProps) {
                         <SubscriptionPanel
                           monthlyPrice={pricingInfo.monthly}
                           currency={pricingInfo.currency}
+                          disabled={hasActiveSchoolSubscription}
                         />
                       )}
                     </>
