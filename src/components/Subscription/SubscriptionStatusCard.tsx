@@ -178,17 +178,17 @@ function SubscriptionStatusCard({
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="outline" onClick={onManage}>
+        <Button type="button" size="sm" variant="outline" onClick={onManage}>
           <ExternalLink className="h-3.5 w-3.5 mr-1" />
           {t("subscription.manageSubscription")}
         </Button>
         {cancelAtPeriodEnd && (status === "active" || status === "trialing") ? (
-          <Button size="sm" variant="outline" onClick={onReactivate}>
+          <Button type="button" size="sm" variant="outline" onClick={onReactivate}>
             <RotateCcw className="h-3.5 w-3.5 mr-1" />
             {t("subscription.reactivate")}
           </Button>
         ) : !cancelAtPeriodEnd && (status === "active" || status === "trialing") ? (
-          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={onCancel}>
+          <Button type="button" size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={onCancel}>
             {t("subscription.cancelSubscription")}
           </Button>
         ) : null}

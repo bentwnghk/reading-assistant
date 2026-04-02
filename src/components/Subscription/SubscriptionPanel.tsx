@@ -87,10 +87,11 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
           <div className="bg-card border border-border rounded-lg p-6 max-w-sm mx-4 space-y-4">
             <p className="text-sm">{t("subscription.cancelConfirm")}</p>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={() => setCanceling(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setCanceling(false)}>
                 {t("setting.cancel")}
               </Button>
               <Button
+                type="button"
                 size="sm"
                 variant="destructive"
                 onClick={() => {
