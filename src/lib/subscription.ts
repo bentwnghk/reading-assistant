@@ -226,7 +226,7 @@ async function getOrCreateStripeCustomer(
   return customer.id;
 }
 
-export async function ensureStripePrices(): Promise<{
+async function ensureStripePrices(): Promise<{
   monthlyPriceId: string;
   yearlyPriceId: string;
 }> {
