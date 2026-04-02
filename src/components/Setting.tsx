@@ -247,11 +247,11 @@ function Setting({ open, onClose }: SettingProps) {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="local">
-                                {t("setting.local")}
-                              </SelectItem>
                               <SelectItem value="subscription">
                                 {t("setting.subscription")}
+                              </SelectItem>
+                              <SelectItem value="local">
+                                {t("setting.local")}
                               </SelectItem>
                               <SelectItem value="proxy">
                                 {t("setting.proxy")}
