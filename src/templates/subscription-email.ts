@@ -36,7 +36,7 @@ const STRINGS: Record<
     payment_failed: {
       htmlTitle: "Payment Failed - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `Payment failed for your ${plan} ProReader subscription`,
+        `Payment failed for your ${plan} Mr.\u{1F196} ProReader subscription`,
       greeting: (name) => `Hi ${name},`,
       body: `We were unable to process your payment for the Mr.\u{1F196} ProReader subscription. This could be due to an expired card, insufficient funds, or a bank decline.\n\nTo avoid service interruption, please update your payment method as soon as possible.`,
       actionText: "Update Payment Method",
@@ -47,20 +47,20 @@ const STRINGS: Record<
     trial_ending: {
       htmlTitle: "Trial Ending Soon - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `Your ${plan} ProReader trial ends soon`,
+        `Your ${plan} Mr.\u{1F196} ProReader trial ends soon`,
       greeting: (name) => `Hi ${name},`,
-      body: `Your free trial for the Mr.\u{1F196} ProReader subscription is ending soon. After the trial ends, you'll be charged the regular subscription fee.\n\nWe hope you've enjoyed the ProReader experience! Your subscription will continue automatically unless you cancel before the trial ends.`,
+      body: `Your free trial for the Mr.\u{1F196} ProReader subscription is ending soon. After the trial ends, you'll be charged the regular subscription fee.\n\nWe hope you've enjoyed the Mr.\u{1F196} ProReader experience! Your subscription will continue automatically unless you cancel before the trial ends.`,
       actionText: "Manage Subscription",
       actionUrl: "{{portalUrl}}",
       footerNote:
         "You can cancel anytime before the trial ends at no charge.",
     },
     subscription_activated: {
-      htmlTitle: "Welcome to ProReader! - Mr.\u{1F196} ProReader",
+      htmlTitle: "Welcome to Mr.\u{1F196} ProReader! - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `Welcome! Your ${plan} ProReader subscription is active`,
+        `Welcome! Your ${plan} Mr.\u{1F196} ProReader subscription is active`,
       greeting: (name) => `Hi ${name},`,
-      body: `Welcome to Mr.\u{1F196} ProReader! Your subscription is now active and you have full access to all ProReader features.\n\nThank you for choosing ProReader. We're excited to be part of your learning journey!`,
+      body: `Welcome to Mr.\u{1F196} ProReader! Your subscription is now active and you have full access to all Mr.\u{1F196} ProReader features.\n\nThank you for choosing Mr.\u{1F196} ProReader. We're excited to be part of your learning journey!`,
       actionText: "Start Learning",
       actionUrl: "{{appUrl}}",
       footerNote:
@@ -69,7 +69,7 @@ const STRINGS: Record<
     subscription_canceled: {
       htmlTitle: "Subscription Canceled - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `Your ${plan} ProReader subscription has been canceled`,
+        `Your ${plan} Mr.\u{1F196} ProReader subscription has been canceled`,
       greeting: (name) => `Hi ${name},`,
       body: `Your Mr.\u{1F196} ProReader subscription has been canceled as requested. You'll still have access until the end of your current billing period.\n\nWe'd love to have you back! You can reactivate your subscription anytime from Settings.`,
       actionText: "Reactivate Subscription",
@@ -80,9 +80,9 @@ const STRINGS: Record<
     subscription_renewed: {
       htmlTitle: "Subscription Renewed - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `Your ${plan} ProReader subscription has been renewed`,
+        `Your ${plan} Mr.\u{1F196} ProReader subscription has been renewed`,
       greeting: (name) => `Hi ${name},`,
-      body: `Your Mr.\u{1F196} ProReader subscription has been successfully renewed. Thank you for continuing your learning journey with us!\n\nYou have full access to all ProReader features. Happy learning!`,
+      body: `Your Mr.\u{1F196} ProReader subscription has been successfully renewed. Thank you for continuing your learning journey with us!\n\nYou have full access to all Mr.\u{1F196} ProReader features. Happy learning!`,
       actionText: "Start Learning",
       actionUrl: "{{appUrl}}",
       footerNote:
@@ -93,7 +93,7 @@ const STRINGS: Record<
     payment_failed: {
       htmlTitle: "\u{4ED8}\u{6B3E}\u{5931}\u{6557} - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} ProReader \u{8A02}\u{95B1}\u{4ED8}\u{6B3E}\u{5931}\u{6555}`,
+        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{4ED8}\u{6B3E}\u{5931}\u{6555}`,
       greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
       body: `\u{6211}\u{5011}\u{7121}\u{6CD5}\u{8655}\u{7406}\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{4ED8}\u{6B3E}\u{3002}\u{9019}\u{53EF}\u{80FD}\u{662F}\u{56E0}\u{70BA}\u{4FE1}\u{7528}\u{5361}\u{904E}\u{671F}\u{3001}\u{9910}\u{984D}\u{4E0D}\u{8DB3}\u{6216}\u{9280}\u{884C}\u{62D2}\u{7D55}\u{3002}\n\n\u{70BA}\u{907F}\u{514D}\u{670D}\u{52D9}\u{4E2D}\u{65B7}\u{FF0C}\u{8ACB}\u{5118}\u{5FEB}\u{66F4}\u{65B0}\u{60A8}\u{7684}\u{4ED8}\u{6B3E}\u{65B9}\u{5F0F}\u{3002}`,
       actionText: "\u{66F4}\u{65B0}\u{4ED8}\u{6B3E}\u{65B9}\u{5F0F}",
@@ -104,20 +104,20 @@ const STRINGS: Record<
     trial_ending: {
       htmlTitle: "\u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F} - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} ProReader \u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F}`,
+        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F}`,
       greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{514D}\u{8CBB}\u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F}\u{3002}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{5F8C}\u{FF0C}\u{60A8}\u{5C07}\u{88AB}\u{6536}\u{53D6}\u{6B63}\u{5E38}\u{8A02}\u{95B1}\u{8CBB}\u{7528}\u{3002}\n\n\u{5E0C}\u{671B}\u{60A8}\u{559C}\u{6B61} ProReader \u{7684}\u{9AD4}\u{9A57}\u{FF01}\u{9664}\u{975E}\u{60A8}\u{5728}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{524D}\u{53D6}\u{6D88}\u{FF0C}\u{5426}\u{5247}\u{8A02}\u{95B1}\u{5C07}\u{81EA}\u{52D5}\u{7E8C}\u{671F}\u{3002}`,
+      body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{514D}\u{8CBB}\u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F}\u{3002}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{5F8C}\u{FF0C}\u{60A8}\u{5C07}\u{88AB}\u{6536}\u{53D6}\u{6B63}\u{5E38}\u{8A02}\u{95B1}\u{8CBB}\u{7528}\u{3002}\n\n\u{5E0C}\u{671B}\u{60A8}\u{559C}\u{6B61} Mr.\u{1F196} ProReader \u{7684}\u{9AD4}\u{9A57}\u{FF01}\u{9664}\u{975E}\u{60A8}\u{5728}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{524D}\u{53D6}\u{6D88}\u{FF0C}\u{5426}\u{5247}\u{8A02}\u{95B1}\u{5C07}\u{81EA}\u{52D5}\u{7E8C}\u{671F}\u{3002}`,
       actionText: "\u{7BA1}\u{7406}\u{8A02}\u{95B1}",
       actionUrl: "{{portalUrl}}",
       footerNote:
         "\u{60A8}\u{53EF}\u{4EE5}\u{5728}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{524D}\u{4EFB}\u{4F55}\u{6642}\u{5019}\u{53D6}\u{6D88}\u{FF0C}\u{4E0D}\u{6703}\u{88AB}\u{6536}\u{8CBB}\u{3002}",
     },
     subscription_activated: {
-      htmlTitle: "\u{6B61}\u{8FCE}\u{4F7F}\u{7528} ProReader\u{FF01} - Mr.\u{1F196} ProReader",
+      htmlTitle: "\u{6B61}\u{8FCE}\u{4F7F}\u{7528} Mr.\u{1F196} ProReader\u{FF01} - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `\u{6B61}\u{8FCE}\u{FF01}\u{60A8}\u{7684} ${plan} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{555F}\u{7528}`,
+        `\u{6B61}\u{8FCE}\u{FF01}\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{555F}\u{7528}`,
       greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{6B61}\u{8FCE}\u{4F7F}\u{7528} Mr.\u{1F196} ProReader\u{FF01}\u{60A8}\u{7684}\u{8A02}\u{95B1}\u{73B0}\u{5DF2}\u{555F}\u{7528}\u{FF0C}\u{60A8}\u{53EF}\u{4EE5}\u{5B8C}\u{5168}\u{5B58}\u{53D6}\u{6240}\u{6709} ProReader \u{529F}\u{80FD}\u{3002}\n\n\u{611F}\u{8B1D}\u{60A8}\u{9078}\u{64C7} ProReader\u{3002}\u{6211}\u{5011}\u{5F88}\u{8208}\u{596E}\u{80FD}\u{966A}\u{4F34}\u{60A8}\u{7684}\u{5B78}\u{7FD2}\u{4E4B}\u{65C5}\u{FF01}`,
+      body: `\u{6B61}\u{8FCE}\u{4F7F}\u{7528} Mr.\u{1F196} ProReader\u{FF01}\u{60A8}\u{7684}\u{8A02}\u{95B1}\u{73B0}\u{5DF2}\u{555F}\u{7528}\u{FF0C}\u{60A8}\u{53EF}\u{4EE5}\u{5B8C}\u{5168}\u{5B58}\u{53D6}\u{6240}\u{6709} Mr.\u{1F196} ProReader \u{529F}\u{80FD}\u{3002}\n\n\u{611F}\u{8B1D}\u{60A8}\u{9078}\u{64C7} Mr.\u{1F196} ProReader\u{3002}\u{6211}\u{5011}\u{5F88}\u{8208}\u{596E}\u{80FD}\u{966A}\u{4F34}\u{60A8}\u{7684}\u{5B78}\u{7FD2}\u{4E4B}\u{65C5}\u{FF01}`,
       actionText: "\u{958B}\u{59CB}\u{5B78}\u{7FD2}",
       actionUrl: "{{appUrl}}",
       footerNote:
@@ -126,7 +126,7 @@ const STRINGS: Record<
     subscription_canceled: {
       htmlTitle: "\u{8A02}\u{95B1}\u{5DF2}\u{53D6}\u{6D88} - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{53D6}\u{6D88}`,
+        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{53D6}\u{6D88}`,
       greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
       body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{6839}\u{64DA}\u{8981}\u{6C42}\u{53D6}\u{6D88}\u{3002}\u{60A8}\u{5728}\u{7576}\u{524D}\u{8A08}\u{8CBB}\u{671F}\u{7D50}\u{675F}\u{524D}\u{4ECD}\u{53EF}\u{4EE5}\u{7E7C}\u{7E8C}\u{4F7F}\u{7528}\u{3002}\n\n\u{6211}\u{5011}\u{5E0C}\u{671B}\u{60A8}\u{80FD}\u{56DE}\u{4F86}\u{FF01}\u{60A8}\u{53EF}\u{4EE5}\u{96A8}\u{6642}\u{5728}\u{8A2D}\u{5B9A}\u{4E2D}\u{91CD}\u{65B0}\u{555F}\u{7528}\u{8A02}\u{95B1}\u{3002}`,
       actionText: "\u{91CD}\u{65B0}\u{555F}\u{7528}\u{8A02}\u{95B1}",
@@ -137,9 +137,9 @@ const STRINGS: Record<
     subscription_renewed: {
       htmlTitle: "\u{8A02}\u{95B1}\u{5DF2}\u{7E8C}\u{671F} - Mr.\u{1F196} ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{7E8C}\u{671F}`,
+        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{7E8C}\u{671F}`,
       greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{6210}\u{529F}\u{7E8C}\u{671F}\u{3002}\u{611F}\u{8B1D}\u{60A8}\u{7E7C}\u{7E8C}\u{8207}\u{6211}\u{5011}\u{4E00}\u{8D77}\u{5B78}\u{7FD2}\u{FF01}\n\n\u{60A8}\u{53EF}\u{4EE5}\u{5B8C}\u{5168}\u{5B58}\u{53D6}\u{6240}\u{6709} ProReader \u{529F}\u{80FD}\u{3002}\u{795D}\u{5B78}\u{7FD2}\u{6109}\u{5FEB}\u{FF01}`,
+      body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{6210}\u{529F}\u{7E8C}\u{671F}\u{3002}\u{611F}\u{8B1D}\u{60A8}\u{7E7C}\u{7E8C}\u{8207}\u{6211}\u{5011}\u{4E00}\u{8D77}\u{5B78}\u{7FD2}\u{FF01}\n\n\u{60A8}\u{53EF}\u{4EE5}\u{5B8C}\u{5168}\u{5B58}\u{53D6}\u{6240}\u{6709} Mr.\u{1F196} ProReader \u{529F}\u{80FD}\u{3002}\u{795D}\u{5B78}\u{7FD2}\u{6109}\u{5FEB}\u{FF01}`,
       actionText: "\u{958B}\u{59CB}\u{5B78}\u{7FD2}",
       actionUrl: "{{appUrl}}",
       footerNote:

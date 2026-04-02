@@ -809,7 +809,7 @@
     "pastDueWarning": "Your last payment failed. Please update your payment method.",
     "updatePayment": "Update Payment",
     "canceledInfo": "Your subscription ends on {{date}}. You can reactivate anytime.",
-    "checkoutSuccess": "Subscription activated! Welcome to ProReader.",
+    "checkoutSuccess": "Subscription activated! Welcome to Mr.🆖 ProReader.",
     "checkoutCanceled": "Checkout was canceled. You can subscribe anytime.",
     "switchPlanTitle": "Switch plan",
     "switchToYearly": "Switch to Yearly",
@@ -845,17 +845,6 @@
       "noSubscriptions": "No subscriptions found",
       "yes": "Yes",
       "no": "No"
-    },
-    "usage": {
-      "title": "Usage Dashboard",
-      "currentPeriod": "Current Period",
-      "last30Days": "Last 30 Days",
-      "sessions": "Sessions",
-      "testsCompleted": "Tests Done",
-      "avgScore": "Avg Score",
-      "totalActivities": "Activities",
-      "dailyActivity": "Daily Activity",
-      "activityBreakdown": "Activity Breakdown"
     }
   },
   "reminder": {

@@ -809,7 +809,7 @@
     "pastDueWarning": "您的上次付款失敗。請更新付款方式。",
     "updatePayment": "更新付款方式",
     "canceledInfo": "您的訂閱將於 {{date}} 結束。您可以隨時重新啟用。",
-    "checkoutSuccess": "訂閱已啟用！歡迎使用 ProReader。",
+    "checkoutSuccess": "訂閱已啟用！歡迎使用 Mr.🆖 ProReader。",
     "checkoutCanceled": "結帳已取消。您可以隨時訂閱。",
     "switchPlanTitle": "切換方案",
     "switchToYearly": "切換至年付",
@@ -845,17 +845,6 @@
       "noSubscriptions": "找不到訂閱",
       "yes": "是",
       "no": "否"
-    },
-    "usage": {
-      "title": "使用儀表板",
-      "currentPeriod": "當前期間",
-      "last30Days": "過去 30 天",
-      "sessions": "閱讀段",
-      "testsCompleted": "完成測驗",
-      "avgScore": "平均分數",
-      "totalActivities": "活動總計",
-      "dailyActivity": "每日活動",
-      "activityBreakdown": "活動明細"
     }
   },
   "reminder": {
