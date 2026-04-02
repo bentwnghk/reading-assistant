@@ -24,6 +24,7 @@ import ClassList from "./ClassList"
 import StudentDataView from "./StudentDataView"
 import SchoolList from "./SchoolList"
 import AiQuestionsView from "./AiQuestionsView"
+import AdminSubscriptionsView from "@/components/Subscription/AdminSubscriptionsView"
 
 interface UserManagementPanelProps {
   open: boolean
@@ -284,6 +285,9 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsTrigger value="aiQuestions">{t("userManagement.tabs.aiQuestions")}</TabsTrigger>
             )}
+            {(isSuperAdmin || isAdmin) && (
+              <TabsTrigger value="subscriptions">{t("userManagement.tabs.subscriptions")}</TabsTrigger>
+            )}
           </TabsList>
           <div className="flex-1 overflow-auto mt-4">
             {isSuperAdmin && (
@@ -307,6 +311,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="aiQuestions" className="mt-0">
                 <AiQuestionsView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} />
+              </TabsContent>
+            )}
+            {(isSuperAdmin || isAdmin) && (
+              <TabsContent value="subscriptions" className="mt-0">
+                <AdminSubscriptionsView />
               </TabsContent>
             )}
           </div>

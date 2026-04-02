@@ -809,6 +809,8 @@
     "pastDueWarning": "Your last payment failed. Please update your payment method.",
     "updatePayment": "Update Payment",
     "canceledInfo": "Your subscription ends on {date}. You can reactivate anytime.",
+    "checkoutSuccess": "Subscription activated! Welcome to ProReader.",
+    "checkoutCanceled": "Checkout was canceled. You can subscribe anytime.",
     "status": {
       "active": "Active",
       "trialing": "Trial",
@@ -819,6 +821,34 @@
       "unpaid": "Unpaid",
       "paused": "Paused",
       "inactive": "Inactive"
+    },
+    "admin": {
+      "total": "Total",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "user": "User",
+      "plan": "Plan",
+      "status": "Status",
+      "periodStart": "Period Start",
+      "periodEnd": "Period End",
+      "cancelPending": "Cancel Pending",
+      "created": "Created",
+      "searchPlaceholder": "Search by name or email...",
+      "allStatuses": "All Statuses",
+      "noSubscriptions": "No subscriptions found",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "usage": {
+      "title": "Usage Dashboard",
+      "currentPeriod": "Current Period",
+      "last30Days": "Last 30 Days",
+      "sessions": "Sessions",
+      "testsCompleted": "Tests Done",
+      "avgScore": "Avg Score",
+      "totalActivities": "Activities",
+      "dailyActivity": "Daily Activity",
+      "activityBreakdown": "Activity Breakdown"
     }
   },
   "reminder": {
@@ -915,7 +945,8 @@
       "classes": "Classes",
       "studentData": "Student Data",
       "schools": "Schools",
-      "aiQuestions": "AI Questions"
+      "aiQuestions": "AI Questions",
+      "subscriptions": "Subscriptions"
     },
     "roles": {
       "superAdmin": "Super Admin",

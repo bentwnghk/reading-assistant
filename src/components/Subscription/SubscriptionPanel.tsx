@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import useSubscription from "@/hooks/useSubscription";
 import PricingCards from "./PricingCards";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
+import UsageDashboard from "./UsageDashboard";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { SubscriptionPlan } from "@/lib/subscription";
@@ -26,6 +28,18 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
   } = useSubscription();
   const [canceling, setCanceling] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get("subscription");
+    if (result === "success") {
+      toast.success(t("subscription.checkoutSuccess"));
+      window.history.replaceState(null, "", "/settings");
+    } else if (result === "canceled") {
+      toast.info(t("subscription.checkoutCanceled"));
+      window.history.replaceState(null, "", "/settings");
+    }
+  }, [t]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-6">
@@ -38,12 +52,15 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
 
   if (subscription.hasSubscription) {
     return (
-      <SubscriptionStatusCard
-        subscription={subscription}
-        onManage={openPortal}
-        onCancel={() => setCanceling(true)}
-        onReactivate={reactivateSubscription}
-      />
+      <div className="space-y-4">
+        <SubscriptionStatusCard
+          subscription={subscription}
+          onManage={openPortal}
+          onCancel={() => setCanceling(true)}
+          onReactivate={reactivateSubscription}
+        />
+        <UsageDashboard />
+      </div>
     );
   }
 

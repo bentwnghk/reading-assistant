@@ -491,6 +491,18 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         ...subData,
         plan: plan || null,
       });
+
+      try {
+        const { notifySubscriptionEvent } = await import("./subscription-email");
+        await notifySubscriptionEvent(userId, "subscription_activated", {
+          plan: plan || "monthly",
+          status: subscription.status,
+          nextBillingDate: subData.currentPeriodEnd,
+          trialEndDate: subData.trialEnd || undefined,
+        });
+      } catch (e) {
+        console.error("[webhook] Failed to send activation email:", e);
+      }
       break;
     }
     case "customer.subscription.updated": {
@@ -500,12 +512,35 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
       );
       if (!userId) return;
 
+      const prevData = event.data.previous_attributes as Record<string, unknown> | null;
       const subData = subscriptionToRecordData(subscription);
       await upsertSubscriptionRecord(userId, {
         stripeCustomerId: subscription.customer as string,
         stripeSubscriptionId: subscription.id,
         ...subData,
       });
+
+      try {
+        const { notifySubscriptionEvent } = await import("./subscription-email");
+        if (prevData?.cancel_at_period_end === false && subscription.cancel_at_period_end) {
+          const record = await getSubscriptionRecord(userId);
+          await notifySubscriptionEvent(userId, "subscription_canceled", {
+            plan: record?.plan || "monthly",
+            status: subscription.status,
+            nextBillingDate: subData.currentPeriodEnd,
+          });
+        }
+        if (prevData?.cancel_at_period_end === true && !subscription.cancel_at_period_end) {
+          const record = await getSubscriptionRecord(userId);
+          await notifySubscriptionEvent(userId, "subscription_renewed", {
+            plan: record?.plan || "monthly",
+            status: subscription.status,
+            nextBillingDate: subData.currentPeriodEnd,
+          });
+        }
+      } catch (e) {
+        console.error("[webhook] Failed to send update email:", e);
+      }
       break;
     }
     case "customer.subscription.deleted": {
@@ -547,6 +582,20 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         stripeSubscriptionId: subscription.id,
         ...subData,
       });
+
+      if (invoice.billing_reason === "subscription_cycle") {
+        try {
+          const { notifySubscriptionEvent } = await import("./subscription-email");
+          const record = await getSubscriptionRecord(userId);
+          await notifySubscriptionEvent(userId, "subscription_renewed", {
+            plan: record?.plan || "monthly",
+            status: subscription.status,
+            nextBillingDate: subData.currentPeriodEnd,
+          });
+        } catch (e) {
+          console.error("[webhook] Failed to send renewal email:", e);
+        }
+      }
       break;
     }
     case "invoice.payment_failed": {
@@ -571,6 +620,18 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         ...subData,
         status: "past_due",
       });
+
+      try {
+        const { notifySubscriptionEvent } = await import("./subscription-email");
+        const record = await getSubscriptionRecord(userId);
+        await notifySubscriptionEvent(userId, "payment_failed", {
+          plan: record?.plan || "monthly",
+          status: "past_due",
+          nextBillingDate: subData.currentPeriodEnd,
+        });
+      } catch (e) {
+        console.error("[webhook] Failed to send payment failed email:", e);
+      }
       break;
     }
   }
