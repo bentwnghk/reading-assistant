@@ -224,7 +224,7 @@ function Setting({ open, onClose }: SettingProps) {
                 )}
               </TabsList>
 
-              <TabsContent value="general" className="space-y-4 mt-4">
+              <TabsContent value="general" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
                 <div className={BUILD_MODE === "export" ? "hidden" : ""}>
                   <FormField
                     control={form.control}
@@ -832,7 +832,7 @@ function Setting({ open, onClose }: SettingProps) {
                 />
               </TabsContent>
 
-              <TabsContent value="tts" className="space-y-4 mt-4">
+              <TabsContent value="tts" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
                 <FormField
                   control={form.control}
                   name="ttsVoice"
@@ -902,7 +902,7 @@ function Setting({ open, onClose }: SettingProps) {
               </TabsContent>
 
               {isAuthenticated && (
-                <TabsContent value="notifications" className="space-y-4 mt-4">
+                <TabsContent value="notifications" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
                   <ReminderPreferences />
                 </TabsContent>
               )}
