@@ -259,14 +259,22 @@ async function ensureStripePrices(): Promise<{
     limit: 100,
   });
 
-  let monthlyPriceId = existingPrices.data.find(
+  const existingMonthly = existingPrices.data.find(
     (p) => p.recurring?.interval === "month"
-  )?.id;
-  let yearlyPriceId = existingPrices.data.find(
+  );
+  const existingYearly = existingPrices.data.find(
     (p) => p.recurring?.interval === "year"
-  )?.id;
+  );
 
-  if (!monthlyPriceId) {
+  let monthlyPriceId: string;
+  let yearlyPriceId: string;
+
+  if (existingMonthly && existingMonthly.unit_amount === monthlyAmount) {
+    monthlyPriceId = existingMonthly.id;
+  } else {
+    if (existingMonthly) {
+      await stripe.prices.update(existingMonthly.id, { active: false });
+    }
     const price = await stripe.prices.create({
       product: productId,
       unit_amount: monthlyAmount,
@@ -276,7 +284,12 @@ async function ensureStripePrices(): Promise<{
     monthlyPriceId = price.id;
   }
 
-  if (!yearlyPriceId) {
+  if (existingYearly && existingYearly.unit_amount === yearlyAmount) {
+    yearlyPriceId = existingYearly.id;
+  } else {
+    if (existingYearly) {
+      await stripe.prices.update(existingYearly.id, { active: false });
+    }
     const price = await stripe.prices.create({
       product: productId,
       unit_amount: yearlyAmount,
