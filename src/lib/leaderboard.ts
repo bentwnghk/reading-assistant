@@ -58,6 +58,11 @@ export interface PersonalStats {
   rankInClass: number | null
   rankInSchool: number | null
   rankGlobal: number | null
+  weeklyActivity: {
+    total: number
+    breakdown: { activity_type: string; count: number }[]
+    daily: { date: string; count: number }[]
+  } | null
 }
 
 interface WeeklyStatsRow {
@@ -635,6 +640,41 @@ export async function getPersonalStats(
     const rankSchool = parseInt(rankSchoolResult.rows[0]?.rank ?? "0") || null
     const rankGlobal = parseInt(rankGlobalResult.rows[0]?.rank ?? "0") || null
 
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekEnd.getDate() + 7)
+
+    const breakdownResult = await client.query(
+      `SELECT activity_type, COUNT(*) as count
+       FROM activity_logs
+       WHERE user_id = $1
+         AND created_at >= $2
+         AND created_at < $3
+       GROUP BY activity_type
+       ORDER BY count DESC`,
+      [userId, weekStart, weekEnd]
+    )
+
+    const totalActivityResult = await client.query(
+      `SELECT COUNT(*) as total FROM activity_logs
+       WHERE user_id = $1
+         AND created_at >= $2
+         AND created_at < $3`,
+      [userId, weekStart, weekEnd]
+    )
+
+    const dailyActivityResult = await client.query(
+      `SELECT DATE(created_at) as date, COUNT(*) as count
+       FROM activity_logs
+       WHERE user_id = $1
+         AND created_at >= $2
+         AND created_at < $3
+       GROUP BY DATE(created_at)
+       ORDER BY date ASC`,
+      [userId, weekStart, weekEnd]
+    )
+
+    const totalActivities = Number(totalActivityResult.rows[0].total)
+
     return {
       currentWeek: currResult.rows.length  > 0 ? mapWeekRow(currResult.rows[0])  : null,
       priorWeek:   priorResult.rows.length > 0 ? mapWeekRow(priorResult.rows[0]) : null,
@@ -648,6 +688,17 @@ export async function getPersonalStats(
       rankInClass:  rankClass,
       rankInSchool: rankSchool,
       rankGlobal,
+      weeklyActivity: totalActivities > 0 ? {
+        total: totalActivities,
+        breakdown: breakdownResult.rows.map((r) => ({
+          activity_type: r.activity_type,
+          count: Number(r.count),
+        })),
+        daily: dailyActivityResult.rows.map((r) => ({
+          date: r.date,
+          count: Number(r.count),
+        })),
+      } : null,
     }
   } finally {
     client.release()

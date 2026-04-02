@@ -1190,6 +1190,8 @@
       "avgTestScore": "平均測試分數",
       "totalFlashcards": "字卡複習總次數",
       "noStats": "完成本週的學習活動，即可出現在排行榜上！",
+      "weeklyActivity": "本週活動",
+      "activityBreakdown": "活動明細",
       "teacherTitle": "教師視圖",
       "teacherMessage": "「我的統計」頁面追蹤學生的學習進度。請切換至「排行榜」頁面查看學生的表現。"
     },
@@ -1395,6 +1397,20 @@
         "description": "向 AI 導師提問 {{count}} 個問題",
         "hint": "向 AI 導師提問有關閱讀材料的問題"
       }
+    },
+    "activityTypes": {
+      "session_create": "閱讀次數",
+      "test_complete": "測驗",
+      "quiz_complete": "詞彙測驗",
+      "spelling_complete": "拼字遊戲",
+      "flashcard_review": "生字卡複習",
+      "mindmap_generate": "思維導圖",
+      "adapted_text_generate": "改寫文本",
+      "simplified_text_generate": "簡化文本",
+      "sentence_analyze": "句子分析",
+      "targeted_practice_complete": "針對性練習",
+      "glossary_add": "詞彙單字",
+      "ai_tutor_question": "AI 導師提問"
     }
   },
   "recommendation": {

@@ -125,7 +125,7 @@ function debouncedSync(settings: Partial<SettingStore>) {
 
 export const defaultValues: SettingStore = {
   provider: "openaicompatible",
-  mode: "" as ApiMode | "",
+  mode: "subscription" as ApiMode,
   model: "gpt-5-mini",
   visionModel: "gpt-5-nano",
   summaryModel: "deepseek-chat",

@@ -70,4 +70,9 @@ export interface PersonalStats {
   rankInClass: number | null
   rankInSchool: number | null
   rankGlobal: number | null
+  weeklyActivity: {
+    total: number
+    breakdown: { activity_type: string; count: number }[]
+    daily: { date: string; count: number }[]
+  } | null
 }
