@@ -303,12 +303,17 @@ async function ensureStripePrices(): Promise<{
 }
 
 function subscriptionToRecordData(
-  sub: Pick<Stripe.Subscription, "id" | "status" | "customer" | "start_date" | "trial_end" | "cancel_at_period_end">
+  sub: Stripe.Subscription
 ) {
+  const item = sub.items.data[0];
   return {
     status: sub.status as SubscriptionStatus,
-    currentPeriodStart: new Date(sub.start_date * 1000).toISOString(),
-    currentPeriodEnd: new Date(sub.start_date * 1000).toISOString(),
+    currentPeriodStart: item
+      ? new Date(item.current_period_start * 1000).toISOString()
+      : new Date(sub.start_date * 1000).toISOString(),
+    currentPeriodEnd: item
+      ? new Date(item.current_period_end * 1000).toISOString()
+      : new Date(sub.start_date * 1000).toISOString(),
     cancelAtPeriodEnd: sub.cancel_at_period_end,
     trialEnd: sub.trial_end
       ? new Date(sub.trial_end * 1000).toISOString()
