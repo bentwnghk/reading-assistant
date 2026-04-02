@@ -119,7 +119,14 @@ function Setting({ open, onClose }: SettingProps) {
   useEffect(() => {
     fetch("/api/subscription/pricing")
       .then((r) => r.json())
-      .then((data) => setPricingInfo(data))
+      .then((data) => {
+        if (data.monthly) {
+          setPricingInfo({
+            monthly: typeof data.monthly === "number" ? data.monthly : data.monthly.amount,
+            currency: data.monthly.currency || data.currency || "usd",
+          });
+        }
+      })
       .catch(() => {});
   }, []);
 
