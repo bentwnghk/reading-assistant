@@ -26,9 +26,11 @@ export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] 
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
 
+export type ApiMode = "local" | "proxy" | "subscription" | "";
+
 export interface SettingStore {
   provider: string;
-  mode: string;
+  mode: ApiMode;
   model: AvailableModel;
   visionModel: VisionModel;
   summaryModel: AvailableModel;
@@ -123,7 +125,7 @@ function debouncedSync(settings: Partial<SettingStore>) {
 
 export const defaultValues: SettingStore = {
   provider: "openaicompatible",
-  mode: "",
+  mode: "" as ApiMode | "",
   model: "gpt-5-mini",
   visionModel: "gpt-5-nano",
   summaryModel: "deepseek-chat",

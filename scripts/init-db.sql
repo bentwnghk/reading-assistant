@@ -403,6 +403,33 @@ CREATE TRIGGER update_email_reminder_preferences_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+-- ─── Subscriptions table ──────────────────────────────────────────────────────
+
+CREATE TABLE subscriptions (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  stripe_customer_id TEXT NOT NULL,
+  stripe_subscription_id TEXT UNIQUE,
+  status TEXT NOT NULL DEFAULT 'inactive'
+    CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused')),
+  plan TEXT CHECK (plan IN ('monthly', 'yearly')),
+  current_period_start TIMESTAMP WITH TIME ZONE,
+  current_period_end TIMESTAMP WITH TIME ZONE,
+  cancel_at_period_end BOOLEAN DEFAULT false,
+  trial_end TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
+CREATE INDEX idx_subscriptions_stripe_customer ON subscriptions(stripe_customer_id);
+CREATE INDEX idx_subscriptions_status ON subscriptions(status);
+
+CREATE TRIGGER update_subscriptions_updated_at
+  BEFORE UPDATE ON subscriptions
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;

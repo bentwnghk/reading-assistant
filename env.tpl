@@ -82,6 +82,22 @@ OPENAI_COMPATIBLE_API_KEY=
 # (Optional) Server-side Compatible with OpenAI API Proxy URL.
 OPENAI_COMPATIBLE_API_BASE_URL=
 
+# ─── Subscription & Stripe Configuration ───────────────────────────────────
+# Stripe secret key for server-side API calls. Get from https://dashboard.stripe.com/apikeys
+STRIPE_SECRET_KEY=
+# Stripe webhook secret for verifying webhook events. Get from https://dashboard.stripe.com/webhooks
+STRIPE_WEBHOOK_SECRET=
+# Stripe publishable key for client-side (NEXT_PUBLIC_ prefix makes it available in the browser)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+# Monthly subscription price (in your chosen currency, e.g. 9.99 for USD)
+# Yearly price is automatically calculated as monthly_price * 10 (save 2 months)
+SUBSCRIPTION_MONTHLY_PRICE=9.99
+# Subscription currency code (e.g. usd, eur, gbp, hkd)
+SUBSCRIPTION_CURRENCY=usd
+# (Optional) Separate OpenAI-compatible API key for subscription users.
+# This allows you to use a different API key/provider for subscription vs EDU users.
+OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY=
+
 # (Optional) Server-side pollinations.ai API Proxy URL. Default, `https://text.pollinations.ai/openai`
 POLLINATIONS_API_BASE_URL=
 

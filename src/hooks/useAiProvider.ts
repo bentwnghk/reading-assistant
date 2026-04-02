@@ -20,7 +20,10 @@ function useModelProvider() {
       settings,
     };
 
-    if (mode === "proxy") {
+    if (mode === "subscription") {
+      options.baseURL = location.origin + "/api/ai/subscription/v1";
+      options.apiKey = "subscription";
+    } else if (mode === "proxy") {
       options.apiKey = generateSignature(accessPassword, Date.now());
       switch (provider) {
         case "openai":

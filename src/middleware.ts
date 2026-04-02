@@ -51,6 +51,10 @@ const ERRORS = {
 export async function middleware(request: NextRequest) {
   if (NODE_ENV === "production") console.debug(request);
 
+  if (request.nextUrl.pathname.startsWith("/api/subscription")) {
+    return NextResponse.next();
+  }
+
   const disabledAIProviders =
     DISABLED_AI_PROVIDER.length > 0 ? DISABLED_AI_PROVIDER.split(",") : [];
   const disabledSearchProviders =

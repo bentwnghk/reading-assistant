@@ -741,6 +741,8 @@ function AdaptedText() {
           if (openaicompatibleApiKey) {
             headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
           }
+        } else if (mode === "subscription") {
+          url = "/api/ai/subscription/v1/audio/speech";
         } else {
           url = "/api/ai/openaicompatible/v1/audio/speech";
           if (accessPassword) {

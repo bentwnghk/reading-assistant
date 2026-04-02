@@ -46,6 +46,7 @@ import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ReminderPreferences from "@/components/ReminderPreferences";
+import SubscriptionPanel from "@/components/Subscription/SubscriptionPanel";
 
 type SettingProps = {
   open: boolean;
@@ -56,7 +57,7 @@ const BUILD_MODE = process.env.NEXT_PUBLIC_BUILD_MODE;
 
 const formSchema = z.object({
   provider: z.string(),
-  mode: z.string().optional(),
+  mode: z.enum(["local", "proxy", "subscription"]).optional(),
   model: z.enum(AVAILABLE_MODELS),
   visionModel: z.enum(VISION_MODELS),
   summaryModel: z.enum(AVAILABLE_MODELS),
@@ -113,6 +114,14 @@ function Setting({ open, onClose }: SettingProps) {
   const { mode, provider, update } = useSettingStore();
   const { status: authStatus } = useSession();
   const isAuthenticated = authStatus === "authenticated";
+  const [pricingInfo, setPricingInfo] = useState<{ monthly: number; currency: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/subscription/pricing")
+      .then((r) => r.json())
+      .then((data) => setPricingInfo(data))
+      .catch(() => {});
+  }, []);
 
   function getFormValues(): z.infer<typeof formSchema> {
     const state = useSettingStore.getState();
@@ -145,7 +154,7 @@ function Setting({ open, onClose }: SettingProps) {
   }
 
   function handleModeChange(mode: string) {
-    update({ mode });
+    update({ mode: mode as import("@/store/setting").ApiMode });
   }
 
   async function handleProviderChange(provider: string) {
@@ -234,6 +243,9 @@ function Setting({ open, onClose }: SettingProps) {
                               <SelectItem value="local">
                                 {t("setting.local")}
                               </SelectItem>
+                              <SelectItem value="subscription">
+                                {t("setting.subscription")}
+                              </SelectItem>
                               <SelectItem value="proxy">
                                 {t("setting.proxy")}
                               </SelectItem>
@@ -273,7 +285,7 @@ function Setting({ open, onClose }: SettingProps) {
                     </FormItem>
                   )}
                 />
-                <div className={cn("space-y-4", { hidden: mode === "proxy" })}>
+                <div className={cn("space-y-4", { hidden: mode === "proxy" || mode === "subscription" })}>
                   <div
                     className={cn("space-y-4", {
                       hidden: provider !== "openaicompatible",
@@ -342,7 +354,7 @@ function Setting({ open, onClose }: SettingProps) {
                 </div>
                 <div
                   className={cn("space-y-4", {
-                    hidden: mode === "local" || BUILD_MODE === "export",
+                    hidden: mode === "local" || mode === "subscription" || BUILD_MODE === "export",
                   })}
                 >
                   <FormField
@@ -367,6 +379,24 @@ function Setting({ open, onClose }: SettingProps) {
                       </FormItem>
                     )}
                   />
+                </div>
+                <div
+                  className={cn("space-y-4", {
+                    hidden: mode !== "subscription",
+                  })}
+                >
+                  {!isAuthenticated ? (
+                    <div className="rounded-lg border border-border bg-muted/50 p-4 text-center space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        {t("subscription.signInPrompt")}
+                      </p>
+                    </div>
+                  ) : pricingInfo ? (
+                    <SubscriptionPanel
+                      monthlyPrice={pricingInfo.monthly}
+                      currency={pricingInfo.currency}
+                    />
+                  ) : null}
                 </div>
                 <FormField
                   control={form.control}

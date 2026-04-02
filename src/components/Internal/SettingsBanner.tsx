@@ -8,7 +8,7 @@ import { useGlobalStore } from "@/store/global";
 
 function SettingsBanner() {
   const { t } = useTranslation();
-  const { openaicompatibleApiKey, accessPassword } = useSettingStore();
+  const { openaicompatibleApiKey, accessPassword, mode } = useSettingStore();
   const { setOpenSetting } = useGlobalStore();
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -23,6 +23,7 @@ function SettingsBanner() {
   }, []);
 
   if (!isHydrated) return null;
+  if (mode === "subscription") return null;
   if (openaicompatibleApiKey || accessPassword) return null;
 
   return (
