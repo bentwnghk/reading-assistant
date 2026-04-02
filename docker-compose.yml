@@ -76,8 +76,8 @@ services:
       SUPER_ADMIN_EMAILS: ""
       # Stripe Configuration
       STRIPE_SECRET_KEY: ""
+      STRIPE_PUBLISHABLE_KEY: ""
       STRIPE_WEBHOOK_SECRET: ""
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ""
       SUBSCRIPTION_MONTHLY_PRICE: "9.99"
       SUBSCRIPTION_CURRENCY: "usd"
       # Separate API key for subscription-based AI usage

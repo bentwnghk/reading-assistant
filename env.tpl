@@ -85,10 +85,10 @@ OPENAI_COMPATIBLE_API_BASE_URL=
 # ─── Subscription & Stripe Configuration ───────────────────────────────────
 # Stripe secret key for server-side API calls. Get from https://dashboard.stripe.com/apikeys
 STRIPE_SECRET_KEY=
+# Stripe publishable key (used by server-side Checkout Sessions). Get from https://dashboard.stripe.com/apikeys
+STRIPE_PUBLISHABLE_KEY=
 # Stripe webhook secret for verifying webhook events. Get from https://dashboard.stripe.com/webhooks
 STRIPE_WEBHOOK_SECRET=
-# Stripe publishable key for client-side (NEXT_PUBLIC_ prefix makes it available in the browser)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 # Monthly subscription price (in your chosen currency, e.g. 9.99 for USD)
 # Yearly price is automatically calculated as monthly_price * 10 (save 2 months)
 SUBSCRIPTION_MONTHLY_PRICE=9.99
