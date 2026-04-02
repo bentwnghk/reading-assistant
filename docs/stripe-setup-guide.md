@@ -48,7 +48,7 @@ STRIPE_WEBHOOK_SECRET: "whsec_..."
 2. Enable the **"Customer portal"**
 3. Configure the following features:
    - **Payment methods** — allow customers to update their payment method
-   - **Subscriptions** — allow customers to cancel and reactivate subscriptions
+   - **Subscriptions** — allow customers to cancel, reactivate, and **switch plans** (monthly ↔ yearly)
    - **Invoices** — allow customers to view and download invoices
 4. Set a **Return URL** to your home page: `https://your-domain.com/`
 5. Customize the branding (logo, colors) to match your app

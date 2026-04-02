@@ -393,6 +393,33 @@ export async function reactivateSubscription(userId: string): Promise<boolean> {
   return true;
 }
 
+export async function switchSubscriptionPlan(
+  userId: string,
+  newPlan: SubscriptionPlan
+): Promise<boolean> {
+  const sub = await getSubscriptionRecord(userId);
+  if (!sub?.stripe_subscription_id) return false;
+
+  const { monthlyPriceId, yearlyPriceId } = await ensureStripePrices();
+  const newPriceId = newPlan === "yearly" ? yearlyPriceId : monthlyPriceId;
+
+  const stripeSub = await getStripe().subscriptions.retrieve(
+    sub.stripe_subscription_id
+  );
+  await getStripe().subscriptions.update(sub.stripe_subscription_id, {
+    items: [{ id: stripeSub.items.data[0].id, price: newPriceId }],
+    metadata: { ...(stripeSub.metadata as Record<string, string>), plan: newPlan },
+  });
+
+  await upsertSubscriptionRecord(userId, {
+    stripeCustomerId: sub.stripe_customer_id,
+    status: sub.status,
+    plan: newPlan,
+  });
+
+  return true;
+}
+
 export async function getSubscriptionStatus(
   userId: string
 ): Promise<SubscriptionStatusResponse> {

@@ -21,6 +21,7 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
     subscription,
     loading,
     createCheckout,
+    switchPlan,
     openPortal,
     cancelSubscription,
     reactivateSubscription,
@@ -54,9 +55,12 @@ function SubscriptionPanel({ monthlyPrice, currency }: SubscriptionPanelProps) {
       <div className="space-y-4">
         <SubscriptionStatusCard
           subscription={subscription}
+          monthlyPrice={monthlyPrice}
+          currency={currency}
           onManage={openPortal}
           onCancel={() => setCanceling(true)}
           onReactivate={reactivateSubscription}
+          onSwitchPlan={switchPlan}
         />
       </div>
     );

@@ -9,14 +9,18 @@ import {
   RotateCcw,
   AlertTriangle,
   Calendar,
+  ArrowRightLeft,
 } from "lucide-react";
-import type { SubscriptionStatusResponse } from "@/lib/subscription";
+import type { SubscriptionStatusResponse, SubscriptionPlan } from "@/lib/subscription";
 
 interface SubscriptionStatusCardProps {
   subscription: SubscriptionStatusResponse;
+  monthlyPrice: number;
+  currency: string;
   onManage: () => void;
   onCancel: () => void;
   onReactivate: () => void;
+  onSwitchPlan: (plan: SubscriptionPlan) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -37,9 +41,12 @@ function formatDate(dateStr: string | null): string {
 
 function SubscriptionStatusCard({
   subscription,
+  monthlyPrice: _monthlyPrice,
+  currency: _currency,
   onManage,
   onCancel,
   onReactivate,
+  onSwitchPlan,
 }: SubscriptionStatusCardProps) {
   const { t } = useTranslation();
   const {
@@ -51,6 +58,9 @@ function SubscriptionStatusCard({
   } = subscription;
 
   const statusLabel = t(`subscription.status.${status}`);
+
+  const otherPlan: SubscriptionPlan | null =
+    plan === "monthly" ? "yearly" : plan === "yearly" ? "monthly" : null;
 
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-3">
@@ -100,6 +110,20 @@ function SubscriptionStatusCard({
         <p className="text-xs text-muted-foreground">
           {t("subscription.nextBillingDate")}: {formatDate(currentPeriodEnd)}
         </p>
+      )}
+
+      {otherPlan && (status === "active" || status === "trialing") && !cancelAtPeriodEnd && (
+        <div className="flex items-center justify-between text-sm bg-muted/50 rounded-md p-2">
+          <span className="text-muted-foreground">
+            {otherPlan === "yearly"
+              ? t("subscription.switchToYearlyHint")
+              : t("subscription.switchToMonthlyHint")}
+          </span>
+          <Button size="sm" variant="outline" onClick={() => onSwitchPlan(otherPlan)}>
+            <ArrowRightLeft className="h-3.5 w-3.5 mr-1" />
+            {t("subscription.switchPlan")}
+          </Button>
+        </div>
       )}
 
       <div className="flex flex-wrap gap-2">
