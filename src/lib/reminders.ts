@@ -88,7 +88,7 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
         last_act.activity_type  AS last_activity_type,
         last_act.created_at     AS last_activity_at,
         EXTRACT(DAY FROM NOW() - last_act.created_at)::INTEGER AS days_inactive,
-        COALESCE(NULLIF(us.settings->>'language', 'system'), NULLIF(us.settings->>'language', ''), 'zh-HK') AS locale
+        COALESCE(NULLIF(NULLIF(us.settings->>'language', 'system'), ''), 'zh-HK') AS locale
       FROM users u
       INNER JOIN LATERAL (
         SELECT al.activity_type, al.created_at
