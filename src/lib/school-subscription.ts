@@ -637,12 +637,14 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
       await recordSeatUsage(adminUserId, schoolId).catch(() => {});
 
       try {
-        const { notifySubscriptionEvent } = await import("./subscription-email");
+        const { notifySubscriptionEvent, getSchoolContext } = await import("./subscription-email");
+        const schoolCtx = await getSchoolContext(schoolId);
         await notifySubscriptionEvent(adminUserId, "subscription_activated", {
           plan: plan || "monthly",
           status: subscription.status,
           nextBillingDate: subData.currentPeriodEnd,
           trialEndDate: subData.trialEnd || undefined,
+          schoolContext: schoolCtx || undefined,
         });
       } catch (e) {
         console.error("[webhook] Failed to send school activation email:", e);
@@ -683,13 +685,15 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
       });
 
       try {
-        const { notifySubscriptionEvent } = await import("./subscription-email");
+        const { notifySubscriptionEvent, getSchoolContext } = await import("./subscription-email");
+        const schoolCtx = await getSchoolContext(schoolId);
         if (prevData?.cancel_at_period_end === false && subscription.cancel_at_period_end) {
           const record = await getSchoolSubscriptionRecord(schoolId);
           await notifySubscriptionEvent(adminUserId, "subscription_canceled", {
             plan: record?.plan || "monthly",
             status: subscription.status,
             nextBillingDate: subData.currentPeriodEnd,
+            schoolContext: schoolCtx || undefined,
           });
         }
         if (prevData?.cancel_at_period_end === true && !subscription.cancel_at_period_end) {
@@ -698,6 +702,7 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
             plan: record?.plan || "monthly",
             status: subscription.status,
             nextBillingDate: subData.currentPeriodEnd,
+            schoolContext: schoolCtx || undefined,
           });
         }
       } catch (e) {
@@ -778,15 +783,32 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
 
       if (invoice.billing_reason === "subscription_cycle") {
         try {
-          const { notifySubscriptionEvent } = await import("./subscription-email");
+          const { notifySubscriptionEvent, notifyPaymentReceipt, getSchoolContext } = await import("./subscription-email");
           const record = await getSchoolSubscriptionRecord(schoolId);
+          const schoolCtx = await getSchoolContext(schoolId);
+          const schoolOpts = schoolCtx ? { schoolContext: schoolCtx } : {};
           await notifySubscriptionEvent(adminUserId, "subscription_renewed", {
             plan: record?.plan || "monthly",
             status: subscription.status,
             nextBillingDate: subData.currentPeriodEnd,
+            ...schoolOpts,
+          });
+          await notifyPaymentReceipt(adminUserId, {
+            plan: record?.plan || "monthly",
+            status: subscription.status,
+            nextBillingDate: subData.currentPeriodEnd,
+            invoiceId: invoice.id,
+            invoiceUrl: invoice.hosted_invoice_url || undefined,
+            invoiceAmount: (invoice.total / 100).toLocaleString(invoice.currency || "usd", {
+              style: "currency",
+              currency: invoice.currency || "usd",
+            }),
+            invoiceDate: new Date(invoice.created * 1000).toLocaleDateString(),
+            invoiceNumber: invoice.number || undefined,
+            ...schoolOpts,
           });
         } catch (e) {
-          console.error("[webhook] Failed to send school renewal email:", e);
+          console.error("[webhook] Failed to send school renewal/receipt email:", e);
         }
       }
       break;
@@ -830,12 +852,14 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
       });
 
       try {
-        const { notifySubscriptionEvent } = await import("./subscription-email");
+        const { notifySubscriptionEvent, getSchoolContext } = await import("./subscription-email");
         const record = await getSchoolSubscriptionRecord(schoolId);
+        const schoolCtx = await getSchoolContext(schoolId);
         await notifySubscriptionEvent(adminUserId, "payment_failed", {
           plan: record?.plan || "monthly",
           status: "past_due",
           nextBillingDate: subData.currentPeriodEnd,
+          schoolContext: schoolCtx || undefined,
         });
       } catch (e) {
         console.error("[webhook] Failed to send school payment failed email:", e);

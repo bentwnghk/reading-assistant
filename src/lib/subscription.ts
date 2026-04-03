@@ -654,15 +654,28 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
 
       if (invoice.billing_reason === "subscription_cycle") {
         try {
-          const { notifySubscriptionEvent } = await import("./subscription-email");
+          const { notifySubscriptionEvent, notifyPaymentReceipt } = await import("./subscription-email");
           const record = await getSubscriptionRecord(userId);
           await notifySubscriptionEvent(userId, "subscription_renewed", {
             plan: record?.plan || "monthly",
             status: subscription.status,
             nextBillingDate: subData.currentPeriodEnd,
           });
+          await notifyPaymentReceipt(userId, {
+            plan: record?.plan || "monthly",
+            status: subscription.status,
+            nextBillingDate: subData.currentPeriodEnd,
+            invoiceId: invoice.id,
+            invoiceUrl: invoice.hosted_invoice_url || undefined,
+            invoiceAmount: (invoice.total / 100).toLocaleString(invoice.currency || "usd", {
+              style: "currency",
+              currency: invoice.currency || "usd",
+            }),
+            invoiceDate: new Date(invoice.created * 1000).toLocaleDateString(),
+            invoiceNumber: invoice.number || undefined,
+          });
         } catch (e) {
-          console.error("[webhook] Failed to send renewal email:", e);
+          console.error("[webhook] Failed to send renewal/receipt email:", e);
         }
       }
       break;

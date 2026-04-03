@@ -31,12 +31,19 @@ function getSenderName(): string {
   return process.env.MAILTRAP_SENDER_NAME || "Mr.🆖 ProReader"
 }
 
+export interface EmailAttachment {
+  filename: string
+  content: string
+  type?: string
+}
+
 export interface SendEmailOptions {
   to: { email: string; name?: string }[]
   subject: string
   html: string
   text?: string
   category?: string
+  attachments?: EmailAttachment[]
 }
 
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
@@ -53,6 +60,15 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       html: options.html,
       text: options.text || "",
       category: options.category,
+      ...(options.attachments?.length
+        ? {
+            attachments: options.attachments.map((a) => ({
+              filename: a.filename,
+              content: a.content,
+              type: a.type || "application/pdf",
+            })),
+          }
+        : {}),
     })
 
     console.log(

@@ -9,21 +9,32 @@ export interface SubscriptionEmailParams {
   nextBillingDate?: string
   trialEndDate?: string
   paymentFailureReason?: string
+  cancelAtPeriodEnd?: boolean
+  invoiceUrl?: string
+  invoiceAmount?: string
+  invoiceDate?: string
+  invoiceNumber?: string
+  schoolName?: string
+  totalSeats?: number
 }
 
-type SubscriptionEmailType =
+export type SubscriptionEmailType =
   | "payment_failed"
   | "trial_ending"
   | "subscription_activated"
   | "subscription_canceled"
   | "subscription_renewed"
+  | "renewal_reminder"
+  | "payment_receipt"
 
 interface SubscriptionEmailStrings {
   htmlTitle: string
   subject: (plan: string) => string
-  greeting: (name: string) => string
+  greeting: (name: string, schoolName?: string) => string
   body: string
+  bodyExpiring?: string
   actionText: string
+  actionTextExpiring?: string
   actionUrl: string
   footerNote: string
 }
@@ -34,116 +45,164 @@ const STRINGS: Record<
 > = {
   "en-US": {
     payment_failed: {
-      htmlTitle: "Payment Failed - Mr.\u{1F196} ProReader",
+      htmlTitle: "Payment Failed - Mr.🆖 ProReader",
       subject: (plan) =>
-        `Payment failed for your ${plan} Mr.\u{1F196} ProReader subscription`,
+        `Payment failed for your ${plan} Mr.🆖 ProReader subscription`,
       greeting: (name) => `Hi ${name},`,
-      body: `We were unable to process your payment for the Mr.\u{1F196} ProReader subscription. This could be due to an expired card, insufficient funds, or a bank decline.\n\nTo avoid service interruption, please update your payment method as soon as possible.`,
+      body: `We were unable to process your payment for the Mr.🆖 ProReader subscription. This could be due to an expired card, insufficient funds, or a bank decline.\n\nTo avoid service interruption, please update your payment method as soon as possible.`,
       actionText: "Update Payment Method",
       actionUrl: "{{portalUrl}}",
       footerNote:
         "If you believe this is an error or need assistance, please contact support.",
     },
     trial_ending: {
-      htmlTitle: "Trial Ending Soon - Mr.\u{1F196} ProReader",
+      htmlTitle: "Trial Ending Soon - Mr.🆖 ProReader",
       subject: (plan) =>
-        `Your ${plan} Mr.\u{1F196} ProReader trial ends soon`,
+        `Your ${plan} Mr.🆖 ProReader trial ends soon`,
       greeting: (name) => `Hi ${name},`,
-      body: `Your free trial for the Mr.\u{1F196} ProReader subscription is ending soon. After the trial ends, you'll be charged the regular subscription fee.\n\nWe hope you've enjoyed the Mr.\u{1F196} ProReader experience! Your subscription will continue automatically unless you cancel before the trial ends.`,
+      body: `Your free trial for the Mr.🆖 ProReader subscription is ending soon. After the trial ends, you'll be charged the regular subscription fee.\n\nWe hope you've enjoyed the Mr.🆖 ProReader experience! Your subscription will continue automatically unless you cancel before the trial ends.`,
       actionText: "Manage Subscription",
       actionUrl: "{{portalUrl}}",
       footerNote:
         "You can cancel anytime before the trial ends at no charge.",
     },
     subscription_activated: {
-      htmlTitle: "Welcome to Mr.\u{1F196} ProReader! - Mr.\u{1F196} ProReader",
+      htmlTitle: "Welcome to Mr.🆖 ProReader! - Mr.🆖 ProReader",
       subject: (plan) =>
-        `Welcome! Your ${plan} Mr.\u{1F196} ProReader subscription is active`,
+        `Welcome! Your ${plan} Mr.🆖 ProReader subscription is active`,
       greeting: (name) => `Hi ${name},`,
-      body: `Welcome to Mr.\u{1F196} ProReader! Your subscription is now active and you have full access to all Mr.\u{1F196} ProReader features.\n\nThank you for choosing Mr.\u{1F196} ProReader. We're excited to be part of your learning journey!`,
+      body: `Welcome to Mr.🆖 ProReader! Your subscription is now active and you have full access to all Mr.🆖 ProReader features.\n\nThank you for choosing Mr.🆖 ProReader. We're excited to be part of your learning journey!`,
       actionText: "Start Learning",
       actionUrl: "{{appUrl}}",
       footerNote:
         "You can manage your subscription anytime from Settings.",
     },
     subscription_canceled: {
-      htmlTitle: "Subscription Canceled - Mr.\u{1F196} ProReader",
+      htmlTitle: "Subscription Canceled - Mr.🆖 ProReader",
       subject: (plan) =>
-        `Your ${plan} Mr.\u{1F196} ProReader subscription has been canceled`,
+        `Your ${plan} Mr.🆖 ProReader subscription has been canceled`,
       greeting: (name) => `Hi ${name},`,
-      body: `Your Mr.\u{1F196} ProReader subscription has been canceled as requested. You'll still have access until the end of your current billing period.\n\nWe'd love to have you back! You can reactivate your subscription anytime from Settings.`,
+      body: `Your Mr.🆖 ProReader subscription has been canceled as requested. You'll still have access until the end of your current billing period.\n\nWe'd love to have you back! You can reactivate your subscription anytime from Settings.`,
       actionText: "Reactivate Subscription",
       actionUrl: "{{appUrl}}/settings",
       footerNote:
         "If you changed your mind, you can reactivate before the period ends.",
     },
     subscription_renewed: {
-      htmlTitle: "Subscription Renewed - Mr.\u{1F196} ProReader",
+      htmlTitle: "Subscription Renewed - Mr.🆖 ProReader",
       subject: (plan) =>
-        `Your ${plan} Mr.\u{1F196} ProReader subscription has been renewed`,
+        `Your ${plan} Mr.🆖 ProReader subscription has been renewed`,
       greeting: (name) => `Hi ${name},`,
-      body: `Your Mr.\u{1F196} ProReader subscription has been successfully renewed. Thank you for continuing your learning journey with us!\n\nYou have full access to all Mr.\u{1F196} ProReader features. Happy learning!`,
+      body: `Your Mr.🆖 ProReader subscription has been successfully renewed. Thank you for continuing your learning journey with us!\n\nYou have full access to all Mr.🆖 ProReader features. Happy learning!`,
       actionText: "Start Learning",
       actionUrl: "{{appUrl}}",
       footerNote:
         "You can manage your subscription from Settings.",
     },
+    renewal_reminder: {
+      htmlTitle: "Subscription Renewal Reminder - Mr.🆖 ProReader",
+      subject: (plan) =>
+        `Your ${plan} Mr.🆖 ProReader subscription will renew in 7 days`,
+      greeting: (name) => `Hi ${name},`,
+      body: `This is a friendly reminder that your Mr.🆖 ProReader subscription will automatically renew in 7 days. Your payment method on file will be charged for the next billing period.\n\nIf you'd like to make changes to your subscription, you can manage it from your billing portal.`,
+      bodyExpiring: `This is a friendly reminder that your Mr.🆖 ProReader subscription will expire in 7 days because it has been set to cancel at the end of the billing period.\n\nIf you'd like to continue using Mr.🆖 ProReader, you can reactivate your subscription before it expires.`,
+      actionText: "Manage Subscription",
+      actionTextExpiring: "Reactivate Subscription",
+      actionUrl: "{{portalUrl}}",
+      footerNote:
+        "You can manage your subscription anytime from your billing portal.",
+    },
+    payment_receipt: {
+      htmlTitle: "Payment Receipt - Mr.🆖 ProReader",
+      subject: (plan) =>
+        `Payment Receipt - Your ${plan} Mr.🆖 ProReader subscription`,
+      greeting: (name) => `Hi ${name},`,
+      body: `Your payment for the Mr.🆖 ProReader subscription has been processed successfully. Thank you for your continued support!\n\nYour receipt is attached to this email as a PDF. You can also view and download it online anytime.`,
+      actionText: "View Receipt Online",
+      actionUrl: "{{invoiceUrl}}",
+      footerNote:
+        "If you have any questions about this charge, please contact support.",
+    },
   },
   "zh-HK": {
     payment_failed: {
-      htmlTitle: "\u{4ED8}\u{6B3E}\u{5931}\u{6557} - Mr.\u{1F196} ProReader",
+      htmlTitle: "付款失敗 - Mr.🆖 ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{4ED8}\u{6B3E}\u{5931}\u{6555}`,
-      greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{6211}\u{5011}\u{7121}\u{6CD5}\u{8655}\u{7406}\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{4ED8}\u{6B3E}\u{3002}\u{9019}\u{53EF}\u{80FD}\u{662F}\u{56E0}\u{70BA}\u{4FE1}\u{7528}\u{5361}\u{904E}\u{671F}\u{3001}\u{9910}\u{984D}\u{4E0D}\u{8DB3}\u{6216}\u{9280}\u{884C}\u{62D2}\u{7D55}\u{3002}\n\n\u{70BA}\u{907F}\u{514D}\u{670D}\u{52D9}\u{4E2D}\u{65B7}\u{FF0C}\u{8ACB}\u{5118}\u{5FEB}\u{66F4}\u{65B0}\u{60A8}\u{7684}\u{4ED8}\u{6B3E}\u{65B9}\u{5F0F}\u{3002}`,
-      actionText: "\u{66F4}\u{65B0}\u{4ED8}\u{6B3E}\u{65B9}\u{5F0F}",
+        `您的 ${plan} Mr.🆖 ProReader 訂閱付款失敗`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `我們無法處理您的 Mr.🆖 ProReader 訂閱付款。這可能是因為信用卡過期、餘額不足或銀行拒絕。\n\n為避免服務中斷，請盡快更新您的付款方式。`,
+      actionText: "更新付款方式",
       actionUrl: "{{portalUrl}}",
       footerNote:
-        "\u{5982}\u{60A8}\u{8A8D}\u{70BA}\u{9019}\u{662F}\u{932F}\u{8AA4}\u{6216}\u{9700}\u{8981}\u{5354}\u{52A9}\u{FF0C}\u{8ACB}\u{806F}\u{7D61}\u{652F}\u{63F4}\u{3002}",
+        "如您認為這是錯誤或需要協助，請聯絡支援。",
     },
     trial_ending: {
-      htmlTitle: "\u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F} - Mr.\u{1F196} ProReader",
+      htmlTitle: "試用期即將結束 - Mr.🆖 ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F}`,
-      greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{514D}\u{8CBB}\u{8A66}\u{7528}\u{671F}\u{5373}\u{5C07}\u{7D50}\u{675F}\u{3002}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{5F8C}\u{FF0C}\u{60A8}\u{5C07}\u{88AB}\u{6536}\u{53D6}\u{6B63}\u{5E38}\u{8A02}\u{95B1}\u{8CBB}\u{7528}\u{3002}\n\n\u{5E0C}\u{671B}\u{60A8}\u{559C}\u{6B61} Mr.\u{1F196} ProReader \u{7684}\u{9AD4}\u{9A57}\u{FF01}\u{9664}\u{975E}\u{60A8}\u{5728}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{524D}\u{53D6}\u{6D88}\u{FF0C}\u{5426}\u{5247}\u{8A02}\u{95B1}\u{5C07}\u{81EA}\u{52D5}\u{7E8C}\u{671F}\u{3002}`,
-      actionText: "\u{7BA1}\u{7406}\u{8A02}\u{95B1}",
+        `您的 ${plan} Mr.🆖 ProReader 試用期即將結束`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `您的 Mr.🆖 ProReader 訂閱免費試用期即將結束。試用期結束後，您將被收取正常訂閱費用。\n\n希望您喜歡 Mr.🆖 ProReader 的體驗！除非您在試用期結束前取消，否則訂閱將自動續期。`,
+      actionText: "管理訂閱",
       actionUrl: "{{portalUrl}}",
       footerNote:
-        "\u{60A8}\u{53EF}\u{4EE5}\u{5728}\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}\u{524D}\u{4EFB}\u{4F55}\u{6642}\u{5019}\u{53D6}\u{6D88}\u{FF0C}\u{4E0D}\u{6703}\u{88AB}\u{6536}\u{8CBB}\u{3002}",
+        "您可以在試用期結束前任何時候取消，不會被收費。",
     },
     subscription_activated: {
-      htmlTitle: "\u{6B61}\u{8FCE}\u{4F7F}\u{7528} Mr.\u{1F196} ProReader\u{FF01} - Mr.\u{1F196} ProReader",
+      htmlTitle: "歡迎使用 Mr.🆖 ProReader！ - Mr.🆖 ProReader",
       subject: (plan) =>
-        `\u{6B61}\u{8FCE}\u{FF01}\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{555F}\u{7528}`,
-      greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{6B61}\u{8FCE}\u{4F7F}\u{7528} Mr.\u{1F196} ProReader\u{FF01}\u{60A8}\u{7684}\u{8A02}\u{95B1}\u{73B0}\u{5DF2}\u{555F}\u{7528}\u{FF0C}\u{60A8}\u{53EF}\u{4EE5}\u{5B8C}\u{5168}\u{5B58}\u{53D6}\u{6240}\u{6709} Mr.\u{1F196} ProReader \u{529F}\u{80FD}\u{3002}\n\n\u{611F}\u{8B1D}\u{60A8}\u{9078}\u{64C7} Mr.\u{1F196} ProReader\u{3002}\u{6211}\u{5011}\u{5F88}\u{8208}\u{596E}\u{80FD}\u{966A}\u{4F34}\u{60A8}\u{7684}\u{5B78}\u{7FD2}\u{4E4B}\u{65C5}\u{FF01}`,
-      actionText: "\u{958B}\u{59CB}\u{5B78}\u{7FD2}",
+        `歡迎！您的 ${plan} Mr.🆖 ProReader 訂閱已啟用`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `歡迎使用 Mr.🆖 ProReader！您的訂閱現已啟用，您可以完全存取所有 Mr.🆖 ProReader 功能。\n\n感謝您選擇 Mr.🆖 ProReader。我們很興奮能陪伴您的學習之旅！`,
+      actionText: "開始學習",
       actionUrl: "{{appUrl}}",
       footerNote:
-        "\u{60A8}\u{53EF}\u{4EE5}\u{96A8}\u{6642}\u{5728}\u{8A2D}\u{5B9A}\u{4E2D}\u{7BA1}\u{7406}\u{60A8}\u{7684}\u{8A02}\u{95B1}\u{3002}",
+        "您可以隨時在設定中管理您的訂閱。",
     },
     subscription_canceled: {
-      htmlTitle: "\u{8A02}\u{95B1}\u{5DF2}\u{53D6}\u{6D88} - Mr.\u{1F196} ProReader",
+      htmlTitle: "訂閱已取消 - Mr.🆖 ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{53D6}\u{6D88}`,
-      greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{6839}\u{64DA}\u{8981}\u{6C42}\u{53D6}\u{6D88}\u{3002}\u{60A8}\u{5728}\u{7576}\u{524D}\u{8A08}\u{8CBB}\u{671F}\u{7D50}\u{675F}\u{524D}\u{4ECD}\u{53EF}\u{4EE5}\u{7E7C}\u{7E8C}\u{4F7F}\u{7528}\u{3002}\n\n\u{6211}\u{5011}\u{5E0C}\u{671B}\u{60A8}\u{80FD}\u{56DE}\u{4F86}\u{FF01}\u{60A8}\u{53EF}\u{4EE5}\u{96A8}\u{6642}\u{5728}\u{8A2D}\u{5B9A}\u{4E2D}\u{91CD}\u{65B0}\u{555F}\u{7528}\u{8A02}\u{95B1}\u{3002}`,
-      actionText: "\u{91CD}\u{65B0}\u{555F}\u{7528}\u{8A02}\u{95B1}",
+        `您的 ${plan} Mr.🆖 ProReader 訂閱已取消`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `您的 Mr.🆖 ProReader 訂閱已根據要求取消。您在當前計費期結束前仍可以繼續使用。\n\n我們希望您能回來！您可以隨時在設定中重新啟用訂閱。`,
+      actionText: "重新啟用訂閱",
       actionUrl: "{{appUrl}}/settings",
       footerNote:
-        "\u{5982}\u{60A8}\u{6539}\u{8B8A}\u{4E3B}\u{610F}\u{FF0C}\u{53EF}\u{4EE5}\u{5728}\u{8A08}\u{8CBB}\u{671F}\u{7D50}\u{675F}\u{524D}\u{91CD}\u{65B0}\u{555F}\u{7528}\u{3002}",
+        "如您改變主意，可以在計費期結束前重新啟用。",
     },
     subscription_renewed: {
-      htmlTitle: "\u{8A02}\u{95B1}\u{5DF2}\u{7E8C}\u{671F} - Mr.\u{1F196} ProReader",
+      htmlTitle: "訂閱已續期 - Mr.🆖 ProReader",
       subject: (plan) =>
-        `\u{60A8}\u{7684} ${plan} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{7E8C}\u{671F}`,
-      greeting: (name) => `\u{55E8} ${name}\u{FF0C}`,
-      body: `\u{60A8}\u{7684} Mr.\u{1F196} ProReader \u{8A02}\u{95B1}\u{5DF2}\u{6210}\u{529F}\u{7E8C}\u{671F}\u{3002}\u{611F}\u{8B1D}\u{60A8}\u{7E7C}\u{7E8C}\u{8207}\u{6211}\u{5011}\u{4E00}\u{8D77}\u{5B78}\u{7FD2}\u{FF01}\n\n\u{60A8}\u{53EF}\u{4EE5}\u{5B8C}\u{5168}\u{5B58}\u{53D6}\u{6240}\u{6709} Mr.\u{1F196} ProReader \u{529F}\u{80FD}\u{3002}\u{795D}\u{5B78}\u{7FD2}\u{6109}\u{5FEB}\u{FF01}`,
-      actionText: "\u{958B}\u{59CB}\u{5B78}\u{7FD2}",
+        `您的 ${plan} Mr.🆖 ProReader 訂閱已續期`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `您的 Mr.🆖 ProReader 訂閱已成功續期。感謝您繼續與我們一起學習！\n\n您可以完全存取所有 Mr.🆖 ProReader 功能。祝學習愉快！`,
+      actionText: "開始學習",
       actionUrl: "{{appUrl}}",
       footerNote:
-        "\u{60A8}\u{53EF}\u{4EE5}\u{5728}\u{8A2D}\u{5B9A}\u{4E2D}\u{7BA1}\u{7406}\u{60A8}\u{7684}\u{8A02}\u{95B1}\u{3002}",
+        "您可以在設定中管理您的訂閱。",
+    },
+    renewal_reminder: {
+      htmlTitle: "訂閱續期提醒 - Mr.🆖 ProReader",
+      subject: (plan) =>
+        `您的 ${plan} Mr.🆖 ProReader 訂閱將在 7 天後續期`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `這是一個友善提醒，您的 Mr.🆖 ProReader 訂閱將在 7 天後自動續期。您的付款方式將被收取下一個計費期的費用。\n\n如您想更改訂閱設定，可以通過計費管理頁面進行管理。`,
+      bodyExpiring: `這是一個友善提醒，您的 Mr.🆖 ProReader 訂閱已設定在計費期結束時取消，將在 7 天後到期。\n\n如您想繼續使用 Mr.🆖 ProReader，可以在到期前重新啟用訂閱。`,
+      actionText: "管理訂閱",
+      actionTextExpiring: "重新啟用訂閱",
+      actionUrl: "{{portalUrl}}",
+      footerNote:
+        "您可以隨時通過計費管理頁面管理您的訂閱。",
+    },
+    payment_receipt: {
+      htmlTitle: "付款收據 - Mr.🆖 ProReader",
+      subject: (plan) =>
+        `付款收據 - 您的 ${plan} Mr.🆖 ProReader 訂閱`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `您的 Mr.🆖 ProReader 訂閱付款已成功處理。感謝您的支持！\n\n收據已以 PDF 附件形式隨附在此郵件中。您也可以隨時在網上查看和下載。`,
+      actionText: "網上查看收據",
+      actionUrl: "{{invoiceUrl}}",
+      footerNote:
+        "如您對此付款有任何疑問，請聯絡支援。",
     },
   },
 }
@@ -154,6 +213,69 @@ function resolveLocale(locale: string): string {
   return "en-US"
 }
 
+function getPlanLabel(plan: string, locale: string): string {
+  return locale.startsWith("zh")
+    ? plan === "monthly"
+      ? "月付"
+      : "年付"
+    : plan === "monthly"
+      ? "Monthly"
+      : "Yearly"
+}
+
+function resolveActionUrl(
+  actionUrlTemplate: string,
+  params: SubscriptionEmailParams
+): string {
+  return actionUrlTemplate
+    .replace("{{portalUrl}}", params.portalUrl || params.appUrl)
+    .replace("{{invoiceUrl}}", params.invoiceUrl || params.appUrl)
+    .replace("{{appUrl}}", params.appUrl)
+}
+
+function buildSchoolDetailRows(params: SubscriptionEmailParams): string {
+  if (!params.schoolName) return ""
+  const isZh = params.locale.startsWith("zh")
+  const rows: string[] = []
+  rows.push(
+    `<tr><td colspan="2" style="padding:8px 0 4px;color:#6366f1;font-size:13px;font-weight:600;">${isZh ? "學校詳情" : "School Details"}</td></tr>`
+  )
+  rows.push(
+    `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "學校名稱" : "School"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.schoolName}</td></tr>`
+  )
+  if (params.totalSeats != null) {
+    rows.push(
+      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "席位總數" : "Total Seats"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.totalSeats}</td></tr>`
+    )
+  }
+  return rows.join("\n")
+}
+
+function buildInvoiceDetailRows(params: SubscriptionEmailParams): string {
+  if (!params.invoiceAmount && !params.invoiceDate && !params.invoiceNumber) return ""
+  const isZh = params.locale.startsWith("zh")
+  const rows: string[] = []
+  rows.push(
+    `<tr><td colspan="2" style="padding:8px 0 4px;color:#6366f1;font-size:13px;font-weight:600;">${isZh ? "帳單詳情" : "Invoice Details"}</td></tr>`
+  )
+  if (params.invoiceAmount) {
+    rows.push(
+      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "付款金額" : "Amount"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.invoiceAmount}</td></tr>`
+    )
+  }
+  if (params.invoiceDate) {
+    rows.push(
+      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "付款日期" : "Date"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.invoiceDate}</td></tr>`
+    )
+  }
+  if (params.invoiceNumber) {
+    rows.push(
+      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "發票號碼" : "Invoice"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.invoiceNumber}</td></tr>`
+    )
+  }
+  return rows.join("\n")
+}
+
 export function buildSubscriptionEmailHtml(
   params: SubscriptionEmailParams,
   type: SubscriptionEmailType
@@ -161,48 +283,51 @@ export function buildSubscriptionEmailHtml(
   const s = STRINGS[resolveLocale(params.locale)][type]
   const displayName = params.userName || "there"
   const htmlLang = resolveLocale(params.locale) === "zh-HK" ? "zh-Hant" : "en"
-  const planLabel =
-    params.locale.startsWith("zh")
-      ? params.plan === "monthly"
-        ? "\u{6708}\u{4ED8}"
-        : "\u{5E74}\u{4ED8}"
-      : params.plan === "monthly"
-        ? "Monthly"
-        : "Yearly"
+  const planLabel = getPlanLabel(params.plan, params.locale)
 
-  const actionUrl = s.actionUrl
-    .replace("{{portalUrl}}", params.portalUrl || params.appUrl)
-    .replace("{{appUrl}}", params.appUrl)
+  const isExpiring = type === "renewal_reminder" && params.cancelAtPeriodEnd === true
+  const bodyText = isExpiring && s.bodyExpiring ? s.bodyExpiring : s.body
+  const actionText = isExpiring && s.actionTextExpiring ? s.actionTextExpiring : s.actionText
 
-  const bodyParagraphs = s.body
+  const actionUrl = resolveActionUrl(s.actionUrl, params)
+
+  const bodyParagraphs = bodyText
     .split("\n\n")
     .map((p) => `<p style="margin:0 0 16px;color:#4b5563;font-size:16px;line-height:1.6;">${p}</p>`)
     .join("")
 
+  const isZh = params.locale.startsWith("zh")
   const detailRows: string[] = []
+
+  if (params.schoolName) {
+    detailRows.push(...buildSchoolDetailRows(params).split("\n").filter(Boolean))
+  }
+
+  detailRows.push(
+    `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "方案" : "Plan"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${planLabel}</td></tr>`
+  )
+
   if (params.nextBillingDate) {
-    const nextLabel =
-      params.locale.startsWith("zh")
-        ? "\u{4E0B}\u{6B21}\u{5E33}\u{55AE}\u{65E5}\u{671F}"
-        : "Next billing date"
     detailRows.push(
-      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${nextLabel}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.nextBillingDate}</td></tr>`
+      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "下次帳單日期" : "Next billing date"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.nextBillingDate}</td></tr>`
     )
   }
   if (params.trialEndDate) {
-    const trialLabel =
-      params.locale.startsWith("zh")
-        ? "\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}"
-        : "Trial ends"
     detailRows.push(
-      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${trialLabel}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.trialEndDate}</td></tr>`
+      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "試用期結束" : "Trial ends"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.trialEndDate}</td></tr>`
     )
   }
 
-  const planLabelStr =
-    params.locale.startsWith("zh")
-      ? "\u{65B9}\u{6848}"
-      : "Plan"
+  if (type === "payment_receipt") {
+    const invoiceRows = buildInvoiceDetailRows(params)
+    if (invoiceRows) {
+      detailRows.push(...invoiceRows.split("\n").filter(Boolean))
+    }
+  }
+
+  const headerSubtitle = params.schoolName
+    ? `<p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">${isZh ? "學校訂閱" : "School Subscription"} — ${params.schoolName}</p>`
+    : ""
 
   return `<!DOCTYPE html>
 <html lang="${htmlLang}">
@@ -219,7 +344,8 @@ export function buildSubscriptionEmailHtml(
 
           <tr>
             <td bgcolor="#6366f1" style="background-color:#6366f1;border-radius:16px 16px 0 0;padding:40px 32px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;">&#128218; Mr.\u{1F196} ProReader</h1>
+              <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;">&#128218; Mr.🆖 ProReader</h1>
+              ${headerSubtitle}
             </td>
           </tr>
 
@@ -240,7 +366,6 @@ export function buildSubscriptionEmailHtml(
                 <tr>
                   <td style="padding-bottom:24px;">
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;">
-                      <tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${planLabelStr}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${planLabel}</td></tr>
                       ${detailRows.join("\n")}
                     </table>
                   </td>
@@ -249,7 +374,7 @@ export function buildSubscriptionEmailHtml(
                 <tr>
                   <td style="padding-bottom:32px;text-align:center;">
                     <a href="${actionUrl}" style="display:inline-block;background-color:#6366f1;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:16px;font-weight:600;">
-                      ${s.actionText}
+                      ${actionText}
                     </a>
                   </td>
                 </tr>
@@ -269,7 +394,7 @@ export function buildSubscriptionEmailHtml(
           <tr>
             <td bgcolor="#f9fafb" style="background-color:#f9fafb;border-radius:0 0 16px 16px;padding:24px 32px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;text-align:center;">
               <p style="margin:0;color:#9ca3af;font-size:12px;">
-                Mr.\u{1F196} ProReader
+                Mr.🆖 ProReader
               </p>
             </td>
           </tr>
@@ -288,31 +413,57 @@ export function buildSubscriptionEmailText(
 ): string {
   const s = STRINGS[resolveLocale(params.locale)][type]
   const displayName = params.userName || "there"
-  const planLabel =
-    params.locale.startsWith("zh")
-      ? params.plan === "monthly"
-        ? "\u{6708}\u{4ED8}"
-        : "\u{5E74}\u{4ED8}"
-      : params.plan === "monthly"
-        ? "Monthly"
-        : "Yearly"
+  const planLabel = getPlanLabel(params.plan, params.locale)
 
-  const actionUrl = s.actionUrl
-    .replace("{{portalUrl}}", params.portalUrl || params.appUrl)
-    .replace("{{appUrl}}", params.appUrl)
+  const isExpiring = type === "renewal_reminder" && params.cancelAtPeriodEnd === true
+  const bodyText = isExpiring && s.bodyExpiring ? s.bodyExpiring : s.body
 
-  return `${s.greeting(displayName)}
+  const actionUrl = resolveActionUrl(s.actionUrl, params)
 
-${s.body}
+  const isZh = params.locale.startsWith("zh")
+  const lines: string[] = [
+    s.greeting(displayName),
+    "",
+    bodyText,
+    "",
+  ]
 
-${params.locale.startsWith("zh") ? "\u{65B9}\u{6848}" : "Plan"}: ${planLabel}
-${params.nextBillingDate ? `${params.locale.startsWith("zh") ? "\u{4E0B}\u{6B21}\u{5E33}\u{55AE}\u{65E5}\u{671F}" : "Next billing date"}: ${params.nextBillingDate}` : ""}
-${params.trialEndDate ? `${params.locale.startsWith("zh") ? "\u{8A66}\u{7528}\u{671F}\u{7D50}\u{675F}" : "Trial ends"}: ${params.trialEndDate}` : ""}
+  if (params.schoolName) {
+    lines.push(`--- ${isZh ? "學校詳情" : "School Details"} ---`)
+    lines.push(`${isZh ? "學校" : "School"}: ${params.schoolName}`)
+    if (params.totalSeats != null) {
+      lines.push(`${isZh ? "席位總數" : "Total Seats"}: ${params.totalSeats}`)
+    }
+    lines.push("")
+  }
 
-${s.actionText}: ${actionUrl}
+  lines.push(`${isZh ? "方案" : "Plan"}: ${planLabel}`)
+  if (params.nextBillingDate) {
+    lines.push(`${isZh ? "下次帳單日期" : "Next billing date"}: ${params.nextBillingDate}`)
+  }
+  if (params.trialEndDate) {
+    lines.push(`${isZh ? "試用期結束" : "Trial ends"}: ${params.trialEndDate}`)
+  }
 
----
-${s.footerNote}`
+  if (type === "payment_receipt") {
+    if (params.invoiceAmount) {
+      lines.push(`${isZh ? "付款金額" : "Amount"}: ${params.invoiceAmount}`)
+    }
+    if (params.invoiceDate) {
+      lines.push(`${isZh ? "付款日期" : "Date"}: ${params.invoiceDate}`)
+    }
+    if (params.invoiceNumber) {
+      lines.push(`${isZh ? "發票號碼" : "Invoice"}: ${params.invoiceNumber}`)
+    }
+  }
+
+  lines.push("")
+  lines.push(`${s.actionText}: ${actionUrl}`)
+  lines.push("")
+  lines.push("---")
+  lines.push(s.footerNote)
+
+  return lines.join("\n")
 }
 
 export function getSubscriptionEmailSubject(
@@ -321,13 +472,6 @@ export function getSubscriptionEmailSubject(
   plan: string
 ): string {
   const s = STRINGS[resolveLocale(locale)][type]
-  const planLabel =
-    locale.startsWith("zh")
-      ? plan === "monthly"
-        ? "\u{6708}\u{4ED8}"
-        : "\u{5E74}\u{4ED8}"
-      : plan === "monthly"
-        ? "Monthly"
-        : "Yearly"
+  const planLabel = getPlanLabel(plan, locale)
   return s.subject(planLabel)
 }
