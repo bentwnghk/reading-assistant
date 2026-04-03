@@ -43,8 +43,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
-import { CircleHelp, Settings, Sparkles, Volume2, Bell } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { toast } from "sonner";
 import ReminderPreferences from "@/components/ReminderPreferences";
 import SubscriptionPanel from "@/components/Subscription/SubscriptionPanel";
 import SchoolSubscriptionPanel from "@/components/Subscription/SchoolSubscriptionPanel";
@@ -114,13 +115,16 @@ function InfoTooltip({ content }: { content: string }) {
 function Setting({ open, onClose }: SettingProps) {
   const { t } = useTranslation();
   const { mode, provider, update } = useSettingStore();
-  const { status: authStatus } = useSession();
+  const { status: authStatus, data: sessionData } = useSession();
   const isAuthenticated = authStatus === "authenticated";
   const [pricingInfo, setPricingInfo] = useState<{ monthly: number; currency: string } | null>(null);
   const { subscription: schoolSub } = useSchoolSubscription();
   const hasActiveSchoolSubscription =
     schoolSub?.hasSubscription === true &&
     (schoolSub.status === "active" || schoolSub.status === "trialing");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetch("/api/subscription/pricing")
@@ -182,6 +186,33 @@ function Setting({ open, onClose }: SettingProps) {
     const { reset } = useSettingStore.getState();
     reset();
     form.reset();
+  }
+
+  async function handleDeleteAccount() {
+    if (!sessionData?.user?.email) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/user/account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmEmail: deleteConfirmEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 403) {
+          toast.error(t("setting.deleteAccountSuperAdmin"));
+        } else {
+          toast.error(data.error || t("setting.deleteAccountError"));
+        }
+        return;
+      }
+      toast.success(t("setting.deleteAccountSuccess"));
+      signOut({ callbackUrl: "/" });
+    } catch {
+      toast.error(t("setting.deleteAccountError"));
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   useLayoutEffect(() => {
@@ -565,6 +596,28 @@ function Setting({ open, onClose }: SettingProps) {
                     );
                   }}
                 />
+                {isAuthenticated && sessionData?.user?.role !== "super-admin" && (
+                  <div className="rounded-lg border border-destructive/50 p-4 space-y-3">
+                    <h3 className="text-sm font-medium text-destructive">
+                      {t("setting.dangerZone")}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t("setting.deleteAccountDescription")}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setDeleteConfirmEmail("");
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t("setting.deleteAccount")}
+                    </Button>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="models" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
@@ -941,6 +994,54 @@ function Setting({ open, onClose }: SettingProps) {
           </form>
         </Form>
       </DialogContent>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("setting.deleteAccount")}</DialogTitle>
+            <DialogDescription>
+              {t("setting.deleteAccountDescription")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {t("setting.deleteAccountConfirmLabel")}
+              </label>
+              <Input
+                type="email"
+                placeholder={t("setting.deleteAccountConfirmPlaceholder")}
+                value={deleteConfirmEmail}
+                onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex-col gap-2">
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-full"
+              disabled={
+                isDeleting ||
+                deleteConfirmEmail.toLowerCase() !==
+                  (sessionData?.user?.email ?? "").toLowerCase()
+              }
+              onClick={handleDeleteAccount}
+            >
+              {isDeleting
+                ? "..."
+                : t("setting.deleteAccountButton")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              {t("setting.cancel")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
