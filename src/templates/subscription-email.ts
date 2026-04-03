@@ -361,7 +361,11 @@ export function buildSubscriptionEmailHtml(
                   </td>
                 </tr>
 
-                ${bodyParagraphs}
+                <tr>
+                  <td>
+                    ${bodyParagraphs}
+                  </td>
+                </tr>
 
                 <tr>
                   <td style="padding-bottom:24px;">
