@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Plus, Pencil, Trash2, Users, ArrowUpDown, School } from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Users, ArrowUpDown, School, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -57,6 +57,8 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
   const [formData, setFormData] = useState({ name: "", description: "", teacherId: "" })
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 20
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -116,6 +118,16 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
       return sortOrder === "asc" ? comparison : -comparison
     })
   }, [classes, sortField, sortOrder])
+
+  const totalPages = Math.max(1, Math.ceil(sortedClasses.length / PAGE_SIZE))
+  const paginatedClasses = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE
+    return sortedClasses.slice(start, start + PAGE_SIZE)
+  }, [sortedClasses, page])
+
+  useEffect(() => {
+    setPage(1)
+  }, [sortField, sortOrder])
 
   const canEditClass = (classInfo: ClassInfo) => {
     if (isSuperAdmin) return true
@@ -264,7 +276,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedClasses.map((classInfo) => (
+          {paginatedClasses.map((classInfo) => (
             <TableRow key={classInfo.id}>
               <TableCell>
                 <div>
@@ -341,6 +353,29 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
       {classes.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           {t("userManagement.classes.noClasses")}
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
 

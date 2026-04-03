@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import dynamic from "next/dynamic"
-import { Loader2, Search, ChevronDown, ChevronRight, MessageCircle, Users, FileText } from "lucide-react"
+import { Loader2, Search, ChevronDown, ChevronRight, ChevronLeft, MessageCircle, Users, FileText } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -86,6 +87,8 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   const [instancesCache, setInstancesCache] = useState<Map<string, QuestionInstance[]>>(new Map())
   const [loadingInstances, setLoadingInstances] = useState<Set<string>>(new Set())
   const [initializedTeacherClass, setInitializedTeacherClass] = useState(false)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 20
 
   const loadInitialData = useCallback(async () => {
     try {
@@ -163,6 +166,16 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
       q.questionText.toLowerCase().includes(query)
     )
   }, [questions, searchQuery])
+
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE))
+  const paginatedQuestions = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE
+    return filteredQuestions.slice(start, start + PAGE_SIZE)
+  }, [filteredQuestions, page])
+
+  useEffect(() => {
+    setPage(1)
+  }, [selectedSchoolId, selectedClassId, dateRange, searchQuery])
 
   const filteredClasses = useMemo(() => {
     if (!isSuperAdmin || selectedSchoolId === "all") return classes
@@ -317,7 +330,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredQuestions.map((question) => (
+              {paginatedQuestions.map((question) => (
                 <QuestionRow
                   key={question.questionHash}
                   question={question}
@@ -330,6 +343,29 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
               ))}
             </TableBody>
           </Table>
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>

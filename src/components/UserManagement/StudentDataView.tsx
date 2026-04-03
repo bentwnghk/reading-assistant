@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ArrowUpDown, Download } from "lucide-react"
+import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -70,6 +70,8 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
   const [exporting, setExporting] = useState(false)
   const [dateRange, setDateRange] = useState<DateRange>("7")
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 20
 
   const _isTeacher = !isSuperAdmin && !isAdmin
 
@@ -204,6 +206,16 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
     return result
   }, [sessions, searchQuery, sortField, sortOrder, dateRange])
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedSessions.length / PAGE_SIZE))
+  const paginatedSessions = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE
+    return filteredAndSortedSessions.slice(start, start + PAGE_SIZE)
+  }, [filteredAndSortedSessions, page])
+
+  useEffect(() => {
+    setPage(1)
+  }, [selectedClassId, selectedSchoolId, dateRange, searchQuery, sortField, sortOrder])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -398,7 +410,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedSessions.map((session) => (
+              {paginatedSessions.map((session) => (
                 <TableRow key={session.id}>
                   {isSuperAdmin && (
                     <TableCell>
@@ -458,6 +470,29 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
               {searchQuery
                 ? t("userManagement.studentData.noResults")
                 : t("userManagement.studentData.noSessions")}
+            </div>
+          )}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page <= 1}
+                onClick={() => setPage(page - 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {page} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages}
+                onClick={() => setPage(page + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           )}
         </>

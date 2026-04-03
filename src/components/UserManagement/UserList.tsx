@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -42,6 +42,8 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
   const [roleFilter, setRoleFilter] = useState<string>("all")
   const [classFilter, setClassFilter] = useState<string>("all")
   const [schoolFilter, setSchoolFilter] = useState<string>("all")
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 20
 
   const loadData = useCallback(async () => {
     try {
@@ -127,6 +129,16 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
 
     return result
   }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter, isSuperAdmin, currentUserId])
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedUsers.length / PAGE_SIZE))
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE
+    return filteredAndSortedUsers.slice(start, start + PAGE_SIZE)
+  }, [filteredAndSortedUsers, page])
+
+  useEffect(() => {
+    setPage(1)
+  }, [roleFilter, classFilter, schoolFilter, sortField, sortOrder])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -329,7 +341,7 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredAndSortedUsers.map((user) => (
+          {paginatedUsers.map((user) => (
             <TableRow key={user.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
@@ -459,6 +471,29 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
       {filteredAndSortedUsers.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           {t("userManagement.users.noUsers")}
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
     </div>

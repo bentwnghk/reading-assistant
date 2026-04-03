@@ -51,6 +51,7 @@ interface SchoolSubscriptionRow {
   status: string
   plan: string | null
   quantity: number
+  seats_used: number
   current_period_start: string | null
   current_period_end: string | null
   cancel_at_period_end: boolean
@@ -211,7 +212,7 @@ export default function AdminSchoolSubscriptionsView() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm">{sub.quantity}</span>
+                      <span className="text-sm">{sub.seats_used}/{sub.quantity}</span>
                     </TableCell>
                     <TableCell>
                       <Badge className={`text-xs ${STATUS_COLORS[sub.status] || ""}`}>

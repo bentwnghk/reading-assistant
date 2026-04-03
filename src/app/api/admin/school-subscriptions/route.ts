@@ -15,6 +15,7 @@ export interface AdminSchoolSubscriptionRow {
   status: string
   plan: string | null
   quantity: number
+  seats_used: number
   current_period_start: string | null
   current_period_end: string | null
   cancel_at_period_end: boolean
@@ -88,7 +89,13 @@ export async function GET(request: Request) {
       `SELECT ss.*, 
          s.name as school_name, 
          u.name as admin_name, 
-         u.email as admin_email
+         u.email as admin_email,
+         COALESCE((
+           SELECT COUNT(*)::int 
+           FROM school_subscription_usage usu 
+           WHERE usu.school_subscription_id = ss.id 
+             AND usu.billing_period_start = ss.current_period_start
+         ), 0) as seats_used
        FROM school_subscriptions ss
        LEFT JOIN schools s ON s.id = ss.school_id
        LEFT JOIN users u ON u.id = ss.admin_user_id

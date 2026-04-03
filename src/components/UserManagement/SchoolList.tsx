@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Pencil, Trash2, ArrowUpDown, School } from "lucide-react"
+import { Loader2, Pencil, Trash2, ArrowUpDown, School, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -37,6 +37,8 @@ export default function SchoolList() {
   const [saving, setSaving] = useState(false)
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 20
 
   const loadSchools = useCallback(async () => {
     setLoading(true)
@@ -85,6 +87,16 @@ export default function SchoolList() {
       return sortOrder === "asc" ? comparison : -comparison
     })
   }, [schools, sortField, sortOrder])
+
+  const totalPages = Math.max(1, Math.ceil(sortedSchools.length / PAGE_SIZE))
+  const paginatedSchools = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE
+    return sortedSchools.slice(start, start + PAGE_SIZE)
+  }, [sortedSchools, page])
+
+  useEffect(() => {
+    setPage(1)
+  }, [sortField, sortOrder])
 
   const openEditDialog = (school: SchoolInfo) => {
     setSelectedSchool(school)
@@ -179,7 +191,7 @@ export default function SchoolList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedSchools.map((school) => (
+          {paginatedSchools.map((school) => (
             <TableRow key={school.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
@@ -224,6 +236,29 @@ export default function SchoolList() {
       {sortedSchools.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           {t("userManagement.schools.noSchools")}
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
