@@ -146,7 +146,7 @@ export async function notifySubscriptionEvent(
             userInfo.name
           )
         } else {
-          portalUrl = `${appUrl}/settings`
+          portalUrl = `${appUrl}`
         }
       } else {
         const { createPortalSession } = await import("./subscription")
@@ -157,7 +157,7 @@ export async function notifySubscriptionEvent(
         )
       }
     } catch {
-      portalUrl = `${appUrl}/settings`
+      portalUrl = `${appUrl}`
     }
   }
 

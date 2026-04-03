@@ -84,7 +84,7 @@ const STRINGS: Record<
       greeting: (name) => `Hi ${name},`,
       body: `Your Mr.🆖 ProReader subscription has been canceled as requested. You'll still have access until the end of your current billing period.\n\nWe'd love to have you back! You can reactivate your subscription anytime from Settings.`,
       actionText: "Reactivate Subscription",
-      actionUrl: "{{appUrl}}/settings",
+      actionUrl: "{{appUrl}}",
       footerNote:
         "If you changed your mind, you can reactivate before the period ends.",
     },
@@ -165,7 +165,7 @@ const STRINGS: Record<
       greeting: (name) => `嗨 ${name}，`,
       body: `您的 Mr.🆖 ProReader 訂閱已根據要求取消。您在當前計費期結束前仍可以繼續使用。\n\n我們希望您能回來！您可以隨時在設定中重新啟用訂閱。`,
       actionText: "重新啟用訂閱",
-      actionUrl: "{{appUrl}}/settings",
+      actionUrl: "{{appUrl}}",
       footerNote:
         "如您改變主意，可以在計費期結束前重新啟用。",
     },
