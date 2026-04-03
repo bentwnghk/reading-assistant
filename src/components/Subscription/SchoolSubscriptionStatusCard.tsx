@@ -7,18 +7,36 @@ import {
   Building2,
   Calendar,
   CreditCard,
+  Loader2,
   Minus,
   Plus,
   ShieldCheck,
   Users,
   ArrowRightLeft,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import type { SubscriptionPlan, SubscriptionStatus } from "@/lib/subscription";
 
 const MIN_SEAT_QUANTITY = 20;
 
 interface SchoolSubscriptionStatusCardProps {
   subscription: {
+    subscriptionId: string | null;
     schoolName: string | null;
     status: SubscriptionStatus;
     plan: SubscriptionPlan | null;
@@ -54,7 +72,14 @@ function SchoolSubscriptionStatusCard({
   const [switching, setSwitching] = useState(false);
   const [updatingQty, setUpdatingQty] = useState(false);
 
+  const [seatDialogOpen, setSeatDialogOpen] = useState(false);
+  const [seatUsers, setSeatUsers] = useState<
+    { user_id: string; user_name: string | null; user_email: string | null; user_role: string; first_accessed_at: string }[]
+  >([]);
+  const [seatUsersLoading, setSeatUsersLoading] = useState(false);
+
   const {
+    subscriptionId,
     schoolName,
     status,
     plan,
@@ -103,6 +128,24 @@ function SchoolSubscriptionStatusCard({
     }
   };
 
+  async function openSeatUsers() {
+    if (!subscriptionId) return;
+    setSeatDialogOpen(true);
+    setSeatUsersLoading(true);
+    setSeatUsers([]);
+    try {
+      const res = await fetch(`/api/admin/school-subscriptions/${subscriptionId}/seats`);
+      if (res.ok) {
+        const data = await res.json();
+        setSeatUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch seat users:", error);
+    } finally {
+      setSeatUsersLoading(false);
+    }
+  }
+
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null;
     return new Date(dateStr).toLocaleDateString(undefined, {
@@ -138,10 +181,14 @@ function SchoolSubscriptionStatusCard({
             <Users className="h-4 w-4 text-muted-foreground" />
             <span>{t("schoolSubscription.seatUsage")}</span>
           </div>
-          <span className="font-medium">
+          <button
+            type="button"
+            className="font-medium text-primary hover:underline cursor-pointer"
+            onClick={openSeatUsers}
+          >
             {seatsUsed} / {quantity}
             <span className="text-muted-foreground ml-1">({seatsRemaining} {t("schoolSubscription.available")})</span>
-          </span>
+          </button>
         </div>
         <div className="h-2 rounded-full bg-muted overflow-hidden">
           <div
@@ -300,6 +347,65 @@ function SchoolSubscriptionStatusCard({
           </div>
         </div>
       )}
+
+      <Dialog open={seatDialogOpen} onOpenChange={setSeatDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>
+              {t("subscription.admin.seatUsersTitle", { school: schoolName || "-" })}
+            </DialogTitle>
+            <DialogDescription>
+              {t("subscription.admin.seatUsersDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto -mx-6 px-6">
+            {seatUsersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : seatUsers.length === 0 ? (
+              <div className="text-center text-muted-foreground py-8">
+                {t("subscription.admin.noSeatUsers")}
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("subscription.admin.userName")}</TableHead>
+                    <TableHead>{t("subscription.admin.userEmail")}</TableHead>
+                    <TableHead>{t("subscription.admin.userRole")}</TableHead>
+                    <TableHead>{t("subscription.admin.firstAccessed")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {seatUsers.map((u) => (
+                    <TableRow key={u.user_id}>
+                      <TableCell className="text-sm">{u.user_name || "-"}</TableCell>
+                      <TableCell className="text-sm">{u.user_email || "-"}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {u.user_role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {u.first_accessed_at
+                          ? new Date(u.first_accessed_at).toLocaleString(undefined, {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

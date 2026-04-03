@@ -28,6 +28,7 @@ export interface SchoolSubscriptionRecord {
 
 export interface SchoolSubscriptionStatusResponse {
   hasSubscription: boolean;
+  subscriptionId: string | null;
   schoolName: string | null;
   status: SubscriptionStatus;
   plan: SubscriptionPlan | null;
@@ -297,6 +298,7 @@ export async function getSchoolSubscriptionStatus(
     if (!sub || sub.status === "inactive") {
       return {
         hasSubscription: false,
+        subscriptionId: null,
         schoolName,
         status: "inactive",
         plan: null,
@@ -315,6 +317,7 @@ export async function getSchoolSubscriptionStatus(
 
     return {
       hasSubscription: sub.status === "active" || sub.status === "trialing",
+      subscriptionId: sub.id,
       schoolName,
       status: sub.status,
       plan: sub.plan,
@@ -329,6 +332,7 @@ export async function getSchoolSubscriptionStatus(
     console.error("Failed to get school subscription status:", error);
     return {
       hasSubscription: false,
+      subscriptionId: null,
       schoolName: null,
       status: "inactive",
       plan: null,

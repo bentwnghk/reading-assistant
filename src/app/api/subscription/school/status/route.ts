@@ -17,6 +17,7 @@ export async function GET() {
     if (!schoolId) {
       return NextResponse.json({
         hasSubscription: false,
+        subscriptionId: null,
         schoolName: null,
         status: "inactive",
         plan: null,
@@ -38,6 +39,7 @@ export async function GET() {
     if (!status) {
       return NextResponse.json({
         hasSubscription: false,
+        subscriptionId: null,
         schoolName: null,
         status: "inactive",
         plan: null,
