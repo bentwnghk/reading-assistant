@@ -22,15 +22,13 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-1">
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <Users className="h-4 w-4" />
-          {t("schoolSubscription.seatInfo")}
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {t("schoolSubscription.seatInfoDesc", { min: MIN_SEAT_QUANTITY })}
-        </p>
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <Users className="h-4 w-4" />
+        {t("schoolSubscription.seatInfo")}
       </div>
+      <p className="text-xs text-muted-foreground">
+        {t("schoolSubscription.seatInfoDesc", { min: MIN_SEAT_QUANTITY })}
+      </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="rounded-lg border border-border p-4 space-y-3">

@@ -39,7 +39,7 @@ function SchoolSubscriptionReadOnlyCard({
   };
 
   return (
-    <div className="rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10 p-3 space-y-3">
+    <div className="space-y-3">
       <div className="flex items-center gap-2">
         <div className="flex items-center justify-center h-6 w-6 rounded-full bg-green-100 dark:bg-green-900/40">
           <Building2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
@@ -97,7 +97,7 @@ function SchoolSubscriptionReadOnlyCard({
         )}
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1 border-t border-green-200/50 dark:border-green-800/50">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2 border-t border-border">
         <Lock className="h-3 w-3" />
         {t("schoolSubscription.managedByAdmin")}
       </div>

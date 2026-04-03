@@ -56,8 +56,8 @@ function SchoolSubscriptionPanel({ monthlyPrice, currency }: SchoolSubscriptionP
   if (!subscription.hasSubscription && !isAdmin) return null;
 
   return (
-    <>
-      <div className="rounded-lg border border-border p-3 space-y-1 mb-4">
+    <div className="rounded-lg border border-border p-3 space-y-3">
+      <div className="space-y-0.5">
         <h3 className="text-sm font-semibold">{t("schoolSubscription.title")}</h3>
         <p className="text-xs text-muted-foreground">{t("schoolSubscription.description")}</p>
       </div>
@@ -110,7 +110,7 @@ function SchoolSubscriptionPanel({ monthlyPrice, currency }: SchoolSubscriptionP
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
