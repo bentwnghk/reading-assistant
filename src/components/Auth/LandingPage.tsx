@@ -348,7 +348,7 @@ export function LandingPage() {
           <Star className="h-6 w-6 text-amber-500" />
           <h2 className="text-3xl font-bold tracking-tight">{t("header.about.whyLove.title")}</h2>
         </motion.div>
-        <motion.div variants={gridContainer(0.12)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div variants={gridContainer(0.25)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
             { icon: Target, Watermark: Target, title: "personalized", desc: "personalized", color: "text-emerald-600 dark:text-emerald-400", colSpan: "" },
             { icon: Trophy, Watermark: Trophy, title: "gamified", desc: "gamified", color: "text-amber-600 dark:text-amber-400", colSpan: "" },
@@ -426,7 +426,7 @@ export function LandingPage() {
             </h2>
             <p className="text-xl text-slate-400 leading-relaxed">{t("header.about.roles.intro")}</p>
           </motion.div>
-          <motion.div variants={gridContainer(0.15)} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div variants={gridContainer(0.25)} className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: Crown, title: "admin", color: "text-amber-400", items: ["manageSchools", "manageUsers", "manageClasses", "uploadTexts"] },
               { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["manageStudents", "uploadTexts", "viewAiQuestions", "exportData", "viewLeaderboard"] },
@@ -466,7 +466,7 @@ export function LandingPage() {
             <Rocket className="h-8 w-8 text-blue-500" />
             <h2 className="text-4xl font-bold tracking-tight">{t("header.about.workflow.title")}</h2>
           </motion.div>
-          <motion.div variants={gridContainer(0.05)} className="flex flex-wrap gap-4">
+          <motion.div variants={gridContainer(0.25)} className="flex flex-wrap gap-4">
             {[
               { num: 1, icon: Upload, key: "upload" },
               { num: 2, icon: FileText, key: "summary" },
