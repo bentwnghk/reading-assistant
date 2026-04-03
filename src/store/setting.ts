@@ -3,19 +3,20 @@ import { persist, StorageValue } from "zustand/middleware";
 
 export const AVAILABLE_MODELS = [
   "gpt-5-mini",
+  "gpt-5.4-mini",
+  "gpt-5.4-nano",
   "deepseek-chat",
   "gemini-3-flash-preview",
-  "glm-4.7",
 ] as const;
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
 
-export const VISION_MODELS = ["gpt-5-nano", "gpt-4.1-mini", "gpt-5-mini"] as const;
+export const VISION_MODELS = ["gpt-5-nano", "gpt-5.4-nano"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
 export const TUTOR_MODELS = [
-  "gpt-5-mini",
+  "gpt-5.4-mini",
   "gemini-3-flash-preview",
   "gpt-5.1",
 ] as const;
@@ -135,7 +136,7 @@ export const defaultValues: SettingStore = {
   readingTestModel: "gpt-5-mini",
   glossaryModel: "deepseek-chat",
   sentenceAnalysisModel: "deepseek-chat",
-  tutorModel: "gpt-5-mini",
+  tutorModel: "gpt-5.4-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
   cheatMode: false,
