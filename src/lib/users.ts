@@ -837,3 +837,75 @@ export async function isTeacherOfClass(teacherId: string, classId: string): Prom
     client.release()
   }
 }
+
+let schoolAccessEndsAtColumnEnsured = false
+
+export async function ensureSchoolAccessEndsAtColumn(): Promise<void> {
+  if (schoolAccessEndsAtColumnEnsured) return
+  const client = await getClient()
+  try {
+    await client.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS school_access_ends_at TIMESTAMP WITH TIME ZONE`
+    )
+    schoolAccessEndsAtColumnEnsured = true
+  } catch (error) {
+    console.error("Failed to ensure school_access_ends_at column:", error)
+  } finally {
+    client.release()
+  }
+}
+
+export async function revokeSchoolAccessBulk(
+  userIds: string[],
+  graceDays: number = 2
+): Promise<{ success: string[]; failed: string[] }> {
+  await ensureSchoolAccessEndsAtColumn()
+  const success: string[] = []
+  const failed: string[] = []
+
+  for (const userId of userIds) {
+    const client = await getClient()
+    try {
+      const checkResult = await client.query(
+        `SELECT school_id FROM users WHERE id = $1 AND school_id IS NOT NULL`,
+        [userId]
+      )
+      if (checkResult.rows.length === 0) {
+        failed.push(userId)
+        continue
+      }
+
+      await client.query(
+        `UPDATE users SET school_access_ends_at = NOW() + ($1 || ' days')::INTERVAL WHERE id = $2`,
+        [graceDays, userId]
+      )
+      success.push(userId)
+    } catch {
+      failed.push(userId)
+    } finally {
+      client.release()
+    }
+  }
+
+  return { success, failed }
+}
+
+export async function cleanupExpiredSchoolAccess(): Promise<number> {
+  await ensureSchoolAccessEndsAtColumn()
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `UPDATE users
+       SET school_id = NULL, school_access_ends_at = NULL
+       WHERE school_access_ends_at IS NOT NULL
+         AND school_access_ends_at < NOW()
+         AND school_id IS NOT NULL`
+    )
+    return result.rowCount ?? 0
+  } catch (error) {
+    console.error("Failed to cleanup expired school access:", error)
+    return 0
+  } finally {
+    client.release()
+  }
+}

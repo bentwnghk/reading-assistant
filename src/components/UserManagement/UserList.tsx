@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
 import type { UserWithRole, UserRole, SchoolInfo, ClassInfo } from "@/lib/users"
 
@@ -43,6 +44,8 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
   const [classFilter, setClassFilter] = useState<string>("all")
   const [schoolFilter, setSchoolFilter] = useState<string>("all")
   const [page, setPage] = useState(1)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [revoking, setRevoking] = useState(false)
   const PAGE_SIZE = 20
 
   const loadData = useCallback(async () => {
@@ -247,6 +250,93 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
     }
   }
 
+  const selectableUsers = useMemo(
+    () => filteredAndSortedUsers.filter(u => u.role !== "super-admin" && u.role !== "admin" && u.schoolId),
+    [filteredAndSortedUsers]
+  )
+
+  const allPageSelected = useMemo(
+    () => paginatedUsers.length > 0 && paginatedUsers.every(u => selectedIds.has(u.id)),
+    [paginatedUsers, selectedIds]
+  )
+
+  const somePageSelected = useMemo(
+    () => paginatedUsers.some(u => selectedIds.has(u.id)),
+    [paginatedUsers, selectedIds]
+  )
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(userId)) {
+        next.delete(userId)
+      } else {
+        next.add(userId)
+      }
+      return next
+    })
+  }
+
+  const toggleAllPageSelection = () => {
+    if (allPageSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        paginatedUsers.forEach(u => next.delete(u.id))
+        return next
+      })
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        paginatedUsers.forEach(u => {
+          if (u.role !== "super-admin" && u.role !== "admin" && u.schoolId) {
+            next.add(u.id)
+          }
+        })
+        return next
+      })
+    }
+  }
+
+  const handleBulkRevoke = async () => {
+    if (selectedIds.size === 0) return
+
+    const confirmMsg = t("userManagement.users.revokeConfirm", { count: selectedIds.size })
+    if (!confirm(confirmMsg)) return
+
+    setRevoking(true)
+    try {
+      const response = await fetch("/api/admin/users/bulk-revoke-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds: Array.from(selectedIds) }),
+      })
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        toast.error((err as { error?: string }).error || t("userManagement.users.revokeFailed"))
+        return
+      }
+
+      const result = await response.json() as { success: string[]; failed: string[] }
+
+      if (result.failed.length > 0) {
+        toast.warning(t("userManagement.users.revokePartial", {
+          success: result.success.length,
+          failed: result.failed.length,
+        }))
+      } else {
+        toast.success(t("userManagement.users.revokeSuccess", { count: result.success.length }))
+      }
+
+      setSelectedIds(new Set())
+      await loadData()
+    } catch {
+      toast.error(t("userManagement.users.revokeFailed"))
+    } finally {
+      setRevoking(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -306,10 +396,42 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
         <div className="text-sm text-muted-foreground">
           {t("userManagement.users.showing", { count: filteredAndSortedUsers.length })}
         </div>
+        {selectedIds.size > 0 && (
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {t("userManagement.users.selectedCount", { count: selectedIds.size })}
+            </span>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBulkRevoke}
+              disabled={revoking}
+            >
+              {revoking ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <ShieldOff className="h-4 w-4 mr-1" />
+              )}
+              {t("userManagement.users.revokeAccess")}
+            </Button>
+          </div>
+        )}
       </div>
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-10">
+              <Checkbox
+                checked={allPageSelected}
+                ref={(el) => {
+                  if (el) {
+                    (el as unknown as { dataset: Record<string, string> }).dataset.state = somePageSelected && !allPageSelected ? "indeterminate" : ""
+                  }
+                }}
+                onCheckedChange={toggleAllPageSelection}
+                disabled={selectableUsers.length === 0}
+              />
+            </TableHead>
             <TableHead>
               <Button variant="ghost" size="sm" onClick={() => handleSort("name")}>
                 {t("userManagement.users.name")}
@@ -341,131 +463,141 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedUsers.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.image || undefined} />
-                    <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
-                  </Avatar>
-                  <span className="truncate max-w-32" title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
-                </div>
-              </TableCell>
-              <TableCell className="truncate max-w-48">{user.email}</TableCell>
-              <TableCell>
-                <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center w-fit">
-                  {getRoleIcon(user.role)}
-                  {t(`userManagement.roles.${user.role}`)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                {user.role === "teacher" && user.taughtClassNames && user.taughtClassNames.length > 0 ? (
-                  <div className="flex flex-wrap gap-1 max-w-48">
-                    {user.taughtClassNames.map((name, idx) => (
-                      <Badge key={user.taughtClassIds?.[idx] || idx} variant="outline" className="text-xs">
-                        {name}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : user.role === "student" ? (
-                  <Select
-                    value={user.classId ?? "__none__"}
-                    onValueChange={(value) => handleClassChange(user.id, value)}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder={t("userManagement.users.noClass")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">
-                        <span className="text-muted-foreground">{t("userManagement.users.noClass")}</span>
-                      </SelectItem>
-                      {classes.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id}>
-                          {cls.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <span className="text-muted-foreground">-</span>
-                )}
-              </TableCell>
-              {isSuperAdmin && (
+          {paginatedUsers.map((user) => {
+            const isSelectable = user.role !== "super-admin" && user.role !== "admin" && !!user.schoolId
+            return (
+              <TableRow key={user.id} data-state={selectedIds.has(user.id) ? "selected" : undefined}>
                 <TableCell>
-                  {user.schoolName ? (
-                    <div className="flex items-center gap-1">
-                      <School className="h-3 w-3 text-muted-foreground shrink-0" />
-                      <span className="text-sm max-w-32 break-words">{user.schoolName}</span>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
+                  <Checkbox
+                    checked={selectedIds.has(user.id)}
+                    onCheckedChange={() => toggleUserSelection(user.id)}
+                    disabled={!isSelectable}
+                  />
                 </TableCell>
-              )}
-              <TableCell>
-                <div className="flex flex-col gap-1">
-                  {user.role === "super-admin" ? (
-                    <Badge variant="destructive" className="flex items-center w-fit">
-                      {getRoleIcon(user.role)}
-                      {t(`userManagement.roles.${user.role}`)}
-                    </Badge>
-                  ) : (
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.image || undefined} />
+                      <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
+                    </Avatar>
+                    <span className="truncate max-w-32" title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="truncate max-w-48">{user.email}</TableCell>
+                <TableCell>
+                  <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center w-fit">
+                    {getRoleIcon(user.role)}
+                    {t(`userManagement.roles.${user.role}`)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {user.role === "teacher" && user.taughtClassNames && user.taughtClassNames.length > 0 ? (
+                    <div className="flex flex-wrap gap-1 max-w-48">
+                      {user.taughtClassNames.map((name, idx) => (
+                        <Badge key={user.taughtClassIds?.[idx] || idx} variant="outline" className="text-xs">
+                          {name}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : user.role === "student" ? (
                     <Select
-                      value={user.role}
-                      onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
+                      value={user.classId ?? "__none__"}
+                      onValueChange={(value) => handleClassChange(user.id, value)}
                     >
                       <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="student">
-                          <div className="flex items-center">
-                            <User className="h-3 w-3 mr-1" />
-                            {t("userManagement.roles.student")}
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="teacher">
-                          <div className="flex items-center">
-                            <GraduationCap className="h-3 w-3 mr-1" />
-                            {t("userManagement.roles.teacher")}
-                          </div>
-                        </SelectItem>
-                        {isSuperAdmin && (
-                           <SelectItem value="admin">
-                             <div className="flex items-center">
-                               <Shield className="h-3 w-3 mr-1" />
-                               {t("userManagement.roles.admin")}
-                             </div>
-                           </SelectItem>
-                         )}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {isSuperAdmin && schools.length > 0 && user.role !== "super-admin" && (
-                    <Select
-                      value={user.schoolId ?? "__none__"}
-                      onValueChange={(value) => handleSchoolChange(user.id, value)}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder={t("userManagement.users.noSchool")} />
+                        <SelectValue placeholder={t("userManagement.users.noClass")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__none__">
-                          <span className="text-muted-foreground">{t("userManagement.users.noSchool")}</span>
+                          <span className="text-muted-foreground">{t("userManagement.users.noClass")}</span>
                         </SelectItem>
-                        {schools.map((school) => (
-                          <SelectItem key={school.id} value={school.id}>
-                            {school.name}
+                        {classes.map((cls) => (
+                          <SelectItem key={cls.id} value={cls.id}>
+                            {cls.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
                   )}
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+                {isSuperAdmin && (
+                  <TableCell>
+                    {user.schoolName ? (
+                      <div className="flex items-center gap-1">
+                        <School className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <span className="text-sm max-w-32 break-words">{user.schoolName}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                )}
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    {user.role === "super-admin" ? (
+                      <Badge variant="destructive" className="flex items-center w-fit">
+                        {getRoleIcon(user.role)}
+                        {t(`userManagement.roles.${user.role}`)}
+                      </Badge>
+                    ) : (
+                      <Select
+                        value={user.role}
+                        onValueChange={(value: UserRole) => handleRoleChange(user.id, value)}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="student">
+                            <div className="flex items-center">
+                              <User className="h-3 w-3 mr-1" />
+                              {t("userManagement.roles.student")}
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="teacher">
+                            <div className="flex items-center">
+                              <GraduationCap className="h-3 w-3 mr-1" />
+                              {t("userManagement.roles.teacher")}
+                            </div>
+                          </SelectItem>
+                          {isSuperAdmin && (
+                             <SelectItem value="admin">
+                               <div className="flex items-center">
+                                 <Shield className="h-3 w-3 mr-1" />
+                                 {t("userManagement.roles.admin")}
+                               </div>
+                             </SelectItem>
+                           )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {isSuperAdmin && schools.length > 0 && user.role !== "super-admin" && (
+                      <Select
+                        value={user.schoolId ?? "__none__"}
+                        onValueChange={(value) => handleSchoolChange(user.id, value)}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder={t("userManagement.users.noSchool")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">
+                            <span className="text-muted-foreground">{t("userManagement.users.noSchool")}</span>
+                          </SelectItem>
+                          {schools.map((school) => (
+                            <SelectItem key={school.id} value={school.id}>
+                              {school.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
       {filteredAndSortedUsers.length === 0 && (

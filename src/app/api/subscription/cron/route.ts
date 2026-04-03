@@ -4,6 +4,7 @@ import {
   notifySubscriptionEvent,
   getSchoolContext,
 } from "@/lib/subscription-email"
+import { cleanupExpiredSchoolAccess } from "@/lib/users"
 import { getClient } from "@/lib/db"
 import { NextResponse } from "next/server"
 
@@ -200,6 +201,15 @@ async function processSchoolRenewalReminders(client: Awaited<ReturnType<typeof g
   return { processed, notified, errors }
 }
 
+async function processSchoolAccessCleanup(): Promise<{ processed: number; notified: number; errors: number }> {
+  try {
+    const cleaned = await cleanupExpiredSchoolAccess()
+    return { processed: cleaned, notified: 0, errors: 0 }
+  } catch {
+    return { processed: 0, notified: 0, errors: 1 }
+  }
+}
+
 export async function POST(request: Request) {
   if (!verifyCronAuth(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -217,6 +227,7 @@ export async function POST(request: Request) {
       results.trialEndingSchool = await processSchoolTrialEndingNotifications(client)
       results.renewalReminderPersonal = await processRenewalReminders(client)
       results.renewalReminderSchool = await processSchoolRenewalReminders(client)
+      results.schoolAccessCleanup = await processSchoolAccessCleanup()
     } finally {
       client.release()
     }

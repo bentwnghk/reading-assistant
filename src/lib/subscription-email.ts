@@ -115,6 +115,7 @@ export async function notifySubscriptionEvent(
     paymentFailureReason?: string
     cancelAtPeriodEnd?: boolean
     schoolContext?: SchoolContext
+    accessEndDate?: string
   } = {}
 ): Promise<void> {
   const userInfo = await getUserEmailAndLocale(userId)
@@ -174,6 +175,7 @@ export async function notifySubscriptionEvent(
       trialEndDate: opts.trialEndDate,
       paymentFailureReason: opts.paymentFailureReason,
       cancelAtPeriodEnd: opts.cancelAtPeriodEnd,
+      accessEndDate: opts.accessEndDate,
       ...(opts.schoolContext
         ? {
             schoolName: opts.schoolContext.schoolName,

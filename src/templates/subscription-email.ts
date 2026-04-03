@@ -16,6 +16,7 @@ export interface SubscriptionEmailParams {
   invoiceNumber?: string
   schoolName?: string
   totalSeats?: number
+  accessEndDate?: string
 }
 
 export type SubscriptionEmailType =
@@ -26,6 +27,7 @@ export type SubscriptionEmailType =
   | "subscription_renewed"
   | "renewal_reminder"
   | "payment_receipt"
+  | "school_access_revoked"
 
 interface SubscriptionEmailStrings {
   htmlTitle: string
@@ -123,6 +125,17 @@ const STRINGS: Record<
       footerNote:
         "If you have any questions about this charge, please contact support.",
     },
+    school_access_revoked: {
+      htmlTitle: "School Subscription Access Ending - Mr.🆖 ProReader",
+      subject: () =>
+        `Your school subscription access to Mr.🆖 ProReader will end soon`,
+      greeting: (name) => `Hi ${name},`,
+      body: `Your school's administrator has removed your access to the Mr.🆖 ProReader school subscription. Your access will end in 2 days.\n\nIf you believe this is a mistake, please contact your school administrator.`,
+      actionText: "Learn More",
+      actionUrl: "{{appUrl}}",
+      footerNote:
+        "You can continue using Mr.🆖 ProReader with a personal subscription.",
+    },
   },
   "zh-HK": {
     payment_failed: {
@@ -203,6 +216,17 @@ const STRINGS: Record<
       actionUrl: "{{invoiceUrl}}",
       footerNote:
         "如您對此付款有任何疑問，請聯絡支援。",
+    },
+    school_access_revoked: {
+      htmlTitle: "學校訂閱存取即將結束 - Mr.🆖 ProReader",
+      subject: () =>
+        `您的 Mr.🆖 ProReader 學校訂閱存取即將結束`,
+      greeting: (name) => `嗨 ${name}，`,
+      body: `您的學校管理員已移除您對 Mr.🆖 ProReader 學校訂閱的存取權限。您的存取權限將在 2 天後結束。\n\n如您認為這是錯誤的，請聯絡您的學校管理員。`,
+      actionText: "了解更多",
+      actionUrl: "{{appUrl}}",
+      footerNote:
+        "您可以購買個人訂閱以繼續使用 Mr.🆖 ProReader。",
     },
   },
 }
@@ -315,6 +339,12 @@ export function buildSubscriptionEmailHtml(
   if (params.trialEndDate) {
     detailRows.push(
       `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "試用期結束" : "Trial ends"}</td><td style="padding:4px 0;color:#1f2937;font-size:14px;font-weight:500;text-align:right;">${params.trialEndDate}</td></tr>`
+    )
+  }
+
+  if (type === "school_access_revoked" && params.accessEndDate) {
+    detailRows.push(
+      `<tr><td style="padding:4px 0;color:#6b7280;font-size:14px;">${isZh ? "存取結束日期" : "Access ends"}</td><td style="padding:4px 0;color:#ef4444;font-size:14px;font-weight:500;text-align:right;">${params.accessEndDate}</td></tr>`
     )
   }
 
@@ -447,6 +477,10 @@ export function buildSubscriptionEmailText(
   }
   if (params.trialEndDate) {
     lines.push(`${isZh ? "試用期結束" : "Trial ends"}: ${params.trialEndDate}`)
+  }
+
+  if (type === "school_access_revoked" && params.accessEndDate) {
+    lines.push(`${isZh ? "存取結束日期" : "Access ends"}: ${params.accessEndDate}`)
   }
 
   if (type === "payment_receipt") {

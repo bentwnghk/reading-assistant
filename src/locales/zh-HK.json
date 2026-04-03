@@ -1010,7 +1010,13 @@
       "allSchools": "所有學校",
       "noSchool": "無學校",
       "noClass": "無班別",
-      "showing": "顯示 {{count}} 個用戶"
+      "showing": "顯示 {{count}} 個用戶",
+      "revokeAccess": "撤銷學校存取權限",
+      "revokeConfirm": "確定要撤銷 {{count}} 個所選用戶的學校訂閱存取權限嗎？他們將有 2 天的寬限期，之後存取權限將被完全移除。",
+      "revokeSuccess": "已撤銷 {{count}} 個用戶的學校存取權限。已向他們發送通知。",
+      "revokeFailed": "撤銷學校存取權限失敗。",
+      "revokePartial": "已撤銷 {{success}} 個用戶的存取權限，{{failed}} 個失敗。",
+      "selectedCount": "已選 {{count}} 個"
     },
     "roleUpdated": "角色已更新",
     "roleUpdateFailed": "更新角色失敗",

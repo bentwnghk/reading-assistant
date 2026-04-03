@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { getClient } from "./db";
-import { getSchoolForUser } from "./users";
+import { getSchoolForUser, ensureSchoolAccessEndsAtColumn } from "./users";
 import {
   ensureStripePrices,
   type SubscriptionPlan,
@@ -361,8 +361,23 @@ export async function verifySchoolSubscriptionAccess(
   userId: string
 ): Promise<boolean> {
   await ensureSchoolSubscriptionTables();
+  await ensureSchoolAccessEndsAtColumn();
   const schoolId = await getSchoolForUser(userId);
   if (!schoolId) return false;
+
+  const client = await getClient();
+  try {
+    const accessResult = await client.query(
+      `SELECT school_access_ends_at FROM users WHERE id = $1`,
+      [userId]
+    );
+    const accessEndsAt = accessResult.rows[0]?.school_access_ends_at;
+    if (accessEndsAt && new Date(accessEndsAt) < new Date()) {
+      return false;
+    }
+  } finally {
+    client.release();
+  }
 
   const sub = await getSchoolSubscriptionRecord(schoolId);
   if (!sub) return false;

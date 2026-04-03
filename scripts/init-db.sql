@@ -171,6 +171,11 @@ ALTER TABLE users ADD COLUMN school_id TEXT REFERENCES schools(id) ON DELETE SET
 
 CREATE INDEX idx_users_school_id ON users(school_id);
 
+-- Grace period timestamp for revoking school subscription access.
+-- When set, the user retains school access until this time; the cron job
+-- then sets school_id = NULL.
+ALTER TABLE users ADD COLUMN school_access_ends_at TIMESTAMP WITH TIME ZONE;
+
 -- Classes table (belongs to a school)
 CREATE TABLE classes (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),

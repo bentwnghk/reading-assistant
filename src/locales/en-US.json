@@ -1010,7 +1010,13 @@
       "allSchools": "All Schools",
       "noSchool": "No School",
       "noClass": "No Class",
-      "showing": "Showing {{count}} users"
+      "showing": "Showing {{count}} users",
+      "revokeAccess": "Revoke School Access",
+      "revokeConfirm": "Revoke school subscription access for {{count}} selected user(s)? They will have a 2-day grace period before access is fully removed.",
+      "revokeSuccess": "School access revoked for {{count}} user(s). They have been notified.",
+      "revokeFailed": "Failed to revoke school access.",
+      "revokePartial": "Revoked access for {{success}} user(s), {{failed}} failed.",
+      "selectedCount": "{{count}} selected"
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",
