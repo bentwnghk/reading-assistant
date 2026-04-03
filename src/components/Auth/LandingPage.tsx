@@ -380,7 +380,7 @@ export function LandingPage() {
           <Sparkles className="h-8 w-8 text-purple-500" />
           <h2 className="text-4xl font-bold tracking-tight">{t("header.about.features.title")}</h2>
         </motion.div>
-        <motion.div variants={gridContainer(0.5)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div variants={gridContainer(0.4)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { icon: Camera, key: "ocr", color: "text-blue-600 dark:text-blue-400" },
             { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400" },
