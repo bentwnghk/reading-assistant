@@ -514,7 +514,7 @@ export function LandingPage() {
           <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           <h2 className="text-3xl font-bold">{t("header.about.skills.title")}</h2>
         </motion.div>
-        <motion.div variants={gridContainer(0.1)} className="flex flex-wrap justify-center gap-4 mb-24">
+        <motion.div variants={gridContainer(0.25)} className="flex flex-wrap justify-center gap-4 mb-24">
           {["mainIdea", "detail", "inference", "vocabulary", "purpose"].map((skill) => (
             <motion.span
               key={skill}
