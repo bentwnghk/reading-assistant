@@ -802,7 +802,7 @@
     "cancelSubscription": "Cancel Subscription",
     "reactivate": "Reactivate",
     "cancelConfirm": "Are you sure? You will lose access at the end of your billing period.",
-    "currentPlan": "Current plan",
+    "currentPlan": "Personal subscription plan",
     "nextBillingDate": "Next billing date",
     "trialEndsAt": "Trial ends",
     "signInPrompt": "Please sign in with Google to use Subscription mode.",
