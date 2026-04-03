@@ -290,7 +290,7 @@ function Setting({ open, onClose }: SettingProps) {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="openaicompatible">
-                              OpenAI Compatible
+                              Mr.🆖 AI Hub
                             </SelectItem>
                           </SelectContent>
                         </Select>
