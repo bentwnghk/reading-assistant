@@ -894,12 +894,28 @@ export async function cleanupExpiredSchoolAccess(): Promise<number> {
   await ensureSchoolAccessEndsAtColumn()
   const client = await getClient()
   try {
-    const result = await client.query(
-      `UPDATE users
-       SET school_id = NULL, school_access_ends_at = NULL
+    const userResult = await client.query(
+      `SELECT id, school_id FROM users
        WHERE school_access_ends_at IS NOT NULL
          AND school_access_ends_at < NOW()
          AND school_id IS NOT NULL`
+    )
+
+    if (userResult.rows.length === 0) return 0
+
+    const userIds = userResult.rows.map((r) => r.id)
+
+    await client.query(
+      `DELETE FROM school_subscription_usage
+       WHERE user_id = ANY($1)`,
+      [userIds]
+    )
+
+    const result = await client.query(
+      `UPDATE users
+       SET school_id = NULL, school_access_ends_at = NULL
+       WHERE id = ANY($1)`,
+      [userIds]
     )
     return result.rowCount ?? 0
   } catch (error) {
