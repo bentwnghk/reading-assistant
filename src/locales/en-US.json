@@ -802,7 +802,7 @@
     "cancelSubscription": "Cancel Subscription",
     "reactivate": "Reactivate",
     "cancelConfirm": "Are you sure? You will lose access at the end of your billing period.",
-    "currentPlan": "Personal subscription plan",
+    "currentPlan": "Current plan",
     "nextBillingDate": "Next billing date",
     "trialEndsAt": "Trial ends",
     "signInPrompt": "Please sign in with Google to use Subscription mode.",
@@ -854,7 +854,14 @@
       "totalSeats": "Total Seats",
       "activeSeats": "Active Seats",
       "searchSchoolPlaceholder": "Search by school, admin name or email...",
-      "noSchoolSubscriptions": "No school subscriptions found"
+      "noSchoolSubscriptions": "No school subscriptions found",
+      "seatUsersTitle": "Seat Users — {{school}}",
+      "seatUsersDesc": "Users who have consumed a seat in the current billing period",
+      "userName": "Name",
+      "userEmail": "Email",
+      "userRole": "Role",
+      "firstAccessed": "First Accessed",
+      "noSeatUsers": "No users have consumed seats in this period"
     }
   },
   "schoolSubscription": {

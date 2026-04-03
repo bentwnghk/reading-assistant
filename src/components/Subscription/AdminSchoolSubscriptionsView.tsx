@@ -21,6 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -36,6 +43,17 @@ function formatDate(dateStr: string | null): string {
     year: "numeric",
     month: "short",
     day: "numeric",
+  })
+}
+
+function formatDateTime(dateStr: string | null): string {
+  if (!dateStr) return "-"
+  return new Date(dateStr).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   })
 }
 
@@ -73,6 +91,14 @@ interface Stats {
   active_seats: number
 }
 
+interface SeatUser {
+  user_id: string
+  user_name: string | null
+  user_email: string | null
+  user_role: string
+  first_accessed_at: string
+}
+
 export default function AdminSchoolSubscriptionsView() {
   const { t } = useTranslation()
   const [subscriptions, setSubscriptions] = useState<SchoolSubscriptionRow[]>([])
@@ -83,6 +109,11 @@ export default function AdminSchoolSubscriptionsView() {
   const [statusFilter, setStatusFilter] = useState("")
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
+
+  const [seatDialogOpen, setSeatDialogOpen] = useState(false)
+  const [seatDialogSub, setSeatDialogSub] = useState<SchoolSubscriptionRow | null>(null)
+  const [seatUsers, setSeatUsers] = useState<SeatUser[]>([])
+  const [seatUsersLoading, setSeatUsersLoading] = useState(false)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -117,6 +148,24 @@ export default function AdminSchoolSubscriptionsView() {
   function handleStatusFilter(value: string) {
     setStatusFilter(value === "all" ? "" : value)
     setPage(1)
+  }
+
+  async function openSeatUsers(sub: SchoolSubscriptionRow) {
+    setSeatDialogSub(sub)
+    setSeatDialogOpen(true)
+    setSeatUsersLoading(true)
+    setSeatUsers([])
+    try {
+      const res = await fetch(`/api/admin/school-subscriptions/${sub.id}/seats`)
+      if (res.ok) {
+        const data = await res.json()
+        setSeatUsers(data.users || [])
+      }
+    } catch (error) {
+      console.error("Failed to fetch seat users:", error)
+    } finally {
+      setSeatUsersLoading(false)
+    }
   }
 
   return (
@@ -212,7 +261,13 @@ export default function AdminSchoolSubscriptionsView() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm">{sub.seats_used}/{sub.quantity}</span>
+                      <button
+                        type="button"
+                        className="text-sm text-primary hover:underline cursor-pointer"
+                        onClick={() => openSeatUsers(sub)}
+                      >
+                        {sub.seats_used}/{sub.quantity}
+                      </button>
                     </TableCell>
                     <TableCell>
                       <Badge className={`text-xs ${STATUS_COLORS[sub.status] || ""}`}>
@@ -268,6 +323,59 @@ export default function AdminSchoolSubscriptionsView() {
           )}
         </>
       )}
+
+      <Dialog open={seatDialogOpen} onOpenChange={setSeatDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>
+              {t("subscription.admin.seatUsersTitle", {
+                school: seatDialogSub?.school_name || "-",
+              })}
+            </DialogTitle>
+            <DialogDescription>
+              {t("subscription.admin.seatUsersDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto -mx-6 px-6">
+            {seatUsersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : seatUsers.length === 0 ? (
+              <div className="text-center text-muted-foreground py-8">
+                {t("subscription.admin.noSeatUsers")}
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("subscription.admin.userName")}</TableHead>
+                    <TableHead>{t("subscription.admin.userEmail")}</TableHead>
+                    <TableHead>{t("subscription.admin.userRole")}</TableHead>
+                    <TableHead>{t("subscription.admin.firstAccessed")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {seatUsers.map((u) => (
+                    <TableRow key={u.user_id}>
+                      <TableCell className="text-sm">{u.user_name || "-"}</TableCell>
+                      <TableCell className="text-sm">{u.user_email || "-"}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {u.user_role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDateTime(u.first_accessed_at)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -802,7 +802,7 @@
     "cancelSubscription": "取消訂閱",
     "reactivate": "重新啟用",
     "cancelConfirm": "確定嗎？您將在計費期結束後失去存取權限。",
-    "currentPlan": "個人訂閱方案",
+    "currentPlan": "目前方案",
     "nextBillingDate": "下次帳單日期",
     "trialEndsAt": "試用期結束",
     "signInPrompt": "請使用 Google 登入以使用訂閱模式。",
@@ -854,7 +854,14 @@
       "totalSeats": "總席位",
       "activeSeats": "生效席位",
       "searchSchoolPlaceholder": "搜尋學校、管理員名稱或電郵...",
-      "noSchoolSubscriptions": "找不到學校訂閱"
+      "noSchoolSubscriptions": "找不到學校訂閱",
+      "seatUsersTitle": "席位用戶 — {{school}}",
+      "seatUsersDesc": "在當前計費期間已消耗席位的用戶",
+      "userName": "名稱",
+      "userEmail": "電郵",
+      "userRole": "角色",
+      "firstAccessed": "首次存取",
+      "noSeatUsers": "此期間沒有用戶消耗席位"
     }
   },
   "schoolSubscription": {
