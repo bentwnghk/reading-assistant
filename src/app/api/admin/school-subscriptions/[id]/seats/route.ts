@@ -33,7 +33,7 @@ export async function GET(
   const client = await getClient()
   try {
     const subResult = await client.query(
-      `SELECT school_id, current_period_start, school_name
+      `SELECT ss.school_id, ss.current_period_start, s.name as school_name
        FROM school_subscriptions ss
        LEFT JOIN schools s ON s.id = ss.school_id
        WHERE ss.id = $1`,
