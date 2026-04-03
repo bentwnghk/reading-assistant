@@ -151,6 +151,7 @@ function SubscriptionStatusCard({
                   })}
             </p>
             <Button
+              type="button"
               size="sm"
               variant="outline"
               className="shrink-0"

@@ -214,7 +214,7 @@ function SchoolSubscriptionStatusCard({
       {status === "past_due" && (
         <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md p-2">
           <span>{t("subscription.pastDueWarning")}</span>
-          <Button size="sm" variant="outline" className="ml-auto" onClick={onManage}>
+          <Button type="button" size="sm" variant="outline" className="ml-auto" onClick={onManage}>
             {t("subscription.updatePayment")}
           </Button>
         </div>
@@ -223,7 +223,7 @@ function SchoolSubscriptionStatusCard({
       {cancelAtPeriodEnd && currentPeriodEnd && status !== "canceled" && (
         <div className="flex items-center gap-2 text-sm text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 rounded-md p-2">
           <span>{t("subscription.canceledInfo", { date: formatDate(currentPeriodEnd) })}</span>
-          <Button size="sm" variant="outline" className="ml-auto" onClick={onReactivate}>
+          <Button type="button" size="sm" variant="outline" className="ml-auto" onClick={onReactivate}>
             {t("subscription.reactivate")}
           </Button>
         </div>
@@ -244,12 +244,13 @@ function SchoolSubscriptionStatusCard({
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Button size="sm" variant="outline" onClick={onManage}>
+            <Button type="button" size="sm" variant="outline" onClick={onManage}>
               {t("subscription.manageSubscription")}
             </Button>
 
             {plan && (
               <Button
+                type="button"
                 size="sm"
                 variant="outline"
                 disabled={switching}
@@ -264,6 +265,7 @@ function SchoolSubscriptionStatusCard({
 
             {!cancelAtPeriodEnd ? (
               <Button
+                type="button"
                 size="sm"
                 variant="outline"
                 className="text-red-600 hover:text-red-700 dark:text-red-400"
@@ -272,7 +274,7 @@ function SchoolSubscriptionStatusCard({
                 {t("subscription.cancelSubscription")}
               </Button>
             ) : (
-              <Button size="sm" variant="outline" onClick={onReactivate}>
+              <Button type="button" size="sm" variant="outline" onClick={onReactivate}>
                 {t("subscription.reactivate")}
               </Button>
             )}

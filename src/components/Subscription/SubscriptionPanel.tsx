@@ -82,7 +82,7 @@ function SubscriptionPanel({ monthlyPrice, currency, disabled }: SubscriptionPan
           {subscription.status === "past_due" && (
             <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md p-2">
               {t("subscription.pastDueWarning")}
-              <Button size="sm" variant="outline" className="ml-auto" onClick={openPortal}>
+              <Button type="button" size="sm" variant="outline" className="ml-auto" onClick={openPortal}>
                 {t("subscription.updatePayment")}
               </Button>
             </div>
