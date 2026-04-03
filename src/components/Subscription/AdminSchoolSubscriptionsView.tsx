@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ChevronLeft, ChevronRight, User, School } from "lucide-react"
+import { Loader2, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -21,8 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import AdminSchoolSubscriptionsView from "./AdminSchoolSubscriptionsView"
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -41,15 +39,18 @@ function formatDate(dateStr: string | null): string {
   })
 }
 
-interface SubscriptionRow {
+interface SchoolSubscriptionRow {
   id: string
-  user_id: string
-  user_name: string | null
-  user_email: string | null
+  school_id: string
+  school_name: string | null
+  admin_user_id: string
+  admin_name: string | null
+  admin_email: string | null
   stripe_customer_id: string
   stripe_subscription_id: string | null
   status: string
   plan: string | null
+  quantity: number
   current_period_start: string | null
   current_period_end: string | null
   cancel_at_period_end: boolean
@@ -67,11 +68,13 @@ interface Stats {
   inactive: number
   monthly_count: number
   yearly_count: number
+  total_seats: number
+  active_seats: number
 }
 
-function PersonalSubscriptionsView() {
+export default function AdminSchoolSubscriptionsView() {
   const { t } = useTranslation()
-  const [subscriptions, setSubscriptions] = useState<SubscriptionRow[]>([])
+  const [subscriptions, setSubscriptions] = useState<SchoolSubscriptionRow[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -87,7 +90,7 @@ function PersonalSubscriptionsView() {
       if (statusFilter) params.set("status", statusFilter)
       if (search) params.set("search", search)
 
-      const res = await fetch(`/api/admin/subscriptions?${params}`)
+      const res = await fetch(`/api/admin/school-subscriptions?${params}`)
       if (res.ok) {
         const data = await res.json()
         setSubscriptions(data.subscriptions || [])
@@ -95,7 +98,7 @@ function PersonalSubscriptionsView() {
         setTotalPages(data.pagination?.totalPages || 1)
       }
     } catch (error) {
-      console.error("Failed to fetch subscriptions:", error)
+      console.error("Failed to fetch school subscriptions:", error)
     } finally {
       setLoading(false)
     }
@@ -118,7 +121,7 @@ function PersonalSubscriptionsView() {
   return (
     <div className="space-y-4">
       {stats && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-9 gap-2">
           <StatCard label={t("subscription.admin.total")} value={stats.total} />
           <StatCard label={t("subscription.status.active")} value={stats.active} color="text-green-600" />
           <StatCard label={t("subscription.status.trialing")} value={stats.trialing} color="text-blue-600" />
@@ -126,13 +129,15 @@ function PersonalSubscriptionsView() {
           <StatCard label={t("subscription.status.canceled")} value={stats.canceled} color="text-orange-600" />
           <StatCard label={t("subscription.admin.monthly")} value={stats.monthly_count} />
           <StatCard label={t("subscription.admin.yearly")} value={stats.yearly_count} />
+          <StatCard label={t("subscription.admin.totalSeats")} value={stats.total_seats} />
+          <StatCard label={t("subscription.admin.activeSeats")} value={stats.active_seats} color="text-green-600" />
         </div>
       )}
 
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="flex gap-2 flex-1">
           <Input
-            placeholder={t("subscription.admin.searchPlaceholder")}
+            placeholder={t("subscription.admin.searchSchoolPlaceholder")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -166,8 +171,10 @@ function PersonalSubscriptionsView() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("subscription.admin.user")}</TableHead>
+                <TableHead>{t("subscription.admin.school")}</TableHead>
+                <TableHead>{t("subscription.admin.admin")}</TableHead>
                 <TableHead>{t("subscription.admin.plan")}</TableHead>
+                <TableHead>{t("subscription.admin.seats")}</TableHead>
                 <TableHead>{t("subscription.admin.status")}</TableHead>
                 <TableHead>{t("subscription.admin.periodStart")}</TableHead>
                 <TableHead>{t("subscription.admin.periodEnd")}</TableHead>
@@ -178,17 +185,20 @@ function PersonalSubscriptionsView() {
             <TableBody>
               {subscriptions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    {t("subscription.admin.noSubscriptions")}
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                    {t("subscription.admin.noSchoolSubscriptions")}
                   </TableCell>
                 </TableRow>
               ) : (
                 subscriptions.map((sub) => (
                   <TableRow key={sub.id}>
                     <TableCell>
+                      <div className="font-medium text-sm">{sub.school_name || "-"}</div>
+                    </TableCell>
+                    <TableCell>
                       <div>
-                        <div className="font-medium text-sm">{sub.user_name || "-"}</div>
-                        <div className="text-xs text-muted-foreground">{sub.user_email || "-"}</div>
+                        <div className="font-medium text-sm">{sub.admin_name || "-"}</div>
+                        <div className="text-xs text-muted-foreground">{sub.admin_email || "-"}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -199,6 +209,9 @@ function PersonalSubscriptionsView() {
                       ) : (
                         <span className="text-xs text-muted-foreground">-</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">{sub.quantity}</span>
                     </TableCell>
                     <TableCell>
                       <Badge className={`text-xs ${STATUS_COLORS[sub.status] || ""}`}>
@@ -272,30 +285,5 @@ function StatCard({
       <div className={`text-xl font-bold ${color || ""}`}>{value}</div>
       <div className="text-xs text-muted-foreground mt-0.5">{label}</div>
     </div>
-  )
-}
-
-export default function AdminSubscriptionsView() {
-  const { t } = useTranslation()
-
-  return (
-    <Tabs defaultValue="personal" className="w-full">
-      <TabsList className="mb-4">
-        <TabsTrigger value="personal" className="flex items-center gap-2">
-          <User className="h-4 w-4" />
-          {t("subscription.admin.personalTab")}
-        </TabsTrigger>
-        <TabsTrigger value="school" className="flex items-center gap-2">
-          <School className="h-4 w-4" />
-          {t("subscription.admin.schoolTab")}
-        </TabsTrigger>
-      </TabsList>
-      <TabsContent value="personal">
-        <PersonalSubscriptionsView />
-      </TabsContent>
-      <TabsContent value="school">
-        <AdminSchoolSubscriptionsView />
-      </TabsContent>
-    </Tabs>
   )
 }

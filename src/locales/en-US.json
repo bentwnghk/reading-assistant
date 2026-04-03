@@ -845,7 +845,16 @@
       "allStatuses": "All Statuses",
       "noSubscriptions": "No subscriptions found",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "personalTab": "Personal",
+      "schoolTab": "School",
+      "school": "School",
+      "admin": "Admin",
+      "seats": "Seats",
+      "totalSeats": "Total Seats",
+      "activeSeats": "Active Seats",
+      "searchSchoolPlaceholder": "Search by school, admin name or email...",
+      "noSchoolSubscriptions": "No school subscriptions found"
     }
   },
   "schoolSubscription": {

@@ -845,7 +845,16 @@
       "allStatuses": "所有狀態",
       "noSubscriptions": "找不到訂閱",
       "yes": "是",
-      "no": "否"
+      "no": "否",
+      "personalTab": "個人",
+      "schoolTab": "學校",
+      "school": "學校",
+      "admin": "管理員",
+      "seats": "席位",
+      "totalSeats": "總席位",
+      "activeSeats": "生效席位",
+      "searchSchoolPlaceholder": "搜尋學校、管理員名稱或電郵...",
+      "noSchoolSubscriptions": "找不到學校訂閱"
     }
   },
   "schoolSubscription": {
