@@ -1025,7 +1025,8 @@
       "revokeSuccess": "已撤銷 {{count}} 個用戶的學校存取權限。已向他們發送通知。",
       "revokeFailed": "撤銷學校存取權限失敗。",
       "revokePartial": "已撤銷 {{success}} 個用戶的存取權限，{{failed}} 個失敗。",
-      "selectedCount": "已選 {{count}} 個"
+      "selectedCount": "已選 {{count}} 個",
+      "accessRevoking": "存取即將結束"
     },
     "roleUpdated": "角色已更新",
     "roleUpdateFailed": "更新角色失敗",

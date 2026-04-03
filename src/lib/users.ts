@@ -22,6 +22,7 @@ export interface UserWithRole {
   taughtClassNames?: string[]
   schoolId?: string
   schoolName?: string
+  schoolAccessEndsAt?: string | null
   createdAt?: number
 }
 
@@ -173,6 +174,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
         c.name as "className",
         u.school_id as "schoolId",
         s.name as "schoolName",
+        u.school_access_ends_at as "schoolAccessEndsAt",
         (
           SELECT COALESCE(json_agg(c2.id), '[]'::json)
           FROM classes c2
@@ -203,6 +205,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       taughtClassNames: row.taughtClassNames || [],
       schoolId: row.schoolId,
       schoolName: row.schoolName,
+      schoolAccessEndsAt: row.schoolAccessEndsAt || null,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
@@ -479,6 +482,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
         COALESCE(ur.role, 'student') as role,
         u.school_id as "schoolId",
         s.name as "schoolName",
+        u.school_access_ends_at as "schoolAccessEndsAt",
         cm.class_id as "classId",
         c.name as "className",
         (
@@ -508,6 +512,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       role: row.role as UserRole,
       schoolId: row.schoolId,
       schoolName: row.schoolName,
+      schoolAccessEndsAt: row.schoolAccessEndsAt || null,
       classId: row.classId,
       className: row.className,
       taughtClassIds: row.taughtClassIds || [],

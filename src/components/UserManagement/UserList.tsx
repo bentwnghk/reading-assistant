@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -481,6 +481,12 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                       <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
                     </Avatar>
                     <span className="truncate max-w-32" title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
+                    {user.schoolAccessEndsAt && new Date(user.schoolAccessEndsAt) > new Date() && (
+                      <Badge variant="outline" className="flex items-center gap-1 text-xs text-amber-600 border-amber-300 bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:bg-amber-950 shrink-0">
+                        <Clock className="h-3 w-3" />
+                        {t("userManagement.users.accessRevoking")}
+                      </Badge>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="truncate max-w-48">{user.email}</TableCell>
