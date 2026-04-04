@@ -16,7 +16,7 @@
     "glossary": "詞彙"
   },
   "settingsBanner": {
-    "message": "請在設定中配置你的 API 金鑰或訪問密碼以使用此應用程式。",
+    "message": "請在設定中啟用你的個人/學校訂閱，或配置你的 API 金鑰或訪問密碼以使用此應用程式。",
     "openSettings": "開啟設定"
   },
   "header": {

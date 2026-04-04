@@ -5,11 +5,15 @@ import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import { useSettingStore } from "@/store/setting";
 import { useGlobalStore } from "@/store/global";
+import useSubscription from "@/hooks/useSubscription";
+import useSchoolSubscription from "@/hooks/useSchoolSubscription";
 
 function SettingsBanner() {
   const { t } = useTranslation();
-  const { openaicompatibleApiKey, accessPassword, mode } = useSettingStore();
+  const { openaicompatibleApiKey, accessPassword } = useSettingStore();
   const { setOpenSetting } = useGlobalStore();
+  const { subscription: personalSub, loading: personalLoading } = useSubscription();
+  const { subscription: schoolSub, loading: schoolLoading } = useSchoolSubscription();
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -23,8 +27,14 @@ function SettingsBanner() {
   }, []);
 
   if (!isHydrated) return null;
-  if (mode === "subscription") return null;
-  if (openaicompatibleApiKey || accessPassword) return null;
+  if (personalLoading || schoolLoading) return null;
+
+  const hasActivePersonalSub = personalSub?.hasSubscription ?? false;
+  const hasActiveSchoolSub = schoolSub?.hasSubscription ?? false;
+  const hasActiveSub = hasActivePersonalSub || hasActiveSchoolSub;
+  const hasCredentials = !!(openaicompatibleApiKey || accessPassword);
+
+  if (hasActiveSub || hasCredentials) return null;
 
   return (
     <div className="bg-amber-100 dark:bg-amber-900/30 border-b-2 border-amber-400 dark:border-amber-600 px-4 py-3 -mx-4 mb-4 print:hidden">
