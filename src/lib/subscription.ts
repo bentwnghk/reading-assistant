@@ -93,7 +93,7 @@ export async function ensureSubscriptionTable(): Promise<boolean> {
         stripe_customer_id TEXT NOT NULL,
         stripe_subscription_id TEXT UNIQUE,
         status TEXT NOT NULL DEFAULT 'inactive'
-          CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused')),
+          CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive')),
         plan TEXT CHECK (plan IN ('monthly', 'yearly')),
         current_period_start TIMESTAMP WITH TIME ZONE,
         current_period_end TIMESTAMP WITH TIME ZONE,
@@ -102,6 +102,17 @@ export async function ensureSubscriptionTable(): Promise<boolean> {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
+    `);
+    // Migrate existing deployments: ensure 'inactive' is in the status check constraint.
+    // The original constraint omitted 'inactive', causing INSERT failures during checkout init.
+    await client.query(`
+      ALTER TABLE subscriptions
+        DROP CONSTRAINT IF EXISTS subscriptions_status_check
+    `);
+    await client.query(`
+      ALTER TABLE subscriptions
+        ADD CONSTRAINT subscriptions_status_check
+          CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive'))
     `);
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)
