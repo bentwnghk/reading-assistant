@@ -41,7 +41,7 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
           <div>
             <div className="text-2xl font-bold">{formatter.format(monthlyPrice)}</div>
             <div className="text-sm font-normal text-muted-foreground text-right">
-              / {t("schoolSubscription.perUserMonth")}
+              /{t("schoolSubscription.perUserMonth")}
             </div>
           </div>
           <div className="text-xs text-muted-foreground">
@@ -64,7 +64,7 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
           <div>
             <div className="text-2xl font-bold">{formatter.format(yearlyTotal)}</div>
             <div className="text-sm font-normal text-muted-foreground text-right">
-              / {t("schoolSubscription.perUserYear")}
+              /{t("schoolSubscription.perUserYear")}
             </div>
           </div>
           <div className="text-xs text-muted-foreground">
