@@ -27,9 +27,9 @@ function PricingCards({ monthlyPrice, currency, onSelect }: PricingCardsProps) {
         <div className="flex items-center justify-between">
           <h4 className="font-semibold text-sm">{t("subscription.monthly")}</h4>
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold">{formatter.format(monthlyPrice)}</span>
-          <span className="text-sm text-muted-foreground">/{t("subscription.month")}</span>
+        <div>
+          <div className="text-2xl font-bold">{formatter.format(monthlyPrice)}</div>
+          <div className="text-sm text-muted-foreground text-right">/{t("subscription.month")}</div>
         </div>
         <Button
           className="w-full"
@@ -46,9 +46,9 @@ function PricingCards({ monthlyPrice, currency, onSelect }: PricingCardsProps) {
         <div className="flex items-center justify-between">
           <h4 className="font-semibold text-sm">{t("subscription.yearly")}</h4>
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold">{formatter.format(yearlyPrice)}</span>
-          <span className="text-sm text-muted-foreground">/{t("subscription.year")}</span>
+        <div>
+          <div className="text-2xl font-bold">{formatter.format(yearlyPrice)}</div>
+          <div className="text-sm text-muted-foreground text-right">/{t("subscription.year")}</div>
         </div>
         <p className="text-xs text-muted-foreground">
           {formatter.format(Math.round((yearlyPrice / 12) * 100) / 100)}/{t("subscription.month")}

@@ -38,11 +38,11 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="rounded-lg border border-border p-4 space-y-3">
           <div className="text-sm font-medium">{t("subscription.monthly")}</div>
-          <div className="text-2xl font-bold">
-            {formatter.format(monthlyPrice)}
-            <span className="text-sm font-normal text-muted-foreground ml-1">
+          <div>
+            <div className="text-2xl font-bold">{formatter.format(monthlyPrice)}</div>
+            <div className="text-sm font-normal text-muted-foreground text-right">
               / {t("schoolSubscription.perUserMonth")}
-            </span>
+            </div>
           </div>
           <div className="text-xs text-muted-foreground">
             {t("schoolSubscription.billedMonthly")}
@@ -61,14 +61,14 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
             {t("subscription.saveTwoMonths")}
           </span>
           <div className="text-sm font-medium">{t("subscription.yearly")}</div>
-          <div className="text-2xl font-bold">
-            {formatter.format(yearlyTotal)}
-            <span className="text-sm font-normal text-muted-foreground ml-1">
+          <div>
+            <div className="text-2xl font-bold">{formatter.format(yearlyTotal)}</div>
+            <div className="text-sm font-normal text-muted-foreground text-right">
               / {t("schoolSubscription.perUserYear")}
-            </span>
+            </div>
           </div>
           <div className="text-xs text-muted-foreground">
-            ~{formatter.format(yearlyPerUser)}/{t("subscription.month").toLowerCase()} {t("schoolSubscription.perUser")}
+            {formatter.format(yearlyPerUser)}/{t("subscription.month").toLowerCase()} {t("schoolSubscription.perUser")}
           </div>
           <QuantitySelector
             monthlyPrice={monthlyPrice}
