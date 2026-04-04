@@ -55,8 +55,20 @@ function getMonthlyPrice(): number {
   return parseFloat(process.env.SUBSCRIPTION_MONTHLY_PRICE || "9.99");
 }
 
+export function getSchoolMonthlyPrice(): number {
+  const schoolPrice = process.env.SCHOOL_SUBSCRIPTION_MONTHLY_PRICE;
+  if (schoolPrice && schoolPrice.trim() !== "") {
+    return parseFloat(schoolPrice);
+  }
+  return getMonthlyPrice();
+}
+
 function getYearlyPrice(): number {
   return getMonthlyPrice() * 10;
+}
+
+function getSchoolYearlyPrice(): number {
+  return getSchoolMonthlyPrice() * 10;
 }
 
 function getCurrency(): string {
@@ -252,6 +264,83 @@ export async function ensureStripePrices(): Promise<{
 
   const monthlyAmount = Math.round(getMonthlyPrice() * 100);
   const yearlyAmount = Math.round(getYearlyPrice() * 100);
+
+  const existingPrices = await stripe.prices.list({
+    product: productId,
+    active: true,
+    limit: 100,
+  });
+
+  const existingMonthly = existingPrices.data.find(
+    (p) => p.recurring?.interval === "month"
+  );
+  const existingYearly = existingPrices.data.find(
+    (p) => p.recurring?.interval === "year"
+  );
+
+  let monthlyPriceId: string;
+  let yearlyPriceId: string;
+
+  if (existingMonthly && existingMonthly.unit_amount === monthlyAmount) {
+    monthlyPriceId = existingMonthly.id;
+  } else {
+    if (existingMonthly) {
+      await stripe.prices.update(existingMonthly.id, { active: false });
+    }
+    const price = await stripe.prices.create({
+      product: productId,
+      unit_amount: monthlyAmount,
+      currency,
+      recurring: { interval: "month" },
+    });
+    monthlyPriceId = price.id;
+  }
+
+  if (existingYearly && existingYearly.unit_amount === yearlyAmount) {
+    yearlyPriceId = existingYearly.id;
+  } else {
+    if (existingYearly) {
+      await stripe.prices.update(existingYearly.id, { active: false });
+    }
+    const price = await stripe.prices.create({
+      product: productId,
+      unit_amount: yearlyAmount,
+      currency,
+      recurring: { interval: "year" },
+    });
+    yearlyPriceId = price.id;
+  }
+
+  return { monthlyPriceId, yearlyPriceId };
+}
+
+export async function ensureSchoolStripePrices(): Promise<{
+  monthlyPriceId: string;
+  yearlyPriceId: string;
+}> {
+  const schoolMonthly = getSchoolMonthlyPrice();
+  const stripe = getStripe();
+  const currency = getCurrency();
+
+  const products = await stripe.products.list({
+    active: true,
+    limit: 100,
+  });
+  const product = products.data.find(
+    (p) => p.name === "Mr.\u{1F196} ProReader School Subscription"
+  );
+
+  let productId = product?.id;
+  if (!productId) {
+    const created = await stripe.products.create({
+      name: "Mr.\u{1F196} ProReader School Subscription",
+      description: "School subscription for Mr.\u{1F196} ProReader (per seat)",
+    });
+    productId = created.id;
+  }
+
+  const monthlyAmount = Math.round(schoolMonthly * 100);
+  const yearlyAmount = Math.round(getSchoolYearlyPrice() * 100);
 
   const existingPrices = await stripe.prices.list({
     product: productId,
@@ -727,6 +816,14 @@ export function getPricingInfo() {
     },
     yearly: {
       amount: getYearlyPrice(),
+      currency: getCurrency(),
+    },
+    schoolMonthly: {
+      amount: getSchoolMonthlyPrice(),
+      currency: getCurrency(),
+    },
+    schoolYearly: {
+      amount: getSchoolYearlyPrice(),
       currency: getCurrency(),
     },
   };

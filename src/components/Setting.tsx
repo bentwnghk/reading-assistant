@@ -118,6 +118,7 @@ function Setting({ open, onClose }: SettingProps) {
   const { status: authStatus, data: sessionData } = useSession();
   const isAuthenticated = authStatus === "authenticated";
   const [pricingInfo, setPricingInfo] = useState<{ monthly: number; currency: string } | null>(null);
+  const [schoolPricingInfo, setSchoolPricingInfo] = useState<{ monthly: number; currency: string } | null>(null);
   const { subscription: schoolSub } = useSchoolSubscription();
   const hasActiveSchoolSubscription =
     schoolSub?.hasSubscription === true &&
@@ -132,6 +133,17 @@ function Setting({ open, onClose }: SettingProps) {
       .then((data) => {
         if (data.monthly) {
           setPricingInfo({
+            monthly: typeof data.monthly === "number" ? data.monthly : data.monthly.amount,
+            currency: data.monthly.currency || data.currency || "usd",
+          });
+        }
+        if (data.schoolMonthly) {
+          setSchoolPricingInfo({
+            monthly: typeof data.schoolMonthly === "number" ? data.schoolMonthly : data.schoolMonthly.amount,
+            currency: data.schoolMonthly.currency || data.currency || "usd",
+          });
+        } else if (data.monthly) {
+          setSchoolPricingInfo({
             monthly: typeof data.monthly === "number" ? data.monthly : data.monthly.amount,
             currency: data.monthly.currency || data.currency || "usd",
           });
@@ -437,10 +449,10 @@ function Setting({ open, onClose }: SettingProps) {
                     </div>
                   ) : (
                     <>
-                      {pricingInfo && (
+                      {schoolPricingInfo && (
                         <SchoolSubscriptionPanel
-                          monthlyPrice={pricingInfo.monthly}
-                          currency={pricingInfo.currency}
+                          monthlyPrice={schoolPricingInfo.monthly}
+                          currency={schoolPricingInfo.currency}
                         />
                       )}
                       {pricingInfo && (

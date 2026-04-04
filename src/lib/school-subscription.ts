@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { getClient } from "./db";
 import { getSchoolForUser, ensureSchoolAccessEndsAtColumn } from "./users";
 import {
-  ensureStripePrices,
+  ensureSchoolStripePrices,
   type SubscriptionPlan,
   type SubscriptionStatus,
   getStripe,
@@ -424,7 +424,7 @@ export async function createSchoolCheckoutSession(
   }
 
   const customerId = await getOrCreateSchoolStripeCustomer(schoolId, adminUserId, email, name);
-  const { monthlyPriceId, yearlyPriceId } = await ensureStripePrices();
+  const { monthlyPriceId, yearlyPriceId } = await ensureSchoolStripePrices();
   const priceId = plan === "yearly" ? yearlyPriceId : monthlyPriceId;
   const appUrl = getAppUrl();
 
@@ -519,7 +519,7 @@ export async function switchSchoolSubscriptionPlan(
   const item = subscription.items.data[0];
   if (!item) return false;
 
-  const { monthlyPriceId, yearlyPriceId } = await ensureStripePrices();
+  const { monthlyPriceId, yearlyPriceId } = await ensureSchoolStripePrices();
   const newPriceId = newPlan === "yearly" ? yearlyPriceId : monthlyPriceId;
 
   if (item.price.id === newPriceId) return true;

@@ -92,6 +92,8 @@ STRIPE_WEBHOOK_SECRET=
 # Monthly subscription price (in your chosen currency, e.g. 9.99 for USD)
 # Yearly price is automatically calculated as monthly_price * 10 (save 2 months)
 SUBSCRIPTION_MONTHLY_PRICE=9.99
+# Monthly price per seat for school subscriptions (defaults to SUBSCRIPTION_MONTHLY_PRICE if not set)
+SCHOOL_SUBSCRIPTION_MONTHLY_PRICE=
 # Subscription currency code (e.g. usd, eur, gbp, hkd)
 SUBSCRIPTION_CURRENCY=usd
 # (Optional) Separate OpenAI-compatible API key for subscription users.

@@ -79,6 +79,8 @@ services:
       STRIPE_PUBLISHABLE_KEY: ""
       STRIPE_WEBHOOK_SECRET: ""
       SUBSCRIPTION_MONTHLY_PRICE: "9.99"
+      # Monthly price per seat for school subscriptions (defaults to SUBSCRIPTION_MONTHLY_PRICE if not set)
+      SCHOOL_SUBSCRIPTION_MONTHLY_PRICE: ""
       SUBSCRIPTION_CURRENCY: "usd"
       # Separate API key for subscription-based AI usage
       OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY: ""
