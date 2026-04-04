@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Building2,
   Calendar,
@@ -302,9 +303,24 @@ function SchoolSubscriptionStatusCard({
                 >
                   <Minus className="h-3 w-3" />
                 </Button>
-                <div className="flex items-center justify-center h-7 px-3 rounded-md border border-border bg-muted/50 text-sm font-medium min-w-[60px]">
-                  {newQuantity}
-                </div>
+                <Input
+                  type="number"
+                  min={MIN_SEAT_QUANTITY}
+                  value={newQuantity}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!isNaN(val)) {
+                      setNewQuantity(Math.max(MIN_SEAT_QUANTITY, val));
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    if (isNaN(val) || val < MIN_SEAT_QUANTITY) {
+                      setNewQuantity(MIN_SEAT_QUANTITY);
+                    }
+                  }}
+                  className="h-7 w-[60px] text-center text-sm font-medium [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
                 <Button
                   type="button"
                   variant="outline"
