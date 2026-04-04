@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This document provides essential guidelines and technical references for AI agents (and human developers) working on the **Reading Assistant** repository. Adhere to these patterns to ensure consistency, security, and maintainability.
+This document provides essential guidelines and technical references for AI agents (and human developers) working on the **Mr.🆖 ProReader** repository. Adhere to these patterns to ensure consistency, security, and maintainability.
 
 ---
 

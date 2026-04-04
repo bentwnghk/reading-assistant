@@ -1,12 +1,12 @@
 {
-  "name": "reading-assistant",
-  "description": "Transform any English text into an interactive learning experience with AI-powered comprehension tools and gamified vocabulary practice.",
+  "name": "proreader",
+  "description": "Transform any English reading material into an interactive learning experience! 🚀 With AI-powered tools, personalized content, and gamified learning, mastering English reading has never been this exciting!",
   "version": "1.1",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/u14app/reading-assistant"
+    "url": "https://github.com/bentwnghk/reading-assistant"
   },
-  "bugs": "https://github.com/u14app/reading-assistant/issues",
+  "bugs": "https://github.com/bentwnghk/reading-assistant/issues",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

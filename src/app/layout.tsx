@@ -14,7 +14,7 @@ const APP_NAME = "Mr.🆖 ProReader";
 const APP_DEFAULT_TITLE = "Mr.🆖 ProReader";
 const APP_TITLE_TEMPLATE = "%s - PWA App";
 const APP_DESCRIPTION =
-  "Transform any English text into an interactive learning experience with AI-powered comprehension tools and gamified vocabulary practice.";
+  "Transform any English reading material into an interactive learning experience! 🚀 With AI-powered tools, personalized content, and gamified learning, mastering English reading has never been this exciting!";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
