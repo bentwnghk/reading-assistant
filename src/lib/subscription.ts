@@ -279,7 +279,7 @@ export async function ensureStripePrices(): Promise<{
   if (!productId) {
     const created = await stripe.products.create({
       name: "Mr.\u{1F196} ProReader Subscription",
-      description: "Full access to Mr.\u{1F196} ProReader AI features",
+      description: "Mr.\u{1F196} ProReader 訂閱",
     });
     productId = created.id;
   }
@@ -356,7 +356,7 @@ export async function ensureSchoolStripePrices(): Promise<{
   if (!productId) {
     const created = await stripe.products.create({
       name: "Mr.\u{1F196} ProReader School Subscription",
-      description: "Full access to Mr.\u{1F196} ProReader AI features across the school",
+      description: "Mr.\u{1F196} ProReader 學校訂閱",
     });
     productId = created.id;
   }
