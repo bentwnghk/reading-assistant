@@ -31,6 +31,9 @@ function PricingCards({ monthlyPrice, currency, onSelect }: PricingCardsProps) {
           <div className="text-2xl font-bold">{formatter.format(monthlyPrice)}</div>
           <div className="text-sm text-muted-foreground text-right">/{t("subscription.month")}</div>
         </div>
+        <p className="text-xs text-muted-foreground">
+          {t("schoolSubscription.billedMonthly")}
+        </p>
         <Button
           className="w-full"
           variant="outline"
