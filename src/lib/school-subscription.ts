@@ -219,7 +219,18 @@ async function getOrCreateSchoolStripeCustomer(
 ): Promise<string> {
   const existing = await getSchoolSubscriptionRecord(schoolId);
   if (existing?.stripe_customer_id) {
-    return existing.stripe_customer_id;
+    // Verify the customer exists in the current Stripe mode (test vs live).
+    // A stored customer ID from the opposite mode causes "No such customer" errors.
+    try {
+      const customer = await getStripe().customers.retrieve(
+        existing.stripe_customer_id
+      );
+      if (!(customer as { deleted?: boolean }).deleted) {
+        return existing.stripe_customer_id;
+      }
+    } catch {
+      // Customer not found in current Stripe mode — fall through to create a new one.
+    }
   }
 
   const customer = await getStripe().customers.create({
