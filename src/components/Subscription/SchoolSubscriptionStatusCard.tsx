@@ -72,6 +72,12 @@ function SchoolSubscriptionStatusCard({
   const [switching, setSwitching] = useState(false);
   const [updatingQty, setUpdatingQty] = useState(false);
 
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: monthlyPrice % 1 === 0 ? 0 : 2,
+  });
+
   const [seatDialogOpen, setSeatDialogOpen] = useState(false);
   const [seatUsers, setSeatUsers] = useState<
     { user_id: string; user_name: string | null; user_email: string | null; user_role: string; first_accessed_at: string }[]
@@ -309,7 +315,7 @@ function SchoolSubscriptionStatusCard({
                   <Plus className="h-3 w-3" />
                 </Button>
                 <div className="text-xs text-muted-foreground ml-1">
-                  ({currency === "usd" ? "$" : ""}{((plan === "yearly" ? monthlyPrice * 10 : monthlyPrice) * newQuantity).toFixed(2)}/{plan === "yearly" ? t("subscription.year").toLowerCase() : t("subscription.month").toLowerCase()})
+                  ({formatter.format((plan === "yearly" ? monthlyPrice * 10 : monthlyPrice) * newQuantity)}/{plan === "yearly" ? t("subscription.year").toLowerCase() : t("subscription.month").toLowerCase()})
                 </div>
                 <Button
                   type="button"

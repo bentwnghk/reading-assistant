@@ -19,6 +19,11 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
 
   const yearlyTotal = monthlyPrice * 10;
   const yearlyPerUser = yearlyTotal / 12;
+  const formatter = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: monthlyPrice % 1 === 0 ? 0 : 2,
+  });
 
   return (
     <div className="space-y-4">
@@ -34,7 +39,7 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
         <div className="rounded-lg border border-border p-4 space-y-3">
           <div className="text-sm font-medium">{t("subscription.monthly")}</div>
           <div className="text-2xl font-bold">
-            {currency === "usd" ? "$" : ""}{monthlyPrice.toFixed(2)}
+            {formatter.format(monthlyPrice)}
             <span className="text-sm font-normal text-muted-foreground ml-1">
               / {t("schoolSubscription.perUserMonth")}
             </span>
@@ -47,6 +52,7 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
             currency={currency}
             onSelect={(qty) => onSelect("monthly", qty)}
             planLabel={t("subscription.monthly")}
+            formatter={formatter}
           />
         </div>
 
@@ -56,13 +62,13 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
           </span>
           <div className="text-sm font-medium">{t("subscription.yearly")}</div>
           <div className="text-2xl font-bold">
-            {currency === "usd" ? "$" : ""}{yearlyTotal.toFixed(2)}
+            {formatter.format(yearlyTotal)}
             <span className="text-sm font-normal text-muted-foreground ml-1">
               / {t("schoolSubscription.perUserYear")}
             </span>
           </div>
           <div className="text-xs text-muted-foreground">
-            ~{currency === "usd" ? "$" : ""}{yearlyPerUser.toFixed(2)}/{t("subscription.month").toLowerCase()} {t("schoolSubscription.perUser")}
+            ~{formatter.format(yearlyPerUser)}/{t("subscription.month").toLowerCase()} {t("schoolSubscription.perUser")}
           </div>
           <QuantitySelector
             monthlyPrice={monthlyPrice}
@@ -70,6 +76,7 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
             onSelect={(qty) => onSelect("yearly", qty)}
             planLabel={t("subscription.yearly")}
             isYearly
+            formatter={formatter}
           />
         </div>
       </div>
@@ -79,16 +86,17 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
 
 function QuantitySelector({
   monthlyPrice,
-  currency,
   onSelect,
   planLabel,
   isYearly = false,
+  formatter,
 }: {
   monthlyPrice: number;
   currency: string;
   onSelect: (quantity: number) => void;
   planLabel: string;
   isYearly?: boolean;
+  formatter: Intl.NumberFormat;
 }) {
   const { t } = useTranslation();
   const [quantity, setQuantity] = useState(MIN_SEAT_QUANTITY);
@@ -126,7 +134,7 @@ function QuantitySelector({
         </span>
       </div>
       <div className="text-sm font-semibold">
-        {t("schoolSubscription.total")}: {currency === "usd" ? "$" : ""}{total.toFixed(2)}
+        {t("schoolSubscription.total")}: {formatter.format(total)}
       </div>
       <Button
         type="button"
