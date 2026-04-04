@@ -85,7 +85,7 @@ function SubscriptionStatusCard({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CreditCard className="h-4 w-4 text-primary" />

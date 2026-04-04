@@ -53,30 +53,39 @@ function SubscriptionPanel({ monthlyPrice, currency, disabled }: SubscriptionPan
 
   if (disabled && !subscription.hasSubscription) {
     return (
-      <div className="rounded-lg border border-border bg-muted/50 p-4 flex items-center gap-3">
-        <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-        <p className="text-sm text-muted-foreground">
-          {t("subscription.disabledBySchoolSubscription")}
-        </p>
+      <div className="rounded-lg border border-border p-3 space-y-3">
+        <div className="space-y-0.5">
+          <h3 className="text-sm font-semibold">{t("subscription.personalTitle")}</h3>
+          <p className="text-xs text-muted-foreground">{t("subscription.personalDescription")}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-muted/50 p-4 flex items-center gap-3">
+          <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            {t("subscription.disabledBySchoolSubscription")}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <>
+    <div className="rounded-lg border border-border p-3 space-y-3">
+      <div className="space-y-0.5">
+        <h3 className="text-sm font-semibold">{t("subscription.personalTitle")}</h3>
+        <p className="text-xs text-muted-foreground">{t("subscription.personalDescription")}</p>
+      </div>
+
       {subscription.hasSubscription ? (
-        <div className="space-y-4">
-          <SubscriptionStatusCard
-            subscription={subscription}
-            monthlyPrice={monthlyPrice}
-            currency={currency}
-            onManage={disabled ? () => {} : openPortal}
-            onCancel={disabled ? () => {} : () => setCanceling(true)}
-            onReactivate={disabled ? () => {} : reactivateSubscription}
-            onSwitchPlan={disabled ? async () => false : switchPlan}
-            disabled={disabled}
-          />
-        </div>
+        <SubscriptionStatusCard
+          subscription={subscription}
+          monthlyPrice={monthlyPrice}
+          currency={currency}
+          onManage={disabled ? () => {} : openPortal}
+          onCancel={disabled ? () => {} : () => setCanceling(true)}
+          onReactivate={disabled ? () => {} : reactivateSubscription}
+          onSwitchPlan={disabled ? async () => false : switchPlan}
+          disabled={disabled}
+        />
       ) : (
         <div className="space-y-3">
           {subscription.status === "past_due" && (
@@ -118,7 +127,7 @@ function SubscriptionPanel({ monthlyPrice, currency, disabled }: SubscriptionPan
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

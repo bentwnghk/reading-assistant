@@ -828,6 +828,8 @@
     "switchPlanTrialWarning": "Switching plans during a trial will end your free trial and charge you immediately.",
     "switchPlanError": "Failed to switch plan. Please try again.",
     "disabledBySchoolSubscription": "Personal subscription is not available because your school already has an active subscription.",
+    "personalTitle": "Personal Subscription",
+    "personalDescription": "Subscribe individually to access all features.",
     "status": {
       "active": "Active",
       "trialing": "Trial",
