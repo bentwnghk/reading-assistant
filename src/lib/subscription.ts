@@ -282,6 +282,10 @@ export async function ensureStripePrices(): Promise<{
       description: "Full access to Mr.\u{1F196} ProReader AI features",
     });
     productId = created.id;
+  } else {
+    await stripe.products.update(productId, {
+      description: "Full access to Mr.\u{1F196} ProReader AI features",
+    });
   }
 
   const monthlyAmount = Math.round(getMonthlyPrice() * 100);
@@ -359,6 +363,10 @@ export async function ensureSchoolStripePrices(): Promise<{
       description: "Full access to Mr.\u{1F196} ProReader AI features across the school",
     });
     productId = created.id;
+  } else {
+    await stripe.products.update(productId, {
+      description: "Full access to Mr.\u{1F196} ProReader AI features across the school",
+    });
   }
 
   const monthlyAmount = Math.round(schoolMonthly * 100);
