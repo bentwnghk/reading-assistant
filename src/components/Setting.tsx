@@ -398,6 +398,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <Input
                               placeholder={t("setting.apiUrlPlaceholder")}
                               {...field}
+                              readOnly
                               onBlur={() =>
                                 updateSetting("openaicompatibleApiProxy", form.getValues("openaicompatibleApiProxy"))
                               }
