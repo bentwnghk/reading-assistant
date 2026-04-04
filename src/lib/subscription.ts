@@ -356,7 +356,7 @@ export async function ensureSchoolStripePrices(): Promise<{
   if (!productId) {
     const created = await stripe.products.create({
       name: "Mr.\u{1F196} ProReader School Subscription",
-      description: "School subscription for Mr.\u{1F196} ProReader (per seat)",
+      description: "Full access to Mr.\u{1F196} ProReader AI features across the school",
     });
     productId = created.id;
   }
