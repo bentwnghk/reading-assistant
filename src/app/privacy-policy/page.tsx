@@ -98,7 +98,7 @@ const en = {
     },
     {
       heading: "9. Children&apos;s Privacy",
-      body: <p>Children under the age of 13 are not permitted to use the Service, and we do not knowingly collect personal information from children under 13. If we become aware that we have collected information from a child under 13, we will take steps to delete such information. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.</p>,
+      body: <p>Children under the age of 8 are not permitted to use the Service, and we do not knowingly collect personal information from children under 8. If we become aware that we have collected information from a child under 8, we will take steps to delete such information. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.</p>,
     },
     {
       heading: "10. Data Transfers",
@@ -230,7 +230,7 @@ const zhHK = {
     },
     {
       heading: "9. 兒童隱私",
-      body: <p>13 歲以下的兒童不得使用本服務，我們不會故意收集 13 歲以下兒童的個人資訊。若我們獲悉已收集了 13 歲以下兒童的資訊，我們將採取步驟刪除該等資訊。若您是家長或監護人，並認為您的孩子向我們提供了個人資訊，請聯絡我們。</p>,
+      body: <p>8 歲以下的兒童不得使用本服務，我們不會故意收集 8 歲以下兒童的個人資訊。若我們獲悉已收集了 8 歲以下兒童的資訊，我們將採取步驟刪除該等資訊。若您是家長或監護人，並認為您的孩子向我們提供了個人資訊，請聯絡我們。</p>,
     },
     {
       heading: "10. 資料轉移",
