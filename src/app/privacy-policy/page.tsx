@@ -9,7 +9,7 @@ const en = {
   effectiveDate: "Effective Date: April 5, 2026",
   backToHome: "Back to Home",
   intro: [
-    <>This Privacy Policy describes how <strong>Mr.🆖 ProReader</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and discloses information about individuals who use our Service. The Service is an AI-powered English reading assistance platform.</>,
+    <>This Privacy Policy describes how <strong>Mr.🆖 ProReader</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, and discloses information about individuals who use our Service. The Service is an AI-powered English reading assistance platform that transforms reading materials into interactive learning experiences.</>,
     <>Please read this Privacy Policy carefully. By using the Service, you agree to the collection, use, and disclosure of your information as described in this Privacy Policy. If you do not agree, please do not use the Service.</>,
     <>For purposes of this Privacy Policy, &quot;you&quot; and &quot;your&quot; means you as the user of the Service.</>,
   ],
@@ -141,7 +141,7 @@ const zhHK = {
   effectiveDate: "生效日期：2026 年 4 月 5 日",
   backToHome: "返回首頁",
   intro: [
-    <>本隱私政策說明 <strong>Mr.🆖 ProReader</strong>（以下簡稱「我們」）如何收集、使用及披露使用我們服務的個人資訊。本服務是一個基於人工智慧的英語閱讀輔助平台。</>,
+    <>本隱私政策說明 <strong>Mr.🆖 ProReader</strong>（以下簡稱「我們」）如何收集、使用及披露使用我們服務的個人資訊。本服務是一個基於人工智慧的英語閱讀輔助平台，可將閱讀材料轉化為互動學習體驗。</>,
     <>請仔細閱讀本隱私政策。使用本服務即表示您同意本隱私政策中所述的資訊收集、使用及披露方式。若您不同意，請勿使用本服務。</>,
     <>就本隱私政策而言，「您」及「您的」係指作為服務使用者的您。</>,
   ],
