@@ -97,7 +97,7 @@ const en = {
       body: <p>The Service may contain links to third-party websites or services. We are not responsible for the privacy practices of these third parties. We encourage you to review the privacy policies of any third-party services you access.</p>,
     },
     {
-      heading: "9. Children&apos;s Privacy",
+      heading: "9. Children's Privacy",
       body: <p>Children under the age of 8 are not permitted to use the Service, and we do not knowingly collect personal information from children under 8. If we become aware that we have collected information from a child under 8, we will take steps to delete such information. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.</p>,
     },
     {
