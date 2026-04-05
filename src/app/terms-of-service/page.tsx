@@ -154,7 +154,7 @@ const en = {
           <p>If you have any questions about these Terms, please contact us at:</p>
           <ul>
             <li>Email: <a href="mailto:read@mr5ai.com">read@mr5ai.com</a></li>
-            <li>Website: <a href="https://api.mr5ai.com/" target="_blank" rel="noopener noreferrer">https://api.mr5ai.com/</a></li>
+            <li>Website: <a href="https://read.mr5ai.com/" target="_blank" rel="noopener noreferrer">https://read.mr5ai.com/</a></li>
           </ul>
         </>
       ),
@@ -312,7 +312,7 @@ const zhHK = {
           <p>若您對本條款有任何疑問，請透過以下方式聯絡我們：</p>
           <ul>
             <li>電郵：<a href="mailto:read@mr5ai.com">read@mr5ai.com</a></li>
-            <li>網站：<a href="https://api.mr5ai.com/" target="_blank" rel="noopener noreferrer">https://api.mr5ai.com/</a></li>
+            <li>網站：<a href="https://read.mr5ai.com/" target="_blank" rel="noopener noreferrer">https://read.mr5ai.com/</a></li>
           </ul>
         </>
       ),
