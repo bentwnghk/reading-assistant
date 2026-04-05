@@ -99,7 +99,7 @@ const en = {
           <ul>
             <li>Subscription fees are non-refundable except as required by applicable law or as described in our refund policy.</li>
             <li>You may cancel your subscription at any time. Upon cancellation, you will continue to have access until the end of the current billing period.</li>
-            <li>We reserve the right to change subscription pricing with at least 30 days' advance notice.</li>
+            <li>We reserve the right to change subscription pricing with at least 30 days&#39; advance notice.</li>
           </ul>
         </>
       ),
