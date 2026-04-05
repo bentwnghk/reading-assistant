@@ -127,7 +127,7 @@ const en = {
         <>
           <p>If you have any questions about this Privacy Policy or our data practices, please contact us at:</p>
           <ul>
-            <li>Email: <a href="mailto:support@mr5ai.com">support@mr5ai.com</a></li>
+            <li>Email: <a href="mailto:read@mr5ai.com">read@mr5ai.com</a></li>
             <li>Website: <a href="https://api.mr5ai.com/" target="_blank" rel="noopener noreferrer">https://api.mr5ai.com/</a></li>
           </ul>
         </>
@@ -259,7 +259,7 @@ const zhHK = {
         <>
           <p>若您對本隱私政策或我們的資料實踐有任何疑問，請透過以下方式聯絡我們：</p>
           <ul>
-            <li>電郵：<a href="mailto:support@mr5ai.com">support@mr5ai.com</a></li>
+            <li>電郵：<a href="mailto:read@mr5ai.com">read@mr5ai.com</a></li>
             <li>網站：<a href="https://api.mr5ai.com/" target="_blank" rel="noopener noreferrer">https://api.mr5ai.com/</a></li>
           </ul>
         </>
