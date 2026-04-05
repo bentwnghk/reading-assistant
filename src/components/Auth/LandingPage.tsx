@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
@@ -551,6 +552,16 @@ export function LandingPage() {
           <p className="relative z-10 text-slate-500 dark:text-slate-400 text-base mt-10 font-medium tracking-wide uppercase">{t("header.about.builtWith")}</p>
         </motion.div>
       </AnimatedSection>
+
+      <footer className="pb-8 text-center text-sm text-slate-400">
+        <Link href="/terms-of-service" className="hover:text-slate-200 transition-colors">
+          {t("termsOfService")}
+        </Link>
+        <span className="mx-3">·</span>
+        <Link href="/privacy-policy" className="hover:text-slate-200 transition-colors">
+          {t("privacyPolicy")}
+        </Link>
+      </footer>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useLayoutEffect, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
@@ -113,6 +114,14 @@ function Home() {
             name: "Mr.🆖 AI Hub",
           })}
         </a>
+        <span className="mx-2">·</span>
+        <Link href="/terms-of-service" className="hover:underline">
+          {t("termsOfService")}
+        </Link>
+        <span className="mx-2">·</span>
+        <Link href="/privacy-policy" className="hover:underline">
+          {t("privacyPolicy")}
+        </Link>
       </footer>
       <aside className="print:hidden">
         <Setting open={openSetting} onClose={() => setOpenSetting(false)} />

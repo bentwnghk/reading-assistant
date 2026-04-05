@@ -3,6 +3,8 @@
   "theme": "Theme",
   "openSource": "Mr.🆖 AI Hub",
   "copyright": "Built with ❤️ by Mr.🆖 for students learning English. Powered by {{name}}",
+  "termsOfService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy",
   "searchPlaceholder": "Please enter keywords",
   "toc": {
     "title": "Navigation",
