@@ -54,7 +54,8 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
           </DialogDescription>
         </DialogHeader>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full overflow-x-auto">
+          <div className="w-full overflow-x-auto">
+          <TabsList className="w-full min-w-max">
             <TabsTrigger value="overview" className="flex-1">
               <BarChart3 className="h-4 w-4 mr-1.5" />
               {t("dashboard.tabs.overview")}
@@ -64,6 +65,7 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
               {t("dashboard.tabs.sessions")}
             </TabsTrigger>
           </TabsList>
+          </div>
           <TabsContent value="overview" className="mt-4">
             <OverviewTab />
           </TabsContent>
