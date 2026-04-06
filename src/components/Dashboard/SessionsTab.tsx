@@ -171,8 +171,8 @@ function SessionsTab({ onClose }: SessionsTabProps) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex gap-2 ml-auto">
+      <div className="flex justify-between items-center mb-2 gap-2">
+        <div className="flex gap-2 ml-auto shrink-0">
           <Button
             variant="secondary"
             size="sm"
@@ -188,14 +188,15 @@ function SessionsTab({ onClose }: SessionsTabProps) {
           />
         </div>
       </div>
-      <div className="max-h-[60vh] overflow-y-auto">
+      <div className="max-h-[60vh] overflow-y-auto -mx-3 sm:mx-0">
+        <div className="min-w-[640px] px-3 sm:px-0">
         {historyList.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             {t("history.noHistory")}
           </div>
         ) : (
           <>
-            <Table className="min-w-[640px]">
+            <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("history.name")}</TableHead>
@@ -300,6 +301,7 @@ function SessionsTab({ onClose }: SessionsTabProps) {
             </div>
           </>
         )}
+        </div>
       </div>
       <input
         ref={fileInputRef}

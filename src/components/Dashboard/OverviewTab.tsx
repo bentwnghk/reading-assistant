@@ -193,7 +193,7 @@ function SpellingTrendChart({
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
-          <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} unit=" pts" />
+          <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} />
           <Tooltip content={<CustomTooltip />} />
           <Line
             type="monotone"
@@ -294,8 +294,6 @@ export function OverviewTab() {
   const filteredDaily = useMemo(() => {
     return fillDailyRange(m.dailyActivities, timeRange);
   }, [m.dailyActivities, timeRange]);
-
-  const hasAnyScores = m.testScores.length > 0 || m.quizScores.length > 0 || m.spellingScores.length > 0;
 
   const isEmpty = m.totalSessions === 0;
 
@@ -490,26 +488,24 @@ export function OverviewTab() {
       </div>
 
       {/* Score Charts: Reading Test Distribution + Vocab Quiz Distribution + Spelling Trend */}
-      {hasAnyScores && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ScoreDistributionChart
-            title={t("dashboard.scores.readingTest")}
-            scores={m.testScores}
-            emptyMessage={t("dashboard.charts.noData")}
-          />
-          <ScoreDistributionChart
-            title={t("dashboard.scores.vocabQuiz")}
-            scores={m.quizScores}
-            emptyMessage={t("dashboard.charts.noData")}
-          />
-          <SpellingTrendChart
-            title={t("dashboard.scores.spelling")}
-            data={m.spellingScores}
-            color="#f97316"
-            emptyMessage={t("dashboard.charts.noData")}
-          />
-        </div>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ScoreDistributionChart
+          title={t("dashboard.scores.readingTest")}
+          scores={m.testScores}
+          emptyMessage={t("dashboard.charts.noData")}
+        />
+        <ScoreDistributionChart
+          title={t("dashboard.scores.vocabQuiz")}
+          scores={m.quizScores}
+          emptyMessage={t("dashboard.charts.noData")}
+        />
+        <SpellingTrendChart
+          title={t("dashboard.scores.spelling")}
+          data={m.spellingScores}
+          color="#f97316"
+          emptyMessage={t("dashboard.charts.noData")}
+        />
+      </div>
 
       {/* Vocabulary Growth (full width) */}
       <ChartCard title={t("dashboard.charts.vocabularyGrowth")}>

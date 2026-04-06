@@ -30,15 +30,15 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-lg:max-w-screen-sm max-w-screen-xl gap-2 max-sm:p-3">
-        <DialogHeader>
+        <DialogHeader className="text-left">
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
             {t("dashboard.title")}
             <Popover>
               <PopoverTrigger asChild>
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors ml-auto" />
               </PopoverTrigger>
-              <PopoverContent className="w-[400px]" align="start">
+              <PopoverContent className="w-[300px] max-w-[calc(100vw-3rem)]" align="start">
                 <div className="space-y-3 text-sm">
                   <h4 className="font-semibold text-base">{t("dashboard.help.title")}</h4>
                   <div className="space-y-2">
@@ -49,12 +49,12 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
               </PopoverContent>
             </Popover>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-left">
             {t("dashboard.description")}
           </DialogDescription>
         </DialogHeader>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full">
+          <TabsList className="w-full overflow-x-auto">
             <TabsTrigger value="overview" className="flex-1">
               <BarChart3 className="h-4 w-4 mr-1.5" />
               {t("dashboard.tabs.overview")}
