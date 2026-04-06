@@ -29,7 +29,7 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-xl gap-2 max-sm:p-3">
+      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-xl gap-2 max-sm:p-3 overflow-hidden">
         <DialogHeader className="text-left">
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
@@ -54,8 +54,7 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
           </DialogDescription>
         </DialogHeader>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="w-full overflow-x-auto">
-          <TabsList className="w-full min-w-max">
+          <TabsList className="w-full">
             <TabsTrigger value="overview" className="flex-1">
               <BarChart3 className="h-4 w-4 mr-1.5" />
               {t("dashboard.tabs.overview")}
@@ -65,7 +64,6 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
               {t("dashboard.tabs.sessions")}
             </TabsTrigger>
           </TabsList>
-          </div>
           <TabsContent value="overview" className="mt-4">
             <OverviewTab />
           </TabsContent>
