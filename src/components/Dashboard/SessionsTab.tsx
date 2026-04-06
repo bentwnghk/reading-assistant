@@ -189,15 +189,14 @@ function SessionsTab({ onClose }: SessionsTabProps) {
           />
         </div>
       </div>
-      <div className="max-h-[60vh] overflow-y-auto overflow-x-auto">
-        <div className="min-w-[640px]">
+      <div className="max-h-[60vh] overflow-y-auto">
         {historyList.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             {t("history.noHistory")}
           </div>
         ) : (
           <>
-            <Table>
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("history.name")}</TableHead>
@@ -302,7 +301,6 @@ function SessionsTab({ onClose }: SessionsTabProps) {
             </div>
           </>
         )}
-        </div>
       </div>
       <input
         ref={fileInputRef}

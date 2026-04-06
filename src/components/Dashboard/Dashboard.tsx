@@ -36,7 +36,7 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
             {t("dashboard.title")}
             <Popover>
               <PopoverTrigger asChild>
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors ml-auto" />
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
               </PopoverTrigger>
               <PopoverContent className="w-[300px] max-w-[calc(100vw-3rem)]" align="start">
                 <div className="space-y-3 text-sm">
