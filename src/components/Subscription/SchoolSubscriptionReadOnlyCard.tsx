@@ -17,7 +17,7 @@ interface SchoolSubscriptionReadOnlyCardProps {
 function SchoolSubscriptionReadOnlyCard({
   subscription,
 }: SchoolSubscriptionReadOnlyCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const {
     schoolName,
@@ -31,7 +31,7 @@ function SchoolSubscriptionReadOnlyCard({
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null;
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    return new Date(dateStr).toLocaleDateString(i18n.language, {
       year: "numeric",
       month: "long",
       day: "numeric",

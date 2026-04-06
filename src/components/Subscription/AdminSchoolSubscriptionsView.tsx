@@ -37,18 +37,18 @@ const STATUS_COLORS: Record<string, string> = {
   inactive: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
 }
 
-function formatDate(dateStr: string | null): string {
+function formatDate(dateStr: string | null, locale: string): string {
   if (!dateStr) return "-"
-  return new Date(dateStr).toLocaleDateString(undefined, {
+  return new Date(dateStr).toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
   })
 }
 
-function formatDateTime(dateStr: string | null): string {
+function formatDateTime(dateStr: string | null, locale: string): string {
   if (!dateStr) return "-"
-  return new Date(dateStr).toLocaleString(undefined, {
+  return new Date(dateStr).toLocaleString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -100,7 +100,7 @@ interface SeatUser {
 }
 
 export default function AdminSchoolSubscriptionsView() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [subscriptions, setSubscriptions] = useState<SchoolSubscriptionRow[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -275,10 +275,10 @@ export default function AdminSchoolSubscriptionsView() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">
-                      {formatDate(sub.current_period_start)}
+                      {formatDate(sub.current_period_start, i18n.language)}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {formatDate(sub.current_period_end)}
+                      {formatDate(sub.current_period_end, i18n.language)}
                     </TableCell>
                     <TableCell>
                       {sub.cancel_at_period_end ? (
@@ -290,7 +290,7 @@ export default function AdminSchoolSubscriptionsView() {
                       )}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {formatDate(sub.created_at)}
+                      {formatDate(sub.created_at, i18n.language)}
                     </TableCell>
                   </TableRow>
                 ))
@@ -366,7 +366,7 @@ export default function AdminSchoolSubscriptionsView() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {formatDateTime(u.first_accessed_at)}
+                        {formatDateTime(u.first_accessed_at, i18n.language)}
                       </TableCell>
                     </TableRow>
                   ))}

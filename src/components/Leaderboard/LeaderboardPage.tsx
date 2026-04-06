@@ -62,17 +62,17 @@ function getWeekStart(offsetWeeks = 0): string {
   return d.toISOString().slice(0, 10);
 }
 
-function formatWeekLabel(weekStart: string): string {
+function formatWeekLabel(weekStart: string, locale: string): string {
   const start = new Date(weekStart);
   const end   = new Date(weekStart);
   end.setDate(end.getDate() + 6);
   const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, opts)}`;
+  return `${start.toLocaleDateString(locale, opts)} – ${end.toLocaleDateString(locale, opts)}`;
 }
 
 // ─── component ────────────────────────────────────────────────────────────────
 export function LeaderboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: authSession } = useSession();
   const router = useRouter();
   const userId = authSession?.user?.id ?? "";
@@ -247,7 +247,7 @@ export function LeaderboardPage() {
             {t("leaderboard.lastWeek")}
           </button>
           <span className="font-medium tabular-nums">
-            {weekOffset === 0 ? t("leaderboard.thisWeek") : formatWeekLabel(weekStart)}
+            {weekOffset === 0 ? t("leaderboard.thisWeek") : formatWeekLabel(weekStart, i18n.language)}
           </span>
           <button
             onClick={() => setWeekOffset(w => Math.min(w + 1, 0))}

@@ -33,9 +33,9 @@ const statusColors: Record<string, string> = {
   canceled: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
 };
 
-function formatDate(dateStr: string | null): string {
+function formatDate(dateStr: string | null, locale: string): string {
   if (!dateStr) return "";
-  return new Date(dateStr).toLocaleDateString(undefined, {
+  return new Date(dateStr).toLocaleDateString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -60,7 +60,7 @@ function SubscriptionStatusCard({
   onSwitchPlan,
   disabled,
 }: SubscriptionStatusCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [switching, setSwitching] = useState(false);
   const [switchError, setSwitchError] = useState(false);
   const {
@@ -107,7 +107,7 @@ function SubscriptionStatusCard({
         <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-md p-2">
           <Calendar className="h-3.5 w-3.5 shrink-0" />
           <span>
-            {t("subscription.trialEndsAt")}: {formatDate(trialEnd)}
+            {t("subscription.trialEndsAt")}: {formatDate(trialEnd, i18n.language)}
           </span>
         </div>
       )}
@@ -123,14 +123,14 @@ function SubscriptionStatusCard({
         <div className="flex items-center gap-2 text-sm text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 rounded-md p-2">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           <span>
-            {t("subscription.canceledInfo", { date: formatDate(currentPeriodEnd) })}
+            {t("subscription.canceledInfo", { date: formatDate(currentPeriodEnd, i18n.language) })}
           </span>
         </div>
       )}
 
       {!cancelAtPeriodEnd && currentPeriodEnd && (status === "active" || status === "trialing") && (
         <p className="text-xs text-muted-foreground">
-          {t("subscription.nextBillingDate")}: {formatDate(currentPeriodEnd)}
+          {t("subscription.nextBillingDate")}: {formatDate(currentPeriodEnd, i18n.language)}
         </p>
       )}
 

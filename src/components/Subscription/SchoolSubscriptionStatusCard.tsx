@@ -67,7 +67,7 @@ function SchoolSubscriptionStatusCard({
   onSwitchPlan,
   onUpdateQuantity,
 }: SchoolSubscriptionStatusCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [editingQuantity, setEditingQuantity] = useState(false);
   const [newQuantity, setNewQuantity] = useState(subscription.quantity);
   const [switching, setSwitching] = useState(false);
@@ -155,7 +155,7 @@ function SchoolSubscriptionStatusCard({
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null;
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    return new Date(dateStr).toLocaleDateString(i18n.language, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -413,7 +413,7 @@ function SchoolSubscriptionStatusCard({
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {u.first_accessed_at
-                          ? new Date(u.first_accessed_at).toLocaleString(undefined, {
+                          ? new Date(u.first_accessed_at).toLocaleString(i18n.language, {
                               year: "numeric",
                               month: "short",
                               day: "numeric",
