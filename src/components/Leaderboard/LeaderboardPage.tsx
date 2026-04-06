@@ -66,8 +66,8 @@ function formatWeekLabel(weekStart: string): string {
   const start = new Date(weekStart);
   const end   = new Date(weekStart);
   end.setDate(end.getDate() + 6);
-  const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
-  return `${start.toLocaleDateString("en-GB", opts)} – ${end.toLocaleDateString("en-GB", opts)}`;
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+  return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, opts)}`;
 }
 
 // ─── component ────────────────────────────────────────────────────────────────
