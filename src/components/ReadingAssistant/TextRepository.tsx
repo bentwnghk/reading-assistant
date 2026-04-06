@@ -24,7 +24,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/utils/formatDate";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -511,7 +510,7 @@ interface TextRepositoryProps {
 }
 
 function TextRepository({ onTextLoaded }: TextRepositoryProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: session } = useSession();
   const userRole = session?.user?.role || "student";
   const userId = session?.user?.id || "";
@@ -903,7 +902,9 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
                     </TableCell>
 
                     <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                      {formatDate(item.createdAt)}
+                      {new Date(item.createdAt).toLocaleDateString(i18n.language, {
+                        year: "numeric", month: "2-digit", day: "2-digit",
+                      })}
                     </TableCell>
 
                     <TableCell>

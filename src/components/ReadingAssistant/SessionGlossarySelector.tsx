@@ -6,7 +6,6 @@ import { ChevronDown, ChevronUp, X, Search, BookOpen, Hash } from "lucide-react"
 import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
 import { mergeGlossariesFromSessions } from "@/utils/vocabulary";
-import dayjs from "dayjs";
 import Fuse from "fuse.js";
 
 interface SessionGlossarySelectorProps {
@@ -26,7 +25,7 @@ function SessionGlossarySelector({
   currentRatings,
   currentSessionId,
 }: SessionGlossarySelectorProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { history } = useHistoryStore();
   const [expanded, setExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -153,9 +152,13 @@ function SessionGlossarySelector({
                   session.docTitle ||
                   session.extractedText?.slice(0, 50) ||
                   "Untitled";
-                const date = dayjs(
+                const date = new Date(
                   session.updatedAt || session.createdAt
-                ).format("DD/MM/YYYY");
+                ).toLocaleDateString(i18n.language, {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                });
 
                 return (
                   <button

@@ -41,7 +41,6 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import dayjs from "dayjs"
 import type { ClassInfo, SchoolInfo } from "@/lib/users"
 
 const View = dynamic(() => import("@/components/MagicDown/View"), { ssr: false })
@@ -71,7 +70,7 @@ interface AiQuestionsViewProps {
 }
 
 export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsViewProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const isTeacher = !isSuperAdmin && !isAdmin
   
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -389,6 +388,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
                   instances={getInstances(question.questionHash)}
                   onToggle={() => toggleExpand(question.questionHash)}
                   t={t}
+                  locale={i18n.language}
                 />
               ))}
             </TableBody>
@@ -429,9 +429,10 @@ interface QuestionRowProps {
   instances: QuestionInstance[]
   onToggle: () => void
   t: (key: string, options?: Record<string, unknown>) => string
+  locale: string
 }
 
-function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t }: QuestionRowProps) {
+function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t, locale }: QuestionRowProps) {
   return (
     <>
       <TableRow 
@@ -458,7 +459,10 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t }
           </div>
         </TableCell>
         <TableCell className="text-center text-sm text-muted-foreground whitespace-nowrap">
-          {dayjs(question.lastAsked).format("DD/MM HH:mm")}
+          {new Date(question.lastAsked).toLocaleString(locale, {
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit",
+          })}
         </TableCell>
       </TableRow>
       {isExpanded && (
@@ -487,7 +491,10 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t }
                           </div>
                         </div>
                         <div className="text-xs text-muted-foreground whitespace-nowrap">
-                          {dayjs(instance.createdAt).format("DD/MM HH:mm")}
+                          {new Date(instance.createdAt).toLocaleString(locale, {
+                            year: "numeric", month: "2-digit", day: "2-digit",
+                            hour: "2-digit", minute: "2-digit",
+                          })}
                         </div>
                       </div>
                       {instance.docTitle && (

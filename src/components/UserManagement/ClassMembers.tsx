@@ -17,7 +17,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import type { ClassMember, UserWithRole } from "@/lib/users"
-import { formatDate } from "@/utils/formatDate"
 
 interface ClassMembersProps {
   classId: string
@@ -28,7 +27,7 @@ interface ClassMembersProps {
 type SortOrder = "asc" | "desc"
 
 export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChange }: ClassMembersProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [members, setMembers] = useState<ClassMember[]>([])
   const [availableStudents, setAvailableStudents] = useState<UserWithRole[]>([])
   const [loading, setLoading] = useState(true)
@@ -261,7 +260,9 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">
-                    {formatDate(member.joinedAt)}
+                    {new Date(member.joinedAt).toLocaleDateString(i18n.language, {
+                      year: "numeric", month: "2-digit", day: "2-digit",
+                    })}
                   </Badge>
                 </TableCell>
                 <TableCell>

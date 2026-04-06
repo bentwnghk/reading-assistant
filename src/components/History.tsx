@@ -5,7 +5,6 @@ import { TrashIcon, FileOutput, Download, BookOpen, Upload } from "lucide-react"
 import { z } from "zod";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
-import dayjs from "dayjs";
 import SearchArea from "@/components/Internal/SearchArea";
 import {
   Dialog,
@@ -55,8 +54,14 @@ const readingSessionSchema = z.object({
   updatedAt: z.number().optional(),
 });
 
-function formatDate(timestamp: number) {
-  return dayjs(timestamp).format("DD/MM/YYYY HH:mm");
+function formatDate(timestamp: number, locale: string): string {
+  return new Date(timestamp).toLocaleString(locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function calculateProgress(item: ReadingHistory): number {
@@ -78,7 +83,7 @@ function calculateProgress(item: ReadingHistory): number {
 }
 
 function History({ open, onClose }: HistoryProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { backup, restore, reset } = useReadingStore();
   const { history, save, load, update, remove } = useHistoryStore();
@@ -267,7 +272,7 @@ function History({ open, onClose }: HistoryProps) {
                           {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
                         </TableCell>
                        <TableCell className="text-center whitespace-nowrap">
-                         {formatDate(item.updatedAt || item.createdAt)}
+                         {formatDate(item.updatedAt || item.createdAt, i18n.language)}
                        </TableCell>
                        <TableCell className="text-center">
                          <div className="flex justify-center">

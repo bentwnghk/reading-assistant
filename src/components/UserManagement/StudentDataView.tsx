@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import dayjs from "dayjs"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
 
@@ -57,7 +56,7 @@ interface SessionWithSchool extends StudentSessionData {
 }
 
 export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all")
@@ -466,8 +465,12 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     )}
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">
-                    <div>{dayjs(session.updatedAt).format("DD/MM/YYYY")}</div>
-                    <div className="text-muted-foreground">{dayjs(session.updatedAt).format("HH:mm")}</div>
+                    <div>{new Date(session.updatedAt).toLocaleDateString(i18n.language, {
+                      year: "numeric", month: "2-digit", day: "2-digit",
+                    })}</div>
+                    <div className="text-muted-foreground">{new Date(session.updatedAt).toLocaleTimeString(i18n.language, {
+                      hour: "2-digit", minute: "2-digit",
+                    })}</div>
                   </TableCell>
                 </TableRow>
               ))}
