@@ -168,7 +168,7 @@ MAILTRAP_SENDER_NAME=Mr.🆖 ProReader
 MAILTRAP_USE_SANDBOX=false
 # Required only when MAILTRAP_USE_SANDBOX=true — your Mailtrap inbox ID
 MAILTRAP_INBOX_ID=
-# Secret token to authenticate cron job requests to /api/reminders/cron
+# Secret token to authenticate cron job requests to /api/cron
 CRON_SECRET=
 # Public URL of the app, used for links in reminder emails (server-side runtime variable, not NEXT_PUBLIC_)
 APP_URL=https://your-domain.com

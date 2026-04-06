@@ -5,6 +5,8 @@ import {
   getSchoolContext,
 } from "@/lib/subscription-email"
 import { cleanupExpiredSchoolAccess } from "@/lib/users"
+import { ensureReminderTables, processReminders } from "@/lib/reminders"
+import { isMailtrapConfigured } from "@/lib/email"
 import { getClient } from "@/lib/db"
 import { NextResponse } from "next/server"
 
@@ -218,10 +220,25 @@ export async function POST(request: Request) {
   try {
     await ensureSubscriptionTable()
     await ensureSchoolSubscriptionTables()
+    await ensureReminderTables()
+
+    const { searchParams } = new URL(request.url)
+    const rawDays = searchParams.get("days")
+    const reminderDays = rawDays !== null ? Math.max(0, Number(rawDays)) : 3
+
+    const results: Record<string, { processed: number; notified: number; errors: number }> = {}
+    const mailtrapReady = isMailtrapConfigured()
+
+    if (mailtrapReady) {
+      const reminderResult = await processReminders(reminderDays)
+      results.inactivityReminders = {
+        processed: reminderResult.processed,
+        notified: reminderResult.sent,
+        errors: reminderResult.errors,
+      }
+    }
 
     const client = await getClient()
-    const results: Record<string, { processed: number; notified: number; errors: number }> = {}
-
     try {
       results.trialEndingPersonal = await processTrialEndingNotifications(client)
       results.trialEndingSchool = await processSchoolTrialEndingNotifications(client)
@@ -237,14 +254,14 @@ export async function POST(request: Request) {
     const totalErrors = Object.values(results).reduce((s, r) => s + r.errors, 0)
 
     console.log(
-      `[subscription-cron] Results: ${JSON.stringify(results)}, total: processed=${totalProcessed}, notified=${totalNotified}, errors=${totalErrors}`
+      `[cron] Results: ${JSON.stringify(results)}, total: processed=${totalProcessed}, notified=${totalNotified}, errors=${totalErrors}`
     )
 
     return NextResponse.json({ results, totalProcessed, totalNotified, totalErrors })
   } catch (error) {
-    console.error("[subscription-cron] Error:", error)
+    console.error("[cron] Error:", error)
     return NextResponse.json(
-      { error: "Failed to process subscription notifications", detail: String(error) },
+      { error: "Failed to process scheduled tasks", detail: String(error) },
       { status: 500 }
     )
   }
