@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Settings,
-  History,
   Info,
   BookOpen,
   BookCopy,
@@ -75,7 +74,7 @@ function Header() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
   const [openAbout, setOpenAbout] = useState<boolean>(false);
-  const { setOpenSetting, setOpenHistory, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
+  const { setOpenSetting, setOpenDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const {
     extractedText,
     summary,
@@ -189,7 +188,7 @@ function Header() {
       }
       if (event.shiftKey && key === "h") {
         event.preventDefault();
-        setOpenHistory(true);
+        setOpenDashboard(true);
         return;
       }
       if (event.shiftKey && key === "e") {
@@ -212,7 +211,7 @@ function Header() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [exportSnapshot, openSnapshotImport, setOpenHistory, setOpenSetting]);
+  }, [exportSnapshot, openSnapshotImport, setOpenDashboard, setOpenSetting]);
 
   async function handleFileUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -252,10 +251,10 @@ function Header() {
               className="h-8 w-8"
               variant="ghost"
               size="icon"
-              title={t("history.title")}
-              onClick={() => setOpenHistory(true)}
+              title={t("dashboard.title")}
+              onClick={() => setOpenDashboard(true)}
             >
-              <History className="h-5 w-5" />
+              <BarChart3 className="h-5 w-5" />
             </Button>
             <Link href="/leaderboard" prefetch={false}>
               <Button

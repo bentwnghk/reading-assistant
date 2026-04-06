@@ -712,6 +712,56 @@
       }
     }
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Track your reading progress, AI usage, vocabulary growth, and score trends over time.",
+    "tabs": {
+      "overview": "Overview",
+      "sessions": "Sessions"
+    },
+    "empty": "No reading sessions yet. Start reading to see your dashboard!",
+    "stats": {
+      "totalTexts": "Reading Texts",
+      "sourceBreakdown": "{{upload}} uploaded · {{repository}} from repository",
+      "summaries": "Summaries",
+      "mindMaps": "Mind Maps",
+      "mindMapBreakdown": "{{en}} English · {{zh}} Chinese",
+      "adaptedTexts": "Adapted Texts",
+      "simplifiedTexts": "Simplified Texts",
+      "sentencesAnalyzed": "Sentences Analyzed",
+      "totalVocabulary": "Total Vocabulary",
+      "tutorQuestions": "AI Tutor Questions",
+      "avgProgress": "Avg Progress"
+    },
+    "features": {
+      "summary": "Summary",
+      "mindMapEn": "Mind Map (EN)",
+      "mindMapZh": "Mind Map (ZH)",
+      "adaptedText": "Adapted Text",
+      "simplifiedText": "Simplified Text",
+      "sentenceAnalysis": "Sentence Analysis"
+    },
+    "scores": {
+      "readingTest": "Reading Test",
+      "vocabQuiz": "Vocab Quiz",
+      "spelling": "Spelling"
+    },
+    "charts": {
+      "readingActivity": "Reading Activity",
+      "sessions": "Sessions",
+      "aiFeatures": "AI Features Usage",
+      "scoreTrends": "Score Trends",
+      "vocabularyGrowth": "Vocabulary Growth",
+      "cumulativeVocab": "Cumulative Vocabulary",
+      "scoreDistribution": "Test Score Distribution",
+      "noTestData": "No test scores yet"
+    },
+    "help": {
+      "title": "Dashboard Guide",
+      "purpose": "The Dashboard shows your reading and learning metrics over time, including AI feature usage, vocabulary growth, and score trends.",
+      "features": "Use the Overview tab for visual analytics, or switch to Sessions to manage your individual reading sessions."
+    }
+  },
   "history": {
     "title": "Reading History",
     "description": "View your reading sessions with learning progress, vocabulary count, and test scores.",

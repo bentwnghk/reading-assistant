@@ -712,6 +712,56 @@
       }
     }
   },
+  "dashboard": {
+    "title": "學習儀表板",
+    "description": "追蹤你的閱讀進度、AI 使用情況、詞彙增長及分數趨勢。",
+    "tabs": {
+      "overview": "總覽",
+      "sessions": "工作階段"
+    },
+    "empty": "尚無閱讀工作階段。開始閱讀以查看你的儀表板！",
+    "stats": {
+      "totalTexts": "閱讀文本",
+      "sourceBreakdown": "{{upload}} 已上傳 · {{repository}} 來自文本庫",
+      "summaries": "摘要",
+      "mindMaps": "思維導圖",
+      "mindMapBreakdown": "{{en}} 英文 · {{zh}} 中文",
+      "adaptedTexts": "改寫文本",
+      "simplifiedTexts": "簡化文本",
+      "sentencesAnalyzed": "已分析句子",
+      "totalVocabulary": "總詞彙量",
+      "tutorQuestions": "AI 導師提問",
+      "avgProgress": "平均進度"
+    },
+    "features": {
+      "summary": "摘要",
+      "mindMapEn": "思維導圖（英）",
+      "mindMapZh": "思維導圖（中）",
+      "adaptedText": "改寫文本",
+      "simplifiedText": "簡化文本",
+      "sentenceAnalysis": "句子分析"
+    },
+    "scores": {
+      "readingTest": "閱讀測驗",
+      "vocabQuiz": "詞彙測驗",
+      "spelling": "拼字挑戰"
+    },
+    "charts": {
+      "readingActivity": "閱讀活動",
+      "sessions": "工作階段",
+      "aiFeatures": "AI 功能使用",
+      "scoreTrends": "分數趨勢",
+      "vocabularyGrowth": "詞彙增長",
+      "cumulativeVocab": "累積詞彙量",
+      "scoreDistribution": "測驗分數分佈",
+      "noTestData": "尚無測驗分數"
+    },
+    "help": {
+      "title": "儀表板指南",
+      "purpose": "儀表板顯示你隨時間的閱讀與學習指標，包括 AI 功能使用、詞彙增長及分數趨勢。",
+      "features": "使用「總覽」分頁查看視覺化分析，或切換到「工作階段」管理你的個別閱讀工作階段。"
+    }
+  },
   "history": {
     "title": "閱讀記錄",
     "description": "查看你的閱讀工作階段的學習進度、詞彙量及測驗得分。",

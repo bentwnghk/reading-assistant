@@ -93,6 +93,7 @@
     "react-resizable-panels": "^3.0.1",
     "react-use-pwa-install": "^1.0.3",
     "react-zoom-pan-pinch": "^3.7.0",
+    "recharts": "^3.8.1",
     "rehype-highlight": "^7.0.2",
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",

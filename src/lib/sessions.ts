@@ -114,6 +114,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       id: row.id,
       docTitle: row.doc_title,
       studentAge: row.student_age,
+      source: row.source || ("repository" as const),
       originalImages: row.images.map((img: any) => 
         bufferToBase64(img.image_data, img.content_type)
       ),
@@ -187,6 +188,7 @@ export async function getReadingSession(
       id: row.id,
       docTitle: row.doc_title,
       studentAge: row.student_age,
+      source: row.source || ("repository" as const),
       originalImages: row.images.map((img: any) => 
         bufferToBase64(img.image_data, img.content_type)
       ),
@@ -242,6 +244,7 @@ export async function updateReadingSession(
     const fieldMappings: Record<string, string> = {
       docTitle: "doc_title",
       studentAge: "student_age",
+      source: "source",
       extractedText: "extracted_text",
       summary: "summary",
       adaptedText: "adapted_text",

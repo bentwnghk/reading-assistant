@@ -97,11 +97,13 @@ export type ReadingStatus =
   | "error";
 
 type ReadingTestMode = "all-at-once" | "question-by-question";
+type TextSource = "upload" | "repository";
 
 export interface ReadingStore {
   id: string;
   docTitle: string;
   studentAge: number;
+  source: TextSource;
   originalImages: string[];
   extractedText: string;
   summary: string;
@@ -175,6 +177,7 @@ interface ReadingActions {
   setIncludeSentenceAnalysis: (include: boolean) => void;
   clearDerivedData: () => void;
   loadFromRepository: (text: RepositoryText) => void;
+  setSource: (source: TextSource) => void;
   reset: () => void;
   backup: () => ReadingStore;
   restore: (session: ReadingStore) => Promise<void>;
@@ -184,6 +187,7 @@ const defaultValues: ReadingStore = {
   id: "",
   docTitle: "",
   studentAge: 13,
+  source: "upload" as TextSource,
   originalImages: [],
   extractedText: "",
   summary: "",
@@ -693,6 +697,18 @@ export const useReadingStore = create(
           }
           return newState;
         }),
+      setSource: (source) =>
+        set((state) => {
+          const newState = {
+            source,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       clearDerivedData: () =>
         set((state) => {
           const newState = {
@@ -718,6 +734,7 @@ export const useReadingStore = create(
           docTitle: text.title || text.name,
           extractedText: text.extractedText,
           originalImages: text.originalImages,
+          source: "repository",
           createdAt: now,
           updatedAt: now,
           status: "idle",
