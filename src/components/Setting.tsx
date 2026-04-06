@@ -104,7 +104,7 @@ function InfoTooltip({ content }: { content: string }) {
             }}
           />
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent className="max-w-64">
           <p>{content}</p>
         </TooltipContent>
       </Tooltip>
