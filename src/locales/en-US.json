@@ -734,7 +734,13 @@
     "glossaryWords": "Vocabulary Count",
     "spellingScore": "Spelling Challenge Score",
     "quizScore": "Vocabulary Quiz Score",
-    "totalVocabulary": "Total Vocabulary"
+    "totalVocabulary": "Total Vocabulary",
+    "help": {
+      "title": "Reading History Guide",
+      "purpose": "The Reading History keeps a record of all your past reading sessions, including learning progress, vocabulary collected, and test scores.",
+      "features": "You can load a previous session to continue reading, export sessions for backup, or delete sessions you no longer need.",
+      "usage": "Click \"Load\" to resume a session, or use the import/export buttons to manage your reading data."
+    }
   },
   "setting": {
     "title": "Settings",

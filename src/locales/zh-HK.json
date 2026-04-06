@@ -734,7 +734,13 @@
     "glossaryWords": "詞彙量",
     "spellingScore": "拼字挑戰得分",
     "quizScore": "詞彙測驗得分",
-    "totalVocabulary": "總詞彙量"
+    "totalVocabulary": "總詞彙量",
+    "help": {
+      "title": "閱讀記錄指南",
+      "purpose": "閱讀記錄會保留你所有過去的閱讀工作階段，包括學習進度、收集的詞彙及測驗得分。",
+      "features": "你可以載入先前的的工作階段以繼續閱讀、匯出工作階段進行備份，或刪除不再需要的工作階段。",
+      "usage": "點擊「載入」以恢復工作階段，或使用匯入/匯出按鈕來管理你的閱讀資料。"
+    }
   },
   "setting": {
     "title": "設定",

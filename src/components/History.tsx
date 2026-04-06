@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { TrashIcon, FileOutput, Download, BookOpen, Upload } from "lucide-react";
+import { TrashIcon, FileOutput, Download, BookOpen, Upload, HelpCircle } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
@@ -14,6 +14,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -189,7 +190,24 @@ function History({ open, onClose }: HistoryProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-lg:max-w-screen-sm max-w-screen-lg gap-2 max-sm:p-3">
         <DialogHeader>
-          <DialogTitle>{t("history.title")}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {t("history.title")}
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px]" align="start">
+                <div className="space-y-3 text-sm">
+                  <h4 className="font-semibold text-base">{t("history.help.title")}</h4>
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground">{t("history.help.purpose")}</p>
+                    <p className="text-muted-foreground">{t("history.help.features")}</p>
+                    <p className="text-muted-foreground">{t("history.help.usage")}</p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </DialogTitle>
           <DialogDescription>
             {t("history.description")}
             {totalVocabularyCount > 0 && (
