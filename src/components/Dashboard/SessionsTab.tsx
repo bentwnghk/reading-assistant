@@ -170,7 +170,7 @@ function SessionsTab({ onClose }: SessionsTabProps) {
   }, [history]);
 
   return (
-    <div>
+    <div className="min-w-0 w-full">
       <div className="flex items-center mb-2 gap-2">
         <Button
           variant="secondary"
