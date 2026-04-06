@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import dynamic from "next/dynamic"
-import { Loader2, Search, ChevronDown, ChevronRight, ChevronLeft, MessageCircle, Users, FileText } from "lucide-react"
+import { Loader2, Search, ChevronDown, ChevronRight, ChevronLeft, MessageCircle, Users, FileText, ArrowUpDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -88,6 +88,8 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   const [loadingInstances, setLoadingInstances] = useState<Set<string>>(new Set())
   const [initializedTeacherClass, setInitializedTeacherClass] = useState(false)
   const [page, setPage] = useState(1)
+  const [sortField, setSortField] = useState<"question" | "frequency" | "users" | "lastAsked">("frequency")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const PAGE_SIZE = 20
 
   const loadInitialData = useCallback(async () => {
@@ -160,12 +162,31 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   }, [loadQuestions])
 
   const filteredQuestions = useMemo(() => {
-    if (!searchQuery) return questions
-    const query = searchQuery.toLowerCase()
-    return questions.filter(q => 
-      q.questionText.toLowerCase().includes(query)
-    )
-  }, [questions, searchQuery])
+    const result = searchQuery
+      ? questions.filter(q => q.questionText.toLowerCase().includes(searchQuery.toLowerCase()))
+      : questions
+
+    result.sort((a, b) => {
+      let comparison = 0
+      switch (sortField) {
+        case "question":
+          comparison = a.questionText.localeCompare(b.questionText)
+          break
+        case "frequency":
+          comparison = b.frequency - a.frequency
+          break
+        case "users":
+          comparison = b.uniqueUserCount - a.uniqueUserCount
+          break
+        case "lastAsked":
+          comparison = b.lastAsked - a.lastAsked
+          break
+      }
+      return sortOrder === "asc" ? -comparison : comparison
+    })
+
+    return result
+  }, [questions, searchQuery, sortField, sortOrder])
 
   const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE))
   const paginatedQuestions = useMemo(() => {
@@ -175,7 +196,16 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
 
   useEffect(() => {
     setPage(1)
-  }, [selectedSchoolId, selectedClassId, dateRange, searchQuery])
+  }, [selectedSchoolId, selectedClassId, dateRange, searchQuery, sortField, sortOrder])
+
+  const handleSort = (field: "question" | "frequency" | "users" | "lastAsked") => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortField(field)
+      setSortOrder("desc")
+    }
+  }
 
   const filteredClasses = useMemo(() => {
     if (!isSuperAdmin || selectedSchoolId === "all") return classes
@@ -323,10 +353,30 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8"></TableHead>
-                <TableHead>{t("userManagement.aiQuestions.question")}</TableHead>
-                <TableHead className="w-24 text-center">{t("userManagement.aiQuestions.frequency")}</TableHead>
-                <TableHead className="w-24 text-center">{t("userManagement.aiQuestions.users")}</TableHead>
-                <TableHead className="w-32 text-center">{t("userManagement.aiQuestions.lastAsked")}</TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("question")}>
+                    {t("userManagement.aiQuestions.question")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-24 text-center">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("frequency")}>
+                    {t("userManagement.aiQuestions.frequency")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-24 text-center">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("users")}>
+                    {t("userManagement.aiQuestions.users")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-32 text-center">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("lastAsked")}>
+                    {t("userManagement.aiQuestions.lastAsked")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -32,7 +32,7 @@ interface StudentDataViewProps {
   currentUserId?: string
 }
 
-type SortField = "date" | "student" | "school" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore"
+type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore"
 type SortOrder = "asc" | "desc"
 type DateRange = "7" | "30" | "90" | "180" | "360" | "all"
 
@@ -184,6 +184,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           break
         case "school":
           comparison = (a.schoolName || "").localeCompare(b.schoolName || "")
+          break
+        case "title":
+          comparison = a.docTitle.localeCompare(b.docTitle)
           break
         case "progress":
           comparison = b.progress - a.progress
@@ -370,7 +373,12 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
-                <TableHead>{t("userManagement.studentData.title")}</TableHead>
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("title")}>
+                    {t("userManagement.studentData.title")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
                 <TableHead className="w-20 text-center whitespace-normal break-words">
                   <Button variant="ghost" size="sm" onClick={() => handleSort("progress")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.progress")}

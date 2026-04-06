@@ -40,7 +40,7 @@ interface ClassListProps {
   currentUserId?: string
 }
 
-type SortField = "name" | "teacherName" | "schoolName"
+type SortField = "name" | "teacherName" | "schoolName" | "studentCount"
 type SortOrder = "asc" | "desc"
 
 export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _currentUserId }: ClassListProps) {
@@ -113,6 +113,9 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
           break
         case "schoolName":
           comparison = (a.schoolName || "").localeCompare(b.schoolName || "")
+          break
+        case "studentCount":
+          comparison = (b.studentCount || 0) - (a.studentCount || 0)
           break
       }
       return sortOrder === "asc" ? comparison : -comparison
@@ -271,7 +274,12 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                 <ArrowUpDown className="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead className="text-center">{t("userManagement.classes.students")}</TableHead>
+            <TableHead className="text-center">
+              <Button variant="ghost" size="sm" onClick={() => handleSort("studentCount")}>
+                {t("userManagement.classes.students")}
+                <ArrowUpDown className="ml-1 h-3 w-3" />
+              </Button>
+            </TableHead>
             <TableHead>{t("userManagement.classes.actions")}</TableHead>
           </TableRow>
         </TableHeader>
