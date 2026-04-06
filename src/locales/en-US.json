@@ -747,14 +747,28 @@
       "spelling": "Spelling"
     },
     "charts": {
+      "dailyActivity": "Daily Learning Activity",
       "readingActivity": "Reading Activity",
       "sessions": "Sessions",
       "aiFeatures": "AI Features Usage",
-      "scoreTrends": "Score Trends",
       "vocabularyGrowth": "Vocabulary Growth",
       "cumulativeVocab": "Cumulative Vocabulary",
       "scoreDistribution": "Test Score Distribution",
-      "noTestData": "No test scores yet"
+      "noTestData": "No test scores yet",
+      "noData": "No data yet"
+    },
+    "activities": {
+      "readText": "Read Text",
+      "summary": "Summary",
+      "mindMap": "Mind Map",
+      "adaptedText": "Adapted Text",
+      "simplifiedText": "Simplified Text",
+      "sentenceAnalysis": "Sentence Analysis",
+      "glossary": "Glossary",
+      "spellingGame": "Spelling Game",
+      "vocabQuiz": "Vocab Quiz",
+      "readingTest": "Reading Test",
+      "tutorQuestion": "AI Tutor"
     },
     "help": {
       "title": "Dashboard Guide",

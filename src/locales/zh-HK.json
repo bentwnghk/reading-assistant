@@ -747,14 +747,28 @@
       "spelling": "拼字挑戰"
     },
     "charts": {
+      "dailyActivity": "每日學習活動",
       "readingActivity": "閱讀活動",
       "sessions": "工作階段",
       "aiFeatures": "AI 功能使用",
-      "scoreTrends": "分數趨勢",
       "vocabularyGrowth": "詞彙增長",
       "cumulativeVocab": "累積詞彙量",
       "scoreDistribution": "測驗分數分佈",
-      "noTestData": "尚無測驗分數"
+      "noTestData": "尚無測驗分數",
+      "noData": "尚無資料"
+    },
+    "activities": {
+      "readText": "閱讀文本",
+      "summary": "摘要",
+      "mindMap": "思維導圖",
+      "adaptedText": "改寫文本",
+      "simplifiedText": "簡化文本",
+      "sentenceAnalysis": "句子分析",
+      "glossary": "詞彙表",
+      "spellingGame": "拼字遊戲",
+      "vocabQuiz": "詞彙測驗",
+      "readingTest": "閱讀測驗",
+      "tutorQuestion": "AI 導師"
     },
     "help": {
       "title": "儀表板指南",

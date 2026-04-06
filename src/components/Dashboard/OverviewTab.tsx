@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen,
@@ -28,10 +28,32 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
+import { Button } from "@/components/ui/button";
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
+import {
+  DAILY_ACTIVITY_KEYS,
+  DAILY_ACTIVITY_COLORS,
+  type SessionScore,
+} from "@/utils/dashboardMetrics";
 import { StatCard, HighlightedStatCard } from "./StatCard";
+
+const TIME_RANGES = [
+  { days: 7, label: "7d" },
+  { days: 30, label: "30d" },
+  { days: 90, label: "90d" },
+  { days: 180, label: "180d" },
+  { days: 360, label: "360d" },
+];
+
+const SCORE_COLORS = ["#3b82f6", "#22c55e", "#f97316"];
+
+const PIE_COLORS = [
+  "hsl(0, 72%, 51%)",
+  "hsl(24, 95%, 53%)",
+  "hsl(142, 71%, 45%)",
+  "hsl(217, 91%, 60%)",
+];
 
 function ChartCard({
   title,
@@ -70,18 +92,98 @@ function CustomTooltip({
   );
 }
 
-const SCORE_COLORS = ["#3b82f6", "#22c55e", "#f97316"];
+function ActivityTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; fill: string; dataKey: string }>;
+  label?: string;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const total = payload.reduce((sum, p) => sum + p.value, 0);
+  return (
+    <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md max-w-[260px]">
+      <p className="font-medium mb-1">{label}</p>
+      {payload
+        .filter((p) => p.value > 0)
+        .map((entry, i) => (
+          <p key={i} className="flex justify-between gap-4" style={{ color: entry.fill }}>
+            <span>{entry.name}</span>
+            <span className="font-medium tabular-nums">{entry.value}</span>
+          </p>
+        ))}
+      <div className="border-t mt-1 pt-1 flex justify-between font-medium">
+        <span>Total</span>
+        <span className="tabular-nums">{total}</span>
+      </div>
+    </div>
+  );
+}
 
-const PIE_COLORS = [
-  "hsl(0, 72%, 51%)",
-  "hsl(24, 95%, 53%)",
-  "hsl(142, 71%, 45%)",
-  "hsl(217, 91%, 60%)",
-];
+function ScoreTrendChart({
+  title,
+  data,
+  color,
+  emptyMessage,
+}: {
+  title: string;
+  data: SessionScore[];
+  color: string;
+  emptyMessage: string;
+}) {
+  if (data.length === 0) {
+    return (
+      <ChartCard title={title}>
+        <div className="flex items-center justify-center h-[160px] text-muted-foreground text-sm">
+          {emptyMessage}
+        </div>
+      </ChartCard>
+    );
+  }
+  const chartData = data.map((s, i) => ({ ...s, idx: i + 1 }));
+  return (
+    <ChartCard title={title}>
+      <ResponsiveContainer width="100%" height={160}>
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+          <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
+          <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} />
+          <Tooltip content={<CustomTooltip />} />
+          <Line
+            type="monotone"
+            dataKey="score"
+            name={title}
+            stroke={color}
+            strokeWidth={2}
+            dot={{ r: 3 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartCard>
+  );
+}
+
+function formatWeekRange(weekStart: string, locale: string): string {
+  const parts = weekStart.split("-").map(Number);
+  const monday = new Date(parts[0], parts[1] - 1, parts[2]);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+  return `${monday.toLocaleDateString(locale, opts)} – ${sunday.toLocaleDateString(locale, opts)}`;
+}
+
+function formatDailyDate(dateStr: string, locale: string): string {
+  const parts = dateStr.split("-").map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  return d.toLocaleDateString(locale, { month: "short", day: "numeric" });
+}
 
 export function OverviewTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const m = useDashboardMetrics();
+  const [timeRange, setTimeRange] = useState(30);
 
   const aiFeaturesData = useMemo(
     () => [
@@ -95,20 +197,34 @@ export function OverviewTab() {
     [m, t]
   );
 
-  const scoreData = useMemo(() => {
-    const allScores = [
-      ...m.testScores.map((s) => ({ title: s.title, date: s.date, testScore: s.score, quizScore: null, spellingScore: null })),
-      ...m.quizScores.map((s) => ({ title: s.title, date: s.date, testScore: null, quizScore: s.score, spellingScore: null })),
-      ...m.spellingScores.map((s) => ({ title: s.title, date: s.date, testScore: null, quizScore: null, spellingScore: s.score })),
-    ];
-    allScores.sort((a, b) => a.date - b.date);
-    return allScores.map((s, i) => ({ ...s, idx: i + 1 }));
-  }, [m]);
+  const filteredDaily = useMemo(() => {
+    if (timeRange >= 9999) return m.dailyActivities;
+    const cutoff = Date.now() - timeRange * 86400000;
+    return m.dailyActivities.filter((d) => {
+      const parts = d.date.split("-").map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2]).getTime() >= cutoff;
+    });
+  }, [m.dailyActivities, timeRange]);
+
+  const testData = useMemo(
+    () => m.testScores.map((s, i) => ({ ...s, idx: i + 1 })),
+    [m.testScores]
+  );
+  const quizData = useMemo(
+    () => m.quizScores.map((s, i) => ({ ...s, idx: i + 1 })),
+    [m.quizScores]
+  );
+  const spellingData = useMemo(
+    () => m.spellingScores.map((s, i) => ({ ...s, idx: i + 1 })),
+    [m.spellingScores]
+  );
 
   const pieData = useMemo(
     () => m.scoreDistribution.filter((b) => b.count > 0),
     [m.scoreDistribution]
   );
+
+  const hasAnyScores = testData.length > 0 || quizData.length > 0 || spellingData.length > 0;
 
   const isEmpty = m.totalSessions === 0;
 
@@ -185,7 +301,67 @@ export function OverviewTab() {
         />
       </div>
 
-      {/* Charts Row 1: Activity Timeline + AI Features */}
+      {/* Daily Activity Stacked Bar Chart (full width) */}
+      <ChartCard title={t("dashboard.charts.dailyActivity")}>
+        <div className="flex gap-1.5 mb-3">
+          {TIME_RANGES.map((range) => (
+            <Button
+              key={range.days}
+              variant={timeRange === range.days ? "default" : "outline"}
+              size="sm"
+              className="h-7 text-xs px-2.5"
+              onClick={() => setTimeRange(range.days)}
+            >
+              {range.label}
+            </Button>
+          ))}
+        </div>
+        {filteredDaily.length > 0 ? (
+          <>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={filteredDaily}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10 }}
+                  tickFormatter={(v: string) => formatDailyDate(v, i18n.language)}
+                  interval={Math.max(0, Math.floor(filteredDaily.length / 8) - 1)}
+                />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip content={<ActivityTooltip />} />
+                {DAILY_ACTIVITY_KEYS.map((key) => (
+                  <Bar
+                    key={key}
+                    dataKey={key}
+                    name={t(`dashboard.activities.${key}`)}
+                    stackId="a"
+                    fill={DAILY_ACTIVITY_COLORS[key]}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3">
+              {DAILY_ACTIVITY_KEYS.map((key) => (
+                <div key={key} className="flex items-center gap-1.5 text-xs">
+                  <span
+                    className="w-2.5 h-2.5 rounded-sm shrink-0"
+                    style={{ backgroundColor: DAILY_ACTIVITY_COLORS[key] }}
+                  />
+                  <span className="text-muted-foreground">
+                    {t(`dashboard.activities.${key}`)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+            {t("dashboard.charts.noData")}
+          </div>
+        )}
+      </ChartCard>
+
+      {/* Charts Row 1: Reading Activity + AI Features */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ChartCard title={t("dashboard.charts.readingActivity")}>
           <ResponsiveContainer width="100%" height={200}>
@@ -197,9 +373,17 @@ export function OverviewTab() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="week" tick={{ fontSize: 10 }} />
+              <XAxis
+                dataKey="weekStart"
+                tick={{ fontSize: 10 }}
+                tickFormatter={(v: string) => formatWeekRange(v, i18n.language)}
+                interval={Math.max(0, Math.floor(m.sessionsOverTime.length / 6) - 1)}
+              />
               <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip
+                content={<CustomTooltip />}
+                labelFormatter={(v) => formatWeekRange(String(v), i18n.language)}
+              />
               <Area
                 type="monotone"
                 dataKey="count"
@@ -234,52 +418,28 @@ export function OverviewTab() {
         </ChartCard>
       </div>
 
-      {/* Score Trends */}
-      {(m.testScores.length > 0 || m.quizScores.length > 0 || m.spellingScores.length > 0) && (
-        <ChartCard title={t("dashboard.charts.scoreTrends")}>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={scoreData}>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              {m.testScores.length > 0 && (
-                <Line
-                  type="monotone"
-                  dataKey="testScore"
-                  name={t("dashboard.scores.readingTest")}
-                  stroke={SCORE_COLORS[0]}
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  connectNulls
-                />
-              )}
-              {m.quizScores.length > 0 && (
-                <Line
-                  type="monotone"
-                  dataKey="quizScore"
-                  name={t("dashboard.scores.vocabQuiz")}
-                  stroke={SCORE_COLORS[1]}
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  connectNulls
-                />
-              )}
-              {m.spellingScores.length > 0 && (
-                <Line
-                  type="monotone"
-                  dataKey="spellingScore"
-                  name={t("dashboard.scores.spelling")}
-                  stroke={SCORE_COLORS[2]}
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  connectNulls
-                />
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
+      {/* Score Trend Charts (3 columns) */}
+      {hasAnyScores && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ScoreTrendChart
+            title={t("dashboard.scores.readingTest")}
+            data={m.testScores}
+            color={SCORE_COLORS[0]}
+            emptyMessage={t("dashboard.charts.noData")}
+          />
+          <ScoreTrendChart
+            title={t("dashboard.scores.vocabQuiz")}
+            data={m.quizScores}
+            color={SCORE_COLORS[1]}
+            emptyMessage={t("dashboard.charts.noData")}
+          />
+          <ScoreTrendChart
+            title={t("dashboard.scores.spelling")}
+            data={m.spellingScores}
+            color={SCORE_COLORS[2]}
+            emptyMessage={t("dashboard.charts.noData")}
+          />
+        </div>
       )}
 
       {/* Charts Row 2: Vocabulary Growth + Score Distribution */}
@@ -294,7 +454,13 @@ export function OverviewTab() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="label" tick={{ fontSize: 9 }} angle={-20} textAnchor="end" height={50} />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 9 }}
+                angle={-20}
+                textAnchor="end"
+                height={50}
+              />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip content={<CustomTooltip />} />
               <Area
@@ -328,7 +494,6 @@ export function OverviewTab() {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
           ) : (

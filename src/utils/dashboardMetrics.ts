@@ -7,7 +7,7 @@ export interface SessionScore {
 }
 
 export interface WeeklyCount {
-  week: string;
+  weekStart: string;
   count: number;
 }
 
@@ -22,6 +22,21 @@ export interface ScoreBucket {
   range: string;
   count: number;
   fill: string;
+}
+
+export interface DailyActivity {
+  date: string;
+  readText: number;
+  summary: number;
+  mindMap: number;
+  adaptedText: number;
+  simplifiedText: number;
+  sentenceAnalysis: number;
+  glossary: number;
+  spellingGame: number;
+  vocabQuiz: number;
+  readingTest: number;
+  tutorQuestion: number;
 }
 
 export interface DashboardMetrics {
@@ -44,7 +59,36 @@ export interface DashboardMetrics {
   sessionsOverTime: WeeklyCount[];
   vocabularyOverTime: VocabularyPoint[];
   scoreDistribution: ScoreBucket[];
+  dailyActivities: DailyActivity[];
 }
+
+export const DAILY_ACTIVITY_KEYS = [
+  "readText",
+  "summary",
+  "mindMap",
+  "adaptedText",
+  "simplifiedText",
+  "sentenceAnalysis",
+  "glossary",
+  "spellingGame",
+  "vocabQuiz",
+  "readingTest",
+  "tutorQuestion",
+] as const;
+
+export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
+  readText: "#3b82f6",
+  summary: "#6366f1",
+  mindMap: "#8b5cf6",
+  adaptedText: "#22c55e",
+  simplifiedText: "#14b8a6",
+  sentenceAnalysis: "#f97316",
+  glossary: "#eab308",
+  spellingGame: "#ec4899",
+  vocabQuiz: "#06b6d4",
+  readingTest: "#ef4444",
+  tutorQuestion: "#a855f7",
+};
 
 function getSessionTitle(item: ReadingHistory): string {
   return item.docTitle || item.extractedText?.slice(0, 50) || "Untitled";
@@ -72,13 +116,34 @@ function detectMindMapLanguage(mermaidCode: string): "zh" | "en" {
   return /[\u4e00-\u9fff]/.test(mermaidCode) ? "zh" : "en";
 }
 
-function getWeekKey(timestamp: number): string {
+function toDateString(timestamp: number): string {
+  const d = new Date(timestamp);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function getMondayKey(timestamp: number): string {
   const date = new Date(timestamp);
-  const startOfYear = new Date(date.getFullYear(), 0, 1);
-  const weekNumber = Math.ceil(
-    ((date.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
-  );
-  return `${date.getFullYear()}-W${String(weekNumber).padStart(2, "0")}`;
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(date.getFullYear(), date.getMonth(), diff);
+  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
+}
+
+function emptyDailyActivity(date: string): DailyActivity {
+  return {
+    date,
+    readText: 0,
+    summary: 0,
+    mindMap: 0,
+    adaptedText: 0,
+    simplifiedText: 0,
+    sentenceAnalysis: 0,
+    glossary: 0,
+    spellingGame: 0,
+    vocabQuiz: 0,
+    readingTest: 0,
+    tutorQuestion: 0,
+  };
 }
 
 export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMetrics {
@@ -103,6 +168,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       sessionsOverTime: [],
       vocabularyOverTime: [],
       scoreDistribution: [],
+      dailyActivities: [],
     };
   }
 
@@ -174,12 +240,12 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
 
   const weekMap = new Map<string, number>();
   for (const item of sorted) {
-    const week = getWeekKey(item.createdAt);
-    weekMap.set(week, (weekMap.get(week) || 0) + 1);
+    const weekKey = getMondayKey(item.createdAt);
+    weekMap.set(weekKey, (weekMap.get(weekKey) || 0) + 1);
   }
   const sessionsOverTime: WeeklyCount[] = Array.from(weekMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([week, count]) => ({ week, count }));
+    .map(([weekStart, count]) => ({ weekStart, count }));
 
   let cumulativeVocab = 0;
   const vocabularyOverTime: VocabularyPoint[] = sorted.map((item) => {
@@ -207,6 +273,27 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     fill: bucket.fill,
   }));
 
+  const dailyMap = new Map<string, DailyActivity>();
+  for (const item of sorted) {
+    const dateKey = toDateString(item.createdAt);
+    const existing = dailyMap.get(dateKey) || emptyDailyActivity(dateKey);
+
+    existing.readText += 1;
+    if (item.summary) existing.summary += 1;
+    if (item.mindMap) existing.mindMap += 1;
+    if (item.adaptedText) existing.adaptedText += 1;
+    if (item.simplifiedText) existing.simplifiedText += 1;
+    existing.sentenceAnalysis += Object.keys(item.analyzedSentences || {}).length;
+    if ((item.glossary || []).length > 0) existing.glossary += 1;
+    if ((item.spellingGameBestScore || 0) > 0) existing.spellingGame += 1;
+    if ((item.vocabularyQuizScore || 0) > 0) existing.vocabQuiz += 1;
+    if (item.testCompleted) existing.readingTest += 1;
+    existing.tutorQuestion += (item.chatHistory || []).filter((m) => m.role === "user").length;
+
+    dailyMap.set(dateKey, existing);
+  }
+  const dailyActivities = Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+
   return {
     totalSessions: sorted.length,
     sessionsBySource: { upload: uploadCount, repository: repositoryCount },
@@ -227,5 +314,6 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     sessionsOverTime,
     vocabularyOverTime,
     scoreDistribution,
+    dailyActivities,
   };
 }
