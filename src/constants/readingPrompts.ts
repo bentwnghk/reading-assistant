@@ -1,5 +1,3 @@
-import { formatDate } from "@/utils/formatDate";
-
 export const systemInstruction = `You are an expert English reading teacher for Hong Kong primary and secondary school students. Today is {now}. Follow these instructions:
 
 - Adapt your language and explanations to be appropriate for the student's age.
@@ -556,5 +554,5 @@ Remember: Your goal is to help the student understand and learn from THIS text, 
 }
 
 export function getSystemPrompt(): string {
-  return systemInstruction.replace("{now}", formatDate(new Date()));
+  return systemInstruction.replace("{now}", new Date().toLocaleDateString());
 }

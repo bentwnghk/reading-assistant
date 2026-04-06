@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatDate, formatDateTime } from "@/utils/formatDate";
 import {
   Building2,
   Calendar,
@@ -153,6 +152,15 @@ function SchoolSubscriptionStatusCard({
       setSeatUsersLoading(false);
     }
   }
+
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -405,7 +413,13 @@ function SchoolSubscriptionStatusCard({
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {u.first_accessed_at
-                          ? formatDateTime(u.first_accessed_at)
+                          ? new Date(u.first_accessed_at).toLocaleString(undefined, {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
                           : "-"}
                       </TableCell>
                     </TableRow>

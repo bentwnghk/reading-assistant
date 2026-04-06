@@ -6,7 +6,6 @@ import { Loader2, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { formatDate, formatDateTime } from "@/utils/formatDate"
 import {
   Table,
   TableBody,
@@ -36,6 +35,26 @@ const STATUS_COLORS: Record<string, string> = {
   past_due: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   canceled: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
   inactive: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "-"
+  return new Date(dateStr).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
+}
+
+function formatDateTime(dateStr: string | null): string {
+  if (!dateStr) return "-"
+  return new Date(dateStr).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
 }
 
 interface SchoolSubscriptionRow {
