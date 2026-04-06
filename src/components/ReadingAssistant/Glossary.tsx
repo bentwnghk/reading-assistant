@@ -21,6 +21,7 @@ import {
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/utils/formatDate";
 import {
   Table as DataTable,
   TableBody,
@@ -115,10 +116,7 @@ function Glossary() {
 
     try {
       const docTitle = useReadingStore.getState().docTitle || "Glossary";
-      const generatedAt = new Date().toLocaleString(undefined, {
-        year: "numeric", month: "short", day: "numeric",
-        hour: "2-digit", minute: "2-digit",
-      });
+      const generatedAt = formatDateTime(new Date());
 
       const colHeaders = [
         t("reading.glossary.word"),
@@ -235,10 +233,7 @@ function Glossary() {
 
     try {
       const docTitle = useReadingStore.getState().docTitle || "Glossary";
-      const generatedAt = new Date().toLocaleString(undefined, {
-        year: "numeric", month: "short", day: "numeric",
-        hour: "2-digit", minute: "2-digit",
-      });
+      const generatedAt = formatDateTime(new Date());
 
       const workbook = new ExcelJS.Workbook();
       workbook.creator = "Mr.🆖 ProReader";

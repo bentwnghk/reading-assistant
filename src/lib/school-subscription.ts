@@ -829,7 +829,7 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
               style: "currency",
               currency: invoice.currency || "usd",
             }),
-            invoiceDate: new Date(invoice.created * 1000).toLocaleDateString(),
+            invoiceDate: new Date(invoice.created * 1000).toISOString(),
             invoiceNumber: invoice.number || undefined,
             ...schoolOpts,
           });

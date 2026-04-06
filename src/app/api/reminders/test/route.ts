@@ -8,6 +8,7 @@ import {
   getActivityDisplayName,
 } from "@/templates/reminder-email"
 import { getUserSettings } from "@/lib/settings"
+import { formatDateLong } from "@/utils/formatDate"
 import { getClient } from "@/lib/db"
 import { generateUnsubscribeToken } from "@/lib/reminders"
 import { NextResponse } from "next/server"
@@ -65,16 +66,8 @@ export async function POST() {
     const dayText = s.day(daysInactive)
 
     const lastActivityDate = lastActivityAt
-      ? lastActivityAt.toLocaleDateString(resolvedLocale, {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : new Date().toLocaleDateString(resolvedLocale, {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
+      ? formatDateLong(lastActivityAt, resolvedLocale)
+      : formatDateLong(new Date(), resolvedLocale)
 
     const unsubscribeToken = generateUnsubscribeToken(session.user.id)
     const unsubscribeUrl = `${appUrl}/api/reminders/preferences?unsubscribe=1&uid=${session.user.id}&token=${unsubscribeToken}`

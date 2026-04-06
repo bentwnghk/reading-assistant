@@ -56,7 +56,7 @@ const readingSessionSchema = z.object({
 });
 
 function formatDate(timestamp: number) {
-  return dayjs(timestamp).format("YYYY-MM-DD HH:mm");
+  return dayjs(timestamp).format("DD/MM/YYYY HH:mm");
 }
 
 function calculateProgress(item: ReadingHistory): number {

@@ -7,6 +7,7 @@ import {
   getEmailStrings,
   resolveLocale,
 } from "@/templates/reminder-email"
+import { formatDateLong } from "@/utils/formatDate"
 import crypto from "crypto"
 
 export interface InactiveUser {
@@ -217,11 +218,7 @@ export async function sendReminderEmail(user: InactiveUser): Promise<boolean> {
   const unsubscribeUrl = `${appUrl}/api/reminders/preferences?unsubscribe=1&uid=${user.id}&token=${unsubscribeToken}`
 
   const lastActivityDate = user.lastActivityAt
-    ? user.lastActivityAt.toLocaleDateString(resolveLocale(user.locale), {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+    ? formatDateLong(user.lastActivityAt, resolveLocale(user.locale))
     : "recently"
 
   const html = buildReminderEmailHtml({

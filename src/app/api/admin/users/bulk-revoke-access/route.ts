@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   const { success, failed } = await revokeSchoolAccessBulk(body.userIds, body.graceDays)
 
-  const accessEndDate = new Date(Date.now() + body.graceDays * 24 * 60 * 60 * 1000).toLocaleDateString()
+  const accessEndDate = new Date(Date.now() + body.graceDays * 24 * 60 * 60 * 1000).toISOString()
 
   for (const userId of success) {
     try {

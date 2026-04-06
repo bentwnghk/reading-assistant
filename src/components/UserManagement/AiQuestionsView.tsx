@@ -408,7 +408,7 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t }
           </div>
         </TableCell>
         <TableCell className="text-center text-sm text-muted-foreground whitespace-nowrap">
-          {dayjs(question.lastAsked).format("MM/DD HH:mm")}
+          {dayjs(question.lastAsked).format("DD/MM HH:mm")}
         </TableCell>
       </TableRow>
       {isExpanded && (
@@ -437,7 +437,7 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t }
                           </div>
                         </div>
                         <div className="text-xs text-muted-foreground whitespace-nowrap">
-                          {dayjs(instance.createdAt).format("MM/DD HH:mm")}
+                          {dayjs(instance.createdAt).format("DD/MM HH:mm")}
                         </div>
                       </div>
                       {instance.docTitle && (

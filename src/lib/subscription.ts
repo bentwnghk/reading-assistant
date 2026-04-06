@@ -782,7 +782,7 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
               style: "currency",
               currency: invoice.currency || "usd",
             }),
-            invoiceDate: new Date(invoice.created * 1000).toLocaleDateString(),
+            invoiceDate: new Date(invoice.created * 1000).toISOString(),
             invoiceNumber: invoice.number || undefined,
           });
         } catch (e) {

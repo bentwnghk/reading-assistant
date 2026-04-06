@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/utils/formatDate";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -902,7 +903,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
                     </TableCell>
 
                     <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                      {formatDate(item.createdAt)}
                     </TableCell>
 
                     <TableCell>

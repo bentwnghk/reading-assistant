@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
+import { formatDateTime } from "@/utils/formatDate";
 import {
   Document,
   Packer,
@@ -544,10 +545,7 @@ function AdaptedText() {
       // ── Title & subtitle ─────────────────────────────────────────────────
       // Use stored docTitle (generated during extraction) with fallback to first line
       const docTitle = storedDocTitle || (extractedText.split(/\n/).find((l) => l.trim()) ?? t("reading.adaptedText.originalTab"));
-      const generatedAt = new Date().toLocaleString(undefined, {
-        year: "numeric", month: "short", day: "numeric",
-        hour: "2-digit", minute: "2-digit",
-      });
+      const generatedAt = formatDateTime(new Date());
       children.push(
         new Paragraph({
           text: docTitle.trim(),

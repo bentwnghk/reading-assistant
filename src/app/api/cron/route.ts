@@ -49,7 +49,7 @@ async function processTrialEndingNotifications(client: Awaited<ReturnType<typeof
       await notifySubscriptionEvent(row.user_id, "trial_ending", {
         plan: row.plan || "monthly",
         status: row.status,
-        trialEndDate: new Date(row.trial_end).toLocaleDateString(),
+        trialEndDate: row.trial_end,
       })
 
       await client.query(
@@ -94,7 +94,7 @@ async function processSchoolTrialEndingNotifications(client: Awaited<ReturnType<
       await notifySubscriptionEvent(row.admin_user_id, "trial_ending", {
         plan: row.plan || "monthly",
         status: row.status,
-        trialEndDate: new Date(row.trial_end).toLocaleDateString(),
+        trialEndDate: row.trial_end,
         schoolContext: schoolCtx || undefined,
       })
 
@@ -138,7 +138,7 @@ async function processRenewalReminders(client: Awaited<ReturnType<typeof getClie
       await notifySubscriptionEvent(row.user_id, "renewal_reminder", {
         plan: row.plan || "monthly",
         status: row.status,
-        nextBillingDate: new Date(row.current_period_end).toLocaleDateString(),
+        nextBillingDate: row.current_period_end,
         cancelAtPeriodEnd: row.cancel_at_period_end,
       })
 
@@ -184,7 +184,7 @@ async function processSchoolRenewalReminders(client: Awaited<ReturnType<typeof g
       await notifySubscriptionEvent(row.admin_user_id, "renewal_reminder", {
         plan: row.plan || "monthly",
         status: row.status,
-        nextBillingDate: new Date(row.current_period_end).toLocaleDateString(),
+        nextBillingDate: row.current_period_end,
         cancelAtPeriodEnd: row.cancel_at_period_end,
         schoolContext: schoolCtx || undefined,
       })

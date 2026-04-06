@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import type { ClassMember, UserWithRole } from "@/lib/users"
+import { formatDate } from "@/utils/formatDate"
 
 interface ClassMembersProps {
   classId: string
@@ -260,7 +261,7 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">
-                    {new Date(member.joinedAt).toLocaleDateString()}
+                    {formatDate(member.joinedAt)}
                   </Badge>
                 </TableCell>
                 <TableCell>

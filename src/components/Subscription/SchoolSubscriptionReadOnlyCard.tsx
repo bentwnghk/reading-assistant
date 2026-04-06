@@ -2,6 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import { Building2, Calendar, CreditCard, Lock, Users } from "lucide-react";
+import { formatDate } from "@/utils/formatDate";
 
 interface SchoolSubscriptionReadOnlyCardProps {
   subscription: {
@@ -28,15 +29,6 @@ function SchoolSubscriptionReadOnlyCard({
   } = subscription;
 
   const seatPercent = quantity > 0 ? Math.min(100, Math.round((seatsUsed / quantity) * 100)) : 0;
-
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    return new Date(dateStr).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
 
   return (
     <div className="space-y-3">

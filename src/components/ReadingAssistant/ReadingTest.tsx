@@ -30,6 +30,7 @@ import {
 } from "docx";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/utils/formatDate";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -265,13 +266,7 @@ function ReadingTest() {
     if (!readingTest.length) return;
 
     const title = docTitle || extractedText.split(/\n/).find((l) => l.trim()) || "Reading Test";
-    const generatedAt = new Date().toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const generatedAt = formatDateTime(new Date());
 
     const children: Paragraph[] = [];
 

@@ -7,6 +7,7 @@ import {
 } from "@/templates/subscription-email"
 import type { SubscriptionEmailParams } from "@/templates/subscription-email"
 import type { SubscriptionEmailType } from "@/templates/subscription-email"
+import { formatDateLong } from "@/utils/formatDate"
 
 export type { SubscriptionEmailType }
 
@@ -122,6 +123,10 @@ export async function notifySubscriptionEvent(
   if (!userInfo?.email) return
 
   const appUrl = process.env.APP_URL || process.env.AUTH_URL || "http://localhost:3000"
+  const locale = userInfo.locale
+
+  const fmtDate = (iso: string | undefined) =>
+    iso ? formatDateLong(new Date(iso), locale) : undefined
 
   let portalUrl: string | undefined
   if (type === "payment_failed" || type === "trial_ending" || type === "renewal_reminder") {
@@ -166,16 +171,16 @@ export async function notifySubscriptionEvent(
     {
       userName: userInfo.name || "",
       email: userInfo.email,
-      locale: userInfo.locale,
+      locale,
       plan: opts.plan || "monthly",
       status: opts.status || "active",
       appUrl,
       portalUrl,
-      nextBillingDate: opts.nextBillingDate,
-      trialEndDate: opts.trialEndDate,
+      nextBillingDate: fmtDate(opts.nextBillingDate),
+      trialEndDate: fmtDate(opts.trialEndDate),
       paymentFailureReason: opts.paymentFailureReason,
       cancelAtPeriodEnd: opts.cancelAtPeriodEnd,
-      accessEndDate: opts.accessEndDate,
+      accessEndDate: fmtDate(opts.accessEndDate),
       ...(opts.schoolContext
         ? {
             schoolName: opts.schoolContext.schoolName,
@@ -205,6 +210,7 @@ export async function notifyPaymentReceipt(
   if (!userInfo?.email) return
 
   const appUrl = process.env.APP_URL || process.env.AUTH_URL || "http://localhost:3000"
+  const locale = userInfo.locale
 
   let attachments: { filename: string; content: string; type?: string }[] | undefined
 
@@ -230,13 +236,13 @@ export async function notifyPaymentReceipt(
     {
       userName: userInfo.name || "",
       email: userInfo.email,
-      locale: userInfo.locale,
+      locale,
       plan: opts.plan || "monthly",
       status: opts.status || "active",
       appUrl,
       invoiceUrl: opts.invoiceUrl,
       invoiceAmount: opts.invoiceAmount,
-      invoiceDate: opts.invoiceDate,
+      invoiceDate: opts.invoiceDate ? formatDateLong(new Date(opts.invoiceDate), locale) : undefined,
       invoiceNumber: opts.invoiceNumber,
       ...(opts.schoolContext
         ? {

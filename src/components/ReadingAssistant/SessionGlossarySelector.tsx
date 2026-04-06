@@ -155,7 +155,7 @@ function SessionGlossarySelector({
                   "Untitled";
                 const date = dayjs(
                   session.updatedAt || session.createdAt
-                ).format("MM/DD");
+                ).format("DD/MM");
 
                 return (
                   <button
