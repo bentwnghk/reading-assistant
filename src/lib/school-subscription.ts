@@ -71,13 +71,21 @@ export async function ensureSchoolSubscriptionTables(): Promise<boolean> {
     // Migrate existing deployments: ensure 'inactive' is in the status check constraint.
     // The original constraint omitted 'inactive', causing INSERT failures during checkout init.
     await client.query(`
-      ALTER TABLE school_subscriptions
-        DROP CONSTRAINT IF EXISTS school_subscriptions_status_check
+      DO $$
+      BEGIN
+        ALTER TABLE school_subscriptions
+          DROP CONSTRAINT IF EXISTS school_subscriptions_status_check;
+        EXCEPTION WHEN OTHERS THEN NULL;
+      END $$
     `);
     await client.query(`
-      ALTER TABLE school_subscriptions
-        ADD CONSTRAINT school_subscriptions_status_check
-          CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive'))
+      DO $$
+      BEGIN
+        ALTER TABLE school_subscriptions
+          ADD CONSTRAINT school_subscriptions_status_check
+            CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive'));
+        EXCEPTION WHEN duplicate_object THEN NULL;
+      END $$
     `);
 
     await client.query(`
