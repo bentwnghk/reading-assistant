@@ -2,8 +2,9 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { User, HelpCircle, Trophy } from "lucide-react";
+import { User, HelpCircle, Trophy, BarChart3 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
+import { useGlobalStore } from "@/store/global";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -14,6 +15,7 @@ function StudentInfo() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
   const { studentAge, setStudentAge } = useReadingStore();
+  const { setOpenDashboard } = useGlobalStore();
 
   function getFormLevel(age: number): string {
     const levelMap: Record<number, string> = {
@@ -63,12 +65,18 @@ function StudentInfo() {
             </PopoverContent>
           </Popover>
         </h3>
-        <Button asChild size="sm">
-          <Link href="/leaderboard">
-            <Trophy className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("leaderboard.title")}</span>
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={() => setOpenDashboard(true)}>
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">{t("dashboard.title")}</span>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/leaderboard">
+              <Trophy className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("leaderboard.title")}</span>
+            </Link>
+          </Button>
+        </div>
       </div>
       <div className="space-y-4">
         <div className="space-y-2">

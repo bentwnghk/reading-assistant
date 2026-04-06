@@ -1,12 +1,11 @@
  "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, BarChart3, Plus, ExternalLink } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, Plus, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useReadingStore } from "@/store/reading";
-import { useGlobalStore } from "@/store/global";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
 import { processPdfFile } from "@/utils/parser/pdfParser";
@@ -34,7 +33,6 @@ function ImageUpload() {
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "repository">("upload");
   const { originalImages, extractedText, status: storeStatus } = useReadingStore();
-  const { setOpenDashboard } = useGlobalStore();
   const { status, extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = status === "extracting" || storeStatus === "extracting";
   const isBusy = isExtracting || isProcessingPdf;
@@ -206,10 +204,6 @@ function ImageUpload() {
           </Popover>
         </h3>
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={() => setOpenDashboard(true)}>
-            <BarChart3 className="h-4 w-4 mr-1" />
-            {t("dashboard.title")}
-          </Button>
           {hasContent && (
             <Button variant="outline" size="sm" onClick={clearAllImages}>
               <Plus className="h-4 w-4 mr-1" />
