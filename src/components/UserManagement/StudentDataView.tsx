@@ -466,7 +466,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">
                     <div>{new Date(session.updatedAt).toLocaleDateString(i18n.language, {
-                      year: "numeric", month: "2-digit", day: "2-digit",
+                      year: "numeric", month: "short", day: "numeric",
                     })}</div>
                     <div className="text-muted-foreground">{new Date(session.updatedAt).toLocaleTimeString(i18n.language, {
                       hour: "2-digit", minute: "2-digit",

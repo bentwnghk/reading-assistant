@@ -903,7 +903,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
 
                     <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                       {new Date(item.createdAt).toLocaleDateString(i18n.language, {
-                        year: "numeric", month: "2-digit", day: "2-digit",
+                        year: "numeric", month: "short", day: "numeric",
                       })}
                     </TableCell>
 

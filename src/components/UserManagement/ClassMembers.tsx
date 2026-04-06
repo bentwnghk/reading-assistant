@@ -261,7 +261,7 @@ export default function ClassMembers({ classId, isAdmin: _isAdmin, onMembersChan
                 <TableCell>
                   <Badge variant="outline">
                     {new Date(member.joinedAt).toLocaleDateString(i18n.language, {
-                      year: "numeric", month: "2-digit", day: "2-digit",
+                      year: "numeric", month: "short", day: "numeric",
                     })}
                   </Badge>
                 </TableCell>

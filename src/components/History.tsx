@@ -57,8 +57,8 @@ const readingSessionSchema = z.object({
 function formatDate(timestamp: number, locale: string): string {
   return new Date(timestamp).toLocaleString(locale, {
     year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+    month: "short",
+    day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });

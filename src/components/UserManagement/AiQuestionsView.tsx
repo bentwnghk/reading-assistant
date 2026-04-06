@@ -460,7 +460,7 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t, 
         </TableCell>
         <TableCell className="text-center text-sm text-muted-foreground whitespace-nowrap">
           {new Date(question.lastAsked).toLocaleString(locale, {
-            year: "numeric", month: "2-digit", day: "2-digit",
+            year: "numeric", month: "short", day: "numeric",
             hour: "2-digit", minute: "2-digit",
           })}
         </TableCell>
@@ -492,7 +492,7 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t, 
                         </div>
                         <div className="text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(instance.createdAt).toLocaleString(locale, {
-                            year: "numeric", month: "2-digit", day: "2-digit",
+                            year: "numeric", month: "short", day: "numeric",
                             hour: "2-digit", minute: "2-digit",
                           })}
                         </div>

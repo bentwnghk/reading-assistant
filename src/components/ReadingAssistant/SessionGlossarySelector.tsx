@@ -156,8 +156,8 @@ function SessionGlossarySelector({
                   session.updatedAt || session.createdAt
                 ).toLocaleDateString(i18n.language, {
                   year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
+                  month: "short",
+                  day: "numeric",
                 });
 
                 return (
