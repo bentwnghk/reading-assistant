@@ -743,9 +743,9 @@
       "count": "Count"
     },
     "scores": {
-      "readingTest": "Reading Test",
-      "vocabQuiz": "Vocab Quiz",
-      "spelling": "Spelling"
+      "readingTest": "Reading Test Score",
+      "vocabQuiz": "Vocab Quiz Score",
+      "spelling": "Spelling Score"
     },
     "charts": {
       "dailyActivity": "Daily Learning Activity",

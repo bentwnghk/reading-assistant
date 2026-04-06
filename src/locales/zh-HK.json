@@ -743,9 +743,9 @@
       "count": "次數"
     },
     "scores": {
-      "readingTest": "閱讀測驗",
-      "vocabQuiz": "詞彙測驗",
-      "spelling": "拼字挑戰"
+      "readingTest": "閱讀測驗得分",
+      "vocabQuiz": "詞彙測驗得分",
+      "spelling": "拼字挑戰得分"
     },
     "charts": {
       "dailyActivity": "每日學習活動",
