@@ -187,10 +187,10 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <DialogTitle>{t("userManagement.title")}</DialogTitle>
             {isSuperAdmin && (
-              <div className="flex items-center gap-1 pr-6">
+              <div className="flex items-center gap-1 pr-6 flex-shrink-0">
                 <TooltipProvider delayDuration={300}>
                   <Tooltip>
                     <TooltipTrigger asChild>
