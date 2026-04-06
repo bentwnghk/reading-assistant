@@ -466,7 +466,8 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     )}
                   </TableCell>
                   <TableCell className="text-center whitespace-nowrap">
-                    {dayjs(session.updatedAt).format("DD/MM HH:mm")}
+                    <div>{dayjs(session.updatedAt).format("DD/MM/YYYY")}</div>
+                    <div className="text-muted-foreground">{dayjs(session.updatedAt).format("HH:mm")}</div>
                   </TableCell>
                 </TableRow>
               ))}
