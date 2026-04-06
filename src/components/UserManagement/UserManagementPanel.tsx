@@ -271,7 +271,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           </div>
         </DialogHeader>
         <Tabs defaultValue={defaultTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="w-full justify-start">
+          <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide">
             {isSuperAdmin && (
               <TabsTrigger value="schools">{t("userManagement.tabs.schools")}</TabsTrigger>
             )}
