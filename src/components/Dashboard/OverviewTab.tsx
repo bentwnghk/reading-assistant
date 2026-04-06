@@ -477,7 +477,7 @@ export function OverviewTab() {
                 tick={{ fontSize: 10 }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+              <Bar dataKey="value" name={t("dashboard.features.count")} radius={[0, 4, 4, 0]}>
                 {aiFeaturesData.map((entry, index) => (
                   <Cell key={index} fill={entry.fill} />
                 ))}

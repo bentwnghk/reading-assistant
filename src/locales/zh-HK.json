@@ -739,7 +739,8 @@
       "mindMapZh": "思維導圖（中）",
       "adaptedText": "改寫文本",
       "simplifiedText": "簡化文本",
-      "sentenceAnalysis": "句子分析"
+      "sentenceAnalysis": "句子分析",
+      "count": "次數"
     },
     "scores": {
       "readingTest": "閱讀測驗",

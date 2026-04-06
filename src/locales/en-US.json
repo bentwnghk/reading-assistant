@@ -739,7 +739,8 @@
       "mindMapZh": "Mind Map (ZH)",
       "adaptedText": "Adapted Text",
       "simplifiedText": "Simplified Text",
-      "sentenceAnalysis": "Sentence Analysis"
+      "sentenceAnalysis": "Sentence Analysis",
+      "count": "Count"
     },
     "scores": {
       "readingTest": "Reading Test",
