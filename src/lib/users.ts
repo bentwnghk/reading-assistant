@@ -239,6 +239,7 @@ export async function getOrCreateSchoolByDomain(domain: string): Promise<SchoolI
 }
 
 export async function ensureUserSchool(userId: string, email: string): Promise<void> {
+  await ensureSchoolManuallyRemovedColumn()
   const atIndex = email.indexOf('@')
   if (atIndex === -1) return
   const domain = email.slice(atIndex + 1).toLowerCase()
@@ -248,9 +249,8 @@ export async function ensureUserSchool(userId: string, email: string): Promise<v
 
   const client = await getClient()
   try {
-    // Only assign if the user has no school yet (preserves Admin manual overrides)
     await client.query(
-      `UPDATE users SET school_id = $1 WHERE id = $2 AND school_id IS NULL`,
+      `UPDATE users SET school_id = $1 WHERE id = $2 AND school_id IS NULL AND school_manually_removed = FALSE`,
       [school.id, userId]
     )
   } finally {
@@ -333,7 +333,7 @@ export async function assignUserSchool(userId: string, schoolId: string | null):
   const client = await getClient()
   try {
     const result = await client.query(
-      `UPDATE users SET school_id = $1 WHERE id = $2`,
+      `UPDATE users SET school_id = $1, school_manually_removed = FALSE WHERE id = $2`,
       [schoolId, userId]
     )
     return (result.rowCount ?? 0) > 0
@@ -860,6 +860,23 @@ export async function ensureSchoolAccessEndsAtColumn(): Promise<void> {
   }
 }
 
+let schoolManuallyRemovedColumnEnsured = false
+
+export async function ensureSchoolManuallyRemovedColumn(): Promise<void> {
+  if (schoolManuallyRemovedColumnEnsured) return
+  const client = await getClient()
+  try {
+    await client.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS school_manually_removed BOOLEAN DEFAULT FALSE`
+    )
+    schoolManuallyRemovedColumnEnsured = true
+  } catch (error) {
+    console.error("Failed to ensure school_manually_removed column:", error)
+  } finally {
+    client.release()
+  }
+}
+
 export async function revokeSchoolAccessBulk(
   userIds: string[],
   graceDays: number = 2
@@ -897,6 +914,7 @@ export async function revokeSchoolAccessBulk(
 
 export async function cleanupExpiredSchoolAccess(): Promise<number> {
   await ensureSchoolAccessEndsAtColumn()
+  await ensureSchoolManuallyRemovedColumn()
   const client = await getClient()
   try {
     const userResult = await client.query(
@@ -911,6 +929,12 @@ export async function cleanupExpiredSchoolAccess(): Promise<number> {
     const userIds = userResult.rows.map((r) => r.id)
 
     await client.query(
+      `DELETE FROM class_members
+       WHERE student_id = ANY($1)`,
+      [userIds]
+    )
+
+    await client.query(
       `DELETE FROM school_subscription_usage
        WHERE user_id = ANY($1)`,
       [userIds]
@@ -918,7 +942,7 @@ export async function cleanupExpiredSchoolAccess(): Promise<number> {
 
     const result = await client.query(
       `UPDATE users
-       SET school_id = NULL, school_access_ends_at = NULL
+       SET school_id = NULL, school_access_ends_at = NULL, school_manually_removed = TRUE
        WHERE id = ANY($1)`,
       [userIds]
     )

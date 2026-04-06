@@ -176,6 +176,8 @@ CREATE INDEX idx_users_school_id ON users(school_id);
 -- then sets school_id = NULL.
 ALTER TABLE users ADD COLUMN school_access_ends_at TIMESTAMP WITH TIME ZONE;
 
+ALTER TABLE users ADD COLUMN school_manually_removed BOOLEAN DEFAULT FALSE;
+
 -- Classes table (belongs to a school)
 CREATE TABLE classes (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
