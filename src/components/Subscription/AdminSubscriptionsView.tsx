@@ -70,7 +70,7 @@ interface Stats {
 }
 
 function PersonalSubscriptionsView() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [subscriptions, setSubscriptions] = useState<SubscriptionRow[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
