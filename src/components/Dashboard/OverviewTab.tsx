@@ -20,8 +20,6 @@ import {
   Line,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
   Cell,
   XAxis,
   YAxis,
@@ -46,13 +44,11 @@ const TIME_RANGES = [
   { days: 360, label: "360d" },
 ];
 
-const SCORE_COLORS = ["#3b82f6", "#22c55e", "#f97316"];
-
-const PIE_COLORS = [
-  "hsl(0, 72%, 51%)",
-  "hsl(24, 95%, 53%)",
-  "hsl(142, 71%, 45%)",
-  "hsl(217, 91%, 60%)",
+const SCORE_BUCKETS = [
+  { range: "0-25", min: 0, max: 25, fill: "#ef4444" },
+  { range: "26-50", min: 26, max: 50, fill: "#f97316" },
+  { range: "51-75", min: 51, max: 75, fill: "#22c55e" },
+  { range: "76-100", min: 76, max: 100, fill: "#3b82f6" },
 ];
 
 function ChartCard({
@@ -122,7 +118,55 @@ function ActivityTooltip({
   );
 }
 
-function ScoreTrendChart({
+function ScoreDistributionChart({
+  title,
+  scores,
+  emptyMessage,
+}: {
+  title: string;
+  scores: SessionScore[];
+  emptyMessage: string;
+}) {
+  const data = useMemo(
+    () =>
+      SCORE_BUCKETS.map((bucket) => ({
+        range: bucket.range,
+        count: scores.filter((s) => s.score >= bucket.min && s.score <= bucket.max).length,
+        fill: bucket.fill,
+      })),
+    [scores]
+  );
+
+  if (scores.length === 0) {
+    return (
+      <ChartCard title={title}>
+        <div className="flex items-center justify-center h-[160px] text-muted-foreground text-sm">
+          {emptyMessage}
+        </div>
+      </ChartCard>
+    );
+  }
+
+  return (
+    <ChartCard title={title}>
+      <ResponsiveContainer width="100%" height={160}>
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+          <XAxis dataKey="range" tick={{ fontSize: 10 }} />
+          <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
+          <Tooltip content={<CustomTooltip />} />
+          <Bar dataKey="count" name={title} radius={[4, 4, 0, 0]}>
+            {data.map((entry, index) => (
+              <Cell key={index} fill={entry.fill} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
+  );
+}
+
+function SpellingTrendChart({
   title,
   data,
   color,
@@ -180,6 +224,56 @@ function formatDailyDate(dateStr: string, locale: string): string {
   return d.toLocaleDateString(locale, { month: "short", day: "numeric" });
 }
 
+interface DailyRow {
+  date: string;
+  readText: number;
+  summary: number;
+  mindMap: number;
+  adaptedText: number;
+  simplifiedText: number;
+  sentenceAnalysis: number;
+  glossary: number;
+  spellingGame: number;
+  vocabQuiz: number;
+  readingTest: number;
+  tutorQuestion: number;
+}
+
+function fillDailyRange(activities: DailyRow[], days: number): DailyRow[] {
+  const result = new Map<string, DailyRow>();
+  for (const a of activities) {
+    result.set(a.date, a);
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - days + 1);
+  const filled: DailyRow[] = [];
+  for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const existing = result.get(key);
+    if (existing) {
+      filled.push(existing);
+    } else {
+      filled.push({
+        date: key,
+        readText: 0,
+        summary: 0,
+        mindMap: 0,
+        adaptedText: 0,
+        simplifiedText: 0,
+        sentenceAnalysis: 0,
+        glossary: 0,
+        spellingGame: 0,
+        vocabQuiz: 0,
+        readingTest: 0,
+        tutorQuestion: 0,
+      });
+    }
+  }
+  return filled;
+}
+
 export function OverviewTab() {
   const { t, i18n } = useTranslation();
   const m = useDashboardMetrics();
@@ -198,33 +292,10 @@ export function OverviewTab() {
   );
 
   const filteredDaily = useMemo(() => {
-    if (timeRange >= 9999) return m.dailyActivities;
-    const cutoff = Date.now() - timeRange * 86400000;
-    return m.dailyActivities.filter((d) => {
-      const parts = d.date.split("-").map(Number);
-      return new Date(parts[0], parts[1] - 1, parts[2]).getTime() >= cutoff;
-    });
+    return fillDailyRange(m.dailyActivities, timeRange);
   }, [m.dailyActivities, timeRange]);
 
-  const testData = useMemo(
-    () => m.testScores.map((s, i) => ({ ...s, idx: i + 1 })),
-    [m.testScores]
-  );
-  const quizData = useMemo(
-    () => m.quizScores.map((s, i) => ({ ...s, idx: i + 1 })),
-    [m.quizScores]
-  );
-  const spellingData = useMemo(
-    () => m.spellingScores.map((s, i) => ({ ...s, idx: i + 1 })),
-    [m.spellingScores]
-  );
-
-  const pieData = useMemo(
-    () => m.scoreDistribution.filter((b) => b.count > 0),
-    [m.scoreDistribution]
-  );
-
-  const hasAnyScores = testData.length > 0 || quizData.length > 0 || spellingData.length > 0;
+  const hasAnyScores = m.testScores.length > 0 || m.quizScores.length > 0 || m.spellingScores.length > 0;
 
   const isEmpty = m.totalSessions === 0;
 
@@ -316,7 +387,7 @@ export function OverviewTab() {
             </Button>
           ))}
         </div>
-        {filteredDaily.length > 0 ? (
+        {m.dailyActivities.length > 0 ? (
           <>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={filteredDaily}>
@@ -418,91 +489,59 @@ export function OverviewTab() {
         </ChartCard>
       </div>
 
-      {/* Score Trend Charts (3 columns) */}
+      {/* Score Charts: Reading Test Distribution + Vocab Quiz Distribution + Spelling Trend */}
       {hasAnyScores && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ScoreTrendChart
+          <ScoreDistributionChart
             title={t("dashboard.scores.readingTest")}
-            data={m.testScores}
-            color={SCORE_COLORS[0]}
+            scores={m.testScores}
             emptyMessage={t("dashboard.charts.noData")}
           />
-          <ScoreTrendChart
+          <ScoreDistributionChart
             title={t("dashboard.scores.vocabQuiz")}
-            data={m.quizScores}
-            color={SCORE_COLORS[1]}
+            scores={m.quizScores}
             emptyMessage={t("dashboard.charts.noData")}
           />
-          <ScoreTrendChart
+          <SpellingTrendChart
             title={t("dashboard.scores.spelling")}
             data={m.spellingScores}
-            color={SCORE_COLORS[2]}
+            color="#f97316"
             emptyMessage={t("dashboard.charts.noData")}
           />
         </div>
       )}
 
-      {/* Charts Row 2: Vocabulary Growth + Score Distribution */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ChartCard title={t("dashboard.charts.vocabularyGrowth")}>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={m.vocabularyOverTime}>
-              <defs>
-                <linearGradient id="gradVocab" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 9 }}
-                angle={-20}
-                textAnchor="end"
-                height={50}
-              />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="cumulative"
-                name={t("dashboard.charts.cumulativeVocab")}
-                stroke="#6366f1"
-                fill="url(#gradVocab)"
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title={t("dashboard.charts.scoreDistribution")}>
-          {pieData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  dataKey="count"
-                  nameKey="range"
-                  label={({ name, value }: { name?: string; value?: number }) => `${name ?? ""}: ${value ?? 0}`}
-                >
-                  {pieData.map((_, index) => (
-                    <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
-              {t("dashboard.charts.noTestData")}
-            </div>
-          )}
-        </ChartCard>
-      </div>
+      {/* Vocabulary Growth (full width) */}
+      <ChartCard title={t("dashboard.charts.vocabularyGrowth")}>
+        <ResponsiveContainer width="100%" height={200}>
+          <AreaChart data={m.vocabularyOverTime}>
+            <defs>
+              <linearGradient id="gradVocab" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 9 }}
+              angle={-20}
+              textAnchor="end"
+              height={50}
+            />
+            <YAxis tick={{ fontSize: 10 }} />
+            <Tooltip content={<CustomTooltip />} />
+            <Area
+              type="monotone"
+              dataKey="cumulative"
+              name={t("dashboard.charts.cumulativeVocab")}
+              stroke="#6366f1"
+              fill="url(#gradVocab)"
+              strokeWidth={2}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </ChartCard>
     </div>
   );
 }
