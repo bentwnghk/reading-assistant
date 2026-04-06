@@ -45,10 +45,10 @@ const TIME_RANGES = [
 ];
 
 const SCORE_BUCKETS = [
-  { range: "0-25", min: 0, max: 25, fill: "#ef4444" },
-  { range: "26-50", min: 26, max: 50, fill: "#f97316" },
-  { range: "51-75", min: 51, max: 75, fill: "#22c55e" },
-  { range: "76-100", min: 76, max: 100, fill: "#3b82f6" },
+  { range: "0-25%", min: 0, max: 25, fill: "#ef4444" },
+  { range: "26-50%", min: 26, max: 50, fill: "#f97316" },
+  { range: "51-75%", min: 51, max: 75, fill: "#22c55e" },
+  { range: "76-100%", min: 76, max: 100, fill: "#3b82f6" },
 ];
 
 function ChartCard({
@@ -122,10 +122,12 @@ function ScoreDistributionChart({
   title,
   scores,
   emptyMessage,
+  countLabel,
 }: {
   title: string;
   scores: SessionScore[];
   emptyMessage: string;
+  countLabel: string;
 }) {
   const data = useMemo(
     () =>
@@ -152,10 +154,10 @@ function ScoreDistributionChart({
       <ResponsiveContainer width="100%" height={160}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-          <XAxis dataKey="range" tick={{ fontSize: 10 }} unit="%" />
+          <XAxis dataKey="range" tick={{ fontSize: 10 }} />
           <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="count" name={title} radius={[4, 4, 0, 0]}>
+          <Bar dataKey="count" name={countLabel} radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (
               <Cell key={index} fill={entry.fill} />
             ))}
@@ -493,11 +495,13 @@ export function OverviewTab() {
           title={t("dashboard.scores.readingTest")}
           scores={m.testScores}
           emptyMessage={t("dashboard.charts.noData")}
+          countLabel={t("dashboard.features.count")}
         />
         <ScoreDistributionChart
           title={t("dashboard.scores.vocabQuiz")}
           scores={m.quizScores}
           emptyMessage={t("dashboard.charts.noData")}
+          countLabel={t("dashboard.features.count")}
         />
         <SpellingTrendChart
           title={t("dashboard.scores.spelling")}
