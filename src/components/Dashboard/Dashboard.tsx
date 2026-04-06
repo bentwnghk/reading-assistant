@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BarChart3, HelpCircle } from "lucide-react";
+import { BarChart3, HelpCircle, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +60,7 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
               {t("dashboard.tabs.overview")}
             </TabsTrigger>
             <TabsTrigger value="sessions" className="flex-1">
+              <Clock className="h-4 w-4 mr-1.5" />
               {t("dashboard.tabs.sessions")}
             </TabsTrigger>
           </TabsList>

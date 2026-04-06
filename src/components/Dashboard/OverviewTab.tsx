@@ -152,7 +152,7 @@ function ScoreDistributionChart({
       <ResponsiveContainer width="100%" height={160}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-          <XAxis dataKey="range" tick={{ fontSize: 10 }} />
+          <XAxis dataKey="range" tick={{ fontSize: 10 }} unit="%" />
           <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
           <Tooltip content={<CustomTooltip />} />
           <Bar dataKey="count" name={title} radius={[4, 4, 0, 0]}>
@@ -193,7 +193,7 @@ function SpellingTrendChart({
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
-          <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} />
+          <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} unit=" pts" />
           <Tooltip content={<CustomTooltip />} />
           <Line
             type="monotone"

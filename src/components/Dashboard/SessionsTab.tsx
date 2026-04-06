@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { TrashIcon, FileOutput, Download, BookOpen, Upload } from "lucide-react";
+import { TrashIcon, FileOutput, Download, Upload } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
@@ -91,10 +91,6 @@ function SessionsTab({ onClose }: SessionsTabProps) {
     return history.length > currentPage * PAGE_SIZE;
   }, [history, currentPage]);
 
-  const totalVocabularyCount = useMemo(() => {
-    return history.reduce((total, item) => total + (item.glossary?.length || 0), 0);
-  }, [history]);
-
   async function importSession(file: File) {
     try {
       const text = await file.text();
@@ -176,11 +172,6 @@ function SessionsTab({ onClose }: SessionsTabProps) {
   return (
     <div>
       <div className="flex justify-between items-center mb-2">
-        {totalVocabularyCount > 0 && (
-          <span className="inline-flex items-center gap-1 text-primary font-medium text-sm">
-            <BookOpen className="h-3.5 w-3.5" /> {t("history.totalVocabulary")}: {totalVocabularyCount}
-          </span>
-        )}
         <div className="flex gap-2 ml-auto">
           <Button
             variant="secondary"
