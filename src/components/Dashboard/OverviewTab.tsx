@@ -118,6 +118,29 @@ function ActivityTooltip({
   );
 }
 
+function BucketTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; payload?: { fill?: string } }>;
+  label?: string;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const fill = payload[0].payload?.fill;
+  return (
+    <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
+      <p className="font-medium mb-1">{label}</p>
+      {payload.map((entry, i) => (
+        <p key={i} style={{ color: fill || undefined }}>
+          {entry.name}: {entry.value}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 function ScoreDistributionChart({
   title,
   scores,
@@ -478,7 +501,7 @@ export function OverviewTab() {
                 width={100}
                 tick={{ fontSize: 10 }}
               />
-              <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<BucketTooltip />} />
               <Bar dataKey="value" name={t("dashboard.features.count")} radius={[0, 4, 4, 0]}>
                 {aiFeaturesData.map((entry, index) => (
                   <Cell key={index} fill={entry.fill} />
@@ -506,7 +529,7 @@ export function OverviewTab() {
         <SpellingTrendChart
           title={t("dashboard.scores.spelling")}
           data={m.spellingScores}
-          color="#f97316"
+          color="#a855f7"
           emptyMessage={t("dashboard.charts.noData")}
         />
       </div>
