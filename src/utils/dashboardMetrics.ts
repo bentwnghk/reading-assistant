@@ -12,10 +12,9 @@ export interface WeeklyCount {
 }
 
 export interface VocabularyPoint {
-  label: string;
+  date: string;
   cumulative: number;
-  session: number;
-  date: number;
+  daily: number;
 }
 
 export interface ScoreBucket {
@@ -57,7 +56,6 @@ export interface DashboardMetrics {
   quizScores: SessionScore[];
   testScores: SessionScore[];
   sessionsOverTime: WeeklyCount[];
-  vocabularyOverTime: VocabularyPoint[];
   scoreDistribution: ScoreBucket[];
   dailyActivities: DailyActivity[];
 }
@@ -166,11 +164,11 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       quizScores: [],
       testScores: [],
       sessionsOverTime: [],
-      vocabularyOverTime: [],
       scoreDistribution: [],
       dailyActivities: [],
     };
   }
+
 
   const sorted = [...history].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
@@ -247,17 +245,6 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([weekStart, count]) => ({ weekStart, count }));
 
-  let cumulativeVocab = 0;
-  const vocabularyOverTime: VocabularyPoint[] = sorted.map((item) => {
-    cumulativeVocab += item.glossary?.length || 0;
-    return {
-      label: getSessionTitle(item).slice(0, 20),
-      cumulative: cumulativeVocab,
-      session: item.glossary?.length || 0,
-      date: item.createdAt,
-    };
-  });
-
   const scoreBuckets = [
     { range: "0-40", min: 0, max: 40, fill: "hsl(var(--destructive))" },
     { range: "41-60", min: 41, max: 60, fill: "hsl(var(--chart-4, 249 115 22))" },
@@ -312,8 +299,41 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     quizScores,
     testScores,
     sessionsOverTime,
-    vocabularyOverTime,
     scoreDistribution,
     dailyActivities,
   };
+}
+
+export function computeVocabularyOverTime(history: ReadingHistory[], days: number): VocabularyPoint[] {
+  const now = new Date();
+  const cutoff = new Date(now);
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = toDateString(cutoff.getTime());
+
+  const sorted = [...history]
+    .filter((h) => (h.glossary || []).length > 0)
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+  const dailyMap = new Map<string, number>();
+  for (const item of sorted) {
+    const dateKey = toDateString(item.createdAt);
+    dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + (item.glossary || []).length);
+  }
+
+  const startDate = new Date(cutoffStr + "T00:00:00");
+  const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const result: VocabularyPoint[] = [];
+  let cumulative = 0;
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    const dateKey = toDateString(current.getTime());
+    const daily = dailyMap.get(dateKey) || 0;
+    cumulative += daily;
+    result.push({ date: dateKey, cumulative, daily });
+    current.setDate(current.getDate() + 1);
+  }
+
+  return result;
 }

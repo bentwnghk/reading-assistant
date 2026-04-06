@@ -32,8 +32,10 @@ import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
 import {
   DAILY_ACTIVITY_KEYS,
   DAILY_ACTIVITY_COLORS,
+  computeVocabularyOverTime,
   type SessionScore,
 } from "@/utils/dashboardMetrics";
+import { useHistoryStore } from "@/store/history";
 import { StatCard, HighlightedStatCard } from "./StatCard";
 
 const TIME_RANGES = [
@@ -42,6 +44,22 @@ const TIME_RANGES = [
   { days: 90, label: "90d" },
   { days: 180, label: "180d" },
   { days: 360, label: "360d" },
+];
+
+const VOCAB_TIME_RANGES = [
+  { days: 7, label: "1W" },
+  { days: 14, label: "2W" },
+  { days: 21, label: "3W" },
+  { days: 30, label: "1M" },
+  { days: 60, label: "2M" },
+  { days: 90, label: "3M" },
+  { days: 120, label: "4M" },
+  { days: 150, label: "5M" },
+  { days: 180, label: "6M" },
+  { days: 270, label: "9M" },
+  { days: 365, label: "1Y" },
+  { days: 730, label: "2Y" },
+  { days: 1095, label: "3Y" },
 ];
 
 const SCORE_BUCKETS = [
@@ -279,7 +297,9 @@ function fillDailyRange(activities: DailyRow[], days: number): DailyRow[] {
 export function OverviewTab() {
   const { t, i18n } = useTranslation();
   const m = useDashboardMetrics();
+  const history = useHistoryStore((s) => s.history);
   const [timeRange, setTimeRange] = useState(30);
+  const [vocabTimeRange, setVocabTimeRange] = useState(90);
 
   const aiFeaturesData = useMemo(
     () => [
@@ -296,6 +316,10 @@ export function OverviewTab() {
   const filteredDaily = useMemo(() => {
     return fillDailyRange(m.dailyActivities, timeRange);
   }, [m.dailyActivities, timeRange]);
+
+  const filteredVocab = useMemo(() => {
+    return computeVocabularyOverTime(history, vocabTimeRange);
+  }, [history, vocabTimeRange]);
 
   const isEmpty = m.totalSessions === 0;
 
@@ -513,8 +537,21 @@ export function OverviewTab() {
 
       {/* Vocabulary Growth (full width) */}
       <ChartCard title={t("dashboard.charts.vocabularyGrowth")}>
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {VOCAB_TIME_RANGES.map((range) => (
+            <Button
+              key={range.days}
+              variant={vocabTimeRange === range.days ? "default" : "outline"}
+              size="sm"
+              className="h-7 text-xs px-2.5"
+              onClick={() => setVocabTimeRange(range.days)}
+            >
+              {range.label}
+            </Button>
+          ))}
+        </div>
         <ResponsiveContainer width="100%" height={200}>
-          <AreaChart data={m.vocabularyOverTime}>
+          <AreaChart data={filteredVocab}>
             <defs>
               <linearGradient id="gradVocab" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -523,11 +560,10 @@ export function OverviewTab() {
             </defs>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis
-              dataKey="label"
-              tick={{ fontSize: 9 }}
-              angle={-20}
-              textAnchor="end"
-              height={50}
+              dataKey="date"
+              tick={{ fontSize: 10 }}
+              tickFormatter={(v: string) => formatDailyDate(v, i18n.language)}
+              interval={Math.max(0, Math.floor(filteredVocab.length / 8) - 1)}
             />
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip content={<CustomTooltip />} />
