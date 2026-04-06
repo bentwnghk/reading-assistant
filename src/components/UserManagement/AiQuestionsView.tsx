@@ -459,10 +459,12 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t, 
           </div>
         </TableCell>
         <TableCell className="text-center text-sm text-muted-foreground whitespace-nowrap">
-          {new Date(question.lastAsked).toLocaleString(locale, {
+          <div>{new Date(question.lastAsked).toLocaleDateString(locale, {
             year: "numeric", month: "short", day: "numeric",
+          })}</div>
+          <div className="text-muted-foreground">{new Date(question.lastAsked).toLocaleTimeString(locale, {
             hour: "2-digit", minute: "2-digit",
-          })}
+          })}</div>
         </TableCell>
       </TableRow>
       {isExpanded && (
@@ -490,11 +492,13 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t, 
                             {instance.userEmail}
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">
-                          {new Date(instance.createdAt).toLocaleString(locale, {
+                        <div className="text-xs whitespace-nowrap">
+                          <div>{new Date(instance.createdAt).toLocaleDateString(locale, {
                             year: "numeric", month: "short", day: "numeric",
+                          })}</div>
+                          <div className="text-muted-foreground">{new Date(instance.createdAt).toLocaleTimeString(locale, {
                             hour: "2-digit", minute: "2-digit",
-                          })}
+                          })}</div>
                         </div>
                       </div>
                       {instance.docTitle && (

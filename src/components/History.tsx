@@ -55,10 +55,15 @@ const readingSessionSchema = z.object({
 });
 
 function formatDate(timestamp: number, locale: string): string {
-  return new Date(timestamp).toLocaleString(locale, {
+  return new Date(timestamp).toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
+  });
+}
+
+function formatTime(timestamp: number, locale: string): string {
+  return new Date(timestamp).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -272,7 +277,8 @@ function History({ open, onClose }: HistoryProps) {
                           {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
                         </TableCell>
                        <TableCell className="text-center whitespace-nowrap">
-                         {formatDate(item.updatedAt || item.createdAt, i18n.language)}
+                         <div>{formatDate(item.updatedAt || item.createdAt, i18n.language)}</div>
+                         <div className="text-muted-foreground">{formatTime(item.updatedAt || item.createdAt, i18n.language)}</div>
                        </TableCell>
                        <TableCell className="text-center">
                          <div className="flex justify-center">
