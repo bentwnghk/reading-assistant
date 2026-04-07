@@ -735,11 +735,13 @@
     },
     "features": {
       "summary": "摘要",
+      "mindMap": "思維導圖",
       "mindMapEn": "思維導圖（英）",
       "mindMapZh": "思維導圖（中）",
       "adaptedText": "改寫文本",
       "simplifiedText": "簡化文本",
       "sentenceAnalysis": "句子分析",
+      "tutorQuestion": "AI 導師",
       "count": "次數"
     },
     "scores": {

@@ -735,11 +735,13 @@
     },
     "features": {
       "summary": "Summary",
+      "mindMap": "Mind Map",
       "mindMapEn": "Mind Map (EN)",
       "mindMapZh": "Mind Map (ZH)",
       "adaptedText": "Adapted Text",
       "simplifiedText": "Simplified Text",
       "sentenceAnalysis": "Sentence Analysis",
+      "tutorQuestion": "AI Tutor",
       "count": "Count"
     },
     "scores": {
