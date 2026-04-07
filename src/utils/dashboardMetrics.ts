@@ -50,6 +50,7 @@ export interface DashboardMetrics {
   adaptedTextsGenerated: number;
   simplifiedTextsGenerated: number;
   totalSentencesAnalyzed: number;
+  glossariesGenerated: number;
   totalVocabulary: number;
   totalTutorQuestions: number;
   spellingScores: SessionScore[];
@@ -158,6 +159,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       adaptedTextsGenerated: 0,
       simplifiedTextsGenerated: 0,
       totalSentencesAnalyzed: 0,
+      glossariesGenerated: 0,
       totalVocabulary: 0,
       totalTutorQuestions: 0,
       spellingScores: [],
@@ -195,6 +197,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
 
   const adaptedTextsGenerated = sorted.filter((h) => !!h.adaptedText).length;
   const simplifiedTextsGenerated = sorted.filter((h) => !!h.simplifiedText).length;
+  const glossariesGenerated = sorted.filter((h) => (h.glossary || []).length > 0).length;
 
   const totalSentencesAnalyzed = sorted.reduce(
     (sum, item) => sum + Object.keys(item.analyzedSentences || {}).length,
@@ -293,6 +296,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     adaptedTextsGenerated,
     simplifiedTextsGenerated,
     totalSentencesAnalyzed,
+    glossariesGenerated,
     totalVocabulary,
     totalTutorQuestions,
     spellingScores,

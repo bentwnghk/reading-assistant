@@ -302,6 +302,7 @@ export function OverviewTab() {
       { name: t("dashboard.features.adaptedText"), value: m.adaptedTextsGenerated, fill: "#22c55e" },
       { name: t("dashboard.features.simplifiedText"), value: m.simplifiedTextsGenerated, fill: "#14b8a6" },
       { name: t("dashboard.features.sentenceAnalysis"), value: m.totalSentencesAnalyzed, fill: "#f97316" },
+      { name: t("dashboard.features.glossary"), value: m.glossariesGenerated, fill: "#eab308" },
       { name: t("dashboard.features.tutorQuestion"), value: m.totalTutorQuestions, fill: "#ec4899" },
     ],
     [m, t]
