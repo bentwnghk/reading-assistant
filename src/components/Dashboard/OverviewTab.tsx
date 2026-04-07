@@ -505,7 +505,7 @@ export function OverviewTab() {
           <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="zh" stackId="mindMap" fill="#ec4899" name={t("dashboard.features.mindMapZh")} radius={[0, 0, 0, 0]} />
               <Bar dataKey="en" stackId="mindMap" fill="#8b5cf6" name={t("dashboard.features.mindMapEn")} radius={[0, 4, 4, 0]} />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]} name={t("dashboard.features.count")}>
+              <Bar dataKey="value" stackId="other" radius={[0, 4, 4, 0]} name={t("dashboard.features.count")}>
                 {aiFeaturesData.map((entry, index) => (
                   <Cell key={index} fill={entry.fill} />
                 ))}
