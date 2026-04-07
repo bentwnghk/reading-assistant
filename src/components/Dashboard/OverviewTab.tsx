@@ -304,11 +304,11 @@ export function OverviewTab() {
   const aiFeaturesData = useMemo(
     () => [
       { name: t("dashboard.features.summary"), value: m.summariesGenerated, fill: "#3b82f6" },
-      { name: t("dashboard.features.mindMapEn"), value: m.mindMapsEnglish, fill: "#8b5cf6" },
-      { name: t("dashboard.features.mindMapZh"), value: m.mindMapsChinese, fill: "#ec4899" },
+      { name: t("dashboard.features.mindMap"), en: m.mindMapsEnglish, zh: m.mindMapsChinese, fill: "#8b5cf6", fill2: "#ec4899" },
       { name: t("dashboard.features.adaptedText"), value: m.adaptedTextsGenerated, fill: "#22c55e" },
       { name: t("dashboard.features.simplifiedText"), value: m.simplifiedTextsGenerated, fill: "#14b8a6" },
       { name: t("dashboard.features.sentenceAnalysis"), value: m.totalSentencesAnalyzed, fill: "#f97316" },
+      { name: t("dashboard.features.tutorQuestion"), value: m.totalTutorQuestions, fill: "#a855f7" },
     ],
     [m, t]
   );
@@ -503,7 +503,9 @@ export function OverviewTab() {
                 tick={{ fontSize: 10 }}
               />
           <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="value" name={t("dashboard.features.count")} radius={[0, 4, 4, 0]}>
+              <Bar dataKey="zh" stackId="mindMap" fill="#ec4899" name={t("dashboard.features.mindMapZh")} radius={[0, 0, 0, 0]} />
+              <Bar dataKey="en" stackId="mindMap" fill="#8b5cf6" name={t("dashboard.features.mindMapEn")} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="value" radius={[0, 4, 4, 0]} name={t("dashboard.features.count")}>
                 {aiFeaturesData.map((entry, index) => (
                   <Cell key={index} fill={entry.fill} />
                 ))}
