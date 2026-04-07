@@ -3,13 +3,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen,
-  FileText,
-  Waypoints,
-  Languages,
-  BookType,
-  MessageSquare,
   BookMarked,
-  MessageCircle,
   TrendingUp,
   BarChart3,
 } from "lucide-react";
@@ -346,47 +340,10 @@ export function OverviewTab() {
           })}
         />
         <StatCard
-          icon={<FileText className="h-3.5 w-3.5" />}
-          label={t("dashboard.stats.summaries")}
-          value={m.summariesGenerated}
-          color="text-blue-500"
-        />
-        <StatCard
-          icon={<Waypoints className="h-3.5 w-3.5" />}
-          label={t("dashboard.stats.mindMaps")}
-          value={m.mindMapsGenerated}
-          sub={t("dashboard.stats.mindMapBreakdown", { en: m.mindMapsEnglish, zh: m.mindMapsChinese })}
-          color="text-purple-500"
-        />
-        <StatCard
-          icon={<Languages className="h-3.5 w-3.5" />}
-          label={t("dashboard.stats.adaptedTexts")}
-          value={m.adaptedTextsGenerated}
-          color="text-green-500"
-        />
-        <StatCard
-          icon={<BookType className="h-3.5 w-3.5" />}
-          label={t("dashboard.stats.simplifiedTexts")}
-          value={m.simplifiedTextsGenerated}
-          color="text-teal-500"
-        />
-        <StatCard
-          icon={<MessageSquare className="h-3.5 w-3.5" />}
-          label={t("dashboard.stats.sentencesAnalyzed")}
-          value={m.totalSentencesAnalyzed}
-          color="text-orange-500"
-        />
-        <StatCard
           icon={<BookMarked className="h-3.5 w-3.5" />}
           label={t("dashboard.stats.totalVocabulary")}
           value={m.totalVocabulary}
           color="text-indigo-500"
-        />
-        <StatCard
-          icon={<MessageCircle className="h-3.5 w-3.5" />}
-          label={t("dashboard.stats.tutorQuestions")}
-          value={m.totalTutorQuestions}
-          color="text-primary"
         />
         <StatCard
           icon={<TrendingUp className="h-3.5 w-3.5" />}
