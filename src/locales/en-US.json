@@ -122,7 +122,7 @@
           "desc": "Get bilingual definitions (English + Chinese), syllabification, and real-world example sentences from AI for every word you highlight."
         },
         "flashcard": {
-          "title": "🃏 SRS Flashcard Review",
+          "title": "🃏 Flashcard Review",
           "desc": "Anki-style spaced repetition with Again/Hard/Good/Easy buttons. Cards you struggle with reappear sooner; cards you know are removed. Prioritize hard words to focus review on what matters most!"
         },
         "spelling": {
