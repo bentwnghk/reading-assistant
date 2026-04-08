@@ -123,6 +123,7 @@ export interface ReadingStore {
   testMode: ReadingTestMode;
   vocabularyQuizScore: number;
   spellingGameBestScore: number;
+  flashcardReviewCount: number;
   chatHistory: ChatMessage[];
   status: ReadingStatus;
   error: string | null;
@@ -164,6 +165,7 @@ interface ReadingActions {
   setTestMode: (mode: ReadingTestMode) => void;
   setVocabularyQuizScore: (score: number) => void;
   setSpellingGameBestScore: (score: number) => void;
+  incrementFlashcardReviewCount: () => void;
   addChatMessage: (message: ChatMessage) => void;
   clearChatHistory: () => void;
   setStatus: (status: ReadingStatus) => void;
@@ -207,6 +209,7 @@ const defaultValues: ReadingStore = {
   testMode: "all-at-once",
   vocabularyQuizScore: 0,
   spellingGameBestScore: 0,
+  flashcardReviewCount: 0,
   chatHistory: [],
   status: "idle",
   error: null,
@@ -578,6 +581,18 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      incrementFlashcardReviewCount: () =>
+        set((state) => {
+          const newState = {
+            flashcardReviewCount: (state.flashcardReviewCount || 0) + 1,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

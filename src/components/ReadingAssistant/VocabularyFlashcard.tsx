@@ -28,7 +28,7 @@ interface SRSCounts {
 
 function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
-  const { id, glossaryRatings, setGlossaryRating, backup } = useReadingStore();
+  const { id, glossaryRatings, setGlossaryRating, backup, incrementFlashcardReviewCount } = useReadingStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
   const { update, save } = useHistoryStore();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
@@ -170,9 +170,10 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
 
       if (newQueue.length === 0) {
         setIsReviewComplete(true);
+        incrementFlashcardReviewCount();
       }
     },
-    [currentEntry, reviewQueue, id, setGlossaryRating, syncToHistory, totalOriginal]
+    [currentEntry, reviewQueue, id, setGlossaryRating, syncToHistory, totalOriginal, incrementFlashcardReviewCount]
   );
 
   // ── TTS ──────────────────────────────────────────────────────────────────

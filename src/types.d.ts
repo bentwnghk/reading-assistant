@@ -101,6 +101,7 @@ interface ReadingSession {
   testCompleted?: boolean;
   vocabularyQuizScore?: number;
   spellingGameBestScore?: number;
+  flashcardReviewCount?: number;
   createdAt: number;
   updatedAt: number;
 }

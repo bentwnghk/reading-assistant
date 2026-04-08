@@ -749,6 +749,7 @@
       "sentenceAnalysis": "Sentence Analysis",
       "glossary": "Generate Glossary",
       "tutorQuestion": "AI Tutor",
+      "flashcardReview": "Flashcard Review",
       "count": "Count"
     },
     "scores": {
@@ -778,7 +779,8 @@
       "spellingGame": "Spelling Game",
       "vocabQuiz": "Vocab Quiz",
       "readingTest": "Reading Test",
-      "tutorQuestion": "AI Tutor"
+      "tutorQuestion": "AI Tutor",
+      "flashcardReview": "Flashcard Review"
     },
     "help": {
       "title": "Dashboard Guide",

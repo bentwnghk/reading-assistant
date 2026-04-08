@@ -36,6 +36,7 @@ export interface DailyActivity {
   vocabQuiz: number;
   readingTest: number;
   tutorQuestion: number;
+  flashcardReview: number;
 }
 
 export interface DashboardMetrics {
@@ -53,6 +54,7 @@ export interface DashboardMetrics {
   glossariesGenerated: number;
   totalVocabulary: number;
   totalTutorQuestions: number;
+  totalFlashcardReviews: number;
   spellingScores: SessionScore[];
   quizScores: SessionScore[];
   testScores: SessionScore[];
@@ -69,6 +71,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "simplifiedText",
   "sentenceAnalysis",
   "glossary",
+  "flashcardReview",
   "spellingGame",
   "vocabQuiz",
   "readingTest",
@@ -87,6 +90,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
   tutorQuestion: "#a855f7",
+  flashcardReview: "#f59e0b",
 };
 
 function getSessionTitle(item: ReadingHistory): string {
@@ -142,6 +146,7 @@ function emptyDailyActivity(date: string): DailyActivity {
     vocabQuiz: 0,
     readingTest: 0,
     tutorQuestion: 0,
+    flashcardReview: 0,
   };
 }
 
@@ -162,6 +167,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       glossariesGenerated: 0,
       totalVocabulary: 0,
       totalTutorQuestions: 0,
+      totalFlashcardReviews: 0,
       spellingScores: [],
       quizScores: [],
       testScores: [],
@@ -212,6 +218,11 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   const totalTutorQuestions = sorted.reduce(
     (sum, item) =>
       sum + (item.chatHistory || []).filter((m) => m.role === "user").length,
+    0
+  );
+
+  const totalFlashcardReviews = sorted.reduce(
+    (sum, item) => sum + (item.flashcardReviewCount || 0),
     0
   );
 
@@ -279,6 +290,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     if ((item.vocabularyQuizScore || 0) > 0) existing.vocabQuiz += 1;
     if (item.testCompleted) existing.readingTest += 1;
     existing.tutorQuestion += (item.chatHistory || []).filter((m) => m.role === "user").length;
+    existing.flashcardReview += item.flashcardReviewCount || 0;
 
     dailyMap.set(dateKey, existing);
   }
@@ -299,6 +311,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     glossariesGenerated,
     totalVocabulary,
     totalTutorQuestions,
+    totalFlashcardReviews,
     spellingScores,
     quizScores,
     testScores,

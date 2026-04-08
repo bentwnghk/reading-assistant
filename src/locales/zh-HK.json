@@ -749,6 +749,7 @@
       "sentenceAnalysis": "句子分析",
       "glossary": "生成詞彙表",
       "tutorQuestion": "AI 導師",
+      "flashcardReview": "字卡複習",
       "count": "次數"
     },
     "scores": {
@@ -778,7 +779,8 @@
       "spellingGame": "拼字遊戲",
       "vocabQuiz": "詞彙測驗",
       "readingTest": "閱讀測驗",
-      "tutorQuestion": "AI 導師"
+      "tutorQuestion": "AI 導師",
+      "flashcardReview": "字卡複習"
     },
     "help": {
       "title": "儀表板指南",
