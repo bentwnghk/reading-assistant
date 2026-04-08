@@ -303,9 +303,9 @@ export async function updateReadingSession(
         const value = (sessionData as any)[key]
         updateFields.push(`${dbColumn} = $${paramIndex}`)
         
-        if (["highlightedWords", "analyzedSentences", "readingTest", "glossary", 
-             "glossaryRatings", "chatHistory", "originalDifficulty", 
-             "adaptedDifficulty", "simplifiedDifficulty"].includes(key)) {
+        if (["highlightedWords", "analyzedSentences", "readingTest", "glossary",
+             "glossaryRatings", "chatHistory", "originalDifficulty",
+             "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else {
           values.push(value)
