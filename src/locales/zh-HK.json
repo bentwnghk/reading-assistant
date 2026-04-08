@@ -9,7 +9,7 @@
   "toc": {
     "title": "導航",
     "description": "跳轉到任何區域",
-    "studentInfo": "學生資料",
+    "studentInfo": "用戶資料",
     "upload": "選擇文本",
     "summary": "摘要",
     "mindmap": "思維導圖",
@@ -195,7 +195,7 @@
       "dse": "DSE程度"
     },
     "studentInfo": {
-      "title": "學生資料",
+      "title": "用戶資料",
       "nameLabel": "你的名字",
       "roleLabel": "角色",
       "roles": {
@@ -208,7 +208,7 @@
       "yearsOld": "歲",
       "estimatedLevel": "預計程度",
       "help": {
-        "title": "學生資料指南",
+        "title": "用戶資料指南",
         "ageSlider": "年齡滑桿：拖動以選擇你的年齡（8-18歲）。這有助於AI將文本改寫至你的閱讀水平。",
         "estimatedLevel": "預計程度：根據你的年齡顯示對應的香港學校級別（小學三年級至DSE）。",
         "usage": "你的年齡用於決定改寫版本和簡化版本的複雜程度，使內容變得更容易或更具挑戰性。"

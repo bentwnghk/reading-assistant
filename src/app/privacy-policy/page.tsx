@@ -27,7 +27,7 @@ const en = {
           <ul>
             <li><strong>Account Information:</strong> Name, email address, and authentication credentials (e.g., Google sign-in). We use this information to provide and secure your account.</li>
             <li><strong>User Content:</strong> Text, images, and documents you upload or submit to the Service for processing. This includes reading materials you submit for text extraction, summarization, or analysis.</li>
-            <li><strong>Student Information:</strong> Reading level, language preferences, and other learning preferences you provide.</li>
+            <li><strong>User Information:</strong> Reading level, language preferences, and other learning preferences you provide.</li>
             <li><strong>Payment Information:</strong> Billing information processed through a third-party payment processor (e.g., Stripe). We do not store your full payment card details on our servers.</li>
           </ul>
           <h3>Information Collected Automatically</h3>
