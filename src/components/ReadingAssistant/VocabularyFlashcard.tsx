@@ -276,6 +276,11 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
     );
   }
 
+  // Guard: reviewQueue may be transiently empty before isReviewComplete flips in the same cycle
+  if (!currentEntry && !isReviewComplete) {
+    return null;
+  }
+
   const remaining = reviewQueue.length;
   const progressPercent = totalOriginal > 0 ? ((totalOriginal - remaining) / totalOriginal) * 100 : 0;
 
