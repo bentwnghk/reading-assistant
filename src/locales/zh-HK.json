@@ -790,6 +790,9 @@
       "tutorQuestion": "AI 導師",
       "flashcardReview": "字卡複習"
     },
+    "activity": {
+      "total": "合計"
+    },
     "timeRanges": {
       "d7": "7天",
       "d14": "14天",

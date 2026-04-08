@@ -114,6 +114,7 @@ function ActivityTooltip({
   payload?: Array<{ name: string; value: number; fill: string; dataKey: string }>;
   label?: string;
 }) {
+  const { t } = useTranslation();
   if (!active || !payload || payload.length === 0) return null;
   const total = payload.reduce((sum, p) => sum + p.value, 0);
   return (
@@ -128,7 +129,7 @@ function ActivityTooltip({
           </p>
         ))}
       <div className="border-t mt-1 pt-1 flex justify-between font-medium">
-        <span>Total</span>
+        <span>{t("dashboard.activity.total")}</span>
         <span className="tabular-nums">{total}</span>
       </div>
     </div>
