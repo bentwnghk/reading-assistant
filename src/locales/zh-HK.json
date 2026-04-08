@@ -543,16 +543,8 @@
         "easy": "簡單",
         "medium": "中等",
         "hard": "困難",
-        "again": "再看一次",
-        "good": "良好",
         "noCards": "請先生成詞彙表以使用生字卡",
-        "clickFlip": "點擊翻轉",
-        "remaining": "剩餘 {{remaining}} / {{total}}",
-        "srsStats": "再看: {{again}} | 困難: {{hard}} | 良好: {{good}} | 簡單: {{easy}}",
-        "reviewComplete": "完成練習！",
-        "reviewCompleteDesc": "你複習了 {{total}} 張卡片。",
-        "restart": "重新開始",
-        "totalReviews": "總複習次數：{{total}}"
+        "clickFlip": "點擊翻轉"
       },
       "quiz": {
         "title": "詞彙測驗",
