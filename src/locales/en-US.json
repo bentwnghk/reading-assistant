@@ -196,6 +196,14 @@
     },
     "studentInfo": {
       "title": "Student Information",
+      "nameLabel": "Your Name",
+      "roleLabel": "Role",
+      "roles": {
+        "admin": "Admin",
+        "teacher": "Teacher",
+        "student": "Student",
+        "super-admin": "Super Admin"
+      },
       "ageLabel": "Your Age",
       "yearsOld": "years old",
       "estimatedLevel": "Estimated Level",

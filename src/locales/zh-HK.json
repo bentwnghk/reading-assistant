@@ -196,6 +196,14 @@
     },
     "studentInfo": {
       "title": "學生資料",
+      "nameLabel": "你的名字",
+      "roleLabel": "角色",
+      "roles": {
+        "admin": "管理員",
+        "teacher": "老師",
+        "student": "學生",
+        "super-admin": "超級管理員"
+      },
       "ageLabel": "你的年齡",
       "yearsOld": "歲",
       "estimatedLevel": "預計程度",

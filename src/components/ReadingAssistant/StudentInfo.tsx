@@ -46,9 +46,6 @@ function StudentInfo() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <User className="h-5 w-5 text-muted-foreground" />
           {t("reading.studentInfo.title")}
-          {status === "authenticated" && session?.user?.name && (
-            <span className="text-muted-foreground font-normal">({session.user.name})</span>
-          )}
           <Popover>
             <PopoverTrigger asChild>
               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
@@ -79,6 +76,15 @@ function StudentInfo() {
         </div>
       </div>
       <div className="space-y-4">
+        {status === "authenticated" && session?.user?.name && (
+          <div className="flex items-center gap-1 text-sm">
+            <Label>{t("reading.studentInfo.nameLabel")}:</Label>
+            <span className="font-medium">{session.user.name}</span>
+            {session.user.role && (
+              <span className="text-muted-foreground">({t("reading.studentInfo.roleLabel")}: {t(`reading.studentInfo.roles.${session.user.role}`)})</span>
+            )}
+          </div>
+        )}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label htmlFor="age-slider">
