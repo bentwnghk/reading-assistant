@@ -33,27 +33,30 @@ import { useHistoryStore } from "@/store/history";
 import { StatCard, HighlightedStatCard } from "./StatCard";
 
 const TIME_RANGES = [
-  { days: 7, label: "7d" },
-  { days: 30, label: "30d" },
-  { days: 90, label: "90d" },
-  { days: 180, label: "180d" },
-  { days: 360, label: "360d" },
+  { days: 7, labelKey: "dashboard.timeRanges.d7" },
+  { days: 14, labelKey: "dashboard.timeRanges.d14" },
+  { days: 30, labelKey: "dashboard.timeRanges.d30" },
+  { days: 60, labelKey: "dashboard.timeRanges.d60" },
+  { days: 90, labelKey: "dashboard.timeRanges.d90" },
+  { days: 180, labelKey: "dashboard.timeRanges.d180" },
+  { days: 270, labelKey: "dashboard.timeRanges.d270" },
+  { days: 360, labelKey: "dashboard.timeRanges.d360" },
 ];
 
 const VOCAB_TIME_RANGES = [
-  { days: 7, label: "1W" },
-  { days: 14, label: "2W" },
-  { days: 21, label: "3W" },
-  { days: 30, label: "1M" },
-  { days: 60, label: "2M" },
-  { days: 90, label: "3M" },
-  { days: 120, label: "4M" },
-  { days: 150, label: "5M" },
-  { days: 180, label: "6M" },
-  { days: 270, label: "9M" },
-  { days: 365, label: "1Y" },
-  { days: 730, label: "2Y" },
-  { days: 1095, label: "3Y" },
+  { days: 7, labelKey: "dashboard.timeRanges.w1" },
+  { days: 14, labelKey: "dashboard.timeRanges.w2" },
+  { days: 21, labelKey: "dashboard.timeRanges.w3" },
+  { days: 30, labelKey: "dashboard.timeRanges.m1" },
+  { days: 60, labelKey: "dashboard.timeRanges.m2" },
+  { days: 90, labelKey: "dashboard.timeRanges.m3" },
+  { days: 120, labelKey: "dashboard.timeRanges.m4" },
+  { days: 150, labelKey: "dashboard.timeRanges.m5" },
+  { days: 180, labelKey: "dashboard.timeRanges.m6" },
+  { days: 270, labelKey: "dashboard.timeRanges.m9" },
+  { days: 365, labelKey: "dashboard.timeRanges.y1" },
+  { days: 730, labelKey: "dashboard.timeRanges.y2" },
+  { days: 1095, labelKey: "dashboard.timeRanges.y3" },
 ];
 
 const SCORE_BUCKETS = [
@@ -295,7 +298,7 @@ export function OverviewTab() {
   const m = useDashboardMetrics();
   const history = useHistoryStore((s) => s.history);
   const [timeRange, setTimeRange] = useState(30);
-  const [vocabTimeRange, setVocabTimeRange] = useState(90);
+  const [vocabTimeRange, setVocabTimeRange] = useState(30);
 
   const aiFeaturesData = useMemo(
     () => [
@@ -367,7 +370,7 @@ export function OverviewTab() {
               className="h-7 text-xs px-2.5"
               onClick={() => setTimeRange(range.days)}
             >
-              {range.label}
+              {t(range.labelKey)}
             </Button>
           ))}
         </div>
@@ -515,7 +518,7 @@ export function OverviewTab() {
               className="h-7 text-xs px-2.5"
               onClick={() => setVocabTimeRange(range.days)}
             >
-              {range.label}
+              {t(range.labelKey)}
             </Button>
           ))}
         </div>
