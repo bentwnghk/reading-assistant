@@ -100,6 +100,32 @@ function CustomTooltip({
   );
 }
 
+function AiFeaturesTooltip({
+  active,
+  payload,
+  label,
+  colorMap,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+  colorMap: Record<string, string>;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  return (
+    <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
+      <p className="font-medium mb-1">{label}</p>
+      {payload
+        .filter((p) => p.value > 0)
+        .map((entry, i) => (
+          <p key={i} style={{ color: colorMap[entry.name] ?? entry.color }}>
+            {entry.name}: {entry.value}
+          </p>
+        ))}
+    </div>
+  );
+}
+
 function ActivityTooltip({
   active,
   payload,
@@ -294,6 +320,14 @@ export function OverviewTab() {
   const history = useHistoryStore((s) => s.history);
   const [timeRange, setTimeRange] = useState(30);
   const [vocabTimeRange, setVocabTimeRange] = useState(90);
+
+  const aiFeaturesColorMap = useMemo(
+    () => ({
+      [t("dashboard.features.mindMapEnLabel")]: "#8b5cf6",
+      [t("dashboard.features.mindMapZhLabel")]: "#a78bfa",
+    }),
+    [t]
+  );
 
   const aiFeaturesData = useMemo(
     () => [
@@ -534,7 +568,7 @@ export function OverviewTab() {
               interval={Math.max(0, Math.floor(filteredVocab.length / 8) - 1)}
             />
             <YAxis tick={{ fontSize: 10 }} />
-            <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<AiFeaturesTooltip colorMap={aiFeaturesColorMap} />} />
             <Area
               type="monotone"
               dataKey="cumulative"
