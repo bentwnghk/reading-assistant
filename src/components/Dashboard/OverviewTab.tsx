@@ -82,15 +82,17 @@ function CustomTooltip({
   active,
   payload,
   label,
+  formatLabel,
 }: {
   active?: boolean;
   payload?: Array<{ name: string; value: number; color: string }>;
   label?: string;
+  formatLabel?: (label: string) => string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
   return (
     <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
-      <p className="font-medium mb-1">{label}</p>
+      <p className="font-medium mb-1">{formatLabel && label ? formatLabel(label) : label}</p>
       {payload.map((entry, i) => (
         <p key={i} style={{ color: entry.color }}>
           {entry.name}: {entry.value}
@@ -434,8 +436,7 @@ export function OverviewTab() {
               />
               <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
               <Tooltip
-                content={<CustomTooltip />}
-                labelFormatter={(v) => formatWeekRange(String(v), i18n.language)}
+                content={<CustomTooltip formatLabel={(v) => formatWeekRange(v, i18n.language)} />}
               />
               <Area
                 type="monotone"
