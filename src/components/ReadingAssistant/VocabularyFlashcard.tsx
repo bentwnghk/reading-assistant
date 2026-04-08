@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2, Target } from "lucide-react";
+import { Shuffle, RotateCcw, Volume2, Loader2, Target, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
@@ -10,14 +10,20 @@ import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
-import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
-
-const SWIPE_THRESHOLD = 50;
-const SWIPE_VELOCITY_THRESHOLD = 0.3;
+import { sortGlossaryByPriority } from "@/utils/vocabulary";
 
 interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
+}
+
+type SRSAction = "again" | "hard" | "good" | "easy";
+
+interface SRSCounts {
+  again: number;
+  hard: number;
+  good: number;
+  easy: number;
 }
 
 function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardProps) {
@@ -26,259 +32,243 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
   const effectiveRatings = mergedRatings ?? glossaryRatings;
   const { update, save } = useHistoryStore();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
-  
-  const [currentIndex, setCurrentIndex] = useState(0);
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
+  const [reviewQueue, setReviewQueue] = useState<GlossaryEntry[]>([]);
+  const [totalOriginal, setTotalOriginal] = useState(0);
+  const [srsCounts, setSrsCounts] = useState<SRSCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
+  const [isReviewComplete, setIsReviewComplete] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
-  const currentGlossary = useMemo(() => {
-    return sortGlossaryByPriority(glossary, effectiveRatings, {
-      prioritize: isPrioritized,
-      shuffle: isShuffled,
-    });
-  }, [glossary, effectiveRatings, isPrioritized, isShuffled]);
+  // Keep a ref to the latest effectiveRatings so toolbar handlers always use fresh data
+  // without triggering a full session reset on every rating change.
+  const effectiveRatingsRef = useRef(effectiveRatings);
+  useEffect(() => {
+    effectiveRatingsRef.current = effectiveRatings;
+  }, [effectiveRatings]);
 
-  const wordStats = useMemo(() => {
-    return getWordStats(glossary, effectiveRatings);
-  }, [glossary, effectiveRatings]);
+  const buildQueue = useCallback(
+    (list: GlossaryEntry[], ratings: Record<string, GlossaryRating>, shuffle: boolean, prioritize: boolean) =>
+      sortGlossaryByPriority(list, ratings, { prioritize, shuffle }),
+    []
+  );
 
-  const currentEntry = currentGlossary[currentIndex];
-  const totalCount = currentGlossary.length;
+  const resetSession = useCallback((queue: GlossaryEntry[]) => {
+    setReviewQueue(queue);
+    setTotalOriginal(queue.length);
+    setIsFlipped(false);
+    setIsReviewComplete(false);
+    setSrsCounts({ again: 0, hard: 0, good: 0, easy: 0 });
+  }, []);
+
+  // Initialize queue only when the glossary list itself changes, not on every rating update.
+  // isShuffled/isPrioritized are intentionally omitted — toolbar handlers manage those resets.
+  useEffect(() => {
+    resetSession(buildQueue(glossary, effectiveRatingsRef.current, isShuffled, isPrioritized));
+  }, [glossary]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentEntry = reviewQueue[0];
 
   const highlightWord = (text: string, word: string) => {
     if (!word) return text;
-    const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
     const parts = text.split(regex);
-    return parts.map((part, index) => 
-      part.toLowerCase() === word.toLowerCase() 
-        ? <span key={index} className="text-primary font-semibold">{part}</span>
-        : part
+    return parts.map((part, index) =>
+      part.toLowerCase() === word.toLowerCase() ? (
+        <span key={index} className="text-primary font-semibold">{part}</span>
+      ) : (
+        part
+      )
     );
   };
 
-  const handlePrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalCount - 1));
-    setIsFlipped(false);
-  }, [totalCount]);
-
-  const handleNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev < totalCount - 1 ? prev + 1 : 0));
-    setIsFlipped(false);
-  }, [totalCount]);
-
-  const handleFlip = useCallback(() => {
-    setIsFlipped((prev) => !prev);
-  }, []);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = {
-      x: touch.clientX,
-      y: touch.clientY,
-      time: Date.now(),
-    };
-    setIsSwiping(true);
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
-    
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      e.preventDefault();
-      setSwipeOffset(deltaX * 0.5);
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
-    const deltaTime = Date.now() - touchStartRef.current.time;
-    const velocity = Math.abs(deltaX) / deltaTime;
-    
-    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
-    const isSwipeAction = (Math.abs(deltaX) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD);
-    
-    if (isHorizontalSwipe && isSwipeAction) {
-      if (deltaX > 0) {
-        handlePrevious();
-      } else {
-        handleNext();
-      }
-    }
-    
-    setSwipeOffset(0);
-    setIsSwiping(false);
-    touchStartRef.current = null;
-  }, [handlePrevious, handleNext]);
+  const handleFlip = useCallback(() => setIsFlipped((prev) => !prev), []);
 
   const handleShuffle = () => {
-    setIsShuffled((prev) => !prev);
-    setCurrentIndex(0);
-    setIsFlipped(false);
+    const next = !isShuffled;
+    setIsShuffled(next);
+    resetSession(buildQueue(glossary, effectiveRatingsRef.current, next, isPrioritized));
   };
 
   const handlePrioritize = () => {
-    setIsPrioritized((prev) => !prev);
-    setCurrentIndex(0);
-    setIsFlipped(false);
+    const next = !isPrioritized;
+    setIsPrioritized(next);
+    resetSession(buildQueue(glossary, effectiveRatingsRef.current, isShuffled, next));
   };
 
   const handleResetOrder = () => {
     setIsShuffled(false);
     setIsPrioritized(false);
-    setCurrentIndex(0);
-    setIsFlipped(false);
+    resetSession(buildQueue(glossary, effectiveRatingsRef.current, false, false));
   };
 
-  const handleRate = (rating: GlossaryRating) => {
-    if (currentEntry) {
-      setGlossaryRating(currentEntry.word, rating);
+  const handleRestart = () => {
+    resetSession(buildQueue(glossary, effectiveRatingsRef.current, isShuffled, isPrioritized));
+  };
+
+  const syncToHistory = useCallback(() => {
+    if (id) {
+      const session = backup();
+      const updated = update(id, session);
+      if (!updated) save(session);
+    }
+  }, [id, backup, update, save]);
+
+  const handleSRS = useCallback(
+    (action: SRSAction) => {
+      if (!currentEntry || reviewQueue.length === 0) return;
+
+      const current = reviewQueue[0];
+      const remaining = reviewQueue.slice(1);
+      let newQueue: GlossaryEntry[];
+
+      switch (action) {
+        case "again":
+          // Insert at position 2 of remaining (立刻再次複習)
+          if (remaining.length === 0) {
+            newQueue = [current];
+          } else {
+            newQueue = [remaining[0], current, ...remaining.slice(1)];
+          }
+          break;
+        case "hard":
+          // Insert at the middle of remaining
+          {
+            const mid = Math.ceil(remaining.length / 2);
+            newQueue = [...remaining.slice(0, mid), current, ...remaining.slice(mid)];
+          }
+          break;
+        case "good":
+          // Move to end
+          newQueue = [...remaining, current];
+          break;
+        case "easy":
+        default:
+          // Remove from review
+          newQueue = [...remaining];
+          break;
+      }
+
+      setSrsCounts((prev) => ({ ...prev, [action]: prev[action] + 1 }));
+
+      // Again & Hard → mark as "hard" and sync to store/history
+      if (action === "again" || action === "hard") {
+        setGlossaryRating(current.word, "hard");
+        syncToHistory();
+      }
+
       logActivity("flashcard_review", {
         sessionId: id || undefined,
-        details: { cardsReviewed: 1, wordCount: glossary.length },
-      });
-      if (id) {
-        const session = backup();
-        const updated = update(id, session);
-        if (!updated) {
-          save(session);
-        }
-      }
-    }
-    handleNext();
-  };
-
-  const speakWord = useCallback(async (word: string) => {
-    if (!word) return;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
-    setIsTTSLoading(true);
-
-    try {
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      let url: string;
-      if (mode === "local") {
-        url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
-        if (openaicompatibleApiKey) {
-          headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
-        }
-      } else if (mode === "subscription") {
-        url = "/api/ai/subscription/v1/audio/speech";
-      } else {
-        url = "/api/ai/openaicompatible/v1/audio/speech";
-        if (accessPassword) {
-          headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
-        }
-      }
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          model: "tts-1",
-          input: word,
-          voice: ttsVoice,
-          response_format: "mp3",
-        }),
+        details: { cardsReviewed: 1, wordCount: totalOriginal },
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`TTS request failed (${response.status}): ${errText}`);
+      setReviewQueue(newQueue);
+      setIsFlipped(false);
+
+      if (newQueue.length === 0) {
+        setIsReviewComplete(true);
       }
+    },
+    [currentEntry, reviewQueue, id, setGlossaryRating, syncToHistory, totalOriginal]
+  );
 
-      const audioBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      await new Promise<void>((resolve, reject) => {
-        const audio = new Audio();
-        audioRef.current = audio;
-
-        audio.oncanplay = () => {
-          audio.play().then(resolve).catch(reject);
-        };
-
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-        };
-
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-          reject(new Error("Audio element error"));
-        };
-
-        audio.src = audioUrl;
-        audio.load();
-      });
-    } catch (error) {
-      console.error("TTS error:", error);
-    } finally {
-      setIsTTSLoading(false);
-    }
-  }, [ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
-
-  const handleSpeak = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (currentEntry?.word) {
-      speakWord(currentEntry.word);
-    }
-  }, [currentEntry, speakWord]);
-
-  useEffect(() => {
-    if (autoSpeakFlashcard && currentEntry?.word) {
-      speakWord(currentEntry.word);
-    }
-  }, [currentIndex, isShuffled, isPrioritized, autoSpeakFlashcard, currentEntry, speakWord]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        handlePrevious();
-      } else if (e.key === "ArrowRight") {
-        handleNext();
-      } else if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        handleFlip();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handlePrevious, handleNext, handleFlip]);
-
-  useEffect(() => {
-    return () => {
+  // ── TTS ──────────────────────────────────────────────────────────────────
+  const speakWord = useCallback(
+    async (word: string) => {
+      if (!word) return;
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      setIsTTSLoading(true);
+      try {
+        const headers: HeadersInit = { "Content-Type": "application/json" };
+        let url: string;
+        if (mode === "local") {
+          url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
+          if (openaicompatibleApiKey) headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
+        } else if (mode === "subscription") {
+          url = "/api/ai/subscription/v1/audio/speech";
+        } else {
+          url = "/api/ai/openaicompatible/v1/audio/speech";
+          if (accessPassword)
+            headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
+        }
+        const response = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ model: "tts-1", input: word, voice: ttsVoice, response_format: "mp3" }),
+        });
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`TTS request failed (${response.status}): ${errText}`);
+        }
+        const audioBuffer = await response.arrayBuffer();
+        const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        await new Promise<void>((resolve, reject) => {
+          const audio = new Audio();
+          audioRef.current = audio;
+          audio.oncanplay = () => audio.play().then(resolve).catch(reject);
+          audio.onended = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; };
+          audio.onerror = () => {
+            URL.revokeObjectURL(audioUrl);
+            audioRef.current = null;
+            reject(new Error("Audio element error"));
+          };
+          audio.src = audioUrl;
+          audio.load();
+        });
+      } catch (error) {
+        console.error("TTS error:", error);
+      } finally {
+        setIsTTSLoading(false);
+      }
+    },
+    [ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
+  );
+
+  const handleSpeak = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (currentEntry?.word) speakWord(currentEntry.word);
+    },
+    [currentEntry, speakWord]
+  );
+
+  // Auto-speak only when the card word actually changes (not on every queue reorder)
+  const prevWordRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (autoSpeakFlashcard && currentEntry?.word && currentEntry.word !== prevWordRef.current) {
+      prevWordRef.current = currentEntry.word;
+      speakWord(currentEntry.word);
+    }
+  }, [currentEntry, autoSpeakFlashcard, speakWord]);
+
+  // Keyboard: Space/Enter to flip (left/right navigation removed)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        handleFlip();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleFlip]);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     };
   }, []);
 
-  if (!currentEntry) {
+  // ── Empty state ───────────────────────────────────────────────────────────
+  if (!glossary.length) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <p>{t("reading.glossary.flashcard.noCards")}</p>
@@ -286,68 +276,126 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
     );
   }
 
-  const currentRating = effectiveRatings[currentEntry.word];
-  const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
+  const remaining = reviewQueue.length;
+  const progressPercent = totalOriginal > 0 ? ((totalOriginal - remaining) / totalOriginal) * 100 : 0;
 
+  // Shared toolbar component
+  const Toolbar = () => (
+    <div className="flex items-center gap-2 flex-wrap justify-center">
+      <Button variant={isPrioritized ? "default" : "secondary"} size="sm" onClick={handlePrioritize}>
+        <Target className="h-4 w-4" />
+        <span className="hidden sm:inline">{t("reading.glossary.prioritizeHard")}</span>
+      </Button>
+      <Button variant={isShuffled ? "default" : "secondary"} size="sm" onClick={handleShuffle}>
+        <Shuffle className="h-4 w-4" />
+        <span className="hidden sm:inline">{t("reading.glossary.flashcard.shuffle")}</span>
+      </Button>
+      {(isShuffled || isPrioritized) && (
+        <Button variant="outline" size="sm" onClick={handleResetOrder}>
+          <RotateCcw className="h-4 w-4" />
+          <span className="hidden sm:inline">{t("reading.glossary.regenerate")}</span>
+        </Button>
+      )}
+    </div>
+  );
+
+  // ── Completion screen ─────────────────────────────────────────────────────
+  if (isReviewComplete) {
+    return (
+      <div className="flex flex-col items-center gap-6 py-4">
+        <Toolbar />
+
+        <div className="w-full max-w-md space-y-2">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{t("reading.glossary.flashcard.remaining", { remaining: 0, total: totalOriginal })}</span>
+            <span>
+              {t("reading.glossary.flashcard.srsStats", {
+                again: srsCounts.again,
+                hard: srsCounts.hard,
+                good: srsCounts.good,
+                easy: srsCounts.easy,
+              })}
+            </span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full w-full transition-all duration-300" />
+          </div>
+        </div>
+
+        <div className="w-full max-w-md bg-gradient-to-br from-card via-card to-green-50 dark:to-green-950/30 border-2 border-green-200 dark:border-green-800 rounded-xl shadow-lg p-8 flex flex-col items-center gap-4">
+          <CheckCircle2 className="h-16 w-16 text-green-500" />
+          <h3 className="text-2xl font-bold text-center">{t("reading.glossary.flashcard.reviewComplete")}</h3>
+          <p className="text-muted-foreground text-center text-sm">
+            {t("reading.glossary.flashcard.reviewCompleteDesc", { total: totalOriginal })}
+          </p>
+
+          <div className="grid grid-cols-4 gap-3 w-full mt-2">
+            <div className="flex flex-col items-center gap-1 bg-rose-50 dark:bg-rose-950/30 rounded-lg p-2">
+              <span className="text-xs text-rose-500 font-medium">{t("reading.glossary.flashcard.again")}</span>
+              <span className="text-2xl font-bold text-rose-600 dark:text-rose-400">{srsCounts.again}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 bg-orange-50 dark:bg-orange-950/30 rounded-lg p-2">
+              <span className="text-xs text-orange-500 font-medium">{t("reading.glossary.flashcard.hard")}</span>
+              <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">{srsCounts.hard}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 bg-blue-50 dark:bg-blue-950/30 rounded-lg p-2">
+              <span className="text-xs text-blue-500 font-medium">{t("reading.glossary.flashcard.good")}</span>
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{srsCounts.good}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 bg-green-50 dark:bg-green-950/30 rounded-lg p-2">
+              <span className="text-xs text-green-500 font-medium">{t("reading.glossary.flashcard.easy")}</span>
+              <span className="text-2xl font-bold text-green-600 dark:text-green-400">{srsCounts.easy}</span>
+            </div>
+          </div>
+
+          <Button onClick={handleRestart} className="mt-2 w-full">
+            <RotateCcw className="h-4 w-4 mr-2" />
+            {t("reading.glossary.flashcard.restart")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main review UI ────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col items-center gap-6 py-4">
-      {isPrioritized && hasRatings && (
-        <div className="text-xs text-muted-foreground">
-          {t("reading.glossary.wordStats", { 
-            hard: wordStats.hard, 
-            medium: wordStats.medium, 
-            easy: wordStats.easy 
-          })}
-        </div>
-      )}
+      <Toolbar />
 
+      {/* Progress bar */}
       <div className="w-full max-w-md space-y-2">
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{currentIndex + 1} / {totalCount}</span>
-          <span>{Math.round(((currentIndex + 1) / totalCount) * 100)}%</span>
+          <span>{t("reading.glossary.flashcard.remaining", { remaining, total: totalOriginal })}</span>
+          <span>
+            {t("reading.glossary.flashcard.srsStats", {
+              again: srsCounts.again,
+              hard: srsCounts.hard,
+              good: srsCounts.good,
+              easy: srsCounts.easy,
+            })}
+          </span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300 rounded-full"
-            style={{ width: `${((currentIndex + 1) / totalCount) * 100}%` }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
+      {/* Card */}
       <div
-        className="relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000 touch-pan-y"
-        onClick={() => {
-          if (!isSwiping && Math.abs(swipeOffset) < 10) {
-            handleFlip();
-          }
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          touchAction: 'pan-y',
-        }}
+        className="relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000"
+        onClick={handleFlip}
       >
-        {swipeOffset > 20 && (
-          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 text-primary/60 pointer-events-none">
-            <ChevronLeft className="h-12 w-12" />
-          </div>
-        )}
-        {swipeOffset < -20 && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 text-primary/60 pointer-events-none">
-            <ChevronRight className="h-12 w-12" />
-          </div>
-        )}
         <div
           className={cn(
             "absolute inset-0 transition-transform duration-500 transform-style-preserve-3d",
             isFlipped && "rotate-y-180"
           )}
-          style={{
-            transform: `${isFlipped ? 'rotateY(180deg)' : ''} translateX(${swipeOffset}px)`,
-            transitionProperty: isSwiping ? 'none' : 'transform',
-          }}
+          style={{ transform: isFlipped ? "rotateY(180deg)" : "" }}
         >
+          {/* Front */}
           <div
             className={cn(
               "absolute inset-0 backface-hidden",
@@ -357,10 +405,16 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             )}
           >
             <div className="flex items-center justify-center gap-2 mb-2">
-              <div className={cn(
-                "font-extrabold text-center",
-                (currentEntry.syllabification || currentEntry.word).length > 18 ? "text-3xl" : (currentEntry.syllabification || currentEntry.word).length > 12 ? "text-4xl" : "text-5xl"
-              )}>
+              <div
+                className={cn(
+                  "font-extrabold text-center",
+                  (currentEntry.syllabification || currentEntry.word).length > 18
+                    ? "text-3xl"
+                    : (currentEntry.syllabification || currentEntry.word).length > 12
+                    ? "text-4xl"
+                    : "text-5xl"
+                )}
+              >
                 {currentEntry.syllabification || currentEntry.word}
               </div>
               <button
@@ -392,6 +446,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             </div>
           </div>
 
+          {/* Back */}
           <div
             className={cn(
               "absolute inset-0 backface-hidden rotate-y-180",
@@ -449,105 +504,48 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
         </div>
       </div>
 
+      {/* SRS buttons — only shown when card is flipped */}
       {isFlipped && (
-        <div className="w-full max-w-md space-y-3">
-          <div className="text-center text-sm text-muted-foreground mb-2">
+        <div className="w-full max-w-md space-y-2">
+          <div className="text-center text-sm text-muted-foreground">
             {t("reading.glossary.flashcard.rateCard")}
           </div>
-          <div className="flex gap-2 justify-center">
+          <div className="grid grid-cols-4 gap-2">
             <Button
-              variant={currentRating === "easy" ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRate("easy");
-              }}
-              className="flex-1"
+              onClick={(e) => { e.stopPropagation(); handleSRS("again"); }}
+              className="border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-950/50"
             >
-              {t("reading.glossary.flashcard.easy")}
+              {t("reading.glossary.flashcard.again")}
             </Button>
             <Button
-              variant={currentRating === "medium" ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRate("medium");
-              }}
-              className="flex-1"
-            >
-              {t("reading.glossary.flashcard.medium")}
-            </Button>
-            <Button
-              variant={currentRating === "hard" ? "default" : "outline"}
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRate("hard");
-              }}
-              className="flex-1"
+              onClick={(e) => { e.stopPropagation(); handleSRS("hard"); }}
+              className="border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:hover:bg-orange-950/50"
             >
               {t("reading.glossary.flashcard.hard")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => { e.stopPropagation(); handleSRS("good"); }}
+              className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/50"
+            >
+              {t("reading.glossary.flashcard.good")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => { e.stopPropagation(); handleSRS("easy"); }}
+              className="border-green-300 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/50"
+            >
+              {t("reading.glossary.flashcard.easy")}
             </Button>
           </div>
         </div>
       )}
-
-      <div className="flex items-center gap-2 flex-wrap justify-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handlePrevious}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">{t("reading.glossary.flashcard.previous")}</span>
-        </Button>
-
-        <Button
-          variant={isPrioritized ? "default" : "secondary"}
-          size="sm"
-          onClick={handlePrioritize}
-        >
-          <Target className="h-4 w-4" />
-          <span className="hidden sm:inline">{t("reading.glossary.prioritizeHard")}</span>
-        </Button>
-
-        <Button
-          variant={isShuffled ? "default" : "secondary"}
-          size="sm"
-          onClick={handleShuffle}
-        >
-          <Shuffle className="h-4 w-4" />
-          <span className="hidden sm:inline">{t("reading.glossary.flashcard.shuffle")}</span>
-        </Button>
-
-        {(isShuffled || isPrioritized) && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleResetOrder}
-          >
-            <RotateCcw className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("reading.glossary.regenerate")}</span>
-          </Button>
-        )}
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNext}
-        >
-          <span className="hidden sm:inline">{t("reading.glossary.flashcard.next")}</span>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-        <span className="hidden sm:flex items-center gap-1"><ChevronLeft className="h-3 w-3" /> Prev</span>
-        <span className="hidden sm:flex items-center gap-1"><ChevronRight className="h-3 w-3" /> Next</span>
-        <span className="hidden sm:inline">Space: Flip</span>
-        <span className="sm:hidden">← Swipe to navigate →</span>
-        <span className="sm:hidden">Tap to flip</span>
-      </div>
     </div>
   );
 }
