@@ -306,7 +306,7 @@ export function OverviewTab() {
       { name: t("dashboard.features.sentenceAnalysis"), value: m.totalSentencesAnalyzed, fill: "#f97316" },
       { name: t("dashboard.features.glossary"), value: m.glossariesGenerated, fill: "#eab308" },
       { name: t("dashboard.features.flashcardReview"), value: m.flashcardReviewsCompleted, fill: "#10b981" },
-      { name: t("dashboard.features.tutorQuestion"), value: m.totalTutorQuestions, fill: "#ec4899" },
+      { name: t("dashboard.features.tutorQuestion"), value: m.totalTutorQuestions, fill: "#a855f7" },
     ],
     [m, t]
   );
@@ -464,8 +464,8 @@ export function OverviewTab() {
                 tick={{ fontSize: 10 }}
               />
           <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="zh" stackId="a" fill="#ec4899" name={t("dashboard.features.mindMapZhLabel")} radius={[0, 0, 0, 0]} />
-              <Bar dataKey="en" stackId="a" fill="#8b5cf6" name={t("dashboard.features.mindMapEnLabel")} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="zh" stackId="a" fill="#a78bfa" name={t("dashboard.features.mindMapZhLabel")} radius={[0, 0, 0, 0]} />
+              <Bar dataKey="en" stackId="a" fill="#7c3aed" name={t("dashboard.features.mindMapEnLabel")} radius={[0, 4, 4, 0]} />
               <Bar dataKey="value" stackId="a" radius={[0, 4, 4, 0]} name={t("dashboard.features.count")}>
                 {aiFeaturesData.map((entry, index) => (
                   <Cell key={index} fill={entry.fill} />
