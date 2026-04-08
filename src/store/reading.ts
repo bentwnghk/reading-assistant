@@ -123,7 +123,15 @@ export interface ReadingStore {
   testMode: ReadingTestMode;
   vocabularyQuizScore: number;
   spellingGameBestScore: number;
-  flashcardReviewCount: number;
+  flashcardReviewDates: number[];
+  summaryGeneratedAt: number;
+  mindMapGeneratedAt: number;
+  adaptedTextGeneratedAt: number;
+  simplifiedTextGeneratedAt: number;
+  glossaryGeneratedAt: number;
+  spellingGameCompletedAt: number;
+  vocabQuizCompletedAt: number;
+  readingTestCompletedAt: number;
   chatHistory: ChatMessage[];
   status: ReadingStatus;
   error: string | null;
@@ -165,7 +173,7 @@ interface ReadingActions {
   setTestMode: (mode: ReadingTestMode) => void;
   setVocabularyQuizScore: (score: number) => void;
   setSpellingGameBestScore: (score: number) => void;
-  incrementFlashcardReviewCount: () => void;
+  incrementFlashcardReviewCount: () => void; // appends Date.now() to flashcardReviewDates
   addChatMessage: (message: ChatMessage) => void;
   clearChatHistory: () => void;
   setStatus: (status: ReadingStatus) => void;
@@ -209,7 +217,15 @@ const defaultValues: ReadingStore = {
   testMode: "all-at-once",
   vocabularyQuizScore: 0,
   spellingGameBestScore: 0,
-  flashcardReviewCount: 0,
+  flashcardReviewDates: [],
+  summaryGeneratedAt: 0,
+  mindMapGeneratedAt: 0,
+  adaptedTextGeneratedAt: 0,
+  simplifiedTextGeneratedAt: 0,
+  glossaryGeneratedAt: 0,
+  spellingGameCompletedAt: 0,
+  vocabQuizCompletedAt: 0,
+  readingTestCompletedAt: 0,
   chatHistory: [],
   status: "idle",
   error: null,
@@ -312,6 +328,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             summary,
+            summaryGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -324,6 +341,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             adaptedText: text,
+            adaptedTextGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -336,6 +354,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             simplifiedText: text,
+            simplifiedTextGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -428,6 +447,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             mindMap: mermaidCode,
+            mindMapGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -484,6 +504,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             glossary: entries,
+            glossaryGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -520,6 +541,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             testCompleted: completed,
+            ...(completed ? { readingTestCompletedAt: Date.now() } : {}),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -569,6 +591,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             vocabularyQuizScore: score,
+            vocabQuizCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -581,6 +604,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
+            spellingGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -592,7 +616,7 @@ export const useReadingStore = create(
       incrementFlashcardReviewCount: () =>
         set((state) => {
           const newState = {
-            flashcardReviewCount: (state.flashcardReviewCount || 0) + 1,
+            flashcardReviewDates: [...(state.flashcardReviewDates || []), Date.now()],
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

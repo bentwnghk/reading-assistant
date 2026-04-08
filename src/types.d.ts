@@ -101,7 +101,15 @@ interface ReadingSession {
   testCompleted?: boolean;
   vocabularyQuizScore?: number;
   spellingGameBestScore?: number;
-  flashcardReviewCount?: number;
+  flashcardReviewDates?: number[];
+  summaryGeneratedAt?: number;
+  mindMapGeneratedAt?: number;
+  adaptedTextGeneratedAt?: number;
+  simplifiedTextGeneratedAt?: number;
+  glossaryGeneratedAt?: number;
+  spellingGameCompletedAt?: number;
+  vocabQuizCompletedAt?: number;
+  readingTestCompletedAt?: number;
   createdAt: number;
   updatedAt: number;
 }

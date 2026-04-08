@@ -222,7 +222,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   );
 
   const totalFlashcardReviews = sorted.reduce(
-    (sum, item) => sum + (item.flashcardReviewCount || 0),
+    (sum, item) => sum + (item.flashcardReviewDates || []).length,
     0
   );
 
@@ -274,25 +274,57 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     fill: bucket.fill,
   }));
 
+  // Helper: get or create a DailyActivity row for a given date string
+  function getDay(map: Map<string, DailyActivity>, date: string): DailyActivity {
+    if (!map.has(date)) map.set(date, emptyDailyActivity(date));
+    return map.get(date)!;
+  }
+
   const dailyMap = new Map<string, DailyActivity>();
   for (const item of sorted) {
-    const dateKey = toDateString(item.createdAt);
-    const existing = dailyMap.get(dateKey) || emptyDailyActivity(dateKey);
+    // readText — date the session was started (reading IS the session)
+    getDay(dailyMap, toDateString(item.createdAt)).readText += 1;
 
-    existing.readText += 1;
-    if (item.summary) existing.summary += 1;
-    if (item.mindMap) existing.mindMap += 1;
-    if (item.adaptedText) existing.adaptedText += 1;
-    if (item.simplifiedText) existing.simplifiedText += 1;
-    existing.sentenceAnalysis += Object.keys(item.analyzedSentences || {}).length;
-    if ((item.glossary || []).length > 0) existing.glossary += 1;
-    if ((item.spellingGameBestScore || 0) > 0) existing.spellingGame += 1;
-    if ((item.vocabularyQuizScore || 0) > 0) existing.vocabQuiz += 1;
-    if (item.testCompleted) existing.readingTest += 1;
-    existing.tutorQuestion += (item.chatHistory || []).filter((m) => m.role === "user").length;
-    existing.flashcardReview += item.flashcardReviewCount || 0;
+    // single-completion activities — use their own *At timestamp, fall back to createdAt
+    if (item.summary) {
+      getDay(dailyMap, toDateString(item.summaryGeneratedAt || item.createdAt)).summary += 1;
+    }
+    if (item.mindMap) {
+      getDay(dailyMap, toDateString(item.mindMapGeneratedAt || item.createdAt)).mindMap += 1;
+    }
+    if (item.adaptedText) {
+      getDay(dailyMap, toDateString(item.adaptedTextGeneratedAt || item.createdAt)).adaptedText += 1;
+    }
+    if (item.simplifiedText) {
+      getDay(dailyMap, toDateString(item.simplifiedTextGeneratedAt || item.createdAt)).simplifiedText += 1;
+    }
+    if ((item.glossary || []).length > 0) {
+      getDay(dailyMap, toDateString(item.glossaryGeneratedAt || item.createdAt)).glossary += 1;
+    }
+    if ((item.spellingGameBestScore || 0) > 0) {
+      getDay(dailyMap, toDateString(item.spellingGameCompletedAt || item.createdAt)).spellingGame += 1;
+    }
+    if ((item.vocabularyQuizScore || 0) > 0) {
+      getDay(dailyMap, toDateString(item.vocabQuizCompletedAt || item.createdAt)).vocabQuiz += 1;
+    }
+    if (item.testCompleted) {
+      getDay(dailyMap, toDateString(item.readingTestCompletedAt || item.createdAt)).readingTest += 1;
+    }
 
-    dailyMap.set(dateKey, existing);
+    // sentenceAnalysis — each entry has its own createdAt
+    for (const entry of Object.values(item.analyzedSentences || {})) {
+      getDay(dailyMap, toDateString((entry as { createdAt?: number }).createdAt || item.createdAt)).sentenceAnalysis += 1;
+    }
+
+    // tutorQuestion — each ChatMessage has its own timestamp
+    for (const msg of (item.chatHistory || []).filter((m) => m.role === "user")) {
+      getDay(dailyMap, toDateString(msg.timestamp || item.createdAt)).tutorQuestion += 1;
+    }
+
+    // flashcardReview — array of completion timestamps
+    for (const ts of (item.flashcardReviewDates || [])) {
+      getDay(dailyMap, toDateString(ts)).flashcardReview += 1;
+    }
   }
   const dailyActivities = Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
