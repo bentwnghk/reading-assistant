@@ -75,12 +75,12 @@ function StudentInfo() {
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={() => setOpenDashboard(true)}>
             <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("dashboard.title")}</span>
+            <span>{t("dashboard.title")}</span>
           </Button>
           <Button asChild size="sm">
             <Link href="/leaderboard">
               <Trophy className="h-4 w-4" />
-              <span className="hidden sm:inline">{t("leaderboard.title")}</span>
+              <span>{t("leaderboard.title")}</span>
             </Link>
           </Button>
         </div>
