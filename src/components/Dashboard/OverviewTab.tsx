@@ -461,8 +461,16 @@ export function OverviewTab() {
                 tick={{ fontSize: 10 }}
               />
           <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="zh" stackId="a" fill="#ec4899" name={t("dashboard.features.mindMapZhLabel")} radius={[0, 0, 0, 0]} />
-              <Bar dataKey="en" stackId="a" fill="#8b5cf6" name={t("dashboard.features.mindMapEnLabel")} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="zh" stackId="a" name={t("dashboard.features.mindMapZhLabel")} radius={[0, 0, 0, 0]}>
+                {aiFeaturesData.map((entry, index) => (
+                  <Cell key={index} fill={entry.fill2} />
+                ))}
+              </Bar>
+              <Bar dataKey="en" stackId="a" name={t("dashboard.features.mindMapEnLabel")} radius={[0, 4, 4, 0]}>
+                {aiFeaturesData.map((entry, index) => (
+                  <Cell key={index} fill={entry.fill} />
+                ))}
+              </Bar>
               <Bar dataKey="value" stackId="a" radius={[0, 4, 4, 0]} name={t("dashboard.features.count")}>
                 {aiFeaturesData.map((entry, index) => (
                   <Cell key={index} fill={entry.fill} />
