@@ -543,8 +543,16 @@
         "easy": "Easy",
         "medium": "Medium",
         "hard": "Hard",
+        "again": "Again",
+        "good": "Good",
         "noCards": "Generate a glossary first to use flashcards",
-        "clickFlip": "Click to flip"
+        "clickFlip": "Click to flip",
+        "remaining": "{{remaining}} / {{total}} remaining",
+        "srsStats": "Again: {{again}} | Hard: {{hard}} | Good: {{good}} | Easy: {{easy}}",
+        "reviewComplete": "Practice Complete!",
+        "reviewCompleteDesc": "You reviewed {{total}} cards.",
+        "restart": "Restart",
+        "totalReviews": "Total reviews: {{total}}"
       },
       "quiz": {
         "title": "Vocabulary Quiz",

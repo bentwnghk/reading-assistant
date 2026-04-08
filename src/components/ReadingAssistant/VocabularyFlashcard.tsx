@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Shuffle, RotateCcw, Volume2, Loader2, Target } from "lucide-react";
+import { Shuffle, RotateCcw, Volume2, Loader2, Target, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
@@ -12,8 +12,7 @@ import { completePath } from "@/utils/url";
 import { cn } from "@/utils/style";
 import { sortGlossaryByPriority, getWordStats } from "@/utils/vocabulary";
 
-const SWIPE_THRESHOLD = 50;
-const SWIPE_VELOCITY_THRESHOLD = 0.3;
+type SRSAction = "again" | "hard" | "good" | "easy";
 
 interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
@@ -26,140 +25,126 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
   const effectiveRatings = mergedRatings ?? glossaryRatings;
   const { update, save } = useHistoryStore();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
-  
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [reviewQueue, setReviewQueue] = useState<GlossaryEntry[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
+  const [isReviewComplete, setIsReviewComplete] = useState(false);
+  const [srsCounts, setSrsCounts] = useState<Record<SRSAction, number>>({ again: 0, hard: 0, good: 0, easy: 0 });
+  const [totalOriginal, setTotalOriginal] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
-
-  const currentGlossary = useMemo(() => {
-    return sortGlossaryByPriority(glossary, effectiveRatings, {
-      prioritize: isPrioritized,
-      shuffle: isShuffled,
-    });
-  }, [glossary, effectiveRatings, isPrioritized, isShuffled]);
 
   const wordStats = useMemo(() => {
     return getWordStats(glossary, effectiveRatings);
   }, [glossary, effectiveRatings]);
 
-  const currentEntry = currentGlossary[currentIndex];
-  const totalCount = currentGlossary.length;
+  const buildQueue = useCallback((shuffled: boolean, prioritized: boolean): GlossaryEntry[] => {
+    return sortGlossaryByPriority(glossary, effectiveRatings, {
+      prioritize: prioritized,
+      shuffle: shuffled,
+    });
+  }, [glossary, effectiveRatings]);
+
+  useEffect(() => {
+    const queue = buildQueue(isShuffled, isPrioritized);
+    setReviewQueue(queue);
+    setTotalOriginal(queue.length);
+    setIsReviewComplete(false);
+    setSrsCounts({ again: 0, hard: 0, good: 0, easy: 0 });
+    setIsFlipped(false);
+  }, [glossary, isShuffled, isPrioritized, buildQueue]);
+
+  const currentEntry = reviewQueue[0] ?? null;
+  const remainingCount = reviewQueue.length;
 
   const highlightWord = (text: string, word: string) => {
     if (!word) return text;
     const regex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
-    return parts.map((part, index) => 
-      part.toLowerCase() === word.toLowerCase() 
+    return parts.map((part, index) =>
+      part.toLowerCase() === word.toLowerCase()
         ? <span key={index} className="text-primary font-semibold">{part}</span>
         : part
     );
   };
 
-  const handlePrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalCount - 1));
-    setIsFlipped(false);
-  }, [totalCount]);
-
-  const handleNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev < totalCount - 1 ? prev + 1 : 0));
-    setIsFlipped(false);
-  }, [totalCount]);
-
   const handleFlip = useCallback(() => {
     setIsFlipped((prev) => !prev);
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = {
-      x: touch.clientX,
-      y: touch.clientY,
-      time: Date.now(),
-    };
-    setIsSwiping(true);
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
-    
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      e.preventDefault();
-      setSwipeOffset(deltaX * 0.5);
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
-    const deltaTime = Date.now() - touchStartRef.current.time;
-    const velocity = Math.abs(deltaX) / deltaTime;
-    
-    const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
-    const isSwipeAction = (Math.abs(deltaX) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD);
-    
-    if (isHorizontalSwipe && isSwipeAction) {
-      if (deltaX > 0) {
-        handlePrevious();
-      } else {
-        handleNext();
-      }
-    }
-    
-    setSwipeOffset(0);
-    setIsSwiping(false);
-    touchStartRef.current = null;
-  }, [handlePrevious, handleNext]);
-
   const handleShuffle = () => {
     setIsShuffled((prev) => !prev);
-    setCurrentIndex(0);
-    setIsFlipped(false);
   };
 
   const handlePrioritize = () => {
     setIsPrioritized((prev) => !prev);
-    setCurrentIndex(0);
-    setIsFlipped(false);
   };
 
   const handleResetOrder = () => {
     setIsShuffled(false);
     setIsPrioritized(false);
-    setCurrentIndex(0);
-    setIsFlipped(false);
   };
 
-  const handleRate = (rating: GlossaryRating) => {
-    if (currentEntry) {
-      setGlossaryRating(currentEntry.word, rating);
-      logActivity("flashcard_review", {
-        sessionId: id || undefined,
-        details: { cardsReviewed: 1, wordCount: glossary.length },
-      });
-      if (id) {
-        const session = backup();
-        const updated = update(id, session);
-        if (!updated) {
-          save(session);
-        }
+  const handleRestart = () => {
+    setIsReviewComplete(false);
+    setSrsCounts({ again: 0, hard: 0, good: 0, easy: 0 });
+    setIsFlipped(false);
+    const queue = buildQueue(isShuffled, isPrioritized);
+    setReviewQueue(queue);
+    setTotalOriginal(queue.length);
+  };
+
+  const handleSRS = useCallback((action: SRSAction) => {
+    if (!currentEntry || reviewQueue.length === 0) return;
+
+    const currentCard = reviewQueue[0];
+    const remaining = reviewQueue.slice(1);
+    let newQueue: GlossaryEntry[];
+
+    switch (action) {
+      case "again":
+        newQueue = [currentCard, ...remaining];
+        break;
+      case "hard": {
+        const mid = Math.floor(remaining.length / 2);
+        newQueue = [...remaining.slice(0, mid), currentCard, ...remaining.slice(mid)];
+        break;
+      }
+      case "good":
+        newQueue = [...remaining, currentCard];
+        break;
+      case "easy":
+        newQueue = [...remaining];
+        break;
+    }
+
+    if (action === "again" || action === "hard") {
+      setGlossaryRating(currentCard.word, "hard");
+    }
+
+    logActivity("flashcard_review", {
+      sessionId: id || undefined,
+      details: { cardsReviewed: 1, wordCount: totalOriginal },
+    });
+
+    if (id) {
+      const session = backup();
+      const updated = update(id, session);
+      if (!updated) {
+        save(session);
       }
     }
-    handleNext();
-  };
+
+    setSrsCounts((prev) => ({ ...prev, [action]: prev[action] + 1 }));
+    setReviewQueue(newQueue);
+    setIsFlipped(false);
+
+    if (newQueue.length === 0) {
+      setIsReviewComplete(true);
+    }
+  }, [currentEntry, reviewQueue, id, totalOriginal, setGlossaryRating, backup, update, save]);
 
   const speakWord = useCallback(async (word: string) => {
     if (!word) return;
@@ -248,18 +233,15 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
   }, [currentEntry, speakWord]);
 
   useEffect(() => {
-    if (autoSpeakFlashcard && currentEntry?.word) {
+    if (autoSpeakFlashcard && currentEntry?.word && !isReviewComplete) {
       speakWord(currentEntry.word);
     }
-  }, [currentIndex, isShuffled, isPrioritized, autoSpeakFlashcard, currentEntry, speakWord]);
+  }, [currentEntry, autoSpeakFlashcard, speakWord, isReviewComplete]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        handlePrevious();
-      } else if (e.key === "ArrowRight") {
-        handleNext();
-      } else if (e.key === " " || e.key === "Enter") {
+      if (isReviewComplete) return;
+      if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
         handleFlip();
       }
@@ -267,7 +249,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handlePrevious, handleNext, handleFlip]);
+  }, [handleFlip, isReviewComplete]);
 
   useEffect(() => {
     return () => {
@@ -278,7 +260,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
     };
   }, []);
 
-  if (!currentEntry) {
+  if (glossary.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <p>{t("reading.glossary.flashcard.noCards")}</p>
@@ -286,66 +268,104 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
     );
   }
 
-  const currentRating = effectiveRatings[currentEntry.word];
+  if (isReviewComplete) {
+    const total = srsCounts.again + srsCounts.hard + srsCounts.good + srsCounts.easy;
+    return (
+      <div className="flex flex-col items-center gap-6 py-8">
+        <CheckCircle2 className="h-16 w-16 text-green-500" />
+        <div className="text-center space-y-2">
+          <h3 className="text-2xl font-bold">{t("reading.glossary.flashcard.reviewComplete")}</h3>
+          <p className="text-muted-foreground">
+            {t("reading.glossary.flashcard.reviewCompleteDesc", { total: totalOriginal })}
+          </p>
+        </div>
+        <div className="w-full max-w-md bg-muted/30 rounded-xl p-4 space-y-2">
+          <div className="text-sm font-medium text-center mb-3">
+            {t("reading.glossary.flashcard.srsStats")}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center justify-between bg-rose-100 dark:bg-rose-950/30 rounded-lg px-3 py-2">
+              <span className="text-sm text-rose-700 dark:text-rose-400">{t("reading.glossary.flashcard.again")}</span>
+              <span className="font-bold text-rose-700 dark:text-rose-400">{srsCounts.again}</span>
+            </div>
+            <div className="flex items-center justify-between bg-orange-100 dark:bg-orange-950/30 rounded-lg px-3 py-2">
+              <span className="text-sm text-orange-700 dark:text-orange-400">{t("reading.glossary.flashcard.hard")}</span>
+              <span className="font-bold text-orange-700 dark:text-orange-400">{srsCounts.hard}</span>
+            </div>
+            <div className="flex items-center justify-between bg-blue-100 dark:bg-blue-950/30 rounded-lg px-3 py-2">
+              <span className="text-sm text-blue-700 dark:text-blue-400">{t("reading.glossary.flashcard.good")}</span>
+              <span className="font-bold text-blue-700 dark:text-blue-400">{srsCounts.good}</span>
+            </div>
+            <div className="flex items-center justify-between bg-green-100 dark:bg-green-950/30 rounded-lg px-3 py-2">
+              <span className="text-sm text-green-700 dark:text-green-400">{t("reading.glossary.flashcard.easy")}</span>
+              <span className="font-bold text-green-700 dark:text-green-400">{srsCounts.easy}</span>
+            </div>
+          </div>
+          <div className="text-center text-xs text-muted-foreground mt-2">
+            {t("reading.glossary.flashcard.totalReviews", { total })}
+          </div>
+        </div>
+        <Button onClick={handleRestart} className="gap-2">
+          <RotateCcw className="h-4 w-4" />
+          {t("reading.glossary.flashcard.restart")}
+        </Button>
+      </div>
+    );
+  }
+
+  if (!currentEntry) return null;
+
   const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
+  const progressPercent = totalOriginal > 0 ? ((totalOriginal - remainingCount) / totalOriginal) * 100 : 0;
+
+  const srsButtons: { action: SRSAction; colorClass: string; hoverClass: string; borderClass: string }[] = [
+    { action: "again", colorClass: "bg-rose-500 hover:bg-rose-600 text-white", hoverClass: "", borderClass: "" },
+    { action: "hard", colorClass: "bg-orange-500 hover:bg-orange-600 text-white", hoverClass: "", borderClass: "" },
+    { action: "good", colorClass: "bg-blue-500 hover:bg-blue-600 text-white", hoverClass: "", borderClass: "" },
+    { action: "easy", colorClass: "bg-green-500 hover:bg-green-600 text-white", hoverClass: "", borderClass: "" },
+  ];
 
   return (
     <div className="flex flex-col items-center gap-6 py-4">
       {isPrioritized && hasRatings && (
         <div className="text-xs text-muted-foreground">
-          {t("reading.glossary.wordStats", { 
-            hard: wordStats.hard, 
-            medium: wordStats.medium, 
-            easy: wordStats.easy 
+          {t("reading.glossary.wordStats", {
+            hard: wordStats.hard,
+            medium: wordStats.medium,
+            easy: wordStats.easy
           })}
         </div>
       )}
 
       <div className="w-full max-w-md space-y-2">
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{currentIndex + 1} / {totalCount}</span>
-          <span>{Math.round(((currentIndex + 1) / totalCount) * 100)}%</span>
+          <span>{t("reading.glossary.flashcard.remaining", { remaining: remainingCount, total: totalOriginal })}</span>
+          <span className="text-muted-foreground/70">
+            <span className="text-rose-500">A:{srsCounts.again}</span>
+            {" "}<span className="text-orange-500">H:{srsCounts.hard}</span>
+            {" "}<span className="text-blue-500">G:{srsCounts.good}</span>
+            {" "}<span className="text-green-500">E:{srsCounts.easy}</span>
+          </span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-300 rounded-full"
-            style={{ width: `${((currentIndex + 1) / totalCount) * 100}%` }}
+          <div
+            className="h-full bg-gradient-to-r from-green-500 to-green-400 transition-all duration-300 rounded-full"
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
       <div
-        className="relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000 touch-pan-y"
-        onClick={() => {
-          if (!isSwiping && Math.abs(swipeOffset) < 10) {
-            handleFlip();
-          }
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          touchAction: 'pan-y',
-        }}
+        className="relative w-full max-w-md aspect-[3/4] cursor-pointer perspective-1000"
+        onClick={handleFlip}
       >
-        {swipeOffset > 20 && (
-          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 text-primary/60 pointer-events-none">
-            <ChevronLeft className="h-12 w-12" />
-          </div>
-        )}
-        {swipeOffset < -20 && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 text-primary/60 pointer-events-none">
-            <ChevronRight className="h-12 w-12" />
-          </div>
-        )}
         <div
           className={cn(
             "absolute inset-0 transition-transform duration-500 transform-style-preserve-3d",
             isFlipped && "rotate-y-180"
           )}
           style={{
-            transform: `${isFlipped ? 'rotateY(180deg)' : ''} translateX(${swipeOffset}px)`,
-            transitionProperty: isSwiping ? 'none' : 'transform',
+            transform: isFlipped ? 'rotateY(180deg)' : '',
           }}
         >
           <div
@@ -455,53 +475,24 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             {t("reading.glossary.flashcard.rateCard")}
           </div>
           <div className="flex gap-2 justify-center">
-            <Button
-              variant={currentRating === "easy" ? "default" : "outline"}
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRate("easy");
-              }}
-              className="flex-1"
-            >
-              {t("reading.glossary.flashcard.easy")}
-            </Button>
-            <Button
-              variant={currentRating === "medium" ? "default" : "outline"}
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRate("medium");
-              }}
-              className="flex-1"
-            >
-              {t("reading.glossary.flashcard.medium")}
-            </Button>
-            <Button
-              variant={currentRating === "hard" ? "default" : "outline"}
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRate("hard");
-              }}
-              className="flex-1"
-            >
-              {t("reading.glossary.flashcard.hard")}
-            </Button>
+            {srsButtons.map(({ action, colorClass }) => (
+              <Button
+                key={action}
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSRS(action);
+                }}
+                className={cn("flex-1 font-medium", colorClass)}
+              >
+                {t(`reading.glossary.flashcard.${action}`)}
+              </Button>
+            ))}
           </div>
         </div>
       )}
 
       <div className="flex items-center gap-2 flex-wrap justify-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handlePrevious}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">{t("reading.glossary.flashcard.previous")}</span>
-        </Button>
-
         <Button
           variant={isPrioritized ? "default" : "secondary"}
           size="sm"
@@ -530,22 +521,10 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             <span className="hidden sm:inline">{t("reading.glossary.regenerate")}</span>
           </Button>
         )}
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNext}
-        >
-          <span className="hidden sm:inline">{t("reading.glossary.flashcard.next")}</span>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
       </div>
 
       <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-        <span className="hidden sm:flex items-center gap-1"><ChevronLeft className="h-3 w-3" /> Prev</span>
-        <span className="hidden sm:flex items-center gap-1"><ChevronRight className="h-3 w-3" /> Next</span>
-        <span className="hidden sm:inline">Space: Flip</span>
-        <span className="sm:hidden">← Swipe to navigate →</span>
+        <span className="hidden sm:inline">Space / Enter: {t("reading.glossary.flashcard.flip")}</span>
         <span className="sm:hidden">Tap to flip</span>
       </div>
     </div>
