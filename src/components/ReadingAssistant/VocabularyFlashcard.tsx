@@ -284,6 +284,18 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
   const remaining = reviewQueue.length;
   const progressPercent = totalOriginal > 0 ? ((totalOriginal - remaining) / totalOriginal) * 100 : 0;
 
+  const SRSStats = ({ counts }: { counts: SRSCounts }) => (
+    <span className="inline-flex items-center gap-1 text-xs">
+      <span className="text-rose-500 dark:text-rose-400">{t("reading.glossary.flashcard.again")}: {counts.again}</span>
+      <span className="text-muted-foreground/40">|</span>
+      <span className="text-orange-500 dark:text-orange-400">{t("reading.glossary.flashcard.hard")}: {counts.hard}</span>
+      <span className="text-muted-foreground/40">|</span>
+      <span className="text-blue-500 dark:text-blue-400">{t("reading.glossary.flashcard.good")}: {counts.good}</span>
+      <span className="text-muted-foreground/40">|</span>
+      <span className="text-green-500 dark:text-green-400">{t("reading.glossary.flashcard.easy")}: {counts.easy}</span>
+    </span>
+  );
+
   // Shared toolbar component
   const Toolbar = () => (
     <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -313,14 +325,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
         <div className="w-full max-w-md space-y-2">
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{t("reading.glossary.flashcard.remaining", { remaining: 0, total: totalOriginal })}</span>
-            <span>
-              {t("reading.glossary.flashcard.srsStats", {
-                again: srsCounts.again,
-                hard: srsCounts.hard,
-                good: srsCounts.good,
-                easy: srsCounts.easy,
-              })}
-            </span>
+            <SRSStats counts={srsCounts} />
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full w-full transition-all duration-300" />
@@ -371,14 +376,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
       <div className="w-full max-w-md space-y-2">
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{t("reading.glossary.flashcard.remaining", { remaining, total: totalOriginal })}</span>
-          <span>
-            {t("reading.glossary.flashcard.srsStats", {
-              again: srsCounts.again,
-              hard: srsCounts.hard,
-              good: srsCounts.good,
-              easy: srsCounts.easy,
-            })}
-          </span>
+          <SRSStats counts={srsCounts} />
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div
