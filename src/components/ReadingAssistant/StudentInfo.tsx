@@ -89,7 +89,7 @@ function StudentInfo() {
         {status === "authenticated" && session?.user?.name && (
           <div className="flex items-center gap-1 text-sm">
             <Label>{t("reading.studentInfo.nameLabel")}:</Label>
-            <span className="font-bold text-primary">{session.user.name}</span>
+            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold">{session.user.name}</span>
             {session.user.role && (
               <>
                 <span className="text-muted-foreground">({t("reading.studentInfo.roleLabel")}:</span>
