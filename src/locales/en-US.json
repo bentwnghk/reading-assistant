@@ -748,7 +748,6 @@
       "simplifiedText": "Simplified Text",
       "sentenceAnalysis": "Sentence Analysis",
       "glossary": "Generate Glossary",
-      "flashcardReview": "Flashcard Review",
       "tutorQuestion": "AI Tutor",
       "count": "Count"
     },
@@ -776,7 +775,6 @@
       "simplifiedText": "Simplified Text",
       "sentenceAnalysis": "Sentence Analysis",
       "glossary": "Glossary",
-      "flashcardReview": "Flashcard Review",
       "spellingGame": "Spelling Game",
       "vocabQuiz": "Vocab Quiz",
       "readingTest": "Reading Test",

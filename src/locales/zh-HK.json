@@ -748,7 +748,6 @@
       "simplifiedText": "簡化文本",
       "sentenceAnalysis": "句子分析",
       "glossary": "生成詞彙表",
-      "flashcardReview": "生字卡複習",
       "tutorQuestion": "AI 導師",
       "count": "次數"
     },
@@ -776,7 +775,6 @@
       "simplifiedText": "簡化文本",
       "sentenceAnalysis": "句子分析",
       "glossary": "詞彙表",
-      "flashcardReview": "生字卡複習",
       "spellingGame": "拼字遊戲",
       "vocabQuiz": "詞彙測驗",
       "readingTest": "閱讀測驗",
