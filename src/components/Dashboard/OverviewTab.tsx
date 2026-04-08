@@ -298,12 +298,12 @@ export function OverviewTab() {
   const aiFeaturesData = useMemo(
     () => [
       { name: t("dashboard.features.summary"), value: m.summariesGenerated, fill: "#3b82f6" },
-      { name: t("dashboard.features.mindMap"), en: m.mindMapsEnglish, zh: m.mindMapsChinese, fill: "#8b5cf6", fill2: "#ec4899" },
+      { name: t("dashboard.features.mindMap"), en: m.mindMapsEnglish, zh: m.mindMapsChinese, fill: "#8b5cf6", fill2: "#a78bfa" },
       { name: t("dashboard.features.adaptedText"), value: m.adaptedTextsGenerated, fill: "#22c55e" },
       { name: t("dashboard.features.simplifiedText"), value: m.simplifiedTextsGenerated, fill: "#14b8a6" },
       { name: t("dashboard.features.sentenceAnalysis"), value: m.totalSentencesAnalyzed, fill: "#f97316" },
       { name: t("dashboard.features.glossary"), value: m.glossariesGenerated, fill: "#eab308" },
-      { name: t("dashboard.features.tutorQuestion"), value: m.totalTutorQuestions, fill: "#ec4899" },
+      { name: t("dashboard.features.tutorQuestion"), value: m.totalTutorQuestions, fill: "#a855f7" },
     ],
     [m, t]
   );
