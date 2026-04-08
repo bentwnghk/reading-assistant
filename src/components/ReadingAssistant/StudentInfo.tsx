@@ -34,6 +34,16 @@ function StudentInfo() {
     return levelMap[age] || t("reading.levels.form6");
   }
 
+  function getRoleBadgeStyle(role: string): string {
+    const styleMap: Record<string, string> = {
+      "super-admin": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+      admin: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      teacher: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+      student: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    };
+    return styleMap[role] || "bg-muted text-muted-foreground";
+  }
+
   function getLevelColor(age: number): string {
     if (age <= 11) return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
     if (age <= 14) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
@@ -79,9 +89,15 @@ function StudentInfo() {
         {status === "authenticated" && session?.user?.name && (
           <div className="flex items-center gap-1 text-sm">
             <Label>{t("reading.studentInfo.nameLabel")}:</Label>
-            <span className="font-medium">{session.user.name}</span>
+            <span className="font-bold text-primary">{session.user.name}</span>
             {session.user.role && (
-              <span className="text-muted-foreground">({t("reading.studentInfo.roleLabel")}: {t(`reading.studentInfo.roles.${session.user.role}`)})</span>
+              <>
+                <span className="text-muted-foreground">({t("reading.studentInfo.roleLabel")}:</span>
+                <span className={cn("px-1.5 py-0.5 rounded text-xs font-semibold", getRoleBadgeStyle(session.user.role))}>
+                  {t(`reading.studentInfo.roles.${session.user.role}`)}
+                </span>
+                <span className="text-muted-foreground">)</span>
+              </>
             )}
           </div>
         )}
