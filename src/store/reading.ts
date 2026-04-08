@@ -123,90 +123,7 @@ export interface ReadingStore {
   testMode: ReadingTestMode;
   vocabularyQuizScore: number;
   spellingGameBestScore: number;
-  chatHistory: ChatMessage[];
-  status: ReadingStatus;
-  error: string | null;
-  originalDifficulty: TextDifficultyResult | null;
-  adaptedDifficulty: TextDifficultyResult | null;
-  simplifiedDifficulty: TextDifficultyResult | null;
-  includeGlossary: boolean;
-  includeSentenceAnalysis: boolean;
-  createdAt: number;
-  updatedAt: number;
-}
-
-interface ReadingActions {
-  setDocTitle: (title: string) => void;
-  setStudentAge: (age: number) => void;
-  setOriginalImages: (images: string[]) => void;
-  addOriginalImage: (image: string) => void;
-  removeOriginalImage: (index: number) => void;
-  setExtractedText: (text: string) => void;
-  setSummary: (summary: string) => void;
-  setAdaptedText: (text: string) => void;
-  setSimplifiedText: (text: string) => void;
-  addHighlightedWord: (word: string) => void;
-  removeHighlightedWord: (word: string) => void;
-  setHighlightedWords: (words: string[]) => void;
-  setSentenceAnalysis: (sentence: string, analysis: string) => void;
-  removeSentenceAnalysis: (sentence: string) => void;
-  getSentenceAnalysis: (sentence: string) => SentenceAnalysis | null;
-  setMindMap: (mermaidCode: string) => void;
-  setReadingTest: (questions: ReadingTestQuestion[]) => void;
-  setUserAnswer: (questionId: string, answer: string) => void;
-  setQuestionEarnedPoints: (questionId: string, points: number) => void;
-  setGlossary: (entries: GlossaryEntry[]) => void;
-  setGlossaryRating: (word: string, rating: GlossaryRating) => void;
-  setTestScore: (score: number) => void;
-  setTestCompleted: (completed: boolean) => void;
-  setTestPoints: (earned: number, total: number) => void;
-  setTestShowChinese: (show: boolean) => void;
-  setTestMode: (mode: ReadingTestMode) => void;
-  setVocabularyQuizScore: (score: number) => void;
-  setSpellingGameBestScore: (score: number) => void;
-  addChatMessage: (message: ChatMessage) => void;
-  clearChatHistory: () => void;
-  setStatus: (status: ReadingStatus) => void;
-  setError: (error: string | null) => void;
-  setStreaming: (value: boolean) => void;
-  setOriginalDifficulty: (result: TextDifficultyResult | null) => void;
-  setAdaptedDifficulty: (result: TextDifficultyResult | null) => void;
-  setSimplifiedDifficulty: (result: TextDifficultyResult | null) => void;
-  clearDifficultyAnalysis: () => void;
-  setIncludeGlossary: (include: boolean) => void;
-  setIncludeSentenceAnalysis: (include: boolean) => void;
-  clearDerivedData: () => void;
-  loadFromRepository: (text: RepositoryText) => void;
-  setSource: (source: TextSource) => void;
-  reset: () => void;
-  backup: () => ReadingStore;
-  restore: (session: ReadingStore) => Promise<void>;
-}
-
-const defaultValues: ReadingStore = {
-  id: "",
-  docTitle: "",
-  studentAge: 13,
-  source: "upload" as TextSource,
-  originalImages: [],
-  extractedText: "",
-  summary: "",
-  adaptedText: "",
-  simplifiedText: "",
-  highlightedWords: [],
-  analyzedSentences: {},
-  mindMap: "",
-  readingTest: [],
-  glossary: [],
-  glossaryRatings: {},
-  testScore: 0,
-  testCompleted: false,
-  testEarnedPoints: 0,
-  testTotalPoints: 0,
-  testShowChinese: false,
-  testMode: "all-at-once",
-  vocabularyQuizScore: 0,
-  spellingGameBestScore: 0,
+  flashcardReviewsCompleted: number;
   chatHistory: [],
   status: "idle",
   error: null,
@@ -578,6 +495,18 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      incrementFlashcardReviews: () =>
+        set((state) => {
+          const newState = {
+            flashcardReviewsCompleted: state.flashcardReviewsCompleted + 1,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

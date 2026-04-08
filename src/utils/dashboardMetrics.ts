@@ -32,6 +32,7 @@ export interface DailyActivity {
   simplifiedText: number;
   sentenceAnalysis: number;
   glossary: number;
+  flashcardReview: number;
   spellingGame: number;
   vocabQuiz: number;
   readingTest: number;
@@ -53,6 +54,7 @@ export interface DashboardMetrics {
   glossariesGenerated: number;
   totalVocabulary: number;
   totalTutorQuestions: number;
+  flashcardReviewsCompleted: number;
   spellingScores: SessionScore[];
   quizScores: SessionScore[];
   testScores: SessionScore[];
@@ -69,6 +71,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "simplifiedText",
   "sentenceAnalysis",
   "glossary",
+  "flashcardReview",
   "spellingGame",
   "vocabQuiz",
   "readingTest",
@@ -83,6 +86,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
   glossary: "#eab308",
+  flashcardReview: "#10b981",
   spellingGame: "#ec4899",
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
@@ -138,6 +142,7 @@ function emptyDailyActivity(date: string): DailyActivity {
     simplifiedText: 0,
     sentenceAnalysis: 0,
     glossary: 0,
+    flashcardReview: 0,
     spellingGame: 0,
     vocabQuiz: 0,
     readingTest: 0,
@@ -162,6 +167,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       glossariesGenerated: 0,
       totalVocabulary: 0,
       totalTutorQuestions: 0,
+      flashcardReviewsCompleted: 0,
       spellingScores: [],
       quizScores: [],
       testScores: [],
@@ -212,6 +218,11 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   const totalTutorQuestions = sorted.reduce(
     (sum, item) =>
       sum + (item.chatHistory || []).filter((m) => m.role === "user").length,
+    0
+  );
+
+  const flashcardReviewsCompleted = sorted.reduce(
+    (sum, item) => sum + (item.flashcardReviewsCompleted || 0),
     0
   );
 
@@ -275,6 +286,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     if (item.simplifiedText) existing.simplifiedText += 1;
     existing.sentenceAnalysis += Object.keys(item.analyzedSentences || {}).length;
     if ((item.glossary || []).length > 0) existing.glossary += 1;
+    existing.flashcardReview += (item.flashcardReviewsCompleted || 0);
     if ((item.spellingGameBestScore || 0) > 0) existing.spellingGame += 1;
     if ((item.vocabularyQuizScore || 0) > 0) existing.vocabQuiz += 1;
     if (item.testCompleted) existing.readingTest += 1;
@@ -299,6 +311,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     glossariesGenerated,
     totalVocabulary,
     totalTutorQuestions,
+    flashcardReviewsCompleted,
     spellingScores,
     quizScores,
     testScores,
