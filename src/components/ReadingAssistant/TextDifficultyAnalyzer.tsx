@@ -159,7 +159,7 @@ export default function TextDifficultyAnalyzer() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <div className="flex items-center justify-between border-b pb-4 mb-4">
+      <div className="flex flex-wrap md:flex-nowrap items-center justify-between border-b pb-4 mb-4 gap-2">
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-muted-foreground" />
           {t("reading.difficulty.title")}
