@@ -362,7 +362,7 @@ export function OverviewTab() {
 
       {/* Daily Activity Stacked Bar Chart (full width) */}
       <ChartCard title={t("dashboard.charts.dailyActivity")}>
-        <div className="flex gap-1.5 mb-3">
+        <div className="flex flex-wrap gap-1.5 mb-3">
           {TIME_RANGES.map((range) => (
             <Button
               key={range.days}
