@@ -161,6 +161,10 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
             <div className="font-bold text-lg tabular-nums">{stats.allTime.totalVocabWords}</div>
           </div>
           <div>
+            <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgQuizScore")}</div>
+            <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeQuizScore}</div>
+          </div>
+          <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgTestScore")}</div>
             <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeTestScore}</div>
           </div>

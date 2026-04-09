@@ -52,6 +52,7 @@ export interface PersonalStats {
     totalSessions: number
     longestStreak: number
     totalVocabWords: number
+    avgAllTimeQuizScore: number
     avgAllTimeTestScore: number
     totalFlashcardReviews: number
   }
@@ -521,9 +522,10 @@ export async function getPersonalStats(
     // ── All-time: sessions and vocab from reading_sessions only ──
     const sessionStatsResult = await client.query(
       `SELECT
-         COUNT(id)::int                                     AS total_sessions,
-         COALESCE(AVG(NULLIF(test_score, 0)), 0)           AS avg_test_score,
-         COALESCE(SUM(jsonb_array_length(glossary)), 0)    AS total_vocab
+         COUNT(id)::int                                       AS total_sessions,
+         COALESCE(AVG(NULLIF(test_score, 0)), 0)             AS avg_test_score,
+         COALESCE(AVG(NULLIF(vocabulary_quiz_score, 0)), 0)  AS avg_quiz_score,
+         COALESCE(SUM(jsonb_array_length(glossary)), 0)      AS total_vocab
        FROM reading_sessions
        WHERE user_id = $1`,
       [userId]
@@ -642,6 +644,7 @@ export async function getPersonalStats(
         totalSessions:         parseInt(sessionStats.total_sessions) || 0,
         longestStreak,
         totalVocabWords:       parseInt(sessionStats.total_vocab) || 0,
+        avgAllTimeQuizScore:   Math.round(parseFloat(sessionStats.avg_quiz_score) || 0),
         avgAllTimeTestScore:   Math.round(parseFloat(sessionStats.avg_test_score) || 0),
         totalFlashcardReviews: parseInt(flashcardResult.rows[0]?.total_flashcard_reviews ?? "0") || 0,
       },

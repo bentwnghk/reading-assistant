@@ -64,6 +64,7 @@ export interface PersonalStats {
     totalSessions: number
     longestStreak: number
     totalVocabWords: number
+    avgAllTimeQuizScore: number
     avgAllTimeTestScore: number
     totalFlashcardReviews: number
   }
