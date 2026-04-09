@@ -302,11 +302,11 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
     <div className="flex items-center gap-2 flex-wrap justify-center">
       <Button variant={isPrioritized ? "default" : "secondary"} size="sm" onClick={handlePrioritize}>
         <Target className="h-4 w-4" />
-        <span className="hidden sm:inline">{t("reading.glossary.prioritizeHard")}</span>
+        <span>{t("reading.glossary.prioritizeHard")}</span>
       </Button>
       <Button variant={isShuffled ? "default" : "secondary"} size="sm" onClick={handleShuffle}>
         <Shuffle className="h-4 w-4" />
-        <span className="hidden sm:inline">{t("reading.glossary.flashcard.shuffle")}</span>
+        <span>{t("reading.glossary.flashcard.shuffle")}</span>
       </Button>
       {(isShuffled || isPrioritized) && (
         <Button variant="outline" size="sm" onClick={handleResetOrder}>
