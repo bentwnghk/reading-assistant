@@ -1041,7 +1041,7 @@ function AdaptedText() {
           </div>
           <Button onClick={handleDownloadWord} variant="outline" size="sm">
             <FileDown className="h-4 w-4" />
-            <span className="hidden sm:inline">{t("reading.extractedText.downloadWord")}</span>
+            <span>{t("reading.extractedText.downloadWord")}</span>
           </Button>
         </div>
       </div>
