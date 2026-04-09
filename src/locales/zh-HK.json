@@ -491,7 +491,7 @@
       "downloadWord": "下載 Word",
       "downloadBlank": "下載空白試卷",
       "downloadWithAnswers": "下載含答案",
-      "answerKey": "閱讀測試答案",
+      "answerKey": "閱讀測驗答案",
       "paragraph": "第 {{num}} 段",
       "skills": {
         "mainIdea": "主旨",
@@ -743,7 +743,7 @@
       "sentencesAnalyzed": "已分析句子",
       "totalVocabulary": "總詞彙量",
       "tutorQuestions": "AI 導師提問",
-      "avgProgress": "平均進度"
+      "avgProgress": "平均學習進度"
     },
     "features": {
       "summary": "摘要",
@@ -1316,7 +1316,7 @@
     "sortBy": {
       "weekly_score": "分數",
       "reading_streak_days": "連續天數",
-      "avg_test_score": "閱讀測試",
+      "avg_test_score": "閱讀測驗",
       "avg_quiz_score": "詞彙測驗",
       "avg_spelling_score": "拼字遊戲",
       "total_vocabulary_words": "詞彙量",
@@ -1328,7 +1328,7 @@
       "student": "學生",
       "score": "本週分數",
       "streak": "連續天數",
-      "test": "閱讀測試",
+      "test": "閱讀測驗",
       "quiz": "詞彙測驗",
       "spelling": "拼字",
       "vocab": "詞彙量",
@@ -1405,8 +1405,8 @@
             "desc": "每天學習保持你的連續紀錄！連續練習建立動力——錯過一天就要重新開始。"
           },
           "testScore": {
-            "title": "閱讀測試",
-            "desc": "你的閱讀理解測試平均分。仔細閱讀並用心作答，提升這個數字。"
+            "title": "閱讀測驗",
+            "desc": "你的閱讀理解測驗平均分。仔細閱讀並用心作答，提升這個數字。"
           },
           "quizScore": {
             "title": "詞彙測驗",
