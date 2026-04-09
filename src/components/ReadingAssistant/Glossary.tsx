@@ -429,7 +429,7 @@ function Glossary() {
 
   return (
     <section className="p-4 border rounded-md mt-4">
-      <div className="flex items-center justify-between border-b pb-4 mb-4">
+      <div className="flex flex-wrap md:flex-nowrap items-center justify-between border-b pb-4 mb-4 gap-2">
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <BookMarked className="h-5 w-5 text-muted-foreground" />
           {t("reading.glossary.title")}
@@ -458,7 +458,7 @@ function Glossary() {
                 size="sm"
               >
                 <FileDown className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("reading.glossary.downloadWord")}</span>
+                <span>{t("reading.glossary.downloadWord")}</span>
               </Button>
               <Button
                 onClick={handleDownloadExcel}
@@ -466,7 +466,7 @@ function Glossary() {
                 size="sm"
               >
                 <FileSpreadsheet className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("reading.glossary.downloadExcel")}</span>
+                <span>{t("reading.glossary.downloadExcel")}</span>
               </Button>
 
             </>
