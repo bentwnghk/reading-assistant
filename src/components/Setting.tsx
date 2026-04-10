@@ -61,7 +61,6 @@ const BUILD_MODE = process.env.NEXT_PUBLIC_BUILD_MODE;
 const formSchema = z.object({
   provider: z.string(),
   mode: z.enum(["local", "proxy", "subscription"]).optional(),
-  model: z.enum(AVAILABLE_MODELS),
   visionModel: z.enum(VISION_MODELS),
   summaryModel: z.enum(AVAILABLE_MODELS),
   mindMapModel: z.enum(AVAILABLE_MODELS),
