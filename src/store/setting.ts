@@ -190,7 +190,7 @@ export const useSettingStore = create(
           const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
           const state = parsed.state as unknown as Record<string, unknown>;
           const modelFields: (keyof SettingStore)[] = [
-            "summaryModel", "mindMapModel", "adaptedTextModel",
+            "model", "summaryModel", "mindMapModel", "adaptedTextModel",
             "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
           ];
           for (const field of modelFields) {
