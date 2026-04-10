@@ -185,7 +185,25 @@ export const useSettingStore = create(
       storage: {
         getItem: (name) => {
           const value = localStorage.getItem(name);
-          return value ? (JSON.parse(value) as StorageValue<SettingStore & SettingActions>) : null;
+          if (!value) return null;
+          const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
+          const state = parsed.state as Record<string, unknown>;
+          const modelFields: (keyof SettingStore)[] = [
+            "model", "summaryModel", "mindMapModel", "adaptedTextModel",
+            "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
+          ];
+          for (const field of modelFields) {
+            if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {
+              state[field] = defaultValues[field];
+            }
+          }
+          if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
+            state.visionModel = defaultValues.visionModel;
+          }
+          if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
+            state.tutorModel = defaultValues.tutorModel;
+          }
+          return parsed;
         },
         setItem: (name, value) => {
           if (currentUserId) return;
