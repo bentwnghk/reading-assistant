@@ -4,7 +4,7 @@ import { persist, StorageValue } from "zustand/middleware";
 export const AVAILABLE_MODELS = [
   "gpt-5.4-mini",
   "gpt-5.4-nano",
-  "gpt-5-mini",
+//  "gpt-5-mini",
   "deepseek-chat",
   "gemini-3-flash-preview",
 ] as const;
@@ -32,7 +32,7 @@ export type ApiMode = "local" | "proxy" | "subscription" | "";
 export interface SettingStore {
   provider: string;
   mode: ApiMode;
-  model: AvailableModel;
+//  model: AvailableModel;
   visionModel: VisionModel;
   summaryModel: AvailableModel;
   mindMapModel: AvailableModel;
@@ -127,7 +127,7 @@ function debouncedSync(settings: Partial<SettingStore>) {
 export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
-  model: "gpt-5-mini",
+//  model: "gpt-5-mini",
   visionModel: "gpt-5-nano",
   summaryModel: "deepseek-chat",
   mindMapModel: "deepseek-chat",
@@ -190,7 +190,7 @@ export const useSettingStore = create(
           const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
           const state = parsed.state as unknown as Record<string, unknown>;
           const modelFields: (keyof SettingStore)[] = [
-            "model", "summaryModel", "mindMapModel", "adaptedTextModel",
+            "summaryModel", "mindMapModel", "adaptedTextModel",
             "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
           ];
           for (const field of modelFields) {
