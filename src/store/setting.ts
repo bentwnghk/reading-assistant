@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist, StorageValue } from "zustand/middleware";
 
 export const AVAILABLE_MODELS = [
-  "gpt-5-mini",
   "gpt-5.4-mini",
   "gpt-5.4-nano",
   "deepseek-chat",
@@ -127,7 +126,7 @@ function debouncedSync(settings: Partial<SettingStore>) {
 export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
-  model: "gpt-5-mini",
+  model: "deepseek-chat",
   visionModel: "gpt-5-nano",
   summaryModel: "deepseek-chat",
   mindMapModel: "deepseek-chat",
