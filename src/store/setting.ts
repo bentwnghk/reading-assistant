@@ -187,7 +187,7 @@ export const useSettingStore = create(
           const value = localStorage.getItem(name);
           if (!value) return null;
           const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
-          const state = parsed.state as Record<string, unknown>;
+          const state = parsed.state as unknown as Record<string, unknown>;
           const modelFields: (keyof SettingStore)[] = [
             "model", "summaryModel", "mindMapModel", "adaptedTextModel",
             "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
