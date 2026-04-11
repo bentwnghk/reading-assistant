@@ -846,13 +846,13 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
           disabled={currentQuestionIndex === 0}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          {t("reading.glossary.flashcard.previous")}
+          {t("reading.glossary.quiz.previous")}
         </Button>
 
         <Button onClick={goToNext} disabled={!currentAnswer}>
           {currentQuestionIndex === questions.length - 1
             ? t("reading.glossary.quiz.submitQuiz")
-            : t("reading.glossary.flashcard.next")}
+            : t("reading.glossary.quiz.next")}
           {currentQuestionIndex !== questions.length - 1 && (
             <ChevronRight className="h-4 w-4 ml-2" />
           )}

@@ -492,6 +492,8 @@
       "downloadBlank": "Download Blank Test",
       "downloadWithAnswers": "Download with Answers",
       "answerKey": "Reading Test Answer Key",
+      "previous": "Previous",
+      "next": "Next",
       "paragraph": "Para. {{num}}",
       "skills": {
         "mainIdea": "Main Idea",
@@ -556,7 +558,9 @@
         "reviewCompleteDesc": "You reviewed {{total}} cards in this session.",
         "restart": "Restart",
         "noCards": "Generate a glossary first to use flashcards",
-        "clickFlip": "Click to flip"
+        "clickFlip": "Click to flip",
+        "previous": "Previous",
+        "next": "Next"
       },
       "quiz": {
         "title": "Vocabulary Quiz",
@@ -606,7 +610,9 @@
         "downloadWord": "Download Word",
         "downloadBlank": "Download Blank Quiz",
         "downloadWithAnswers": "Download with Answers",
-        "correctAnswer": "Correct Answer"
+        "correctAnswer": "Correct Answer",
+        "previous": "Previous",
+        "next": "Next"
       },
       "help": {
         "title": "Vocabulary Guide",

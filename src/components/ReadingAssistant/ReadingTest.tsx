@@ -990,7 +990,7 @@ function ReadingTest() {
               disabled={currentQuestionIndex === 0}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {t("reading.glossary.flashcard.previous")}
+              {t("reading.readingTest.previous")}
             </Button>
 
             {currentQuestionIndex === questionsToDisplay.length - 1 ? (
@@ -1012,7 +1012,7 @@ function ReadingTest() {
               </Button>
             ) : (
               <Button onClick={goToNext} disabled={!currentAnswer}>
-                {t("reading.glossary.flashcard.next")}
+                {t("reading.readingTest.next")}
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             )}
