@@ -446,7 +446,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             )}
             <div className="absolute bottom-4 text-xs text-muted-foreground">
               <span className="hidden sm:inline">{t("reading.glossary.flashcard.clickFlip")}</span>
-              <span className="sm:hidden">Tap to flip</span>
+              <span className="sm:hidden">{t("reading.glossary.flashcard.tapFlip")}</span>
             </div>
           </div>
 
