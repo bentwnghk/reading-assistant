@@ -163,7 +163,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   const filteredQuestions = useMemo(() => {
     const result = searchQuery
       ? questions.filter(q => q.questionText.toLowerCase().includes(searchQuery.toLowerCase()))
-      : questions
+      : [...questions]
 
     result.sort((a, b) => {
       let comparison = 0
