@@ -1405,7 +1405,7 @@
         "categories": {
           "weeklyScore": {
             "title": "Weekly Score",
-            "desc": "Your all-around performance metric. Every reading session, test, quiz, and game contributes points to your weekly total."
+            "desc": "Your all-around performance metric. Every reading session, reading test, vocab quiz, and spelling game contributes points to your weekly total."
           },
           "streak": {
             "title": "Reading Streak",
@@ -1433,7 +1433,7 @@
           },
           "flashcards": {
             "title": "Flashcards",
-            "desc": "Flashcard reviews completed. Rate each card (Easy, Good, Hard) to strengthen your memory and rack up reviews."
+            "desc": "Flashcard reviews completed. Rate each card (Again, Hard, Good, Easy) to strengthen your memory and rack up reviews."
           }
         },
         "tip": {
