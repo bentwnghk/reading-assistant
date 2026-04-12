@@ -1,6 +1,7 @@
 "use client";
 
 import type { StudentMetrics } from "@/utils/teacherDashboardMetrics";
+import { getQuartileColor } from "@/utils/teacherDashboardMetrics";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import {
@@ -12,6 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Cell,
 } from "recharts";
 
 interface AvgProgressChartProps {
@@ -51,6 +53,11 @@ export default function AvgProgressChart({ students, classAvg }: AvgProgressChar
     }));
   }, [students]);
 
+  const quartileColors = useMemo(
+    () => getQuartileColor(chartData.map((d) => d.progress)),
+    [chartData]
+  );
+
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center justify-between mb-1">
@@ -78,7 +85,11 @@ export default function AvgProgressChart({ students, classAvg }: AvgProgressChar
             <YAxis tick={{ fontSize: 10 }} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={classAvg} stroke="#22c55e" strokeDasharray="4 4" strokeWidth={1} />
-            <Bar dataKey="progress" name={t("teacherDashboard.charts.avgProgress")} fill="#22c55e" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="progress" name={t("teacherDashboard.charts.avgProgress")} fill="#22c55e" radius={[4, 4, 0, 0]}>
+              {chartData.map((_entry, index) => (
+                <Cell key={index} fill={quartileColors[index]} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       )}

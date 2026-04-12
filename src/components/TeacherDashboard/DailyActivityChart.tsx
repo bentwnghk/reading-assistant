@@ -43,7 +43,7 @@ function ActivityTooltip({
         .filter((p) => p.value > 0)
         .map((entry, i) => (
           <p key={i} className="flex justify-between gap-4" style={{ color: entry.fill }}>
-            <span>{t(`dashboard.activities.${entry.name}`)}</span>
+            <span>{entry.name}</span>
             <span className="font-medium tabular-nums">{entry.value}</span>
           </p>
         ))}

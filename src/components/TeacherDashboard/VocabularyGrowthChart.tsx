@@ -55,8 +55,18 @@ function CustomTooltip({
 export default function VocabularyGrowthChart({ students }: VocabularyGrowthChartProps) {
   const { t, i18n } = useTranslation();
   const [timeRange, setTimeRange] = useState(30);
+  const [hiddenStudents, setHiddenStudents] = useState<Set<string>>(new Set());
 
   const studentNames = useMemo(() => students.map((s) => s.userName), [students]);
+
+  const toggleStudent = (name: string) => {
+    setHiddenStudents((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
 
   const chartData = useMemo(() => {
     return getVocabularyGrowthData(students, timeRange);
@@ -118,20 +128,30 @@ export default function VocabularyGrowthChart({ students }: VocabularyGrowthChar
                   fill={STUDENT_COLORS[i % STUDENT_COLORS.length]}
                   fillOpacity={0.1}
                   strokeWidth={1.5}
+                  hide={hiddenStudents.has(name)}
                 />
               ))}
             </AreaChart>
           </ResponsiveContainer>
           <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3">
-            {studentNames.map((name, i) => (
-              <div key={name} className="flex items-center gap-1.5 text-xs">
-                <span
-                  className="w-2.5 h-2.5 rounded-sm shrink-0"
-                  style={{ backgroundColor: STUDENT_COLORS[i % STUDENT_COLORS.length] }}
-                />
-                <span className="text-muted-foreground">{name}</span>
-              </div>
-            ))}
+            {studentNames.map((name, i) => {
+              const isHidden = hiddenStudents.has(name);
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  className="flex items-center gap-1.5 text-xs cursor-pointer opacity-100 hover:opacity-80 transition-opacity"
+                  style={{ opacity: isHidden ? 0.35 : 1 }}
+                  onClick={() => toggleStudent(name)}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-sm shrink-0"
+                    style={{ backgroundColor: STUDENT_COLORS[i % STUDENT_COLORS.length] }}
+                  />
+                  <span className="text-muted-foreground">{name}</span>
+                </button>
+              );
+            })}
           </div>
         </>
       ) : (

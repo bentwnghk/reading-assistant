@@ -1,6 +1,7 @@
 "use client";
 
 import type { StudentMetrics } from "@/utils/teacherDashboardMetrics";
+import { getQuartileColor } from "@/utils/teacherDashboardMetrics";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 import {
@@ -12,6 +13,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Cell,
 } from "recharts";
 
 interface TotalVocabularyChartProps {
@@ -52,6 +54,11 @@ export default function TotalVocabularyChart({ students, classTotal, classAvg }:
     }));
   }, [students]);
 
+  const quartileColors = useMemo(
+    () => getQuartileColor(chartData.map((d) => d.vocab)),
+    [chartData]
+  );
+
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center justify-between mb-1">
@@ -80,7 +87,11 @@ export default function TotalVocabularyChart({ students, classTotal, classAvg }:
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={classAvg} stroke="#6366f1" strokeDasharray="4 4" strokeWidth={1} />
-            <Bar dataKey="vocab" name={t("teacherDashboard.charts.totalVocabulary")} fill="#6366f1" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="vocab" name={t("teacherDashboard.charts.totalVocabulary")} fill="#6366f1" radius={[4, 4, 0, 0]}>
+              {chartData.map((_entry, index) => (
+                <Cell key={index} fill={quartileColors[index]} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       )}

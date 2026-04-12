@@ -1,7 +1,7 @@
 "use client";
 
 import type { StudentMetrics } from "@/utils/teacherDashboardMetrics";
-import { READING_TEXT_PERIODS } from "@/utils/teacherDashboardMetrics";
+import { READING_TEXT_PERIODS, getQuartileColor } from "@/utils/teacherDashboardMetrics";
 import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
 import {
@@ -56,6 +56,11 @@ export default function ReadingTextsChart({ students, classTotal, classAvg }: Re
     }));
   }, [students, period]);
 
+  const quartileColors = useMemo(
+    () => getQuartileColor(chartData.map((d) => d.count)),
+    [chartData]
+  );
+
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center justify-between mb-1">
@@ -98,10 +103,9 @@ export default function ReadingTextsChart({ students, classTotal, classAvg }: Re
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={classAvg} stroke="#6366f1" strokeDasharray="4 4" strokeWidth={1} />
             <Bar dataKey="count" name={t("teacherDashboard.charts.readingTexts")} fill="#3b82f6" radius={[4, 4, 0, 0]}>
-              {chartData.map((_entry, index) => {
-                const hue = (index * 137) % 360;
-                return <Cell key={index} fill={`hsl(${hue}, 70%, 55%)`} />;
-              })}
+              {chartData.map((_entry, index) => (
+                <Cell key={index} fill={quartileColors[index]} />
+              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

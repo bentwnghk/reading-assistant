@@ -126,6 +126,18 @@ export const SPELLING_BUCKETS = [
   { range: "81-100", min: 81, max: 100, fill: "#3b82f6" },
 ] as const;
 
+export const QUARTILE_COLORS = ["#ef4444", "#f97316", "#22c55e", "#3b82f6"] as const;
+
+export function getQuartileColor(values: number[]): string[] {
+  if (values.length === 0) return [];
+  const sorted = values.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+  const result = new Array(values.length);
+  for (let i = 0; i < sorted.length; i++) {
+    result[sorted[i].i] = QUARTILE_COLORS[Math.min(3, Math.floor((i * 4) / sorted.length))];
+  }
+  return result;
+}
+
 export const AI_USAGE_KEYS = [
   "summary",
   "mindMap",
