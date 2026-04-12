@@ -832,8 +832,10 @@
   "teacherDashboard": {
     "title": "Teacher Dashboard",
     "description": "Track your students' reading and learning activity, AI usage, scores, and vocabulary growth over time.",
+    "selectSchool": "Select a school",
     "selectClass": "Select a class",
     "selectClassPrompt": "Please select a class to view student data.",
+    "allSchools": "All Schools",
     "allClasses": "All Classes",
     "classTotal": "Total",
     "classAvg": "Avg",

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getTeacherDashboardData, getTeacherDashboardDataForSchool, canAccessClass, getSchoolForUser } from "@/lib/users"
+import { getTeacherDashboardData, getTeacherDashboardDataForSchool, getTeacherDashboardDataAllSchools, canAccessClass, getSchoolForUser } from "@/lib/users"
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth()
@@ -18,17 +18,24 @@ export async function GET(
   }
 
   const { id } = await params
+  const { searchParams } = new URL(request.url)
+  const schoolId = searchParams.get("schoolId")
 
   try {
     if (id === "all") {
       if (role === "super-admin") {
-        return NextResponse.json({ error: "School ID required for super-admin" }, { status: 400 })
+        if (schoolId && schoolId !== "all") {
+          const data = await getTeacherDashboardDataForSchool(schoolId)
+          return NextResponse.json(data)
+        }
+        const data = await getTeacherDashboardDataAllSchools()
+        return NextResponse.json(data)
       }
-      const schoolId = await getSchoolForUser(session.user.id)
-      if (!schoolId) {
+      const userSchoolId = await getSchoolForUser(session.user.id)
+      if (!userSchoolId) {
         return NextResponse.json({ error: "No school assigned" }, { status: 400 })
       }
-      const data = await getTeacherDashboardDataForSchool(schoolId)
+      const data = await getTeacherDashboardDataForSchool(userSchoolId)
       return NextResponse.json(data)
     }
 

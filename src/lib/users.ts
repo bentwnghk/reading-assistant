@@ -224,6 +224,68 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
   }
 }
 
+export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessionData[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT 
+        rs.id, rs.user_id, rs.doc_title,
+        rs.summary IS NOT NULL AND rs.summary != '' as summary,
+        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
+        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
+        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
+        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
+        rs.created_at, rs.updated_at,
+        rs.summary_generated_at, rs.mind_map_generated_at,
+        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
+        rs.glossary_generated_at, rs.spelling_game_completed_at,
+        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
+        u.name as user_name, u.email as user_email
+       FROM reading_sessions rs
+       JOIN users u ON rs.user_id = u.id
+       WHERE u.role = 'student'
+       ORDER BY rs.updated_at DESC`
+    )
+    
+    return result.rows.map(row => ({
+      id: row.id,
+      userId: row.user_id,
+      userName: row.user_name,
+      userEmail: row.user_email,
+      docTitle: row.doc_title || 'Untitled',
+      studentAge: row.student_age || 13,
+      summary: !!row.summary,
+      adaptedText: !!row.adapted_text,
+      simplifiedText: !!row.simplified_text,
+      mindMap: !!row.mind_map,
+      testScore: row.test_score || null,
+      testCompleted: !!row.test_completed,
+      vocabularyQuizScore: row.vocabulary_quiz_score || null,
+      spellingGameBestScore: row.spelling_game_best_score || null,
+      glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
+      sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
+      tutorQuestionCount: Array.isArray(row.chat_history)
+        ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
+        : 0,
+      flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+      progress: calculateProgress(row),
+      createdAt: new Date(row.created_at).getTime(),
+      updatedAt: new Date(row.updated_at).getTime(),
+      summaryGeneratedAt: Number(row.summary_generated_at) || 0,
+      mindMapGeneratedAt: Number(row.mind_map_generated_at) || 0,
+      adaptedTextGeneratedAt: Number(row.adapted_text_generated_at) || 0,
+      simplifiedTextGeneratedAt: Number(row.simplified_text_generated_at) || 0,
+      glossaryGeneratedAt: Number(row.glossary_generated_at) || 0,
+      spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
+      vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
+      readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
+    }))
+  } finally {
+    client.release()
+  }
+}
+
 export function getAdminEmails(): string[] {
   const adminEmails = process.env.ADMIN_EMAILS || ''
   return adminEmails.split(',').map(email => email.trim().toLowerCase()).filter(Boolean)

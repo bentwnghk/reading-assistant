@@ -10,7 +10,7 @@ interface UseTeacherDashboardReturn {
   refetch: () => void;
 }
 
-export function useTeacherDashboard(classId: string | "all"): UseTeacherDashboardReturn {
+export function useTeacherDashboard(classId: string | "all", schoolId?: string | "all"): UseTeacherDashboardReturn {
   const [rawSessions, setRawSessions] = useState<TeacherSessionData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +20,10 @@ export function useTeacherDashboard(classId: string | "all"): UseTeacherDashboar
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/classes/${classId}/dashboard`);
+      const params = new URLSearchParams();
+      if (schoolId) params.set("schoolId", schoolId);
+      const qs = params.toString();
+      const response = await fetch(`/api/classes/${classId}/dashboard${qs ? `?${qs}` : ""}`);
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || "Failed to fetch");
@@ -32,7 +35,7 @@ export function useTeacherDashboard(classId: string | "all"): UseTeacherDashboar
     } finally {
       setLoading(false);
     }
-  }, [classId]);
+  }, [classId, schoolId]);
 
   useEffect(() => {
     fetchData();

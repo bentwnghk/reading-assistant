@@ -832,8 +832,10 @@
   "teacherDashboard": {
     "title": "教師儀表板",
     "description": "追蹤學生的閱讀和學習活動記錄、AI 使用情況、分數及詞彙增長。",
+    "selectSchool": "選擇學校",
     "selectClass": "選擇班級",
     "selectClassPrompt": "請選擇班級以查看學生資料。",
+    "allSchools": "所有學校",
     "allClasses": "所有班級",
     "classTotal": "合計",
     "classAvg": "平均",

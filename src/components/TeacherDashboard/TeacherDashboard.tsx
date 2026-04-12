@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { GraduationCap, Loader2, BarChart3 } from "lucide-react";
 import {
@@ -22,7 +22,7 @@ import { useTeacherDashboard } from "@/hooks/useTeacherDashboard";
 import {
   SCORE_BUCKETS,
 } from "@/utils/teacherDashboardMetrics";
-import type { ClassInfo } from "@/lib/users";
+import type { ClassInfo, SchoolInfo } from "@/lib/users";
 import DailyActivityChart from "./DailyActivityChart";
 import ReadingTextsChart from "./ReadingTextsChart";
 import TotalVocabularyChart from "./TotalVocabularyChart";
@@ -45,17 +45,39 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const isAdmin = role === "admin" || isSuperAdmin;
   const isTeacher = role === "teacher";
 
-  const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [allClasses, setAllClasses] = useState<ClassInfo[]>([]);
+  const [schools, setSchools] = useState<SchoolInfo[]>([]);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
 
-  const { metrics, loading, error } = useTeacherDashboard(selectedClassId);
+  const filteredClasses = useMemo(() => {
+    if (!isSuperAdmin || selectedSchoolId === "all") return allClasses;
+    return allClasses.filter((c) => c.schoolId === selectedSchoolId);
+  }, [allClasses, selectedSchoolId, isSuperAdmin]);
+
+  const { metrics, loading, error } = useTeacherDashboard(
+    selectedClassId,
+    isSuperAdmin ? selectedSchoolId : undefined
+  );
+
+  const loadSchools = useCallback(async () => {
+    try {
+      const response = await fetch("/api/schools");
+      if (response.ok) {
+        const data: SchoolInfo[] = await response.json();
+        setSchools(data);
+      }
+    } catch (err) {
+      console.error("Failed to load schools:", err);
+    }
+  }, []);
 
   const loadClasses = useCallback(async () => {
     try {
       const response = await fetch("/api/classes");
       if (response.ok) {
         const data: ClassInfo[] = await response.json();
-        setClasses(data);
+        setAllClasses(data);
         if (isAdmin) {
           setSelectedClassId("all");
         } else if (data.length > 0) {
@@ -70,8 +92,20 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   useEffect(() => {
     if (open && (isTeacher || isAdmin)) {
       loadClasses();
+      if (isSuperAdmin) {
+        loadSchools();
+      }
     }
-  }, [open, isTeacher, isAdmin, loadClasses]);
+  }, [open, isTeacher, isAdmin, isSuperAdmin, loadClasses, loadSchools]);
+
+  useEffect(() => {
+    if (isSuperAdmin && selectedSchoolId !== "all") {
+      const hasClass = filteredClasses.some((c) => c.id === selectedClassId);
+      if (!hasClass) {
+        setSelectedClassId("all");
+      }
+    }
+  }, [selectedSchoolId, filteredClasses, selectedClassId, isSuperAdmin]);
 
   function handleClose(dialogOpen: boolean) {
     if (!dialogOpen) onClose();
@@ -90,7 +124,23 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex flex-wrap items-center gap-3 mb-2">
+          {isSuperAdmin && (
+            <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder={t("teacherDashboard.selectSchool")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("teacherDashboard.allSchools")}</SelectItem>
+                {schools.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder={t("teacherDashboard.selectClass")} />
@@ -99,7 +149,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
               {isAdmin && (
                 <SelectItem value="all">{t("teacherDashboard.allClasses")}</SelectItem>
               )}
-              {classes.map((c) => (
+              {filteredClasses.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.name} ({c.studentCount || 0})
                 </SelectItem>
