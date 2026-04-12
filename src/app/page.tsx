@@ -17,6 +17,7 @@ const Header = dynamic(() => import("@/components/Internal/Header"));
 const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
 const Setting = dynamic(() => import("@/components/Setting"));
 const History = dynamic(() => import("@/components/Dashboard/Dashboard"));
+const TeacherDashboard = dynamic(() => import("@/components/TeacherDashboard/TeacherDashboard"));
 const StudentInfo = dynamic(() => import("@/components/ReadingAssistant/StudentInfo"));
 const ImageUpload = dynamic(() => import("@/components/ReadingAssistant/ImageUpload"));
 const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/WorkflowProgress"));
@@ -32,7 +33,7 @@ const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingA
 function Home() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
-  const { openSetting, setOpenSetting, openDashboard, setOpenDashboard } = useGlobalStore();
+  const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard } = useGlobalStore();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
   const { extractedText, docTitle } = useReadingStore();
@@ -126,6 +127,7 @@ function Home() {
       <aside className="print:hidden">
         <Setting open={openSetting} onClose={() => setOpenSetting(false)} />
         <History open={openDashboard} onClose={() => setOpenDashboard(false)} />
+        <TeacherDashboard open={openTeacherDashboard} onClose={() => setOpenTeacherDashboard(false)} />
         <LearningRecommendationDialog />
       </aside>
     </div>

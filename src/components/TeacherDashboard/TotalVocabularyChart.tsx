@@ -1,0 +1,89 @@
+"use client";
+
+import type { StudentMetrics } from "@/utils/teacherDashboardMetrics";
+import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
+
+interface TotalVocabularyChartProps {
+  students: StudentMetrics[];
+  classTotal: number;
+  classAvg: number;
+}
+
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  return (
+    <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
+      <p className="font-medium mb-1">{label}</p>
+      {payload.map((entry, i) => (
+        <p key={i} style={{ color: entry.color }}>
+          {entry.name}: {entry.value}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+export default function TotalVocabularyChart({ students, classTotal, classAvg }: TotalVocabularyChartProps) {
+  const { t } = useTranslation();
+
+  const chartData = useMemo(() => {
+    return students.map((s) => ({
+      userName: s.userName,
+      vocab: s.totalVocabulary,
+    }));
+  }, [students]);
+
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="text-sm font-semibold text-muted-foreground">{t("teacherDashboard.charts.totalVocabulary")}</h3>
+      </div>
+      <div className="flex items-center justify-between mb-3 text-xs text-muted-foreground">
+        <span>{t("teacherDashboard.classTotal")}: <strong className="text-foreground tabular-nums">{classTotal}</strong></span>
+        <span>{t("teacherDashboard.classAvg")}: <strong className="text-foreground tabular-nums">{classAvg}</strong></span>
+      </div>
+      {students.length === 0 ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+          {t("dashboard.charts.noData")}
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={chartData} margin={{ bottom: 40 }}>
+            <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+            <XAxis
+              dataKey="userName"
+              tick={{ fontSize: 10 }}
+              angle={-45}
+              textAnchor="end"
+              interval={0}
+              height={60}
+            />
+            <YAxis tick={{ fontSize: 10 }} />
+            <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={classAvg} stroke="#6366f1" strokeDasharray="4 4" strokeWidth={1} />
+            <Bar dataKey="vocab" name={t("teacherDashboard.charts.totalVocabulary")} fill="#6366f1" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
+    </div>
+  );
+}

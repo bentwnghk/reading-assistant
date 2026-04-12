@@ -1,0 +1,111 @@
+"use client";
+
+import type { StudentMetrics } from "@/utils/teacherDashboardMetrics";
+import { READING_TEXT_PERIODS } from "@/utils/teacherDashboardMetrics";
+import { useTranslation } from "react-i18next";
+import { useState, useMemo } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  Cell,
+} from "recharts";
+import { Button } from "@/components/ui/button";
+
+interface ReadingTextsChartProps {
+  students: StudentMetrics[];
+  classTotal: number;
+  classAvg: number;
+}
+
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  return (
+    <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
+      <p className="font-medium mb-1">{label}</p>
+      {payload.map((entry, i) => (
+        <p key={i} style={{ color: entry.color }}>
+          {entry.name}: {entry.value}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+export default function ReadingTextsChart({ students, classTotal, classAvg }: ReadingTextsChartProps) {
+  const { t } = useTranslation();
+  const [period, setPeriod] = useState("all");
+
+  const chartData = useMemo(() => {
+    return students.map((s) => ({
+      userName: s.userName,
+      count: s.readingTextsByPeriod[period] || 0,
+    }));
+  }, [students, period]);
+
+  return (
+    <div className="rounded-xl border bg-card p-4">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="text-sm font-semibold text-muted-foreground">{t("teacherDashboard.charts.readingTexts")}</h3>
+      </div>
+      <div className="flex items-center justify-between mb-3 text-xs text-muted-foreground">
+        <span>{t("teacherDashboard.classTotal")}: <strong className="text-foreground tabular-nums">{classTotal}</strong></span>
+        <span>{t("teacherDashboard.classAvg")}: <strong className="text-foreground tabular-nums">{classAvg}</strong></span>
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {READING_TEXT_PERIODS.map((p) => (
+          <Button
+            key={p.key}
+            variant={period === p.key ? "default" : "outline"}
+            size="sm"
+            className="h-7 text-xs px-2.5"
+            onClick={() => setPeriod(p.key)}
+          >
+            {t(p.labelKey)}
+          </Button>
+        ))}
+      </div>
+      {students.length === 0 ? (
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+          {t("dashboard.charts.noData")}
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={chartData} margin={{ bottom: 40 }}>
+            <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+            <XAxis
+              dataKey="userName"
+              tick={{ fontSize: 10 }}
+              angle={-45}
+              textAnchor="end"
+              interval={0}
+              height={60}
+            />
+            <YAxis tick={{ fontSize: 10 }} />
+            <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={classAvg} stroke="#6366f1" strokeDasharray="4 4" strokeWidth={1} />
+            <Bar dataKey="count" name={t("teacherDashboard.charts.readingTexts")} fill="#3b82f6" radius={[4, 4, 0, 0]}>
+              {chartData.map((_entry, index) => {
+                const hue = (index * 137) % 360;
+                return <Cell key={index} fill={`hsl(${hue}, 70%, 55%)`} />;
+              })}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      )}
+    </div>
+  );
+}

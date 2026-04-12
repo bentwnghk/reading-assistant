@@ -8,6 +8,7 @@ interface GlobalStore {
   hasOpenedAbout: boolean;
   openTutorChat: boolean;
   tutorChatSelectedText: string;
+  openTeacherDashboard: boolean;
 }
 
 interface GlobalActions {
@@ -17,6 +18,7 @@ interface GlobalActions {
   setHasOpenedAbout: (value: boolean) => void;
   setOpenTutorChat: (visible: boolean) => void;
   setTutorChatSelectedText: (text: string) => void;
+  setOpenTeacherDashboard: (visible: boolean) => void;
 }
 
 export const useGlobalStore = create(
@@ -28,12 +30,14 @@ export const useGlobalStore = create(
       hasOpenedAbout: false,
       openTutorChat: false,
       tutorChatSelectedText: "",
+      openTeacherDashboard: false,
       setOpenSetting: (visible) => set({ openSetting: visible }),
       setOpenHistory: (visible) => set({ openHistory: visible }),
       setOpenDashboard: (visible) => set({ openDashboard: visible }),
       setHasOpenedAbout: (value) => set({ hasOpenedAbout: value }),
       setOpenTutorChat: (visible) => set({ openTutorChat: visible }),
       setTutorChatSelectedText: (text) => set({ tutorChatSelectedText: text }),
+      setOpenTeacherDashboard: (visible) => set({ openTeacherDashboard: visible }),
     }),
     { name: "global" }
   )

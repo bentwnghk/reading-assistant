@@ -35,6 +35,7 @@ import {
   School,
 } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/Internal/Button";
 import { LoginButton } from "@/components/Auth/LoginButton";
 import { UserManagementButton } from "@/components/UserManagement/UserManagementButton";
@@ -71,10 +72,11 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 function Header() {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
   const [openAbout, setOpenAbout] = useState<boolean>(false);
-  const { setOpenSetting, setOpenDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
+  const { setOpenSetting, setOpenDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const {
     extractedText,
     summary,
@@ -277,6 +279,18 @@ function Header() {
             </Button>
           </div>
           <div className="flex items-center gap-2">
+            {session?.user?.role && session.user.role !== "student" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mr-2"
+                title={t("teacherDashboard.title")}
+                onClick={() => setOpenTeacherDashboard(true)}
+              >
+                <GraduationCap className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">{t("teacherDashboard.title")}</span>
+              </Button>
+            )}
             <UserManagementButton />
             <LoginButton />
           </div>

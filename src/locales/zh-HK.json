@@ -829,6 +829,35 @@
       "features": "使用「總覽」分頁查看視覺化分析，或切換到「工作階段」管理你的個別閱讀工作階段。"
     }
   },
+  "teacherDashboard": {
+    "title": "教師儀表板",
+    "description": "追蹤學生的閱讀和學習活動記錄、AI 使用情況、分數及詞彙增長。",
+    "selectClass": "選擇班級",
+    "selectClassPrompt": "請選擇班級以查看學生資料。",
+    "allClasses": "所有班級",
+    "classTotal": "合計",
+    "classAvg": "平均",
+    "empty": "所選班級沒有學生資料。",
+    "charts": {
+      "dailyActivity": "每日學習活動",
+      "readingTexts": "閱讀文本",
+      "totalVocabulary": "總詞彙量",
+      "avgProgress": "平均學習進度",
+      "aiFeatures": "AI 功能使用",
+      "vocabularyGrowth": "詞彙增長"
+    },
+    "readingTexts": {
+      "all": "全部",
+      "1w": "1週",
+      "2w": "2週",
+      "1m": "1個月",
+      "2m": "2個月",
+      "3m": "3個月",
+      "6m": "6個月",
+      "9m": "9個月",
+      "1y": "1年"
+    }
+  },
   "history": {
     "title": "閱讀記錄",
     "description": "查看你的閱讀工作階段的學習進度、詞彙量及測驗得分。",

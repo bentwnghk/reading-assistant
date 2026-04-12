@@ -829,6 +829,35 @@
       "features": "Use the Overview tab for visual analytics, or switch to Sessions to manage your individual reading sessions."
     }
   },
+  "teacherDashboard": {
+    "title": "Teacher Dashboard",
+    "description": "Track your students' reading and learning activity, AI usage, scores, and vocabulary growth over time.",
+    "selectClass": "Select a class",
+    "selectClassPrompt": "Please select a class to view student data.",
+    "allClasses": "All Classes",
+    "classTotal": "Total",
+    "classAvg": "Avg",
+    "empty": "No student data found for the selected class.",
+    "charts": {
+      "dailyActivity": "Daily Learning Activity",
+      "readingTexts": "Reading Texts",
+      "totalVocabulary": "Total Vocabulary",
+      "avgProgress": "Avg Learning Progress",
+      "aiFeatures": "AI Features Usage",
+      "vocabularyGrowth": "Vocabulary Growth"
+    },
+    "readingTexts": {
+      "all": "All",
+      "1w": "1W",
+      "2w": "2W",
+      "1m": "1M",
+      "2m": "2M",
+      "3m": "3M",
+      "6m": "6M",
+      "9m": "9M",
+      "1y": "1Y"
+    }
+  },
   "history": {
     "title": "Reading History",
     "description": "View your reading sessions with learning progress, vocabulary count, and test scores.",
