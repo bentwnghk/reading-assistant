@@ -24,7 +24,7 @@ function CustomTooltip({
   label,
 }: {
   active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string }>;
+  payload?: Array<{ name: string; value: number; color: string; dataKey?: string }>;
   label?: string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
@@ -33,7 +33,7 @@ function CustomTooltip({
       <p className="font-medium mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} style={{ color: entry.color }}>
-          {entry.name}: {entry.value}
+          {entry.dataKey === "avgScore" ? "Avg Score" : entry.name}: {entry.value}
         </p>
       ))}
     </div>
@@ -93,13 +93,7 @@ export default function SpellingScoreChart({ students, classAvg }: SpellingScore
             height={60}
           />
           <YAxis tick={{ fontSize: 10 }} />
-          <Tooltip
-            content={<CustomTooltip />}
-            formatter={(value: number, name: string) => {
-              if (name === "avgScore") return [value, "Avg Score"];
-              return [value, name];
-            }}
-          />
+          <Tooltip content={<CustomTooltip />} />
           {classAvg > 0 && <ReferenceLine y={classAvg} stroke="#6366f1" strokeDasharray="4 4" strokeWidth={1} />}
           <Bar dataKey="avgScore" name="Avg Score" fill="#a855f7" radius={[4, 4, 0, 0]} />
         </BarChart>
