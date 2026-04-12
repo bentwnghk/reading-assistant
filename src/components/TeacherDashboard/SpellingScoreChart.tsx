@@ -96,7 +96,7 @@ export default function SpellingScoreChart({ students, classAvg }: SpellingScore
           />
           <YAxis tick={{ fontSize: 10 }} />
           <Tooltip content={<CustomTooltip />} />
-          {classAvg > 0 && <ReferenceLine y={classAvg} stroke="#000" strokeDasharray="4 4" strokeWidth={1} />}
+          {classAvg > 0 && <ReferenceLine y={classAvg} stroke="hsl(var(--foreground))" strokeDasharray="4 4" strokeWidth={1} />}
           <Bar dataKey="avgScore" name={t("teacherDashboard.avgScore")} fill="#a855f7" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>

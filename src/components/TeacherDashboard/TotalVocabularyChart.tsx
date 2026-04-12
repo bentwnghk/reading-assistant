@@ -87,7 +87,7 @@ export default function TotalVocabularyChart({ students, classTotal, classAvg }:
               />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip content={<CustomTooltip />} />
-              <ReferenceLine y={classAvg} stroke="#000" strokeDasharray="4 4" strokeWidth={1} />
+              <ReferenceLine y={classAvg} stroke="hsl(var(--foreground))" strokeDasharray="4 4" strokeWidth={1} />
               <Bar dataKey="vocab" name={t("teacherDashboard.charts.totalVocabulary")} fill="#6366f1" radius={[4, 4, 0, 0]}>
                 {chartData.map((_entry, index) => (
                   <Cell key={index} fill={quartileColors[index]} />

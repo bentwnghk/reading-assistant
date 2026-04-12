@@ -107,7 +107,7 @@ export default function AiFeaturesChart({ students, classTotal, classAvg }: AiFe
             />
             <YAxis tick={{ fontSize: 10 }} />
             <Tooltip content={<CustomTooltip />} />
-            {avgSum > 0 && <ReferenceLine y={avgSum} stroke="#000" strokeDasharray="4 4" strokeWidth={1} />}
+            {avgSum > 0 && <ReferenceLine y={avgSum} stroke="hsl(var(--foreground))" strokeDasharray="4 4" strokeWidth={1} />}
             {AI_USAGE_KEYS.map((key) => (
               <Bar
                 key={key}

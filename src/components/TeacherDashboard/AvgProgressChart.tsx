@@ -85,7 +85,7 @@ export default function AvgProgressChart({ students, classAvg }: AvgProgressChar
               />
               <YAxis tick={{ fontSize: 10 }} domain={[0, 100]} />
               <Tooltip content={<CustomTooltip />} />
-              <ReferenceLine y={classAvg} stroke="#000" strokeDasharray="4 4" strokeWidth={1} />
+              <ReferenceLine y={classAvg} stroke="hsl(var(--foreground))" strokeDasharray="4 4" strokeWidth={1} />
               <Bar dataKey="progress" name={t("teacherDashboard.charts.avgProgress")} fill="#22c55e" radius={[4, 4, 0, 0]}>
                 {chartData.map((_entry, index) => (
                   <Cell key={index} fill={quartileColors[index]} />
