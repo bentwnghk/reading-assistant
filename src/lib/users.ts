@@ -181,7 +181,8 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
-       WHERE u.school_id = $1 AND u.role = 'student'
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       WHERE u.school_id = $1 AND COALESCE(ur.role, 'student') = 'student'
        ORDER BY rs.updated_at DESC`,
       [schoolId]
     )
@@ -244,7 +245,8 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
-       WHERE u.role = 'student'
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       WHERE COALESCE(ur.role, 'student') = 'student'
        ORDER BY rs.updated_at DESC`
     )
     
