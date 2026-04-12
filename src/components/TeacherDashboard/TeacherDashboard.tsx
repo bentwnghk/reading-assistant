@@ -13,7 +13,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -130,7 +132,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
               <SelectTrigger className="w-64">
                 <SelectValue placeholder={t("teacherDashboard.selectSchool")} />
               </SelectTrigger>
-              <SelectContent>
+            <SelectContent className="max-w-[calc(100vw-3rem)]">
                 <SelectItem value="all">{t("teacherDashboard.allSchools")}</SelectItem>
                 {schools.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
@@ -149,11 +151,26 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
               {isAdmin && (
                 <SelectItem value="all">{t("teacherDashboard.allClasses")}</SelectItem>
               )}
-              {filteredClasses.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name} ({c.studentCount || 0})
-                </SelectItem>
-              ))}
+              {isSuperAdmin && selectedSchoolId === "all"
+                ? schools.map((school) => {
+                    const schoolClasses = filteredClasses.filter((c) => c.schoolId === school.id);
+                    if (schoolClasses.length === 0) return null;
+                    return (
+                      <SelectGroup key={school.id}>
+                        <SelectLabel>{school.name}</SelectLabel>
+                        {schoolClasses.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name} ({c.studentCount || 0})
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    );
+                  })
+                : filteredClasses.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name} ({c.studentCount || 0})
+                    </SelectItem>
+                  ))}
             </SelectContent>
           </Select>
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
