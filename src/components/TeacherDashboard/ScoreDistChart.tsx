@@ -2,6 +2,7 @@
 
 import type { StudentMetrics } from "@/utils/teacherDashboardMetrics";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   BarChart,
   Bar,
@@ -38,6 +39,7 @@ function CustomTooltip({
   payload?: Array<{ name: string; value: number; color: string }>;
   label?: string;
 }) {
+  const { t } = useTranslation();
   if (!active || !payload || payload.length === 0) return null;
   const total = payload.reduce((sum, p) => sum + p.value, 0);
   return (
@@ -52,7 +54,7 @@ function CustomTooltip({
           </p>
         ))}
       <div className="border-t mt-1 pt-1 flex justify-between font-medium">
-        <span>Total</span>
+        <span>{t("teacherDashboard.total")}</span>
         <span className="tabular-nums">{total}</span>
       </div>
     </div>
@@ -60,6 +62,8 @@ function CustomTooltip({
 }
 
 export default function ScoreDistChart({ title, students, scoreKey, buckets, classAvg }: ScoreDistChartProps) {
+  const { t } = useTranslation();
+
   const chartData = useMemo(() => {
     return students.map((s) => {
       const scores = s[scoreKey];
@@ -82,11 +86,11 @@ export default function ScoreDistChart({ title, students, scoreKey, buckets, cla
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
           <span className="text-xs text-muted-foreground">
-            Avg: <strong className="text-foreground tabular-nums">{classAvg}</strong>
+            {t("teacherDashboard.avg")}: <strong className="text-foreground tabular-nums">{classAvg}</strong>
           </span>
         </div>
         <div className="flex items-center justify-center h-[160px] text-muted-foreground text-sm">
-          No data yet
+          {t("dashboard.charts.noData")}
         </div>
       </div>
     );
@@ -97,7 +101,7 @@ export default function ScoreDistChart({ title, students, scoreKey, buckets, cla
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
         <span className="text-xs text-muted-foreground">
-          Avg: <strong className="text-foreground tabular-nums">{classAvg}</strong>
+          {t("teacherDashboard.avg")}: <strong className="text-foreground tabular-nums">{classAvg}</strong>
         </span>
       </div>
       <ResponsiveContainer width="100%" height={160}>
@@ -113,7 +117,7 @@ export default function ScoreDistChart({ title, students, scoreKey, buckets, cla
           />
           <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
           <Tooltip content={<CustomTooltip />} />
-          {classAvg > 0 && <ReferenceLine y={classAvg} stroke="#6366f1" strokeDasharray="4 4" strokeWidth={1} />}
+          {classAvg > 0 && <ReferenceLine y={classAvg} stroke="#000" strokeDasharray="4 4" strokeWidth={1} />}
           {buckets.map((bucket) => (
             <Bar
               key={bucket.range}

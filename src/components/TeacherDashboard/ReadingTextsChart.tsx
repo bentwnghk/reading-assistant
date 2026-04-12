@@ -1,7 +1,7 @@
 "use client";
 
 import type { StudentMetrics } from "@/utils/teacherDashboardMetrics";
-import { READING_TEXT_PERIODS, getQuartileColor } from "@/utils/teacherDashboardMetrics";
+import { READING_TEXT_PERIODS, QUARTILE_COLORS, getQuartileColor } from "@/utils/teacherDashboardMetrics";
 import { useTranslation } from "react-i18next";
 import { useState, useMemo } from "react";
 import {
@@ -37,7 +37,7 @@ function CustomTooltip({
     <div className="rounded-lg border bg-background px-3 py-2 text-xs shadow-md">
       <p className="font-medium mb-1">{label}</p>
       {payload.map((entry, i) => (
-        <p key={i} style={{ color: entry.color }}>
+        <p key={i} className="text-foreground">
           {entry.name}: {entry.value}
         </p>
       ))}
@@ -88,27 +88,37 @@ export default function ReadingTextsChart({ students, classTotal, classAvg }: Re
           {t("dashboard.charts.noData")}
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={chartData} margin={{ bottom: 40 }}>
-            <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-            <XAxis
-              dataKey="userName"
-              tick={{ fontSize: 10 }}
-              angle={-45}
-              textAnchor="end"
-              interval={0}
-              height={60}
-            />
-            <YAxis tick={{ fontSize: 10 }} />
-            <Tooltip content={<CustomTooltip />} />
-            <ReferenceLine y={classAvg} stroke="#6366f1" strokeDasharray="4 4" strokeWidth={1} />
-            <Bar dataKey="count" name={t("teacherDashboard.charts.readingTexts")} fill="#3b82f6" radius={[4, 4, 0, 0]}>
-              {chartData.map((_entry, index) => (
-                <Cell key={index} fill={quartileColors[index]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={chartData} margin={{ bottom: 40 }}>
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis
+                dataKey="userName"
+                tick={{ fontSize: 10 }}
+                angle={-45}
+                textAnchor="end"
+                interval={0}
+                height={60}
+              />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip content={<CustomTooltip />} />
+              <ReferenceLine y={classAvg} stroke="#000" strokeDasharray="4 4" strokeWidth={1} />
+              <Bar dataKey="count" name={t("teacherDashboard.charts.readingTexts")} fill="#3b82f6" radius={[4, 4, 0, 0]}>
+                {chartData.map((_entry, index) => (
+                  <Cell key={index} fill={quartileColors[index]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3">
+            {QUARTILE_COLORS.map((color, i) => (
+              <div key={i} className="flex items-center gap-1.5 text-xs">
+                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+                <span className="text-muted-foreground">{t(`teacherDashboard.quartiles.q${i + 1}`)}</span>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
