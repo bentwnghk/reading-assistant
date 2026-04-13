@@ -448,7 +448,10 @@ function autoFitColumns(sheet: ExcelJS.Worksheet): void {
   const colWidths: number[] = []
   sheet.eachRow((row) => {
     row.eachCell((cell, colNumber) => {
-      const len = cell.value ? String(cell.value).length * 1.2 + 2 : 0
+      const raw = cell.value ? String(cell.value) : ""
+      // For wrapped headers (containing \n), use the longest individual line
+      const maxLineLen = raw.split("\n").reduce((m, l) => Math.max(m, l.length), 0)
+      const len = maxLineLen * 1.2 + 2
       const capped = Math.min(Math.max(len, 10), 50)
       if (!colWidths[colNumber - 1] || capped > colWidths[colNumber - 1]) {
         colWidths[colNumber - 1] = capped
