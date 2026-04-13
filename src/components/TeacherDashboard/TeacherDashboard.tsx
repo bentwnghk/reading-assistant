@@ -217,26 +217,26 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
               classAvg={metrics.classAvgAiUsage}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <ScoreDistChart
-                title={t("dashboard.scores.readingTest")}
-                students={metrics.students}
-                scoreKey="testScores"
-                buckets={SCORE_BUCKETS}
-                classAvg={metrics.classAvgTestScore}
-              />
-              <ScoreDistChart
-                title={t("dashboard.scores.vocabQuiz")}
-                students={metrics.students}
-                scoreKey="quizScores"
-                buckets={SCORE_BUCKETS}
-                classAvg={metrics.classAvgQuizScore}
-              />
-              <SpellingScoreChart
-                students={metrics.students}
-                classAvg={metrics.classAvgSpellingScore}
-              />
-            </div>
+            <ScoreDistChart
+              title={t("dashboard.scores.readingTest")}
+              students={metrics.students}
+              scoreKey="testScores"
+              buckets={SCORE_BUCKETS}
+              classAvg={metrics.classAvgTestScore}
+            />
+
+            <ScoreDistChart
+              title={t("dashboard.scores.vocabQuiz")}
+              students={metrics.students}
+              scoreKey="quizScores"
+              buckets={SCORE_BUCKETS}
+              classAvg={metrics.classAvgQuizScore}
+            />
+
+            <SpellingScoreChart
+              students={metrics.students}
+              classAvg={metrics.classAvgSpellingScore}
+            />
 
             <VocabularyGrowthChart students={metrics.students} />
           </div>
