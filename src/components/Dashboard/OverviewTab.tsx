@@ -160,7 +160,7 @@ function ScoreDistributionChart({
   if (scores.length === 0) {
     return (
       <ChartCard title={title}>
-        <div className="flex items-center justify-center h-[160px] text-muted-foreground text-sm">
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
           {emptyMessage}
         </div>
       </ChartCard>
@@ -169,7 +169,7 @@ function ScoreDistributionChart({
 
   return (
     <ChartCard title={title}>
-      <ResponsiveContainer width="100%" height={160}>
+      <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis dataKey="range" tick={{ fontSize: 10 }} />
@@ -200,7 +200,7 @@ function SpellingTrendChart({
   if (data.length === 0) {
     return (
       <ChartCard title={title}>
-        <div className="flex items-center justify-center h-[160px] text-muted-foreground text-sm">
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
           {emptyMessage}
         </div>
       </ChartCard>
@@ -209,7 +209,7 @@ function SpellingTrendChart({
   const chartData = data.map((s, i) => ({ ...s, idx: i + 1 }));
   return (
     <ChartCard title={title}>
-      <ResponsiveContainer width="100%" height={160}>
+      <ResponsiveContainer width="100%" height={200}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
