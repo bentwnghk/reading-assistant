@@ -68,7 +68,7 @@ const RED_FONT: Partial<ExcelJS.Font> = { color: { argb: "FF9C0006" }, bold: tru
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function applyHeaderStyle(row: ExcelJS.Row): void {
-  row.height = 28
+  row.height = 36
   row.eachCell((cell) => {
     cell.fill = HEADER_FILL
     cell.font = HEADER_FONT
@@ -209,13 +209,13 @@ function buildStudentOverviewSheet(
 
   const headers = [
     "Student",
-    "Reading Texts",
-    "Total Vocabulary",
-    "Avg Progress",
-    "Avg Reading Test Score",
-    "Avg Vocab Quiz Score",
-    "Avg Spelling Score",
-    "Total AI Actions",
+    "Reading\nTexts",
+    "Total\nVocabulary",
+    "Avg\nProgress",
+    "Avg Reading\nTest Score",
+    "Avg Vocab\nQuiz Score",
+    "Avg Spelling\nScore",
+    "Total\nAI Actions",
   ]
   sheet.columns = headers.map((h) => ({ header: h, width: 20 }))
   applyHeaderStyle(sheet.getRow(1))
@@ -304,10 +304,10 @@ function buildAiFeaturesSheet(
     "Summary",
     "Mind Map",
     "Adapted Text",
-    "Simplified Text",
-    "Sentence Analysis",
+    "Simplified\nText",
+    "Sentence\nAnalysis",
     "Glossary",
-    "Tutor Questions",
+    "Tutor\nQuestions",
     "Total",
   ]
   sheet.columns = headers.map((h) => ({ header: h, width: 18 }))
@@ -368,14 +368,14 @@ function buildScoreDetailsSheet(
 
   const headers = [
     "Student",
-    "Reading Tests Taken",
-    "Avg Reading Test Score",
-    "Reading Test Pass Rate",
-    "Vocab Quiz Attempts",
-    "Avg Vocab Quiz Score",
-    "Spelling Attempts",
-    "Avg Spelling Score",
-    "Best Spelling Score",
+    "Reading\nTests Taken",
+    "Avg Reading\nTest Score",
+    "Reading Test\nPass Rate",
+    "Vocab Quiz\nAttempts",
+    "Avg Vocab\nQuiz Score",
+    "Spelling\nAttempts",
+    "Avg Spelling\nScore",
+    "Best Spelling\nScore",
   ]
   sheet.columns = headers.map((h) => ({ header: h, width: 20 }))
   applyHeaderStyle(sheet.getRow(1))
