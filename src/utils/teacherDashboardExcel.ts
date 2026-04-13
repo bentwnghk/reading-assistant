@@ -212,9 +212,9 @@ function buildStudentOverviewSheet(
     "Reading Texts",
     "Total Vocabulary",
     "Avg Progress",
-    "Avg Test Score",
-    "Avg Quiz Score",
-    "Avg Spelling",
+    "Avg Reading Test Score",
+    "Avg Vocab Quiz Score",
+    "Avg Spelling Score",
     "Total AI Actions",
   ]
   sheet.columns = headers.map((h) => ({ header: h, width: 20 }))
@@ -368,14 +368,14 @@ function buildScoreDetailsSheet(
 
   const headers = [
     "Student",
-    "Tests Taken",
-    "Avg Test Score",
-    "Test Pass Rate",
-    "Quiz Attempts",
-    "Avg Quiz Score",
+    "Reading Tests Taken",
+    "Avg Reading Test Score",
+    "Reading Test Pass Rate",
+    "Vocab Quiz Attempts",
+    "Avg Vocab Quiz Score",
     "Spelling Attempts",
-    "Avg Spelling",
-    "Best Spelling",
+    "Avg Spelling Score",
+    "Best Spelling Score",
   ]
   sheet.columns = headers.map((h) => ({ header: h, width: 20 }))
   applyHeaderStyle(sheet.getRow(1))
