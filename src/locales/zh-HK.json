@@ -868,6 +868,11 @@
       "6m": "6個月",
       "9m": "9個月",
       "1y": "1年"
+    },
+    "exportExcel": "匯出至 Excel",
+    "exporting": "匯出中...",
+    "excel": {
+      "scoreDistribution": "分數分佈"
     }
   },
   "history": {

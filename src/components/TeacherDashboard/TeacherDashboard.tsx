@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, Loader2, BarChart3 } from "lucide-react";
+import { GraduationCap, Loader2, BarChart3, FileDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { useTeacherDashboard } from "@/hooks/useTeacherDashboard";
 import {
@@ -51,6 +52,10 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const [schools, setSchools] = useState<SchoolInfo[]>([]);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
+  const [isExporting, setIsExporting] = useState(false);
+
+  // Refs for each chart card — order matches the JSX render order below
+  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(9).fill(null));
 
   const filteredClasses = useMemo(() => {
     if (!isSuperAdmin || selectedSchoolId === "all") return allClasses;
@@ -111,6 +116,65 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
 
   function handleClose(dialogOpen: boolean) {
     if (!dialogOpen) onClose();
+  }
+
+  // ── Chart capture & Excel export ──────────────────────────────────────────
+  const CHART_LABELS = [
+    t("teacherDashboard.charts.dailyActivity"),
+    t("teacherDashboard.charts.readingTexts"),
+    t("teacherDashboard.charts.totalVocabulary"),
+    t("teacherDashboard.charts.avgProgress"),
+    t("teacherDashboard.charts.aiFeatures"),
+    `${t("dashboard.scores.readingTest")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
+    `${t("dashboard.scores.vocabQuiz")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
+    t("teacherDashboard.charts.spellingScore"),
+    t("teacherDashboard.charts.vocabularyGrowth"),
+  ];
+
+  async function captureChartAsBase64(el: HTMLDivElement): Promise<{ base64: string; width: number; height: number }> {
+    const html2canvas = (await import("html2canvas")).default;
+    const canvas = await html2canvas(el, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    const dataUrl = canvas.toDataURL("image/png");
+    const base64 = dataUrl.split(",")[1];
+    return { base64, width: canvas.width, height: canvas.height };
+  }
+
+  async function handleExport() {
+    if (!metrics) return;
+    setIsExporting(true);
+    try {
+      const { exportTeacherDashboardToExcel } = await import("@/utils/teacherDashboardExcel");
+
+      // Capture chart images in order
+      const chartImages = [];
+      for (let i = 0; i < chartRefs.current.length; i++) {
+        const el = chartRefs.current[i];
+        if (el) {
+          const img = await captureChartAsBase64(el);
+          chartImages.push({ title: CHART_LABELS[i], ...img });
+        }
+      }
+
+      // Determine class/school names for the filename and report header
+      const selectedClass = allClasses.find((c) => c.id === selectedClassId);
+      const selectedSchool = schools.find((s) => s.id === selectedSchoolId);
+
+      await exportTeacherDashboardToExcel({
+        metrics,
+        chartImages,
+        className: selectedClass?.name,
+        schoolName: selectedSchool?.name,
+      });
+    } catch (err) {
+      console.error("Export failed:", err);
+    } finally {
+      setIsExporting(false);
+    }
   }
 
   return (
@@ -175,6 +239,25 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
           </Select>
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           {error && <span className="text-xs text-destructive">{error}</span>}
+
+          {metrics && metrics.students.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto gap-1.5"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="h-4 w-4" />
+              )}
+              {isExporting
+                ? t("teacherDashboard.exporting")
+                : t("teacherDashboard.exportExcel")}
+            </Button>
+          )}
         </div>
 
         {!selectedClassId ? (
@@ -192,53 +275,71 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
           </div>
         ) : (
           <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-1">
-            <DailyActivityChart students={metrics.students} />
+            <div ref={(el) => { chartRefs.current[0] = el; }}>
+              <DailyActivityChart students={metrics.students} />
+            </div>
 
-            <ReadingTextsChart
-              students={metrics.students}
-              classTotal={metrics.classTotalReadingTexts}
-              classAvg={metrics.classAvgReadingTexts}
-            />
+            <div ref={(el) => { chartRefs.current[1] = el; }}>
+              <ReadingTextsChart
+                students={metrics.students}
+                classTotal={metrics.classTotalReadingTexts}
+                classAvg={metrics.classAvgReadingTexts}
+              />
+            </div>
 
-            <TotalVocabularyChart
-              students={metrics.students}
-              classTotal={metrics.classTotalVocabulary}
-              classAvg={metrics.classAvgVocabulary}
-            />
+            <div ref={(el) => { chartRefs.current[2] = el; }}>
+              <TotalVocabularyChart
+                students={metrics.students}
+                classTotal={metrics.classTotalVocabulary}
+                classAvg={metrics.classAvgVocabulary}
+              />
+            </div>
 
-            <AvgProgressChart
-              students={metrics.students}
-              classAvg={metrics.classAvgProgress}
-            />
+            <div ref={(el) => { chartRefs.current[3] = el; }}>
+              <AvgProgressChart
+                students={metrics.students}
+                classAvg={metrics.classAvgProgress}
+              />
+            </div>
 
-            <AiFeaturesChart
-              students={metrics.students}
-              classTotal={metrics.classTotalAiUsage}
-              classAvg={metrics.classAvgAiUsage}
-            />
+            <div ref={(el) => { chartRefs.current[4] = el; }}>
+              <AiFeaturesChart
+                students={metrics.students}
+                classTotal={metrics.classTotalAiUsage}
+                classAvg={metrics.classAvgAiUsage}
+              />
+            </div>
 
-            <ScoreDistChart
-              title={t("dashboard.scores.readingTest")}
-              students={metrics.students}
-              scoreKey="testScores"
-              buckets={SCORE_BUCKETS}
-              classAvg={metrics.classAvgTestScore}
-            />
+            <div ref={(el) => { chartRefs.current[5] = el; }}>
+              <ScoreDistChart
+                title={t("dashboard.scores.readingTest")}
+                students={metrics.students}
+                scoreKey="testScores"
+                buckets={SCORE_BUCKETS}
+                classAvg={metrics.classAvgTestScore}
+              />
+            </div>
 
-            <ScoreDistChart
-              title={t("dashboard.scores.vocabQuiz")}
-              students={metrics.students}
-              scoreKey="quizScores"
-              buckets={SCORE_BUCKETS}
-              classAvg={metrics.classAvgQuizScore}
-            />
+            <div ref={(el) => { chartRefs.current[6] = el; }}>
+              <ScoreDistChart
+                title={t("dashboard.scores.vocabQuiz")}
+                students={metrics.students}
+                scoreKey="quizScores"
+                buckets={SCORE_BUCKETS}
+                classAvg={metrics.classAvgQuizScore}
+              />
+            </div>
 
-            <SpellingScoreChart
-              students={metrics.students}
-              classAvg={metrics.classAvgSpellingScore}
-            />
+            <div ref={(el) => { chartRefs.current[7] = el; }}>
+              <SpellingScoreChart
+                students={metrics.students}
+                classAvg={metrics.classAvgSpellingScore}
+              />
+            </div>
 
-            <VocabularyGrowthChart students={metrics.students} />
+            <div ref={(el) => { chartRefs.current[8] = el; }}>
+              <VocabularyGrowthChart students={metrics.students} />
+            </div>
           </div>
         )}
       </DialogContent>

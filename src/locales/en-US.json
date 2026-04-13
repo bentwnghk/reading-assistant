@@ -868,6 +868,11 @@
       "6m": "6M",
       "9m": "9M",
       "1y": "1Y"
+    },
+    "exportExcel": "Export to Excel",
+    "exporting": "Exporting...",
+    "excel": {
+      "scoreDistribution": "Score Distribution"
     }
   },
   "history": {
