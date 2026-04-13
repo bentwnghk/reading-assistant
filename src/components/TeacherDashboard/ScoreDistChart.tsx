@@ -104,7 +104,7 @@ export default function ScoreDistChart({ title, students, scoreKey, buckets, cla
           {t("teacherDashboard.avg")}: <strong className="text-foreground tabular-nums">{classAvg}</strong>
         </span>
       </div>
-      <ResponsiveContainer width="100%" height={160}>
+      <ResponsiveContainer width="100%" height={200}>
         <BarChart data={chartData} margin={{ bottom: 40 }}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis
