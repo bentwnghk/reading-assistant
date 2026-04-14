@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, StorageValue } from "zustand/middleware";
 import { pick } from "radash";
 import { nanoid } from "nanoid";
+import { markLastOpenedSession } from "@/store/setting";
 
 let _isStreaming = false;
 export function setStreamingFlag(value: boolean) {
@@ -786,6 +787,10 @@ export const useReadingStore = create(
         if (currentUserId) {
           createSessionInAPI({ ...newState } as ReadingStore);
         }
+        // Mark this as the last opened session so that on page reload the
+        // restore flow in AuthStateManager picks this session instead of the
+        // previously-opened one.
+        markLastOpenedSession(newId);
       },
       reset: () => {
         set(() => ({
