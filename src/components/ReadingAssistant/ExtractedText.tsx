@@ -138,11 +138,16 @@ function ExtractedText() {
 
       if (container && container.contains(range.commonAncestorContainer)) {
         const rect = range.getBoundingClientRect();
-        // On iOS the native text-selection bar appears below the selection when it
-        // is in the upper half of the viewport, and above it when in the lower half.
-        // Show the app popup on the opposite side so the two bars never overlap.
-        const isTouch = isTouchDeviceRef.current;
-        const showAbove = isTouch && rect.top < window.innerHeight / 2;
+        // Position the popup on the opposite side from the native selection bar:
+        //   iOS  — bar appears below in the upper half of the viewport and above
+        //           in the lower half, so we mirror that (above / below).
+        //   Android — bar is almost always above the selection, so we always
+        //             show below to avoid overlap.
+        //   Desktop — no native bar; always show below.
+        const isIOS =
+          /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        const showAbove = isIOS && rect.top < window.innerHeight / 2;
         setSelection({
           text: selectedText,
           x: rect.left + rect.width / 2,
@@ -319,16 +324,24 @@ function ExtractedText() {
   const analyzedSentencesKeys = useMemo(() => Object.keys(analyzedSentences), [analyzedSentences]);
 
   useEffect(() => {
-    document.addEventListener("mouseup", handleSelectionChange);
-    document.addEventListener("touchend", handleSelectionChange);
+    // selectionchange fires as soon as the browser commits a text selection —
+    // including during Android long-press (before touchend) and handle drags.
+    // A short debounce prevents excessive calls during rapid handle dragging.
+    let selectionTimer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedSelectionChange = () => {
+      if (selectionTimer) clearTimeout(selectionTimer);
+      selectionTimer = setTimeout(handleSelectionChange, 150);
+    };
+
+    document.addEventListener("selectionchange", debouncedSelectionChange);
     document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("touchstart", handleMouseDown, { passive: true });
 
     return () => {
-      document.removeEventListener("mouseup", handleSelectionChange);
-      document.removeEventListener("touchend", handleSelectionChange);
+      document.removeEventListener("selectionchange", debouncedSelectionChange);
       document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("touchstart", handleMouseDown);
+      if (selectionTimer) clearTimeout(selectionTimer);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
