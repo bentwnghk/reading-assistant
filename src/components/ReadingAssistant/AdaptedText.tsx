@@ -874,6 +874,11 @@ function AdaptedText() {
       !target.closest("[role='dialog']")
     ) {
       setSelection(null);
+      // On iOS, an active text selection causes the first tap on any button to be
+      // consumed for dismissing the selection rather than firing a click event.
+      // Explicitly clearing the native selection here ensures the tap propagates
+      // normally so buttons respond on the first touch.
+      window.getSelection()?.removeAllRanges();
     }
   }, []);
 
