@@ -48,11 +48,17 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     scrollToBottom();
   }, [chatHistory, streamingContent, scrollToBottom]);
 
+  // Auto-focus the input when the dialog first opens with pre-selected text.
+  // We capture the initial value in a ref so this runs only on mount.
+  // Running focus() on every tutorChatSelectedText change would call
+  // inputRef.current.focus() while the user is mid-drag on desktop, which
+  // steals browser focus and cancels the ongoing mouse selection.
+  const initialSelectedTextRef = useRef(tutorChatSelectedText);
   useEffect(() => {
-    if (tutorChatSelectedText && inputRef.current) {
+    if (initialSelectedTextRef.current && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [tutorChatSelectedText]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
