@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { Plus, Volume2, Loader2, Brain } from "lucide-react";
@@ -106,6 +106,22 @@ function ExtractedText() {
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const isTouchDeviceRef = useRef(false);
   const sentenceListRef = useRef<string[]>([]);
+  const popupRef = useRef<HTMLDivElement>(null);
+
+  // Clamp the popup horizontally so it never overflows the viewport edges.
+  // useLayoutEffect runs after DOM mutation but before paint, so the user never
+  // sees the pre-clamp position. We replace the translateX(-50%) centering with a
+  // direct pixel value and keep only the vertical translateY for the above/below flip.
+  useLayoutEffect(() => {
+    const el = popupRef.current;
+    if (!el || !selection) return;
+    const popupWidth = el.offsetWidth;
+    const MARGIN = 8;
+    const desiredLeft = selection.x - popupWidth / 2;
+    const left = Math.max(MARGIN, Math.min(window.innerWidth - popupWidth - MARGIN, desiredLeft));
+    el.style.left = `${left}px`;
+    el.style.transform = selection.above ? "translateY(-100%)" : "none";
+  }, [selection]);
 
   const handleSelectionChange = useCallback(() => {
     const selectionObj = window.getSelection();
@@ -437,6 +453,7 @@ function ExtractedText() {
 
       {selection && (
         <div
+          ref={popupRef}
           className="selection-popup fixed z-[9999] shadow-md flex gap-0.5 bg-background border rounded-md p-0.5"
           style={{ left: selection.x, top: selection.y, transform: selection.above ? "translate(-50%, -100%)" : "translateX(-50%)" }}
         >
