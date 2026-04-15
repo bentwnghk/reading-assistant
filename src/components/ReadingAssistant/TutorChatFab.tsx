@@ -42,6 +42,7 @@ function TutorChatFab() {
     <>
       <Button
         onClick={handleToggle}
+        onTouchEnd={(e) => { e.preventDefault(); handleToggle(); }}
         className={cn(
           "fixed bottom-20 right-6 z-50 h-12 w-12 rounded-full shadow-lg print:hidden",
           "bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",

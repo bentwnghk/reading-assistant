@@ -88,6 +88,7 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
               variant="outline"
               size="sm"
               onClick={() => onSelectQuestion(q.question, q.action)}
+              onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action); }}
               disabled={disabled}
               className="h-7 text-xs"
             >
@@ -110,6 +111,7 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => onSelectQuestion(q.question, q.action)}
+                onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action); }}
                 disabled={disabled}
                 className="h-7 text-xs"
               >

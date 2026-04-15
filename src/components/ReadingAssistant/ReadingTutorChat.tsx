@@ -270,6 +270,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             variant="ghost"
             size="icon"
             onClick={() => setIsExpanded(!isExpanded)}
+            onTouchEnd={(e) => { e.preventDefault(); setIsExpanded((v) => !v); }}
             className="h-7 w-7"
           >
             {isExpanded ? (
@@ -283,6 +284,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
               variant="ghost"
               size="icon"
               onClick={onClose}
+              onTouchEnd={(e) => { e.preventDefault(); onClose(); }}
               className="h-7 w-7"
             >
               <X className="w-4 h-4" />
@@ -343,6 +345,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             <button
               type="button"
               onClick={() => setTutorChatSelectedText("")}
+              onTouchEnd={(e) => { e.preventDefault(); setTutorChatSelectedText(""); }}
               className="flex-shrink-0 hover:bg-primary/20 rounded p-0.5 transition-colors"
               title={t("reading.tutor.removeSelection")}
             >
@@ -362,6 +365,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
                 <button
                   type="button"
                   onClick={() => removePendingImage(index)}
+                  onTouchEnd={(e) => { e.preventDefault(); removePendingImage(index); }}
                   className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <XIcon className="h-3 w-3" />
@@ -384,6 +388,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             variant="ghost"
             size="icon"
             onClick={() => fileInputRef.current?.click()}
+            onTouchEnd={(e) => { e.preventDefault(); fileInputRef.current?.click(); }}
             disabled={isLoading}
             className="h-10 w-10 flex-shrink-0"
             title={t("reading.tutor.addImage")}
@@ -403,6 +408,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             <Button
               size="icon"
               onClick={() => handleSend()}
+              onTouchEnd={(e) => { e.preventDefault(); handleSend(); }}
               disabled={(!input.trim() && pendingImages.length === 0) || isLoading}
               className="h-10 w-10"
             >
@@ -417,6 +423,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
                 variant="ghost"
                 size="icon"
                 onClick={handleClearHistory}
+                onTouchEnd={(e) => { e.preventDefault(); handleClearHistory(); }}
                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
                 title={t("reading.tutor.clearHistory")}
               >

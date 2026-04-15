@@ -12,6 +12,7 @@ function TocFab() {
     <>
       <button
         onClick={() => setOpen(true)}
+        onTouchEnd={(e) => { e.preventDefault(); setOpen(true); }}
         className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors print:hidden flex items-center justify-center"
         title={t("toc.title")}
         aria-label={t("toc.title")}
