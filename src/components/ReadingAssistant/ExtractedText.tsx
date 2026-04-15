@@ -122,14 +122,16 @@ function ExtractedText() {
 
       if (container && container.contains(range.commonAncestorContainer)) {
         const rect = range.getBoundingClientRect();
-        // On touch devices position the popup above the selection so it does not
-        // overlap the iOS native text-selection bar, which appears below.
+        // On iOS the native text-selection bar appears below the selection when it
+        // is in the upper half of the viewport, and above it when in the lower half.
+        // Show the app popup on the opposite side so the two bars never overlap.
         const isTouch = isTouchDeviceRef.current;
+        const showAbove = isTouch && rect.top < window.innerHeight / 2;
         setSelection({
           text: selectedText,
           x: rect.left + rect.width / 2,
-          y: isTouch ? rect.top - 8 : rect.bottom + 8,
-          above: isTouch,
+          y: showAbove ? rect.top - 8 : rect.bottom + 8,
+          above: showAbove,
         });
       } else {
         setSelection(null);
@@ -424,7 +426,6 @@ function ExtractedText() {
       <div
         className="prose prose-slate dark:prose-invert max-w-full"
         ref={containerRef}
-        style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
       >
         <MagicDown
           value={highlightedText}
