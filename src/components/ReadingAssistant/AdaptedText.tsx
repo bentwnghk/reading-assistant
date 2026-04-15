@@ -1283,7 +1283,7 @@ function AdaptedText() {
                     <>
                       <BookOpen className="h-4 w-4" />
                       <span>
-                        {t("reading.adaptedText.regenerate")} ({studentAge})
+                        {t("reading.adaptedText.regenerate")} ({studentAge} {t("reading.studentInfo.yearsOld")})
                       </span>
                     </>
                   )}
