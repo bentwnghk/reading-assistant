@@ -435,7 +435,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
               </button>
             </div>
             {currentEntry.syllabification && currentEntry.syllabification !== currentEntry.word && (
-              <div className="text-base font-medium text-muted-foreground mb-2">
+              <div className="text-xl font-medium text-muted-foreground mb-2">
                 [ {currentEntry.syllabification} ]
               </div>
             )}
