@@ -436,7 +436,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             </div>
             {currentEntry.syllabification && currentEntry.syllabification !== currentEntry.word && (
               <div className="text-xl font-medium text-muted-foreground mb-2">
-                [ {currentEntry.syllabification} ]
+                {currentEntry.syllabification}
               </div>
             )}
             {currentEntry.partOfSpeech && (
@@ -478,7 +478,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             </div>
             {currentEntry.syllabification && currentEntry.syllabification !== currentEntry.word && (
               <div className="text-base text-muted-foreground mb-2">
-                [ {currentEntry.syllabification} ]
+                {currentEntry.syllabification}
               </div>
             )}
             {currentEntry.partOfSpeech && (
