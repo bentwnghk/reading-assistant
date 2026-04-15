@@ -412,14 +412,14 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
               <div
                 className={cn(
                   "font-extrabold text-center",
-                  (currentEntry.syllabification || currentEntry.word).length > 18
+                  currentEntry.word.length > 18
                     ? "text-3xl"
-                    : (currentEntry.syllabification || currentEntry.word).length > 12
+                    : currentEntry.word.length > 12
                     ? "text-4xl"
                     : "text-5xl"
                 )}
               >
-                {currentEntry.syllabification || currentEntry.word}
+                {currentEntry.word}
               </div>
               <button
                 onClick={handleSpeak}
@@ -436,7 +436,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             </div>
             {currentEntry.syllabification && currentEntry.syllabification !== currentEntry.word && (
               <div className="text-base font-medium text-muted-foreground mb-2">
-                [ {currentEntry.word} ]
+                [ {currentEntry.syllabification} ]
               </div>
             )}
             {currentEntry.partOfSpeech && (
@@ -461,7 +461,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
           >
             <div className="flex items-center justify-center gap-2">
               <div className="text-3xl font-extrabold text-center">
-                {currentEntry.syllabification || currentEntry.word}
+                {currentEntry.word}
               </div>
               <button
                 onClick={handleSpeak}
@@ -478,7 +478,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
             </div>
             {currentEntry.syllabification && currentEntry.syllabification !== currentEntry.word && (
               <div className="text-base text-muted-foreground mb-2">
-                [ {currentEntry.word} ]
+                [ {currentEntry.syllabification} ]
               </div>
             )}
             {currentEntry.partOfSpeech && (
