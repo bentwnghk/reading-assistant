@@ -1267,6 +1267,28 @@ function AdaptedText() {
         <TabsContent value="adapted" className="mt-4">
           {adaptedText ? (
             <>
+              <div className="mb-4 flex justify-end">
+                <Button
+                  onClick={() => adaptText()}
+                  disabled={isAdapting}
+                  size="sm"
+                  variant="secondary"
+                >
+                  {isAdapting ? (
+                    <>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      <span>{t("reading.adaptedText.regenerating")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="h-4 w-4" />
+                      <span>
+                        {t("reading.adaptedText.regenerate")} ({studentAge})
+                      </span>
+                    </>
+                  )}
+                </Button>
+              </div>
               <div
                 ref={adaptedContainerRef}
                 className="prose prose-slate dark:prose-invert max-w-full"

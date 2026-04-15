@@ -375,6 +375,8 @@
       "editWarningTitle": "Clear derived data?",
       "editWarningDesc": "Saving changes to the original text will clear the adapted text, simplified text, vocabulary highlights, sentence analyses, and glossary as they may no longer match the new text.",
       "confirmClear": "Confirm",
+      "regenerate": "Regenerate",
+      "regenerating": "Regenerating...",
       "help": {
         "title": "Text Analysis & Adaptation Guide",
         "tabs": {

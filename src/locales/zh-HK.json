@@ -375,6 +375,8 @@
       "editWarningTitle": "清除衍生資料？",
       "editWarningDesc": "保存對原文的修改將會清除改寫版本、簡化版本、詞彙標示、句子分析和詞彙表，因為它們可能不再與新文本匹配。",
       "confirmClear": "確認",
+      "regenerate": "重新改寫",
+      "regenerating": "正在重新改寫...",
       "help": {
         "title": "文本分析與改寫指南",
         "tabs": {
