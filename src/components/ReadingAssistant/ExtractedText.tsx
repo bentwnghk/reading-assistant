@@ -100,7 +100,7 @@ function ExtractedText() {
   const { createModelProvider } = useModelProvider();
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [selection, setSelection] = useState<{ text: string; x: number; y: number } | null>(null);
+  const [selection, setSelection] = useState<{ text: string; x: number; y: number; above: boolean } | null>(null);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
@@ -122,10 +122,14 @@ function ExtractedText() {
 
       if (container && container.contains(range.commonAncestorContainer)) {
         const rect = range.getBoundingClientRect();
+        // On touch devices position the popup above the selection so it does not
+        // overlap the iOS native text-selection bar, which appears below.
+        const isTouch = isTouchDeviceRef.current;
         setSelection({
           text: selectedText,
           x: rect.left + rect.width / 2,
-          y: rect.bottom + 8,
+          y: isTouch ? rect.top - 8 : rect.bottom + 8,
+          above: isTouch,
         });
       } else {
         setSelection(null);
@@ -417,7 +421,11 @@ function ExtractedText() {
         </div>
       )}
 
-      <div className="prose prose-slate dark:prose-invert max-w-full" ref={containerRef}>
+      <div
+        className="prose prose-slate dark:prose-invert max-w-full"
+        ref={containerRef}
+        style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
+      >
         <MagicDown
           value={highlightedText}
           onChange={() => {}}
@@ -429,7 +437,7 @@ function ExtractedText() {
       {selection && (
         <div
           className="selection-popup fixed z-[9999] shadow-md flex gap-0.5 bg-background border rounded-md p-0.5"
-          style={{ left: selection.x, top: selection.y, transform: "translateX(-50%)" }}
+          style={{ left: selection.x, top: selection.y, transform: selection.above ? "translate(-50%, -100%)" : "translateX(-50%)" }}
         >
           <Button
             size="sm"

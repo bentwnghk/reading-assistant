@@ -396,6 +396,7 @@ function AdaptedText() {
     text: string;
     x: number;
     y: number;
+    above: boolean;
   } | null>(null);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
@@ -460,10 +461,14 @@ function AdaptedText() {
 
       if (container && container.contains(range.commonAncestorContainer)) {
         const rect = range.getBoundingClientRect();
+        // On touch devices position the popup above the selection so it does not
+        // overlap the iOS native text-selection bar, which appears below.
+        const isTouch = isTouchDeviceRef.current;
         setSelection({
           text: selectedText,
           x: rect.left + rect.width / 2,
-          y: rect.bottom + 8,
+          y: isTouch ? rect.top - 8 : rect.bottom + 8,
+          above: isTouch,
         });
         setTutorChatSelectedText(selectedText);
       } else if (adaptedContainer && adaptedContainer.contains(range.commonAncestorContainer)) {
@@ -1189,6 +1194,7 @@ function AdaptedText() {
               <div
                 className="prose prose-slate dark:prose-invert max-w-full"
                 ref={setContainerRef}
+                style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
               >
                 <ParagraphWithNav
                   text={extractedText}
@@ -1239,6 +1245,7 @@ function AdaptedText() {
               <div
                 ref={adaptedContainerRef}
                 className="prose prose-slate dark:prose-invert max-w-full"
+                style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
               >
                 <ParagraphWithNav
                   text={adaptedText}
@@ -1306,6 +1313,7 @@ function AdaptedText() {
               <div
                 ref={simplifiedContainerRef}
                 className="prose prose-slate dark:prose-invert max-w-full"
+                style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
               >
                 <ParagraphWithNav
                   text={simplifiedText}
@@ -1370,7 +1378,7 @@ function AdaptedText() {
           style={{
             left: selection.x,
             top: selection.y,
-            transform: "translateX(-50%)",
+            transform: selection.above ? "translate(-50%, -100%)" : "translateX(-50%)",
           }}
         >
           <Button
