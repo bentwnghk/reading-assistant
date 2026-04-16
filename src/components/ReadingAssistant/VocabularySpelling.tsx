@@ -326,15 +326,18 @@ function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps
   const checkAnswer = useCallback(() => {
     if (!currentChallenge) return;
 
-    const normalizedInput = userInput.toLowerCase().trim();
     let correct: boolean;
 
     if (currentMode === "fill-blanks") {
+      // Do not trim — blank positions can include space characters, and trimming
+      // would remove a trailing space typed by the user, causing a false negative.
+      const normalizedInput = userInput.toLowerCase();
       const missingLetters = currentChallenge.blankPositions
         .map((pos) => currentChallenge.word[pos].toLowerCase())
         .join("");
       correct = normalizedInput === missingLetters;
     } else {
+      const normalizedInput = userInput.toLowerCase().trim();
       const normalizedAnswer = currentChallenge.word.toLowerCase();
       correct = normalizedInput === normalizedAnswer;
     }
