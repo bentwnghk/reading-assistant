@@ -29,7 +29,7 @@ const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
 async function loadMermaid(element: HTMLElement, code: string) {
   const { default: mermaid } = await import("mermaid");
-  mermaid.initialize({ startOnLoad: false });
+  mermaid.initialize({ startOnLoad: false, theme: "default" });
   const canParse = await mermaid.parse(code, { suppressErrors: true });
   if (canParse) {
     await mermaid.render(nanoid(), code).then(({ svg }) => {
