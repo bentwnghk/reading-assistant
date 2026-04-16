@@ -455,7 +455,7 @@ export async function createCheckoutSession(
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
     subscription_data: {
-      trial_period_days: 1,
+      trial_period_days: parseInt(process.env.SUBSCRIPTION_TRIAL_PERIOD_DAYS || "1", 10) || undefined,
       metadata: { userId },
     },
     success_url: `${appUrl}/?subscription=success`,

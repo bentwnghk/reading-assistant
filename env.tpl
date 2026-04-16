@@ -99,6 +99,14 @@ SUBSCRIPTION_CURRENCY=usd
 # (Optional) Separate OpenAI-compatible API key for subscription users.
 # This allows you to use a different API key/provider for subscription vs EDU users.
 OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY=
+# Trial period in days for personal subscriptions (default: 1)
+SUBSCRIPTION_TRIAL_PERIOD_DAYS=1
+# Trial period in days for school subscriptions (default: 1)
+SCHOOL_SUBSCRIPTION_TRIAL_PERIOD_DAYS=1
+# Hours before trial ends to send notification email for personal subscriptions (default: 6)
+TRIAL_ENDING_NOTIFICATION_HOURS=6
+# Hours before trial ends to send notification email for school subscriptions (default: 6)
+SCHOOL_TRIAL_ENDING_NOTIFICATION_HOURS=6
 
 # (Optional) Server-side pollinations.ai API Proxy URL. Default, `https://text.pollinations.ai/openai`
 POLLINATIONS_API_BASE_URL=

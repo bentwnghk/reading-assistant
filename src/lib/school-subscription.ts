@@ -452,7 +452,7 @@ export async function createSchoolCheckoutSession(
     mode: "subscription",
     line_items: [{ price: priceId, quantity }],
     subscription_data: {
-      trial_period_days: 1,
+      trial_period_days: parseInt(process.env.SCHOOL_SUBSCRIPTION_TRIAL_PERIOD_DAYS || "1", 10) || undefined,
       metadata: { schoolId, adminUserId, type: "school", plan },
     },
     success_url: `${appUrl}/?school_subscription=success`,

@@ -28,13 +28,15 @@ async function processTrialEndingNotifications(client: Awaited<ReturnType<typeof
   let notified = 0
   let errors = 0
 
+  const notificationHours = parseInt(process.env.TRIAL_ENDING_NOTIFICATION_HOURS || "6", 10) || 6
+
   const result = await client.query(
     `SELECT s.user_id, s.plan, s.trial_end, s.status
      FROM subscriptions s
      WHERE s.status = 'trialing'
        AND s.trial_end IS NOT NULL
        AND s.trial_end > NOW()
-       AND s.trial_end <= NOW() + INTERVAL '6 hours'
+       AND s.trial_end <= NOW() + INTERVAL '${notificationHours} hours'
        AND NOT EXISTS (
          SELECT 1 FROM email_reminder_logs erl
          WHERE erl.user_id = s.user_id
@@ -71,13 +73,15 @@ async function processSchoolTrialEndingNotifications(client: Awaited<ReturnType<
   let notified = 0
   let errors = 0
 
+  const notificationHours = parseInt(process.env.SCHOOL_TRIAL_ENDING_NOTIFICATION_HOURS || "6", 10) || 6
+
   const result = await client.query(
     `SELECT ss.admin_user_id, ss.school_id, ss.plan, ss.trial_end, ss.status
      FROM school_subscriptions ss
      WHERE ss.status = 'trialing'
        AND ss.trial_end IS NOT NULL
        AND ss.trial_end > NOW()
-       AND ss.trial_end <= NOW() + INTERVAL '6 hours'
+       AND ss.trial_end <= NOW() + INTERVAL '${notificationHours} hours'
        AND NOT EXISTS (
          SELECT 1 FROM email_reminder_logs erl
          WHERE erl.user_id = ss.admin_user_id

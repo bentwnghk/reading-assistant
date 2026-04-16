@@ -84,6 +84,14 @@ services:
       SUBSCRIPTION_CURRENCY: "usd"
       # Separate API key for subscription-based AI usage
       OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY: ""
+      # Trial period in days for personal subscriptions (default: 1)
+      SUBSCRIPTION_TRIAL_PERIOD_DAYS: "1"
+      # Trial period in days for school subscriptions (default: 1)
+      SCHOOL_SUBSCRIPTION_TRIAL_PERIOD_DAYS: "1"
+      # Hours before trial ends to send notification email for personal subscriptions (default: 6)
+      TRIAL_ENDING_NOTIFICATION_HOURS: "6"
+      # Hours before trial ends to send notification email for school subscriptions (default: 6)
+      SCHOOL_TRIAL_ENDING_NOTIFICATION_HOURS: "6"
 
 volumes:
   reading-assistant_postgres_data:
