@@ -27,6 +27,73 @@ type Props = {
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
 
+function parseRgb(color: string): { r: number; g: number; b: number } | null {
+  if (color.startsWith("#")) {
+    const hex = color.slice(1);
+    const full = hex.length === 3
+      ? hex.split("").map(c => c + c).join("")
+      : hex;
+    if (full.length !== 6) return null;
+    return {
+      r: parseInt(full.slice(0, 2), 16),
+      g: parseInt(full.slice(2, 4), 16),
+      b: parseInt(full.slice(4, 6), 16),
+    };
+  }
+  const match = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+  if (match) {
+    return { r: +match[1], g: +match[2], b: +match[3] };
+  }
+  return null;
+}
+
+function contrastColor(fill: string): string {
+  const rgb = parseRgb(fill);
+  if (!rgb) return "#333333";
+  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+  return luminance > 0.5 ? "#333333" : "#ffffff";
+}
+
+function applyContrastTextColors(element: HTMLElement): void {
+  const svg = element.querySelector("svg");
+  if (!svg) return;
+
+  function resolveColor(el: SVGElement): string | null {
+    const attr = el.getAttribute("fill");
+    if (attr && attr !== "none" && attr !== "transparent") return attr;
+    const style = el.style.fill;
+    if (style && style !== "none" && style !== "transparent") return style;
+    const computed = getComputedStyle(el).fill;
+    if (computed && computed !== "none" && computed !== "transparent") return computed;
+    return null;
+  }
+
+  // SVG <text> / <tspan> elements
+  svg.querySelectorAll<SVGTextElement>("text, tspan").forEach(textEl => {
+    const parentG = textEl.closest("g");
+    if (!parentG) return;
+    const shape = parentG.querySelector<SVGElement>("rect, circle, ellipse, polygon, path");
+    if (!shape) return;
+    const fill = resolveColor(shape);
+    if (!fill) return;
+    textEl.style.fill = contrastColor(fill);
+  });
+
+  // HTML labels inside <foreignObject>
+  svg.querySelectorAll<SVGForeignObjectElement>("foreignObject").forEach(fo => {
+    const parentG = fo.closest("g");
+    if (!parentG) return;
+    const shape = parentG.querySelector<SVGElement>("rect, circle, ellipse, polygon, path");
+    if (!shape) return;
+    const fill = resolveColor(shape);
+    if (!fill) return;
+    const color = contrastColor(fill);
+    fo.querySelectorAll<HTMLElement>("*").forEach(el => {
+      el.style.color = color;
+    });
+  });
+}
+
 async function loadMermaid(element: HTMLElement, code: string) {
   const { default: mermaid } = await import("mermaid");
   mermaid.initialize({ startOnLoad: false, theme: "default" });
@@ -34,6 +101,7 @@ async function loadMermaid(element: HTMLElement, code: string) {
   if (canParse) {
     await mermaid.render(nanoid(), code).then(({ svg }) => {
       element.innerHTML = svg;
+      applyContrastTextColors(element);
     });
   }
 }

@@ -292,11 +292,4 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Force mermaid diagram text to always use light-mode colors regardless of app theme */
-.dark .mermaid svg text,
-.dark .mermaid svg tspan,
-.dark .mermaid foreignObject,
-.dark .mermaid foreignObject * {
-  color: #333333 !important;
-  fill: #333333 !important;
-}
+
