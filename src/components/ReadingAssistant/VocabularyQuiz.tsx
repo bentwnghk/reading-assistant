@@ -512,53 +512,6 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
         </div>
 
         <div className="w-full max-w-md mx-auto space-y-6">
-          <div className="border rounded-lg p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Timer className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{t("reading.glossary.quiz.timeChallenge")}</span>
-              </div>
-              <button
-                onClick={() => setIsTimed(!isTimed)}
-                className={cn(
-                  "w-12 h-6 rounded-full transition-colors relative",
-                  isTimed ? "bg-primary" : "bg-muted"
-                )}
-              >
-                <div
-                  className={cn(
-                    "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
-                    isTimed ? "translate-x-7" : "translate-x-1"
-                  )}
-                />
-              </button>
-            </div>
-
-            {isTimed && (
-              <div className="pt-2 border-t">
-                <label className="text-sm font-medium mb-3 block">
-                  {t("reading.glossary.quiz.selectDifficulty")}
-                </label>
-                <div className="flex gap-2">
-                  {(["easy", "medium", "hard"] as QuizDifficulty[]).map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => setDifficulty(d)}
-                      className={cn(
-                        "flex-1 px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
-                        difficulty === d
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border hover:border-primary/50"
-                      )}
-                    >
-                      {t(`reading.glossary.quiz.difficulty.${d}`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
           {hasRatings && (
             <button
               onClick={() => setPrioritizeHardWords(!prioritizeHardWords)}
@@ -619,6 +572,53 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
               </div>
             </div>
           )}
+
+          <div className="border rounded-lg p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Timer className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{t("reading.glossary.quiz.timeChallenge")}</span>
+              </div>
+              <button
+                onClick={() => setIsTimed(!isTimed)}
+                className={cn(
+                  "w-12 h-6 rounded-full transition-colors relative",
+                  isTimed ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <div
+                  className={cn(
+                    "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                    isTimed ? "translate-x-7" : "translate-x-1"
+                  )}
+                />
+              </button>
+            </div>
+
+            {isTimed && (
+              <div className="pt-2 border-t">
+                <label className="text-sm font-medium mb-3 block">
+                  {t("reading.glossary.quiz.selectDifficulty")}
+                </label>
+                <div className="flex gap-2">
+                  {(["easy", "medium", "hard"] as QuizDifficulty[]).map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setDifficulty(d)}
+                      className={cn(
+                        "flex-1 px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
+                        difficulty === d
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      {t(`reading.glossary.quiz.difficulty.${d}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <Button onClick={startQuiz} className="w-full" size="lg">
             <Play className="h-5 w-5 mr-2" />
