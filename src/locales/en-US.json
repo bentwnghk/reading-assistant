@@ -1005,6 +1005,7 @@
     "personalDescription": "Subscribe individually to access all features.",
     "trialPeriod": "{{days}}-day free trial",
     "trialPeriodOneDay": "1-day free trial",
+    "noTrialAvailable": "Free trial not available for this account",
     "status": {
       "active": "Active",
       "trialing": "Trial",

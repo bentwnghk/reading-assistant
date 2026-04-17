@@ -27,6 +27,7 @@ export async function GET() {
         currentPeriodStart: null,
         cancelAtPeriodEnd: false,
         trialEnd: null,
+        trialEligible: true,
         isAdmin: false,
       });
     }
@@ -49,6 +50,7 @@ export async function GET() {
         currentPeriodStart: null,
         cancelAtPeriodEnd: false,
         trialEnd: null,
+        trialEligible: true,
         isAdmin,
       });
     }

@@ -1005,6 +1005,7 @@
     "personalDescription": "以個人身份訂閱以使用所有功能。",
     "trialPeriod": "{{days}} 天免費試用",
     "trialPeriodOneDay": "1 天免費試用",
+    "noTrialAvailable": "此帳戶無法使用免費試用",
     "status": {
       "active": "生效中",
       "trialing": "試用中",

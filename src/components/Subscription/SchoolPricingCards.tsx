@@ -13,10 +13,11 @@ interface SchoolPricingCardsProps {
   monthlyPrice: number;
   currency: string;
   trialPeriodDays?: number;
+  trialEligible?: boolean;
   onSelect: (plan: SubscriptionPlan, quantity: number) => void;
 }
 
-function SchoolPricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect }: SchoolPricingCardsProps) {
+function SchoolPricingCards({ monthlyPrice, currency, trialPeriodDays, trialEligible, onSelect }: SchoolPricingCardsProps) {
   const { t } = useTranslation();
 
   const yearlyTotal = monthlyPrice * 10;
@@ -27,7 +28,8 @@ function SchoolPricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect 
     minimumFractionDigits: monthlyPrice % 1 === 0 ? 0 : 2,
   });
 
-  const trialText = trialPeriodDays
+  const showTrial = trialEligible !== false && trialPeriodDays;
+  const trialText = showTrial
     ? trialPeriodDays === 1
       ? t("subscription.trialPeriodOneDay")
       : t("subscription.trialPeriod", { days: trialPeriodDays })
@@ -61,6 +63,9 @@ function SchoolPricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect 
               <span>{trialText}</span>
             </div>
           )}
+          {trialEligible === false && (
+            <p className="text-xs text-muted-foreground italic">{t("subscription.noTrialAvailable")}</p>
+          )}
           <QuantitySelector
             monthlyPrice={monthlyPrice}
             currency={currency}
@@ -89,6 +94,9 @@ function SchoolPricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect 
               <Gift className="h-3.5 w-3.5" />
               <span>{trialText}</span>
             </div>
+          )}
+          {trialEligible === false && (
+            <p className="text-xs text-muted-foreground italic">{t("subscription.noTrialAvailable")}</p>
           )}
           <QuantitySelector
             monthlyPrice={monthlyPrice}

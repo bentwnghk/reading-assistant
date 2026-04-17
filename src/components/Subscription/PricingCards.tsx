@@ -10,10 +10,11 @@ interface PricingCardsProps {
   monthlyPrice: number;
   currency: string;
   trialPeriodDays?: number;
+  trialEligible?: boolean;
   onSelect: (plan: SubscriptionPlan) => void;
 }
 
-function PricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect }: PricingCardsProps) {
+function PricingCards({ monthlyPrice, currency, trialPeriodDays, trialEligible, onSelect }: PricingCardsProps) {
   const { t } = useTranslation();
   const yearlyPrice = monthlyPrice * 10;
   const formatter = new Intl.NumberFormat("en-US", {
@@ -22,7 +23,8 @@ function PricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect }: Pri
     minimumFractionDigits: monthlyPrice % 1 === 0 ? 0 : 2,
   });
 
-  const trialText = trialPeriodDays
+  const showTrial = trialEligible !== false && trialPeriodDays;
+  const trialText = showTrial
     ? trialPeriodDays === 1
       ? t("subscription.trialPeriodOneDay")
       : t("subscription.trialPeriod", { days: trialPeriodDays })
@@ -46,6 +48,9 @@ function PricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect }: Pri
             <Gift className="h-3.5 w-3.5" />
             <span>{trialText}</span>
           </div>
+        )}
+        {trialEligible === false && (
+          <p className="text-xs text-muted-foreground italic">{t("subscription.noTrialAvailable")}</p>
         )}
         <Button
           className="w-full"
@@ -74,6 +79,9 @@ function PricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect }: Pri
             <Gift className="h-3.5 w-3.5" />
             <span>{trialText}</span>
           </div>
+        )}
+        {trialEligible === false && (
+          <p className="text-xs text-muted-foreground italic">{t("subscription.noTrialAvailable")}</p>
         )}
         <Button
           className="w-full"

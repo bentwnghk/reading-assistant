@@ -80,6 +80,7 @@ function SchoolSubscriptionPanel({ monthlyPrice, currency, trialPeriodDays }: Sc
             monthlyPrice={monthlyPrice}
             currency={currency}
             trialPeriodDays={trialPeriodDays}
+            trialEligible={subscription.trialEligible}
             onSelect={(plan: SubscriptionPlan, quantity: number) =>
               createCheckout(plan, quantity)
             }

@@ -36,6 +36,7 @@ export interface SubscriptionStatusResponse {
   currentPeriodStart: string | null;
   cancelAtPeriodEnd: boolean;
   trialEnd: string | null;
+  trialEligible: boolean;
 }
 
 let stripeInstance: Stripe | null = null;
@@ -147,6 +148,22 @@ async function getSubscriptionRecord(
   } catch (error) {
     console.error("Failed to get subscription:", error);
     return null;
+  } finally {
+    client.release();
+  }
+}
+
+export async function hasHadTrial(userId: string): Promise<boolean> {
+  const client = await getClient();
+  try {
+    const result = await client.query(
+      "SELECT 1 FROM subscriptions WHERE user_id = $1 AND trial_end IS NOT NULL LIMIT 1",
+      [userId]
+    );
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error("Failed to check trial history:", error);
+    return false;
   } finally {
     client.release();
   }
@@ -449,13 +466,15 @@ export async function createCheckoutSession(
   const { monthlyPriceId, yearlyPriceId } = await ensureStripePrices();
   const priceId = plan === "yearly" ? yearlyPriceId : monthlyPriceId;
   const appUrl = getAppUrl();
+  const previouslyTrialed = await hasHadTrial(userId);
+  const trialDays = previouslyTrialed ? undefined : parseInt(process.env.SUBSCRIPTION_TRIAL_PERIOD_DAYS || "1", 10) || undefined;
 
   const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
     subscription_data: {
-      trial_period_days: parseInt(process.env.SUBSCRIPTION_TRIAL_PERIOD_DAYS || "1", 10) || undefined,
+      ...(trialDays ? { trial_period_days: trialDays } : {}),
       metadata: { userId },
     },
     success_url: `${appUrl}/?subscription=success`,
@@ -565,6 +584,7 @@ export async function getSubscriptionStatus(
 ): Promise<SubscriptionStatusResponse> {
   await ensureSubscriptionTable();
   const sub = await getSubscriptionRecord(userId);
+  const previouslyTrialed = await hasHadTrial(userId);
 
   if (!sub) {
     return {
@@ -575,6 +595,7 @@ export async function getSubscriptionStatus(
       currentPeriodStart: null,
       cancelAtPeriodEnd: false,
       trialEnd: null,
+      trialEligible: !previouslyTrialed,
     };
   }
 
@@ -586,6 +607,7 @@ export async function getSubscriptionStatus(
     currentPeriodStart: sub.current_period_start,
     cancelAtPeriodEnd: sub.cancel_at_period_end,
     trialEnd: sub.trial_end,
+    trialEligible: !previouslyTrialed,
   };
 }
 

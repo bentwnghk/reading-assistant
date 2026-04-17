@@ -38,6 +38,7 @@ export interface SchoolSubscriptionStatusResponse {
   currentPeriodStart: string | null;
   cancelAtPeriodEnd: boolean;
   trialEnd: string | null;
+  trialEligible: boolean;
 }
 
 export const MIN_SEAT_QUANTITY = 20;
@@ -135,6 +136,22 @@ async function getSchoolSubscriptionRecord(
   } catch (error) {
     console.error("Failed to get school subscription:", error);
     return null;
+  } finally {
+    client.release();
+  }
+}
+
+export async function hasHadSchoolTrial(schoolId: string): Promise<boolean> {
+  const client = await getClient();
+  try {
+    const result = await client.query(
+      "SELECT 1 FROM school_subscriptions WHERE school_id = $1 AND trial_end IS NOT NULL LIMIT 1",
+      [schoolId]
+    );
+    return result.rows.length > 0;
+  } catch (error) {
+    console.error("Failed to check school trial history:", error);
+    return false;
   } finally {
     client.release();
   }
@@ -304,6 +321,8 @@ export async function getSchoolSubscriptionStatus(
 ): Promise<SchoolSubscriptionStatusResponse> {
   await ensureSchoolSubscriptionTables();
 
+  const previouslyTrialed = await hasHadSchoolTrial(schoolId);
+
   const client = await getClient();
   try {
     const schoolResult = await client.query(
@@ -327,6 +346,7 @@ export async function getSchoolSubscriptionStatus(
         currentPeriodStart: null,
         cancelAtPeriodEnd: false,
         trialEnd: null,
+        trialEligible: !previouslyTrialed,
       };
     }
 
@@ -346,6 +366,7 @@ export async function getSchoolSubscriptionStatus(
       currentPeriodStart: sub.current_period_start,
       cancelAtPeriodEnd: sub.cancel_at_period_end,
       trialEnd: sub.trial_end,
+      trialEligible: !previouslyTrialed,
     };
   } catch (error) {
     console.error("Failed to get school subscription status:", error);
@@ -361,6 +382,7 @@ export async function getSchoolSubscriptionStatus(
       currentPeriodStart: null,
       cancelAtPeriodEnd: false,
       trialEnd: null,
+      trialEligible: !previouslyTrialed,
     };
   } finally {
     client.release();
@@ -446,13 +468,15 @@ export async function createSchoolCheckoutSession(
   const { monthlyPriceId, yearlyPriceId } = await ensureSchoolStripePrices();
   const priceId = plan === "yearly" ? yearlyPriceId : monthlyPriceId;
   const appUrl = getAppUrl();
+  const previouslyTrialed = await hasHadSchoolTrial(schoolId);
+  const trialDays = previouslyTrialed ? undefined : parseInt(process.env.SCHOOL_SUBSCRIPTION_TRIAL_PERIOD_DAYS || "1", 10) || undefined;
 
   const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
     line_items: [{ price: priceId, quantity }],
     subscription_data: {
-      trial_period_days: parseInt(process.env.SCHOOL_SUBSCRIPTION_TRIAL_PERIOD_DAYS || "1", 10) || undefined,
+      ...(trialDays ? { trial_period_days: trialDays } : {}),
       metadata: { schoolId, adminUserId, type: "school", plan },
     },
     success_url: `${appUrl}/?school_subscription=success`,

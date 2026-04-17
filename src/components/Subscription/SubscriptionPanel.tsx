@@ -101,6 +101,7 @@ function SubscriptionPanel({ monthlyPrice, currency, trialPeriodDays, disabled }
             monthlyPrice={monthlyPrice}
             currency={currency}
             trialPeriodDays={trialPeriodDays}
+            trialEligible={subscription.trialEligible}
             onSelect={(plan: SubscriptionPlan) => createCheckout(plan)}
           />
         </div>
