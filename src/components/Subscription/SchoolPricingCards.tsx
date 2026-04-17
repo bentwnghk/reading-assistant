@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Minus, Plus, Users } from "lucide-react";
+import { Minus, Plus, Users, Gift } from "lucide-react";
 import type { SubscriptionPlan } from "@/lib/subscription";
 
 const MIN_SEAT_QUANTITY = 20;
@@ -12,10 +12,11 @@ const MIN_SEAT_QUANTITY = 20;
 interface SchoolPricingCardsProps {
   monthlyPrice: number;
   currency: string;
+  trialPeriodDays?: number;
   onSelect: (plan: SubscriptionPlan, quantity: number) => void;
 }
 
-function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingCardsProps) {
+function SchoolPricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect }: SchoolPricingCardsProps) {
   const { t } = useTranslation();
 
   const yearlyTotal = monthlyPrice * 10;
@@ -25,6 +26,12 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
     currency: currency.toUpperCase(),
     minimumFractionDigits: monthlyPrice % 1 === 0 ? 0 : 2,
   });
+
+  const trialText = trialPeriodDays
+    ? trialPeriodDays === 1
+      ? t("subscription.trialPeriodOneDay")
+      : t("subscription.trialPeriod", { days: trialPeriodDays })
+    : null;
 
   return (
     <div className="space-y-4">
@@ -48,6 +55,12 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
           <div className="text-xs text-muted-foreground">
             {t("schoolSubscription.billedMonthly")}
           </div>
+          {trialText && (
+            <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+              <Gift className="h-3.5 w-3.5" />
+              <span>{trialText}</span>
+            </div>
+          )}
           <QuantitySelector
             monthlyPrice={monthlyPrice}
             currency={currency}
@@ -71,6 +84,12 @@ function SchoolPricingCards({ monthlyPrice, currency, onSelect }: SchoolPricingC
           <div className="text-xs text-muted-foreground">
             {formatter.format(yearlyPerUser)}/{t("subscription.month").toLowerCase()} {t("schoolSubscription.perUser")}
           </div>
+          {trialText && (
+            <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+              <Gift className="h-3.5 w-3.5" />
+              <span>{trialText}</span>
+            </div>
+          )}
           <QuantitySelector
             monthlyPrice={monthlyPrice}
             currency={currency}

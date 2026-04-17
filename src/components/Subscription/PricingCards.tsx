@@ -3,16 +3,17 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Gift } from "lucide-react";
 import type { SubscriptionPlan } from "@/lib/subscription";
 
 interface PricingCardsProps {
   monthlyPrice: number;
   currency: string;
+  trialPeriodDays?: number;
   onSelect: (plan: SubscriptionPlan) => void;
 }
 
-function PricingCards({ monthlyPrice, currency, onSelect }: PricingCardsProps) {
+function PricingCards({ monthlyPrice, currency, trialPeriodDays, onSelect }: PricingCardsProps) {
   const { t } = useTranslation();
   const yearlyPrice = monthlyPrice * 10;
   const formatter = new Intl.NumberFormat("en-US", {
@@ -20,6 +21,12 @@ function PricingCards({ monthlyPrice, currency, onSelect }: PricingCardsProps) {
     currency: currency.toUpperCase(),
     minimumFractionDigits: monthlyPrice % 1 === 0 ? 0 : 2,
   });
+
+  const trialText = trialPeriodDays
+    ? trialPeriodDays === 1
+      ? t("subscription.trialPeriodOneDay")
+      : t("subscription.trialPeriod", { days: trialPeriodDays })
+    : null;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -34,6 +41,12 @@ function PricingCards({ monthlyPrice, currency, onSelect }: PricingCardsProps) {
         <p className="text-xs text-muted-foreground">
           {t("schoolSubscription.billedMonthly")}
         </p>
+        {trialText && (
+          <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+            <Gift className="h-3.5 w-3.5" />
+            <span>{trialText}</span>
+          </div>
+        )}
         <Button
           className="w-full"
           variant="outline"
@@ -56,6 +69,12 @@ function PricingCards({ monthlyPrice, currency, onSelect }: PricingCardsProps) {
         <p className="text-xs text-muted-foreground">
           {formatter.format(Math.round((yearlyPrice / 12) * 100) / 100)}/{t("subscription.month")}
         </p>
+        {trialText && (
+          <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+            <Gift className="h-3.5 w-3.5" />
+            <span>{trialText}</span>
+          </div>
+        )}
         <Button
           className="w-full"
           onClick={() => onSelect("yearly")}

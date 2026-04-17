@@ -14,9 +14,10 @@ import type { SubscriptionPlan } from "@/lib/subscription";
 interface SchoolSubscriptionPanelProps {
   monthlyPrice: number;
   currency: string;
+  trialPeriodDays?: number;
 }
 
-function SchoolSubscriptionPanel({ monthlyPrice, currency }: SchoolSubscriptionPanelProps) {
+function SchoolSubscriptionPanel({ monthlyPrice, currency, trialPeriodDays }: SchoolSubscriptionPanelProps) {
   const { t } = useTranslation();
   const {
     subscription,
@@ -78,6 +79,7 @@ function SchoolSubscriptionPanel({ monthlyPrice, currency }: SchoolSubscriptionP
           <SchoolPricingCards
             monthlyPrice={monthlyPrice}
             currency={currency}
+            trialPeriodDays={trialPeriodDays}
             onSelect={(plan: SubscriptionPlan, quantity: number) =>
               createCheckout(plan, quantity)
             }

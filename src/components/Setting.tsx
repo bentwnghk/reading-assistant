@@ -116,8 +116,8 @@ function Setting({ open, onClose }: SettingProps) {
   const { mode, provider, update } = useSettingStore();
   const { status: authStatus, data: sessionData } = useSession();
   const isAuthenticated = authStatus === "authenticated";
-  const [pricingInfo, setPricingInfo] = useState<{ monthly: number; currency: string } | null>(null);
-  const [schoolPricingInfo, setSchoolPricingInfo] = useState<{ monthly: number; currency: string } | null>(null);
+  const [pricingInfo, setPricingInfo] = useState<{ monthly: number; currency: string; trialPeriodDays: number } | null>(null);
+  const [schoolPricingInfo, setSchoolPricingInfo] = useState<{ monthly: number; currency: string; trialPeriodDays: number } | null>(null);
   const { subscription: schoolSub } = useSchoolSubscription();
   const hasActiveSchoolSubscription =
     schoolSub?.hasSubscription === true &&
@@ -134,17 +134,20 @@ function Setting({ open, onClose }: SettingProps) {
           setPricingInfo({
             monthly: typeof data.monthly === "number" ? data.monthly : data.monthly.amount,
             currency: data.monthly.currency || data.currency || "usd",
+            trialPeriodDays: data.trialPeriodDays || 0,
           });
         }
         if (data.schoolMonthly) {
           setSchoolPricingInfo({
             monthly: typeof data.schoolMonthly === "number" ? data.schoolMonthly : data.schoolMonthly.amount,
             currency: data.schoolMonthly.currency || data.currency || "usd",
+            trialPeriodDays: data.schoolTrialPeriodDays || 0,
           });
         } else if (data.monthly) {
           setSchoolPricingInfo({
             monthly: typeof data.monthly === "number" ? data.monthly : data.monthly.amount,
             currency: data.monthly.currency || data.currency || "usd",
+            trialPeriodDays: data.schoolTrialPeriodDays || data.trialPeriodDays || 0,
           });
         }
       })
@@ -453,12 +456,14 @@ function Setting({ open, onClose }: SettingProps) {
                         <SchoolSubscriptionPanel
                           monthlyPrice={schoolPricingInfo.monthly}
                           currency={schoolPricingInfo.currency}
+                          trialPeriodDays={schoolPricingInfo.trialPeriodDays || undefined}
                         />
                       )}
                       {pricingInfo && (
                         <SubscriptionPanel
                           monthlyPrice={pricingInfo.monthly}
                           currency={pricingInfo.currency}
+                          trialPeriodDays={pricingInfo.trialPeriodDays || undefined}
                           disabled={hasActiveSchoolSubscription}
                         />
                       )}
