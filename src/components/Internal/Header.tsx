@@ -284,7 +284,6 @@ function Header() {
                 variant="outline"
                 size="sm"
                 className="mr-2"
-                title={t("teacherDashboard.title")}
                 onClick={() => setOpenTeacherDashboard(true)}
               >
                 <GraduationCap className="h-4 w-4 sm:mr-1" />
