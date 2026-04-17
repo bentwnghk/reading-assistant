@@ -30,6 +30,20 @@ interface ExportOptions {
   className?: string
 }
 
+interface SchoolBreakdownStats {
+  count: number
+  avgProgress: number
+  avgVocabulary: number
+  vocabularyCompletedCount: number
+  avgSpellingScore: number
+  spellingCompletedCount: number
+  avgQuizScore: number
+  quizCompletedCount: number
+  avgTestScore: number
+  testCompletedCount: number
+  passRate: number
+}
+
 interface SummaryStats {
   totalSessions: number
   avgProgress: number
@@ -42,7 +56,7 @@ interface SummaryStats {
   spellingCompletedCount: number
   avgQuizScore: number
   quizCompletedCount: number
-  schoolBreakdown: Map<string, { count: number; avgProgress: number; avgTestScore: number }>
+  schoolBreakdown: Map<string, SchoolBreakdownStats>
 }
 
 function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
@@ -79,25 +93,63 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
   const quizCompletedSessions = sessions.filter(s => s.vocabularyQuizScore !== undefined && s.vocabularyQuizScore > 0)
   const totalQuizScore = quizCompletedSessions.reduce((sum, s) => sum + (s.vocabularyQuizScore || 0), 0)
 
-  const schoolBreakdown = new Map<string, { count: number; totalProgress: number; totalTestScore: number; testCount: number }>()
+  const schoolBreakdown = new Map<string, {
+    count: number
+    totalProgress: number
+    totalTestScore: number
+    testCount: number
+    passedTests: number
+    vocabularyCompletedCount: number
+    totalVocabulary: number
+    spellingCompletedCount: number
+    totalSpellingScore: number
+    quizCompletedCount: number
+    totalQuizScore: number
+  }>()
   sessions.forEach(s => {
     const school = s.schoolName || "Unknown"
-    const existing = schoolBreakdown.get(school) || { count: 0, totalProgress: 0, totalTestScore: 0, testCount: 0 }
+    const existing = schoolBreakdown.get(school) || {
+      count: 0, totalProgress: 0, totalTestScore: 0, testCount: 0, passedTests: 0,
+      vocabularyCompletedCount: 0, totalVocabulary: 0,
+      spellingCompletedCount: 0, totalSpellingScore: 0,
+      quizCompletedCount: 0, totalQuizScore: 0,
+    }
     existing.count++
     existing.totalProgress += s.progress
     if (s.testCompleted && s.testScore !== undefined) {
       existing.totalTestScore += s.testScore
       existing.testCount++
+      if (s.testScore >= 70) existing.passedTests++
+    }
+    if (s.glossaryCount > 0) {
+      existing.vocabularyCompletedCount++
+      existing.totalVocabulary += s.glossaryCount
+    }
+    if (s.spellingGameBestScore !== undefined && s.spellingGameBestScore > 0) {
+      existing.spellingCompletedCount++
+      existing.totalSpellingScore += s.spellingGameBestScore
+    }
+    if (s.vocabularyQuizScore !== undefined && s.vocabularyQuizScore > 0) {
+      existing.quizCompletedCount++
+      existing.totalQuizScore += s.vocabularyQuizScore
     }
     schoolBreakdown.set(school, existing)
   })
 
-  const schoolBreakdownFinal = new Map<string, { count: number; avgProgress: number; avgTestScore: number }>()
+  const schoolBreakdownFinal = new Map<string, SchoolBreakdownStats>()
   schoolBreakdown.forEach((value, key) => {
     schoolBreakdownFinal.set(key, {
       count: value.count,
       avgProgress: Math.round(value.totalProgress / value.count),
+      avgVocabulary: value.vocabularyCompletedCount > 0 ? Math.round(value.totalVocabulary / value.vocabularyCompletedCount) : 0,
+      vocabularyCompletedCount: value.vocabularyCompletedCount,
+      avgSpellingScore: value.spellingCompletedCount > 0 ? Math.round(value.totalSpellingScore / value.spellingCompletedCount) : 0,
+      spellingCompletedCount: value.spellingCompletedCount,
+      avgQuizScore: value.quizCompletedCount > 0 ? Math.round(value.totalQuizScore / value.quizCompletedCount) : 0,
+      quizCompletedCount: value.quizCompletedCount,
       avgTestScore: value.testCount > 0 ? Math.round(value.totalTestScore / value.testCount) : 0,
+      testCompletedCount: value.testCount,
+      passRate: value.testCount > 0 ? Math.round((value.passedTests / value.testCount) * 100) : 0,
     })
   })
 
@@ -378,7 +430,11 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
 
     summarySheet.addRow([])
 
-    const schoolTableHeader = summarySheet.addRow(["School Name", "Sessions", "Avg Progress", "Avg Test Score"])
+    const schoolTableHeader = summarySheet.addRow([
+      "School Name", "Sessions", "Avg Progress", "Sessions with Vocabulary", "Avg Vocabulary Collected",
+      "Spelling Challenges Completed", "Avg Spelling Score", "Vocabulary Quizzes Completed", "Avg Quiz Score",
+      "Reading Tests Completed", "Avg Test Score", "Pass Rate (≥70%)",
+    ])
     schoolTableHeader.height = 22
     schoolTableHeader.eachCell((cell) => {
       cell.fill = {
@@ -392,13 +448,34 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
         size: 10,
         name: "Calibri",
       }
-      cell.alignment = { horizontal: "center", vertical: "middle" }
+      cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true }
     })
+
+    summarySheet.columns = [
+      { width: 30 },
+      { width: 12 },
+      { width: 14 },
+      { width: 22 },
+      { width: 22 },
+      { width: 26 },
+      { width: 18 },
+      { width: 26 },
+      { width: 16 },
+      { width: 22 },
+      { width: 16 },
+      { width: 18 },
+    ]
 
     const sortedSchools = Array.from(stats.schoolBreakdown.entries()).sort((a, b) => b[1].count - a[1].count)
 
     sortedSchools.forEach(([schoolName, schoolStats], index) => {
-      const row = summarySheet.addRow([schoolName, schoolStats.count, `${schoolStats.avgProgress}%`, `${schoolStats.avgTestScore}%`])
+      const row = summarySheet.addRow([
+        schoolName, schoolStats.count, `${schoolStats.avgProgress}%`,
+        schoolStats.vocabularyCompletedCount, schoolStats.avgVocabulary,
+        schoolStats.spellingCompletedCount, schoolStats.avgSpellingScore,
+        schoolStats.quizCompletedCount, `${schoolStats.avgQuizScore}%`,
+        schoolStats.testCompletedCount, `${schoolStats.avgTestScore}%`, `${schoolStats.passRate}%`,
+      ])
       row.height = 20
       row.eachCell((cell) => {
         cell.font = { size: 10, name: "Calibri" }
