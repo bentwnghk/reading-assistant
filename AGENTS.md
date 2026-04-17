@@ -4,17 +4,17 @@ This document provides essential guidelines and technical references for AI agen
 
 ---
 
-## 🚀 Development Workflow & Commands
+## Development Workflow & Commands
 
-The project uses **npm** as the primary package manager.
+The project uses **npm** as the primary package manager (>= 9.8.0, Node >= 18.18.0).
 
 ### Core Commands
 
 - **Install Dependencies**: `npm install`
 - **Development Server**: `npm run dev` (Runs at `http://localhost:3000` with Turbopack)
 - **Build Project**: `npm run build`
-- **Static Export**: `npm run build:export` (Generates `out/` directory)
-- **Standalone Build**: `npm run build:standalone`
+- **Static Export**: `npm run build:export` (Generates `out/` directory, sets `NEXT_PUBLIC_BUILD_MODE=export`)
+- **Standalone Build**: `npm run build:standalone` (Sets `NEXT_PUBLIC_BUILD_MODE=standalone`)
 - **Start Production**: `npm run start`
 - **Linting**: `npm run lint`
 
@@ -22,55 +22,102 @@ The project uses **npm** as the primary package manager.
 
 - **Status**: Currently, there are no automated tests in the codebase.
 - **Guideline**: If adding tests, use **Vitest** or **Jest** following standard Next.js patterns. Place test files next to the code they test (e.g., `ComponentName.test.tsx`) or in a `__tests__` directory.
-- **Single Test**: To run a single test (if added), use `npm run vitest run path/to/file.test.ts`.
+
+### Docker
+
+- **Dockerfile**: Multi-stage build on `node:18-alpine`, runs `build:standalone`, exposes port 3000.
+- **docker-compose.yml**: Two services — `postgres` (PostgreSQL 16 Alpine, port 5432) and `reading-assistant` (port 3000, depends on healthy postgres).
+- **Build & Run**: `docker compose up --build`
+
+### CI/CD
+
+- **`.github/workflows/docker.yml`**: Pushes multi-arch (amd64/arm64) Docker image to Docker Hub on `main`/`dev` pushes and `v*` tags.
+- **`.github/workflows/ghcr.yml`**: Pushes Docker image to GitHub Container Registry on `main`/`db` pushes and `v*` tags.
+- **`.github/workflows/issue-translator.yml`**: Auto-translates non-English GitHub issues.
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
-- `src/app`: Next.js App Router (Pages, API routes, Layouts).
-- `src/components`: UI components.
-  - `ui/`: Shadcn primitives.
-  - `Internal/`: Custom shared components.
-  - `ReadingAssistant/`: Feature-specific components for reading assistance.
-  - `MagicDown/`: Markdown rendering and editing components.
-  - `Provider/`: Context providers (Theme, I18n).
-- `src/hooks`: Custom React hooks for business logic and state interaction.
-- `src/store`: Zustand stores for global state and persistence.
-- `src/utils`: Helper functions and core logic.
-- `src/constants`: Application constants (prompts, URLs, locales).
-- `src/locales`: I18n translation files (JSON).
-- `src/middleware.ts`: Next.js middleware for request handling.
+```
+src/
+├── app/                        # Next.js App Router (Pages, API routes, Layouts)
+│   ├── api/                    # API route handlers (see Backend section)
+│   ├── sw.ts                   # Serwist service worker source
+│   └── ...                     # Page routes
+├── auth.ts                     # NextAuth v5 full server-side config (PostgreSQL adapter)
+├── auth.config.ts              # NextAuth v5 Edge-compatible config (Google OAuth only)
+├── middleware.ts                # Request middleware (API key injection, access control)
+├── components/
+│   ├── ui/                     # Shadcn UI primitives (do not modify directly)
+│   ├── Internal/               # Custom shared components
+│   ├── ReadingAssistant/       # Core reading assistance feature components
+│   ├── MagicDown/              # Markdown rendering and editing components
+│   ├── Auth/                   # Authentication UI components
+│   ├── Dashboard/              # Student dashboard components
+│   ├── TeacherDashboard/       # Teacher dashboard components
+│   ├── Leaderboard/            # Leaderboard components
+│   ├── Subscription/           # Subscription/billing UI components
+│   ├── UserManagement/         # User management components
+│   └── Provider/               # Context providers (Theme, I18n)
+├── hooks/                      # Custom React hooks for business logic
+├── store/                      # Zustand stores (global state, persisted)
+├── lib/                        # Server-side data access layer
+│   ├── db.ts                   # PostgreSQL connection pool singleton
+│   ├── sessions.ts             # Session data access
+│   ├── users.ts                # User data access
+│   ├── achievements.ts         # Achievement logic
+│   ├── activity.ts             # Activity tracking
+│   ├── chatQuestions.ts        # Chat question generation
+│   ├── email.ts                # Email sending (Mailtrap)
+│   ├── leaderboard.ts          # Leaderboard queries
+│   ├── reminders.ts            # Email reminder scheduling
+│   ├── repository.ts           # Text repository queries
+│   ├── school-subscription.ts  # School subscription logic
+│   ├── settings.ts             # App settings queries
+│   ├── subscription.ts         # Subscription data access
+│   └── subscription-email.ts   # Subscription email templates
+├── templates/                  # Email template files
+├── utils/                      # Client/server helper functions
+├── constants/                  # Application constants (prompts, URLs, locales)
+├── locales/                    # I18n translation files (JSON)
+└── types.d.ts                  # Shared TypeScript type definitions
+scripts/                        # SQL migrations (init-db.sql + incremental migrations)
+```
 
 ---
 
-## 🎨 Code Style & Conventions
+## Code Style & Conventions
 
 ### 1. TypeScript & Types
 
 - **Strict Mode**: `strict: true` is enabled in `tsconfig.json`. Always provide explicit types for function parameters and return values.
-- **Global Types**: Core business logic types (e.g., `ReadingSession`, `ReadingTestQuestion`, `GlossaryEntry`) are defined in `src/types.d.ts`. Check this file before creating new interfaces.
+- **Global Types**: Core business logic types (e.g., `ReadingSession`, `ReadingTestQuestion`, `GlossaryEntry`, `UserRole`, `SchoolInfo`, `TextVisibility`, `RepositoryText`) are defined in `src/types.d.ts`. Check this file before creating new interfaces.
 - **Explicit Any**: While `@typescript-eslint/no-explicit-any` is currently `off`, avoid `any` unless absolutely necessary for external library compatibility. Prefer `unknown` or specific interfaces.
+- **Unused Vars**: `@typescript-eslint/no-unused-vars` is `error`. Prefix intentionally unused variables with `_`.
 - **Zod**: Use **Zod** for schema validation, especially for AI response parsing and API request bodies.
 
 ### 2. React & Next.js
 
 - **App Router**: This project uses the Next.js App Router.
+- **React Compiler**: The experimental React Compiler is enabled (`reactCompiler: true` in `next.config.ts`). Avoid manual memoization (`useMemo`, `useCallback`, `React.memo`) unless there is a specific reason the compiler cannot optimize it.
 - **Client Components**: Use `"use client";` at the top of files that require browser APIs or React hooks (state, effects).
 - **Dynamic Imports**: Use Next.js `dynamic()` for heavy components or those that rely on browser-only libraries (e.g., `MagicDown`, `Mermaid`).
-- **Hooks**: Prefer custom hooks for complex logic (e.g., `useReadingAssistant`, `useAiProvider`).
+- **Hooks**: Prefer custom hooks for complex logic (e.g., `useReadingAssistant`, `useAiProvider`, `useDashboardMetrics`, `useTeacherDashboard`, `useSubscription`).
 
 ### 3. Components & UI
 
 - **Shadcn UI**: UI primitives are located in `@/components/ui`. Do not modify them directly; extend them or create wrappers in `src/components/Internal`.
-- **Styling**: Use **Tailwind CSS**. Follow mobile-first responsive design patterns.
+- **Styling**: Use **Tailwind CSS** with the `tailwindcss-animate` and `@tailwindcss/typography` plugins. Follow mobile-first responsive design patterns.
+- **Dark Mode**: Uses `darkMode: ["class"]`. Ensure all new UI elements support both light and dark modes using Tailwind `dark:` classes.
 - **Icons**: Use **lucide-react**.
 - **I18n**: All UI strings must use `useTranslation` from `react-i18next`. Use `t("key.path")` for all labels.
 
 ### 4. State Management
 
-- **Zustand**: Used for global state and persistence.
-- **Persistence**: Most stores use the `persist` middleware (e.g., `useReadingStore` in `src/store/reading.ts`) to save data in `localStorage`.
+- **Zustand**: Used for global client-side state and persistence.
+- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts` — all in `src/store/`.
+- **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`.
 - **Radash**: Use **radash** utilities for common operations like `pick`, `isString`, `isObject`, etc.
 
 ### 5. Imports
@@ -85,7 +132,30 @@ The project uses **npm** as the primary package manager.
 
 ---
 
-## 🛠 Backend & API Patterns
+## Authentication (NextAuth v5)
+
+The project uses **next-auth v5 (beta.30)** with **Google OAuth** as the sole provider.
+
+- **`src/auth.ts`**: Full server-side config with `PostgresAdapter` (pg Pool, max 20 connections). Session strategy is `database` with 30-day maxAge.
+- **`src/auth.config.ts`**: Lightweight Edge-compatible config used by middleware (no pg dependency).
+- **`src/middleware.ts`**: Intercepts `/api/:path*` requests. Handles API key injection for AI/search providers and verifies `ACCESS_PASSWORD` via HMAC signature.
+- **Roles**: `UserRole` includes `admin`, `teacher`, `student`. Roles are auto-assigned on first sign-in via session callbacks (`ensureUserRole`, `ensureUserSchool`).
+- **Session**: Extended to include `user.id` and `user.role` on the client side.
+
+---
+
+## Database (PostgreSQL)
+
+The project uses **PostgreSQL 16** as its primary database.
+
+- **Connection**: Singleton `pg.Pool` in `src/lib/db.ts` (max 20 connections, 30s idle timeout, 2s connect timeout).
+- **Data Access**: Server-side queries live in `src/lib/*.ts` files. All database operations should go through these modules, not raw SQL in API routes.
+- **Migrations**: SQL migration files in `scripts/` (e.g., `init-db.sql`, `add-subscriptions.sql`, `migrate-ai-models.sql`). Apply migrations manually in order.
+- **Auth Storage**: next-auth uses the `@auth/pg-adapter` with its own schema managed by the adapter.
+
+---
+
+## Backend & API Patterns
 
 ### 1. Error Handling
 
@@ -94,32 +164,85 @@ The project uses **npm** as the primary package manager.
 
 ### 2. API Routes
 
-- **AI Provider Proxies**: Located at `src/app/api/ai/*`. These proxy requests to various AI providers (Google, OpenAI, Anthropic, DeepSeek, etc.) to avoid CORS issues and manage keys.
-- **Proxying**: The project proxies various AI and search providers via `next.config.ts` rewrites to avoid CORS issues and manage keys.
+API routes are in `src/app/api/`. Key route groups:
 
-### 3. Environment Variables
+- **`ai/*`**: AI provider proxies (Google, Google Vertex, OpenAI, Anthropic, DeepSeek, xAI, Mistral, Azure, OpenRouter, OpenAI Compatible, Pollinations, Ollama).
+- **`webhooks/stripe/`**: Stripe webhook handler.
+- **`subscription/*`**: Subscription management (checkout, portal, cancel, reactivate, status).
+- **`auth/*`**: NextAuth API routes.
+- **`users/*` / `user/*`**: User management and profile.
+- **`classes/*`**: Class management (teacher/student).
+- **`sessions/*`**: Reading session CRUD.
+- **`leaderboard/*`**: Leaderboard data.
+- **`achievements/*`**: Achievement tracking.
+- **`activity/*`**: User activity logging.
+- **`repository/*`**: Shared text repository.
+- **`schools/*`**: School management.
+- **`chat-questions/*`**: AI-generated chat questions.
+- **`reminders/*`**: Email reminder preferences.
+- **`settings/*`**: Application settings.
+- **`import/*`**: Data import endpoints.
+- **`admin/*`**: Admin-only endpoints.
+- **`cron/*`**: Scheduled tasks (email reminders).
 
-- Refer to `env.tpl` for all available environment variables.
-- Critical AI provider variables include `GOOGLE_GENERATIVE_AI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.
-- MCP server configuration: `MCP_AI_PROVIDER`, `MCP_SEARCH_PROVIDER`, `MCP_THINKING_MODEL`, `MCP_TASK_MODEL`.
-- Never commit `.env` or `.env.local` files.
+### 3. Provider Proxying
+
+The middleware (`src/middleware.ts`) and `next.config.ts` rewrites proxy requests to external AI and search providers:
+
+- **AI Providers**: Google, Google Vertex, OpenRouter, OpenAI, Anthropic, DeepSeek, xAI, Mistral, Azure, OpenAI Compatible, Pollinations, Ollama.
+- **Search Providers**: Tavily, Firecrawl, Exa, Bocha, Brave, SearXNG.
+- **Access Control**: All proxied routes require HMAC-signed `ACCESS_PASSWORD`. The middleware replaces client tokens with server-side API keys.
+- **Disabled Providers**: `NEXT_PUBLIC_DISABLED_AI_PROVIDER` and `NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER` env vars can disable entire providers. `NEXT_PUBLIC_MODEL_LIST` supports `-all,+model` syntax for fine-grained model control.
+
+### 4. Subscriptions & Billing (Stripe)
+
+- **Stripe Integration**: Full subscription lifecycle (checkout, portal, cancellation, reactivation, webhooks).
+- **Plans**: Individual and school subscriptions with configurable pricing and trial periods.
+- **Webhook**: `src/app/api/webhooks/stripe/route.ts` handles Stripe events.
+
+### 5. Email System
+
+- **Provider**: Mailtrap for transactional emails.
+- **Use Cases**: Reading reminders, subscription expiry notifications.
+- **Cron**: `src/app/api/cron/route.ts` triggers scheduled email sends.
+- **Templates**: `src/templates/` contains email template definitions.
+
+### 6. Environment Variables
+
+- Refer to `env.tpl` for all available environment variables (~70+ variables).
+- **Categories**: AI provider keys/URLs, search provider keys/URLs, auth (NextAuth + Google OAuth), database (`DATABASE_URL`, `POSTGRES_PASSWORD`), Stripe/billing, email (Mailtrap), access control (`ACCESS_PASSWORD`, `ADMIN_EMAILS`, `SUPER_ADMIN_EMAILS`), MCP server config, feature flags (`NEXT_PUBLIC_DISABLED_AI_PROVIDER`, `NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER`, `NEXT_PUBLIC_MODEL_LIST`).
+- **Never commit** `.env` or `.env.local` files.
 
 ---
 
-## 🔒 Security & Safety
+## PWA (Serwist)
+
+The project uses **Serwist** (Workbox successor) for service worker support.
+
+- **Source**: `src/app/sw.ts` — configured with `skipWaiting`, `clientsClaim`, `navigationPreload`, and runtime caching via `defaultCache`.
+- **Build**: During `PHASE_PRODUCTION_BUILD`, `next.config.ts` wraps the config with `withSerwistInit` (swSrc → swDest: `public/sw.js`).
+- **TypeScript**: `tsconfig.json` includes `"webworker"` in `lib` for service worker type support.
+
+---
+
+## Security & Safety
 
 - **Secrets**: Do not hardcode API keys or credentials.
 - **Sanitization**: Use Zod to sanitize and validate all external inputs (user input, file uploads).
+- **API Access**: All AI/search proxy routes are protected by HMAC-signed `ACCESS_PASSWORD` verification in middleware.
+- **RBAC**: Role-based access control (admin/teacher/student) is enforced via NextAuth session callbacks and API route checks.
 - **Destructive Actions**: Avoid `rm -rf` or history rewriting in git unless explicitly requested.
 
 ---
 
-## 🤖 Agent Instructions
+## Agent Instructions
 
 - **Read First**: Always read the relevant file and its neighbors before proposing edits.
-- **Follow Patterns**: If adding a new component, look at existing components in `src/components/ReadingAssistant/` for reference implementations.
+- **Follow Patterns**: If adding a new component, look at existing components in the appropriate `src/components/` subdirectory for reference implementations.
 - **Keep it Focused**: Make small, cohesive changes. Avoid unrelated refactors.
 - **Validate**: Run `npm run lint` and `npm run build` to ensure your changes don't break the build.
+- **Database Changes**: If modifying database schema, create a new SQL migration file in `scripts/` following the existing naming convention. Update the corresponding `src/lib/*.ts` data access module.
+- **API Routes**: New API routes should follow existing patterns — use `parseError` for error handling, Zod for input validation, and the `getPool()`/`getClient()` helpers from `src/lib/db.ts` for database access.
 - **Communication**: Summarize what changed, where, and why. Call out tradeoffs, assumptions, and known limitations. If validation could not be run, say so explicitly.
 - **Clarity**: Prefer clarity and simplicity over cleverness. Preserve existing behavior unless the task explicitly requires changes.
 - **UI Consistency**: Ensure all new UI elements support both light and dark modes using Tailwind `dark:` classes.
