@@ -462,6 +462,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Trophy className="h-4 w-4 mt-0.5 text-yellow-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.leaderboard.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.leaderboard.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <Download className="h-4 w-4 mt-0.5 text-rose-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.wordExport.title")}</div>

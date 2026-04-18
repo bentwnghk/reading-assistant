@@ -73,7 +73,7 @@
         },
         "teacher": {
           "title": "🎓 Teacher",
-          "manageStudents": "Add students & track their learning progress",
+          "manageStudents": "Add students & track their learning progress through Teacher Dashboard",
           "uploadTexts": "Upload reading materials to Text Repository to share with your classes",
           "exportData": "Export detailed Excel reports",
           "viewLeaderboard": "Monitor class leaderboards",
@@ -83,7 +83,7 @@
           "title": "👥 Student",
           "learn": "Full access to all features",
           "cloudSync": "Automatic cloud sync",
-          "history": "Track your learning journey",
+          "history": "Track your learning journey in Dashboard",
           "leaderboard": "Compete in leaderboards & unlock achievements"
         }
       },
@@ -140,6 +140,10 @@
         "achievements": {
           "title": "🏆 Achievements",
           "desc": "Unlock badges and milestones as you learn! Track your progress across 12 achievement types—from reading sessions to vocabulary quizzes. Every step counts!"
+        },
+        "leaderboard": {
+          "title": "🏅 Leaderboard",
+          "desc": "Compete with classmates and climb the ranks! Compare your reading stats, track streaks, and earn top spots across multiple categories."
         },
         "tts": {
           "title": "🔊 Text-to-Speech",

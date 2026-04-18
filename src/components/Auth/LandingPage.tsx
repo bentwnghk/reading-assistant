@@ -397,6 +397,7 @@ export function LandingPage() {
             { icon: ClipboardList, key: "quiz", color: "text-violet-600 dark:text-violet-400" },
             { icon: Target, key: "test", color: "text-red-600 dark:text-red-400" },
             { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400" },
+            { icon: Trophy, key: "leaderboard", color: "text-yellow-600 dark:text-yellow-400" },
             { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400" },
           ]          .map(({ icon: Icon, key, color }) => (
              <motion.div
