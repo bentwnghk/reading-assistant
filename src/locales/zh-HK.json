@@ -73,7 +73,7 @@
         },
         "teacher": {
           "title": "🎓 老師",
-          "manageStudents": "添加學生並追蹤進度",
+          "manageStudents": "添加學生並追蹤學習進度",
           "uploadTexts": "上傳閱讀材料至文本庫與班別分享",
           "exportData": "匯出詳細 Excel 報告",
           "viewLeaderboard": "查看班別排行榜",

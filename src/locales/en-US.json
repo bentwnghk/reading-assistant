@@ -73,7 +73,7 @@
         },
         "teacher": {
           "title": "🎓 Teacher",
-          "manageStudents": "Add students & track progress",
+          "manageStudents": "Add students & track their learning progress",
           "uploadTexts": "Upload reading materials to Text Repository to share with your classes",
           "exportData": "Export detailed Excel reports",
           "viewLeaderboard": "Monitor class leaderboards",
