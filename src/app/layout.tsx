@@ -23,34 +23,17 @@ export const metadata: Metadata = {
     template: APP_TITLE_TEMPLATE,
   },
   icons: {
-    icon: [
-      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    icon: {
+      type: "image/png",
+      url: "./logo.png",
+    },
   },
   description: APP_DESCRIPTION,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: APP_DEFAULT_TITLE,
-    startupImage: [
-      { url: "/apple-splash-2048x2732.png", width: 2048, height: 2732 },
-      { url: "/apple-splash-1668x2388.png", width: 1668, height: 2388 },
-      { url: "/apple-splash-1640x2360.png", width: 1640, height: 2360 },
-      { url: "/apple-splash-1536x2048.png", width: 1536, height: 2048 },
-      { url: "/apple-splash-1290x2796.png", width: 1290, height: 2796 },
-      { url: "/apple-splash-1278x2778.png", width: 1278, height: 2778 },
-      { url: "/apple-splash-1242x2688.png", width: 1242, height: 2688 },
-      { url: "/apple-splash-1179x2556.png", width: 1179, height: 2556 },
-      { url: "/apple-splash-1170x2532.png", width: 1170, height: 2532 },
-      { url: "/apple-splash-1125x2436.png", width: 1125, height: 2436 },
-      { url: "/apple-splash-1080x1920.png", width: 1080, height: 1920 },
-      { url: "/apple-splash-828x1792.png", width: 828, height: 1792 },
-      { url: "/apple-splash-750x1334.png", width: 750, height: 1334 },
-    ],
+    // startUpImage: [],
   },
   formatDetection: {
     telephone: false,
