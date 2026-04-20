@@ -1,8 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,8 @@ function ImageViewerContent() {
   const index = parseInt(searchParams.get("index") || "0", 10);
   const originalImages = useReadingStore((s) => s.originalImages);
   const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    setLoaded(false);
-  }, [index]);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   const goBack = useCallback(() => {
     router.back();
@@ -33,6 +30,26 @@ function ImageViewerContent() {
       router.replace(`/image-viewer?index=${index + 1}`);
     }
   }, [index, originalImages.length, router]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    touchStartX.current = null;
+    touchStartY.current = null;
+    if (Math.abs(dx) < Math.abs(dy)) return;
+    if (Math.abs(dx) < 50) return;
+    if (dx > 0) {
+      goPrev();
+    } else {
+      goNext();
+    }
+  }, [goPrev, goNext]);
 
   useEffect(() => {
     if (index < 0 || index >= originalImages.length) {
@@ -64,7 +81,11 @@ function ImageViewerContent() {
         <div className="w-9" />
       </div>
 
-      <div className="flex-1 relative overflow-hidden">
+      <div
+        className="flex-1 relative overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {!loaded && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/30 border-t-white" />
