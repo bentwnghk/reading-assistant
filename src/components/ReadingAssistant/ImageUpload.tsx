@@ -1,10 +1,11 @@
  "use client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, Plus, ExternalLink } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, Plus, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
@@ -28,6 +29,7 @@ function readFileAsDataURL(file: File): Promise<string> {
 function ImageUpload() {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
@@ -237,15 +239,9 @@ function ImageUpload() {
                         size="icon"
                         className="h-6 w-6 bg-green-100 dark:bg-secondary hover:bg-green-200 dark:hover:bg-secondary/80 text-green-800 dark:text-green-200"
                         title={t("reading.imageUpload.openInNewTab")}
-                        onClick={() => {
-                          const win = window.open();
-                          if (win) {
-                            win.document.write(`<html><head><title>Image ${index + 1}</title><style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000;}</style></head><body><img src="${image}" style="max-width:100%;max-height:100vh;object-fit:contain;" /></body></html>`);
-                            win.document.close();
-                          }
-                        }}
+                        onClick={() => setFullscreenImage(image)}
                       >
-                        <ExternalLink className="h-3 w-3" />
+                        <Maximize2 className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="destructive"
@@ -351,6 +347,19 @@ function ImageUpload() {
           <TextRepository onTextLoaded={() => setActiveTab("upload")} />
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!fullscreenImage} onOpenChange={(open) => { if (!open) setFullscreenImage(null); }}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-auto h-auto border-none bg-black/95 p-0 flex items-center justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">{t("reading.imageUpload.openInNewTab")}</DialogTitle>
+          {fullscreenImage && (
+            <img
+              src={fullscreenImage}
+              alt=""
+              className="max-w-full max-h-[90vh] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
