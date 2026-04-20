@@ -1,12 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { Button } from "@/components/ui/button";
 
-function ImageViewer() {
+function ImageViewerContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const index = parseInt(searchParams.get("index") || "0", 10);
@@ -104,4 +105,10 @@ function ImageViewer() {
   );
 }
 
-export default ImageViewer;
+export default function ImageViewer() {
+  return (
+    <Suspense>
+      <ImageViewerContent />
+    </Suspense>
+  );
+}
