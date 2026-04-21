@@ -262,15 +262,6 @@ function Header() {
               <Info className="h-5 w-5" />
             </Button>
             <Button
-              className="h-8 w-8"
-              variant="ghost"
-              size="icon"
-              title={t("dashboard.title")}
-              onClick={() => setOpenDashboard(true)}
-            >
-              <BarChart3 className="h-5 w-5" />
-            </Button>
-            <Button
               className="h-8 w-8 relative"
               variant="ghost"
               size="icon"
@@ -283,6 +274,15 @@ function Header() {
                   {pendingCount > 9 ? "9+" : pendingCount}
                 </span>
               )}
+            </Button>
+            <Button
+              className="h-8 w-8"
+              variant="ghost"
+              size="icon"
+              title={t("dashboard.title")}
+              onClick={() => setOpenDashboard(true)}
+            >
+              <BarChart3 className="h-5 w-5" />
             </Button>
             <Link href="/leaderboard" prefetch={false}>
               <Button
