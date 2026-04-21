@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/utils/style";
@@ -167,6 +168,9 @@ export default function SharedSessionDialog() {
             COLOR_BG[CARD_COLOR] ?? "bg-primary"
           )}
         />
+        <VisuallyHidden>
+          <DialogTitle>{t("share.pendingTitle")}</DialogTitle>
+        </VisuallyHidden>
 
         {loading ? (
           <div className="flex flex-col items-center gap-4 py-12">
