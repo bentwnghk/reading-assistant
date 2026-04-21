@@ -52,6 +52,7 @@ export default function SharedSessionDialog() {
     showSharedDialog,
     setShowSharedDialog,
     setPendingShares,
+    markShareAccepted,
   } = useSharingStore();
   const { backup, restore, reset } = useReadingStore();
   const { update } = useHistoryStore();
@@ -102,6 +103,7 @@ export default function SharedSessionDialog() {
         setPendingShares((prev) =>
           prev.filter((s) => s.id !== share.id)
         );
+        markShareAccepted();
         toast.success(t("share.acceptSuccess"));
 
         if (pendingShares.length <= 1) {
@@ -113,7 +115,7 @@ export default function SharedSessionDialog() {
         setProcessing(null);
       }
     },
-    [backup, restore, reset, update, pendingShares.length, setPendingShares, setShowSharedDialog, t]
+    [backup, restore, reset, update, pendingShares.length, setPendingShares, setShowSharedDialog, markShareAccepted, t]
   );
 
   const handleReject = useCallback(

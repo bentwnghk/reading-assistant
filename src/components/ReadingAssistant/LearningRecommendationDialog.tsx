@@ -162,15 +162,15 @@ export default function LearningRecommendationDialog() {
 
   const { status } = useSession();
   const { id, extractedText } = useReadingStore();
-  const { showSharedDialog } = useSharingStore();
+  const { shareAcceptedAt } = useSharingStore();
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
 
   useEffect(() => {
-    if (showSharedDialog && open) {
+    if (shareAcceptedAt && open) {
       setOpen(false);
       checkedRef.current = true;
     }
-  }, [showSharedDialog]);
+  }, [shareAcceptedAt]);
 
   useEffect(() => {
     if (status !== "authenticated") return;

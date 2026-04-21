@@ -5,9 +5,11 @@ interface SharingStore {
   pendingShares: SharedSession[]
   pendingCount: number
   showSharedDialog: boolean
+  shareAcceptedAt: number | null
   setPendingShares: (shares: SharedSession[] | ((prev: SharedSession[]) => SharedSession[])) => void
   setPendingCount: (count: number) => void
   setShowSharedDialog: (open: boolean) => void
+  markShareAccepted: () => void
   fetchPendingShares: () => Promise<SharedSession[]>
   fetchPendingCount: () => Promise<number>
 }
@@ -16,6 +18,7 @@ export const useSharingStore = create<SharingStore>((set, get) => ({
   pendingShares: [],
   pendingCount: 0,
   showSharedDialog: false,
+  shareAcceptedAt: null,
 
   setPendingShares: (shares) => {
     const resolved = typeof shares === "function" ? shares(get().pendingShares) : shares
@@ -25,6 +28,8 @@ export const useSharingStore = create<SharingStore>((set, get) => ({
   setPendingCount: (count) => set({ pendingCount: count }),
 
   setShowSharedDialog: (open) => set({ showSharedDialog: open }),
+
+  markShareAccepted: () => set({ shareAcceptedAt: Date.now() }),
 
   fetchPendingShares: async () => {
     try {
