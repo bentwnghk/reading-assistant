@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useReadingStore, isRestoreComplete } from "@/store/reading";
+import { useSharingStore } from "@/store/sharing";
 import { cn } from "@/utils/style";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { processPdfFile } from "@/utils/parser/pdfParser";
@@ -161,7 +162,15 @@ export default function LearningRecommendationDialog() {
 
   const { status } = useSession();
   const { id, extractedText } = useReadingStore();
+  const { showSharedDialog } = useSharingStore();
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
+
+  useEffect(() => {
+    if (showSharedDialog && open) {
+      setOpen(false);
+      checkedRef.current = true;
+    }
+  }, [showSharedDialog]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
