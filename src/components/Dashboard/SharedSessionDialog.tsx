@@ -66,13 +66,9 @@ export default function SharedSessionDialog() {
       .then((res) => (res.ok ? res.json() : []))
       .then((data: SharedSession[]) => {
         setPendingShares(data);
-        if (data.length === 0) {
-          setShowSharedDialog(false);
-        }
       })
       .catch(() => {
         setPendingShares([]);
-        setShowSharedDialog(false);
       })
       .finally(() => setLoading(false));
   }, [showSharedDialog, setPendingShares, setShowSharedDialog]);
@@ -183,9 +179,35 @@ export default function SharedSessionDialog() {
           </div>
         ) : pendingShares.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-12">
-            <p className="text-sm text-muted-foreground">
-              {t("share.noPending")}
-            </p>
+            <div className="relative flex items-center justify-center">
+              <div className={cn(
+                "absolute w-20 h-20 rounded-full opacity-20 blur-xl",
+                COLOR_BG[CARD_COLOR] ?? "bg-primary"
+              )} />
+              <div className={cn(
+                "relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg",
+                COLOR_BG[CARD_COLOR] ?? "bg-primary",
+                COLOR_GLOW[CARD_COLOR] ?? ""
+              )}>
+                <Share2 className="w-8 h-8 text-white drop-shadow" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <DialogTitle className="text-xl font-bold text-foreground">
+                {t("share.pendingTitle")}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                {t("share.noPending")}
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+              onClick={handleClose}
+            >
+              {t("share.close")}
+            </Button>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4 pt-4 pb-2">
