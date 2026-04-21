@@ -923,19 +923,20 @@
     "share": "分享",
     "sharing": "分享中...",
     "success": "已成功分享給 {{count}} 位使用者。",
-    "error": "分享工作階段失敗。",
+    "error": "分享閱讀工作階段失敗。",
     "pendingTitle": "分享的閱讀工作階段",
+    "pendingDescription": "你有 {{count}} 個待處理的分享閱讀工作階段。",
     "pendingMessage": "{{sender}} 與你分享了一個閱讀工作階段：「{{title}}」",
     "accept": "接受",
     "decline": "拒絕",
     "acceptAll": "全部接受",
     "declineAll": "全部拒絕",
     "noPending": "沒有待處理的分享。",
-    "acceptSuccess": "工作階段已成功載入。",
+    "acceptSuccess": "閱讀工作階段已成功載入。",
     "processing": "處理中...",
     "close": "關閉",
     "sharedBy": "{{sender}} 分享",
-    "sessionTitle": "工作階段：{{title}}"
+    "sessionTitle": "閱讀工作階段：{{title}}"
   },
   "setting": {
     "title": "設定",

@@ -136,7 +136,7 @@ export default function SharedSessionDialog() {
         <DialogHeader>
           <DialogTitle>{t("share.pendingTitle")}</DialogTitle>
           <DialogDescription>
-            {t("share.pendingMessage", {
+            {t("share.pendingDescription", {
               count: pendingShares.length,
             })}
           </DialogDescription>
