@@ -10,7 +10,7 @@ export async function GET() {
     }
 
     const role = session.user.role as "admin" | "teacher" | "student" | "super-admin"
-    if (!["admin", "teacher", "student"].includes(role)) {
+    if (!["super-admin", "admin", "teacher", "student"].includes(role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

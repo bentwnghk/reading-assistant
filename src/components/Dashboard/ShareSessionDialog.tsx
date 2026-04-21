@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Search } from "lucide-react";
+import { Search, Building2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +51,8 @@ export default function ShareSessionDialog({
       .finally(() => setLoading(false));
   }, [open]);
 
+  const hasSchools = groups.some((g) => g.schoolId);
+
   const filteredGroups = useMemo(() => {
     if (!search.trim()) return groups;
     const q = search.toLowerCase();
@@ -65,6 +67,21 @@ export default function ShareSessionDialog({
       }))
       .filter((g) => g.users.length > 0);
   }, [groups, search]);
+
+  const filteredGroupedBySchool = useMemo(() => {
+    if (!hasSchools) return [{ schoolId: undefined, schoolName: undefined, groups: filteredGroups }];
+    const map = new Map<string | undefined, typeof filteredGroups>();
+    for (const g of filteredGroups) {
+      const key = g.schoolId;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(g);
+    }
+    return [...map.entries()].map(([schoolId, groups]) => ({
+      schoolId,
+      schoolName: groups[0]?.schoolName,
+      groups,
+    }));
+  }, [filteredGroups, hasSchools]);
 
   const allFilteredIds = useMemo(
     () => new Set(filteredGroups.flatMap((g) => g.users.map((u) => u.id))),
@@ -188,66 +205,80 @@ export default function ShareSessionDialog({
             )}
 
             <ScrollArea className="max-h-64">
-              <div className="space-y-3 pr-3">
-                {filteredGroups.map((group) => {
-                  const groupIds = group.users.map((u) => u.id);
-                  const groupAllSelected = groupIds.every((id) =>
-                    selectedIds.has(id)
-                  );
-                  const groupSomeSelected =
-                    groupIds.some((id) => selectedIds.has(id)) &&
-                    !groupAllSelected;
-
-                  return (
-                    <div key={group.classId || group.label}>
-                      {filteredGroups.length > 1 && (
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <Checkbox
-                            id={`group-${group.classId || group.label}`}
-                            checked={
-                              groupAllSelected
-                                ? true
-                                : groupSomeSelected
-                                  ? "indeterminate"
-                                  : false
-                            }
-                            onCheckedChange={() => toggleGroup(group)}
-                          />
-                          <label
-                            htmlFor={`group-${group.classId || group.label}`}
-                            className="text-sm font-medium cursor-pointer select-none"
-                          >
-                            {group.classId
-                              ? t("share.classGroup", { name: group.label })
-                              : group.label}
-                          </label>
-                        </div>
-                      )}
-                      <div className="space-y-1">
-                        {group.users.map((user) => (
-                          <div
-                            key={user.id}
-                            className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted"
-                          >
-                            <Checkbox
-                              id={`user-${user.id}`}
-                              checked={selectedIds.has(user.id)}
-                              onCheckedChange={() => toggleUser(user.id)}
-                            />
-                            <label
-                              htmlFor={`user-${user.id}`}
-                              className="text-sm cursor-pointer select-none flex-1 min-w-0"
-                            >
-                              <span className="truncate block">
-                                {user.name || user.email || user.id}
-                              </span>
-                            </label>
-                          </div>
-                        ))}
+              <div className="space-y-4 pr-3">
+                {filteredGroupedBySchool.map((schoolBlock) => (
+                  <div key={schoolBlock.schoolId ?? "__none__"}>
+                    {hasSchools && (
+                      <div className="flex items-center gap-2 mb-2 pb-1 border-b">
+                        <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="text-sm font-semibold">
+                          {schoolBlock.schoolName || "Other"}
+                        </span>
                       </div>
+                    )}
+                    <div className="space-y-3">
+                      {schoolBlock.groups.map((group) => {
+                        const groupIds = group.users.map((u) => u.id);
+                        const groupAllSelected = groupIds.every((id) =>
+                          selectedIds.has(id)
+                        );
+                        const groupSomeSelected =
+                          groupIds.some((id) => selectedIds.has(id)) &&
+                          !groupAllSelected;
+
+                        return (
+                          <div key={group.classId || group.label}>
+                            {(schoolBlock.groups.length > 1 || hasSchools) && (
+                              <div className="flex items-center gap-2 mb-1.5">
+                                <Checkbox
+                                  id={`group-${group.classId || group.label}`}
+                                  checked={
+                                    groupAllSelected
+                                      ? true
+                                      : groupSomeSelected
+                                        ? "indeterminate"
+                                        : false
+                                  }
+                                  onCheckedChange={() => toggleGroup(group)}
+                                />
+                                <label
+                                  htmlFor={`group-${group.classId || group.label}`}
+                                  className="text-sm font-medium cursor-pointer select-none"
+                                >
+                                  {group.classId
+                                    ? t("share.classGroup", { name: group.label })
+                                    : group.label}
+                                </label>
+                              </div>
+                            )}
+                            <div className="space-y-1">
+                              {group.users.map((user) => (
+                                <div
+                                  key={user.id}
+                                  className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted"
+                                >
+                                  <Checkbox
+                                    id={`user-${user.id}`}
+                                    checked={selectedIds.has(user.id)}
+                                    onCheckedChange={() => toggleUser(user.id)}
+                                  />
+                                  <label
+                                    htmlFor={`user-${user.id}`}
+                                    className="text-sm cursor-pointer select-none flex-1 min-w-0"
+                                  >
+                                    <span className="truncate block">
+                                      {user.name || user.email || user.id}
+                                    </span>
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </ScrollArea>
           </>

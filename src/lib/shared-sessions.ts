@@ -1,6 +1,6 @@
 import { getClient } from "./db"
 import { createReadingSession } from "./sessions"
-import { getSchoolForUser, getClassesForTeacher, getClassMembers, getStudentClassId, getUsersInSchool } from "./users"
+import { getSchoolForUser, getClassesForTeacher, getClassMembers, getStudentClassId, getUsersInSchool, getAllSchools } from "./users"
 import type { ReadingStore } from "@/store/reading"
 import type { UserRole, ClassMember } from "./users"
 
@@ -21,11 +21,15 @@ export interface ShareTarget {
   email: string | null
   classId?: string
   className?: string
+  schoolId?: string
+  schoolName?: string
 }
 
 export interface ShareTargetGroup {
   classId?: string
   className?: string
+  schoolId?: string
+  schoolName?: string
   label: string
   users: ShareTarget[]
 }
@@ -194,6 +198,62 @@ export async function getShareTargets(
   userId: string,
   role: UserRole
 ): Promise<ShareTargetGroup[]> {
+  if (role === "super-admin") {
+    const schools = await getAllSchools()
+    const result: ShareTargetGroup[] = []
+
+    for (const school of schools) {
+      const users = await getUsersInSchool(school.id)
+      const targets = users
+        .filter((u) => u.id !== userId)
+        .map((u) => ({
+          id: u.id,
+          name: u.name ?? null,
+          email: u.email ?? null,
+          classId: u.classId ?? undefined,
+          className: u.className ?? undefined,
+          schoolId: school.id,
+          schoolName: school.name,
+        }))
+
+      if (targets.length === 0) continue
+
+      const groupedByClass: Record<string, ShareTarget[]> = {}
+      const ungrouped: ShareTarget[] = []
+
+      for (const t of targets) {
+        if (t.classId && t.className) {
+          if (!groupedByClass[t.classId]) groupedByClass[t.classId] = []
+          groupedByClass[t.classId].push(t)
+        } else {
+          ungrouped.push(t)
+        }
+      }
+
+      for (const [classId, clsUsers] of Object.entries(groupedByClass)) {
+        result.push({
+          classId,
+          className: clsUsers[0].className,
+          schoolId: school.id,
+          schoolName: school.name,
+          label: clsUsers[0].className || classId,
+          users: clsUsers,
+        })
+      }
+
+      if (ungrouped.length > 0) {
+        result.push({
+          schoolId: school.id,
+          schoolName: school.name,
+          label: "Other",
+          users: ungrouped,
+        })
+      }
+    }
+
+    return result
+  }
+
   if (role === "admin") {
     const schoolId = await getSchoolForUser(userId)
     if (!schoolId) return []
