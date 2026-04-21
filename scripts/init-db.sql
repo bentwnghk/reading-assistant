@@ -446,6 +446,31 @@ CREATE TRIGGER update_subscriptions_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- ─── Shared Sessions table ─────────────────────────────────────────────────────
+
+CREATE TABLE shared_sessions (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recipient_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  session_id TEXT NOT NULL,
+  session_data JSONB NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+  doc_title TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_shared_sessions_recipient_status
+  ON shared_sessions(recipient_id, status);
+
+CREATE INDEX idx_shared_sessions_sender
+  ON shared_sessions(sender_id);
+
+CREATE TRIGGER update_shared_sessions_updated_at
+  BEFORE UPDATE ON shared_sessions
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;
