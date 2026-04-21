@@ -33,6 +33,7 @@ import {
   GraduationCap,
   Crown,
   School,
+  Bell,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -49,6 +50,7 @@ import { useGlobalStore } from "@/store/global";
 import { useReadingStore } from "@/store/reading";
 import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
+import { useSharingStore } from "@/store/sharing";
 
 function getSafeFilename(value: string): string {
   return (
@@ -77,6 +79,7 @@ function Header() {
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
   const [openAbout, setOpenAbout] = useState<boolean>(false);
   const { setOpenSetting, setOpenDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
+  const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
     extractedText,
     summary,
@@ -117,6 +120,15 @@ function Header() {
   );
 
   const showPulseAnimation = !hasOpenedAbout || !isWorkflowComplete;
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    fetchPendingCount();
+    const interval = setInterval(() => {
+      fetchPendingCount();
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [session?.user?.id, fetchPendingCount]);
 
   const exportSnapshot = useCallback(() => {
     const { backup } = useReadingStore.getState();
@@ -257,6 +269,20 @@ function Header() {
               onClick={() => setOpenDashboard(true)}
             >
               <BarChart3 className="h-5 w-5" />
+            </Button>
+            <Button
+              className="h-8 w-8 relative"
+              variant="ghost"
+              size="icon"
+              title={t("share.pendingTitle")}
+              onClick={() => setShowSharedDialog(true)}
+            >
+              <Bell className="h-5 w-5" />
+              {pendingCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                  {pendingCount > 9 ? "9+" : pendingCount}
+                </span>
+              )}
             </Button>
             <Link href="/leaderboard" prefetch={false}>
               <Button

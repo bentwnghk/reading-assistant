@@ -909,7 +909,33 @@
       "purpose": "The Reading History keeps a record of all your past reading sessions, including learning progress, vocabulary collected, and test scores.",
       "features": "You can load a previous session to continue reading, export sessions for backup, or delete sessions you no longer need.",
       "usage": "Click \"Load\" to resume a session, or use the import/export buttons to manage your reading data."
-    }
+    },
+    "share": "Share"
+  },
+  "share": {
+    "title": "Share Reading Session",
+    "shareWith": "Share with",
+    "searchUsers": "Search users...",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "classGroup": "Class: {{name}}",
+    "noTargets": "No users available to share with.",
+    "share": "Share",
+    "sharing": "Sharing...",
+    "success": "Session shared with {{count}} user(s).",
+    "error": "Failed to share session.",
+    "pendingTitle": "Shared Reading Session",
+    "pendingMessage": "{{sender}} shared a reading session with you: \"{{title}}\"",
+    "accept": "Accept",
+    "decline": "Decline",
+    "acceptAll": "Accept All",
+    "declineAll": "Decline All",
+    "noPending": "No pending shares.",
+    "acceptSuccess": "Session loaded successfully.",
+    "processing": "Processing...",
+    "close": "Close",
+    "sharedBy": "Shared by {{sender}}",
+    "sessionTitle": "Session: {{title}}"
   },
   "setting": {
     "title": "Settings",

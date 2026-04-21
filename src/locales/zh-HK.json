@@ -909,7 +909,33 @@
       "purpose": "閱讀記錄會保留你所有過去的閱讀工作階段，包括學習進度、收集的詞彙及測驗得分。",
       "features": "你可以載入先前的的工作階段以繼續閱讀、匯出工作階段進行備份，或刪除不再需要的工作階段。",
       "usage": "點擊「載入」以恢復工作階段，或使用匯入/匯出按鈕來管理你的閱讀資料。"
-    }
+    },
+    "share": "分享"
+  },
+  "share": {
+    "title": "分享閱讀工作階段",
+    "shareWith": "分享給",
+    "searchUsers": "搜尋使用者...",
+    "selectAll": "全選",
+    "deselectAll": "取消全選",
+    "classGroup": "班級：{{name}}",
+    "noTargets": "沒有可分享的使用者。",
+    "share": "分享",
+    "sharing": "分享中...",
+    "success": "已成功分享給 {{count}} 位使用者。",
+    "error": "分享工作階段失敗。",
+    "pendingTitle": "分享的閱讀工作階段",
+    "pendingMessage": "{{sender}} 與你分享了一個閱讀工作階段：「{{title}}」",
+    "accept": "接受",
+    "decline": "拒絕",
+    "acceptAll": "全部接受",
+    "declineAll": "全部拒絕",
+    "noPending": "沒有待處理的分享。",
+    "acceptSuccess": "工作階段已成功載入。",
+    "processing": "處理中...",
+    "close": "關閉",
+    "sharedBy": "{{sender}} 分享",
+    "sessionTitle": "工作階段：{{title}}"
   },
   "setting": {
     "title": "設定",

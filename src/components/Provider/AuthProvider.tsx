@@ -16,6 +16,7 @@ import {
 
 import { useHistoryStore } from "@/store/history"
 import { initAchievementCallbacks } from "@/store/achievements"
+import { useSharingStore } from "@/store/sharing"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
@@ -95,6 +96,12 @@ function AuthStateManager() {
         }
 
         setRestoreComplete(true)
+
+        useSharingStore.getState().fetchPendingCount().then((count) => {
+          if (count > 0) {
+            useSharingStore.getState().setShowSharedDialog(true)
+          }
+        })
       })
   }, [session?.user?.id, status, t])
   

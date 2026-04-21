@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { TrashIcon, FileOutput, Download, Upload } from "lucide-react";
+import { TrashIcon, FileOutput, Download, Upload, Share2 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
@@ -19,6 +19,7 @@ import { useReadingStore, type ReadingStore } from "@/store/reading";
 import { useHistoryStore, type ReadingHistory } from "@/store/history";
 import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
+import ShareSessionDialog from "@/components/Dashboard/ShareSessionDialog";
 
 interface SessionsTabProps {
   onClose: () => void;
@@ -86,6 +87,8 @@ function SessionsTab({ onClose }: SessionsTabProps) {
   const { history, save, load, update, remove } = useHistoryStore();
   const [historyList, setHistoryList] = useState<ReadingHistory[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [shareSession, setShareSession] = useState<ReadingHistory | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const showLoadMore = useMemo(() => {
     return history.length > currentPage * PAGE_SIZE;
@@ -275,6 +278,17 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                           <Download className="h-4 w-4" />
                         </Button>
                         <Button
+                          variant="ghost"
+                          size="icon"
+                          title={t("history.share")}
+                          onClick={() => {
+                            setShareSession(item);
+                            setShareOpen(true);
+                          }}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <Button
                           className="text-red-500 hover:text-red-600"
                           variant="ghost"
                           size="icon"
@@ -309,6 +323,11 @@ function SessionsTab({ onClose }: SessionsTabProps) {
         multiple
         hidden
         onChange={(ev) => handleFileUpload(ev.target.files)}
+      />
+      <ShareSessionDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        session={shareSession}
       />
     </div>
   );
