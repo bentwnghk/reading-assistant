@@ -454,7 +454,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
           <div
             className={cn(
               "absolute inset-0 backface-hidden rotate-y-180",
-              "bg-gradient-to-br from-card via-card to-amber-100 dark:to-amber-950/50 border-2 border-amber-200 dark:border-amber-800 rounded-xl shadow-lg",
+              "bg-gradient-to-br from-card via-card to-emerald-100 dark:to-emerald-950/50 border-2 border-emerald-200 dark:border-emerald-800 rounded-xl shadow-lg",
               "hover:shadow-xl transition-shadow duration-300",
               "flex flex-col items-center justify-center p-6 overflow-y-auto"
             )}
