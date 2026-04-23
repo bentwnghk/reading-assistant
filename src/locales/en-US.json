@@ -739,7 +739,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "description": "Track your reading and learning activity, AI usage, scores, and vocabulary growth over time.",
+    "description": "Track your reading and learning activity, scores, and vocabulary growth, and manage or share your reading sessions.",
     "tabs": {
       "overview": "Overview",
       "sessions": "Sessions"
@@ -832,7 +832,7 @@
     "help": {
       "title": "Dashboard Guide",
       "purpose": "The Dashboard shows your reading and learning metrics over time, including AI feature usage, score trends, and vocabulary growth.",
-      "features": "Use the Overview tab for visual analytics, or switch to Sessions to manage your individual reading sessions."
+      "features": "Use the Overview tab for visual analytics, or switch to Sessions to manage or share your reading sessions."
     }
   },
   "teacherDashboard": {
