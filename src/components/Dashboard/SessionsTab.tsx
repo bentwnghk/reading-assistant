@@ -264,6 +264,17 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title={t("history.share")}
+                          onClick={() => {
+                            setShareSession(item);
+                            setShareOpen(true);
+                          }}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           title={t("history.load")}
                           onClick={() => loadHistory(item.id)}
                         >
@@ -276,17 +287,6 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                           onClick={() => downloadSession(item.id)}
                         >
                           <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={t("history.share")}
-                          onClick={() => {
-                            setShareSession(item);
-                            setShareOpen(true);
-                          }}
-                        >
-                          <Share2 className="h-4 w-4" />
                         </Button>
                         <Button
                           className="text-red-500 hover:text-red-600"
