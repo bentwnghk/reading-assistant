@@ -1661,6 +1661,16 @@
       }
     }
   },
+  "pwa": {
+    "installTitle": "Install App",
+    "installDescription": "Install Mr.🆖 ProReader on your device for quick access and a native app-like experience.",
+    "installButton": "Install App",
+    "iosDescription": "Install Mr.🆖 ProReader on your iPhone for quick access.",
+    "iosStep1": "Tap the Share button",
+    "iosStep2": "Scroll down and tap \"Add to Home Screen\"",
+    "iosStep3": "Tap \"Add\" to confirm",
+    "dismiss": "Not now"
+  },
   "recommendation": {
     "welcomeBack": "Welcome back!",
     "readyToContinue": "Ready to continue learning?",

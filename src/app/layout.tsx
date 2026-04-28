@@ -4,6 +4,8 @@ import ThemeProvider from "@/components/Provider/Theme";
 import I18Provider from "@/components/Provider/I18n";
 import { AuthProvider } from "@/components/Provider/AuthProvider";
 import { AchievementUnlockedDialog } from "@/components/Leaderboard/AchievementUnlockedDialog";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import Debugger from "@/components/Internal/Debugger";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -87,6 +89,8 @@ export default function RootLayout({
         >
           <AuthProvider>
             <I18Provider>
+              <ServiceWorkerRegistrar />
+              <PWAInstallPrompt />
               {children}
               <AchievementUnlockedDialog />
             </I18Provider>

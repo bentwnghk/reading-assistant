@@ -1661,6 +1661,16 @@
       }
     }
   },
+  "pwa": {
+    "installTitle": "安裝應用程式",
+    "installDescription": "將 Mr.🆖 ProReader 安裝到你的裝置上，享受快速存取和原生應用程式般的體驗。",
+    "installButton": "安裝應用程式",
+    "iosDescription": "將 Mr.🆖 ProReader 安裝到你的 iPhone 上，方便快速存取。",
+    "iosStep1": "點擊分享按鈕",
+    "iosStep2": "向下滑動並點擊「加入主畫面」",
+    "iosStep3": "點擊「加入」確認",
+    "dismiss": "暫時不要"
+  },
   "recommendation": {
     "welcomeBack": "歡迎回來！",
     "readyToContinue": "準備好繼續學習了嗎？",
