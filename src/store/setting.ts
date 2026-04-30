@@ -4,7 +4,7 @@ import { persist, StorageValue } from "zustand/middleware";
 export const AVAILABLE_MODELS = [
   "gpt-5.4-mini",
   "gpt-5.4-nano",
-  "deepseek-chat",
+  "deepseek-v4-flash",
   "gemini-3-flash-preview",
 ] as const;
 
@@ -126,13 +126,13 @@ export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
   visionModel: "gpt-5-nano",
-  summaryModel: "deepseek-chat",
-  mindMapModel: "deepseek-chat",
-  adaptedTextModel: "deepseek-chat",
-  simplifyModel: "deepseek-chat",
+  summaryModel: "deepseek-v4-flash",
+  mindMapModel: "deepseek-v4-flash",
+  adaptedTextModel: "deepseek-v4-flash",
+  simplifyModel: "deepseek-v4-flash",
   readingTestModel: "gpt-5.4-mini",
-  glossaryModel: "deepseek-chat",
-  sentenceAnalysisModel: "deepseek-chat",
+  glossaryModel: "deepseek-v4-flash",
+  sentenceAnalysisModel: "deepseek-v4-flash",
   tutorModel: "gpt-5.4-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
