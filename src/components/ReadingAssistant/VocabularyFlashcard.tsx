@@ -393,6 +393,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
         onClick={handleFlip}
       >
         <div
+          key={currentEntry.word}
           className={cn(
             "absolute inset-0 transition-transform duration-500 transform-style-preserve-3d",
             isFlipped && "rotate-y-180"
