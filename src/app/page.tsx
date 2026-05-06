@@ -10,6 +10,7 @@ import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
 import { useHistoryStore } from "@/store/history";
 import { setHistorySyncFn, useReadingStore, isRestoreComplete } from "@/store/reading";
+import { isShareCheckComplete } from "@/store/sharing";
 import useAutoSave from "@/hooks/useAutoSave";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { LandingPage } from "@/components/Auth/LandingPage";
@@ -47,12 +48,12 @@ function Home() {
 
   useEffect(() => {
     if (status !== "authenticated") return;
-    if (isRestoreComplete()) {
+    if (isRestoreComplete() && isShareCheckComplete()) {
       setRestoreReady(true);
       return;
     }
     const interval = setInterval(() => {
-      if (isRestoreComplete()) {
+      if (isRestoreComplete() && isShareCheckComplete()) {
         setRestoreReady(true);
         clearInterval(interval);
       }

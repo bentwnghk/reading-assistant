@@ -1,6 +1,14 @@
 import { create } from "zustand"
 import type { SharedSession } from "@/lib/shared-sessions"
 
+let _shareCheckComplete = false
+export function setShareCheckComplete(value: boolean) {
+  _shareCheckComplete = value
+}
+export function isShareCheckComplete() {
+  return _shareCheckComplete
+}
+
 interface SharingStore {
   pendingShares: SharedSession[]
   pendingCount: number

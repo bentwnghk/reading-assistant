@@ -162,7 +162,7 @@ export default function LearningRecommendationDialog() {
 
   const { status } = useSession();
   const { id, extractedText } = useReadingStore();
-  const { shareAcceptedAt } = useSharingStore();
+  const { shareAcceptedAt, showSharedDialog } = useSharingStore();
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
 
   useEffect(() => {
@@ -192,6 +192,7 @@ export default function LearningRecommendationDialog() {
     if (status !== "authenticated") return;
     if (!restoreReady) return;
     if (dismissedSessionRef.current === id) return;
+    if (showSharedDialog) return;
 
     const state = useReadingStore.getState();
     const hasSession = !!(id && extractedText);
@@ -216,7 +217,7 @@ export default function LearningRecommendationDialog() {
     setStep("choices");
     setOpen(true);
     checkedRef.current = true;
-  }, [id, extractedText, status, restoreReady]);
+  }, [id, extractedText, status, restoreReady, showSharedDialog]);
 
   const handleContinueLearning = useCallback(() => {
     if (!activity) return;

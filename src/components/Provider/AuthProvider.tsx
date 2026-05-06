@@ -16,7 +16,7 @@ import {
 
 import { useHistoryStore } from "@/store/history"
 import { initAchievementCallbacks } from "@/store/achievements"
-import { useSharingStore } from "@/store/sharing"
+import { useSharingStore, setShareCheckComplete } from "@/store/sharing"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
@@ -38,6 +38,7 @@ function AuthStateManager() {
     if (!isAuthenticated || !userId) {
       syncedUserIdRef.current = null
       setRestoreComplete(false)
+      setShareCheckComplete(false)
       const currentLanguage = useSettingStore.getState().language
       useSettingStore.getState().loadFromServer({ ...defaultValues, language: currentLanguage })
       return
@@ -72,11 +73,13 @@ function AuthStateManager() {
         if (hasActiveSession) {
           markLastOpenedSession(currentReading.id)
           setRestoreComplete(true)
+          setShareCheckComplete(true)
           return
         }
 
         if (sessions.length === 0) {
           setRestoreComplete(true)
+          setShareCheckComplete(true)
           return
         }
 
@@ -101,6 +104,7 @@ function AuthStateManager() {
           if (count > 0) {
             useSharingStore.getState().setShowSharedDialog(true)
           }
+          setShareCheckComplete(true)
         })
       })
   }, [session?.user?.id, status, t])
