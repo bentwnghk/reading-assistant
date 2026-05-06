@@ -1,14 +1,15 @@
 "use client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useLayoutEffect, useEffect } from "react";
+import { useState, useLayoutEffect, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
+import { LoaderCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
 import { useHistoryStore } from "@/store/history";
-import { setHistorySyncFn, useReadingStore } from "@/store/reading";
+import { setHistorySyncFn, useReadingStore, isRestoreComplete } from "@/store/reading";
 import useAutoSave from "@/hooks/useAutoSave";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { LandingPage } from "@/components/Auth/LandingPage";
@@ -42,6 +43,23 @@ function Home() {
 
   useAutoSave();
 
+  const [restoreReady, setRestoreReady] = useState(false);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    if (isRestoreComplete()) {
+      setRestoreReady(true);
+      return;
+    }
+    const interval = setInterval(() => {
+      if (isRestoreComplete()) {
+        setRestoreReady(true);
+        clearInterval(interval);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [status]);
+
   useLayoutEffect(() => {
     setHistorySyncFn((readingStore) => {
       useHistoryStore.getState().syncToHistory(readingStore);
@@ -65,13 +83,14 @@ function Home() {
     setTheme(settingStore.theme);
   }, [theme, setTheme]);
 
-  // Show landing page for unauthenticated users. While session status is
-  // loading we render nothing to avoid a flash of the landing page for
-  // already-authenticated users.
-  if (status === "loading") {
+  // Show a full-screen loading overlay while the session is being resolved
+  // or while the user's data is being restored after sign-in. This prevents
+  // a flash of the app UI before the "Welcome back!" dialog appears.
+  if (status === "loading" || (status === "authenticated" && !restoreReady)) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <LoaderCircle className="h-8 w-8 animate-spin text-blue-500" />
+        <p className="text-lg text-muted-foreground">{t("header.auth.loading")}</p>
       </div>
     );
   }
