@@ -166,7 +166,7 @@ export default function LearningRecommendationDialog() {
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
 
   useEffect(() => {
-    if (shareAcceptedAt && open) {
+    if (shareAcceptedAt) {
       setOpen(false);
       checkedRef.current = true;
     }
