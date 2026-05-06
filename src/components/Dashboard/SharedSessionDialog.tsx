@@ -102,7 +102,7 @@ export default function SharedSessionDialog() {
         markShareAccepted();
         toast.success(t("share.acceptSuccess"));
 
-        if (pendingShares.length <= 1) {
+        if (useSharingStore.getState().pendingShares.length === 0) {
           setShowSharedDialog(false);
         }
       } catch {
@@ -111,7 +111,7 @@ export default function SharedSessionDialog() {
         setProcessing(null);
       }
     },
-    [backup, restore, reset, update, pendingShares.length, setPendingShares, setShowSharedDialog, markShareAccepted, t]
+    [backup, restore, reset, update, setPendingShares, setShowSharedDialog, markShareAccepted, t]
   );
 
   const handleReject = useCallback(
@@ -129,7 +129,7 @@ export default function SharedSessionDialog() {
         setPendingShares((prev) =>
           prev.filter((s) => s.id !== share.id)
         );
-        if (pendingShares.length <= 1) {
+        if (useSharingStore.getState().pendingShares.length === 0) {
           setShowSharedDialog(false);
         }
       } catch {
@@ -138,7 +138,7 @@ export default function SharedSessionDialog() {
         setProcessing(null);
       }
     },
-    [pendingShares.length, setPendingShares, setShowSharedDialog, t]
+    [setPendingShares, setShowSharedDialog, t]
   );
 
   const handleAcceptAll = useCallback(async () => {
