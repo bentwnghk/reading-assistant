@@ -479,7 +479,9 @@ function Grammar() {
                 <Badge variant="outline" className="text-xs">
                   {t(`reading.grammar.quiz.types.${q.type}`)}
                 </Badge>
-                <Badge variant="secondary" className="text-xs">{q.topicName}</Badge>
+                {q.type !== "identify" && (
+                  <Badge variant="secondary" className="text-xs">{q.topicName}</Badge>
+                )}
               </div>
               <p className="text-sm font-medium mb-3">
                 {i + 1}. {q.question}
