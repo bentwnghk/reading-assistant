@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
 import locales from "@/constants/locales";
+import { resolveLanguagePreference } from "@/utils/i18n";
 import { motion, useInView } from "motion/react";
 import {
   BookCopy,
@@ -252,8 +253,9 @@ export function LandingPage() {
 
   const handleLocaleChange = (locale: string) => {
     update({ language: locale });
-    i18n.changeLanguage(locale);
-    document.documentElement.setAttribute("lang", locale);
+    const resolvedLanguage = resolveLanguagePreference(locale);
+    i18n.changeLanguage(resolvedLanguage);
+    document.documentElement.setAttribute("lang", resolvedLanguage);
   };
 
   return (

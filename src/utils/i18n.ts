@@ -41,6 +41,10 @@ export function detectLanguage() {
   return lang;
 }
 
+export function resolveLanguagePreference(language: string) {
+  return language === "system" || language === "" ? detectLanguage() : normalizeLocale(language);
+}
+
 i18next
   .use(initReactI18next)
   .use(

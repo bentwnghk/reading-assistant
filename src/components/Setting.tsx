@@ -49,6 +49,7 @@ import ReminderPreferences from "@/components/ReminderPreferences";
 import SubscriptionPanel from "@/components/Subscription/SubscriptionPanel";
 import SchoolSubscriptionPanel from "@/components/Subscription/SchoolSubscriptionPanel";
 import useSchoolSubscription from "@/hooks/useSchoolSubscription";
+import i18n, { resolveLanguagePreference } from "@/utils/i18n";
 
 type SettingProps = {
   open: boolean;
@@ -194,6 +195,11 @@ function Setting({ open, onClose }: SettingProps) {
 
   async function updateSetting(key: string, value?: string | number | boolean) {
     update({ [key]: value });
+    if (key === "language" && typeof value === "string") {
+      const resolvedLanguage = resolveLanguagePreference(value);
+      i18n.changeLanguage(resolvedLanguage);
+      document.documentElement.setAttribute("lang", resolvedLanguage);
+    }
   }
 
   function handleReset() {
