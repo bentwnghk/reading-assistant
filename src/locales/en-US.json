@@ -1505,7 +1505,9 @@
       "sessions": "Sessions",
       "testsCompleted": "Tests Completed",
       "quizzesCompleted": "Quizzes Done",
-      "spellingGamesCompleted": "Games Played"
+      "spellingGamesCompleted": "Games Played",
+      "grammarQuizScore": "Avg Grammar Quiz Score",
+      "grammarQuizzesCompleted": "Quizzes Done"
     },
     "personal": {
       "title": "Your Progress",

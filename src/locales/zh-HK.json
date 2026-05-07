@@ -1505,7 +1505,9 @@
       "sessions": "學習次數",
       "testsCompleted": "完成測試",
       "quizzesCompleted": "完成測驗",
-      "spellingGamesCompleted": "遊戲場次"
+      "spellingGamesCompleted": "遊戲場次",
+      "grammarQuizScore": "平均語法測驗分數",
+      "grammarQuizzesCompleted": "完成測驗"
     },
     "personal": {
       "title": "你的進度",

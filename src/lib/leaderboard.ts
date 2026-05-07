@@ -78,6 +78,7 @@ interface WeeklyStatsRow {
   testsCompleted: number
   quizzesCompleted: number
   spellingGamesCompleted: number
+  grammarQuizzesCompleted: number
   weeklyScore: number
   improvementScore: number
 }
@@ -264,6 +265,7 @@ export async function refreshWeeklyStatsForUser(
       testsCompleted,
       quizzesCompleted,
       spellingGamesCompleted,
+      grammarQuizzesCompleted,
       weeklyScore,
       improvementScore,
     }
@@ -645,6 +647,7 @@ export async function getPersonalStats(
       testsCompleted:          parseInt(row.tests_completed as string) || 0,
       quizzesCompleted:        parseInt(row.quizzes_completed as string) || 0,
       spellingGamesCompleted:  parseInt(row.spelling_games_completed as string) || 0,
+      grammarQuizzesCompleted: parseInt(row.grammar_quizzes_completed as string) || 0,
       weeklyScore:             parseFloat(row.weekly_score as string) || 0,
       improvementScore:        parseFloat(row.improvement_score as string) || 0,
     })

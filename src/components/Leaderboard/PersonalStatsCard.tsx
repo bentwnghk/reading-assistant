@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2 } from "lucide-react";
+import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2, BookOpenCheck } from "lucide-react";
 import { cn } from "@/utils/style";
 import { ImprovementIndicator } from "./ImprovementIndicator";
 import type { PersonalStats } from "./types";
@@ -128,6 +128,14 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
           value={Math.round(cw?.avgSpellingScore ?? 0)}
           sub={cw?.spellingGamesCompleted
             ? `${cw.spellingGamesCompleted} ${t("leaderboard.stats.spellingGamesCompleted")}`
+            : undefined}
+        />
+        <StatItem
+          icon={<BookOpenCheck className="h-3.5 w-3.5" />}
+          label={t("leaderboard.stats.grammarQuizScore")}
+          value={Math.round(cw?.avgGrammarQuizScore ?? 0)}
+          sub={cw?.grammarQuizzesCompleted
+            ? `${cw.grammarQuizzesCompleted} ${t("leaderboard.stats.grammarQuizzesCompleted")}`
             : undefined}
         />
         <StatItem

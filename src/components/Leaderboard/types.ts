@@ -56,6 +56,7 @@ export interface WeeklyStatsRow {
   testsCompleted: number
   quizzesCompleted: number
   spellingGamesCompleted: number
+  grammarQuizzesCompleted: number
   weeklyScore: number
   improvementScore: number
 }
