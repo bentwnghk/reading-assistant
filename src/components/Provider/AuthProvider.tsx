@@ -4,7 +4,7 @@ import { SessionProvider, useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
-import { setUserId, useReadingStore, setRestoreComplete } from "@/store/reading"
+import { setUserId, useReadingStore, setRestoreComplete, setWelcomeDialogChecked } from "@/store/reading"
 import { setAuthState } from "@/store/history"
 import {
   setSettingUserId,
@@ -39,6 +39,7 @@ function AuthStateManager() {
       syncedUserIdRef.current = null
       setRestoreComplete(false)
       setShareCheckComplete(false)
+      setWelcomeDialogChecked(false)
       const currentLanguage = useSettingStore.getState().language
       useSettingStore.getState().loadFromServer({ ...defaultValues, language: currentLanguage })
       return

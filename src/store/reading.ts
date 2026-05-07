@@ -20,6 +20,14 @@ export function isRestoreComplete() {
   return _restoreComplete;
 }
 
+let _welcomeDialogChecked = false;
+export function setWelcomeDialogChecked(value: boolean) {
+  _welcomeDialogChecked = value;
+}
+export function isWelcomeDialogChecked() {
+  return _welcomeDialogChecked;
+}
+
 let currentUserId: string | null = null;
 export function setUserId(id: string | null) {
   currentUserId = id;

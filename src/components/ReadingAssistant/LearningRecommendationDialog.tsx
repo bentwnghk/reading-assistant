@@ -28,7 +28,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useReadingStore, isRestoreComplete } from "@/store/reading";
+import { useReadingStore, isRestoreComplete, isWelcomeDialogChecked, setWelcomeDialogChecked } from "@/store/reading";
 import { useSharingStore } from "@/store/sharing";
 import { cn } from "@/utils/style";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -188,6 +188,10 @@ export default function LearningRecommendationDialog() {
   }, [status]);
 
   useEffect(() => {
+    if (isWelcomeDialogChecked()) {
+      checkedRef.current = true;
+      return;
+    }
     if (checkedRef.current) return;
     if (status !== "authenticated") return;
     if (!restoreReady) return;
@@ -210,6 +214,7 @@ export default function LearningRecommendationDialog() {
       setStep("choices");
       setOpen(true);
       checkedRef.current = true;
+      setWelcomeDialogChecked(true);
       return;
     }
 
@@ -217,6 +222,7 @@ export default function LearningRecommendationDialog() {
     setStep("choices");
     setOpen(true);
     checkedRef.current = true;
+    setWelcomeDialogChecked(true);
   }, [id, extractedText, status, restoreReady, showSharedDialog]);
 
   const handleContinueLearning = useCallback(() => {
