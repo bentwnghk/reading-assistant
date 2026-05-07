@@ -45,7 +45,9 @@ ALTER TABLE user_achievements
       'targeted_practices',
       'spelling_challenges',
       'vocabulary_quizzes',
-      'ai_tutor_questions'
+      'ai_tutor_questions',
+      'grammar_analysis',
+      'grammar_quizzes'
     ));
 
 -- ─── 3. Create the user_achievements table (fresh installs) ──────────────────

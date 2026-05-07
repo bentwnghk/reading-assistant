@@ -325,7 +325,9 @@ CREATE TABLE user_achievements (
       'targeted_practices',
       'spelling_challenges',
       'vocabulary_quizzes',
-      'ai_tutor_questions'
+      'ai_tutor_questions',
+      'grammar_analysis',
+      'grammar_quizzes'
     )),
   milestone        INTEGER     NOT NULL,   -- the target that was reached (e.g. 5, 10, 20 …)
   unlocked_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
