@@ -39,6 +39,7 @@ export interface SettingStore {
   readingTestModel: AvailableModel;
   glossaryModel: AvailableModel;
   sentenceAnalysisModel: AvailableModel;
+  grammarModel: AvailableModel;
   tutorModel: TutorModel;
   ttsVoice: TTSVoice;
   autoSpeakFlashcard: boolean;
@@ -133,6 +134,7 @@ export const defaultValues: SettingStore = {
   readingTestModel: "gpt-5.4-mini",
   glossaryModel: "deepseek-v4-flash",
   sentenceAnalysisModel: "deepseek-v4-flash",
+  grammarModel: "gpt-5.4-mini",
   tutorModel: "gpt-5.4-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
@@ -189,6 +191,7 @@ export const useSettingStore = create(
           const modelFields: (keyof SettingStore)[] = [
             "summaryModel", "mindMapModel", "adaptedTextModel",
             "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
+            "grammarModel",
           ];
           for (const field of modelFields) {
             if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {

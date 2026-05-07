@@ -48,6 +48,7 @@ function useReadingAssistant() {
     simplifyModel,
     readingTestModel,
     glossaryModel,
+    grammarModel,
   } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
@@ -760,7 +761,7 @@ Guidelines:
     const toastId = toast.info(i18next.t("reading.grammar.analyzingWait"), { duration: Infinity });
 
     try {
-      const thinkingModel = await createModelProvider(readingTestModel);
+      const thinkingModel = await createModelProvider(grammarModel);
 
       const result = await generateText({
         model: thinkingModel,
@@ -817,7 +818,7 @@ Guidelines:
     const toastId = toast.info(i18next.t("reading.grammar.quiz.generatingWait"), { duration: Infinity });
 
     try {
-      const thinkingModel = await createModelProvider(readingTestModel);
+      const thinkingModel = await createModelProvider(grammarModel);
 
       const result = await generateText({
         model: thinkingModel,
@@ -895,7 +896,7 @@ Guidelines:
     userAnswer: string,
     maxPoints: number
   ) {
-    const { readingTestModel } = useSettingStore.getState();
+    const { grammarModel } = useSettingStore.getState();
     const { setGrammarQuizQuestionPoints } = readingStore;
 
     if (!userAnswer.trim()) {
@@ -904,7 +905,7 @@ Guidelines:
     }
 
     try {
-      const thinkingModel = await createModelProvider(readingTestModel);
+      const thinkingModel = await createModelProvider(grammarModel);
 
       const result = await generateText({
         model: thinkingModel,

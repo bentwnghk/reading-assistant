@@ -1010,6 +1010,7 @@
     "readingTestModel": "Reading Test Model",
     "glossaryModel": "Glossary Model",
     "sentenceAnalysisModel": "Sentence Analysis Model",
+    "grammarModel": "Grammar Model",
     "tutorModel": "AI Tutor Model",
     "ttsVoice": "TTS Voice",
     "autoSpeakFlashcard": "Auto-speak Flashcard",

@@ -68,6 +68,7 @@ const formSchema = z.object({
   readingTestModel: z.enum(AVAILABLE_MODELS),
   glossaryModel: z.enum(AVAILABLE_MODELS),
   sentenceAnalysisModel: z.enum(AVAILABLE_MODELS),
+  grammarModel: z.enum(AVAILABLE_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
   ttsVoice: z.enum(TTS_VOICES),
   autoSpeakFlashcard: z.boolean().optional(),
@@ -868,6 +869,37 @@ function Setting({ open, onClose }: SettingProps) {
                           onValueChange={(value) => {
                             field.onChange(value);
                             updateSetting("sentenceAnalysisModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AVAILABLE_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="grammarModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.grammarModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("grammarModel", value);
                           }}
                         >
                           <SelectTrigger className="form-field">
