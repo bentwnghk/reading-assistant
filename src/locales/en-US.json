@@ -523,6 +523,7 @@
       "analyzingWait": "Analyzing grammar topics... This usually takes 1-2 minutes. Please wait.",
       "regenerate": "Re-analyze",
       "analyzeFirst": "Click 'Analyze Grammar' above to identify grammar structures in the text",
+      "backToGrammar": "Back to Grammar",
       "tabTopics": "Topics",
       "tabLessons": "Lessons",
       "tabQuiz": "Quiz",

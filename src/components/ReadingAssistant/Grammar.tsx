@@ -143,6 +143,9 @@ function Grammar() {
       } else {
         setGrammarHighlightTopicId(topicId);
         setGrammarHighlightEnabled(true);
+        requestAnimationFrame(() => {
+          document.getElementById("grammar-highlighter")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
       }
     },
     [grammarHighlightEnabled, grammarHighlightTopicId, setGrammarHighlightEnabled, setGrammarHighlightTopicId]

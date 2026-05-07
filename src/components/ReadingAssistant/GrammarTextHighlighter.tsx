@@ -1,6 +1,9 @@
 "use client";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { BookOpenCheck } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
+import { Button } from "@/components/ui/button";
 
 const TOPIC_COLORS: Record<string, { bg: string; border: string }> = {
   tenses: { bg: "bg-blue-200 dark:bg-blue-800", border: "border-blue-400" },
@@ -89,6 +92,7 @@ interface GrammarTextHighlighterProps {
 
 export default function GrammarTextHighlighter({ text }: GrammarTextHighlighterProps) {
   const { grammarHighlightEnabled, grammarHighlightTopicId, grammarTopics } = useReadingStore();
+  const { t } = useTranslation();
 
   if (!text || !grammarHighlightEnabled || !grammarHighlightTopicId) return null;
 
@@ -96,7 +100,7 @@ export default function GrammarTextHighlighter({ text }: GrammarTextHighlighterP
   if (!topic) return null;
 
   return (
-    <div className="mt-4 border rounded-md p-4">
+    <div id="grammar-highlighter" className="mt-4 border rounded-md p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span
@@ -111,6 +115,16 @@ export default function GrammarTextHighlighter({ text }: GrammarTextHighlighterP
             — {topic.textSentences.length} sentences highlighted
           </span>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            document.getElementById("section-grammar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
+          <BookOpenCheck className="h-3 w-3 mr-1" />
+          {t("reading.grammar.backToGrammar")}
+        </Button>
       </div>
 
       <div className="prose prose-sm dark:prose-invert max-w-full max-h-[300px] overflow-y-auto">

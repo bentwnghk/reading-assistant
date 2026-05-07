@@ -523,6 +523,7 @@
       "analyzingWait": "正在分析語法主題...通常需要 1-2 分鐘，請稍候。",
       "regenerate": "重新分析",
       "analyzeFirst": "點擊上方的「分析語法」按鈕，識別文本中的語法結構",
+      "backToGrammar": "返回語法",
       "tabTopics": "主題",
       "tabLessons": "課程",
       "tabQuiz": "測驗",
