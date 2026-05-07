@@ -12,6 +12,8 @@ export type ActivityType =
   | "sentence_analyze"
   | "targeted_practice_complete"
   | "glossary_add"
+  | "grammar_analyze"
+  | "grammar_quiz_complete"
   | "ai_tutor_question"
 
 export interface ActivityDetails {
