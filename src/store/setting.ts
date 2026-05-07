@@ -134,7 +134,7 @@ export const defaultValues: SettingStore = {
   readingTestModel: "gpt-5.4-mini",
   glossaryModel: "deepseek-v4-flash",
   sentenceAnalysisModel: "deepseek-v4-flash",
-  grammarModel: "gpt-5.4-mini",
+  grammarModel: "deepseek-v4-flash",
   tutorModel: "gpt-5.4-mini",
   ttsVoice: "alloy",
   autoSpeakFlashcard: true,
