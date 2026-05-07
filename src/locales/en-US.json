@@ -1472,6 +1472,7 @@
       "avg_test_score": "Test",
       "avg_quiz_score": "Quiz",
       "avg_spelling_score": "Spelling",
+    "avg_grammar_quiz_score": "Grammar Quiz",
       "total_vocabulary_words": "Vocab",
       "improvement_score": "Improvement",
       "total_flashcard_reviews": "Flashcards"
@@ -1484,6 +1485,7 @@
       "test": "Reading Test",
       "quiz": "Vocab Quiz",
       "spelling": "Spelling",
+    "grammarQuiz": "Grammar Quiz",
       "vocab": "Vocab Words",
       "flashcards": "Flashcards",
       "improvement": "Improvement",
@@ -1516,6 +1518,7 @@
       "totalVocab": "Total Vocabulary",
       "avgQuizScore": "Avg Vocab Quiz Score",
       "avgTestScore": "Avg Reading Test Score",
+    "avgGrammarQuizScore": "Avg Grammar Quiz Score",
       "totalFlashcards": "Total Flashcards",
       "noStats": "Complete learning activities this week to appear on the leaderboard!",
       "teacherTitle": "Teacher View",
@@ -1634,6 +1637,14 @@
             "name": "Quiz Wizard",
             "desc": "Test your word knowledge with vocabulary quizzes. Take quizzes right after adding new words while they're fresh!"
           },
+          "grammar_analysis": {
+            "name": "Grammar Explorer",
+            "desc": "Analyze grammar structures in your reading texts. The more you explore grammar, the sharper your writing becomes!"
+          },
+          "grammar_quizzes": {
+            "name": "Grammar Ace",
+            "desc": "Complete grammar quizzes to test your understanding of grammar rules. Practice makes perfect!"
+          },
           "ai_tutor_questions": {
             "name": "Curious Learner",
             "desc": "Stuck on something? Ask the AI Tutor! Every question you ask counts—there are no silly questions here!"
@@ -1713,11 +1724,21 @@
         "description": "Complete {{count}} spelling challenges",
         "hint": "Play spelling games with your vocabulary words"
       },
-      "vocabulary_quizzes": {
-        "name": "Quiz Wizard",
-        "description": "Complete {{count}} vocabulary quizzes",
-        "hint": "Take vocabulary quizzes to test your word knowledge"
-      },
+    "vocabulary_quizzes": {
+      "name": "Quiz Wizard",
+      "description": "Complete {{count}} vocabulary quizzes",
+      "hint": "Take vocabulary quizzes to test your word knowledge"
+    },
+    "grammar_analysis": {
+      "name": "Grammar Explorer",
+      "description": "Analyze grammar in {{count}} texts",
+      "hint": "Use the Grammar section to identify grammar structures in your reading texts"
+    },
+    "grammar_quizzes": {
+      "name": "Grammar Ace",
+      "description": "Complete {{count}} grammar quizzes",
+      "hint": "Take grammar quizzes to test your understanding of grammar rules"
+    },
       "ai_tutor_questions": {
         "name": "Curious Learner",
         "description": "Ask AI Tutor {{count}} questions",

@@ -343,7 +343,10 @@ type AchievementType =
   | "tests_completed"
   | "targeted_practices"
   | "spelling_challenges"
-  | "vocabulary_quizzes";
+  | "vocabulary_quizzes"
+  | "grammar_analysis"
+  | "grammar_quizzes"
+  | "ai_tutor_questions";
 
 interface AchievementMilestone {
   target: number;

@@ -785,6 +785,8 @@ Guidelines:
       const topics: GrammarTopic[] = JSON.parse(text);
       setGrammarTopics(topics);
 
+      logActivity("grammar_analyze", { sessionId: readingStore.id || undefined });
+
       toast.dismiss(toastId);
       setStoreStatus("idle");
       setStatus("idle");
@@ -885,6 +887,11 @@ Guidelines:
     setGrammarQuizScore(score);
     setGrammarQuizCompleted(true);
     setGrammarQuizPoints(earnedPoints, totalPoints);
+
+    logActivity("grammar_quiz_complete", {
+      sessionId: useReadingStore.getState().id || undefined,
+      score,
+    });
 
     return score;
   }

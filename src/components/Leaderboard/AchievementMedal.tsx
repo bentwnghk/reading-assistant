@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles, Lock, CheckCircle2,
+  BookOpenCheck, GraduationCap,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import type { AchievementState } from "@/store/achievements";
@@ -12,55 +13,60 @@ import type { AchievementState } from "@/store/achievements";
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles,
+  BookOpenCheck, GraduationCap,
 };
 
 // ─── Color maps ───────────────────────────────────────────────────────────────
 const COLOR_BG: Record<string, string> = {
-  blue:   "bg-blue-500",
-  green:  "bg-green-500",
-  indigo: "bg-indigo-500",
-  purple: "bg-purple-500",
-  orange: "bg-orange-500",
-  teal:   "bg-teal-500",
-  pink:   "bg-pink-500",
-  red:    "bg-red-500",
-  cyan:   "bg-cyan-500",
+  blue:    "bg-blue-500",
+  green:   "bg-green-500",
+  indigo:  "bg-indigo-500",
+  purple:  "bg-purple-500",
+  orange:  "bg-orange-500",
+  teal:    "bg-teal-500",
+  pink:    "bg-pink-500",
+  red:     "bg-red-500",
+  cyan:    "bg-cyan-500",
+  fuchsia: "bg-fuchsia-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
-  blue:   "shadow-blue-400/50",
-  green:  "shadow-green-400/50",
-  indigo: "shadow-indigo-400/50",
-  purple: "shadow-purple-400/50",
-  orange: "shadow-orange-400/50",
-  teal:   "shadow-teal-400/50",
-  pink:   "shadow-pink-400/50",
-  red:    "shadow-red-400/50",
-  cyan:   "shadow-cyan-400/50",
+  blue:    "shadow-blue-400/50",
+  green:   "shadow-green-400/50",
+  indigo:  "shadow-indigo-400/50",
+  purple:  "shadow-purple-400/50",
+  orange:  "shadow-orange-400/50",
+  teal:    "shadow-teal-400/50",
+  pink:    "shadow-pink-400/50",
+  red:     "shadow-red-400/50",
+  cyan:    "shadow-cyan-400/50",
+  fuchsia: "shadow-fuchsia-400/50",
 };
 
 const COLOR_RING: Record<string, string> = {
-  blue:   "stroke-blue-500",
-  green:  "stroke-green-500",
-  indigo: "stroke-indigo-500",
-  purple: "stroke-purple-500",
-  orange: "stroke-orange-500",
-  teal:   "stroke-teal-500",
-  pink:   "stroke-pink-500",
-  red:    "stroke-red-500",
-  cyan:   "stroke-cyan-500",
+  blue:    "stroke-blue-500",
+  green:   "stroke-green-500",
+  indigo:  "stroke-indigo-500",
+  purple:  "stroke-purple-500",
+  orange:  "stroke-orange-500",
+  teal:    "stroke-teal-500",
+  pink:    "stroke-pink-500",
+  red:     "stroke-red-500",
+  cyan:    "stroke-cyan-500",
+  fuchsia: "stroke-fuchsia-500",
 };
 
 const COLOR_TEXT: Record<string, string> = {
-  blue:   "text-blue-600 dark:text-blue-400",
-  green:  "text-green-600 dark:text-green-400",
-  indigo: "text-indigo-600 dark:text-indigo-400",
-  purple: "text-purple-600 dark:text-purple-400",
-  orange: "text-orange-600 dark:text-orange-400",
-  teal:   "text-teal-600 dark:text-teal-400",
-  pink:   "text-pink-600 dark:text-pink-400",
-  red:    "text-red-600 dark:text-red-400",
-  cyan:   "text-cyan-600 dark:text-cyan-400",
+  blue:    "text-blue-600 dark:text-blue-400",
+  green:   "text-green-600 dark:text-green-400",
+  indigo:  "text-indigo-600 dark:text-indigo-400",
+  purple:  "text-purple-600 dark:text-purple-400",
+  orange:  "text-orange-600 dark:text-orange-400",
+  teal:    "text-teal-600 dark:text-teal-400",
+  pink:    "text-pink-600 dark:text-pink-400",
+  red:     "text-red-600 dark:text-red-400",
+  cyan:    "text-cyan-600 dark:text-cyan-400",
+  fuchsia: "text-fuchsia-600 dark:text-fuchsia-400",
 };
 
 // ─── Progress ring SVG ────────────────────────────────────────────────────────

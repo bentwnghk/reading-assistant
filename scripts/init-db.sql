@@ -246,6 +246,8 @@ CREATE TABLE activity_logs (
       'sentence_analyze',
       'targeted_practice_complete',
       'glossary_add',
+      'grammar_analyze',
+      'grammar_quiz_complete',
       'ai_tutor_question'
     )),
   session_id    TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
@@ -275,10 +277,12 @@ CREATE TABLE weekly_stats (
   total_flashcard_reviews   INTEGER       DEFAULT 0,
   avg_quiz_score            NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   avg_spelling_score        NUMERIC(10,2) DEFAULT 0,  -- raw game points, unbounded
+  avg_grammar_quiz_score    NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   total_vocabulary_words    INTEGER       DEFAULT 0,
   tests_completed           INTEGER       DEFAULT 0,
   quizzes_completed         INTEGER       DEFAULT 0,
   spelling_games_completed  INTEGER       DEFAULT 0,
+  grammar_quizzes_completed INTEGER       DEFAULT 0,
   weekly_score              NUMERIC(10,2) DEFAULT 0,  -- composite score, unbounded
   improvement_score         NUMERIC(10,2) DEFAULT 0,  -- week-over-week delta, can be negative/large
   created_at                TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
