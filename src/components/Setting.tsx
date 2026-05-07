@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Password } from "@/components/Internal/PasswordInput";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,6 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -358,8 +357,8 @@ function Setting({ open, onClose }: SettingProps) {
                             {t("setting.apiKeyLabel")}
                           </FormLabel>
                           <FormControl className="form-field">
-                            <Password
-                              type="text"
+                            <Input
+                              type="password"
                               placeholder={t("setting.apiKeyPlaceholder")}
                               {...field}
                               onBlur={() =>
@@ -426,8 +425,8 @@ function Setting({ open, onClose }: SettingProps) {
                           <InfoTooltip content={t("setting.accessPasswordTip")} />
                         </FormLabel>
                         <FormControl className="form-field">
-                          <Password
-                            type="text"
+                          <Input
+                            type="password"
                             placeholder={t("setting.accessPasswordPlaceholder")}
                             {...field}
                             onBlur={() =>
