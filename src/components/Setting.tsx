@@ -664,7 +664,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {VISION_MODELS.map((m) => (
+                            {GRAMMAR_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -912,7 +912,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {GRAMMAR_MODELS.map((m) => (
+                            {AVAILABLE_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
