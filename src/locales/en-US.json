@@ -1752,6 +1752,10 @@
         "title": "Complete your reading comprehension test",
         "description": "Test your understanding of the text with reading comprehension questions. See how well you grasped the key ideas!"
       },
+      "grammar": {
+        "title": "Explore grammar topics",
+        "description": "Discover key grammar patterns in your text, learn the rules, and test yourself with a grammar quiz!"
+      },
       "spellingGame": {
         "title": "Try the spelling challenge",
         "description": "Practice spelling your vocabulary words with a fun, interactive game. Build streaks and earn bonus points!"

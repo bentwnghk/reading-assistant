@@ -82,6 +82,14 @@ const ACTIVITY_DEFINITIONS: LearningActivity[] = [
     titleKey: "recommendation.activities.readingTest.title",
     descriptionKey: "recommendation.activities.readingTest.description",
   },
+  {
+    id: "grammar",
+    sectionId: "section-grammar",
+    icon: "BookOpenCheck",
+    color: "teal",
+    titleKey: "recommendation.activities.grammar.title",
+    descriptionKey: "recommendation.activities.grammar.description",
+  },
 ];
 
 function getActivity(id: string): LearningActivity {
@@ -131,6 +139,12 @@ export function getIncompleteActivities(
     incomplete.push(getActivity("reading-test"));
   } else if (session.readingTest.length === 0) {
     incomplete.push(getActivity("reading-test"));
+  }
+
+  if (session.grammarTopics.length === 0) {
+    incomplete.push(getActivity("grammar"));
+  } else if (!session.grammarQuizCompleted) {
+    incomplete.push(getActivity("grammar"));
   }
 
   return incomplete;

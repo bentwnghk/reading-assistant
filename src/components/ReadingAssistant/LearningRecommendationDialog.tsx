@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import {
   BookOpen,
+  BookOpenCheck,
   BookMarked,
   Waypoints,
   ClipboardCheck,
@@ -57,6 +58,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Waypoints,
   FileText,
   BookOpen,
+  BookOpenCheck,
   BookMarked,
   Search,
   Highlighter,
