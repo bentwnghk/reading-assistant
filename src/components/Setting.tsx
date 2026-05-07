@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, GRAMMAR_MODELS, TTS_VOICES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -69,7 +69,7 @@ const formSchema = z.object({
   readingTestModel: z.enum(AVAILABLE_MODELS),
   glossaryModel: z.enum(AVAILABLE_MODELS),
   sentenceAnalysisModel: z.enum(AVAILABLE_MODELS),
-  grammarModel: z.enum(AVAILABLE_MODELS),
+  grammarModel: z.enum(GRAMMAR_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
   ttsVoice: z.enum(TTS_VOICES),
   autoSpeakFlashcard: z.boolean().optional(),
@@ -664,7 +664,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {VISION_MODELS.map((m) => (
+                            {GRAMMAR_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
