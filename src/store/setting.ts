@@ -14,15 +14,6 @@ export const VISION_MODELS = ["gpt-5-nano", "gpt-5.4-nano"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
-export const GRAMMAR_MODELS = [
-  "deepseek-v4-flash",
-  "gemini-3-flash-preview",
-  "gpt-5.1",
-  "gpt-5.4-mini",
-] as const;
-
-export type GrammarModel = (typeof GRAMMAR_MODELS)[number];
-
 export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3-flash-preview",
@@ -48,7 +39,7 @@ export interface SettingStore {
   readingTestModel: AvailableModel;
   glossaryModel: AvailableModel;
   sentenceAnalysisModel: AvailableModel;
-  grammarModel: GrammarModel;
+  grammarModel: AvailableModel;
   tutorModel: TutorModel;
   ttsVoice: TTSVoice;
   autoSpeakFlashcard: boolean;
@@ -200,14 +191,12 @@ export const useSettingStore = create(
           const modelFields: (keyof SettingStore)[] = [
             "summaryModel", "mindMapModel", "adaptedTextModel",
             "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
+            "grammarModel",
           ];
           for (const field of modelFields) {
             if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {
               state[field] = defaultValues[field];
             }
-          }
-          if (!GRAMMAR_MODELS.includes(state.grammarModel as GrammarModel)) {
-            state.grammarModel = defaultValues.grammarModel;
           }
           if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
             state.visionModel = defaultValues.visionModel;
