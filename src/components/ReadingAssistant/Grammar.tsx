@@ -85,6 +85,7 @@ function Grammar() {
   const [quizState, setQuizState] = useState<GrammarQuizState>("idle");
   const [showReview, setShowReview] = useState(false);
   const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
 
   const isAnalyzing = status === "grammar";
 
@@ -93,7 +94,12 @@ function Grammar() {
   }, [analyzeGrammarTopics]);
 
   const handleGenerateQuiz = useCallback(async () => {
-    await generateGrammarQuiz();
+    setIsGeneratingQuiz(true);
+    try {
+      await generateGrammarQuiz();
+    } finally {
+      setIsGeneratingQuiz(false);
+    }
   }, [generateGrammarQuiz]);
 
   const handleStartQuiz = useCallback(() => {
@@ -303,8 +309,8 @@ function Grammar() {
             <p className="text-sm text-muted-foreground mb-4">
               {t("reading.grammar.quiz.ready", { count: 0 })}
             </p>
-            <Button onClick={handleGenerateQuiz} disabled={isAnalyzing}>
-              {t("reading.grammar.quiz.generate")}
+            <Button onClick={handleGenerateQuiz} disabled={isGeneratingQuiz || isAnalyzing}>
+              {isGeneratingQuiz ? <LoaderCircle className="h-4 w-4 animate-spin" /> : t("reading.grammar.quiz.generate")}
             </Button>
           </div>
         );
@@ -580,11 +586,15 @@ function Grammar() {
           {grammarTopics.length > 0 && (
             <Button
               onClick={handleGenerateQuiz}
-              disabled={isAnalyzing}
+              disabled={isGeneratingQuiz || isAnalyzing}
               size="sm"
               variant="secondary"
             >
-              <CheckCircle2 className="h-4 w-4" />
+              {isGeneratingQuiz ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
               <span>
                 {grammarQuiz.length > 0
                   ? t("reading.grammar.quiz.regenerate")
