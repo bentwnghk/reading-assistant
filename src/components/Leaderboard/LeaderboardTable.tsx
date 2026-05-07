@@ -70,6 +70,7 @@ export function LeaderboardTable({
             ["avg_test_score", "leaderboard.columns.test"],
             ["avg_quiz_score", "leaderboard.columns.quiz"],
             ["avg_spelling_score", "leaderboard.columns.spelling"],
+            ["avg_grammar_quiz_score", "leaderboard.columns.grammarQuiz"],
             ["total_vocabulary_words", "leaderboard.columns.vocab"],
             ["total_flashcard_reviews", "leaderboard.columns.flashcards"],
             ["improvement_score", "leaderboard.columns.improvement"],
@@ -206,6 +207,7 @@ export function LeaderboardTable({
                     {sortBy === "avg_test_score" ? entry.avgTestScore :
                      sortBy === "avg_quiz_score" ? entry.avgQuizScore :
                      sortBy === "avg_spelling_score" ? entry.avgSpellingScore :
+                     sortBy === "avg_grammar_quiz_score" ? entry.avgGrammarQuizScore :
                      sortBy === "total_vocabulary_words" ? entry.totalVocabWords :
                      sortBy === "total_flashcard_reviews" ? entry.flashcardReviews :
                      entry.weeklyScore}
@@ -214,6 +216,7 @@ export function LeaderboardTable({
                     {sortBy === "avg_test_score" ? t("leaderboard.columns.test") :
                      sortBy === "avg_quiz_score" ? t("leaderboard.columns.quiz") :
                      sortBy === "avg_spelling_score" ? t("leaderboard.columns.spelling") :
+                     sortBy === "avg_grammar_quiz_score" ? t("leaderboard.columns.grammarQuiz") :
                      sortBy === "total_vocabulary_words" ? t("leaderboard.columns.vocab") :
                      sortBy === "total_flashcard_reviews" ? t("leaderboard.columns.flashcards") :
                      t("leaderboard.columns.score")}

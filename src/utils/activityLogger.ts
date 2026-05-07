@@ -11,6 +11,8 @@ type ActivityType =
   | "targeted_practice_complete"
   | "glossary_add"
   | "ai_tutor_question"
+  | "grammar_analysis"
+  | "grammar_quiz_complete"
 
 interface ActivityDetails {
   cardsReviewed?: number
