@@ -555,6 +555,174 @@ ${text.slice(0, 8000)}
 Remember: Your goal is to help the student understand and learn from THIS text, not just to give answers.`;
 }
 
+export function analyzeGrammarTopicsPrompt(age: number, text: string) {
+  const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
+  const maxTopics = age <= 11 ? 4 : age <= 15 ? 6 : 8;
+
+  return `Analyze the following English text and identify the most notable grammar structures that a ${age}-year-old Hong Kong ${schoolLevel} student could learn from.
+
+<text>
+${text}
+</text>
+
+Identify ${maxTopics} notable grammar topics present in this text. For each topic, provide a detailed analysis. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+
+[
+  {
+    "id": "g1",
+    "name": "Present Perfect Tense",
+    "nameZh": "現在完成式",
+    "category": "tenses",
+    "cefrLevel": "A2",
+    "explanation": "Clear, age-appropriate English explanation of what this grammar structure is and when to use it. 2-3 sentences.",
+    "explanationZh": "繁體中文解釋，2-3句",
+    "pattern": "Subject + has/have + Past Participle",
+    "examples": [
+      { "sentence": "An actual sentence from the text demonstrating this grammar.", "source": "text" },
+      { "sentence": "An additional example sentence not from the text.", "source": "generated" }
+    ],
+    "commonMistakes": "Common mistakes Hong Kong students make with this grammar point. 1-2 sentences.",
+    "commonMistakesZh": "香港學生常犯的錯誤，1-2句",
+    "occurrences": 3,
+    "textSentences": ["Full sentence from the text showing this grammar structure", "Another full sentence from the text"]
+  }
+]
+
+**Category values MUST be one of:**
+"tenses", "conditionals", "passive-voice", "relative-clauses", "reported-speech", "modal-verbs", "articles", "prepositions", "conjunctions", "comparisons", "infinitives-gerunds", "subjunctive", "clause-structure", "other"
+
+**CEFR level values MUST be one of:** "A1", "A2", "B1", "B2", "C1", "C2"
+
+**Guidelines:**
+- Prioritize grammar structures that are: (1) actually present in the text, (2) educational for the student's age level, (3) varied across categories
+- All textSentences MUST be exact quotes from the text above
+- Examples with source "text" MUST use sentences from the text; source "generated" should be original examples
+- English explanations should use simple language appropriate for the student's age
+- Chinese translations MUST be in Traditional Chinese (繁體中文)
+- Pattern should be a simplified formula showing the structure
+- Common mistakes should be specific to Hong Kong students learning English
+- occurrences should count how many times this grammar structure appears in the text
+- ${age <= 11 ? "Focus on basic grammar: simple tenses, articles, basic prepositions, simple conjunctions, subject-verb agreement" : age <= 15 ? "Include intermediate grammar: perfect tenses, conditionals, passive voice, relative clauses, modal verbs" : "Include advanced grammar: complex conditionals, subjunctive, advanced clause structures, reported speech, infinitive/gerund distinctions"}
+
+**Respond with ONLY the JSON array, no markdown, no code blocks.**`;
+}
+
+export function generateGrammarQuizPrompt(text: string, age: number, topics: GrammarTopic[]) {
+  const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
+  const topicSummaries = topics.map(t => `- ${t.name} (${t.id}): ${t.pattern}`).join("\n");
+
+  return `Create a grammar quiz for a ${age}-year-old Hong Kong ${schoolLevel} student based on grammar structures found in this text.
+
+<text>
+${text}
+</text>
+
+<Grammar Topics to Test>
+${topicSummaries}
+</Grammar Topics to Test>
+
+Generate 10 grammar quiz questions. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+
+[
+  {
+    "id": "gq1",
+    "type": "identify",
+    "topicId": "g1",
+    "topicName": "Present Perfect Tense",
+    "question": "Which grammar structure is used in this sentence: 'She has lived here for ten years'?",
+    "questionZh": "這個句子使用了什麼語法結構？",
+    "options": ["A) Simple Past", "B) Present Perfect", "C) Past Perfect", "D) Present Continuous"],
+    "optionsZh": ["A) 一般過去式", "B) 現在完成式", "C) 過去完成式", "D) 現在進行式"],
+    "correctAnswer": "B",
+    "explanation": "The sentence uses 'has + past participle (lived)' which is the present perfect tense structure.",
+    "explanationZh": "這個句子使用了 'has + 過去分詞 (lived)'，這是現在完成式的結構。",
+    "points": 1
+  },
+  {
+    "id": "gq2",
+    "type": "fill-in",
+    "topicId": "g1",
+    "topicName": "Present Perfect Tense",
+    "question": "Complete: She _____ (live) in Hong Kong since 2010.",
+    "questionZh": "完成句子：She _____ (live) in Hong Kong since 2010.",
+    "correctAnswer": "has lived",
+    "explanation": "'Since 2010' indicates the present perfect tense. Use 'has lived' for third person singular.",
+    "explanationZh": "'Since 2010' 表示現在完成式。第三人稱單數使用 'has lived'。",
+    "points": 2
+  },
+  {
+    "id": "gq3",
+    "type": "error-spot",
+    "topicId": "g1",
+    "topicName": "Present Perfect Tense",
+    "question": "Find and correct the grammar error: 'She have went to the store yesterday.'",
+    "questionZh": "找出並改正語法錯誤：'She have went to the store yesterday.'",
+    "options": ["A) She has gone to the store yesterday.", "B) She went to the store yesterday.", "C) She have went to the store.", "D) No error"],
+    "optionsZh": ["A) She has gone to the store yesterday.", "B) She went to the store yesterday.", "C) She have went to the store.", "D) 沒有錯誤"],
+    "correctAnswer": "B",
+    "explanation": "With 'yesterday', use simple past 'went', not present perfect. Also 'have' doesn't agree with 'she'.",
+    "explanationZh": "使用 'yesterday' 時，應使用一般過去式 'went'，而不是現在完成式。此外 'have' 與 'she' 不搭配。",
+    "points": 1
+  },
+  {
+    "id": "gq4",
+    "type": "rewrite",
+    "topicId": "g2",
+    "topicName": "Passive Voice",
+    "question": "Rewrite in passive voice: 'The teacher explained the lesson.'",
+    "questionZh": "將以下句子改為被動語態：'The teacher explained the lesson.'",
+    "correctAnswer": "The lesson was explained by the teacher.",
+    "explanation": "Object becomes subject, verb becomes 'was + past participle', subject becomes 'by' phrase.",
+    "explanationZh": "賓語變為主語，動詞變為 'was + 過去分詞'，主語變為 'by' 短語。",
+    "points": 2
+  }
+]
+
+**Question types (distribute evenly across topics):**
+- "identify": Given a sentence, identify which grammar structure it uses. Must have options (A-D).
+- "fill-in": Fill in the blank with the correct grammar form. No options. correctAnswer is the expected answer.
+- "error-spot": Find and correct a grammar error. Must have options (A-D).
+- "rewrite": Rewrite a sentence using a different grammar structure. No options. correctAnswer is one correct version.
+
+**Guidelines:**
+- Use sentences from the text when possible for identify and error-spot questions
+- For error-spot: create realistic errors that Hong Kong students commonly make
+- For rewrite: accept any grammatically correct answer (AI will evaluate)
+- Points: identify/error-spot = 1, fill-in/rewrite = 2
+- Chinese translations are REQUIRED for all questions
+- Use Traditional Chinese (繁體中文) for all Chinese text
+- Make questions age-appropriate
+
+**Respond with ONLY the JSON array, no markdown, no code blocks.**`;
+}
+
+export function evaluateGrammarRewritePrompt(
+  question: string,
+  correctAnswer: string,
+  userAnswer: string,
+  maxPoints: number
+) {
+  return `Evaluate this grammar rewrite/fill-in answer for a Hong Kong student learning English.
+
+Question: ${question}
+Expected answer: ${correctAnswer}
+Student's answer: ${userAnswer}
+Maximum points: ${maxPoints}
+
+Evaluate whether the student's answer is grammatically correct and addresses the question.
+Respond with ONLY a JSON object (no markdown, no code blocks):
+{
+  "earnedPoints": <number 0 to ${maxPoints}>,
+  "feedback": "<brief feedback in English explaining what was good and what could be improved>"
+}
+
+Guidelines:
+- Award full points if the answer is grammatically correct even if different from expected
+- Award partial points if partially correct
+- Award 0 if completely wrong
+- Keep feedback brief and encouraging`;
+}
+
 export function getSystemPrompt(): string {
   return systemInstruction.replace("{now}", new Date().toLocaleDateString(i18next.language));
 }

@@ -23,8 +23,13 @@ export async function createReadingSession(
         test_completed, test_earned_points, test_total_points, test_show_chinese,
         test_mode, vocabulary_quiz_score, spelling_game_best_score, chat_history,
         original_difficulty, adapted_difficulty, simplified_difficulty,
-        include_glossary, include_sentence_analysis, created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)`,
+        include_glossary, include_sentence_analysis,
+        grammar_topics, grammar_quiz, grammar_quiz_score, grammar_quiz_completed,
+        grammar_quiz_earned_points, grammar_quiz_total_points,
+        grammar_generated_at, grammar_quiz_completed_at,
+        grammar_highlight_enabled, grammar_highlight_topic_id,
+        created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39)`,
       [
         sessionData.id,
         userId,
@@ -54,6 +59,16 @@ export async function createReadingSession(
         sessionData.simplifiedDifficulty ? JSON.stringify(sessionData.simplifiedDifficulty) : null,
         sessionData.includeGlossary ?? true,
         sessionData.includeSentenceAnalysis ?? true,
+        JSON.stringify(sessionData.grammarTopics ?? []),
+        JSON.stringify(sessionData.grammarQuiz ?? []),
+        sessionData.grammarQuizScore ?? 0,
+        sessionData.grammarQuizCompleted ?? false,
+        sessionData.grammarQuizEarnedPoints ?? 0,
+        sessionData.grammarQuizTotalPoints ?? 0,
+        sessionData.grammarGeneratedAt ?? 0,
+        sessionData.grammarQuizCompletedAt ?? 0,
+        sessionData.grammarHighlightEnabled ?? false,
+        sessionData.grammarHighlightTopicId ?? null,
         new Date(sessionData.createdAt || Date.now()),
       ]
     )
@@ -153,6 +168,16 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       simplifiedDifficulty: row.simplified_difficulty,
       includeGlossary: row.include_glossary ?? true,
       includeSentenceAnalysis: row.include_sentence_analysis ?? true,
+      grammarTopics: row.grammar_topics ?? [],
+      grammarQuiz: row.grammar_quiz ?? [],
+      grammarQuizScore: row.grammar_quiz_score ?? 0,
+      grammarQuizCompleted: row.grammar_quiz_completed ?? false,
+      grammarQuizEarnedPoints: row.grammar_quiz_earned_points ?? 0,
+      grammarQuizTotalPoints: row.grammar_quiz_total_points ?? 0,
+      grammarGeneratedAt: Number(row.grammar_generated_at ?? 0),
+      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
+      grammarHighlightEnabled: row.grammar_highlight_enabled ?? false,
+      grammarHighlightTopicId: row.grammar_highlight_topic_id ?? null,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -236,6 +261,16 @@ export async function getReadingSession(
       simplifiedDifficulty: row.simplified_difficulty,
       includeGlossary: row.include_glossary ?? true,
       includeSentenceAnalysis: row.include_sentence_analysis ?? true,
+      grammarTopics: row.grammar_topics ?? [],
+      grammarQuiz: row.grammar_quiz ?? [],
+      grammarQuizScore: row.grammar_quiz_score ?? 0,
+      grammarQuizCompleted: row.grammar_quiz_completed ?? false,
+      grammarQuizEarnedPoints: row.grammar_quiz_earned_points ?? 0,
+      grammarQuizTotalPoints: row.grammar_quiz_total_points ?? 0,
+      grammarGeneratedAt: Number(row.grammar_generated_at ?? 0),
+      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
+      grammarHighlightEnabled: row.grammar_highlight_enabled ?? false,
+      grammarHighlightTopicId: row.grammar_highlight_topic_id ?? null,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -296,6 +331,16 @@ export async function updateReadingSession(
       simplifiedDifficulty: "simplified_difficulty",
       includeGlossary: "include_glossary",
       includeSentenceAnalysis: "include_sentence_analysis",
+      grammarTopics: "grammar_topics",
+      grammarQuiz: "grammar_quiz",
+      grammarQuizScore: "grammar_quiz_score",
+      grammarQuizCompleted: "grammar_quiz_completed",
+      grammarQuizEarnedPoints: "grammar_quiz_earned_points",
+      grammarQuizTotalPoints: "grammar_quiz_total_points",
+      grammarGeneratedAt: "grammar_generated_at",
+      grammarQuizCompletedAt: "grammar_quiz_completed_at",
+      grammarHighlightEnabled: "grammar_highlight_enabled",
+      grammarHighlightTopicId: "grammar_highlight_topic_id",
     }
     
     for (const [key, dbColumn] of Object.entries(fieldMappings)) {
@@ -305,7 +350,8 @@ export async function updateReadingSession(
         
         if (["highlightedWords", "analyzedSentences", "readingTest", "glossary",
              "glossaryRatings", "chatHistory", "originalDifficulty",
-             "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates"].includes(key)) {
+             "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates",
+             "grammarTopics", "grammarQuiz"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else {
           values.push(value)

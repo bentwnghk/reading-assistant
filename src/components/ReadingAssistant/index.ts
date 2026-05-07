@@ -6,4 +6,5 @@ export { default as AdaptedText } from "./AdaptedText";
 export { default as MindMap } from "./MindMap";
 export { default as ReadingTest } from "./ReadingTest";
 export { default as Glossary } from "./Glossary";
+export { default as Grammar } from "./Grammar";
 export { default as WorkflowProgress } from "./WorkflowProgress";

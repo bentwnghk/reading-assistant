@@ -103,6 +103,7 @@ export type ReadingStatus =
   | "mindmap"
   | "testing"
   | "glossary"
+  | "grammar"
   | "error";
 
 type ReadingTestMode = "all-at-once" | "question-by-question";
@@ -124,6 +125,16 @@ export interface ReadingStore {
   readingTest: ReadingTestQuestion[];
   glossary: GlossaryEntry[];
   glossaryRatings: Record<string, GlossaryRating>;
+  grammarTopics: GrammarTopic[];
+  grammarQuiz: GrammarQuizQuestion[];
+  grammarQuizScore: number;
+  grammarQuizCompleted: boolean;
+  grammarQuizEarnedPoints: number;
+  grammarQuizTotalPoints: number;
+  grammarGeneratedAt: number;
+  grammarQuizCompletedAt: number;
+  grammarHighlightEnabled: boolean;
+  grammarHighlightTopicId: string | null;
   testScore: number;
   testCompleted: boolean;
   testEarnedPoints: number;
@@ -175,6 +186,15 @@ interface ReadingActions {
   setQuestionEarnedPoints: (questionId: string, points: number) => void;
   setGlossary: (entries: GlossaryEntry[]) => void;
   setGlossaryRating: (word: string, rating: GlossaryRating) => void;
+  setGrammarTopics: (topics: GrammarTopic[]) => void;
+  setGrammarQuiz: (questions: GrammarQuizQuestion[]) => void;
+  setGrammarQuizAnswer: (questionId: string, answer: string) => void;
+  setGrammarQuizQuestionPoints: (questionId: string, points: number) => void;
+  setGrammarQuizScore: (score: number) => void;
+  setGrammarQuizCompleted: (completed: boolean) => void;
+  setGrammarQuizPoints: (earned: number, total: number) => void;
+  setGrammarHighlightEnabled: (enabled: boolean) => void;
+  setGrammarHighlightTopicId: (topicId: string | null) => void;
   setTestScore: (score: number) => void;
   setTestCompleted: (completed: boolean) => void;
   setTestPoints: (earned: number, total: number) => void;
@@ -218,6 +238,16 @@ const defaultValues: ReadingStore = {
   readingTest: [],
   glossary: [],
   glossaryRatings: {},
+  grammarTopics: [],
+  grammarQuiz: [],
+  grammarQuizScore: 0,
+  grammarQuizCompleted: false,
+  grammarQuizEarnedPoints: 0,
+  grammarQuizTotalPoints: 0,
+  grammarGeneratedAt: 0,
+  grammarQuizCompletedAt: 0,
+  grammarHighlightEnabled: false,
+  grammarHighlightTopicId: null,
   testScore: 0,
   testCompleted: false,
   testEarnedPoints: 0,
@@ -534,6 +564,125 @@ export const useReadingStore = create(
           }
           return newState;
         }),
+      setGrammarTopics: (topics) =>
+        set((state) => {
+          const newState = {
+            grammarTopics: topics,
+            grammarGeneratedAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarQuiz: (questions) =>
+        set((state) => {
+          const newState = {
+            grammarQuiz: questions,
+            grammarQuizCompleted: false,
+            grammarQuizScore: 0,
+            grammarQuizEarnedPoints: 0,
+            grammarQuizTotalPoints: questions.reduce((sum, q) => sum + q.points, 0),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarQuizAnswer: (questionId, answer) =>
+        set((state) => {
+          const newState = {
+            grammarQuiz: state.grammarQuiz.map((q) =>
+              q.id === questionId ? { ...q, userAnswer: answer } : q
+            ),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarQuizQuestionPoints: (questionId, points) =>
+        set((state) => {
+          const newState = {
+            grammarQuiz: state.grammarQuiz.map((q) =>
+              q.id === questionId ? { ...q, earnedPoints: points } : q
+            ),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarQuizScore: (score) =>
+        set((state) => {
+          const newState = {
+            grammarQuizScore: score,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarQuizCompleted: (completed) =>
+        set((state) => {
+          const newState = {
+            grammarQuizCompleted: completed,
+            ...(completed ? { grammarQuizCompletedAt: Date.now() } : {}),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarQuizPoints: (earned, total) =>
+        set((state) => {
+          const newState = {
+            grammarQuizEarnedPoints: earned,
+            grammarQuizTotalPoints: total,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarHighlightEnabled: (enabled) =>
+        set((state) => {
+          const newState = {
+            grammarHighlightEnabled: enabled,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarHighlightTopicId: (topicId) =>
+        set((state) => {
+          const newState = {
+            grammarHighlightTopicId: topicId,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       setTestScore: (score) =>
         set((state) => {
           const newState = {
@@ -824,7 +973,7 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
-      version: 7,
+      version: 8,
       storage: {
         getItem: (name) => {
           const value = localStorage.getItem(name);

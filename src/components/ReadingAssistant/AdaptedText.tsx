@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
+import GrammarTextHighlighter from "./GrammarTextHighlighter";
 import { formatDateTime } from "@/utils/formatDate";
 import {
   Document,
@@ -1530,6 +1531,7 @@ function AdaptedText() {
       </Dialog>
 
       <TextDifficultyAnalyzer />
+      <GrammarTextHighlighter text={extractedText} />
     </section>
   );
 }

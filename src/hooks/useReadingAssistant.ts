@@ -17,6 +17,9 @@ import {
   generateTargetedPracticePrompt,
   generateGlossaryPrompt,
   readingTutorSystemPrompt,
+  analyzeGrammarTopicsPrompt,
+  generateGrammarQuizPrompt,
+  evaluateGrammarRewritePrompt,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
 import { logActivity } from "@/utils/activityLogger";
@@ -743,6 +746,197 @@ Guidelines:
     }
   }
 
+  async function analyzeGrammarTopics() {
+    const { studentAge, extractedText, setGrammarTopics, setStatus: setStoreStatus, setError } = readingStore;
+
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return [];
+    }
+
+    setStoreStatus("grammar");
+    setStatus("grammar");
+
+    const toastId = toast.info(i18next.t("reading.grammar.analyzingWait"), { duration: Infinity });
+
+    try {
+      const thinkingModel = await createModelProvider(readingTestModel);
+
+      const result = await generateText({
+        model: thinkingModel,
+        system: getSystemPrompt(),
+        prompt: analyzeGrammarTopicsPrompt(studentAge, extractedText),
+      });
+
+      let text = result.text.trim();
+
+      if (text.startsWith("```json")) {
+        text = text.slice(7);
+      }
+      if (text.startsWith("```")) {
+        text = text.slice(3);
+      }
+      if (text.endsWith("```")) {
+        text = text.slice(0, -3);
+      }
+      text = text.trim();
+
+      const topics: GrammarTopic[] = JSON.parse(text);
+      setGrammarTopics(topics);
+
+      toast.dismiss(toastId);
+      setStoreStatus("idle");
+      setStatus("idle");
+      return topics;
+    } catch (error) {
+      toast.dismiss(toastId);
+      const msg = handleError(error);
+      setError(msg);
+      setStoreStatus("error");
+      setStatus("idle");
+      return [];
+    }
+  }
+
+  async function generateGrammarQuiz() {
+    const { studentAge, extractedText, grammarTopics, setGrammarQuiz, setStatus: setStoreStatus, setError } = readingStore;
+
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return [];
+    }
+
+    if (grammarTopics.length === 0) {
+      toast.error("Please analyze grammar topics first.");
+      return [];
+    }
+
+    setStoreStatus("grammar");
+    setStatus("grammar");
+
+    const toastId = toast.info(i18next.t("reading.grammar.quiz.generatingWait"), { duration: Infinity });
+
+    try {
+      const thinkingModel = await createModelProvider(readingTestModel);
+
+      const result = await generateText({
+        model: thinkingModel,
+        system: getSystemPrompt(),
+        prompt: generateGrammarQuizPrompt(extractedText, studentAge, grammarTopics),
+      });
+
+      let text = result.text.trim();
+
+      if (text.startsWith("```json")) {
+        text = text.slice(7);
+      }
+      if (text.startsWith("```")) {
+        text = text.slice(3);
+      }
+      if (text.endsWith("```")) {
+        text = text.slice(0, -3);
+      }
+      text = text.trim();
+
+      const questions: GrammarQuizQuestion[] = JSON.parse(text);
+      setGrammarQuiz(questions);
+
+      toast.dismiss(toastId);
+      setStoreStatus("idle");
+      setStatus("idle");
+      return questions;
+    } catch (error) {
+      toast.dismiss(toastId);
+      const msg = handleError(error);
+      setError(msg);
+      setStoreStatus("error");
+      setStatus("idle");
+      return [];
+    }
+  }
+
+  function calculateGrammarQuizScore() {
+    const { setGrammarQuizScore, setGrammarQuizCompleted, setGrammarQuizPoints } = readingStore;
+    const { grammarQuiz } = useReadingStore.getState();
+
+    let earnedPoints = 0;
+    let totalPoints = 0;
+
+    for (const question of grammarQuiz) {
+      totalPoints += question.points;
+
+      if (question.type === "rewrite" || question.type === "fill-in") {
+        if (question.earnedPoints !== undefined) {
+          earnedPoints += question.earnedPoints;
+        }
+        continue;
+      }
+
+      const userAnswer = question.userAnswer?.toLowerCase().trim();
+      const correctAnswer = question.correctAnswer.toLowerCase().trim();
+
+      if (userAnswer === correctAnswer || userAnswer === correctAnswer.charAt(0)) {
+        earnedPoints += question.points;
+      }
+    }
+
+    const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
+    setGrammarQuizScore(score);
+    setGrammarQuizCompleted(true);
+    setGrammarQuizPoints(earnedPoints, totalPoints);
+
+    return score;
+  }
+
+  async function evaluateGrammarOpenAnswer(
+    questionId: string,
+    question: string,
+    correctAnswer: string,
+    userAnswer: string,
+    maxPoints: number
+  ) {
+    const { readingTestModel } = useSettingStore.getState();
+    const { setGrammarQuizQuestionPoints } = readingStore;
+
+    if (!userAnswer.trim()) {
+      setGrammarQuizQuestionPoints(questionId, 0);
+      return { earnedPoints: 0, feedback: "No answer provided." };
+    }
+
+    try {
+      const thinkingModel = await createModelProvider(readingTestModel);
+
+      const result = await generateText({
+        model: thinkingModel,
+        system: getSystemPrompt(),
+        prompt: evaluateGrammarRewritePrompt(question, correctAnswer, userAnswer, maxPoints),
+      });
+
+      let text = result.text.trim();
+      if (text.startsWith("```json")) {
+        text = text.slice(7);
+      }
+      if (text.startsWith("```")) {
+        text = text.slice(3);
+      }
+      if (text.endsWith("```")) {
+        text = text.slice(0, -3);
+      }
+      text = text.trim();
+
+      const evaluation = JSON.parse(text);
+      const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
+
+      setGrammarQuizQuestionPoints(questionId, earnedPoints);
+
+      return { earnedPoints, feedback: evaluation.feedback };
+    } catch (error) {
+      console.error("Error evaluating grammar answer:", error);
+      setGrammarQuizQuestionPoints(questionId, 0);
+      return { earnedPoints: 0, feedback: "Could not evaluate answer." };
+    }
+  }
+
   function saveSession() {
     const { backup } = readingStore;
     const { save } = useHistoryStore.getState();
@@ -772,6 +966,10 @@ Guidelines:
     generateReadingTest,
     generateTargetedPractice,
     generateGlossary,
+    analyzeGrammarTopics,
+    generateGrammarQuiz,
+    calculateGrammarQuizScore,
+    evaluateGrammarOpenAnswer,
     calculateTestScore,
     evaluateShortAnswer,
     askTutor,

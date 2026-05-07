@@ -50,6 +50,62 @@ interface SentenceAnalysis {
   createdAt: number;
 }
 
+type GrammarTopicCategory =
+  | "tenses"
+  | "conditionals"
+  | "passive-voice"
+  | "relative-clauses"
+  | "reported-speech"
+  | "modal-verbs"
+  | "articles"
+  | "prepositions"
+  | "conjunctions"
+  | "comparisons"
+  | "infinitives-gerunds"
+  | "subjunctive"
+  | "clause-structure"
+  | "other";
+
+interface GrammarTopic {
+  id: string;
+  name: string;
+  nameZh: string;
+  category: GrammarTopicCategory;
+  cefrLevel: CEFRLevel;
+  explanation: string;
+  explanationZh: string;
+  pattern: string;
+  examples: GrammarExample[];
+  commonMistakes: string;
+  commonMistakesZh: string;
+  occurrences: number;
+  textSentences: string[];
+}
+
+interface GrammarExample {
+  sentence: string;
+  source: "text" | "generated";
+}
+
+interface GrammarQuizQuestion {
+  id: string;
+  type: "identify" | "fill-in" | "rewrite" | "error-spot";
+  topicId: string;
+  topicName: string;
+  question: string;
+  questionZh?: string;
+  options?: string[];
+  optionsZh?: string[];
+  correctAnswer: string;
+  userAnswer?: string;
+  explanation: string;
+  explanationZh?: string;
+  points: number;
+  earnedPoints?: number;
+}
+
+type GrammarQuizState = "idle" | "in-progress" | "completed";
+
 type SpellingGameMode = "listen-type" | "scramble" | "fill-blanks" | "mixed";
 type SpellingDifficulty = "easy" | "medium" | "hard";
 

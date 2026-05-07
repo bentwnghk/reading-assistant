@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   BookMarked,
   Check,
+  BookOpenCheck,
 } from "lucide-react";
 import {
   Dialog,
@@ -84,6 +85,15 @@ const sections = [
     labelKey: "toc.test",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       store.testCompleted,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
+  },
+  {
+    id: "section-grammar",
+    icon: BookOpenCheck,
+    labelKey: "toc.grammar",
+    checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
+      store.grammarTopics.length > 0,
     isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.extractedText,
   },

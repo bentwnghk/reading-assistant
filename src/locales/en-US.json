@@ -15,7 +15,8 @@
     "mindmap": "Mind Map",
     "adapted": "Text Analysis & Adaptation",
     "test": "Reading Test",
-    "glossary": "Vocabulary"
+    "glossary": "Vocabulary",
+    "grammar": "Grammar"
   },
   "settingsBanner": {
     "message": "Please activate your personal/school subscription, or configure your API Key or Access Password in Settings to use this app.",
@@ -515,6 +516,61 @@
         "usage": "Usage: Click 'Generate Test' to create questions. Choose 'One Question at a Time' mode for focused practice or answer all at once. Toggle 'Show Chinese' for translations. After submitting, review answers, retry missed questions, or practice weak skills with additional targeted questions."
       }
     },
+    "grammar": {
+      "title": "Grammar",
+      "analyze": "Analyze Grammar",
+      "analyzing": "Analyzing...",
+      "analyzingWait": "Analyzing grammar topics... This usually takes 1-2 minutes. Please wait.",
+      "regenerate": "Re-analyze",
+      "analyzeFirst": "Click 'Analyze Grammar' above to identify grammar structures in the text",
+      "tabTopics": "Topics",
+      "tabLessons": "Lessons",
+      "tabPractice": "Practice",
+      "tabQuiz": "Quiz",
+      "fromText": "From this text",
+      "showHighlight": "Highlight in Text",
+      "hideHighlight": "Remove Highlight",
+      "whatIsIt": "What is it?",
+      "pattern": "Pattern / Formula",
+      "examples": "Examples",
+      "fromThisText": "From this text",
+      "example": "Example",
+      "commonMistakes": "Common Mistakes",
+      "help": {
+        "title": "Grammar Guide",
+        "purpose": "Purpose: The Grammar section uses AI to identify notable grammar structures from your reading text and helps you learn them through interactive lessons and practice exercises.",
+        "features": "Features: AI scans the text for grammar topics (tenses, conditionals, passive voice, etc.) and provides explanations, patterns, text-based examples, and common mistakes. Four modes: Topics (overview cards), Lessons (detailed explanations with examples), Practice (interactive exercises), and Quiz (grammar test). You can also highlight grammar structures directly in the text.",
+        "usage": "Usage: Click 'Analyze Grammar' to identify topics. Browse Topics for a quick overview, or switch to Lessons for detailed explanations. Use 'Highlight in Text' to see grammar structures highlighted in the original text. Generate a Quiz to test your understanding."
+      },
+      "quiz": {
+        "generate": "Generate Quiz",
+        "regenerate": "New Quiz",
+        "generateFirst": "Generate a quiz to practice grammar from this text",
+        "generatingWait": "Generating grammar quiz... This usually takes 1-2 minutes. Please wait.",
+        "start": "Start Quiz",
+        "submit": "Submit Answers",
+        "retry": "Retry",
+        "ready": "{{count}} grammar questions ready",
+        "evaluating": "Evaluating...",
+        "questionsReady": "{{count}} questions",
+        "excellent": "Excellent! Great grammar understanding!",
+        "good": "Good job! Keep practicing!",
+        "keepPracticing": "Keep practicing to improve!",
+        "pointsFormat": "{{earned}} out of {{total}} points",
+        "topicBreakdown": "Performance by Topic",
+        "reviewAnswers": "Review Answers",
+        "hideReview": "Hide Review",
+        "yourAnswer": "Your answer",
+        "correctAnswer": "Correct answer",
+        "typeAnswer": "Type your answer here...",
+        "types": {
+          "identify": "Identify",
+          "fill-in": "Fill in",
+          "rewrite": "Rewrite",
+          "error-spot": "Error Spot"
+        }
+      }
+    },
     "glossary": {
       "title": "Vocabulary",
       "generate": "Generate Glossary",
@@ -682,6 +738,7 @@
       "adapt": "Adapt Text",
       "mindmap": "Mind Map",
       "test": "Reading Test",
+      "grammar": "Grammar",
       "analyze": "Analyze Sentence",
       "highlight": "Highlight Word",
       "glossary": "Vocabulary",

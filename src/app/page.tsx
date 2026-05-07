@@ -28,6 +28,7 @@ const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedT
 const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
 const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
+const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
 const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
 const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
@@ -126,6 +127,9 @@ function Home() {
         </section>
         <section id="section-test">
           <ReadingTest />
+        </section>
+        <section id="section-grammar">
+          <Grammar />
         </section>
       </main>
       <TocFab />

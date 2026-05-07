@@ -15,7 +15,8 @@
     "mindmap": "思維導圖",
     "adapted": "文本分析和改寫",
     "test": "閱讀測驗",
-    "glossary": "詞彙"
+    "glossary": "詞彙",
+    "grammar": "語法"
   },
   "settingsBanner": {
     "message": "請在設定中啟用你的個人/學校訂閱，或配置你的 API 金鑰或訪問密碼以使用此應用程式。",
@@ -515,6 +516,61 @@
         "usage": "使用方法：點擊「生成測驗」創建題目。選擇「逐題顯示」模式逐一作答，或一次過完成所有題目。開啟「顯示中文」查看題目翻譯。提交後可查看答案、重做錯題，或針對弱項技能進行額外練習。"
       }
     },
+    "grammar": {
+      "title": "語法",
+      "analyze": "分析語法",
+      "analyzing": "正在分析...",
+      "analyzingWait": "正在分析語法主題...通常需要 1-2 分鐘，請稍候。",
+      "regenerate": "重新分析",
+      "analyzeFirst": "點擊上方的「分析語法」按鈕，識別文本中的語法結構",
+      "tabTopics": "主題",
+      "tabLessons": "課程",
+      "tabPractice": "練習",
+      "tabQuiz": "測驗",
+      "fromText": "來自此文本",
+      "showHighlight": "在文本中標記",
+      "hideHighlight": "移除標記",
+      "whatIsIt": "這是什麼？",
+      "pattern": "句式/公式",
+      "examples": "例子",
+      "fromThisText": "來自此文本",
+      "example": "例子",
+      "commonMistakes": "常見錯誤",
+      "help": {
+        "title": "語法指南",
+        "purpose": "目的：語法部分利用 AI 識別閱讀文本中的重要語法結構，並通過互動課程和練習幫助你學習。",
+        "features": "功能特色：AI 掃描文本找出語法主題（時態、條件句、被動語態等），提供解釋、句式、文本實例和常見錯誤。四個模式：主題（概覽卡片）、課程（詳細解釋和例子）、練習（互動練習）和測驗（語法測試）。你還可以在原文中標記顯示語法結構。",
+        "usage": "使用方法：點擊「分析語法」識別主題。瀏覽「主題」快速概覽，或切換到「課程」查看詳細解釋。使用「在文本中標記」在原文中標記顯示語法結構。生成測驗來測試你的理解。"
+      },
+      "quiz": {
+        "generate": "生成測驗",
+        "regenerate": "新測驗",
+        "generateFirst": "生成測驗以練習此文本的語法",
+        "generatingWait": "正在生成語法測驗...通常需要 1-2 分鐘，請稍候。",
+        "start": "開始測驗",
+        "submit": "提交答案",
+        "retry": "重試",
+        "ready": "{{count}} 條語法題目已準備好",
+        "evaluating": "正在評估...",
+        "questionsReady": "{{count}} 條題目",
+        "excellent": "太棒了！語法理解很好！",
+        "good": "做得好！繼續練習！",
+        "keepPracticing": "繼續練習以提升！",
+        "pointsFormat": "{{earned}} / {{total}} 分",
+        "topicBreakdown": "按主題分析",
+        "reviewAnswers": "查看答案",
+        "hideReview": "隱藏答案",
+        "yourAnswer": "你的答案",
+        "correctAnswer": "正確答案",
+        "typeAnswer": "輸入你的答案...",
+        "types": {
+          "identify": "辨識",
+          "fill-in": "填空",
+          "rewrite": "改寫",
+          "error-spot": "找錯"
+        }
+      }
+    },
     "glossary": {
       "title": "詞彙",
       "generate": "生成詞彙表",
@@ -682,6 +738,7 @@
       "adapt": "文本改寫",
       "mindmap": "思維導圖",
       "test": "閱讀測驗",
+      "grammar": "語法",
       "analyze": "分析句子",
       "highlight": "標記生字",
       "glossary": "詞彙",
