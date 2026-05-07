@@ -93,7 +93,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   spellingGame: "#ec4899",
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
-  grammarQuiz: "#14b8a6",
+  grammarQuiz: "#d946ef",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
 };

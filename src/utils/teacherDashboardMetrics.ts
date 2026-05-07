@@ -85,7 +85,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   spellingGame: "#ec4899",
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
-  grammarQuiz: "#14b8a6",
+  grammarQuiz: "#d946ef",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
 };
@@ -162,7 +162,7 @@ export const AI_USAGE_COLORS: Record<string, string> = {
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
   glossary: "#eab308",
-  grammar: "#14b8a6",
+  grammar: "#d946ef",
   tutorQuestion: "#a855f7",
 };
 
