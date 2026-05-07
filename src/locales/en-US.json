@@ -83,7 +83,7 @@
           "title": "👥 Student",
           "learn": "Full access to all features",
           "cloudSync": "Automatic cloud sync",
-          "history": "Track learning journey in Dashboard",
+          "history": "Track reading and learning activity in Learning Journey",
           "leaderboard": "Compete in leaderboards & unlock achievements"
         }
       },
@@ -738,13 +738,13 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Learning Journey",
     "description": "Track your reading and learning activity, scores, and vocabulary growth, and manage or share your reading sessions.",
     "tabs": {
       "overview": "Overview",
       "sessions": "Sessions"
     },
-    "empty": "No reading sessions yet. Start reading to see your dashboard!",
+    "empty": "No reading sessions yet. Start reading to see your Learning Journey!",
     "stats": {
       "totalTexts": "Reading Texts",
       "sourceBreakdown": "{{upload}} uploaded · {{repository}} from repository",
@@ -830,8 +830,8 @@
       "y3": "3Y"
     },
     "help": {
-      "title": "Dashboard Guide",
-      "purpose": "The Dashboard shows your reading and learning metrics over time, including AI feature usage, score trends, and vocabulary growth.",
+      "title": "Learning Journey Guide",
+      "purpose": "The Learning Journey shows your reading and learning metrics over time, including AI feature usage, score trends, and vocabulary growth.",
       "features": "Use the Overview tab for visual analytics, or switch to Sessions to manage or share your reading sessions."
     }
   },
