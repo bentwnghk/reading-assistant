@@ -507,7 +507,7 @@ function Grammar() {
         if (grammarTopics.length === 0) {
           return (
             <div className="text-center py-8 text-muted-foreground">
-              <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <BookOpenCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>{t("reading.grammar.analyzeFirst")}</p>
             </div>
           );
@@ -552,12 +552,12 @@ function Grammar() {
               </>
             ) : grammarTopics.length > 0 ? (
               <>
-                <BookOpen className="h-4 w-4" />
+                <BookOpenCheck className="h-4 w-4" />
                 <span>{t("reading.grammar.regenerate")}</span>
               </>
             ) : (
               <>
-                <BookOpen className="h-4 w-4" />
+                <BookOpenCheck className="h-4 w-4" />
                 <span>{t("reading.grammar.analyze")}</span>
               </>
             )}
