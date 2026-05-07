@@ -580,28 +580,34 @@ function Grammar() {
         </div>
       </div>
 
-      {grammarTopics.length > 0 && (
-        <div className="flex gap-1 mb-4 border-b">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
-                "border-b-2 -mb-px",
-                activeTab === tab.key
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {tab.icon}
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          ))}
+      {grammarTopics.length > 0 ? (
+        <>
+          <div className="flex gap-1 mb-4 border-b">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
+                  "border-b-2 -mb-px",
+                  activeTab === tab.key
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {tab.icon}
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+          {renderContent()}
+        </>
+      ) : (
+        <div className="text-center py-8 text-muted-foreground">
+          <BookOpenCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>{t("reading.grammar.analyzeFirst")}</p>
         </div>
       )}
-
-      {renderContent()}
     </section>
   );
 }
