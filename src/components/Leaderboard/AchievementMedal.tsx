@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
-  Search, FileCheck, Target, PenTool, Brain, Sparkles, BookOpenCheck, Lock, CheckCircle2,
+  Search, FileCheck, Target, PenTool, Brain, Sparkles, Lock, CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import type { AchievementState } from "@/store/achievements";
@@ -11,7 +11,7 @@ import type { AchievementState } from "@/store/achievements";
 // ─── Icon map ─────────────────────────────────────────────────────────────────
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
-  Search, FileCheck, Target, PenTool, Brain, Sparkles, BookOpenCheck,
+  Search, FileCheck, Target, PenTool, Brain, Sparkles,
 };
 
 // ─── Color maps ───────────────────────────────────────────────────────────────
@@ -25,7 +25,6 @@ const COLOR_BG: Record<string, string> = {
   pink:   "bg-pink-500",
   red:    "bg-red-500",
   cyan:   "bg-cyan-500",
-  fuchsia:"bg-fuchsia-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -38,7 +37,6 @@ const COLOR_GLOW: Record<string, string> = {
   pink:   "shadow-pink-400/50",
   red:    "shadow-red-400/50",
   cyan:   "shadow-cyan-400/50",
-  fuchsia:"shadow-fuchsia-400/50",
 };
 
 const COLOR_RING: Record<string, string> = {
@@ -51,7 +49,6 @@ const COLOR_RING: Record<string, string> = {
   pink:   "stroke-pink-500",
   red:    "stroke-red-500",
   cyan:   "stroke-cyan-500",
-  fuchsia:"stroke-fuchsia-500",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -64,7 +61,6 @@ const COLOR_TEXT: Record<string, string> = {
   pink:   "text-pink-600 dark:text-pink-400",
   red:    "text-red-600 dark:text-red-400",
   cyan:   "text-cyan-600 dark:text-cyan-400",
-  fuchsia:"text-fuchsia-600 dark:text-fuchsia-400",
 };
 
 // ─── Progress ring SVG ────────────────────────────────────────────────────────

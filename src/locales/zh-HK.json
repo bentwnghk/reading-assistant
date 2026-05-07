@@ -1484,7 +1484,6 @@
       "test": "閱讀測驗",
       "quiz": "詞彙測驗",
       "spelling": "拼字",
-      "grammarQuiz": "語法測驗",
       "vocab": "詞彙量",
       "flashcards": "字卡",
       "improvement": "進步幅度",
@@ -1498,15 +1497,13 @@
       "testScore": "平均閱讀測驗分數",
       "quizScore": "平均詞彙測驗分數",
       "spellingScore": "平均拼字分數",
-      "grammarQuizScore": "平均語法測驗分數",
       "vocabWords": "詞彙量",
       "flashcards": "字卡複習次數",
       "improvement": "較上週",
       "sessions": "學習次數",
       "testsCompleted": "完成測試",
       "quizzesCompleted": "完成測驗",
-      "spellingGamesCompleted": "遊戲場次",
-      "grammarQuizzesCompleted": "測驗次數"
+      "spellingGamesCompleted": "遊戲場次"
     },
     "personal": {
       "title": "你的進度",
@@ -1519,7 +1516,6 @@
       "totalVocab": "累積詞彙量",
       "avgQuizScore": "平均詞彙測驗分數",
       "avgTestScore": "平均閱讀測驗分數",
-      "avgGrammarQuizScore": "平均語法測驗分數",
       "totalFlashcards": "字卡複習總次數",
       "noStats": "完成本週的學習活動，即可出現在排行榜上！",
       "teacherTitle": "教師視圖",
@@ -1638,14 +1634,6 @@
             "name": "詞彙測驗高手",
             "desc": "用詞彙測驗測試你的生字知識。剛加入新生字後馬上測驗，趁記憶猶新效果最好！"
           },
-          "grammar_analysis": {
-            "name": "語法探索者",
-            "desc": "閱讀後點擊「分析語法」來識別語法結構。每次分析都有助你贏得這枚徽章！"
-          },
-          "grammar_quizzes": {
-            "name": "語法達人",
-            "desc": "通過語法測驗來測試你對語法模式的理解。每次完成測驗都讓你更接近下一個等級！"
-          },
           "ai_tutor_questions": {
             "name": "好奇學習者",
             "desc": "有地方不明白？問 AI 導師吧！你問的每個問題都算數——這裡沒有笨問題！"
@@ -1729,16 +1717,6 @@
         "name": "詞彙測驗高手",
         "description": "完成 {{count}} 次詞彙測驗",
         "hint": "進行詞彙測驗以測試你的生字知識"
-      },
-      "grammar_analysis": {
-        "name": "語法探索者",
-        "description": "分析 {{count}} 篇文本的語法主題",
-        "hint": "從閱讀文本中分析語法主題"
-      },
-      "grammar_quizzes": {
-        "name": "語法達人",
-        "description": "完成 {{count}} 次語法測驗",
-        "hint": "分析語法主題後進行語法測驗"
       },
       "ai_tutor_questions": {
         "name": "好奇學習者",
