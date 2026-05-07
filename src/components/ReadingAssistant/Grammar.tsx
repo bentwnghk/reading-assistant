@@ -297,6 +297,18 @@ function Grammar() {
 
   const renderQuizContent = () => {
     if (quizState === "idle") {
+      if (grammarQuiz.length === 0) {
+        return (
+          <div className="text-center py-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              {t("reading.grammar.quiz.ready", { count: 0 })}
+            </p>
+            <Button onClick={handleGenerateQuiz} disabled={isAnalyzing}>
+              {t("reading.grammar.quiz.generate")}
+            </Button>
+          </div>
+        );
+      }
       return (
         <div className="text-center py-6">
           <p className="text-sm text-muted-foreground mb-4">
