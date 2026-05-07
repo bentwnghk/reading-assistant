@@ -3,10 +3,10 @@ import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen,
+  BookOpenCheck,
   LoaderCircle,
   HelpCircle,
   GraduationCap,
-  PenTool,
   CheckCircle2,
   XCircle,
   Highlighter,
@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 
-type TabType = "topics" | "lessons" | "practice" | "quiz";
+type TabType = "topics" | "lessons" | "quiz";
 
 const CATEGORY_COLORS: Record<GrammarTopicCategory, string> = {
   tenses: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -155,7 +155,6 @@ function Grammar() {
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
     { key: "topics", label: t("reading.grammar.tabTopics"), icon: <BookOpen className="h-4 w-4" /> },
     { key: "lessons", label: t("reading.grammar.tabLessons"), icon: <GraduationCap className="h-4 w-4" /> },
-    { key: "practice", label: t("reading.grammar.tabPractice"), icon: <PenTool className="h-4 w-4" /> },
     { key: "quiz", label: t("reading.grammar.tabQuiz"), icon: <CheckCircle2 className="h-4 w-4" /> },
   ];
 
@@ -292,28 +291,6 @@ function Grammar() {
       ))}
     </Accordion>
   );
-
-  const renderPractice = () => {
-    if (grammarTopics.length === 0) {
-      return (
-        <div className="text-center py-8 text-muted-foreground">
-          <PenTool className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>{t("reading.grammar.analyzeFirst")}</p>
-        </div>
-      );
-    }
-
-    if (grammarQuiz.length === 0) {
-      return (
-        <div className="text-center py-8 text-muted-foreground">
-          <PenTool className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>{t("reading.grammar.quiz.generateFirst")}</p>
-        </div>
-      );
-    }
-
-    return renderQuizContent();
-  };
 
   const renderQuizContent = () => {
     if (quizState === "idle") {
@@ -520,29 +497,22 @@ function Grammar() {
     );
   };
 
-  const renderQuizTab = () => {
-    if (grammarTopics.length === 0) {
-      return (
-        <div className="text-center py-8 text-muted-foreground">
-          <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>{t("reading.grammar.analyzeFirst")}</p>
-        </div>
-      );
-    }
-
-    return renderQuizContent();
-  };
-
   const renderContent = () => {
     switch (activeTab) {
       case "topics":
         return renderTopicCards();
       case "lessons":
         return renderLessons();
-      case "practice":
-        return renderPractice();
       case "quiz":
-        return renderQuizTab();
+        if (grammarTopics.length === 0) {
+          return (
+            <div className="text-center py-8 text-muted-foreground">
+              <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>{t("reading.grammar.analyzeFirst")}</p>
+            </div>
+          );
+        }
+        return renderQuizContent();
     }
   };
 
@@ -550,7 +520,7 @@ function Grammar() {
     <section className="p-4 border rounded-md mt-4">
       <div className="flex flex-wrap md:flex-nowrap items-center justify-between border-b pb-4 mb-4 gap-2">
         <h3 className="font-semibold text-lg flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-muted-foreground" />
+          <BookOpenCheck className="h-5 w-5 text-muted-foreground" />
           {t("reading.grammar.title")}
           <Popover>
             <PopoverTrigger asChild>
@@ -599,7 +569,7 @@ function Grammar() {
               size="sm"
               variant="secondary"
             >
-              <PenTool className="h-4 w-4" />
+              <CheckCircle2 className="h-4 w-4" />
               <span>
                 {grammarQuiz.length > 0
                   ? t("reading.grammar.quiz.regenerate")
