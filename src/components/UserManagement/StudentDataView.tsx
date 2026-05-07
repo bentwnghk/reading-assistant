@@ -31,7 +31,7 @@ interface StudentDataViewProps {
   currentUserId?: string
 }
 
-type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore"
+type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore" | "grammarQuizScore"
 type SortOrder = "asc" | "desc"
 type DateRange = "7" | "30" | "90" | "180" | "360" | "all"
 
@@ -201,6 +201,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           break
         case "quizScore":
           comparison = (b.vocabularyQuizScore || 0) - (a.vocabularyQuizScore || 0)
+          break
+        case "grammarQuizScore":
+          comparison = (b.grammarQuizScore || 0) - (a.grammarQuizScore || 0)
           break
       }
       return sortOrder === "asc" ? -comparison : comparison
@@ -403,6 +406,12 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </Button>
                 </TableHead>
                 <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("grammarQuizScore")} className="h-auto py-1 whitespace-normal">
+                    {t("userManagement.studentData.grammarQuiz")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
                   <Button variant="ghost" size="sm" onClick={() => handleSort("testScore")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.testScore")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -450,6 +459,15 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     {session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore !== null ? (
                       <Badge variant={session.vocabularyQuizScore >= 70 ? "default" : "destructive"}>
                         {session.vocabularyQuizScore}%
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? (
+                      <Badge variant={(session.grammarQuizScore || 0) >= 70 ? "default" : "destructive"}>
+                        {session.grammarQuizScore}%
                       </Badge>
                     ) : (
                       <span className="text-muted-foreground">-</span>

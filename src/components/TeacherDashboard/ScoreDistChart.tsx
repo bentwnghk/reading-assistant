@@ -25,7 +25,7 @@ interface ScoreBucketDef {
 interface ScoreDistChartProps {
   title: string;
   students: StudentMetrics[];
-  scoreKey: "testScores" | "quizScores" | "spellingScores";
+  scoreKey: "testScores" | "quizScores" | "spellingScores" | "grammarQuizScores";
   buckets: readonly ScoreBucketDef[];
   classAvg: number;
 }

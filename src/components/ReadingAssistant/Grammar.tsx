@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   XCircle,
   Highlighter,
+  Trophy,
 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -323,6 +324,24 @@ function Grammar() {
           <Button onClick={handleStartQuiz}>
             {t("reading.grammar.quiz.start")}
           </Button>
+          {_grammarQuizCompleted && grammarQuizScore > 0 && (
+            <div className="flex justify-center mt-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                <Trophy className="h-4 w-4 text-yellow-500" />
+                <span className="text-sm font-medium">{t("reading.grammar.quiz.lastScore")}</span>
+                <span className={cn(
+                  "text-lg font-bold",
+                  grammarQuizScore >= 80
+                    ? "text-green-600 dark:text-green-400"
+                    : grammarQuizScore >= 60
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-red-600 dark:text-red-400"
+                )}>
+                  {grammarQuizScore}%
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       );
     }

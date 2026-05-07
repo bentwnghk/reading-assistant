@@ -214,6 +214,7 @@ function buildStudentOverviewSheet(
     "Avg\nProgress",
     "Avg Reading\nTest Score",
     "Avg Vocab\nQuiz Score",
+    "Avg Grammar\nQuiz Score",
     "Avg Spelling\nScore",
     "Total\nAI Actions",
   ]
@@ -223,6 +224,7 @@ function buildStudentOverviewSheet(
   metrics.students.forEach((s, idx) => {
     const avgTest = average(s.testScores)
     const avgQuiz = average(s.quizScores)
+    const avgGrammarQuiz = average(s.grammarQuizScores)
     const avgSpelling = average(s.spellingScores)
     const totalAi = Object.values(s.aiUsage).reduce((a, b) => a + b, 0)
 
@@ -233,6 +235,7 @@ function buildStudentOverviewSheet(
       s.avgProgress,
       avgTest ?? "-",
       avgQuiz ?? "-",
+      avgGrammarQuiz ?? "-",
       avgSpelling ?? "-",
       totalAi,
     ])
@@ -254,14 +257,16 @@ function buildStudentOverviewSheet(
       }
     }
 
-    // Test score (col 5), Quiz score (col 6)
+    // Test score (col 5), Quiz score (col 6), Grammar quiz score (col 7)
     colourScoreCell(row.getCell(5))
     colourScoreCell(row.getCell(6))
+    colourScoreCell(row.getCell(7))
   })
 
   // Class average footer
   const allTest = metrics.students.flatMap((s) => s.testScores)
   const allQuiz = metrics.students.flatMap((s) => s.quizScores)
+  const allGrammarQuiz = metrics.students.flatMap((s) => s.grammarQuizScores)
   const allSpelling = metrics.students.flatMap((s) => s.spellingScores)
 
   const footerRow = sheet.addRow([
@@ -271,13 +276,14 @@ function buildStudentOverviewSheet(
     metrics.classAvgProgress,
     average(allTest) ?? "-",
     average(allQuiz) ?? "-",
+    average(allGrammarQuiz) ?? "-",
     average(allSpelling) ?? "-",
     "",
   ])
   applyFooterRowStyle(footerRow)
   const fpCell = footerRow.getCell(4)
   if (typeof fpCell.value === "number") fpCell.numFmt = '0"%"'
-  ;[5, 6].forEach((col) => {
+  ;[5, 6, 7].forEach((col) => {
     const cell = footerRow.getCell(col)
     if (typeof cell.value === "number") cell.numFmt = '0"%"'
   })
@@ -307,6 +313,7 @@ function buildAiFeaturesSheet(
     "Simplified\nText",
     "Sentence\nAnalysis",
     "Glossary",
+    "Grammar",
     "Tutor\nQuestions",
     "Total",
   ]
@@ -323,6 +330,7 @@ function buildAiFeaturesSheet(
       s.aiUsage.simplifiedText,
       s.aiUsage.sentenceAnalysis,
       s.aiUsage.glossary,
+      s.aiUsage.grammar,
       s.aiUsage.tutorQuestion,
       total,
     ])
@@ -330,7 +338,7 @@ function buildAiFeaturesSheet(
     const isAlt = idx % 2 === 1
     row.eachCell((cell, colNumber) => applyDataCellStyle(cell, colNumber, isAlt))
     // Bold total
-    const totalCell = row.getCell(9)
+    const totalCell = row.getCell(10)
     totalCell.font = { bold: true, size: 10, name: "Calibri" }
   })
 
@@ -345,6 +353,7 @@ function buildAiFeaturesSheet(
     t.simplifiedText,
     t.sentenceAnalysis,
     t.glossary,
+    t.grammar,
     t.tutorQuestion,
     grandTotal,
   ])
@@ -373,6 +382,8 @@ function buildScoreDetailsSheet(
     "Reading Test\nPass Rate",
     "Vocab Quiz\nAttempts",
     "Avg Vocab\nQuiz Score",
+    "Grammar Quiz\nAttempts",
+    "Avg Grammar\nQuiz Score",
     "Spelling\nAttempts",
     "Avg Spelling\nScore",
     "Best Spelling\nScore",
@@ -387,6 +398,7 @@ function buildScoreDetailsSheet(
         ? Math.round((s.testScores.filter((v) => v >= 70).length / s.testScores.length) * 100)
         : null
     const avgQuiz = average(s.quizScores)
+    const avgGrammarQuiz = average(s.grammarQuizScores)
     const avgSpelling = average(s.spellingScores)
     const bestSpelling = s.spellingScores.length > 0 ? Math.max(...s.spellingScores) : null
 
@@ -397,6 +409,8 @@ function buildScoreDetailsSheet(
       testPassRate !== null ? testPassRate : "-",
       s.quizScores.length,
       avgQuiz ?? "-",
+      s.grammarQuizScores.length,
+      avgGrammarQuiz ?? "-",
       s.spellingScores.length,
       avgSpelling ?? "-",
       bestSpelling ?? "-",
@@ -408,11 +422,13 @@ function buildScoreDetailsSheet(
     colourScoreCell(row.getCell(3)) // avg test
     colourScoreCell(row.getCell(4)) // pass rate
     colourScoreCell(row.getCell(6)) // avg quiz
+    colourScoreCell(row.getCell(8)) // avg grammar quiz
   })
 
   // Class averages footer
   const allTest = metrics.students.flatMap((s) => s.testScores)
   const allQuiz = metrics.students.flatMap((s) => s.quizScores)
+  const allGrammarQuiz = metrics.students.flatMap((s) => s.grammarQuizScores)
   const allSpelling = metrics.students.flatMap((s) => s.spellingScores)
   const classTestPassRate =
     allTest.length > 0
@@ -426,12 +442,14 @@ function buildScoreDetailsSheet(
     classTestPassRate !== null ? classTestPassRate : "-",
     metrics.students.reduce((sum, s) => sum + s.quizScores.length, 0),
     average(allQuiz) ?? "-",
+    metrics.students.reduce((sum, s) => sum + s.grammarQuizScores.length, 0),
+    average(allGrammarQuiz) ?? "-",
     metrics.students.reduce((sum, s) => sum + s.spellingScores.length, 0),
     average(allSpelling) ?? "-",
     allSpelling.length > 0 ? Math.max(...allSpelling) : "-",
   ])
   applyFooterRowStyle(footerRow)
-  ;[3, 4, 6].forEach((col) => {
+  ;[3, 4, 6, 8].forEach((col) => {
     const cell = footerRow.getCell(col)
     if (typeof cell.value === "number") cell.numFmt = '0"%"'
   })

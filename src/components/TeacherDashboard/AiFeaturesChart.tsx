@@ -59,6 +59,7 @@ const AI_FEATURE_KEY_MAP: Record<string, string> = {
   simplifiedText: "dashboard.features.simplifiedText",
   sentenceAnalysis: "dashboard.features.sentenceAnalysis",
   glossary: "dashboard.features.glossary",
+  grammar: "dashboard.features.grammar",
   tutorQuestion: "dashboard.features.tutorQuestion",
 };
 

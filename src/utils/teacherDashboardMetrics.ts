@@ -15,11 +15,13 @@ export interface StudentMetrics {
     simplifiedText: number;
     sentenceAnalysis: number;
     glossary: number;
+    grammar: number;
     tutorQuestion: number;
   };
   testScores: number[];
   quizScores: number[];
   spellingScores: number[];
+  grammarQuizScores: number[];
   dailyActivities: Map<string, DailyStudentActivity>;
 }
 
@@ -36,6 +38,7 @@ export interface DailyStudentActivity {
   spellingGame: number;
   vocabQuiz: number;
   readingTest: number;
+  grammarQuiz: number;
   tutorQuestion: number;
 }
 
@@ -50,6 +53,7 @@ export interface TeacherDashboardMetrics {
   classAvgTestScore: number;
   classAvgQuizScore: number;
   classAvgSpellingScore: number;
+  classAvgGrammarQuizScore: number;
   classTotalAiUsage: StudentMetrics["aiUsage"];
   classAvgAiUsage: StudentMetrics["aiUsage"];
 }
@@ -66,6 +70,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "spellingGame",
   "vocabQuiz",
   "readingTest",
+  "grammarQuiz",
   "tutorQuestion",
 ] as const;
 
@@ -80,6 +85,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   spellingGame: "#ec4899",
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
+  grammarQuiz: "#14b8a6",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
 };
@@ -145,6 +151,7 @@ export const AI_USAGE_KEYS = [
   "simplifiedText",
   "sentenceAnalysis",
   "glossary",
+  "grammar",
   "tutorQuestion",
 ] as const;
 
@@ -155,6 +162,7 @@ export const AI_USAGE_COLORS: Record<string, string> = {
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
   glossary: "#eab308",
+  grammar: "#14b8a6",
   tutorQuestion: "#a855f7",
 };
 
@@ -177,6 +185,7 @@ function emptyDailyActivity(date: string): DailyStudentActivity {
     spellingGame: 0,
     vocabQuiz: 0,
     readingTest: 0,
+    grammarQuiz: 0,
     tutorQuestion: 0,
   };
 }
@@ -191,10 +200,11 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
       totalVocabulary: 0,
       vocabularyTimeline: [],
       avgProgress: 0,
-      aiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, tutorQuestion: 0 },
+      aiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
       testScores: [],
       quizScores: [],
       spellingScores: [],
+      grammarQuizScores: [],
       dailyActivities: new Map(),
     };
   }
@@ -241,12 +251,14 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     simplifiedText: sorted.filter((s) => s.simplifiedText).length,
     sentenceAnalysis: sorted.reduce((sum, s) => sum + s.sentenceAnalysisCount, 0),
     glossary: sorted.filter((s) => s.glossaryCount > 0).length,
+    grammar: sorted.filter((s) => s.grammarAnalysisCount > 0).length,
     tutorQuestion: sorted.reduce((sum, s) => sum + s.tutorQuestionCount, 0),
   };
 
   const testScores = sorted.filter((s) => s.testCompleted && s.testScore != null && s.testScore > 0).map((s) => s.testScore!);
   const quizScores = sorted.filter((s) => s.vocabularyQuizScore != null && s.vocabularyQuizScore > 0).map((s) => s.vocabularyQuizScore!);
   const spellingScores = sorted.filter((s) => s.spellingGameBestScore != null && s.spellingGameBestScore > 0).map((s) => s.spellingGameBestScore!);
+  const grammarQuizScores = sorted.filter((s) => s.grammarQuizCompleted && s.grammarQuizScore != null && s.grammarQuizScore > 0).map((s) => s.grammarQuizScore!);
 
   const dailyMap = new Map<string, DailyStudentActivity>();
   function getDay(date: string): DailyStudentActivity {
@@ -280,6 +292,9 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     if (item.testCompleted && item.readingTestCompletedAt) {
       getDay(toDateString(item.readingTestCompletedAt)).readingTest += 1;
     }
+    if (item.grammarQuizCompleted && item.grammarQuizScore && item.grammarQuizScore > 0 && item.grammarQuizCompletedAt) {
+      getDay(toDateString(item.grammarQuizCompletedAt)).grammarQuiz += 1;
+    }
     if (item.tutorQuestionCount > 0) {
       getDay(toDateString(item.createdAt)).tutorQuestion += item.tutorQuestionCount;
     }
@@ -300,6 +315,7 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     testScores,
     quizScores,
     spellingScores,
+    grammarQuizScores,
     dailyActivities: dailyMap,
   };
 }
@@ -317,8 +333,9 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
       classAvgTestScore: 0,
       classAvgQuizScore: 0,
       classAvgSpellingScore: 0,
-      classTotalAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, tutorQuestion: 0 },
-      classAvgAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, tutorQuestion: 0 },
+      classAvgGrammarQuizScore: 0,
+      classTotalAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      classAvgAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
     };
   }
 
@@ -349,9 +366,11 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
   const allTestScores = students.flatMap((s) => s.testScores);
   const allQuizScores = students.flatMap((s) => s.quizScores);
   const allSpellingScores = students.flatMap((s) => s.spellingScores);
+  const allGrammarQuizScores = students.flatMap((s) => s.grammarQuizScores);
   const classAvgTestScore = allTestScores.length > 0 ? Math.round(allTestScores.reduce((a, b) => a + b, 0) / allTestScores.length) : 0;
   const classAvgQuizScore = allQuizScores.length > 0 ? Math.round(allQuizScores.reduce((a, b) => a + b, 0) / allQuizScores.length) : 0;
   const classAvgSpellingScore = allSpellingScores.length > 0 ? Math.round(allSpellingScores.reduce((a, b) => a + b, 0) / allSpellingScores.length) : 0;
+  const classAvgGrammarQuizScore = allGrammarQuizScores.length > 0 ? Math.round(allGrammarQuizScores.reduce((a, b) => a + b, 0) / allGrammarQuizScores.length) : 0;
 
   const classTotalAiUsage = {
     summary: students.reduce((sum, s) => sum + s.aiUsage.summary, 0),
@@ -360,6 +379,7 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
     simplifiedText: students.reduce((sum, s) => sum + s.aiUsage.simplifiedText, 0),
     sentenceAnalysis: students.reduce((sum, s) => sum + s.aiUsage.sentenceAnalysis, 0),
     glossary: students.reduce((sum, s) => sum + s.aiUsage.glossary, 0),
+    grammar: students.reduce((sum, s) => sum + s.aiUsage.grammar, 0),
     tutorQuestion: students.reduce((sum, s) => sum + s.aiUsage.tutorQuestion, 0),
   };
 
@@ -370,6 +390,7 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
     simplifiedText: Math.round(classTotalAiUsage.simplifiedText / n),
     sentenceAnalysis: Math.round(classTotalAiUsage.sentenceAnalysis / n),
     glossary: Math.round(classTotalAiUsage.glossary / n),
+    grammar: Math.round(classTotalAiUsage.grammar / n),
     tutorQuestion: Math.round(classTotalAiUsage.tutorQuestion / n),
   };
 
@@ -384,6 +405,7 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
     classAvgTestScore,
     classAvgQuizScore,
     classAvgSpellingScore,
+    classAvgGrammarQuizScore,
     classTotalAiUsage,
     classAvgAiUsage,
   };
@@ -408,6 +430,7 @@ export function getDailyActivityForDate(
       spellingGame: activity?.spellingGame || 0,
       vocabQuiz: activity?.vocabQuiz || 0,
       readingTest: activity?.readingTest || 0,
+      grammarQuiz: activity?.grammarQuiz || 0,
       tutorQuestion: activity?.tutorQuestion || 0,
     };
   });

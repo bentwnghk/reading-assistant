@@ -75,6 +75,7 @@ function calculateProgress(item: ReadingHistory): number {
     (item.glossary || []).length > 0,
     (item.spellingGameBestScore || 0) > 0,
     (item.vocabularyQuizScore || 0) > 0,
+    (item.grammarQuizCompleted) && (item.grammarQuizScore || 0) > 0,
   ];
   const completedCount = steps.filter(Boolean).length;
   return Math.round((completedCount / steps.length) * 100);
@@ -199,7 +200,7 @@ function SessionsTab({ onClose }: SessionsTabProps) {
           </div>
         ) : (
           <>
-            <Table className="min-w-[640px]">
+            <Table className="min-w-[720px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("history.name")}</TableHead>
@@ -217,6 +218,9 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                   </TableHead>
                   <TableHead className="w-16 text-center whitespace-normal break-words">
                     {t("history.testScore")}
+                  </TableHead>
+                  <TableHead className="w-16 text-center whitespace-normal break-words">
+                    {t("history.grammarQuizScore")}
                   </TableHead>
                   <TableHead className="text-center whitespace-normal break-words">
                     {t("history.date")}
@@ -254,6 +258,9 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
+                      {item.grammarQuizCompleted && item.grammarQuizScore > 0 ? `${item.grammarQuizScore}%` : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       <div>{formatDate(item.updatedAt || item.createdAt, i18n.language)}</div>

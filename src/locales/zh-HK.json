@@ -548,6 +548,7 @@
         "generateFirst": "生成測驗以練習此文本的語法",
         "generatingWait": "正在生成語法測驗...通常需要 1-2 分鐘，請稍候。",
         "start": "開始測驗",
+        "lastScore": "上次得分：",
         "submit": "提交答案",
         "retry": "重試",
         "ready": "{{count}} 條語法題目已準備好",
@@ -826,6 +827,7 @@
       "simplifiedText": "簡化文本",
       "sentenceAnalysis": "句子分析",
       "glossary": "生成詞彙表",
+      "grammar": "語法分析",
       "tutorQuestion": "AI 導師",
       "flashcardReview": "字卡複習",
       "count": "次數"
@@ -833,7 +835,8 @@
     "scores": {
       "readingTest": "閱讀測驗得分",
       "vocabQuiz": "詞彙測驗得分",
-      "spelling": "拼字挑戰得分"
+      "spelling": "拼字挑戰得分",
+      "grammarQuiz": "語法測驗得分"
     },
     "charts": {
       "dailyActivity": "每日學習活動",
@@ -857,6 +860,7 @@
       "spellingGame": "拼字遊戲",
       "vocabQuiz": "詞彙測驗",
       "readingTest": "閱讀測驗",
+      "grammarQuiz": "語法測驗",
       "tutorQuestion": "AI 導師",
       "flashcardReview": "字卡複習"
     },
@@ -960,6 +964,7 @@
     "glossaryWords": "詞彙量",
     "spellingScore": "拼字挑戰得分",
     "quizScore": "詞彙測驗得分",
+    "grammarQuizScore": "語法測驗得分",
     "totalVocabulary": "總詞彙量",
     "help": {
       "title": "閱讀記錄指南",
@@ -1374,6 +1379,7 @@
       "vocabulary": "詞彙量",
       "spelling": "拼字挑戰",
       "quiz": "詞彙測驗",
+      "grammarQuiz": "語法測驗",
       "date": "最後更新",
       "dateRange": {
         "7days": "最近 7 天",

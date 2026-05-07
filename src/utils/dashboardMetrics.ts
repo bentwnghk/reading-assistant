@@ -35,6 +35,7 @@ export interface DailyActivity {
   spellingGame: number;
   vocabQuiz: number;
   readingTest: number;
+  grammarQuiz: number;
   tutorQuestion: number;
   flashcardReview: number;
 }
@@ -52,12 +53,14 @@ export interface DashboardMetrics {
   simplifiedTextsGenerated: number;
   totalSentencesAnalyzed: number;
   glossariesGenerated: number;
+  grammarAnalysisGenerated: number;
   totalVocabulary: number;
   totalTutorQuestions: number;
   totalFlashcardReviews: number;
   spellingScores: SessionScore[];
   quizScores: SessionScore[];
   testScores: SessionScore[];
+  grammarQuizScores: SessionScore[];
   sessionsOverTime: WeeklyCount[];
   scoreDistribution: ScoreBucket[];
   dailyActivities: DailyActivity[];
@@ -75,6 +78,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "spellingGame",
   "vocabQuiz",
   "readingTest",
+  "grammarQuiz",
   "tutorQuestion",
 ] as const;
 
@@ -89,6 +93,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   spellingGame: "#ec4899",
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
+  grammarQuiz: "#14b8a6",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
 };
@@ -145,6 +150,7 @@ function emptyDailyActivity(date: string): DailyActivity {
     spellingGame: 0,
     vocabQuiz: 0,
     readingTest: 0,
+    grammarQuiz: 0,
     tutorQuestion: 0,
     flashcardReview: 0,
   };
@@ -165,12 +171,14 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       simplifiedTextsGenerated: 0,
       totalSentencesAnalyzed: 0,
       glossariesGenerated: 0,
+      grammarAnalysisGenerated: 0,
       totalVocabulary: 0,
       totalTutorQuestions: 0,
       totalFlashcardReviews: 0,
       spellingScores: [],
       quizScores: [],
       testScores: [],
+      grammarQuizScores: [],
       sessionsOverTime: [],
       scoreDistribution: [],
       dailyActivities: [],
@@ -204,6 +212,8 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   const adaptedTextsGenerated = sorted.filter((h) => !!h.adaptedText).length;
   const simplifiedTextsGenerated = sorted.filter((h) => !!h.simplifiedText).length;
   const glossariesGenerated = sorted.filter((h) => (h.glossary || []).length > 0).length;
+
+  const grammarAnalysisGenerated = sorted.filter((h) => (h.grammarTopics || []).length > 0).length;
 
   const totalSentencesAnalyzed = sorted.reduce(
     (sum, item) => sum + Object.keys(item.analyzedSentences || {}).length,
@@ -247,6 +257,14 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     .map((h) => ({
       title: getSessionTitle(h),
       score: h.testScore!,
+      date: h.updatedAt || h.createdAt,
+    }));
+
+  const grammarQuizScores: SessionScore[] = sorted
+    .filter((h) => h.grammarQuizCompleted && (h.grammarQuizScore || 0) > 0)
+    .map((h) => ({
+      title: getSessionTitle(h),
+      score: h.grammarQuizScore!,
       date: h.updatedAt || h.createdAt,
     }));
 
@@ -310,6 +328,9 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     if (item.testCompleted) {
       getDay(dailyMap, toDateString(item.readingTestCompletedAt || item.createdAt)).readingTest += 1;
     }
+    if (item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0) {
+      getDay(dailyMap, toDateString(item.grammarQuizCompletedAt || item.createdAt)).grammarQuiz += 1;
+    }
 
     // sentenceAnalysis — each entry has its own createdAt
     for (const entry of Object.values(item.analyzedSentences || {})) {
@@ -341,12 +362,14 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     simplifiedTextsGenerated,
     totalSentencesAnalyzed,
     glossariesGenerated,
+    grammarAnalysisGenerated,
     totalVocabulary,
     totalTutorQuestions,
     totalFlashcardReviews,
     spellingScores,
     quizScores,
     testScores,
+    grammarQuizScores,
     sessionsOverTime,
     scoreDistribution,
     dailyActivities,

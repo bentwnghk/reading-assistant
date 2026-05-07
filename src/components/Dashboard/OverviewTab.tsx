@@ -256,6 +256,7 @@ interface DailyRow {
   spellingGame: number;
   vocabQuiz: number;
   readingTest: number;
+  grammarQuiz: number;
   tutorQuestion: number;
 }
 
@@ -287,6 +288,7 @@ function fillDailyRange(activities: DailyRow[], days: number): DailyRow[] {
         spellingGame: 0,
         vocabQuiz: 0,
         readingTest: 0,
+        grammarQuiz: 0,
         tutorQuestion: 0,
       });
     }
@@ -309,6 +311,7 @@ export function OverviewTab() {
       { name: t("dashboard.features.simplifiedText"), value: m.simplifiedTextsGenerated, fill: "#14b8a6" },
       { name: t("dashboard.features.sentenceAnalysis"), value: m.totalSentencesAnalyzed, fill: "#f97316" },
       { name: t("dashboard.features.glossary"), value: m.glossariesGenerated, fill: "#eab308" },
+      { name: t("dashboard.features.grammar"), value: m.grammarAnalysisGenerated, fill: "#14b8a6" },
       { name: t("dashboard.features.tutorQuestion"), value: m.totalTutorQuestions, fill: "#a855f7" },
     ],
     [m, t]
@@ -486,8 +489,8 @@ export function OverviewTab() {
         </ChartCard>
       </div>
 
-      {/* Score Charts: Reading Test Distribution + Vocab Quiz Distribution + Spelling Trend */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Score Charts: 2x2 grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ScoreDistributionChart
           title={t("dashboard.scores.readingTest")}
           scores={m.testScores}
@@ -505,6 +508,12 @@ export function OverviewTab() {
           data={m.spellingScores}
           color="#a855f7"
           emptyMessage={t("dashboard.charts.noData")}
+        />
+        <ScoreDistributionChart
+          title={t("dashboard.scores.grammarQuiz")}
+          scores={m.grammarQuizScores}
+          emptyMessage={t("dashboard.charts.noData")}
+          countLabel={t("dashboard.features.count")}
         />
       </div>
 

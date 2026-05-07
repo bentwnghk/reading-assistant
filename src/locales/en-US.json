@@ -548,6 +548,7 @@
         "generateFirst": "Generate a quiz to practice grammar from this text",
         "generatingWait": "Generating grammar quiz... This usually takes 1-2 minutes. Please wait.",
         "start": "Start Quiz",
+        "lastScore": "Last Score:",
         "submit": "Submit Answers",
         "retry": "Retry",
         "ready": "{{count}} grammar questions ready",
@@ -826,6 +827,7 @@
       "simplifiedText": "Simplified Text",
       "sentenceAnalysis": "Sentence Analysis",
       "glossary": "Generate Glossary",
+      "grammar": "Grammar Analysis",
       "tutorQuestion": "AI Tutor",
       "flashcardReview": "Flashcard Review",
       "count": "Count"
@@ -833,7 +835,8 @@
     "scores": {
       "readingTest": "Reading Test Score",
       "vocabQuiz": "Vocab Quiz Score",
-      "spelling": "Spelling Score"
+      "spelling": "Spelling Score",
+      "grammarQuiz": "Grammar Quiz Score"
     },
     "charts": {
       "dailyActivity": "Daily Learning Activity",
@@ -857,6 +860,7 @@
       "spellingGame": "Spelling Game",
       "vocabQuiz": "Vocab Quiz",
       "readingTest": "Reading Test",
+      "grammarQuiz": "Grammar Quiz",
       "tutorQuestion": "AI Tutor",
       "flashcardReview": "Flashcard Review"
     },
@@ -960,6 +964,7 @@
     "glossaryWords": "Vocabulary Count",
     "spellingScore": "Spelling Challenge Score",
     "quizScore": "Vocabulary Quiz Score",
+    "grammarQuizScore": "Grammar Quiz Score",
     "totalVocabulary": "Total Vocabulary",
     "help": {
       "title": "Reading History Guide",
@@ -1374,6 +1379,7 @@
       "vocabulary": "Vocabulary Count",
       "spelling": "Spelling Challenge",
       "quiz": "Vocabulary Quiz",
+      "grammarQuiz": "Grammar Quiz",
       "date": "Last Update",
       "dateRange": {
         "7days": "Last 7 days",

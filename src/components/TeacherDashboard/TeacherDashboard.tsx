@@ -55,7 +55,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const [isExporting, setIsExporting] = useState(false);
 
   // Refs for each chart card — order matches the JSX render order below
-  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(9).fill(null));
+  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(10).fill(null));
 
   const filteredClasses = useMemo(() => {
     if (!isSuperAdmin || selectedSchoolId === "all") return allClasses;
@@ -127,6 +127,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
     t("teacherDashboard.charts.aiFeatures"),
     `${t("dashboard.scores.readingTest")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
     `${t("dashboard.scores.vocabQuiz")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
+    `${t("dashboard.scores.grammarQuiz")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
     t("teacherDashboard.charts.spellingScore"),
     t("teacherDashboard.charts.vocabularyGrowth"),
   ];
@@ -331,13 +332,23 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
             </div>
 
             <div ref={(el) => { chartRefs.current[7] = el; }}>
+              <ScoreDistChart
+                title={t("dashboard.scores.grammarQuiz")}
+                students={metrics.students}
+                scoreKey="grammarQuizScores"
+                buckets={SCORE_BUCKETS}
+                classAvg={metrics.classAvgGrammarQuizScore}
+              />
+            </div>
+
+            <div ref={(el) => { chartRefs.current[8] = el; }}>
               <SpellingScoreChart
                 students={metrics.students}
                 classAvg={metrics.classAvgSpellingScore}
               />
             </div>
 
-            <div ref={(el) => { chartRefs.current[8] = el; }}>
+            <div ref={(el) => { chartRefs.current[9] = el; }}>
               <VocabularyGrowthChart students={metrics.students} />
             </div>
           </div>

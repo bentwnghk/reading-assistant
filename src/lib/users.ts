@@ -59,6 +59,8 @@ export interface StudentSessionData {
   testCompleted?: boolean
   vocabularyQuizScore?: number
   spellingGameBestScore?: number
+  grammarQuizScore?: number
+  grammarQuizCompleted?: boolean
   glossaryCount: number
   progress: number
   createdAt: number
@@ -80,10 +82,15 @@ export interface TeacherSessionData {
   testCompleted: boolean
   vocabularyQuizScore: number | null
   spellingGameBestScore: number | null
+  grammarQuizScore: number | null
+  grammarQuizCompleted: boolean
   glossaryCount: number
   sentenceAnalysisCount: number
   tutorQuestionCount: number
   flashcardReviewCount: number
+  grammarAnalysisCount: number
+  grammarGeneratedAt: number
+  grammarQuizCompletedAt: number
   progress: number
   createdAt: number
   updatedAt: number
@@ -108,7 +115,9 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
         rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
+        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
         rs.summary_generated_at, rs.mind_map_generated_at,
         rs.adapted_text_generated_at, rs.simplified_text_generated_at,
@@ -138,12 +147,17 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       testCompleted: !!row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score || null,
       spellingGameBestScore: row.spelling_game_best_score || null,
+      grammarQuizScore: row.grammar_quiz_score || null,
+      grammarQuizCompleted: !!row.grammar_quiz_completed,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
         ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
         : 0,
       flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+      grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
+      grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
+      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
@@ -172,7 +186,9 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
         rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
+        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
         rs.summary_generated_at, rs.mind_map_generated_at,
         rs.adapted_text_generated_at, rs.simplified_text_generated_at,
@@ -202,12 +218,17 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       testCompleted: !!row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score || null,
       spellingGameBestScore: row.spelling_game_best_score || null,
+      grammarQuizScore: row.grammar_quiz_score || null,
+      grammarQuizCompleted: !!row.grammar_quiz_completed,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
         ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
         : 0,
       flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+      grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
+      grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
+      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
@@ -236,7 +257,9 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
         rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
+        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
         rs.summary_generated_at, rs.mind_map_generated_at,
         rs.adapted_text_generated_at, rs.simplified_text_generated_at,
@@ -265,12 +288,17 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       testCompleted: !!row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score || null,
       spellingGameBestScore: row.spelling_game_best_score || null,
+      grammarQuizScore: row.grammar_quiz_score || null,
+      grammarQuizCompleted: !!row.grammar_quiz_completed,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
         ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
         : 0,
       flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+      grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
+      grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
+      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
@@ -852,6 +880,8 @@ function calculateProgress(row: {
   glossary?: unknown[]
   spelling_game_best_score?: number
   vocabulary_quiz_score?: number
+  grammar_quiz_completed?: boolean
+  grammar_quiz_score?: number
 }): number {
   const hasExtractedText = !!row.extracted_text
   const steps = [
@@ -865,6 +895,7 @@ function calculateProgress(row: {
     (row.glossary || []).length > 0,
     (row.spelling_game_best_score || 0) > 0,
     (row.vocabulary_quiz_score || 0) > 0,
+    row.grammar_quiz_completed && (row.grammar_quiz_score || 0) > 0,
   ]
   const completedCount = steps.filter(Boolean).length
   return Math.round((completedCount / steps.length) * 100)
@@ -877,6 +908,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       `SELECT 
         rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -901,6 +933,8 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       testCompleted: row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score,
       spellingGameBestScore: row.spelling_game_best_score,
+      grammarQuizScore: row.grammar_quiz_score || 0,
+      grammarQuizCompleted: !!row.grammar_quiz_completed,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
@@ -918,6 +952,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       `SELECT 
         rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -941,6 +976,8 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       testCompleted: row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score,
       spellingGameBestScore: row.spelling_game_best_score,
+      grammarQuizScore: row.grammar_quiz_score || 0,
+      grammarQuizCompleted: !!row.grammar_quiz_completed,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),

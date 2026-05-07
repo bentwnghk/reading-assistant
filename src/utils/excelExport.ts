@@ -15,6 +15,8 @@ interface SessionWithSchool {
   testCompleted?: boolean
   vocabularyQuizScore?: number
   spellingGameBestScore?: number
+  grammarQuizScore?: number
+  grammarQuizCompleted?: boolean
   glossaryCount: number
   progress: number
   createdAt: number
@@ -42,6 +44,8 @@ interface SchoolBreakdownStats {
   avgTestScore: number
   testCompletedCount: number
   passRate: number
+  avgGrammarQuizScore: number
+  grammarQuizCompletedCount: number
 }
 
 interface SummaryStats {
@@ -56,6 +60,8 @@ interface SummaryStats {
   spellingCompletedCount: number
   avgQuizScore: number
   quizCompletedCount: number
+  avgGrammarQuizScore: number
+  grammarQuizCompletedCount: number
   schoolBreakdown: Map<string, SchoolBreakdownStats>
 }
 
@@ -75,6 +81,8 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       spellingCompletedCount: 0,
       avgQuizScore: 0,
       quizCompletedCount: 0,
+      grammarQuizCompletedCount: 0,
+      avgGrammarQuizScore: 0,
       schoolBreakdown: new Map(),
     }
   }
@@ -93,6 +101,9 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
   const quizCompletedSessions = sessions.filter(s => s.vocabularyQuizScore !== undefined && s.vocabularyQuizScore > 0)
   const totalQuizScore = quizCompletedSessions.reduce((sum, s) => sum + (s.vocabularyQuizScore || 0), 0)
 
+  const grammarQuizCompletedSessions = sessions.filter(s => s.grammarQuizCompleted && (s.grammarQuizScore || 0) > 0)
+  const totalGrammarQuizScore = grammarQuizCompletedSessions.reduce((sum, s) => sum + (s.grammarQuizScore || 0), 0)
+
   const schoolBreakdown = new Map<string, {
     count: number
     totalProgress: number
@@ -105,6 +116,8 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
     totalSpellingScore: number
     quizCompletedCount: number
     totalQuizScore: number
+    grammarQuizCompletedCount: number
+    totalGrammarQuizScore: number
   }>()
   sessions.forEach(s => {
     const school = s.schoolName || "Unknown"
@@ -113,6 +126,7 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       vocabularyCompletedCount: 0, totalVocabulary: 0,
       spellingCompletedCount: 0, totalSpellingScore: 0,
       quizCompletedCount: 0, totalQuizScore: 0,
+      grammarQuizCompletedCount: 0, totalGrammarQuizScore: 0,
     }
     existing.count++
     existing.totalProgress += s.progress
@@ -133,6 +147,10 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       existing.quizCompletedCount++
       existing.totalQuizScore += s.vocabularyQuizScore
     }
+    if (s.grammarQuizCompleted && (s.grammarQuizScore || 0) > 0) {
+      existing.grammarQuizCompletedCount++
+      existing.totalGrammarQuizScore += s.grammarQuizScore!
+    }
     schoolBreakdown.set(school, existing)
   })
 
@@ -147,6 +165,8 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       spellingCompletedCount: value.spellingCompletedCount,
       avgQuizScore: value.quizCompletedCount > 0 ? Math.round(value.totalQuizScore / value.quizCompletedCount) : 0,
       quizCompletedCount: value.quizCompletedCount,
+      avgGrammarQuizScore: value.grammarQuizCompletedCount > 0 ? Math.round(value.totalGrammarQuizScore / value.grammarQuizCompletedCount) : 0,
+      grammarQuizCompletedCount: value.grammarQuizCompletedCount,
       avgTestScore: value.testCount > 0 ? Math.round(value.totalTestScore / value.testCount) : 0,
       testCompletedCount: value.testCount,
       passRate: value.testCount > 0 ? Math.round((value.passedTests / value.testCount) * 100) : 0,
@@ -165,6 +185,8 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
     spellingCompletedCount: spellingCompletedSessions.length,
     avgQuizScore: quizCompletedSessions.length > 0 ? Math.round(totalQuizScore / quizCompletedSessions.length) : 0,
     quizCompletedCount: quizCompletedSessions.length,
+    avgGrammarQuizScore: grammarQuizCompletedSessions.length > 0 ? Math.round(totalGrammarQuizScore / grammarQuizCompletedSessions.length) : 0,
+    grammarQuizCompletedCount: grammarQuizCompletedSessions.length,
     schoolBreakdown: schoolBreakdownFinal,
   }
 }
@@ -181,8 +203,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   })
 
   const headers = isAdmin
-    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Reading Test", "Last Update"]
-    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Reading Test", "Last Update"]
+    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Reading Test", "Last Update"]
+    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Reading Test", "Last Update"]
 
   dataSheet.columns = headers.map(header => ({
     header,
@@ -248,6 +270,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.glossaryCount,
           session.spellingGameBestScore || "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
+          session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? session.grammarQuizScore : "-",
           session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
@@ -259,6 +282,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.glossaryCount,
           session.spellingGameBestScore || "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
+          session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? session.grammarQuizScore : "-",
           session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
@@ -287,7 +311,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
 
       const progressColIndex = isAdmin ? 5 : 4
       const quizColIndex = isAdmin ? 8 : 7
-      const testColIndex = isAdmin ? 9 : 8
+      const grammarColIndex = isAdmin ? 9 : 8
+      const testColIndex = isAdmin ? 10 : 9
 
       if (colNumber === progressColIndex && typeof cell.value === "number") {
         cell.numFmt = "0\"%\""
@@ -312,6 +337,17 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
       }
 
       if (colNumber === quizColIndex && typeof cell.value === "number") {
+        cell.numFmt = "0\"%\""
+        if (cell.value >= 70) {
+          cell.fill = greenFill
+          cell.font = { ...cell.font as ExcelJS.Font, ...greenFont }
+        } else {
+          cell.fill = redFill
+          cell.font = { ...cell.font as ExcelJS.Font, ...redFont }
+        }
+      }
+
+      if (colNumber === grammarColIndex && typeof cell.value === "number") {
         cell.numFmt = "0\"%\""
         if (cell.value >= 70) {
           cell.fill = greenFill
@@ -402,6 +438,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
     ["Average Spelling Challenge Score (Completed)", stats.avgSpellingScore],
     ["Vocabulary Quizzes Completed", stats.quizCompletedCount],
     ["Average Vocabulary Quiz Score (Completed)", `${stats.avgQuizScore}%`],
+    ["Grammar Quizzes Completed", stats.grammarQuizCompletedCount],
+    ["Average Grammar Quiz Score (Completed)", `${stats.avgGrammarQuizScore}%`],
     ["Reading Tests Completed", stats.testCompletedCount],
     ["Average Reading Test Score (Completed)", `${stats.avgTestScore}%`],
     ["Reading Test Pass Rate (≥70%)", `${stats.passRate}%`],
@@ -433,6 +471,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
     const schoolTableHeader = summarySheet.addRow([
       "School Name", "Sessions", "Avg Progress", "Sessions with Vocabulary", "Avg Vocabulary Collected",
       "Spelling Challenges Completed", "Avg Spelling Score", "Vocabulary Quizzes Completed", "Avg Quiz Score",
+      "Grammar Quizzes Completed", "Avg Grammar Quiz Score",
       "Reading Tests Completed", "Avg Test Score", "Pass Rate (≥70%)",
     ])
     schoolTableHeader.height = 22
@@ -474,6 +513,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
         schoolStats.vocabularyCompletedCount, schoolStats.avgVocabulary,
         schoolStats.spellingCompletedCount, schoolStats.avgSpellingScore,
         schoolStats.quizCompletedCount, `${schoolStats.avgQuizScore}%`,
+        schoolStats.grammarQuizCompletedCount, `${schoolStats.avgGrammarQuizScore}%`,
         schoolStats.testCompletedCount, `${schoolStats.avgTestScore}%`, `${schoolStats.passRate}%`,
       ])
       row.height = 20
