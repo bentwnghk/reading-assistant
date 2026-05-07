@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { Md5 } from "ts-md5";
 
 export const runtime = "edge";
+export const maxDuration = 300;
 export const preferredRegion = [
   "cle1",
   "iad1",
