@@ -75,7 +75,7 @@ function WorkflowProgress() {
         />
       </div>
 
-      <div className="flex flex-wrap justify-between gap-x-2 gap-y-2">
+      <div className="flex flex-wrap justify-start gap-x-2 gap-y-2 md:justify-between">
         {steps.map((step, index) => (
           <div
             key={step.key}
