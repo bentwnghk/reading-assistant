@@ -30,6 +30,10 @@ function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function cleanSentence(s: string): string {
+  return s.replace(/^\.{3,}|^…+|\.{3,}$|…+$|\.$/g, "").trim();
+}
+
 function GrammarHighlightedText({ text }: GrammarHighlightedTextProps) {
   const { grammarTopics, grammarHighlightTopicId } = useReadingStore();
 
@@ -40,9 +44,16 @@ function GrammarHighlightedText({ text }: GrammarHighlightedTextProps) {
     }
 
     const parts: React.ReactNode[] = [];
-    const sentences = [...topic.textSentences].sort((a, b) => b.length - a.length);
+    const sentences = [...topic.textSentences]
+      .map((s) => cleanSentence(s))
+      .filter((s) => s.length > 0)
+      .sort((a, b) => b.length - a.length);
 
-    const patterns = sentences.map((s) => escapeRegExp(s.trim()));
+    if (sentences.length === 0) {
+      return <span>{text}</span>;
+    }
+
+    const patterns = sentences.map((s) => escapeRegExp(s));
     const combinedPattern = new RegExp(`(${patterns.join("|")})`, "g");
 
     let lastIndex = 0;
