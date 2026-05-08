@@ -67,7 +67,7 @@ const CEFR_COLORS: Record<string, string> = {
 function Grammar() {
   const { t } = useTranslation();
   const {
-    extractedText,
+    extractedText: text,
     grammarTopics,
     grammarQuiz,
     grammarQuizScore,
@@ -158,7 +158,7 @@ function Grammar() {
     [grammarHighlightEnabled, grammarHighlightTopicId, setGrammarHighlightEnabled, setGrammarHighlightTopicId]
   );
 
-  if (!extractedText) {
+  if (!text) {
     return null;
   }
 
@@ -186,7 +186,7 @@ function Grammar() {
                 {topic.cefrLevel}
               </span>
               <span className={cn("text-xs px-1.5 py-0.5 rounded", CATEGORY_COLORS[topic.category])}>
-                {topic.textSentences.filter((s) => s.trim().length > 5).length}x
+                {topic.textSentences.filter((s) => s.trim().length > 5 && text.includes(s.trim())).length}x
               </span>
             </div>
           </div>
