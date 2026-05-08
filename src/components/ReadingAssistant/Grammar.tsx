@@ -258,9 +258,20 @@ function Grammar() {
               <div>
                 <h5 className="font-medium text-sm mb-1">{t("reading.grammar.examples")}</h5>
                 <div className="space-y-2">
+                  {topic.textSentences.map((s, i) => (
+                    <div
+                      key={`ts-${i}`}
+                      className="text-sm px-3 py-2 rounded bg-blue-50 dark:bg-blue-950 border-l-2 border-blue-400"
+                    >
+                      <p className="italic">&ldquo;{s}&rdquo;</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t("reading.grammar.fromThisText")}
+                      </p>
+                    </div>
+                  ))}
                   {topic.examples.map((ex, i) => (
                     <div
-                      key={i}
+                      key={`ex-${i}`}
                       className={cn(
                         "text-sm px-3 py-2 rounded",
                         ex.source === "text"
