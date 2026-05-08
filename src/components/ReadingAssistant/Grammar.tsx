@@ -269,19 +269,14 @@ function Grammar() {
                       </p>
                     </div>
                   ))}
-                  {topic.examples.map((ex, i) => (
+                  {topic.examples.filter((ex) => ex.source !== "text").map((ex, i) => (
                     <div
                       key={`ex-${i}`}
-                      className={cn(
-                        "text-sm px-3 py-2 rounded",
-                        ex.source === "text"
-                          ? "bg-blue-50 dark:bg-blue-950 border-l-2 border-blue-400"
-                          : "bg-muted"
-                      )}
+                      className="bg-muted text-sm px-3 py-2 rounded"
                     >
                       <p className="italic">&ldquo;{ex.sentence}&rdquo;</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {ex.source === "text" ? t("reading.grammar.fromThisText") : t("reading.grammar.example")}
+                        {t("reading.grammar.example")}
                       </p>
                     </div>
                   ))}
