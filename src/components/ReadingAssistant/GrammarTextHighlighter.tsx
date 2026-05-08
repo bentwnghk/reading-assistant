@@ -40,13 +40,7 @@ function GrammarHighlightedText({ text }: GrammarHighlightedTextProps) {
     }
 
     const parts: React.ReactNode[] = [];
-    const sentences = topic.textSentences
-      .filter((s) => s.trim().length > 5)
-      .sort((a, b) => b.length - a.length);
-
-    if (sentences.length === 0) {
-      return <span>{text}</span>;
-    }
+    const sentences = [...topic.textSentences].sort((a, b) => b.length - a.length);
 
     const patterns = sentences.map((s) => escapeRegExp(s.trim()));
     const combinedPattern = new RegExp(`(${patterns.join("|")})`, "g");
@@ -99,16 +93,7 @@ export default function GrammarTextHighlighter({ text }: GrammarTextHighlighterP
   const topic = grammarTopics.find((t) => t.id === grammarHighlightTopicId);
   if (!topic) return null;
 
-  const filteredSentences = topic.textSentences
-    .filter((s) => s.trim().length > 5)
-    .sort((a, b) => b.length - a.length);
-
-  let matchedCount = 0;
-  if (filteredSentences.length > 0) {
-    for (const s of filteredSentences) {
-      if (text.includes(s.trim())) matchedCount++;
-    }
-  }
+  const sentenceCount = topic.textSentences.length;
 
   return (
     <div id="grammar-highlighter" className="mt-4 border rounded-md p-4">
@@ -122,9 +107,9 @@ export default function GrammarTextHighlighter({ text }: GrammarTextHighlighterP
           <span className="font-medium text-sm">
             {topic.name} ({topic.nameZh})
           </span>
-          {matchedCount > 0 && (
+          {sentenceCount > 0 && (
             <span className="text-xs text-muted-foreground">
-              — {matchedCount === 1 ? t("reading.grammar.sentenceHighlighted") : t("reading.grammar.sentencesHighlighted", { count: matchedCount })}
+              — {sentenceCount === 1 ? t("reading.grammar.sentenceHighlighted") : t("reading.grammar.sentencesHighlighted", { count: sentenceCount })}
             </span>
           )}
         </div>
