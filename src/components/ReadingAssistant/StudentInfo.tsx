@@ -92,11 +92,9 @@ function StudentInfo() {
             <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold">{session.user.name}</span>
             {session.user.role && (
               <>
-                <span className="text-muted-foreground">(</span>
                 <span className={cn("px-1.5 py-0.5 rounded text-xs font-semibold", getRoleBadgeStyle(session.user.role))}>
                   {t(`reading.studentInfo.roles.${session.user.role}`)}
                 </span>
-                <span className="text-muted-foreground">)</span>
               </>
             )}
           </div>
