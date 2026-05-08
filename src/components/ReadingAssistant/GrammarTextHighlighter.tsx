@@ -99,6 +99,17 @@ export default function GrammarTextHighlighter({ text }: GrammarTextHighlighterP
   const topic = grammarTopics.find((t) => t.id === grammarHighlightTopicId);
   if (!topic) return null;
 
+  const filteredSentences = topic.textSentences
+    .filter((s) => s.trim().length > 5)
+    .sort((a, b) => b.length - a.length);
+
+  let matchedCount = 0;
+  if (filteredSentences.length > 0) {
+    for (const s of filteredSentences) {
+      if (text.includes(s.trim())) matchedCount++;
+    }
+  }
+
   return (
     <div id="grammar-highlighter" className="mt-4 border rounded-md p-4">
       <div className="flex items-center justify-between mb-3">
@@ -111,9 +122,11 @@ export default function GrammarTextHighlighter({ text }: GrammarTextHighlighterP
           <span className="font-medium text-sm">
             {topic.name} ({topic.nameZh})
           </span>
-          <span className="text-xs text-muted-foreground">
-            — {topic.textSentences.length} sentences highlighted
-          </span>
+          {matchedCount > 0 && (
+            <span className="text-xs text-muted-foreground">
+              — {matchedCount === 1 ? t("reading.grammar.sentenceHighlighted") : t("reading.grammar.sentencesHighlighted", { count: matchedCount })}
+            </span>
+          )}
         </div>
         <Button
           variant="outline"

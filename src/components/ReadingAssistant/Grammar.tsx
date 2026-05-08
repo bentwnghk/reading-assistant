@@ -186,7 +186,7 @@ function Grammar() {
                 {topic.cefrLevel}
               </span>
               <span className={cn("text-xs px-1.5 py-0.5 rounded", CATEGORY_COLORS[topic.category])}>
-                {topic.occurrences}x
+                {topic.textSentences.filter((s) => s.trim().length > 5).length}x
               </span>
             </div>
           </div>

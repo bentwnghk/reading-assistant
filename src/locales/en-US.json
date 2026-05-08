@@ -542,6 +542,8 @@
       "fromThisText": "From this text",
       "example": "Example",
       "commonMistakes": "Common Mistakes",
+      "sentencesHighlighted": "{{count}} sentences highlighted",
+      "sentenceHighlighted": "1 sentence highlighted",
       "help": {
         "title": "Grammar Guide",
         "purpose": "Purpose: The Grammar section uses AI to identify notable grammar structures from your reading text and helps you learn them through interactive lessons and practice exercises.",

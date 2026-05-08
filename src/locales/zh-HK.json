@@ -542,6 +542,8 @@
       "fromThisText": "來自此文本",
       "example": "例子",
       "commonMistakes": "常見錯誤",
+      "sentencesHighlighted": "{{count}} 個句子已標記",
+      "sentenceHighlighted": "1 個句子已標記",
       "help": {
         "title": "語法指南",
         "purpose": "目的：語法部分利用 AI 識別閱讀文本中的重要語法結構，並通過互動課程和練習幫助你學習。",
