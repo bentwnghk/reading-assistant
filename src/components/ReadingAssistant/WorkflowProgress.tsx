@@ -81,7 +81,7 @@ function WorkflowProgress() {
             key={step.key}
             onClick={() => handleStepClick(step.sectionId, step.accessible)}
             className={cn(
-              "flex-1 flex flex-col items-center",
+              "flex flex-col items-center",
               step.accessible ? "cursor-pointer" : "cursor-not-allowed opacity-40",
             )}
           >
