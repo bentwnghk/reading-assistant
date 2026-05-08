@@ -153,6 +153,10 @@
         "wordExport": {
           "title": "📄 Word Export",
           "desc": "Export learning materials as Word documents: adapted text with vocabulary & sentence analysis, glossary, vocabulary quiz, and reading comprehension test (with optional answer keys)."
+        },
+        "grammar": {
+          "title": "📐 Grammar Analysis & Quiz",
+          "desc": "AI identifies grammar structures in your text with CEFR levels, bilingual explanations, patterns, and examples. Test your understanding with interactive quizzes featuring 4 question types and AI-scored open answers!"
         }
       },
       "workflow": {
@@ -169,7 +173,8 @@
         "highlight": "Highlight words to build vocabulary",
         "glossary": "Review vocabulary using flashcards",
         "spelling": "Practice with spelling games",
-        "vocabQuiz": "Test your vocabulary knowledge"
+        "vocabQuiz": "Test your vocabulary knowledge",
+        "grammar": "Analyze grammar structures & take quizzes"
       },
       "skills": {
         "title": "Reading Skills You'll Master",
@@ -177,7 +182,8 @@
         "detail": "🔍 Detail",
         "inference": "🧩 Inference",
         "vocabulary": "📚 Vocabulary",
-        "purpose": "✍️ Author's Purpose"
+        "purpose": "✍️ Author's Purpose",
+        "grammar": "📐 Grammar"
       },
       "builtWith": "Built with ❤️ by Mr.🆖 for students learning English"
     }

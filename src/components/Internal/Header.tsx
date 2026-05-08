@@ -34,6 +34,7 @@ import {
   Crown,
   School,
   Bell,
+  BookOpenCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -501,6 +502,13 @@ function Header() {
                     <div className="text-xs text-muted-foreground">{t("header.about.features.wordExport.desc")}</div>
                   </div>
                 </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <BookOpenCheck className="h-4 w-4 mt-0.5 text-fuchsia-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.grammar.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.grammar.desc")}</div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -625,6 +633,11 @@ function Header() {
                     <Target className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.test")}</span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-600 dark:text-fuchsia-300 text-xs font-bold">14</span>
+                    <BookOpenCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.grammar")}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -635,7 +648,7 @@ function Header() {
                 {t("header.about.skills.title")}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {["mainIdea", "detail", "inference", "vocabulary", "purpose"].map((skill) => (
+                {["mainIdea", "detail", "inference", "vocabulary", "purpose", "grammar"].map((skill) => (
                   <span key={skill} className="inline-flex items-center gap-1 bg-muted px-2 py-1 rounded-full text-xs">
                     <span>{t(`header.about.skills.${skill}`)}</span>
                   </span>

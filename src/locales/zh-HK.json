@@ -153,6 +153,10 @@
         "wordExport": {
           "title": "📄 匯出 Word",
           "desc": "將學習材料匯出為 Word 文件：改寫文章（含詞彙表及句子分析）、詞彙表、詞彙測驗及閱讀理解測驗（可選附答案）。"
+        },
+        "grammar": {
+          "title": "📐 語法分析與測驗",
+          "desc": "AI 識別文章中的語法結構，附 CEFR 等級、雙語解釋、句型和例句。透過互動測驗測試你的理解，設有 4 種題型及 AI 智能評分！"
         }
       },
       "workflow": {
@@ -169,7 +173,8 @@
         "highlight": "標記生字建立詞彙表",
         "glossary": "用字卡複習生字",
         "spelling": "用拼字遊戲練習",
-        "vocabQuiz": "測試你的詞彙知識"
+        "vocabQuiz": "測試你的詞彙知識",
+        "grammar": "分析語法結構並參加語法測驗"
       },
       "skills": {
         "title": "你將掌握的閱讀技能",
@@ -177,7 +182,8 @@
         "detail": "🔍 細節",
         "inference": "🧩 推論",
         "vocabulary": "📚 詞彙",
-        "purpose": "✍️ 作者目的"
+        "purpose": "✍️ 作者目的",
+        "grammar": "📐 語法"
       },
       "builtWith": "Mr.🆖 為學習英語的學生用 ❤️ 打造"
     }

@@ -53,6 +53,7 @@ flowchart LR
     subgraph PRACTICE["✏️ Practice"]
         F[Reading Test]
         G[Sentence Analysis]
+        P[Grammar Quiz]
     end
     
     subgraph MASTER["📖 Master"]
@@ -68,12 +69,13 @@ flowchart LR
     
     A --> B
     B --> C & D & E
-    E --> F & G & M
+    E --> F & G & M & P
     M --> N & O
     G --> H
     F --> H
+    P --> H
     H --> I & J & K
-    C & E & G & H --> L
+    C & E & G & H & P --> L
 ```
 
 ---
@@ -193,7 +195,44 @@ Click any sentence for a complete AI breakdown:
 
 ---
 
-### ❓ 8. Reading Comprehension Test
+### 📐 9. Grammar Analysis & Quiz
+
+Learn grammar structures found directly in your reading material. AI identifies, explains, and tests your understanding of real-world grammar usage.
+
+#### Grammar Topics Analysis
+AI scans your text and identifies notable grammar structures appropriate for your age and level (4/6/8 topics for primary/secondary/DSE). Each topic includes:
+
+| Field | Content |
+|-------|---------|
+| 🏷️ **Category** | One of 14 categories (tenses, conditionals, passive voice, relative clauses, etc.) |
+| 📊 **CEFR Level** | A1–C2 difficulty rating |
+| 📝 **Bilingual Explanation** | English + Traditional Chinese |
+| 🧩 **Pattern** | Grammar formula (e.g., "Subject + has/have + Past Participle") |
+| 💬 **Examples** | Sentences from the text and AI-generated examples |
+| ⚠️ **Common Mistakes** | Errors students typically make (bilingual) |
+| 📍 **Text Sentences** | Exact quotes from the reading showing the grammar in use |
+
+#### Interactive Grammar Lessons
+Each identified topic has a dedicated lesson view with detailed explanations, patterns, text-based examples, and common mistakes — all bilingual (English + 繁體中文).
+
+#### Grammar Quiz
+Test your understanding with a 10-question interactive quiz:
+
+| Question Type | Format | Scoring |
+|---------------|--------|---------|
+| 🔍 **Identify** | Multiple choice: which grammar structure is used? | 1 point |
+| ✏️ **Fill-in** | Type the correct grammar form | 2 points (AI-evaluated) |
+| 🐛 **Error Spot** | Multiple choice: find and correct the error | 1 point |
+| 🔄 **Rewrite** | Rewrite using a different grammar structure | 2 points (AI-evaluated with partial credit) |
+
+#### Grammar Text Highlighting
+- 🎨 **Color-coded** grammar structure sentences highlighted directly in the original text
+- 🔘 **Toggle per topic**: Show/hide highlights for each grammar topic individually
+- 📊 **14 distinct categories** with unique color schemes
+
+---
+
+### ❓ 10. Reading Comprehension Test
 
 Test your understanding with AI-generated questions tailored to YOUR level.
 
@@ -227,7 +266,7 @@ Test your understanding with AI-generated questions tailored to YOUR level.
 
 ---
 
-### 📖 9. Vocabulary Builder
+### 📖 11. Vocabulary Builder
 
 Build your word power with interactive tools.
 
@@ -256,7 +295,7 @@ Build your word power with interactive tools.
 
 ---
 
-### 🎮 10. Spelling Challenge - 4 Game Modes!
+### 🎮 12. Spelling Challenge - 4 Game Modes!
 
 | Mode | How It Works | Best For |
 |------|--------------|----------|
@@ -275,7 +314,7 @@ Build your word power with interactive tools.
 
 ---
 
-### 📋 11. Vocabulary Quiz
+### 📋 13. Vocabulary Quiz
 
 Test your vocabulary knowledge with interactive quizzes.
 
@@ -287,7 +326,7 @@ Test your vocabulary knowledge with interactive quizzes.
 
 ---
 
-### 🔊 12. Text-to-Speech
+### 🔊 14. Text-to-Speech
 
 Perfect your pronunciation with natural voice reading.
 
@@ -300,7 +339,7 @@ Perfect your pronunciation with natural voice reading.
 
 ---
 
-### 📄 13. Word Export
+### 📄 15. Word Export
 
 Download your learning materials for offline study.
 
@@ -316,7 +355,7 @@ Download your learning materials for offline study.
 
 ## 🆕 New Features
 
-### 🏆 14. Leaderboard & Achievements
+### 🏆 16. Leaderboard & Achievements
 
 Compete with classmates and track your learning journey!
 
@@ -349,10 +388,12 @@ Unlock medals by reaching learning milestones:
 | 📝 **Tests Completed** | 5, 15, 30, 50 tests |
 | 🎮 **Spelling Challenges** | 10, 30, 50, 100 games |
 | 📋 **Quizzes Completed** | 5, 15, 30, 50 quizzes |
+| 📐 **Grammar Analysis** | Topics identified across reading sessions |
+| 🎓 **Grammar Quizzes** | Quizzes completed with high scores |
 
 ---
 
-### 📚 15. Text Repository
+### 📚 17. Text Repository
 
 Share and reuse reading materials across your school or class.
 
@@ -367,7 +408,7 @@ Share and reuse reading materials across your school or class.
 
 ---
 
-### 🏫 16. School & Class Management
+### 🏫 18. School & Class Management
 
 Built for educational institutions with multi-tenant support.
 
@@ -389,7 +430,7 @@ Built for educational institutions with multi-tenant support.
 
 ---
 
-### 🔐 17. Authentication & Security
+### 🔐 19. Authentication & Security
 
 Secure login with Google OAuth integration.
 
@@ -402,7 +443,7 @@ Secure login with Google OAuth integration.
 
 ---
 
-### 📱 18. PWA Support
+### 📱 20. PWA Support
 
 Install Mr.🆖 ProReader as a native app on your device!
 

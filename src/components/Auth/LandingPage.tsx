@@ -41,6 +41,7 @@ import {
   Globe,
   Check,
   Medal,
+  BookOpenCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -401,6 +402,7 @@ export function LandingPage() {
             { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400" },
             { icon: Trophy, key: "leaderboard", color: "text-yellow-600 dark:text-yellow-400" },
             { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400" },
+            { icon: BookOpenCheck, key: "grammar", color: "text-fuchsia-600 dark:text-fuchsia-400" },
           ]          .map(({ icon: Icon, key, color }) => (
              <motion.div
                key={key}
@@ -485,6 +487,7 @@ export function LandingPage() {
               { num: 11, icon: Gamepad2, key: "spelling" },
               { num: 12, icon: Layers, key: "vocabQuiz" },
               { num: 13, icon: Target, key: "test" },
+              { num: 14, icon: BookOpenCheck, key: "grammar" },
             ].map(({ num, icon: Icon, key }) => (
               <motion.div
                 key={key}
@@ -519,7 +522,7 @@ export function LandingPage() {
           <h2 className="text-3xl font-bold">{t("header.about.skills.title")}</h2>
         </motion.div>
         <motion.div variants={gridContainer(0.4)} className="flex flex-wrap justify-center gap-4 mb-24">
-          {["mainIdea", "detail", "inference", "vocabulary", "purpose"].map((skill) => (
+          {["mainIdea", "detail", "inference", "vocabulary", "purpose", "grammar"].map((skill) => (
             <motion.span
               key={skill}
               variants={pillVariants}

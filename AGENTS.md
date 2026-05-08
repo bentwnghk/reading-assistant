@@ -246,3 +246,71 @@ The project uses **Serwist** (Workbox successor) for service worker support.
 - **Communication**: Summarize what changed, where, and why. Call out tradeoffs, assumptions, and known limitations. If validation could not be run, say so explicitly.
 - **Clarity**: Prefer clarity and simplicity over cleverness. Preserve existing behavior unless the task explicitly requires changes.
 - **UI Consistency**: Ensure all new UI elements support both light and dark modes using Tailwind `dark:` classes.
+
+---
+
+## Lessons Learned: Adding Major Features
+
+The Grammar feature (v2.462–v2.485) introduced several issues that required multiple reverts and fixes. The insights below apply to any major feature addition.
+
+### 1. Multi-System Integration Checklist
+
+A major feature touches **many subsystems**. Missing any one causes runtime errors or data inconsistencies. Before marking a feature complete, verify integration across **all** of the following:
+
+| System | Files to Update | What to Check |
+|--------|----------------|---------------|
+| **Types** | `src/types.d.ts` | Define all new interfaces/types first |
+| **Store** | `src/store/reading.ts` | Add state fields, setters, and persistence |
+| **Hooks** | `src/hooks/useReadingAssistant.ts` | Add business logic methods |
+| **Prompts** | `src/constants/readingPrompts.ts` | Add AI prompt functions |
+| **Components** | `src/components/ReadingAssistant/` | Main UI component + any helper components |
+| **Barrel Export** | `src/components/ReadingAssistant/index.ts` | Re-export new component |
+| **Main Page** | `src/app/page.tsx` | Render the new component section |
+| **Workflow** | `WorkflowProgress.tsx`, `TocDrawer.tsx` | Add to step list and table of contents |
+| **Session Persistence** | `src/lib/sessions.ts` | Save/load new fields to/from DB |
+| **DB Migration** | `scripts/*.sql` | Add columns; update `init-db.sql` for fresh installs |
+| **Achievements** | `src/lib/achievements.ts` | Add achievement types + colors in `AchievementMedal.tsx` |
+| **Activity Logging** | `src/lib/activity.ts`, `src/utils/activityLogger.ts` | Add activity types |
+| **Leaderboard** | `src/lib/leaderboard.ts`, `LeaderboardTable.tsx`, `PersonalStatsCard.tsx`, `types.ts` | Add new stat columns |
+| **Dashboard** | `src/utils/dashboardMetrics.ts`, `OverviewTab.tsx`, `SessionsTab.tsx` | Add to student metrics |
+| **Teacher Dashboard** | `src/utils/teacherDashboardMetrics.ts`, `TeacherDashboard.tsx`, charts | Add to class metrics and charts |
+| **Excel Export** | `src/utils/excelExport.ts`, `src/utils/teacherDashboardExcel.ts` | Add columns to exports |
+| **User Data** | `src/lib/users.ts`, `StudentDataView.tsx` | Include in student detail views |
+| **Settings** | `src/store/setting.ts`, `src/components/Setting.tsx` | Add any model-specific settings |
+| **I18n** | `src/locales/en-US.json`, `src/locales/zh-HK.json` | Add all UI strings in both languages |
+| **Landing Page** | `src/components/Auth/LandingPage.tsx` | Add to feature cards, workflow, skills |
+| **About Dialog** | `src/components/Internal/Header.tsx` | Add to feature cards, workflow, skills |
+
+### 2. Database Migration Best Practices
+
+- **Separate migration files**: Each new feature must have its own incremental migration file (e.g., `add-grammar-columns.sql`, `add-grammar-achievements.sql`). Do **not** modify existing migration files that have already been applied.
+- **Update `init-db.sql`**: Also update `scripts/init-db.sql` so fresh installs include all features without running incremental migrations.
+- **CHECK constraints**: When adding new values to `CHECK` constraints (e.g., `achievement_type`, `activity_type`), the migration must `DROP CONSTRAINT IF EXISTS` then re-create it with the full list of values.
+- **Test both paths**: Verify that both (1) running the incremental migration on an existing DB and (2) running `init-db.sql` on a fresh DB produce the correct schema.
+
+### 3. Model List Reuse in Settings
+
+- When adding a new AI model setting (e.g., `grammarModel`), **reuse existing model lists** (`AVAILABLE_MODELS`, `VISION_MODELS`, `TUTOR_MODELS`) unless there's a strong reason to create a separate list.
+- Creating a dedicated model list (e.g., `GRAMMAR_MODELS`) adds maintenance burden and caused Zod enum validation issues that required two reverts (v2.480, v2.481) to fix.
+- The settings form uses `z.enum()` from Zod, so the model list must match exactly between the store definition and the form schema.
+
+### 4. Color and Data Conflicts
+
+- Before choosing colors (Tailwind classes, hex codes) for a new feature, audit all existing color usages across the codebase to avoid conflicts:
+  - Chart colors in `dashboardMetrics.ts` and `teacherDashboardMetrics.ts`
+  - Badge/label colors in `AchievementMedal.tsx`
+  - Category colors in feature components
+  - Landing page and About dialog feature card colors
+- Each feature's chart color must be unique within its chart. The grammar feature initially used `#d946ef` (fuchsia) which conflicted, and was changed to `#14b8a6` (teal) in a hotfix.
+
+### 5. Incremental Commits
+
+- Avoid massive single commits. The initial grammar commit (1,530 lines across 15 files) made it difficult to isolate and revert bugs.
+- Recommended commit structure for a major feature:
+  1. Types + store + hooks (data layer)
+  2. Prompts + AI logic (AI layer)
+  3. Component UI (UI layer)
+  4. DB migrations + session persistence (persistence layer)
+  5. Dashboard/leaderboard/achievements integration (metrics layer)
+  6. I18n + landing page updates (presentation layer)
+- Each commit should be independently buildable and not break existing functionality.
