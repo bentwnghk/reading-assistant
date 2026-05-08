@@ -54,7 +54,7 @@ function GrammarHighlightedText({ text }: GrammarHighlightedTextProps) {
     }
 
     const patterns = sentences.map((s) => escapeRegExp(s));
-    const combinedPattern = new RegExp(`(${patterns.join("|")})`, "g");
+    const combinedPattern = new RegExp(`(${patterns.join("|")})`, "gi");
 
     let lastIndex = 0;
     let match: RegExpExecArray | null;
