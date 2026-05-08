@@ -8,7 +8,7 @@ import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
   const { t } = useTranslation();
-  const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarTopics } = useReadingStore();
+  const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarQuizCompleted, grammarQuizScore } = useReadingStore();
 
   const hasExtractedText = !!extractedText;
 
@@ -23,7 +23,7 @@ function WorkflowProgress() {
     { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasExtractedText, sectionId: "section-test" },
-    { key: "grammar", label: t("reading.workflow.grammar"), completed: grammarTopics.length > 0, accessible: hasExtractedText, sectionId: "section-grammar" },
+    { key: "grammar", label: t("reading.workflow.grammarQuiz"), completed: grammarQuizCompleted && (grammarQuizScore || 0) > 0, accessible: hasExtractedText, sectionId: "section-grammar" },
   ];
 
   const handleStepClick = useCallback((sectionId: string, accessible: boolean) => {

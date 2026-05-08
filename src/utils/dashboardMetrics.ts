@@ -115,6 +115,7 @@ function calculateProgress(item: ReadingHistory): number {
     (item.glossary || []).length > 0,
     (item.spellingGameBestScore || 0) > 0,
     (item.vocabularyQuizScore || 0) > 0,
+    item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0,
   ];
   const completedCount = steps.filter(Boolean).length;
   return Math.round((completedCount / steps.length) * 100);
