@@ -482,6 +482,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <BookOpenCheck className="h-4 w-4 mt-0.5 text-fuchsia-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.grammar.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.grammar.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <Medal className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.achievements.title")}</div>
@@ -500,13 +507,6 @@ function Header() {
                   <div>
                     <div className="font-medium">{t("header.about.features.wordExport.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.wordExport.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <BookOpenCheck className="h-4 w-4 mt-0.5 text-fuchsia-500 shrink-0" />
-                  <div>
-                    <div className="font-medium">{t("header.about.features.grammar.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.grammar.desc")}</div>
                   </div>
                 </div>
               </div>

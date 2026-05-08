@@ -399,10 +399,10 @@ export function LandingPage() {
             { icon: Gamepad2, key: "spelling", color: "text-pink-600 dark:text-pink-400" },
             { icon: ClipboardList, key: "quiz", color: "text-violet-600 dark:text-violet-400" },
             { icon: Target, key: "test", color: "text-red-600 dark:text-red-400" },
+            { icon: BookOpenCheck, key: "grammar", color: "text-fuchsia-600 dark:text-fuchsia-400" },
             { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400" },
             { icon: Trophy, key: "leaderboard", color: "text-yellow-600 dark:text-yellow-400" },
             { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400" },
-            { icon: BookOpenCheck, key: "grammar", color: "text-fuchsia-600 dark:text-fuchsia-400" },
           ]          .map(({ icon: Icon, key, color }) => (
              <motion.div
                key={key}
