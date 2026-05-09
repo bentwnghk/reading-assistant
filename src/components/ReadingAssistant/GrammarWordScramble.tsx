@@ -125,13 +125,6 @@ export default function GrammarWordScramble({ onBack }: Props) {
     setGameStatus("playing");
   }, [challenges, grammarTopics, buildRound]);
 
-  const handleTimeUp = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setRound((prev) => prev ? { ...prev, result: "incorrect" } : prev);
-    setStreak(0);
-    setTimeout(() => advanceRound(), 3000);
-  }, [advanceRound]);
-
   const advanceRound = useCallback(() => {
     setRound((prevRound) => {
       const nextIndex = roundIndex + 1;
@@ -145,6 +138,13 @@ export default function GrammarWordScramble({ onBack }: Props) {
       return buildRound(challenges[nextIndex], grammarTopics);
     });
   }, [roundIndex, challenges, grammarTopics, buildRound]);
+
+  const handleTimeUp = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRound((prev) => prev ? { ...prev, result: "incorrect" } : prev);
+    setStreak(0);
+    setTimeout(() => advanceRound(), 3000);
+  }, [advanceRound]);
 
   const placeChip = useCallback((chip: WordChip) => {
     if (!round || round.result !== "pending" || chip.placed) return;
