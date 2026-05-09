@@ -167,8 +167,8 @@ function Grammar() {
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
     { key: "topics",  label: t("reading.grammar.tabTopics"),  icon: <BookOpen className="h-4 w-4" /> },
     { key: "lessons", label: t("reading.grammar.tabLessons"), icon: <GraduationCap className="h-4 w-4" /> },
-    { key: "quiz",    label: t("reading.grammar.tabQuiz"),    icon: <CheckCircle2 className="h-4 w-4" /> },
     { key: "games",   label: t("reading.grammar.tabGames"),   icon: <Gamepad2 className="h-4 w-4" /> },
+    { key: "quiz",    label: t("reading.grammar.tabQuiz"),    icon: <CheckCircle2 className="h-4 w-4" /> },
   ];
 
   const renderTopicCards = () => (
@@ -554,6 +554,8 @@ function Grammar() {
         return renderTopicCards();
       case "lessons":
         return renderLessons();
+      case "games":
+        return <GrammarGames />;
       case "quiz":
         if (grammarTopics.length === 0) {
           return (
@@ -564,8 +566,6 @@ function Grammar() {
           );
         }
         return renderQuizContent();
-      case "games":
-        return <GrammarGames />;
     }
   };
 
