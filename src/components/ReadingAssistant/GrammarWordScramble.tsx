@@ -130,8 +130,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
     setRound((prev) => prev ? { ...prev, result: "incorrect" } : prev);
     setStreak(0);
     setTimeout(() => advanceRound(), 3000);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [advanceRound]);
 
   const advanceRound = useCallback(() => {
     setRound((prevRound) => {
