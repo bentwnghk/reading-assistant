@@ -24,7 +24,6 @@ import { useSession } from "next-auth/react";
 import { useTeacherDashboard } from "@/hooks/useTeacherDashboard";
 import {
   SCORE_BUCKETS,
-  SPELLING_BUCKETS,
 } from "@/utils/teacherDashboardMetrics";
 import type { ClassInfo, SchoolInfo } from "@/lib/users";
 import DailyActivityChart from "./DailyActivityChart";
@@ -34,6 +33,7 @@ import AvgProgressChart from "./AvgProgressChart";
 import AiFeaturesChart from "./AiFeaturesChart";
 import ScoreDistChart from "./ScoreDistChart";
 import SpellingScoreChart from "./SpellingScoreChart";
+import GrammarGameChart from "./GrammarGameChart";
 import VocabularyGrowthChart from "./VocabularyGrowthChart";
 
 interface TeacherDashboardProps {
@@ -345,11 +345,8 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
             </div>
 
             <div ref={(el) => { chartRefs.current[8] = el; }}>
-              <ScoreDistChart
-                title={t("dashboard.scores.grammarGame")}
+              <GrammarGameChart
                 students={metrics.students}
-                scoreKey="grammarGameScores"
-                buckets={SPELLING_BUCKETS}
                 classAvg={metrics.classAvgGrammarGameScore}
               />
             </div>
