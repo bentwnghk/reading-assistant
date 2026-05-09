@@ -104,10 +104,13 @@ export default function GrammarRoulette({ onBack }: Props) {
 
     const targetIndex = Math.floor(Math.random() * grammarTopics.length);
     const sliceDeg = 360 / grammarTopics.length;
-    // Align the fixed top pointer with the center of the target slice.
-    // The SVG slices are laid out clockwise from the top, and the wheel's
-    // effective rotation modulo 360 maps directly to that original slice angle.
-    const desiredMod = (targetIndex * sliceDeg + sliceDeg / 2) % 360;
+    // Align the fixed top pointer with the CENTER of the target slice.
+    // CSS rotate(θ) moves a point at original screen-angle α to α+θ.
+    // So the pointer (at 0°) aligns with original angle = –θ (mod 360°).
+    // Center of slice i = i*sliceDeg + sliceDeg/2.
+    // We need: -(wheelRotation % 360) ≡ targetIndex*sliceDeg + sliceDeg/2
+    // i.e. desiredMod = (360 – targetIndex*sliceDeg – sliceDeg/2 + 360) % 360
+    const desiredMod = (720 - targetIndex * sliceDeg - sliceDeg / 2) % 360;
     const currentMod = ((wheelRotation % 360) + 360) % 360;
     let delta = (desiredMod - currentMod + 360) % 360;
     if (delta === 0) delta = 360; // always rotate forward at least one full turn
