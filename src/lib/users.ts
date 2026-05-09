@@ -86,6 +86,8 @@ export interface TeacherSessionData {
   spellingGameBestScore: number | null
   grammarQuizScore: number | null
   grammarQuizCompleted: boolean
+  grammarGameBestScore: number | null
+  grammarGameAccuracy: number | null
   glossaryCount: number
   sentenceAnalysisCount: number
   tutorQuestionCount: number
@@ -118,6 +120,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        rs.grammar_game_best_score, rs.grammar_game_accuracy,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -151,6 +154,8 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       spellingGameBestScore: row.spelling_game_best_score || null,
       grammarQuizScore: row.grammar_quiz_score || null,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
+      grammarGameBestScore: row.grammar_game_best_score || null,
+      grammarGameAccuracy: row.grammar_game_accuracy || null,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
@@ -189,6 +194,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        rs.grammar_game_best_score, rs.grammar_game_accuracy,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -222,6 +228,8 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       spellingGameBestScore: row.spelling_game_best_score || null,
       grammarQuizScore: row.grammar_quiz_score || null,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
+      grammarGameBestScore: row.grammar_game_best_score || null,
+      grammarGameAccuracy: row.grammar_game_accuracy || null,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
@@ -260,6 +268,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        rs.grammar_game_best_score, rs.grammar_game_accuracy,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -292,6 +301,8 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       spellingGameBestScore: row.spelling_game_best_score || null,
       grammarQuizScore: row.grammar_quiz_score || null,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
+      grammarGameBestScore: row.grammar_game_best_score || null,
+      grammarGameAccuracy: row.grammar_game_accuracy || null,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)

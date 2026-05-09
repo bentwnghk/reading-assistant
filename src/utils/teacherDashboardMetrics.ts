@@ -22,6 +22,8 @@ export interface StudentMetrics {
   quizScores: number[];
   spellingScores: number[];
   grammarQuizScores: number[];
+  grammarGameScores: number[];
+  grammarGameAccuracies: number[];
   dailyActivities: Map<string, DailyStudentActivity>;
 }
 
@@ -55,6 +57,8 @@ export interface TeacherDashboardMetrics {
   classAvgQuizScore: number;
   classAvgSpellingScore: number;
   classAvgGrammarQuizScore: number;
+  classAvgGrammarGameScore: number;
+  classAvgGrammarGameAccuracy: number;
   classTotalAiUsage: StudentMetrics["aiUsage"];
   classAvgAiUsage: StudentMetrics["aiUsage"];
 }
@@ -209,6 +213,8 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
       quizScores: [],
       spellingScores: [],
       grammarQuizScores: [],
+      grammarGameScores: [],
+      grammarGameAccuracies: [],
       dailyActivities: new Map(),
     };
   }
@@ -263,6 +269,8 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
   const quizScores = sorted.filter((s) => s.vocabularyQuizScore != null && s.vocabularyQuizScore > 0).map((s) => s.vocabularyQuizScore!);
   const spellingScores = sorted.filter((s) => s.spellingGameBestScore != null && s.spellingGameBestScore > 0).map((s) => s.spellingGameBestScore!);
   const grammarQuizScores = sorted.filter((s) => s.grammarQuizCompleted && s.grammarQuizScore != null && s.grammarQuizScore > 0).map((s) => s.grammarQuizScore!);
+  const grammarGameScores = sorted.filter((s) => s.grammarGameBestScore != null && s.grammarGameBestScore > 0).map((s) => s.grammarGameBestScore!);
+  const grammarGameAccuracies = sorted.filter((s) => s.grammarGameAccuracy != null && s.grammarGameAccuracy > 0).map((s) => s.grammarGameAccuracy!);
 
   const dailyMap = new Map<string, DailyStudentActivity>();
   function getDay(date: string): DailyStudentActivity {
@@ -320,6 +328,8 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     quizScores,
     spellingScores,
     grammarQuizScores,
+    grammarGameScores,
+    grammarGameAccuracies,
     dailyActivities: dailyMap,
   };
 }
@@ -338,6 +348,8 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
       classAvgQuizScore: 0,
       classAvgSpellingScore: 0,
       classAvgGrammarQuizScore: 0,
+      classAvgGrammarGameScore: 0,
+      classAvgGrammarGameAccuracy: 0,
       classTotalAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
       classAvgAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
     };
@@ -371,10 +383,14 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
   const allQuizScores = students.flatMap((s) => s.quizScores);
   const allSpellingScores = students.flatMap((s) => s.spellingScores);
   const allGrammarQuizScores = students.flatMap((s) => s.grammarQuizScores);
+  const allGrammarGameScores = students.flatMap((s) => s.grammarGameScores);
+  const allGrammarGameAccuracies = students.flatMap((s) => s.grammarGameAccuracies);
   const classAvgTestScore = allTestScores.length > 0 ? Math.round(allTestScores.reduce((a, b) => a + b, 0) / allTestScores.length) : 0;
   const classAvgQuizScore = allQuizScores.length > 0 ? Math.round(allQuizScores.reduce((a, b) => a + b, 0) / allQuizScores.length) : 0;
   const classAvgSpellingScore = allSpellingScores.length > 0 ? Math.round(allSpellingScores.reduce((a, b) => a + b, 0) / allSpellingScores.length) : 0;
   const classAvgGrammarQuizScore = allGrammarQuizScores.length > 0 ? Math.round(allGrammarQuizScores.reduce((a, b) => a + b, 0) / allGrammarQuizScores.length) : 0;
+  const classAvgGrammarGameScore = allGrammarGameScores.length > 0 ? Math.round(allGrammarGameScores.reduce((a, b) => a + b, 0) / allGrammarGameScores.length) : 0;
+  const classAvgGrammarGameAccuracy = allGrammarGameAccuracies.length > 0 ? Math.round(allGrammarGameAccuracies.reduce((a, b) => a + b, 0) / allGrammarGameAccuracies.length) : 0;
 
   const classTotalAiUsage = {
     summary: students.reduce((sum, s) => sum + s.aiUsage.summary, 0),
@@ -410,6 +426,8 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
     classAvgQuizScore,
     classAvgSpellingScore,
     classAvgGrammarQuizScore,
+    classAvgGrammarGameScore,
+    classAvgGrammarGameAccuracy,
     classTotalAiUsage,
     classAvgAiUsage,
   };

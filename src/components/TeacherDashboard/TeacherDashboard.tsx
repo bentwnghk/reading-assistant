@@ -24,6 +24,7 @@ import { useSession } from "next-auth/react";
 import { useTeacherDashboard } from "@/hooks/useTeacherDashboard";
 import {
   SCORE_BUCKETS,
+  SPELLING_BUCKETS,
 } from "@/utils/teacherDashboardMetrics";
 import type { ClassInfo, SchoolInfo } from "@/lib/users";
 import DailyActivityChart from "./DailyActivityChart";
@@ -55,7 +56,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const [isExporting, setIsExporting] = useState(false);
 
   // Refs for each chart card — order matches the JSX render order below
-  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(10).fill(null));
+  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(12).fill(null));
 
   const filteredClasses = useMemo(() => {
     if (!isSuperAdmin || selectedSchoolId === "all") return allClasses;
@@ -128,6 +129,8 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
     `${t("dashboard.scores.readingTest")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
     `${t("dashboard.scores.vocabQuiz")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
     `${t("dashboard.scores.grammarQuiz")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
+    `${t("dashboard.scores.grammarGame")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
+    `${t("dashboard.scores.grammarGameAccuracy")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
     t("teacherDashboard.charts.spellingScore"),
     t("teacherDashboard.charts.vocabularyGrowth"),
   ];
@@ -342,13 +345,33 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
             </div>
 
             <div ref={(el) => { chartRefs.current[8] = el; }}>
+              <ScoreDistChart
+                title={t("dashboard.scores.grammarGame")}
+                students={metrics.students}
+                scoreKey="grammarGameScores"
+                buckets={SPELLING_BUCKETS}
+                classAvg={metrics.classAvgGrammarGameScore}
+              />
+            </div>
+
+            <div ref={(el) => { chartRefs.current[9] = el; }}>
+              <ScoreDistChart
+                title={t("dashboard.scores.grammarGameAccuracy")}
+                students={metrics.students}
+                scoreKey="grammarGameAccuracies"
+                buckets={SCORE_BUCKETS}
+                classAvg={metrics.classAvgGrammarGameAccuracy}
+              />
+            </div>
+
+            <div ref={(el) => { chartRefs.current[10] = el; }}>
               <SpellingScoreChart
                 students={metrics.students}
                 classAvg={metrics.classAvgSpellingScore}
               />
             </div>
 
-            <div ref={(el) => { chartRefs.current[9] = el; }}>
+            <div ref={(el) => { chartRefs.current[11] = el; }}>
               <VocabularyGrowthChart students={metrics.students} />
             </div>
           </div>
