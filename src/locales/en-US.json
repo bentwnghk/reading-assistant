@@ -1594,6 +1594,10 @@
           "flashcards": {
             "title": "Flashcards",
             "desc": "Flashcard reviews completed. Rate each card (Again, Hard, Good, Easy) to strengthen your memory and rack up reviews."
+          },
+          "grammarQuiz": {
+            "title": "Grammar Quiz",
+            "desc": "Average grammar quiz score. Analyze grammar structures and complete quizzes to master grammar rules!"
           }
         },
         "tip": {

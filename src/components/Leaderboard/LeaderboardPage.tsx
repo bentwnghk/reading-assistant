@@ -24,6 +24,8 @@ import {
   FileCheck,
   Target,
   Network,
+  BookOpenCheck,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -582,6 +584,26 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-teal-500/10 flex items-center justify-center">
+                  <BookOpenCheck className="h-5 w-5 text-teal-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.grammar_analysis.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.achievements.types.grammar_analysis.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-fuchsia-500/10 flex items-center justify-center">
+                  <GraduationCap className="h-5 w-5 text-fuchsia-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.grammar_quizzes.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.achievements.types.grammar_quizzes.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-cyan-500" />
                 </div>
@@ -674,6 +696,16 @@ export function LeaderboardPage() {
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.flashcards.title")}</h4>
                   <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.flashcards.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-fuchsia-500/10 flex items-center justify-center">
+                  <GraduationCap className="h-5 w-5 text-fuchsia-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.grammarQuiz.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.grammarQuiz.desc")}</p>
                 </div>
               </div>
 
