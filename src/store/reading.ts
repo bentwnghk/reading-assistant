@@ -135,6 +135,13 @@ export interface ReadingStore {
   grammarQuizCompletedAt: number;
   grammarHighlightEnabled: boolean;
   grammarHighlightTopicId: string | null;
+  // Grammar Games
+  grammarScrambleHighScore: number;
+  grammarWorkshopHighScore: number;
+  grammarSurgeryHighScore: number;
+  grammarRouletteHighScore: number;
+  grammarDuelHighScore: number;
+  grammarErrorChallenges: ErrorSurgeryChallenge[];
   testScore: number;
   testCompleted: boolean;
   testEarnedPoints: number;
@@ -195,6 +202,13 @@ interface ReadingActions {
   setGrammarQuizPoints: (earned: number, total: number) => void;
   setGrammarHighlightEnabled: (enabled: boolean) => void;
   setGrammarHighlightTopicId: (topicId: string | null) => void;
+  // Grammar Games
+  setGrammarScrambleHighScore: (score: number) => void;
+  setGrammarWorkshopHighScore: (score: number) => void;
+  setGrammarSurgeryHighScore: (score: number) => void;
+  setGrammarRouletteHighScore: (score: number) => void;
+  setGrammarDuelHighScore: (score: number) => void;
+  setGrammarErrorChallenges: (challenges: ErrorSurgeryChallenge[]) => void;
   setTestScore: (score: number) => void;
   setTestCompleted: (completed: boolean) => void;
   setTestPoints: (earned: number, total: number) => void;
@@ -248,6 +262,12 @@ const defaultValues: ReadingStore = {
   grammarQuizCompletedAt: 0,
   grammarHighlightEnabled: false,
   grammarHighlightTopicId: null,
+  grammarScrambleHighScore: 0,
+  grammarWorkshopHighScore: 0,
+  grammarSurgeryHighScore: 0,
+  grammarRouletteHighScore: 0,
+  grammarDuelHighScore: 0,
+  grammarErrorChallenges: [],
   testScore: 0,
   testCompleted: false,
   testEarnedPoints: 0,
@@ -675,6 +695,79 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             grammarHighlightTopicId: topicId,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      // ── Grammar Games setters ──────────────────────────────────────────────
+      setGrammarScrambleHighScore: (score) =>
+        set((state) => {
+          const newState = {
+            grammarScrambleHighScore: Math.max(state.grammarScrambleHighScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarWorkshopHighScore: (score) =>
+        set((state) => {
+          const newState = {
+            grammarWorkshopHighScore: Math.max(state.grammarWorkshopHighScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarSurgeryHighScore: (score) =>
+        set((state) => {
+          const newState = {
+            grammarSurgeryHighScore: Math.max(state.grammarSurgeryHighScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarRouletteHighScore: (score) =>
+        set((state) => {
+          const newState = {
+            grammarRouletteHighScore: Math.max(state.grammarRouletteHighScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarDuelHighScore: (score) =>
+        set((state) => {
+          const newState = {
+            grammarDuelHighScore: Math.max(state.grammarDuelHighScore, score),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarErrorChallenges: (challenges) =>
+        set((state) => {
+          const newState = {
+            grammarErrorChallenges: challenges,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

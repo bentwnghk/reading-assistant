@@ -28,8 +28,11 @@ export async function createReadingSession(
         grammar_quiz_earned_points, grammar_quiz_total_points,
         grammar_generated_at, grammar_quiz_completed_at,
         grammar_highlight_enabled, grammar_highlight_topic_id,
+        grammar_scramble_high_score, grammar_workshop_high_score,
+        grammar_surgery_high_score, grammar_roulette_high_score,
+        grammar_duel_high_score, grammar_error_challenges,
         created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45)`,
       [
         sessionData.id,
         userId,
@@ -69,6 +72,12 @@ export async function createReadingSession(
         sessionData.grammarQuizCompletedAt ?? 0,
         sessionData.grammarHighlightEnabled ?? false,
         sessionData.grammarHighlightTopicId ?? null,
+        sessionData.grammarScrambleHighScore ?? 0,
+        sessionData.grammarWorkshopHighScore ?? 0,
+        sessionData.grammarSurgeryHighScore ?? 0,
+        sessionData.grammarRouletteHighScore ?? 0,
+        sessionData.grammarDuelHighScore ?? 0,
+        JSON.stringify(sessionData.grammarErrorChallenges ?? []),
         new Date(sessionData.createdAt || Date.now()),
       ]
     )
@@ -178,6 +187,12 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
       grammarHighlightEnabled: row.grammar_highlight_enabled ?? false,
       grammarHighlightTopicId: row.grammar_highlight_topic_id ?? null,
+      grammarScrambleHighScore: row.grammar_scramble_high_score ?? 0,
+      grammarWorkshopHighScore: row.grammar_workshop_high_score ?? 0,
+      grammarSurgeryHighScore: row.grammar_surgery_high_score ?? 0,
+      grammarRouletteHighScore: row.grammar_roulette_high_score ?? 0,
+      grammarDuelHighScore: row.grammar_duel_high_score ?? 0,
+      grammarErrorChallenges: row.grammar_error_challenges ?? [],
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -271,6 +286,12 @@ export async function getReadingSession(
       grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
       grammarHighlightEnabled: row.grammar_highlight_enabled ?? false,
       grammarHighlightTopicId: row.grammar_highlight_topic_id ?? null,
+      grammarScrambleHighScore: row.grammar_scramble_high_score ?? 0,
+      grammarWorkshopHighScore: row.grammar_workshop_high_score ?? 0,
+      grammarSurgeryHighScore: row.grammar_surgery_high_score ?? 0,
+      grammarRouletteHighScore: row.grammar_roulette_high_score ?? 0,
+      grammarDuelHighScore: row.grammar_duel_high_score ?? 0,
+      grammarErrorChallenges: row.grammar_error_challenges ?? [],
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -341,6 +362,12 @@ export async function updateReadingSession(
       grammarQuizCompletedAt: "grammar_quiz_completed_at",
       grammarHighlightEnabled: "grammar_highlight_enabled",
       grammarHighlightTopicId: "grammar_highlight_topic_id",
+      grammarScrambleHighScore: "grammar_scramble_high_score",
+      grammarWorkshopHighScore: "grammar_workshop_high_score",
+      grammarSurgeryHighScore: "grammar_surgery_high_score",
+      grammarRouletteHighScore: "grammar_roulette_high_score",
+      grammarDuelHighScore: "grammar_duel_high_score",
+      grammarErrorChallenges: "grammar_error_challenges",
     }
     
     for (const [key, dbColumn] of Object.entries(fieldMappings)) {
@@ -351,7 +378,7 @@ export async function updateReadingSession(
         if (["highlightedWords", "analyzedSentences", "readingTest", "glossary",
              "glossaryRatings", "chatHistory", "originalDifficulty",
              "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates",
-             "grammarTopics", "grammarQuiz"].includes(key)) {
+             "grammarTopics", "grammarQuiz", "grammarErrorChallenges"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else {
           values.push(value)

@@ -20,6 +20,10 @@ import {
   analyzeGrammarTopicsPrompt,
   generateGrammarQuizPrompt,
   evaluateGrammarRewritePrompt,
+  generateGrammarScramblePrompt,
+  generateGrammarWorkshopPrompt,
+  generateErrorSurgeryPrompt,
+  generateGrammarQuestionsPrompt,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
 import { logActivity } from "@/utils/activityLogger";
@@ -945,6 +949,102 @@ Guidelines:
     }
   }
 
+  // ── Grammar Games AI helpers ───────────────────────────────────────────────
+
+  /** Generates (or refreshes) Error Surgery challenges using grammarTopics. */
+  async function generateErrorSurgeryContent(): Promise<ErrorSurgeryChallenge[]> {
+    const { grammarTopics, studentAge, setGrammarErrorChallenges } = readingStore;
+    const { grammarModel } = useSettingStore.getState();
+
+    if (grammarTopics.length === 0) return [];
+
+    try {
+      const model = await createModelProvider(grammarModel);
+      const result = await generateText({
+        model,
+        system: getSystemPrompt(),
+        prompt: generateErrorSurgeryPrompt(grammarTopics, studentAge),
+      });
+
+      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+      const challenges: ErrorSurgeryChallenge[] = JSON.parse(text);
+      setGrammarErrorChallenges(challenges);
+      return challenges;
+    } catch (error) {
+      handleError(error);
+      return [];
+    }
+  }
+
+  /** Generates additional Word Order Scramble sentences (stored in component state). */
+  async function generateGrammarScrambleContent(): Promise<GrammarScrambleChallenge[]> {
+    const { grammarTopics, studentAge } = readingStore;
+    const { grammarModel } = useSettingStore.getState();
+
+    if (grammarTopics.length === 0) return [];
+
+    try {
+      const model = await createModelProvider(grammarModel);
+      const result = await generateText({
+        model,
+        system: getSystemPrompt(),
+        prompt: generateGrammarScramblePrompt(grammarTopics, studentAge),
+      });
+
+      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+      return JSON.parse(text) as GrammarScrambleChallenge[];
+    } catch (error) {
+      handleError(error);
+      return [];
+    }
+  }
+
+  /** Generates additional Grammar Workshop slot-fill challenges (stored in component state). */
+  async function generateGrammarWorkshopContent(): Promise<GrammarWorkshopChallenge[]> {
+    const { grammarTopics, studentAge } = readingStore;
+    const { grammarModel } = useSettingStore.getState();
+
+    if (grammarTopics.length === 0) return [];
+
+    try {
+      const model = await createModelProvider(grammarModel);
+      const result = await generateText({
+        model,
+        system: getSystemPrompt(),
+        prompt: generateGrammarWorkshopPrompt(grammarTopics, studentAge),
+      });
+
+      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+      return JSON.parse(text) as GrammarWorkshopChallenge[];
+    } catch (error) {
+      handleError(error);
+      return [];
+    }
+  }
+
+  /** Generates MCQ questions for Grammar Roulette / Grammar Duel (stored in component state). */
+  async function generateGrammarQuestions(): Promise<GrammarGameQuestion[]> {
+    const { grammarTopics, studentAge } = readingStore;
+    const { grammarModel } = useSettingStore.getState();
+
+    if (grammarTopics.length === 0) return [];
+
+    try {
+      const model = await createModelProvider(grammarModel);
+      const result = await generateText({
+        model,
+        system: getSystemPrompt(),
+        prompt: generateGrammarQuestionsPrompt(grammarTopics, studentAge),
+      });
+
+      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+      return JSON.parse(text) as GrammarGameQuestion[];
+    } catch (error) {
+      handleError(error);
+      return [];
+    }
+  }
+
   function saveSession() {
     const { backup } = readingStore;
     const { save } = useHistoryStore.getState();
@@ -978,6 +1078,10 @@ Guidelines:
     generateGrammarQuiz,
     calculateGrammarQuizScore,
     evaluateGrammarOpenAnswer,
+    generateErrorSurgeryContent,
+    generateGrammarScrambleContent,
+    generateGrammarWorkshopContent,
+    generateGrammarQuestions,
     calculateTestScore,
     evaluateShortAnswer,
     askTutor,

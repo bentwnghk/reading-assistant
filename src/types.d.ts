@@ -106,6 +106,45 @@ interface GrammarQuizQuestion {
 
 type GrammarQuizState = "idle" | "in-progress" | "completed";
 
+// ── Grammar Games ────────────────────────────────────────────────────────────
+
+type GrammarGameMode = "practice" | "arcade" | "mastery";
+type GrammarGameStatus = "setup" | "playing" | "completed";
+
+/** One sentence challenge for the Word Order Scramble game. */
+interface GrammarScrambleChallenge {
+  topicId: string;
+  sentence: string; // correct full sentence; words shuffled client-side
+  hint: string;     // the topic's pattern formula shown as a guide
+}
+
+/** One slot-fill challenge for the Grammar Workshop game. */
+interface GrammarWorkshopChallenge {
+  topicId: string;
+  template: string;  // sentence with __[label]__ blanks e.g. "She __[auxiliary]__ finished her work."
+  slots: { label: string; answer: string }[];
+  wordBank: string[]; // correct answers + distractors, pre-shuffled
+  explanation: string;
+}
+
+/** One error-repair challenge for the Error Surgery game (AI-generated). */
+interface ErrorSurgeryChallenge {
+  topicId: string;
+  sentence: string;   // sentence containing exactly one grammar error
+  errorWord: string;  // the exact erroneous token as it appears in the sentence
+  correction: string; // the correct replacement word/phrase
+  explanation: string;
+}
+
+/** One MCQ question shared by Grammar Roulette and Grammar Duel. */
+interface GrammarGameQuestion {
+  topicId: string;
+  question: string;
+  options: string[]; // exactly 4 options
+  correctIndex: number;
+  explanation: string;
+}
+
 type SpellingGameMode = "listen-type" | "scramble" | "fill-blanks" | "mixed";
 type SpellingDifficulty = "easy" | "medium" | "hard";
 

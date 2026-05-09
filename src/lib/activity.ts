@@ -14,6 +14,11 @@ export type ActivityType =
   | "glossary_add"
   | "grammar_analyze"
   | "grammar_quiz_complete"
+  | "grammar_scramble_complete"
+  | "grammar_workshop_complete"
+  | "grammar_surgery_complete"
+  | "grammar_roulette_complete"
+  | "grammar_duel_complete"
   | "ai_tutor_question"
 
 export interface ActivityDetails {

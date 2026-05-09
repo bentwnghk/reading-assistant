@@ -11,6 +11,7 @@ import {
   XCircle,
   Highlighter,
   Trophy,
+  Gamepad2,
 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -35,8 +36,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
+import GrammarGames from "./GrammarGames";
 
-type TabType = "topics" | "lessons" | "quiz";
+type TabType = "topics" | "lessons" | "quiz" | "games";
 
 const CATEGORY_COLORS: Record<GrammarTopicCategory, string> = {
   tenses: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -163,9 +165,10 @@ function Grammar() {
   }
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
-    { key: "topics", label: t("reading.grammar.tabTopics"), icon: <BookOpen className="h-4 w-4" /> },
+    { key: "topics",  label: t("reading.grammar.tabTopics"),  icon: <BookOpen className="h-4 w-4" /> },
     { key: "lessons", label: t("reading.grammar.tabLessons"), icon: <GraduationCap className="h-4 w-4" /> },
-    { key: "quiz", label: t("reading.grammar.tabQuiz"), icon: <CheckCircle2 className="h-4 w-4" /> },
+    { key: "quiz",    label: t("reading.grammar.tabQuiz"),    icon: <CheckCircle2 className="h-4 w-4" /> },
+    { key: "games",   label: t("reading.grammar.tabGames"),   icon: <Gamepad2 className="h-4 w-4" /> },
   ];
 
   const renderTopicCards = () => (
@@ -561,6 +564,8 @@ function Grammar() {
           );
         }
         return renderQuizContent();
+      case "games":
+        return <GrammarGames />;
     }
   };
 

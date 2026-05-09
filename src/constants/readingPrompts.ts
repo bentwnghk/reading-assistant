@@ -723,6 +723,162 @@ Guidelines:
 - Keep feedback brief and encouraging`;
 }
 
+// ── Grammar Games AI prompts ─────────────────────────────────────────────────
+
+/**
+ * Generates additional Word Order Scramble sentences for each grammar topic.
+ * Returns: GrammarScrambleChallenge[]
+ */
+export function generateGrammarScramblePrompt(topics: GrammarTopic[], age: number): string {
+  const topicList = topics
+    .map(t => `- id: "${t.id}", name: "${t.name}", pattern: "${t.pattern}", CEFR: ${t.cefrLevel}`)
+    .join("\n");
+
+  return `Generate Word Order Scramble challenges for a ${age}-year-old Hong Kong student learning English grammar.
+
+Grammar topics identified in the text:
+${topicList}
+
+For each topic, generate 3 new example sentences that clearly demonstrate the grammar pattern. The sentences must NOT be taken from any previously seen text — they must be original.
+
+Respond with ONLY a valid JSON array. No markdown, no code blocks.
+
+[
+  {
+    "topicId": "<topic id from the list above>",
+    "sentence": "<a complete, natural sentence of 6–14 words demonstrating the grammar pattern>",
+    "hint": "<the pattern formula for this topic>"
+  }
+]
+
+Guidelines:
+- Each sentence must clearly and unambiguously illustrate the target grammar pattern
+- Use vocabulary appropriate for age ${age}
+- Sentences should be varied: different subjects, tenses within the pattern, contexts
+- Generate exactly 3 sentences per topic
+- Keep sentences between 6 and 14 words so they are manageable as word-chip puzzles
+- Respond with ONLY the JSON array, no markdown, no code blocks`;
+}
+
+/**
+ * Generates Grammar Workshop slot-fill challenges for each grammar topic.
+ * Returns: GrammarWorkshopChallenge[]
+ */
+export function generateGrammarWorkshopPrompt(topics: GrammarTopic[], age: number): string {
+  const topicList = topics
+    .map(t => `- id: "${t.id}", name: "${t.name}", pattern: "${t.pattern}", commonMistakes: "${t.commonMistakes}"`)
+    .join("\n");
+
+  return `Generate Grammar Workshop slot-fill challenges for a ${age}-year-old Hong Kong student.
+
+Grammar topics:
+${topicList}
+
+For each topic, create 2 slot-fill challenges. Each challenge has a sentence with one or two labelled blanks that the student must fill by selecting from a word bank. The word bank contains the correct answers plus plausible distractors targeting common Hong Kong student mistakes.
+
+Respond with ONLY a valid JSON array. No markdown, no code blocks.
+
+[
+  {
+    "topicId": "<topic id>",
+    "template": "<sentence with blanks written as __[label]__ e.g. 'She __[auxiliary]__ finished her homework.'>",
+    "slots": [
+      { "label": "<label matching the blank in template>", "answer": "<correct word or phrase>" }
+    ],
+    "wordBank": ["<correct answer 1>", "<correct answer 2 if two slots>", "<distractor 1>", "<distractor 2>", "<distractor 3>"],
+    "explanation": "<brief explanation of why the correct answer is right, in English>"
+  }
+]
+
+Guidelines:
+- Blank labels should be grammar role names: [auxiliary], [verb form], [preposition], [article], [conjunction], [connector], [modal]
+- Word bank must contain all correct answers plus at least 3 distractors
+- Distractors should be the exact wrong forms Hong Kong students commonly use (from commonMistakes)
+- Shuffle the word bank (do not put correct answer first)
+- Template must use __[label]__ format with double underscores
+- Generate 2 challenges per topic
+- Respond with ONLY the JSON array, no markdown, no code blocks`;
+}
+
+/**
+ * Generates Error Surgery challenges — sentences with one deliberate grammar error.
+ * Returns: ErrorSurgeryChallenge[]
+ */
+export function generateErrorSurgeryPrompt(topics: GrammarTopic[], age: number): string {
+  const topicList = topics
+    .map(t => `- id: "${t.id}", name: "${t.name}", pattern: "${t.pattern}", commonMistakes: "${t.commonMistakes}"`)
+    .join("\n");
+
+  return `Generate Error Surgery challenges for a ${age}-year-old Hong Kong student learning English grammar.
+
+Grammar topics:
+${topicList}
+
+For each topic, generate 3 sentences. Each sentence contains exactly ONE deliberate grammar error related to that topic — specifically the kind of mistake Hong Kong students commonly make (see commonMistakes above). The student must identify the single erroneous word or short phrase and correct it.
+
+Respond with ONLY a valid JSON array. No markdown, no code blocks.
+
+[
+  {
+    "topicId": "<topic id>",
+    "sentence": "<a complete sentence containing exactly one grammar error>",
+    "errorWord": "<the exact erroneous word or short phrase as it appears in the sentence>",
+    "correction": "<the correct replacement word or phrase>",
+    "explanation": "<brief explanation of the error and why the correction is right>"
+  }
+]
+
+Guidelines:
+- The errorWord must appear verbatim in the sentence — exact same casing and spacing
+- Each sentence should have exactly ONE error — all other grammar must be correct
+- Errors must be realistic, natural-sounding sentences (not obviously artificial)
+- Use vocabulary appropriate for age ${age}
+- The error should be clearly related to the grammar topic, not a spelling or vocabulary mistake
+- Generate exactly 3 error sentences per topic
+- Respond with ONLY the JSON array, no markdown, no code blocks`;
+}
+
+/**
+ * Generates MCQ questions for Grammar Roulette and Grammar Duel (AI refresh).
+ * Returns: GrammarGameQuestion[]
+ */
+export function generateGrammarQuestionsPrompt(topics: GrammarTopic[], age: number): string {
+  const topicList = topics
+    .map(t => `- id: "${t.id}", name: "${t.name}", pattern: "${t.pattern}", explanation: "${t.explanation}", commonMistakes: "${t.commonMistakes}"`)
+    .join("\n");
+
+  return `Generate multiple-choice grammar questions for a ${age}-year-old Hong Kong student.
+
+Grammar topics:
+${topicList}
+
+Generate 4 questions per topic. Use these question types:
+1. "Which sentence correctly uses [topic]?" — one correct + three wrong sentences (distractors target commonMistakes)
+2. "Which word/phrase correctly completes this sentence?" — fill-in with 4 options
+3. "Which situation calls for [topic] rather than an alternative?" — usage judgment
+4. "Find the grammatically correct sentence" — one correct + three with typical HK student errors
+
+Respond with ONLY a valid JSON array. No markdown, no code blocks.
+
+[
+  {
+    "topicId": "<topic id>",
+    "question": "<question text>",
+    "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
+    "correctIndex": <0-3>,
+    "explanation": "<brief explanation of why the correct answer is right>"
+  }
+]
+
+Guidelines:
+- Exactly 4 options per question, exactly one correct
+- Distractors must be plausible — target specific errors from commonMistakes
+- Questions should be clearly worded for age ${age}
+- Vary question types across the 4 questions per topic
+- Generate exactly 4 questions per topic
+- Respond with ONLY the JSON array, no markdown, no code blocks`;
+}
+
 export function getSystemPrompt(): string {
   return systemInstruction.replace("{now}", new Date().toLocaleDateString(i18next.language));
 }
