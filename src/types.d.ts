@@ -130,9 +130,10 @@ interface GrammarWorkshopChallenge {
 /** One error-repair challenge for the Error Surgery game (AI-generated). */
 interface ErrorSurgeryChallenge {
   topicId: string;
-  sentence: string;   // sentence containing exactly one grammar error
-  errorWord: string;  // the exact erroneous token as it appears in the sentence
-  correction: string; // the correct replacement word/phrase
+  sentence: string;    // sentence containing exactly one grammar error
+  errorWord: string;   // the exact erroneous token as it appears in the sentence
+  correction: string;  // the correct replacement word/phrase
+  distractors: string[]; // 3 plausible but wrong alternatives (AI-generated)
   explanation: string;
 }
 

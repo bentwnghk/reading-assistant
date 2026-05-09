@@ -21,6 +21,23 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
+/** Locate the token-index span of errorWord within the sentence token array.
+ *  Returns null if not found. Handles both single-word and multi-word errorWords.
+ */
+function computeErrorSpan(
+  tokens: string[],
+  errorWord: string
+): { start: number; end: number } | null {
+  const strip = (w: string) => w.toLowerCase().replace(/[,.:;?!'"()]+$/g, "");
+  const errorTokens = errorWord.split(/\s+/).map(strip);
+  for (let i = 0; i <= tokens.length - errorTokens.length; i++) {
+    if (errorTokens.every((et, j) => strip(tokens[i + j]) === et)) {
+      return { start: i, end: i + errorTokens.length - 1 };
+    }
+  }
+  return null;
+}
+
 interface Props { onBack: () => void }
 
 export default function GrammarErrorSurgery({ onBack }: Props) {
@@ -41,6 +58,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   const [challenges, setChallenges] = useState<ErrorSurgeryChallenge[]>([]);
   const [roundIndex, setRoundIndex] = useState(0);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [selectedSpan, setSelectedSpan] = useState<{ start: number; end: number } | null>(null);
   const [result, setResult] = useState<"pending" | "correct" | "incorrect">("pending");
   const [showOptions, setShowOptions] = useState(false);
   const [correctionOptions, setCorrectionOptions] = useState<string[]>([]);
@@ -74,20 +92,23 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
 
   // ── Build correction options for the selected error word ─────────────────
   const buildCorrectionOptions = useCallback((challenge: ErrorSurgeryChallenge): string[] => {
-    // The correct correction + 3 plausible wrong alternatives
-    const topic = grammarTopics.find((t) => t.id === challenge.topicId);
-    const patternWords = (topic?.pattern ?? "").split(/[\s+/,]+/).map(w => w.trim()).filter(w => w.length > 1 && /^[a-z]/i.test(w));
-    const distractors = shuffleArray(patternWords.filter(w => w.toLowerCase() !== challenge.correction.toLowerCase())).slice(0, 3);
-    // Ensure we have at least 3 distractors
-    const fallback = ["is", "are", "was", "were", "have", "has", "had", "do", "does", "did", "be", "been"]
-      .filter(w => w !== challenge.correction.toLowerCase() && !distractors.includes(w));
-    while (distractors.length < 3) distractors.push(fallback[distractors.length] ?? "—");
-    return shuffleArray([challenge.correction, ...distractors.slice(0, 3)]);
-  }, [grammarTopics]);
+    const distractors = (challenge.distractors ?? [])
+      .filter(w => w && w.trim().length > 0)
+      .slice(0, 3);
+    return shuffleArray([challenge.correction, ...distractors]);
+  }, []);
 
-  const handleWordClick = useCallback((word: string) => {
+  const handleWordClick = useCallback((word: string, index: number, tokens: string[]) => {
     if (result !== "pending" || !currentChallenge) return;
-    setSelectedWord(word);
+    const errorSpan = computeErrorSpan(tokens, currentChallenge.errorWord);
+    if (errorSpan && index >= errorSpan.start && index <= errorSpan.end) {
+      // Tapped within the error phrase — auto-expand selection to cover the full phrase
+      setSelectedWord(currentChallenge.errorWord);
+      setSelectedSpan(errorSpan);
+    } else {
+      setSelectedWord(word);
+      setSelectedSpan({ start: index, end: index });
+    }
     setCorrectionOptions(buildCorrectionOptions(currentChallenge));
     setShowOptions(true);
   }, [result, currentChallenge, buildCorrectionOptions]);
@@ -123,6 +144,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
       } else {
         setRoundIndex(nextIndex);
         setSelectedWord(null);
+        setSelectedSpan(null);
         setResult("pending");
         setTimeLeft(20);
       }
@@ -137,6 +159,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     setMaxStreak(0);
     setCorrectCount(0);
     setSelectedWord(null);
+    setSelectedSpan(null);
     setResult("pending");
     setShowOptions(false);
     setTimeLeft(20);
@@ -165,6 +188,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
                 return ri;
               }
               setSelectedWord(null);
+              setSelectedSpan(null);
               setResult("pending");
               setTimeLeft(20);
               return nextIndex;
@@ -270,6 +294,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   // ── Playing ───────────────────────────────────────────────────────────────
   if (!currentChallenge) return null;
   const words = currentChallenge.sentence.split(/\s+/).filter(Boolean);
+  const errorSpan = computeErrorSpan(words, currentChallenge.errorWord);
 
   return (
     <div className="space-y-4">
@@ -306,13 +331,12 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
       <div className="rounded-xl border p-4 leading-loose">
         <p className="flex flex-wrap gap-x-1 gap-y-1.5 text-sm">
           {words.map((word, i) => {
-            const clean = word.toLowerCase().replace(/[,.:;?!'"()]$/g, "");
-            const isError = clean === currentChallenge.errorWord.toLowerCase().replace(/[,.:;?!'"()]$/g, "");
-            const isSelected = selectedWord === word;
+            const isError = errorSpan !== null && i >= errorSpan.start && i <= errorSpan.end;
+            const isSelected = selectedSpan !== null && i >= selectedSpan.start && i <= selectedSpan.end;
             return (
               <button
                 key={`${word}-${i}`}
-                onClick={() => handleWordClick(word)}
+                onClick={() => handleWordClick(word, i, words)}
                 disabled={result !== "pending"}
                 className={cn(
                   "rounded px-1 py-0.5 transition-all text-sm",

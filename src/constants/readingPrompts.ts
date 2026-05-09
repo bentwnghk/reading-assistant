@@ -824,17 +824,19 @@ Respond with ONLY a valid JSON array. No markdown, no code blocks.
     "sentence": "<a complete sentence containing exactly one grammar error>",
     "errorWord": "<the exact erroneous word or short phrase as it appears in the sentence>",
     "correction": "<the correct replacement word or phrase>",
+    "distractors": ["<wrong option 1>", "<wrong option 2>", "<wrong option 3>"],
     "explanation": "<brief explanation of the error and why the correction is right>"
   }
 ]
 
 Guidelines:
-- The errorWord must appear verbatim in the sentence — exact same casing and spacing
+- The errorWord must appear verbatim in the sentence with exact same casing; it may be one word or a short phrase (2–3 words max) when the error is inherently multi-word (e.g. "will rain" → "rains" for a conditional clause)
 - Each sentence should have exactly ONE error — all other grammar must be correct
 - Errors must be realistic, natural-sounding sentences (not obviously artificial)
 - Use vocabulary appropriate for age ${age}
 - The error should be clearly related to the grammar topic, not a spelling or vocabulary mistake
 - Generate exactly 3 error sentences per topic
+- distractors must be exactly 3 real words or short phrases of the same form as the correction — plausible alternatives that are grammatically wrong in this context (NOT the correction, NOT grammatical terms like "participle" or "agent", NOT meta-labels like "correct")
 - Respond with ONLY the JSON array, no markdown, no code blocks`;
 }
 
