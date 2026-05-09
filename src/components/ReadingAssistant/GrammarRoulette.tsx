@@ -62,7 +62,9 @@ export default function GrammarRoulette({ onBack }: Props) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAutoGenerating, setIsAutoGenerating] = useState(false);
   const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const usedQuestionIds = useRef<Set<string>>(new Set());
+  const [timeLeft, setTimeLeft] = useState(30);
 
   // ── Sync store cache → local questions + byTopic map ─────────────────────
   useEffect(() => {
@@ -84,6 +86,40 @@ export default function GrammarRoulette({ onBack }: Props) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Countdown timer (Arcade / Mastery mode) ──────────────────────────────
+  useEffect(() => {
+    if (gameStatus !== "playing" || mode === "practice" || !currentRound || currentRound.answered || isSpinning) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+    setTimeLeft(30);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          setCurrentRound((r) => r ? { ...r, answered: true, correct: false } : r);
+          setStreak(0);
+          setTimeout(() => {
+            setRoundIndex((ri) => {
+              const nextRound = ri + 1;
+              if (nextRound >= totalRounds) {
+                setGameStatus("completed");
+                return ri;
+              }
+              setCurrentRound(null);
+              setSelectedOption(null);
+              return nextRound;
+            });
+          }, 3000);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStatus, mode, roundIndex, isSpinning, currentRound?.answered]);
 
   const getQuestionForTopic = useCallback((topicId: string): GrammarGameQuestion | null => {
     const pool = (questionsByTopic.get(topicId) ?? []).filter((q) => {
@@ -140,12 +176,12 @@ export default function GrammarRoulette({ onBack }: Props) {
 
   const handleAnswer = useCallback((optIdx: number) => {
     if (!currentRound || currentRound.answered) return;
+    if (timerRef.current) clearInterval(timerRef.current);
     setSelectedOption(optIdx);
 
     const isCorrect = optIdx === currentRound.question.correctIndex;
     const topic = grammarTopics[currentRound.topicIndex];
 
-    let award = 100;
     const newStreak = isCorrect ? streak + 1 : 0;
 
     if (isCorrect) {
@@ -154,7 +190,8 @@ export default function GrammarRoulette({ onBack }: Props) {
       setHotTopicId(topic.id);
       setHotTopicStreak(newHotStreak);
       const multiplier = newHotStreak >= 3 ? 3 : newHotStreak >= 2 ? 2 : 1;
-      award = Math.round(100 * multiplier);
+      let award = Math.round(100 * multiplier);
+      if (mode === "arcade") award += Math.round((timeLeft / 30) * 50);
       setCoins((c) => c + award);
       setStreak(newStreak);
       setMaxStreak((ms) => Math.max(ms, newStreak));
@@ -177,7 +214,7 @@ export default function GrammarRoulette({ onBack }: Props) {
         setSelectedOption(null);
       }
     }, 3000);
-  }, [currentRound, streak, hotTopicId, hotTopicStreak, grammarTopics, roundIndex, totalRounds]);
+  }, [currentRound, streak, hotTopicId, hotTopicStreak, grammarTopics, roundIndex, totalRounds, mode, timeLeft]);
 
   const startGame = useCallback(() => {
     setRoundIndex(0);
@@ -191,6 +228,7 @@ export default function GrammarRoulette({ onBack }: Props) {
     setSelectedOption(null);
     setWheelRotation(0);
     setLandedTopicIndex(null);
+    setTimeLeft(30);
     usedQuestionIds.current = new Set();
     setGameStatus("playing");
   }, []);
@@ -376,8 +414,16 @@ export default function GrammarRoulette({ onBack }: Props) {
         </div>
       </div>
 
-      <div className="text-xs text-muted-foreground text-right">
-        {t("reading.grammar.games.rounds", { count: totalRounds })} {roundIndex + 1}/{totalRounds}
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>{t("reading.grammar.games.rounds", { count: totalRounds })} {roundIndex + 1}/{totalRounds}</span>
+        {mode !== "practice" && currentRound && !isSpinning && (
+          <span className={cn(
+            "font-bold tabular-nums",
+            timeLeft <= 10 ? "text-red-500 animate-pulse" : "text-muted-foreground"
+          )}>
+            {timeLeft}s
+          </span>
+        )}
       </div>
 
       {/* Wheel */}

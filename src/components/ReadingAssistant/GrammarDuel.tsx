@@ -9,7 +9,7 @@ import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, GameModeSelector, AnswerFeedback, GameStatRow } from "./GrammarGames";
+import { GameBackButton, AnswerFeedback, GameStatRow } from "./GrammarGames";
 import { logActivity } from "@/utils/activityLogger";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -43,7 +43,6 @@ export default function GrammarDuel({ onBack }: Props) {
   const { update, save } = useHistoryStore();
 
   const [gameStatus, setGameStatus] = useState<GrammarGameStatus>("setup");
-  const [mode, setMode] = useState<GrammarGameMode>("practice");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [questions, setQuestions] = useState<GrammarGameQuestion[]>([]);
   const [isAutoGenerating, setIsAutoGenerating] = useState(false);
@@ -244,8 +243,6 @@ export default function GrammarDuel({ onBack }: Props) {
           </div>
         ) : (
           <>
-            <GameModeSelector mode={mode} onChange={setMode} />
-
             {/* Difficulty selector */}
             <div className="space-y-1.5">
               <p className="text-xs font-medium text-muted-foreground">{t("reading.grammar.games.duel.opponentLevel")}</p>
