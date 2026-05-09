@@ -925,7 +925,9 @@
       "readingTest": "閱讀測驗得分",
       "vocabQuiz": "詞彙測驗得分",
       "spelling": "拼字挑戰得分",
-      "grammarQuiz": "語法測驗得分"
+      "grammarQuiz": "語法測驗得分",
+      "grammarGame": "語法遊戲得分",
+      "grammarGameAccuracy": "語法遊戲正確率"
     },
     "charts": {
       "dailyActivity": "每日學習活動",
@@ -950,6 +952,7 @@
       "vocabQuiz": "詞彙測驗",
       "readingTest": "閱讀測驗",
       "grammarQuiz": "語法測驗",
+      "grammarGame": "語法遊戲",
       "tutorQuestion": "AI 導師",
       "flashcardReview": "字卡複習"
     },
@@ -1054,6 +1057,8 @@
     "spellingScore": "拼字挑戰得分",
     "quizScore": "詞彙測驗得分",
     "grammarQuizScore": "語法測驗得分",
+    "grammarGameScore": "語法遊戲",
+    "grammarGameAccuracy": "語法遊戲正確率",
     "totalVocabulary": "總詞彙量",
     "help": {
       "title": "閱讀記錄指南",
@@ -1469,6 +1474,8 @@
       "spelling": "拼字挑戰",
       "quiz": "詞彙測驗",
       "grammarQuiz": "語法測驗",
+      "grammarGame": "語法遊戲",
+      "grammarGameAccuracy": "語法遊戲正確率",
       "date": "最後更新",
       "dateRange": {
         "7days": "最近 7 天",
@@ -1562,6 +1569,7 @@
       "avg_quiz_score": "詞彙測驗",
        "avg_spelling_score": "拼字遊戲",
        "avg_grammar_quiz_score": "語法測驗",
+      "avg_grammar_game_score": "語法遊戲",
       "total_vocabulary_words": "詞彙量",
       "improvement_score": "進步幅度",
       "total_flashcard_reviews": "字卡複習"
@@ -1596,7 +1604,9 @@
       "quizzesCompleted": "完成測驗",
       "spellingGamesCompleted": "遊戲場次",
       "grammarQuizScore": "平均語法測驗分數",
-      "grammarQuizzesCompleted": "完成測驗"
+      "grammarQuizzesCompleted": "完成測驗",
+      "grammarGameScore": "平均語法遊戲分數",
+      "grammarGamesCompleted": "遊戲場次"
     },
     "personal": {
       "title": "你的進度",
@@ -1610,6 +1620,7 @@
       "avgQuizScore": "平均詞彙測驗分數",
       "avgTestScore": "平均閱讀測驗分數",
       "avgGrammarQuizScore": "平均語法測驗分數",
+      "avgGrammarGameScore": "平均語法遊戲分數",
       "totalFlashcards": "字卡複習總次數",
       "noStats": "完成本週的學習活動，即可出現在排行榜上！",
       "teacherTitle": "教師視圖",
@@ -1740,6 +1751,10 @@
             "name": "語法高手",
             "desc": "完成語法測驗以測試你對語法規則的理解。熟能生巧！"
           },
+          "grammar_games": {
+            "name": "語法遊戲達人",
+            "desc": "玩語法遊戲如重組句子、語法工作坊、手術室、輪盤和對戰，透過趣味挑戰掌握語法！"
+          },
           "ai_tutor_questions": {
             "name": "好奇學習者",
             "desc": "有地方不明白？問 AI 導師吧！你問的每個問題都算數——這裡沒有笨問題！"
@@ -1833,6 +1848,11 @@
         "name": "語法高手",
         "description": "完成 {{count}} 次語法測驗",
         "hint": "進行語法測驗以測試你對語法規則的理解"
+      },
+      "grammar_games": {
+        "name": "語法遊戲達人",
+        "description": "玩 {{count}} 次語法遊戲",
+        "hint": "玩語法遊戲如重組句子、語法工作坊、手術室、輪盤和對戰"
       },
       "ai_tutor_questions": {
         "name": "好奇學習者",

@@ -925,7 +925,9 @@
       "readingTest": "Reading Test Score",
       "vocabQuiz": "Vocab Quiz Score",
       "spelling": "Spelling Score",
-      "grammarQuiz": "Grammar Quiz Score"
+      "grammarQuiz": "Grammar Quiz Score",
+      "grammarGame": "Grammar Game Score",
+      "grammarGameAccuracy": "Grammar Game Accuracy"
     },
     "charts": {
       "dailyActivity": "Daily Learning Activity",
@@ -950,6 +952,7 @@
       "vocabQuiz": "Vocab Quiz",
       "readingTest": "Reading Test",
       "grammarQuiz": "Grammar Quiz",
+      "grammarGame": "Grammar Game",
       "tutorQuestion": "AI Tutor",
       "flashcardReview": "Flashcard Review"
     },
@@ -1054,6 +1057,8 @@
     "spellingScore": "Spelling Challenge Score",
     "quizScore": "Vocabulary Quiz Score",
     "grammarQuizScore": "Grammar Quiz Score",
+    "grammarGameScore": "Grammar Game",
+    "grammarGameAccuracy": "Grammar Game Accuracy",
     "totalVocabulary": "Total Vocabulary",
     "help": {
       "title": "Reading History Guide",
@@ -1469,6 +1474,8 @@
       "spelling": "Spelling Challenge",
       "quiz": "Vocabulary Quiz",
       "grammarQuiz": "Grammar Quiz",
+      "grammarGame": "Grammar Game",
+      "grammarGameAccuracy": "Grammar Game Accuracy",
       "date": "Last Update",
       "dateRange": {
         "7days": "Last 7 days",
@@ -1562,6 +1569,7 @@
       "avg_quiz_score": "Quiz",
       "avg_spelling_score": "Spelling",
     "avg_grammar_quiz_score": "Grammar Quiz",
+    "avg_grammar_game_score": "Grammar Game",
       "total_vocabulary_words": "Vocab",
       "improvement_score": "Improvement",
       "total_flashcard_reviews": "Flashcards"
@@ -1596,7 +1604,9 @@
       "quizzesCompleted": "Quizzes Done",
       "spellingGamesCompleted": "Games Played",
       "grammarQuizScore": "Avg Grammar Quiz Score",
-      "grammarQuizzesCompleted": "Quizzes Done"
+      "grammarQuizzesCompleted": "Quizzes Done",
+      "grammarGameScore": "Avg Grammar Game Score",
+      "grammarGamesCompleted": "Games Played"
     },
     "personal": {
       "title": "Your Progress",
@@ -1610,6 +1620,7 @@
       "avgQuizScore": "Avg Vocab Quiz Score",
       "avgTestScore": "Avg Reading Test Score",
     "avgGrammarQuizScore": "Avg Grammar Quiz Score",
+    "avgGrammarGameScore": "Avg Grammar Game Score",
       "totalFlashcards": "Total Flashcards",
       "noStats": "Complete learning activities this week to appear on the leaderboard!",
       "teacherTitle": "Teacher View",
@@ -1740,6 +1751,10 @@
             "name": "Grammar Ace",
             "desc": "Complete grammar quizzes to test your understanding of grammar rules. Practice makes perfect!"
           },
+          "grammar_games": {
+            "name": "Grammar Gamer",
+            "desc": "Play grammar games like Scramble, Workshop, Surgery, Roulette, and Duel to master grammar through fun challenges!"
+          },
           "ai_tutor_questions": {
             "name": "Curious Learner",
             "desc": "Stuck on something? Ask the AI Tutor! Every question you ask counts—there are no silly questions here!"
@@ -1833,6 +1848,11 @@
       "name": "Grammar Ace",
       "description": "Complete {{count}} grammar quizzes",
       "hint": "Take grammar quizzes to test your understanding of grammar rules"
+    },
+    "grammar_games": {
+      "name": "Grammar Gamer",
+      "description": "Play {{count}} grammar games",
+      "hint": "Play grammar games like Scramble, Workshop, Surgery, Roulette, and Duel"
     },
       "ai_tutor_questions": {
         "name": "Curious Learner",

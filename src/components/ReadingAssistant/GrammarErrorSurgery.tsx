@@ -47,6 +47,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     grammarErrorChallenges,
     grammarSurgeryHighScore,
     setGrammarSurgeryHighScore,
+    setGrammarGameAccuracy,
     id,
     backup,
   } = useReadingStore();
@@ -205,8 +206,10 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
 
   useEffect(() => {
     if (gameStatus === "completed" && challenges.length > 0) {
+      const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
       setGrammarSurgeryHighScore(score);
-      logActivity("grammar_surgery_complete", { sessionId: id || undefined, score });
+      setGrammarGameAccuracy(accuracy);
+      logActivity("grammar_surgery_complete", { sessionId: id || undefined, score, accuracy });
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);

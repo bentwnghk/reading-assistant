@@ -11,6 +11,7 @@ export type SortColumn =
   | "avg_quiz_score"
   | "avg_spelling_score"
   | "avg_grammar_quiz_score"
+  | "avg_grammar_game_score"
   | "total_vocabulary_words"
   | "improvement_score"
   | "total_flashcard_reviews"
@@ -30,6 +31,7 @@ export interface LeaderboardEntry {
   avgQuizScore: number
   avgSpellingScore: number
   avgGrammarQuizScore: number
+  avgGrammarGameScore: number
   flashcardReviews: number
   totalVocabWords: number
   totalSessions: number
@@ -57,6 +59,7 @@ export interface PersonalStats {
     avgAllTimeQuizScore: number
     avgAllTimeTestScore: number
     avgAllTimeGrammarQuizScore: number
+    avgAllTimeGrammarGameScore: number
     totalFlashcardReviews: number
   }
   rankInClass: number | null
@@ -74,11 +77,13 @@ interface WeeklyStatsRow {
   avgQuizScore: number
   avgSpellingScore: number
   avgGrammarQuizScore: number
+  avgGrammarGameScore: number
   totalVocabularyWords: number
   testsCompleted: number
   quizzesCompleted: number
   spellingGamesCompleted: number
   grammarQuizzesCompleted: number
+  grammarGamesCompleted: number
   weeklyScore: number
   improvementScore: number
 }
@@ -144,9 +149,11 @@ export async function refreshWeeklyStatsForUser(
          AVG(CASE WHEN activity_type = 'quiz_complete' THEN score END)  AS avg_quiz_score,
          COUNT(CASE WHEN activity_type = 'spelling_complete' THEN 1 END) AS spelling_games,
          AVG(CASE WHEN activity_type = 'spelling_complete' THEN score END) AS avg_spelling_score,
-         COUNT(CASE WHEN activity_type = 'grammar_quiz_complete' THEN 1 END) AS grammar_quizzes,
-         AVG(CASE WHEN activity_type = 'grammar_quiz_complete' THEN score END) AS avg_grammar_quiz_score,
-         COALESCE(SUM(CASE WHEN activity_type = 'flashcard_review'
+          COUNT(CASE WHEN activity_type = 'grammar_quiz_complete' THEN 1 END) AS grammar_quizzes,
+          AVG(CASE WHEN activity_type = 'grammar_quiz_complete' THEN score END) AS avg_grammar_quiz_score,
+          COUNT(CASE WHEN activity_type IN ('grammar_scramble_complete','grammar_workshop_complete','grammar_surgery_complete','grammar_roulette_complete','grammar_duel_complete') THEN 1 END) AS grammar_games,
+          AVG(CASE WHEN activity_type IN ('grammar_scramble_complete','grammar_workshop_complete','grammar_surgery_complete','grammar_roulette_complete','grammar_duel_complete') THEN score END) AS avg_grammar_game_score,
+          COALESCE(SUM(CASE WHEN activity_type = 'flashcard_review'
                            THEN (details->>'cardsReviewed')::int
                            ELSE 0 END), 0) AS total_flashcard_reviews
        FROM activity_logs
@@ -178,6 +185,8 @@ export async function refreshWeeklyStatsForUser(
     const avgSpellingScore = parseFloat(agg.avg_spelling_score ?? "0") || 0
     const grammarQuizzesCompleted = parseInt(agg.grammar_quizzes ?? "0") || 0
     const avgGrammarQuizScore = parseFloat(agg.avg_grammar_quiz_score ?? "0") || 0
+    const grammarGamesCompleted = parseInt(agg.grammar_games ?? "0") || 0
+    const avgGrammarGameScore = parseFloat(agg.avg_grammar_game_score ?? "0") || 0
     const totalFlashcardReviews = parseInt(agg.total_flashcard_reviews ?? "0") || 0
 
     // Get prior week's score for improvement bonus
@@ -209,11 +218,11 @@ export async function refreshWeeklyStatsForUser(
          user_id, week_start_date,
          total_sessions, reading_streak_days,
          avg_test_score, total_flashcard_reviews,
-         avg_quiz_score, avg_spelling_score, avg_grammar_quiz_score,
+         avg_quiz_score, avg_spelling_score, avg_grammar_quiz_score, avg_grammar_game_score,
          total_vocabulary_words,
-         tests_completed, quizzes_completed, spelling_games_completed, grammar_quizzes_completed,
+         tests_completed, quizzes_completed, spelling_games_completed, grammar_quizzes_completed, grammar_games_completed,
          weekly_score, improvement_score
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
        ON CONFLICT (user_id, week_start_date)
        DO UPDATE SET
          total_sessions            = EXCLUDED.total_sessions,
@@ -223,11 +232,13 @@ export async function refreshWeeklyStatsForUser(
          avg_quiz_score            = EXCLUDED.avg_quiz_score,
          avg_spelling_score        = EXCLUDED.avg_spelling_score,
          avg_grammar_quiz_score    = EXCLUDED.avg_grammar_quiz_score,
+         avg_grammar_game_score    = EXCLUDED.avg_grammar_game_score,
          total_vocabulary_words    = EXCLUDED.total_vocabulary_words,
          tests_completed           = EXCLUDED.tests_completed,
          quizzes_completed         = EXCLUDED.quizzes_completed,
          spelling_games_completed  = EXCLUDED.spelling_games_completed,
          grammar_quizzes_completed = EXCLUDED.grammar_quizzes_completed,
+         grammar_games_completed   = EXCLUDED.grammar_games_completed,
          weekly_score              = EXCLUDED.weekly_score,
          improvement_score         = EXCLUDED.improvement_score,
          updated_at                = NOW()`,
@@ -241,11 +252,13 @@ export async function refreshWeeklyStatsForUser(
         avgQuizScore,
         avgSpellingScore,
         avgGrammarQuizScore,
+        avgGrammarGameScore,
         totalVocabWords,
         testsCompleted,
         quizzesCompleted,
         spellingGamesCompleted,
         grammarQuizzesCompleted,
+        grammarGamesCompleted,
         weeklyScore,
         improvementScore,
       ]
@@ -261,11 +274,13 @@ export async function refreshWeeklyStatsForUser(
       avgQuizScore,
       avgSpellingScore,
       avgGrammarQuizScore,
+      avgGrammarGameScore,
       totalVocabularyWords: totalVocabWords,
       testsCompleted,
       quizzesCompleted,
       spellingGamesCompleted,
       grammarQuizzesCompleted,
+      grammarGamesCompleted,
       weeklyScore,
       improvementScore,
     }
@@ -414,6 +429,7 @@ export async function getLeaderboard(
       avgQuizScore:       Math.round(parseFloat(row.avg_quiz_score as string) || 0),
       avgSpellingScore:   Math.round(parseFloat(row.avg_spelling_score as string) || 0),
       avgGrammarQuizScore: Math.round(parseFloat(row.avg_grammar_quiz_score as string) || 0),
+      avgGrammarGameScore: Math.round(parseFloat(row.avg_grammar_game_score as string) || 0),
       flashcardReviews:   parseInt(row.total_flashcard_reviews as string) || 0,
       totalVocabWords:    parseInt(row.total_vocabulary_words as string) || 0,
       totalSessions:      parseInt(row.total_sessions as string) || 0,
@@ -549,6 +565,16 @@ export async function getPersonalStats(
       [userId]
     )
 
+    // ── All-time: avg grammar game score from activity_logs ──
+    const grammarGameResult = await client.query(
+      `SELECT COALESCE(AVG(score), 0) AS avg_grammar_game_score
+       FROM activity_logs
+       WHERE user_id = $1
+         AND activity_type IN ('grammar_scramble_complete','grammar_workshop_complete','grammar_surgery_complete','grammar_roulette_complete','grammar_duel_complete')`,
+      [userId]
+    )
+    const avgAllTimeGrammarGameScore = Math.round(parseFloat(grammarGameResult.rows[0]?.avg_grammar_game_score ?? "0") || 0)
+
     // ── All-time: flashcard reviews from activity_logs separately ──
     const flashcardResult = await client.query(
       `SELECT COALESCE(
@@ -643,11 +669,13 @@ export async function getPersonalStats(
       avgQuizScore:            parseFloat(row.avg_quiz_score as string) || 0,
       avgSpellingScore:        parseFloat(row.avg_spelling_score as string) || 0,
       avgGrammarQuizScore:     parseFloat(row.avg_grammar_quiz_score as string) || 0,
+      avgGrammarGameScore:     parseFloat(row.avg_grammar_game_score as string) || 0,
       totalVocabularyWords:    parseInt(row.total_vocabulary_words as string) || 0,
       testsCompleted:          parseInt(row.tests_completed as string) || 0,
       quizzesCompleted:        parseInt(row.quizzes_completed as string) || 0,
       spellingGamesCompleted:  parseInt(row.spelling_games_completed as string) || 0,
       grammarQuizzesCompleted: parseInt(row.grammar_quizzes_completed as string) || 0,
+      grammarGamesCompleted:   parseInt(row.grammar_games_completed as string) || 0,
       weeklyScore:             parseFloat(row.weekly_score as string) || 0,
       improvementScore:        parseFloat(row.improvement_score as string) || 0,
     })
@@ -667,6 +695,7 @@ export async function getPersonalStats(
         avgAllTimeQuizScore:        Math.round(parseFloat(sessionStats.avg_quiz_score) || 0),
         avgAllTimeTestScore:        Math.round(parseFloat(sessionStats.avg_test_score) || 0),
         avgAllTimeGrammarQuizScore: Math.round(parseFloat(sessionStats.avg_grammar_quiz_score) || 0),
+        avgAllTimeGrammarGameScore,
         totalFlashcardReviews:      parseInt(flashcardResult.rows[0]?.total_flashcard_reviews ?? "0") || 0,
       },
       rankInClass:  rankClass,

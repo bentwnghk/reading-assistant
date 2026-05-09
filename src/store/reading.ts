@@ -141,6 +141,7 @@ export interface ReadingStore {
   grammarSurgeryHighScore: number;
   grammarRouletteHighScore: number;
   grammarDuelHighScore: number;
+  grammarGameAccuracy: number;
   // Grammar Games — cached AI content
   grammarErrorChallenges: ErrorSurgeryChallenge[];
   grammarScrambleChallenges: GrammarScrambleChallenge[];
@@ -212,6 +213,7 @@ interface ReadingActions {
   setGrammarSurgeryHighScore: (score: number) => void;
   setGrammarRouletteHighScore: (score: number) => void;
   setGrammarDuelHighScore: (score: number) => void;
+  setGrammarGameAccuracy: (accuracy: number) => void;
   // Grammar Games setters — cached AI content
   setGrammarErrorChallenges: (challenges: ErrorSurgeryChallenge[]) => void;
   setGrammarScrambleChallenges: (challenges: GrammarScrambleChallenge[]) => void;
@@ -275,6 +277,7 @@ const defaultValues: ReadingStore = {
   grammarSurgeryHighScore: 0,
   grammarRouletteHighScore: 0,
   grammarDuelHighScore: 0,
+  grammarGameAccuracy: 0,
   grammarErrorChallenges: [],
   grammarScrambleChallenges: [],
   grammarWorkshopChallenges: [],
@@ -773,6 +776,16 @@ export const useReadingStore = create(
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }
+          return newState;
+        }),
+      setGrammarGameAccuracy: (accuracy) =>
+        set((state) => {
+          const newState = {
+            grammarGameAccuracy: Math.max(state.grammarGameAccuracy, accuracy),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) syncToAPI(state.id, newState);
           return newState;
         }),
       setGrammarErrorChallenges: (challenges) =>

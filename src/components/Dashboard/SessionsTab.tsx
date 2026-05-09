@@ -62,6 +62,12 @@ const readingSessionSchema = z.object({
   grammarQuizCompletedAt: z.number().optional(),
   grammarHighlightEnabled: z.boolean().optional(),
   grammarHighlightTopicId: z.string().nullable().optional(),
+  grammarScrambleHighScore: z.number().optional(),
+  grammarWorkshopHighScore: z.number().optional(),
+  grammarSurgeryHighScore: z.number().optional(),
+  grammarRouletteHighScore: z.number().optional(),
+  grammarDuelHighScore: z.number().optional(),
+  grammarGameAccuracy: z.number().optional(),
   flashcardReviewDates: z.array(z.number()).optional(),
   summaryGeneratedAt: z.number().optional(),
   mindMapGeneratedAt: z.number().optional(),
@@ -236,7 +242,7 @@ function SessionsTab({ onClose }: SessionsTabProps) {
           </div>
         ) : (
           <>
-            <Table className="min-w-[720px]">
+            <Table className="min-w-[800px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("history.name")}</TableHead>
@@ -257,6 +263,12 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                   </TableHead>
                   <TableHead className="w-16 text-center whitespace-normal break-words">
                     {t("history.grammarQuizScore")}
+                  </TableHead>
+                  <TableHead className="w-16 text-center whitespace-normal break-words">
+                    {t("history.grammarGameScore")}
+                  </TableHead>
+                  <TableHead className="w-16 text-center whitespace-normal break-words">
+                    {t("history.grammarGameAccuracy")}
                   </TableHead>
                   <TableHead className="text-center whitespace-normal break-words">
                     {t("history.date")}
@@ -297,6 +309,18 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {item.grammarQuizCompleted && item.grammarQuizScore > 0 ? `${item.grammarQuizScore}%` : "-"}
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
+                      {Math.max(
+                        item.grammarScrambleHighScore || 0,
+                        item.grammarWorkshopHighScore || 0,
+                        item.grammarSurgeryHighScore || 0,
+                        item.grammarRouletteHighScore || 0,
+                        item.grammarDuelHighScore || 0,
+                      ) || "-"}
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
+                      {item.grammarGameAccuracy ? `${item.grammarGameAccuracy}%` : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       <div>{formatDate(item.updatedAt || item.createdAt, i18n.language)}</div>

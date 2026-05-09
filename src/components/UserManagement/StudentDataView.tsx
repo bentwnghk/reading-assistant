@@ -31,7 +31,7 @@ interface StudentDataViewProps {
   currentUserId?: string
 }
 
-type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore" | "grammarQuizScore"
+type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore" | "grammarQuizScore" | "grammarGameScore"
 type SortOrder = "asc" | "desc"
 type DateRange = "7" | "30" | "90" | "180" | "360" | "all"
 
@@ -204,6 +204,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           break
         case "grammarQuizScore":
           comparison = (b.grammarQuizScore || 0) - (a.grammarQuizScore || 0)
+          break
+        case "grammarGameScore":
+          comparison = (b.grammarGameBestScore || 0) - (a.grammarGameBestScore || 0)
           break
       }
       return sortOrder === "asc" ? -comparison : comparison
@@ -412,6 +415,15 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </Button>
                 </TableHead>
                 <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("grammarGameScore")} className="h-auto py-1 whitespace-normal">
+                    {t("userManagement.studentData.grammarGame")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
+                  {t("userManagement.studentData.grammarGameAccuracy")}
+                </TableHead>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
                   <Button variant="ghost" size="sm" onClick={() => handleSort("testScore")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.testScore")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -468,6 +480,24 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     {session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? (
                       <Badge variant={(session.grammarQuizScore || 0) >= 70 ? "default" : "destructive"}>
                         {session.grammarQuizScore}%
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {(session.grammarGameBestScore || 0) > 0 ? (
+                      <Badge variant={session.grammarGameBestScore! >= 70 ? "default" : "destructive"}>
+                        {session.grammarGameBestScore}
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {(session.grammarGameAccuracy || 0) > 0 ? (
+                      <Badge variant={session.grammarGameAccuracy! >= 70 ? "default" : "destructive"}>
+                        {session.grammarGameAccuracy}%
                       </Badge>
                     ) : (
                       <span className="text-muted-foreground">-</span>

@@ -17,6 +17,8 @@ interface SessionWithSchool {
   spellingGameBestScore?: number
   grammarQuizScore?: number
   grammarQuizCompleted?: boolean
+  grammarGameBestScore?: number
+  grammarGameAccuracy?: number
   glossaryCount: number
   progress: number
   createdAt: number
@@ -203,8 +205,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   })
 
   const headers = isAdmin
-    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Reading Test", "Last Update"]
-    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Reading Test", "Last Update"]
+    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
+    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
 
   dataSheet.columns = headers.map(header => ({
     header,
@@ -271,6 +273,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.spellingGameBestScore || "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
           session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? session.grammarQuizScore : "-",
+          (session.grammarGameBestScore || 0) > 0 ? session.grammarGameBestScore : "-",
+          (session.grammarGameAccuracy || 0) > 0 ? `${session.grammarGameAccuracy}%` : "-",
           session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
@@ -283,6 +287,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.spellingGameBestScore || "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
           session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? session.grammarQuizScore : "-",
+          (session.grammarGameBestScore || 0) > 0 ? session.grammarGameBestScore : "-",
+          (session.grammarGameAccuracy || 0) > 0 ? `${session.grammarGameAccuracy}%` : "-",
           session.testCompleted && session.testScore !== undefined ? session.testScore : "-",
           dayjs(session.updatedAt).format("YYYY-MM-DD HH:mm"),
         ]
@@ -293,9 +299,10 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
     const isAltRow = index % 2 === 1
 
     row.eachCell((cell, colNumber) => {
+      const docTitleColIndex = isAdmin ? 4 : 3
       cell.alignment = {
         vertical: "middle",
-        horizontal: colNumber === 4 ? "left" : "center",
+        horizontal: colNumber === docTitleColIndex ? "left" : "center",
       }
       cell.font = {
         size: 10,
@@ -312,7 +319,9 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
       const progressColIndex = isAdmin ? 5 : 4
       const quizColIndex = isAdmin ? 8 : 7
       const grammarColIndex = isAdmin ? 9 : 8
-      const testColIndex = isAdmin ? 10 : 9
+      const grammarGameColIndex = isAdmin ? 10 : 9
+      const grammarGameAccuracyColIndex = isAdmin ? 11 : 10
+      const testColIndex = isAdmin ? 12 : 11
 
       if (colNumber === progressColIndex && typeof cell.value === "number") {
         cell.numFmt = "0\"%\""
@@ -355,6 +364,26 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
         } else {
           cell.fill = redFill
           cell.font = { ...cell.font as ExcelJS.Font, ...redFont }
+        }
+      }
+
+      if (colNumber === grammarGameColIndex && typeof cell.value === "number") {
+        if (cell.value >= 70) {
+          cell.fill = greenFill
+          cell.font = { ...cell.font as ExcelJS.Font, ...greenFont }
+        }
+      }
+
+      if (colNumber === grammarGameAccuracyColIndex && typeof cell.value === "string" && cell.value !== "-") {
+        const accVal = parseInt(cell.value, 10)
+        if (!isNaN(accVal)) {
+          if (accVal >= 70) {
+            cell.fill = greenFill
+            cell.font = { ...cell.font as ExcelJS.Font, ...greenFont }
+          } else {
+            cell.fill = redFill
+            cell.font = { ...cell.font as ExcelJS.Font, ...redFont }
+          }
         }
       }
     })

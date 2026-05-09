@@ -48,6 +48,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
     grammarScrambleChallenges,
     grammarScrambleHighScore,
     setGrammarScrambleHighScore,
+    setGrammarGameAccuracy,
     id, backup,
   } = useReadingStore();
   const { generateGrammarScrambleContent } = useReadingAssistant();
@@ -197,8 +198,10 @@ export default function GrammarWordScramble({ onBack }: Props) {
   // ── Save on completion ────────────────────────────────────────────────────
   useEffect(() => {
     if (gameStatus === "completed" && challenges.length > 0) {
+      const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
       setGrammarScrambleHighScore(score);
-      logActivity("grammar_scramble_complete", { sessionId: id || undefined, score });
+      setGrammarGameAccuracy(accuracy);
+      logActivity("grammar_scramble_complete", { sessionId: id || undefined, score, accuracy });
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);

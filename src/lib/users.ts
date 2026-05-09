@@ -61,6 +61,8 @@ export interface StudentSessionData {
   spellingGameBestScore?: number
   grammarQuizScore?: number
   grammarQuizCompleted?: boolean
+  grammarGameBestScore?: number
+  grammarGameAccuracy?: number
   glossaryCount: number
   progress: number
   createdAt: number
@@ -909,6 +911,9 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
+        rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
+        rs.grammar_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -935,6 +940,14 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       spellingGameBestScore: row.spelling_game_best_score,
       grammarQuizScore: row.grammar_quiz_score || 0,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
+      grammarGameBestScore: Math.max(
+        row.grammar_scramble_high_score || 0,
+        row.grammar_workshop_high_score || 0,
+        row.grammar_surgery_high_score || 0,
+        row.grammar_roulette_high_score || 0,
+        row.grammar_duel_high_score || 0,
+      ),
+      grammarGameAccuracy: row.grammar_game_accuracy || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
@@ -953,6 +966,9 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
+        rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
+        rs.grammar_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -978,6 +994,14 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       spellingGameBestScore: row.spelling_game_best_score,
       grammarQuizScore: row.grammar_quiz_score || 0,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
+      grammarGameBestScore: Math.max(
+        row.grammar_scramble_high_score || 0,
+        row.grammar_workshop_high_score || 0,
+        row.grammar_surgery_high_score || 0,
+        row.grammar_roulette_high_score || 0,
+        row.grammar_duel_high_score || 0,
+      ),
+      grammarGameAccuracy: row.grammar_game_accuracy || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),

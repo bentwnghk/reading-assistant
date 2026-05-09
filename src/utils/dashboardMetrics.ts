@@ -4,6 +4,7 @@ export interface SessionScore {
   title: string;
   score: number;
   date: number;
+  accuracy?: number;
 }
 
 export interface WeeklyCount {
@@ -36,6 +37,7 @@ export interface DailyActivity {
   vocabQuiz: number;
   readingTest: number;
   grammarQuiz: number;
+  grammarGame: number;
   tutorQuestion: number;
   flashcardReview: number;
 }
@@ -61,6 +63,7 @@ export interface DashboardMetrics {
   quizScores: SessionScore[];
   testScores: SessionScore[];
   grammarQuizScores: SessionScore[];
+  grammarGameScores: SessionScore[];
   sessionsOverTime: WeeklyCount[];
   scoreDistribution: ScoreBucket[];
   dailyActivities: DailyActivity[];
@@ -79,6 +82,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "vocabQuiz",
   "readingTest",
   "grammarQuiz",
+  "grammarGame",
   "tutorQuestion",
 ] as const;
 
@@ -94,6 +98,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
   grammarQuiz: "#d946ef",
+  grammarGame: "#84cc16",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
 };
@@ -152,6 +157,7 @@ function emptyDailyActivity(date: string): DailyActivity {
     vocabQuiz: 0,
     readingTest: 0,
     grammarQuiz: 0,
+    grammarGame: 0,
     tutorQuestion: 0,
     flashcardReview: 0,
   };
@@ -180,6 +186,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       quizScores: [],
       testScores: [],
       grammarQuizScores: [],
+      grammarGameScores: [],
       sessionsOverTime: [],
       scoreDistribution: [],
       dailyActivities: [],
@@ -269,6 +276,30 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       date: h.updatedAt || h.createdAt,
     }));
 
+  const grammarGameScores: SessionScore[] = sorted
+    .filter((h) => {
+      const best = Math.max(
+        h.grammarScrambleHighScore || 0,
+        h.grammarWorkshopHighScore || 0,
+        h.grammarSurgeryHighScore || 0,
+        h.grammarRouletteHighScore || 0,
+        h.grammarDuelHighScore || 0,
+      );
+      return best > 0;
+    })
+    .map((h) => ({
+      title: getSessionTitle(h),
+      score: Math.max(
+        h.grammarScrambleHighScore || 0,
+        h.grammarWorkshopHighScore || 0,
+        h.grammarSurgeryHighScore || 0,
+        h.grammarRouletteHighScore || 0,
+        h.grammarDuelHighScore || 0,
+      ),
+      accuracy: h.grammarGameAccuracy || 0,
+      date: h.updatedAt || h.createdAt,
+    }));
+
   const weekMap = new Map<string, number>();
   for (const item of sorted) {
     const weekKey = getMondayKey(item.createdAt);
@@ -333,6 +364,17 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       getDay(dailyMap, toDateString(item.grammarQuizCompletedAt || item.createdAt)).grammarQuiz += 1;
     }
 
+    const grammarGameBest = Math.max(
+      item.grammarScrambleHighScore || 0,
+      item.grammarWorkshopHighScore || 0,
+      item.grammarSurgeryHighScore || 0,
+      item.grammarRouletteHighScore || 0,
+      item.grammarDuelHighScore || 0,
+    );
+    if (grammarGameBest > 0) {
+      getDay(dailyMap, toDateString(item.updatedAt || item.createdAt)).grammarGame += 1;
+    }
+
     // sentenceAnalysis — each entry has its own createdAt
     for (const entry of Object.values(item.analyzedSentences || {})) {
       getDay(dailyMap, toDateString((entry as { createdAt?: number }).createdAt || item.createdAt)).sentenceAnalysis += 1;
@@ -371,6 +413,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     quizScores,
     testScores,
     grammarQuizScores,
+    grammarGameScores,
     sessionsOverTime,
     scoreDistribution,
     dailyActivities,

@@ -30,6 +30,7 @@ interface ActivityDetails {
 interface LogActivityOptions {
   sessionId?: string
   score?: number
+  accuracy?: number
   details?: ActivityDetails
 }
 

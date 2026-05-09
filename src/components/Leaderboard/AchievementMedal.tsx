@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles, Lock, CheckCircle2,
-  BookOpenCheck, GraduationCap,
+  BookOpenCheck, GraduationCap, Gamepad2,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import type { AchievementState } from "@/store/achievements";
@@ -13,7 +13,7 @@ import type { AchievementState } from "@/store/achievements";
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles,
-  BookOpenCheck, GraduationCap,
+  BookOpenCheck, GraduationCap, Gamepad2,
 };
 
 // ─── Color maps ───────────────────────────────────────────────────────────────
@@ -28,6 +28,7 @@ const COLOR_BG: Record<string, string> = {
   red:     "bg-red-500",
   cyan:    "bg-cyan-500",
   fuchsia: "bg-fuchsia-500",
+  amber:   "bg-amber-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -41,6 +42,7 @@ const COLOR_GLOW: Record<string, string> = {
   red:     "shadow-red-400/50",
   cyan:    "shadow-cyan-400/50",
   fuchsia: "shadow-fuchsia-400/50",
+  amber:   "shadow-amber-400/50",
 };
 
 const COLOR_RING: Record<string, string> = {
@@ -54,6 +56,7 @@ const COLOR_RING: Record<string, string> = {
   red:     "stroke-red-500",
   cyan:    "stroke-cyan-500",
   fuchsia: "stroke-fuchsia-500",
+  amber:   "stroke-amber-500",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -67,6 +70,7 @@ const COLOR_TEXT: Record<string, string> = {
   red:     "text-red-600 dark:text-red-400",
   cyan:    "text-cyan-600 dark:text-cyan-400",
   fuchsia: "text-fuchsia-600 dark:text-fuchsia-400",
+  amber:   "text-amber-600 dark:text-amber-400",
 };
 
 // ─── Progress ring SVG ────────────────────────────────────────────────────────

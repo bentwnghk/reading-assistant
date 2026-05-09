@@ -37,6 +37,7 @@ export default function GrammarRoulette({ onBack }: Props) {
     grammarGameQuestions,
     grammarRouletteHighScore,
     setGrammarRouletteHighScore,
+    setGrammarGameAccuracy,
     id, backup,
   } = useReadingStore();
   const { generateGrammarQuestions } = useReadingAssistant();
@@ -235,8 +236,10 @@ export default function GrammarRoulette({ onBack }: Props) {
 
   useEffect(() => {
     if (gameStatus === "completed" && totalRounds > 0) {
+      const accuracy = totalRounds > 0 ? Math.round((correctCount / totalRounds) * 100) : 0;
       setGrammarRouletteHighScore(coins);
-      logActivity("grammar_roulette_complete", { sessionId: id || undefined, score: coins });
+      setGrammarGameAccuracy(accuracy);
+      logActivity("grammar_roulette_complete", { sessionId: id || undefined, score: coins, accuracy });
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);

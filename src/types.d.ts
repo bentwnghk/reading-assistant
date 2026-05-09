@@ -386,6 +386,7 @@ type AchievementType =
   | "vocabulary_quizzes"
   | "grammar_analysis"
   | "grammar_quizzes"
+  | "grammar_games"
   | "ai_tutor_questions";
 
 interface AchievementMilestone {

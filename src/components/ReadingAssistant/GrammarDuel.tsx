@@ -37,6 +37,7 @@ export default function GrammarDuel({ onBack }: Props) {
     grammarGameQuestions,
     grammarDuelHighScore,
     setGrammarDuelHighScore,
+    setGrammarGameAccuracy,
     id, backup,
   } = useReadingStore();
   const { generateGrammarQuestions } = useReadingAssistant();
@@ -209,8 +210,10 @@ export default function GrammarDuel({ onBack }: Props) {
 
   useEffect(() => {
     if (gameStatus === "completed") {
+      const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
       setGrammarDuelHighScore(score);
-      logActivity("grammar_duel_complete", { sessionId: id || undefined, score });
+      setGrammarGameAccuracy(accuracy);
+      logActivity("grammar_duel_complete", { sessionId: id || undefined, score, accuracy });
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);

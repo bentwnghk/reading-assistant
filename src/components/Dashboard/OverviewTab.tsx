@@ -257,6 +257,7 @@ interface DailyRow {
   vocabQuiz: number;
   readingTest: number;
   grammarQuiz: number;
+  grammarGame: number;
   tutorQuestion: number;
 }
 
@@ -289,6 +290,7 @@ function fillDailyRange(activities: DailyRow[], days: number): DailyRow[] {
         vocabQuiz: 0,
         readingTest: 0,
         grammarQuiz: 0,
+        grammarGame: 0,
         tutorQuestion: 0,
       });
     }
@@ -515,6 +517,32 @@ export function OverviewTab() {
           emptyMessage={t("dashboard.charts.noData")}
           countLabel={t("dashboard.features.count")}
         />
+        <SpellingTrendChart
+          title={t("dashboard.scores.grammarGame")}
+          data={m.grammarGameScores}
+          color="#84cc16"
+          emptyMessage={t("dashboard.charts.noData")}
+        />
+        {m.grammarGameScores.length > 0 && (
+          <ChartCard title={t("dashboard.scores.grammarGameAccuracy")}>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={m.grammarGameScores.map((s, i) => ({ ...s, idx: i + 1 }))}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="accuracy"
+                  name={t("dashboard.scores.grammarGameAccuracy")}
+                  stroke="#84cc16"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        )}
       </div>
 
       {/* Vocabulary Growth (full width) */}

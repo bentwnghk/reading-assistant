@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2, BookOpenCheck } from "lucide-react";
+import { Trophy, Flame, BookOpen, Target, Layers, TrendingUp, Medal, Gamepad2, BookOpenCheck, Dices } from "lucide-react";
 import { cn } from "@/utils/style";
 import { ImprovementIndicator } from "./ImprovementIndicator";
 import type { PersonalStats } from "./types";
@@ -139,6 +139,14 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
             : undefined}
         />
         <StatItem
+          icon={<Dices className="h-3.5 w-3.5" />}
+          label={t("leaderboard.stats.grammarGameScore")}
+          value={Math.round(cw?.avgGrammarGameScore ?? 0)}
+          sub={cw?.grammarGamesCompleted
+            ? `${cw.grammarGamesCompleted} ${t("leaderboard.stats.grammarGamesCompleted")}`
+            : undefined}
+        />
+        <StatItem
           icon={<Layers className="h-3.5 w-3.5" />}
           label={t("leaderboard.stats.flashcards")}
           value={cw?.totalFlashcardReviews ?? 0}
@@ -179,6 +187,10 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgGrammarQuizScore")}</div>
             <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeGrammarQuizScore}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgGrammarGameScore")}</div>
+            <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeGrammarGameScore}</div>
           </div>
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.totalFlashcards")}</div>

@@ -6,6 +6,7 @@ export type SortColumn =
   | "avg_quiz_score"
   | "avg_spelling_score"
   | "avg_grammar_quiz_score"
+  | "avg_grammar_game_score"
   | "total_vocabulary_words"
   | "improvement_score"
   | "total_flashcard_reviews"
@@ -25,6 +26,7 @@ export interface LeaderboardEntry {
   avgQuizScore: number
   avgSpellingScore: number
   avgGrammarQuizScore: number
+  avgGrammarGameScore: number
   flashcardReviews: number
   totalVocabWords: number
   totalSessions: number
@@ -52,11 +54,13 @@ export interface WeeklyStatsRow {
   avgQuizScore: number
   avgSpellingScore: number
   avgGrammarQuizScore: number
+  avgGrammarGameScore: number
   totalVocabularyWords: number
   testsCompleted: number
   quizzesCompleted: number
   spellingGamesCompleted: number
   grammarQuizzesCompleted: number
+  grammarGamesCompleted: number
   weeklyScore: number
   improvementScore: number
 }
@@ -71,6 +75,7 @@ export interface PersonalStats {
     avgAllTimeQuizScore: number
     avgAllTimeTestScore: number
     avgAllTimeGrammarQuizScore: number
+    avgAllTimeGrammarGameScore: number
     totalFlashcardReviews: number
   }
   rankInClass: number | null

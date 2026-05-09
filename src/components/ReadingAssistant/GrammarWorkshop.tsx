@@ -23,6 +23,7 @@ export default function GrammarWorkshop({ onBack }: Props) {
     grammarWorkshopChallenges,
     grammarWorkshopHighScore,
     setGrammarWorkshopHighScore,
+    setGrammarGameAccuracy,
     id, backup,
   } = useReadingStore();
   const { generateGrammarWorkshopContent } = useReadingAssistant();
@@ -176,8 +177,10 @@ export default function GrammarWorkshop({ onBack }: Props) {
 
   useEffect(() => {
     if (gameStatus === "completed" && challenges.length > 0) {
+      const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
       setGrammarWorkshopHighScore(score);
-      logActivity("grammar_workshop_complete", { sessionId: id || undefined, score });
+      setGrammarGameAccuracy(accuracy);
+      logActivity("grammar_workshop_complete", { sessionId: id || undefined, score, accuracy });
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);

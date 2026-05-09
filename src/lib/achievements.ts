@@ -14,6 +14,7 @@ export type AchievementType =
   | "vocabulary_quizzes"
   | "grammar_analysis"
   | "grammar_quizzes"
+  | "grammar_games"
   | "ai_tutor_questions"
 
 export interface AchievementMilestone {
@@ -128,6 +129,12 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
     icon: "GraduationCap",
     color: "fuchsia",
     activityTypes: ["grammar_quiz_complete"],
+    initialMilestone: 5,
+  },
+  grammar_games: {
+    icon: "Gamepad2",
+    color: "amber",
+    activityTypes: ["grammar_scramble_complete", "grammar_workshop_complete", "grammar_surgery_complete", "grammar_roulette_complete", "grammar_duel_complete"],
     initialMilestone: 5,
   },
   ai_tutor_questions: {

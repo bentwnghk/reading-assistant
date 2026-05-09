@@ -39,6 +39,7 @@ export interface DailyStudentActivity {
   vocabQuiz: number;
   readingTest: number;
   grammarQuiz: number;
+  grammarGame: number;
   tutorQuestion: number;
 }
 
@@ -71,6 +72,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "vocabQuiz",
   "readingTest",
   "grammarQuiz",
+  "grammarGame",
   "tutorQuestion",
 ] as const;
 
@@ -86,6 +88,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
   grammarQuiz: "#d946ef",
+  grammarGame: "#84cc16",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
 };
@@ -186,6 +189,7 @@ function emptyDailyActivity(date: string): DailyStudentActivity {
     vocabQuiz: 0,
     readingTest: 0,
     grammarQuiz: 0,
+    grammarGame: 0,
     tutorQuestion: 0,
   };
 }
@@ -431,6 +435,7 @@ export function getDailyActivityForDate(
       vocabQuiz: activity?.vocabQuiz || 0,
       readingTest: activity?.readingTest || 0,
       grammarQuiz: activity?.grammarQuiz || 0,
+      grammarGame: activity?.grammarGame || 0,
       tutorQuestion: activity?.tutorQuestion || 0,
     };
   });

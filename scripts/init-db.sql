@@ -120,6 +120,7 @@ CREATE TABLE reading_sessions (
   grammar_surgery_high_score   INTEGER DEFAULT 0,
   grammar_roulette_high_score  INTEGER DEFAULT 0,
   grammar_duel_high_score      INTEGER DEFAULT 0,
+  grammar_game_accuracy        INTEGER DEFAULT 0,
   grammar_error_challenges     JSONB DEFAULT '[]'::jsonb,
   grammar_scramble_challenges  JSONB DEFAULT '[]'::jsonb,
   grammar_workshop_challenges  JSONB DEFAULT '[]'::jsonb,
@@ -292,11 +293,13 @@ CREATE TABLE weekly_stats (
   avg_quiz_score            NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   avg_spelling_score        NUMERIC(10,2) DEFAULT 0,  -- raw game points, unbounded
   avg_grammar_quiz_score    NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
+  avg_grammar_game_score    NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   total_vocabulary_words    INTEGER       DEFAULT 0,
   tests_completed           INTEGER       DEFAULT 0,
   quizzes_completed         INTEGER       DEFAULT 0,
   spelling_games_completed  INTEGER       DEFAULT 0,
   grammar_quizzes_completed INTEGER       DEFAULT 0,
+  grammar_games_completed   INTEGER       DEFAULT 0,
   weekly_score              NUMERIC(10,2) DEFAULT 0,  -- composite score, unbounded
   improvement_score         NUMERIC(10,2) DEFAULT 0,  -- week-over-week delta, can be negative/large
   created_at                TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -341,7 +344,8 @@ CREATE TABLE user_achievements (
       'vocabulary_quizzes',
       'ai_tutor_questions',
       'grammar_analysis',
-      'grammar_quizzes'
+      'grammar_quizzes',
+      'grammar_games'
     )),
   milestone        INTEGER     NOT NULL,   -- the target that was reached (e.g. 5, 10, 20 …)
   unlocked_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
