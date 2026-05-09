@@ -135,13 +135,17 @@ export interface ReadingStore {
   grammarQuizCompletedAt: number;
   grammarHighlightEnabled: boolean;
   grammarHighlightTopicId: string | null;
-  // Grammar Games
+  // Grammar Games — scores
   grammarScrambleHighScore: number;
   grammarWorkshopHighScore: number;
   grammarSurgeryHighScore: number;
   grammarRouletteHighScore: number;
   grammarDuelHighScore: number;
+  // Grammar Games — cached AI content
   grammarErrorChallenges: ErrorSurgeryChallenge[];
+  grammarScrambleChallenges: GrammarScrambleChallenge[];
+  grammarWorkshopChallenges: GrammarWorkshopChallenge[];
+  grammarGameQuestions: GrammarGameQuestion[];
   testScore: number;
   testCompleted: boolean;
   testEarnedPoints: number;
@@ -208,7 +212,11 @@ interface ReadingActions {
   setGrammarSurgeryHighScore: (score: number) => void;
   setGrammarRouletteHighScore: (score: number) => void;
   setGrammarDuelHighScore: (score: number) => void;
+  // Grammar Games setters — cached AI content
   setGrammarErrorChallenges: (challenges: ErrorSurgeryChallenge[]) => void;
+  setGrammarScrambleChallenges: (challenges: GrammarScrambleChallenge[]) => void;
+  setGrammarWorkshopChallenges: (challenges: GrammarWorkshopChallenge[]) => void;
+  setGrammarGameQuestions: (questions: GrammarGameQuestion[]) => void;
   setTestScore: (score: number) => void;
   setTestCompleted: (completed: boolean) => void;
   setTestPoints: (earned: number, total: number) => void;
@@ -268,6 +276,9 @@ const defaultValues: ReadingStore = {
   grammarRouletteHighScore: 0,
   grammarDuelHighScore: 0,
   grammarErrorChallenges: [],
+  grammarScrambleChallenges: [],
+  grammarWorkshopChallenges: [],
+  grammarGameQuestions: [],
   testScore: 0,
   testCompleted: false,
   testEarnedPoints: 0,
@@ -766,14 +777,30 @@ export const useReadingStore = create(
         }),
       setGrammarErrorChallenges: (challenges) =>
         set((state) => {
-          const newState = {
-            grammarErrorChallenges: challenges,
-            updatedAt: Date.now(),
-          };
+          const newState = { grammarErrorChallenges: challenges, updatedAt: Date.now() };
           syncToHistoryIfNeeded({ ...state, ...newState });
-          if (currentUserId && state.id) {
-            syncToAPI(state.id, newState);
-          }
+          if (currentUserId && state.id) syncToAPI(state.id, newState);
+          return newState;
+        }),
+      setGrammarScrambleChallenges: (challenges) =>
+        set((state) => {
+          const newState = { grammarScrambleChallenges: challenges, updatedAt: Date.now() };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) syncToAPI(state.id, newState);
+          return newState;
+        }),
+      setGrammarWorkshopChallenges: (challenges) =>
+        set((state) => {
+          const newState = { grammarWorkshopChallenges: challenges, updatedAt: Date.now() };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) syncToAPI(state.id, newState);
+          return newState;
+        }),
+      setGrammarGameQuestions: (questions) =>
+        set((state) => {
+          const newState = { grammarGameQuestions: questions, updatedAt: Date.now() };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) syncToAPI(state.id, newState);
           return newState;
         }),
       setTestScore: (score) =>

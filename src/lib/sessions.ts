@@ -31,8 +31,10 @@ export async function createReadingSession(
         grammar_scramble_high_score, grammar_workshop_high_score,
         grammar_surgery_high_score, grammar_roulette_high_score,
         grammar_duel_high_score, grammar_error_challenges,
+        grammar_scramble_challenges, grammar_workshop_challenges,
+        grammar_game_questions,
         created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49)`,
       [
         sessionData.id,
         userId,
@@ -78,6 +80,9 @@ export async function createReadingSession(
         sessionData.grammarRouletteHighScore ?? 0,
         sessionData.grammarDuelHighScore ?? 0,
         JSON.stringify(sessionData.grammarErrorChallenges ?? []),
+        JSON.stringify(sessionData.grammarScrambleChallenges ?? []),
+        JSON.stringify(sessionData.grammarWorkshopChallenges ?? []),
+        JSON.stringify(sessionData.grammarGameQuestions ?? []),
         new Date(sessionData.createdAt || Date.now()),
       ]
     )
@@ -193,6 +198,9 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       grammarRouletteHighScore: row.grammar_roulette_high_score ?? 0,
       grammarDuelHighScore: row.grammar_duel_high_score ?? 0,
       grammarErrorChallenges: row.grammar_error_challenges ?? [],
+      grammarScrambleChallenges: row.grammar_scramble_challenges ?? [],
+      grammarWorkshopChallenges: row.grammar_workshop_challenges ?? [],
+      grammarGameQuestions: row.grammar_game_questions ?? [],
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -292,6 +300,9 @@ export async function getReadingSession(
       grammarRouletteHighScore: row.grammar_roulette_high_score ?? 0,
       grammarDuelHighScore: row.grammar_duel_high_score ?? 0,
       grammarErrorChallenges: row.grammar_error_challenges ?? [],
+      grammarScrambleChallenges: row.grammar_scramble_challenges ?? [],
+      grammarWorkshopChallenges: row.grammar_workshop_challenges ?? [],
+      grammarGameQuestions: row.grammar_game_questions ?? [],
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
@@ -368,6 +379,9 @@ export async function updateReadingSession(
       grammarRouletteHighScore: "grammar_roulette_high_score",
       grammarDuelHighScore: "grammar_duel_high_score",
       grammarErrorChallenges: "grammar_error_challenges",
+      grammarScrambleChallenges: "grammar_scramble_challenges",
+      grammarWorkshopChallenges: "grammar_workshop_challenges",
+      grammarGameQuestions: "grammar_game_questions",
     }
     
     for (const [key, dbColumn] of Object.entries(fieldMappings)) {
@@ -378,7 +392,9 @@ export async function updateReadingSession(
         if (["highlightedWords", "analyzedSentences", "readingTest", "glossary",
              "glossaryRatings", "chatHistory", "originalDifficulty",
              "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates",
-             "grammarTopics", "grammarQuiz", "grammarErrorChallenges"].includes(key)) {
+             "grammarTopics", "grammarQuiz", "grammarErrorChallenges",
+             "grammarScrambleChallenges", "grammarWorkshopChallenges",
+             "grammarGameQuestions"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else {
           values.push(value)

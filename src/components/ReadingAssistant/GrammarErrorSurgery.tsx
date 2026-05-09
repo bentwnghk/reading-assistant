@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { RefreshCw, Stethoscope, LoaderCircle } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
@@ -48,21 +48,23 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(20);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAutoGenerating, setIsAutoGenerating] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ── Load / auto-generate challenges ──────────────────────────────────────
+  // ── Sync store cache → local challenges ──────────────────────────────────
   useEffect(() => {
     if (grammarErrorChallenges.length > 0) {
-      setChallenges(shuffleArray([...grammarErrorChallenges]));
-    } else if (grammarTopics.length > 0) {
-      // Auto-generate on first entry
+      setChallenges(grammarErrorChallenges);
+    }
+  }, [grammarErrorChallenges]);
+
+  // ── Auto-generate on first entry if cache is empty ───────────────────────
+  useEffect(() => {
+    if (grammarErrorChallenges.length === 0 && grammarTopics.length > 0) {
       setIsAutoGenerating(true);
-      generateErrorSurgeryContent()
-        .then((generated) => {
-          if (generated.length > 0) setChallenges(shuffleArray(generated));
-        })
-        .finally(() => setIsAutoGenerating(false));
+      generateErrorSurgeryContent().finally(() => setIsAutoGenerating(false));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -92,6 +94,8 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
 
   const handleCorrectionSelect = useCallback((correction: string) => {
     if (!currentChallenge) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+
     const isCorrect =
       selectedWord?.toLowerCase().replace(/[,.]$/, "") === currentChallenge.errorWord.toLowerCase().replace(/[,.]$/, "") &&
       correction.toLowerCase() === currentChallenge.correction.toLowerCase();
@@ -99,6 +103,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     let pts = 0;
     if (isCorrect) {
       pts = 100;
+      if (mode === "arcade") pts += Math.round((timeLeft / 20) * 50);
       const newStreak = streak + 1;
       if (newStreak >= 3) pts += Math.floor(pts * 0.1 * Math.min(newStreak - 2, 5));
       setScore((s) => s + pts);
@@ -119,9 +124,10 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
         setRoundIndex(nextIndex);
         setSelectedWord(null);
         setResult("pending");
+        setTimeLeft(20);
       }
-    }, 1800);
-  }, [currentChallenge, selectedWord, streak, roundIndex, challenges.length]);
+    }, 3000);
+  }, [currentChallenge, selectedWord, streak, roundIndex, challenges.length, mode, timeLeft]);
 
   const startGame = useCallback(() => {
     if (challenges.length === 0) return;
@@ -133,8 +139,45 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     setSelectedWord(null);
     setResult("pending");
     setShowOptions(false);
+    setTimeLeft(20);
     setGameStatus("playing");
   }, [challenges]);
+
+  // ── Arcade / Mastery countdown timer ─────────────────────────────────────
+  useEffect(() => {
+    if (gameStatus !== "playing" || mode === "practice" || result !== "pending") {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          // Time's up — count as incorrect, advance
+          setStreak(0);
+          setResult("incorrect");
+          setShowOptions(false);
+          setTimeout(() => {
+            setRoundIndex((ri) => {
+              const nextIndex = ri + 1;
+              if (nextIndex >= challenges.length) {
+                setGameStatus("completed");
+                return ri;
+              }
+              setSelectedWord(null);
+              setResult("pending");
+              setTimeLeft(20);
+              return nextIndex;
+            });
+          }, 3000);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStatus, mode, result, roundIndex]);
 
   useEffect(() => {
     if (gameStatus === "completed" && challenges.length > 0) {
@@ -150,10 +193,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   const handleGenerateNew = async () => {
     setIsGenerating(true);
     try {
-      const newChallenges = await generateErrorSurgeryContent();
-      if (newChallenges.length > 0) {
-        setChallenges(shuffleArray(newChallenges));
-      }
+      await generateErrorSurgeryContent();
     } finally {
       setIsGenerating(false);
     }
@@ -235,9 +275,17 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <GameBackButton onBack={onBack} />
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          {streak >= 2 && <span className="text-orange-500 font-bold">🔥 ×{streak}</span>}
-          <span className="font-semibold">{score} pts</span>
+        <div className="flex items-center gap-3">
+          {mode !== "practice" && (
+            <span className={cn(
+              "text-lg font-bold tabular-nums",
+              timeLeft <= 7 ? "text-red-500 animate-pulse" : "text-muted-foreground"
+            )}>
+              {timeLeft}s
+            </span>
+          )}
+          {streak >= 2 && <span className="text-xs text-orange-500 font-bold">🔥 ×{streak}</span>}
+          <span className="text-xs font-semibold text-muted-foreground">{score} pts</span>
         </div>
       </div>
 

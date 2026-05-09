@@ -12,57 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { GameBackButton, GameModeSelector, AnswerFeedback, GameStatRow } from "./GrammarGames";
 import { logActivity } from "@/utils/activityLogger";
 
-// ── Client-side question builder (same as Roulette) ──────────────────────────
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function buildGameQuestions(topics: GrammarTopic[]): GrammarGameQuestion[] {
-  const questions: GrammarGameQuestion[] = [];
-  if (topics.length < 2) return questions;
-
-  for (const topic of topics) {
-    const otherTopics = topics.filter((t) => t.id !== topic.id);
-
-    const correctEx = topic.examples[0]?.sentence ?? topic.textSentences[0];
-    if (correctEx && otherTopics.length >= 3) {
-      const wrongs = shuffleArray(
-        otherTopics.map((t) => t.examples[0]?.sentence ?? t.textSentences[0]).filter(Boolean)
-      ).slice(0, 3);
-      if (wrongs.length === 3) {
-        const opts = shuffleArray([correctEx, ...wrongs]);
-        questions.push({
-          topicId: topic.id,
-          question: `Which sentence demonstrates "${topic.name}"?`,
-          options: opts,
-          correctIndex: opts.indexOf(correctEx),
-          explanation: `"${correctEx}" uses the pattern: ${topic.pattern}`,
-        });
-      }
-    }
-
-    if (otherTopics.length >= 3) {
-      const wrongPatterns = shuffleArray(otherTopics.map((t) => t.pattern)).slice(0, 3);
-      const opts = shuffleArray([topic.pattern, ...wrongPatterns]);
-      questions.push({
-        topicId: topic.id,
-        question: `Which formula describes "${topic.name}"?`,
-        options: opts,
-        correctIndex: opts.indexOf(topic.pattern),
-        explanation: `${topic.name} follows: ${topic.pattern}`,
-      });
-    }
-  }
-
-  return shuffleArray(questions);
-}
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -83,7 +32,13 @@ interface Props { onBack: () => void }
 
 export default function GrammarDuel({ onBack }: Props) {
   const { t } = useTranslation();
-  const { grammarTopics, grammarDuelHighScore, setGrammarDuelHighScore, id, backup } = useReadingStore();
+  const {
+    grammarTopics,
+    grammarGameQuestions,
+    grammarDuelHighScore,
+    setGrammarDuelHighScore,
+    id, backup,
+  } = useReadingStore();
   const { generateGrammarQuestions } = useReadingAssistant();
   const { update, save } = useHistoryStore();
 
@@ -91,6 +46,7 @@ export default function GrammarDuel({ onBack }: Props) {
   const [mode, setMode] = useState<GrammarGameMode>("practice");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [questions, setQuestions] = useState<GrammarGameQuestion[]>([]);
+  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
   const [queueIndex, setQueueIndex] = useState(0);
 
   const [playerHp, setPlayerHp] = useState(MAX_HP);
@@ -111,11 +67,21 @@ export default function GrammarDuel({ onBack }: Props) {
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const usedQIndices = useRef<Set<number>>(new Set());
 
+  // ── Sync store cache → local questions ───────────────────────────────────
   useEffect(() => {
-    if (grammarTopics.length > 0) {
-      setQuestions(buildGameQuestions(grammarTopics));
+    if (grammarGameQuestions.length > 0) {
+      setQuestions(grammarGameQuestions);
     }
-  }, [grammarTopics]);
+  }, [grammarGameQuestions]);
+
+  // ── Auto-generate on first entry if cache is empty ───────────────────────
+  useEffect(() => {
+    if (grammarGameQuestions.length === 0 && grammarTopics.length > 0) {
+      setIsAutoGenerating(true);
+      generateGrammarQuestions().finally(() => setIsAutoGenerating(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const currentQuestion = questions[queueIndex] ?? null;
   const currentTopic = grammarTopics.find((t) => t.id === currentQuestion?.topicId);
@@ -165,11 +131,10 @@ export default function GrammarDuel({ onBack }: Props) {
       setRoundResult("player-wins");
 
       setTimeout(() => {
-        setIsPowerMove(false);
         const newAiHp = Math.max(0, (aiHp - dmg));
         if (newAiHp <= 0) { setGameStatus("completed"); return; }
         advanceRound();
-      }, isPower ? 2000 : 1500);
+      }, isPower ? 3500 : 3000);
     } else {
       setPlayerStreak(0);
       applyDamage("player", BASE_DAMAGE);
@@ -178,7 +143,7 @@ export default function GrammarDuel({ onBack }: Props) {
         const newPlayerHp = Math.max(0, (playerHp - BASE_DAMAGE));
         if (newPlayerHp <= 0) { setGameStatus("completed"); return; }
         advanceRound();
-      }, 1500);
+      }, 3000);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnswered, currentQuestion, playerStreak, aiHp, playerHp, applyDamage]);
@@ -218,7 +183,7 @@ export default function GrammarDuel({ onBack }: Props) {
         if (playerHp - (aiCorrect ? BASE_DAMAGE : 0) <= 0) { setGameStatus("completed"); return; }
         if (aiHp - (!aiCorrect ? BASE_DAMAGE : 0) <= 0) { setGameStatus("completed"); return; }
         advanceRound();
-      }, 1500);
+      }, 3000);
     }, thinkTime);
 
     return () => { if (aiTimerRef.current) clearTimeout(aiTimerRef.current); };
@@ -257,8 +222,7 @@ export default function GrammarDuel({ onBack }: Props) {
   const handleGenerateNew = async () => {
     setIsGenerating(true);
     try {
-      const newQ = await generateGrammarQuestions();
-      if (newQ.length > 0) setQuestions(newQ);
+      await generateGrammarQuestions();
     } finally {
       setIsGenerating(false);
     }
@@ -273,46 +237,55 @@ export default function GrammarDuel({ onBack }: Props) {
           <h3 className="font-bold text-base">{t("reading.grammar.games.duel.name")}</h3>
           <p className="text-sm text-muted-foreground">{t("reading.grammar.games.duel.description")}</p>
         </div>
-        <GameModeSelector mode={mode} onChange={setMode} />
-
-        {/* Difficulty selector */}
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium text-muted-foreground">{t("reading.grammar.games.duel.opponentLevel")}</p>
-          <div className="grid grid-cols-3 gap-2">
-            {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
-              <button
-                key={d}
-                onClick={() => setDifficulty(d)}
-                className={cn(
-                  "rounded-lg border py-2 text-sm font-medium transition-all",
-                  difficulty === d
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:border-primary/40"
-                )}
-              >
-                {t(`reading.grammar.games.duel.${d}`)}
-              </button>
-            ))}
+        {isAutoGenerating ? (
+          <div className="flex flex-col items-center gap-3 py-8 text-muted-foreground">
+            <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-center">{t("reading.grammar.games.generating")}</p>
           </div>
-        </div>
+        ) : (
+          <>
+            <GameModeSelector mode={mode} onChange={setMode} />
 
-        <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
-          <span>{questions.length} {t("reading.grammar.games.questionsAvailable")}</span>
-          {grammarDuelHighScore > 0 && (
-            <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-              🏆 {grammarDuelHighScore}
-            </span>
-          )}
-        </div>
+            {/* Difficulty selector */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium text-muted-foreground">{t("reading.grammar.games.duel.opponentLevel")}</p>
+              <div className="grid grid-cols-3 gap-2">
+                {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDifficulty(d)}
+                    className={cn(
+                      "rounded-lg border py-2 text-sm font-medium transition-all",
+                      difficulty === d
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40"
+                    )}
+                  >
+                    {t(`reading.grammar.games.duel.${d}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <div className="flex gap-2">
-          <Button onClick={startGame} className="flex-1" disabled={questions.length === 0}>
-            {t("reading.grammar.games.start")}
-          </Button>
-          <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
-            {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-          </Button>
-        </div>
+            <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
+              <span>{questions.length} {t("reading.grammar.games.questionsAvailable")}</span>
+              {grammarDuelHighScore > 0 && (
+                <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                  🏆 {grammarDuelHighScore}
+                </span>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={startGame} className="flex-1" disabled={questions.length === 0}>
+                {t("reading.grammar.games.start")}
+              </Button>
+              <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
+                {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     );
   }

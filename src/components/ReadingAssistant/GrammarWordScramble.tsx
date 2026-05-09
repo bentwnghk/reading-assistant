@@ -12,8 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { GameBackButton, GameModeSelector, AnswerFeedback, GameStatRow } from "./GrammarGames";
 import { logActivity } from "@/utils/activityLogger";
 
-// ── Client-side challenge builder ────────────────────────────────────────────
-
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -21,23 +19,6 @@ function shuffleArray<T>(arr: T[]): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
-
-function buildScrambleChallenges(topics: GrammarTopic[]): GrammarScrambleChallenge[] {
-  const challenges: GrammarScrambleChallenge[] = [];
-  for (const topic of topics) {
-    const sentences = [
-      ...topic.examples.map((e) => e.sentence),
-      ...topic.textSentences,
-    ]
-      .filter((s, i, arr) => arr.indexOf(s) === i)
-      .filter((s) => s.trim().split(/\s+/).length >= 4 && s.trim().split(/\s+/).length <= 20);
-
-    for (const sentence of sentences.slice(0, 3)) {
-      challenges.push({ topicId: topic.id, sentence, hint: topic.pattern });
-    }
-  }
-  return shuffleArray(challenges);
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -62,7 +43,13 @@ interface Props { onBack: () => void }
 
 export default function GrammarWordScramble({ onBack }: Props) {
   const { t } = useTranslation();
-  const { grammarTopics, grammarScrambleHighScore, setGrammarScrambleHighScore, id, backup } = useReadingStore();
+  const {
+    grammarTopics,
+    grammarScrambleChallenges,
+    grammarScrambleHighScore,
+    setGrammarScrambleHighScore,
+    id, backup,
+  } = useReadingStore();
   const { generateGrammarScrambleContent } = useReadingAssistant();
   const { update, save } = useHistoryStore();
 
@@ -79,14 +66,24 @@ export default function GrammarWordScramble({ onBack }: Props) {
   const [showHint, setShowHint] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ── Build initial challenges from grammarTopics ──────────────────────────
+  // ── Sync store cache → local challenges ──────────────────────────────────
   useEffect(() => {
-    if (grammarTopics.length > 0) {
-      setChallenges(buildScrambleChallenges(grammarTopics));
+    if (grammarScrambleChallenges.length > 0) {
+      setChallenges(grammarScrambleChallenges);
     }
-  }, [grammarTopics]);
+  }, [grammarScrambleChallenges]);
+
+  // ── Auto-generate on first entry if cache is empty ───────────────────────
+  useEffect(() => {
+    if (grammarScrambleChallenges.length === 0 && grammarTopics.length > 0) {
+      setIsAutoGenerating(true);
+      generateGrammarScrambleContent().finally(() => setIsAutoGenerating(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Timer (Arcade / Mastery mode) ────────────────────────────────────────
   useEffect(() => {
@@ -132,7 +129,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
     if (timerRef.current) clearInterval(timerRef.current);
     setRound((prev) => prev ? { ...prev, result: "incorrect" } : prev);
     setStreak(0);
-    setTimeout(() => advanceRound(), 1500);
+    setTimeout(() => advanceRound(), 3000);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -194,7 +191,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
     }
 
     setRound((prev) => prev ? { ...prev, result: correct ? "correct" : "incorrect" } : prev);
-    setTimeout(() => advanceRound(), 1800);
+    setTimeout(() => advanceRound(), 3000);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, mode, timeLeft, streak, hintsUsed]);
 
@@ -214,10 +211,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
   const handleGenerateNew = async () => {
     setIsGenerating(true);
     try {
-      const newChallenges = await generateGrammarScrambleContent();
-      if (newChallenges.length > 0) {
-        setChallenges(shuffleArray(newChallenges));
-      }
+      await generateGrammarScrambleContent();
     } finally {
       setIsGenerating(false);
     }
@@ -233,25 +227,35 @@ export default function GrammarWordScramble({ onBack }: Props) {
           <p className="text-sm text-muted-foreground">{t("reading.grammar.games.scramble.description")}</p>
         </div>
 
-        <GameModeSelector mode={mode} onChange={setMode} />
+        {isAutoGenerating && (
+          <div className="flex flex-col items-center gap-3 py-8 text-muted-foreground">
+            <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-center">{t("reading.grammar.games.generating")}</p>
+          </div>
+        )}
 
-        <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
-          <span>{t("reading.grammar.games.rounds", { count: challenges.length })}</span>
-          {grammarScrambleHighScore > 0 && (
-            <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-              🏆 {grammarScrambleHighScore}
-            </span>
-          )}
-        </div>
+        {!isAutoGenerating && <GameModeSelector mode={mode} onChange={setMode} />}
 
-        <div className="flex gap-2">
-          <Button onClick={startGame} className="flex-1" disabled={challenges.length === 0}>
-            {t("reading.grammar.games.start")}
-          </Button>
-          <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
-            {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-          </Button>
-        </div>
+        {!isAutoGenerating && (
+          <>
+            <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
+              <span>{t("reading.grammar.games.rounds", { count: challenges.length })}</span>
+              {grammarScrambleHighScore > 0 && (
+                <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                  🏆 {grammarScrambleHighScore}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={startGame} className="flex-1" disabled={challenges.length === 0}>
+                {t("reading.grammar.games.start")}
+              </Button>
+              <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
+                {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     );
   }

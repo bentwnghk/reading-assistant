@@ -976,9 +976,9 @@ Guidelines:
     }
   }
 
-  /** Generates additional Word Order Scramble sentences (stored in component state). */
+  /** Generates (or refreshes) Word Order Scramble challenges, persisted to store. */
   async function generateGrammarScrambleContent(): Promise<GrammarScrambleChallenge[]> {
-    const { grammarTopics, studentAge } = readingStore;
+    const { grammarTopics, studentAge, setGrammarScrambleChallenges } = readingStore;
     const { grammarModel } = useSettingStore.getState();
 
     if (grammarTopics.length === 0) return [];
@@ -992,16 +992,18 @@ Guidelines:
       });
 
       const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
-      return JSON.parse(text) as GrammarScrambleChallenge[];
+      const challenges = JSON.parse(text) as GrammarScrambleChallenge[];
+      setGrammarScrambleChallenges(challenges);
+      return challenges;
     } catch (error) {
       handleError(error);
       return [];
     }
   }
 
-  /** Generates additional Grammar Workshop slot-fill challenges (stored in component state). */
+  /** Generates (or refreshes) Grammar Workshop slot-fill challenges, persisted to store. */
   async function generateGrammarWorkshopContent(): Promise<GrammarWorkshopChallenge[]> {
-    const { grammarTopics, studentAge } = readingStore;
+    const { grammarTopics, studentAge, setGrammarWorkshopChallenges } = readingStore;
     const { grammarModel } = useSettingStore.getState();
 
     if (grammarTopics.length === 0) return [];
@@ -1015,16 +1017,18 @@ Guidelines:
       });
 
       const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
-      return JSON.parse(text) as GrammarWorkshopChallenge[];
+      const challenges = JSON.parse(text) as GrammarWorkshopChallenge[];
+      setGrammarWorkshopChallenges(challenges);
+      return challenges;
     } catch (error) {
       handleError(error);
       return [];
     }
   }
 
-  /** Generates MCQ questions for Grammar Roulette / Grammar Duel (stored in component state). */
+  /** Generates (or refreshes) MCQ questions for Grammar Roulette + Duel, persisted to store. */
   async function generateGrammarQuestions(): Promise<GrammarGameQuestion[]> {
-    const { grammarTopics, studentAge } = readingStore;
+    const { grammarTopics, studentAge, setGrammarGameQuestions } = readingStore;
     const { grammarModel } = useSettingStore.getState();
 
     if (grammarTopics.length === 0) return [];
@@ -1038,7 +1042,9 @@ Guidelines:
       });
 
       const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
-      return JSON.parse(text) as GrammarGameQuestion[];
+      const questions = JSON.parse(text) as GrammarGameQuestion[];
+      setGrammarGameQuestions(questions);
+      return questions;
     } catch (error) {
       handleError(error);
       return [];

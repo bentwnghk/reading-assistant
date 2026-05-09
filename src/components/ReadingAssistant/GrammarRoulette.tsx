@@ -17,91 +17,6 @@ const WHEEL_COLORS = [
   "#8b5cf6", "#ec4899", "#14b8a6", "#f97316",
 ];
 
-// ── Client-side question builder ─────────────────────────────────────────────
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function buildGameQuestions(topics: GrammarTopic[]): GrammarGameQuestion[] {
-  const questions: GrammarGameQuestion[] = [];
-  if (topics.length < 2) return questions;
-
-  for (const topic of topics) {
-    const otherTopics = topics.filter((t) => t.id !== topic.id);
-
-    // Type A: which sentence uses this topic?
-    const correctEx = topic.examples[0]?.sentence ?? topic.textSentences[0];
-    if (correctEx && otherTopics.length >= 3) {
-      const wrongs = shuffleArray(
-        otherTopics
-          .map((t) => t.examples[0]?.sentence ?? t.textSentences[0])
-          .filter(Boolean)
-      ).slice(0, 3);
-      if (wrongs.length === 3) {
-        const opts = shuffleArray([correctEx, ...wrongs]);
-        questions.push({
-          topicId: topic.id,
-          question: `Which sentence demonstrates "${topic.name}"?`,
-          options: opts,
-          correctIndex: opts.indexOf(correctEx),
-          explanation: `"${correctEx}" uses the pattern: ${topic.pattern}`,
-        });
-      }
-    }
-
-    // Type B: fill in blank
-    const ex2 = topic.examples[1]?.sentence ?? topic.examples[0]?.sentence;
-    if (ex2) {
-      const patternParts = topic.pattern.split(/[\s+]+/);
-      const functionWord = patternParts.find((p) => p.includes("/"))?.split("/")[0] ??
-        patternParts.find((p) => /^[a-z]/.test(p.trim()));
-      if (functionWord) {
-        const clean = functionWord.trim().toLowerCase();
-        const words = ex2.split(/\s+/);
-        const idx = words.findIndex((w) => w.toLowerCase().replace(/[,.]$/, "") === clean);
-        if (idx !== -1) {
-          const blanked = words.map((w, i) => (i === idx ? "___" : w)).join(" ");
-          const correct = words[idx];
-          const allVariants = topic.pattern.split(/[\s+/,]+/).map(w => w.trim()).filter(w => /^[a-z]/.test(w) && w !== clean && w.length > 1);
-          const distractors = shuffleArray(allVariants).slice(0, 3);
-          if (distractors.length >= 1) {
-            while (distractors.length < 3) distractors.push(["is", "was", "were", "be"].find(w => !distractors.includes(w) && w !== clean) ?? "—");
-            const opts = shuffleArray([correct, ...distractors.slice(0, 3)]);
-            questions.push({
-              topicId: topic.id,
-              question: `Complete: "${blanked}"`,
-              options: opts,
-              correctIndex: opts.indexOf(correct),
-              explanation: `The correct form is "${correct}". Pattern: ${topic.pattern}`,
-            });
-          }
-        }
-      }
-    }
-
-    // Type C: which formula matches?
-    if (otherTopics.length >= 3) {
-      const wrongPatterns = shuffleArray(otherTopics.map((t) => t.pattern)).slice(0, 3);
-      const opts = shuffleArray([topic.pattern, ...wrongPatterns]);
-      questions.push({
-        topicId: topic.id,
-        question: `Which formula describes "${topic.name}"?`,
-        options: opts,
-        correctIndex: opts.indexOf(topic.pattern),
-        explanation: `${topic.name} follows the pattern: ${topic.pattern}`,
-      });
-    }
-  }
-
-  return shuffleArray(questions);
-}
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface RouletteRound {
@@ -117,7 +32,13 @@ interface Props { onBack: () => void }
 
 export default function GrammarRoulette({ onBack }: Props) {
   const { t } = useTranslation();
-  const { grammarTopics, grammarRouletteHighScore, setGrammarRouletteHighScore, id, backup } = useReadingStore();
+  const {
+    grammarTopics,
+    grammarGameQuestions,
+    grammarRouletteHighScore,
+    setGrammarRouletteHighScore,
+    id, backup,
+  } = useReadingStore();
   const { generateGrammarQuestions } = useReadingAssistant();
   const { update, save } = useHistoryStore();
 
@@ -139,20 +60,30 @@ export default function GrammarRoulette({ onBack }: Props) {
   const [landedTopicIndex, setLandedTopicIndex] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
   const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const usedQuestionIds = useRef<Set<string>>(new Set());
 
+  // ── Sync store cache → local questions + byTopic map ─────────────────────
   useEffect(() => {
-    if (grammarTopics.length > 0) {
-      const q = buildGameQuestions(grammarTopics);
-      setQuestions(q);
+    if (grammarGameQuestions.length > 0) {
+      setQuestions(grammarGameQuestions);
       const byTopic = new Map<string, GrammarGameQuestion[]>();
       for (const topic of grammarTopics) {
-        byTopic.set(topic.id, q.filter((qq) => qq.topicId === topic.id));
+        byTopic.set(topic.id, grammarGameQuestions.filter((q) => q.topicId === topic.id));
       }
       setQuestionsByTopic(byTopic);
     }
-  }, [grammarTopics]);
+  }, [grammarGameQuestions, grammarTopics]);
+
+  // ── Auto-generate on first entry if cache is empty ───────────────────────
+  useEffect(() => {
+    if (grammarGameQuestions.length === 0 && grammarTopics.length > 0) {
+      setIsAutoGenerating(true);
+      generateGrammarQuestions().finally(() => setIsAutoGenerating(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getQuestionForTopic = useCallback((topicId: string): GrammarGameQuestion | null => {
     const pool = (questionsByTopic.get(topicId) ?? []).filter((q) => {
@@ -236,7 +167,7 @@ export default function GrammarRoulette({ onBack }: Props) {
         setCurrentRound(null);
         setSelectedOption(null);
       }
-    }, 1800);
+    }, 3000);
   }, [currentRound, streak, hotTopicId, hotTopicStreak, grammarTopics, roundIndex, totalRounds]);
 
   const startGame = useCallback(() => {
@@ -269,15 +200,7 @@ export default function GrammarRoulette({ onBack }: Props) {
   const handleGenerateNew = async () => {
     setIsGenerating(true);
     try {
-      const newQ = await generateGrammarQuestions();
-      if (newQ.length > 0) {
-        setQuestions(newQ);
-        const byTopic = new Map<string, GrammarGameQuestion[]>();
-        for (const topic of grammarTopics) {
-          byTopic.set(topic.id, newQ.filter((qq) => qq.topicId === topic.id));
-        }
-        setQuestionsByTopic(byTopic);
-      }
+      await generateGrammarQuestions();
     } finally {
       setIsGenerating(false);
     }
@@ -361,24 +284,33 @@ export default function GrammarRoulette({ onBack }: Props) {
           <h3 className="font-bold text-base">{t("reading.grammar.games.roulette.name")}</h3>
           <p className="text-sm text-muted-foreground">{t("reading.grammar.games.roulette.description")}</p>
         </div>
-        <GameModeSelector mode={mode} onChange={setMode} />
-        {renderWheel()}
-        <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
-          <span>{totalRounds} {t("reading.grammar.games.roundsLabel")}</span>
-          {grammarRouletteHighScore > 0 && (
-            <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-              🏆 {grammarRouletteHighScore} {t("reading.grammar.games.roulette.coinsUnit")}
-            </span>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={startGame} className="flex-1" disabled={questions.length === 0}>
-            {t("reading.grammar.games.start")}
-          </Button>
-          <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
-            {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-          </Button>
-        </div>
+        {isAutoGenerating ? (
+          <div className="flex flex-col items-center gap-3 py-8 text-muted-foreground">
+            <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-center">{t("reading.grammar.games.generating")}</p>
+          </div>
+        ) : (
+          <>
+            <GameModeSelector mode={mode} onChange={setMode} />
+            {renderWheel()}
+            <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
+              <span>{totalRounds} {t("reading.grammar.games.roundsLabel")}</span>
+              {grammarRouletteHighScore > 0 && (
+                <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                  🏆 {grammarRouletteHighScore} {t("reading.grammar.games.roulette.coinsUnit")}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={startGame} className="flex-1" disabled={questions.length === 0}>
+                {t("reading.grammar.games.start")}
+              </Button>
+              <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
+                {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     );
   }
