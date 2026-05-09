@@ -17,9 +17,9 @@ import { logActivity } from "@/utils/activityLogger";
 type Difficulty = "easy" | "medium" | "hard";
 
 const DIFFICULTY_CONFIG: Record<Difficulty, { aiThinkTime: [number, number]; aiCorrectRate: number; label: string }> = {
-  easy:   { aiThinkTime: [8000, 14000], aiCorrectRate: 0.4, label: "Easy" },
-  medium: { aiThinkTime: [4000, 8000],  aiCorrectRate: 0.65, label: "Medium" },
-  hard:   { aiThinkTime: [1500, 4000],  aiCorrectRate: 0.85, label: "Hard" },
+  easy:   { aiThinkTime: [16000, 28000], aiCorrectRate: 0.4, label: "Easy" },
+  medium: { aiThinkTime: [8000, 16000],  aiCorrectRate: 0.6, label: "Medium" },
+  hard:   { aiThinkTime: [3000, 8000],  aiCorrectRate: 0.8, label: "Hard" },
 };
 
 const MAX_HP = 100;
