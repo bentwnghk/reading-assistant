@@ -8,7 +8,7 @@ import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
   const { t } = useTranslation();
-  const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarQuizCompleted, grammarQuizScore } = useReadingStore();
+  const { extractedText, summary, adaptedText, mindMap, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarQuizCompleted, grammarQuizScore, grammarScrambleHighScore, grammarWorkshopHighScore, grammarSurgeryHighScore, grammarRouletteHighScore, grammarDuelHighScore } = useReadingStore();
 
   const hasExtractedText = !!extractedText;
 
@@ -23,6 +23,7 @@ function WorkflowProgress() {
     { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasExtractedText, sectionId: "section-test" },
+    { key: "grammarGame", label: t("reading.workflow.grammarGame"), completed: Math.max(grammarScrambleHighScore || 0, grammarWorkshopHighScore || 0, grammarSurgeryHighScore || 0, grammarRouletteHighScore || 0, grammarDuelHighScore || 0) > 0, accessible: hasExtractedText, sectionId: "section-grammar" },
     { key: "grammar", label: t("reading.workflow.grammarQuiz"), completed: grammarQuizCompleted && (grammarQuizScore || 0) > 0, accessible: hasExtractedText, sectionId: "section-grammar" },
   ];
 

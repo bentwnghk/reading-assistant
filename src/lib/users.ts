@@ -940,6 +940,11 @@ function calculateProgress(row: {
   vocabulary_quiz_score?: number
   grammar_quiz_completed?: boolean
   grammar_quiz_score?: number
+  grammar_scramble_high_score?: number
+  grammar_workshop_high_score?: number
+  grammar_surgery_high_score?: number
+  grammar_roulette_high_score?: number
+  grammar_duel_high_score?: number
 }): number {
   const hasExtractedText = !!row.extracted_text
   const steps = [
@@ -953,6 +958,13 @@ function calculateProgress(row: {
     (row.glossary || []).length > 0,
     (row.spelling_game_best_score || 0) > 0,
     (row.vocabulary_quiz_score || 0) > 0,
+    Math.max(
+      row.grammar_scramble_high_score || 0,
+      row.grammar_workshop_high_score || 0,
+      row.grammar_surgery_high_score || 0,
+      row.grammar_roulette_high_score || 0,
+      row.grammar_duel_high_score || 0,
+    ) > 0,
     row.grammar_quiz_completed && (row.grammar_quiz_score || 0) > 0,
   ]
   const completedCount = steps.filter(Boolean).length

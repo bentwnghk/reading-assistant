@@ -876,6 +876,7 @@
       "mindmap": "Mind Map",
       "test": "Reading Test",
       "grammar": "Grammar",
+      "grammarGame": "Grammar Game",
       "grammarQuiz": "Grammar Quiz",
       "analyze": "Analyze Sentence",
       "highlight": "Highlight Word",
@@ -884,7 +885,7 @@
       "vocabQuiz": "Vocab Quiz",
       "help": {
         "title": "Learning Progress Guide",
-        "intro": "Track your learning journey through 10 interactive steps. Each completed step shows a checkmark. Click any step to jump to that section.",
+        "intro": "Track your learning journey through 12 interactive steps. Each completed step shows a checkmark. Click any step to jump to that section.",
         "navigation": {
           "title": "Quick Navigation",
           "desc": "Click on any step to jump directly to that section. Grayed-out steps unlock after uploading your reading material."

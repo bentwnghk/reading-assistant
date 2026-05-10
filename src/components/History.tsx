@@ -83,6 +83,13 @@ function calculateProgress(item: ReadingHistory): number {
     (item.glossary || []).length > 0,
     (item.spellingGameBestScore || 0) > 0,
     (item.vocabularyQuizScore || 0) > 0,
+    Math.max(
+      item.grammarScrambleHighScore || 0,
+      item.grammarWorkshopHighScore || 0,
+      item.grammarSurgeryHighScore || 0,
+      item.grammarRouletteHighScore || 0,
+      item.grammarDuelHighScore || 0,
+    ) > 0,
     item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0,
   ];
   const completedCount = steps.filter(Boolean).length;
