@@ -296,19 +296,19 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
       getDay(toDateString(item.glossaryGeneratedAt)).glossary += 1;
     }
     if (item.spellingGameBestScore && item.spellingGameBestScore > 0 && item.spellingGameCompletedAt) {
-      getDay(toDateString(item.spellingGameCompletedAt)).spellingGame += 1;
+      getDay(toDateString(item.spellingGameCompletedAt)).spellingGame += item.spellingGamesCompleted || 1;
     }
     if (item.vocabularyQuizScore && item.vocabularyQuizScore > 0 && item.vocabQuizCompletedAt) {
-      getDay(toDateString(item.vocabQuizCompletedAt)).vocabQuiz += 1;
+      getDay(toDateString(item.vocabQuizCompletedAt)).vocabQuiz += item.vocabQuizzesCompleted || 1;
     }
     if (item.testCompleted && item.readingTestCompletedAt) {
-      getDay(toDateString(item.readingTestCompletedAt)).readingTest += 1;
+      getDay(toDateString(item.readingTestCompletedAt)).readingTest += item.testsCompleted || 1;
     }
     if (item.grammarQuizCompleted && item.grammarQuizScore && item.grammarQuizScore > 0 && item.grammarQuizCompletedAt) {
-      getDay(toDateString(item.grammarQuizCompletedAt)).grammarQuiz += 1;
+      getDay(toDateString(item.grammarQuizCompletedAt)).grammarQuiz += item.grammarQuizzesCompleted || 1;
     }
     if (item.grammarGameBestScore != null && item.grammarGameBestScore > 0) {
-      getDay(toDateString(item.grammarGameCompletedAt || item.updatedAt)).grammarGame += 1;
+      getDay(toDateString(item.grammarGameCompletedAt || item.updatedAt)).grammarGame += item.grammarGamesCompleted || 1;
     }
     if (item.tutorQuestionCount > 0) {
       getDay(toDateString(item.createdAt)).tutorQuestion += item.tutorQuestionCount;

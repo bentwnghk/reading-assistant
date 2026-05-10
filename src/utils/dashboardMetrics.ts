@@ -352,16 +352,16 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       getDay(dailyMap, toDateString(item.glossaryGeneratedAt || item.createdAt)).glossary += 1;
     }
     if ((item.spellingGameBestScore || 0) > 0) {
-      getDay(dailyMap, toDateString(item.spellingGameCompletedAt || item.createdAt)).spellingGame += 1;
+      getDay(dailyMap, toDateString(item.spellingGameCompletedAt || item.createdAt)).spellingGame += item.spellingGamesCompleted || 1;
     }
     if ((item.vocabularyQuizScore || 0) > 0) {
-      getDay(dailyMap, toDateString(item.vocabQuizCompletedAt || item.createdAt)).vocabQuiz += 1;
+      getDay(dailyMap, toDateString(item.vocabQuizCompletedAt || item.createdAt)).vocabQuiz += item.vocabQuizzesCompleted || 1;
     }
     if (item.testCompleted) {
-      getDay(dailyMap, toDateString(item.readingTestCompletedAt || item.createdAt)).readingTest += 1;
+      getDay(dailyMap, toDateString(item.readingTestCompletedAt || item.createdAt)).readingTest += item.testsCompleted || 1;
     }
     if (item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0) {
-      getDay(dailyMap, toDateString(item.grammarQuizCompletedAt || item.createdAt)).grammarQuiz += 1;
+      getDay(dailyMap, toDateString(item.grammarQuizCompletedAt || item.createdAt)).grammarQuiz += item.grammarQuizzesCompleted || 1;
     }
 
     const grammarGameBest = Math.max(
@@ -372,7 +372,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       item.grammarDuelHighScore || 0,
     );
     if (grammarGameBest > 0) {
-      getDay(dailyMap, toDateString(item.grammarGameCompletedAt || item.updatedAt || item.createdAt)).grammarGame += 1;
+      getDay(dailyMap, toDateString(item.grammarGameCompletedAt || item.updatedAt || item.createdAt)).grammarGame += item.grammarGamesCompleted || 1;
     }
 
     // sentenceAnalysis — each entry has its own createdAt

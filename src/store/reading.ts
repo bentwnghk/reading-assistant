@@ -129,6 +129,7 @@ export interface ReadingStore {
   grammarQuiz: GrammarQuizQuestion[];
   grammarQuizScore: number;
   grammarQuizCompleted: boolean;
+  grammarQuizzesCompleted: number;
   grammarQuizEarnedPoints: number;
   grammarQuizTotalPoints: number;
   grammarGeneratedAt: number;
@@ -142,6 +143,7 @@ export interface ReadingStore {
   grammarRouletteHighScore: number;
   grammarDuelHighScore: number;
   grammarGameAccuracy: number;
+  grammarGamesCompleted: number;
   grammarGameCompletedAt: number;
   // Grammar Games — cached AI content
   grammarErrorChallenges: ErrorSurgeryChallenge[];
@@ -154,8 +156,11 @@ export interface ReadingStore {
   testTotalPoints: number;
   testShowChinese: boolean;
   testMode: ReadingTestMode;
+  testsCompleted: number;
   vocabularyQuizScore: number;
+  vocabQuizzesCompleted: number;
   spellingGameBestScore: number;
+  spellingGamesCompleted: number;
   flashcardReviewDates: number[];
   summaryGeneratedAt: number;
   mindMapGeneratedAt: number;
@@ -267,6 +272,7 @@ const defaultValues: ReadingStore = {
   grammarQuiz: [],
   grammarQuizScore: 0,
   grammarQuizCompleted: false,
+  grammarQuizzesCompleted: 0,
   grammarQuizEarnedPoints: 0,
   grammarQuizTotalPoints: 0,
   grammarGeneratedAt: 0,
@@ -279,6 +285,7 @@ const defaultValues: ReadingStore = {
   grammarRouletteHighScore: 0,
   grammarDuelHighScore: 0,
   grammarGameAccuracy: 0,
+  grammarGamesCompleted: 0,
   grammarGameCompletedAt: 0,
   grammarErrorChallenges: [],
   grammarScrambleChallenges: [],
@@ -290,8 +297,11 @@ const defaultValues: ReadingStore = {
   testTotalPoints: 0,
   testShowChinese: false,
   testMode: "all-at-once",
+  testsCompleted: 0,
   vocabularyQuizScore: 0,
+  vocabQuizzesCompleted: 0,
   spellingGameBestScore: 0,
+  spellingGamesCompleted: 0,
   flashcardReviewDates: [],
   summaryGeneratedAt: 0,
   mindMapGeneratedAt: 0,
@@ -661,6 +671,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             grammarQuizScore: score,
+            grammarQuizzesCompleted: score > 0 ? (state.grammarQuizzesCompleted || 0) + 1 : state.grammarQuizzesCompleted,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -784,6 +795,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             grammarGameAccuracy: Math.max(state.grammarGameAccuracy, accuracy),
+            grammarGamesCompleted: state.grammarGamesCompleted + 1,
             grammarGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };
@@ -823,6 +835,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             testScore: score,
+            testsCompleted: score > 0 ? state.testsCompleted + 1 : state.testsCompleted,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -885,6 +898,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             vocabularyQuizScore: score,
+            vocabQuizzesCompleted: state.vocabQuizzesCompleted + 1,
             vocabQuizCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };
@@ -898,6 +912,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
+            spellingGamesCompleted: state.spellingGamesCompleted + 1,
             spellingGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };
