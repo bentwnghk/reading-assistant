@@ -427,6 +427,8 @@ export async function updateReadingSession(
              "grammarScrambleChallenges", "grammarWorkshopChallenges",
              "grammarGameQuestions"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
+        } else if (key === "grammarGameCompletedAt") {
+          values.push(value ? new Date(value as number) : null)
         } else {
           values.push(value)
         }
