@@ -142,6 +142,7 @@ export interface ReadingStore {
   grammarRouletteHighScore: number;
   grammarDuelHighScore: number;
   grammarGameAccuracy: number;
+  grammarGameCompletedAt: number;
   // Grammar Games — cached AI content
   grammarErrorChallenges: ErrorSurgeryChallenge[];
   grammarScrambleChallenges: GrammarScrambleChallenge[];
@@ -278,6 +279,7 @@ const defaultValues: ReadingStore = {
   grammarRouletteHighScore: 0,
   grammarDuelHighScore: 0,
   grammarGameAccuracy: 0,
+  grammarGameCompletedAt: 0,
   grammarErrorChallenges: [],
   grammarScrambleChallenges: [],
   grammarWorkshopChallenges: [],
@@ -782,6 +784,7 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             grammarGameAccuracy: Math.max(state.grammarGameAccuracy, accuracy),
+            grammarGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

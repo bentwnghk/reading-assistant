@@ -372,7 +372,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       item.grammarDuelHighScore || 0,
     );
     if (grammarGameBest > 0) {
-      getDay(dailyMap, toDateString(item.updatedAt || item.createdAt)).grammarGame += 1;
+      getDay(dailyMap, toDateString(item.grammarGameCompletedAt || item.updatedAt || item.createdAt)).grammarGame += 1;
     }
 
     // sentenceAnalysis — each entry has its own createdAt

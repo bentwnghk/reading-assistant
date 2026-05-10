@@ -121,6 +121,7 @@ CREATE TABLE reading_sessions (
   grammar_roulette_high_score  INTEGER DEFAULT 0,
   grammar_duel_high_score      INTEGER DEFAULT 0,
   grammar_game_accuracy        INTEGER DEFAULT 0,
+  grammar_game_completed_at    TIMESTAMP WITH TIME ZONE,
   grammar_error_challenges     JSONB DEFAULT '[]'::jsonb,
   grammar_scramble_challenges  JSONB DEFAULT '[]'::jsonb,
   grammar_workshop_challenges  JSONB DEFAULT '[]'::jsonb,

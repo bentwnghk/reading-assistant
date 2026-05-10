@@ -68,6 +68,7 @@ const readingSessionSchema = z.object({
   grammarRouletteHighScore: z.number().optional(),
   grammarDuelHighScore: z.number().optional(),
   grammarGameAccuracy: z.number().optional(),
+  grammarGameCompletedAt: z.number().optional(),
   flashcardReviewDates: z.array(z.number()).optional(),
   summaryGeneratedAt: z.number().optional(),
   mindMapGeneratedAt: z.number().optional(),

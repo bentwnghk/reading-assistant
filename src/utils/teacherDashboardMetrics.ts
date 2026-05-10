@@ -307,6 +307,9 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     if (item.grammarQuizCompleted && item.grammarQuizScore && item.grammarQuizScore > 0 && item.grammarQuizCompletedAt) {
       getDay(toDateString(item.grammarQuizCompletedAt)).grammarQuiz += 1;
     }
+    if (item.grammarGameBestScore != null && item.grammarGameBestScore > 0) {
+      getDay(toDateString(item.grammarGameCompletedAt || item.updatedAt)).grammarGame += 1;
+    }
     if (item.tutorQuestionCount > 0) {
       getDay(toDateString(item.createdAt)).tutorQuestion += item.tutorQuestionCount;
     }

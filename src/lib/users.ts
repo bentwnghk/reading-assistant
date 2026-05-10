@@ -88,6 +88,7 @@ export interface TeacherSessionData {
   grammarQuizCompleted: boolean
   grammarGameBestScore: number | null
   grammarGameAccuracy: number | null
+  grammarGameCompletedAt: number
   glossaryCount: number
   sentenceAnalysisCount: number
   tutorQuestionCount: number
@@ -122,6 +123,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
         GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
         COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
+        rs.grammar_game_completed_at,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -157,6 +159,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       grammarQuizCompleted: !!row.grammar_quiz_completed,
       grammarGameBestScore: row.grammar_game_best_score || null,
       grammarGameAccuracy: row.grammar_game_accuracy || null,
+      grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
@@ -197,6 +200,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
         GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
         COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
+        rs.grammar_game_completed_at,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -232,6 +236,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       grammarQuizCompleted: !!row.grammar_quiz_completed,
       grammarGameBestScore: row.grammar_game_best_score || null,
       grammarGameAccuracy: row.grammar_game_accuracy || null,
+      grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
@@ -272,6 +277,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
         GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
         COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
+        rs.grammar_game_completed_at,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -306,6 +312,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       grammarQuizCompleted: !!row.grammar_quiz_completed,
       grammarGameBestScore: row.grammar_game_best_score || null,
       grammarGameAccuracy: row.grammar_game_accuracy || null,
+      grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
       tutorQuestionCount: Array.isArray(row.chat_history)
