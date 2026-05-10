@@ -1039,7 +1039,15 @@ Guidelines:
       });
 
       const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
-      const challenges = JSON.parse(text) as GrammarWorkshopChallenge[];
+      const raw = JSON.parse(text) as GrammarWorkshopChallenge[];
+      const challenges = raw.map((c) => {
+        const shuffled = [...c.wordBank];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return { ...c, wordBank: shuffled };
+      });
       setGrammarWorkshopChallenges(challenges);
       return challenges;
     } catch (error) {

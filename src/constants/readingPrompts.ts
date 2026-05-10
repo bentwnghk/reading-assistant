@@ -785,7 +785,7 @@ Respond with ONLY a valid JSON array. No markdown, no code blocks.
     "slots": [
       { "label": "<label matching the blank in template>", "answer": "<correct word or phrase>" }
     ],
-    "wordBank": ["<correct answer 1>", "<correct answer 2 if two slots>", "<distractor 1>", "<distractor 2>", "<distractor 3>"],
+    "wordBank": ["<distractor 2>", "<correct answer 1>", "<distractor 1>", "<correct answer 2 if two slots>", "<distractor 3>"],
     "explanation": "<brief explanation of why the correct answer is right, in English>"
   }
 ]
