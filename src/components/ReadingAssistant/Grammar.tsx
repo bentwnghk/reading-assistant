@@ -119,7 +119,7 @@ function QuizResultScreen({
     <div className="space-y-5">
       <div
         className={cn(
-          "relative w-full rounded-2xl border-2 px-4 py-5 sm:px-6 sm:py-6 text-center space-y-3 transition-all duration-700 overflow-hidden",
+          "relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden",
           config.ring,
           animateIn && "shadow-2xl " + config.glow,
           animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95"

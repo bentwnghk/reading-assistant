@@ -97,7 +97,7 @@ function SpellingResultScreen({
 
   return (
     <div className="space-y-5">
-      <div className={cn("relative w-full rounded-2xl border-2 px-4 py-5 sm:px-6 sm:py-6 text-center space-y-3 transition-all duration-700 overflow-hidden", config.ring, animateIn && "shadow-2xl " + config.glow, animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95")}
+      <div className={cn("relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden", config.ring, animateIn && "shadow-2xl " + config.glow, animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95")}
         style={{ background: config.gradient }}>
         {(tier === "master" || tier === "great") && <FloatingParticles color={config.particleColor} count={tier === "master" ? 20 : 12} />}
         <div className={cn("text-5xl transition-all duration-500 delay-200", animateIn ? "opacity-100 scale-100" : "opacity-0 scale-50")}>{config.emoji}</div>

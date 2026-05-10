@@ -144,7 +144,7 @@ export default function GameResultScreen({
 
       <div
         className={cn(
-          "relative w-full rounded-2xl border-2 px-4 py-5 sm:px-6 sm:py-6 text-center space-y-3 transition-all duration-700 overflow-hidden",
+          "relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden",
           config.ringClass,
           animateIn && "shadow-2xl " + config.glowColor,
           animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95"
@@ -235,7 +235,7 @@ export default function GameResultScreen({
 
       <div
         className={cn(
-          "border rounded-lg divide-y px-4 transition-all duration-500 delay-[400ms]",
+          "border rounded-lg divide-y transition-all duration-500 delay-[400ms]",
           animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}
       >

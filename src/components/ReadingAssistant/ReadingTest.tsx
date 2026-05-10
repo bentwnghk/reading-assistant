@@ -114,7 +114,7 @@ function TestResultScreen({
 
   return (
     <div
-      className={cn("relative w-full rounded-2xl border-2 px-4 py-5 sm:px-6 sm:py-6 text-center space-y-3 transition-all duration-700 overflow-hidden", config.ring, animateIn && "shadow-2xl " + config.glow, animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95")}
+      className={cn("relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden", config.ring, animateIn && "shadow-2xl " + config.glow, animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95")}
       style={{ background: config.gradient }}
     >
       {(tier === "master" || tier === "great") && <FloatingParticles color={config.particleColor} count={tier === "master" ? 20 : 12} />}
