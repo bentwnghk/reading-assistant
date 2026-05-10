@@ -552,9 +552,9 @@
       "sentenceHighlighted": "1 sentence highlighted",
       "help": {
         "title": "Grammar Guide",
-        "purpose": "Purpose: The Grammar section uses AI to identify notable grammar structures from your reading text and helps you learn them through interactive lessons and practice exercises.",
-        "features": "Features: AI scans the text for grammar topics (tenses, conditionals, passive voice, etc.) and provides explanations, patterns, text-based examples, and common mistakes. Four modes: Topics (overview cards), Lessons (detailed explanations with examples), Practice (interactive exercises), and Quiz (grammar test). You can also highlight grammar structures directly in the text.",
-        "usage": "Usage: Click 'Analyze Grammar' to identify topics. Browse Topics for a quick overview, or switch to Lessons for detailed explanations. Use 'Highlight in Text' to see grammar structures highlighted in the original text. Generate a Quiz to test your understanding."
+        "purpose": "Purpose: The Grammar section uses AI to identify notable grammar structures from your reading text and helps you learn them through interactive lessons, games, and practice exercises.",
+        "features": "Features: AI scans the text for grammar topics (tenses, conditionals, passive voice, etc.) and provides explanations, patterns, text-based examples, and common mistakes. Four modes: Topics (overview cards), Lessons (detailed explanations with examples), Games (5 interactive grammar games: Word Scramble, Grammar Workshop, Error Surgery, Grammar Roulette, Grammar Duel), and Quiz (grammar test). You can also highlight grammar structures directly in the text. Game results feature performance tiers (Master/Great/Good/Keep Practicing) with animated visual effects.",
+        "usage": "Usage: Click 'Analyze Grammar' to identify topics. Browse Topics for a quick overview, or switch to Lessons for detailed explanations. Use 'Highlight in Text' to see grammar structures highlighted in the original text. Play Grammar Games in the Games tab to reinforce learning through interactive gameplay. Generate a Quiz to test your understanding."
       },
       "quiz": {
         "generate": "Generate Quiz",
@@ -669,7 +669,16 @@
           "playerHp": "Your HP",
           "opponentHp": "Opponent HP",
           "aiAnswered": "The AI answered first!"
-        }
+        },
+        "aboutTitle": "How It Works",
+        "aboutDesc": "Strengthen your grammar skills through 5 interactive games, each focusing on a different aspect of grammar. Play in Practice, Arcade, or Mastery mode for increasing challenge.",
+        "aboutScramble": "Rearrange jumbled words to form a grammatically correct sentence. Tap word chips in the right order to build proper sentence structure.",
+        "aboutWorkshop": "Fill in the blank slots with correct words from the word bank. Each slot targets a specific part of speech or grammar pattern.",
+        "aboutSurgery": "Find and fix grammar errors in sentences. Tap the incorrect word, then select the right correction to improve grammatical accuracy.",
+        "aboutRoulette": "Spin the wheel to land on a grammar topic, then answer questions correctly to earn coins. Hot topics give bonus multipliers!",
+        "aboutDuel": "Face off against an AI opponent in a turn-based battle. Answer grammar questions correctly to deal damage and win the duel.",
+        "aboutModes": "Practice mode is untimed with hints. Arcade mode adds time pressure and streak bonuses. Mastery mode has no hints for the ultimate challenge.",
+        "aboutResultTiers": "Your result screen features performance tiers: Mastery (90%+), Great (70-89%), Good (50-69%), and Keep Practicing (<50%), each with unique visual effects."
       }
     },
     "glossary": {

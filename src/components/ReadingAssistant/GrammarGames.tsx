@@ -11,6 +11,9 @@ import {
   Trophy,
   Star,
   Target,
+  Info,
+  Sparkles,
+  Gamepad2,
 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { cn } from "@/utils/style";
@@ -95,6 +98,7 @@ interface GrammarGamesProps {
 export default function GrammarGames({ onBack: _onBack }: GrammarGamesProps) {
   const { t } = useTranslation();
   const [activeGame, setActiveGame] = useState<ActiveGame>(null);
+  const [showInfo, setShowInfo] = useState(false);
   const store = useReadingStore();
 
   const handleBack = () => setActiveGame(null);
@@ -107,6 +111,58 @@ export default function GrammarGames({ onBack: _onBack }: GrammarGamesProps) {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-1">
+        <h3 className="font-semibold text-lg flex items-center gap-2">
+          <Gamepad2 className="h-5 w-5 text-muted-foreground" />
+          {t("reading.grammar.games.title")}
+        </h3>
+        <button
+          onClick={() => setShowInfo(!showInfo)}
+          className="p-1 rounded-full hover:bg-muted transition-colors"
+          title={t("reading.grammar.games.aboutTitle")}
+        >
+          <Info className="h-4 w-4 text-muted-foreground" />
+        </button>
+      </div>
+
+      {showInfo && (
+        <div className="bg-muted/50 border rounded-lg p-4 mb-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="font-semibold text-sm">{t("reading.grammar.games.aboutTitle")}</span>
+          </div>
+          <p className="text-xs text-muted-foreground">{t("reading.grammar.games.aboutDesc")}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {GAME_CONFIG.map((game) => {
+              const Icon = game.icon;
+              return (
+                <div key={game.id} className="flex items-start gap-2 bg-background border rounded-lg p-2.5">
+                  <div className={cn("p-1.5 rounded-md shrink-0", game.iconBg)}>
+                    <Icon className={cn("h-3.5 w-3.5", game.color)} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold">{t(game.nameKey)}</div>
+                    <div className="text-[11px] text-muted-foreground leading-relaxed">
+                      {t(`reading.grammar.games.about${game.id.charAt(0).toUpperCase()}${game.id.slice(1)}`)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="space-y-2 text-[11px] text-muted-foreground">
+            <div className="flex items-start gap-1.5">
+              <Trophy className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
+              <span>{t("reading.grammar.games.aboutModes")}</span>
+            </div>
+            <div className="flex items-start gap-1.5">
+              <Sparkles className="h-3 w-3 text-violet-500 shrink-0 mt-0.5" />
+              <span>{t("reading.grammar.games.aboutResultTiers")}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <p className="text-sm text-muted-foreground">
         {t("reading.grammar.games.description")}
       </p>
