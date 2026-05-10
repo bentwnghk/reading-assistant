@@ -26,6 +26,8 @@ import {
   Network,
   BookOpenCheck,
   GraduationCap,
+  Gamepad2,
+  Dices,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -604,6 +606,16 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <Gamepad2 className="h-5 w-5 text-amber-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.grammar_games.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.achievements.types.grammar_games.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-cyan-500" />
                 </div>
@@ -706,6 +718,16 @@ export function LeaderboardPage() {
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.grammarQuiz.title")}</h4>
                   <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.grammarQuiz.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-lime-500/10 flex items-center justify-center">
+                  <Dices className="h-5 w-5 text-lime-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.grammarGame.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.grammarGame.desc")}</p>
                 </div>
               </div>
 

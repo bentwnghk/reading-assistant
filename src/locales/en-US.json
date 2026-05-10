@@ -1714,6 +1714,10 @@
           "grammarQuiz": {
             "title": "Grammar Quiz",
             "desc": "Average grammar quiz score. Analyze grammar structures and complete quizzes to master grammar rules!"
+          },
+          "grammarGame": {
+            "title": "Grammar Game",
+            "desc": "Average grammar game score. Play Scramble, Workshop, Surgery, Roulette, and Duel to boost your grammar through interactive games!"
           }
         },
         "tip": {
