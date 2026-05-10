@@ -853,7 +853,21 @@ Guidelines:
       }
       text = text.trim();
 
-      const questions: GrammarQuizQuestion[] = JSON.parse(text);
+      const raw: GrammarQuizQuestion[] = JSON.parse(text);
+      const questions = raw.map((q) => {
+        if (!q.options || q.type === "fill-in" || q.type === "rewrite") return q;
+        const correctIdx = q.correctAnswer.toUpperCase().charCodeAt(0) - 65;
+        const indices = q.options.map((_, i) => i);
+        for (let i = indices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        const stripPrefix = (s: string) => s.replace(/^[A-D]\)\s*/, "");
+        const newOptions = indices.map((idx, pos) => `${String.fromCharCode(65 + pos)}) ${stripPrefix(q.options![idx])}`);
+        const newOptionsZh = q.optionsZh ? indices.map((idx, pos) => `${String.fromCharCode(65 + pos)}) ${stripPrefix(q.optionsZh![idx])}`) : undefined;
+        const newCorrectAnswer = String.fromCharCode(65 + indices.indexOf(correctIdx));
+        return { ...q, options: newOptions, optionsZh: newOptionsZh, correctAnswer: newCorrectAnswer };
+      });
       setGrammarQuiz(questions);
 
       toast.dismiss(toastId);
