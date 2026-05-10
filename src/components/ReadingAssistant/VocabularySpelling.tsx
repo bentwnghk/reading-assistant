@@ -20,6 +20,10 @@ import {
   Headphones,
   Sparkles,
   Target,
+  Crown,
+  Star,
+  Zap,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
@@ -50,6 +54,88 @@ const MODE_ICONS: Record<SpellingGameMode, React.ReactNode> = {
   "fill-blanks": <Keyboard className="h-4 w-4" />,
   mixed: <HelpCircle className="h-4 w-4" />,
 };
+
+function FloatingParticles({ color, count }: { color: string; count: number }) {
+  const particles = Array.from({ length: count }, (_, i) => ({
+    id: i, x: Math.random() * 100, delay: Math.random() * 2, duration: 2 + Math.random() * 2, size: 4 + Math.random() * 6,
+  }));
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p) => (
+        <div key={p.id} className="absolute rounded-full opacity-60 animate-float-up"
+          style={{ left: `${p.x}%`, bottom: "-10%", width: p.size, height: p.size, backgroundColor: color, animationDelay: `${p.delay}s`, animationDuration: `${p.duration}s` }} />
+      ))}
+    </div>
+  );
+}
+
+function getResultTier(score: number) {
+  if (score >= 80) return "master";
+  if (score >= 60) return "great";
+  if (score >= 40) return "good";
+  return "keepGoing";
+}
+
+const TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: string; ring: string; glow: string; badgeBg: string; particleColor: string; gradient: string }> = {
+  master:    { emoji: "👑", icon: Crown, color: "text-amber-600 dark:text-amber-400", ring: "ring-4 ring-amber-400/60", glow: "shadow-amber-400/50", badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", particleColor: "#fbbf24", gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)" },
+  great:      { emoji: "🌟", icon: Star, color: "text-emerald-600 dark:text-emerald-400", ring: "ring-4 ring-emerald-400/50", glow: "shadow-emerald-400/40", badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", particleColor: "#34d399", gradient: "linear-gradient(135deg, rgba(167,243,208,0.15) 0%, rgba(52,211,153,0.08) 50%, rgba(167,243,208,0.15) 100%)" },
+  good:       { emoji: "💪", icon: Zap, color: "text-blue-600 dark:text-blue-400", ring: "ring-4 ring-blue-400/40", glow: "shadow-blue-400/30", badgeBg: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", particleColor: "#60a5fa", gradient: "linear-gradient(135deg, rgba(191,219,254,0.15) 0%, rgba(96,165,250,0.08) 50%, rgba(191,219,254,0.15) 100%)" },
+  keepGoing: { emoji: "❤️", icon: Heart, color: "text-rose-600 dark:text-rose-400", ring: "ring-4 ring-rose-400/30", glow: "shadow-rose-400/25", badgeBg: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300", particleColor: "#fb7185", gradient: "linear-gradient(135deg, rgba(254,205,211,0.15) 0%, rgba(251,113,133,0.08) 50%, rgba(254,205,211,0.15) 100%)" },
+};
+
+function SpellingResultScreen({
+  score, accuracy, correctCount, totalCount, maxStreak, onPlayAgain,
+}: {
+  score: number; accuracy: number; correctCount: number; totalCount: number; maxStreak: number; onPlayAgain: () => void;
+}) {
+  const { t } = useTranslation();
+  const tier = getResultTier(accuracy);
+  const config = TIER_CONFIG[tier];
+  const TierIcon = config.icon;
+  const [animateIn, setAnimateIn] = useState(false);
+  useEffect(() => { const timer = setTimeout(() => setAnimateIn(true), 100); return () => clearTimeout(timer); }, []);
+
+  return (
+    <div className="space-y-5">
+      <div className={cn("relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden", config.ring, animateIn && "shadow-2xl " + config.glow, animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95")}
+        style={{ background: config.gradient }}>
+        {(tier === "master" || tier === "great") && <FloatingParticles color={config.particleColor} count={tier === "master" ? 20 : 12} />}
+        <div className={cn("text-5xl transition-all duration-500 delay-200", animateIn ? "opacity-100 scale-100" : "opacity-0 scale-50")}>{config.emoji}</div>
+        <div className={cn("transition-all duration-500 delay-300", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+          <div className={cn("text-5xl font-black", config.color)}>{accuracy}%</div>
+          <p className="text-sm text-muted-foreground mt-1">{score} {t("reading.glossary.spelling.points")}</p>
+        </div>
+        <div className={cn("transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+          <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}><TierIcon className="h-3.5 w-3.5" />{t(`reading.glossary.spelling.resultTier.${tier}`)}</span>
+        </div>
+        {tier === "master" && <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />}
+      </div>
+      <div className={cn("border rounded-lg divide-y transition-all duration-500 delay-[400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+        <div className="flex justify-between px-4 py-3">
+          <span className="text-muted-foreground">{t("reading.glossary.spelling.accuracy")}</span>
+          <span className={cn("font-semibold", config.color)}>{accuracy}%</span>
+        </div>
+        <div className="flex justify-between px-4 py-3">
+          <span className="text-muted-foreground">{t("reading.glossary.spelling.correctWords")}</span>
+          <span className="font-semibold">{correctCount} / {totalCount}</span>
+        </div>
+        <div className="flex justify-between px-4 py-3">
+          <span className="text-muted-foreground flex items-center gap-2">
+            <Flame className="h-4 w-4 text-orange-500" />
+            {t("reading.glossary.spelling.maxStreak")}
+          </span>
+          <span className="font-semibold">{maxStreak}</span>
+        </div>
+      </div>
+      <div className={cn("text-center transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+        <Button onClick={onPlayAgain} variant="outline" size="lg">
+          <RotateCcw className="h-4 w-4 mr-2" />
+          {t("reading.glossary.spelling.playAgain")}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps) {
   const { t } = useTranslation();
@@ -725,45 +811,17 @@ function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps
 
   if (gameStatus === "completed") {
     const percentage = Math.round((correctCount / challenges.length) * 100);
-    const getScoreColor = () => {
-      if (percentage >= 80) return "text-green-600 dark:text-green-400";
-      if (percentage >= 60) return "text-yellow-600 dark:text-yellow-400";
-      return "text-red-600 dark:text-red-400";
-    };
 
     return (
-      <div className="flex flex-col items-center gap-6 py-8">
-        <Trophy className="h-16 w-16 text-yellow-500" />
-        <div className="text-center">
-          <h3 className="text-2xl font-bold mb-2">{t("reading.glossary.spelling.gameComplete")}</h3>
-          <p className={cn("text-4xl font-bold", getScoreColor())}>{score}</p>
-          <p className="text-muted-foreground text-sm mt-1">{t("reading.glossary.spelling.points")}</p>
-        </div>
-
-        <div className="w-full max-w-sm space-y-3">
-          <div className="flex justify-between p-3 bg-muted/50 rounded-lg">
-            <span className="text-muted-foreground">{t("reading.glossary.spelling.accuracy")}</span>
-            <span className={cn("font-semibold", getScoreColor())}>{percentage}%</span>
-          </div>
-          <div className="flex justify-between p-3 bg-muted/50 rounded-lg">
-            <span className="text-muted-foreground">{t("reading.glossary.spelling.correctWords")}</span>
-            <span className="font-semibold">
-              {correctCount} / {challenges.length}
-            </span>
-          </div>
-          <div className="flex justify-between p-3 bg-muted/50 rounded-lg">
-            <span className="text-muted-foreground flex items-center gap-2">
-              <Flame className="h-4 w-4 text-orange-500" />
-              {t("reading.glossary.spelling.maxStreak")}
-            </span>
-            <span className="font-semibold">{maxStreak}</span>
-          </div>
-        </div>
-
-        <Button onClick={() => setGameStatus("setup")} variant="outline" size="lg">
-          <RotateCcw className="h-4 w-4 mr-2" />
-          {t("reading.glossary.spelling.playAgain")}
-        </Button>
+      <div className="flex flex-col items-center py-8">
+        <SpellingResultScreen
+          score={score}
+          accuracy={percentage}
+          correctCount={correctCount}
+          totalCount={challenges.length}
+          maxStreak={maxStreak}
+          onPlayAgain={() => setGameStatus("setup")}
+        />
       </div>
     );
   }

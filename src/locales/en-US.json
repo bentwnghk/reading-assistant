@@ -825,6 +825,12 @@
         "startGame": "Start Game",
         "playAgain": "Play Again",
         "gameComplete": "Game Complete!",
+        "resultTier": {
+          "master": "Spelling Master",
+          "great": "Great Speller",
+          "good": "Steady Speller",
+          "keepGoing": "Keep Spelling"
+        },
         "points": "points",
         "accuracy": "Accuracy",
         "correctWords": "Correct Words",

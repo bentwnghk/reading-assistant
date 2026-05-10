@@ -825,6 +825,12 @@
         "startGame": "開始遊戲",
         "playAgain": "再玩一次",
         "gameComplete": "遊戲完成！",
+        "resultTier": {
+          "master": "拼字大師",
+          "great": "拼字高手",
+          "good": "穩步拼字",
+          "keepGoing": "繼續拼字"
+        },
         "points": "分",
         "accuracy": "準確率",
         "correctWords": "正確生字",
