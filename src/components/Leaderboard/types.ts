@@ -55,6 +55,7 @@ export interface WeeklyStatsRow {
   avgSpellingScore: number
   avgGrammarQuizScore: number
   avgGrammarGameScore: number
+  avgGrammarGameAccuracy: number
   totalVocabularyWords: number
   testsCompleted: number
   quizzesCompleted: number
@@ -76,6 +77,8 @@ export interface PersonalStats {
     avgAllTimeTestScore: number
     avgAllTimeGrammarQuizScore: number
     avgAllTimeGrammarGameScore: number
+    avgAllTimeGrammarGameAccuracy: number
+    avgAllTimeSpellingScore: number
     totalFlashcardReviews: number
   }
   rankInClass: number | null

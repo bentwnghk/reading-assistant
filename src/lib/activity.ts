@@ -49,19 +49,21 @@ export async function logActivity(
   options: {
     sessionId?: string
     score?: number
+    accuracy?: number
     details?: ActivityDetails
   } = {}
 ): Promise<void> {
   const client = await getClient()
   try {
     await client.query(
-      `INSERT INTO activity_logs (user_id, activity_type, session_id, score, details)
-       VALUES ($1, $2, $3, $4, $5)`,
+      `INSERT INTO activity_logs (user_id, activity_type, session_id, score, accuracy, details)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         userId,
         activityType,
         options.sessionId ?? null,
         options.score ?? null,
+        options.accuracy ?? null,
         JSON.stringify(options.details ?? {}),
       ]
     )

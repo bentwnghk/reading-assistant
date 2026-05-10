@@ -29,6 +29,7 @@ const ActivitySchema = z.object({
   ]),
   sessionId: z.string().optional(),
   score:     z.number().min(0).max(10000).optional(),
+  accuracy:  z.number().min(0).max(100).optional(),
   details:   z.object({
     cardsReviewed: z.number().int().min(0).optional(),
     wordCount:     z.number().int().min(0).optional(),
@@ -55,12 +56,13 @@ export async function POST(request: Request) {
       )
     }
 
-    const { activityType, sessionId, score, details } = parsed.data
+    const { activityType, sessionId, score, accuracy, details } = parsed.data
 
     // Log the activity
     await logActivity(session.user.id, activityType as ActivityType, {
       sessionId,
       score,
+      accuracy,
       details: details as ActivityDetails | undefined,
     })
 

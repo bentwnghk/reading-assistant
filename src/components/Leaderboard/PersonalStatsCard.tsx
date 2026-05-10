@@ -142,9 +142,11 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
           icon={<Dices className="h-3.5 w-3.5" />}
           label={t("leaderboard.stats.grammarGameScore")}
           value={Math.round(cw?.avgGrammarGameScore ?? 0)}
-          sub={cw?.grammarGamesCompleted
-            ? `${cw.grammarGamesCompleted} ${t("leaderboard.stats.grammarGamesCompleted")}`
-            : undefined}
+          sub={
+            cw?.grammarGamesCompleted
+              ? `${Math.round(cw.avgGrammarGameAccuracy ?? 0)}% ${t("leaderboard.stats.grammarGameAccuracy")} · ${cw.grammarGamesCompleted} ${t("leaderboard.stats.grammarGamesCompleted")}`
+              : undefined
+          }
         />
         <StatItem
           icon={<Layers className="h-3.5 w-3.5" />}
@@ -191,6 +193,11 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgGrammarGameScore")}</div>
             <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeGrammarGameScore}</div>
+            <div className="text-xs text-muted-foreground">{stats.allTime.avgAllTimeGrammarGameAccuracy}% {t("leaderboard.stats.grammarGameAccuracy")}</div>
+          </div>
+          <div>
+            <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgSpellingScore")}</div>
+            <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeSpellingScore}</div>
           </div>
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.totalFlashcards")}</div>

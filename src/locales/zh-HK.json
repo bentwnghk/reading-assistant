@@ -1613,6 +1613,7 @@
       "grammarQuizScore": "平均語法測驗分數",
       "grammarQuizzesCompleted": "完成測驗",
       "grammarGameScore": "平均語法遊戲分數",
+      "grammarGameAccuracy": "平均語法遊戲準確率",
       "grammarGamesCompleted": "遊戲場次"
     },
     "personal": {
@@ -1628,6 +1629,8 @@
       "avgTestScore": "平均閱讀測驗分數",
       "avgGrammarQuizScore": "平均語法測驗分數",
       "avgGrammarGameScore": "平均語法遊戲分數",
+      "avgGrammarGameAccuracy": "平均語法遊戲準確率",
+      "avgSpellingScore": "平均拼字分數",
       "totalFlashcards": "字卡複習總次數",
       "noStats": "完成本週的學習活動，即可出現在排行榜上！",
       "teacherTitle": "教師視圖",

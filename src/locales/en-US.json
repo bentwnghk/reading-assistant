@@ -1613,6 +1613,7 @@
       "grammarQuizScore": "Avg Grammar Quiz Score",
       "grammarQuizzesCompleted": "Quizzes Done",
       "grammarGameScore": "Avg Grammar Game Score",
+      "grammarGameAccuracy": "Avg Grammar Game Accuracy",
       "grammarGamesCompleted": "Games Played"
     },
     "personal": {
@@ -1628,6 +1629,8 @@
       "avgTestScore": "Avg Reading Test Score",
     "avgGrammarQuizScore": "Avg Grammar Quiz Score",
     "avgGrammarGameScore": "Avg Grammar Game Score",
+      "avgGrammarGameAccuracy": "Avg Grammar Game Accuracy",
+      "avgSpellingScore": "Avg Spelling Score",
       "totalFlashcards": "Total Flashcards",
       "noStats": "Complete learning activities this week to appear on the leaderboard!",
       "teacherTitle": "Teacher View",

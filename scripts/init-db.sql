@@ -283,6 +283,7 @@ CREATE TABLE activity_logs (
     )),
   session_id    TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
   score         INTEGER,          -- raw score/percentage (0-100 for tests; raw points for spelling)
+  accuracy      INTEGER,          -- accuracy percentage (0-100) for games/quizzes
   details       JSONB DEFAULT '{}'::jsonb,  -- e.g. { "cardsReviewed": 5, "wordCount": 12 }
   created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -310,6 +311,7 @@ CREATE TABLE weekly_stats (
   avg_spelling_score        NUMERIC(10,2) DEFAULT 0,  -- raw game points, unbounded
   avg_grammar_quiz_score    NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   avg_grammar_game_score    NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
+  avg_grammar_game_accuracy NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   total_vocabulary_words    INTEGER       DEFAULT 0,
   tests_completed           INTEGER       DEFAULT 0,
   quizzes_completed         INTEGER       DEFAULT 0,
