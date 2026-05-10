@@ -589,6 +589,7 @@
         "backToGames": "Back to Games",
         "generateChallenges": "New Challenges",
         "generating": "Generating...",
+        "generatingWait": "Generating new challenges… Please wait.",
         "score": "Score",
         "accuracy": "Accuracy",
         "streak": "Best Streak",

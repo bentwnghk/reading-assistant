@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { RefreshCw, LoaderCircle, Coins } from "lucide-react";
+import { toast } from "sonner";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { useHistoryStore } from "@/store/history";
@@ -83,7 +84,8 @@ export default function GrammarRoulette({ onBack }: Props) {
   useEffect(() => {
     if (grammarGameQuestions.length === 0 && grammarTopics.length > 0) {
       setIsAutoGenerating(true);
-      generateGrammarQuestions().finally(() => setIsAutoGenerating(false));
+      const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
+      generateGrammarQuestions().finally(() => { setIsAutoGenerating(false); toast.dismiss(tid); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -249,10 +251,12 @@ export default function GrammarRoulette({ onBack }: Props) {
 
   const handleGenerateNew = async () => {
     setIsGenerating(true);
+    const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
     try {
       await generateGrammarQuestions();
     } finally {
       setIsGenerating(false);
+      toast.dismiss(tid);
     }
   };
 
@@ -352,7 +356,7 @@ export default function GrammarRoulette({ onBack }: Props) {
               )}
             </div>
             <div className="flex gap-2">
-              <Button onClick={startGame} className="flex-1" disabled={questions.length === 0}>
+              <Button onClick={startGame} className="flex-1" disabled={questions.length === 0 || isGenerating}>
                 {t("reading.grammar.games.start")}
               </Button>
               <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
@@ -365,7 +369,6 @@ export default function GrammarRoulette({ onBack }: Props) {
     );
   }
 
-  // ── Completed ─────────────────────────────────────────────────────────────
   if (gameStatus === "completed") {
     const accuracy = totalRounds > 0 ? Math.round((correctCount / totalRounds) * 100) : 0;
     const isNewHigh = coins > grammarRouletteHighScore;
@@ -386,7 +389,7 @@ export default function GrammarRoulette({ onBack }: Props) {
           <GameStatRow label={t("reading.grammar.games.rounds", { count: totalRounds })} value={`${correctCount}/${totalRounds}`} />
         </div>
         <div className="flex gap-2">
-          <Button onClick={startGame} className="flex-1">{t("reading.grammar.games.playAgain")}</Button>
+          <Button onClick={startGame} className="flex-1" disabled={isGenerating}>{t("reading.grammar.games.playAgain")}</Button>
           <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
             {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             <span className="ml-1.5 hidden sm:inline">{t("reading.grammar.games.generateChallenges")}</span>

@@ -589,6 +589,7 @@
         "backToGames": "返回遊戲",
         "generateChallenges": "新挑戰",
         "generating": "正在生成...",
+        "generatingWait": "正在生成新挑戰，請稍候...",
         "score": "得分",
         "accuracy": "準確率",
         "streak": "最高連勝",
