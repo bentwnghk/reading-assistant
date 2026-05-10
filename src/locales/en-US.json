@@ -160,7 +160,7 @@
         },
         "grammarGames": {
           "title": "🎮 Grammar Games",
-          "desc": "Reinforce grammar skills through 5 interactive games: Scramble, Workshop, Surgery, Roulette, and Duel. Earn points, track accuracy, and compete on the leaderboard!"
+          "desc": "Reinforce grammar skills through 5 interactive games: Roulette, Surgery, Workshop, Duel, and Scramble. Earn points, track accuracy, and compete on the leaderboard!"
         }
       },
       "workflow": {
@@ -1760,7 +1760,7 @@
           },
           "grammar_games": {
             "name": "Grammar Gamer",
-            "desc": "Play grammar games like Scramble, Workshop, Surgery, Roulette, and Duel to master grammar through fun challenges!"
+            "desc": "Play grammar games like Roulette, Surgery, Workshop, Duel, and Scramble to master grammar through fun challenges!"
           },
           "ai_tutor_questions": {
             "name": "Curious Learner",
@@ -1859,7 +1859,7 @@
     "grammar_games": {
       "name": "Grammar Gamer",
       "description": "Play {{count}} grammar games",
-      "hint": "Play grammar games like Scramble, Workshop, Surgery, Roulette, and Duel"
+      "hint": "Play grammar games like Roulette, Surgery, Workshop, Duel, and Scramble"
     },
       "ai_tutor_questions": {
         "name": "Curious Learner",
