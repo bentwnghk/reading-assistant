@@ -788,6 +788,14 @@ Guidelines:
 
       const topics: GrammarTopic[] = JSON.parse(text);
       setGrammarTopics(topics);
+      readingStore.setGrammarQuiz([]);
+      readingStore.setGrammarQuizCompleted(false);
+      readingStore.setGrammarQuizScore(0);
+      readingStore.setGrammarQuizPoints(0, 0);
+      readingStore.setGrammarErrorChallenges([]);
+      readingStore.setGrammarScrambleChallenges([]);
+      readingStore.setGrammarWorkshopChallenges([]);
+      readingStore.setGrammarGameQuestions([]);
 
       logActivity("grammar_analyze", { sessionId: readingStore.id || undefined });
 
