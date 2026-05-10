@@ -157,6 +157,10 @@
         "grammar": {
           "title": "📐 Grammar Analysis & Quiz",
           "desc": "AI identifies grammar structures in your text with CEFR levels, bilingual explanations, patterns, and examples. Test your understanding with interactive quizzes featuring 4 question types and AI-scored open answers!"
+        },
+        "grammarGames": {
+          "title": "🎮 Grammar Games",
+          "desc": "Reinforce grammar skills through 5 interactive games: Scramble, Workshop, Surgery, Roulette, and Duel. Earn points, track accuracy, and compete on the leaderboard!"
         }
       },
       "workflow": {
@@ -174,7 +178,8 @@
         "glossary": "Review vocabulary using flashcards",
         "spelling": "Practice with spelling games",
         "vocabQuiz": "Test your vocabulary knowledge",
-        "grammar": "Analyze grammar structures & take quizzes"
+        "grammar": "Analyze grammar structures & take quizzes",
+        "grammarGames": "Play grammar games to reinforce skills"
       },
       "skills": {
         "title": "Reading Skills You'll Master",

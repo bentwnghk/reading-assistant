@@ -400,6 +400,7 @@ export function LandingPage() {
             { icon: ClipboardList, key: "quiz", color: "text-violet-600 dark:text-violet-400" },
             { icon: Target, key: "test", color: "text-red-600 dark:text-red-400" },
             { icon: BookOpenCheck, key: "grammar", color: "text-fuchsia-600 dark:text-fuchsia-400" },
+            { icon: Gamepad2, key: "grammarGames", color: "text-lime-600 dark:text-lime-400" },
             { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400" },
             { icon: Trophy, key: "leaderboard", color: "text-yellow-600 dark:text-yellow-400" },
             { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400" },
@@ -488,6 +489,7 @@ export function LandingPage() {
               { num: 12, icon: Layers, key: "vocabQuiz" },
               { num: 13, icon: Target, key: "test" },
               { num: 14, icon: BookOpenCheck, key: "grammar" },
+              { num: 15, icon: Gamepad2, key: "grammarGames" },
             ].map(({ num, icon: Icon, key }) => (
               <motion.div
                 key={key}

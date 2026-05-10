@@ -489,6 +489,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Gamepad2 className="h-4 w-4 mt-0.5 text-lime-600 dark:text-lime-400 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.grammarGames.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.grammarGames.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <Medal className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.achievements.title")}</div>
@@ -637,6 +644,11 @@ function Header() {
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-600 dark:text-fuchsia-300 text-xs font-bold">14</span>
                     <BookOpenCheck className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.grammar")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-lime-100 dark:bg-lime-900 text-lime-600 dark:text-lime-300 text-xs font-bold">15</span>
+                    <Gamepad2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.grammarGames")}</span>
                   </div>
                 </div>
               </div>
