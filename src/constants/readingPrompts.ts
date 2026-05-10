@@ -631,9 +631,9 @@ Generate 10 grammar quiz questions. You MUST respond with ONLY a valid JSON arra
     "topicName": "Present Perfect Tense",
     "question": "Which grammar structure is used in this sentence: 'She has lived here for ten years'?",
     "questionZh": "這個句子使用了什麼語法結構？",
-    "options": ["A) Simple Past", "B) Present Perfect", "C) Past Perfect", "D) Present Continuous"],
-    "optionsZh": ["A) 一般過去式", "B) 現在完成式", "C) 過去完成式", "D) 現在進行式"],
-    "correctAnswer": "B",
+    "options": ["A) Simple Past", "B) Past Perfect", "C) Present Perfect", "D) Present Continuous"],
+    "optionsZh": ["A) 一般過去式", "B) 過去完成式", "C) 現在完成式", "D) 現在進行式"],
+    "correctAnswer": "C",
     "explanation": "The sentence uses 'has + past participle (lived)' which is the present perfect tense structure.",
     "explanationZh": "這個句子使用了 'has + 過去分詞 (lived)'，這是現在完成式的結構。",
     "points": 1
@@ -657,9 +657,9 @@ Generate 10 grammar quiz questions. You MUST respond with ONLY a valid JSON arra
     "topicName": "Present Perfect Tense",
     "question": "Find and correct the grammar error: 'She have went to the store yesterday.'",
     "questionZh": "找出並改正語法錯誤：'She have went to the store yesterday.'",
-    "options": ["A) She has gone to the store yesterday.", "B) She went to the store yesterday.", "C) She have went to the store.", "D) No error"],
-    "optionsZh": ["A) She has gone to the store yesterday.", "B) She went to the store yesterday.", "C) She have went to the store.", "D) 沒有錯誤"],
-    "correctAnswer": "B",
+    "options": ["A) She has gone to the store yesterday.", "B) She have went to the store.", "C) No error", "D) She went to the store yesterday."],
+    "optionsZh": ["A) She has gone to the store yesterday.", "B) She have went to the store.", "C) 沒有錯誤", "D) She went to the store yesterday."],
+    "correctAnswer": "D",
     "explanation": "With 'yesterday', use simple past 'went', not present perfect. Also 'have' doesn't agree with 'she'.",
     "explanationZh": "使用 'yesterday' 時，應使用一般過去式 'went'，而不是現在完成式。此外 'have' 與 'she' 不搭配。",
     "points": 1
@@ -689,6 +689,7 @@ Generate 10 grammar quiz questions. You MUST respond with ONLY a valid JSON arra
 - For error-spot: create realistic errors that Hong Kong students commonly make
 - For rewrite: accept any grammatically correct answer (AI will evaluate)
 - Points: identify/error-spot = 1, fill-in/rewrite = 2
+- CRITICAL: For questions with options (identify, error-spot), the correct answer MUST be evenly distributed across ALL option positions (A, B, C, D). Do NOT bias toward A or B. Randomize the position of the correct answer for every question.
 - Chinese translations are REQUIRED for all questions
 - Use Traditional Chinese (繁體中文) for all Chinese text
 - Make questions age-appropriate
