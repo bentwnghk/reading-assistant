@@ -37,6 +37,7 @@ export default function GrammarDuel({ onBack }: Props) {
     grammarTopics,
     grammarGameQuestions,
     grammarDuelHighScore,
+    grammarDuelAccuracy,
     setGrammarDuelHighScore,
     setGrammarGameAccuracy,
     id, backup,
@@ -213,7 +214,7 @@ export default function GrammarDuel({ onBack }: Props) {
   useEffect(() => {
     if (gameStatus === "completed") {
       const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
-      setGrammarDuelHighScore(score);
+      setGrammarDuelHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
       logActivity("grammar_duel_complete", { sessionId: id || undefined, score, accuracy });
       const session = backup();
@@ -274,8 +275,15 @@ export default function GrammarDuel({ onBack }: Props) {
             <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
               <span>{questions.length} {t("reading.grammar.games.questionsAvailable")}</span>
               {grammarDuelHighScore > 0 && (
-                <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-                  🏆 {grammarDuelHighScore}
+                <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                    🏆 {grammarDuelHighScore}
+                  </span>
+                  {grammarDuelAccuracy > 0 && (
+                    <span className="flex items-center gap-1 font-medium text-green-600 dark:text-green-400">
+                      🎯 {grammarDuelAccuracy}%
+                    </span>
+                  )}
                 </span>
               )}
             </div>

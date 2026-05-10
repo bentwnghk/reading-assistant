@@ -37,6 +37,7 @@ export default function GrammarRoulette({ onBack }: Props) {
     grammarTopics,
     grammarGameQuestions,
     grammarRouletteHighScore,
+    grammarRouletteAccuracy,
     setGrammarRouletteHighScore,
     setGrammarGameAccuracy,
     id, backup,
@@ -239,7 +240,7 @@ export default function GrammarRoulette({ onBack }: Props) {
   useEffect(() => {
     if (gameStatus === "completed" && totalRounds > 0) {
       const accuracy = totalRounds > 0 ? Math.round((correctCount / totalRounds) * 100) : 0;
-      setGrammarRouletteHighScore(coins);
+      setGrammarRouletteHighScore(coins, accuracy);
       setGrammarGameAccuracy(accuracy);
       logActivity("grammar_roulette_complete", { sessionId: id || undefined, score: coins, accuracy });
       const session = backup();
@@ -350,8 +351,15 @@ export default function GrammarRoulette({ onBack }: Props) {
             <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
               <span>{totalRounds} {t("reading.grammar.games.roundsLabel")}</span>
               {grammarRouletteHighScore > 0 && (
-                <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-                  🏆 {grammarRouletteHighScore} {t("reading.grammar.games.roulette.coinsUnit")}
+                <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                    🏆 {grammarRouletteHighScore} {t("reading.grammar.games.roulette.coinsUnit")}
+                  </span>
+                  {grammarRouletteAccuracy > 0 && (
+                    <span className="flex items-center gap-1 font-medium text-green-600 dark:text-green-400">
+                      🎯 {grammarRouletteAccuracy}%
+                    </span>
+                  )}
                 </span>
               )}
             </div>

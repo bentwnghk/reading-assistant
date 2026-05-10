@@ -47,6 +47,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     grammarTopics,
     grammarErrorChallenges,
     grammarSurgeryHighScore,
+    grammarSurgeryAccuracy,
     setGrammarSurgeryHighScore,
     setGrammarGameAccuracy,
     id,
@@ -209,7 +210,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   useEffect(() => {
     if (gameStatus === "completed" && challenges.length > 0) {
       const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
-      setGrammarSurgeryHighScore(score);
+      setGrammarSurgeryHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
       logActivity("grammar_surgery_complete", { sessionId: id || undefined, score, accuracy });
       const session = backup();
@@ -251,8 +252,15 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
             <div className="flex items-center justify-between text-sm text-muted-foreground border rounded-lg px-4 py-3">
               <span>{t("reading.grammar.games.rounds", { count: challenges.length })}</span>
               {grammarSurgeryHighScore > 0 && (
-                <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-                  🏆 {grammarSurgeryHighScore}
+                <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                    🏆 {grammarSurgeryHighScore}
+                  </span>
+                  {grammarSurgeryAccuracy > 0 && (
+                    <span className="flex items-center gap-1 font-medium text-green-600 dark:text-green-400">
+                      🎯 {grammarSurgeryAccuracy}%
+                    </span>
+                  )}
                 </span>
               )}
             </div>

@@ -136,12 +136,22 @@ export interface ReadingStore {
   grammarQuizCompletedAt: number;
   grammarHighlightEnabled: boolean;
   grammarHighlightTopicId: string | null;
-  // Grammar Games — scores
+  // Grammar Games — scores & per-game accuracy
   grammarScrambleHighScore: number;
   grammarWorkshopHighScore: number;
   grammarSurgeryHighScore: number;
   grammarRouletteHighScore: number;
   grammarDuelHighScore: number;
+  grammarScrambleAccuracy: number;
+  grammarWorkshopAccuracy: number;
+  grammarSurgeryAccuracy: number;
+  grammarRouletteAccuracy: number;
+  grammarDuelAccuracy: number;
+  grammarScrambleCompleted: number;
+  grammarWorkshopCompleted: number;
+  grammarSurgeryCompleted: number;
+  grammarRouletteCompleted: number;
+  grammarDuelCompleted: number;
   grammarGameAccuracy: number;
   grammarGamesCompleted: number;
   grammarGameCompletedAt: number;
@@ -214,11 +224,11 @@ interface ReadingActions {
   setGrammarHighlightEnabled: (enabled: boolean) => void;
   setGrammarHighlightTopicId: (topicId: string | null) => void;
   // Grammar Games
-  setGrammarScrambleHighScore: (score: number) => void;
-  setGrammarWorkshopHighScore: (score: number) => void;
-  setGrammarSurgeryHighScore: (score: number) => void;
-  setGrammarRouletteHighScore: (score: number) => void;
-  setGrammarDuelHighScore: (score: number) => void;
+  setGrammarScrambleHighScore: (score: number, accuracy: number) => void;
+  setGrammarWorkshopHighScore: (score: number, accuracy: number) => void;
+  setGrammarSurgeryHighScore: (score: number, accuracy: number) => void;
+  setGrammarRouletteHighScore: (score: number, accuracy: number) => void;
+  setGrammarDuelHighScore: (score: number, accuracy: number) => void;
   setGrammarGameAccuracy: (accuracy: number) => void;
   // Grammar Games setters — cached AI content
   setGrammarErrorChallenges: (challenges: ErrorSurgeryChallenge[]) => void;
@@ -284,6 +294,16 @@ const defaultValues: ReadingStore = {
   grammarSurgeryHighScore: 0,
   grammarRouletteHighScore: 0,
   grammarDuelHighScore: 0,
+  grammarScrambleAccuracy: 0,
+  grammarWorkshopAccuracy: 0,
+  grammarSurgeryAccuracy: 0,
+  grammarRouletteAccuracy: 0,
+  grammarDuelAccuracy: 0,
+  grammarScrambleCompleted: 0,
+  grammarWorkshopCompleted: 0,
+  grammarSurgeryCompleted: 0,
+  grammarRouletteCompleted: 0,
+  grammarDuelCompleted: 0,
   grammarGameAccuracy: 0,
   grammarGamesCompleted: 0,
   grammarGameCompletedAt: 0,
@@ -731,10 +751,15 @@ export const useReadingStore = create(
           return newState;
         }),
       // ── Grammar Games setters ──────────────────────────────────────────────
-      setGrammarScrambleHighScore: (score) =>
+      setGrammarScrambleHighScore: (score, accuracy) =>
         set((state) => {
+          const count = state.grammarScrambleCompleted + 1;
           const newState = {
             grammarScrambleHighScore: Math.max(state.grammarScrambleHighScore, score),
+            grammarScrambleAccuracy: Math.round(
+              (state.grammarScrambleAccuracy * state.grammarScrambleCompleted + accuracy) / count
+            ),
+            grammarScrambleCompleted: count,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -743,10 +768,15 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      setGrammarWorkshopHighScore: (score) =>
+      setGrammarWorkshopHighScore: (score, accuracy) =>
         set((state) => {
+          const count = state.grammarWorkshopCompleted + 1;
           const newState = {
             grammarWorkshopHighScore: Math.max(state.grammarWorkshopHighScore, score),
+            grammarWorkshopAccuracy: Math.round(
+              (state.grammarWorkshopAccuracy * state.grammarWorkshopCompleted + accuracy) / count
+            ),
+            grammarWorkshopCompleted: count,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -755,10 +785,15 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      setGrammarSurgeryHighScore: (score) =>
+      setGrammarSurgeryHighScore: (score, accuracy) =>
         set((state) => {
+          const count = state.grammarSurgeryCompleted + 1;
           const newState = {
             grammarSurgeryHighScore: Math.max(state.grammarSurgeryHighScore, score),
+            grammarSurgeryAccuracy: Math.round(
+              (state.grammarSurgeryAccuracy * state.grammarSurgeryCompleted + accuracy) / count
+            ),
+            grammarSurgeryCompleted: count,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -767,10 +802,15 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      setGrammarRouletteHighScore: (score) =>
+      setGrammarRouletteHighScore: (score, accuracy) =>
         set((state) => {
+          const count = state.grammarRouletteCompleted + 1;
           const newState = {
             grammarRouletteHighScore: Math.max(state.grammarRouletteHighScore, score),
+            grammarRouletteAccuracy: Math.round(
+              (state.grammarRouletteAccuracy * state.grammarRouletteCompleted + accuracy) / count
+            ),
+            grammarRouletteCompleted: count,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -779,10 +819,15 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      setGrammarDuelHighScore: (score) =>
+      setGrammarDuelHighScore: (score, accuracy) =>
         set((state) => {
+          const count = state.grammarDuelCompleted + 1;
           const newState = {
             grammarDuelHighScore: Math.max(state.grammarDuelHighScore, score),
+            grammarDuelAccuracy: Math.round(
+              (state.grammarDuelAccuracy * state.grammarDuelCompleted + accuracy) / count
+            ),
+            grammarDuelCompleted: count,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -793,9 +838,12 @@ export const useReadingStore = create(
         }),
       setGrammarGameAccuracy: (accuracy) =>
         set((state) => {
+          const count = state.grammarGamesCompleted + 1;
           const newState = {
-            grammarGameAccuracy: Math.max(state.grammarGameAccuracy, accuracy),
-            grammarGamesCompleted: state.grammarGamesCompleted + 1,
+            grammarGameAccuracy: Math.round(
+              (state.grammarGameAccuracy * state.grammarGamesCompleted + accuracy) / count
+            ),
+            grammarGamesCompleted: count,
             grammarGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };

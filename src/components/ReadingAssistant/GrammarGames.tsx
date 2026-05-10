@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Trophy,
   Star,
+  Target,
 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { cn } from "@/utils/style";
@@ -34,6 +35,7 @@ const GAME_CONFIG = [
     nameZhKey: "reading.grammar.games.roulette.nameZh",
     descKey: "reading.grammar.games.roulette.description",
     scoreField: "grammarRouletteHighScore" as const,
+    accuracyField: "grammarRouletteAccuracy" as const,
   },
   {
     id: "surgery" as const,
@@ -45,6 +47,7 @@ const GAME_CONFIG = [
     nameZhKey: "reading.grammar.games.surgery.nameZh",
     descKey: "reading.grammar.games.surgery.description",
     scoreField: "grammarSurgeryHighScore" as const,
+    accuracyField: "grammarSurgeryAccuracy" as const,
   },
   {
     id: "workshop" as const,
@@ -56,6 +59,7 @@ const GAME_CONFIG = [
     nameZhKey: "reading.grammar.games.workshop.nameZh",
     descKey: "reading.grammar.games.workshop.description",
     scoreField: "grammarWorkshopHighScore" as const,
+    accuracyField: "grammarWorkshopAccuracy" as const,
   },
   {
     id: "duel" as const,
@@ -67,6 +71,7 @@ const GAME_CONFIG = [
     nameZhKey: "reading.grammar.games.duel.nameZh",
     descKey: "reading.grammar.games.duel.description",
     scoreField: "grammarDuelHighScore" as const,
+    accuracyField: "grammarDuelAccuracy" as const,
   },
   {
     id: "scramble" as const,
@@ -78,6 +83,7 @@ const GAME_CONFIG = [
     nameZhKey: "reading.grammar.games.scramble.nameZh",
     descKey: "reading.grammar.games.scramble.description",
     scoreField: "grammarScrambleHighScore" as const,
+    accuracyField: "grammarScrambleAccuracy" as const,
   },
 ] as const;
 
@@ -109,6 +115,7 @@ export default function GrammarGames({ onBack: _onBack }: GrammarGamesProps) {
         {GAME_CONFIG.map((game) => {
           const Icon = game.icon;
           const highScore = store[game.scoreField] as number;
+          const avgAccuracy = store[game.accuracyField] as number;
 
           return (
             <div
@@ -134,11 +141,21 @@ export default function GrammarGames({ onBack: _onBack }: GrammarGamesProps) {
                   </p>
                 </div>
                 {highScore > 0 && (
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Trophy className="h-3 w-3 text-amber-500" />
-                    <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-                      {highScore}
-                    </span>
+                  <div className="flex flex-col items-end gap-0.5 shrink-0">
+                    <div className="flex items-center gap-1">
+                      <Trophy className="h-3 w-3 text-amber-500" />
+                      <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                        {highScore}
+                      </span>
+                    </div>
+                    {avgAccuracy > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Target className="h-3 w-3 text-green-500" />
+                        <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                          {avgAccuracy}%
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
