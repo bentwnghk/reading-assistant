@@ -570,7 +570,13 @@
         "questionsReady": "{{count}} questions",
         "excellent": "Excellent! Great grammar understanding!",
         "good": "Good job! Keep practicing!",
-        "keepPracticing": "Keep practicing to improve!",
+      "keepPracticing": "Keep practicing to improve!",
+      "resultTier": {
+        "master": "Reading Champion",
+        "great": "Skilled Reader",
+        "good": "Steady Reader",
+        "keepGoing": "Keep Reading"
+      },
         "resultTier": {
           "master": "Grammar Master",
           "great": "Great Grammarian",

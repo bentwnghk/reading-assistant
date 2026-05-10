@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { 
   ClipboardCheck, 
@@ -16,7 +16,11 @@ import {
   Target,
   FileDown,
   ChevronDown,
-  HelpCircle
+  HelpCircle,
+  Crown,
+  Star,
+  Zap,
+  Heart,
 } from "lucide-react";
 import {
   Document,
@@ -67,6 +71,66 @@ const SKILL_LABELS: Record<string, string> = {
   "purpose": "purpose",
   "referencing": "detail",
 };
+
+function FloatingParticles({ color, count }: { color: string; count: number }) {
+  const particles = Array.from({ length: count }, (_, i) => ({
+    id: i, x: Math.random() * 100, delay: Math.random() * 2, duration: 2 + Math.random() * 2, size: 4 + Math.random() * 6,
+  }));
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p) => (
+        <div key={p.id} className="absolute rounded-full opacity-60 animate-float-up"
+          style={{ left: `${p.x}%`, bottom: "-10%", width: p.size, height: p.size, backgroundColor: color, animationDelay: `${p.delay}s`, animationDuration: `${p.duration}s` }} />
+      ))}
+    </div>
+  );
+}
+
+function getResultTier(score: number) {
+  if (score >= 80) return "master";
+  if (score >= 60) return "great";
+  if (score >= 40) return "good";
+  return "keepGoing";
+}
+
+const TEST_TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: string; ring: string; glow: string; badgeBg: string; particleColor: string; gradient: string }> = {
+  master:    { emoji: "👑", icon: Crown, color: "text-amber-600 dark:text-amber-400", ring: "ring-4 ring-amber-400/60", glow: "shadow-amber-400/50", badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", particleColor: "#fbbf24", gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)" },
+  great:      { emoji: "🌟", icon: Star, color: "text-emerald-600 dark:text-emerald-400", ring: "ring-4 ring-emerald-400/50", glow: "shadow-emerald-400/40", badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", particleColor: "#34d399", gradient: "linear-gradient(135deg, rgba(167,243,208,0.15) 0%, rgba(52,211,153,0.08) 50%, rgba(167,243,208,0.15) 100%)" },
+  good:       { emoji: "💪", icon: Zap, color: "text-blue-600 dark:text-blue-400", ring: "ring-4 ring-blue-400/40", glow: "shadow-blue-400/30", badgeBg: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", particleColor: "#60a5fa", gradient: "linear-gradient(135deg, rgba(191,219,254,0.15) 0%, rgba(96,165,250,0.08) 50%, rgba(191,219,254,0.15) 100%)" },
+  keepGoing: { emoji: "❤️", icon: Heart, color: "text-rose-600 dark:text-rose-400", ring: "ring-4 ring-rose-400/30", glow: "shadow-rose-400/25", badgeBg: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300", particleColor: "#fb7185", gradient: "linear-gradient(135deg, rgba(254,205,211,0.15) 0%, rgba(251,113,133,0.08) 50%, rgba(254,205,211,0.15) 100%)" },
+};
+
+function TestResultScreen({
+  score, scoreMessage, earnedPoints, totalPoints,
+}: {
+  score: number; scoreMessage: string; earnedPoints: number; totalPoints: number;
+}) {
+  const { t } = useTranslation();
+  const tier = getResultTier(score);
+  const config = TEST_TIER_CONFIG[tier];
+  const TierIcon = config.icon;
+  const [animateIn, setAnimateIn] = useState(false);
+  useEffect(() => { const timer = setTimeout(() => setAnimateIn(true), 100); return () => clearTimeout(timer); }, []);
+
+  return (
+    <div
+      className={cn("relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden", config.ring, animateIn && "shadow-2xl " + config.glow, animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95")}
+      style={{ background: config.gradient }}
+    >
+      {(tier === "master" || tier === "great") && <FloatingParticles color={config.particleColor} count={tier === "master" ? 20 : 12} />}
+      <div className={cn("text-5xl transition-all duration-500 delay-200", animateIn ? "opacity-100 scale-100" : "opacity-0 scale-50")}>{config.emoji}</div>
+      <div className={cn("transition-all duration-500 delay-300", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+        <div className={cn("text-5xl font-black", config.color)}>{score}%</div>
+        <p className="text-sm text-muted-foreground mt-1">{scoreMessage}</p>
+        <p className="text-sm text-muted-foreground">{t("reading.readingTest.pointsFormat", { earned: earnedPoints, total: totalPoints })}</p>
+      </div>
+      <div className={cn("transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+        <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}><TierIcon className="h-3.5 w-3.5" />{t(`reading.readingTest.resultTier.${tier}`)}</span>
+      </div>
+      {tier === "master" && <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />}
+    </div>
+  );
+}
 
 function ReadingTest() {
   const { t } = useTranslation();
@@ -845,24 +909,16 @@ function ReadingTest() {
         </div>
 
         <div className="space-y-6">
-          <div className="p-4 bg-muted rounded-lg text-center">
-            <p className="text-lg font-medium mb-2">
-              {t("reading.readingTest.yourScore")}
-            </p>
-            <p className={cn("text-4xl font-bold", getScoreColor(testScore))}>
-              {testScore}%
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t("reading.readingTest.pointsFormat", { earned: testEarnedPoints, total: testTotalPoints })}
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              {testScore >= 80
+          <TestResultScreen
+            score={testScore}
+            scoreMessage={
+              testScore >= 80
                 ? t("reading.readingTest.excellent")
-                : testScore >= 60
-                ? t("reading.readingTest.good")
-                : t("reading.readingTest.keepPracticing")}
-            </p>
-          </div>
+                : testScore >= 60 ? t("reading.readingTest.good") : t("reading.readingTest.keepPracticing")
+            }
+            earnedPoints={testEarnedPoints}
+            totalPoints={testTotalPoints}
+          />
 
           <div className="p-4 bg-muted rounded-lg">
             <div className="flex items-center gap-2 mb-3">

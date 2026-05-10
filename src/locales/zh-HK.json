@@ -482,6 +482,12 @@
       "excellent": "太棒了！理解得很好！",
       "good": "做得不錯！繼續努力！",
       "keepPracticing": "繼續練習，會越來越好！",
+      "resultTier": {
+        "master": "閱讀冠軍",
+        "great": "熟練讀者",
+        "good": "穩步閱讀",
+        "keepGoing": "繼續閱讀"
+      },
       "shortAnswerPlaceholder": "在這裡輸入你的答案...",
       "suggestedAnswer": "參考答案",
       "explanation": "解釋",
