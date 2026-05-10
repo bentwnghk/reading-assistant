@@ -1042,7 +1042,16 @@ Guidelines:
       });
 
       const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
-      const questions = JSON.parse(text) as GrammarGameQuestion[];
+      const raw = JSON.parse(text) as GrammarGameQuestion[];
+      const questions = raw.map((q) => {
+        const correctOpt = q.options[q.correctIndex];
+        const shuffled = [...q.options];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return { ...q, options: shuffled, correctIndex: shuffled.indexOf(correctOpt) };
+      });
       setGrammarGameQuestions(questions);
       return questions;
     } catch (error) {
