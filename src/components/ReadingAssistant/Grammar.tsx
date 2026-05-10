@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen,
@@ -12,6 +12,11 @@ import {
   Highlighter,
   Trophy,
   Gamepad2,
+  Crown,
+  Star,
+  Zap,
+  Heart,
+  Flame,
 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -40,6 +45,126 @@ import GrammarGames from "./GrammarGames";
 
 type TabType = "topics" | "lessons" | "quiz" | "games";
 
+function FloatingParticles({ color, count }: { color: string; count: number }) {
+  const particles = Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    delay: Math.random() * 2,
+    duration: 2 + Math.random() * 2,
+    size: 4 + Math.random() * 6,
+  }));
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full opacity-60 animate-float-up"
+          style={{
+            left: `${p.x}%`,
+            bottom: "-10%",
+            width: p.size,
+            height: p.size,
+            backgroundColor: color,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function getQuizTier(score: number) {
+  if (score >= 80) return "master";
+  if (score >= 60) return "great";
+  if (score >= 40) return "good";
+  return "keepGoing";
+}
+
+const QUIZ_TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: string; ring: string; glow: string; badgeBg: string; particleColor: string; gradient: string }> = {
+  master:      { emoji: "👑", icon: Crown, color: "text-amber-600 dark:text-amber-400", ring: "ring-4 ring-amber-400/60", glow: "shadow-amber-400/50", badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", particleColor: "#fbbf24", gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)" },
+  great:        { emoji: "🌟", icon: Star, color: "text-emerald-600 dark:text-emerald-400", ring: "ring-4 ring-emerald-400/50", glow: "shadow-emerald-400/40", badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", particleColor: "#34d399", gradient: "linear-gradient(135deg, rgba(167,243,208,0.15) 0%, rgba(52,211,153,0.08) 50%, rgba(167,243,208,0.15) 100%)" },
+  good:          { emoji: "💪", icon: Zap, color: "text-blue-600 dark:text-blue-400", ring: "ring-4 ring-blue-400/40", glow: "shadow-blue-400/30", badgeBg: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", particleColor: "#60a5fa", gradient: "linear-gradient(135deg, rgba(191,219,254,0.15) 0%, rgba(96,165,250,0.08) 50%, rgba(191,219,254,0.15) 100%)" },
+  keepGoing:  { emoji: "❤️", icon: Heart, color: "text-rose-600 dark:text-rose-400", ring: "ring-4 ring-rose-400/30", glow: "shadow-rose-400/25", badgeBg: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300", particleColor: "#fb7185", gradient: "linear-gradient(135deg, rgba(254,205,211,0.15) 0%, rgba(251,113,133,0.08) 50%, rgba(254,205,211,0.15) 100%)" },
+};
+
+function QuizResultScreen({
+  score,
+  earnedPoints,
+  totalPoints,
+  topicBreakdown,
+  onReview,
+  onRetry,
+  showReview,
+  scoreMessage,
+}: {
+  score: number;
+  earnedPoints: number;
+  totalPoints: number;
+  topicBreakdown: React.ReactNode;
+  onReview: () => void;
+  onRetry: () => void;
+  showReview: boolean;
+  scoreMessage: string;
+}) {
+  const { t } = useTranslation();
+  const tier = getQuizTier(score);
+  const config = QUIZ_TIER_CONFIG[tier];
+  const TierIcon = config.icon;
+  const [animateIn, setAnimateIn] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setAnimateIn(true), 100); return () => clearTimeout(t); }, []);
+
+  return (
+    <div className="space-y-5">
+      <div
+        className={cn(
+          "relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden",
+          config.ring,
+          animateIn && "shadow-2xl " + config.glow,
+          animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        )}
+        style={{ background: config.gradient }}
+      >
+        {(tier === "master" || tier === "great") && (
+          <FloatingParticles color={config.particleColor} count={tier === "master" ? 20 : 12} />
+        )}
+        <div className={cn("text-5xl transition-all duration-500 delay-200", animateIn ? "opacity-100 scale-100" : "opacity-0 scale-50")}>
+          {config.emoji}
+        </div>
+        <div className={cn("transition-all duration-500 delay-300", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+          <div className={cn("text-5xl font-black", config.color)}>{score}%</div>
+          <p className="text-sm text-muted-foreground mt-1">{scoreMessage}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("reading.grammar.quiz.pointsFormat", { earned: earnedPoints, total: totalPoints })}
+          </p>
+        </div>
+        <div className={cn("transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+          <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}>
+            <TierIcon className="h-3.5 w-3.5" />
+            {t(`reading.grammar.quiz.resultTier.${tier}`)}
+          </span>
+        </div>
+        {tier === "master" && (
+          <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />
+        )}
+      </div>
+      <div className={cn("border rounded-lg p-4 space-y-2 transition-all duration-500 delay-[400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+        {topicBreakdown}
+      </div>
+      <div className={cn("flex gap-2 transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+        <Button variant="outline" size="sm" onClick={onReview}>
+          {showReview ? t("reading.grammar.quiz.hideReview") : t("reading.grammar.quiz.reviewAnswers")}
+        </Button>
+        <Button variant="default" size="sm" onClick={onRetry}>
+          <Flame className="h-3.5 w-3.5 mr-1" />
+          {t("reading.grammar.quiz.retry")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 const CATEGORY_COLORS: Record<GrammarTopicCategory, string> = {
   tenses: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   conditionals: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
@@ -58,12 +183,12 @@ const CATEGORY_COLORS: Record<GrammarTopicCategory, string> = {
 };
 
 const CEFR_COLORS: Record<string, string> = {
-  A1: "bg-cyan-500 text-white",
-  A2: "bg-green-500 text-white",
-  B1: "bg-amber-500 text-white",
-  B2: "bg-orange-500 text-white",
-  C1: "bg-red-500 text-white",
-  C2: "bg-purple-500 text-white",
+  A1: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  A2: "bg-lime-100 text-lime-800 dark:bg-lime-900 dark:text-lime-200",
+  B1: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  B2: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  C1: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  C2: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
 };
 
 function Grammar() {
@@ -356,12 +481,6 @@ function Grammar() {
     }
 
     if (quizState === "completed") {
-      const scoreColor =
-        grammarQuizScore >= 80
-          ? "text-green-600 dark:text-green-400"
-          : grammarQuizScore >= 60
-            ? "text-yellow-600 dark:text-yellow-400"
-            : "text-red-600 dark:text-red-400";
       const scoreMessage =
         grammarQuizScore >= 80
           ? t("reading.grammar.quiz.excellent")
@@ -370,54 +489,44 @@ function Grammar() {
             : t("reading.grammar.quiz.keepPracticing");
 
       return (
-        <div className="space-y-4">
-          <div className="text-center py-4">
-            <p className={cn("text-4xl font-bold", scoreColor)}>{grammarQuizScore}%</p>
-            <p className="text-sm text-muted-foreground mt-1">{scoreMessage}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("reading.grammar.quiz.pointsFormat", {
-                earned: grammarQuizEarnedPoints,
-                total: grammarQuizTotalPoints,
-              })}
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">{t("reading.grammar.quiz.topicBreakdown")}</h4>
-            {grammarTopics.map((topic) => {
-              const topicQuestions = grammarQuiz.filter((q) => q.topicId === topic.id);
-              if (topicQuestions.length === 0) return null;
-              const topicCorrect = topicQuestions.filter((q) => {
-                if (q.type === "rewrite" || q.type === "fill-in") {
-                  return (q.earnedPoints ?? 0) >= q.points;
-                }
-                const ua = q.userAnswer?.toLowerCase().trim();
-                const ca = q.correctAnswer.toLowerCase().trim();
-                return ua === ca || ua === ca.charAt(0);
-              }).length;
-              const topicTotal = topicQuestions.length;
-              const pct = Math.round((topicCorrect / topicTotal) * 100);
-              return (
-                <div key={topic.id} className="flex items-center gap-2 text-sm">
-                  <span className="w-32 truncate text-xs">{topic.name}</span>
-                  <Progress value={pct} className="flex-1 h-2" />
-                  <span className="text-xs text-muted-foreground w-16 text-right">
-                    {topicCorrect}/{topicTotal}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowReview(!showReview)}>
-              {showReview ? t("reading.grammar.quiz.hideReview") : t("reading.grammar.quiz.reviewAnswers")}
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleRetry}>
-              {t("reading.grammar.quiz.retry")}
-            </Button>
-          </div>
-
+        <>
+          <QuizResultScreen
+            score={grammarQuizScore}
+            earnedPoints={grammarQuizEarnedPoints}
+            totalPoints={grammarQuizTotalPoints}
+            scoreMessage={scoreMessage}
+            showReview={showReview}
+            onReview={() => setShowReview(!showReview)}
+            onRetry={handleRetry}
+            topicBreakdown={
+              <>
+                <h4 className="font-medium text-sm">{t("reading.grammar.quiz.topicBreakdown")}</h4>
+                {grammarTopics.map((topic) => {
+                  const topicQuestions = grammarQuiz.filter((q) => q.topicId === topic.id);
+                  if (topicQuestions.length === 0) return null;
+                  const topicCorrect = topicQuestions.filter((q) => {
+                    if (q.type === "rewrite" || q.type === "fill-in") {
+                      return (q.earnedPoints ?? 0) >= q.points;
+                    }
+                    const ua = q.userAnswer?.toLowerCase().trim();
+                    const ca = q.correctAnswer.toLowerCase().trim();
+                    return ua === ca || ua === ca.charAt(0);
+                  }).length;
+                  const topicTotal = topicQuestions.length;
+                  const pct = Math.round((topicCorrect / topicTotal) * 100);
+                  return (
+                    <div key={topic.id} className="flex items-center gap-2 text-sm">
+                      <span className="w-32 truncate text-xs">{topic.name}</span>
+                      <Progress value={pct} className="flex-1 h-2" />
+                      <span className="text-xs text-muted-foreground w-16 text-right">
+                        {topicCorrect}/{topicTotal}
+                      </span>
+                    </div>
+                  );
+                })}
+              </>
+            }
+          />
           {showReview && (
             <div className="space-y-4 mt-4">
               {grammarQuiz.map((q, i) => {
@@ -472,7 +581,7 @@ function Grammar() {
               })}
             </div>
           )}
-        </div>
+        </>
       );
     }
 

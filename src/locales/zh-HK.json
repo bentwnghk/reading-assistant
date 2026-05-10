@@ -571,6 +571,12 @@
         "excellent": "太棒了！語法理解很好！",
         "good": "做得好！繼續練習！",
         "keepPracticing": "繼續練習以提升！",
+        "resultTier": {
+          "master": "語法大師",
+          "great": "語法高手",
+          "good": "穩步前進",
+          "keepGoing": "繼續加油"
+        },
         "pointsFormat": "{{earned}} / {{total}} 分",
         "topicBreakdown": "按主題分析",
         "reviewAnswers": "查看答案",
