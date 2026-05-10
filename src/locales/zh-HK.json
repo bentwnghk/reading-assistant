@@ -749,6 +749,15 @@
         "retryQuiz": "全部重試",
         "retryMissed": "重試錯誤",
         "quizComplete": "測驗完成！",
+        "excellent": "優秀！詞彙知識很棒！",
+        "good": "做得好！繼續學習新詞彙！",
+        "keepPracticing": "繼續練習以擴展詞彙量！",
+        "resultTier": {
+          "master": "詞彙大師",
+          "great": "詞彙高手",
+          "good": "穩步學習",
+          "keepGoing": "繼續累積"
+        },
         "yourScore": "你的答案",
         "question": "題目",
         "chooseDefinition": "這個生字是什麼意思？",

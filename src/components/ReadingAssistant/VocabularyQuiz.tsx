@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target, FileDown, ChevronDown, Info, Sparkles, HelpCircle, PenLine, Timer } from "lucide-react";
+import { Play, CheckCircle, XCircle, RotateCcw, Eye, ArrowLeft, ChevronRight, Trophy, Target, FileDown, ChevronDown, Info, Sparkles, HelpCircle, PenLine, Timer, Crown, Star, Zap, Heart, Flame } from "lucide-react";
 import {
   Document,
   Packer,
@@ -140,6 +140,130 @@ const DIFFICULTY_CONFIG: Record<QuizDifficulty, { timeLimit: number }> = {
   medium: { timeLimit: 15 },
   hard: { timeLimit: 10 },
 };
+
+function FloatingParticles({ color, count }: { color: string; count: number }) {
+  const particles = Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    delay: Math.random() * 2,
+    duration: 2 + Math.random() * 2,
+    size: 4 + Math.random() * 6,
+  }));
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full opacity-60 animate-float-up"
+          style={{
+            left: `${p.x}%`, bottom: "-10%", width: p.size, height: p.size,
+            backgroundColor: color, animationDelay: `${p.delay}s`, animationDuration: `${p.duration}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function getQuizTier(score: number) {
+  if (score >= 80) return "master";
+  if (score >= 60) return "great";
+  if (score >= 40) return "good";
+  return "keepGoing";
+}
+
+const QUIZ_TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: string; ring: string; glow: string; badgeBg: string; particleColor: string; gradient: string }> = {
+  master:      { emoji: "👑", icon: Crown, color: "text-amber-600 dark:text-amber-400", ring: "ring-4 ring-amber-400/60", glow: "shadow-amber-400/50", badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", particleColor: "#fbbf24", gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)" },
+  great:        { emoji: "🌟", icon: Star, color: "text-emerald-600 dark:text-emerald-400", ring: "ring-4 ring-emerald-400/50", glow: "shadow-emerald-400/40", badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", particleColor: "#34d399", gradient: "linear-gradient(135deg, rgba(167,243,208,0.15) 0%, rgba(52,211,153,0.08) 50%, rgba(167,243,208,0.15) 100%)" },
+  good:          { emoji: "💪", icon: Zap, color: "text-blue-600 dark:text-blue-400", ring: "ring-4 ring-blue-400/40", glow: "shadow-blue-400/30", badgeBg: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", particleColor: "#60a5fa", gradient: "linear-gradient(135deg, rgba(191,219,254,0.15) 0%, rgba(96,165,250,0.08) 50%, rgba(191,219,254,0.15) 100%)" },
+  keepGoing:  { emoji: "❤️", icon: Heart, color: "text-rose-600 dark:text-rose-400", ring: "ring-4 ring-rose-400/30", glow: "shadow-rose-400/25", badgeBg: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300", particleColor: "#fb7185", gradient: "linear-gradient(135deg, rgba(254,205,211,0.15) 0%, rgba(251,113,133,0.08) 50%, rgba(254,205,211,0.15) 100%)" },
+};
+
+function VocabQuizResultScreen({
+  percentage,
+  correct,
+  total,
+  scoreMessage,
+  onReview,
+  onRetry,
+  onRetryMissed,
+  missedCount,
+  downloadContent,
+  showReview,
+}: {
+  percentage: number;
+  correct: number;
+  total: number;
+  scoreMessage: string;
+  onReview: () => void;
+  onRetry: () => void;
+  onRetryMissed: () => void;
+  missedCount: number;
+  downloadContent: React.ReactNode;
+  showReview: boolean;
+}) {
+  const { t } = useTranslation();
+  const tier = getQuizTier(percentage);
+  const config = QUIZ_TIER_CONFIG[tier];
+  const TierIcon = config.icon;
+  const [animateIn, setAnimateIn] = useState(false);
+  useEffect(() => { const timer = setTimeout(() => setAnimateIn(true), 100); return () => clearTimeout(timer); }, []);
+
+  return (
+    <div className="space-y-5">
+      <div
+        className={cn(
+          "relative rounded-2xl border-2 p-6 text-center space-y-3 transition-all duration-700 overflow-hidden",
+          config.ring,
+          animateIn && "shadow-2xl " + config.glow,
+          animateIn ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        )}
+        style={{ background: config.gradient }}
+      >
+        {(tier === "master" || tier === "great") && (
+          <FloatingParticles color={config.particleColor} count={tier === "master" ? 20 : 12} />
+        )}
+        <div className={cn("text-5xl transition-all duration-500 delay-200", animateIn ? "opacity-100 scale-100" : "opacity-0 scale-50")}>
+          {config.emoji}
+        </div>
+        <div className={cn("transition-all duration-500 delay-300", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+          <div className={cn("text-5xl font-black", config.color)}>{percentage}%</div>
+          <p className="text-sm text-muted-foreground mt-1">{scoreMessage}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("reading.glossary.quiz.scoreFormat", { correct, total })}
+          </p>
+        </div>
+        <div className={cn("transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+          <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}>
+            <TierIcon className="h-3.5 w-3.5" />
+            {t(`reading.glossary.quiz.resultTier.${tier}`)}
+          </span>
+        </div>
+        {tier === "master" && (
+          <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />
+        )}
+      </div>
+
+      <div className={cn("flex gap-2 justify-center flex-wrap transition-all duration-500 delay-[400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+        {downloadContent}
+        <Button variant="outline" size="sm" onClick={onReview}>
+          <Eye className="h-4 w-4 mr-1" />
+          {showReview ? t("reading.glossary.quiz.reviewAnswers") : t("reading.glossary.quiz.reviewAnswers")}
+        </Button>
+        {missedCount > 0 && (
+          <Button variant="secondary" size="sm" onClick={onRetryMissed}>
+            <RotateCcw className="h-4 w-4 mr-1" />
+            {t("reading.glossary.quiz.retryMissed")} ({missedCount})
+          </Button>
+        )}
+        <Button variant="default" size="sm" onClick={onRetry}>
+          <Flame className="h-3.5 w-3.5 mr-1" />
+          {t("reading.glossary.quiz.retryQuiz")}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
   const { t } = useTranslation();
@@ -641,61 +765,42 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
 
   if (quizState === "completed") {
     const percentage = Math.round((getScore.correct / getScore.total) * 100);
+    const scoreMessage = percentage >= 80
+      ? t("reading.glossary.quiz.excellent")
+      : percentage >= 60 ? t("reading.glossary.quiz.good") : t("reading.glossary.quiz.keepPracticing");
 
     return (
-      <div className="py-6 space-y-6">
-        <div className="text-center">
-          <h4 className="text-xl font-bold mb-2">{t("reading.glossary.quiz.quizComplete")}</h4>
-          <div
-            className={cn(
-              "text-5xl font-bold mb-2",
-              percentage >= 80
-                ? "text-green-600 dark:text-green-400"
-                : percentage >= 60
-                ? "text-yellow-600 dark:text-yellow-400"
-                : "text-red-600 dark:text-red-400"
-            )}
-          >
-            {percentage}%
-          </div>
-          <p className="text-muted-foreground">
-            {t("reading.glossary.quiz.scoreFormat", { correct: getScore.correct, total: getScore.total })}
-          </p>
-        </div>
-
-        <div className="flex gap-2 justify-center flex-wrap">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <FileDown className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("reading.glossary.quiz.downloadWord")}</span>
-                <ChevronDown className="h-3 w-3 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => downloadWord(false)}>
-                {t("reading.glossary.quiz.downloadBlank")}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => downloadWord(true)}>
-                {t("reading.glossary.quiz.downloadWithAnswers")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="outline" onClick={() => setShowReview(!showReview)}>
-            <Eye className="h-4 w-4 mr-2" />
-            {t("reading.glossary.quiz.reviewAnswers")}
-          </Button>
-          {missedQuestions.length > 0 && (
-            <Button variant="secondary" onClick={retryMissed}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              {t("reading.glossary.quiz.retryMissed")} ({missedQuestions.length})
-            </Button>
-          )}
-          <Button onClick={startQuiz}>
-            <Play className="h-4 w-4 mr-2" />
-            {t("reading.glossary.quiz.retryQuiz")}
-          </Button>
-        </div>
+      <>
+        <VocabQuizResultScreen
+          percentage={percentage}
+          correct={getScore.correct}
+          total={getScore.total}
+          scoreMessage={scoreMessage}
+          showReview={showReview}
+          onReview={() => setShowReview(!showReview)}
+          onRetry={startQuiz}
+          onRetryMissed={retryMissed}
+          missedCount={missedQuestions.length}
+          downloadContent={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <FileDown className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t("reading.glossary.quiz.downloadWord")}</span>
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => downloadWord(false)}>
+                  {t("reading.glossary.quiz.downloadBlank")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => downloadWord(true)}>
+                  {t("reading.glossary.quiz.downloadWithAnswers")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
+        />
 
         {showReview && (
           <div className="space-y-4 mt-6">
@@ -760,7 +865,7 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
             })}
           </div>
         )}
-      </div>
+      </>
     );
   }
 

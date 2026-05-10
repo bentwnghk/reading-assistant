@@ -749,6 +749,15 @@
         "retryQuiz": "Retry All",
         "retryMissed": "Retry Missed",
         "quizComplete": "Quiz Complete!",
+        "excellent": "Excellent! Great vocabulary knowledge!",
+        "good": "Good job! Keep learning new words!",
+        "keepPracticing": "Keep practicing to expand your vocabulary!",
+        "resultTier": {
+          "master": "Vocabulary Master",
+          "great": "Word Wizard",
+          "good": "Steady Learner",
+          "keepGoing": "Keep Building"
+        },
         "yourScore": "Your Answer",
         "question": "Question",
         "chooseDefinition": "What does this word mean?",
