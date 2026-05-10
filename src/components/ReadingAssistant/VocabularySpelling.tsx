@@ -111,16 +111,16 @@ function SpellingResultScreen({
         {tier === "master" && <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />}
       </div>
       <div className={cn("border rounded-lg divide-y transition-all duration-500 delay-[400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
-        <div className="flex justify-between px-4 py-3">
-          <span className="text-muted-foreground">{t("reading.glossary.spelling.accuracy")}</span>
-          <span className={cn("font-semibold", config.color)}>{accuracy}%</span>
+        <div className="flex justify-between px-5 py-3.5">
+          <span className="text-muted-foreground text-sm">{t("reading.glossary.spelling.accuracy")}</span>
+          <span className={cn("font-semibold text-sm", config.color)}>{accuracy}%</span>
         </div>
-        <div className="flex justify-between px-4 py-3">
-          <span className="text-muted-foreground">{t("reading.glossary.spelling.correctWords")}</span>
-          <span className="font-semibold">{correctCount} / {totalCount}</span>
+        <div className="flex justify-between px-5 py-3.5">
+          <span className="text-muted-foreground text-sm">{t("reading.glossary.spelling.correctWords")}</span>
+          <span className="font-semibold text-sm">{correctCount} / {totalCount}</span>
         </div>
-        <div className="flex justify-between px-4 py-3">
-          <span className="text-muted-foreground flex items-center gap-2">
+        <div className="flex justify-between px-5 py-3.5">
+          <span className="text-muted-foreground text-sm flex items-center gap-2">
             <Flame className="h-4 w-4 text-orange-500" />
             {t("reading.glossary.spelling.maxStreak")}
           </span>
@@ -813,7 +813,7 @@ function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps
     const percentage = Math.round((correctCount / challenges.length) * 100);
 
     return (
-      <div className="flex flex-col items-center py-8">
+      <div className="py-8">
         <SpellingResultScreen
           score={score}
           accuracy={percentage}
