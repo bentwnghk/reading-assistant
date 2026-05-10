@@ -602,6 +602,12 @@
         "roundsLabel": "回合",
         "questionsAvailable": "條題目",
         "newBest": "新紀錄！",
+        "result": {
+          "master": "出色表現！",
+          "great": "做得很好！",
+          "good": "繼續努力！",
+          "keepGoing": "加油練習！"
+        },
         "correct": "正確！",
         "incorrect": "錯誤",
         "checkAnswer": "確認答案",

@@ -75,10 +75,33 @@ export default {
             height: "0",
           },
         },
+        "float-up": {
+          "0%": {
+            transform: "translateY(0) scale(1)",
+            opacity: "0.7",
+          },
+          "50%": {
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateY(-300px) scale(0.3)",
+            opacity: "0",
+          },
+        },
+        shimmer: {
+          "0%": {
+            backgroundPosition: "-200% 0",
+          },
+          "100%": {
+            backgroundPosition: "200% 0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "float-up": "float-up 3s ease-out infinite",
+        shimmer: "shimmer 3s linear infinite",
       },
     },
   },

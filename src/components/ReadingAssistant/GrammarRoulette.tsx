@@ -9,8 +9,9 @@ import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, GameModeSelector, AnswerFeedback, GameStatRow } from "./GrammarGames";
+import { GameBackButton, GameModeSelector, AnswerFeedback } from "./GrammarGames";
 import { logActivity } from "@/utils/activityLogger";
+import GameResultScreen from "./GameResultScreen";
 
 // ── Wheel colours per topic slot ─────────────────────────────────────────────
 const WHEEL_COLORS = [
@@ -381,29 +382,23 @@ export default function GrammarRoulette({ onBack }: Props) {
     const accuracy = totalRounds > 0 ? Math.round((correctCount / totalRounds) * 100) : 0;
     const isNewHigh = coins > grammarRouletteHighScore;
     return (
-      <div className="space-y-5">
-        <GameBackButton onBack={onBack} />
-        <div className="text-center space-y-2 py-4">
-          <div className="flex items-center justify-center gap-2">
-            <Coins className="h-7 w-7 text-amber-500" />
-            <div className="text-5xl font-black text-amber-500">{coins}</div>
-          </div>
-          <div className="text-sm text-muted-foreground">{t("reading.grammar.games.roulette.coins", { count: coins })}</div>
-          {isNewHigh && <Badge className="bg-amber-500 text-white">🏆 {t("reading.grammar.games.newBest")}</Badge>}
-        </div>
-        <div className="border rounded-lg divide-y">
-          <GameStatRow label={t("reading.grammar.games.accuracy")} value={`${accuracy}%`} highlight />
-          <GameStatRow label={t("reading.grammar.games.streak")} value={maxStreak} />
-          <GameStatRow label={t("reading.grammar.games.rounds", { count: totalRounds })} value={`${correctCount}/${totalRounds}`} />
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={startGame} className="flex-1" disabled={isGenerating}>{t("reading.grammar.games.playAgain")}</Button>
-          <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
-            {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            <span className="ml-1.5 hidden sm:inline">{t("reading.grammar.games.generateChallenges")}</span>
-          </Button>
-        </div>
-      </div>
+      <GameResultScreen
+        onBack={onBack}
+        score={coins}
+        scoreLabel={t("reading.grammar.games.roulette.coins", { count: coins })}
+        scoreIcon={<Coins className="h-7 w-7 text-amber-500" />}
+        accuracy={accuracy}
+        isNewHigh={isNewHigh}
+        stats={[
+          { label: t("reading.grammar.games.accuracy"), value: `${accuracy}%`, highlight: true },
+          { label: t("reading.grammar.games.streak"), value: maxStreak },
+          { label: t("reading.grammar.games.rounds", { count: totalRounds }), value: `${correctCount}/${totalRounds}` },
+        ]}
+        onPlayAgain={startGame}
+        onGenerateNew={handleGenerateNew}
+        isGenerating={isGenerating}
+        showGenerateLabel
+      />
     );
   }
 

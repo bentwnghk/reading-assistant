@@ -602,6 +602,12 @@
         "roundsLabel": "rounds",
         "questionsAvailable": "questions available",
         "newBest": "New Best!",
+        "result": {
+          "master": "Outstanding Mastery!",
+          "great": "Excellent Work!",
+          "good": "Good Effort!",
+          "keepGoing": "Keep Practicing!"
+        },
         "correct": "Correct!",
         "incorrect": "Incorrect",
         "checkAnswer": "Check Answer",

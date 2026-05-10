@@ -10,8 +10,9 @@ import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, GameModeSelector, AnswerFeedback, GameStatRow } from "./GrammarGames";
+import { GameBackButton, GameModeSelector, AnswerFeedback } from "./GrammarGames";
 import { logActivity } from "@/utils/activityLogger";
+import GameResultScreen from "./GameResultScreen";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -290,26 +291,21 @@ export default function GrammarWorkshop({ onBack }: Props) {
     const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
     const isNewHigh = score > grammarWorkshopHighScore;
     return (
-      <div className="space-y-5">
-        <GameBackButton onBack={onBack} />
-        <div className="text-center space-y-2 py-4">
-          <div className="text-5xl font-black text-primary">{score}</div>
-          <div className="text-sm text-muted-foreground">{t("reading.grammar.games.score")}</div>
-          {isNewHigh && <Badge className="bg-amber-500 text-white">🏆 {t("reading.grammar.games.newBest")}</Badge>}
-        </div>
-        <div className="border rounded-lg divide-y">
-          <GameStatRow label={t("reading.grammar.games.accuracy")} value={`${accuracy}%`} highlight />
-          <GameStatRow label={t("reading.grammar.games.streak")} value={maxStreak} />
-          <GameStatRow label={t("reading.grammar.games.rounds", { count: challenges.length })} value={`${correctCount}/${challenges.length}`} />
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={startGame} className="flex-1" disabled={isGenerating}>{t("reading.grammar.games.playAgain")}</Button>
-          <Button variant="outline" onClick={handleGenerateNew} disabled={isGenerating}>
-            {isGenerating ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            <span className="ml-1.5 hidden sm:inline">{t("reading.grammar.games.generateChallenges")}</span>
-          </Button>
-        </div>
-      </div>
+      <GameResultScreen
+        onBack={onBack}
+        score={score}
+        accuracy={accuracy}
+        isNewHigh={isNewHigh}
+        stats={[
+          { label: t("reading.grammar.games.accuracy"), value: `${accuracy}%`, highlight: true },
+          { label: t("reading.grammar.games.streak"), value: maxStreak },
+          { label: t("reading.grammar.games.rounds", { count: challenges.length }), value: `${correctCount}/${challenges.length}` },
+        ]}
+        onPlayAgain={startGame}
+        onGenerateNew={handleGenerateNew}
+        isGenerating={isGenerating}
+        showGenerateLabel
+      />
     );
   }
 
