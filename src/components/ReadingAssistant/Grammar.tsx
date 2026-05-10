@@ -589,25 +589,9 @@ function Grammar() {
 
     return (
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            {t("reading.grammar.quiz.questionsReady", { count: grammarQuiz.length })}
-          </p>
-          <Button
-            onClick={handleSubmitQuiz}
-            disabled={!allAnswered || evaluatingId !== null}
-            size="sm"
-          >
-            {evaluatingId ? (
-              <>
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-                {t("reading.grammar.quiz.evaluating")}
-              </>
-            ) : (
-              t("reading.grammar.quiz.submit")
-            )}
-          </Button>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {t("reading.grammar.quiz.questionsReady", { count: grammarQuiz.length })}
+        </p>
 
         <div className="space-y-4">
           {grammarQuiz.map((q, i) => (
@@ -652,6 +636,23 @@ function Grammar() {
               )}
             </div>
           ))}
+        </div>
+
+        <div className="flex justify-center">
+          <Button
+            onClick={handleSubmitQuiz}
+            disabled={!allAnswered || evaluatingId !== null}
+            size="sm"
+          >
+            {evaluatingId ? (
+              <>
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+                {t("reading.grammar.quiz.evaluating")}
+              </>
+            ) : (
+              t("reading.grammar.quiz.submit")
+            )}
+          </Button>
         </div>
       </div>
     );
