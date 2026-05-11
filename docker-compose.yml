@@ -62,6 +62,8 @@ services:
       ACCESS_PASSWORD: ""
       OPENAI_COMPATIBLE_API_BASE_URL: "https://api.mr5ai.com"
       OPENAI_COMPATIBLE_API_KEY: ""
+      # Fallback model when the primary AI model fails (default: gemini-3-flash-preview)
+      FALLBACK_MODEL: "gemini-3-flash-preview"
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
       AUTH_SECRET: ""
       # Get Google OAuth credentials from: https://console.cloud.google.com/apis/credentials

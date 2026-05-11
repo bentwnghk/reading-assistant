@@ -46,7 +46,17 @@ function stripMarkdownFences(text: string): string {
   return text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
 }
 
-const GRAMMAR_FALLBACK_MODEL = "gemini-3-flash-preview";
+let _fallbackModelPromise: Promise<string> | null = null;
+
+function getFallbackModel(): Promise<string> {
+  if (!_fallbackModelPromise) {
+    _fallbackModelPromise = fetch("/api/config")
+      .then((r) => r.json())
+      .then((data) => data.fallbackModel || "gemini-3-flash-preview")
+      .catch(() => "gemini-3-flash-preview");
+  }
+  return _fallbackModelPromise;
+}
 
 function useReadingAssistant() {
   const { 
@@ -64,16 +74,17 @@ function useReadingAssistant() {
 
   async function grammarGenerateText(prompt: string, system: string): Promise<string> {
     const { grammarModel: model } = useSettingStore.getState();
+    const FALLBACK_MODEL = await getFallbackModel();
     try {
       const aiModel = await createModelProvider(model);
       const result = await generateText({ model: aiModel, system, prompt });
       return stripMarkdownFences(result.text);
     } catch (primaryError) {
-      if (model === GRAMMAR_FALLBACK_MODEL) throw primaryError;
-      console.warn("Grammar model failed, retrying with fallback:", GRAMMAR_FALLBACK_MODEL, primaryError);
+      if (model === FALLBACK_MODEL) throw primaryError;
+      console.warn("Grammar model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
       try {
-        const fallbackModel = await createModelProvider(GRAMMAR_FALLBACK_MODEL);
-        const result = await generateText({ model: fallbackModel, system, prompt });
+        const fbModel = await createModelProvider(FALLBACK_MODEL);
+        const result = await generateText({ model: fbModel, system, prompt });
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Grammar fallback also failed:", fallbackError);
@@ -84,16 +95,17 @@ function useReadingAssistant() {
 
   async function readingTestGenerateText(prompt: string, system: string): Promise<string> {
     const { readingTestModel: model } = useSettingStore.getState();
+    const FALLBACK_MODEL = await getFallbackModel();
     try {
       const aiModel = await createModelProvider(model);
       const result = await generateText({ model: aiModel, system, prompt });
       return stripMarkdownFences(result.text);
     } catch (primaryError) {
-      if (model === GRAMMAR_FALLBACK_MODEL) throw primaryError;
-      console.warn("Reading test model failed, retrying with fallback:", GRAMMAR_FALLBACK_MODEL, primaryError);
+      if (model === FALLBACK_MODEL) throw primaryError;
+      console.warn("Reading test model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
       try {
-        const fallbackModel = await createModelProvider(GRAMMAR_FALLBACK_MODEL);
-        const result = await generateText({ model: fallbackModel, system, prompt });
+        const fbModel = await createModelProvider(FALLBACK_MODEL);
+        const result = await generateText({ model: fbModel, system, prompt });
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Reading test fallback also failed:", fallbackError);
@@ -103,16 +115,17 @@ function useReadingAssistant() {
   }
 
   async function glossaryGenerateText(prompt: string, system: string, model: string): Promise<string> {
+    const FALLBACK_MODEL = await getFallbackModel();
     try {
       const aiModel = await createModelProvider(model);
       const result = await generateText({ model: aiModel, system, prompt });
       return stripMarkdownFences(result.text);
     } catch (primaryError) {
-      if (model === GRAMMAR_FALLBACK_MODEL) throw primaryError;
-      console.warn("Glossary model failed, retrying with fallback:", GRAMMAR_FALLBACK_MODEL, primaryError);
+      if (model === FALLBACK_MODEL) throw primaryError;
+      console.warn("Glossary model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
       try {
-        const fallbackModel = await createModelProvider(GRAMMAR_FALLBACK_MODEL);
-        const result = await generateText({ model: fallbackModel, system, prompt });
+        const fbModel = await createModelProvider(FALLBACK_MODEL);
+        const result = await generateText({ model: fbModel, system, prompt });
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Glossary fallback also failed:", fallbackError);
