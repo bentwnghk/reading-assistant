@@ -42,6 +42,12 @@ function handleError(error: unknown) {
   return errorMessage;
 }
 
+function stripMarkdownFences(text: string): string {
+  return text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+}
+
+const GRAMMAR_FALLBACK_MODEL = "gemini-3-flash-preview";
+
 function useReadingAssistant() {
   const { 
     smoothTextStreamType, 
@@ -52,11 +58,30 @@ function useReadingAssistant() {
     simplifyModel,
     readingTestModel,
     glossaryModel,
-    grammarModel,
   } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
   const [status, setStatus] = useState<ReadingStatus>("idle");
+
+  async function grammarGenerateText(prompt: string, system: string): Promise<string> {
+    const { grammarModel: model } = useSettingStore.getState();
+    try {
+      const aiModel = await createModelProvider(model);
+      const result = await generateText({ model: aiModel, system, prompt });
+      return stripMarkdownFences(result.text);
+    } catch (primaryError) {
+      if (model === GRAMMAR_FALLBACK_MODEL) throw primaryError;
+      console.warn("Grammar model failed, retrying with fallback:", GRAMMAR_FALLBACK_MODEL, primaryError);
+      try {
+        const fallbackModel = await createModelProvider(GRAMMAR_FALLBACK_MODEL);
+        const result = await generateText({ model: fallbackModel, system, prompt });
+        return stripMarkdownFences(result.text);
+      } catch (fallbackError) {
+        console.error("Grammar fallback also failed:", fallbackError);
+        throw primaryError;
+      }
+    }
+  }
 
   async function extractTextFromImage(imageData: string) {
     const { setStatus: setStoreStatus, setExtractedText, setError, addOriginalImage } = readingStore;
@@ -765,26 +790,10 @@ Guidelines:
     const toastId = toast.info(i18next.t("reading.grammar.analyzingWait"), { duration: Infinity });
 
     try {
-      const thinkingModel = await createModelProvider(grammarModel);
-
-      const result = await generateText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: analyzeGrammarTopicsPrompt(studentAge, extractedText),
-      });
-
-      let text = result.text.trim();
-
-      if (text.startsWith("```json")) {
-        text = text.slice(7);
-      }
-      if (text.startsWith("```")) {
-        text = text.slice(3);
-      }
-      if (text.endsWith("```")) {
-        text = text.slice(0, -3);
-      }
-      text = text.trim();
+      const text = await grammarGenerateText(
+        analyzeGrammarTopicsPrompt(studentAge, extractedText),
+        getSystemPrompt(),
+      );
 
       const topics: GrammarTopic[] = JSON.parse(text);
       setGrammarTopics(topics);
@@ -832,26 +841,10 @@ Guidelines:
     const toastId = toast.info(i18next.t("reading.grammar.quiz.generatingWait"), { duration: Infinity });
 
     try {
-      const thinkingModel = await createModelProvider(grammarModel);
-
-      const result = await generateText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: generateGrammarQuizPrompt(extractedText, studentAge, grammarTopics),
-      });
-
-      let text = result.text.trim();
-
-      if (text.startsWith("```json")) {
-        text = text.slice(7);
-      }
-      if (text.startsWith("```")) {
-        text = text.slice(3);
-      }
-      if (text.endsWith("```")) {
-        text = text.slice(0, -3);
-      }
-      text = text.trim();
+      const text = await grammarGenerateText(
+        generateGrammarQuizPrompt(extractedText, studentAge, grammarTopics),
+        getSystemPrompt(),
+      );
 
       const raw: GrammarQuizQuestion[] = JSON.parse(text);
       const questions = raw.map((q) => {
@@ -929,7 +922,6 @@ Guidelines:
     userAnswer: string,
     maxPoints: number
   ) {
-    const { grammarModel } = useSettingStore.getState();
     const { setGrammarQuizQuestionPoints } = readingStore;
 
     if (!userAnswer.trim()) {
@@ -938,25 +930,10 @@ Guidelines:
     }
 
     try {
-      const thinkingModel = await createModelProvider(grammarModel);
-
-      const result = await generateText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: evaluateGrammarRewritePrompt(question, correctAnswer, userAnswer, maxPoints),
-      });
-
-      let text = result.text.trim();
-      if (text.startsWith("```json")) {
-        text = text.slice(7);
-      }
-      if (text.startsWith("```")) {
-        text = text.slice(3);
-      }
-      if (text.endsWith("```")) {
-        text = text.slice(0, -3);
-      }
-      text = text.trim();
+      const text = await grammarGenerateText(
+        evaluateGrammarRewritePrompt(question, correctAnswer, userAnswer, maxPoints),
+        getSystemPrompt(),
+      );
 
       const evaluation = JSON.parse(text);
       const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
@@ -976,19 +953,15 @@ Guidelines:
   /** Generates (or refreshes) Error Surgery challenges using grammarTopics. */
   async function generateErrorSurgeryContent(): Promise<ErrorSurgeryChallenge[]> {
     const { grammarTopics, studentAge, setGrammarErrorChallenges } = readingStore;
-    const { grammarModel } = useSettingStore.getState();
 
     if (grammarTopics.length === 0) return [];
 
     try {
-      const model = await createModelProvider(grammarModel);
-      const result = await generateText({
-        model,
-        system: getSystemPrompt(),
-        prompt: generateErrorSurgeryPrompt(grammarTopics, studentAge),
-      });
+      const text = await grammarGenerateText(
+        generateErrorSurgeryPrompt(grammarTopics, studentAge),
+        getSystemPrompt(),
+      );
 
-      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
       const challenges: ErrorSurgeryChallenge[] = JSON.parse(text);
       setGrammarErrorChallenges(challenges);
       return challenges;
@@ -1001,19 +974,15 @@ Guidelines:
   /** Generates (or refreshes) Word Order Scramble challenges, persisted to store. */
   async function generateGrammarScrambleContent(): Promise<GrammarScrambleChallenge[]> {
     const { grammarTopics, studentAge, setGrammarScrambleChallenges } = readingStore;
-    const { grammarModel } = useSettingStore.getState();
 
     if (grammarTopics.length === 0) return [];
 
     try {
-      const model = await createModelProvider(grammarModel);
-      const result = await generateText({
-        model,
-        system: getSystemPrompt(),
-        prompt: generateGrammarScramblePrompt(grammarTopics, studentAge),
-      });
+      const text = await grammarGenerateText(
+        generateGrammarScramblePrompt(grammarTopics, studentAge),
+        getSystemPrompt(),
+      );
 
-      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
       const challenges = JSON.parse(text) as GrammarScrambleChallenge[];
       setGrammarScrambleChallenges(challenges);
       return challenges;
@@ -1026,19 +995,15 @@ Guidelines:
   /** Generates (or refreshes) Grammar Workshop slot-fill challenges, persisted to store. */
   async function generateGrammarWorkshopContent(): Promise<GrammarWorkshopChallenge[]> {
     const { grammarTopics, studentAge, setGrammarWorkshopChallenges } = readingStore;
-    const { grammarModel } = useSettingStore.getState();
 
     if (grammarTopics.length === 0) return [];
 
     try {
-      const model = await createModelProvider(grammarModel);
-      const result = await generateText({
-        model,
-        system: getSystemPrompt(),
-        prompt: generateGrammarWorkshopPrompt(grammarTopics, studentAge),
-      });
+      const text = await grammarGenerateText(
+        generateGrammarWorkshopPrompt(grammarTopics, studentAge),
+        getSystemPrompt(),
+      );
 
-      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
       const raw = JSON.parse(text) as GrammarWorkshopChallenge[];
       const challenges = raw.map((c) => {
         const shuffled = [...c.wordBank];
@@ -1059,19 +1024,15 @@ Guidelines:
   /** Generates (or refreshes) MCQ questions for Grammar Roulette + Duel, persisted to store. */
   async function generateGrammarQuestions(): Promise<GrammarGameQuestion[]> {
     const { grammarTopics, studentAge, setGrammarGameQuestions } = readingStore;
-    const { grammarModel } = useSettingStore.getState();
 
     if (grammarTopics.length === 0) return [];
 
     try {
-      const model = await createModelProvider(grammarModel);
-      const result = await generateText({
-        model,
-        system: getSystemPrompt(),
-        prompt: generateGrammarQuestionsPrompt(grammarTopics, studentAge),
-      });
+      const text = await grammarGenerateText(
+        generateGrammarQuestionsPrompt(grammarTopics, studentAge),
+        getSystemPrompt(),
+      );
 
-      const text = result.text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
       const raw = JSON.parse(text) as GrammarGameQuestion[];
       const questions = raw.map((q) => {
         const correctOpt = q.options[q.correctIndex];
