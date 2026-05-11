@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Download, Info, Loader2, Mail, Upload } from "lucide-react"
+import { Download, Info, Loader2, Mail, Upload, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -19,6 +19,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import UserList from "./UserList"
 import ClassList from "./ClassList"
 import StudentDataView from "./StudentDataView"
@@ -166,10 +172,14 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     }
   }
 
-  const handleSendTestReminder = async () => {
+  const handleSendTestEmail = async (type: string) => {
     setSendingTest(true)
     try {
-      const res = await fetch("/api/reminders/test", { method: "POST" })
+      const res = await fetch("/api/admin/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      })
       const data = await res.json()
       if (!res.ok) {
         toast.error(data.error || t("reminder.testSendFailed"))
@@ -182,6 +192,18 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
       setSendingTest(false)
     }
   }
+
+  const testEmailOptions = [
+    { type: "reminder", label: t("reminder.testTypes.reminder") },
+    { type: "subscription_activated", label: t("reminder.testTypes.subscriptionActivated") },
+    { type: "subscription_canceled", label: t("reminder.testTypes.subscriptionCanceled") },
+    { type: "subscription_renewed", label: t("reminder.testTypes.subscriptionRenewed") },
+    { type: "renewal_reminder", label: t("reminder.testTypes.renewalReminder") },
+    { type: "trial_ending", label: t("reminder.testTypes.trialEnding") },
+    { type: "payment_failed", label: t("reminder.testTypes.paymentFailed") },
+    { type: "payment_receipt", label: t("reminder.testTypes.paymentReceipt") },
+    { type: "school_access_revoked", label: t("reminder.testTypes.schoolAccessRevoked") },
+  ]
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -244,28 +266,34 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                   onChange={handleFileSelected}
                 />
 
-                <TooltipProvider delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleSendTestReminder}
-                        disabled={exporting || importing || sendingTest}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={exporting || importing || sendingTest}
+                    >
+                      {sendingTest ? (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      ) : (
+                        <Mail className="h-4 w-4 mr-1" />
+                      )}
+                      {t("reminder.sendTest")}
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {testEmailOptions.map((opt) => (
+                      <DropdownMenuItem
+                        key={opt.type}
+                        onClick={() => handleSendTestEmail(opt.type)}
+                        disabled={sendingTest}
                       >
-                        {sendingTest ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : (
-                          <Mail className="h-4 w-4 mr-1" />
-                        )}
-                        {t("reminder.sendTest")}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-64 text-center">
-                      {t("reminder.sendTestTip")}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                        {opt.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
           </div>
