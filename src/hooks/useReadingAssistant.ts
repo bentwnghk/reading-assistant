@@ -102,6 +102,25 @@ function useReadingAssistant() {
     }
   }
 
+  async function glossaryGenerateText(prompt: string, system: string, model: string): Promise<string> {
+    try {
+      const aiModel = await createModelProvider(model);
+      const result = await generateText({ model: aiModel, system, prompt });
+      return stripMarkdownFences(result.text);
+    } catch (primaryError) {
+      if (model === GRAMMAR_FALLBACK_MODEL) throw primaryError;
+      console.warn("Glossary model failed, retrying with fallback:", GRAMMAR_FALLBACK_MODEL, primaryError);
+      try {
+        const fallbackModel = await createModelProvider(GRAMMAR_FALLBACK_MODEL);
+        const result = await generateText({ model: fallbackModel, system, prompt });
+        return stripMarkdownFences(result.text);
+      } catch (fallbackError) {
+        console.error("Glossary fallback also failed:", fallbackError);
+        throw primaryError;
+      }
+    }
+  }
+
   async function extractTextFromImage(imageData: string) {
     const { setStatus: setStoreStatus, setExtractedText, setError, addOriginalImage } = readingStore;
     setStoreStatus("extracting");
@@ -483,27 +502,11 @@ function useReadingAssistant() {
     const toastId = toast.info(i18next.t("reading.glossary.generatingWait"), { duration: Infinity });
 
     try {
-      const effectiveModel = highlightedWords.length > 25 ? "deepseek-v4-flash" : glossaryModel;
-      const thinkingModel = await createModelProvider(effectiveModel);
-      
-      const result = await generateText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: generateGlossaryPrompt(extractedText, highlightedWords),
-      });
-
-      let text = result.text.trim();
-      
-      if (text.startsWith("```json")) {
-        text = text.slice(7);
-      }
-      if (text.startsWith("```")) {
-        text = text.slice(3);
-      }
-      if (text.endsWith("```")) {
-        text = text.slice(0, -3);
-      }
-      text = text.trim();
+      const text = await glossaryGenerateText(
+        generateGlossaryPrompt(extractedText, highlightedWords),
+        getSystemPrompt(),
+        glossaryModel,
+      );
 
       const entries: GlossaryEntry[] = JSON.parse(text);
       setGlossary(entries);
