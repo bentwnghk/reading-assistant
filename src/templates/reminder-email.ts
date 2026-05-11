@@ -20,8 +20,10 @@ interface EmailStrings {
   youLast: (activity: string, date: string) => string
   day: (n: number) => string
   motivation: string
-  featureReadTitle: string
-  featureReadDesc: string
+  featureSnapTitle: string
+  featureSnapDesc: string
+  featureSummarizeTitle: string
+  featureSummarizeDesc: string
   featureMindMapTitle: string
   featureMindMapDesc: string
   featureGlossaryTitle: string
@@ -30,8 +32,14 @@ interface EmailStrings {
   featureFlashcardDesc: string
   featureSpellingTitle: string
   featureSpellingDesc: string
+  featureGrammarTitle: string
+  featureGrammarDesc: string
   featureQuizTitle: string
   featureQuizDesc: string
+  featureTestTitle: string
+  featureTestDesc: string
+  featureTutorTitle: string
+  featureTutorDesc: string
   ctaButton: string
   closingMessage: string
   footerNote: string
@@ -53,8 +61,10 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
     youLast: (activity, date) => `You last ${activity} on ${date}`,
     day: (n) => (n === 1 ? "1 day" : `${n} days`),
     motivation: "Consistency is the key to improvement! Even just 10 minutes a day can make a huge difference in your reading skills. Here\u2019s what you can do today:",
-    featureReadTitle: "Read & Summarize",
-    featureReadDesc: "Upload text and get AI-powered summaries",
+    featureSnapTitle: "Snap, Upload & Text Library",
+    featureSnapDesc: "Snap a photo, upload your own text, or pick one from the shared library",
+    featureSummarizeTitle: "Summarize & TL;DR",
+    featureSummarizeDesc: "Get AI-powered overviews and key takeaways",
     featureMindMapTitle: "Mind Maps",
     featureMindMapDesc: "Visualize concepts with mind maps",
     featureGlossaryTitle: "Vocabulary Glossary",
@@ -63,8 +73,14 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
     featureFlashcardDesc: "Review and master new vocabulary",
     featureSpellingTitle: "Spelling Games",
     featureSpellingDesc: "Practice spelling in a fun way",
-    featureQuizTitle: "Quizzes & Tests",
-    featureQuizDesc: "Test your reading comprehension and vocabulary knowledge",
+    featureGrammarTitle: "Grammar Games",
+    featureGrammarDesc: "Play fun challenges to master grammar rules and sentence structure",
+    featureQuizTitle: "Vocab & Grammar Quizzes",
+    featureQuizDesc: "Test your vocabulary and grammar knowledge",
+    featureTestTitle: "Reading Tests",
+    featureTestDesc: "Assess your reading comprehension skills",
+    featureTutorTitle: "AI Tutor",
+    featureTutorDesc: "Get personalized help from your AI learning assistant",
     ctaButton: "Continue Learning \u2192",
     closingMessage: "Pick up right where you left off, or start something new. Your learning journey awaits!",
     footerNote: "This reminder was sent because you have email notifications enabled in Mr.\u{1F196} ProReader.",
@@ -98,18 +114,26 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
     youLast: (activity, date) => `\u{4F60}\u{4E0A}\u{6B21}${activity}\u{662F}\u{5728} ${date}`,
     day: (n) => (n === 1 ? "1 \u{5929}" : `${n} \u{5929}`),
     motivation: "\u{6301}\u{4E4B}\u{4EE5}\u{6046}\u{662F}\u{9032}\u{6B65}\u{7684}\u{95DC}\u{9375}\u{FF01}\u{6BCF}\u{5929}\u{53EA}\u{9700} 10 \u{5206}\u{9418}\u{5C31}\u{80FD}\u{5927}\u{5E45}\u{63D0}\u{5347}\u{4F60}\u{7684}\u{95B1}\u{8B80}\u{80FD}\u{529B}\u{3002}\u{4EE5}\u{4E0B}\u{662F}\u{4F60}\u{4ECA}\u{5929}\u{53EF}\u{4EE5}\u{505A}\u{7684}\u{4E8B}\u{60C5}\u{FF1A}",
-    featureReadTitle: "\u{95B1}\u{8B80}\u{8207}\u{6458}\u{8981}",
-    featureReadDesc: "\u{4E0A}\u{50B3}\u{6587}\u{672C}\u{4E26}\u{7372}\u{53D6} AI \u{6458}\u{8981}",
+    featureSnapTitle: "\u{62CD}\u{7167}\u{3001}\u{4E0A}\u{50B3}\u{8207}\u{6587}\u{672C}\u{5EAB}",
+    featureSnapDesc: "\u{62CD}\u{7167}\u{3001}\u{4E0A}\u{50B3}\u{6587}\u{672C}\u{FF0C}\u{6216}\u{5F9E}\u{5171}\u{4EAB}\u{6587}\u{672C}\u{5EAB}\u{4E2D}\u{9078}\u{64C7}",
+    featureSummarizeTitle: "\u{6458}\u{8981}\u{8207}\u{6982}\u{89BD}",
+    featureSummarizeDesc: "\u{7372}\u{53D6} AI \u{751F}\u{6210}\u{7684}\u{6587}\u{7AE0}\u{6458}\u{8981}\u{548C}\u{91CD}\u{9EDE}",
     featureMindMapTitle: "\u{601D}\u{7EF4}\u{5C0E}\u{5716}",
     featureMindMapDesc: "\u{7528}\u{601D}\u{7EF4}\u{5C0E}\u{5716}\u{5177}\u{9AD4}\u{5316}\u{6982}\u{5FF5}",
     featureGlossaryTitle: "\u{8A5E}\u{5F59}\u{8868}",
-    featureGlossaryDesc: "\u{5EFA}\u{7ACB}\u{548C}\u{6E29}\u{7FD2}\u{4F60}\u{7684}\u{55AE}\u{5B57}\u{5EAB}",
+    featureGlossaryDesc: "\u{5EFA}\u{7ACB}\u{548C}\u{6EAB}\u{7FD2}\u{4F60}\u{7684}\u{55AE}\u{5B57}\u{5EAB}",
     featureFlashcardTitle: "\u{751F}\u{5B57}\u{5361}",
-    featureFlashcardDesc: "\u{6E29}\u{7FD2}\u{4E26}\u{638C}\u{63E1}\u{65B0}\u{8A5E}\u{5F59}",
+    featureFlashcardDesc: "\u{6EAB}\u{7FD2}\u{4E26}\u{638C}\u{63E1}\u{65B0}\u{8A5E}\u{5F59}",
     featureSpellingTitle: "\u{62FC}\u{5B57}\u{904A}\u{6232}",
     featureSpellingDesc: "\u{4EE5}\u{6709}\u{8DA3}\u{7684}\u{65B9}\u{5F0F}\u{7DF4}\u{7FD2}\u{62FC}\u{5B57}",
-    featureQuizTitle: "\u{6E2C}\u{9A57}\u{8207}\u{8003}\u{8A66}",
-    featureQuizDesc: "\u{6E2C}\u8A66\u{4F60}\u{7684}\u{95B1}\u{8B80}\u{7406}\u{89E3}\u{80FD}\u{529B}\u{548C}\u{8A5E}\u{5F59}\u{77E5}\u{8B58}",
+    featureGrammarTitle: "\u{8A9E}\u{6CD5}\u{904A}\u{6232}",
+    featureGrammarDesc: "\u{900F}\u{904E}\u{8DA3}\u{5473}\u{6311}\u{6230}\u{638C}\u{63E1}\u{8A9E}\u{6CD5}\u{898F}\u{5247}\u{548C}\u{53E5}\u{5B50}\u{7D50}\u{69CB}",
+    featureQuizTitle: "\u{8A5E}\u{5F59}\u{8207}\u{8A9E}\u{6CD5}\u{6E2C}\u{9A57}",
+    featureQuizDesc: "\u{6E2C}\u{8A66}\u{4F60}\u{7684}\u{8A5E}\u{5F59}\u{548C}\u{8A9E}\u{6CD5}\u{77E5}\u{8B58}",
+    featureTestTitle: "\u{95B1}\u{8B80}\u{6E2C}\u{9A57}",
+    featureTestDesc: "\u{8A55}\u{4F30}\u{4F60}\u{7684}\u{95B1}\u{8B80}\u{7406}\u{89E3}\u{80FD}\u{529B}",
+    featureTutorTitle: "AI \u{5C0E}\u{5E2B}",
+    featureTutorDesc: "\u{7372}\u{5F97} AI \u{5B78}\u{7FD2}\u{52A9}\u{624B}\u{7684}\u{4E00}\u{5C0D}\u{4E00}\u{5E6B}\u{52A9}",
     ctaButton: "\u{7E7C}\u{7E8C}\u{5B78}\u{7FD2} \u2192",
     closingMessage: "\u{5F9E}\u{4F60}\u{505C}\u{4E0B}\u{7684}\u{5730}\u{65B9}\u{7E7C}\u{7E8C}\u{FF0C}\u{6216}\u{8005}\u{958B}\u{59CB}\u{65B0}\u{7684}\u{5B78}\u{7FD2}\u{4E4B}\u{65C5}\u{FF01}",
     footerNote: "\u{6B64}\u{63D0}\u{9192}\u{662F}\u{56E0}\u{70BA}\u{4F60}\u{5DF2}\u{5728} Mr.\u{1F196} ProReader \u{4E2D}\u{555F}\u{7528}\u{4E86}\u{96FB}\u{90F5}\u{901A}\u{77E5}\u{3002}",
@@ -265,9 +289,9 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f0fdf4;border-radius:10px;padding:16px;">
                             <tr>
                               <td style="padding:16px;">
-                                <p style="margin:0 0 4px;font-size:20px;">📖</p>
-                                <p style="margin:0 0 4px;color:#166534;font-size:14px;font-weight:600;">${s.featureReadTitle}</p>
-                                <p style="margin:0;color:#15803d;font-size:12px;line-height:1.4;">${s.featureReadDesc}</p>
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F4F8;</p>
+                                <p style="margin:0 0 4px;color:#166534;font-size:14px;font-weight:600;">${s.featureSnapTitle}</p>
+                                <p style="margin:0;color:#15803d;font-size:12px;line-height:1.4;">${s.featureSnapDesc}</p>
                               </td>
                             </tr>
                           </table>
@@ -276,9 +300,9 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#eff6ff;border-radius:10px;padding:16px;">
                             <tr>
                               <td style="padding:16px;">
-                                <p style="margin:0 0 4px;font-size:20px;">🧠</p>
-                                <p style="margin:0 0 4px;color:#1e40af;font-size:14px;font-weight:600;">${s.featureMindMapTitle}</p>
-                                <p style="margin:0;color:#2563eb;font-size:12px;line-height:1.4;">${s.featureMindMapDesc}</p>
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F4CB;</p>
+                                <p style="margin:0 0 4px;color:#1e40af;font-size:14px;font-weight:600;">${s.featureSummarizeTitle}</p>
+                                <p style="margin:0;color:#2563eb;font-size:12px;line-height:1.4;">${s.featureSummarizeDesc}</p>
                               </td>
                             </tr>
                           </table>
@@ -286,23 +310,47 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                       </tr>
                       <tr>
                         <td width="50%" style="padding:8px 8px 8px 0;vertical-align:top;">
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#eef2ff;border-radius:10px;padding:16px;">
+                            <tr>
+                              <td style="padding:16px;">
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F9E0;</p>
+                                <p style="margin:0 0 4px;color:#3730a3;font-size:14px;font-weight:600;">${s.featureMindMapTitle}</p>
+                                <p style="margin:0;color:#4f46e5;font-size:12px;line-height:1.4;">${s.featureMindMapDesc}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td width="50%" style="padding:8px 0 8px 8px;vertical-align:top;">
                           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#fefce8;border-radius:10px;padding:16px;">
                             <tr>
                               <td style="padding:16px;">
-                                <p style="margin:0 0 4px;font-size:20px;">📝</p>
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F4DD;</p>
                                 <p style="margin:0 0 4px;color:#854d0e;font-size:14px;font-weight:600;">${s.featureGlossaryTitle}</p>
                                 <p style="margin:0;color:#a16207;font-size:12px;line-height:1.4;">${s.featureGlossaryDesc}</p>
                               </td>
                             </tr>
                           </table>
                         </td>
-                        <td width="50%" style="padding:8px 0 8px 8px;vertical-align:top;">
+                      </tr>
+                      <tr>
+                        <td width="50%" style="padding:8px 8px 8px 0;vertical-align:top;">
                           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#fdf2f8;border-radius:10px;padding:16px;">
                             <tr>
                               <td style="padding:16px;">
-                                <p style="margin:0 0 4px;font-size:20px;">🗂️</p>
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F5C2;&#xFE0F;</p>
                                 <p style="margin:0 0 4px;color:#9d174d;font-size:14px;font-weight:600;">${s.featureFlashcardTitle}</p>
                                 <p style="margin:0;color:#be185d;font-size:12px;line-height:1.4;">${s.featureFlashcardDesc}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td width="50%" style="padding:8px 0 8px 8px;vertical-align:top;">
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f0f9ff;border-radius:10px;padding:16px;">
+                            <tr>
+                              <td style="padding:16px;">
+                                <p style="margin:0 0 4px;font-size:20px;">&#x270F;&#xFE0F;</p>
+                                <p style="margin:0 0 4px;color:#0c4a6e;font-size:14px;font-weight:600;">${s.featureSpellingTitle}</p>
+                                <p style="margin:0;color:#0369a1;font-size:12px;line-height:1.4;">${s.featureSpellingDesc}</p>
                               </td>
                             </tr>
                           </table>
@@ -310,12 +358,12 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                       </tr>
                       <tr>
                         <td width="50%" style="padding:8px 8px 8px 0;vertical-align:top;">
-                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f0f9ff;border-radius:10px;padding:16px;">
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#fff7ed;border-radius:10px;padding:16px;">
                             <tr>
                               <td style="padding:16px;">
-                                <p style="margin:0 0 4px;font-size:20px;">✏️</p>
-                                <p style="margin:0 0 4px;color:#0c4a6e;font-size:14px;font-weight:600;">${s.featureSpellingTitle}</p>
-                                <p style="margin:0;color:#0369a1;font-size:12px;line-height:1.4;">${s.featureSpellingDesc}</p>
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F3AD;</p>
+                                <p style="margin:0 0 4px;color:#9a3412;font-size:14px;font-weight:600;">${s.featureGrammarTitle}</p>
+                                <p style="margin:0;color:#ea580c;font-size:12px;line-height:1.4;">${s.featureGrammarDesc}</p>
                               </td>
                             </tr>
                           </table>
@@ -324,9 +372,33 @@ export function buildReminderEmailHtml(params: ReminderEmailParams): string {
                           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#faf5ff;border-radius:10px;padding:16px;">
                             <tr>
                               <td style="padding:16px;">
-                                <p style="margin:0 0 4px;font-size:20px;">🎯</p>
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F3AF;</p>
                                 <p style="margin:0 0 4px;color:#6b21a8;font-size:14px;font-weight:600;">${s.featureQuizTitle}</p>
                                 <p style="margin:0;color:#7c3aed;font-size:12px;line-height:1.4;">${s.featureQuizDesc}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="50%" style="padding:8px 8px 8px 0;vertical-align:top;">
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#ecfeff;border-radius:10px;padding:16px;">
+                            <tr>
+                              <td style="padding:16px;">
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F4CA;</p>
+                                <p style="margin:0 0 4px;color:#155e75;font-size:14px;font-weight:600;">${s.featureTestTitle}</p>
+                                <p style="margin:0;color:#0891b2;font-size:12px;line-height:1.4;">${s.featureTestDesc}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td width="50%" style="padding:8px 0 8px 8px;vertical-align:top;">
+                          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#fff1f2;border-radius:10px;padding:16px;">
+                            <tr>
+                              <td style="padding:16px;">
+                                <p style="margin:0 0 4px;font-size:20px;">&#x1F916;</p>
+                                <p style="margin:0 0 4px;color:#9f1239;font-size:14px;font-weight:600;">${s.featureTutorTitle}</p>
+                                <p style="margin:0;color:#e11d48;font-size:12px;line-height:1.4;">${s.featureTutorDesc}</p>
                               </td>
                             </tr>
                           </table>
@@ -406,12 +478,16 @@ export function buildReminderEmailText(params: ReminderEmailParams): string {
     "",
     s.motivation,
     "",
-    `  - ${s.featureReadTitle}: ${s.featureReadDesc}`,
+    `  - ${s.featureSnapTitle}: ${s.featureSnapDesc}`,
+    `  - ${s.featureSummarizeTitle}: ${s.featureSummarizeDesc}`,
     `  - ${s.featureMindMapTitle}: ${s.featureMindMapDesc}`,
     `  - ${s.featureGlossaryTitle}: ${s.featureGlossaryDesc}`,
     `  - ${s.featureFlashcardTitle}: ${s.featureFlashcardDesc}`,
     `  - ${s.featureSpellingTitle}: ${s.featureSpellingDesc}`,
+    `  - ${s.featureGrammarTitle}: ${s.featureGrammarDesc}`,
     `  - ${s.featureQuizTitle}: ${s.featureQuizDesc}`,
+    `  - ${s.featureTestTitle}: ${s.featureTestDesc}`,
+    `  - ${s.featureTutorTitle}: ${s.featureTutorDesc}`,
     "",
     `${s.ctaButton}: ${appUrl}`,
     "",
