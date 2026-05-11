@@ -56,7 +56,6 @@ function useReadingAssistant() {
     mindMapModel,
     adaptedTextModel,
     simplifyModel,
-    readingTestModel,
     glossaryModel,
   } = useSettingStore();
   const readingStore = useReadingStore();
@@ -78,6 +77,26 @@ function useReadingAssistant() {
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Grammar fallback also failed:", fallbackError);
+        throw primaryError;
+      }
+    }
+  }
+
+  async function readingTestGenerateText(prompt: string, system: string): Promise<string> {
+    const { readingTestModel: model } = useSettingStore.getState();
+    try {
+      const aiModel = await createModelProvider(model);
+      const result = await generateText({ model: aiModel, system, prompt });
+      return stripMarkdownFences(result.text);
+    } catch (primaryError) {
+      if (model === GRAMMAR_FALLBACK_MODEL) throw primaryError;
+      console.warn("Reading test model failed, retrying with fallback:", GRAMMAR_FALLBACK_MODEL, primaryError);
+      try {
+        const fallbackModel = await createModelProvider(GRAMMAR_FALLBACK_MODEL);
+        const result = await generateText({ model: fallbackModel, system, prompt });
+        return stripMarkdownFences(result.text);
+      } catch (fallbackError) {
+        console.error("Reading test fallback also failed:", fallbackError);
         throw primaryError;
       }
     }
@@ -423,26 +442,10 @@ function useReadingAssistant() {
     setStatus("testing");
 
     try {
-      const thinkingModel = await createModelProvider(readingTestModel);
-      
-      const result = await generateText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: generateReadingTestPrompt(extractedText, studentAge),
-      });
-
-      let text = result.text.trim();
-      
-      if (text.startsWith("```json")) {
-        text = text.slice(7);
-      }
-      if (text.startsWith("```")) {
-        text = text.slice(3);
-      }
-      if (text.endsWith("```")) {
-        text = text.slice(0, -3);
-      }
-      text = text.trim();
+      const text = await readingTestGenerateText(
+        generateReadingTestPrompt(extractedText, studentAge),
+        getSystemPrompt(),
+      );
 
       const questions: ReadingTestQuestion[] = JSON.parse(text);
       setReadingTest(questions);
@@ -574,7 +577,6 @@ function useReadingAssistant() {
     userAnswer: string,
     maxPoints: number
   ) {
-    const { readingTestModel } = useSettingStore.getState();
     const { setQuestionEarnedPoints } = readingStore;
     
     if (!userAnswer.trim()) {
@@ -583,12 +585,8 @@ function useReadingAssistant() {
     }
     
     try {
-      const thinkingModel = await createModelProvider(readingTestModel);
-      
-      const result = await generateText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: `Evaluate this short-answer question response for a Hong Kong student learning English.
+      const text = await readingTestGenerateText(
+        `Evaluate this short-answer question response for a Hong Kong student learning English.
 
 Question: ${question}
 
@@ -610,19 +608,8 @@ Guidelines:
 - Award 0 if answer is completely wrong or irrelevant
 - Award full points if all key points are covered
 - Keep feedback brief and encouraging`,
-      });
-
-      let text = result.text.trim();
-      if (text.startsWith("```json")) {
-        text = text.slice(7);
-      }
-      if (text.startsWith("```")) {
-        text = text.slice(3);
-      }
-      if (text.endsWith("```")) {
-        text = text.slice(0, -3);
-      }
-      text = text.trim();
+        getSystemPrompt(),
+      );
 
       const evaluation = JSON.parse(text);
       const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
@@ -656,26 +643,10 @@ Guidelines:
     const toastId = toast.info(i18next.t("reading.readingTest.practiceGeneratingWait"), { duration: Infinity });
 
     try {
-      const thinkingModel = await createModelProvider(readingTestModel);
-      
-      const result = await generateText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: generateTargetedPracticePrompt(extractedText, studentAge, missedSkills),
-      });
-
-      let text = result.text.trim();
-      
-      if (text.startsWith("```json")) {
-        text = text.slice(7);
-      }
-      if (text.startsWith("```")) {
-        text = text.slice(3);
-      }
-      if (text.endsWith("```")) {
-        text = text.slice(0, -3);
-      }
-      text = text.trim();
+      const text = await readingTestGenerateText(
+        generateTargetedPracticePrompt(extractedText, studentAge, missedSkills),
+        getSystemPrompt(),
+      );
 
       const questions: ReadingTestQuestion[] = JSON.parse(text);
       setReadingTest(questions);
