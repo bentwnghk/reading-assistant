@@ -152,7 +152,7 @@
         },
         "wordExport": {
           "title": "📄 匯出 Word",
-          "desc": "將學習材料匯出為 Word 文件：改寫文章（含詞彙表及句子分析）、詞彙表、詞彙測驗及閱讀理解測驗（可選附答案）。"
+          "desc": "將學習材料匯出為 Word 文件：改寫文章（含詞彙表及句子分析）、詞彙表、詞彙測驗、閱讀理解測驗，以及語法分析（主題、課程、測驗空白卷及答案）。"
         },
         "grammar": {
           "title": "📐 語法分析與測驗",
@@ -540,6 +540,10 @@
       "analyzing": "正在分析...",
       "analyzingWait": "正在分析語法主題...通常需要 1-2 分鐘，請稍候。",
       "regenerate": "重新分析",
+      "exportWord": "匯出 Word",
+      "exportDownload": "下載",
+      "exportQuizBlank": "測驗（空白）",
+      "exportQuizAnswerKey": "測驗答案",
       "analyzeFirst": "點擊上方的「分析語法」按鈕，識別文本中的語法結構",
       "backToGrammar": "返回語法",
       "tabTopics": "主題",
