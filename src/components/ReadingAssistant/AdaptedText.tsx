@@ -128,7 +128,7 @@ function highlightTextAndSentences(
           (matchedWord: string) => {
             const entry = glossaryMap.get(matchedWord.toLowerCase());
             if (entry) {
-              return `<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded cursor-pointer" data-glossary-word="${matchedWord}">${matchedWord}<sup class="glossary-indicator inline-flex items-center justify-center min-w-[14px] h-[14px] text-[8px] leading-none rounded-full bg-amber-500/80 dark:bg-amber-600/80 text-white font-bold cursor-pointer select-none ml-0.5 align-super">譯</sup></mark>`;
+              return `<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded cursor-pointer" data-glossary-word="${matchedWord}">${matchedWord}<sup class="glossary-indicator inline-flex items-center justify-center min-w-[14px] h-[14px] text-[8px] leading-none rounded-full bg-amber-500/80 dark:bg-amber-600/80 text-white font-bold cursor-pointer select-none ml-0.5 align-super" aria-hidden="true"></sup></mark>`;
             }
             return `<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">${matchedWord}</mark>`;
           }
@@ -995,6 +995,9 @@ function AdaptedText() {
   const handleSentenceClick = useCallback((e: Event) => {
     const mouseEvent = e as MouseEvent;
     const target = mouseEvent.target as HTMLElement;
+
+    if (target.closest("[data-glossary-word]")) return;
+
     const analyzedSpan = target.closest(
       ".analyzed-sentence"
     ) as HTMLElement | null;

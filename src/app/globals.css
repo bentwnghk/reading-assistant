@@ -292,4 +292,13 @@ html {
   scroll-behavior: smooth;
 }
 
+.glossary-indicator {
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.glossary-indicator::after {
+  content: "譯";
+}
+
 
