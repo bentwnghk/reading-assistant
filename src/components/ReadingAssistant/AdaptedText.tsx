@@ -1587,7 +1587,7 @@ function AdaptedText() {
                 </span>
               )}
             </div>
-            <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+            <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground mr-5">
               {glossaryPopover.entry.partOfSpeech}
             </span>
           </div>
