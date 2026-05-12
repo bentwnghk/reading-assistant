@@ -131,7 +131,7 @@ export const defaultValues: SettingStore = {
   mindMapModel: "deepseek-v4-flash",
   adaptedTextModel: "deepseek-v4-flash",
   simplifyModel: "deepseek-v4-flash",
-  readingTestModel: "gpt-5.4-mini",
+  readingTestModel: "deepseek-v4-flash",
   glossaryModel: "deepseek-v4-flash",
   sentenceAnalysisModel: "deepseek-v4-flash",
   grammarModel: "deepseek-v4-flash",
