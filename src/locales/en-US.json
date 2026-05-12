@@ -349,7 +349,8 @@
       "analyze": "Analyze sentence",
       "analyzing": "Analyzing...",
       "analysisTitle": "Sentence Analysis",
-      "analysisDescription": "Detailed analysis of the selected sentence"
+      "analysisDescription": "Detailed analysis of the selected sentence",
+      "glossaryHint": "💡 Tap any highlighted word with a 譯 badge to see its Chinese definition."
     },
     "summary": {
       "title": "Summary",

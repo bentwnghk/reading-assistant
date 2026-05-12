@@ -349,7 +349,8 @@
       "analyze": "分析句子",
       "analyzing": "分析中...",
       "analysisTitle": "句子分析",
-      "analysisDescription": "所選句子的詳細分析"
+      "analysisDescription": "所選句子的詳細分析",
+      "glossaryHint": "💡 點擊帶有「譯」標記的黃色生字，即可查看中文釋義。"
     },
     "summary": {
       "title": "摘要",

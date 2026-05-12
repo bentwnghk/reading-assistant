@@ -91,7 +91,8 @@ function getContextAround(
 function highlightTextAndSentences(
   text: string,
   words: string[],
-  analyzedSentences: Record<string, SentenceAnalysis>
+  analyzedSentences: Record<string, SentenceAnalysis>,
+  glossaryMap: Map<string, GlossaryEntry>
 ): { html: string; sentenceList: string[] } {
   let result = text;
   const sentenceList: string[] = [];
@@ -124,7 +125,13 @@ function highlightTextAndSentences(
       if (textContent) {
         return textContent.replace(
           wordPattern,
-          '<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">$1</mark>'
+          (matchedWord: string) => {
+            const entry = glossaryMap.get(matchedWord.toLowerCase());
+            if (entry) {
+              return `<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded cursor-pointer" data-glossary-word="${matchedWord}">${matchedWord}<sup class="glossary-indicator inline-flex items-center justify-center min-w-[14px] h-[14px] text-[8px] leading-none rounded-full bg-amber-500/80 dark:bg-amber-600/80 text-white font-bold cursor-pointer select-none ml-0.5 align-super">譯</sup></mark>`;
+            }
+            return `<mark class="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">${matchedWord}</mark>`;
+          }
         );
       }
       return match;
@@ -405,6 +412,14 @@ function AdaptedText() {
   const isTouchDeviceRef = useRef(false);
   const sentenceListRef = useRef<string[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
+  const glossaryPopoverRef = useRef<HTMLDivElement>(null);
+
+  const [glossaryPopover, setGlossaryPopover] = useState<{
+    entry: GlossaryEntry;
+    x: number;
+    y: number;
+    above: boolean;
+  } | null>(null);
 
   // Clamp the popup horizontally so it never overflows the viewport edges.
   // useLayoutEffect runs after DOM mutation but before paint, so the user never
@@ -420,6 +435,17 @@ function AdaptedText() {
     el.style.left = `${left}px`;
     el.style.transform = selection.above ? "translateY(-100%)" : "none";
   }, [selection]);
+
+  useLayoutEffect(() => {
+    const el = glossaryPopoverRef.current;
+    if (!el || !glossaryPopover) return;
+    const popoverWidth = el.offsetWidth;
+    const MARGIN = 8;
+    const desiredLeft = glossaryPopover.x - popoverWidth / 2;
+    const left = Math.max(MARGIN, Math.min(window.innerWidth - popoverWidth - MARGIN, desiredLeft));
+    el.style.left = `${left}px`;
+    el.style.transform = glossaryPopover.above ? "translateY(-100%)" : "none";
+  }, [glossaryPopover]);
 
   // ── handlers ──
 
@@ -900,9 +926,12 @@ function AdaptedText() {
     const target = e.target as HTMLElement;
     if (
       !target.closest(".selection-popup") &&
-      !target.closest("[role='dialog']")
+      !target.closest("[role='dialog']") &&
+      !target.closest(".glossary-popover") &&
+      !target.closest("[data-glossary-word]")
     ) {
       setSelection(null);
+      setGlossaryPopover(null);
     }
   }, []);
 
@@ -913,15 +942,24 @@ function AdaptedText() {
       "ontouchstart" in window || navigator.maxTouchPoints > 0;
   }, []);
 
+  const glossaryMap = useMemo(() => {
+    const map = new Map<string, GlossaryEntry>();
+    for (const entry of glossary) {
+      map.set(entry.word.toLowerCase(), entry);
+    }
+    return map;
+  }, [glossary]);
+
   const highlightedText = useMemo(() => {
     const { html, sentenceList } = highlightTextAndSentences(
       extractedText,
       highlightedWords,
-      analyzedSentences
+      analyzedSentences,
+      glossaryMap
     );
     sentenceListRef.current = sentenceList;
     return html;
-  }, [extractedText, highlightedWords, analyzedSentences]);
+  }, [extractedText, highlightedWords, analyzedSentences, glossaryMap]);
 
   const analyzedSentencesKeys = useMemo(
     () => Object.keys(analyzedSentences),
@@ -975,6 +1013,36 @@ function AdaptedText() {
     }
   }, []);
 
+  const handleGlossaryWordClick = useCallback((e: Event) => {
+    const target = (e.target as HTMLElement).closest(
+      "[data-glossary-word]"
+    ) as HTMLElement | null;
+
+    if (target) {
+      e.stopPropagation();
+      e.preventDefault();
+      const word = target.getAttribute("data-glossary-word");
+      if (word) {
+        const entry = glossaryMap.get(word.toLowerCase());
+        if (entry) {
+          const rect = target.getBoundingClientRect();
+          const isIOS =
+            /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+          const showAbove = isIOS && rect.top < window.innerHeight / 2;
+          setGlossaryPopover({
+            entry,
+            x: rect.left + rect.width / 2,
+            y: showAbove ? rect.top - 8 : rect.bottom + 8,
+            above: showAbove,
+          });
+          setSelection(null);
+          window.getSelection()?.removeAllRanges();
+        }
+      }
+    }
+  }, [glossaryMap]);
+
   const setContainerRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (containerRef.current) {
@@ -983,13 +1051,19 @@ function AdaptedText() {
           handleSentenceClick,
           true
         );
+        containerRef.current.removeEventListener(
+          "click",
+          handleGlossaryWordClick,
+          true
+        );
       }
       containerRef.current = node;
       if (node) {
         node.addEventListener("click", handleSentenceClick, true);
+        node.addEventListener("click", handleGlossaryWordClick, true);
       }
     },
-    [handleSentenceClick]
+    [handleSentenceClick, handleGlossaryWordClick]
   );
 
   const activeAnalysis = activeSentence
@@ -1160,6 +1234,14 @@ function AdaptedText() {
                   💡 {t("reading.extractedText.highlightTip")}
                 </p>
               </div>
+
+              {glossary.length > 0 && (
+                <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    {t("reading.extractedText.glossaryHint")}
+                  </p>
+                </div>
+              )}
 
               {/* Vocabulary list chips */}
               {highlightedWords.length > 0 && (
@@ -1474,6 +1556,56 @@ function AdaptedText() {
               {t("reading.extractedText.analyze")}
             </span>
           </Button>
+        </div>
+      )}
+
+      {/* ── Glossary popover ──────────────────────────────────────────────── */}
+      {glossaryPopover && (
+        <div
+          ref={glossaryPopoverRef}
+          className="glossary-popover fixed z-[9998] w-[calc(100vw-1rem)] max-w-[320px] bg-background border rounded-lg shadow-lg p-3 animate-in fade-in-0 zoom-in-95 duration-150"
+          style={{
+            left: glossaryPopover.x,
+            top: glossaryPopover.y,
+            transform: glossaryPopover.above
+              ? "translate(-50%, -100%)"
+              : "translateX(-50%)",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <div className="min-w-0">
+              <span className="text-base font-bold text-foreground">
+                {glossaryPopover.entry.word}
+              </span>
+              {glossaryPopover.entry.syllabification && (
+                <span className="ml-1.5 text-xs text-muted-foreground">
+                  {glossaryPopover.entry.syllabification}
+                </span>
+              )}
+            </div>
+            <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+              {glossaryPopover.entry.partOfSpeech}
+            </span>
+          </div>
+          <div className="text-lg font-semibold text-primary mb-1">
+            {glossaryPopover.entry.chineseDefinition}
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {glossaryPopover.entry.englishDefinition}
+          </div>
+          {glossaryPopover.entry.example && (
+            <div className="mt-2 pt-2 border-t text-xs text-muted-foreground italic">
+              {glossaryPopover.entry.example}
+            </div>
+          )}
+          <button
+            type="button"
+            className="absolute top-1.5 right-1.5 p-0.5 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            onClick={() => setGlossaryPopover(null)}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
       )}
 
