@@ -1131,7 +1131,7 @@ function Grammar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="sm">
                   <FileDown className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t("reading.grammar.exportWord")}</span>
+                  <span className="hidden sm:inline">{t("reading.grammar.downloadWord")}</span>
                   <ChevronDown className="h-3 w-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
@@ -1162,7 +1162,7 @@ function Grammar() {
                   checked={exportSections.has("quiz-answers")}
                   onCheckedChange={(checked) => toggleExportSection("quiz-answers", checked)}
                   onSelect={(e) => e.preventDefault()}
-                  disabled={grammarQuiz.length === 0}
+                  disabled={grammarQuiz.length === 0 || !_grammarQuizCompleted}
                 >
                   {t("reading.grammar.exportQuizAnswerKey")}
                 </DropdownMenuCheckboxItem>

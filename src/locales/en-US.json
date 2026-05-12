@@ -534,7 +534,7 @@
       "analyzing": "Analyzing...",
       "analyzingWait": "Analyzing grammar topics... This usually takes 1-2 minutes. Please wait.",
       "regenerate": "Re-analyze",
-      "exportWord": "Export Word",
+      "downloadWord": "Download Word",
       "exportDownload": "Download",
       "exportQuizBlank": "Quiz (Blank)",
       "exportQuizAnswerKey": "Quiz Answer Key",

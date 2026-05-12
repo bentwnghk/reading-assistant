@@ -540,7 +540,7 @@
       "analyzing": "正在分析...",
       "analyzingWait": "正在分析語法主題...通常需要 1-2 分鐘，請稍候。",
       "regenerate": "重新分析",
-      "exportWord": "匯出 Word",
+      "downloadWord": "下載 Word",
       "exportDownload": "下載",
       "exportQuizBlank": "測驗（空白）",
       "exportQuizAnswerKey": "測驗答案",
