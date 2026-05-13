@@ -25,7 +25,7 @@ const DIFFICULTY_CONFIG: Record<Difficulty, { aiThinkTime: [number, number]; aiC
 };
 
 const MAX_HP = 100;
-const BASE_DAMAGE = 20;
+const BASE_DAMAGE = 10;
 const POWER_MOVE_THRESHOLD = 3;
 
 interface Props { onBack: () => void }
