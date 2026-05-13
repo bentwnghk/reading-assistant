@@ -52,6 +52,22 @@ export async function createAIProvider({
       baseURL,
       apiKey,
       headers,
+      ...(provider === "openaicompatible" && model === "deepseek-v4-flash"
+        ? {
+            fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+              if (init?.body && typeof init.body === "string") {
+                try {
+                  const body = JSON.parse(init.body);
+                  if (body.model === "deepseek-v4-flash") {
+                    body.max_tokens = 384000;
+                    init = { ...init, body: JSON.stringify(body) };
+                  }
+                } catch {}
+              }
+              return fetch(input, init);
+            },
+          }
+        : {}),
     });
     return openai(model, settings);
   } else if (provider === "anthropic") {

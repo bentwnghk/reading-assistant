@@ -74,7 +74,12 @@ async function handleRequest(req: NextRequest) {
         Authorization: `Bearer ${SUBSCRIPTION_API_KEY}`,
       },
     };
-    if (body) payload.body = JSON.stringify(body);
+    if (body) {
+      if (body.model === "deepseek-v4-flash") {
+        body.max_tokens = 384000;
+      }
+      payload.body = JSON.stringify(body);
+    }
     const response = await fetch(url, payload);
     return new NextResponse(response.body, response);
   } catch (error) {
