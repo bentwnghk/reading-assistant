@@ -31,6 +31,7 @@ import {
   PageOrientation,
 } from "docx";
 import { saveAs } from "file-saver";
+import { useSession } from "next-auth/react";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
@@ -230,6 +231,8 @@ function Grammar() {
     setGrammarHighlightTopicId,
   } = useReadingStore();
   const { status, analyzeGrammarTopics, generateGrammarQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer } = useReadingAssistant();
+  const { data: session } = useSession();
+  const isTeacherOrAbove = session?.user?.role === "teacher" || session?.user?.role === "admin" || session?.user?.role === "super-admin";
 
   const [activeTab, setActiveTab] = useState<TabType>("topics");
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
@@ -1162,7 +1165,7 @@ function Grammar() {
                   checked={exportSections.has("quiz-answers")}
                   onCheckedChange={(checked) => toggleExportSection("quiz-answers", checked)}
                   onSelect={(e) => e.preventDefault()}
-                  disabled={grammarQuiz.length === 0 || !_grammarQuizCompleted}
+                  disabled={grammarQuiz.length === 0 || (!_grammarQuizCompleted && !isTeacherOrAbove)}
                 >
                   {t("reading.grammar.exportQuizAnswerKey")}
                 </DropdownMenuCheckboxItem>
