@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
+import { useSession } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { logActivity } from "@/utils/activityLogger";
 import { nanoid } from "nanoid";
@@ -269,6 +270,8 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
   const { t } = useTranslation();
   const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
+  const { data: session } = useSession();
+  const isTeacherOrAbove = session?.user?.role === "teacher" || session?.user?.role === "admin" || session?.user?.role === "super-admin";
   const effectiveRatings = mergedRatings ?? glossaryRatings;
 
   const [quizState, setQuizState] = useState<QuizState>("idle");
@@ -626,7 +629,7 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
               <DropdownMenuItem onClick={() => downloadWord(false)}>
                 {t("reading.glossary.quiz.downloadBlank")}
               </DropdownMenuItem>
-              {vocabularyQuizScore > 0 && (
+              {(vocabularyQuizScore > 0 || isTeacherOrAbove) && (
                 <DropdownMenuItem onClick={() => downloadWord(true)}>
                   {t("reading.glossary.quiz.downloadWithAnswers")}
                 </DropdownMenuItem>

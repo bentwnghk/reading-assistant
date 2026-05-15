@@ -49,6 +49,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
+import { useSession } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { logActivity } from "@/utils/activityLogger";
 
@@ -148,6 +149,8 @@ function ReadingTest() {
     setTestMode,
   } = useReadingStore();
   const { status, generateReadingTest, generateTargetedPractice, calculateTestScore, evaluateShortAnswer } = useReadingAssistant();
+  const { data: session } = useSession();
+  const isTeacherOrAbove = session?.user?.role === "teacher" || session?.user?.role === "admin" || session?.user?.role === "super-admin";
   
   const [quizState, setQuizState] = useState<QuizState>("idle");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -744,7 +747,7 @@ function ReadingTest() {
               <DropdownMenuItem onClick={() => downloadWord(false)}>
                 {t("reading.readingTest.downloadBlank")}
               </DropdownMenuItem>
-              {testCompleted && (
+              {(testCompleted || isTeacherOrAbove) && (
                 <DropdownMenuItem onClick={() => downloadWord(true)}>
                   {t("reading.readingTest.downloadWithAnswers")}
                 </DropdownMenuItem>
