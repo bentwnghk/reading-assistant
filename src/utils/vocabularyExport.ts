@@ -306,7 +306,7 @@ export async function exportFlashcardPdf(
     pdf.setFontSize(16);
     const wordLines = pdf.splitTextToSize(w.word, cardW - 10);
     const wordLineH = 7;
-    const topPad = 5;
+    const topPad = 10;
     let topCursorY = y + topPad;
     pdf.text(wordLines, x + cardW / 2, topCursorY, {
       align: "center",
