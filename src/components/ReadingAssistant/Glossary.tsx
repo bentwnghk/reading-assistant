@@ -1,7 +1,8 @@
 "use client";
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, HelpCircle, ArrowUpDown } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, HelpCircle, ArrowUpDown, ExternalLink } from "lucide-react";
+import Link from "next/link";
 import {
   Document,
   Packer,
@@ -531,6 +532,17 @@ function Glossary() {
       )}
 
       {renderContent()}
+
+      {glossary.length > 0 && (
+        <div className="mt-4 pt-3 border-t">
+          <Link href="/vocabulary">
+            <Button variant="outline" size="sm" className="w-full">
+              <ExternalLink className="h-4 w-4 mr-1" />
+              {t("vocabulary.title")}
+            </Button>
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

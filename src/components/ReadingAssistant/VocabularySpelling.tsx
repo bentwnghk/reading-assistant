@@ -38,6 +38,7 @@ import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "
 interface VocabularySpellingProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
+  onWordResult?: (word: string, correct: boolean) => void;
 }
 
 type GameStatus = "setup" | "playing" | "completed";
@@ -137,7 +138,7 @@ function SpellingResultScreen({
   );
 }
 
-function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps) {
+function VocabularySpelling({ glossary, mergedRatings, onWordResult }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
@@ -178,6 +179,7 @@ function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const challengeRef = useRef<SpellingWordChallenge | null>(null);
   const revealedPositionsRef = useRef<number[]>([]);
+  const correctWordsRef = useRef<Map<string, boolean>>(new Map());
 
   const currentChallenge = challenges[currentIndex];
   challengeRef.current = currentChallenge;
@@ -450,6 +452,10 @@ function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps
       setStreak(0);
     }
 
+    if (currentChallenge) {
+      correctWordsRef.current.set(currentChallenge.word, correct);
+    }
+
     setTimeout(() => moveToNext(), 1500);
   }, [currentChallenge, userInput, streak, isTimed, timeRemaining, config.timeLimits, hintsUsed, moveToNext, currentMode]);
 
@@ -566,6 +572,13 @@ function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps
         score,
         details: { mode: gameMode, difficulty, streak: maxStreak },
       });
+
+      if (onWordResult && correctWordsRef.current.size > 0) {
+        for (const [word, correct] of correctWordsRef.current) {
+          onWordResult(word, correct);
+        }
+        correctWordsRef.current.clear();
+      }
       
       if (id) {
         const session = backup();
@@ -575,7 +588,7 @@ function VocabularySpelling({ glossary, mergedRatings }: VocabularySpellingProps
         }
       }
     }
-  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak]);
+  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult]);
 
   if (glossary.length < 3) {
     return (

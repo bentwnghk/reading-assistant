@@ -12,6 +12,7 @@ import { useHistoryStore } from "@/store/history";
 import { setHistorySyncFn, useReadingStore, isRestoreComplete } from "@/store/reading";
 import { isShareCheckComplete } from "@/store/sharing";
 import useAutoSave from "@/hooks/useAutoSave";
+import { useVocabularySync } from "@/hooks/useVocabularySync";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { LandingPage } from "@/components/Auth/LandingPage";
 
@@ -44,6 +45,7 @@ function Home() {
   const { generateTitle } = useReadingAssistant();
 
   useAutoSave();
+  useVocabularySync();
 
   const [restoreReady, setRestoreReady] = useState(false);
 

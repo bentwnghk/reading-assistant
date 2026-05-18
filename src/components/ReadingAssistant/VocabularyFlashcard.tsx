@@ -15,6 +15,7 @@ import { sortGlossaryByPriority } from "@/utils/vocabulary";
 interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
+  onWordAction?: (word: string, action: "again" | "hard" | "good" | "easy") => void;
 }
 
 type SRSAction = "again" | "hard" | "good" | "easy";
@@ -26,7 +27,7 @@ interface SRSCounts {
   easy: number;
 }
 
-function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardProps) {
+function VocabularyFlashcard({ glossary, mergedRatings, onWordAction }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
   const { id, glossaryRatings, setGlossaryRating, backup, incrementFlashcardReviewCount } = useReadingStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
@@ -165,6 +166,10 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
         details: { cardsReviewed: 1, wordCount: totalOriginal },
       });
 
+      if (onWordAction) {
+        onWordAction(current.word, action);
+      }
+
       setReviewQueue(newQueue);
       setIsFlipped(false);
 
@@ -173,7 +178,7 @@ function VocabularyFlashcard({ glossary, mergedRatings }: VocabularyFlashcardPro
         incrementFlashcardReviewCount();
       }
     },
-    [currentEntry, reviewQueue, id, setGlossaryRating, syncToHistory, totalOriginal, incrementFlashcardReviewCount]
+    [currentEntry, reviewQueue, id, setGlossaryRating, syncToHistory, totalOriginal, incrementFlashcardReviewCount, onWordAction]
   );
 
   // ── TTS ──────────────────────────────────────────────────────────────────

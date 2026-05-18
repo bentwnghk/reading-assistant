@@ -34,6 +34,7 @@ import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "
 interface VocabularyQuizProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
+  onWordResult?: (word: string, correct: boolean) => void;
 }
 
 type QuizState = "idle" | "in-progress" | "completed";
@@ -266,7 +267,7 @@ function VocabQuizResultScreen({
   );
 }
 
-function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
+function VocabularyQuiz({ glossary, mergedRatings, onWordResult }: VocabularyQuizProps) {
   const { t } = useTranslation();
   const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
@@ -331,6 +332,12 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
       setVocabularyQuizScore(percentage);
       setQuizState("completed");
       logActivity("quiz_complete", { sessionId: id || undefined, score: percentage });
+
+      if (onWordResult) {
+        for (const q of questions) {
+          onWordResult(q.wordRef, answers[q.id] === q.correctAnswer);
+        }
+      }
       
       if (id) {
         const session = backup();
@@ -374,6 +381,12 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
               setVocabularyQuizScore(percentage);
               setQuizState("completed");
               logActivity("quiz_complete", { sessionId: id || undefined, score: percentage });
+
+              if (onWordResult) {
+                for (const q of questions) {
+                  onWordResult(q.wordRef, answers[q.id] === q.correctAnswer);
+                }
+              }
               
               if (id) {
                 const session = backup();
@@ -395,7 +408,7 @@ function VocabularyQuiz({ glossary, mergedRatings }: VocabularyQuizProps) {
         clearInterval(timerRef.current);
       }
     };
-  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, id, backup, update, save, setVocabularyQuizScore]);
+  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, id, backup, update, save, setVocabularyQuizScore, onWordResult]);
 
   const missedQuestions = useMemo(() => {
     return questions.filter((q) => answers[q.id] !== q.correctAnswer);

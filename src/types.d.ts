@@ -438,6 +438,42 @@ interface RepositoryText {
   updatedAt: number;
 }
 
+// ── Vocabulary Page types ──────────────────────────────────────────────────────
+
+type VocabularyMasteryLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+type VocabularySelectionStrategy = "due" | "hardest" | "newest" | "random" | "weakest";
+
+interface VocabularyWord {
+  id: string;
+  word: string;
+  syllabification: string;
+  partOfSpeech: string;
+  englishDefinition: string;
+  chineseDefinition: string;
+  example: string;
+  rating: GlossaryRating | null;
+  masteryLevel: VocabularyMasteryLevel;
+  reviewCount: number;
+  correctCount: number;
+  lastReviewedAt: number;
+  nextReviewAt: number;
+  sourceSessionIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface VocabularyStats {
+  totalWords: number;
+  dueForReview: number;
+  mastered: number;
+  newWords: number;
+  hard: number;
+  medium: number;
+  easy: number;
+  unrated: number;
+}
+
 interface RepositoryTextListItem {
   id: string;
   name: string;

@@ -285,6 +285,16 @@ function Header() {
             >
               <BarChart3 className="h-5 w-5" />
             </Button>
+            <Link href="/vocabulary" prefetch={false}>
+              <Button
+                className="h-8 w-8"
+                variant="ghost"
+                size="icon"
+                title={t("vocabulary.title")}
+              >
+                <BookOpen className="h-5 w-5" />
+              </Button>
+            </Link>
             <Link href="/leaderboard" prefetch={false}>
               <Button
                 className="h-8 w-8"

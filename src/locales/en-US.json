@@ -369,7 +369,7 @@
         "usage": "Usage: Click 'Generate Summary' to create a summary. Use TL;DR for quick understanding, main points for overview, key words for vocabulary building, and the question to think deeper about the text."
       }
     },
-"adaptedText": {
+    "adaptedText": {
       "title": "Text Analysis & Adaptation",
       "adapt": "Adapt",
       "adapting": "Adapting...",
@@ -575,13 +575,7 @@
         "questionsReady": "{{count}} questions",
         "excellent": "Excellent! Great grammar understanding!",
         "good": "Good job! Keep practicing!",
-      "keepPracticing": "Keep practicing to improve!",
-      "resultTier": {
-        "master": "Reading Champion",
-        "great": "Skilled Reader",
-        "good": "Steady Reader",
-        "keepGoing": "Keep Reading"
-      },
+        "keepPracticing": "Keep practicing to improve!",
         "resultTier": {
           "master": "Grammar Master",
           "great": "Great Grammarian",
@@ -936,6 +930,56 @@
         "helpWithImageAnswer": "Give answer",
         "helpWithImageAnswerQuestion": "Help me answer this reading comprehension question. Give me the answer with a clear explanation."
       }
+    }
+  },
+  "vocabulary": {
+    "title": "My Vocabulary",
+    "tabTable": "Table",
+    "tabFlashcard": "Flashcard",
+    "tabSpelling": "Spelling",
+    "tabQuiz": "Quiz",
+    "emptyTitle": "No Vocabulary Yet",
+    "emptyDesc": "Start reading to collect vocabulary words. They will appear here for review.",
+    "startReading": "Start Reading",
+    "searchPlaceholder": "Search words...",
+    "allRatings": "All Ratings",
+    "hardOnly": "Hard",
+    "mediumOnly": "Medium",
+    "easyOnly": "Easy",
+    "allLevels": "All Levels",
+    "dueOnly": "Due for Review",
+    "newOnly": "New",
+    "masteredOnly": "Mastered",
+    "clearFilters": "Clear",
+    "showingWords": "Showing {{count}} of {{total}} words",
+    "noWordsMatch": "No words match your filters",
+    "selectedCount": "{{count}} words selected",
+    "clearSelection": "Clear",
+    "startReview": "Start Review",
+    "autoSelect": "Auto Select",
+    "wordCount": "Number of words",
+    "selectStrategy": "Selection strategy",
+    "selectWords": "Select {{count}} words",
+    "word": "Word",
+    "syllabification": "Syllables",
+    "partOfSpeech": "PoS",
+    "englishDefinition": "English Definition",
+    "chineseDefinition": "Chinese Definition",
+    "example": "Example",
+    "rating": "Rating",
+    "mastery": "Level",
+    "stats": {
+      "total": "Total Words",
+      "due": "Due for Review",
+      "mastered": "Mastered",
+      "new": "New Words"
+    },
+    "strategy": {
+      "due": "Due for Review",
+      "hardest": "Hardest Words",
+      "newest": "Newest Words",
+      "random": "Random Mix",
+      "weakest": "Weakest Words"
     }
   },
   "dashboard": {
@@ -1633,8 +1677,8 @@
       "avg_test_score": "Test",
       "avg_quiz_score": "Quiz",
       "avg_spelling_score": "Spelling",
-    "avg_grammar_quiz_score": "Grammar Quiz",
-    "avg_grammar_game_score": "Grammar Game",
+      "avg_grammar_quiz_score": "Grammar Quiz",
+      "avg_grammar_game_score": "Grammar Game",
       "total_vocabulary_words": "Vocab",
       "improvement_score": "Improvement",
       "total_flashcard_reviews": "Flashcards"
@@ -1686,8 +1730,8 @@
       "totalVocab": "Total Vocabulary",
       "avgQuizScore": "Avg Vocab Quiz Score",
       "avgTestScore": "Avg Reading Test Score",
-    "avgGrammarQuizScore": "Avg Grammar Quiz Score",
-    "avgGrammarGameScore": "Avg Grammar Game Score",
+      "avgGrammarQuizScore": "Avg Grammar Quiz Score",
+      "avgGrammarGameScore": "Avg Grammar Game Score",
       "avgGrammarGameAccuracy": "Avg Grammar Game Accuracy",
       "avgSpellingScore": "Avg Spelling Score",
       "totalFlashcards": "Total Flashcards",
@@ -1907,26 +1951,26 @@
         "description": "Complete {{count}} spelling challenges",
         "hint": "Play spelling games with your vocabulary words"
       },
-    "vocabulary_quizzes": {
-      "name": "Quiz Wizard",
-      "description": "Complete {{count}} vocabulary quizzes",
-      "hint": "Take vocabulary quizzes to test your word knowledge"
-    },
-    "grammar_analysis": {
-      "name": "Grammar Explorer",
-      "description": "Analyze grammar in {{count}} texts",
-      "hint": "Use the Grammar section to identify grammar structures in your reading texts"
-    },
-    "grammar_quizzes": {
-      "name": "Grammar Ace",
-      "description": "Complete {{count}} grammar quizzes",
-      "hint": "Take grammar quizzes to test your understanding of grammar rules"
-    },
-    "grammar_games": {
-      "name": "Grammar Gamer",
-      "description": "Play {{count}} grammar games",
-      "hint": "Play grammar games like Roulette, Surgery, Workshop, Duel, and Scramble"
-    },
+      "vocabulary_quizzes": {
+        "name": "Quiz Wizard",
+        "description": "Complete {{count}} vocabulary quizzes",
+        "hint": "Take vocabulary quizzes to test your word knowledge"
+      },
+      "grammar_analysis": {
+        "name": "Grammar Explorer",
+        "description": "Analyze grammar in {{count}} texts",
+        "hint": "Use the Grammar section to identify grammar structures in your reading texts"
+      },
+      "grammar_quizzes": {
+        "name": "Grammar Ace",
+        "description": "Complete {{count}} grammar quizzes",
+        "hint": "Take grammar quizzes to test your understanding of grammar rules"
+      },
+      "grammar_games": {
+        "name": "Grammar Gamer",
+        "description": "Play {{count}} grammar games",
+        "hint": "Play grammar games like Roulette, Surgery, Workshop, Duel, and Scramble"
+      },
       "ai_tutor_questions": {
         "name": "Curious Learner",
         "description": "Ask AI Tutor {{count}} questions",

@@ -523,6 +523,35 @@ CREATE TRIGGER update_shared_sessions_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- ─── User Vocabulary table ──────────────────────────────────────────────────
+
+CREATE TABLE user_vocabulary (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  word TEXT NOT NULL,
+  syllabification TEXT DEFAULT '',
+  part_of_speech TEXT DEFAULT '',
+  english_definition TEXT DEFAULT '',
+  chinese_definition TEXT DEFAULT '',
+  example TEXT DEFAULT '',
+  rating TEXT DEFAULT NULL CHECK (rating IS NULL OR rating IN ('easy', 'medium', 'hard')),
+  mastery_level INTEGER NOT NULL DEFAULT 0 CHECK (mastery_level BETWEEN 0 AND 5),
+  review_count INTEGER NOT NULL DEFAULT 0,
+  correct_count INTEGER NOT NULL DEFAULT 0,
+  last_reviewed_at BIGINT NOT NULL DEFAULT 0,
+  next_review_at BIGINT NOT NULL DEFAULT 0,
+  source_session_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at BIGINT NOT NULL DEFAULT 0,
+  updated_at BIGINT NOT NULL DEFAULT 0,
+  UNIQUE (user_id, word)
+);
+
+CREATE INDEX idx_user_vocabulary_user_id ON user_vocabulary(user_id);
+CREATE INDEX idx_user_vocabulary_next_review ON user_vocabulary(user_id, next_review_at);
+CREATE INDEX idx_user_vocabulary_rating ON user_vocabulary(user_id, rating);
+CREATE INDEX idx_user_vocabulary_mastery ON user_vocabulary(user_id, mastery_level);
+CREATE INDEX idx_user_vocabulary_word ON user_vocabulary(user_id, word);
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;
