@@ -99,7 +99,7 @@ export async function upsertVocabularyFromGlossary(
         user_id, word, syllabification, part_of_speech,
         english_definition, chinese_definition, example,
         rating, source_session_ids, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, jsonb_build_array($9), $10, $10)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $10)
       ON CONFLICT (user_id, word) DO UPDATE SET
         syllabification = COALESCE(NULLIF(EXCLUDED.syllabification, ''), user_vocabulary.syllabification),
         part_of_speech = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''), user_vocabulary.part_of_speech),
@@ -109,9 +109,9 @@ export async function upsertVocabularyFromGlossary(
         rating = CASE
           WHEN user_vocabulary.rating IS NULL THEN EXCLUDED.rating
           WHEN EXCLUDED.rating IS NULL THEN user_vocabulary.rating
-          WHEN (COALESCE((SELECT v FROM (VALUES (EXCLUDED.rating)) AS t(v)), 'easy') = 'hard') THEN EXCLUDED.rating
-          WHEN (COALESCE((SELECT v FROM (VALUES (user_vocabulary.rating)) AS t(v)), 'easy') = 'hard') THEN user_vocabulary.rating
-          WHEN (COALESCE((SELECT v FROM (VALUES (EXCLUDED.rating)) AS t(v)), 'easy') = 'medium') THEN EXCLUDED.rating
+          WHEN EXCLUDED.rating = 'hard' THEN 'hard'
+          WHEN EXCLUDED.rating = 'medium' AND user_vocabulary.rating != 'hard' THEN 'medium'
+          WHEN user_vocabulary.rating IS NULL THEN EXCLUDED.rating
           ELSE user_vocabulary.rating
         END,
         source_session_ids = (
@@ -129,7 +129,7 @@ export async function upsertVocabularyFromGlossary(
         entry.chineseDefinition || "",
         entry.example || "",
         rating,
-        sessionId,
+        JSON.stringify([sessionId]),
         now,
       ]
     );
