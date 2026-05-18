@@ -235,10 +235,11 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     0
   );
 
-  const totalVocabulary = sorted.reduce(
-    (sum, item) => sum + (item.glossary?.length || 0),
-    0
-  );
+  const totalVocabulary = new Set(
+    sorted.flatMap((item) =>
+      (item.glossary || []).map((e) => e.word.toLowerCase())
+    )
+  ).size;
 
   const totalTutorQuestions = sorted.reduce(
     (sum, item) =>
@@ -437,24 +438,36 @@ export function computeVocabularyOverTime(history: ReadingHistory[], days: numbe
     .filter((h) => (h.glossary || []).length > 0)
     .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
-  const dailyMap = new Map<string, number>();
+  const dailyMap = new Map<string, Set<string>>();
   for (const item of sorted) {
     const dateKey = toDateString(item.createdAt);
-    dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + (item.glossary || []).length);
+    const existing = dailyMap.get(dateKey) || new Set<string>();
+    for (const entry of item.glossary || []) {
+      existing.add(entry.word.toLowerCase());
+    }
+    dailyMap.set(dateKey, existing);
   }
 
   const startDate = new Date(cutoffStr + "T00:00:00");
   const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
+  const allTimeWords = new Set<string>();
   const result: VocabularyPoint[] = [];
   let cumulative = 0;
   const current = new Date(startDate);
 
   while (current <= endDate) {
     const dateKey = toDateString(current.getTime());
-    const daily = dailyMap.get(dateKey) || 0;
-    cumulative += daily;
-    result.push({ date: dateKey, cumulative, daily });
+    const dayWords = dailyMap.get(dateKey);
+    if (dayWords) {
+      for (const w of dayWords) {
+        if (!allTimeWords.has(w)) {
+          allTimeWords.add(w);
+          cumulative++;
+        }
+      }
+    }
+    result.push({ date: dateKey, cumulative, daily: dayWords?.size || 0 });
     current.setDate(current.getDate() + 1);
   }
 

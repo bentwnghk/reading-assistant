@@ -109,7 +109,13 @@ function History({ open, onClose }: HistoryProps) {
   }, [history, currentPage]);
 
   const totalVocabularyCount = useMemo(() => {
-    return history.reduce((total, item) => total + (item.glossary?.length || 0), 0);
+    const uniqueWords = new Set<string>();
+    for (const item of history) {
+      for (const entry of item.glossary || []) {
+        uniqueWords.add(entry.word.toLowerCase());
+      }
+    }
+    return uniqueWords.size;
   }, [history]);
 
   async function importSession(file: File) {
