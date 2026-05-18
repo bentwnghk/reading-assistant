@@ -26,6 +26,19 @@ type ExportWord = Pick<
   | "example"
 >;
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(
+      null,
+      bytes.subarray(i, i + chunkSize) as unknown as number[]
+    );
+  }
+  return btoa(binary);
+}
+
 function formatDate(): string {
   return new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -201,6 +214,22 @@ export async function exportFlashcardPdf(
   words: ExportWord[]
 ): Promise<void> {
   const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+  let zhFontLoaded = false;
+  try {
+    const fontResp = await fetch("/standard_fonts/NotoSansTC-Regular.ttf");
+    if (fontResp.ok) {
+      const fontBuf = await fontResp.arrayBuffer();
+      const fontB64 = arrayBufferToBase64(fontBuf);
+      pdf.addFileToVFS("NotoSansTC-Regular.ttf", fontB64);
+      pdf.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
+      zhFontLoaded = true;
+    }
+  } catch {
+    // Chinese text will fall back to default font
+  }
+
+  const zhFont = zhFontLoaded ? "NotoSansTC" : "helvetica";
   const pageW = 297;
   const pageH = 210;
   const margin = 10;
@@ -246,12 +275,24 @@ export async function exportFlashcardPdf(
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(16);
     const wordLines = pdf.splitTextToSize(w.word, cardW - 10);
-    const wordBlockH = wordLines.length * 7;
-    pdf.text(wordLines, x + cardW / 2, midY - wordBlockH / 2 - 6, {
+    const wordLineH = 7;
+    const topPad = 5;
+    let topCursorY = y + topPad;
+    pdf.text(wordLines, x + cardW / 2, topCursorY, {
       align: "center",
     });
+    topCursorY += wordLines.length * wordLineH;
 
-    let topCursorY = midY - wordBlockH / 2 + wordLines.length * 7;
+    if (w.syllabification) {
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(w.syllabification, x + cardW / 2, topCursorY, {
+        align: "center",
+      });
+      topCursorY += 4;
+    }
+
     if (w.partOfSpeech) {
       pdf.setFont("helvetica", "italic");
       pdf.setFontSize(8);
@@ -259,7 +300,6 @@ export async function exportFlashcardPdf(
       pdf.text(w.partOfSpeech, x + cardW / 2, topCursorY, {
         align: "center",
       });
-      topCursorY += 4;
     }
 
     pdf.setFont("helvetica", "normal");
@@ -276,6 +316,7 @@ export async function exportFlashcardPdf(
     });
 
     if (w.chineseDefinition) {
+      pdf.setFont(zhFont, "normal");
       pdf.setFontSize(7);
       pdf.setTextColor(100, 100, 100);
       const zhDefLines = pdf.splitTextToSize(
