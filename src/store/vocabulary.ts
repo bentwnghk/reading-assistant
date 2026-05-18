@@ -126,7 +126,7 @@ export const useVocabularyStore = create<
     switch (strategy) {
       case "due":
         pool = pool.filter(
-          (w) => w.nextReviewAt > 0 && w.nextReviewAt <= now
+          (w) => w.nextReviewAt === 0 || w.nextReviewAt <= now
         );
         pool.sort((a, b) => a.nextReviewAt - b.nextReviewAt);
         break;

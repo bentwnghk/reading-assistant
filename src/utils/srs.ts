@@ -31,7 +31,7 @@ export function calculateNextReview(
 }
 
 export function isDueForReview(word: VocabularyWord): boolean {
-  if (word.nextReviewAt === 0) return false;
+  if (word.nextReviewAt === 0) return true;
   return word.nextReviewAt <= Date.now();
 }
 
