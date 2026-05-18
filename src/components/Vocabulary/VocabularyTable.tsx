@@ -50,7 +50,9 @@ function VocabularyTable() {
 
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const [showSelectedOnly, setShowSelectedOnly] = useState(true);
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const hasEverSelected = selectedWordIds.size > 0;
+  const effectiveShowSelectedOnly = showSelectedOnly && hasEverSelected;
 
   const filteredWords = useMemo(() => {
     let result = [...words];
@@ -78,7 +80,7 @@ function VocabularyTable() {
       result = result.filter((w) => w.masteryLevel === 5);
     }
 
-    if (showSelectedOnly) {
+    if (effectiveShowSelectedOnly) {
       result = result.filter((w) => selectedWordIds.has(w.id));
     }
 
@@ -105,7 +107,7 @@ function VocabularyTable() {
     });
 
     return result;
-  }, [words, searchQuery, filterRating, filterMastery, sortField, sortOrder, showSelectedOnly, selectedWordIds]);
+  }, [words, searchQuery, filterRating, filterMastery, sortField, sortOrder, effectiveShowSelectedOnly, selectedWordIds]);
 
   const handleSort = useCallback(
     (field: SortField) => {
@@ -229,19 +231,19 @@ function VocabularyTable() {
               {t("vocabulary.clearFilters")}
             </Button>
           )}
-          {selectedWordIds.size > 0 && (
+          {hasEverSelected && (
             <Button
-              variant={showSelectedOnly ? "default" : "outline"}
+              variant={effectiveShowSelectedOnly ? "default" : "outline"}
               size="sm"
               onClick={() => setShowSelectedOnly((v) => !v)}
               className="h-9"
             >
-              {showSelectedOnly ? (
+              {effectiveShowSelectedOnly ? (
                 <EyeOff className="h-3.5 w-3.5 mr-1" />
               ) : (
                 <Eye className="h-3.5 w-3.5 mr-1" />
               )}
-              {showSelectedOnly
+              {effectiveShowSelectedOnly
                 ? t("vocabulary.showAll")
                 : t("vocabulary.showSelected")}
             </Button>
