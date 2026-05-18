@@ -938,6 +938,7 @@
     "tabFlashcard": "Flashcard",
     "tabSpelling": "Spelling",
     "tabQuiz": "Quiz",
+    "tabHistory": "History",
     "emptyTitle": "No Vocabulary Yet",
     "emptyDesc": "Start reading to collect vocabulary words. They will appear here for review.",
     "startReading": "Start Reading",
@@ -1008,6 +1009,16 @@
       "newest": "Newest Words",
       "random": "Random Mix",
       "weakest": "Weakest Words"
+    },
+    "reviewHistory": {
+      "flashcard": "Flashcard Review",
+      "quiz": "Vocabulary Quiz",
+      "spelling": "Spelling Practice",
+      "words": "words",
+      "correct": "correct",
+      "incorrect": "incorrect",
+      "accuracy": "accuracy",
+      "empty": "No review sessions yet. Complete a review to see your history here."
     }
   },
   "dashboard": {

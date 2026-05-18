@@ -474,6 +474,26 @@ interface VocabularyStats {
   unrated: number;
 }
 
+type VocabularyReviewMode = "flashcard" | "quiz" | "spelling";
+
+interface VocabularyReviewResult {
+  word: string;
+  correct: boolean;
+  masteryBefore: number;
+  masteryAfter: number;
+}
+
+interface VocabularyReviewSession {
+  id: string;
+  mode: VocabularyReviewMode;
+  totalWords: number;
+  correctCount: number;
+  accuracy: number;
+  startedAt: number;
+  completedAt: number;
+  results?: VocabularyReviewResult[];
+}
+
 interface RepositoryTextListItem {
   id: string;
   name: string;

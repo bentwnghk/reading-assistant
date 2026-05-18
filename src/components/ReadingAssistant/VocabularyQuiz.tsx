@@ -35,6 +35,7 @@ interface VocabularyQuizProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
   onWordResult?: (word: string, correct: boolean) => void;
+  onComplete?: (results: { word: string; correct: boolean }[]) => void;
 }
 
 type QuizState = "idle" | "in-progress" | "completed";
@@ -267,7 +268,7 @@ function VocabQuizResultScreen({
   );
 }
 
-function VocabularyQuiz({ glossary, mergedRatings, onWordResult }: VocabularyQuizProps) {
+function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete }: VocabularyQuizProps) {
   const { t } = useTranslation();
   const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
@@ -338,6 +339,14 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult }: VocabularyQui
           onWordResult(q.wordRef, answers[q.id] === q.correctAnswer);
         }
       }
+
+      if (onComplete) {
+        const results = questions.map((q) => ({
+          word: q.wordRef,
+          correct: answers[q.id] === q.correctAnswer,
+        }));
+        onComplete(results);
+      }
       
       if (id) {
         const session = backup();
@@ -386,6 +395,14 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult }: VocabularyQui
                 for (const q of questions) {
                   onWordResult(q.wordRef, answers[q.id] === q.correctAnswer);
                 }
+              }
+
+              if (onComplete) {
+                const results = questions.map((q) => ({
+                  word: q.wordRef,
+                  correct: answers[q.id] === q.correctAnswer,
+                }));
+                onComplete(results);
               }
               
               if (id) {

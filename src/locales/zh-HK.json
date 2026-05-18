@@ -944,6 +944,7 @@
     "tabFlashcard": "閃卡",
     "tabSpelling": "拼寫",
     "tabQuiz": "測驗",
+    "tabHistory": "記錄",
     "emptyTitle": "還沒有詞彙",
     "emptyDesc": "開始閱讀以收集詞彙。它們會出現在這裡供你複習。",
     "startReading": "開始閱讀",
@@ -1014,6 +1015,16 @@
       "newest": "最新",
       "random": "隨機",
       "weakest": "最薄弱"
+    },
+    "reviewHistory": {
+      "flashcard": "閃卡複習",
+      "quiz": "詞彙測驗",
+      "spelling": "拼寫練習",
+      "words": "個詞",
+      "correct": "正確",
+      "incorrect": "錯誤",
+      "accuracy": "準確率",
+      "empty": "尚無複習記錄。完成一次複習後，記錄會顯示在這裡。"
     }
   },
   "dashboard": {

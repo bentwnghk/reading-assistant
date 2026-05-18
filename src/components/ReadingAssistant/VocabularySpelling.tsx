@@ -39,6 +39,7 @@ interface VocabularySpellingProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
   onWordResult?: (word: string, correct: boolean) => void;
+  onComplete?: (results: { word: string; correct: boolean }[]) => void;
 }
 
 type GameStatus = "setup" | "playing" | "completed";
@@ -138,7 +139,7 @@ function SpellingResultScreen({
   );
 }
 
-function VocabularySpelling({ glossary, mergedRatings, onWordResult }: VocabularySpellingProps) {
+function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
@@ -577,8 +578,16 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult }: Vocabular
         for (const [word, correct] of correctWordsRef.current) {
           onWordResult(word, correct);
         }
-        correctWordsRef.current.clear();
       }
+
+      if (onComplete && correctWordsRef.current.size > 0) {
+        const results = Array.from(correctWordsRef.current.entries()).map(
+          ([word, correct]) => ({ word, correct })
+        );
+        onComplete(results);
+      }
+
+      correctWordsRef.current.clear();
       
       if (id) {
         const session = backup();
@@ -588,7 +597,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult }: Vocabular
         }
       }
     }
-  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult]);
+  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete]);
 
   if (glossary.length < 3) {
     return (

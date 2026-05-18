@@ -552,6 +552,29 @@ CREATE INDEX idx_user_vocabulary_rating ON user_vocabulary(user_id, rating);
 CREATE INDEX idx_user_vocabulary_mastery ON user_vocabulary(user_id, mastery_level);
 CREATE INDEX idx_user_vocabulary_word ON user_vocabulary(user_id, word);
 
+CREATE TABLE vocabulary_review_sessions (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  mode TEXT NOT NULL CHECK (mode IN ('flashcard', 'quiz', 'spelling')),
+  total_words INTEGER NOT NULL DEFAULT 0,
+  correct_count INTEGER NOT NULL DEFAULT 0,
+  accuracy INTEGER NOT NULL DEFAULT 0,
+  started_at BIGINT NOT NULL DEFAULT 0,
+  completed_at BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE vocabulary_review_results (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  session_id TEXT NOT NULL REFERENCES vocabulary_review_sessions(id) ON DELETE CASCADE,
+  word TEXT NOT NULL,
+  correct BOOLEAN NOT NULL DEFAULT FALSE,
+  mastery_before INTEGER NOT NULL DEFAULT 0,
+  mastery_after INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_review_sessions_user_date ON vocabulary_review_sessions(user_id, completed_at DESC);
+CREATE INDEX idx_review_results_session ON vocabulary_review_results(session_id);
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;

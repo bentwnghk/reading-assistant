@@ -200,3 +200,112 @@ export async function deleteVocabularyBySession(
     ]
   );
 }
+
+export async function createReviewSession(
+  userId: string,
+  mode: VocabularyReviewMode,
+  results: VocabularyReviewResult[]
+): Promise<string> {
+  const pool = getPool();
+  const now = Date.now();
+  const sessionId = crypto.randomUUID();
+
+  const totalWords = results.length;
+  const correctCount = results.filter((r) => r.correct).length;
+  const accuracy = totalWords > 0 ? Math.round((correctCount / totalWords) * 100) : 0;
+
+  await pool.query(
+    `INSERT INTO vocabulary_review_sessions (id, user_id, mode, total_words, correct_count, accuracy, started_at, completed_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [sessionId, userId, mode, totalWords, correctCount, accuracy, now - 60000, now]
+  );
+
+  if (results.length > 0) {
+    const values = results
+      .map(
+        (_, i) =>
+          `($${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}, $${i * 5 + 5})`
+      )
+      .join(", ");
+    const params = results.flatMap((r) => [
+      crypto.randomUUID(),
+      sessionId,
+      r.word,
+      r.correct,
+      r.masteryAfter,
+    ]);
+    await pool.query(
+      `INSERT INTO vocabulary_review_results (id, session_id, word, correct, mastery_after)
+       VALUES ${values}`,
+      params
+    );
+  }
+
+  return sessionId;
+}
+
+export async function getReviewSessions(
+  userId: string,
+  limit: number = 20
+): Promise<VocabularyReviewSession[]> {
+  const pool = getPool();
+  const { rows } = await pool.query(
+    `SELECT id, mode, total_words, correct_count, accuracy, started_at, completed_at
+     FROM vocabulary_review_sessions
+     WHERE user_id = $1
+     ORDER BY completed_at DESC
+     LIMIT $2`,
+    [userId, limit]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    mode: r.mode,
+    totalWords: Number(r.total_words),
+    correctCount: Number(r.correct_count),
+    accuracy: Number(r.accuracy),
+    startedAt: Number(r.started_at),
+    completedAt: Number(r.completed_at),
+  }));
+}
+
+export async function getReviewSessionDetail(
+  userId: string,
+  sessionId: string
+): Promise<VocabularyReviewSession | null> {
+  const pool = getPool();
+
+  const { rows: sessionRows } = await pool.query(
+    `SELECT id, mode, total_words, correct_count, accuracy, started_at, completed_at
+     FROM vocabulary_review_sessions
+     WHERE id = $1 AND user_id = $2`,
+    [sessionId, userId]
+  );
+
+  if (sessionRows.length === 0) return null;
+
+  const s = sessionRows[0];
+
+  const { rows: resultRows } = await pool.query(
+    `SELECT word, correct, mastery_after
+     FROM vocabulary_review_results
+     WHERE session_id = $1
+     ORDER BY word`,
+    [sessionId]
+  );
+
+  return {
+    id: s.id,
+    mode: s.mode,
+    totalWords: Number(s.total_words),
+    correctCount: Number(s.correct_count),
+    accuracy: Number(s.accuracy),
+    startedAt: Number(s.started_at),
+    completedAt: Number(s.completed_at),
+    results: resultRows.map((r) => ({
+      word: r.word,
+      correct: r.correct,
+      masteryBefore: 0,
+      masteryAfter: Number(r.mastery_after),
+    })),
+  };
+}

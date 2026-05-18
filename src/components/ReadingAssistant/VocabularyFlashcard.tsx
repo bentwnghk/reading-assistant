@@ -16,6 +16,7 @@ interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
   onWordAction?: (word: string, action: "again" | "hard" | "good" | "easy") => void;
+  onComplete?: (results: { word: string; correct: boolean }[]) => void;
 }
 
 type SRSAction = "again" | "hard" | "good" | "easy";
@@ -27,7 +28,7 @@ interface SRSCounts {
   easy: number;
 }
 
-function VocabularyFlashcard({ glossary, mergedRatings, onWordAction }: VocabularyFlashcardProps) {
+function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
   const { id, glossaryRatings, setGlossaryRating, backup, incrementFlashcardReviewCount } = useReadingStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
@@ -42,6 +43,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction }: Vocabula
   const [totalOriginal, setTotalOriginal] = useState(0);
   const [srsCounts, setSrsCounts] = useState<SRSCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
   const [isReviewComplete, setIsReviewComplete] = useState(false);
+  const flashcardResultsRef = useRef<Map<string, boolean>>(new Map());
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Keep a ref to the latest effectiveRatings so toolbar handlers always use fresh data
@@ -155,6 +157,9 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction }: Vocabula
 
       setSrsCounts((prev) => ({ ...prev, [action]: prev[action] + 1 }));
 
+      const isCorrect = action === "good" || action === "easy";
+      flashcardResultsRef.current.set(current.word, isCorrect);
+
       // Again & Hard → mark as "hard" and sync to store/history
       if (action === "again" || action === "hard") {
         setGlossaryRating(current.word, "hard");
@@ -176,6 +181,13 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction }: Vocabula
       if (newQueue.length === 0) {
         setIsReviewComplete(true);
         incrementFlashcardReviewCount();
+        if (onComplete) {
+          const results = Array.from(flashcardResultsRef.current.entries()).map(
+            ([word, correct]) => ({ word, correct })
+          );
+          onComplete(results);
+          flashcardResultsRef.current.clear();
+        }
       }
     },
     [currentEntry, reviewQueue, id, setGlossaryRating, syncToHistory, totalOriginal, incrementFlashcardReviewCount, onWordAction]

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -13,6 +13,7 @@ import {
   Brain,
   Clock,
   CheckCircle2,
+  History,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -23,7 +24,7 @@ import VocabularyTable from "./VocabularyTable";
 import AutoSelectPanel from "./AutoSelectPanel";
 import ExportPanel from "./ExportPanel";
 
-type TabType = "table" | "flashcard" | "quiz" | "spelling";
+type TabType = "table" | "flashcard" | "quiz" | "spelling" | "history";
 
 const VocabularyFlashcard = dynamic(
   () => import("@/components/ReadingAssistant/VocabularyFlashcard")
@@ -34,6 +35,7 @@ const VocabularyQuiz = dynamic(
 const VocabularySpelling = dynamic(
   () => import("@/components/ReadingAssistant/VocabularySpelling")
 );
+const ReviewHistory = dynamic(() => import("./ReviewHistory"));
 
 function VocabularyContainer() {
   const { t } = useTranslation();
@@ -47,6 +49,7 @@ function VocabularyContainer() {
     clearSelection,
   } = useVocabularyStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
+  const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
 
   useEffect(() => {
     fetchVocabulary();
@@ -89,17 +92,52 @@ function VocabularyContainer() {
 
   const handleStartReview = useCallback(() => {
     startReview();
+    currentReviewMode.current = "flashcard";
     setActiveTab("flashcard");
   }, [startReview]);
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
+      if (tab === "history") {
+        setActiveTab(tab);
+        return;
+      }
       if (tab !== "table" && selectedWordIds.size === 0 && reviewQueue.length === 0) {
         return;
+      }
+      if (tab === "flashcard" || tab === "quiz" || tab === "spelling") {
+        currentReviewMode.current = tab;
       }
       setActiveTab(tab);
     },
     [selectedWordIds, reviewQueue]
+  );
+
+  const handleReviewComplete = useCallback(
+    (results: { word: string; correct: boolean }[]) => {
+      if (results.length === 0) return;
+      const store = useVocabularyStore.getState();
+      const reviewResults: VocabularyReviewResult[] = results.map((r) => {
+        const w = store.words.find(
+          (vw) => vw.word.toLowerCase() === r.word.toLowerCase()
+        );
+        return {
+          word: r.word,
+          correct: r.correct,
+          masteryBefore: w?.masteryLevel ?? 0,
+          masteryAfter: w?.masteryLevel ?? 0,
+        };
+      });
+      fetch("/api/vocabulary/review-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: currentReviewMode.current,
+          results: reviewResults,
+        }),
+      }).catch((err) => console.error("Failed to save review session:", err));
+    },
+    []
   );
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
@@ -107,6 +145,7 @@ function VocabularyContainer() {
     { key: "flashcard", label: t("vocabulary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
     { key: "spelling", label: t("vocabulary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },
     { key: "quiz", label: t("vocabulary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },
+    { key: "history", label: t("vocabulary.tabHistory"), icon: <History className="h-4 w-4" /> },
   ];
 
   const isLoading = useVocabularyStore((s) => s.isLoading);
@@ -245,6 +284,7 @@ function VocabularyContainer() {
                 onClick={() => handleTabChange(tab.key)}
                 disabled={
                   tab.key !== "table" &&
+                  tab.key !== "history" &&
                   selectedWordIds.size === 0 &&
                   reviewQueue.length === 0
                 }
@@ -255,6 +295,7 @@ function VocabularyContainer() {
                     ? "border-primary text-primary"
                     : "border-transparent text-muted-foreground hover:text-foreground",
                   tab.key !== "table" &&
+                    tab.key !== "history" &&
                     selectedWordIds.size === 0 &&
                     reviewQueue.length === 0 &&
                     "opacity-40 cursor-not-allowed"
@@ -272,6 +313,7 @@ function VocabularyContainer() {
               glossary={reviewGlossary}
               mergedRatings={reviewRatings}
               onWordAction={handleWordAction}
+              onComplete={handleReviewComplete}
             />
           )}
           {activeTab === "quiz" && (
@@ -279,6 +321,7 @@ function VocabularyContainer() {
               glossary={reviewGlossary}
               mergedRatings={reviewRatings}
               onWordResult={handleWordResult}
+              onComplete={handleReviewComplete}
             />
           )}
           {activeTab === "spelling" && (
@@ -286,8 +329,10 @@ function VocabularyContainer() {
               glossary={reviewGlossary}
               mergedRatings={reviewRatings}
               onWordResult={handleWordResult}
+              onComplete={handleReviewComplete}
             />
           )}
+          {activeTab === "history" && <ReviewHistory />}
         </>
       )}
     </div>
