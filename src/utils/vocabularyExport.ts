@@ -26,17 +26,62 @@ type ExportWord = Pick<
   | "example"
 >;
 
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  const chunkSize = 8192;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode.apply(
-      null,
-      bytes.subarray(i, i + chunkSize) as unknown as number[]
-    );
+function renderTextAsImage(
+  pdf: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  fontSize: number,
+  color: string,
+  align: "left" | "center" | "right"
+): void {
+  const scale = 4;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.font = `${fontSize * scale}px "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif`;
+  const lines: string[] = [];
+  for (const line of text.split("\n")) {
+    const words = [...line];
+    let current = "";
+    for (const char of words) {
+      const test = current + char;
+      if (ctx.measureText(test).width > maxWidth * scale) {
+        lines.push(current);
+        current = char;
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
   }
-  return btoa(binary);
+
+  const lineH = fontSize * scale * 1.3;
+  const textW = maxWidth * scale;
+  const textH = lines.length * lineH + lineH * 0.5;
+  canvas.width = Math.ceil(textW);
+  canvas.height = Math.ceil(textH);
+
+  ctx.font = `${fontSize * scale}px "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textBaseline = "top";
+
+  for (let i = 0; i < lines.length; i++) {
+    let drawX = 0;
+    if (align === "center") {
+      drawX = (textW - ctx.measureText(lines[i]).width) / 2;
+    } else if (align === "right") {
+      drawX = textW - ctx.measureText(lines[i]).width;
+    }
+    ctx.fillText(lines[i], drawX, i * lineH + lineH * 0.2);
+  }
+
+  const dataUrl = canvas.toDataURL("image/png");
+  const imgW = maxWidth;
+  const imgH = textH / scale;
+  pdf.addImage(dataUrl, "PNG", x - (align === "center" ? imgW / 2 : align === "right" ? imgW : 0), y, imgW, imgH);
 }
 
 function formatDate(): string {
@@ -215,21 +260,6 @@ export async function exportFlashcardPdf(
 ): Promise<void> {
   const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-  let zhFontLoaded = false;
-  try {
-    const fontResp = await fetch("/standard_fonts/NotoSansTC-Regular.ttf");
-    if (fontResp.ok) {
-      const fontBuf = await fontResp.arrayBuffer();
-      const fontB64 = arrayBufferToBase64(fontBuf);
-      pdf.addFileToVFS("NotoSansTC-Regular.ttf", fontB64);
-      pdf.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
-      zhFontLoaded = true;
-    }
-  } catch {
-    // Chinese text will fall back to default font
-  }
-
-  const zhFont = zhFontLoaded ? "NotoSansTC" : "helvetica";
   const pageW = 297;
   const pageH = 210;
   const margin = 10;
@@ -316,16 +346,23 @@ export async function exportFlashcardPdf(
     });
 
     if (w.chineseDefinition) {
-      pdf.setFont(zhFont, "normal");
       pdf.setFontSize(7);
       pdf.setTextColor(100, 100, 100);
       const zhDefLines = pdf.splitTextToSize(
         w.chineseDefinition,
         cardW - 10
       );
-      pdf.text(zhDefLines, x + cardW / 2, enDefY + enDefBlockH + 2, {
-        align: "center",
-      });
+      const zhY = enDefY + enDefBlockH + 2;
+      renderTextAsImage(
+        pdf,
+        zhDefLines.join("\n"),
+        x + cardW / 2,
+        zhY,
+        cardW - 10,
+        7,
+        "#64748b",
+        "center"
+      );
     }
 
     pdf.setTextColor(0, 0, 0);
