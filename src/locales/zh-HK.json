@@ -957,6 +957,8 @@
     "newOnly": "新詞",
     "masteredOnly": "已掌握",
     "clearFilters": "清除",
+    "showSelected": "僅顯示已選",
+    "showAll": "顯示全部",
     "showingWords": "顯示 {{count}} / {{total}} 個詞彙",
     "noWordsMatch": "沒有符合篩選條件的詞彙",
     "selectedCount": "已選擇 {{count}} 個詞彙",
@@ -974,6 +976,19 @@
     "example": "例句",
     "rating": "評級",
     "mastery": "等級",
+    "ratings": {
+      "hard": "困難",
+      "medium": "中等",
+      "easy": "容易"
+    },
+    "masteryLevels": {
+      "0": "新詞",
+      "1": "L1",
+      "2": "L2",
+      "3": "L3",
+      "4": "L4",
+      "5": "已掌握"
+    },
     "stats": {
       "total": "詞彙總數",
       "due": "待複習",

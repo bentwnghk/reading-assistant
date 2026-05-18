@@ -6,6 +6,8 @@ import {
   Search,
   Filter,
   X,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useVocabularyStore } from "@/store/vocabulary";
-import { getMasteryLabel, getMasteryColor, isDueForReview } from "@/utils/srs";
+import { getMasteryColor, isDueForReview } from "@/utils/srs";
 import { cn } from "@/utils/style";
 
 type SortField =
@@ -48,6 +50,7 @@ function VocabularyTable() {
 
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [showSelectedOnly, setShowSelectedOnly] = useState(true);
 
   const filteredWords = useMemo(() => {
     let result = [...words];
@@ -75,6 +78,10 @@ function VocabularyTable() {
       result = result.filter((w) => w.masteryLevel === 5);
     }
 
+    if (showSelectedOnly) {
+      result = result.filter((w) => selectedWordIds.has(w.id));
+    }
+
     result.sort((a, b) => {
       let cmp = 0;
       switch (sortField) {
@@ -98,7 +105,7 @@ function VocabularyTable() {
     });
 
     return result;
-  }, [words, searchQuery, filterRating, filterMastery, sortField, sortOrder]);
+  }, [words, searchQuery, filterRating, filterMastery, sortField, sortOrder, showSelectedOnly, selectedWordIds]);
 
   const handleSort = useCallback(
     (field: SortField) => {
@@ -131,6 +138,12 @@ function VocabularyTable() {
       useVocabularyStore.getState().setSelectedWordIds(next);
     }
   }, [allSelected, filteredWords, selectedWordIds]);
+
+  const getRatingLabel = (rating: GlossaryRating | null) => {
+    if (!rating) return "-";
+    const key = `vocabulary.ratings.${rating}`;
+    return t(key);
+  };
 
   const getRatingDot = (rating: GlossaryRating | null) => {
     if (!rating) return <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 inline-block" />;
@@ -214,6 +227,23 @@ function VocabularyTable() {
             >
               <X className="h-3.5 w-3.5 mr-1" />
               {t("vocabulary.clearFilters")}
+            </Button>
+          )}
+          {selectedWordIds.size > 0 && (
+            <Button
+              variant={showSelectedOnly ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowSelectedOnly((v) => !v)}
+              className="h-9"
+            >
+              {showSelectedOnly ? (
+                <EyeOff className="h-3.5 w-3.5 mr-1" />
+              ) : (
+                <Eye className="h-3.5 w-3.5 mr-1" />
+              )}
+              {showSelectedOnly
+                ? t("vocabulary.showAll")
+                : t("vocabulary.showSelected")}
             </Button>
           )}
         </div>
@@ -311,7 +341,7 @@ function VocabularyTable() {
                   <div className="flex items-center gap-1.5">
                     {getRatingDot(w.rating)}
                     <span className="text-xs text-muted-foreground">
-                      {w.rating || "-"}
+                      {getRatingLabel(w.rating)}
                     </span>
                   </div>
                 </TableCell>
@@ -322,7 +352,7 @@ function VocabularyTable() {
                       getMasteryColor(w.masteryLevel)
                     )}
                   >
-                    {getMasteryLabel(w.masteryLevel)}
+                    {t(`vocabulary.masteryLevels.${w.masteryLevel}`)}
                   </span>
                 </TableCell>
               </TableRow>
