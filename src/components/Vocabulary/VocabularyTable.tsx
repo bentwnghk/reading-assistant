@@ -231,21 +231,26 @@ function VocabularyTable() {
               {t("vocabulary.clearFilters")}
             </Button>
           )}
-          {hasEverSelected && (
+          {hasEverSelected && !effectiveShowSelectedOnly && (
             <Button
-              variant={effectiveShowSelectedOnly ? "default" : "outline"}
+              variant="outline"
               size="sm"
-              onClick={() => setShowSelectedOnly((v) => !v)}
+              onClick={() => setShowSelectedOnly(true)}
+              className="h-9 animate-pulse ring-2 ring-primary/50 ring-offset-1 ring-offset-background"
+            >
+              <Eye className="h-3.5 w-3.5 mr-1" />
+              {t("vocabulary.showSelected")}
+            </Button>
+          )}
+          {hasEverSelected && effectiveShowSelectedOnly && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setShowSelectedOnly(false)}
               className="h-9"
             >
-              {effectiveShowSelectedOnly ? (
-                <EyeOff className="h-3.5 w-3.5 mr-1" />
-              ) : (
-                <Eye className="h-3.5 w-3.5 mr-1" />
-              )}
-              {effectiveShowSelectedOnly
-                ? t("vocabulary.showAll")
-                : t("vocabulary.showSelected")}
+              <EyeOff className="h-3.5 w-3.5 mr-1" />
+              {t("vocabulary.showAll")}
             </Button>
           )}
         </div>

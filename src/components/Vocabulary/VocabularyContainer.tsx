@@ -221,7 +221,11 @@ function VocabularyContainer() {
                   >
                     {t("vocabulary.clearSelection")}
                   </Button>
-                  <Button size="sm" onClick={handleStartReview}>
+                  <Button
+                    size="sm"
+                    onClick={handleStartReview}
+                    className="shadow-[0_0_12px_2px_rgba(59,130,246,0.4)] hover:shadow-[0_0_16px_4px_rgba(59,130,246,0.5)]"
+                  >
                     {t("vocabulary.startReview")}
                   </Button>
                 </div>
