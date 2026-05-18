@@ -58,7 +58,7 @@ export async function getVocabularyStats(
   const { rows } = await pool.query(
     `SELECT
        COUNT(*) AS total_words,
-       COUNT(*) FILTER (WHERE next_review_at > 0 AND next_review_at <= $2) AS due_for_review,
+        COUNT(*) FILTER (WHERE next_review_at = 0 OR next_review_at <= $2) AS due_for_review,
        COUNT(*) FILTER (WHERE mastery_level = 5) AS mastered,
        COUNT(*) FILTER (WHERE mastery_level = 0 AND review_count = 0) AS new_words,
        COUNT(*) FILTER (WHERE rating = 'hard') AS hard,
