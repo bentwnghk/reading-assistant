@@ -224,7 +224,7 @@ function VocabularyContainer() {
                   <Button
                     size="sm"
                     onClick={handleStartReview}
-                    className="shadow-[0_0_12px_2px_rgba(59,130,246,0.4)] hover:shadow-[0_0_16px_4px_rgba(59,130,246,0.5)]"
+                    className="shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
                   >
                     {t("vocabulary.startReview")}
                   </Button>

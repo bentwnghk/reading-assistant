@@ -236,7 +236,7 @@ function VocabularyTable() {
               variant="outline"
               size="sm"
               onClick={() => setShowSelectedOnly(true)}
-              className="h-9 animate-pulse ring-2 ring-primary/50 ring-offset-1 ring-offset-background"
+              className="h-9 animate-pulse ring-2 ring-sky-400 dark:ring-sky-300 ring-offset-1 ring-offset-background shadow-[0_0_8px_1px_rgba(56,189,248,0.5)] dark:shadow-[0_0_8px_1px_rgba(125,211,252,0.6)]"
             >
               <Eye className="h-3.5 w-3.5 mr-1" />
               {t("vocabulary.showSelected")}
