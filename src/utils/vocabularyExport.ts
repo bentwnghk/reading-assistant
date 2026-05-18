@@ -346,7 +346,7 @@ export async function exportFlashcardPdf(
     });
 
     if (w.chineseDefinition) {
-      pdf.setFontSize(7);
+      pdf.setFontSize(5);
       pdf.setTextColor(100, 100, 100);
       const zhDefLines = pdf.splitTextToSize(
         w.chineseDefinition,
@@ -359,7 +359,7 @@ export async function exportFlashcardPdf(
         x + cardW / 2,
         zhY,
         cardW - 10,
-        7,
+        5,
         "#64748b",
         "center"
       );
