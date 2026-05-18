@@ -41,7 +41,7 @@ function AutoSelectPanel() {
             <ChevronDown className="h-3 w-3 ml-1" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-72" align="start">
+        <PopoverContent className="w-72" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium">
@@ -64,6 +64,7 @@ function AutoSelectPanel() {
                   )
                 }
                 className="mt-1 h-8"
+                onFocus={(e) => e.target.select()}
               />
             </div>
             <div>
