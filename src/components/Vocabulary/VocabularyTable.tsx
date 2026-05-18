@@ -8,6 +8,8 @@ import {
   X,
   Eye,
   EyeOff,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -51,6 +53,8 @@ function VocabularyTable() {
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const [pageSize, setPageSize] = useState<number>(50);
+  const [currentPage, setCurrentPage] = useState(1);
   const hasEverSelected = selectedWordIds.size > 0;
   const effectiveShowSelectedOnly = showSelectedOnly && hasEverSelected;
 
@@ -109,6 +113,15 @@ function VocabularyTable() {
     return result;
   }, [words, searchQuery, filterRating, filterMastery, sortField, sortOrder, effectiveShowSelectedOnly, selectedWordIds]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredWords.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const pagedWords = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredWords.slice(start, start + pageSize);
+  }, [filteredWords, safePage, pageSize]);
+
+  const resetPage = useCallback(() => setCurrentPage(1), []);
+
   const handleSort = useCallback(
     (field: SortField) => {
       if (sortField === field) {
@@ -122,12 +135,12 @@ function VocabularyTable() {
   );
 
   const allSelected =
-    filteredWords.length > 0 &&
-    filteredWords.every((w) => selectedWordIds.has(w.id));
+    pagedWords.length > 0 &&
+    pagedWords.every((w) => selectedWordIds.has(w.id));
 
   const handleSelectAll = useCallback(() => {
     if (allSelected) {
-      const idsToRemove = new Set(filteredWords.map((w) => w.id));
+      const idsToRemove = new Set(pagedWords.map((w) => w.id));
       const next = new Set(
         [...selectedWordIds].filter((id) => !idsToRemove.has(id))
       );
@@ -135,11 +148,11 @@ function VocabularyTable() {
     } else {
       const next = new Set([
         ...selectedWordIds,
-        ...filteredWords.map((w) => w.id),
+        ...pagedWords.map((w) => w.id),
       ]);
       useVocabularyStore.getState().setSelectedWordIds(next);
     }
-  }, [allSelected, filteredWords, selectedWordIds]);
+  }, [allSelected, pagedWords, selectedWordIds]);
 
   const getRatingLabel = (rating: GlossaryRating | null) => {
     if (!rating) return "-";
@@ -169,7 +182,10 @@ function VocabularyTable() {
           <Input
             placeholder={t("vocabulary.searchPlaceholder")}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              resetPage();
+            }}
             className="pl-9 h-9"
           />
         </div>
@@ -181,6 +197,7 @@ function VocabularyTable() {
               const ratings: Array<GlossaryRating | "all"> = ["all", "hard", "medium", "easy"];
               const idx = ratings.indexOf(filterRating);
               setFilterRating(ratings[(idx + 1) % ratings.length]);
+              resetPage();
             }}
             className="h-9"
           >
@@ -205,6 +222,7 @@ function VocabularyTable() {
               ];
               const idx = options.indexOf(filterMastery);
               setFilterMastery(options[(idx + 1) % options.length]);
+              resetPage();
             }}
             className="h-9"
           >
@@ -224,6 +242,7 @@ function VocabularyTable() {
                 setSearchQuery("");
                 setFilterRating("all");
                 setFilterMastery("all");
+                resetPage();
               }}
               className="h-9"
             >
@@ -256,8 +275,13 @@ function VocabularyTable() {
         </div>
       </div>
 
-      <div className="text-xs text-muted-foreground mb-2">
-        {t("vocabulary.showingWords", { count: filteredWords.length, total: words.length })}
+      <div className="text-xs text-muted-foreground mb-2 flex items-center justify-between">
+        <span>
+          {t("vocabulary.showingWords", { count: filteredWords.length, total: words.length })}
+        </span>
+        <span>
+          {t("vocabulary.pageInfo", { page: safePage, total: totalPages })}
+        </span>
       </div>
 
       <div className="overflow-x-auto border rounded-md">
@@ -317,7 +341,7 @@ function VocabularyTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredWords.map((w) => (
+            {pagedWords.map((w) => (
               <TableRow
                 key={w.id}
                 className={cn(
@@ -364,7 +388,7 @@ function VocabularyTable() {
                 </TableCell>
               </TableRow>
             ))}
-            {filteredWords.length === 0 && (
+            {pagedWords.length === 0 && (
               <TableRow>
                 <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   {t("vocabulary.noWordsMatch")}
@@ -374,6 +398,89 @@ function VocabularyTable() {
           </TableBody>
         </Table>
       </div>
+
+      {filteredWords.length > pageSize && (
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">
+              {t("vocabulary.rowsPerPage")}:
+            </span>
+            {[25, 50, 75, 100].map((size) => (
+              <button
+                key={size}
+                onClick={() => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "px-2 py-0.5 text-xs rounded transition-colors",
+                  pageSize === size
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={safePage <= 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => {
+                if (totalPages <= 7) return true;
+                if (p === 1 || p === totalPages) return true;
+                return Math.abs(p - safePage) <= 1;
+              })
+              .reduce<(number | "ellipsis")[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) {
+                  acc.push("ellipsis");
+                }
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((item, i) =>
+                item === "ellipsis" ? (
+                  <span
+                    key={`e${i}`}
+                    className="text-xs text-muted-foreground px-1"
+                  >
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    onClick={() => setCurrentPage(item)}
+                    className={cn(
+                      "h-7 w-7 text-xs rounded transition-colors",
+                      safePage === item
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={safePage >= totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

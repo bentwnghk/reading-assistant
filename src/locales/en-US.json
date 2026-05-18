@@ -955,6 +955,8 @@
     "showSelected": "Selected Only",
     "showAll": "Show All",
     "showingWords": "Showing {{count}} of {{total}} words",
+    "pageInfo": "Page {{page}} of {{total}}",
+    "rowsPerPage": "Per page",
     "noWordsMatch": "No words match your filters",
     "selectedCount": "{{count}} words selected",
     "clearSelection": "Clear",
