@@ -340,7 +340,7 @@ export async function exportFlashcardPdf(
       cardW - 10
     );
     const enDefBlockH = enDefLines.length * 4;
-    const enDefY = midY + 5;
+    const enDefY = midY + 10;
     pdf.text(enDefLines, x + cardW / 2, enDefY, {
       align: "center",
     });
