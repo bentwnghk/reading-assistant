@@ -126,11 +126,16 @@ export async function exportGlossaryDocx(
               new Paragraph({
                 children: [
                   new TextRun({ text: w.word, bold: true }),
-                  ...(w.syllabification
-                    ? [new TextRun({ text: ` ${w.syllabification}`, color: "666666", size: 18 })]
-                    : []),
                 ],
               }),
+              ...(w.syllabification
+                ? [new Paragraph({
+                    children: [
+                      new TextRun({ text: w.syllabification, color: "666666", size: 18 }),
+                    ],
+                    spacing: { before: 20 },
+                  })]
+                : []),
             ],
             verticalAlign: VerticalAlign.CENTER,
           }),
@@ -242,26 +247,42 @@ export async function exportFlashcardPdf(
     pdf.setFontSize(16);
     const wordLines = pdf.splitTextToSize(w.word, cardW - 10);
     const wordBlockH = wordLines.length * 7;
-    pdf.text(wordLines, x + cardW / 2, midY - wordBlockH / 2 - 3, {
+    pdf.text(wordLines, x + cardW / 2, midY - wordBlockH / 2 - 6, {
       align: "center",
     });
+
+    let topCursorY = midY - wordBlockH / 2 + wordLines.length * 7;
+    if (w.partOfSpeech) {
+      pdf.setFont("helvetica", "italic");
+      pdf.setFontSize(8);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text(w.partOfSpeech, x + cardW / 2, topCursorY, {
+        align: "center",
+      });
+      topCursorY += 4;
+    }
 
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(8);
-    pdf.setTextColor(100, 100, 100);
-    const defLines = pdf.splitTextToSize(
+    pdf.setTextColor(80, 80, 80);
+    const enDefLines = pdf.splitTextToSize(
       w.englishDefinition,
       cardW - 10
     );
-    const defBlockH = defLines.length * 4;
-    pdf.text(defLines, x + cardW / 2, midY + defBlockH / 2 + 5, {
+    const enDefBlockH = enDefLines.length * 4;
+    const enDefY = midY + 5;
+    pdf.text(enDefLines, x + cardW / 2, enDefY, {
       align: "center",
     });
 
-    if (w.partOfSpeech) {
+    if (w.chineseDefinition) {
       pdf.setFontSize(7);
-      pdf.setTextColor(150, 150, 150);
-      pdf.text(w.partOfSpeech, x + cardW / 2, midY + defBlockH / 2 + 8 + defLines.length * 0.5, {
+      pdf.setTextColor(100, 100, 100);
+      const zhDefLines = pdf.splitTextToSize(
+        w.chineseDefinition,
+        cardW - 10
+      );
+      pdf.text(zhDefLines, x + cardW / 2, enDefY + enDefBlockH + 2, {
         align: "center",
       });
     }
