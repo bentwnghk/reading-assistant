@@ -989,6 +989,19 @@
       "mastered": "Mastered",
       "new": "New Words"
     },
+    "export": {
+      "title": "Export",
+      "selectedWords": "Export {{count}} selected words",
+      "allWords": "Export all {{count}} words",
+      "glossary": "Glossary",
+      "glossaryDesc": "Word list with definitions in a table",
+      "flashcard": "Flashcard Sheets",
+      "flashcardDesc": "Printable cut-out flashcards",
+      "fillblank": "Fill-in-the-Blank",
+      "fillblankDesc": "Worksheet with missing words",
+      "matching": "Matching Exercise",
+      "matchingDesc": "Match words with definitions"
+    },
     "strategy": {
       "due": "Due for Review",
       "hardest": "Hardest Words",

@@ -995,6 +995,19 @@
       "mastered": "已掌握",
       "new": "新詞"
     },
+    "export": {
+      "title": "匯出",
+      "selectedWords": "匯出 {{count}} 個已選詞彙",
+      "allWords": "匯出全部 {{count}} 個詞彙",
+      "glossary": "詞彙表",
+      "glossaryDesc": "含釋義的詞彙表格",
+      "flashcard": "閃卡",
+      "flashcardDesc": "可列印剪裁的閃卡",
+      "fillblank": "填空練習",
+      "fillblankDesc": "挖空詞彙的練習題",
+      "matching": "配對練習",
+      "matchingDesc": "將詞彙與釋義配對"
+    },
     "strategy": {
       "due": "待複習",
       "hardest": "最困難",

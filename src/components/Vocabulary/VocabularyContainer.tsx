@@ -21,6 +21,7 @@ import { useVocabularyStore } from "@/store/vocabulary";
 import { cn } from "@/utils/style";
 import VocabularyTable from "./VocabularyTable";
 import AutoSelectPanel from "./AutoSelectPanel";
+import ExportPanel from "./ExportPanel";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling";
 
@@ -205,7 +206,11 @@ function VocabularyContainer() {
 
           {activeTab === "table" && (
             <>
-              <AutoSelectPanel />
+              <div className="flex items-center gap-2 mb-4">
+                <AutoSelectPanel />
+                <div className="flex-1" />
+                <ExportPanel />
+              </div>
               {selectedWordIds.size > 0 && (
                 <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
                   <span className="text-sm font-medium">
