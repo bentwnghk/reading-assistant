@@ -1,6 +1,5 @@
--- ─── User Vocabulary table ──────────────────────────────────────────────────
--- Creates the table + indexes + backfills from existing sessions.
--- Safe to re-run (uses IF NOT EXISTS and deduplicated backfill).
+-- ─── Incremental migration: backfill user_vocabulary ─────────────────────────
+-- Safe to re-run. Creates table/indexes only if missing. Deduplicates before insert.
 
 CREATE TABLE IF NOT EXISTS user_vocabulary (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -30,7 +29,8 @@ CREATE INDEX IF NOT EXISTS idx_user_vocabulary_mastery    ON user_vocabulary(use
 CREATE INDEX IF NOT EXISTS idx_user_vocabulary_word       ON user_vocabulary(user_id, word);
 
 -- Backfill: aggregate all glossary entries across sessions per user,
--- keeping the richest definition for each unique word, then upsert.
+-- keeping the richest definition for each unique word, then insert
+-- only words that do not already exist in user_vocabulary.
 WITH extracted AS (
   SELECT
     rs.user_id,
@@ -55,6 +55,7 @@ deduped AS (
     created_at, updated_at
   FROM (
     SELECT *,
+      -- prefer rows with longer definitions (richer content)
       LENGTH(english_definition) + LENGTH(chinese_definition) + LENGTH(example) AS richness
     FROM extracted
   ) sub
@@ -73,18 +74,18 @@ SELECT
 FROM deduped d
 JOIN session_ids s ON s.user_id = d.user_id AND s.word = d.word
 ON CONFLICT (user_id, word) DO UPDATE SET
-  syllabification    = COALESCE(NULLIF(EXCLUDED.syllabification, ''),    user_vocabulary.syllabification),
-  part_of_speech     = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''),     user_vocabulary.part_of_speech),
+  syllabification   = COALESCE(NULLIF(EXCLUDED.syllabification, ''),   user_vocabulary.syllabification),
+  part_of_speech    = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''),    user_vocabulary.part_of_speech),
   english_definition = COALESCE(NULLIF(EXCLUDED.english_definition, ''), user_vocabulary.english_definition),
   chinese_definition = COALESCE(NULLIF(EXCLUDED.chinese_definition, ''), user_vocabulary.chinese_definition),
-  example            = COALESCE(NULLIF(EXCLUDED.example, ''),            user_vocabulary.example),
+  example           = COALESCE(NULLIF(EXCLUDED.example, ''),           user_vocabulary.example),
   source_session_ids = (
     SELECT jsonb_agg(DISTINCT elem)
     FROM jsonb_array_elements(user_vocabulary.source_session_ids || EXCLUDED.source_session_ids) elem
   ),
   updated_at = GREATEST(user_vocabulary.updated_at, EXCLUDED.updated_at);
 
--- Update ratings from glossary_ratings in sessions (pick hardest rating per word)
+-- Update ratings from glossary_ratings in sessions (pick hardest rating)
 UPDATE user_vocabulary uv
 SET rating = r.rating_val
 FROM (
