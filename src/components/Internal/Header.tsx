@@ -37,6 +37,7 @@ import {
   BookOpenCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/Internal/Button";
 import { LoginButton } from "@/components/Auth/LoginButton";
@@ -77,6 +78,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
 
 function Header() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
@@ -87,7 +89,6 @@ function Header() {
   const {
     pendingReviewListShareCount,
     fetchPendingReviewListShareCount,
-    setShowReviewListShareDialog,
   } = useVocabularyStore();
   const totalPending = pendingCount + pendingReviewListShareCount;
   const {
@@ -282,10 +283,7 @@ function Header() {
                 if (pendingCount > 0) {
                   setShowSharedDialog(true);
                 } else if (pendingReviewListShareCount > 0) {
-                  setShowReviewListShareDialog(true);
-                  if (window.location.pathname !== "/vocabulary") {
-                    window.location.href = "/vocabulary";
-                  }
+                  void router.push("/vocabulary?openReviewListShare=1");
                 } else {
                   setOpenNoPending(true);
                 }

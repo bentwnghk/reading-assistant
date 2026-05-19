@@ -18,6 +18,7 @@ import {
   ListPlus,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { useVocabularyStore } from "@/store/vocabulary";
@@ -58,10 +59,19 @@ function VocabularyContainer() {
   const [shareOpen, setShareOpen] = useState(false);
   const [addToListOpen, setAddToListOpen] = useState(false);
   const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     fetchVocabulary();
   }, [fetchVocabulary]);
+
+  useEffect(() => {
+    if (searchParams.get("openReviewListShare") === "1") {
+      useVocabularyStore.getState().setShowReviewListShareDialog(true);
+      router.replace("/vocabulary", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const reviewGlossary = useMemo(() => {
     if (reviewQueue.length > 0) {
