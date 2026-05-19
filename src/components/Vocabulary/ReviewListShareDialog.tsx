@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -42,12 +43,13 @@ const COLOR_BORDER: Record<string, string> = {
 
 function ReviewListShareDialog() {
   const { t } = useTranslation();
+  const router = useRouter();
   const {
     showReviewListShareDialog,
     setShowReviewListShareDialog,
     pendingReviewListShares,
     setPendingReviewListShares,
-    loadReviewListIntoQueue,
+    setAcceptedReviewListWords,
   } = useVocabularyStore();
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -83,8 +85,9 @@ function ReviewListShareDialog() {
         toast.success(t("vocabulary.reviewLists.acceptSuccess"));
 
         if (words && words.length > 0) {
-          loadReviewListIntoQueue(words);
+          setAcceptedReviewListWords(words);
           setShowReviewListShareDialog(false);
+          router.push("/vocabulary");
         }
       } catch {
         toast.error(t("vocabulary.reviewLists.acceptError"));
@@ -92,7 +95,7 @@ function ReviewListShareDialog() {
         setProcessing(null);
       }
     },
-    [setPendingReviewListShares, loadReviewListIntoQueue, setShowReviewListShareDialog, t]
+    [setPendingReviewListShares, setAcceptedReviewListWords, setShowReviewListShareDialog, router, t]
   );
 
   const handleReject = useCallback(
@@ -121,10 +124,33 @@ function ReviewListShareDialog() {
   );
 
   const handleAcceptAll = useCallback(async () => {
+    const allWords: ReviewListWord[] = [];
     for (const share of pendingReviewListShares) {
-      await handleAccept(share);
+      setProcessing(share.id);
+      try {
+        const res = await fetch(`/api/review-lists/share/${share.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "accept" }),
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.words) allWords.push(...data.words);
+        setPendingReviewListShares((prev) =>
+          prev.filter((s) => s.id !== share.id)
+        );
+      } catch {
+        toast.error(t("vocabulary.reviewLists.acceptError"));
+      }
     }
-  }, [pendingReviewListShares, handleAccept]);
+    setProcessing(null);
+    if (allWords.length > 0) {
+      toast.success(t("vocabulary.reviewLists.acceptSuccess"));
+      setAcceptedReviewListWords(allWords);
+      setShowReviewListShareDialog(false);
+      router.push("/vocabulary");
+    }
+  }, [pendingReviewListShares, setPendingReviewListShares, setAcceptedReviewListWords, setShowReviewListShareDialog, router, t]);
 
   const handleDeclineAll = useCallback(async () => {
     for (const share of pendingReviewListShares) {

@@ -64,6 +64,8 @@ function VocabularyContainer() {
     startReview,
     clearSelection,
     loadReviewListIntoQueue,
+    acceptedReviewListWords,
+    setAcceptedReviewListWords,
   } = useVocabularyStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [shareOpen, setShareOpen] = useState(false);
@@ -75,6 +77,15 @@ function VocabularyContainer() {
   useEffect(() => {
     fetchVocabulary();
   }, [fetchVocabulary]);
+
+  useEffect(() => {
+    if (!acceptedReviewListWords || acceptedReviewListWords.length === 0) return;
+    if (useVocabularyStore.getState().isLoading) return;
+    const w = acceptedReviewListWords;
+    setAcceptedReviewListWords(null);
+    loadReviewListIntoQueue(w);
+    setActiveTab("table");
+  }, [acceptedReviewListWords, words, loadReviewListIntoQueue, setAcceptedReviewListWords]);
 
   useEffect(() => {
     if (searchParams.get("openReviewListShare") === "1") {
