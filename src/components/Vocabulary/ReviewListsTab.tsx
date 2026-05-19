@@ -496,6 +496,7 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
                                       className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted"
                                     >
                                       <Checkbox
+                                        id={`rl-user-${user.id}`}
                                         checked={shareSelectedIds.has(
                                           user.id
                                         )}
@@ -511,9 +512,14 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
                                           });
                                         }}
                                       />
-                                      <span className="text-sm truncate">
-                                        {user.name || user.email || user.id}
-                                      </span>
+                                      <label
+                                        htmlFor={`rl-user-${user.id}`}
+                                        className="text-sm cursor-pointer select-none flex-1 min-w-0"
+                                      >
+                                        <span className="truncate block">
+                                          {user.name || user.email || user.id}
+                                        </span>
+                                      </label>
                                     </div>
                                   ))}
                                 </div>
