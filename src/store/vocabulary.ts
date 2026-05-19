@@ -19,6 +19,7 @@ interface VocabularyStoreState {
   sortOrder: SortOrder;
   filterRating: GlossaryRating | "all";
   filterMastery: "all" | "due" | "new" | "mastered";
+  filterSource: "all" | "own" | "teacher";
   isLoading: boolean;
 }
 
@@ -47,6 +48,7 @@ interface VocabularyStoreActions {
   setSortOrder: (order: SortOrder) => void;
   setFilterRating: (filter: GlossaryRating | "all") => void;
   setFilterMastery: (filter: "all" | "due" | "new" | "mastered") => void;
+  setFilterSource: (filter: "all" | "own" | "teacher") => void;
 }
 
 export const useVocabularyStore = create<
@@ -55,6 +57,8 @@ export const useVocabularyStore = create<
   words: [],
   stats: {
     totalWords: 0,
+    ownWords: 0,
+    teacherWords: 0,
     dueForReview: 0,
     mastered: 0,
     newWords: 0,
@@ -70,6 +74,7 @@ export const useVocabularyStore = create<
   sortOrder: "asc",
   filterRating: "all",
   filterMastery: "all",
+  filterSource: "all",
   isLoading: false,
 
   fetchVocabulary: async () => {
@@ -82,6 +87,8 @@ export const useVocabularyStore = create<
         words: data.words || [],
         stats: data.stats || {
           totalWords: 0,
+          ownWords: 0,
+          teacherWords: 0,
           dueForReview: 0,
           mastered: 0,
           newWords: 0,
@@ -119,7 +126,7 @@ export const useVocabularyStore = create<
   clearSelection: () => set({ selectedWordIds: new Set() }),
 
   autoSelectForReview: (count, strategy) => {
-    const { words, filterRating, filterMastery } = get();
+    const { words, filterRating, filterMastery, filterSource } = get();
     const now = Date.now();
     let pool = [...words];
 
@@ -133,6 +140,10 @@ export const useVocabularyStore = create<
       pool = pool.filter((w) => w.masteryLevel === 0 && w.reviewCount === 0);
     } else if (filterMastery === "mastered") {
       pool = pool.filter((w) => w.masteryLevel === 5);
+    }
+
+    if (filterSource !== "all") {
+      pool = pool.filter((w) => w.source === filterSource);
     }
 
     switch (strategy) {
@@ -253,4 +264,5 @@ export const useVocabularyStore = create<
   setSortOrder: (order) => set({ sortOrder: order }),
   setFilterRating: (filter) => set({ filterRating: filter }),
   setFilterMastery: (filter) => set({ filterMastery: filter }),
+  setFilterSource: (filter) => set({ filterSource: filter }),
 }));

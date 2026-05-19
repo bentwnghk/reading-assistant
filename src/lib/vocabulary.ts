@@ -18,6 +18,8 @@ function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
     sourceSessionIds: Array.isArray(row.source_session_ids)
       ? (row.source_session_ids as string[])
       : [],
+    source: row.shared_by ? "teacher" : "own",
+    sharedBy: (row.shared_by as string) || null,
     createdAt: Number(row.created_at) || 0,
     updatedAt: Number(row.updated_at) || 0,
   };
@@ -57,20 +59,24 @@ export async function getVocabularyStats(
   const now = Date.now();
   const { rows } = await pool.query(
     `SELECT
-       COUNT(*) AS total_words,
+        COUNT(*) AS total_words,
+        COUNT(*) FILTER (WHERE shared_by IS NULL) AS own_words,
+        COUNT(*) FILTER (WHERE shared_by IS NOT NULL) AS teacher_words,
         COUNT(*) FILTER (WHERE next_review_at = 0 OR next_review_at <= $2) AS due_for_review,
-       COUNT(*) FILTER (WHERE mastery_level = 5) AS mastered,
-       COUNT(*) FILTER (WHERE mastery_level = 0 AND review_count = 0) AS new_words,
-       COUNT(*) FILTER (WHERE rating = 'hard') AS hard,
-       COUNT(*) FILTER (WHERE rating = 'medium') AS medium,
-       COUNT(*) FILTER (WHERE rating = 'easy') AS easy,
-       COUNT(*) FILTER (WHERE rating IS NULL) AS unrated
-     FROM user_vocabulary WHERE user_id = $1`,
+        COUNT(*) FILTER (WHERE mastery_level = 5) AS mastered,
+        COUNT(*) FILTER (WHERE mastery_level = 0 AND review_count = 0) AS new_words,
+        COUNT(*) FILTER (WHERE rating = 'hard') AS hard,
+        COUNT(*) FILTER (WHERE rating = 'medium') AS medium,
+        COUNT(*) FILTER (WHERE rating = 'easy') AS easy,
+        COUNT(*) FILTER (WHERE rating IS NULL) AS unrated
+      FROM user_vocabulary WHERE user_id = $1`,
     [userId, now]
   );
   const r = rows[0];
   return {
     totalWords: Number(r.total_words),
+    ownWords: Number(r.own_words),
+    teacherWords: Number(r.teacher_words),
     dueForReview: Number(r.due_for_review),
     mastered: Number(r.mastered),
     newWords: Number(r.new_words),
@@ -308,4 +314,68 @@ export async function getReviewSessionDetail(
       masteryAfter: Number(r.mastery_after),
     })),
   };
+}
+
+export async function shareVocabularyWords(
+  senderId: string,
+  recipientIds: string[],
+  wordIds: string[]
+): Promise<{ inserted: number; skipped: number }> {
+  const pool = getPool();
+  const now = Date.now();
+
+  const { rows: senderRows } = await pool.query(
+    `SELECT id, word, syllabification, part_of_speech, english_definition,
+            chinese_definition, example, rating
+     FROM user_vocabulary
+     WHERE user_id = $1 AND id = ANY($2::text[])`,
+    [senderId, wordIds]
+  );
+
+  if (senderRows.length === 0) {
+    return { inserted: 0, skipped: 0 };
+  }
+
+  let inserted = 0;
+  let skipped = 0;
+
+  for (const recipientId of recipientIds) {
+    if (recipientId === senderId) continue;
+
+    const { rows: existing } = await pool.query(
+      `SELECT word FROM user_vocabulary WHERE user_id = $1 AND word = ANY($2::text[])`,
+      [recipientId, senderRows.map((r) => r.word)]
+    );
+    const existingWords = new Set(existing.map((r) => r.word));
+
+    for (const row of senderRows) {
+      if (existingWords.has(row.word)) {
+        skipped++;
+        continue;
+      }
+
+      await pool.query(
+        `INSERT INTO user_vocabulary (
+          user_id, word, syllabification, part_of_speech,
+          english_definition, chinese_definition, example,
+          rating, shared_by, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)`,
+        [
+          recipientId,
+          row.word,
+          row.syllabification || "",
+          row.part_of_speech || "",
+          row.english_definition || "",
+          row.chinese_definition || "",
+          row.example || "",
+          row.rating || null,
+          senderId,
+          now,
+        ]
+      );
+      inserted++;
+    }
+  }
+
+  return { inserted, skipped };
 }

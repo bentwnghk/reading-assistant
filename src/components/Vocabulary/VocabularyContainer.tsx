@@ -14,6 +14,7 @@ import {
   Clock,
   CheckCircle2,
   History,
+  Share2,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -23,6 +24,7 @@ import { cn } from "@/utils/style";
 import VocabularyTable from "./VocabularyTable";
 import AutoSelectPanel from "./AutoSelectPanel";
 import ExportPanel from "./ExportPanel";
+import ShareVocabularyDialog from "./ShareVocabularyDialog";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling" | "history";
 
@@ -49,6 +51,7 @@ function VocabularyContainer() {
     clearSelection,
   } = useVocabularyStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
+  const [shareOpen, setShareOpen] = useState(false);
   const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
 
   useEffect(() => {
@@ -213,6 +216,10 @@ function VocabularyContainer() {
                 {t("vocabulary.stats.total")}
               </div>
               <div className="text-2xl font-bold">{stats.totalWords}</div>
+              <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                <span>{t("vocabulary.stats.own")}: {stats.ownWords}</span>
+                <span>{t("vocabulary.stats.teacher")}: {stats.teacherWords}</span>
+              </div>
             </div>
             <div className="bg-card border rounded-lg p-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -248,6 +255,17 @@ function VocabularyContainer() {
               <div className="flex items-center gap-2 mb-4">
                 <AutoSelectPanel />
                 <div className="flex-1" />
+                {selectedWordIds.size > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9"
+                    onClick={() => setShareOpen(true)}
+                  >
+                    <Share2 className="h-4 w-4 mr-1" />
+                    {t("vocabulary.share.button")}
+                  </Button>
+                )}
                 <ExportPanel />
               </div>
               {selectedWordIds.size > 0 && (
@@ -333,6 +351,12 @@ function VocabularyContainer() {
             />
           )}
           {activeTab === "history" && <ReviewHistory />}
+          <ShareVocabularyDialog
+            open={shareOpen}
+            onOpenChange={setShareOpen}
+            selectedWordIds={selectedWordIds}
+            wordCount={selectedWordIds.size}
+          />
         </>
       )}
     </div>

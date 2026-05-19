@@ -961,6 +961,26 @@
     "selectedCount": "{{count}} words selected",
     "clearSelection": "Clear",
     "startReview": "Start Review",
+    "source": "Source",
+    "sourceLabels": {
+      "own": "Own",
+      "teacher": "Teacher"
+    },
+    "allSources": "All Sources",
+    "ownOnly": "Own",
+    "teacherOnly": "Teacher",
+    "share": {
+      "button": "Share",
+      "title": "Share Vocabulary",
+      "description": "Share {{count}} selected word(s) with other users.",
+      "searchUsers": "Search users...",
+      "noTargets": "No users available to share with.",
+      "share": "Share",
+      "sharing": "Sharing...",
+      "success": "Shared {{count}} word(s) successfully.",
+      "skipped": "{{count}} word(s) already existed and were skipped.",
+      "error": "Failed to share vocabulary."
+    },
     "autoSelect": "Auto Select",
     "wordCount": "Number of words",
     "selectStrategy": "Selection strategy",
@@ -988,6 +1008,8 @@
     },
     "stats": {
       "total": "Total Words",
+      "own": "Own",
+      "teacher": "Teacher",
       "due": "Due for Review",
       "mastered": "Mastered",
       "new": "New Words"

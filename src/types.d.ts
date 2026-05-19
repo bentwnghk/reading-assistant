@@ -444,6 +444,8 @@ type VocabularyMasteryLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 type VocabularySelectionStrategy = "due" | "hardest" | "newest" | "random" | "weakest";
 
+type VocabularySource = "own" | "teacher";
+
 interface VocabularyWord {
   id: string;
   word: string;
@@ -459,12 +461,16 @@ interface VocabularyWord {
   lastReviewedAt: number;
   nextReviewAt: number;
   sourceSessionIds: string[];
+  source: VocabularySource;
+  sharedBy: string | null;
   createdAt: number;
   updatedAt: number;
 }
 
 interface VocabularyStats {
   totalWords: number;
+  ownWords: number;
+  teacherWords: number;
   dueForReview: number;
   mastered: number;
   newWords: number;

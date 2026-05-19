@@ -10,6 +10,7 @@ import {
   EyeOff,
   ChevronLeft,
   ChevronRight,
+  UserCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,8 @@ function VocabularyTable() {
     setFilterRating,
     filterMastery,
     setFilterMastery,
+    filterSource,
+    setFilterSource,
   } = useVocabularyStore();
 
   const [sortField, setSortField] = useState<SortField>("word");
@@ -84,6 +87,10 @@ function VocabularyTable() {
       result = result.filter((w) => w.masteryLevel === 5);
     }
 
+    if (filterSource !== "all") {
+      result = result.filter((w) => w.source === filterSource);
+    }
+
     if (effectiveShowSelectedOnly) {
       result = result.filter((w) => selectedWordIds.has(w.id));
     }
@@ -111,7 +118,7 @@ function VocabularyTable() {
     });
 
     return result;
-  }, [words, searchQuery, filterRating, filterMastery, sortField, sortOrder, effectiveShowSelectedOnly, selectedWordIds]);
+  }, [words, searchQuery, filterRating, filterMastery, filterSource, sortField, sortOrder, effectiveShowSelectedOnly, selectedWordIds]);
 
   const totalPages = Math.max(1, Math.ceil(filteredWords.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
@@ -172,7 +179,7 @@ function VocabularyTable() {
     );
   };
 
-  const hasActiveFilters = filterRating !== "all" || filterMastery !== "all" || searchQuery !== "";
+  const hasActiveFilters = filterRating !== "all" || filterMastery !== "all" || filterSource !== "all" || searchQuery !== "";
 
   return (
     <div>
@@ -234,6 +241,24 @@ function VocabularyTable() {
                   ? t("vocabulary.newOnly")
                   : t("vocabulary.masteredOnly")}
           </Button>
+          <Button
+            variant={filterSource !== "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              const options: Array<"all" | "own" | "teacher"> = ["all", "own", "teacher"];
+              const idx = options.indexOf(filterSource);
+              setFilterSource(options[(idx + 1) % options.length]);
+              resetPage();
+            }}
+            className="h-9"
+          >
+            <UserCheck className="h-3.5 w-3.5 mr-1" />
+            {filterSource === "all"
+              ? t("vocabulary.allSources")
+              : filterSource === "own"
+                ? t("vocabulary.ownOnly")
+                : t("vocabulary.teacherOnly")}
+          </Button>
           {hasActiveFilters && (
             <Button
               variant="ghost"
@@ -242,6 +267,7 @@ function VocabularyTable() {
                 setSearchQuery("");
                 setFilterRating("all");
                 setFilterMastery("all");
+                setFilterSource("all");
                 resetPage();
               }}
               className="h-9"
@@ -317,6 +343,9 @@ function VocabularyTable() {
               </TableHead>
               <TableHead>{t("vocabulary.example")}</TableHead>
               <TableHead className="w-[80px]">
+                {t("vocabulary.source")}
+              </TableHead>
+              <TableHead className="w-[80px]">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -369,6 +398,16 @@ function VocabularyTable() {
                   {w.example || "-"}
                 </TableCell>
                 <TableCell>
+                  <span className={cn(
+                    "inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-medium",
+                    w.source === "teacher"
+                      ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                      : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                  )}>
+                    {t(`vocabulary.sourceLabels.${w.source}`)}
+                  </span>
+                </TableCell>
+                <TableCell>
                   <div className="flex items-center gap-1.5">
                     {getRatingDot(w.rating)}
                     <span className="text-xs text-muted-foreground">
@@ -390,7 +429,7 @@ function VocabularyTable() {
             ))}
             {pagedWords.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   {t("vocabulary.noWordsMatch")}
                 </TableCell>
               </TableRow>

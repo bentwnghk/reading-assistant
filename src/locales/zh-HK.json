@@ -967,6 +967,26 @@
     "selectedCount": "已選擇 {{count}} 個詞彙",
     "clearSelection": "清除",
     "startReview": "開始複習",
+    "source": "來源",
+    "sourceLabels": {
+      "own": "自己",
+      "teacher": "老師"
+    },
+    "allSources": "全部來源",
+    "ownOnly": "自己",
+    "teacherOnly": "老師",
+    "share": {
+      "button": "分享",
+      "title": "分享詞彙",
+      "description": "將已選的 {{count}} 個詞彙分享給其他使用者。",
+      "searchUsers": "搜尋使用者...",
+      "noTargets": "沒有可分享的使用者。",
+      "share": "分享",
+      "sharing": "分享中...",
+      "success": "已成功分享 {{count}} 個詞彙。",
+      "skipped": "{{count}} 個詞彙已存在並已跳過。",
+      "error": "分享詞彙失敗。"
+    },
     "autoSelect": "自動選擇",
     "wordCount": "詞彙數量",
     "selectStrategy": "選擇策略",
@@ -994,6 +1014,8 @@
     },
     "stats": {
       "total": "詞彙總數",
+      "own": "自己",
+      "teacher": "老師",
       "due": "待複習",
       "mastered": "已掌握",
       "new": "新詞"

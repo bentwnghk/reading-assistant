@@ -3,3 +3,4 @@ export { default as VocabularyTable } from "./VocabularyTable";
 export { default as AutoSelectPanel } from "./AutoSelectPanel";
 export { default as ExportPanel } from "./ExportPanel";
 export { default as ReviewHistory } from "./ReviewHistory";
+export { default as ShareVocabularyDialog } from "./ShareVocabularyDialog";

@@ -541,6 +541,7 @@ CREATE TABLE user_vocabulary (
   last_reviewed_at BIGINT NOT NULL DEFAULT 0,
   next_review_at BIGINT NOT NULL DEFAULT 0,
   source_session_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+  shared_by TEXT DEFAULT NULL REFERENCES users(id) ON DELETE SET NULL,
   created_at BIGINT NOT NULL DEFAULT 0,
   updated_at BIGINT NOT NULL DEFAULT 0,
   UNIQUE (user_id, word)
@@ -551,6 +552,7 @@ CREATE INDEX idx_user_vocabulary_next_review ON user_vocabulary(user_id, next_re
 CREATE INDEX idx_user_vocabulary_rating ON user_vocabulary(user_id, rating);
 CREATE INDEX idx_user_vocabulary_mastery ON user_vocabulary(user_id, mastery_level);
 CREATE INDEX idx_user_vocabulary_word ON user_vocabulary(user_id, word);
+CREATE INDEX idx_user_vocabulary_shared_by ON user_vocabulary(user_id, shared_by);
 
 CREATE TABLE vocabulary_review_sessions (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
