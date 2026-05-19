@@ -577,6 +577,36 @@ CREATE TABLE vocabulary_review_results (
 CREATE INDEX idx_review_sessions_user_date ON vocabulary_review_sessions(user_id, completed_at DESC);
 CREATE INDEX idx_review_results_session ON vocabulary_review_results(session_id);
 
+-- ─── Review Lists ─────────────────────────────────────────────────────────
+
+CREATE TABLE review_lists (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  words JSONB NOT NULL DEFAULT '[]'::jsonb,
+  word_count INTEGER NOT NULL DEFAULT 0,
+  created_by TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at BIGINT NOT NULL DEFAULT 0,
+  updated_at BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_review_lists_created_by ON review_lists(created_by);
+CREATE INDEX idx_review_lists_created_at ON review_lists(created_by, created_at DESC);
+
+CREATE TABLE shared_review_lists (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recipient_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  review_list_id TEXT NOT NULL REFERENCES review_lists(id) ON DELETE CASCADE,
+  review_list_name TEXT NOT NULL DEFAULT '',
+  word_count INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_shared_review_lists_recipient ON shared_review_lists(recipient_id, status);
+CREATE INDEX idx_shared_review_lists_sender ON shared_review_lists(sender_id);
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;

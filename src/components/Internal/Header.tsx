@@ -52,6 +52,7 @@ import { useReadingStore } from "@/store/reading";
 import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
 import { useSharingStore } from "@/store/sharing";
+import { useVocabularyStore } from "@/store/vocabulary";
 
 function getSafeFilename(value: string): string {
   return (
@@ -81,6 +82,12 @@ function Header() {
   const [openAbout, setOpenAbout] = useState<boolean>(false);
   const { setOpenSetting, setOpenDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
+  const {
+    pendingReviewListShareCount,
+    fetchPendingReviewListShareCount,
+    setShowReviewListShareDialog,
+  } = useVocabularyStore();
+  const totalPending = pendingCount + pendingReviewListShareCount;
   const {
     extractedText,
     summary,
@@ -125,11 +132,13 @@ function Header() {
   useEffect(() => {
     if (!session?.user?.id) return;
     fetchPendingCount();
+    fetchPendingReviewListShareCount();
     const interval = setInterval(() => {
       fetchPendingCount();
+      fetchPendingReviewListShareCount();
     }, 60_000);
     return () => clearInterval(interval);
-  }, [session?.user?.id, fetchPendingCount]);
+  }, [session?.user?.id, fetchPendingCount, fetchPendingReviewListShareCount]);
 
   const exportSnapshot = useCallback(() => {
     const { backup } = useReadingStore.getState();
@@ -267,12 +276,16 @@ function Header() {
               variant="ghost"
               size="icon"
               title={t("share.pendingTitle")}
-              onClick={() => setShowSharedDialog(true)}
+              onClick={() => {
+                if (pendingCount > 0) setShowSharedDialog(true);
+                if (pendingReviewListShareCount > 0)
+                  setShowReviewListShareDialog(true);
+              }}
             >
               <Bell className="h-5 w-5" />
-              {pendingCount > 0 && (
+              {totalPending > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                  {pendingCount > 9 ? "9+" : pendingCount}
+                  {totalPending > 9 ? "9+" : totalPending}
                 </span>
               )}
             </Button>

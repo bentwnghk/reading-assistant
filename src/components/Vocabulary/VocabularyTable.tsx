@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   UserCheck,
+  ListChecks,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,8 @@ function VocabularyTable() {
     setFilterMastery,
     filterSource,
     setFilterSource,
+    activeReviewListWordIds,
+    exitReviewList,
   } = useVocabularyStore();
 
   const [sortField, setSortField] = useState<SortField>("word");
@@ -62,7 +65,9 @@ function VocabularyTable() {
   const effectiveShowSelectedOnly = showSelectedOnly && hasEverSelected;
 
   const filteredWords = useMemo(() => {
-    let result = [...words];
+    let result = activeReviewListWordIds
+      ? words.filter((w) => activeReviewListWordIds.has(w.id))
+      : [...words];
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -118,7 +123,7 @@ function VocabularyTable() {
     });
 
     return result;
-  }, [words, searchQuery, filterRating, filterMastery, filterSource, sortField, sortOrder, effectiveShowSelectedOnly, selectedWordIds]);
+  }, [words, searchQuery, filterRating, filterMastery, filterSource, sortField, sortOrder, effectiveShowSelectedOnly, selectedWordIds, activeReviewListWordIds]);
 
   const totalPages = Math.max(1, Math.ceil(filteredWords.length / pageSize));
   const safePage = Math.min(currentPage, totalPages);
@@ -183,6 +188,23 @@ function VocabularyTable() {
 
   return (
     <div>
+      {activeReviewListWordIds && (
+        <div className="flex items-center gap-2 mb-4 p-3 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+          <ListChecks className="h-4 w-4 text-indigo-500 shrink-0" />
+          <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+            {t("vocabulary.reviewLists.viewingList", { count: activeReviewListWordIds.size })}
+          </span>
+          <div className="flex-1" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={exitReviewList}
+          >
+            {t("vocabulary.reviewLists.backToMyVocab")}
+          </Button>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -302,9 +324,12 @@ function VocabularyTable() {
       </div>
 
       <div className="text-xs text-muted-foreground mb-2 flex items-center justify-between">
-        <span>
-          {t("vocabulary.showingWords", { count: filteredWords.length, total: words.length })}
-        </span>
+          <span>
+            {activeReviewListWordIds
+              ? t("vocabulary.reviewLists.listWords", { count: filteredWords.length })
+              : t("vocabulary.showingWords", { count: filteredWords.length, total: words.length })
+            }
+          </span>
         <span>
           {t("vocabulary.pageInfo", { page: safePage, total: totalPages })}
         </span>

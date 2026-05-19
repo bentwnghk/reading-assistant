@@ -4,3 +4,6 @@ export { default as AutoSelectPanel } from "./AutoSelectPanel";
 export { default as ExportPanel } from "./ExportPanel";
 export { default as ReviewHistory } from "./ReviewHistory";
 export { default as ShareVocabularyDialog } from "./ShareVocabularyDialog";
+export { default as AddToReviewListDialog } from "./AddToReviewListDialog";
+export { default as ReviewListsTab } from "./ReviewListsTab";
+export { default as ReviewListShareDialog } from "./ReviewListShareDialog";

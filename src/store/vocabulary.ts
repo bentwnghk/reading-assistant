@@ -21,6 +21,11 @@ interface VocabularyStoreState {
   filterMastery: "all" | "due" | "new" | "mastered";
   filterSource: "all" | "own" | "teacher";
   isLoading: boolean;
+  pendingReviewListShares: SharedReviewList[];
+  pendingReviewListShareCount: number;
+  showReviewListShareDialog: boolean;
+  acceptedReviewListWords: ReviewListWord[] | null;
+  activeReviewListWordIds: Set<string> | null;
 }
 
 interface VocabularyStoreActions {
@@ -49,6 +54,13 @@ interface VocabularyStoreActions {
   setFilterRating: (filter: GlossaryRating | "all") => void;
   setFilterMastery: (filter: "all" | "due" | "new" | "mastered") => void;
   setFilterSource: (filter: "all" | "own" | "teacher") => void;
+  setPendingReviewListShares: (shares: SharedReviewList[] | ((prev: SharedReviewList[]) => SharedReviewList[])) => void;
+  setPendingReviewListShareCount: (count: number) => void;
+  setShowReviewListShareDialog: (open: boolean) => void;
+  setAcceptedReviewListWords: (words: ReviewListWord[] | null) => void;
+  fetchPendingReviewListShareCount: () => Promise<number>;
+  loadReviewListIntoQueue: (words: ReviewListWord[]) => void;
+  exitReviewList: () => void;
 }
 
 export const useVocabularyStore = create<
@@ -76,6 +88,11 @@ export const useVocabularyStore = create<
   filterMastery: "all",
   filterSource: "all",
   isLoading: false,
+  pendingReviewListShares: [],
+  pendingReviewListShareCount: 0,
+  showReviewListShareDialog: false,
+  acceptedReviewListWords: null,
+  activeReviewListWordIds: null,
 
   fetchVocabulary: async () => {
     set({ isLoading: true });
@@ -265,4 +282,78 @@ export const useVocabularyStore = create<
   setFilterRating: (filter) => set({ filterRating: filter }),
   setFilterMastery: (filter) => set({ filterMastery: filter }),
   setFilterSource: (filter) => set({ filterSource: filter }),
+
+  setPendingReviewListShares: (shares) =>
+    set((state) => {
+      const resolved = typeof shares === "function" ? shares(state.pendingReviewListShares) : shares;
+      return { pendingReviewListShares: resolved, pendingReviewListShareCount: resolved.length };
+    }),
+  setPendingReviewListShareCount: (count) =>
+    set({ pendingReviewListShareCount: count }),
+  setShowReviewListShareDialog: (open) =>
+    set({ showReviewListShareDialog: open }),
+  setAcceptedReviewListWords: (words) =>
+    set({ acceptedReviewListWords: words }),
+
+  fetchPendingReviewListShareCount: async () => {
+    try {
+      const res = await fetch("/api/review-lists/share/pending?count=1");
+      if (!res.ok) {
+        set({ pendingReviewListShareCount: 0 });
+        return 0;
+      }
+      const data = await res.json();
+      set({ pendingReviewListShareCount: data.count ?? 0 });
+      return data.count ?? 0;
+    } catch {
+      set({ pendingReviewListShareCount: 0 });
+      return 0;
+    }
+  },
+
+  loadReviewListIntoQueue: (words) => {
+    const now = Date.now();
+    const queue: VocabularyWord[] = words.map((w, i) => ({
+      id: `review-list-${i}-${now}`,
+      word: w.word,
+      syllabification: w.syllabification || "",
+      partOfSpeech: w.partOfSpeech || "",
+      englishDefinition: w.englishDefinition || "",
+      chineseDefinition: w.chineseDefinition || "",
+      example: w.example || "",
+      rating: null,
+      masteryLevel: 0,
+      reviewCount: 0,
+      correctCount: 0,
+      lastReviewedAt: 0,
+      nextReviewAt: 0,
+      sourceSessionIds: [],
+      source: "teacher" as VocabularySource,
+      sharedBy: null,
+      createdAt: now,
+      updatedAt: now,
+    }));
+    set((state) => {
+      const existingWords = new Set(
+        state.words.map((w) => w.word.toLowerCase())
+      );
+      const newWords = queue.filter(
+        (w) => !existingWords.has(w.word.toLowerCase())
+      );
+      return {
+        words: [...state.words, ...newWords],
+        reviewQueue: queue,
+        selectedWordIds: new Set(queue.map((w) => w.id)),
+        activeReviewListWordIds: new Set(queue.map((w) => w.id)),
+        acceptedReviewListWords: null,
+      };
+    });
+  },
+
+  exitReviewList: () =>
+    set({
+      activeReviewListWordIds: null,
+      reviewQueue: [],
+      selectedWordIds: new Set(),
+    }),
 }));

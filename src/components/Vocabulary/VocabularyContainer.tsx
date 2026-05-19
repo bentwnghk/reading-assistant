@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   History,
   Share2,
+  ListPlus,
 } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -25,8 +26,11 @@ import VocabularyTable from "./VocabularyTable";
 import AutoSelectPanel from "./AutoSelectPanel";
 import ExportPanel from "./ExportPanel";
 import ShareVocabularyDialog from "./ShareVocabularyDialog";
+import AddToReviewListDialog from "./AddToReviewListDialog";
+import ReviewListsTab from "./ReviewListsTab";
+import ReviewListShareDialog from "./ReviewListShareDialog";
 
-type TabType = "table" | "flashcard" | "quiz" | "spelling" | "history";
+type TabType = "table" | "flashcard" | "quiz" | "spelling" | "lists" | "history";
 
 const VocabularyFlashcard = dynamic(
   () => import("@/components/ReadingAssistant/VocabularyFlashcard")
@@ -52,6 +56,7 @@ function VocabularyContainer() {
   } = useVocabularyStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [shareOpen, setShareOpen] = useState(false);
+  const [addToListOpen, setAddToListOpen] = useState(false);
   const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
 
   useEffect(() => {
@@ -101,7 +106,7 @@ function VocabularyContainer() {
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
-      if (tab === "history") {
+      if (tab === "history" || tab === "lists") {
         setActiveTab(tab);
         return;
       }
@@ -148,6 +153,7 @@ function VocabularyContainer() {
     { key: "flashcard", label: t("vocabulary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
     { key: "spelling", label: t("vocabulary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },
     { key: "quiz", label: t("vocabulary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },
+    { key: "lists", label: t("vocabulary.tabLists"), icon: <ListPlus className="h-4 w-4" /> },
     { key: "history", label: t("vocabulary.tabHistory"), icon: <History className="h-4 w-4" /> },
   ];
 
@@ -256,15 +262,26 @@ function VocabularyContainer() {
                 <AutoSelectPanel />
                 <div className="flex-1" />
                 {selectedWordIds.size > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9"
-                    onClick={() => setShareOpen(true)}
-                  >
-                    <Share2 className="h-4 w-4 mr-1" />
-                    {t("vocabulary.share.button")}
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9"
+                      onClick={() => setAddToListOpen(true)}
+                    >
+                      <ListPlus className="h-4 w-4 mr-1" />
+                      {t("vocabulary.reviewLists.addToList")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9"
+                      onClick={() => setShareOpen(true)}
+                    >
+                      <Share2 className="h-4 w-4 mr-1" />
+                      {t("vocabulary.share.button")}
+                    </Button>
+                  </>
                 )}
                 <ExportPanel />
               </div>
@@ -303,6 +320,7 @@ function VocabularyContainer() {
                 disabled={
                   tab.key !== "table" &&
                   tab.key !== "history" &&
+                  tab.key !== "lists" &&
                   selectedWordIds.size === 0 &&
                   reviewQueue.length === 0
                 }
@@ -314,6 +332,7 @@ function VocabularyContainer() {
                     : "border-transparent text-muted-foreground hover:text-foreground",
                   tab.key !== "table" &&
                     tab.key !== "history" &&
+                    tab.key !== "lists" &&
                     selectedWordIds.size === 0 &&
                     reviewQueue.length === 0 &&
                     "opacity-40 cursor-not-allowed"
@@ -351,12 +370,18 @@ function VocabularyContainer() {
             />
           )}
           {activeTab === "history" && <ReviewHistory />}
+          {activeTab === "lists" && <ReviewListsTab />}
           <ShareVocabularyDialog
             open={shareOpen}
             onOpenChange={setShareOpen}
             selectedWordIds={selectedWordIds}
             wordCount={selectedWordIds.size}
           />
+          <AddToReviewListDialog
+            open={addToListOpen}
+            onOpenChange={setAddToListOpen}
+          />
+          <ReviewListShareDialog />
         </>
       )}
     </div>

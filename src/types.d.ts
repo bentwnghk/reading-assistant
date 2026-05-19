@@ -500,6 +500,39 @@ interface VocabularyReviewSession {
   results?: VocabularyReviewResult[];
 }
 
+// ── Review List types ──────────────────────────────────────────────────────
+
+interface ReviewListWord {
+  word: string;
+  syllabification: string;
+  partOfSpeech: string;
+  englishDefinition: string;
+  chineseDefinition: string;
+  example: string;
+}
+
+interface ReviewList {
+  id: string;
+  name: string;
+  words: ReviewListWord[];
+  wordCount: number;
+  createdBy: string;
+  createdByName: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface SharedReviewList {
+  id: string;
+  senderId: string;
+  senderName: string;
+  reviewListId: string;
+  reviewListName: string;
+  wordCount: number;
+  status: "pending" | "accepted" | "rejected";
+  createdAt: string;
+}
+
 interface RepositoryTextListItem {
   id: string;
   name: string;
