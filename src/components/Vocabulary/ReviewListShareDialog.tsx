@@ -136,16 +136,6 @@ function ReviewListShareDialog() {
     setShowReviewListShareDialog(false);
   }, [setShowReviewListShareDialog]);
 
-  useEffect(() => {
-    if (
-      showReviewListShareDialog &&
-      !loading &&
-      pendingReviewListShares.length === 0
-    ) {
-      setShowReviewListShareDialog(false);
-    }
-  }, [showReviewListShareDialog, loading, pendingReviewListShares.length, setShowReviewListShareDialog]);
-
   return (
     <Dialog
       open={showReviewListShareDialog}
