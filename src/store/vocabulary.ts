@@ -119,9 +119,21 @@ export const useVocabularyStore = create<
   clearSelection: () => set({ selectedWordIds: new Set() }),
 
   autoSelectForReview: (count, strategy) => {
-    const { words } = get();
+    const { words, filterRating, filterMastery } = get();
     const now = Date.now();
     let pool = [...words];
+
+    if (filterRating !== "all") {
+      pool = pool.filter((w) => w.rating === filterRating);
+    }
+
+    if (filterMastery === "due") {
+      pool = pool.filter((w) => w.nextReviewAt === 0 || w.nextReviewAt <= now);
+    } else if (filterMastery === "new") {
+      pool = pool.filter((w) => w.masteryLevel === 0 && w.reviewCount === 0);
+    } else if (filterMastery === "mastered") {
+      pool = pool.filter((w) => w.masteryLevel === 5);
+    }
 
     switch (strategy) {
       case "due":
