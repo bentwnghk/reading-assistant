@@ -34,6 +34,7 @@ const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
 const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
 const SharedSessionDialog = dynamic(() => import("@/components/Dashboard/SharedSessionDialog"));
+const ReviewListShareDialog = dynamic(() => import("@/components/Vocabulary/ReviewListShareDialog"));
 
 function Home() {
   const { t } = useTranslation();
@@ -157,6 +158,7 @@ function Home() {
         <TeacherDashboard open={openTeacherDashboard} onClose={() => setOpenTeacherDashboard(false)} />
         <LearningRecommendationDialog />
         <SharedSessionDialog />
+        <ReviewListShareDialog />
       </aside>
     </div>
   );

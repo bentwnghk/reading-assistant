@@ -17,6 +17,7 @@ import {
 import { useHistoryStore } from "@/store/history"
 import { initAchievementCallbacks } from "@/store/achievements"
 import { useSharingStore, setShareCheckComplete } from "@/store/sharing"
+import { useVocabularyStore } from "@/store/vocabulary"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
@@ -74,37 +75,37 @@ function AuthStateManager() {
         if (hasActiveSession) {
           markLastOpenedSession(currentReading.id)
           setRestoreComplete(true)
-          setShareCheckComplete(true)
-          return
-        }
+        } else if (sessions.length > 0) {
+          const preferredSessionId = settings?.lastOpenedSessionId
+          const sessionToRestore =
+            sessions.find((item) => item.id === preferredSessionId) ?? sessions[0]
 
-        if (sessions.length === 0) {
-          setRestoreComplete(true)
-          setShareCheckComplete(true)
-          return
-        }
+          if (sessionToRestore) {
+            useReadingStore.getState().restore(sessionToRestore)
+            markLastOpenedSession(sessionToRestore.id)
 
-        const preferredSessionId = settings?.lastOpenedSessionId
-        const sessionToRestore =
-          sessions.find((item) => item.id === preferredSessionId) ?? sessions[0]
-
-        if (sessionToRestore) {
-          useReadingStore.getState().restore(sessionToRestore)
-          markLastOpenedSession(sessionToRestore.id)
-
-          const sessionTitle =
-            sessionToRestore.docTitle ||
-            sessionToRestore.extractedText.slice(0, 40) ||
-            sessionToRestore.id
-          toast.message(t("history.restored", { title: sessionTitle }))
+            const sessionTitle =
+              sessionToRestore.docTitle ||
+              sessionToRestore.extractedText.slice(0, 40) ||
+              sessionToRestore.id
+            toast.message(t("history.restored", { title: sessionTitle }))
+          }
         }
 
         setRestoreComplete(true)
 
-        useSharingStore.getState().fetchPendingCount().then((count) => {
+        const sessionSharePromise = useSharingStore.getState().fetchPendingCount().then((count) => {
           if (count > 0) {
             useSharingStore.getState().setShowSharedDialog(true)
           }
+        })
+        const reviewListSharePromise = useVocabularyStore.getState().fetchPendingReviewListShareCount().then((count) => {
+          if (count > 0) {
+            useVocabularyStore.getState().setShowReviewListShareDialog(true)
+          }
+        })
+
+        Promise.all([sessionSharePromise, reviewListSharePromise]).finally(() => {
           setShareCheckComplete(true)
         })
       })
