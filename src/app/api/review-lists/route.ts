@@ -3,6 +3,7 @@ import {
   createReviewList,
   getReviewLists,
   deleteReviewList,
+  updateReviewList,
 } from "@/lib/review-lists";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -66,6 +67,57 @@ export async function POST(request: Request) {
     console.error("Error creating review list:", error);
     return NextResponse.json(
       { error: "Failed to create review list" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const schema = z.object({
+      id: z.string().min(1),
+      name: z.string().min(1).max(200),
+      words: z
+        .array(
+          z.object({
+            word: z.string().min(1),
+            syllabification: z.string().optional().default(""),
+            partOfSpeech: z.string().optional().default(""),
+            englishDefinition: z.string().optional().default(""),
+            chineseDefinition: z.string().optional().default(""),
+            example: z.string().optional().default(""),
+          })
+        )
+        .min(1),
+    });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid request body", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const updated = await updateReviewList(
+      session.user.id,
+      parsed.data.id,
+      parsed.data.name,
+      parsed.data.words
+    );
+    if (!updated) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Error updating review list:", error);
+    return NextResponse.json(
+      { error: "Failed to update review list" },
       { status: 500 }
     );
   }

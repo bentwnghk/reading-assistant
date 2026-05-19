@@ -90,6 +90,34 @@ export async function deleteReviewList(
   return (result.rowCount ?? 0) > 0;
 }
 
+export async function updateReviewList(
+  userId: string,
+  listId: string,
+  name: string,
+  words: ReviewListWord[]
+): Promise<ReviewList | null> {
+  const pool = getPool();
+  const now = Date.now();
+  const result = await pool.query(
+    `UPDATE review_lists SET name = $3, words = $4, word_count = $5, updated_at = $6
+     WHERE id = $1 AND created_by = $2
+     RETURNING id, name, words, word_count, created_by, created_at, updated_at`,
+    [listId, userId, name, JSON.stringify(words), words.length, now]
+  );
+  if (result.rows.length === 0) return null;
+  const r = result.rows[0];
+  return {
+    id: r.id,
+    name: r.name,
+    words: typeof r.words === "string" ? JSON.parse(r.words) : r.words,
+    wordCount: Number(r.word_count),
+    createdBy: r.created_by,
+    createdByName: null,
+    createdAt: Number(r.created_at),
+    updatedAt: Number(r.updated_at),
+  };
+}
+
 export async function shareReviewList(
   senderId: string,
   recipientIds: string[],

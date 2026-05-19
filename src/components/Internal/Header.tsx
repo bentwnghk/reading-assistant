@@ -44,6 +44,7 @@ import { UserManagementButton } from "@/components/UserManagement/UserManagement
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -80,6 +81,7 @@ function Header() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
   const [openAbout, setOpenAbout] = useState<boolean>(false);
+  const [openNoPending, setOpenNoPending] = useState<boolean>(false);
   const { setOpenSetting, setOpenDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
@@ -275,7 +277,7 @@ function Header() {
               className="h-8 w-8 relative"
               variant="ghost"
               size="icon"
-              title={t("share.pendingTitle")}
+              title={t("share.bellTitle")}
               onClick={() => {
                 if (pendingCount > 0) {
                   setShowSharedDialog(true);
@@ -284,6 +286,8 @@ function Header() {
                   if (window.location.pathname !== "/vocabulary") {
                     window.location.href = "/vocabulary";
                   }
+                } else {
+                  setOpenNoPending(true);
                 }
               }}
             >
@@ -702,6 +706,16 @@ function Header() {
               </p>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openNoPending} onOpenChange={setOpenNoPending}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("share.noPendingTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("share.noPendingMessage")}
+            </DialogDescription>
+          </DialogHeader>
         </DialogContent>
       </Dialog>
       <input

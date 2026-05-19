@@ -9,8 +9,11 @@ import {
   ArrowUpDown,
   LoaderCircle,
   ListChecks,
+  Pencil,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -56,6 +59,13 @@ function ReviewListsTab() {
   const [shareSearch, setShareSearch] = useState("");
   const [shareLoading, setShareLoading] = useState(false);
   const [shareSending, setShareSending] = useState(false);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editWords, setEditWords] = useState<ReviewListWord[]>([]);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
 
   const fetchLists = useCallback(async () => {
     try {
@@ -103,6 +113,49 @@ function ReviewListsTab() {
     },
     []
   );
+
+  const openEdit = useCallback(async (list: ReviewListSummary) => {
+    setEditId(list.id);
+    setEditName(list.name);
+    setEditWords([]);
+    setEditOpen(true);
+    setEditLoading(true);
+    try {
+      const res = await fetch(`/api/review-lists/${list.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setEditName(data.name || list.name);
+        setEditWords(data.words || []);
+      }
+    } catch {
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
+
+  const handleEditRemoveWord = useCallback((index: number) => {
+    setEditWords((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleEditSave = useCallback(async () => {
+    if (!editId || !editName.trim() || editWords.length === 0) return;
+    setEditSaving(true);
+    try {
+      const res = await fetch("/api/review-lists", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editId, name: editName.trim(), words: editWords }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(t("vocabulary.reviewLists.saved"));
+      setEditOpen(false);
+      fetchLists();
+    } catch {
+      toast.error(t("vocabulary.reviewLists.saveError"));
+    } finally {
+      setEditSaving(false);
+    }
+  }, [editId, editName, editWords, fetchLists, t]);
 
   const hasSchools = shareGroups.some((g) => g.schoolId);
 
@@ -234,6 +287,15 @@ function ReviewListsTab() {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title={t("vocabulary.reviewLists.edit")}
+                      onClick={() => openEdit(list)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -468,6 +530,92 @@ function ReviewListsTab() {
               {shareSending
                 ? t("vocabulary.share.sharing")
                 : t("vocabulary.share.share")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>{t("vocabulary.reviewLists.editTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("vocabulary.reviewLists.editDescription")}
+            </DialogDescription>
+          </DialogHeader>
+
+          {editLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <LoaderCircle className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="space-y-3 flex-1 min-h-0 overflow-y-auto px-1">
+              <div>
+                <label className="text-sm font-medium">
+                  {t("vocabulary.reviewLists.listName")}
+                </label>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder={t("vocabulary.reviewLists.listNamePlaceholder")}
+                  className="mt-1"
+                  maxLength={200}
+                />
+              </div>
+
+              <div className="flex flex-col min-h-0">
+                <label className="text-sm font-medium text-muted-foreground mb-1">
+                  {t("vocabulary.reviewLists.words")} ({editWords.length})
+                </label>
+                <div className="border rounded-md overflow-hidden max-h-64 min-h-0 overflow-y-auto">
+                  <div className="divide-y">
+                    {editWords.map((w, i) => (
+                      <div
+                        key={`${w.word}-${i}`}
+                        className="flex items-center gap-2 text-sm py-2 px-3 hover:bg-muted min-w-0"
+                      >
+                        <span className="font-medium shrink-0">{w.word}</span>
+                        <span className="text-muted-foreground truncate min-w-0 flex-1">
+                          {w.englishDefinition}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleEditRemoveWord(i)}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ))}
+                    {editWords.length === 0 && (
+                      <div className="text-center py-6 text-muted-foreground text-sm">
+                        {t("vocabulary.reviewLists.noWords")}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditOpen(false)}
+              disabled={editSaving}
+            >
+              {t("share.close")}
+            </Button>
+            <Button
+              onClick={handleEditSave}
+              disabled={
+                editSaving || editLoading || !editName.trim() || editWords.length === 0
+              }
+            >
+              {editSaving
+                ? t("vocabulary.reviewLists.saving")
+                : t("vocabulary.reviewLists.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
