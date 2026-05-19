@@ -11,6 +11,7 @@ import {
   ListChecks,
   Pencil,
   X,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +43,11 @@ type ReviewListSummary = {
   createdAt: number;
 };
 
-function ReviewListsTab() {
+interface ReviewListsTabProps {
+  onReviewList?: (listId: string) => void;
+}
+
+function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
   const { t } = useTranslation();
   const [lists, setLists] = useState<ReviewListSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -272,7 +277,7 @@ function ReviewListsTab() {
                   <ArrowUpDown className="ml-1 h-3 w-3" />
                 </Button>
               </TableHead>
-              <TableHead className="w-[100px]" />
+              <TableHead className="w-[140px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -287,6 +292,15 @@ function ReviewListsTab() {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title={t("vocabulary.reviewLists.review")}
+                      onClick={() => onReviewList?.(list.id)}
+                    >
+                      <Play className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"

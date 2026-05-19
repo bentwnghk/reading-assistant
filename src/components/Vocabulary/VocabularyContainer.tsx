@@ -54,6 +54,7 @@ function VocabularyContainer() {
     fetchVocabulary,
     startReview,
     clearSelection,
+    loadReviewListIntoQueue,
   } = useVocabularyStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [shareOpen, setShareOpen] = useState(false);
@@ -155,7 +156,24 @@ function VocabularyContainer() {
         }),
       }).catch((err) => console.error("Failed to save review session:", err));
     },
-    []
+    [],
+  );
+
+  const handleReviewList = useCallback(
+    async (listId: string) => {
+      try {
+        const res = await fetch(`/api/review-lists/${listId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.words?.length > 0) {
+          loadReviewListIntoQueue(data.words);
+          setActiveTab("table");
+        }
+      } catch (err) {
+        console.error("Failed to load review list:", err);
+      }
+    },
+    [loadReviewListIntoQueue]
   );
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
@@ -380,7 +398,7 @@ function VocabularyContainer() {
             />
           )}
           {activeTab === "history" && <ReviewHistory />}
-          {activeTab === "lists" && <ReviewListsTab />}
+          {activeTab === "lists" && <ReviewListsTab onReviewList={handleReviewList} />}
           <ShareVocabularyDialog
             open={shareOpen}
             onOpenChange={setShareOpen}

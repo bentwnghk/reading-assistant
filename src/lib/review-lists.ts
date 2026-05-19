@@ -201,7 +201,7 @@ export async function acceptReviewListShare(
   const pool = getPool();
 
   const { rows: shareRows } = await pool.query(
-    `SELECT srl.review_list_id, srl.status
+    `SELECT srl.review_list_id, srl.review_list_name, srl.status
      FROM shared_review_lists srl
      WHERE srl.id = $1 AND srl.recipient_id = $2 AND srl.status = 'pending'`,
     [shareId, recipientId]
@@ -209,6 +209,7 @@ export async function acceptReviewListShare(
   if (shareRows.length === 0) return null;
 
   const listId = shareRows[0].review_list_id;
+  const listName = shareRows[0].review_list_name || "Review List";
 
   const { rows: listRows } = await pool.query(
     `SELECT words FROM review_lists WHERE id = $1`,
@@ -224,6 +225,20 @@ export async function acceptReviewListShare(
   await pool.query(
     `UPDATE shared_review_lists SET status = 'accepted', updated_at = NOW() WHERE id = $1`,
     [shareId]
+  );
+
+  const now = Date.now();
+  await pool.query(
+    `INSERT INTO review_lists (id, name, words, word_count, created_by, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $6)`,
+    [
+      crypto.randomUUID(),
+      listName,
+      JSON.stringify(words),
+      words.length,
+      recipientId,
+      now,
+    ]
   );
 
   return words;
