@@ -334,14 +334,10 @@ export const useVocabularyStore = create<
       updatedAt: now,
     }));
     set((state) => {
-      const existingWords = new Set(
-        state.words.map((w) => w.word.toLowerCase())
-      );
-      const newWords = queue.filter(
-        (w) => !existingWords.has(w.word.toLowerCase())
-      );
+      const existingIds = new Set(state.words.map((w) => w.id));
+      const added = queue.filter((w) => !existingIds.has(w.id));
       return {
-        words: [...state.words, ...newWords],
+        words: [...state.words, ...added],
         reviewQueue: queue,
         selectedWordIds: new Set(queue.map((w) => w.id)),
         activeReviewListWordIds: new Set(queue.map((w) => w.id)),
