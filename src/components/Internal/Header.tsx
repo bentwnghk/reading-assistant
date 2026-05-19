@@ -277,9 +277,14 @@ function Header() {
               size="icon"
               title={t("share.pendingTitle")}
               onClick={() => {
-                if (pendingCount > 0) setShowSharedDialog(true);
-                if (pendingReviewListShareCount > 0)
+                if (pendingCount > 0) {
+                  setShowSharedDialog(true);
+                } else if (pendingReviewListShareCount > 0) {
                   setShowReviewListShareDialog(true);
+                  if (window.location.pathname !== "/vocabulary") {
+                    window.location.href = "/vocabulary";
+                  }
+                }
               }}
             >
               <Bell className="h-5 w-5" />
