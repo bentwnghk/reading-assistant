@@ -941,7 +941,7 @@
   "vocabulary": {
     "title": "我的詞彙",
     "tabTable": "表格",
-    "tabFlashcard": "閃卡",
+    "tabFlashcard": "字卡",
     "tabSpelling": "拼寫",
     "tabQuiz": "測驗",
     "tabHistory": "記錄",
@@ -1004,8 +1004,8 @@
       "allWords": "匯出全部 {{count}} 個詞彙",
       "glossary": "詞彙表",
       "glossaryDesc": "含釋義的詞彙表格",
-      "flashcard": "閃卡",
-      "flashcardDesc": "可列印剪裁的閃卡",
+      "flashcard": "字卡",
+      "flashcardDesc": "可列印剪裁的字卡",
       "fillblank": "填空練習",
       "fillblankDesc": "挖空詞彙的練習題",
       "matching": "配對練習",
@@ -1019,7 +1019,7 @@
       "weakest": "最薄弱"
     },
     "reviewHistory": {
-      "flashcard": "閃卡複習",
+      "flashcard": "字卡複習",
       "quiz": "詞彙測驗",
       "spelling": "拼寫練習",
       "words": "個詞",
