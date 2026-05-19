@@ -44,6 +44,15 @@ const VocabularySpelling = dynamic(
 );
 const ReviewHistory = dynamic(() => import("./ReviewHistory"));
 
+const toEntry = (w: { word: string; syllabification?: string; partOfSpeech: string; englishDefinition: string; chineseDefinition: string; example?: string }): GlossaryEntry => ({
+  word: w.word,
+  syllabification: w.syllabification || undefined,
+  partOfSpeech: w.partOfSpeech,
+  englishDefinition: w.englishDefinition,
+  chineseDefinition: w.chineseDefinition,
+  example: w.example || undefined,
+});
+
 function VocabularyContainer() {
   const { t } = useTranslation();
   const {
@@ -74,28 +83,14 @@ function VocabularyContainer() {
     }
   }, [searchParams, router]);
 
-  const reviewGlossary = useMemo(() => {
-    if (reviewQueue.length > 0) {
-      return reviewQueue.map((w) => ({
-        word: w.word,
-        syllabification: w.syllabification || undefined,
-        partOfSpeech: w.partOfSpeech,
-        englishDefinition: w.englishDefinition,
-        chineseDefinition: w.chineseDefinition,
-        example: w.example || undefined,
-      }));
-    }
-    return words
-      .filter((w) => selectedWordIds.has(w.id))
-      .map((w) => ({
-        word: w.word,
-        syllabification: w.syllabification || undefined,
-        partOfSpeech: w.partOfSpeech,
-        englishDefinition: w.englishDefinition,
-        chineseDefinition: w.chineseDefinition,
-        example: w.example || undefined,
-      }));
-  }, [reviewQueue, words, selectedWordIds]);
+  const reviewQueueGlossary = useMemo(() => reviewQueue.map(toEntry), [reviewQueue]);
+
+  const selectedWordsGlossary = useMemo(
+    () => words.filter((w) => selectedWordIds.has(w.id)).map(toEntry),
+    [words, selectedWordIds]
+  );
+
+  const reviewGlossary = reviewQueue.length > 0 ? reviewQueueGlossary : selectedWordsGlossary;
 
   const reviewRatings = useMemo(() => {
     const sourceWords =
