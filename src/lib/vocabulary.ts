@@ -333,6 +333,18 @@ export async function getReviewSessionDetail(
   };
 }
 
+export async function deleteReviewSession(
+  userId: string,
+  sessionId: string
+): Promise<boolean> {
+  const pool = getPool();
+  const { rowCount } = await pool.query(
+    `DELETE FROM vocabulary_review_sessions WHERE id = $1 AND user_id = $2`,
+    [sessionId, userId]
+  );
+  return (rowCount ?? 0) > 0;
+}
+
 export async function shareVocabularyWords(
   senderId: string,
   recipientIds: string[],

@@ -1090,7 +1090,12 @@
       "good": "Good",
       "easy": "Easy",
       "attempts": "×{{count}}",
-      "empty": "No review sessions yet. Complete a review to see your history here."
+      "empty": "No review sessions yet. Complete a review to see your history here.",
+      "confirmDelete": "Delete Review Session?",
+      "confirmDeleteDesc": "This action cannot be undone. The session record will be permanently deleted.",
+      "delete": "Delete",
+      "deleted": "Review session deleted.",
+      "deleteError": "Failed to delete review session."
     },
     "help": {
       "title": "How It Works",

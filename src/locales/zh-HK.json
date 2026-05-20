@@ -1096,7 +1096,12 @@
       "good": "良好",
       "easy": "簡單",
       "attempts": "×{{count}}",
-      "empty": "尚無複習記錄。完成一次複習後，記錄會顯示在這裡。"
+      "empty": "尚無複習記錄。完成一次複習後，記錄會顯示在這裡。",
+      "confirmDelete": "刪除複習記錄？",
+      "confirmDeleteDesc": "此操作無法撤銷，記錄將被永久刪除。",
+      "delete": "刪除",
+      "deleted": "複習記錄已刪除。",
+      "deleteError": "刪除複習記錄失敗。"
     },
     "help": {
       "title": "使用說明",

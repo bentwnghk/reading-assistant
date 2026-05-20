@@ -15,10 +15,20 @@ import {
   Trophy,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import { getMasteryColor, getMasteryLabel } from "@/utils/srs";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const RATING_COLORS: Record<string, string> = {
   again: "text-rose-500",
@@ -35,6 +45,7 @@ function ReviewHistory() {
   const [isLoading, setIsLoading] = useState(true);
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/vocabulary/review-sessions?limit=100")
@@ -68,6 +79,25 @@ function ReviewHistory() {
     },
     [expandedId]
   );
+
+  const handleDelete = useCallback(async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch(`/api/vocabulary/review-sessions?id=${deleteId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error();
+      setSessions((prev) => prev.filter((s) => s.id !== deleteId));
+      if (expandedId === deleteId) {
+        setExpandedId(null);
+        setDetail(null);
+      }
+      toast.success(t("vocabulary.reviewHistory.deleted"));
+    } catch {
+      toast.error(t("vocabulary.reviewHistory.deleteError"));
+    }
+    setDeleteId(null);
+  }, [deleteId, expandedId, t]);
 
   const getModeIcon = (mode: string) => {
     switch (mode) {
@@ -176,6 +206,17 @@ function ReviewHistory() {
               ) : (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteId(session.id);
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
             </button>
 
             {isExpanded && detail && (
@@ -332,6 +373,25 @@ function ReviewHistory() {
         </div>
       </div>
     )}
+
+    <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{t("vocabulary.reviewHistory.confirmDelete")}</DialogTitle>
+          <DialogDescription>
+            {t("vocabulary.reviewHistory.confirmDeleteDesc")}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setDeleteId(null)}>
+            {t("share.close")}
+          </Button>
+          <Button variant="destructive" onClick={handleDelete}>
+            {t("vocabulary.reviewHistory.delete")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </>
   );
 }
