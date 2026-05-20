@@ -335,12 +335,22 @@ export const useVocabularyStore = create<
     }));
     set((state) => {
       const existingIds = new Set(state.words.map((w) => w.id));
-      const added = queue.filter((w) => !existingIds.has(w.id));
+      const wordToExistingId = new Map(
+        state.words.map((w) => [w.word.toLowerCase(), w.id])
+      );
+      const added = queue.filter(
+        (w) => !existingIds.has(w.id) && !wordToExistingId.has(w.word.toLowerCase())
+      );
+      const activeIds = new Set(queue.map((w) => w.id));
+      for (const w of queue) {
+        const existingId = wordToExistingId.get(w.word.toLowerCase());
+        if (existingId) activeIds.add(existingId);
+      }
       return {
         words: [...state.words, ...added],
         reviewQueue: queue,
-        selectedWordIds: new Set(queue.map((w) => w.id)),
-        activeReviewListWordIds: new Set(queue.map((w) => w.id)),
+        selectedWordIds: activeIds,
+        activeReviewListWordIds: activeIds,
         acceptedReviewListWords: null,
       };
     });
