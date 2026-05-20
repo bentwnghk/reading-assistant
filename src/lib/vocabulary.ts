@@ -1,6 +1,7 @@
 import { getPool } from "./db";
 
 function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
+  const rawCounts = row.srs_counts as { hard?: number; medium?: number; easy?: number } | null;
   return {
     id: row.id as string,
     word: row.word as string,
@@ -10,6 +11,11 @@ function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
     chineseDefinition: (row.chinese_definition as string) || "",
     example: (row.example as string) || "",
     rating: (row.rating as GlossaryRating) || null,
+    srsCounts: {
+      hard: rawCounts?.hard ?? 0,
+      medium: rawCounts?.medium ?? 0,
+      easy: rawCounts?.easy ?? 0,
+    },
     masteryLevel: (row.mastery_level as number) as VocabularyMasteryLevel,
     reviewCount: (row.review_count as number) || 0,
     correctCount: (row.correct_count as number) || 0,
@@ -23,6 +29,13 @@ function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
     createdAt: Number(row.created_at) || 0,
     updatedAt: Number(row.updated_at) || 0,
   };
+}
+
+function deriveRatingFromCounts(counts: { hard: number; medium: number; easy: number }): GlossaryRating | null {
+  if (counts.hard === 0 && counts.medium === 0 && counts.easy === 0) return null;
+  if (counts.hard >= counts.medium && counts.hard >= counts.easy) return "hard";
+  if (counts.medium >= counts.easy) return "medium";
+  return "easy";
 }
 
 export async function getUserVocabulary(
@@ -142,17 +155,33 @@ export async function upsertVocabularyFromGlossary(
   }
 }
 
-export async function updateVocabularyRating(
+export async function recordSRSAction(
   userId: string,
   word: string,
-  rating: GlossaryRating
-): Promise<void> {
+  action: SRSAction
+): Promise<{ rating: GlossaryRating | null; srsCounts: { hard: number; medium: number; easy: number } }> {
   const pool = getPool();
-  await pool.query(
-    `UPDATE user_vocabulary SET rating = $3, updated_at = $4
-     WHERE user_id = $1 AND word = $2`,
-    [userId, word.toLowerCase(), rating, Date.now()]
+  const ratingKey: "hard" | "medium" | "easy" = (action === "again" || action === "hard") ? "hard" : (action === "good" ? "medium" : "easy");
+
+  const { rows } = await pool.query(
+    `UPDATE user_vocabulary SET
+       srs_counts = jsonb_set(srs_counts, $3, (COALESCE((srs_counts->>$3)::int, 0) + 1)::text::jsonb),
+       updated_at = $4
+     WHERE user_id = $1 AND word = $2
+     RETURNING srs_counts`,
+    [userId, word.toLowerCase(), ratingKey, Date.now()]
   );
+
+  const counts = rows[0]?.srs_counts as { hard: number; medium: number; easy: number } | undefined;
+  const srsCounts = counts ? { hard: counts.hard ?? 0, medium: counts.medium ?? 0, easy: counts.easy ?? 0 } : { hard: 0, medium: 0, easy: 0 };
+  const rating = deriveRatingFromCounts(srsCounts);
+
+  await pool.query(
+    `UPDATE user_vocabulary SET rating = $3 WHERE user_id = $1 AND word = $2`,
+    [userId, word.toLowerCase(), rating]
+  );
+
+  return { rating, srsCounts };
 }
 
 export async function updateVocabularyReview(

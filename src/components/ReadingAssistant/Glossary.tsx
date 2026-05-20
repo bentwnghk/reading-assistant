@@ -34,6 +34,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
+import { useVocabularyStore } from "@/store/vocabulary";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 import { cn } from "@/utils/style";
@@ -93,6 +94,11 @@ function Glossary() {
       setSortOrder("asc");
     }
   }, [sortField, sortOrder]);
+
+  const handleSRSAction = useCallback((word: string, action: SRSAction) => {
+    const store = useVocabularyStore.getState();
+    store.recordSRSAction(word, action);
+  }, []);
 
   const handleDownloadWord = useCallback(async () => {
     if (sortedGlossary.length === 0) return;
@@ -379,7 +385,7 @@ function Glossary() {
 
     switch (activeTab) {
       case "flashcard":
-        return <VocabularyFlashcard glossary={mergedGlossary} mergedRatings={mergedRatings} />;
+        return <VocabularyFlashcard glossary={mergedGlossary} mergedRatings={mergedRatings} onWordAction={handleSRSAction} />;
       case "quiz":
         return <VocabularyQuiz glossary={mergedGlossary} mergedRatings={mergedRatings} />;
       case "spelling":

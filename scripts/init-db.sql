@@ -542,6 +542,7 @@ CREATE TABLE user_vocabulary (
   next_review_at BIGINT NOT NULL DEFAULT 0,
   source_session_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
   shared_by TEXT DEFAULT NULL REFERENCES users(id) ON DELETE SET NULL,
+  srs_counts JSONB NOT NULL DEFAULT '{"hard":0,"medium":0,"easy":0}'::jsonb,
   created_at BIGINT NOT NULL DEFAULT 0,
   updated_at BIGINT NOT NULL DEFAULT 0,
   UNIQUE (user_id, word)

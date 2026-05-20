@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Shuffle, RotateCcw, Volume2, Loader2, Target, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
-import { useHistoryStore } from "@/store/history";
 import { logActivity } from "@/utils/activityLogger";
 import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
@@ -30,9 +29,8 @@ interface SRSCounts {
 
 function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
-  const { id, glossaryRatings, setGlossaryRating, backup, incrementFlashcardReviewCount } = useReadingStore();
+  const { id, glossaryRatings, incrementFlashcardReviewCount } = useReadingStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
-  const { update, save } = useHistoryStore();
   const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
 
   const [isFlipped, setIsFlipped] = useState(false);
@@ -112,14 +110,6 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
     resetSession(buildQueue(glossary, effectiveRatingsRef.current, isShuffled, isPrioritized));
   };
 
-  const syncToHistory = useCallback(() => {
-    if (id) {
-      const session = backup();
-      const updated = update(id, session);
-      if (!updated) save(session);
-    }
-  }, [id, backup, update, save]);
-
   const handleSRS = useCallback(
     (action: SRSAction) => {
       if (!currentEntry || reviewQueue.length === 0) return;
@@ -167,12 +157,6 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         attempts: (prev?.attempts ?? 0) + 1,
       });
 
-      // Again & Hard → mark as "hard" and sync to store/history
-      if (action === "again" || action === "hard") {
-        setGlossaryRating(current.word, "hard");
-        syncToHistory();
-      }
-
       logActivity("flashcard_review", {
         sessionId: id || undefined,
         details: { cardsReviewed: 1, wordCount: totalOriginal },
@@ -197,7 +181,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         }
       }
     },
-    [currentEntry, reviewQueue, id, setGlossaryRating, syncToHistory, totalOriginal, incrementFlashcardReviewCount, onWordAction]
+    [currentEntry, reviewQueue, id, totalOriginal, incrementFlashcardReviewCount, onWordAction]
   );
 
   // ── TTS ──────────────────────────────────────────────────────────────────

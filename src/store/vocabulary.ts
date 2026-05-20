@@ -40,9 +40,9 @@ interface VocabularyStoreActions {
   ) => void;
   startReview: () => void;
   clearReviewQueue: () => void;
-  updateWordRating: (
+  recordSRSAction: (
     word: string,
-    rating: GlossaryRating
+    action: SRSAction
   ) => Promise<void>;
   updateWordReview: (
     word: string,
@@ -212,22 +212,23 @@ export const useVocabularyStore = create<
 
   clearReviewQueue: () => set({ reviewQueue: [] }),
 
-  updateWordRating: async (word, rating) => {
+  recordSRSAction: async (word, action) => {
     try {
-      await fetch("/api/vocabulary/word", {
+      const res = await fetch("/api/vocabulary/word", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word, rating }),
+        body: JSON.stringify({ word, srsAction: action }),
       });
+      const data = await res.json();
       set((state) => ({
         words: state.words.map((w) =>
           w.word.toLowerCase() === word.toLowerCase()
-            ? { ...w, rating, updatedAt: Date.now() }
+            ? { ...w, rating: data.rating, srsCounts: data.srsCounts, updatedAt: Date.now() }
             : w
         ),
       }));
     } catch (error) {
-      console.error("Failed to update rating:", error);
+      console.error("Failed to record SRS action:", error);
     }
   },
 
@@ -322,6 +323,7 @@ export const useVocabularyStore = create<
       chineseDefinition: w.chineseDefinition || "",
       example: w.example || "",
       rating: null,
+      srsCounts: { hard: 0, medium: 0, easy: 0 },
       masteryLevel: 0,
       reviewCount: 0,
       correctCount: 0,

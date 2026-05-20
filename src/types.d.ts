@@ -455,6 +455,7 @@ interface VocabularyWord {
   chineseDefinition: string;
   example: string;
   rating: GlossaryRating | null;
+  srsCounts: { hard: number; medium: number; easy: number };
   masteryLevel: VocabularyMasteryLevel;
   reviewCount: number;
   correctCount: number;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { updateVocabularyRating, updateVocabularyReview } from "@/lib/vocabulary";
+import { recordSRSAction, updateVocabularyReview } from "@/lib/vocabulary";
 
 export async function PATCH(request: Request) {
   const session = await auth();
@@ -10,9 +10,9 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json();
-    const { word, rating, correct, masteryLevel, nextReviewAt } = body as {
+    const { word, srsAction, correct, masteryLevel, nextReviewAt } = body as {
       word: string;
-      rating?: GlossaryRating;
+      srsAction?: SRSAction;
       correct?: boolean;
       masteryLevel?: VocabularyMasteryLevel;
       nextReviewAt?: number;
@@ -22,8 +22,9 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "word is required" }, { status: 400 });
     }
 
-    if (rating) {
-      await updateVocabularyRating(session.user.id, word, rating);
+    if (srsAction) {
+      const result = await recordSRSAction(session.user.id, word, srsAction);
+      return NextResponse.json({ success: true, rating: result.rating, srsCounts: result.srsCounts });
     }
 
     if (typeof correct === "boolean" && typeof masteryLevel === "number" && typeof nextReviewAt === "number") {

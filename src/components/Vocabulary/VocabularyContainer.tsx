@@ -213,13 +213,10 @@ function VocabularyContainer() {
   const handleWordAction = useCallback(
     (word: string, action: "again" | "hard" | "good" | "easy") => {
       const store = useVocabularyStore.getState();
+      store.recordSRSAction(word, action);
       if (action === "again" || action === "hard") {
-        store.updateWordRating(word, "hard");
         store.updateWordReview(word, false);
-      } else if (action === "good") {
-        store.updateWordReview(word, true);
-      } else if (action === "easy") {
-        store.updateWordRating(word, "easy");
+      } else {
         store.updateWordReview(word, true);
       }
     },
