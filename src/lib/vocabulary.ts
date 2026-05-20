@@ -210,7 +210,8 @@ export async function deleteVocabularyBySession(
 export async function createReviewSession(
   userId: string,
   mode: VocabularyReviewMode,
-  results: VocabularyReviewResult[]
+  results: VocabularyReviewResult[],
+  ratingCounts?: VocabularyRatingCounts
 ): Promise<string> {
   const pool = getPool();
   const now = Date.now();
@@ -220,9 +221,9 @@ export async function createReviewSession(
   const correctCount = results.filter((r) => r.correct).length;
   const accuracy = totalWords > 0 ? Math.round((correctCount / totalWords) * 100) : 0;
 
-  const ratingCounts: VocabularyRatingCounts | null =
+  const counts: VocabularyRatingCounts | null =
     mode === "flashcard"
-      ? {
+      ? ratingCounts ?? {
           again: results.filter((r) => r.rating === "again").length,
           hard: results.filter((r) => r.rating === "hard").length,
           good: results.filter((r) => r.rating === "good").length,
@@ -233,7 +234,7 @@ export async function createReviewSession(
   await pool.query(
     `INSERT INTO vocabulary_review_sessions (id, user_id, mode, total_words, correct_count, accuracy, rating_counts, started_at, completed_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-    [sessionId, userId, mode, totalWords, correctCount, accuracy, ratingCounts ? JSON.stringify(ratingCounts) : null, now - 60000, now]
+    [sessionId, userId, mode, totalWords, correctCount, accuracy, counts ? JSON.stringify(counts) : null, now - 60000, now]
   );
 
   if (results.length > 0) {

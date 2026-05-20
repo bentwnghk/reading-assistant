@@ -18,6 +18,12 @@ const createSchema = z.object({
       rating: z.enum(["again", "hard", "good", "easy"]).optional(),
     })
   ),
+  ratingCounts: z.object({
+    again: z.number().int().min(0),
+    hard: z.number().int().min(0),
+    good: z.number().int().min(0),
+    easy: z.number().int().min(0),
+  }).optional(),
 });
 
 export async function POST(request: Request) {
@@ -39,7 +45,8 @@ export async function POST(request: Request) {
     const id = await createReviewSession(
       session.user.id,
       parsed.data.mode,
-      parsed.data.results
+      parsed.data.results,
+      parsed.data.ratingCounts
     );
     return NextResponse.json({ id });
   } catch (error) {

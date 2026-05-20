@@ -153,7 +153,7 @@ function VocabularyContainer() {
   );
 
   const handleReviewComplete = useCallback(
-    (results: { word: string; correct: boolean; rating?: SRSAction }[]) => {
+    (results: { word: string; correct: boolean; rating?: SRSAction }[], ratingCounts?: VocabularyRatingCounts) => {
       if (results.length === 0) return;
       const store = useVocabularyStore.getState();
       const reviewResults: VocabularyReviewResult[] = results.map((r) => {
@@ -174,6 +174,7 @@ function VocabularyContainer() {
         body: JSON.stringify({
           mode: currentReviewMode.current,
           results: reviewResults,
+          ratingCounts,
         }),
       }).catch((err) => console.error("Failed to save review session:", err));
     },

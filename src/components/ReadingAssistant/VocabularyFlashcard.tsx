@@ -16,7 +16,7 @@ interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
   onWordAction?: (word: string, action: "again" | "hard" | "good" | "easy") => void;
-  onComplete?: (results: { word: string; correct: boolean; rating: SRSAction }[]) => void;
+  onComplete?: (results: { word: string; correct: boolean; rating: SRSAction }[], ratingCounts: VocabularyRatingCounts) => void;
 }
 
 type SRSAction = "again" | "hard" | "good" | "easy";
@@ -185,7 +185,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
           const results = Array.from(flashcardResultsRef.current.entries()).map(
             ([word, data]) => ({ word, correct: data.correct, rating: data.rating })
           );
-          onComplete(results);
+          onComplete(results, { ...srsCounts });
           flashcardResultsRef.current.clear();
         }
       }
