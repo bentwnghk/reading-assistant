@@ -76,6 +76,7 @@
           "title": "🎓 Teacher",
           "manageStudents": "Add students & track their learning progress through Teacher Dashboard",
           "uploadTexts": "Upload reading materials to Text Repository to share with your classes",
+          "shareVocabulary": "Share curated vocabulary & review lists with students",
           "exportData": "Export detailed Excel reports",
           "viewLeaderboard": "Monitor class leaderboards",
           "viewAiQuestions": "Track questions students ask AI Tutor"
@@ -161,6 +162,10 @@
         "grammarGames": {
           "title": "🎮 Grammar Games",
           "desc": "Reinforce grammar skills through 5 interactive games: Roulette, Surgery, Workshop, Duel, and Scramble. Earn points, track accuracy, and compete on the leaderboard!"
+        },
+        "vocabularyPage": {
+          "title": "📚 My Vocabulary Hub",
+          "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Teachers can share curated review lists with students!"
         }
       },
       "workflow": {
@@ -179,7 +184,8 @@
         "spelling": "Practice with spelling games",
         "vocabQuiz": "Test your vocabulary knowledge",
         "grammar": "Analyze grammar structures & take quizzes",
-        "grammarGames": "Play grammar games to reinforce skills"
+        "grammarGames": "Play grammar games to reinforce skills",
+        "myVocabulary": "Master all words in My Vocabulary Hub with spaced repetition"
       },
       "skills": {
         "title": "Reading Skills You'll Master",

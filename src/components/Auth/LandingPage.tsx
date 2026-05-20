@@ -42,6 +42,7 @@ import {
   Check,
   Medal,
   BookOpenCheck,
+  Library,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -401,6 +402,7 @@ export function LandingPage() {
             { icon: Target, key: "test", color: "text-red-600 dark:text-red-400" },
             { icon: BookOpenCheck, key: "grammar", color: "text-fuchsia-600 dark:text-fuchsia-400" },
             { icon: Gamepad2, key: "grammarGames", color: "text-lime-600 dark:text-lime-400" },
+            { icon: Library, key: "vocabularyPage", color: "text-sky-600 dark:text-sky-400" },
             { icon: Medal, key: "achievements", color: "text-amber-600 dark:text-amber-400" },
             { icon: Trophy, key: "leaderboard", color: "text-yellow-600 dark:text-yellow-400" },
             { icon: Download, key: "wordExport", color: "text-rose-600 dark:text-rose-400" },
@@ -436,7 +438,7 @@ export function LandingPage() {
           <motion.div variants={gridContainer(0.4)} className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: Crown, title: "admin", color: "text-amber-400", items: ["manageSchools", "manageUsers", "manageClasses", "uploadTexts"] },
-              { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["manageStudents", "uploadTexts", "viewAiQuestions", "exportData", "viewLeaderboard"] },
+              { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["manageStudents", "uploadTexts", "shareVocabulary", "viewAiQuestions", "exportData", "viewLeaderboard"] },
               { icon: Users, title: "student", color: "text-emerald-400", items: ["learn", "cloudSync", "history", "leaderboard"] },
             ].map((role) => (
               <motion.div
@@ -490,6 +492,7 @@ export function LandingPage() {
               { num: 13, icon: Target, key: "test" },
               { num: 14, icon: BookOpenCheck, key: "grammar" },
               { num: 15, icon: Gamepad2, key: "grammarGames" },
+              { num: 16, icon: Library, key: "myVocabulary" },
             ].map(({ num, icon: Icon, key }) => (
               <motion.div
                 key={key}

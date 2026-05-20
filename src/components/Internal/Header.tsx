@@ -35,6 +35,7 @@ import {
   School,
   Bell,
   BookOpenCheck,
+  Library,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -526,6 +527,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Library className="h-4 w-4 mt-0.5 text-sky-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.vocabularyPage.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.vocabularyPage.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <Medal className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.achievements.title")}</div>
@@ -578,6 +586,7 @@ function Header() {
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• {t("header.about.roles.teacher.manageStudents")}</li>
                     <li>• {t("header.about.roles.teacher.uploadTexts")}</li>
+                    <li>• {t("header.about.roles.teacher.shareVocabulary")}</li>
                     <li>• {t("header.about.roles.teacher.viewAiQuestions")}</li>
                     <li>• {t("header.about.roles.teacher.exportData")}</li>
                     <li>• {t("header.about.roles.teacher.viewLeaderboard")}</li>
@@ -679,6 +688,11 @@ function Header() {
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-lime-100 dark:bg-lime-900 text-lime-600 dark:text-lime-300 text-xs font-bold">15</span>
                     <Gamepad2 className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.grammarGames")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-300 text-xs font-bold">16</span>
+                    <Library className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.myVocabulary")}</span>
                   </div>
                 </div>
               </div>
