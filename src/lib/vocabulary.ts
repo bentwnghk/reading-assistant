@@ -163,7 +163,7 @@ export async function recordSRSAction(
 
   const { rows } = await pool.query(
     `UPDATE user_vocabulary SET
-       srs_counts = jsonb_set(srs_counts, $3, (COALESCE((srs_counts->>$3)::int, 0) + 1)::text::jsonb),
+       srs_counts = jsonb_set(srs_counts, ARRAY[$3], ((COALESCE((srs_counts->>$3)::int, 0) + 1)::text)::jsonb),
        updated_at = $4
      WHERE user_id = $1 AND word = $2
      RETURNING srs_counts`,
