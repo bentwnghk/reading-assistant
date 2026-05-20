@@ -1090,6 +1090,102 @@
       "good": "Good",
       "easy": "Easy",
       "empty": "No review sessions yet. Complete a review to see your history here."
+    },
+    "help": {
+      "title": "How It Works",
+      "tabs": {
+        "overview": "Overview",
+        "review": "Review Modes",
+        "extras": "More Features"
+      },
+      "overview": {
+        "intro": "My Vocabulary collects every glossary word from your reading sessions into one place for systematic review. Words are automatically synced — just read and they appear here.",
+        "stats": {
+          "title": "Stats at a Glance",
+          "total": {
+            "name": "Total Words",
+            "desc": "All words collected, including your own and those shared by teachers."
+          },
+          "due": {
+            "name": "Due for Review",
+            "desc": "Words whose next review time has passed. Shown in orange — review these soon!"
+          },
+          "mastered": {
+            "name": "Mastered",
+            "desc": "Words that reached the highest mastery level (Level 5) through repeated correct reviews."
+          },
+          "new": {
+            "name": "New Words",
+            "desc": "Words you haven't reviewed yet. Start reviewing to track your progress!"
+          }
+        },
+        "table": {
+          "title": "Word Table",
+          "desc": "Browse, search, sort, and filter all your words. Select words manually or use Auto Select, then start a review."
+        }
+      },
+      "review": {
+        "intro": "Choose from three review modes. Select words first (or accept a shared review list), then pick a mode.",
+        "flashcard": {
+          "name": "Flashcard",
+          "desc": "Flip cards to reveal definitions, then rate your confidence with SRS buttons:"
+        },
+        "again": {
+          "name": "Again",
+          "desc": "Shows the word again almost immediately. Marks it as Hard."
+        },
+        "hard": {
+          "name": "Hard",
+          "desc": "Re-inserts the word in the middle of the queue. Marks it as Hard."
+        },
+        "good": {
+          "name": "Good",
+          "desc": "Moves the word to the end of the queue. Counts as correct."
+        },
+        "easy": {
+          "name": "Easy",
+          "desc": "Removes the word from the queue. Marks it as Easy."
+        },
+        "quiz": {
+          "name": "Quiz",
+          "desc": "Multiple-choice questions testing word meanings. Great for quick self-checks."
+        },
+        "spelling": {
+          "name": "Spelling",
+          "desc": "Type the correct spelling of each word. Perfect for memorizing word forms."
+        },
+        "srs": {
+          "title": "Spaced Repetition (SRS)",
+          "desc": "Words move through 6 levels (New → L1 → L2 → L3 → L4 → Mastered). Correct answers advance a level; incorrect answers drop back. Higher levels have longer review intervals (1 day → 3 days → 7 days → 14 days → 30 days)."
+        }
+      },
+      "extras": {
+        "intro": "Additional tools to help you manage and share your vocabulary.",
+        "autoSelect": {
+          "name": "Auto Select",
+          "desc": "Automatically pick words based on a strategy: Due for Review, Hardest, Newest, Random Mix, or Weakest. Choose how many words to select."
+        },
+        "export": {
+          "name": "Export",
+          "desc": "Download your words as Glossary (PDF), Flashcard Sheets, Fill-in-the-Blank, or Matching Exercise worksheets."
+        },
+        "reviewLists": {
+          "name": "Review Lists",
+          "desc": "Create named lists of words for focused study. Edit, share, or delete your lists. Teachers can share lists with students."
+        },
+        "share": {
+          "name": "Share Vocabulary",
+          "desc": "Teachers can share selected words directly with students. Shared words are labelled \"Teacher\" in the student's table."
+        },
+        "history": {
+          "name": "Review History",
+          "desc": "See past review sessions with per-word results. Flashcard sessions show Again/Hard/Good/Easy counts; Quiz and Spelling sessions show accuracy."
+        },
+        "tip": {
+          "title": "Tip",
+          "content": "Use Auto Select with \"Due for Review\" to quickly catch up on overdue words, or \"Random Mix\" for a balanced study session."
+        }
+      }
     }
   },
   "dashboard": {
