@@ -201,7 +201,7 @@ export async function acceptReviewListShare(
   const pool = getPool();
 
   const { rows: shareRows } = await pool.query(
-    `SELECT srl.review_list_id, srl.review_list_name, srl.status
+    `SELECT srl.review_list_id, srl.review_list_name, srl.status, srl.sender_id
      FROM shared_review_lists srl
      WHERE srl.id = $1 AND srl.recipient_id = $2 AND srl.status = 'pending'`,
     [shareId, recipientId]
@@ -210,6 +210,7 @@ export async function acceptReviewListShare(
 
   const listId = shareRows[0].review_list_id;
   const listName = shareRows[0].review_list_name || "Review List";
+  const senderId = shareRows[0].sender_id;
 
   const { rows: listRows } = await pool.query(
     `SELECT words FROM review_lists WHERE id = $1`,
@@ -240,6 +241,36 @@ export async function acceptReviewListShare(
       now,
     ]
   );
+
+  for (const w of words) {
+    const word = (w.word || "").toLowerCase();
+    if (!word) continue;
+    await pool.query(
+      `INSERT INTO user_vocabulary (
+        user_id, word, syllabification, part_of_speech,
+        english_definition, chinese_definition, example,
+        shared_by, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)
+      ON CONFLICT (user_id, word) DO UPDATE SET
+        syllabification = COALESCE(NULLIF(EXCLUDED.syllabification, ''), user_vocabulary.syllabification),
+        part_of_speech = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''), user_vocabulary.part_of_speech),
+        english_definition = COALESCE(NULLIF(EXCLUDED.english_definition, ''), user_vocabulary.english_definition),
+        chinese_definition = COALESCE(NULLIF(EXCLUDED.chinese_definition, ''), user_vocabulary.chinese_definition),
+        example = COALESCE(NULLIF(EXCLUDED.example, ''), user_vocabulary.example),
+        updated_at = $9`,
+      [
+        recipientId,
+        word,
+        w.syllabification || "",
+        w.partOfSpeech || "",
+        w.englishDefinition || "",
+        w.chineseDefinition || "",
+        w.example || "",
+        senderId,
+        now,
+      ]
+    );
+  }
 
   return words;
 }

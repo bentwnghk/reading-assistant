@@ -213,17 +213,39 @@ export const useVocabularyStore = create<
   clearReviewQueue: () => set({ reviewQueue: [] }),
 
   recordSRSAction: async (word, action) => {
+    const state = get();
+    const existingWord = state.words.find(
+      (w) => w.word.toLowerCase() === word.toLowerCase()
+    );
+    const wordData = existingWord
+      ? {
+          syllabification: existingWord.syllabification,
+          partOfSpeech: existingWord.partOfSpeech,
+          englishDefinition: existingWord.englishDefinition,
+          chineseDefinition: existingWord.chineseDefinition,
+          example: existingWord.example,
+          source: existingWord.source,
+          sharedBy: existingWord.sharedBy,
+        }
+      : null;
     try {
       const res = await fetch("/api/vocabulary/word", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word, srsAction: action }),
+        body: JSON.stringify({ word, srsAction: action, wordData }),
       });
       const data = await res.json();
       set((state) => ({
         words: state.words.map((w) =>
           w.word.toLowerCase() === word.toLowerCase()
-            ? { ...w, rating: data.rating, srsCounts: data.srsCounts, updatedAt: Date.now() }
+            ? {
+                ...w,
+                rating: data.rating,
+                srsCounts: data.srsCounts,
+                id: data.id || w.id,
+                source: data.source || w.source,
+                updatedAt: Date.now(),
+              }
             : w
         ),
       }));
@@ -330,7 +352,7 @@ export const useVocabularyStore = create<
       lastReviewedAt: 0,
       nextReviewAt: 0,
       sourceSessionIds: [],
-      source: "teacher" as VocabularySource,
+      source: "own" as VocabularySource,
       sharedBy: null,
       createdAt: now,
       updatedAt: now,

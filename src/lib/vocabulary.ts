@@ -153,33 +153,76 @@ export async function upsertVocabularyFromGlossary(
   }
 }
 
+type WordData = {
+  syllabification: string;
+  partOfSpeech: string;
+  englishDefinition: string;
+  chineseDefinition: string;
+  example: string;
+  source: VocabularySource;
+  sharedBy: string | null;
+};
+
 export async function recordSRSAction(
   userId: string,
   word: string,
-  action: SRSAction
-): Promise<{ rating: GlossaryRating | null; srsCounts: { hard: number; medium: number } }> {
+  action: SRSAction,
+  wordData?: WordData
+): Promise<{ id: string; rating: GlossaryRating | null; srsCounts: { hard: number; medium: number }; source: VocabularySource }> {
   const pool = getPool();
   const ratingKey: "hard" | "medium" = (action === "again" || action === "hard") ? "hard" : "medium";
+  const normalizedWord = word.toLowerCase();
+  const now = Date.now();
 
   const { rows } = await pool.query(
     `UPDATE user_vocabulary SET
        srs_counts = jsonb_set(srs_counts, ARRAY[$3], ((COALESCE((srs_counts->>$3)::int, 0) + 1)::text)::jsonb),
        updated_at = $4
      WHERE user_id = $1 AND word = $2
-     RETURNING srs_counts`,
-    [userId, word.toLowerCase(), ratingKey, Date.now()]
+     RETURNING id, srs_counts, shared_by`,
+    [userId, normalizedWord, ratingKey, now]
   );
+
+  if (rows.length === 0 && wordData) {
+    const id = crypto.randomUUID();
+    await pool.query(
+      `INSERT INTO user_vocabulary (
+        id, user_id, word, syllabification, part_of_speech,
+        english_definition, chinese_definition, example,
+        srs_counts, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)`,
+      [
+        id, userId, normalizedWord,
+        wordData.syllabification || "",
+        wordData.partOfSpeech || "",
+        wordData.englishDefinition || "",
+        wordData.chineseDefinition || "",
+        wordData.example || "",
+        JSON.stringify({ hard: ratingKey === "hard" ? 1 : 0, medium: ratingKey === "medium" ? 1 : 0 }),
+        now,
+      ]
+    );
+    const srsCounts = { hard: ratingKey === "hard" ? 1 : 0, medium: ratingKey === "medium" ? 1 : 0 };
+    const rating = deriveRatingFromCounts(srsCounts);
+    await pool.query(
+      `UPDATE user_vocabulary SET rating = $3 WHERE user_id = $1 AND word = $2`,
+      [userId, normalizedWord, rating]
+    );
+    return { id, rating, srsCounts, source: "own" };
+  }
 
   const counts = rows[0]?.srs_counts as { hard: number; medium: number } | undefined;
   const srsCounts = counts ? { hard: counts.hard ?? 0, medium: counts.medium ?? 0 } : { hard: 0, medium: 0 };
   const rating = deriveRatingFromCounts(srsCounts);
+  const rowId = rows[0]?.id as string;
+  const source: VocabularySource = rows[0]?.shared_by ? "teacher" : "own";
 
   await pool.query(
     `UPDATE user_vocabulary SET rating = $3 WHERE user_id = $1 AND word = $2`,
-    [userId, word.toLowerCase(), rating]
+    [userId, normalizedWord, rating]
   );
 
-  return { rating, srsCounts };
+  return { id: rowId, rating, srsCounts, source };
 }
 
 export async function updateVocabularyReview(

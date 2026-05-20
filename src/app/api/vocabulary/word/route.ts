@@ -10,9 +10,18 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json();
-    const { word, srsAction, correct, masteryLevel, nextReviewAt } = body as {
+    const { word, srsAction, wordData, correct, masteryLevel, nextReviewAt } = body as {
       word: string;
       srsAction?: SRSAction;
+      wordData?: {
+        syllabification: string;
+        partOfSpeech: string;
+        englishDefinition: string;
+        chineseDefinition: string;
+        example: string;
+        source: VocabularySource;
+        sharedBy: string | null;
+      };
       correct?: boolean;
       masteryLevel?: VocabularyMasteryLevel;
       nextReviewAt?: number;
@@ -23,8 +32,8 @@ export async function PATCH(request: Request) {
     }
 
     if (srsAction) {
-      const result = await recordSRSAction(session.user.id, word, srsAction);
-      return NextResponse.json({ success: true, rating: result.rating, srsCounts: result.srsCounts });
+      const result = await recordSRSAction(session.user.id, word, srsAction, wordData ?? undefined);
+      return NextResponse.json({ success: true, rating: result.rating, srsCounts: result.srsCounts, id: result.id, source: result.source });
     }
 
     if (typeof correct === "boolean" && typeof masteryLevel === "number" && typeof nextReviewAt === "number") {
