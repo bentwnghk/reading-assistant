@@ -217,9 +217,14 @@ function ReviewHistory() {
                       key={i}
                       className="flex items-center gap-2 text-sm py-0.5"
                     >
-                      {detail.mode === "flashcard" && r.rating ? (
-                        <span className={cn("text-xs font-medium w-12 shrink-0", RATING_COLORS[r.rating])}>
-                          {t(`vocabulary.reviewHistory.${r.rating}`)}
+                      {detail.mode === "flashcard" && r.attempts != null ? (
+                        <span className={cn(
+                          "text-xs font-semibold w-12 shrink-0 text-center",
+                          r.attempts <= 1 ? "text-green-600 dark:text-green-400" :
+                          r.attempts <= 2 ? "text-yellow-600 dark:text-yellow-400" :
+                          "text-red-600 dark:text-red-400"
+                        )}>
+                          ×{r.attempts}
                         </span>
                       ) : r.correct ? (
                         <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />

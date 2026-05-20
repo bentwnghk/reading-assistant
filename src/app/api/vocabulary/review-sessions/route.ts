@@ -16,6 +16,7 @@ const createSchema = z.object({
       masteryBefore: z.number().int().min(0).max(5),
       masteryAfter: z.number().int().min(0).max(5),
       rating: z.enum(["again", "hard", "good", "easy"]).optional(),
+      attempts: z.number().int().min(1).optional(),
     })
   ),
   ratingCounts: z.object({

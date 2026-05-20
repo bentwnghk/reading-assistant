@@ -241,7 +241,7 @@ export async function createReviewSession(
     const values = results
       .map(
         (_, i) =>
-          `($${i * 6 + 1}, $${i * 6 + 2}, $${i * 6 + 3}, $${i * 6 + 4}, $${i * 6 + 5}, $${i * 6 + 6})`
+          `($${i * 7 + 1}, $${i * 7 + 2}, $${i * 7 + 3}, $${i * 7 + 4}, $${i * 7 + 5}, $${i * 7 + 6}, $${i * 7 + 7})`
       )
       .join(", ");
     const params = results.flatMap((r) => [
@@ -251,9 +251,10 @@ export async function createReviewSession(
       r.correct,
       r.masteryAfter,
       r.rating || null,
+      r.attempts || 1,
     ]);
     await pool.query(
-      `INSERT INTO vocabulary_review_results (id, session_id, word, correct, mastery_after, rating)
+      `INSERT INTO vocabulary_review_results (id, session_id, word, correct, mastery_after, rating, attempts)
        VALUES ${values}`,
       params
     );
@@ -305,7 +306,7 @@ export async function getReviewSessionDetail(
   const s = sessionRows[0];
 
   const { rows: resultRows } = await pool.query(
-    `SELECT word, correct, mastery_after, rating
+    `SELECT word, correct, mastery_after, rating, attempts
      FROM vocabulary_review_results
      WHERE session_id = $1
      ORDER BY word`,
@@ -327,6 +328,7 @@ export async function getReviewSessionDetail(
       masteryBefore: 0,
       masteryAfter: Number(r.mastery_after),
       rating: r.rating || undefined,
+      attempts: Number(r.attempts) || undefined,
     })),
   };
 }

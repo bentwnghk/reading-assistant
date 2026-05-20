@@ -490,6 +490,7 @@ interface VocabularyReviewResult {
   masteryBefore: number;
   masteryAfter: number;
   rating?: SRSAction;
+  attempts?: number;
 }
 
 interface VocabularyRatingCounts {

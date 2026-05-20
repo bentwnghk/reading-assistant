@@ -573,7 +573,8 @@ CREATE TABLE vocabulary_review_results (
   correct BOOLEAN NOT NULL DEFAULT FALSE,
   mastery_before INTEGER NOT NULL DEFAULT 0,
   mastery_after INTEGER NOT NULL DEFAULT 0,
-  rating TEXT
+  rating TEXT,
+  attempts INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE INDEX idx_review_sessions_user_date ON vocabulary_review_sessions(user_id, completed_at DESC);

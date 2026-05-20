@@ -1089,6 +1089,7 @@
       "hard": "Hard",
       "good": "Good",
       "easy": "Easy",
+      "attempts": "×{{count}}",
       "empty": "No review sessions yet. Complete a review to see your history here."
     },
     "help": {

@@ -153,7 +153,7 @@ function VocabularyContainer() {
   );
 
   const handleReviewComplete = useCallback(
-    (results: { word: string; correct: boolean; rating?: SRSAction }[], ratingCounts?: VocabularyRatingCounts) => {
+    (results: { word: string; correct: boolean; rating?: SRSAction; attempts?: number }[], ratingCounts?: VocabularyRatingCounts) => {
       if (results.length === 0) return;
       const store = useVocabularyStore.getState();
       const reviewResults: VocabularyReviewResult[] = results.map((r) => {
@@ -166,6 +166,7 @@ function VocabularyContainer() {
           masteryBefore: w?.masteryLevel ?? 0,
           masteryAfter: w?.masteryLevel ?? 0,
           rating: r.rating,
+          attempts: r.attempts,
         };
       });
       fetch("/api/vocabulary/review-sessions", {
