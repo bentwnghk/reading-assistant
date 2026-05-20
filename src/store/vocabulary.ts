@@ -323,7 +323,7 @@ export const useVocabularyStore = create<
       chineseDefinition: w.chineseDefinition || "",
       example: w.example || "",
       rating: null,
-      srsCounts: { hard: 0, medium: 0, easy: 0 },
+      srsCounts: { hard: 0, medium: 0 },
       masteryLevel: 0,
       reviewCount: 0,
       correctCount: 0,
