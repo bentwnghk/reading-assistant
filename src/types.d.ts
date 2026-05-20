@@ -482,11 +482,21 @@ interface VocabularyStats {
 
 type VocabularyReviewMode = "flashcard" | "quiz" | "spelling";
 
+type SRSAction = "again" | "hard" | "good" | "easy";
+
 interface VocabularyReviewResult {
   word: string;
   correct: boolean;
   masteryBefore: number;
   masteryAfter: number;
+  rating?: SRSAction;
+}
+
+interface VocabularyRatingCounts {
+  again: number;
+  hard: number;
+  good: number;
+  easy: number;
 }
 
 interface VocabularyReviewSession {
@@ -495,6 +505,7 @@ interface VocabularyReviewSession {
   totalWords: number;
   correctCount: number;
   accuracy: number;
+  ratingCounts?: VocabularyRatingCounts;
   startedAt: number;
   completedAt: number;
   results?: VocabularyReviewResult[];

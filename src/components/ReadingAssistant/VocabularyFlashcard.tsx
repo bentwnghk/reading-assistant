@@ -16,7 +16,7 @@ interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
   onWordAction?: (word: string, action: "again" | "hard" | "good" | "easy") => void;
-  onComplete?: (results: { word: string; correct: boolean }[]) => void;
+  onComplete?: (results: { word: string; correct: boolean; rating: SRSAction }[]) => void;
 }
 
 type SRSAction = "again" | "hard" | "good" | "easy";
@@ -43,7 +43,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
   const [totalOriginal, setTotalOriginal] = useState(0);
   const [srsCounts, setSrsCounts] = useState<SRSCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
   const [isReviewComplete, setIsReviewComplete] = useState(false);
-  const flashcardResultsRef = useRef<Map<string, boolean>>(new Map());
+  const flashcardResultsRef = useRef<Map<string, { correct: boolean; rating: SRSAction }>>(new Map());
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Keep a ref to the latest effectiveRatings so toolbar handlers always use fresh data
@@ -158,7 +158,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
       setSrsCounts((prev) => ({ ...prev, [action]: prev[action] + 1 }));
 
       const isCorrect = action === "good" || action === "easy";
-      flashcardResultsRef.current.set(current.word, isCorrect);
+      flashcardResultsRef.current.set(current.word, { correct: isCorrect, rating: action });
 
       // Again & Hard → mark as "hard" and sync to store/history
       if (action === "again" || action === "hard") {
@@ -183,7 +183,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         incrementFlashcardReviewCount();
         if (onComplete) {
           const results = Array.from(flashcardResultsRef.current.entries()).map(
-            ([word, correct]) => ({ word, correct })
+            ([word, data]) => ({ word, correct: data.correct, rating: data.rating })
           );
           onComplete(results);
           flashcardResultsRef.current.clear();

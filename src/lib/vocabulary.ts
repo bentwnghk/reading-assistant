@@ -220,17 +220,27 @@ export async function createReviewSession(
   const correctCount = results.filter((r) => r.correct).length;
   const accuracy = totalWords > 0 ? Math.round((correctCount / totalWords) * 100) : 0;
 
+  const ratingCounts: VocabularyRatingCounts | null =
+    mode === "flashcard"
+      ? {
+          again: results.filter((r) => r.rating === "again").length,
+          hard: results.filter((r) => r.rating === "hard").length,
+          good: results.filter((r) => r.rating === "good").length,
+          easy: results.filter((r) => r.rating === "easy").length,
+        }
+      : null;
+
   await pool.query(
-    `INSERT INTO vocabulary_review_sessions (id, user_id, mode, total_words, correct_count, accuracy, started_at, completed_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-    [sessionId, userId, mode, totalWords, correctCount, accuracy, now - 60000, now]
+    `INSERT INTO vocabulary_review_sessions (id, user_id, mode, total_words, correct_count, accuracy, rating_counts, started_at, completed_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    [sessionId, userId, mode, totalWords, correctCount, accuracy, ratingCounts ? JSON.stringify(ratingCounts) : null, now - 60000, now]
   );
 
   if (results.length > 0) {
     const values = results
       .map(
         (_, i) =>
-          `($${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}, $${i * 5 + 5})`
+          `($${i * 6 + 1}, $${i * 6 + 2}, $${i * 6 + 3}, $${i * 6 + 4}, $${i * 6 + 5}, $${i * 6 + 6})`
       )
       .join(", ");
     const params = results.flatMap((r) => [
@@ -239,9 +249,10 @@ export async function createReviewSession(
       r.word,
       r.correct,
       r.masteryAfter,
+      r.rating || null,
     ]);
     await pool.query(
-      `INSERT INTO vocabulary_review_results (id, session_id, word, correct, mastery_after)
+      `INSERT INTO vocabulary_review_results (id, session_id, word, correct, mastery_after, rating)
        VALUES ${values}`,
       params
     );
@@ -256,7 +267,7 @@ export async function getReviewSessions(
 ): Promise<VocabularyReviewSession[]> {
   const pool = getPool();
   const { rows } = await pool.query(
-    `SELECT id, mode, total_words, correct_count, accuracy, started_at, completed_at
+    `SELECT id, mode, total_words, correct_count, accuracy, rating_counts, started_at, completed_at
      FROM vocabulary_review_sessions
      WHERE user_id = $1
      ORDER BY completed_at DESC
@@ -269,6 +280,7 @@ export async function getReviewSessions(
     totalWords: Number(r.total_words),
     correctCount: Number(r.correct_count),
     accuracy: Number(r.accuracy),
+    ratingCounts: r.rating_counts || undefined,
     startedAt: Number(r.started_at),
     completedAt: Number(r.completed_at),
   }));
@@ -281,7 +293,7 @@ export async function getReviewSessionDetail(
   const pool = getPool();
 
   const { rows: sessionRows } = await pool.query(
-    `SELECT id, mode, total_words, correct_count, accuracy, started_at, completed_at
+    `SELECT id, mode, total_words, correct_count, accuracy, rating_counts, started_at, completed_at
      FROM vocabulary_review_sessions
      WHERE id = $1 AND user_id = $2`,
     [sessionId, userId]
@@ -292,7 +304,7 @@ export async function getReviewSessionDetail(
   const s = sessionRows[0];
 
   const { rows: resultRows } = await pool.query(
-    `SELECT word, correct, mastery_after
+    `SELECT word, correct, mastery_after, rating
      FROM vocabulary_review_results
      WHERE session_id = $1
      ORDER BY word`,
@@ -305,6 +317,7 @@ export async function getReviewSessionDetail(
     totalWords: Number(s.total_words),
     correctCount: Number(s.correct_count),
     accuracy: Number(s.accuracy),
+    ratingCounts: s.rating_counts || undefined,
     startedAt: Number(s.started_at),
     completedAt: Number(s.completed_at),
     results: resultRows.map((r) => ({
@@ -312,6 +325,7 @@ export async function getReviewSessionDetail(
       correct: r.correct,
       masteryBefore: 0,
       masteryAfter: Number(r.mastery_after),
+      rating: r.rating || undefined,
     })),
   };
 }

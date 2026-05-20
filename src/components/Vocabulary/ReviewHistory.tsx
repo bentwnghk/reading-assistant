@@ -17,6 +17,13 @@ import {
 import { cn } from "@/utils/style";
 import { getMasteryColor, getMasteryLabel } from "@/utils/srs";
 
+const RATING_COLORS: Record<string, string> = {
+  again: "text-rose-500",
+  hard: "text-orange-500",
+  good: "text-blue-500",
+  easy: "text-green-500",
+};
+
 function ReviewHistory() {
   const { t } = useTranslation();
   const [sessions, setSessions] = useState<VocabularyReviewSession[]>([]);
@@ -160,34 +167,48 @@ function ReviewHistory() {
 
             {isExpanded && detail && (
               <div className="border-t px-4 py-3 bg-muted/20">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      {session.correctCount} {t("vocabulary.reviewHistory.correct")}
-                    </span>
+                {detail.mode === "flashcard" && detail.ratingCounts ? (
+                  <div className="flex items-center gap-3 mb-3">
+                    {(["again", "hard", "good", "easy"] as const).map((key) => (
+                      <span key={key} className={cn("text-sm font-medium", RATING_COLORS[key])}>
+                        {t(`vocabulary.reviewHistory.${key}`)}: {detail.ratingCounts![key]}
+                      </span>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <XCircle className="h-4 w-4 text-red-500" />
-                    <span className="text-sm">
-                      {session.totalWords - session.correctCount}{" "}
-                      {t("vocabulary.reviewHistory.incorrect")}
-                    </span>
+                ) : (
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span className="text-sm">
+                        {session.correctCount} {t("vocabulary.reviewHistory.correct")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <XCircle className="h-4 w-4 text-red-500" />
+                      <span className="text-sm">
+                        {session.totalWords - session.correctCount}{" "}
+                        {t("vocabulary.reviewHistory.incorrect")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Trophy className="h-4 w-4 text-yellow-500" />
+                      <span className={cn("text-sm font-medium", getAccuracyColor(session.accuracy))}>
+                        {session.accuracy}% {t("vocabulary.reviewHistory.accuracy")}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Trophy className="h-4 w-4 text-yellow-500" />
-                    <span className={cn("text-sm font-medium", getAccuracyColor(session.accuracy))}>
-                      {session.accuracy}% {t("vocabulary.reviewHistory.accuracy")}
-                    </span>
-                  </div>
-                </div>
+                )}
                 <div className="space-y-1">
                   {detail.results?.map((r, i) => (
                     <div
                       key={i}
                       className="flex items-center gap-2 text-sm py-0.5"
                     >
-                      {r.correct ? (
+                      {detail.mode === "flashcard" && r.rating ? (
+                        <span className={cn("text-xs font-medium w-12 shrink-0", RATING_COLORS[r.rating])}>
+                          {t(`vocabulary.reviewHistory.${r.rating}`)}
+                        </span>
+                      ) : r.correct ? (
                         <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
                       ) : (
                         <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />

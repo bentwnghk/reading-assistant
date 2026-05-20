@@ -1085,6 +1085,10 @@
       "correct": "correct",
       "incorrect": "incorrect",
       "accuracy": "accuracy",
+      "again": "Again",
+      "hard": "Hard",
+      "good": "Good",
+      "easy": "Easy",
       "empty": "No review sessions yet. Complete a review to see your history here."
     }
   },
