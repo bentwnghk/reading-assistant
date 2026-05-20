@@ -15,6 +15,7 @@ const createSchema = z.object({
       correct: z.boolean(),
       masteryBefore: z.number().int().min(0).max(5),
       masteryAfter: z.number().int().min(0).max(5),
+      rating: z.enum(["again", "hard", "good", "easy"]).optional(),
     })
   ),
 });
