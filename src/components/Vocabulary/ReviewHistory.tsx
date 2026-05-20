@@ -13,9 +13,12 @@ import {
   LoaderCircle,
   Clock,
   Trophy,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import { getMasteryColor, getMasteryLabel } from "@/utils/srs";
+import { Button } from "@/components/ui/button";
 
 const RATING_COLORS: Record<string, string> = {
   again: "text-rose-500",
@@ -30,9 +33,11 @@ function ReviewHistory() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<VocabularyReviewSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pageSize, setPageSize] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    fetch("/api/vocabulary/review-sessions?limit=20")
+    fetch("/api/vocabulary/review-sessions?limit=100")
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         setSessions(Array.isArray(data) ? data : []);
@@ -107,6 +112,13 @@ function ReviewHistory() {
     return "text-red-600 dark:text-red-400";
   };
 
+  const totalPages = Math.max(1, Math.ceil(sessions.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const pagedSessions = sessions.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -125,8 +137,9 @@ function ReviewHistory() {
   }
 
   return (
+    <>
     <div className="space-y-2">
-      {sessions.map((session) => {
+      {pagedSessions.map((session) => {
         const isExpanded = expandedId === session.id;
         return (
           <div
@@ -231,6 +244,90 @@ function ReviewHistory() {
         );
       })}
     </div>
+
+    {sessions.length > pageSize && (
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">
+            {t("vocabulary.rowsPerPage")}:
+          </span>
+          {[10, 20, 30, 50].map((size) => (
+            <button
+              key={size}
+              onClick={() => {
+                setPageSize(size);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                "px-2 py-0.5 text-xs rounded transition-colors",
+                pageSize === size
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted"
+              )}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7"
+            disabled={safePage <= 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((p) => {
+              if (totalPages <= 7) return true;
+              if (p === 1 || p === totalPages) return true;
+              return Math.abs(p - safePage) <= 1;
+            })
+            .reduce<(number | "ellipsis")[]>((acc, p, i, arr) => {
+              if (i > 0 && p - (arr[i - 1] as number) > 1) {
+                acc.push("ellipsis");
+              }
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((item, i) =>
+              item === "ellipsis" ? (
+                <span
+                  key={`e${i}`}
+                  className="text-xs text-muted-foreground px-1"
+                >
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={item}
+                  onClick={() => setCurrentPage(item)}
+                  className={cn(
+                    "h-7 w-7 text-xs rounded transition-colors",
+                    safePage === item
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {item}
+                </button>
+              )
+            )}
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7"
+            disabled={safePage >= totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

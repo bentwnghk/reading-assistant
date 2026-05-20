@@ -12,6 +12,8 @@ import {
   Pencil,
   X,
   Play,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +36,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Building2, Search } from "lucide-react";
+import { cn } from "@/utils/style";
 import type { ShareTargetGroup } from "@/lib/shared-sessions";
 
 type ReviewListSummary = {
@@ -71,6 +74,9 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
   const [editWords, setEditWords] = useState<ReviewListWord[]>([]);
   const [editLoading, setEditLoading] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+
+  const [pageSize, setPageSize] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchLists = useCallback(async () => {
     try {
@@ -220,6 +226,13 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
     return sortOrder === "desc" ? -cmp : cmp;
   });
 
+  const totalListPages = Math.max(1, Math.ceil(sortedLists.length / pageSize));
+  const safeListPage = Math.min(currentPage, totalListPages);
+  const pagedLists = sortedLists.slice(
+    (safeListPage - 1) * pageSize,
+    safeListPage * pageSize
+  );
+
   const handleSort = (field: "name" | "date") => {
     if (sortField === field) {
       setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -281,7 +294,7 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedLists.map((list) => (
+            {pagedLists.map((list) => (
               <TableRow key={list.id}>
                 <TableCell className="font-medium">{list.name}</TableCell>
                 <TableCell className="text-muted-foreground">
@@ -335,6 +348,89 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
           </TableBody>
         </Table>
       </div>
+
+      {sortedLists.length > pageSize && (
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">
+              {t("vocabulary.rowsPerPage")}:
+            </span>
+            {[10, 20, 30, 50].map((size) => (
+              <button
+                key={size}
+                onClick={() => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  "px-2 py-0.5 text-xs rounded transition-colors",
+                  pageSize === size
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={safeListPage <= 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalListPages }, (_, i) => i + 1)
+              .filter((p) => {
+                if (totalListPages <= 7) return true;
+                if (p === 1 || p === totalListPages) return true;
+                return Math.abs(p - safeListPage) <= 1;
+              })
+              .reduce<(number | "ellipsis")[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) {
+                  acc.push("ellipsis");
+                }
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((item, i) =>
+                item === "ellipsis" ? (
+                  <span
+                    key={`e${i}`}
+                    className="text-xs text-muted-foreground px-1"
+                  >
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    onClick={() => setCurrentPage(item)}
+                    className={cn(
+                      "h-7 w-7 text-xs rounded transition-colors",
+                      safeListPage === item
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={safeListPage >= totalListPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
         <DialogContent className="max-w-sm">
