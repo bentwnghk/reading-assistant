@@ -157,11 +157,13 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
 
       setSrsCounts((prev) => ({ ...prev, [action]: prev[action] + 1 }));
 
+      const HARDEST: Record<SRSAction, number> = { again: 3, hard: 2, good: 1, easy: 0 };
       const isCorrect = action === "good" || action === "easy";
       const prev = flashcardResultsRef.current.get(current.word);
+      const hardestRating = prev && HARDEST[prev.rating] > HARDEST[action] ? prev.rating : action;
       flashcardResultsRef.current.set(current.word, {
         correct: isCorrect,
-        rating: action,
+        rating: hardestRating,
         attempts: (prev?.attempts ?? 0) + 1,
       });
 
