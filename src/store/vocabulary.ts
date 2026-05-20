@@ -341,10 +341,14 @@ export const useVocabularyStore = create<
       const added = queue.filter(
         (w) => !existingIds.has(w.id) && !wordToExistingId.has(w.word.toLowerCase())
       );
-      const activeIds = new Set(queue.map((w) => w.id));
+      const activeIds = new Set<string>();
       for (const w of queue) {
         const existingId = wordToExistingId.get(w.word.toLowerCase());
-        if (existingId) activeIds.add(existingId);
+        if (existingId) {
+          activeIds.add(existingId);
+        } else {
+          activeIds.add(w.id);
+        }
       }
       return {
         words: [...state.words, ...added],
