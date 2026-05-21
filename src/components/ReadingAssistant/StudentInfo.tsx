@@ -86,19 +86,6 @@ function StudentInfo() {
         </div>
       </div>
       <div className="space-y-4">
-        {status === "authenticated" && session?.user?.name && (
-          <div className="flex items-center gap-1 text-sm">
-            <Label>{t("reading.studentInfo.nameLabel")}:</Label>
-            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold">{session.user.name}</span>
-            {session.user.role && (
-              <>
-                <span className={cn("px-1.5 py-0.5 rounded text-xs font-semibold", getRoleBadgeStyle(session.user.role))}>
-                  {t(`reading.studentInfo.roles.${session.user.role}`)}
-                </span>
-              </>
-            )}
-          </div>
-        )}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label htmlFor="age-slider">
