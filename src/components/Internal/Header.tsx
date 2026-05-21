@@ -39,6 +39,7 @@ import {
   LogOut,
   LogIn,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession, signOut, signIn } from "next-auth/react";
 import { cn } from "@/utils/style";
@@ -265,7 +266,7 @@ function Header() {
     <>
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden">
         <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex justify-between items-center h-14">
-          <h1 className="text-left text-xl font-semibold flex items-center gap-1.5 relative overflow-hidden group">
+          <h1 className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
             <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
             <span className="text-blue-600 dark:text-blue-400">Mr.</span>
             <span className="text-2xl leading-none">🆖</span>
@@ -297,16 +298,17 @@ function Header() {
                 </span>
               )}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-1.5"
-              title={t("dashboard.title")}
-              onClick={() => setOpenDashboard(true)}
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span className="text-sm">{t("dashboard.title")}</span>
-            </Button>
+            <Link href="/vocabulary" prefetch={false}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5"
+                title={t("vocabulary.title")}
+              >
+                <BookOpen className="h-4 w-4" />
+                <span className="text-sm">{t("vocabulary.title")}</span>
+              </Button>
+            </Link>
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -342,9 +344,9 @@ function Header() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/vocabulary")}>
-                    <BookOpen className="h-4 w-4" />
-                    {t("vocabulary.title")}
+                  <DropdownMenuItem onClick={() => setOpenDashboard(true)}>
+                    <BarChart3 className="h-4 w-4" />
+                    {t("dashboard.title")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/leaderboard")}>
                     <Trophy className="h-4 w-4" />
