@@ -321,7 +321,7 @@ function VocabularyContainer() {
 
           {activeTab === "table" && (
             <>
-              <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <div className="flex items-center gap-2 mb-4 flex-wrap justify-end">
                 <AutoSelectPanel />
                 {selectedWordIds.size > 0 && (
                   <>
