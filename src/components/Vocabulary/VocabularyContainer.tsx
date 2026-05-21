@@ -321,9 +321,8 @@ function VocabularyContainer() {
 
           {activeTab === "table" && (
             <>
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <AutoSelectPanel />
-                <div className="flex-1" />
                 {selectedWordIds.size > 0 && (
                   <>
                     <Button
@@ -351,7 +350,7 @@ function VocabularyContainer() {
                 <ExportPanel />
               </div>
               {selectedWordIds.size > 0 && (
-                <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex-wrap">
                   <span className="text-sm font-medium">
                     {t("vocabulary.selectedCount", {
                       count: selectedWordIds.size,

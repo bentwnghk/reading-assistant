@@ -218,7 +218,7 @@ function VocabularyTable() {
             className="pl-9 h-9"
           />
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <Button
             variant={filterRating !== "all" ? "default" : "outline"}
             size="sm"
