@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { User, HelpCircle, Trophy, BarChart3 } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
@@ -13,7 +12,6 @@ import { cn } from "@/utils/style";
 
 function StudentInfo() {
   const { t } = useTranslation();
-  const { data: session, status } = useSession();
   const { studentAge, setStudentAge } = useReadingStore();
   const { setOpenDashboard } = useGlobalStore();
 
@@ -32,16 +30,6 @@ function StudentInfo() {
       18: t("reading.levels.dse"),
     };
     return levelMap[age] || t("reading.levels.form6");
-  }
-
-  function getRoleBadgeStyle(role: string): string {
-    const styleMap: Record<string, string> = {
-      "super-admin": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-      admin: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-      teacher: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      student: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    };
-    return styleMap[role] || "bg-muted text-muted-foreground";
   }
 
   function getLevelColor(age: number): string {
