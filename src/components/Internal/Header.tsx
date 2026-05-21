@@ -43,6 +43,7 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut, signIn } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/Internal/Button";
+import { Button as UiButton } from "@/components/ui/button";
 import { UserManagementButton } from "@/components/UserManagement/UserManagementButton";
 import {
   Dialog,
@@ -320,14 +321,14 @@ function Header() {
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                  <UiButton variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                     <Avatar className="h-7 w-7">
                       <AvatarImage src={session.user.image ?? undefined} alt={session.user.name ?? ""} />
                       <AvatarFallback className="text-xs">
                         {session.user.name?.charAt(0)?.toUpperCase() ?? "U"}
                       </AvatarFallback>
                     </Avatar>
-                  </Button>
+                  </UiButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuLabel className="font-normal">
