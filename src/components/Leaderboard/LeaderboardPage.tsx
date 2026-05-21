@@ -2,12 +2,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import {
   Trophy,
-  RefreshCw,
   ChevronLeft,
-  X,
   HelpCircle,
   Flame,
   BookOpen,
@@ -78,7 +75,6 @@ function formatWeekLabel(weekStart: string, locale: string): string {
 export function LeaderboardPage() {
   const { t, i18n } = useTranslation();
   const { data: authSession } = useSession();
-  const router = useRouter();
   const userId = authSession?.user?.id ?? "";
 
   const [scope, setScope]     = useState<LeaderboardScope>("class");
@@ -92,7 +88,6 @@ export function LeaderboardPage() {
   const [personalLoading, setPersonalLoading] = useState(false);
   const [boardError,   setBoardError]   = useState<string | null>(null);
   const [personalError, setPersonalError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [helpTab, setHelpTab] = useState<"achievements" | "leaderboard">("achievements");
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
@@ -188,12 +183,6 @@ export function LeaderboardPage() {
     if (tab === "me") fetchPersonal();
   }, [tab, fetchPersonal]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([fetchBoard(), tab === "me" ? fetchPersonal() : Promise.resolve()]);
-    setRefreshing(false);
-  };
-
   const scopes: LeaderboardScope[] = ["class", "school", "global"];
 
   return (
@@ -218,25 +207,6 @@ export function LeaderboardPage() {
             </div>
             <p className="text-xs text-muted-foreground">{t("leaderboard.subtitle")}</p>
           </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            title={t("leaderboard.refresh")}
-          >
-            <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/")}
-            title={t("leaderboard.close")}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 

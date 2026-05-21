@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -47,6 +48,7 @@ const COLOR_BORDER: Record<string, string> = {
 
 export default function SharedSessionDialog() {
   const { t } = useTranslation();
+  const router = useRouter();
   const {
     pendingShares,
     showSharedDialog,
@@ -101,6 +103,8 @@ export default function SharedSessionDialog() {
         );
         markShareAccepted();
         toast.success(t("share.acceptSuccess"));
+
+        router.push("/");
 
         if (useSharingStore.getState().pendingShares.length === 0) {
           setShowSharedDialog(false);

@@ -22,7 +22,6 @@ import {
   FileDown,
   ListChecks,
   RotateCcw,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -252,14 +251,6 @@ function VocabularyContainer() {
             </Button>
           </h1>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push("/")}
-          title={t("vocabulary.close")}
-        >
-          <X className="h-4 w-4" />
-        </Button>
       </div>
 
       {isLoading ? (
