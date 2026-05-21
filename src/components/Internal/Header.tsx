@@ -36,12 +36,13 @@ import {
   Bell,
   BookOpenCheck,
   Library,
+  LogOut,
+  LogIn,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut, signIn } from "next-auth/react";
+import { cn } from "@/utils/style";
 import { Button } from "@/components/Internal/Button";
-import { LoginButton } from "@/components/Auth/LoginButton";
 import { UserManagementButton } from "@/components/UserManagement/UserManagementButton";
 import {
   Dialog,
@@ -50,6 +51,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGlobalStore } from "@/store/global";
 import { useReadingStore } from "@/store/reading";
 import { markLastOpenedSession } from "@/store/setting";
@@ -131,7 +141,7 @@ function Header() {
     ]
   );
 
-  const showPulseAnimation = !hasOpenedAbout || !isWorkflowComplete;
+  const _showPulseAnimation = !hasOpenedAbout || !isWorkflowComplete;
 
   useEffect(() => {
     if (!session?.user?.id) return;
@@ -251,30 +261,18 @@ function Header() {
 
   return (
     <>
-      <header className="flex justify-between items-center my-6 max-sm:my-4 print:hidden">
-        <h1 className="text-left text-xl font-semibold flex items-center gap-1.5 relative overflow-hidden group">
-          <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
-          <span className="text-blue-600 dark:text-blue-400">Mr.</span>
-          <span className="text-2xl leading-none">🆖</span>
-          <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative">
-            ProReader
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent animate-shimmer" />
-          </span>
-        </h1>
-        <div className="flex flex-col items-end gap-1">
-          <div className="flex">
-            <Button
-              className={`h-8 w-8 ${showPulseAnimation ? "animate-pulse-ring" : ""}`}
-              variant="ghost"
-              size="icon"
-              title={t("header.about.title")}
-              onClick={() => {
-                setOpenAbout(true);
-                setHasOpenedAbout(true);
-              }}
-            >
-              <Info className="h-5 w-5" />
-            </Button>
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden">
+        <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex justify-between items-center h-14">
+          <h1 className="text-left text-xl font-semibold flex items-center gap-1.5 relative overflow-hidden group">
+            <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
+            <span className="text-blue-600 dark:text-blue-400">Mr.</span>
+            <span className="text-2xl leading-none">🆖</span>
+            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative">
+              ProReader
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent animate-shimmer" />
+            </span>
+          </h1>
+          <div className="flex items-center gap-1">
             <Button
               className="h-8 w-8 relative"
               variant="ghost"
@@ -297,59 +295,97 @@ function Header() {
                 </span>
               )}
             </Button>
-            <Link href="/vocabulary" prefetch={false}>
-              <Button
-                className="h-8 w-8"
-                variant="ghost"
-                size="icon"
-                title={t("vocabulary.title")}
-              >
-                <BookOpen className="h-5 w-5" />
-              </Button>
-            </Link>
             <Button
-              className="h-8 w-8"
               variant="ghost"
-              size="icon"
+              size="sm"
+              className="h-8 gap-1.5"
               title={t("dashboard.title")}
               onClick={() => setOpenDashboard(true)}
             >
-              <BarChart3 className="h-5 w-5" />
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline text-sm">{t("dashboard.title")}</span>
             </Button>
-            <Link href="/leaderboard" prefetch={false}>
-              <Button
-                className="h-8 w-8"
-                variant="ghost"
-                size="icon"
-                title={t("leaderboard.title")}
-              >
-                <Trophy className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Button
-              className="h-8 w-8"
-              title={t("setting.title")}
-              variant="ghost"
-              size="icon"
-              onClick={() => setOpenSetting(true)}
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
             {session?.user?.role && session.user.role !== "student" && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="mr-2"
+                className="h-8 gap-1.5"
                 onClick={() => setOpenTeacherDashboard(true)}
               >
-                <GraduationCap className="h-4 w-4 sm:mr-1" />
-                <span className="hidden sm:inline">{t("teacherDashboard.title")}</span>
+                <GraduationCap className="h-4 w-4" />
+                <span className="hidden sm:inline text-sm">{t("teacherDashboard.title")}</span>
               </Button>
             )}
             <UserManagementButton />
-            <LoginButton />
+            {session?.user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={session.user.image ?? undefined} alt={session.user.name ?? ""} />
+                      <AvatarFallback className="text-xs">
+                        {session.user.name?.charAt(0)?.toUpperCase() ?? "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium leading-none">{session.user.name}</p>
+                        {session.user.role && (
+                          <span className={cn(
+                            "px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none",
+                            {
+                              "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200": session.user.role === "super-admin",
+                              "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200": session.user.role === "admin",
+                              "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200": session.user.role === "teacher",
+                              "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200": session.user.role === "student",
+                            }
+                          )}>
+                            {t(`reading.studentInfo.roles.${session.user.role}`)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs leading-none text-muted-foreground">{session.user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/vocabulary")}>
+                    <BookOpen className="h-4 w-4" />
+                    {t("vocabulary.title")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/leaderboard")}>
+                    <Trophy className="h-4 w-4" />
+                    {t("leaderboard.title")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setOpenSetting(true)}>
+                    <Settings className="h-4 w-4" />
+                    {t("setting.title")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setOpenAbout(true);
+                      setHasOpenedAbout(true);
+                    }}
+                  >
+                    <Info className="h-4 w-4" />
+                    {t("header.about.title")}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="h-4 w-4" />
+                    {t("header.auth.signOut")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button onClick={() => signIn("google")} size="sm" variant="ghost">
+                <LogIn className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t("header.auth.signIn")}</span>
+              </Button>
+            )}
           </div>
         </div>
       </header>

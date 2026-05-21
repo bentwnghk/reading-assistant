@@ -105,9 +105,10 @@ function Home() {
   }
 
   return (
-    <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
+    <>
       <Header />
-      <SettingsBanner />
+      <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
+        <SettingsBanner />
       <main>
         <section id="section-student-info">
           <StudentInfo />
@@ -161,6 +162,7 @@ function Home() {
         <ReviewListShareDialog />
       </aside>
     </div>
+    </>
   );
 }
 
