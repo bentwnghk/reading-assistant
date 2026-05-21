@@ -270,9 +270,9 @@ function Header() {
             <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
             <span className="text-blue-600 dark:text-blue-400">Mr.</span>
             <span className="text-2xl leading-none">🆖</span>
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative">
+            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
               ProReader
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent animate-shimmer" />
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
             </span>
           </h1>
           <div className="flex items-center gap-1">
