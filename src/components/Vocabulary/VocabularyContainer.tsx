@@ -321,8 +321,10 @@ function VocabularyContainer() {
 
           {activeTab === "table" && (
             <>
-              <div className="flex items-center gap-2 mb-4 flex-wrap justify-end">
+              <div className="flex items-center gap-2 mb-4">
                 <AutoSelectPanel />
+                <div className="flex-1" />
+                <div className="flex items-center gap-2 flex-wrap justify-end">
                 {selectedWordIds.size > 0 && (
                   <>
                     <Button
@@ -348,6 +350,7 @@ function VocabularyContainer() {
                   </>
                 )}
                 <ExportPanel />
+                </div>
               </div>
               {selectedWordIds.size > 0 && (
                 <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex-wrap">
