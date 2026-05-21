@@ -7,6 +7,7 @@ import { useSettingStore } from "@/store/setting";
 import { useTheme } from "next-themes";
 import { useLayoutEffect } from "react";
 
+const Header = dynamic(() => import("@/components/Internal/Header"));
 const LeaderboardPage = dynamic(
   () =>
     import("@/components/Leaderboard/LeaderboardPage").then(
@@ -43,7 +44,10 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-background">
-      <LeaderboardPage />
+      <Header />
+      <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
+        <LeaderboardPage />
+      </div>
     </div>
   );
 }

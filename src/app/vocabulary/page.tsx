@@ -7,6 +7,7 @@ import { useSettingStore } from "@/store/setting";
 import { useTheme } from "next-themes";
 import { useLayoutEffect } from "react";
 
+const Header = dynamic(() => import("@/components/Internal/Header"));
 const VocabularyContainer = dynamic(
   () => import("@/components/Vocabulary/VocabularyContainer"),
   { ssr: false }
@@ -40,7 +41,10 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-background">
-      <VocabularyContainer />
+      <Header />
+      <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
+        <VocabularyContainer />
+      </div>
     </div>
   );
 }
