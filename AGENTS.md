@@ -52,6 +52,7 @@ src/
 │   ├── ui/                     # Shadcn UI primitives (do not modify directly)
 │   ├── Internal/               # Custom shared components
 │   ├── ReadingAssistant/       # Core reading assistance feature components
+│   ├── Vocabulary/             # My Vocabulary page components (table, flashcards, quiz, spelling, review lists, export, sharing)
 │   ├── MagicDown/              # Markdown rendering and editing components
 │   ├── Auth/                   # Authentication UI components
 │   ├── Dashboard/              # Student dashboard components
@@ -66,6 +67,8 @@ src/
 │   ├── db.ts                   # PostgreSQL connection pool singleton
 │   ├── sessions.ts             # Session data access
 │   ├── users.ts                # User data access
+│   ├── vocabulary.ts           # Vocabulary data access (CRUD, stats, SRS, review sessions)
+│   ├── review-lists.ts         # Review list CRUD + sharing
 │   ├── achievements.ts         # Achievement logic
 │   ├── activity.ts             # Activity tracking
 │   ├── chatQuestions.ts        # Chat question generation
@@ -92,7 +95,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 ### 1. TypeScript & Types
 
 - **Strict Mode**: `strict: true` is enabled in `tsconfig.json`. Always provide explicit types for function parameters and return values.
-- **Global Types**: Core business logic types (e.g., `ReadingSession`, `ReadingTestQuestion`, `GlossaryEntry`, `UserRole`, `SchoolInfo`, `TextVisibility`, `RepositoryText`) are defined in `src/types.d.ts`. Check this file before creating new interfaces.
+- **Global Types**: Core business logic types (e.g., `ReadingSession`, `ReadingTestQuestion`, `GlossaryEntry`, `VocabularyWord`, `VocabularyReviewSession`, `ReviewList`, `UserRole`, `SchoolInfo`, `TextVisibility`, `RepositoryText`) are defined in `src/types.d.ts`. Check this file before creating new interfaces.
 - **Explicit Any**: While `@typescript-eslint/no-explicit-any` is currently `off`, avoid `any` unless absolutely necessary for external library compatibility. Prefer `unknown` or specific interfaces.
 - **Unused Vars**: `@typescript-eslint/no-unused-vars` is `error`. Prefix intentionally unused variables with `_`.
 - **Zod**: Use **Zod** for schema validation, especially for AI response parsing and API request bodies.
@@ -116,7 +119,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 ### 4. State Management
 
 - **Zustand**: Used for global client-side state and persistence.
-- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts` — all in `src/store/`.
+- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts` — all in `src/store/`.
 - **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`.
 - **Radash**: Use **radash** utilities for common operations like `pick`, `isString`, `isObject`, etc.
 
@@ -173,6 +176,8 @@ API routes are in `src/app/api/`. Key route groups:
 - **`users/*` / `user/*`**: User management and profile.
 - **`classes/*`**: Class management (teacher/student).
 - **`sessions/*`**: Reading session CRUD.
+- **`vocabulary/*`**: Vocabulary CRUD, sync, SRS rating, word sharing, review session history.
+- **`review-lists/*`**: Named review list CRUD + sharing between users.
 - **`leaderboard/*`**: Leaderboard data.
 - **`achievements/*`**: Achievement tracking.
 - **`activity/*`**: User activity logging.
@@ -222,6 +227,84 @@ The project uses **Serwist** (Workbox successor) for service worker support.
 - **Source**: `src/app/sw.ts` — configured with `skipWaiting`, `clientsClaim`, `navigationPreload`, and runtime caching via `defaultCache`.
 - **Build**: During `PHASE_PRODUCTION_BUILD`, `next.config.ts` wraps the config with `withSerwistInit` (swSrc → swDest: `public/sw.js`).
 - **TypeScript**: `tsconfig.json` includes `"webworker"` in `lib` for service worker type support.
+
+---
+
+## My Vocabulary Page (`/vocabulary`)
+
+A dedicated auth-gated page for systematic vocabulary review across all reading sessions. Accessible via the Header `BookOpen` icon (after Bell icon) and a link inside the Glossary section on the main page.
+
+### Database Tables
+
+- **`user_vocabulary`**: Per-user word bank. Columns: `user_id`, `word` (unique per user), `syllabification`, `part_of_speech`, `english_definition`, `chinese_definition`, `example`, `source_session_ids` (JSONB), `shared_by` (FK to `users.id`, NULL = "own"), `srs_counts` (JSONB `{"hard":N,"medium":N}`), `rating` (derived: easy/hard/medium), `mastery_level` (0-5), `review_count`, `correct_count`, `last_reviewed_at`, `next_review_at`.
+- **`vocabulary_review_sessions`**: Review session history. Columns: `id`, `user_id`, `mode` (flashcard/quiz/spelling), `word_count`, `correct_count`, `rating_counts` (JSONB `{"again":N,"hard":N,"good":N,"easy":N}`), `results` (JSONB array), `created_at`.
+- **`review_lists`**: Named word lists. Columns: `id`, `name`, `words` (JSONB array of `ReviewListWord`), `word_count`, `created_by`, `created_at`, `updated_at`.
+- **`shared_review_lists`**: Pending/accepted/rejected review list shares. Columns: `id`, `sender_id`, `recipient_id`, `review_list_id`, `review_list_name`, `word_count`, `status`, `created_at`, `updated_at`.
+
+### Migrations (apply in order)
+
+1. `scripts/add-user-vocabulary.sql` — creates `user_vocabulary` table
+2. `scripts/add-vocabulary-shared-by.sql` — adds `shared_by` column
+3. `scripts/add-vocabulary-review-sessions.sql` — creates `vocabulary_review_sessions` table
+4. `scripts/add-review-lists.sql` — creates `review_lists` and `shared_review_lists` tables
+5. `scripts/add-review-session-rating-counts.sql` — adds `rating_counts` JSONB + `rating` TEXT
+6. `scripts/add-srs-counts.sql` — adds `srs_counts` JSONB to `user_vocabulary`
+7. `scripts/backfill-user-vocabulary.sql` — backfills words from existing sessions
+
+`scripts/init-db.sql` includes all tables for fresh installs.
+
+### SRS (Spaced Repetition) System
+
+- **Algorithm**: Leitner 5-box in `src/utils/srs.ts`
+- **Intervals**: 0 (immediate), 1d, 3d, 7d, 14d, 30d
+- **Rating**: Derived from cumulative `srs_counts`: `again`/`hard` presses → `hard` count, `good` presses → `medium` count, `easy` is dismissal (not counted). Rating logic: both 0 → "easy", hard ≥ medium → "hard", medium > hard → "medium"
+- **Actions**: `recordSRSAction` in `src/lib/vocabulary.ts` auto-inserts words not yet in DB (with `wordData` payload), then updates `srs_counts` via `jsonb_set`
+- **Due for Review**: Words where `next_review_at = 0` (never reviewed) OR `next_review_at <= now()`
+- **Unified flow**: Both main page and vocabulary page flashcards use `onWordAction` → `recordSRSAction`
+
+### Key Components
+
+| Component | Purpose |
+|-----------|---------|
+| `VocabularyContainer.tsx` | Main container — tabs (Table, Flashcards, Quiz, Spelling, Review Lists, History), stats cards, word selection |
+| `VocabularyTable.tsx` | Sortable/filterable word table with source column, bulk selection, review list filtering |
+| `AutoSelectPanel.tsx` | 5 auto-select strategies (due for review, hard words, random, new, oldest reviewed) |
+| `ExportPanel.tsx` | Export to PDF, Word, CSV, text-as-image |
+| `ReviewListsTab.tsx` | CRUD for named review lists, pagination, share button (teachers/admins only) |
+| `ReviewHistory.tsx` | Paginated review session history with per-rating counts, delete with confirmation |
+| `ShareVocabularyDialog.tsx` | Share individual words with same-school users (teachers/admins/super-admins) |
+| `AddToReviewListDialog.tsx` | Add selected words to a review list |
+| `ReviewListShareDialog.tsx` | Share named review lists with same-school users |
+
+### API Routes
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
+| `/api/vocabulary` | GET | Fetch user's vocabulary with stats |
+| `/api/vocabulary/sync` | POST | Sync words from reading sessions to DB |
+| `/api/vocabulary/word` | PATCH | SRS action (rate word), auto-insert if missing |
+| `/api/vocabulary/share` | POST | Share words with other users |
+| `/api/vocabulary/review-sessions` | GET, POST, DELETE | Review session CRUD |
+| `/api/review-lists` | GET, POST, PATCH, DELETE | Review list CRUD |
+| `/api/review-lists/[id]` | GET | Get single review list |
+| `/api/review-lists/share` | POST | Share review list with users |
+| `/api/review-lists/share/pending` | GET | List pending shares (or count) |
+| `/api/review-lists/share/[id]` | PUT | Accept/reject a share |
+
+### Sharing Rules
+
+- **Vocabulary sharing**: Teachers/admins/super-admins can share individual words with same-school users. Super-admins can share with any user.
+- **Review list sharing**: Teachers/admins/super-admins can share named review lists. Share button hidden from students in UI.
+- **Accept flow**: When a student accepts a shared review list, words are written to `user_vocabulary` with `shared_by = sender_id` (teacher source) AND to `review_lists` (recipient's copy).
+- **Role gating**: UI shows share controls conditionally; API rejects non-teacher/admin/super-admin requests.
+
+### Important Implementation Notes
+
+- `recordSRSAction` uses `jsonb_set(srs_counts, ARRAY[$3], ...)` — the `ARRAY[]` wrapper is required to avoid PostgreSQL `text vs text[]` type conflict.
+- `loadReviewListIntoQueue` deduplicates by word text (case-insensitive), not by ID, to prevent duplicate entries.
+- Accepted shared review list words are persisted to `user_vocabulary` on accept (not deferred to first review), so source attribution is correct immediately.
+- The `acceptedReviewListWords` store field bridges the main page to the vocabulary page for review list workflows.
+- Pagination: Table tab uses 25/50/75/100 per page; Review Lists & History tabs use 10/20/30/50.
 
 ---
 

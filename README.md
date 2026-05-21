@@ -295,6 +295,64 @@ Build your word power with interactive tools.
 
 ---
 
+### 📚 My Vocabulary Page (`/vocabulary`)
+
+A dedicated page for **systematic vocabulary review** across all your reading sessions, powered by spaced repetition.
+
+#### Stats Dashboard
+| Card | What It Shows |
+|------|---------------|
+| 📊 **Total Words** | All words in your collection |
+| 🎯 **Due for Review** | Words ready for SRS review today |
+| ✅ **Mastered** | Words at mastery level 5 |
+| 🆕 **New Words** | Words not yet reviewed |
+| 👤 **Own / 👨‍🏫 Teacher** | Words by source |
+
+#### Six Tabs
+| Tab | Purpose |
+|-----|---------|
+| 📋 **Table** | Sortable, filterable word list with bulk selection and source tracking |
+| 🃏 **Flashcards** | SRS-powered review with Again/Hard/Good/Easy ratings |
+| 📝 **Quiz** | Multiple-choice vocabulary quiz across all sessions |
+| 🎮 **Spelling** | 4 spelling game modes with all vocabulary |
+| 📁 **Review Lists** | Create named word lists, share with students (teachers only) |
+| 📜 **History** | Review session history with detailed results and rating counts |
+
+#### Spaced Repetition (SRS)
+Leitner 5-box algorithm tracks when to review each word:
+
+| Mastery Level | Review Interval |
+|---------------|----------------|
+| 0 (New) | Immediate |
+| 1 | 1 day |
+| 2 | 3 days |
+| 3 | 7 days |
+| 4 | 14 days |
+| 5 (Mastered) | 30 days |
+
+- **Correct** → moves up one level → longer interval
+- **Incorrect** → drops one level → shorter interval
+- **Auto-select**: Choose "Due for Review" to practice words that are ready today
+
+#### Review Lists & Sharing (Teachers/Admins)
+| Feature | Description |
+|---------|-------------|
+| 📁 **Create Lists** | Group words into named review lists |
+| 📤 **Share Lists** | Send lists to students in the same school |
+| 📥 **Accept Shares** | Students receive and review shared words |
+| 👨‍🏫 **Source Tracking** | Shared words show as "Teacher" source |
+| 🔒 **Role-Gated** | Share controls visible to teachers/admins/super-admins only |
+
+#### Export & Study Materials
+| Format | Description |
+|--------|-------------|
+| 📄 **PDF** | Print-ready vocabulary list |
+| 📝 **Word (.docx)** | Editable document |
+| 📊 **CSV** | Spreadsheet-compatible |
+| 🖼️ **Image** | Text rendered as image for sharing |
+
+---
+
 ### 🎮 12. Spelling Challenge - 4 Game Modes!
 
 | Mode | How It Works | Best For |
@@ -507,15 +565,18 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes (AI, auth, admin)
 │   ├── leaderboard/       # Leaderboard page
+│   ├── vocabulary/        # My Vocabulary page
 │   └── page.tsx           # Main application
 ├── components/
 │   ├── ui/                # Shadcn UI primitives
 │   ├── Internal/          # Shared components
 │   ├── ReadingAssistant/  # Core feature components
+│   ├── Vocabulary/        # Vocabulary page components
 │   ├── Leaderboard/       # Leaderboard & achievements
 │   └── Provider/          # Context providers
 ├── hooks/                 # Custom React hooks
 ├── store/                 # Zustand state stores
+├── lib/                   # Server-side data access
 ├── utils/                 # Helper functions
 ├── constants/             # App constants
 ├── locales/               # i18n translations
