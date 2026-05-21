@@ -44,7 +44,7 @@ import { useSession, signOut, signIn } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/Internal/Button";
 import { Button as UiButton } from "@/components/ui/button";
-import { UserManagementButton } from "@/components/UserManagement/UserManagementButton";
+import UserManagementPanel from "@/components/UserManagement/UserManagementPanel";
 import {
   Dialog,
   DialogContent,
@@ -96,6 +96,7 @@ function Header() {
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
   const [openAbout, setOpenAbout] = useState<boolean>(false);
   const [openNoPending, setOpenNoPending] = useState<boolean>(false);
+  const [openUserManagement, setOpenUserManagement] = useState<boolean>(false);
   const { setOpenSetting, setOpenDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
@@ -304,20 +305,8 @@ function Header() {
               onClick={() => setOpenDashboard(true)}
             >
               <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline text-sm">{t("dashboard.title")}</span>
+              <span className="text-sm">{t("dashboard.title")}</span>
             </Button>
-            {session?.user?.role && session.user.role !== "student" && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-1.5"
-                onClick={() => setOpenTeacherDashboard(true)}
-              >
-                <GraduationCap className="h-4 w-4" />
-                <span className="hidden sm:inline text-sm">{t("teacherDashboard.title")}</span>
-              </Button>
-            )}
-            <UserManagementButton />
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -361,6 +350,18 @@ function Header() {
                     <Trophy className="h-4 w-4" />
                     {t("leaderboard.title")}
                   </DropdownMenuItem>
+                  {session.user.role && session.user.role !== "student" && (
+                    <>
+                      <DropdownMenuItem onClick={() => setOpenTeacherDashboard(true)}>
+                        <GraduationCap className="h-4 w-4" />
+                        {t("teacherDashboard.title")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setOpenUserManagement(true)}>
+                        <Users className="h-4 w-4" />
+                        {t("userManagement.title")}
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuItem onClick={() => setOpenSetting(true)}>
                     <Settings className="h-4 w-4" />
                     {t("setting.title")}
@@ -767,6 +768,7 @@ function Header() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+      <UserManagementPanel open={openUserManagement} onClose={() => setOpenUserManagement(false)} />
       <input
         ref={fileInputRef}
         type="file"
