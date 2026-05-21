@@ -40,7 +40,7 @@ import {
   LogIn,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut, signIn } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/Internal/Button";
@@ -92,6 +92,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
 function Header() {
   const { t } = useTranslation();
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
@@ -304,6 +305,7 @@ function Header() {
                 size="sm"
                 className="h-8 gap-1.5"
                 title={t("vocabulary.title")}
+                disabled={pathname === "/vocabulary"}
               >
                 <BookOpen className="h-4 w-4" />
                 <span className="text-sm">{t("vocabulary.title")}</span>
@@ -348,7 +350,7 @@ function Header() {
                     <BarChart3 className="h-4 w-4" />
                     {t("dashboard.title")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/leaderboard")}>
+                  <DropdownMenuItem onClick={() => router.push("/leaderboard")} disabled={pathname === "/leaderboard"}>
                     <Trophy className="h-4 w-4" />
                     {t("leaderboard.title")}
                   </DropdownMenuItem>
