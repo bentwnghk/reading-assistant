@@ -140,7 +140,7 @@ export const useVocabularyStore = create<
       selectedWordIds: new Set(state.words.map((w) => w.id)),
     })),
 
-  clearSelection: () => set({ selectedWordIds: new Set() }),
+  clearSelection: () => set({ selectedWordIds: new Set(), reviewQueue: [] }),
 
   autoSelectForReview: (count, strategy) => {
     const { words, filterRating, filterMastery, filterSource } = get();
