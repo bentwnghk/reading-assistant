@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import {
   Trash2,
@@ -52,6 +53,11 @@ interface ReviewListsTabProps {
 
 function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
   const { t } = useTranslation();
+  const { data: session } = useSession();
+  const isTeacherOrAbove =
+    session?.user?.role === "teacher" ||
+    session?.user?.role === "admin" ||
+    session?.user?.role === "super-admin";
   const [lists, setLists] = useState<ReviewListSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<"name" | "date">("date");
@@ -323,15 +329,17 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      title={t("vocabulary.reviewLists.share")}
-                      onClick={() => openShare(list)}
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
+                    {isTeacherOrAbove && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title={t("vocabulary.reviewLists.share")}
+                        onClick={() => openShare(list)}
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
