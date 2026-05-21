@@ -1,4 +1,5 @@
 "use client";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -69,6 +70,12 @@ import { downloadFile } from "@/utils/file";
 import { useSharingStore } from "@/store/sharing";
 import { useVocabularyStore } from "@/store/vocabulary";
 
+const Setting = dynamic(() => import("@/components/Setting"));
+const History = dynamic(() => import("@/components/Dashboard/Dashboard"));
+const TeacherDashboard = dynamic(() => import("@/components/TeacherDashboard/TeacherDashboard"));
+const SharedSessionDialog = dynamic(() => import("@/components/Dashboard/SharedSessionDialog"));
+const ReviewListShareDialog = dynamic(() => import("@/components/Vocabulary/ReviewListShareDialog"));
+
 function getSafeFilename(value: string): string {
   return (
     value
@@ -99,7 +106,7 @@ function Header() {
   const [openAbout, setOpenAbout] = useState<boolean>(false);
   const [openNoPending, setOpenNoPending] = useState<boolean>(false);
   const [openUserManagement, setOpenUserManagement] = useState<boolean>(false);
-  const { setOpenSetting, setOpenDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
+  const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
     pendingReviewListShareCount,
@@ -267,7 +274,7 @@ function Header() {
     <>
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden">
         <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex justify-between items-center h-14">
-          <h1 className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
+          <Link href="/" className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
             <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
             <span className="text-blue-600 dark:text-blue-400">Mr.</span>
             <span className="text-2xl leading-none">🆖</span>
@@ -275,7 +282,7 @@ function Header() {
               ProReader
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
             </span>
-          </h1>
+          </Link>
           <div className="flex items-center gap-1">
             <Button
               className="h-8 w-8 relative"
@@ -773,6 +780,11 @@ function Header() {
         </DialogContent>
       </Dialog>
       <UserManagementPanel open={openUserManagement} onClose={() => setOpenUserManagement(false)} />
+      <Setting open={openSetting} onClose={() => setOpenSetting(false)} />
+      <History open={openDashboard} onClose={() => setOpenDashboard(false)} />
+      <TeacherDashboard open={openTeacherDashboard} onClose={() => setOpenTeacherDashboard(false)} />
+      <SharedSessionDialog />
+      <ReviewListShareDialog />
       <input
         ref={fileInputRef}
         type="file"

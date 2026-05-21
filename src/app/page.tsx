@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { LoaderCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
 import { useHistoryStore } from "@/store/history";
 import { setHistorySyncFn, useReadingStore, isRestoreComplete } from "@/store/reading";
@@ -18,9 +17,6 @@ import { LandingPage } from "@/components/Auth/LandingPage";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
 const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
-const Setting = dynamic(() => import("@/components/Setting"));
-const History = dynamic(() => import("@/components/Dashboard/Dashboard"));
-const TeacherDashboard = dynamic(() => import("@/components/TeacherDashboard/TeacherDashboard"));
 const StudentInfo = dynamic(() => import("@/components/ReadingAssistant/StudentInfo"));
 const ImageUpload = dynamic(() => import("@/components/ReadingAssistant/ImageUpload"));
 const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/WorkflowProgress"));
@@ -32,14 +28,10 @@ const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"))
 const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
 const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
-const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
-const SharedSessionDialog = dynamic(() => import("@/components/Dashboard/SharedSessionDialog"));
-const ReviewListShareDialog = dynamic(() => import("@/components/Vocabulary/ReviewListShareDialog"));
 
 function Home() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
-  const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard } = useGlobalStore();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
   const { extractedText, docTitle } = useReadingStore();
@@ -153,14 +145,6 @@ function Home() {
           {t("privacyPolicy")}
         </Link>
       </footer>
-      <aside className="print:hidden">
-        <Setting open={openSetting} onClose={() => setOpenSetting(false)} />
-        <History open={openDashboard} onClose={() => setOpenDashboard(false)} />
-        <TeacherDashboard open={openTeacherDashboard} onClose={() => setOpenTeacherDashboard(false)} />
-        <LearningRecommendationDialog />
-        <SharedSessionDialog />
-        <ReviewListShareDialog />
-      </aside>
     </div>
     </>
   );
