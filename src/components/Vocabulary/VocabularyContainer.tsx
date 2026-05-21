@@ -3,7 +3,6 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import {
-  ArrowLeft,
   BookMarked,
   Table,
   Layers,
@@ -23,6 +22,7 @@ import {
   FileDown,
   ListChecks,
   RotateCcw,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -238,11 +238,6 @@ function VocabularyContainer() {
     <div className="max-w-screen-lg mx-auto px-4 py-4">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Link href="/">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
           <h1 className="text-xl font-semibold flex items-center gap-2">
             <BookMarked className="h-5 w-5 text-indigo-500" />
             {t("vocabulary.title")}
@@ -257,6 +252,14 @@ function VocabularyContainer() {
             </Button>
           </h1>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push("/")}
+          title={t("vocabulary.close")}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
       {isLoading ? (

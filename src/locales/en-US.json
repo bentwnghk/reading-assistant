@@ -940,6 +940,7 @@
   },
   "vocabulary": {
     "title": "My Vocabulary",
+    "close": "Back to app",
     "tabTable": "Table",
     "tabFlashcard": "Flashcard",
     "tabSpelling": "Spelling",

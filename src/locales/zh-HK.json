@@ -946,6 +946,7 @@
   },
   "vocabulary": {
     "title": "我的詞彙",
+    "close": "返回應用程式",
     "tabTable": "表格",
     "tabFlashcard": "字卡",
     "tabSpelling": "拼寫",
