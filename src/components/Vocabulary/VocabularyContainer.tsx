@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useSession } from "next-auth/react";
 import {
   ArrowLeft,
   BookMarked,
@@ -67,6 +68,11 @@ const toEntry = (w: { word: string; syllabification?: string; partOfSpeech: stri
 
 function VocabularyContainer() {
   const { t } = useTranslation();
+  const { data: session } = useSession();
+  const isTeacherOrAbove =
+    session?.user?.role === "teacher" ||
+    session?.user?.role === "admin" ||
+    session?.user?.role === "super-admin";
   const {
     words,
     stats,
@@ -329,15 +335,17 @@ function VocabularyContainer() {
                       <ListPlus className="h-4 w-4 mr-1" />
                       {t("vocabulary.reviewLists.addToList")}
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9"
-                      onClick={() => setShareOpen(true)}
-                    >
-                      <Share2 className="h-4 w-4 mr-1" />
-                      {t("vocabulary.share.button")}
-                    </Button>
+                    {isTeacherOrAbove && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9"
+                        onClick={() => setShareOpen(true)}
+                      >
+                        <Share2 className="h-4 w-4 mr-1" />
+                        {t("vocabulary.share.button")}
+                      </Button>
+                    )}
                   </>
                 )}
                 <ExportPanel />
