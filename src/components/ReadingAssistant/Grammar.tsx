@@ -19,6 +19,8 @@ import {
   Flame,
   FileDown,
   ChevronDown,
+  ArrowLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Document,
@@ -50,6 +52,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Popover,
   PopoverContent,
@@ -229,6 +232,8 @@ function Grammar() {
     grammarHighlightTopicId,
     setGrammarHighlightEnabled,
     setGrammarHighlightTopicId,
+    grammarQuizMode,
+    setGrammarQuizMode,
   } = useReadingStore();
   const { status, analyzeGrammarTopics, generateGrammarQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer } = useReadingAssistant();
   const { data: session } = useSession();
@@ -241,6 +246,7 @@ function Grammar() {
   const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [exportSections, setExportSections] = useState<Set<string>>(new Set());
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const isAnalyzing = status === "grammar";
 
@@ -260,6 +266,7 @@ function Grammar() {
   const handleStartQuiz = useCallback(() => {
     setQuizState("in-progress");
     setShowReview(false);
+    setCurrentQuestionIndex(0);
   }, []);
 
   const handleSubmitQuiz = useCallback(async () => {
@@ -294,6 +301,7 @@ function Grammar() {
     );
     setQuizState("in-progress");
     setShowReview(false);
+    setCurrentQuestionIndex(0);
   }, [grammarQuiz]);
 
   const handleHighlightTopic = useCallback(
@@ -863,6 +871,18 @@ function Grammar() {
     </Accordion>
   );
 
+  const goToNext = () => {
+    if (currentQuestionIndex < grammarQuiz.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    }
+  };
+
+  const goToPrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+    }
+  };
+
   const renderQuizContent = () => {
     if (quizState === "idle") {
       if (grammarQuiz.length === 0) {
@@ -872,17 +892,39 @@ function Grammar() {
               {t("reading.grammar.quiz.ready", { count: 0 })}
             </p>
             <Button onClick={handleGenerateQuiz} disabled={isGeneratingQuiz || isAnalyzing}>
-              {isGeneratingQuiz ? <LoaderCircle className="h-4 w-4 animate-spin" /> : t("reading.grammar.quiz.generate")}
+              {isGeneratingQuiz ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                  <span>{t("reading.grammar.quiz.generating")}</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>{t("reading.grammar.quiz.generate")}</span>
+                </>
+              )}
             </Button>
           </div>
         );
       }
       return (
-        <div className="text-center py-6">
-          <p className="text-sm text-muted-foreground mb-4">
+        <div className="text-center py-6 space-y-6">
+          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+            <div className="space-y-1">
+              <p className="font-medium">{t("reading.grammar.quiz.questionByQuestion")}</p>
+              <p className="text-sm text-muted-foreground">{t("reading.grammar.quiz.modeDesc")}</p>
+            </div>
+            <Switch
+              checked={grammarQuizMode === "question-by-question"}
+              onCheckedChange={(checked: boolean) => setGrammarQuizMode(checked ? "question-by-question" : "all-at-once")}
+            />
+          </div>
+
+          <p className="text-sm text-muted-foreground">
             {t("reading.grammar.quiz.ready", { count: grammarQuiz.length })}
           </p>
-          <Button onClick={handleStartQuiz}>
+          <Button onClick={handleStartQuiz} size="lg">
+            <CheckCircle2 className="h-5 w-5 mr-2" />
             {t("reading.grammar.quiz.start")}
           </Button>
           {_grammarQuizCompleted && grammarQuizScore > 0 && (
@@ -1014,6 +1056,108 @@ function Grammar() {
 
     const allAnswered = grammarQuiz.every((q) => q.userAnswer?.trim());
 
+    const renderQuestion = (q: GrammarQuizQuestion, i: number) => (
+      <div key={q.id} className="border rounded-lg p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge variant="outline" className="text-xs">
+            {t(`reading.grammar.quiz.types.${q.type}`)}
+          </Badge>
+          {q.type !== "identify" && (
+            <Badge variant="secondary" className="text-xs">{q.topicName}</Badge>
+          )}
+        </div>
+        <p className="text-sm font-medium mb-3">
+          {i + 1}. {q.question}
+        </p>
+
+        {q.type === "identify" || q.type === "error-spot" ? (
+          <RadioGroup
+            value={q.userAnswer || ""}
+            onValueChange={(val) =>
+              useReadingStore.getState().setGrammarQuizAnswer(q.id, val)
+            }
+          >
+            {q.options?.map((opt, oi) => (
+              <div key={oi} className="flex items-center gap-2 mb-1.5">
+                <RadioGroupItem value={opt.charAt(0)} id={`${q.id}-${oi}`} />
+                <Label htmlFor={`${q.id}-${oi}`} className="text-sm font-normal cursor-pointer">
+                  {opt}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        ) : (
+          <Input
+            placeholder={t("reading.grammar.quiz.typeAnswer")}
+            value={q.userAnswer || ""}
+            onChange={(e) =>
+              useReadingStore.getState().setGrammarQuizAnswer(q.id, e.target.value)
+            }
+            className="text-sm"
+          />
+        )}
+      </div>
+    );
+
+    if (grammarQuizMode === "question-by-question") {
+      const currentQuestion = grammarQuiz[currentQuestionIndex];
+      const currentAnswer = currentQuestion?.userAnswer;
+
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>
+                {t("reading.grammar.quiz.question")} {currentQuestionIndex + 1}{" "}
+                {t("reading.grammar.quiz.of")} {grammarQuiz.length}
+              </span>
+              <span>
+                {t("reading.grammar.quiz.pressKey")} →/←
+              </span>
+            </div>
+            <Progress value={((currentQuestionIndex + 1) / grammarQuiz.length) * 100} className="h-2" />
+          </div>
+
+          {currentQuestion && renderQuestion(currentQuestion, currentQuestionIndex)}
+
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={goToPrevious}
+              disabled={currentQuestionIndex === 0}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t("reading.grammar.quiz.previous")}
+            </Button>
+
+            {currentQuestionIndex === grammarQuiz.length - 1 ? (
+              <Button
+                onClick={handleSubmitQuiz}
+                disabled={!allAnswered || evaluatingId !== null}
+              >
+                {evaluatingId ? (
+                  <>
+                    <LoaderCircle className="h-4 w-4 animate-spin mr-2" />
+                    {t("reading.grammar.quiz.evaluating")}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    {t("reading.grammar.quiz.submit")}
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button onClick={goToNext} disabled={!currentAnswer}>
+                {t("reading.grammar.quiz.next")}
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
@@ -1021,48 +1165,7 @@ function Grammar() {
         </p>
 
         <div className="space-y-4">
-          {grammarQuiz.map((q, i) => (
-            <div key={q.id} className="border rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="text-xs">
-                  {t(`reading.grammar.quiz.types.${q.type}`)}
-                </Badge>
-                {q.type !== "identify" && (
-                  <Badge variant="secondary" className="text-xs">{q.topicName}</Badge>
-                )}
-              </div>
-              <p className="text-sm font-medium mb-3">
-                {i + 1}. {q.question}
-              </p>
-
-              {q.type === "identify" || q.type === "error-spot" ? (
-                <RadioGroup
-                  value={q.userAnswer || ""}
-                  onValueChange={(val) =>
-                    useReadingStore.getState().setGrammarQuizAnswer(q.id, val)
-                  }
-                >
-                  {q.options?.map((opt, oi) => (
-                    <div key={oi} className="flex items-center gap-2 mb-1.5">
-                      <RadioGroupItem value={opt.charAt(0)} id={`${q.id}-${oi}`} />
-                      <Label htmlFor={`${q.id}-${oi}`} className="text-sm font-normal cursor-pointer">
-                        {opt}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              ) : (
-                <Input
-                  placeholder={t("reading.grammar.quiz.typeAnswer")}
-                  value={q.userAnswer || ""}
-                  onChange={(e) =>
-                    useReadingStore.getState().setGrammarQuizAnswer(q.id, e.target.value)
-                  }
-                  className="text-sm"
-                />
-              )}
-            </div>
-          ))}
+          {grammarQuiz.map((q, i) => renderQuestion(q, i))}
         </div>
 
         <div className="flex justify-center">
@@ -1216,9 +1319,11 @@ function Grammar() {
                 <CheckCircle2 className="h-4 w-4" />
               )}
               <span>
-                {grammarQuiz.length > 0
-                  ? t("reading.grammar.quiz.regenerate")
-                  : t("reading.grammar.quiz.generate")}
+                {isGeneratingQuiz
+                  ? t("reading.grammar.quiz.generating")
+                  : grammarQuiz.length > 0
+                    ? t("reading.grammar.quiz.regenerate")
+                    : t("reading.grammar.quiz.generate")}
               </span>
             </Button>
           )}

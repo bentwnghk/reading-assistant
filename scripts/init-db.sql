@@ -119,6 +119,7 @@ CREATE TABLE reading_sessions (
   grammar_quiz_completed_at BIGINT DEFAULT 0,
   grammar_highlight_enabled BOOLEAN DEFAULT false,
   grammar_highlight_topic_id TEXT DEFAULT NULL,
+  grammar_quiz_mode TEXT NOT NULL DEFAULT 'all-at-once',
   grammar_scramble_high_score  INTEGER DEFAULT 0,
   grammar_workshop_high_score  INTEGER DEFAULT 0,
   grammar_surgery_high_score   INTEGER DEFAULT 0,

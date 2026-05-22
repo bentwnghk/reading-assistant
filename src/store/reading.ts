@@ -136,6 +136,7 @@ export interface ReadingStore {
   grammarQuizCompletedAt: number;
   grammarHighlightEnabled: boolean;
   grammarHighlightTopicId: string | null;
+  grammarQuizMode: ReadingTestMode;
   // Grammar Games — scores & per-game accuracy
   grammarScrambleHighScore: number;
   grammarWorkshopHighScore: number;
@@ -223,6 +224,7 @@ interface ReadingActions {
   setGrammarQuizPoints: (earned: number, total: number) => void;
   setGrammarHighlightEnabled: (enabled: boolean) => void;
   setGrammarHighlightTopicId: (topicId: string | null) => void;
+  setGrammarQuizMode: (mode: ReadingTestMode) => void;
   // Grammar Games
   setGrammarScrambleHighScore: (score: number, accuracy: number) => void;
   setGrammarWorkshopHighScore: (score: number, accuracy: number) => void;
@@ -289,6 +291,7 @@ const defaultValues: ReadingStore = {
   grammarQuizCompletedAt: 0,
   grammarHighlightEnabled: false,
   grammarHighlightTopicId: null,
+  grammarQuizMode: "all-at-once",
   grammarScrambleHighScore: 0,
   grammarWorkshopHighScore: 0,
   grammarSurgeryHighScore: 0,
@@ -742,6 +745,18 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             grammarHighlightTopicId: topicId,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarQuizMode: (mode) =>
+        set((state) => {
+          const newState = {
+            grammarQuizMode: mode,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

@@ -30,6 +30,7 @@ export async function createReadingSession(
         grammar_quiz_earned_points, grammar_quiz_total_points,
         grammar_generated_at, grammar_quiz_completed_at,
         grammar_highlight_enabled, grammar_highlight_topic_id,
+        grammar_quiz_mode,
         grammar_scramble_high_score, grammar_workshop_high_score,
         grammar_surgery_high_score, grammar_roulette_high_score,
         grammar_duel_high_score, grammar_game_accuracy,
@@ -44,7 +45,7 @@ export async function createReadingSession(
         grammar_scramble_challenges, grammar_workshop_challenges,
         grammar_game_questions,
         created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66)
       ON CONFLICT (id) DO UPDATE SET
         doc_title = EXCLUDED.doc_title,
         student_age = EXCLUDED.student_age,
@@ -86,6 +87,7 @@ export async function createReadingSession(
         grammar_quiz_completed_at = EXCLUDED.grammar_quiz_completed_at,
         grammar_highlight_enabled = EXCLUDED.grammar_highlight_enabled,
         grammar_highlight_topic_id = EXCLUDED.grammar_highlight_topic_id,
+        grammar_quiz_mode = EXCLUDED.grammar_quiz_mode,
         grammar_scramble_high_score = EXCLUDED.grammar_scramble_high_score,
         grammar_workshop_high_score = EXCLUDED.grammar_workshop_high_score,
         grammar_surgery_high_score = EXCLUDED.grammar_surgery_high_score,
@@ -151,6 +153,7 @@ export async function createReadingSession(
         sessionData.grammarQuizCompletedAt ?? 0,
         sessionData.grammarHighlightEnabled ?? false,
         sessionData.grammarHighlightTopicId ?? null,
+        sessionData.grammarQuizMode ?? "all-at-once",
         sessionData.grammarScrambleHighScore ?? 0,
         sessionData.grammarWorkshopHighScore ?? 0,
         sessionData.grammarSurgeryHighScore ?? 0,
@@ -289,6 +292,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
       grammarHighlightEnabled: row.grammar_highlight_enabled ?? false,
       grammarHighlightTopicId: row.grammar_highlight_topic_id ?? null,
+      grammarQuizMode: row.grammar_quiz_mode ?? "all-at-once",
       grammarScrambleHighScore: row.grammar_scramble_high_score ?? 0,
       grammarWorkshopHighScore: row.grammar_workshop_high_score ?? 0,
       grammarSurgeryHighScore: row.grammar_surgery_high_score ?? 0,
@@ -408,6 +412,7 @@ export async function getReadingSession(
       grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
       grammarHighlightEnabled: row.grammar_highlight_enabled ?? false,
       grammarHighlightTopicId: row.grammar_highlight_topic_id ?? null,
+      grammarQuizMode: row.grammar_quiz_mode ?? "all-at-once",
       grammarScrambleHighScore: row.grammar_scramble_high_score ?? 0,
       grammarWorkshopHighScore: row.grammar_workshop_high_score ?? 0,
       grammarSurgeryHighScore: row.grammar_surgery_high_score ?? 0,
@@ -504,6 +509,7 @@ export async function updateReadingSession(
       grammarQuizCompletedAt: "grammar_quiz_completed_at",
       grammarHighlightEnabled: "grammar_highlight_enabled",
       grammarHighlightTopicId: "grammar_highlight_topic_id",
+      grammarQuizMode: "grammar_quiz_mode",
       grammarScrambleHighScore: "grammar_scramble_high_score",
       grammarWorkshopHighScore: "grammar_workshop_high_score",
       grammarSurgeryHighScore: "grammar_surgery_high_score",
