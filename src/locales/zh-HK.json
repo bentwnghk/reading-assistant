@@ -1446,6 +1446,7 @@
     "grammarModel": "語法模型",
     "tutorModel": "AI 導師模型",
     "ttsVoice": "語音選擇",
+    "ttsPlaybackRate": "播放速度",
     "autoSpeakFlashcard": "自動朗讀字卡",
     "autoSpeakFlashcardTip": "當字卡載入時自動朗讀生字",
     "cheatMode": "越獄模式",

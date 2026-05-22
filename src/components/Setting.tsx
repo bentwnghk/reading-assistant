@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES, TTS_PLAYBACK_RATES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -72,6 +72,7 @@ const formSchema = z.object({
   grammarModel: z.enum(AVAILABLE_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
   ttsVoice: z.enum(TTS_VOICES),
+  ttsPlaybackRate: z.union([z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1.0)]),
   autoSpeakFlashcard: z.boolean().optional(),
   cheatMode: z.boolean().optional(),
   showGiveAnswer: z.boolean().optional(),
@@ -980,6 +981,38 @@ function Setting({ open, onClose }: SettingProps) {
                             {TTS_VOICES.map((voice) => (
                               <SelectItem key={voice} value={voice}>
                                 {voice}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="ttsPlaybackRate"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.ttsPlaybackRate")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={String(field.value)}
+                          onValueChange={(value) => {
+                            const numValue = parseFloat(value) as import("@/store/setting").TTSPlaybackRate;
+                            field.onChange(numValue);
+                            updateSetting("ttsPlaybackRate", numValue);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TTS_PLAYBACK_RATES.map((rate) => (
+                              <SelectItem key={rate} value={String(rate)}>
+                                {rate}x
                               </SelectItem>
                             ))}
                           </SelectContent>

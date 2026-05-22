@@ -26,6 +26,10 @@ export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] 
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
 
+export const TTS_PLAYBACK_RATES = [0.25, 0.5, 0.75, 1.0] as const;
+
+export type TTSPlaybackRate = (typeof TTS_PLAYBACK_RATES)[number];
+
 export type ApiMode = "local" | "proxy" | "subscription" | "";
 
 export interface SettingStore {
@@ -42,6 +46,7 @@ export interface SettingStore {
   grammarModel: AvailableModel;
   tutorModel: TutorModel;
   ttsVoice: TTSVoice;
+  ttsPlaybackRate: TTSPlaybackRate;
   autoSpeakFlashcard: boolean;
   cheatMode: boolean;
   showGiveAnswer: boolean;
@@ -137,6 +142,7 @@ export const defaultValues: SettingStore = {
   grammarModel: "deepseek-v4-flash",
   tutorModel: "gpt-5.4-mini",
   ttsVoice: "alloy",
+  ttsPlaybackRate: 1.0 as TTSPlaybackRate,
   autoSpeakFlashcard: true,
   cheatMode: false,
   showGiveAnswer: false,

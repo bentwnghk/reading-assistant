@@ -1440,6 +1440,7 @@
     "grammarModel": "Grammar Model",
     "tutorModel": "AI Tutor Model",
     "ttsVoice": "TTS Voice",
+    "ttsPlaybackRate": "Playback Speed",
     "autoSpeakFlashcard": "Auto-speak Flashcard",
     "autoSpeakFlashcardTip": "Automatically read the word aloud when a flashcard loads",
     "cheatMode": "Jailbreak Mode",

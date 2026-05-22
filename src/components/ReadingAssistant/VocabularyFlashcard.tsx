@@ -31,7 +31,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
   const { t } = useTranslation();
   const { id, glossaryRatings, incrementFlashcardReviewCount } = useReadingStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
-  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
+  const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
@@ -221,7 +221,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         await new Promise<void>((resolve, reject) => {
           const audio = new Audio();
           audioRef.current = audio;
-          audio.oncanplay = () => audio.play().then(resolve).catch(reject);
+          audio.oncanplay = () => { audio.playbackRate = ttsPlaybackRate; audio.play().then(resolve).catch(reject); };
           audio.onended = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; };
           audio.onerror = () => {
             URL.revokeObjectURL(audioUrl);
@@ -237,7 +237,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         setIsTTSLoading(false);
       }
     },
-    [ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
   );
 
   const handleSpeak = useCallback(

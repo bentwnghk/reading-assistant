@@ -141,7 +141,7 @@ function SpellingResultScreen({
 
 function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete }: VocabularySpellingProps) {
   const { t } = useTranslation();
-  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
+  const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
@@ -388,6 +388,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
         audioRef.current = audio;
 
         audio.oncanplay = () => {
+          audio.playbackRate = ttsPlaybackRate;
           audio.play().then(resolve).catch(reject);
         };
 
@@ -410,7 +411,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
     } finally {
       setIsTTSLoading(false);
     }
-  }, [ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+  }, [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
 
   const checkAnswer = useCallback(() => {
     if (!currentChallenge) return;

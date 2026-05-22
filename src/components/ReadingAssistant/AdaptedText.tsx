@@ -339,6 +339,7 @@ function AdaptedText() {
 
   const {
     ttsVoice,
+    ttsPlaybackRate,
     mode,
     openaicompatibleApiKey,
     accessPassword,
@@ -833,6 +834,7 @@ function AdaptedText() {
           audioRef.current = audio;
 
           audio.oncanplay = () => {
+            audio.playbackRate = ttsPlaybackRate;
             audio.play().then(resolve).catch(reject);
           };
 
@@ -862,6 +864,7 @@ function AdaptedText() {
     [
       selection,
       ttsVoice,
+      ttsPlaybackRate,
       mode,
       openaicompatibleApiKey,
       accessPassword,
@@ -1082,7 +1085,7 @@ function AdaptedText() {
         await new Promise<void>((resolve, reject) => {
           const audio = new Audio();
           audioRef.current = audio;
-          audio.oncanplay = () => audio.play().then(resolve).catch(reject);
+          audio.oncanplay = () => { audio.playbackRate = ttsPlaybackRate; audio.play().then(resolve).catch(reject); };
           audio.onended = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; };
           audio.onerror = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; reject(new Error("Audio error")); };
           audio.src = audioUrl;
@@ -1094,7 +1097,7 @@ function AdaptedText() {
         setIsTTSLoading(false);
       }
     },
-    [glossaryPopover, ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
+    [glossaryPopover, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
   );
 
   const setContainerRef = useCallback(

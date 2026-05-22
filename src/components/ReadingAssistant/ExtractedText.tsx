@@ -96,7 +96,7 @@ function ExtractedText() {
     setSentenceAnalysis,
     getSentenceAnalysis
   } = useReadingStore();
-  const { ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, sentenceAnalysisModel } = useSettingStore();
+  const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, sentenceAnalysisModel } = useSettingStore();
   const { createModelProvider } = useModelProvider();
   const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -235,6 +235,7 @@ function ExtractedText() {
         audioRef.current = audio;
 
         audio.oncanplay = () => {
+          audio.playbackRate = ttsPlaybackRate;
           audio.play().then(resolve).catch(reject);
         };
 
@@ -260,7 +261,7 @@ function ExtractedText() {
     } finally {
       setIsTTSLoading(false);
     }
-  }, [selection, ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+  }, [selection, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
 
   const handleAnalyzeSentence = useCallback(async (e?: React.MouseEvent | React.TouchEvent) => {
     e?.preventDefault();
