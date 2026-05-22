@@ -690,6 +690,7 @@ Generate 10 grammar quiz questions. You MUST respond with ONLY a valid JSON arra
 - For rewrite: accept any grammatically correct answer (AI will evaluate)
 - Points: identify/error-spot = 1, fill-in/rewrite = 2
 - CRITICAL: For questions with options (identify, error-spot), the correct answer MUST be evenly distributed across ALL option positions (A, B, C, D). Do NOT bias toward A or B. Randomize the position of the correct answer for every question.
+- CRITICAL: Do NOT reference "underlined" or "the underlined part" in any question. When you need to highlight a specific word or phrase within a sentence, wrap it in **double asterisks**. For example: "Identify the grammar structure used in **has lived** in this sentence: 'She has lived here for ten years.'"
 - Chinese translations are REQUIRED for all questions
 - Use Traditional Chinese (繁體中文) for all Chinese text
 - Make questions age-appropriate

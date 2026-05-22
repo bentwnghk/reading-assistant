@@ -108,6 +108,27 @@ function getQuizTier(score: number) {
   return "keepGoing";
 }
 
+const BOLD_MARKER_RE = /(\*\*[^*]+\*\*)/g;
+
+function renderFormattedText(text: string) {
+  const parts = text.split(BOLD_MARKER_RE);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <u key={i} className="font-semibold">{part.slice(2, -2)}</u>;
+    }
+    return part;
+  });
+}
+
+function questionToTextRuns(text: string): TextRun[] {
+  return text.split(BOLD_MARKER_RE).map((part) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return new TextRun({ text: part.slice(2, -2), underline: {} });
+    }
+    return new TextRun({ text: part });
+  });
+}
+
 const QUIZ_TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: string; ring: string; glow: string; badgeBg: string; particleColor: string; gradient: string }> = {
   master:      { emoji: "👑", icon: Crown, color: "text-amber-600 dark:text-amber-400", ring: "ring-4 ring-amber-400/60", glow: "shadow-amber-400/50", badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", particleColor: "#fbbf24", gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)" },
   great:        { emoji: "🌟", icon: Star, color: "text-emerald-600 dark:text-emerald-400", ring: "ring-4 ring-emerald-400/50", glow: "shadow-emerald-400/40", badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", particleColor: "#34d399", gradient: "linear-gradient(135deg, rgba(167,243,208,0.15) 0%, rgba(52,211,153,0.08) 50%, rgba(167,243,208,0.15) 100%)" },
@@ -558,7 +579,10 @@ function Grammar() {
 
           children.push(
             new Paragraph({
-              text: `${index + 1}. ${q.question}`,
+              children: [
+                new TextRun({ text: `${index + 1}. ` }),
+                ...questionToTextRuns(q.question),
+              ],
               heading: HeadingLevel.HEADING_3,
               spacing: { before: 200, after: 80 },
             })
@@ -611,7 +635,10 @@ function Grammar() {
 
           children.push(
             new Paragraph({
-              text: `${index + 1}. ${q.question}`,
+              children: [
+                new TextRun({ text: `${index + 1}. ` }),
+                ...questionToTextRuns(q.question),
+              ],
               heading: HeadingLevel.HEADING_3,
               spacing: { before: 200, after: 80 },
             })
@@ -1020,7 +1047,7 @@ function Grammar() {
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">
-                          {i + 1}. {q.question}
+                          {i + 1}. {renderFormattedText(q.question)}
                         </p>
                         <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
                           <p>
@@ -1067,7 +1094,7 @@ function Grammar() {
           )}
         </div>
         <p className="text-sm font-medium mb-3">
-          {i + 1}. {q.question}
+          {i + 1}. {renderFormattedText(q.question)}
         </p>
 
         {q.type === "identify" || q.type === "error-spot" ? (
