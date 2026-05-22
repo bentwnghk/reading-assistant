@@ -21,6 +21,7 @@ import {
   Star,
   Zap,
   Heart,
+  ListChecks,
 } from "lucide-react";
 import {
   Document,
@@ -759,7 +760,10 @@ function ReadingTest() {
         <div className="space-y-6 py-4">
           <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
             <div className="space-y-1">
-              <p className="font-medium">{t("reading.readingTest.questionByQuestion")}</p>
+              <div className="flex items-center gap-2">
+                <ListChecks className="h-4 w-4" />
+                <p className="font-medium">{t("reading.readingTest.questionByQuestion")}</p>
+              </div>
               <p className="text-sm text-muted-foreground">{t("reading.readingTest.modeDesc")}</p>
             </div>
             <Switch

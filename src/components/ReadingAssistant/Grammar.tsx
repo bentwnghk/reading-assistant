@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ArrowLeft,
   ChevronRight,
+  ListChecks,
 } from "lucide-react";
 import {
   Document,
@@ -938,7 +939,10 @@ function Grammar() {
         <div className="text-center py-6 space-y-6">
           <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
             <div className="space-y-1">
-              <p className="font-medium">{t("reading.grammar.quiz.questionByQuestion")}</p>
+              <div className="flex items-center gap-2">
+                <ListChecks className="h-4 w-4" />
+                <p className="font-medium">{t("reading.grammar.quiz.questionByQuestion")}</p>
+              </div>
               <p className="text-sm text-muted-foreground">{t("reading.grammar.quiz.modeDesc")}</p>
             </div>
             <Switch
