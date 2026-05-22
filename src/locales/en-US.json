@@ -231,9 +231,9 @@
       "estimatedLevel": "Estimated Level",
       "help": {
         "title": "User Information Guide",
-        "ageSlider": "Age Slider: Drag to select your age (8-18). This helps the AI adapt the text to your reading level.",
-        "estimatedLevel": "Estimated Level: Shows the corresponding Hong Kong school level (Primary 3 to DSE) based on your age.",
-        "usage": "Your age is used to determine the complexity of the Adapted and Simplified text versions, making the content easier or more challenging as appropriate."
+        "ageSlider": "Age Slider: Drag to select your age (8–18). Your age determines the corresponding Hong Kong school level (e.g., age 10 → Primary 5, age 14 → Form 3, age 17 → Form 6/DSE).",
+        "estimatedLevel": "Estimated Level: Displays the Hong Kong school level mapped to your age. This level is embedded into every AI prompt so the assistant knows whether you are a primary or secondary student.",
+        "usage": "Your age is used across all AI-powered features to personalise content to your level. Specifically:\n\n• Adapted Text — rewrites the original passage using vocabulary and sentence structures suitable for your year group.\n• Simplified Text — provides an even simpler version for students who need extra help, with shorter sentences and basic vocabulary.\n• Summary — adjusts tone, emoji usage, and complexity (e.g., more emojis and simpler language for primary students; academic language for DSE students).\n• Mind Map — structures the visual overview at a level appropriate for your age.\n• Reading Test — generates comprehension questions with difficulty calibrated to your school level (e.g., fewer questions for primary, more for senior secondary).\n• Vocabulary & Glossary — selects vocabulary explanations and examples suited to your comprehension level.\n• Grammar Analysis — identifies age-appropriate grammar structures from the text (fewer topics for primary, more for DSE).\n• Grammar Games (Quiz, Word Order, Slot-fill, Error Surgery, MC) — all game content and vocabulary are tailored to your age group.\n• Reading Tutor Chat — the AI tutor adapts its language complexity and teaching approach to match your year group.\n\nYour age is stored locally on your device and is never sent to any external server other than as part of AI prompts for generating responses."
       }
     },
     "imageUpload": {

@@ -48,13 +48,13 @@ function StudentInfo() {
             <PopoverTrigger asChild>
               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
             </PopoverTrigger>
-            <PopoverContent className="w-[400px]" align="start">
+            <PopoverContent className="w-[480px] max-h-[70vh] overflow-y-auto" align="start">
               <div className="space-y-3 text-sm">
                 <h4 className="font-semibold text-base">{t("reading.studentInfo.help.title")}</h4>
                 <div className="space-y-2">
                   <p className="text-muted-foreground">{t("reading.studentInfo.help.ageSlider")}</p>
                   <p className="text-muted-foreground">{t("reading.studentInfo.help.estimatedLevel")}</p>
-                  <p className="text-muted-foreground">{t("reading.studentInfo.help.usage")}</p>
+                  <div className="text-muted-foreground whitespace-pre-line">{t("reading.studentInfo.help.usage")}</div>
                 </div>
               </div>
             </PopoverContent>
