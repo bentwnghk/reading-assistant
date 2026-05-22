@@ -218,6 +218,7 @@ function ExtractedText() {
           input: selectedText,
           voice: ttsVoice,
           response_format: "mp3",
+          speed: ttsPlaybackRate,
         }),
       });
 
@@ -235,7 +236,6 @@ function ExtractedText() {
         audioRef.current = audio;
 
         audio.oncanplay = () => {
-          audio.playbackRate = ttsPlaybackRate;
           audio.play().then(resolve).catch(reject);
         };
 

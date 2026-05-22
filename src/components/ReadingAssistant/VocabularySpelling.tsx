@@ -372,6 +372,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
           input: word,
           voice: ttsVoice,
           response_format: "mp3",
+          speed: ttsPlaybackRate,
         }),
       });
 
@@ -388,7 +389,6 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
         audioRef.current = audio;
 
         audio.oncanplay = () => {
-          audio.playbackRate = ttsPlaybackRate;
           audio.play().then(resolve).catch(reject);
         };
 

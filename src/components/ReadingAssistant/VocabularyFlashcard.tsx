@@ -209,7 +209,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         const response = await fetch(url, {
           method: "POST",
           headers,
-          body: JSON.stringify({ model: "tts-1", input: word, voice: ttsVoice, response_format: "mp3" }),
+          body: JSON.stringify({ model: "tts-1", input: word, voice: ttsVoice, response_format: "mp3", speed: ttsPlaybackRate }),
         });
         if (!response.ok) {
           const errText = await response.text();
@@ -221,7 +221,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         await new Promise<void>((resolve, reject) => {
           const audio = new Audio();
           audioRef.current = audio;
-          audio.oncanplay = () => { audio.playbackRate = ttsPlaybackRate; audio.play().then(resolve).catch(reject); };
+          audio.oncanplay = () => audio.play().then(resolve).catch(reject);
           audio.onended = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; };
           audio.onerror = () => {
             URL.revokeObjectURL(audioUrl);
