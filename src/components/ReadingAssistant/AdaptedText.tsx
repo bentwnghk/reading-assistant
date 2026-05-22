@@ -1046,6 +1046,57 @@ function AdaptedText() {
     }
   }, [glossaryMap]);
 
+  const handleSpeakGlossaryWord = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const word = glossaryPopover?.entry.word;
+      if (!word) return;
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
+      setIsTTSLoading(true);
+      try {
+        const headers: HeadersInit = { "Content-Type": "application/json" };
+        let url: string;
+        if (mode === "local") {
+          url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
+          if (openaicompatibleApiKey) headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
+        } else if (mode === "subscription") {
+          url = "/api/ai/subscription/v1/audio/speech";
+        } else {
+          url = "/api/ai/openaicompatible/v1/audio/speech";
+          if (accessPassword) headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
+        }
+        const response = await fetch(url, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ model: "tts-1", input: word, voice: ttsVoice, response_format: "mp3" }),
+        });
+        if (!response.ok) throw new Error(`TTS failed (${response.status})`);
+        const audioBuffer = await response.arrayBuffer();
+        const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        await new Promise<void>((resolve, reject) => {
+          const audio = new Audio();
+          audioRef.current = audio;
+          audio.oncanplay = () => audio.play().then(resolve).catch(reject);
+          audio.onended = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; };
+          audio.onerror = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; reject(new Error("Audio error")); };
+          audio.src = audioUrl;
+          audio.load();
+        });
+      } catch (error) {
+        console.error("Glossary TTS error:", error);
+      } finally {
+        setIsTTSLoading(false);
+      }
+    },
+    [glossaryPopover, ttsVoice, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
+  );
+
   const setContainerRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (containerRef.current) {
@@ -1586,6 +1637,18 @@ function AdaptedText() {
                   {glossaryPopover.entry.syllabification}
                 </span>
               )}
+              <button
+                type="button"
+                className="ml-1 inline-flex items-center justify-center p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+                onClick={handleSpeakGlossaryWord}
+                disabled={isTTSLoading}
+              >
+                {isTTSLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Volume2 className="h-3.5 w-3.5" />
+                )}
+              </button>
             </div>
             <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground mr-5">
               {glossaryPopover.entry.partOfSpeech}
