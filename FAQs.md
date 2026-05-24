@@ -20,7 +20,7 @@ Think of Mr.🆖 ProReader as a patient, personalized tutor that turns any diffi
 
 ---
 
-## Q2: If there is a word or a phrase that I don't understand in the text, what can I do? And what are the differences between the two approaches?
+## Q2: If there is a word or a phrase that I don't understand in the text, what can I do?
 
 You have two great options, each designed for a different learning moment:
 
@@ -334,24 +334,19 @@ Select words from your own vocabulary and share them directly with students in y
 
 Create classes, assign students, and edit class details. Add or remove students from your classes at any time.
 
-### For School Administrators (Admins & Super Admins)
+### For School Administrators
 
 Everything above, plus:
 
 **7. User Management**
 
-- **Admins** can manage users within their school and assign teacher/student roles
-- **Super Admins** can manage all users across all schools, including assigning admin roles
+Manage users within your school and assign teacher/student roles.
 
-**8. School Management** (Super Admin only)
-
-Manage all schools — view, edit, and delete schools. Schools are automatically created based on user email domains.
-
-**9. School Subscriptions**
+**8. School Subscriptions**
 
 Purchase and manage a subscription for your entire school. Allocate seats, monitor usage, and revoke access when needed. Students covered by a school subscription don't need individual subscriptions.
 
-**10. Full system backup & restore**
+**9. Full system backup & restore**
 
 Export a complete backup of all users, classes, schools, reading sessions, and images as a ZIP file. Import backups to restore or migrate data.
 
