@@ -39,6 +39,7 @@ import {
   Library,
   LogOut,
   LogIn,
+  CircleHelp,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -63,6 +64,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useGlobalStore } from "@/store/global";
 import { useReadingStore } from "@/store/reading";
 import { markLastOpenedSession } from "@/store/setting";
@@ -770,6 +777,28 @@ function Header() {
                   </span>
                 ))}
               </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold flex items-center gap-2 mb-3 text-base">
+                <CircleHelp className="h-4 w-4 text-blue-500" />
+                {t("header.about.faqs.title")}
+              </h3>
+              <Accordion type="single" collapsible className="space-y-2">
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                  <AccordionItem key={n} value={`faq-${n}`} className="border-b-0">
+                    <AccordionTrigger className="px-4 py-3 text-left text-sm font-semibold hover:no-underline hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                      {t(`header.about.faqs.q${n}.q`)}
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
+                      <div
+                        className="text-muted-foreground text-sm [&_p]:mb-2 [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:mb-2 [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:mb-2 [&_li]:mb-1 [&_strong]:text-foreground [&_table]:w-full [&_table]:mb-2 [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_th]:text-xs [&_th]:font-semibold [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_td]:text-xs"
+                        dangerouslySetInnerHTML={{ __html: t(`header.about.faqs.q${n}.a`) }}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
 
             <div className="pt-3 border-t text-center">
