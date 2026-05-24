@@ -12,7 +12,7 @@ Mr.🆖 ProReader is built exactly for moments like that. Just upload your text 
 
 4. **Grammar Analysis** — Complex grammar structures are identified and explained with patterns and examples from the text itself, plus interactive grammar games to reinforce your understanding.
 
-5. **AI Reading Tutor** — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.
+5. **AI Tutor** — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.
 
 6. **Reading Comprehension Test** — Once you feel ready, take a generated quiz covering main ideas, details, inferences, and more, with detailed explanations for every answer.
 
@@ -36,7 +36,7 @@ It's fast, visual, and perfect for quick lookups while you're in the flow of rea
 
 ### Option 2: Highlight the word and ask the AI Tutor
 
-Select (highlight) the word or phrase, then switch to the **Reading Tutor** chat. The tutor already knows your text, so it will give you a deeper, more conversational explanation — not just a dictionary definition, but *why* that word or phrase is used in context, how it connects to the passage's meaning, and even nuances like tone or connotation. You can ask follow-up questions too, like "Can you give me another example?" or "Is there a simpler word for this?"
+Select (highlight) the word or phrase, then switch to the **AI Tutor** chat. The tutor already knows your text, so it will give you a deeper, more conversational explanation — not just a dictionary definition, but *why* that word or phrase is used in context, how it connects to the passage's meaning, and even nuances like tone or connotation. You can ask follow-up questions too, like "Can you give me another example?" or "Is there a simpler word for this?"
 
 ### So what's the difference?
 
@@ -68,9 +68,9 @@ Select (highlight) the confusing sentence in your text, and tap the **brain icon
 
 The analyzed sentence gets underlined in blue in your text, so you can tap it anytime to revisit the explanation.
 
-### 2. AI Reading Tutor — Get a conversational explanation
+### 2. AI Tutor — Get a conversational explanation
 
-Highlight the sentence and take it to the **Reading Tutor** chat. Because the tutor already knows your entire text, it can explain the sentence *in context* — not just what it means in isolation, but how it fits into the paragraph and why the author phrased it that way. You can keep asking follow-up questions until it fully clicks, like:
+Highlight the sentence and take it to the **AI Tutor** chat. Because the tutor already knows your entire text, it can explain the sentence *in context* — not just what it means in isolation, but how it fits into the paragraph and why the author phrased it that way. You can keep asking follow-up questions until it fully clicks, like:
 
 - "Can you rephrase this in simpler words?"
 - "What does 'X' refer to in this sentence?"
@@ -80,7 +80,7 @@ Highlight the sentence and take it to the **Reading Tutor** chat. Because the tu
 
 If confusing sentences keep popping up, it might be a grammar pattern you haven't mastered yet. Run the **Grammar Analysis** on your text — it will scan for grammar topics (tenses, conditionals, passive voice, etc.) and provide explanations with patterns and examples drawn directly from your text. You can even reinforce your understanding with **Grammar Games** like Word Scramble, Error Surgery, and Grammar Roulette.
 
-**Pro tip:** Start with Sentence Analysis for a quick, structured breakdown. If the sentence is part of a bigger confusion, bring it to the Reading Tutor for a richer discussion. And if you notice a pattern — like always struggling with passive voice or conditional sentences — head to Grammar Analysis to tackle the root cause.
+**Pro tip:** Start with Sentence Analysis for a quick, structured breakdown. If the sentence is part of a bigger confusion, bring it to the AI Tutor for a richer discussion. And if you notice a pattern — like always struggling with passive voice or conditional sentences — head to Grammar Analysis to tackle the root cause.
 
 ---
 
@@ -206,9 +206,9 @@ Absolutely — Mr.🆖 ProReader can help you tackle even the toughest DSE quest
 
 If you haven't already, upload the DSE past paper (photo, PDF, or paste the text). The app will extract the text and generate a full suite of learning aids — summary, mind map, adapted text, glossary — so you have a solid understanding of the passage before you even look at the questions.
 
-### 2. AI Reading Tutor — your on-demand exam coach
+### 2. AI Tutor — your on-demand exam coach
 
-Switch to the **Reading Tutor** chat and you can:
+Switch to the **AI Tutor** chat and you can:
 
 - **Type or paste the exam question** directly into the chat, and the tutor will guide you through how to approach it — not just give you the answer, but help you *think* through it step by step
 - **Highlight the part of the text** the question refers to, and ask the tutor how that section connects to the question
@@ -221,7 +221,7 @@ The tutor uses **Socratic questioning** — it guides you to discover the answer
 
 ### 3. Upload an image of the question for direct help
 
-You can also **snap a photo of the exam question** and upload it directly in the Reading Tutor chat. The AI will read the question from the image and help you work through it based on the passage you're currently reading. Three levels of help are available:
+You can also **snap a photo of the exam question** and upload it directly in the AI Tutor chat. The AI will read the question from the image and help you work through it based on the passage you're currently reading. Three levels of help are available:
 
 - **"Hint me"** — The tutor gives you hints and guiding questions so you can find the answer yourself (always available)
 - **"Step-by-step"** — A full walkthrough explaining how to arrive at the answer (requires **Jailbreak Mode** in Settings)
@@ -345,9 +345,5 @@ Manage users within your school and assign teacher/student roles.
 **8. School Subscriptions**
 
 Purchase and manage a subscription for your entire school. Allocate seats, monitor usage, and revoke access when needed. Students covered by a school subscription don't need individual subscriptions.
-
-**9. Full system backup & restore**
-
-Export a complete backup of all users, classes, schools, reading sessions, and images as a ZIP file. Import backups to restore or migrate data.
 
 **Pro tip:** Use the **AI Questions Tracker** to discover common misconceptions across your class. If you notice multiple students asking about the same concept, that's a clear signal to address it in your next lesson. Combined with the **Student Data** tab and Excel exports, you'll have everything you need for data-driven teaching — without any extra administrative overhead.
