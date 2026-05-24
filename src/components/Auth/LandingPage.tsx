@@ -548,7 +548,7 @@ export function LandingPage() {
         </motion.div>
 
         {/* FAQs */}
-        <AnimatedSection className="mt-16 max-w-4xl mx-auto text-left" staggerDelay={0.1}>
+        <AnimatedSection className="mt-24 mb-24 max-w-4xl mx-auto text-left" staggerDelay={0.1}>
           <motion.div variants={sectionTitleVariants} className="flex items-center justify-center gap-3 mb-12">
             <HelpCircle className="h-8 w-8 text-emerald-500" />
             <h2 className="text-3xl font-bold">{t("header.about.faqs.title")}</h2>
