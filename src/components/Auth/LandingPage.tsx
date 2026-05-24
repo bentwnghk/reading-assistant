@@ -547,6 +547,37 @@ export function LandingPage() {
           ))}
         </motion.div>
 
+        {/* FAQs */}
+        <AnimatedSection className="mt-16 max-w-4xl mx-auto text-left" staggerDelay={0.1}>
+          <motion.div variants={sectionTitleVariants} className="flex items-center justify-center gap-3 mb-12">
+            <HelpCircle className="h-8 w-8 text-emerald-500" />
+            <h2 className="text-3xl font-bold">{t("header.about.faqs.title")}</h2>
+          </motion.div>
+          <motion.div variants={gridContainer(0.08)}>
+            <Accordion type="single" collapsible className="space-y-3">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                <motion.div
+                  key={n}
+                  variants={cardVariants}
+                  className={`${glassCard} rounded-2xl overflow-hidden`}
+                >
+                  <AccordionItem value={`faq-${n}`} className="border-b-0">
+                    <AccordionTrigger className="px-6 py-5 text-left text-base font-semibold hover:no-underline hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                      {t(`header.about.faqs.q${n}.q`)}
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-5">
+                      <div
+                        className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 leading-relaxed [&_strong]:text-slate-900 dark:[&_strong]:text-slate-100 [&_a]:text-emerald-600 dark:[&_a]:text-emerald-400"
+                        dangerouslySetInnerHTML={{ __html: t(`header.about.faqs.q${n}.a`) }}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
+          </motion.div>
+        </AnimatedSection>
+
         <motion.div
           variants={cardVariants}
           className={`relative max-w-3xl mx-auto text-center ${glassCard} rounded-[2rem] sm:rounded-[3rem] md:rounded-[4rem] px-6 py-10 sm:p-12 md:p-16 shadow-2xl overflow-hidden group`}
@@ -568,37 +599,6 @@ export function LandingPage() {
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </motion.button>
           <p className="relative z-10 text-slate-500 dark:text-slate-400 text-base mt-10 font-medium tracking-wide uppercase">{t("header.about.builtWith")}</p>
-        </motion.div>
-      </AnimatedSection>
-
-      {/* FAQs */}
-      <AnimatedSection className="relative z-10 max-w-4xl mx-auto px-6 py-24" staggerDelay={0.1}>
-        <motion.div variants={sectionTitleVariants} className="flex items-center gap-3 mb-12">
-          <HelpCircle className="h-8 w-8 text-emerald-500" />
-          <h2 className="text-4xl font-bold tracking-tight">{t("header.about.faqs.title")}</h2>
-        </motion.div>
-        <motion.div variants={gridContainer(0.08)}>
-          <Accordion type="single" collapsible className="space-y-3">
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-              <motion.div
-                key={n}
-                variants={cardVariants}
-                className={`${glassCard} rounded-2xl overflow-hidden`}
-              >
-                <AccordionItem value={`faq-${n}`} className="border-b-0">
-                  <AccordionTrigger className="px-6 py-5 text-left text-base font-semibold hover:no-underline hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                    {t(`header.about.faqs.q${n}.q`)}
-                  </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-5">
-                    <div
-                      className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 leading-relaxed [&_strong]:text-slate-900 dark:[&_strong]:text-slate-100 [&_a]:text-emerald-600 dark:[&_a]:text-emerald-400"
-                      dangerouslySetInnerHTML={{ __html: t(`header.about.faqs.q${n}.a`) }}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-              </motion.div>
-            ))}
-          </Accordion>
         </motion.div>
       </AnimatedSection>
 
