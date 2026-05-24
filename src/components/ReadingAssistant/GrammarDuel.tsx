@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import Image from "next/image";
 import { RefreshCw, LoaderCircle, Swords, Shield, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useReadingStore } from "@/store/reading";
@@ -360,6 +361,9 @@ export default function GrammarDuel({ onBack }: Props) {
         {/* Player */}
         <div className={cn("rounded-xl border-2 p-3 space-y-1.5 transition-all",
           hitAnimation === "player" ? "border-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse" : "border-blue-400 dark:border-blue-600")}>
+          <div className="flex justify-center">
+            <Image src="/duel-player.svg" alt="Player" width={48} height={48} priority />
+          </div>
           <div className="flex items-center gap-1.5">
             <Shield className="h-4 w-4 text-blue-500" />
             <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{t("reading.grammar.games.duel.you")}</span>
@@ -379,6 +383,9 @@ export default function GrammarDuel({ onBack }: Props) {
         {/* AI Opponent */}
         <div className={cn("rounded-xl border-2 p-3 space-y-1.5 transition-all",
           hitAnimation === "ai" ? "border-green-500 bg-green-50 dark:bg-green-900/20 animate-pulse" : "border-red-400 dark:border-red-600")}>
+          <div className="flex justify-center">
+            <Image src="/duel-opponent.svg" alt="AI Opponent" width={48} height={48} priority />
+          </div>
           <div className="flex items-center gap-1.5">
             <Swords className="h-4 w-4 text-red-500" />
             <span className="text-xs font-bold text-red-600 dark:text-red-400">{t("reading.grammar.games.duel.opponent")}</span>
