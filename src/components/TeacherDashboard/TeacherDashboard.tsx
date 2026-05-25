@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, Loader2, BarChart3, FileDown } from "lucide-react";
+import { GraduationCap, HelpCircle, Loader2, BarChart3, FileDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,7 @@ import ScoreDistChart from "./ScoreDistChart";
 import SpellingScoreChart from "./SpellingScoreChart";
 import GrammarGameChart from "./GrammarGameChart";
 import VocabularyGrowthChart from "./VocabularyGrowthChart";
+import TeacherDashboardGuide from "./TeacherDashboardGuide";
 
 interface TeacherDashboardProps {
   open: boolean;
@@ -54,6 +55,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [isExporting, setIsExporting] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Refs for each chart card — order matches the JSX render order below
   const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(12).fill(null));
@@ -188,6 +190,15 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
           <DialogTitle className="flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary" />
             {t("teacherDashboard.title")}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowHelp(true)}
+              title={t("teacherDashboard.help.title")}
+            >
+              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </DialogTitle>
           <DialogDescription className="text-left">
             {t("teacherDashboard.description")}
@@ -374,6 +385,8 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
           </div>
         )}
       </DialogContent>
+
+      <TeacherDashboardGuide open={showHelp} onOpenChange={setShowHelp} />
     </Dialog>
   );
 }

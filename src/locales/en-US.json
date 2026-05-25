@@ -1400,6 +1400,123 @@
     "exporting": "Exporting...",
     "excel": {
       "scoreDistribution": "Score Distribution"
+    },
+    "help": {
+      "title": "Teacher Dashboard Guide",
+      "tabs": {
+        "charts": "Charts",
+        "functions": "Features"
+      },
+      "charts": {
+        "intro": "The dashboard provides 12 visual charts to help you monitor student progress, identify learning gaps, and track engagement at a glance.",
+        "items": {
+          "dailyActivity": {
+            "name": "Daily Learning Activity",
+            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 14 activity types."
+          },
+          "readingTexts": {
+            "name": "Reading Texts",
+            "desc": "A bar chart showing how many reading texts each student has worked on. Use time-period filters (1W to 1Y) to focus on recent activity. Bars are color-coded by quartile."
+          },
+          "totalVocabulary": {
+            "name": "Total Vocabulary",
+            "desc": "A bar chart displaying each student's total vocabulary size. The dashed reference line shows the class average for quick comparison."
+          },
+          "avgProgress": {
+            "name": "Avg Learning Progress",
+            "desc": "A bar chart showing each student's average learning progress (0–100%). Use this to identify students who may need additional support."
+          },
+          "aiFeatures": {
+            "name": "AI Features Usage",
+            "desc": "A stacked bar chart breaking down how each student uses 8 AI-powered features: summaries, mind maps, adapted texts, simplified texts, sentence analysis, glossary, grammar, and AI tutor."
+          },
+          "readingTestDist": {
+            "name": "Reading Test Score Distribution",
+            "desc": "A stacked bar chart showing how each student's reading test scores are distributed across four score buckets: 0–25%, 26–50%, 51–75%, and 76–100%."
+          },
+          "vocabQuizDist": {
+            "name": "Vocabulary Quiz Score Distribution",
+            "desc": "A stacked bar chart showing each student's vocabulary quiz scores grouped into four performance buckets. Helps identify mastery levels across the class."
+          },
+          "grammarQuizDist": {
+            "name": "Grammar Quiz Score Distribution",
+            "desc": "A stacked bar chart showing each student's grammar quiz scores grouped into four performance buckets. Useful for spotting grammar understanding gaps."
+          },
+          "grammarGameScore": {
+            "name": "Grammar Game Score",
+            "desc": "A bar chart displaying each student's average grammar game score. The dashed line shows the class average."
+          },
+          "grammarGameAccuracy": {
+            "name": "Grammar Game Accuracy Distribution",
+            "desc": "A stacked bar chart showing each student's grammar game accuracy across four buckets. Helps identify which students have strong grammar fundamentals."
+          },
+          "spellingScore": {
+            "name": "Spelling Score",
+            "desc": "A bar chart displaying each student's average spelling score. Useful for tracking spelling proficiency across the class."
+          },
+          "vocabularyGrowth": {
+            "name": "Vocabulary Growth",
+            "desc": "A multi-line area chart tracking cumulative vocabulary growth over time for each student. Choose from 13 time ranges (1W to 3Y) and toggle individual students on/off."
+          }
+        },
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Use the Excel export to capture all 12 charts with detailed student data for offline analysis, parent meetings, or progress reports."
+        }
+      },
+      "functions": {
+        "intro": "The dashboard includes interactive features for filtering, navigating, and exporting data to help you focus on what matters most.",
+        "items": {
+          "schoolFilter": {
+            "name": "School Filter",
+            "desc": "Super-admins can filter all dashboard data by a specific school or view data across all schools. Available only to super-admin accounts."
+          },
+          "classFilter": {
+            "name": "Class Filter",
+            "desc": "Select a specific class to view its student data. Admins and super-admins can also choose 'All Classes' for a combined view. Teachers see only their assigned classes."
+          },
+          "dateNavigation": {
+            "name": "Date Navigation",
+            "desc": "In the Daily Learning Activity chart, use the back and forward arrows to browse activity data day by day. You cannot navigate past today's date."
+          },
+          "timePeriod": {
+            "name": "Time Period Filter",
+            "desc": "In the Reading Texts chart, filter by time period (1W, 2W, 1M, 2M, 3M, 6M, 9M, 1Y) to focus on recent or historical reading activity."
+          },
+          "timeRange": {
+            "name": "Time Range Selection",
+            "desc": "In the Vocabulary Growth chart, choose from 13 time ranges (1W to 3Y) to view vocabulary accumulation over different periods."
+          },
+          "studentToggle": {
+            "name": "Student Visibility Toggle",
+            "desc": "In the Vocabulary Growth chart, click on student names in the legend to show or hide their data lines. Focus on specific students or compare groups."
+          },
+          "quartileColors": {
+            "name": "Quartile Color Coding",
+            "desc": "Bar charts use a four-color system: Q1 (red, 0–25%), Q2 (orange, 25–50%), Q3 (green, 50–75%), Q4 (blue, 75–100%). Students are ranked and colored by their position."
+          },
+          "scoreBuckets": {
+            "name": "Score Distribution Buckets",
+            "desc": "Score distribution charts group individual scores into four color-coded buckets: red (0–25%), orange (26–50%), green (51–75%), blue (76–100%)."
+          },
+          "referenceLines": {
+            "name": "Class Average Reference Line",
+            "desc": "A dashed reference line on charts shows the class average, making it easy to identify students who are above or below average at a glance."
+          },
+          "tooltips": {
+            "name": "Interactive Tooltips",
+            "desc": "Hover over any bar or data point to see detailed breakdowns including exact values, activity counts, and score distributions for individual students."
+          },
+          "excelExport": {
+            "name": "Export to Excel",
+            "desc": "Generate a comprehensive Excel report with all 12 charts as images plus 3 data sheets: Student Overview, AI Features breakdown, and Score Details with conditional formatting."
+          }
+        },
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Combine school and class filters to drill down into specific groups, then use the Excel export to share tailored reports with co-teachers or school administrators."
+        }
+      }
     }
   },
   "history": {
