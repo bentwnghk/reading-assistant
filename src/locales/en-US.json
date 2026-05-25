@@ -1352,8 +1352,121 @@
     },
     "help": {
       "title": "Learning Journey Guide",
-      "purpose": "The Learning Journey shows your reading and learning metrics over time, including AI feature usage, score trends, and vocabulary growth.",
-      "features": "Use the Overview tab for visual analytics, or switch to Sessions to manage or share your reading sessions."
+      "tabs": {
+        "overview": "Overview",
+        "sessions": "Sessions"
+      },
+      "overview": {
+        "intro": "The Overview tab provides visual analytics of your reading and learning activity, including stat cards, activity charts, score distributions, and vocabulary growth over time.",
+        "items": {
+          "statCards": {
+            "name": "Summary Stat Cards",
+            "desc": "Three cards at the top show your total Reading Texts (with upload/repository breakdown), Total Vocabulary size, and Average Learning Progress across all sessions."
+          },
+          "dailyActivity": {
+            "name": "Daily Learning Activity",
+            "desc": "A stacked bar chart showing your daily learning activities across 14 types including reading, summaries, mind maps, tests, quizzes, spelling games, and more. Use the time range buttons to adjust the window."
+          },
+          "readingActivity": {
+            "name": "Reading Activity",
+            "desc": "An area chart showing how many reading sessions you completed each week. The x-axis shows week ranges so you can track consistency over time."
+          },
+          "aiFeatures": {
+            "name": "AI Features Usage",
+            "desc": "A horizontal bar chart breaking down your usage of 8 AI-powered features: summaries, mind maps (English and Chinese separately), adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI tutor questions."
+          },
+          "readingTestDist": {
+            "name": "Reading Test Score Distribution",
+            "desc": "A bar chart showing how your reading test scores are distributed across four score buckets: 0–25%, 26–50%, 51–75%, and 76–100%."
+          },
+          "vocabQuizDist": {
+            "name": "Vocab Quiz Score Distribution",
+            "desc": "A bar chart showing how your vocabulary quiz scores are distributed across four performance buckets."
+          },
+          "spellingTrend": {
+            "name": "Spelling Score Trend",
+            "desc": "A line chart tracking your spelling scores across sessions. Watch your scores improve over time."
+          },
+          "grammarQuizDist": {
+            "name": "Grammar Quiz Score Distribution",
+            "desc": "A bar chart showing how your grammar quiz scores are distributed across four performance buckets."
+          },
+          "grammarGameTrend": {
+            "name": "Grammar Game Score Trend",
+            "desc": "A line chart tracking your grammar game scores across sessions. See how your grammar skills develop over time."
+          },
+          "grammarGameAccuracy": {
+            "name": "Grammar Game Accuracy",
+            "desc": "A line chart tracking your grammar game accuracy percentage across sessions. Shows your precision in grammar challenges."
+          },
+          "vocabularyGrowth": {
+            "name": "Vocabulary Growth",
+            "desc": "An area chart tracking your cumulative vocabulary growth over time. Choose from 13 time ranges (1W to 3Y) to view your vocabulary accumulation over different periods."
+          }
+        },
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Focus on consistency! Regular daily activity builds stronger learning habits than occasional bursts. Use the time range selectors to track your weekly and monthly progress."
+        }
+      },
+      "sharedFeatures": {
+        "title": "Interactive Features",
+        "items": {
+          "timeRange": {
+            "name": "Time Range Selectors",
+            "desc": "Charts with time-dependent data offer range buttons (7d to 360d for daily activity, 1W to 3Y for vocabulary growth). Click any range to focus on a specific period."
+          },
+          "scoreBuckets": {
+            "name": "Score Distribution Buckets",
+            "desc": "Score distribution charts group your scores into four color-coded buckets: red (0–25%), orange (26–50%), green (51–75%), blue (76–100%)."
+          },
+          "tooltips": {
+            "name": "Interactive Tooltips",
+            "desc": "Hover over any bar, line, or data point to see detailed breakdowns including exact values, activity counts, and score details."
+          }
+        }
+      },
+      "sessions": {
+        "intro": "The Sessions tab lets you browse, search, import, share, and manage all your reading sessions in a detailed table view.",
+        "items": {
+          "importSessions": {
+            "name": "Import Sessions",
+            "desc": "Upload JSON session files to restore previously exported reading sessions. Accepts .json files exported from the app."
+          },
+          "search": {
+            "name": "Search Sessions",
+            "desc": "Fuzzy-search across your sessions by reading text content and summaries. Quickly find specific sessions from your history."
+          },
+          "sessionTable": {
+            "name": "Session Table",
+            "desc": "A detailed table showing each session's reading text title, learning progress %, vocabulary count, spelling score, quiz score, test score, grammar quiz score, grammar game score, accuracy, and last update date."
+          },
+          "shareSession": {
+            "name": "Share Session",
+            "desc": "Share a reading session with classmates or students. Opens a dialog to select recipients grouped by class and school."
+          },
+          "loadSession": {
+            "name": "Load Session",
+            "desc": "Restore a saved session back into the reading workspace. Your current session is automatically saved before loading."
+          },
+          "exportSession": {
+            "name": "Export Session",
+            "desc": "Download a reading session as a JSON file. Use this to back up your work or transfer sessions between devices."
+          },
+          "deleteSession": {
+            "name": "Delete Session",
+            "desc": "Remove a session from your history. This action cannot be undone."
+          },
+          "pagination": {
+            "name": "Load More",
+            "desc": "Sessions are loaded 20 at a time. Click 'Load More' at the bottom of the table to see earlier sessions."
+          }
+        },
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Click on any session title in the table to quickly load it into the reading workspace. Export important sessions as JSON backups before deleting them."
+        }
+      }
     }
   },
   "teacherDashboard": {

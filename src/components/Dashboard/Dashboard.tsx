@@ -9,10 +9,11 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OverviewTab } from "./OverviewTab";
 import SessionsTab from "./SessionsTab";
+import DashboardGuide from "./DashboardGuide";
 
 interface DashboardProps {
   open: boolean;
@@ -22,6 +23,7 @@ interface DashboardProps {
 export default function Dashboard({ open, onClose }: DashboardProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showHelp, setShowHelp] = useState(false);
 
   function handleClose(dialogOpen: boolean) {
     if (!dialogOpen) onClose();
@@ -34,20 +36,15 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
             {t("dashboard.title")}
-            <Popover>
-              <PopoverTrigger asChild>
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-              </PopoverTrigger>
-              <PopoverContent className="w-[300px] max-w-[calc(100vw-3rem)]" align="start">
-                <div className="space-y-3 text-sm">
-                  <h4 className="font-semibold text-base">{t("dashboard.help.title")}</h4>
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground">{t("dashboard.help.purpose")}</p>
-                    <p className="text-muted-foreground">{t("dashboard.help.features")}</p>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setShowHelp(true)}
+              title={t("dashboard.help.title")}
+            >
+              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </DialogTitle>
           <DialogDescription className="text-left">
             {t("dashboard.description")}
@@ -72,6 +69,8 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      <DashboardGuide open={showHelp} onOpenChange={setShowHelp} />
     </Dialog>
   );
 }
