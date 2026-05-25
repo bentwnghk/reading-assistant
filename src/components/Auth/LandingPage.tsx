@@ -338,13 +338,12 @@ export function LandingPage() {
 
         <motion.button
           variants={heroItemVariants}
-          whileHover={{ scale: 1.03, y: -4 }}
-          whileTap={{ scale: 0.98 }}
           onClick={handleSignIn}
           disabled={loading}
           className="group relative inline-flex items-center gap-4 px-10 py-5 rounded-full text-lg font-bold transition-all duration-300
             bg-slate-900 dark:bg-white text-white dark:text-slate-900
-            hover:shadow-[0_0_40px_rgba(16,185,129,0.3)]
+            hover:shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:-translate-y-1 hover:scale-[1.03]
+            active:scale-[0.98]
             disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
         >
           <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 dark:via-black/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
@@ -367,18 +366,15 @@ export function LandingPage() {
             { icon: Cloud, Watermark: Cloud, title: "private", desc: "private", color: "text-blue-600 dark:text-blue-400", colSpan: "md:col-span-2" },
           ].map((card) => (
              <motion.div
-               key={card.title}
-               variants={cardVariants}
-               whileHover={{ y: -8, scale: 1.01 }}
-               className={`${card.colSpan} group relative overflow-hidden ${glassCard} rounded-[2.5rem] p-10 transition-shadow duration-500 hover:shadow-2xl hover:shadow-emerald-500/10`}
-             >
-               <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-               <div className="absolute -top-10 -right-10 p-8 opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500">
-                 <card.Watermark className="h-48 w-48 text-emerald-500" />
-               </div>
-               <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
-                 <card.icon className={`relative z-10 h-12 w-12 mb-6 ${card.color}`} />
-               </motion.div>
+                key={card.title}
+                variants={cardVariants}
+                className={`${card.colSpan} group relative overflow-hidden ${glassCard} rounded-[2.5rem] p-10 transition-[transform,shadow] duration-500 hover:-translate-y-2 hover:scale-[1.01] hover:shadow-2xl hover:shadow-emerald-500/10`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute -top-10 -right-10 p-8 opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500">
+                  <card.Watermark className="h-48 w-48 text-emerald-500" />
+                </div>
+                  <card.icon className={`relative z-10 h-12 w-12 mb-6 ${card.color} transition-transform duration-300 group-hover:scale-115 group-hover:rotate-2`} />
               <h3 className="relative z-10 text-3xl font-bold mb-3">{t(`header.about.whyLove.${card.title}.title`)}</h3>
               <p className="relative z-10 text-xl text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">{t(`header.about.whyLove.${card.desc}.desc`)}</p>
             </motion.div>
@@ -417,17 +413,14 @@ export function LandingPage() {
              <motion.div
                key={key}
                variants={cardVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-               className={`group flex flex-col p-8 rounded-[2rem] ${glassCard} transition-shadow duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden`}
-             >
-               <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
-              <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
-                 <Icon className={`h-7 w-7 mb-6 ${color}`} />
-               </motion.div>
-              <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">{t(`header.about.features.${key}.title`)}</h3>
-              <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed">{t(`header.about.features.${key}.desc`)}</p>
-            </motion.div>
-          ))}
+                className={`group flex flex-col p-8 rounded-[2rem] ${glassCard} transition-[transform,shadow] duration-300 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/10 relative overflow-hidden`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
+                  <Icon className={`h-7 w-7 mb-6 ${color} transition-transform duration-300 group-hover:scale-115 group-hover:rotate-2`} />
+               <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-slate-100">{t(`header.about.features.${key}.title`)}</h3>
+               <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed">{t(`header.about.features.${key}.desc`)}</p>
+             </motion.div>
+           ))}
         </motion.div>
       </AnimatedSection>
 
@@ -448,16 +441,13 @@ export function LandingPage() {
               { icon: GraduationCap, title: "teacher", color: "text-blue-400", items: ["manageStudents", "uploadTexts", "shareVocabulary", "viewAiQuestions", "exportData", "viewLeaderboard"] },
               { icon: Users, title: "student", color: "text-emerald-400", items: ["learn", "cloudSync", "history", "leaderboard"] },
             ].map((role) => (
-              <motion.div
-                key={role.title}
-                variants={cardVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="group bg-white/[0.03] border border-white/[0.05] rounded-[2.5rem] p-8 hover:bg-white/[0.06] transition-colors duration-300 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/8 via-emerald-500/4 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
-                <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
-                  <role.icon className={`h-10 w-10 mb-6 ${role.color}`} />
-                </motion.div>
+               <motion.div
+                 key={role.title}
+                 variants={cardVariants}
+                 className="group bg-white/[0.03] border border-white/[0.05] rounded-[2.5rem] p-8 hover:bg-white/[0.06] transition-[transform,colors] duration-300 hover:-translate-y-2 hover:scale-[1.02] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] relative overflow-hidden"
+               >
+                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/8 via-emerald-500/4 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
+                 <role.icon className={`h-10 w-10 mb-6 ${role.color} transition-transform duration-300 group-hover:scale-115 group-hover:rotate-2`} />
                 <h3 className="text-2xl font-bold mb-6">{t(`header.about.roles.${role.title}.title`)}</h3>
                 <ul className="space-y-4 text-slate-300">
                   {role.items.map((item) => (
@@ -500,23 +490,18 @@ export function LandingPage() {
               { num: 14, icon: BookOpenCheck, key: "grammar" },
               { num: 15, icon: Gamepad2, key: "grammarGames" },
               { num: 16, icon: Library, key: "myVocabulary" },
-            ].map(({ num, icon: Icon, key }) => (
-              <motion.div
-                key={key}
-                variants={pillVariants}
-                whileHover={{ scale: 1.08, y: -4 }}
-                className={`group flex items-center gap-4 ${glassCard} rounded-full py-3 px-6 hover:shadow-lg hover:shadow-emerald-500/10 transition-colors duration-300 cursor-default relative overflow-hidden`}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                <motion.span
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", stiffness: 400, delay: num * 0.03 }}
-                  className="text-sm font-bold text-emerald-500/70"
-                >
-                  {num.toString().padStart(2, "0")}
-                </motion.span>
+             ].map(({ num, icon: Icon, key }) => (
+               <motion.div
+                 key={key}
+                 variants={pillVariants}
+                 className={`group flex items-center gap-4 ${glassCard} rounded-full py-3 px-6 transition-[transform,shadow,color] duration-300 hover:scale-108 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/10 cursor-default relative overflow-hidden`}
+               >
+                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                 <span
+                   className="text-sm font-bold text-emerald-500/70"
+                 >
+                   {num.toString().padStart(2, "0")}
+                 </span>
                 <Icon className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
                 <span className="text-base font-semibold group-hover:text-emerald-900 dark:group-hover:text-emerald-100 transition-colors">{t(`header.about.workflow.${key}`)}</span>
               </motion.div>
@@ -535,12 +520,11 @@ export function LandingPage() {
          </motion.div>
          <motion.div variants={gridContainer(0.4)} className="flex flex-wrap justify-center gap-4">
            {["mainIdea", "detail", "inference", "vocabulary", "purpose", "grammar"].map((skill) => (
-             <motion.span
-               key={skill}
-               variants={pillVariants}
-               whileHover={{ y: -6, scale: 1.05 }}
-               className={`px-8 py-4 ${glassCard} rounded-full text-lg font-bold hover:shadow-xl hover:shadow-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-300 cursor-default relative overflow-hidden`}
-             >
+              <motion.span
+                key={skill}
+                variants={pillVariants}
+                className={`px-8 py-4 ${glassCard} rounded-full text-lg font-bold hover:shadow-xl hover:shadow-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-[transform,shadow,color] duration-300 hover:-translate-y-1.5 hover:scale-105 cursor-default relative overflow-hidden`}
+              >
                <span className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-full" />
                {t(`header.about.skills.${skill}`)}
              </motion.span>
@@ -589,12 +573,11 @@ export function LandingPage() {
 
           <h2 className="relative z-10 text-4xl font-extrabold mb-10 leading-tight">{t("header.about.tagline")}</h2>
           <motion.button
-            whileHover={{ scale: 1.03, y: -4 }}
-            whileTap={{ scale: 0.98 }}
             onClick={handleSignIn}
             disabled={loading}
             className="relative z-10 group inline-flex items-center gap-4 px-10 py-5 rounded-full text-lg font-bold whitespace-nowrap transition-all duration-300
               bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl hover:shadow-[0_0_40px_rgba(16,185,129,0.4)]
+              hover:-translate-y-1 hover:scale-[1.03] active:scale-[0.98]
               disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? <SpinnerIcon /> : <GoogleIcon />}
