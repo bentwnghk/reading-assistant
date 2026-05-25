@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Download, Info, Loader2, Mail, Upload, ChevronDown } from "lucide-react"
+import { Download, HelpCircle, Info, Loader2, Mail, Upload, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -31,6 +31,7 @@ import StudentDataView from "./StudentDataView"
 import SchoolList from "./SchoolList"
 import AiQuestionsView from "./AiQuestionsView"
 import AdminSubscriptionsView from "@/components/Subscription/AdminSubscriptionsView"
+import UserManagementGuide from "./UserManagementGuide"
 
 interface UserManagementPanelProps {
   open: boolean
@@ -50,6 +51,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
   const [sendingTest, setSendingTest] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const importFileRef = useRef<HTMLInputElement>(null)
 
   const defaultTab = useMemo(() => {
@@ -210,7 +212,18 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
       <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <DialogTitle>{t("userManagement.title")}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              {t("userManagement.title")}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setShowHelp(true)}
+                title={t("userManagement.help.title")}
+              >
+                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DialogTitle>
             {isSuperAdmin && (
               <div className="flex items-center gap-1 pr-6 flex-shrink-0">
                 <TooltipProvider delayDuration={300}>
@@ -349,6 +362,8 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           </div>
         </Tabs>
       </DialogContent>
+
+      <UserManagementGuide open={showHelp} onOpenChange={setShowHelp} />
     </Dialog>
   )
 }

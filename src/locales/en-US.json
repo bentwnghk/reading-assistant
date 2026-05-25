@@ -2160,6 +2160,103 @@
       "wrongFileType": "Please select a .zip or .json backup file",
       "importConfirm": "This will merge the backup data with existing records. Reading sessions and images will be fully restored. Continue?",
       "tooltip": "Export or import a full system backup (.zip) including all users, classes, and reading history with images"
+    },
+    "help": {
+      "title": "User Management Guide",
+      "tabs": {
+        "tabs": "Tabs",
+        "features": "Features"
+      },
+      "tabsContent": {
+        "intro": "The User Management panel provides six tabs for managing schools, users, classes, student data, AI questions, and subscriptions. Available tabs depend on your role.",
+        "items": {
+          "schools": {
+            "name": "Schools",
+            "desc": "View, edit, and delete schools. Each school has a name and email domain. Deleting a school un-assigns all its users. Super-admin only."
+          },
+          "users": {
+            "name": "Users",
+            "desc": "View all users in a sortable, filterable table. Change roles (student, teacher, admin), assign users to schools, and assign students to classes. Filter by role, class, or school."
+          },
+          "classes": {
+            "name": "Classes",
+            "desc": "Create, edit, and delete classes. Assign a teacher to each class and manage student membership. Teachers see only their own classes."
+          },
+          "classMembers": {
+            "name": "Class Members",
+            "desc": "Opened from the Classes tab. View all students in a class, add new students from the same school, or remove existing members. Search available students by name."
+          },
+          "studentData": {
+            "name": "Student Data",
+            "desc": "View detailed reading session data for students across classes. Filter by school, class, date range, or search by student name. Export filtered data to Excel for offline analysis."
+          },
+          "aiQuestions": {
+            "name": "AI Questions",
+            "desc": "View aggregated AI tutor questions asked by students. See question frequency, unique user counts, and last-asked dates. Click any question to expand and view individual instances with AI responses."
+          },
+          "subscriptions": {
+            "name": "Subscriptions",
+            "desc": "Manage individual and school subscription plans. View active, canceled, and trial subscriptions. Admin and super-admin only."
+          }
+        },
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Use the class filter dropdowns across tabs to quickly narrow your view to a specific group of students. The Student Data tab remembers your class selection."
+        }
+      },
+      "featuresContent": {
+        "intro": "Common interactive features available across tabs to help you find, organize, and manage data efficiently.",
+        "items": {
+          "sorting": {
+            "name": "Sorting",
+            "desc": "Click any column header to sort the table by that column. Click again to reverse the sort direction. Sorted tables remember your preference while browsing."
+          },
+          "filtering": {
+            "name": "Filtering",
+            "desc": "Use dropdown filters to narrow results by role, class, or school. Filters work together — combine role and class filters to find specific groups of users."
+          },
+          "pagination": {
+            "name": "Pagination",
+            "desc": "All tables display 20 items per page with page navigation at the bottom. Large datasets are split across pages for faster loading."
+          },
+          "roleManagement": {
+            "name": "Role Management",
+            "desc": "Change user roles inline using the role dropdown in the Users tab. Super-admins can assign any role; admins can assign teacher and student roles."
+          },
+          "schoolAssignment": {
+            "name": "School Assignment",
+            "desc": "Assign users to schools using the school dropdown in the Users tab. Only available to super-admins. Students must have a school before being assigned to a class."
+          },
+          "bulkActions": {
+            "name": "Bulk Actions",
+            "desc": "Select multiple users with checkboxes in the Users tab, then use the bulk action button to revoke school access for all selected users at once."
+          },
+          "search": {
+            "name": "Search",
+            "desc": "Search across Student Data by student name, email, or reading text title. In AI Questions, search by question text. Results update as you type."
+          },
+          "dateRange": {
+            "name": "Date Range Filter",
+            "desc": "In Student Data and AI Questions tabs, filter by time period: 7 days, 30 days, 90 days, 180 days, 360 days, or all time. Focus on recent activity or view the full history."
+          },
+          "exportImport": {
+            "name": "Export / Import Backup",
+            "desc": "Super-admins can export a full system backup (.zip) including all users, classes, and reading sessions with images. Import a backup to merge data into the system."
+          },
+          "testEmails": {
+            "name": "Test Emails",
+            "desc": "Super-admins can send test emails for 9 different email templates (reminders, subscription notifications, etc.) to verify email delivery is working correctly."
+          },
+          "excelExport": {
+            "name": "Excel Export",
+            "desc": "In the Student Data tab, export the currently filtered session data to an Excel file with formatted columns for offline analysis or reporting."
+          }
+        },
+        "tip": {
+          "title": "Pro Tip:",
+          "content": "Use Export before making bulk changes to create a safety net. The import feature merges data, so you can restore specific records without overwriting everything."
+        }
+      }
     }
   },
   "leaderboard": {
