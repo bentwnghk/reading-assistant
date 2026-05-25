@@ -532,6 +532,12 @@
       "excellent": "Excellent! Great understanding!",
       "good": "Good job! Keep practicing!",
       "keepPracticing": "Keep practicing to improve!",
+      "resultTier": {
+        "master": "Reading Champion",
+        "great": "Skilled Reader",
+        "good": "Steady Reader",
+        "keepGoing": "Keep Reading"
+      },
       "shortAnswerPlaceholder": "Type your answer here...",
       "suggestedAnswer": "Suggested Answer",
       "explanation": "Explanation",
