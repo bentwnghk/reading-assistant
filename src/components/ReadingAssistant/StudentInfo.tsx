@@ -48,10 +48,10 @@ function StudentInfo() {
             <PopoverTrigger asChild>
               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
             </PopoverTrigger>
-            <PopoverContent className="w-[480px] max-h-[70vh] overflow-y-auto" align="start">
-              <div className="space-y-3 text-sm">
+            <PopoverContent className="w-[calc(100vw-2rem)] max-w-[480px] max-h-[70vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" align="start">
+              <div className="space-y-4 text-sm">
                 <h4 className="font-semibold text-base">{t("reading.studentInfo.help.title")}</h4>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <p className="text-muted-foreground">{t("reading.studentInfo.help.ageSlider")}</p>
                   <p className="text-muted-foreground">{t("reading.studentInfo.help.estimatedLevel")}</p>
                   <div className="text-muted-foreground whitespace-pre-line">{t("reading.studentInfo.help.usage")}</div>
