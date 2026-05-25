@@ -227,7 +227,7 @@ function WaveDivider({ flip = false }: { flip?: boolean }) {
   );
 }
 
-const glassBase = "bg-white/[0.08] dark:bg-white/[0.02] backdrop-blur-xl border border-white/[0.15] dark:border-white/[0.05] shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]";
+const glassBase = "bg-white/[0.08] dark:bg-white/[0.02] backdrop-blur-sm border border-white/[0.15] dark:border-white/[0.05] shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]";
 const glassCard = `${glassBase} bg-emerald-50/[0.05] dark:bg-emerald-900/[0.04]`;
 
 function GoogleIcon() {
@@ -432,7 +432,7 @@ export function LandingPage() {
       </AnimatedSection>
 
       {/* For Schools & Teachers - Dark Glass Section */}
-      <div className="relative z-10 bg-slate-900/90 dark:bg-slate-900/50 backdrop-blur-xl text-white py-32 rounded-[3rem] mx-4 sm:mx-8 my-12 overflow-hidden shadow-2xl border border-white/[0.06]">
+      <div className="relative z-10 bg-slate-900/90 dark:bg-slate-900/50 text-white py-32 rounded-[3rem] mx-4 sm:mx-8 my-12 overflow-hidden shadow-2xl border border-white/[0.06]">
         <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-900/30 via-transparent to-transparent opacity-60 pointer-events-none" />
         <AnimatedSection className="relative max-w-7xl mx-auto px-6" staggerDelay={0.15}>
           <motion.div variants={sectionTitleVariants} className="max-w-2xl mb-16">
@@ -452,7 +452,7 @@ export function LandingPage() {
                 key={role.title}
                 variants={cardVariants}
                 whileHover={{ y: -8, scale: 1.02 }}
-                className="group bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] rounded-[2.5rem] p-8 hover:bg-white/[0.06] transition-colors duration-300 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] relative overflow-hidden"
+                className="group bg-white/[0.03] border border-white/[0.05] rounded-[2.5rem] p-8 hover:bg-white/[0.06] transition-colors duration-300 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/8 via-emerald-500/4 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
                 <motion.div whileHover={{ scale: 1.15, rotate: 8 }} transition={{ type: "spring", stiffness: 300 }}>
