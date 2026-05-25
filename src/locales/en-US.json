@@ -941,14 +941,14 @@
       "vocabQuiz": "Vocab Quiz",
       "help": {
         "title": "Learning Progress Guide",
-        "intro": "Track your learning journey through 12 interactive steps. Each completed step shows a checkmark. Click any step to jump to that section.",
+        "intro": "Track your progress across 12 steps. Completed steps show a checkmark. You can do the steps in any order — there is no required sequence.",
         "navigation": {
           "title": "Quick Navigation",
-          "desc": "Click on any step to jump directly to that section. Grayed-out steps unlock after uploading your reading material."
+          "desc": "Click any step to scroll to its section. Steps 2–12 unlock once text is extracted (via upload, photo, or Text Repository)."
         },
         "progress": {
           "title": "Progress Tracking",
-          "desc": "The progress bar shows your overall completion percentage."
+          "desc": "The progress bar shows how many of the 12 steps you have completed."
         }
       }
     },
