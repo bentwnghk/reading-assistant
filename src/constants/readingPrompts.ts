@@ -741,7 +741,7 @@ export function generateGrammarScramblePrompt(topics: GrammarTopic[], age: numbe
 Grammar topics identified in the text:
 ${topicList}
 
-For each topic, generate 3 new example sentences that clearly demonstrate the grammar pattern. The sentences must NOT be taken from any previously seen text — they must be original.
+For each topic, generate 2 new example sentences that clearly demonstrate the grammar pattern. The sentences must NOT be taken from any previously seen text — they must be original.
 
 Respond with ONLY a valid JSON array. No markdown, no code blocks.
 
@@ -757,7 +757,7 @@ Guidelines:
 - Each sentence must clearly and unambiguously illustrate the target grammar pattern
 - Use vocabulary appropriate for age ${age}
 - Sentences should be varied: different subjects, tenses within the pattern, contexts
-- Generate exactly 3 sentences per topic
+- Generate exactly 2 sentences per topic
 - Keep sentences between 6 and 14 words so they are manageable as word-chip puzzles
 - Respond with ONLY the JSON array, no markdown, no code blocks`;
 }
