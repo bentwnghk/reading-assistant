@@ -441,7 +441,7 @@ function Header() {
         </DialogContent>
       </Dialog>
       <Dialog open={openAbout} onOpenChange={setOpenAbout}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-hide">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400" />
