@@ -445,7 +445,7 @@ function VocabularyContainer() {
           <ReviewListShareDialog />
 
           <Dialog open={showHelp} onOpenChange={setShowHelp}>
-            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-indigo-500" />
