@@ -1,18 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { generateVisualizationPrompt } from "@/constants/readingPrompts";
+import { multiApiKeyPolling } from "@/utils/model";
+
+const ZENMUX_API_KEY = process.env.ZENMUX_API_KEY || "";
+const ZENMUX_API_BASE_URL =
+  process.env.ZENMUX_API_BASE_URL || "https://zenmux.ai/api/vertex-ai";
+const ZENMUX_PROJECT = process.env.ZENMUX_PROJECT || "";
+const ZENMUX_LOCATION = process.env.ZENMUX_LOCATION || "us-central1";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
 const GOOGLE_API_BASE_URL =
   process.env.GOOGLE_GENERATIVE_AI_API_BASE_URL ||
   "https://generativelanguage.googleapis.com";
+
 const OPENAI_COMPATIBLE_API_BASE_URL =
   process.env.OPENAI_COMPATIBLE_API_BASE_URL || "";
 const OPENAI_COMPATIBLE_API_KEY =
   process.env.OPENAI_COMPATIBLE_API_KEY || "";
 const OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY =
   process.env.OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || "";
-const IMAGE_MODEL = process.env.IMAGE_MODEL || "gemini-3.1-flash-image";
+
+const IMAGE_MODEL =
+  process.env.IMAGE_MODEL || "google/gemini-3.1-flash-image-preview";
 
 function extractBase64FromGeminiResponse(data: any): string | null {
   const parts = data?.candidates?.[0]?.content?.parts;
@@ -27,11 +37,39 @@ function extractBase64FromGeminiResponse(data: any): string | null {
   return null;
 }
 
-async function callGeminiNativeApi(
+async function callZenMuxApi(
   prompt: string,
   model: string
 ): Promise<Response> {
-  const url = `${GOOGLE_API_BASE_URL}/v1/models/${model}:generateContent`;
+  const url = ZENMUX_PROJECT
+    ? `${ZENMUX_API_BASE_URL}/v1/projects/${ZENMUX_PROJECT}/locations/${ZENMUX_LOCATION}/publishers/google/models/${encodeURIComponent(model)}:generateContent`
+    : `${ZENMUX_API_BASE_URL}/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": ZENMUX_API_KEY,
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+      generationConfig: {
+        responseModalities: ["TEXT", "IMAGE"],
+      },
+    }),
+  });
+}
+
+async function callGoogleNativeApi(
+  prompt: string,
+  model: string
+): Promise<Response> {
+  const url = `${GOOGLE_API_BASE_URL}/v1beta/models/${model}:generateContent`;
 
   return fetch(url, {
     method: "POST",
@@ -46,6 +84,9 @@ async function callGeminiNativeApi(
           parts: [{ text: prompt }],
         },
       ],
+      generationConfig: {
+        responseModalities: ["TEXT", "IMAGE"],
+      },
     }),
   });
 }
@@ -54,15 +95,9 @@ async function callOpenAICompatibleApi(
   prompt: string,
   model: string
 ): Promise<Response> {
-  const apiKey = OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY
-    ? OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY
-    : OPENAI_COMPATIBLE_API_KEY;
-
-  const keys = apiKey
-    .split(",")
-    .map((k: string) => k.trim())
-    .filter(Boolean);
-  const selectedKey = keys[Math.floor(Math.random() * keys.length)];
+  const apiKey = multiApiKeyPolling(
+    OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || OPENAI_COMPATIBLE_API_KEY
+  );
 
   return fetch(
     `${OPENAI_COMPATIBLE_API_BASE_URL}/v1/chat/completions`,
@@ -70,15 +105,48 @@ async function callOpenAICompatibleApi(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${selectedKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
         messages: [{ role: "user", content: prompt }],
         max_tokens: 4096,
+        responseModalities: ["TEXT", "IMAGE"],
+        responseFormat: {
+          image: {
+            aspectRatio: "16:9",
+            imageSize: "2K",
+          },
+        },
       }),
     }
   );
+}
+
+function extractFromOpenAIResponse(data: any): string | null {
+  const message = data?.choices?.[0]?.message;
+  if (!message) return null;
+
+  if (typeof message.content === "string") {
+    const b64Match = message.content.match(
+      /data:image\/[a-zA-Z+]+;base64,([A-Za-z0-9+/=]+)/
+    );
+    if (b64Match) return `data:image/png;base64,${b64Match[1]}`;
+  }
+
+  if (Array.isArray(message.content)) {
+    for (const part of message.content) {
+      if (part.type === "image_url" && part.image_url?.url) {
+        return part.image_url.url;
+      }
+      if (part.type === "image" && part.source?.data) {
+        const mime = part.source.media_type || "image/png";
+        return `data:${mime};base64,${part.source.data}`;
+      }
+    }
+  }
+
+  return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -101,71 +169,60 @@ export async function POST(request: NextRequest) {
     const age = typeof studentAge === "number" ? studentAge : 13;
     const prompt = generateVisualizationPrompt(age, text);
 
+    const errors: string[] = [];
     let imageDataUrl: string | null = null;
 
-    if (GOOGLE_API_KEY) {
-      const geminiResponse = await callGeminiNativeApi(prompt, IMAGE_MODEL);
+    if (ZENMUX_API_KEY) {
+      try {
+        const response = await callZenMuxApi(prompt, IMAGE_MODEL);
+        if (response.ok) {
+          const data = await response.json();
+          imageDataUrl = extractBase64FromGeminiResponse(data);
+        } else {
+          const errorText = await response.text();
+          errors.push(`ZenMux (${response.status}): ${errorText.substring(0, 200)}`);
+        }
+      } catch (e) {
+        errors.push(`ZenMux: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
 
-      if (!geminiResponse.ok) {
-        const errorText = await geminiResponse.text();
-        console.error(
-          "Gemini native API failed:",
-          geminiResponse.status,
-          errorText
-        );
-      } else {
-        const data = await geminiResponse.json();
-        imageDataUrl = extractBase64FromGeminiResponse(data);
+    if (!imageDataUrl && GOOGLE_API_KEY) {
+      try {
+        const response = await callGoogleNativeApi(prompt, IMAGE_MODEL);
+        if (response.ok) {
+          const data = await response.json();
+          imageDataUrl = extractBase64FromGeminiResponse(data);
+        } else {
+          const errorText = await response.text();
+          errors.push(`Google AI (${response.status}): ${errorText.substring(0, 200)}`);
+        }
+      } catch (e) {
+        errors.push(`Google AI: ${e instanceof Error ? e.message : String(e)}`);
       }
     }
 
     if (!imageDataUrl && OPENAI_COMPATIBLE_API_KEY && OPENAI_COMPATIBLE_API_BASE_URL) {
-      const compatResponse = await callOpenAICompatibleApi(
-        prompt,
-        IMAGE_MODEL
-      );
-
-      if (compatResponse.ok) {
-        const data = await compatResponse.json();
-        const message = data?.choices?.[0]?.message;
-
-        if (typeof message?.content === "string") {
-          const b64Match = message.content.match(
-            /data:image\/[a-zA-Z+]+;base64,([A-Za-z0-9+/=]+)/
-          );
-          if (b64Match) {
-            imageDataUrl = `data:image/png;base64,${b64Match[1]}`;
-          }
+      try {
+        const response = await callOpenAICompatibleApi(prompt, IMAGE_MODEL);
+        if (response.ok) {
+          const data = await response.json();
+          imageDataUrl = extractFromOpenAIResponse(data);
+        } else {
+          const errorText = await response.text();
+          errors.push(`OpenAI-compatible (${response.status}): ${errorText.substring(0, 200)}`);
         }
-
-        if (!imageDataUrl && Array.isArray(message?.content)) {
-          for (const part of message.content) {
-            if (part.type === "image_url" && part.image_url?.url) {
-              imageDataUrl = part.image_url.url;
-              break;
-            }
-            if (part.type === "image" && part.source?.data) {
-              const mime = part.source.media_type || "image/png";
-              imageDataUrl = `data:${mime};base64,${part.source.data}`;
-              break;
-            }
-          }
-        }
-      } else {
-        const errorText = await compatResponse.text();
-        console.error(
-          "OpenAI-compatible API failed:",
-          compatResponse.status,
-          errorText
-        );
+      } catch (e) {
+        errors.push(`OpenAI-compatible: ${e instanceof Error ? e.message : String(e)}`);
       }
     }
 
     if (!imageDataUrl) {
+      console.error("All visualization providers failed:", errors);
       return NextResponse.json(
         {
-          error:
-            "Image generation failed. Ensure GOOGLE_GENERATIVE_AI_API_KEY is set for direct Gemini API access, or the OpenAI-compatible provider supports image generation.",
+          error: "Image generation failed",
+          details: errors.join("; "),
         },
         { status: 502 }
       );

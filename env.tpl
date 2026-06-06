@@ -163,9 +163,17 @@ NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER=
 NEXT_PUBLIC_MODEL_LIST=
 # (Optional) Fallback model when the primary AI model fails (default: gemini-3-flash-preview)
 FALLBACK_MODEL=gemini-3-flash-preview
-# (Optional) Text-to-image model for visualization generation (default: gemini-3.1-flash-image)
-IMAGE_MODEL=gemini-3.1-flash-image
-# Google Gemini API key — required for visualization image generation (get from https://aistudio.google.com/apikey)
+# (Optional) Text-to-image model for visualization generation (default: google/gemini-3.1-flash-image-preview)
+IMAGE_MODEL=google/gemini-3.1-flash-image-preview
+# ZenMux API key — primary provider for visualization image generation
+ZENMUX_API_KEY=
+# (Optional) ZenMux base URL (default: https://zenmux.ai/api/vertex-ai)
+ZENMUX_API_BASE_URL=https://zenmux.ai/api/vertex-ai
+# (Optional) ZenMux Google Cloud project. When set, uses Vertex AI v1 URL format; otherwise uses v1beta format.
+ZENMUX_PROJECT=
+# (Optional) ZenMux Google Cloud location (default: us-central1)
+ZENMUX_LOCATION=us-central1
+# (Optional) Google Gemini API key — fallback for visualization image generation (get from https://aistudio.google.com/apikey)
 GOOGLE_GENERATIVE_AI_API_KEY=
 
 # (Optional) Injected script code can be used for statistics or error tracking.
