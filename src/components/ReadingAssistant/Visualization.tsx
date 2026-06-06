@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSession } from "next-auth/react";
 import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,6 +12,9 @@ import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 function Visualization() {
   const { t } = useTranslation();
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || "student";
+  const isStudent = userRole === "student";
   const { extractedText, visualizationImage, docTitle } = useReadingStore();
   const { status, generateVisualization } = useReadingAssistant();
   const isGenerating = status === "visualization";
@@ -72,33 +76,35 @@ function Visualization() {
               {t("reading.visualization.download")}
             </Button>
           )}
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
             <Switch
               checked={useChinese}
               onCheckedChange={setUseChinese}
-              disabled={isGenerating}
+              disabled={isGenerating || (isStudent && !!visualizationImage)}
             />
             <span className="text-sm text-muted-foreground">
               {t("reading.visualization.chineseLabel")}
             </span>
           </div>
-          <Button
-            onClick={() => generateVisualization(useChinese)}
-            disabled={isGenerating}
-            size="sm"
-            variant={visualizationImage ? "secondary" : "default"}
-          >
-            {isGenerating ? (
-              <>
-                <LoaderCircle className="h-4 w-4 mr-1 animate-spin" />
-                {t("reading.visualization.generating")}
-              </>
-            ) : visualizationImage ? (
-              t("reading.visualization.regenerate")
-            ) : (
-              t("reading.visualization.generate")
-            )}
-          </Button>
+          {!(isStudent && visualizationImage) && (
+            <Button
+              onClick={() => generateVisualization(useChinese)}
+              disabled={isGenerating}
+              size="sm"
+              variant={visualizationImage ? "secondary" : "default"}
+            >
+              {isGenerating ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 mr-1 animate-spin" />
+                  {t("reading.visualization.generating")}
+                </>
+              ) : visualizationImage ? (
+                t("reading.visualization.regenerate")
+              ) : (
+                t("reading.visualization.generate")
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
