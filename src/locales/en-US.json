@@ -510,6 +510,22 @@
         "usage": "Usage: Click 'Generate Mind Map' to create a visual representation. Use the 'Chinese' toggle to switch between English and Chinese versions. Review the mind map to quickly grasp the text's structure."
       }
     },
+    "visualization": {
+      "title": "Visualization",
+      "generate": "Generate Visualization",
+      "generating": "Generating...",
+      "regenerate": "Regenerate",
+      "download": "Download",
+      "emptyTip": "Click the button above to generate a colorful visualization of the main ideas",
+      "help": {
+        "title": "Visualization Guide",
+        "purpose": "Purpose: The Visualization section generates a colorful image to help you visualize the main ideas of the reading text. The AI automatically chooses the best visual style based on the text's genre.",
+        "featuresTitle": "Visual Styles",
+        "features": "Infographic poster for informational texts, comic strip for narratives, cartoon for children's stories, and painting for literary or poetic texts. Each visualization is colorful, educational, and age-appropriate.",
+        "usageTitle": "How to Use",
+        "usage": "Click 'Generate Visualization' to create an image. Click the image to zoom in. Use the download button to save it. Click 'Regenerate' to get a different visualization."
+      }
+    },
     "readingTest": {
       "title": "Reading Test",
       "generate": "Generate Test",
@@ -936,6 +952,7 @@
       "summary": "Summary",
       "adapt": "Adapt Text",
       "mindmap": "Mind Map",
+      "visualization": "Visualization",
       "test": "Reading Test",
       "grammar": "Grammar",
       "grammarGame": "Grammar Game",

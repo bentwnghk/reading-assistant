@@ -79,6 +79,8 @@ CREATE TABLE reading_sessions (
   highlighted_words JSONB DEFAULT '[]'::jsonb,
   analyzed_sentences JSONB DEFAULT '{}'::jsonb,
   mind_map TEXT DEFAULT '',
+  visualization_image TEXT DEFAULT '',
+  visualization_generated_at BIGINT DEFAULT 0,
   reading_test JSONB DEFAULT '[]'::jsonb,
   glossary JSONB DEFAULT '[]'::jsonb,
   glossary_ratings JSONB DEFAULT '{}'::jsonb,

@@ -163,6 +163,8 @@ NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER=
 NEXT_PUBLIC_MODEL_LIST=
 # (Optional) Fallback model when the primary AI model fails (default: gemini-3-flash-preview)
 FALLBACK_MODEL=gemini-3-flash-preview
+# (Optional) Text-to-image model for visualization generation (default: gemini-3.1-flash-image)
+IMAGE_MODEL=gemini-3.1-flash-image
 
 # (Optional) Injected script code can be used for statistics or error tracking.
 HEAD_SCRIPTS=

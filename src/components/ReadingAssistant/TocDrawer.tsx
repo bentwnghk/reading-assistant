@@ -5,6 +5,7 @@ import {
   Upload,
   FileText,
   Waypoints,
+  ImageIcon,
   BookOpen,
   ClipboardCheck,
   BookMarked,
@@ -58,6 +59,15 @@ const sections = [
     labelKey: "toc.mindmap",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.mindMap,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
+  },
+  {
+    id: "section-visualization",
+    icon: ImageIcon,
+    labelKey: "toc.visualization",
+    checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.visualizationImage,
     isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.extractedText,
   },

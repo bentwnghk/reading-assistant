@@ -460,6 +460,48 @@ function useReadingAssistant() {
     }
   }
 
+  async function generateVisualization() {
+    const { studentAge, extractedText, setVisualizationImage, setStatus: setStoreStatus, setError } = readingStore;
+
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return;
+    }
+
+    setStoreStatus("visualization");
+    setStatus("visualization");
+
+    try {
+      const response = await fetch("/api/ai/visualization", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: extractedText, studentAge }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `Request failed (${response.status})`);
+      }
+
+      const data = await response.json();
+      if (!data.image) {
+        throw new Error("No image in response");
+      }
+
+      setVisualizationImage(data.image);
+
+      logActivity("visualization_generate", { sessionId: readingStore.id || undefined });
+
+      setStoreStatus("idle");
+      setStatus("idle");
+    } catch (error) {
+      const msg = handleError(error);
+      setError(msg);
+      setStoreStatus("error");
+      setStatus("idle");
+    }
+  }
+
   async function generateReadingTest() {
     const { studentAge, extractedText, setReadingTest, setStatus: setStoreStatus, setError } = readingStore;
     
@@ -1064,6 +1106,7 @@ Guidelines:
     adaptText,
     simplifyText,
     generateMindMap,
+    generateVisualization,
     generateReadingTest,
     generateTargetedPractice,
     generateGlossary,

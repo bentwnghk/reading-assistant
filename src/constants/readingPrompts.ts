@@ -883,6 +883,31 @@ Guidelines:
 - Respond with ONLY the JSON array, no markdown, no code blocks`;
 }
 
+export function generateVisualizationPrompt(age: number, text: string): string {
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `You are generating an image to help a ${age}-year-old Hong Kong ${schoolLevel} student visualize the main ideas of a reading passage. Analyze the text below, determine its genre and nature, then create a vivid, educational image.
+
+<text>
+${text}
+</text>
+
+**Instructions:**
+1. Analyze the genre and nature of the text above (e.g., informational/expository, narrative/story, children's literature/fable, literary/poetic, scientific, historical, etc.).
+2. Choose the most fitting visual representation style:
+   - **Infographic poster**: for informational, expository, scientific, or technical texts — organize key facts, data, and concepts into a visually appealing poster layout with sections, icons, and labels.
+   - **Comic strip**: for narrative texts with dialogue, events, or story arcs — depict key scenes in a colorful comic strip format with speech bubbles and sequential panels.
+   - **Cartoon**: for children's literature, fables, or light-hearted texts — create a fun, colorful cartoon-style illustration featuring characters and key plot elements.
+   - **Painting**: for literary, poetic, emotional, or descriptive texts — create an artistic, evocative painting-style illustration that captures the mood and atmosphere.
+3. The image must be:
+   - **Colorful and visually engaging** — use vibrant colors that appeal to students
+   - **Educational** — convey the main ideas, key concepts, and important details from the text
+   - **Age-appropriate** — suitable for a ${age}-year-old student
+   - **Clear and readable** — any text in the image should be legible and concise
+   - **2K resolution (2048x1152), 16:9 aspect ratio, PNG format**
+
+**Respond with ONLY a detailed image generation prompt** (a single paragraph describing exactly what to draw, including the visual style chosen, color palette, key elements to include, layout/composition, and any text labels). Do not include any preamble, explanation, or commentary — just the prompt itself.`;
+}
+
 export function getSystemPrompt(): string {
   return systemInstruction.replace("{now}", new Date().toLocaleDateString(i18next.language));
 }

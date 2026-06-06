@@ -190,6 +190,7 @@ interface ReadingSession {
   simplifiedText: string;
   highlightedWords: string[];
   mindMap: string;
+  visualizationImage: string;
   readingTest: ReadingTestQuestion[];
   glossary: GlossaryEntry[];
   glossaryRatings?: Record<string, GlossaryRating>;
@@ -200,6 +201,7 @@ interface ReadingSession {
   flashcardReviewDates?: number[];
   summaryGeneratedAt?: number;
   mindMapGeneratedAt?: number;
+  visualizationGeneratedAt?: number;
   adaptedTextGeneratedAt?: number;
   simplifiedTextGeneratedAt?: number;
   glossaryGeneratedAt?: number;

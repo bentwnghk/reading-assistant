@@ -23,6 +23,7 @@ const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/Wor
 const Summary = dynamic(() => import("@/components/ReadingAssistant/Summary"));
 const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedText"));
 const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
+const Visualization = dynamic(() => import("@/components/ReadingAssistant/Visualization"));
 const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
 const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
@@ -115,6 +116,9 @@ function Home() {
         </section>
         <section id="section-mindmap">
           <MindMap />
+        </section>
+        <section id="section-visualization">
+          <Visualization />
         </section>
         <section id="section-adapted">
           <AdaptedText />

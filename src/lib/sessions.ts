@@ -19,7 +19,7 @@ export async function createReadingSession(
       `INSERT INTO reading_sessions (
         id, user_id, doc_title, student_age, extracted_text, summary,
         adapted_text, simplified_text, highlighted_words, analyzed_sentences,
-        mind_map, reading_test, glossary, glossary_ratings, test_score,
+        mind_map, visualization_image, visualization_generated_at, reading_test, glossary, glossary_ratings, test_score,
         test_completed, test_earned_points, test_total_points, test_show_chinese,
         test_mode, vocabulary_quiz_score, spelling_game_best_score, chat_history,
         tests_completed, vocab_quizzes_completed, spelling_games_completed,
@@ -45,7 +45,7 @@ export async function createReadingSession(
         grammar_scramble_challenges, grammar_workshop_challenges,
         grammar_game_questions,
         created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68)
       ON CONFLICT (id) DO UPDATE SET
         doc_title = EXCLUDED.doc_title,
         student_age = EXCLUDED.student_age,
@@ -56,6 +56,8 @@ export async function createReadingSession(
         highlighted_words = EXCLUDED.highlighted_words,
         analyzed_sentences = EXCLUDED.analyzed_sentences,
         mind_map = EXCLUDED.mind_map,
+        visualization_image = EXCLUDED.visualization_image,
+        visualization_generated_at = EXCLUDED.visualization_generated_at,
         reading_test = EXCLUDED.reading_test,
         glossary = EXCLUDED.glossary,
         glossary_ratings = EXCLUDED.glossary_ratings,
@@ -122,6 +124,8 @@ export async function createReadingSession(
         JSON.stringify(sessionData.highlightedWords),
         JSON.stringify(sessionData.analyzedSentences),
         sessionData.mindMap,
+        sessionData.visualizationImage ?? "",
+        sessionData.visualizationGeneratedAt ?? 0,
         JSON.stringify(sessionData.readingTest),
         JSON.stringify(sessionData.glossary),
         JSON.stringify(sessionData.glossaryRatings),
@@ -250,6 +254,8 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       highlightedWords: row.highlighted_words,
       analyzedSentences: row.analyzed_sentences,
       mindMap: row.mind_map,
+      visualizationImage: row.visualization_image ?? "",
+      visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
       readingTest: row.reading_test,
       glossary: row.glossary,
       glossaryRatings: row.glossary_ratings,
@@ -370,6 +376,8 @@ export async function getReadingSession(
       highlightedWords: row.highlighted_words,
       analyzedSentences: row.analyzed_sentences,
       mindMap: row.mind_map,
+      visualizationImage: row.visualization_image ?? "",
+      visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
       readingTest: row.reading_test,
       glossary: row.glossary,
       glossaryRatings: row.glossary_ratings,
@@ -469,6 +477,8 @@ export async function updateReadingSession(
       highlightedWords: "highlighted_words",
       analyzedSentences: "analyzed_sentences",
       mindMap: "mind_map",
+      visualizationImage: "visualization_image",
+      visualizationGeneratedAt: "visualization_generated_at",
       readingTest: "reading_test",
       glossary: "glossary",
       glossaryRatings: "glossary_ratings",

@@ -18,6 +18,7 @@ type ActivityType =
   | "grammar_roulette_complete"
   | "grammar_duel_complete"
   | "ai_tutor_question"
+  | "visualization_generate"
 
 interface ActivityDetails {
   cardsReviewed?: number

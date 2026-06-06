@@ -101,6 +101,7 @@ export type ReadingStatus =
   | "adapting"
   | "simplifying"
   | "mindmap"
+  | "visualization"
   | "testing"
   | "glossary"
   | "grammar"
@@ -122,6 +123,8 @@ export interface ReadingStore {
   highlightedWords: string[];
   analyzedSentences: Record<string, SentenceAnalysis>;
   mindMap: string;
+  visualizationImage: string;
+  visualizationGeneratedAt: number;
   readingTest: ReadingTestQuestion[];
   glossary: GlossaryEntry[];
   glossaryRatings: Record<string, GlossaryRating>;
@@ -210,6 +213,7 @@ interface ReadingActions {
   removeSentenceAnalysis: (sentence: string) => void;
   getSentenceAnalysis: (sentence: string) => SentenceAnalysis | null;
   setMindMap: (mermaidCode: string) => void;
+  setVisualizationImage: (imageDataUrl: string) => void;
   setReadingTest: (questions: ReadingTestQuestion[]) => void;
   setUserAnswer: (questionId: string, answer: string) => void;
   setQuestionEarnedPoints: (questionId: string, points: number) => void;
@@ -277,6 +281,8 @@ const defaultValues: ReadingStore = {
   highlightedWords: [],
   analyzedSentences: {},
   mindMap: "",
+  visualizationImage: "",
+  visualizationGeneratedAt: 0,
   readingTest: [],
   glossary: [],
   glossaryRatings: {},
@@ -556,6 +562,19 @@ export const useReadingStore = create(
           const newState = {
             mindMap: mermaidCode,
             mindMapGeneratedAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setVisualizationImage: (imageDataUrl) =>
+        set((state) => {
+          const newState = {
+            visualizationImage: imageDataUrl,
+            visualizationGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -1187,7 +1206,7 @@ export const useReadingStore = create(
     }),
     {
       name: "reading",
-      version: 8,
+      version: 9,
       storage: {
         getItem: (name) => {
           const value = localStorage.getItem(name);
@@ -1205,7 +1224,7 @@ export const useReadingStore = create(
           return {} as ReadingStore & ReadingActions;
         }
         const keysToPersist = (Object.keys(defaultValues) as (keyof ReadingStore)[]).filter(
-          (key) => key !== "originalImages"
+          (key) => key !== "originalImages" && key !== "visualizationImage"
         );
         return pick(state, keysToPersist) as ReadingStore & ReadingActions;
       },
