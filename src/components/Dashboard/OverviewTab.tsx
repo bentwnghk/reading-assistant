@@ -429,7 +429,7 @@ export function OverviewTab() {
       {/* Charts Row 1: Reading Activity + AI Features */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ChartCard title={t("dashboard.charts.readingActivity")}>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={m.sessionsOverTime}>
               <defs>
                 <linearGradient id="gradSessions" x1="0" y1="0" x2="0" y2="1">
