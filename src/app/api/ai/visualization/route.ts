@@ -9,6 +9,39 @@ const SUBSCRIPTION_API_KEY =
   process.env.OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || "";
 const IMAGE_MODEL = process.env.IMAGE_MODEL || "gemini-3.1-flash-image";
 
+function extractImageFromResponse(data: any): string | null {
+  const message = data?.choices?.[0]?.message;
+  if (!message) return null;
+
+  if (typeof message.content === "string") {
+    const b64Match = message.content.match(
+      /data:image\/[a-zA-Z+]+;base64,([A-Za-z0-9+/=]+)/
+    );
+    if (b64Match) return `data:image/png;base64,${b64Match[1]}`;
+  }
+
+  if (Array.isArray(message.content)) {
+    for (const part of message.content) {
+      if (part.type === "image_url" && part.image_url?.url) {
+        const url = part.image_url.url;
+        if (url.startsWith("data:image/")) return url;
+      }
+      if (part.type === "image" && part.source?.data) {
+        const mime = part.source.media_type || "image/png";
+        return `data:${mime};base64,${part.source.data}`;
+      }
+      if (part.type === "text" && typeof part.text === "string") {
+        const b64Match = part.text.match(
+          /data:image\/[a-zA-Z+]+;base64,([A-Za-z0-9+/=]+)/
+        );
+        if (b64Match) return `data:image/png;base64,${b64Match[1]}`;
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -40,8 +73,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const imageResponse = await fetch(
-      `${API_BASE_URL}/v1/images/generations`,
+    const chatResponse = await fetch(
+      `${API_BASE_URL}/v1/chat/completions`,
       {
         method: "POST",
         headers: {
@@ -50,46 +83,45 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           model: IMAGE_MODEL,
-          prompt,
-          n: 1,
-          size: "2048x1152",
-          response_format: "b64_json",
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          max_tokens: 4096,
         }),
       }
     );
 
-    if (!imageResponse.ok) {
-      const errorText = await imageResponse.text();
+    if (!chatResponse.ok) {
+      const errorText = await chatResponse.text();
       console.error(
         "Image generation failed:",
-        imageResponse.status,
+        chatResponse.status,
         errorText
       );
       return NextResponse.json(
         { error: "Image generation failed", details: errorText },
-        { status: imageResponse.status }
+        { status: chatResponse.status }
       );
     }
 
-    const imageData = await imageResponse.json();
+    const responseData = await chatResponse.json();
+    const imageDataUrl = extractImageFromResponse(responseData);
 
-    let base64Data: string | null = null;
-    if (imageData.data?.[0]?.b64_json) {
-      base64Data = imageData.data[0].b64_json;
-    } else if (imageData.data?.[0]?.url) {
-      return NextResponse.json({ image: imageData.data[0].url });
-    }
-
-    if (!base64Data) {
+    if (!imageDataUrl) {
+      const msg = responseData?.choices?.[0]?.message?.content || "";
+      if (msg.includes("```") || msg.length < 200) {
+        console.error("No image in response. Response content:", msg.substring(0, 500));
+      }
       return NextResponse.json(
-        { error: "No image data in response" },
+        { error: "No image in response" },
         { status: 502 }
       );
     }
 
-    const dataUrl = `data:image/png;base64,${base64Data}`;
-
-    return NextResponse.json({ image: dataUrl });
+    return NextResponse.json({ image: imageDataUrl });
   } catch (error) {
     console.error("Visualization API error:", error);
     return NextResponse.json(
