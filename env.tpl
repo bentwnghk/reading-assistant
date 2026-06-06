@@ -165,7 +165,7 @@ NEXT_PUBLIC_MODEL_LIST=
 FALLBACK_MODEL=gemini-3-flash-preview
 # (Optional) Text-to-image model for visualization generation (default: google/gemini-3.1-flash-image-preview)
 IMAGE_MODEL=google/gemini-3.1-flash-image-preview
-# ZenMux API key — primary provider for visualization image generation
+# ZenMux API key — primary provider for visualization image generation (comma-separated for load balancing)
 ZENMUX_API_KEY=
 # (Optional) ZenMux base URL (default: https://zenmux.ai/api/vertex-ai)
 ZENMUX_API_BASE_URL=https://zenmux.ai/api/vertex-ai
