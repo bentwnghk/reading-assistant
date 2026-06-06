@@ -112,6 +112,7 @@ export interface TeacherSessionData {
   spellingGameCompletedAt: number
   vocabQuizCompletedAt: number
   readingTestCompletedAt: number
+  visualization: boolean
 }
 
 export async function getTeacherDashboardData(classId: string): Promise<TeacherSessionData[]> {
@@ -141,6 +142,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         rs.adapted_text_generated_at, rs.simplified_text_generated_at,
         rs.glossary_generated_at, rs.spelling_game_completed_at,
         rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
+        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
        JOIN class_members cm ON rs.user_id = cm.student_id
@@ -195,6 +197,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
       vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
       readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
+      visualization: !!row.visualization,
     }))
   } finally {
     client.release()
@@ -228,6 +231,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         rs.adapted_text_generated_at, rs.simplified_text_generated_at,
         rs.glossary_generated_at, rs.spelling_game_completed_at,
         rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
+        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
@@ -282,6 +286,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
       vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
       readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
+      visualization: !!row.visualization,
     }))
   } finally {
     client.release()
@@ -315,6 +320,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         rs.adapted_text_generated_at, rs.simplified_text_generated_at,
         rs.glossary_generated_at, rs.spelling_game_completed_at,
         rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
+        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
@@ -368,6 +374,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
       vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
       readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
+      visualization: !!row.visualization,
     }))
   } finally {
     client.release()

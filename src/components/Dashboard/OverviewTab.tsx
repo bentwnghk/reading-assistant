@@ -309,6 +309,7 @@ export function OverviewTab() {
     () => [
       { name: t("dashboard.features.summary"), value: m.summariesGenerated, fill: "#3b82f6" },
       { name: t("dashboard.features.mindMap"), en: m.mindMapsEnglish, zh: m.mindMapsChinese, fill: "#8b5cf6", fill2: "#a78bfa" },
+      { name: t("dashboard.features.visualization"), value: m.visualizationsGenerated, fill: "#0ea5e9" },
       { name: t("dashboard.features.adaptedText"), value: m.adaptedTextsGenerated, fill: "#22c55e" },
       { name: t("dashboard.features.simplifiedText"), value: m.simplifiedTextsGenerated, fill: "#14b8a6" },
       { name: t("dashboard.features.sentenceAnalysis"), value: m.totalSentencesAnalyzed, fill: "#f97316" },

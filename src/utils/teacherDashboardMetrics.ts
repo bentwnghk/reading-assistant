@@ -11,6 +11,7 @@ export interface StudentMetrics {
   aiUsage: {
     summary: number;
     mindMap: number;
+    visualization: number;
     adaptedText: number;
     simplifiedText: number;
     sentenceAnalysis: number;
@@ -154,6 +155,7 @@ export function getQuartileColor(values: number[]): string[] {
 export const AI_USAGE_KEYS = [
   "summary",
   "mindMap",
+  "visualization",
   "adaptedText",
   "simplifiedText",
   "sentenceAnalysis",
@@ -165,6 +167,7 @@ export const AI_USAGE_KEYS = [
 export const AI_USAGE_COLORS: Record<string, string> = {
   summary: "#3b82f6",
   mindMap: "#8b5cf6",
+  visualization: "#0ea5e9",
   adaptedText: "#22c55e",
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
@@ -208,7 +211,7 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
       totalVocabulary: 0,
       vocabularyTimeline: [],
       avgProgress: 0,
-      aiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      aiUsage: { summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
       testScores: [],
       quizScores: [],
       spellingScores: [],
@@ -257,6 +260,7 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
   const aiUsage = {
     summary: sorted.filter((s) => s.summary).length,
     mindMap: sorted.filter((s) => s.mindMap).length,
+    visualization: sorted.filter((s) => s.visualization).length,
     adaptedText: sorted.filter((s) => s.adaptedText).length,
     simplifiedText: sorted.filter((s) => s.simplifiedText).length,
     sentenceAnalysis: sorted.reduce((sum, s) => sum + s.sentenceAnalysisCount, 0),
@@ -353,8 +357,8 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
       classAvgGrammarQuizScore: 0,
       classAvgGrammarGameScore: 0,
       classAvgGrammarGameAccuracy: 0,
-      classTotalAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
-      classAvgAiUsage: { summary: 0, mindMap: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      classTotalAiUsage: { summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      classAvgAiUsage: { summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
     };
   }
 
@@ -398,6 +402,7 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
   const classTotalAiUsage = {
     summary: students.reduce((sum, s) => sum + s.aiUsage.summary, 0),
     mindMap: students.reduce((sum, s) => sum + s.aiUsage.mindMap, 0),
+    visualization: students.reduce((sum, s) => sum + s.aiUsage.visualization, 0),
     adaptedText: students.reduce((sum, s) => sum + s.aiUsage.adaptedText, 0),
     simplifiedText: students.reduce((sum, s) => sum + s.aiUsage.simplifiedText, 0),
     sentenceAnalysis: students.reduce((sum, s) => sum + s.aiUsage.sentenceAnalysis, 0),
@@ -409,6 +414,7 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
   const classAvgAiUsage = {
     summary: Math.round(classTotalAiUsage.summary / n),
     mindMap: Math.round(classTotalAiUsage.mindMap / n),
+    visualization: Math.round(classTotalAiUsage.visualization / n),
     adaptedText: Math.round(classTotalAiUsage.adaptedText / n),
     simplifiedText: Math.round(classTotalAiUsage.simplifiedText / n),
     sentenceAnalysis: Math.round(classTotalAiUsage.sentenceAnalysis / n),

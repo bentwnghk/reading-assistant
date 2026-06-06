@@ -51,6 +51,7 @@ export interface DashboardMetrics {
   mindMapsGenerated: number;
   mindMapsChinese: number;
   mindMapsEnglish: number;
+  visualizationsGenerated: number;
   adaptedTextsGenerated: number;
   simplifiedTextsGenerated: number;
   totalSentencesAnalyzed: number;
@@ -181,6 +182,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       mindMapsGenerated: 0,
       mindMapsChinese: 0,
       mindMapsEnglish: 0,
+      visualizationsGenerated: 0,
       adaptedTextsGenerated: 0,
       simplifiedTextsGenerated: 0,
       totalSentencesAnalyzed: 0,
@@ -223,6 +225,8 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   const mindMapsGenerated = mindMaps.length;
   const mindMapsChinese = mindMaps.filter((h) => detectMindMapLanguage(h.mindMap!) === "zh").length;
   const mindMapsEnglish = mindMapsGenerated - mindMapsChinese;
+
+  const visualizationsGenerated = sorted.filter((h) => !!h.visualizationImage).length;
 
   const adaptedTextsGenerated = sorted.filter((h) => !!h.adaptedText).length;
   const simplifiedTextsGenerated = sorted.filter((h) => !!h.simplifiedText).length;
@@ -409,6 +413,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     mindMapsGenerated,
     mindMapsChinese,
     mindMapsEnglish,
+    visualizationsGenerated,
     adaptedTextsGenerated,
     simplifiedTextsGenerated,
     totalSentencesAnalyzed,

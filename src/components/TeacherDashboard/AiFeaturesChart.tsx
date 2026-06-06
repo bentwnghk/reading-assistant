@@ -55,6 +55,7 @@ function CustomTooltip({
 const AI_FEATURE_KEY_MAP: Record<string, string> = {
   summary: "dashboard.features.summary",
   mindMap: "dashboard.features.mindMap",
+  visualization: "dashboard.features.visualization",
   adaptedText: "dashboard.features.adaptedText",
   simplifiedText: "dashboard.features.simplifiedText",
   sentenceAnalysis: "dashboard.features.sentenceAnalysis",
