@@ -68,12 +68,6 @@ services:
       IMAGE_MODEL: "google/gemini-3.1-flash-image-preview"
       # ZenMux API key for visualization image generation (primary provider)
       ZENMUX_API_KEY: ""
-      # ZenMux base URL (default: https://zenmux.ai/api/vertex-ai)
-      # ZENMUX_API_BASE_URL: "https://zenmux.ai/api/vertex-ai"
-      # ZenMux Google Cloud project (optional, uses v1beta format if not set)
-      # ZENMUX_PROJECT: ""
-      # ZenMux Google Cloud location (default: us-central1)
-      # ZENMUX_LOCATION: "us-central1"
       # Google Gemini API key — fallback for visualization image generation
       GOOGLE_GENERATIVE_AI_API_KEY: ""
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"

@@ -169,10 +169,6 @@ IMAGE_MODEL=google/gemini-3.1-flash-image-preview
 ZENMUX_API_KEY=
 # (Optional) ZenMux base URL (default: https://zenmux.ai/api/vertex-ai)
 ZENMUX_API_BASE_URL=https://zenmux.ai/api/vertex-ai
-# (Optional) ZenMux Google Cloud project. When set, uses Vertex AI v1 URL format; otherwise uses v1beta format.
-ZENMUX_PROJECT=
-# (Optional) ZenMux Google Cloud location (default: us-central1)
-ZENMUX_LOCATION=us-central1
 # (Optional) Google Gemini API key — fallback for visualization image generation (get from https://aistudio.google.com/apikey)
 GOOGLE_GENERATIVE_AI_API_KEY=
 

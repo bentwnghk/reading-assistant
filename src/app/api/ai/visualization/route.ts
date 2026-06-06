@@ -6,8 +6,6 @@ import { multiApiKeyPolling } from "@/utils/model";
 const ZENMUX_API_KEY = process.env.ZENMUX_API_KEY || "";
 const ZENMUX_API_BASE_URL =
   process.env.ZENMUX_API_BASE_URL || "https://zenmux.ai/api/vertex-ai";
-const ZENMUX_PROJECT = process.env.ZENMUX_PROJECT || "";
-const ZENMUX_LOCATION = process.env.ZENMUX_LOCATION || "us-central1";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
 const GOOGLE_API_BASE_URL =
@@ -37,13 +35,21 @@ function extractBase64FromGeminiResponse(data: any): string | null {
   return null;
 }
 
+function formatModelResource(model: string): string {
+  if (model.startsWith("publishers/")) return model;
+  if (model.includes("/")) {
+    const idx = model.indexOf("/");
+    return `publishers/${model.substring(0, idx)}/models/${model.substring(idx + 1)}`;
+  }
+  return `publishers/google/models/${model}`;
+}
+
 async function callZenMuxApi(
   prompt: string,
   model: string
 ): Promise<Response> {
-  const url = ZENMUX_PROJECT
-    ? `${ZENMUX_API_BASE_URL}/v1/projects/${ZENMUX_PROJECT}/locations/${ZENMUX_LOCATION}/publishers/google/models/${encodeURIComponent(model)}:generateContent`
-    : `${ZENMUX_API_BASE_URL}/v1/models/${encodeURIComponent(model)}:generateContent`;
+  const modelResource = formatModelResource(model);
+  const url = `${ZENMUX_API_BASE_URL}/v1/${modelResource}:generateContent`;
 
   return fetch(url, {
     method: "POST",
