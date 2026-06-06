@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import copy from "copy-to-clipboard";
 import { customAlphabet } from "nanoid";
 import {
@@ -109,6 +109,7 @@ async function loadMermaid(element: HTMLElement, code: string) {
 function Mermaid({ children }: Props) {
   const { t } = useTranslation();
   const mermaidContainerRef = useRef<HTMLDivElement>(null);
+  const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const [content, setContent] = useState<string>("");
   const [waitingCopy, setWaitingCopy] = useState<boolean>(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState<boolean>(false);
@@ -150,19 +151,34 @@ function Mermaid({ children }: Props) {
     setModalKey(prev => prev + 1);
   };
 
+  const fitToView = () => {
+    const target = mermaidContainerRef.current;
+    if (!target) return;
+    const wrapper = target.closest(".react-transform-wrapper")?.parentElement;
+    const svg = target.querySelector("svg");
+    if (wrapper && svg) {
+      const scaleX = wrapper.clientWidth / svg.getBoundingClientRect().width;
+      const scaleY = wrapper.clientHeight / svg.getBoundingClientRect().height;
+      const fitScale = Math.min(scaleX, scaleY, 1);
+      if (transformRef.current) {
+        transformRef.current.setTransform(fitScale, 0, 0);
+      }
+    }
+  };
+
   useEffect(() => {
     const target = mermaidContainerRef.current;
     if (target) {
       setContent(target.innerText);
-      loadMermaid(target, target.innerText);
+      loadMermaid(target, target.innerText).then(fitToView);
     }
   }, [children]);
 
   return (
     <>
       <div className="relative cursor-pointer justify-center w-full overflow-auto rounded">
-        <TransformWrapper initialScale={2} smooth>
-          {({ zoomIn, zoomOut, resetTransform }) => (
+        <TransformWrapper initialScale={1} minScale={0.1} centerOnInit smooth ref={transformRef}>
+          {({ zoomIn, zoomOut }) => (
             <>
               <div className="absolute top-0 right-0 z-50 flex gap-1 print:hidden">
                 <Button
@@ -203,7 +219,7 @@ function Mermaid({ children }: Props) {
                   size="icon"
                   variant="ghost"
                   title={t("editor.mermaid.resize")}
-                  onClick={() => resetTransform()}
+                  onClick={() => fitToView()}
                 >
                   <RefreshCcw />
                 </Button>
