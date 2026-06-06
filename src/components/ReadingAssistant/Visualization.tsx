@@ -76,16 +76,18 @@ function Visualization() {
               {t("reading.visualization.download")}
             </Button>
           )}
-        <div className="flex flex-wrap items-center gap-2">
-            <Switch
-              checked={useChinese}
-              onCheckedChange={setUseChinese}
-              disabled={isGenerating || (isStudent && !!visualizationImage)}
-            />
-            <span className="text-sm text-muted-foreground">
-              {t("reading.visualization.chineseLabel")}
-            </span>
-          </div>
+          {!(isStudent && visualizationImage) && (
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={useChinese}
+                onCheckedChange={setUseChinese}
+                disabled={isGenerating}
+              />
+              <span className="text-sm text-muted-foreground">
+                {t("reading.visualization.chineseLabel")}
+              </span>
+            </div>
+          )}
           {!(isStudent && visualizationImage) && (
             <Button
               onClick={() => generateVisualization(useChinese)}
