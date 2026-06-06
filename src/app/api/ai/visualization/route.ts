@@ -43,7 +43,7 @@ async function callZenMuxApi(
 ): Promise<Response> {
   const url = ZENMUX_PROJECT
     ? `${ZENMUX_API_BASE_URL}/v1/projects/${ZENMUX_PROJECT}/locations/${ZENMUX_LOCATION}/publishers/google/models/${encodeURIComponent(model)}:generateContent`
-    : `${ZENMUX_API_BASE_URL}/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+    : `${ZENMUX_API_BASE_URL}/v1/models/${encodeURIComponent(model)}:generateContent`;
 
   return fetch(url, {
     method: "POST",
