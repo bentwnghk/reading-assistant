@@ -165,6 +165,8 @@ NEXT_PUBLIC_MODEL_LIST=
 FALLBACK_MODEL=gemini-3-flash-preview
 # (Optional) Text-to-image model for visualization generation (default: gemini-3.1-flash-image)
 IMAGE_MODEL=gemini-3.1-flash-image
+# Google Gemini API key — required for visualization image generation (get from https://aistudio.google.com/apikey)
+GOOGLE_GENERATIVE_AI_API_KEY=
 
 # (Optional) Injected script code can be used for statistics or error tracking.
 HEAD_SCRIPTS=
