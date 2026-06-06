@@ -46,15 +46,6 @@ async function callGeminiNativeApi(
           parts: [{ text: prompt }],
         },
       ],
-      generationConfig: {
-        responseModalities: ["TEXT", "IMAGE"],
-        responseFormat: {
-          image: {
-            aspectRatio: "16:9",
-            imageSize: "2K",
-          },
-        },
-      },
     }),
   });
 }
@@ -85,13 +76,6 @@ async function callOpenAICompatibleApi(
         model,
         messages: [{ role: "user", content: prompt }],
         max_tokens: 4096,
-        responseModalities: ["TEXT", "IMAGE"],
-        responseFormat: {
-          image: {
-            aspectRatio: "16:9",
-            imageSize: "2K",
-          },
-        },
       }),
     }
   );
