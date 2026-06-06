@@ -504,6 +504,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <ImageIcon className="h-4 w-4 mt-0.5 text-sky-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.visualization.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.visualization.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <BarChart3 className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.difficulty.title")}</div>
@@ -550,13 +557,6 @@ function Header() {
                   <div>
                     <div className="font-medium">{t("header.about.features.glossary.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.glossary.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <ImageIcon className="h-4 w-4 mt-0.5 text-sky-500 shrink-0" />
-                  <div>
-                    <div className="font-medium">{t("header.about.features.visualization.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.visualization.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">

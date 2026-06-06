@@ -393,6 +393,7 @@ export function LandingPage() {
           {[
             { icon: Camera, key: "ocr", color: "text-blue-600 dark:text-blue-400" },
             { icon: Brain, key: "visual", color: "text-purple-600 dark:text-purple-400" },
+            { icon: ImageIcon, key: "visualization", color: "text-sky-600 dark:text-sky-400" },
             { icon: BarChart3, key: "difficulty", color: "text-emerald-600 dark:text-emerald-400" },
             { icon: Highlighter, key: "cefrHighlight", color: "text-sky-600 dark:text-sky-400" },
             { icon: PenTool, key: "adaptation", color: "text-green-600 dark:text-green-400" },
@@ -400,7 +401,6 @@ export function LandingPage() {
             { icon: MessageCircle, key: "tutor", color: "text-indigo-600 dark:text-indigo-400" },
             { icon: MessageSquareText, key: "sentenceAnalysis", color: "text-orange-600 dark:text-orange-400" },
             { icon: BookOpen, key: "glossary", color: "text-teal-600 dark:text-teal-400" },
-            { icon: ImageIcon, key: "visualization", color: "text-sky-600 dark:text-sky-400" },
             { icon: Layers, key: "flashcard", color: "text-cyan-600 dark:text-cyan-400" },
             { icon: Gamepad2, key: "spelling", color: "text-pink-600 dark:text-pink-400" },
             { icon: ClipboardList, key: "quiz", color: "text-violet-600 dark:text-violet-400" },
