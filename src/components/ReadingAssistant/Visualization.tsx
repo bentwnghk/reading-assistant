@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
-import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X } from "lucide-react";
+import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
+import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 function Visualization() {
@@ -15,6 +16,8 @@ function Visualization() {
   const { data: session } = useSession();
   const userRole = session?.user?.role || "student";
   const isStudent = userRole === "student";
+  const { mode } = useSettingStore();
+  const isMeterMode = mode === "local";
   const { extractedText, visualizationImage, docTitle } = useReadingStore();
   const { status, generateVisualization } = useReadingAssistant();
   const isGenerating = status === "visualization";
@@ -76,7 +79,7 @@ function Visualization() {
               {t("reading.visualization.download")}
             </Button>
           )}
-          {!(isStudent && visualizationImage) && (
+          {!isMeterMode && !(isStudent && visualizationImage) && (
             <div className="flex items-center gap-2">
               <Switch
                 checked={useChinese}
@@ -88,7 +91,7 @@ function Visualization() {
               </span>
             </div>
           )}
-          {!(isStudent && visualizationImage) && (
+          {!isMeterMode && !(isStudent && visualizationImage) && (
             <Button
               onClick={() => generateVisualization(useChinese)}
               disabled={isGenerating}
@@ -105,7 +108,13 @@ function Visualization() {
                   <ImageIcon className="h-4 w-4 mr-1" />
                   {t("reading.visualization.regenerate")}
                 </>
-              ) : (
+      ) : isMeterMode ? (
+        <div className="text-center py-8">
+          <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+          <p className="text-muted-foreground font-medium mb-1">{t("reading.visualization.meterModeTitle")}</p>
+          <p className="text-sm text-muted-foreground">{t("reading.visualization.meterModeTip")}</p>
+        </div>
+      ) : (
                 <>
                   <ImageIcon className="h-4 w-4 mr-1" />
                   {t("reading.visualization.generate")}

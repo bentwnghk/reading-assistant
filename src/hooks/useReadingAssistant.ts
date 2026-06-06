@@ -27,7 +27,6 @@ import {
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
 import { logActivity } from "@/utils/activityLogger";
-import { multiApiKeyPolling } from "@/utils/model";
 
 function smoothTextStream(type: "character" | "word" | "line") {
   return smoothStream({
@@ -473,18 +472,10 @@ function useReadingAssistant() {
     setStatus("visualization");
 
     try {
-      const { mode, openaicompatibleApiKey, openaicompatibleApiProxy } = useSettingStore.getState();
-      const requestBody: Record<string, unknown> = { text: extractedText, studentAge, useChinese };
-
-      if (mode === "local" && openaicompatibleApiKey && openaicompatibleApiProxy) {
-        requestBody.meterApiKey = multiApiKeyPolling(openaicompatibleApiKey);
-        requestBody.meterApiBaseUrl = openaicompatibleApiProxy;
-      }
-
       const response = await fetch("/api/ai/visualization", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({ text: extractedText, studentAge, useChinese }),
       });
 
       if (!response.ok) {

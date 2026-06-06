@@ -164,12 +164,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text, studentAge, useChinese, meterApiKey, meterApiBaseUrl } = body as {
+    const { text, studentAge, useChinese } = body as {
       text: string;
       studentAge: number;
       useChinese?: boolean;
-      meterApiKey?: string;
-      meterApiBaseUrl?: string;
     };
 
     if (!text || typeof text !== "string") {
@@ -184,32 +182,6 @@ export async function POST(request: NextRequest) {
 
     const errors: string[] = [];
     let imageDataUrl: string | null = null;
-
-    if (meterApiKey && meterApiBaseUrl) {
-      try {
-        const response = await fetch(
-          `${meterApiBaseUrl}/v1/chat/completions`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${meterApiKey}`,
-            },
-            body: JSON.stringify({
-              model: "gemini-3.1-pro-preview",
-              messages: [{ role: "user", content: prompt }],
-              max_tokens: 5667,
-            }),
-          }
-        );
-        if (!response.ok) {
-          const errorText = await response.text();
-          errors.push(`Meter (${response.status}): ${errorText.substring(0, 200)}`);
-        }
-      } catch (e) {
-        errors.push(`Meter: ${e instanceof Error ? e.message : String(e)}`);
-      }
-    }
 
     if (ZENMUX_API_KEY) {
       try {
