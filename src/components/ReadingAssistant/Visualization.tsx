@@ -142,6 +142,12 @@ function Visualization() {
             </div>
           </button>
         </div>
+      ) : isMeterMode ? (
+        <div className="text-center py-8">
+          <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+          <p className="text-muted-foreground font-medium mb-1">{t("reading.visualization.meterModeTitle")}</p>
+          <p className="text-sm text-muted-foreground">{t("reading.visualization.meterModeTip")}</p>
+        </div>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
           <ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
