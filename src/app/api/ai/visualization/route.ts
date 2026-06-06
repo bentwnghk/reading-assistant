@@ -50,12 +50,13 @@ async function callZenMuxApi(
 ): Promise<Response> {
   const modelResource = formatModelResource(model);
   const url = `${ZENMUX_API_BASE_URL}/v1/${modelResource}:generateContent`;
+  const apiKey = multiApiKeyPolling(ZENMUX_API_KEY);
 
   return fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-goog-api-key": ZENMUX_API_KEY,
+      "x-goog-api-key": apiKey,
     },
     body: JSON.stringify({
       contents: [
