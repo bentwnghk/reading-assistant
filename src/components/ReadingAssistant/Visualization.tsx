@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
-import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X, RefreshCw } from "lucide-react";
+import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
