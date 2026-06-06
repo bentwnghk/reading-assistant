@@ -461,7 +461,7 @@ export function OverviewTab() {
         </ChartCard>
 
         <ChartCard title={t("dashboard.charts.aiFeatures")}>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={260}>
             <BarChart data={aiFeaturesData} layout="vertical" margin={{ left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} />
