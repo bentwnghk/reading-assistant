@@ -10,7 +10,7 @@ import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 function Visualization() {
   const { t } = useTranslation();
-  const { extractedText, visualizationImage } = useReadingStore();
+  const { extractedText, visualizationImage, docTitle } = useReadingStore();
   const { status, generateVisualization } = useReadingAssistant();
   const isGenerating = status === "visualization";
   const [zoomed, setZoomed] = useState(false);
@@ -23,7 +23,12 @@ function Visualization() {
     if (!visualizationImage) return;
     const link = document.createElement("a");
     link.href = visualizationImage;
-    link.download = `visualization-${Date.now()}.png`;
+    const safeFileName = (docTitle || "Untitled")
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 80);
+    link.download = `${safeFileName} - Visualization.png`;
     link.click();
   }
 
