@@ -26,6 +26,7 @@ const ActivitySchema = z.object({
     "grammar_roulette_complete",
     "grammar_duel_complete",
     "ai_tutor_question",
+    "visualization_generate",
   ]),
   sessionId: z.string().optional(),
   score:     z.number().min(0).max(10000).optional(),

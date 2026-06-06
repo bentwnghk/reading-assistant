@@ -282,7 +282,8 @@ CREATE TABLE activity_logs (
       'grammar_surgery_complete',
       'grammar_roulette_complete',
       'grammar_duel_complete',
-      'ai_tutor_question'
+      'ai_tutor_question',
+      'visualization_generate'
     )),
   session_id    TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
   score         INTEGER,          -- raw score/percentage (0-100 for tests; raw points for spelling)

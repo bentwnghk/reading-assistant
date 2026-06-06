@@ -20,6 +20,7 @@ export type ActivityType =
   | "grammar_roulette_complete"
   | "grammar_duel_complete"
   | "ai_tutor_question"
+  | "visualization_generate"
 
 export interface ActivityDetails {
   cardsReviewed?: number
