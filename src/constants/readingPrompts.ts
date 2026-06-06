@@ -909,7 +909,7 @@ ${text}
    - **2K resolution (2048x1152), 16:9 aspect ratio, PNG format**
 4. ${languageInstruction}
 
-**Respond with ONLY a detailed image generation prompt** (a single paragraph describing exactly what to draw, including the visual style chosen, color palette, key elements to include, layout/composition, and any text labels). Do not include any preamble, explanation, or commentary — just the prompt itself.`;
+Generate the image now.`;
 }
 
 export function getSystemPrompt(): string {
