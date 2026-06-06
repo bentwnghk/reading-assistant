@@ -178,7 +178,7 @@ function Mermaid({ children }: Props) {
     <>
       <div className="relative cursor-pointer justify-center w-full overflow-auto rounded">
         <TransformWrapper initialScale={1} minScale={0.1} centerOnInit smooth ref={transformRef}>
-          {({ zoomIn, zoomOut }) => (
+          {() => (
             <>
               <div className="absolute top-0 right-0 z-50 flex gap-1 print:hidden">
                 <Button
@@ -211,35 +211,6 @@ function Mermaid({ children }: Props) {
                   onClick={() => openFullscreen()}
                 >
                   <Maximize2 />
-                </Button>
-              </div>
-              <div className="absolute bottom-0 right-0 z-50 flex gap-1 print:hidden">
-                <Button
-                  className="w-6 h-6"
-                  size="icon"
-                  variant="ghost"
-                  title={t("editor.mermaid.resize")}
-                  onClick={() => fitToView()}
-                >
-                  <RefreshCcw />
-                </Button>
-                <Button
-                  className="w-6 h-6"
-                  size="icon"
-                  variant="ghost"
-                  title={t("editor.mermaid.zoomIn")}
-                  onClick={() => zoomIn()}
-                >
-                  <ZoomIn />
-                </Button>
-                <Button
-                  className="w-6 h-6"
-                  size="icon"
-                  variant="ghost"
-                  title={t("editor.mermaid.zoomOut")}
-                  onClick={() => zoomOut()}
-                >
-                  <ZoomOut />
                 </Button>
               </div>
               <TransformComponent>
