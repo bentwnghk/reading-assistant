@@ -40,6 +40,7 @@ import {
   LogOut,
   LogIn,
   CircleHelp,
+  ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -552,6 +553,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <ImageIcon className="h-4 w-4 mt-0.5 text-sky-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.visualization.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.visualization.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <Layers className="h-4 w-4 mt-0.5 text-cyan-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.flashcard.title")}</div>
@@ -697,67 +705,72 @@ function Header() {
                     <span className="text-xs">{t("header.about.workflow.mindmap")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300 text-xs font-bold">4</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-300 text-xs font-bold">4</span>
+                    <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs">{t("header.about.workflow.visualization")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-300 text-xs font-bold">5</span>
                     <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.difficulty")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-300 text-xs font-bold">5</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-300 text-xs font-bold">6</span>
                     <Highlighter className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.cefrHighlight")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 text-xs font-bold">6</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 text-xs font-bold">7</span>
                     <PenTool className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.adapt")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-xs font-bold">7</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-xs font-bold">8</span>
                     <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.tutor")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-xs font-bold">8</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 text-xs font-bold">9</span>
                     <MessageSquareText className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.analyze")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 text-xs font-bold">9</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 text-xs font-bold">10</span>
                     <Zap className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.highlight")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 text-xs font-bold">10</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 text-xs font-bold">11</span>
                     <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.glossary")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300 text-xs font-bold">11</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300 text-xs font-bold">12</span>
                     <Gamepad2 className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.spelling")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300 text-xs font-bold">12</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300 text-xs font-bold">13</span>
                     <Layers className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.vocabQuiz")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 text-xs font-bold">13</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 text-xs font-bold">14</span>
                     <Target className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.test")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-600 dark:text-fuchsia-300 text-xs font-bold">14</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-600 dark:text-fuchsia-300 text-xs font-bold">15</span>
                     <BookOpenCheck className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.grammar")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-lime-100 dark:bg-lime-900 text-lime-600 dark:text-lime-300 text-xs font-bold">15</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-lime-100 dark:bg-lime-900 text-lime-600 dark:text-lime-300 text-xs font-bold">16</span>
                     <Gamepad2 className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.grammarGames")}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-300 text-xs font-bold">16</span>
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-300 text-xs font-bold">17</span>
                     <Library className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="text-xs">{t("header.about.workflow.myVocabulary")}</span>
                   </div>

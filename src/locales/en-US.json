@@ -122,7 +122,11 @@
         },
         "glossary": {
           "title": "📖 Smart Glossary",
-          "desc": "Get bilingual definitions (English + Chinese), syllabification, and real-world example sentences from AI for every word you highlight."
+          "desc": "AI provides bilingual definitions (English + Chinese), syllable breakdowns, and example sentences for every word you mark."
+        },
+        "visualization": {
+          "title": "🖼️ AI Visualization",
+          "desc": "AI generates a vivid, colorful image to help you visualize the main ideas! Automatically picks the best style — infographic, comic strip, cartoon, or painting — based on the text's genre. Supports English and Chinese."
         },
         "flashcard": {
           "title": "🃏 Flashcard Review",
@@ -174,6 +178,7 @@
         "upload": "Select text via image/PDF upload or Text Repository",
         "summary": "Get a quick summary of the content",
         "mindmap": "Explore with an interactive mind map",
+        "visualization": "Visualize main ideas with a colorful AI-generated image",
         "adapt": "Read text adapted to your level",
         "difficulty": "Analyze text difficulty metrics",
         "cefrHighlight": "See word difficulty color-coded",
