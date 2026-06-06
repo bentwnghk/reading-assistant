@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -14,6 +15,7 @@ function Visualization() {
   const { status, generateVisualization } = useReadingAssistant();
   const isGenerating = status === "visualization";
   const [zoomed, setZoomed] = useState(false);
+  const [useChinese, setUseChinese] = useState(false);
 
   if (!extractedText) {
     return null;
@@ -70,8 +72,18 @@ function Visualization() {
               {t("reading.visualization.download")}
             </Button>
           )}
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={useChinese}
+              onCheckedChange={setUseChinese}
+              disabled={isGenerating}
+            />
+            <span className="text-sm text-muted-foreground">
+              {t("reading.visualization.chineseLabel")}
+            </span>
+          </div>
           <Button
-            onClick={generateVisualization}
+            onClick={() => generateVisualization(useChinese)}
             disabled={isGenerating}
             size="sm"
             variant={visualizationImage ? "secondary" : "default"}

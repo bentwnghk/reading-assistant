@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text, studentAge } = body as { text: string; studentAge: number };
+    const { text, studentAge, useChinese } = body as { text: string; studentAge: number; useChinese?: boolean };
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
     }
 
     const age = typeof studentAge === "number" ? studentAge : 13;
-    const prompt = generateVisualizationPrompt(age, text);
+    const prompt = generateVisualizationPrompt(age, text, !!useChinese);
 
     const errors: string[] = [];
     let imageDataUrl: string | null = null;

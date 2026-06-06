@@ -460,7 +460,7 @@ function useReadingAssistant() {
     }
   }
 
-  async function generateVisualization() {
+  async function generateVisualization(useChinese: boolean = false) {
     const { studentAge, extractedText, setVisualizationImage, setStatus: setStoreStatus, setError } = readingStore;
 
     if (!extractedText) {
@@ -475,7 +475,7 @@ function useReadingAssistant() {
       const response = await fetch("/api/ai/visualization", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: extractedText, studentAge }),
+        body: JSON.stringify({ text: extractedText, studentAge, useChinese }),
       });
 
       if (!response.ok) {

@@ -883,8 +883,11 @@ Guidelines:
 - Respond with ONLY the JSON array, no markdown, no code blocks`;
 }
 
-export function generateVisualizationPrompt(age: number, text: string): string {
+export function generateVisualizationPrompt(age: number, text: string, useChinese: boolean = false): string {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
+  const languageInstruction = useChinese
+    ? "Use Traditional Chinese (繁體中文) for ALL text labels, captions, headings, and any readable text in the image."
+    : "Use the same language as the original text for all text labels, captions, headings, and any readable text in the image.";
   return `You are generating an image to help a ${age}-year-old Hong Kong ${schoolLevel} student visualize the main ideas of a reading passage. Analyze the text below, determine its genre and nature, then create a vivid, educational image.
 
 <text>
@@ -904,6 +907,7 @@ ${text}
    - **Age-appropriate** — suitable for a ${age}-year-old student
    - **Clear and readable** — any text in the image should be legible and concise
    - **2K resolution (2048x1152), 16:9 aspect ratio, PNG format**
+4. ${languageInstruction}
 
 **Respond with ONLY a detailed image generation prompt** (a single paragraph describing exactly what to draw, including the visual style chosen, color palette, key elements to include, layout/composition, and any text labels). Do not include any preamble, explanation, or commentary — just the prompt itself.`;
 }
