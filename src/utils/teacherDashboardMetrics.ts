@@ -33,6 +33,7 @@ export interface DailyStudentActivity {
   readText: number;
   summary: number;
   mindMap: number;
+  visualization: number;
   adaptedText: number;
   simplifiedText: number;
   sentenceAnalysis: number;
@@ -68,6 +69,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "readText",
   "summary",
   "mindMap",
+  "visualization",
   "adaptedText",
   "simplifiedText",
   "sentenceAnalysis",
@@ -85,6 +87,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   readText: "#3b82f6",
   summary: "#6366f1",
   mindMap: "#8b5cf6",
+  visualization: "#0ea5e9",
   adaptedText: "#22c55e",
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
@@ -187,6 +190,7 @@ function emptyDailyActivity(date: string): DailyStudentActivity {
     readText: 0,
     summary: 0,
     mindMap: 0,
+    visualization: 0,
     adaptedText: 0,
     simplifiedText: 0,
     sentenceAnalysis: 0,
@@ -289,6 +293,9 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     }
     if (item.mindMap && item.mindMapGeneratedAt) {
       getDay(toDateString(item.mindMapGeneratedAt)).mindMap += 1;
+    }
+    if (item.visualization && item.visualizationGeneratedAt) {
+      getDay(toDateString(item.visualizationGeneratedAt)).visualization += 1;
     }
     if (item.adaptedText && item.adaptedTextGeneratedAt) {
       getDay(toDateString(item.adaptedTextGeneratedAt)).adaptedText += 1;
