@@ -157,39 +157,44 @@ function Mermaid({ children }: Props) {
       const container = containerRef.current;
       const target = mermaidContainerRef.current;
       if (!container || !target) return;
+
       const svg = target.querySelector("svg");
       if (!svg) {
         if (retries > 0) setTimeout(() => fitToView(retries - 1), 50);
         return;
       }
+
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
       if (containerWidth === 0 || containerHeight === 0) {
         if (retries > 0) setTimeout(() => fitToView(retries - 1), 50);
         return;
       }
-      // Use viewBox for reliable natural SVG dimensions, fall back to bounding rect
-      let svgWidth = 0, svgHeight = 0;
+
+      // Parse viewBox for the SVG's natural coordinate dimensions
       const viewBox = svg.getAttribute("viewBox");
-      if (viewBox) {
-        const parts = viewBox.trim().split(/[\s,]+/);
-        svgWidth = parseFloat(parts[2] || "0");
-        svgHeight = parseFloat(parts[3] || "0");
-      }
-      if (svgWidth === 0 || svgHeight === 0) {
-        const rect = svg.getBoundingClientRect();
-        svgWidth = rect.width;
-        svgHeight = rect.height;
-      }
-      if (svgWidth === 0 || svgHeight === 0) {
+      if (!viewBox) {
         if (retries > 0) setTimeout(() => fitToView(retries - 1), 50);
         return;
       }
-      const fitScale = Math.min(containerWidth / svgWidth, containerHeight / svgHeight);
-      const posX = (containerWidth - svgWidth * fitScale) / 2;
-      const posY = (containerHeight - svgHeight * fitScale) / 2;
+      const parts = viewBox.trim().split(/[\s,]+/);
+      const vbWidth = parseFloat(parts[2] || "0");
+      const vbHeight = parseFloat(parts[3] || "0");
+      if (vbWidth === 0 || vbHeight === 0) {
+        if (retries > 0) setTimeout(() => fitToView(retries - 1), 50);
+        return;
+      }
+
+      // Scale the SVG to fill the container, then let flex centre it.
+      // Setting explicit pixel dimensions on the SVG element means
+      // react-zoom-pan-pinch starts at scale=1 with an already-fitted image,
+      // avoiding any coordinate-system mismatch from setTransform.
+      const fitScale = Math.min(containerWidth / vbWidth, containerHeight / vbHeight);
+      svg.setAttribute("width", String(Math.floor(vbWidth * fitScale)));
+      svg.setAttribute("height", String(Math.floor(vbHeight * fitScale)));
+
       if (transformRef.current) {
-        transformRef.current.setTransform(posX, posY, fitScale, 0);
+        transformRef.current.resetTransform(0);
       }
     });
   };
@@ -204,8 +209,8 @@ function Mermaid({ children }: Props) {
 
   return (
     <>
-      <div ref={containerRef} className="relative w-full h-[540px] overflow-hidden rounded">
-        <TransformWrapper initialScale={1} minScale={0.1} centerOnInit smooth ref={transformRef}>
+      <div ref={containerRef} className="relative w-full h-[540px] overflow-hidden rounded flex items-center justify-center">
+        <TransformWrapper initialScale={1} minScale={0.1} smooth ref={transformRef}>
           {() => (
             <>
               <div className="absolute top-0 right-0 z-50 flex gap-1 print:hidden">
