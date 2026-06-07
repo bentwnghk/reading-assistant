@@ -108,6 +108,7 @@ async function loadMermaid(element: HTMLElement, code: string) {
 
 function Mermaid({ children }: Props) {
   const { t } = useTranslation();
+  const containerRef = useRef<HTMLDivElement>(null);
   const mermaidContainerRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const [content, setContent] = useState<string>("");
@@ -151,19 +152,44 @@ function Mermaid({ children }: Props) {
     setModalKey(prev => prev + 1);
   };
 
-  const fitToView = () => {
+  const fitToView = (retries = 5) => {
     requestAnimationFrame(() => {
+      const container = containerRef.current;
       const target = mermaidContainerRef.current;
-      if (!target) return;
-      const wrapper = target.closest(".react-transform-component")?.parentElement;
+      if (!container || !target) return;
       const svg = target.querySelector("svg");
-      if (wrapper && svg && wrapper.clientWidth > 0 && wrapper.clientHeight > 0) {
-        const scaleX = wrapper.clientWidth / svg.getBoundingClientRect().width;
-        const scaleY = wrapper.clientHeight / svg.getBoundingClientRect().height;
-        const fitScale = Math.min(scaleX, scaleY, 1);
-        if (transformRef.current) {
-          transformRef.current.setTransform(fitScale, 0, 0);
-        }
+      if (!svg) {
+        if (retries > 0) setTimeout(() => fitToView(retries - 1), 50);
+        return;
+      }
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      if (containerWidth === 0 || containerHeight === 0) {
+        if (retries > 0) setTimeout(() => fitToView(retries - 1), 50);
+        return;
+      }
+      // Use viewBox for reliable natural SVG dimensions, fall back to bounding rect
+      let svgWidth = 0, svgHeight = 0;
+      const viewBox = svg.getAttribute("viewBox");
+      if (viewBox) {
+        const parts = viewBox.trim().split(/[\s,]+/);
+        svgWidth = parseFloat(parts[2] || "0");
+        svgHeight = parseFloat(parts[3] || "0");
+      }
+      if (svgWidth === 0 || svgHeight === 0) {
+        const rect = svg.getBoundingClientRect();
+        svgWidth = rect.width;
+        svgHeight = rect.height;
+      }
+      if (svgWidth === 0 || svgHeight === 0) {
+        if (retries > 0) setTimeout(() => fitToView(retries - 1), 50);
+        return;
+      }
+      const fitScale = Math.min(containerWidth / svgWidth, containerHeight / svgHeight);
+      const posX = (containerWidth - svgWidth * fitScale) / 2;
+      const posY = (containerHeight - svgHeight * fitScale) / 2;
+      if (transformRef.current) {
+        transformRef.current.setTransform(posX, posY, fitScale, 0);
       }
     });
   };
@@ -172,13 +198,13 @@ function Mermaid({ children }: Props) {
     const target = mermaidContainerRef.current;
     if (target) {
       setContent(target.innerText);
-      loadMermaid(target, target.innerText).then(fitToView);
+      loadMermaid(target, target.innerText).then(() => fitToView());
     }
   }, [children]);
 
   return (
     <>
-      <div className="relative cursor-pointer justify-center w-full h-[540px] overflow-auto rounded">
+      <div ref={containerRef} className="relative w-full h-[540px] overflow-hidden rounded">
         <TransformWrapper initialScale={1} minScale={0.1} centerOnInit smooth ref={transformRef}>
           {() => (
             <>
@@ -215,9 +241,7 @@ function Mermaid({ children }: Props) {
                   <Maximize2 />
                 </Button>
               </div>
-              <TransformComponent
-                wrapperStyle={{ width: "100%", height: "100%" }}
-              >
+              <TransformComponent>
                 <div
                   className="mermaid cursor-pointer"
                   ref={mermaidContainerRef}
