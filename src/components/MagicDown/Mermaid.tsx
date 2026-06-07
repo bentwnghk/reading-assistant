@@ -207,9 +207,18 @@ function Mermaid({ children }: Props) {
     }
   }, [children]);
 
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() => fitToView());
+    observer.observe(container);
+    return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
-      <div ref={containerRef} className="relative w-full h-[540px] overflow-hidden rounded flex items-center justify-center">
+      <div ref={containerRef} className="relative w-full aspect-video overflow-hidden rounded flex items-center justify-center">
         <TransformWrapper initialScale={1} minScale={0.1} smooth ref={transformRef}>
           {() => (
             <>
