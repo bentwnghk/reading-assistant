@@ -152,18 +152,20 @@ function Mermaid({ children }: Props) {
   };
 
   const fitToView = () => {
-    const target = mermaidContainerRef.current;
-    if (!target) return;
-    const wrapper = target.closest(".react-transform-wrapper")?.parentElement;
-    const svg = target.querySelector("svg");
-    if (wrapper && svg) {
-      const scaleX = wrapper.clientWidth / svg.getBoundingClientRect().width;
-      const scaleY = wrapper.clientHeight / svg.getBoundingClientRect().height;
-      const fitScale = Math.min(scaleX, scaleY, 1);
-      if (transformRef.current) {
-        transformRef.current.setTransform(fitScale, 0, 0);
+    requestAnimationFrame(() => {
+      const target = mermaidContainerRef.current;
+      if (!target) return;
+      const wrapper = target.closest(".react-transform-component")?.parentElement;
+      const svg = target.querySelector("svg");
+      if (wrapper && svg && wrapper.clientWidth > 0 && wrapper.clientHeight > 0) {
+        const scaleX = wrapper.clientWidth / svg.getBoundingClientRect().width;
+        const scaleY = wrapper.clientHeight / svg.getBoundingClientRect().height;
+        const fitScale = Math.min(scaleX, scaleY, 1);
+        if (transformRef.current) {
+          transformRef.current.setTransform(fitScale, 0, 0);
+        }
       }
-    }
+    });
   };
 
   useEffect(() => {
