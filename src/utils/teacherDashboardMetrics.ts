@@ -460,6 +460,7 @@ export function getDailyActivityForDate(
       readText: activity?.readText || 0,
       summary: activity?.summary || 0,
       mindMap: activity?.mindMap || 0,
+      visualization: activity?.visualization || 0,
       adaptedText: activity?.adaptedText || 0,
       simplifiedText: activity?.simplifiedText || 0,
       sentenceAnalysis: activity?.sentenceAnalysis || 0,
