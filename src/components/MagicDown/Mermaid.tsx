@@ -178,7 +178,7 @@ function Mermaid({ children }: Props) {
 
   return (
     <>
-      <div className="relative cursor-pointer justify-center w-full overflow-auto rounded">
+      <div className="relative cursor-pointer justify-center w-full h-[540px] overflow-auto rounded">
         <TransformWrapper initialScale={1} minScale={0.1} centerOnInit smooth ref={transformRef}>
           {() => (
             <>
@@ -215,7 +215,9 @@ function Mermaid({ children }: Props) {
                   <Maximize2 />
                 </Button>
               </div>
-              <TransformComponent>
+              <TransformComponent
+                wrapperStyle={{ width: "100%", height: "100%" }}
+              >
                 <div
                   className="mermaid cursor-pointer"
                   ref={mermaidContainerRef}
