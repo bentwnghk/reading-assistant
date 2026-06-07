@@ -973,14 +973,14 @@
       "vocabQuiz": "Vocab Quiz",
       "help": {
         "title": "Learning Progress Guide",
-        "intro": "Track your progress across 12 steps. Completed steps show a checkmark. You can do the steps in any order — there is no required sequence.",
+        "intro": "Track your progress across 13 steps. Completed steps show a checkmark. You can do the steps in any order — there is no required sequence.",
         "navigation": {
           "title": "Quick Navigation",
-          "desc": "Click any step to scroll to its section. Steps 2–12 unlock once text is extracted (via upload, photo, or Text Repository)."
+          "desc": "Click any step to scroll to its section. Steps 2–13 unlock once text is extracted (via upload, photo, or Text Repository)."
         },
         "progress": {
           "title": "Progress Tracking",
-          "desc": "The progress bar shows how many of the 12 steps you have completed."
+          "desc": "The progress bar shows how many of the 13 steps you have completed."
         }
       }
     },
@@ -1399,7 +1399,7 @@
           },
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing your daily learning activities across 14 types including reading, summaries, mind maps, tests, quizzes, spelling games, and more. Use the time range buttons to adjust the window."
+            "desc": "A stacked bar chart showing your daily learning activities across 15 types including reading, summaries, mind maps, visualizations, tests, quizzes, spelling games, and more. Use the time range buttons to adjust the window."
           },
           "readingActivity": {
             "name": "Reading Activity",
@@ -1407,7 +1407,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A horizontal bar chart breaking down your usage of 8 AI-powered features: summaries, mind maps (English and Chinese separately), adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI tutor questions."
+            "desc": "A horizontal bar chart breaking down your usage of 9 AI-powered features: summaries, mind maps (English and Chinese separately), visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI tutor questions."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",
@@ -1559,7 +1559,7 @@
         "items": {
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 14 activity types."
+            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 15 activity types."
           },
           "readingTexts": {
             "name": "Reading Texts",
@@ -1575,7 +1575,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A stacked bar chart breaking down how each student uses 8 AI-powered features: summaries, mind maps, adapted texts, simplified texts, sentence analysis, glossary, grammar, and AI tutor."
+            "desc": "A stacked bar chart breaking down how each student uses 9 AI-powered features: summaries, mind maps, visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar, and AI tutor."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",

@@ -117,6 +117,7 @@ function calculateProgress(item: ReadingHistory): number {
     hasExtractedText,
     !!item.summary,
     !!item.mindMap,
+    !!item.visualizationImage,
     !!item.adaptedText,
     item.testCompleted,
     Object.keys(item.analyzedSentences || {}).length > 0,

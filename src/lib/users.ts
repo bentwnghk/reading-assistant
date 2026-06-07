@@ -945,6 +945,7 @@ function calculateProgress(row: {
   extracted_text: string
   summary?: string
   mind_map?: string
+  visualization_image?: string
   adapted_text?: string
   test_completed?: boolean
   analyzed_sentences?: Record<string, unknown>
@@ -965,6 +966,7 @@ function calculateProgress(row: {
     hasExtractedText,
     !!row.summary,
     !!row.mind_map,
+    !!row.visualization_image,
     !!row.adapted_text,
     row.test_completed,
     Object.keys(row.analyzed_sentences || {}).length > 0,
