@@ -12,6 +12,7 @@ function useAutoSave() {
     adaptedText, 
     simplifiedText, 
     mindMap, 
+    visualizationImage,
     readingTest, 
     glossary,
     highlightedWords,
@@ -52,7 +53,7 @@ function useAutoSave() {
     }
 
     prevIdRef.current = id;
-  }, [id, docTitle, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences, testScore, testCompleted, testEarnedPoints, testTotalPoints]);
+  }, [id, docTitle, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, visualizationImage, readingTest, glossary, highlightedWords, analyzedSentences, testScore, testCompleted, testEarnedPoints, testTotalPoints]);
 }
 
 export default useAutoSave;
