@@ -51,17 +51,22 @@ src/
 ├── components/
 │   ├── ui/                     # Shadcn UI primitives (do not modify directly)
 │   ├── Internal/               # Custom shared components
-│   ├── ReadingAssistant/       # Core reading assistance feature components
+│   ├── ReadingAssistant/       # Core reading assistance feature components (37 files — see Reading Assistant Features section)
 │   ├── Vocabulary/             # My Vocabulary page components (table, flashcards, quiz, spelling, review lists, export, sharing)
 │   ├── MagicDown/              # Markdown rendering and editing components
 │   ├── Auth/                   # Authentication UI components
-│   ├── Dashboard/              # Student dashboard components
-│   ├── TeacherDashboard/       # Teacher dashboard components
+│   ├── Dashboard/              # Student dashboard components (includes session sharing dialogs)
+│   ├── TeacherDashboard/       # Teacher dashboard components (includes GrammarGameChart)
 │   ├── Leaderboard/            # Leaderboard components
 │   ├── Subscription/           # Subscription/billing UI components
 │   ├── UserManagement/         # User management components
-│   └── Provider/               # Context providers (Theme, I18n)
-├── hooks/                      # Custom React hooks for business logic
+│   ├── Provider/               # Context providers (Theme, I18n)
+│   ├── PWAInstallPrompt.tsx    # PWA install dialog (iOS + standard browsers)
+│   ├── ServiceWorkerRegistrar.tsx # Service worker registration on mount
+│   ├── History.tsx             # Reading session history browser with import/export
+│   ├── ReminderPreferences.tsx # Email reminder frequency settings
+│   └── Setting.tsx             # Application settings panel
+├── hooks/                      # Custom React hooks (see Hooks section)
 ├── store/                      # Zustand stores (global state, persisted)
 ├── lib/                        # Server-side data access layer
 │   ├── db.ts                   # PostgreSQL connection pool singleton
@@ -78,10 +83,11 @@ src/
 │   ├── repository.ts           # Text repository queries
 │   ├── school-subscription.ts  # School subscription logic
 │   ├── settings.ts             # App settings queries
+│   ├── shared-sessions.ts      # Session sharing CRUD + share target resolution
 │   ├── subscription.ts         # Subscription data access
 │   └── subscription-email.ts   # Subscription email templates
 ├── templates/                  # Email template files
-├── utils/                      # Client/server helper functions
+├── utils/                      # Client/server helper functions (see Utils section)
 ├── constants/                  # Application constants (prompts, URLs, locales)
 ├── locales/                    # I18n translation files (JSON)
 └── types.d.ts                  # Shared TypeScript type definitions
@@ -107,6 +113,18 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 - **Client Components**: Use `"use client";` at the top of files that require browser APIs or React hooks (state, effects).
 - **Dynamic Imports**: Use Next.js `dynamic()` for heavy components or those that rely on browser-only libraries (e.g., `MagicDown`, `Mermaid`).
 - **Hooks**: Prefer custom hooks for complex logic (e.g., `useReadingAssistant`, `useAiProvider`, `useDashboardMetrics`, `useTeacherDashboard`, `useSubscription`).
+- **All Hooks** (in `src/hooks/`):
+  - `useReadingAssistant` — Core reading session business logic (AI generation, games, vocabulary)
+  - `useAiProvider` — AI model provider factory for streaming/generation
+  - `useDashboardMetrics` — Student dashboard data aggregation
+  - `useTeacherDashboard` — Teacher dashboard data aggregation
+  - `useSubscription` — Stripe subscription state management
+  - `useSchoolSubscription` — School subscription state management
+  - `useVocabularySync` — Auto-syncs glossary changes to vocabulary DB on change
+  - `useAutoSave` — Auto-saves reading session to localforage history (skips during streaming)
+  - `useMobile` — Responsive breakpoint detection
+  - `useAccurateTimer` — High-precision countdown timer for games
+  - `useSubmitShortcut` — Keyboard shortcut (Ctrl+Enter) for form submission
 
 ### 3. Components & UI
 
@@ -119,7 +137,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 ### 4. State Management
 
 - **Zustand**: Used for global client-side state and persistence.
-- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts` — all in `src/store/`.
+- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts`, `sharing.ts` — all in `src/store/`.
 - **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`.
 - **Radash**: Use **radash** utilities for common operations like `pick`, `isString`, `isObject`, etc.
 
@@ -142,7 +160,7 @@ The project uses **next-auth v5 (beta.30)** with **Google OAuth** as the sole pr
 - **`src/auth.ts`**: Full server-side config with `PostgresAdapter` (pg Pool, max 20 connections). Session strategy is `database` with 30-day maxAge.
 - **`src/auth.config.ts`**: Lightweight Edge-compatible config used by middleware (no pg dependency).
 - **`src/middleware.ts`**: Intercepts `/api/:path*` requests. Handles API key injection for AI/search providers and verifies `ACCESS_PASSWORD` via HMAC signature.
-- **Roles**: `UserRole` includes `admin`, `teacher`, `student`. Roles are auto-assigned on first sign-in via session callbacks (`ensureUserRole`, `ensureUserSchool`).
+- **Roles**: `UserRole` includes `super-admin`, `admin`, `teacher`, `student`. Super-admins can share with any user across schools. Roles are auto-assigned on first sign-in via session callbacks (`ensureUserRole`, `ensureUserSchool`).
 - **Session**: Extended to include `user.id` and `user.role` on the client side.
 
 ---
@@ -189,6 +207,8 @@ API routes are in `src/app/api/`. Key route groups:
 - **`import/*`**: Data import endpoints.
 - **`admin/*`**: Admin-only endpoints.
 - **`cron/*`**: Scheduled tasks (email reminders).
+- **`config/*`**: Public config endpoints (e.g., fallback model).
+- **`shares/*`**: Reading session sharing (create, list pending, accept/reject, get targets).
 
 ### 3. Provider Proxying
 
@@ -308,12 +328,205 @@ A dedicated auth-gated page for systematic vocabulary review across all reading 
 
 ---
 
+## Reading Assistant Features
+
+The main reading page (`src/app/page.tsx`) is a multi-step workflow driven by `useReadingAssistant` and the Zustand `reading` store. Each step has a corresponding component in `src/components/ReadingAssistant/`.
+
+### Workflow Steps
+
+| Step | Component | Description |
+|------|-----------|-------------|
+| Student Info | `StudentInfo.tsx` | Age/grade slider for adaptive content |
+| Image Upload | `ImageUpload.tsx` | Upload images, PDFs, or paste URLs; OCR extraction |
+| Text Difficulty | `TextDifficultyAnalyzer.tsx` | Multi-metric readability (Flesch, Flesch-Kincaid, ARI, Coleman-Liau, SMOG, CEFR) with interactive highlighting |
+| CEFR Highlighting | `CefrTextHighlighter.tsx` | Color-coded word difficulty overlay per CEFR level |
+| Summary | `Summary.tsx` | AI-generated text summary |
+| Adapted Text | `AdaptedText.tsx` | AI-simplified version of the text |
+| Mind Map | `MindMap.tsx` | AI-generated Markdown mind map (rendered via `MagicDown`) |
+| Visualization | `Visualization.tsx` | AI-generated image visualization of the text |
+| Reading Test | `ReadingTest.tsx` | Multi-type comprehension questions (MC, T/F/NG, short answer, inference, vocab-context, referencing) |
+| Glossary | `Glossary.tsx` | Extracted vocabulary with definitions, syllabification, examples, and SRS rating |
+| Grammar | `Grammar.tsx` | AI grammar topic extraction, interactive quiz, Word export, grammar-specific text highlighting |
+| Grammar Games | `GrammarGames.tsx` | Hub for 5 gamified grammar exercises (see Grammar Games below) |
+| Vocabulary Flashcard | `VocabularyFlashcard.tsx` | In-session flashcard review with SRS integration |
+| Vocabulary Quiz | `VocabularyQuiz.tsx` | In-session word-to-definition / fill-blank quiz |
+| Vocabulary Spelling | `VocabularySpelling.tsx` | Spelling game with listen-type, scramble, and fill-blanks modes |
+| Reading Tutor | `ReadingTutorChat.tsx` | AI-powered reading comprehension tutor (accessed via `TutorChatFab.tsx`) |
+
+### Grammar Games (5 games)
+
+All games are launched from `GrammarGames.tsx` hub. Each game stores high scores and per-game accuracy in the reading store and persists to `reading_sessions` DB table.
+
+| Game | Component | Description |
+|------|-----------|-------------|
+| Grammar Roulette | `GrammarRoulette.tsx` | Spinning wheel selects a grammar topic; answer MCQs. Practice/Arcade/Mastery modes. |
+| Error Surgery | `GrammarErrorSurgery.tsx` | AI generates sentences with one grammar error; identify and fix it from 4 options. |
+| Grammar Workshop | `GrammarWorkshop.tsx` | Fill-in-the-blank sentences with word bank (slot-fill challenges). |
+| Grammar Duel | `GrammarDuel.tsx` | Turn-based battle vs AI (easy/medium/hard). Power moves after streak. |
+| Word Scramble | `GrammarWordScramble.tsx` | Reorder scrambled words to form a grammatically correct sentence. |
+
+- **Shared UI**: `GameResultScreen.tsx` provides celebration animations (canvas-confetti), performance tiers, and replay for all games.
+- **Game modes**: Practice (no timer), Arcade (timed), Mastery (target score).
+
+### Grammar Database Columns
+
+Grammar data is stored on the `reading_sessions` table:
+- `grammar_topics` (JSONB) — AI-extracted grammar topics
+- `grammar_quiz` (JSONB) — Quiz questions
+- `grammar_quiz_score`, `grammar_quiz_completed`, `grammar_quiz_earned_points`, `grammar_quiz_total_points`
+- `grammar_highlight_enabled`, `grammar_highlight_topic_id` — Text highlight state
+- Per-game high scores: `grammar_scramble_high_score`, `grammar_workshop_high_score`, `grammar_surgery_high_score`, `grammar_roulette_high_score`, `grammar_duel_high_score`
+- Per-game accuracy: `grammar_scramble_accuracy`, etc.
+- Per-game completion count: `grammar_scramble_completed`, etc.
+- Challenge caches: `grammar_scramble_challenges`, `grammar_workshop_challenges`, `grammar_game_questions`, `grammar_error_challenges`
+
+### Grammar Migrations (apply in order)
+
+1. `scripts/add-grammar-columns.sql` — Base grammar analysis + quiz columns
+2. `scripts/add-grammar-games.sql` — High scores, error challenges, activity types
+3. `scripts/add-grammar-game-challenges.sql` — AI-generated challenge caches
+4. `scripts/add-grammar-game-accuracy.sql` — Overall grammar game accuracy
+5. `scripts/add-grammar-game-per-game-accuracy.sql` — Per-game accuracy + completion counts
+6. `scripts/add-grammar-game-completed-at.sql` — Completion counters + timestamp
+7. `scripts/add-grammar-game-leaderboard.sql` — Leaderboard columns in `weekly_stats`
+8. `scripts/add-grammar-leaderboard.sql` — Grammar quiz leaderboard
+9. `scripts/add-grammar-achievements.sql` — Grammar achievement types
+10. `scripts/add-grammar-games-achievements.sql` — Grammar games achievement type
+11. `scripts/add-grammar-activities.sql` — Grammar activity types
+12. `scripts/add-grammar-quiz-mode.sql` — Quiz navigation mode
+
+### Other Key ReadingAssistant Components
+
+| Component | Purpose |
+|-----------|---------|
+| `LearningRecommendationDialog.tsx` | Adaptive dialog suggesting next learning activities based on session progress |
+| `RepositoryUploadDialog.tsx` | Upload extracted text to the shared text repository |
+| `SessionGlossarySelector.tsx` | Merge glossaries from multiple past sessions into flashcard review |
+| `WorkflowProgress.tsx` | Step progress indicator at top of main page |
+| `TocDrawer.tsx` | Table of contents drawer for all workflow sections |
+| `TocFab.tsx` | Floating button to open TOC drawer on mobile |
+| `TutorChatFab.tsx` | Floating button to open AI reading tutor chat |
+| `QuickQuestions.tsx` | Suggested questions for the reading tutor |
+| `ChatMessageBubble.tsx` | Renders individual chat messages with markdown |
+| `ParagraphWithNav.tsx` | Paragraph display with navigation |
+
+### Visualization & Mind Map
+
+Both features use AI image generation from the extracted text:
+- **Visualization** (`Visualization.tsx`): Generates an image via AI. Supports Chinese/English toggle. Downloadable as PNG.
+- **Mind Map** (`MindMap.tsx`): Generates a Markdown mind map rendered with `MagicDown`. Supports Chinese/English toggle.
+- **DB columns**: `visualization_image` (TEXT, base64 data URL), `visualization_generated_at` (BIGINT).
+
+### Text Difficulty Analysis
+
+`TextDifficultyAnalyzer.tsx` and `src/utils/textDifficulty.ts` provide multi-metric readability analysis:
+- **Readability formulas**: Flesch Reading Ease, Flesch-Kincaid Grade, Automated Readability Index, Coleman-Liau Index, SMOG Index
+- **CEFR analysis**: Uses `cefr-analyzer` for word-level CEFR classification (A1–C2) with color-coded highlighting
+- **Libraries**: `flesch`, `flesch-kincaid`, `automated-readability`, `coleman-liau`, `smog-formula`, `syllable`, `cefr-analyzer`
+- Types: `TextDifficultyResult`, `CEFRLevel`
+
+---
+
+## Session Sharing
+
+Teachers and admins can share completed reading sessions with students. Shared sessions strip user-specific data (answers, scores, chat history) and create a clean copy for the recipient.
+
+### Database Table
+
+- **`shared_sessions`**: Columns: `id`, `sender_id`, `recipient_id`, `session_id`, `session_data` (JSONB), `status` (pending/accepted/rejected), `doc_title`, `created_at`, `updated_at`.
+
+### Migration
+
+- `scripts/add-shared-sessions.sql` — Creates `shared_sessions` table with indexes
+
+### Key Modules
+
+| Module | Purpose |
+|--------|---------|
+| `src/lib/shared-sessions.ts` | CRUD for shared sessions + share target resolution by role |
+| `src/store/sharing.ts` | Client-side state for pending shares (non-persisted Zustand store) |
+| `src/components/Dashboard/ShareSessionDialog.tsx` | Dialog to select recipients and share a session |
+| `src/components/Dashboard/SharedSessionDialog.tsx` | Dialog to accept/reject incoming shared sessions |
+
+### API Routes
+
+| Route | Methods | Purpose |
+|-------|---------|-------------|
+| `/api/shares` | GET, POST | List pending shares / create shared sessions |
+| `/api/shares/[id]` | PUT | Accept or reject a shared session |
+| `/api/shares/targets` | GET | Get available share targets for current user (grouped by class/school) |
+
+### Share Target Resolution
+
+`getShareTargets` in `src/lib/shared-sessions.ts` resolves available recipients based on role:
+- **super-admin**: All users across all schools, grouped by class and school
+- **admin**: All users in the same school, grouped by class
+- **teacher**: Students in the teacher's classes
+- **student**: Classmates in the same class
+
+### Data Stripping
+
+When sharing, `stripUserData` removes: `userAnswer`, `earnedPoints` from test questions; resets `testScore`, `testCompleted`, `vocabularyQuizScore`, `spellingGameBestScore`, `flashcardReviewDates`, `glossaryRatings`, `chatHistory`, `status`, `error`; strips `id`, `createdAt`, `updatedAt`. On accept, a new `id` and timestamps are assigned.
+
+---
+
+## App Routes
+
+Next.js App Router pages in `src/app/`:
+
+| Route | Purpose |
+|-------|---------|
+| `/` (`page.tsx`) | Main reading assistant page (core workflow) |
+| `/vocabulary` | My Vocabulary page (auth-gated) |
+| `/leaderboard` | Leaderboard + achievements page (auth-gated) |
+| `/image-viewer` | Standalone image viewer with zoom/pan |
+| `/privacy-policy` | Privacy policy page |
+| `/terms-of-service` | Terms of service page |
+| `/unsubscribe` | Email unsubscribe handler |
+
+---
+
+## Utils (`src/utils/`)
+
+| Module | Purpose |
+|--------|---------|
+| `textDifficulty.ts` | Multi-metric readability analysis (Flesch, CEFR, etc.) |
+| `vocabularyExport.ts` | Export vocabulary to PDF, Word (docx), CSV, text-as-image |
+| `vocabulary.ts` | Glossary sorting, merging across sessions, deduplication |
+| `srs.ts` | Leitner SRS algorithm for spaced repetition |
+| `reading-assistant/provider.ts` | AI provider factory (creates Vercel AI SDK provider instances) |
+| `parser/` | File content extraction (`pdfParser.ts`, `officeParser.ts`, `textParser.ts`) |
+| `crawler.ts` | Web page content extraction via Jina Reader |
+| `learningActivities.ts` | Learning activity definitions for recommendation engine |
+| `activityLogger.ts` | Log user activities to API |
+| `chatQuestionLogger.ts` | Log tutor chat questions to API (silent, non-blocking) |
+| `artifact.ts` | AI artifact modification prompt templates |
+| `error.ts` | `parseError` utility for standardized error messages |
+| `style.ts` | `cn()` Tailwind class merge utility |
+| `file.ts` | File download and size formatting |
+| `formatDate.ts` | Date formatting helpers |
+| `url.ts` | URL completion utilities |
+| `vertexAuth.ts` | Google Vertex AI authentication helpers |
+| `storage.ts` | Localforage storage helpers |
+| `markdown.ts` | Markdown processing |
+| `animate-text.ts` | Rehype plugin: splits text into animated spans |
+| `model.ts` | AI model list and configuration utilities |
+| `text.ts` | Text processing helpers |
+| `signature.ts` | HMAC signature generation for API access |
+| `dashboardMetrics.ts` | Student dashboard data aggregation |
+| `teacherDashboardMetrics.ts` | Teacher dashboard data aggregation |
+| `excelExport.ts` | Student data Excel export |
+| `teacherDashboardExcel.ts` | Teacher dashboard Excel export |
+| `i18n.ts` | i18n configuration |
+
+---
+
 ## Security & Safety
 
 - **Secrets**: Do not hardcode API keys or credentials.
 - **Sanitization**: Use Zod to sanitize and validate all external inputs (user input, file uploads).
 - **API Access**: All AI/search proxy routes are protected by HMAC-signed `ACCESS_PASSWORD` verification in middleware.
-- **RBAC**: Role-based access control (admin/teacher/student) is enforced via NextAuth session callbacks and API route checks.
+- **RBAC**: Role-based access control (super-admin/admin/teacher/student) is enforced via NextAuth session callbacks and API route checks.
 - **Destructive Actions**: Avoid `rm -rf` or history rewriting in git unless explicitly requested.
 
 ---

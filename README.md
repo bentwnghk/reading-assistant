@@ -25,7 +25,7 @@ Transform any English reading material into an interactive learning experience w
 
 | **Personalized** | **Gamified** | **Cloud Sync** | **Collaborative** |
 |:---:|:---:|:---:|:---:|
-| Adapts to your age & level (8-18) | Learn through games & achievements | Your progress syncs automatically—access your data from any device with every sign-in | Share texts with classes & schools |
+| Adapts to your age & level (8-18) | 10+ games & 5 grammar challenges | Your progress syncs automatically—access your data from any device with every sign-in | Share sessions, vocab lists & texts |
 
 ---
 
@@ -34,7 +34,7 @@ Transform any English reading material into an interactive learning experience w
 ```mermaid
 flowchart LR
     subgraph INPUT["📷 Start"]
-        A[Upload Image/PDF]
+        A[Upload Image/PDF/URL]
     end
     
     subgraph UNDERSTAND["🧠 Understand"]
@@ -42,6 +42,7 @@ flowchart LR
         C[Generate Summary]
         D[Create Mind Map]
         E[Adapt to Your Level]
+        Q[Generate Visualization]
     end
     
     subgraph TUTOR["🤖 AI Tutor"]
@@ -54,6 +55,7 @@ flowchart LR
         F[Reading Test]
         G[Sentence Analysis]
         P[Grammar Quiz]
+        R[Grammar Games]
     end
     
     subgraph MASTER["📖 Master"]
@@ -64,12 +66,13 @@ flowchart LR
     end
     
     subgraph EXPORT["📄 Export"]
-        L[Word Document]
+        L[Word/PDF/CSV]
     end
     
     A --> B
-    B --> C & D & E
+    B --> C & D & E & Q
     E --> F & G & M & P
+    P --> R
     M --> N & O
     G --> H
     F --> H
@@ -191,6 +194,7 @@ Click any sentence for a complete AI breakdown:
 |------|---------|
 | 📋 **Summary** | Quick 2-3 sentence overview |
 | 🧩 **Mind Map** | Interactive Mermaid diagram showing key concepts & relationships |
+| 🎨 **AI Visualization** | AI-generated illustration of the text content (downloadable as PNG) |
 | 🔍 **Zoom & Pan** | Explore mind maps in detail |
 
 ---
@@ -229,6 +233,26 @@ Test your understanding with a 10-question interactive quiz:
 - 🎨 **Color-coded** grammar structure sentences highlighted directly in the original text
 - 🔘 **Toggle per topic**: Show/hide highlights for each grammar topic individually
 - 📊 **14 distinct categories** with unique color schemes
+
+#### Grammar Games (5 Gamified Exercises)
+Practice grammar through fun, interactive games — all generated from your reading material's grammar topics.
+
+| Game | Description |
+|------|-------------|
+| 🎡 **Grammar Roulette** | Spinning wheel selects a grammar topic; answer MCQs to score |
+| 🏥 **Error Surgery** | Identify and fix the grammar error in AI-generated sentences |
+| 🔧 **Grammar Workshop** | Fill-in-the-blank with draggable word bank challenges |
+| ⚔️ **Grammar Duel** | Turn-based battle vs AI — earn power moves after streaks |
+| 🔀 **Word Scramble** | Reorder scrambled words into grammatically correct sentences |
+
+**Game Modes:**
+| Mode | Description |
+|------|-------------|
+| 🎯 **Practice** | No timer, learn at your pace |
+| 🏃 **Arcade** | Beat the clock for bonus points |
+| 🏆 **Mastery** | Reach a target score to win |
+
+All games feature celebration animations (canvas-confetti), performance tiers (Master/Great/Good), and persistent high scores.
 
 ---
 
@@ -318,6 +342,16 @@ A dedicated page for **systematic vocabulary review** across all your reading se
 | 📁 **Review Lists** | Create named word lists, share with students (teachers only) |
 | 📜 **History** | Review session history with detailed results and rating counts |
 
+#### Auto-Select Strategies
+Choose words for review automatically:
+| Strategy | Description |
+|----------|-------------|
+| ⏰ **Due for Review** | Words ready for SRS review today |
+| 🔴 **Hard Words** | Words you rated as hard |
+| 🎲 **Random** | Random selection from your collection |
+| 🆕 **New Words** | Words not yet reviewed |
+| 📅 **Oldest Reviewed** | Words reviewed longest ago |
+
 #### Spaced Repetition (SRS)
 Leitner 5-box algorithm tracks when to review each word:
 
@@ -354,6 +388,8 @@ Leitner 5-box algorithm tracks when to review each word:
 ---
 
 ### 🎮 12. Spelling Challenge - 4 Game Modes!
+
+Available both in-session and on the My Vocabulary page across all your words.
 
 | Mode | How It Works | Best For |
 |------|--------------|----------|
@@ -392,7 +428,9 @@ Perfect your pronunciation with natural voice reading.
 |---------|-------------|
 | 🗣️ **Read Words** | Click any word to hear it |
 | 📖 **Read Sentences** | Listen to full sentences |
-| 🎙️ **Voice Selection** | Choose your preferred voice |
+| 📝 **Text Selection Popup** | Select any text and tap Read Aloud |
+| 🎙️ **Voice Selection** | Choose from 6 voices (alloy, nova, echo, fable, onyx, shimmer) |
+| ⏱️ **Playback Speed** | Adjustable rate (0.25x, 0.5x, 0.75x, 1.0x) |
 | 🔄 **Auto-Speak** | Flashcards can auto-read on load |
 
 ---
@@ -411,9 +449,55 @@ Download your learning materials for offline study.
 
 ---
 
-## 🆕 New Features
+### 📬 16. Session Sharing
 
-### 🏆 16. Leaderboard & Achievements
+Teachers can share reading sessions with students — complete with all AI-generated content but stripped of answers and scores.
+
+| Feature | Description |
+|---------|-------------|
+| 📤 **Share Sessions** | Send completed sessions to individual students or entire classes |
+| 🔔 **Notifications** | Students see pending shares via the header bell icon |
+| ✅ **Accept/Reject** | Students choose which sessions to accept |
+| 🧹 **Data Stripping** | Shared sessions remove answers, scores, chat history, and personal data |
+| 👨‍🏫 **Role-Based** | Teachers share with their classes; admins with their school; super-admins across schools |
+| 📚 **Instant Content** | Accepted sessions include summary, mind map, glossary, grammar analysis, and more |
+
+---
+
+### 📊 17. Student Dashboard
+
+Track your learning journey with personal analytics.
+
+| Feature | Description |
+|---------|-------------|
+| 📈 **Overview** | Sessions, vocabulary, flashcard reviews, quiz scores, and game stats |
+| 📉 **Charts** | Vocabulary growth, score distribution, and activity over time |
+| 📅 **Time Range** | Filter by 7 days to 360 days |
+| 📚 **Session History** | Browse all past sessions with import/export support |
+| 📖 **Guide** | Built-in dashboard walkthrough |
+
+---
+
+### 🏫 18. Teacher Dashboard
+
+Comprehensive class-level analytics for educators.
+
+| Chart | What It Shows |
+|-------|---------------|
+| 📊 **Daily Activity** | Student activity over time |
+| 📚 **Reading Texts** | Texts completed by students |
+| 📖 **Vocabulary Growth** | Words collected over time |
+| 📈 **Average Progress** | Class-wide progress metrics |
+| 🤖 **AI Feature Usage** | Which AI tools students use most |
+| 📉 **Score Distribution** | Test and quiz score breakdown |
+| 🎮 **Spelling Scores** | Spelling game performance |
+| 🎯 **Grammar Game Stats** | Grammar game accuracy by type |
+| 📊 **Vocabulary Over Time** | Cumulative vocabulary charts |
+| 📥 **Excel Export** | Download class data as spreadsheet |
+
+---
+
+### 🏆 19. Leaderboard & Achievements
 
 Compete with classmates and track your learning journey!
 
@@ -448,10 +532,11 @@ Unlock medals by reaching learning milestones:
 | 📋 **Quizzes Completed** | 5, 15, 30, 50 quizzes |
 | 📐 **Grammar Analysis** | Topics identified across reading sessions |
 | 🎓 **Grammar Quizzes** | Quizzes completed with high scores |
+| 🎮 **Grammar Games** | Games played across all 5 game types |
 
 ---
 
-### 📚 17. Text Repository
+### 📚 20. Text Repository
 
 Share and reuse reading materials across your school or class.
 
@@ -466,7 +551,7 @@ Share and reuse reading materials across your school or class.
 
 ---
 
-### 🏫 18. School & Class Management
+### 🏫 21. School & Class Management
 
 Built for educational institutions with multi-tenant support.
 
@@ -475,20 +560,23 @@ Built for educational institutions with multi-tenant support.
 |---------|-------------|
 | 👨‍🏫 **Class Creation** | Create and manage classes |
 | 👥 **Student Management** | Add/remove students from classes |
-| 📊 **Progress Monitoring** | Track student activity and scores |
+| 📊 **Teacher Dashboard** | 9 analytics charts tracking class progress |
 | 📚 **Shared Materials** | Distribute reading texts to classes |
+| 📬 **Session Sharing** | Share reading sessions with students |
+| 📁 **Vocab List Sharing** | Share review word lists with students |
 
 #### For Administrators
 | Feature | Description |
 |---------|-------------|
 | 🏫 **School Management** | Create and configure schools |
 | 👥 **User Management** | Manage teachers and students |
-| 📊 **Data Export** | Export data for analysis |
+| 📊 **Data Export** | Export student and class data as Excel |
 | 🔐 **Access Control** | Manage roles and permissions |
+| 💳 **Subscription Management** | Manage school subscriptions and billing |
 
 ---
 
-### 🔐 19. Authentication & Security
+### 🔐 22. Authentication & Security
 
 Secure login with Google OAuth integration.
 
@@ -501,7 +589,7 @@ Secure login with Google OAuth integration.
 
 ---
 
-### 📱 20. PWA Support
+### 📱 23. PWA Support
 
 Install Mr.🆖 ProReader as a native app on your device!
 
@@ -514,13 +602,54 @@ Install Mr.🆖 ProReader as a native app on your device!
 
 ---
 
+### 💳 24. Subscriptions & Billing
+
+Full subscription lifecycle powered by Stripe for both individual users and schools.
+
+| Plan | Description |
+|------|-------------|
+| 👤 **Individual** | Monthly or yearly subscription with trial period |
+| 🏫 **School** | Per-seat pricing for institutions, monthly or yearly |
+
+#### Subscription Features
+| Feature | Description |
+|---------|-------------|
+| 💳 **Stripe Checkout** | Secure payment processing |
+| 🔄 **Customer Portal** | Self-service plan management |
+| ❌ **Cancel/Reactivate** | Cancel and resume subscriptions anytime |
+| 🔀 **Plan Switching** | Switch between monthly and yearly |
+| 📧 **Email Notifications** | Activation, renewal, payment failed, and trial ending alerts |
+| 📊 **Admin Views** | Manage school subscriptions and billing |
+
+---
+
 ## AI Models Supported
 
-| Provider | Models |
-|----------|--------|
-| 🟢 **Google Gemini** | gemini-3-flash |
+| Provider | Models/Description |
+|----------|-------------------|
+| 🟢 **Google Gemini** | gemini-3-flash and more |
+| 🔷 **Google Vertex AI** | Enterprise Google AI via Vertex |
 | 🔵 **OpenAI** | gpt-5.1, gpt-5-mini, gpt-5-nano |
-| 🟣 **DeepSeek** | deepseek-chat |
+| 🟣 **Anthropic** | Claude models |
+| 🟠 **OpenRouter** | Multi-model gateway |
+| 🔴 **DeepSeek** | deepseek-chat |
+| ⚡ **xAI** | Grok models |
+| 🌊 **Mistral** | Mistral AI models |
+| ☁️ **Azure OpenAI** | Enterprise OpenAI via Azure |
+| 🔌 **OpenAI Compatible** | Any OpenAI-compatible endpoint |
+| 🌸 **Pollinations** | Free AI access |
+| 🦙 **Ollama** | Local AI models |
+| 🤖 **Subscription Mode** | Built-in EDU access (no API key needed) |
+
+### Search Providers
+| Provider | Description |
+|----------|-------------|
+| 🔍 **Tavily** | AI-optimized search |
+| 🔥 **Firecrawl** | Web scraping & search |
+| 🎯 **Exa** | Neural search engine |
+| 🌐 **Bocha** | Multi-modal search |
+| 🦁 **Brave** | Privacy-focused search |
+| 🔎 **SearXNG** | Self-hosted meta search |
 
 ### Access Modes
 | Mode | Description |
@@ -563,24 +692,35 @@ Install Mr.🆖 ProReader as a native app on your device!
 ```
 src/
 ├── app/                    # Next.js App Router
-│   ├── api/               # API routes (AI, auth, admin)
+│   ├── api/               # API routes (AI, auth, admin, subscriptions, etc.)
 │   ├── leaderboard/       # Leaderboard page
 │   ├── vocabulary/        # My Vocabulary page
+│   ├── image-viewer/      # Standalone image viewer
+│   ├── privacy-policy/    # Privacy policy page
+│   ├── terms-of-service/  # Terms of service page
 │   └── page.tsx           # Main application
 ├── components/
 │   ├── ui/                # Shadcn UI primitives
-│   ├── Internal/          # Shared components
-│   ├── ReadingAssistant/  # Core feature components
-│   ├── Vocabulary/        # Vocabulary page components
+│   ├── Internal/          # Shared components (Header, etc.)
+│   ├── ReadingAssistant/  # Core feature components (37 files)
+│   ├── Vocabulary/        # Vocabulary page components (table, flashcards, quiz, spelling, review lists, export, sharing)
+│   ├── Dashboard/         # Student dashboard + session sharing dialogs
+│   ├── TeacherDashboard/  # Teacher dashboard (9 charts + guide)
 │   ├── Leaderboard/       # Leaderboard & achievements
-│   └── Provider/          # Context providers
+│   ├── Subscription/      # Subscription/billing UI (individual + school)
+│   ├── MagicDown/         # Markdown rendering and editing
+│   ├── Auth/              # Authentication UI (Landing page with FAQs)
+│   ├── UserManagement/    # User management components
+│   └── Provider/          # Context providers (Theme, I18n)
 ├── hooks/                 # Custom React hooks
-├── store/                 # Zustand state stores
-├── lib/                   # Server-side data access
+├── store/                 # Zustand state stores (persisted)
+├── lib/                   # Server-side data access layer
 ├── utils/                 # Helper functions
-├── constants/             # App constants
-├── locales/               # i18n translations
+├── constants/             # App constants (prompts, URLs, locales)
+├── templates/             # Email template files
+├── locales/               # i18n translations (en-US, zh-HK)
 └── types.d.ts            # TypeScript interfaces
+scripts/                   # SQL migrations (init-db.sql + incremental)
 ```
 
 ---
