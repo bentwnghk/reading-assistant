@@ -350,6 +350,7 @@ export function OverviewTab() {
           sub={t("dashboard.stats.sourceBreakdown", {
             upload: m.sessionsBySource.upload,
             repository: m.sessionsBySource.repository,
+            shared: m.sessionsBySource.shared,
           })}
         />
         <StatCard

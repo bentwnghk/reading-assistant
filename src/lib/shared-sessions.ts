@@ -156,6 +156,7 @@ export async function acceptSharedSession(
     const fullSession: ReadingStore = {
       ...sessionData,
       id: newId,
+      source: "shared",
       createdAt: now,
       updatedAt: now,
     } as ReadingStore

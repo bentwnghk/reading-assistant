@@ -45,7 +45,7 @@ export interface DailyActivity {
 
 export interface DashboardMetrics {
   totalSessions: number;
-  sessionsBySource: { upload: number; repository: number };
+  sessionsBySource: { upload: number; repository: number; shared: number };
   progressPerSession: { id: string; title: string; progress: number; date: number }[];
   averageProgress: number;
   summariesGenerated: number;
@@ -180,7 +180,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   if (history.length === 0) {
     return {
       totalSessions: 0,
-      sessionsBySource: { upload: 0, repository: 0 },
+      sessionsBySource: { upload: 0, repository: 0, shared: 0 },
       progressPerSession: [],
       averageProgress: 0,
       summariesGenerated: 0,
@@ -211,7 +211,8 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   const sorted = [...history].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 
   const uploadCount = sorted.filter((h) => h.source === "upload").length;
-  const repositoryCount = sorted.length - uploadCount;
+  const repositoryCount = sorted.filter((h) => h.source === "repository").length;
+  const sharedCount = sorted.filter((h) => h.source === "shared").length;
 
   const progressPerSession = sorted.map((item) => ({
     id: item.id,
@@ -414,7 +415,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
 
   return {
     totalSessions: sorted.length,
-    sessionsBySource: { upload: uploadCount, repository: repositoryCount },
+    sessionsBySource: { upload: uploadCount, repository: repositoryCount, shared: sharedCount },
     progressPerSession,
     averageProgress,
     summariesGenerated,

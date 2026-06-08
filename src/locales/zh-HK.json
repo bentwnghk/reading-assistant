@@ -1294,7 +1294,7 @@
     "empty": "尚無閱讀工作階段。開始閱讀以查看你的學習歷程！",
     "stats": {
       "totalTexts": "閱讀文本",
-      "sourceBreakdown": "{{upload}} 已上傳 · {{repository}} 來自文本庫",
+      "sourceBreakdown": "{{upload}} 已上傳 · {{repository}} 來自文本庫 · {{shared}} 已分享",
       "summaries": "摘要",
       "mindMaps": "思維導圖",
       "mindMapBreakdown": "{{en}} 英文 · {{zh}} 中文",

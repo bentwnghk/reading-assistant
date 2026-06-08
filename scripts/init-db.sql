@@ -71,6 +71,7 @@ CREATE TABLE reading_sessions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   doc_title TEXT DEFAULT '',
+  source TEXT NOT NULL DEFAULT 'repository' CHECK (source IN ('upload', 'repository', 'shared')),
   student_age INTEGER DEFAULT 13,
   extracted_text TEXT NOT NULL,
   summary TEXT DEFAULT '',

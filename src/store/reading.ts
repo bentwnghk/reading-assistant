@@ -108,7 +108,7 @@ export type ReadingStatus =
   | "error";
 
 type ReadingTestMode = "all-at-once" | "question-by-question";
-type TextSource = "upload" | "repository";
+type TextSource = "upload" | "repository" | "shared";
 
 export interface ReadingStore {
   id: string;
