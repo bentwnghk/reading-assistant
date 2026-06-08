@@ -610,3 +610,37 @@ A major feature touches **many subsystems**. Missing any one causes runtime erro
   5. Dashboard/leaderboard/achievements integration (metrics layer)
   6. I18n + landing page updates (presentation layer)
 - Each commit should be independently buildable and not break existing functionality.
+
+### 6. SQL INSERT Synchronization
+
+When modifying a `INSERT INTO ... VALUES ($1, $2, ...)` statement, **all three parts must be updated together**:
+
+1. **Column list** — the column names after `INSERT INTO table (`
+2. **Parameter placeholders** — the `$N` tokens in `VALUES (...)`
+3. **Values array** — the JS array passed as the query's second argument
+
+A mismatch between column count and placeholder count causes a PostgreSQL `INSERT has more target columns than expressions` error at runtime. This is easy to miss during code review because the three parts are often far apart in the same function.
+
+**Prevention checklist** when adding a column to `createReadingSession` (or any hand-written INSERT):
+
+| Step | What to update | Where in `sessions.ts` |
+|------|---------------|----------------------|
+| Add column name | Column list after `INSERT INTO reading_sessions (` | ~line 19 |
+| Add `$N` placeholder | VALUES clause — increment the max `$N` by 1 | ~line 48 |
+| Add value expression | JS array — insert at the correct positional index | ~line 116 |
+| Add ON CONFLICT update | `column = EXCLUDED.column` in the upsert clause | ~line 49 |
+
+Also verify that `updateReadingSession`'s `fieldMappings` already includes the new field (it maps JS camelCase → DB snake_case).
+
+### 7. Full Persistence Layer Check for New Store Fields
+
+When a new field is added to the Zustand store (`src/store/reading.ts`), it is not automatically persisted to the database. The persistence layer must be updated explicitly. Before considering a new store field "complete", verify:
+
+| Layer | File | What to check |
+|-------|------|---------------|
+| **DB schema** | `scripts/init-db.sql` + new migration | Column exists with correct type and constraints |
+| **Create** | `src/lib/sessions.ts` `createReadingSession()` | Column in INSERT, placeholder in VALUES, value in array, ON CONFLICT update |
+| **Update** | `src/lib/sessions.ts` `updateReadingSession()` | Field in `fieldMappings` + correct serialization (JSON vs raw) |
+| **Read** | `src/lib/sessions.ts` `getUserReadingSessions()` + `getReadingSession()` | Field mapped from `row.column_name` with correct fallback default |
+
+A field that exists in the store and `fieldMappings` but is missing from the DB schema and INSERT will silently fail: the column doesn't exist in the table, so reads return `undefined`, and fallback logic determines the displayed value. This was the root cause of the `source` field bug where all sessions appeared as "from repository" — the `source` column had never been added to the database.
