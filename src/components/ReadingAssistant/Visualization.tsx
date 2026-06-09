@@ -25,13 +25,13 @@ function Visualization() {
   const [useChinese, setUseChinese] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
 
-  const isLimitReached = isRateLimitedRole && remaining !== null && remaining <= 0;
-  const showLimit = isRateLimitedRole && !isMeterMode && remaining !== null;
+  const isLimitReached = !isMeterMode && isRateLimitedRole && remaining !== null && remaining <= 0;
+  const showLimit = !isMeterMode && isRateLimitedRole && remaining !== null;
 
   const fetchRemaining = useCallback(async () => {
     if (!session?.user?.id || isMeterMode || !isRateLimitedRole) return;
     try {
-      const res = await fetch("/api/ai/visualization");
+      const res = await fetch(`/api/ai/visualization?mode=${mode}`);
       if (res.ok) {
         const data = await res.json();
         setRemaining(data.remaining);
@@ -70,7 +70,7 @@ function Visualization() {
   }
 
   const isStudentOnShared = userRole === "student" && source === "shared";
-  const canGenerateControls = !isMeterMode && !isLimitReached && !(isStudentOnShared && visualizationImage);
+  const canGenerateControls = !isLimitReached && !(isStudentOnShared && visualizationImage);
 
   return (
     <section className="p-4 border rounded-md mt-4">
@@ -171,12 +171,6 @@ function Visualization() {
               <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-80 transition-opacity" />
             </div>
           </button>
-        </div>
-      ) : isMeterMode ? (
-        <div className="text-center py-8">
-          <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-          <p className="text-muted-foreground font-medium mb-1">{t("reading.visualization.meterModeTitle")}</p>
-          <p className="text-sm text-muted-foreground">{t("reading.visualization.meterModeTip")}</p>
         </div>
       ) : isLimitReached ? (
         <div className="text-center py-8">

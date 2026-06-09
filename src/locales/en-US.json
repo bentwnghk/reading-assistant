@@ -524,8 +524,6 @@
       "download": "Download",
       "chineseLabel": "Chinese",
       "emptyTip": "Click the button above to generate a colorful visualization of the main ideas",
-      "meterModeTitle": "Not available in Meter mode",
-      "meterModeTip": "Switch to Subscription mode in Settings to use AI Visualization.",
       "limitReachedTitle": "Daily limit reached",
       "limitReachedTip": "You've used all your visualization generations for today. Come back tomorrow!",
       "remaining": "{{count}} left today",

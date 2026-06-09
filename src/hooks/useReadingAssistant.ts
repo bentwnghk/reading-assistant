@@ -475,7 +475,7 @@ function useReadingAssistant() {
       const response = await fetch("/api/ai/visualization", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: extractedText, studentAge, useChinese }),
+        body: JSON.stringify({ text: extractedText, studentAge, useChinese, mode: useSettingStore.getState().mode }),
       });
 
       if (!response.ok) {

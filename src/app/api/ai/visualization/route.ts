@@ -171,13 +171,18 @@ const ADMIN_ROLES = new Set(["admin", "super-admin"]);
 
 async function getDailyLimitInfo(
   userId: string,
-  role?: string
+  role?: string,
+  isMeterMode?: boolean
 ): Promise<{
   limit: number;
   used: number;
   remaining: number;
 }> {
   if (role && ADMIN_ROLES.has(role)) {
+    return { limit: Infinity, used: 0, remaining: Infinity };
+  }
+
+  if (isMeterMode) {
     return { limit: Infinity, used: 0, remaining: Infinity };
   }
 
@@ -201,14 +206,16 @@ async function getDailyLimitInfo(
   return { limit, used, remaining: Math.max(0, limit - used) };
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const info = await getDailyLimitInfo(session.user.id, session.user.role);
+    const { searchParams } = new URL(request.url);
+    const isMeterMode = searchParams.get("mode") === "local";
+    const info = await getDailyLimitInfo(session.user.id, session.user.role, isMeterMode);
     return NextResponse.json(info);
   } catch (error) {
     console.error("Visualization limit check error:", error);
@@ -226,7 +233,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const limitInfo = await getDailyLimitInfo(session.user.id, session.user.role);
+    const body = await request.json();
+    const { text, studentAge, useChinese } = body as {
+      text: string;
+      studentAge: number;
+      useChinese?: boolean;
+      mode?: string;
+    };
+
+    const isMeterMode = body.mode === "local";
+    const limitInfo = await getDailyLimitInfo(session.user.id, session.user.role, isMeterMode);
     if (limitInfo.remaining <= 0) {
       return NextResponse.json(
         {
@@ -238,13 +254,6 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-
-    const body = await request.json();
-    const { text, studentAge, useChinese } = body as {
-      text: string;
-      studentAge: number;
-      useChinese?: boolean;
-    };
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
