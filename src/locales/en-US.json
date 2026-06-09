@@ -526,6 +526,9 @@
       "emptyTip": "Click the button above to generate a colorful visualization of the main ideas",
       "meterModeTitle": "Not available in Meter mode",
       "meterModeTip": "Switch to Subscription mode in Settings to use AI Visualization.",
+      "limitReachedTitle": "Daily limit reached",
+      "limitReachedTip": "You've used all your visualization generations for today. Come back tomorrow!",
+      "remaining": "{{count}} left today",
       "help": {
         "title": "Visualization Guide",
         "purpose": "Purpose: The Visualization section generates a colorful image to help you visualize the main ideas of the reading text. The AI automatically chooses the best visual style based on the text's genre.",

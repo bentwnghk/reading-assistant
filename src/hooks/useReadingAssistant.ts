@@ -460,12 +460,12 @@ function useReadingAssistant() {
     }
   }
 
-  async function generateVisualization(useChinese: boolean = false) {
+  async function generateVisualization(useChinese: boolean = false): Promise<number | null> {
     const { studentAge, extractedText, setVisualizationImage, setStatus: setStoreStatus, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
-      return;
+      return null;
     }
 
     setStoreStatus("visualization");
@@ -494,11 +494,13 @@ function useReadingAssistant() {
 
       setStoreStatus("idle");
       setStatus("idle");
+      return typeof data.remaining === "number" ? data.remaining : null;
     } catch (error) {
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
       setStatus("idle");
+      return null;
     }
   }
 

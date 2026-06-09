@@ -171,6 +171,10 @@ ZENMUX_API_KEY=
 ZENMUX_API_BASE_URL=https://zenmux.ai/api/vertex-ai
 # (Optional) Google Gemini API key — fallback for visualization image generation (get from https://aistudio.google.com/apikey)
 GOOGLE_GENERATIVE_AI_API_KEY=
+# Daily visualization generation limit for subscribed students (default: 2)
+VISUALIZATION_DAILY_LIMIT_SUBSCRIPTION=2
+# Daily visualization generation limit for free-tier students (default: 1)
+VISUALIZATION_DAILY_LIMIT_FREE=1
 
 # (Optional) Injected script code can be used for statistics or error tracking.
 HEAD_SCRIPTS=

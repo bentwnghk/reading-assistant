@@ -72,6 +72,10 @@ services:
       ZENMUX_API_KEY: ""
       # Google Gemini API key — fallback for visualization image generation
       GOOGLE_GENERATIVE_AI_API_KEY: ""
+      # Daily visualization generation limit for subscribed students (default: 2)
+      VISUALIZATION_DAILY_LIMIT_SUBSCRIPTION: "2"
+      # Daily visualization generation limit for free-tier students (default: 1)
+      VISUALIZATION_DAILY_LIMIT_FREE: "1"
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
       AUTH_SECRET: ""
       # Get Google OAuth credentials from: https://console.cloud.google.com/apis/credentials

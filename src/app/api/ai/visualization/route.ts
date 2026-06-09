@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { generateVisualizationPrompt } from "@/constants/readingPrompts";
 import { multiApiKeyPolling } from "@/utils/model";
+import { getPool } from "@/lib/db";
+import { verifySubscriptionAccess } from "@/lib/subscription";
 
 const ZENMUX_API_KEY = process.env.ZENMUX_API_KEY || "";
+
+const DAILY_LIMIT_SUBSCRIPTION = parseInt(
+  process.env.VISUALIZATION_DAILY_LIMIT_SUBSCRIPTION || "2",
+  10
+);
+const DAILY_LIMIT_FREE = parseInt(
+  process.env.VISUALIZATION_DAILY_LIMIT_FREE || "1",
+  10
+);
 const ZENMUX_API_BASE_URL =
   process.env.ZENMUX_API_BASE_URL || "https://zenmux.ai/api/vertex-ai";
 
@@ -156,11 +167,76 @@ function extractFromOpenAIResponse(data: any): string | null {
   return null;
 }
 
+const ADMIN_ROLES = new Set(["admin", "super-admin"]);
+
+async function getDailyLimitInfo(
+  userId: string,
+  role?: string
+): Promise<{
+  limit: number;
+  used: number;
+  remaining: number;
+}> {
+  if (role && ADMIN_ROLES.has(role)) {
+    return { limit: Infinity, used: 0, remaining: Infinity };
+  }
+
+  const isSubscriber = await verifySubscriptionAccess(userId);
+  const limit = isSubscriber ? DAILY_LIMIT_SUBSCRIPTION : DAILY_LIMIT_FREE;
+
+  const pool = getPool();
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+
+  const result = await pool.query(
+    `SELECT COUNT(*)::int AS cnt
+     FROM activity_logs
+     WHERE user_id = $1
+       AND activity_type = 'visualization_generate'
+       AND created_at >= $2`,
+    [userId, todayStart.toISOString()]
+  );
+
+  const used = result.rows[0]?.cnt ?? 0;
+  return { limit, used, remaining: Math.max(0, limit - used) };
+}
+
+export async function GET() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const info = await getDailyLimitInfo(session.user.id, session.user.role);
+    return NextResponse.json(info);
+  } catch (error) {
+    console.error("Visualization limit check error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const limitInfo = await getDailyLimitInfo(session.user.id, session.user.role);
+    if (limitInfo.remaining <= 0) {
+      return NextResponse.json(
+        {
+          error: "Daily limit reached",
+          limit: limitInfo.limit,
+          used: limitInfo.used,
+          remaining: 0,
+        },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();
@@ -239,7 +315,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ image: imageDataUrl });
+    return NextResponse.json({
+      image: imageDataUrl,
+      remaining: Math.max(0, limitInfo.remaining - 1),
+    });
   } catch (error) {
     console.error("Visualization API error:", error);
     return NextResponse.json(

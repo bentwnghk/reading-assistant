@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X, Lock } from "lucide-react";
@@ -15,17 +15,45 @@ function Visualization() {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const userRole = session?.user?.role || "student";
-  const isStudent = userRole === "student";
+  const isRateLimitedRole = userRole === "student" || userRole === "teacher";
   const { mode } = useSettingStore();
   const isMeterMode = mode === "local";
-  const { extractedText, visualizationImage, docTitle } = useReadingStore();
+  const { extractedText, visualizationImage, docTitle, source } = useReadingStore();
   const { status, generateVisualization } = useReadingAssistant();
   const isGenerating = status === "visualization";
   const [zoomed, setZoomed] = useState(false);
   const [useChinese, setUseChinese] = useState(false);
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  const isLimitReached = isRateLimitedRole && remaining !== null && remaining <= 0;
+  const showLimit = isRateLimitedRole && !isMeterMode && remaining !== null;
+
+  const fetchRemaining = useCallback(async () => {
+    if (!session?.user?.id || isMeterMode || !isRateLimitedRole) return;
+    try {
+      const res = await fetch("/api/ai/visualization");
+      if (res.ok) {
+        const data = await res.json();
+        setRemaining(data.remaining);
+      }
+    } catch {}
+  }, [session?.user?.id, isMeterMode, isRateLimitedRole]);
+
+  useEffect(() => {
+    fetchRemaining();
+  }, [fetchRemaining]);
 
   if (!extractedText) {
     return null;
+  }
+
+  async function handleGenerate() {
+    const result = await generateVisualization(useChinese);
+    if (result !== null) {
+      setRemaining(result);
+    } else {
+      fetchRemaining();
+    }
   }
 
   function handleDownload() {
@@ -40,6 +68,9 @@ function Visualization() {
     link.download = `${safeFileName} - Visualization.png`;
     link.click();
   }
+
+  const isStudentOnShared = userRole === "student" && source === "shared";
+  const canGenerateControls = !isMeterMode && !isLimitReached && !(isStudentOnShared && visualizationImage);
 
   return (
     <section className="p-4 border rounded-md mt-4">
@@ -79,7 +110,7 @@ function Visualization() {
               {t("reading.visualization.download")}
             </Button>
           )}
-          {!isMeterMode && !(isStudent && visualizationImage) && (
+          {canGenerateControls && (
             <div className="flex items-center gap-2">
               <Switch
                 checked={useChinese}
@@ -91,9 +122,9 @@ function Visualization() {
               </span>
             </div>
           )}
-          {!isMeterMode && !(isStudent && visualizationImage) && (
+          {canGenerateControls && (
             <Button
-              onClick={() => generateVisualization(useChinese)}
+              onClick={handleGenerate}
               disabled={isGenerating}
               size="sm"
               variant={visualizationImage ? "secondary" : "default"}
@@ -108,19 +139,18 @@ function Visualization() {
                   <ImageIcon className="h-4 w-4 mr-1" />
                   {t("reading.visualization.regenerate")}
                 </>
-      ) : isMeterMode ? (
-        <div className="text-center py-8">
-          <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-          <p className="text-muted-foreground font-medium mb-1">{t("reading.visualization.meterModeTitle")}</p>
-          <p className="text-sm text-muted-foreground">{t("reading.visualization.meterModeTip")}</p>
-        </div>
-      ) : (
+              ) : (
                 <>
                   <ImageIcon className="h-4 w-4 mr-1" />
                   {t("reading.visualization.generate")}
                 </>
               )}
             </Button>
+          )}
+          {showLimit && (
+            <span className="text-xs text-muted-foreground">
+              {t("reading.visualization.remaining", { count: remaining })}
+            </span>
           )}
         </div>
       </div>
@@ -147,6 +177,12 @@ function Visualization() {
           <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
           <p className="text-muted-foreground font-medium mb-1">{t("reading.visualization.meterModeTitle")}</p>
           <p className="text-sm text-muted-foreground">{t("reading.visualization.meterModeTip")}</p>
+        </div>
+      ) : isLimitReached ? (
+        <div className="text-center py-8">
+          <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+          <p className="text-muted-foreground font-medium mb-1">{t("reading.visualization.limitReachedTitle")}</p>
+          <p className="text-sm text-muted-foreground">{t("reading.visualization.limitReachedTip")}</p>
         </div>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
