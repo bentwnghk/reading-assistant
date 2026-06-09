@@ -60,7 +60,7 @@ function StudentInfo() {
             </PopoverContent>
           </Popover>
         </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           <Button size="sm" onClick={() => setOpenDashboard(true)}>
             <BarChart3 className="h-4 w-4" />
             <span>{t("dashboard.title")}</span>

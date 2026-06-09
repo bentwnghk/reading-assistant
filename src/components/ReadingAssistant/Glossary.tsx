@@ -456,7 +456,7 @@ function Glossary() {
             </PopoverContent>
           </Popover>
         </h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           {glossary.length > 0 && (
             <>
               <Button

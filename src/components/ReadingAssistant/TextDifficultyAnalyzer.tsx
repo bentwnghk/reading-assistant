@@ -164,7 +164,7 @@ export default function TextDifficultyAnalyzer() {
           <BarChart3 className="h-5 w-5 text-muted-foreground" />
           {t("reading.difficulty.title")}
         </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           <Button
             onClick={handleAnalyze}
             disabled={!hasAnyText || isAnalyzing || !showCards}
