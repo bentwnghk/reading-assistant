@@ -1262,7 +1262,7 @@ function Grammar() {
             </PopoverContent>
           </Popover>
         </h3>
-        <div className="flex flex-wrap justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2 ml-auto">
           {grammarTopics.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
