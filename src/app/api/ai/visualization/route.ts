@@ -111,10 +111,13 @@ async function callGoogleNativeApi(
 
 async function callOpenAICompatibleApi(
   prompt: string,
-  model: string
+  model: string,
+  isSubscriptionMode: boolean
 ): Promise<Response> {
   const apiKey = multiApiKeyPolling(
-    OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || OPENAI_COMPATIBLE_API_KEY
+    isSubscriptionMode
+      ? (OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || OPENAI_COMPATIBLE_API_KEY)
+      : OPENAI_COMPATIBLE_API_KEY
   );
 
   return fetch(
@@ -300,7 +303,7 @@ export async function POST(request: NextRequest) {
 
     if (!imageDataUrl && OPENAI_COMPATIBLE_API_KEY && OPENAI_COMPATIBLE_API_BASE_URL) {
       try {
-        const response = await callOpenAICompatibleApi(prompt, IMAGE_MODEL);
+        const response = await callOpenAICompatibleApi(prompt, IMAGE_MODEL, body.mode === "subscription");
         if (response.ok) {
           const data = await response.json();
           imageDataUrl = extractFromOpenAIResponse(data);
