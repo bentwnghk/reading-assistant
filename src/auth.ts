@@ -12,7 +12,6 @@ import {
   shouldUpdateActivity,
   destroySession,
   enforceConcurrentSessionLimit,
-  hasLapsedSubscription,
 } from "@/lib/session-security"
 
 const pool = new Pool({
@@ -76,14 +75,6 @@ export const config: NextAuthConfig = {
         session.user.id = user.id
         const role = await ensureUserRole(user.id, user.email)
         session.user.role = role
-
-        // #2: Subscription-based session expiry — invalidate lapsed subscribers
-        if (await hasLapsedSubscription(user.id, role)) {
-          if (sessionToken) {
-            await destroySession(sessionToken)
-          }
-          return { expires: new Date(0).toISOString() } as typeof session
-        }
 
         // Auto-assign school based on email domain (only if not already assigned)
         if (user.email) {
