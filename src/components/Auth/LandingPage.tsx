@@ -362,9 +362,9 @@ export function LandingPage() {
         </motion.div>
         <motion.div variants={gridContainer(0.4)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { icon: Target, Watermark: Target, title: "personalized", desc: "personalized", color: "text-emerald-600 dark:text-emerald-400", colSpan: "", features: ["adaptive", "weakAreas"] },
-            { icon: Trophy, Watermark: Trophy, title: "gamified", desc: "gamified", color: "text-amber-600 dark:text-amber-400", colSpan: "", features: [] },
-            { icon: Cloud, Watermark: Cloud, title: "private", desc: "private", color: "text-blue-600 dark:text-blue-400", colSpan: "md:col-span-2", features: [] },
+            { icon: Target, Watermark: Target, title: "personalized", desc: "personalized", color: "text-emerald-600 dark:text-emerald-400", colSpan: "", features: ["adaptive", "weakAreas", "smartReview"] },
+            { icon: Trophy, Watermark: Trophy, title: "gamified", desc: "gamified", color: "text-amber-600 dark:text-amber-400", colSpan: "", features: ["games", "leaderboards", "achievements"] },
+            { icon: Cloud, Watermark: Cloud, title: "private", desc: "private", color: "text-blue-600 dark:text-blue-400", colSpan: "md:col-span-2", features: ["autoSync", "crossDevice", "history"] },
           ].map((card) => (
              <motion.div
                 key={card.title}

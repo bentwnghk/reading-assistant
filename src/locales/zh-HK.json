@@ -55,16 +55,27 @@
           "desc": "AI 驅動的個人化學習體驗",
           "features": {
             "adaptive": "根據你的年齡和英語程度調整內容（8-18 歲）",
-            "weakAreas": "針對你的弱項進行定向閱讀練習"
+            "weakAreas": "針對你的弱項進行定向閱讀練習",
+            "smartReview": "智能詞彙複習，根據你的記憶自動調整"
           }
         },
         "gamified": {
           "title": "🎮 遊戲化",
-          "desc": "透過有趣遊戲、每週排行榜學習，並在進步時解鎖成就！"
+          "desc": "讓學習像遊戲一樣有趣",
+          "features": {
+            "games": "透過有趣的互動遊戲學習",
+            "leaderboards": "在每週排行榜上競爭",
+            "achievements": "隨著進步解鎖成就"
+          }
         },
         "private": {
           "title": "☁️ 雲端同步",
-          "desc": "你的進度自動同步——每次登入即可從任何裝置存取你的資料"
+          "desc": "你的學習旅程，時刻同步",
+          "features": {
+            "autoSync": "進度自動在所有裝置間同步",
+            "crossDevice": "登入即可從任何地方存取資料",
+            "history": "永不遺失你的閱讀紀錄或詞彙"
+          }
         }
       },
       "roles": {

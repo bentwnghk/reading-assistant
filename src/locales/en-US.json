@@ -55,16 +55,27 @@
           "desc": "AI-powered learning tailored just for you",
           "features": {
             "adaptive": "Adapts content to your age & level (8-18)",
-            "weakAreas": "Targeted reading practice for your weak areas"
+            "weakAreas": "Targeted reading practice for your weak areas",
+            "smartReview": "Smart vocabulary review that adapts to your memory"
           }
         },
         "gamified": {
           "title": "🎮 Gamified",
-          "desc": "Learn through fun games, weekly leaderboards & unlock achievements as you progress!"
+          "desc": "Learning that feels like play",
+          "features": {
+            "games": "Learn through fun interactive games",
+            "leaderboards": "Compete on weekly leaderboards",
+            "achievements": "Unlock achievements as you progress"
+          }
         },
         "private": {
           "title": "☁️ Cloud Sync",
-          "desc": "Your progress syncs automatically—access your data from any device with every sign-in"
+          "desc": "Your learning journey, always in sync",
+          "features": {
+            "autoSync": "Progress syncs automatically across devices",
+            "crossDevice": "Access your data from anywhere with sign-in",
+            "history": "Never lose your reading sessions or vocabulary"
+          }
         }
       },
       "roles": {
