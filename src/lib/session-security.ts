@@ -144,7 +144,10 @@ export async function hasLapsedSubscription(
 
     const sub = result.rows[0] as SubscriptionRow;
 
-    if (sub.status === "active" || sub.status === "trialing") return false;
+    // Only invalidate for subscriptions that were previously active and have
+    // definitively ended. Ignore transitional/never-active states so that free
+    // users with stale checkout or trial records are not locked out.
+    if (sub.status !== "canceled" && sub.status !== "unpaid") return false;
 
     if (sub.current_period_end) {
       const periodEnd = new Date(sub.current_period_end);
