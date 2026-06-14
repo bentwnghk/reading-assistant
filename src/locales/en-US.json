@@ -52,7 +52,11 @@
         "title": "Why You'll Love It",
         "personalized": {
           "title": "🎯 Personalized",
-          "desc": "AI adapts content to your age & level (8-18)"
+          "desc": "AI-powered learning tailored just for you",
+          "features": {
+            "adaptive": "Adapts content to your age & level (8-18)",
+            "weakAreas": "Targeted reading practice for your weak areas"
+          }
         },
         "gamified": {
           "title": "🎮 Gamified",

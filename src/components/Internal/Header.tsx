@@ -469,6 +469,16 @@ function Header() {
                   <Target className="h-5 w-5 mx-auto mb-1 text-blue-500" />
                   <div className="font-medium text-xs">{t("header.about.whyLove.personalized.title")}</div>
                   <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.personalized.desc")}</div>
+                  <ul className="text-xs text-muted-foreground mt-2 space-y-1 text-left">
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-emerald-500" />
+                      <span>{t("header.about.whyLove.personalized.features.adaptive")}</span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-emerald-500" />
+                      <span>{t("header.about.whyLove.personalized.features.weakAreas")}</span>
+                    </li>
+                  </ul>
                 </div>
                 <div className="bg-card border rounded-lg p-3 text-center">
                   <Trophy className="h-5 w-5 mx-auto mb-1 text-amber-500" />

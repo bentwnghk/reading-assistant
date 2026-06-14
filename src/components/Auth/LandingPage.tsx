@@ -362,9 +362,9 @@ export function LandingPage() {
         </motion.div>
         <motion.div variants={gridContainer(0.4)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { icon: Target, Watermark: Target, title: "personalized", desc: "personalized", color: "text-emerald-600 dark:text-emerald-400", colSpan: "" },
-            { icon: Trophy, Watermark: Trophy, title: "gamified", desc: "gamified", color: "text-amber-600 dark:text-amber-400", colSpan: "" },
-            { icon: Cloud, Watermark: Cloud, title: "private", desc: "private", color: "text-blue-600 dark:text-blue-400", colSpan: "md:col-span-2" },
+            { icon: Target, Watermark: Target, title: "personalized", desc: "personalized", color: "text-emerald-600 dark:text-emerald-400", colSpan: "", features: ["adaptive", "weakAreas"] },
+            { icon: Trophy, Watermark: Trophy, title: "gamified", desc: "gamified", color: "text-amber-600 dark:text-amber-400", colSpan: "", features: [] },
+            { icon: Cloud, Watermark: Cloud, title: "private", desc: "private", color: "text-blue-600 dark:text-blue-400", colSpan: "md:col-span-2", features: [] },
           ].map((card) => (
              <motion.div
                 key={card.title}
@@ -378,6 +378,16 @@ export function LandingPage() {
                   <card.icon className={`relative z-10 h-12 w-12 mb-6 ${card.color} transition-transform duration-300 group-hover:scale-115 group-hover:rotate-2`} />
               <h3 className="relative z-10 text-3xl font-bold mb-3">{t(`header.about.whyLove.${card.title}.title`)}</h3>
               <p className="relative z-10 text-xl text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">{t(`header.about.whyLove.${card.desc}.desc`)}</p>
+              {card.features.length > 0 && (
+                <ul className="relative z-10 mt-5 space-y-3 max-w-md">
+                  {card.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3 text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+                      <CheckCircle2 className="h-5 w-5 shrink-0 mt-1 text-emerald-500" />
+                      <span>{t(`header.about.whyLove.${card.title}.features.${feature}`)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </motion.div>
           ))}
         </motion.div>
