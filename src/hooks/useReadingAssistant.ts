@@ -755,7 +755,7 @@ Guidelines:
           ? `${msg.content}\n\n[Context: The student is asking about this text: "${msg.selectedText}"]`
           : msg.content;
         
-        if (msg.role === "user" && msg.images && msg.images.length > 0) {
+        if (msg.role === "user" && msg.images && msg.images.length > 0 && hasImages) {
           return {
             role: "user",
             content: [
