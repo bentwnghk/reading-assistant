@@ -1,5 +1,4 @@
 import { getClient } from "./db";
-import type { UserRole } from "./users";
 
 const IDLE_TIMEOUT_MINUTES = parseInt(
   process.env.SESSION_IDLE_TIMEOUT_MINUTES || "30",
