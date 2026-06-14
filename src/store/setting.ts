@@ -22,6 +22,13 @@ export const TUTOR_MODELS = [
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
 
+export const BASIC_TUTOR_MODELS = [
+  "deepseek-v4-flash",
+  "gpt-5.4-nano",
+] as const;
+
+export type BasicTutorModel = (typeof BASIC_TUTOR_MODELS)[number];
+
 export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] as const;
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
@@ -47,6 +54,7 @@ export interface SettingStore {
   sentenceAnalysisModel: AvailableModel;
   grammarModel: AvailableModel;
   tutorModel: TutorModel;
+  basicTutorModel: BasicTutorModel;
   ttsVoice: TTSVoice;
   ttsPlaybackRate: TTSPlaybackRate;
   autoSpeakFlashcard: boolean;
@@ -144,6 +152,7 @@ export const defaultValues: SettingStore = {
   sentenceAnalysisModel: "deepseek-v4-flash",
   grammarModel: "deepseek-v4-flash",
   tutorModel: "gpt-5.4-mini",
+  basicTutorModel: "deepseek-v4-flash",
   ttsVoice: "alloy",
   ttsPlaybackRate: 1.0 as TTSPlaybackRate,
   autoSpeakFlashcard: true,
@@ -213,6 +222,9 @@ export const useSettingStore = create(
           }
           if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
             state.tutorModel = defaultValues.tutorModel;
+          }
+          if (!BASIC_TUTOR_MODELS.includes(state.basicTutorModel as BasicTutorModel)) {
+            state.basicTutorModel = defaultValues.basicTutorModel;
           }
           return parsed;
         },

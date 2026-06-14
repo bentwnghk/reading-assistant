@@ -737,15 +737,17 @@ Guidelines:
     useChinese: boolean = false
   ): Promise<string> {
     const { studentAge, extractedText } = useReadingStore.getState();
-    const { tutorModel } = useSettingStore.getState();
+    const { tutorModel, basicTutorModel } = useSettingStore.getState();
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return "";
     }
 
-    const visionModel = await createModelProvider(tutorModel);
-    
+    const hasImages = images && images.length > 0;
+    const modelToUse = hasImages ? tutorModel : basicTutorModel;
+    const visionModel = await createModelProvider(modelToUse);
+
     const messages: any[] = history
       .slice(-20)
       .map((msg) => {
@@ -765,7 +767,6 @@ Guidelines:
         return { role: msg.role, content: textContent };
       });
 
-    const hasImages = images && images.length > 0;
     if (hasImages) {
       messages.push({
         role: "user",

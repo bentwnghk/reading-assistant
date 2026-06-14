@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, TTS_VOICES, TTS_PLAYBACK_RATES } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, TTS_VOICES, TTS_PLAYBACK_RATES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -71,6 +71,7 @@ const formSchema = z.object({
   sentenceAnalysisModel: z.enum(AVAILABLE_MODELS),
   grammarModel: z.enum(AVAILABLE_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
+  basicTutorModel: z.enum(BASIC_TUTOR_MODELS),
   ttsVoice: z.enum(TTS_VOICES),
   ttsPlaybackRate: z.union([z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1.0)]),
   autoSpeakFlashcard: z.boolean().optional(),
@@ -914,6 +915,37 @@ function Setting({ open, onClose }: SettingProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {AVAILABLE_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="basicTutorModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.basicTutorModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("basicTutorModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {BASIC_TUTOR_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
