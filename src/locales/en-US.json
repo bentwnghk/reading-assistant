@@ -997,14 +997,14 @@
       "addImage": "Add image",
       "imageOnly": "[Image]",
       "languageToggleLabel": "Response language",
-      "languageToggleHint": "Choose the language the AI Tutor uses to reply. When set to Traditional Chinese, the tutor will always respond in 繁體中文, regardless of the reading text or your question language.",
       "languageEnglish": "EN",
       "languageChinese": "中文",
       "help": {
         "title": "AI Tutor Guide",
         "purpose": "Purpose: The AI Tutor is your personal reading assistant that helps you understand any text through interactive conversations. Ask questions, get explanations, and deepen your comprehension.",
         "features": "Features: Context-aware answers based on your current reading material. Support for text selection - highlight any text to ask about it. Image upload for homework help - upload questions and get step-by-step guidance. Quick question buttons for common queries.",
-        "usage": "Usage: Click the chat icon to open. Type your question or use quick question buttons. Select text in the Text Analysis & Adaptation section first to ask about a specific word, sentence, or paragraph. Upload images of reading questions for guided help. The tutor remembers your conversation for follow-up questions."
+        "usage": "Usage: Click the chat icon to open. Type your question or use quick question buttons. Select text in the Text Analysis & Adaptation section first to ask about a specific word, sentence, or paragraph. Upload images of reading questions for guided help. The tutor remembers your conversation for follow-up questions.",
+        "language": "Language toggle: Use the EN / 中文 switch in the header to choose the tutor's response language. EN makes the tutor always reply in English. 中文 makes it always reply in Traditional Chinese (繁體中文), regardless of the reading text or the language you ask in. Your choice is saved automatically."
       },
       "quickQuestions": {
         "title": "Quick Questions:",

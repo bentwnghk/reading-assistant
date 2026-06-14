@@ -272,6 +272,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
                     <p className="text-muted-foreground">{t("reading.tutor.help.purpose")}</p>
                     <p className="text-muted-foreground">{t("reading.tutor.help.features")}</p>
                     <p className="text-muted-foreground">{t("reading.tutor.help.usage")}</p>
+                    <p className="text-muted-foreground">{t("reading.tutor.help.language")}</p>
                   </div>
                 </div>
               </PopoverContent>
@@ -281,7 +282,6 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
         <div className="flex items-center gap-1">
           <div
             className="flex items-center gap-1.5 mr-1 px-2 h-7 rounded-md border border-border bg-muted/40"
-            title={t("reading.tutor.languageToggleHint")}
           >
             <Languages className="h-3.5 w-3.5 text-muted-foreground" />
             <span className={cn(
