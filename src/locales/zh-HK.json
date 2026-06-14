@@ -996,6 +996,10 @@
       "removeSelection": "從上下文中移除選取文字",
       "addImage": "添加圖片",
       "imageOnly": "[圖片]",
+      "languageToggleLabel": "回應語言",
+      "languageToggleHint": "選擇 AI 導師用來回覆的語言。當設定為繁體中文時，無論文章或你的提問使用何種語言，導師都會一律以繁體中文回覆。",
+      "languageEnglish": "EN",
+      "languageChinese": "中文",
       "help": {
         "title": "AI 導師指南",
         "purpose": "功能說明：AI 導師是你的個人閱讀助手，透過互動對話幫助你理解任何文章。提問、獲取解釋，加深你的理解。",

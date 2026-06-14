@@ -3,10 +3,11 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
-import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon, HelpCircle } from "lucide-react";
+import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon, HelpCircle, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { useReadingStore } from "@/store/reading";
 import { useGlobalStore } from "@/store/global";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -33,6 +34,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [pendingQuestionForImage, setPendingQuestionForImage] = useState<string | null>(null);
+  const [useChinese, setUseChinese] = useState(false);
   
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -126,7 +128,8 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       chatHistory,
       contextText,
       images.length > 0 ? images : undefined,
-      (chunk) => setStreamingContent(chunk)
+      (chunk) => setStreamingContent(chunk),
+      useChinese
     );
 
     if (response) {
@@ -188,7 +191,8 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       chatHistory,
       contextText,
       imagesToSend.length > 0 ? imagesToSend : undefined,
-      (chunk) => setStreamingContent(chunk)
+      (chunk) => setStreamingContent(chunk),
+      useChinese
     );
 
     if (response) {
@@ -272,6 +276,30 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
           </h3>
         </div>
         <div className="flex items-center gap-1">
+          <div
+            className="flex items-center gap-1.5 mr-1 px-2 h-7 rounded-md border border-border bg-muted/40"
+            title={t("reading.tutor.languageToggleHint")}
+          >
+            <Languages className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className={cn(
+              "text-xs font-medium transition-colors",
+              !useChinese ? "text-foreground" : "text-muted-foreground"
+            )}>
+              {t("reading.tutor.languageEnglish")}
+            </span>
+            <Switch
+              checked={useChinese}
+              onCheckedChange={setUseChinese}
+              disabled={isLoading}
+              className="h-4 w-7 data-[state=checked]:bg-primary"
+            />
+            <span className={cn(
+              "text-xs font-medium transition-colors",
+              useChinese ? "text-foreground" : "text-muted-foreground"
+            )}>
+              {t("reading.tutor.languageChinese")}
+            </span>
+          </div>
           <Button
             variant="ghost"
             size="icon"

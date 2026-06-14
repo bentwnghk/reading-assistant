@@ -733,7 +733,8 @@ Guidelines:
     history: ChatMessage[],
     selectedText?: string,
     images?: string[],
-    onChunk?: (chunk: string) => void
+    onChunk?: (chunk: string) => void,
+    useChinese: boolean = false
   ): Promise<string> {
     const { studentAge, extractedText } = useReadingStore.getState();
     const { tutorModel } = useSettingStore.getState();
@@ -788,7 +789,7 @@ Guidelines:
     try {
       const result = streamText({
         model: visionModel,
-        system: readingTutorSystemPrompt(studentAge, extractedText),
+        system: readingTutorSystemPrompt(studentAge, extractedText, useChinese),
         messages,
         experimental_transform: smoothTextStream(smoothTextStreamType),
       });

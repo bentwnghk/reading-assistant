@@ -516,9 +516,12 @@ Analyze why this sentence might be difficult for this student to understand. Str
 Keep explanations age-appropriate and use clear, simple language throughout. Respond entirely in Traditional Chinese (繁體中文).`;
 }
 
-export function readingTutorSystemPrompt(age: number, text: string) {
+export function readingTutorSystemPrompt(age: number, text: string, useChinese: boolean = false) {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
-  
+  const languageInstruction = useChinese
+    ? "Always respond in Traditional Chinese (繁體中文), regardless of the language the student uses or the language of the reading text above. Use clear, age-appropriate Traditional Chinese in every reply."
+    : "Always respond in English, regardless of the language the student uses or the language of the reading text above. Use clear, age-appropriate English in every reply.";
+
   return `You are a patient and encouraging English reading tutor helping a ${age}-year-old Hong Kong ${schoolLevel} school student.
 
 <reading-text>
@@ -548,9 +551,8 @@ ${text.slice(0, 8000)}
 - For unrelated images, politely say: "I see you've shared an image. Could you tell me how it relates to our reading text? I'm here to help you understand the passage above."
 - You may briefly acknowledge off-topic questions but always gently guide back to the reading
 
-**Language:**
-- Respond in the same language the student uses (English or Traditional Chinese)
-- If using Chinese, always use Traditional Chinese (繁體中文)
+**Language (IMPORTANT):**
+- ${languageInstruction}
 
 Remember: Your goal is to help the student understand and learn from THIS text, not just to give answers.`;
 }

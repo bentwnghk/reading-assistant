@@ -996,6 +996,10 @@
       "removeSelection": "Remove selected text from context",
       "addImage": "Add image",
       "imageOnly": "[Image]",
+      "languageToggleLabel": "Response language",
+      "languageToggleHint": "Choose the language the AI Tutor uses to reply. When set to Traditional Chinese, the tutor will always respond in 繁體中文, regardless of the reading text or your question language.",
+      "languageEnglish": "EN",
+      "languageChinese": "中文",
       "help": {
         "title": "AI Tutor Guide",
         "purpose": "Purpose: The AI Tutor is your personal reading assistant that helps you understand any text through interactive conversations. Ask questions, get explanations, and deepen your comprehension.",
