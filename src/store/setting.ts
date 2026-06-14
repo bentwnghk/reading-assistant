@@ -32,6 +32,8 @@ export type TTSPlaybackRate = (typeof TTS_PLAYBACK_RATES)[number];
 
 export type ApiMode = "local" | "proxy" | "subscription" | "";
 
+export type TutorLanguage = "en" | "zh";
+
 export interface SettingStore {
   provider: string;
   mode: ApiMode;
@@ -59,6 +61,7 @@ export interface SettingStore {
   theme: string;
   debug: "enable" | "disable";
   smoothTextStreamType: "character" | "word" | "line";
+  tutorLanguage: TutorLanguage;
   lastOpenedSessionId: string;
 }
 
@@ -155,6 +158,7 @@ export const defaultValues: SettingStore = {
   theme: "system",
   debug: "disable",
   smoothTextStreamType: "word",
+  tutorLanguage: "en",
   lastOpenedSessionId: "",
 };
 

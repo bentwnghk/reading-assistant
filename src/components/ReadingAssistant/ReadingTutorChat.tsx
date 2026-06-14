@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Switch } from "@/components/ui/switch";
 import { useReadingStore } from "@/store/reading";
 import { useGlobalStore } from "@/store/global";
+import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import ChatMessageBubble from "./ChatMessageBubble";
 import QuickQuestions from "./QuickQuestions";
@@ -26,7 +27,10 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const { data: session } = useSession();
   const { chatHistory, addChatMessage, clearChatHistory, extractedText, id: sessionId, docTitle } = useReadingStore();
   const { tutorChatSelectedText, setTutorChatSelectedText } = useGlobalStore();
+  const { tutorLanguage, update } = useSettingStore();
   const { askTutor } = useReadingAssistant();
+  
+  const useChinese = tutorLanguage === "zh";
   
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +38,6 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
   const [pendingQuestionForImage, setPendingQuestionForImage] = useState<string | null>(null);
-  const [useChinese, setUseChinese] = useState(false);
   
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -289,7 +292,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             </span>
             <Switch
               checked={useChinese}
-              onCheckedChange={setUseChinese}
+              onCheckedChange={(checked) => update({ tutorLanguage: checked ? "zh" : "en" })}
               disabled={isLoading}
               className="h-4 w-7 data-[state=checked]:bg-primary"
             />
