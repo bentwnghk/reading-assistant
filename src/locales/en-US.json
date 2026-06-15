@@ -54,7 +54,7 @@
           "title": "🎯 Personalized",
           "desc": "AI-powered learning tailored just for you",
           "features": {
-            "adaptive": "Adapts content to your age & level (8-18)",
+            "adaptive": "Adapts content to your age & level",
             "weakAreas": "Targeted reading practice for your weak areas",
             "smartReview": "Smart vocabulary review that adapts to your memory"
           }
