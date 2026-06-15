@@ -2705,5 +2705,8 @@
         "description": "Mark important words in the text to build your personalized vocabulary list."
       }
     }
+  },
+  "idle": {
+    "warning": "You will be signed out soon due to inactivity."
   }
 }

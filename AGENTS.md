@@ -125,6 +125,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
   - `useMobile` — Responsive breakpoint detection
   - `useAccurateTimer` — High-precision countdown timer for games
   - `useSubmitShortcut` — Keyboard shortcut (Ctrl+Enter) for form submission
+  - `useIdleTimer` — Client-side idle timeout with multi-tab sync via BroadcastChannel
 
 ### 3. Components & UI
 
@@ -157,11 +158,25 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 
 The project uses **next-auth v5 (beta.30)** with **Google OAuth** as the sole provider.
 
-- **`src/auth.ts`**: Full server-side config with `PostgresAdapter` (pg Pool, max 20 connections). Session strategy is `database` with 30-day maxAge.
+- **`src/auth.ts`**: Full server-side config with `PostgresAdapter` (pg Pool, max 20 connections). Session strategy is `database` with configurable `SESSION_MAX_AGE` (default: 3 days).
 - **`src/auth.config.ts`**: Lightweight Edge-compatible config used by middleware (no pg dependency).
 - **`src/middleware.ts`**: Intercepts `/api/:path*` requests. Handles API key injection for AI/search providers and verifies `ACCESS_PASSWORD` via HMAC signature.
 - **Roles**: `UserRole` includes `super-admin`, `admin`, `teacher`, `student`. Super-admins can share with any user across schools. Roles are auto-assigned on first sign-in via session callbacks (`ensureUserRole`, `ensureUserSchool`).
 - **Session**: Extended to include `user.id` and `user.role` on the client side.
+
+### Session Security
+
+Three layers protect user sessions:
+
+| Feature | Config Var | Default | How it works |
+|---------|-----------|---------|--------------|
+| **Session max lifetime** | `SESSION_MAX_AGE` (server-side, seconds) | 259200 (3 days) | Hard ceiling — NextAuth rejects sessions after this period from creation. No extension on activity. |
+| **Concurrent session limit** | `MAX_CONCURRENT_SESSIONS` (server-side) | 3 | On each sign-in (`events.signIn`), old sessions beyond this count are pruned via `enforceConcurrentSessionLimit()` in `src/lib/session-security.ts`. |
+| **Client-side idle timeout** | `SESSION_IDLE_TIMEOUT_MINUTES` (server-side, minutes) | 30 | The `useIdleTimer` hook (`src/hooks/useIdleTimer.ts`) tracks real DOM interaction (mouse, keyboard, touch, click, scroll). After the idle threshold, calls `signOut()`. Multi-tab sync via `BroadcastChannel`. Shows a warning toast 1 minute before. The value is exposed to the client at runtime via `/api/config` (NOT `NEXT_PUBLIC_*`) so it can be changed without rebuilding. |
+
+**Key design decisions**:
+- Idle timeout is **client-side only** — server-side idle detection was removed because background polling (60s pending-shares poll in `Header.tsx`) keeps server-side activity timestamps fresh, making it ineffective.
+- `SESSION_IDLE_TIMEOUT_MINUTES` is a **server-side env var** exposed via `/api/config`, not a `NEXT_PUBLIC_*` build-time var, so it can be changed per-deployment without rebuilding the Docker image.
 
 ---
 
@@ -235,8 +250,9 @@ The middleware (`src/middleware.ts`) and `next.config.ts` rewrites proxy request
 ### 6. Environment Variables
 
 - Refer to `env.tpl` for all available environment variables (~70+ variables).
-- **Categories**: AI provider keys/URLs, search provider keys/URLs, auth (NextAuth + Google OAuth), database (`DATABASE_URL`, `POSTGRES_PASSWORD`), Stripe/billing, email (Mailtrap), access control (`ACCESS_PASSWORD`, `ADMIN_EMAILS`, `SUPER_ADMIN_EMAILS`), MCP server config, feature flags (`NEXT_PUBLIC_DISABLED_AI_PROVIDER`, `NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER`, `NEXT_PUBLIC_MODEL_LIST`).
+- **Categories**: AI provider keys/URLs, search provider keys/URLs, auth (NextAuth + Google OAuth), database (`DATABASE_URL`, `POSTGRES_PASSWORD`), Stripe/billing, email (Mailtrap), access control (`ACCESS_PASSWORD`, `ADMIN_EMAILS`, `SUPER_ADMIN_EMAILS`), session security (`SESSION_MAX_AGE`, `MAX_CONCURRENT_SESSIONS`, `SESSION_IDLE_TIMEOUT_MINUTES`), MCP server config, feature flags (`NEXT_PUBLIC_DISABLED_AI_PROVIDER`, `NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER`, `NEXT_PUBLIC_MODEL_LIST`).
 - **Never commit** `.env` or `.env.local` files.
+- **CRITICAL — Runtime vs Build-time**: `NEXT_PUBLIC_*` env vars are **inlined at build time** — changing them requires a rebuild. For values that should be configurable at deployment/runtime (e.g., timeouts, limits, feature toggles), use **server-side env vars** (no `NEXT_PUBLIC_` prefix) and expose them to the client via an API route (e.g., `/api/config`). The Docker image is built once and deployed with different env var values across environments, so avoid `NEXT_PUBLIC_*` for anything that varies per deployment.
 
 ---
 

@@ -42,12 +42,10 @@ CREATE TABLE sessions (
   "sessionToken" TEXT UNIQUE NOT NULL,
   "userId" TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   expires TIMESTAMP WITH TIME ZONE NOT NULL,
-  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_sessions_user_id ON sessions("userId");
-CREATE INDEX idx_sessions_last_activity ON sessions(last_activity_at);
 
 CREATE TABLE verification_tokens (
   identifier TEXT NOT NULL,

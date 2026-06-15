@@ -18,6 +18,7 @@ import { useHistoryStore } from "@/store/history"
 import { initAchievementCallbacks } from "@/store/achievements"
 import { useSharingStore, setShareCheckComplete } from "@/store/sharing"
 import { useVocabularyStore } from "@/store/vocabulary"
+import { useIdleTimer } from "@/hooks/useIdleTimer"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
@@ -114,10 +115,16 @@ function AuthStateManager() {
   return null
 }
 
+function IdleTimer() {
+  useIdleTimer()
+  return null
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <AuthStateManager />
+      <IdleTimer />
       {children}
     </SessionProvider>
   )

@@ -5,12 +5,10 @@ ACCESS_PASSWORD=
 # ─── Session Security Configuration ─────────────────────────────────────────
 # Session maximum lifetime in seconds (default: 259200 = 3 days)
 SESSION_MAX_AGE=259200
-# Sliding idle timeout in minutes — sessions expire after this many minutes of inactivity (default: 30)
-SESSION_IDLE_TIMEOUT_MINUTES=30
 # Maximum concurrent active sessions per user — oldest sessions are pruned on new sign-in (default: 3)
 MAX_CONCURRENT_SESSIONS=3
-# Throttle for session activity DB updates in minutes — avoids a write on every request (default: 5)
-SESSION_ACTIVITY_UPDATE_INTERVAL=5
+# Client-side idle timeout in minutes — users are signed out after this many minutes of inactivity (default: 30)
+SESSION_IDLE_TIMEOUT_MINUTES=30
 
 # PostgreSQL Configuration
 POSTGRES_PASSWORD=your_secure_password_here
