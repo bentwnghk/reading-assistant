@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { streamText, smoothStream, generateText } from "ai";
+import { z } from "zod";
 import { toast } from "sonner";
 import i18next from "i18next";
 import { markLastOpenedSession, useSettingStore } from "@/store/setting";
@@ -16,6 +17,7 @@ import {
   generateReadingTestPrompt,
   generateTargetedPracticePrompt,
   generateGlossaryPrompt,
+  suggestVocabularyPrompt,
   readingTutorSystemPrompt,
   analyzeGrammarTopicsPrompt,
   generateGrammarQuizPrompt,
@@ -588,6 +590,61 @@ function useReadingAssistant() {
     }
   }
 
+  async function suggestVocabulary(count: number) {
+    const { extractedText, studentAge, highlightedWords, setHighlightedWords } = readingStore;
+
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return [];
+    }
+
+    const toastId = toast.info(i18next.t("reading.adaptedText.suggesting"), { duration: Infinity });
+
+    try {
+      const text = await glossaryGenerateText(
+        suggestVocabularyPrompt(studentAge, extractedText, count),
+        getSystemPrompt(),
+        glossaryModel,
+      );
+
+      const parsed = z
+        .array(z.string())
+        .transform((arr) => arr.map((s) => s.trim()).filter((s) => s.length > 0))
+        .safeParse(JSON.parse(text));
+
+      if (!parsed.success) {
+        throw new Error(i18next.t("reading.adaptedText.suggestParseError"));
+      }
+
+      const existing = new Set(highlightedWords.map((w) => w.toLowerCase().trim()));
+      const newWords: string[] = [];
+      for (const word of parsed.data) {
+        const normalized = word.toLowerCase().trim();
+        if (normalized && !existing.has(normalized)) {
+          existing.add(normalized);
+          newWords.push(word);
+        }
+      }
+
+      if (newWords.length > 0) {
+        setHighlightedWords([...highlightedWords, ...newWords]);
+      }
+
+      toast.dismiss(toastId);
+      toast.success(
+        i18next.t("reading.adaptedText.suggestSuccess", {
+          added: newWords.length,
+          total: highlightedWords.length + newWords.length,
+        }),
+      );
+      return newWords;
+    } catch (error) {
+      toast.dismiss(toastId);
+      handleError(error);
+      return [];
+    }
+  }
+
   function calculateTestScore() {
     const { setTestScore, setTestCompleted, setTestPoints } = readingStore;
     const { readingTest } = useReadingStore.getState();
@@ -1114,6 +1171,7 @@ Guidelines:
     generateReadingTest,
     generateTargetedPractice,
     generateGlossary,
+    suggestVocabulary,
     analyzeGrammarTopics,
     generateGrammarQuiz,
     calculateGrammarQuizScore,

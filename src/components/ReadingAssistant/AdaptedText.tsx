@@ -15,6 +15,7 @@ import {
   Pencil,
   Check,
   X,
+  Wand2,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
 import GrammarTextHighlighter from "./GrammarTextHighlighter";
@@ -43,6 +44,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -347,7 +355,7 @@ function AdaptedText() {
     sentenceAnalysisModel,
   } = useSettingStore();
 
-  const { status, adaptText, simplifyText } = useReadingAssistant();
+  const { status, adaptText, simplifyText, suggestVocabulary } = useReadingAssistant();
   const { createModelProvider } = useModelProvider();
 
 // tab state
@@ -355,6 +363,8 @@ function AdaptedText() {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [suggestCount, setSuggestCount] = useState(20);
+  const [isSuggesting, setIsSuggesting] = useState(false);
 
   const isAdapting = status === "adapting";
   const isSimplifying = status === "simplifying";
@@ -483,6 +493,15 @@ function AdaptedText() {
     setEditText("");
     setShowClearConfirm(false);
   }, [editText, setExtractedText, clearDerivedData]);
+
+  const handleSuggestVocabulary = useCallback(async () => {
+    setIsSuggesting(true);
+    try {
+      await suggestVocabulary(suggestCount);
+    } finally {
+      setIsSuggesting(false);
+    }
+  }, [suggestVocabulary, suggestCount]);
 
   const handleSelectionChange = useCallback(() => {
     const selectionObj = window.getSelection();
@@ -1158,6 +1177,7 @@ function AdaptedText() {
                     <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
                       <li>{t("reading.adaptedText.help.features.edit")}</li>
                       <li>{t("reading.adaptedText.help.features.highlight")}</li>
+                      <li>{t("reading.adaptedText.help.features.suggestVocabulary")}</li>
                       <li>{t("reading.adaptedText.help.features.tts")}</li>
                       <li>{t("reading.adaptedText.help.features.sentenceAnalysis")}</li>
                       <li>{t("reading.adaptedText.help.features.paragraphNav")}</li>
@@ -1299,6 +1319,44 @@ function AdaptedText() {
                   </p>
                 </div>
               )}
+
+              {/* AI vocabulary suggestion */}
+              <div className="mb-4 flex flex-wrap items-center gap-2 p-3 bg-muted/50 rounded-md">
+                <Wand2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-sm text-muted-foreground mr-1">
+                  {t("reading.adaptedText.suggestLabel")}
+                </span>
+                <Select
+                  value={String(suggestCount)}
+                  onValueChange={(v) => setSuggestCount(Number(v))}
+                  disabled={isSuggesting}
+                >
+                  <SelectTrigger className="w-[80px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 20, 30, 40, 50].map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  onClick={handleSuggestVocabulary}
+                  disabled={isSuggesting}
+                >
+                  {isSuggesting ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-4 w-4" />
+                  )}
+                  {isSuggesting
+                    ? t("reading.adaptedText.suggesting")
+                    : t("reading.adaptedText.suggestButton")}
+                </Button>
+              </div>
 
               {/* Vocabulary list chips */}
               {highlightedWords.length > 0 && (

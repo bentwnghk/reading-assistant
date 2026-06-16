@@ -467,7 +467,49 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 - Include ALL highlighted words in the response.
 - Maintain the same order as the highlighted words list.
 
-**Respond with ONLY the JSON array, no markdown, no code blocks.`;
+  **Respond with ONLY the JSON array, no markdown, no code blocks.`;
+}
+
+export function suggestVocabularyPrompt(age: number, text: string, count: number) {
+  const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "junior secondary" : "senior secondary/DSE";
+
+  const levelGuidance = age <= 11 ? `
+**For a ${age}-year-old primary student (ages 8-11):**
+- The student knows only very common everyday words (A1-A2 level).
+- Select challenging words, useful phrases, collocations, and idioms that appear in the text.
+- Include multi-word phrases (e.g. "look forward to", "in spite of") when they are worth learning.
+- Do NOT include extremely basic words the student certainly knows (e.g. "the", "go", "big").
+` : age <= 15 ? `
+**For a ${age}-year-old junior secondary student (ages 12-15):**
+- The student knows common everyday and early academic words (up to B1 level).
+- Focus on B2+ vocabulary, abstract concepts, figurative language, and useful phrases/idioms.
+- Include multi-word expressions when they are worth learning.
+- Do NOT include words a typical 12-15 year old already knows.
+` : `
+**For a ${age}-year-old senior secondary/DSE student (ages 16-18):**
+- The student has solid command of everyday and academic English (up to B2 level).
+- Focus on advanced (C1-C2) vocabulary, low-frequency academic words, nuanced expressions, and idioms.
+- Include multi-word expressions when they are worth learning.
+- Do NOT include words a typical senior secondary student already knows.
+`;
+
+  return `You are an expert English reading teacher for Hong Kong students. Identify exactly **${count}** words and/or phrases from the text below that a ${age}-year-old ${schoolLevel} student is unlikely to already know, and that are therefore worth learning.
+
+<text>
+${text}
+</text>
+${levelGuidance}
+**Selection rules:**
+- Return AT MOST ${count} items. If the text contains fewer than ${count} genuinely challenging items, return fewer — never pad the list with easy words.
+- Prefer items in order of their first appearance in the text.
+- Each item MUST be copied **verbatim** from the text (same words, same form). Do not lemmatize, inflect, or rephrase.
+- Single words and multi-word phrases are both allowed.
+- Each item should be distinct and independently worth learning.
+
+**Output format:**
+Respond with ONLY a valid JSON array of strings. No markdown, no code blocks, no commentary.
+
+["first item", "second item", "third item"]`;
 }
 
 export function analyzeSentencePrompt(age: number, sentence: string, context: string) {
