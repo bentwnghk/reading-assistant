@@ -354,7 +354,7 @@ export function LandingPage() {
         </motion.button>
       </motion.div>
 
-      {/* Why You'll Love It - Glassmorphism Grid */}
+      {/* Learning Reimagined - Glassmorphism Grid */}
       <AnimatedSection className="relative z-10 max-w-7xl mx-auto px-6 py-24">
         <motion.div variants={sectionTitleVariants} className="flex items-center gap-3 mb-12">
           <Star className="h-6 w-6 text-amber-500" />
