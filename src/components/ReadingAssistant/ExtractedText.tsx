@@ -3,12 +3,14 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } fr
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { Plus, Volume2, Loader2, Brain } from "lucide-react";
+import { toast } from "sonner";
 import { generateText } from "ai";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
+import { parseError } from "@/utils/error";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -224,7 +226,15 @@ function ExtractedText() {
 
       if (!response.ok) {
         const errText = await response.text();
-        throw new Error(`TTS request failed (${response.status}): ${errText}`);
+        let errorMsg = `TTS request failed (${response.status})`;
+        try {
+          const parsed = JSON.parse(errText);
+          if (parsed.error?.status && parsed.error?.message) {
+            errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
+          }
+        } catch {}
+        toast.error(errorMsg);
+        return;
       }
 
       const audioBuffer = await response.arrayBuffer();
@@ -257,7 +267,7 @@ function ExtractedText() {
       setSelection(null);
       selectionObj?.removeAllRanges();
     } catch (error) {
-      console.error("TTS error:", error);
+      toast.error(parseError(error));
     } finally {
       setIsTTSLoading(false);
     }
@@ -299,7 +309,7 @@ function ExtractedText() {
       const { id: sessionId } = useReadingStore.getState();
       logActivity("sentence_analyze", { sessionId: sessionId || undefined });
     } catch (error) {
-      console.error("Analysis error:", error);
+      toast.error(parseError(error));
     } finally {
       setIsAnalysisLoading(false);
     }

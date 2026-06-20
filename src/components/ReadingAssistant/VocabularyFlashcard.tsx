@@ -2,12 +2,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Shuffle, RotateCcw, Volume2, Loader2, Target, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { logActivity } from "@/utils/activityLogger";
 import { useSettingStore } from "@/store/setting";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
+import { parseError } from "@/utils/error";
 import { cn } from "@/utils/style";
 import { sortGlossaryByPriority } from "@/utils/vocabulary";
 
@@ -213,7 +215,15 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         });
         if (!response.ok) {
           const errText = await response.text();
-          throw new Error(`TTS request failed (${response.status}): ${errText}`);
+          let errorMsg = `TTS request failed (${response.status})`;
+          try {
+            const parsed = JSON.parse(errText);
+            if (parsed.error?.status && parsed.error?.message) {
+              errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
+            }
+          } catch {}
+          toast.error(errorMsg);
+          return;
         }
         const audioBuffer = await response.arrayBuffer();
         const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
@@ -232,7 +242,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
           audio.load();
         });
       } catch (error) {
-        console.error("TTS error:", error);
+        toast.error(parseError(error));
       } finally {
         setIsTTSLoading(false);
       }

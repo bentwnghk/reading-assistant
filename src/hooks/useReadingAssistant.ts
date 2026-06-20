@@ -879,6 +879,9 @@ Guidelines:
         system: readingTutorSystemPrompt(studentAge, extractedText, useChinese),
         messages,
         experimental_transform: smoothTextStream(smoothTextStreamType),
+        onError: (error) => {
+          handleError(error);
+        },
       });
 
       for await (const textPart of result.textStream) {

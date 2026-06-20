@@ -37,6 +37,7 @@ import {
   PageOrientation,
 } from "docx";
 import { saveAs } from "file-saver";
+import { toast } from "sonner";
 import { generateText } from "ai";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -64,6 +65,7 @@ import { useSettingStore } from "@/store/setting";
 import { useGlobalStore } from "@/store/global";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
+import { parseError } from "@/utils/error";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
@@ -840,9 +842,15 @@ function AdaptedText() {
 
         if (!response.ok) {
           const errText = await response.text();
-          throw new Error(
-            `TTS request failed (${response.status}): ${errText}`
-          );
+          let errorMsg = `TTS request failed (${response.status})`;
+          try {
+            const parsed = JSON.parse(errText);
+            if (parsed.error?.status && parsed.error?.message) {
+              errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
+            }
+          } catch {}
+          toast.error(errorMsg);
+          return;
         }
 
         const audioBuffer = await response.arrayBuffer();
@@ -875,7 +883,7 @@ function AdaptedText() {
         setSelection(null);
         selectionObj?.removeAllRanges();
       } catch (error) {
-        console.error("TTS error:", error);
+        toast.error(parseError(error));
       } finally {
         setIsTTSLoading(false);
       }
@@ -928,7 +936,7 @@ function AdaptedText() {
         const { id: sessionId } = useReadingStore.getState();
         logActivity("sentence_analyze", { sessionId: sessionId || undefined });
       } catch (error) {
-        console.error("Analysis error:", error);
+        toast.error(parseError(error));
       } finally {
         setIsAnalysisLoading(false);
       }
@@ -1097,7 +1105,18 @@ function AdaptedText() {
           headers,
           body: JSON.stringify({ model: "tts-1", input: word, voice: ttsVoice, response_format: "mp3", speed: ttsPlaybackRate }),
         });
-        if (!response.ok) throw new Error(`TTS failed (${response.status})`);
+        if (!response.ok) {
+          const errText = await response.text();
+          let errorMsg = `TTS failed (${response.status})`;
+          try {
+            const parsed = JSON.parse(errText);
+            if (parsed.error?.status && parsed.error?.message) {
+              errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
+            }
+          } catch {}
+          toast.error(errorMsg);
+          return;
+        }
         const audioBuffer = await response.arrayBuffer();
         const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -1111,7 +1130,7 @@ function AdaptedText() {
           audio.load();
         });
       } catch (error) {
-        console.error("Glossary TTS error:", error);
+        toast.error(parseError(error));
       } finally {
         setIsTTSLoading(false);
       }

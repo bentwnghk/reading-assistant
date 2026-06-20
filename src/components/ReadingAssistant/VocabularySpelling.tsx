@@ -25,6 +25,7 @@ import {
   Zap,
   Heart,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
 import { useReadingStore } from "@/store/reading";
@@ -32,6 +33,7 @@ import { useHistoryStore } from "@/store/history";
 import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
+import { parseError } from "@/utils/error";
 import { cn } from "@/utils/style";
 import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
 
@@ -377,7 +379,16 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
       });
 
       if (!response.ok) {
-        throw new Error(`TTS request failed (${response.status})`);
+        const errText = await response.text();
+        let errorMsg = `TTS request failed (${response.status})`;
+        try {
+          const parsed = JSON.parse(errText);
+          if (parsed.error?.status && parsed.error?.message) {
+            errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
+          }
+        } catch {}
+        toast.error(errorMsg);
+        return;
       }
 
       const audioBuffer = await response.arrayBuffer();
@@ -407,7 +418,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
         audio.load();
       });
     } catch (error) {
-      console.error("TTS error:", error);
+      toast.error(parseError(error));
     } finally {
       setIsTTSLoading(false);
     }

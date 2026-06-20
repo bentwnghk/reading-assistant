@@ -9,16 +9,30 @@ interface GeminiError {
   };
 }
 
+function formatApiCallError(error: APICallError): string {
+  if (error.responseBody) {
+    try {
+      const response = JSON.parse(error.responseBody) as GeminiError;
+      if (response.error?.status && response.error?.message) {
+        return `[${response.error.status}]: ${response.error.message}`;
+      }
+    } catch {
+      // responseBody is not valid JSON; fall through
+    }
+  }
+  return `[${error.name}]: ${error.message}`;
+}
+
 export function parseError(err: unknown): string {
   let errorMessage: string = "Unknown Error";
-  if (isString(err)) errorMessage = err;
-  if (isObject(err)) {
+  if (isString(err)) {
+    errorMessage = err;
+  } else if (err instanceof Error) {
+    errorMessage = formatApiCallError(err as APICallError);
+  } else if (isObject(err)) {
     const { error } = err as { error: APICallError };
-    if (error.responseBody) {
-      const response = JSON.parse(error.responseBody) as GeminiError;
-      errorMessage = `[${response.error.status}]: ${response.error.message}`;
-    } else {
-      errorMessage = `[${error.name}]: ${error.message}`;
+    if (error) {
+      errorMessage = formatApiCallError(error);
     }
   }
   return errorMessage;
