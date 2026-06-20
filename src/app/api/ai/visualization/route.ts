@@ -174,10 +174,12 @@ function extractFromOpenAIResponse(data: any): string | null {
 
 const ADMIN_ROLES = new Set(["admin", "super-admin"]);
 
-const FORBIDDEN_RESPONSE = NextResponse.json(
-  { error: { code: 403, message: "No permissions", status: "FORBIDDEN" } },
-  { status: 403 }
-);
+function forbiddenResponse() {
+  return NextResponse.json(
+    { error: { code: 403, message: "No permissions", status: "FORBIDDEN" } },
+    { status: 403 }
+  );
+}
 
 async function verifyModeAccess(
   userId: string,
@@ -250,7 +252,7 @@ export async function GET(request: NextRequest) {
     const signature = request.headers.get("x-access-signature") || undefined;
     const hasAccess = await verifyModeAccess(session.user.id, mode, signature);
     if (!hasAccess) {
-      return FORBIDDEN_RESPONSE;
+      return forbiddenResponse();
     }
     const isMeterMode = mode === "local";
     const info = await getDailyLimitInfo(session.user.id, session.user.role, isMeterMode);
@@ -282,7 +284,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-access-signature") || undefined;
     const hasAccess = await verifyModeAccess(session.user.id, body.mode, signature);
     if (!hasAccess) {
-      return FORBIDDEN_RESPONSE;
+      return forbiddenResponse();
     }
 
     const isMeterMode = body.mode === "local";
