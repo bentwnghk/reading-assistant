@@ -25,7 +25,7 @@ interface ReadingTutorChatProps {
 function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { chatHistory, addChatMessage, clearChatHistory, extractedText, id: sessionId, docTitle } = useReadingStore();
+  const { chatHistory, addChatMessage, removeChatMessage, clearChatHistory, extractedText, id: sessionId, docTitle } = useReadingStore();
   const { tutorChatSelectedText, setTutorChatSelectedText } = useGlobalStore();
   const { tutorLanguage, update } = useSettingStore();
   const { askTutor } = useReadingAssistant();
@@ -153,6 +153,8 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
         });
         logActivity("ai_tutor_question", { sessionId: sessionId || undefined });
       }
+    } else {
+      removeChatMessage(userMessage.id);
     }
 
     setIsLoading(false);
@@ -216,6 +218,8 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
         });
         logActivity("ai_tutor_question", { sessionId: sessionId || undefined });
       }
+    } else {
+      removeChatMessage(userMessage.id);
     }
 
     setIsLoading(false);

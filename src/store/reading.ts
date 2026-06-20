@@ -250,6 +250,7 @@ interface ReadingActions {
   setSpellingGameBestScore: (score: number) => void;
   incrementFlashcardReviewCount: () => void; // appends Date.now() to flashcardReviewDates
   addChatMessage: (message: ChatMessage) => void;
+  removeChatMessage: (id: string) => void;
   clearChatHistory: () => void;
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
@@ -1020,6 +1021,18 @@ export const useReadingStore = create(
         set((state) => {
           const newState = {
             chatHistory: [...state.chatHistory, message],
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      removeChatMessage: (id) =>
+        set((state) => {
+          const newState = {
+            chatHistory: state.chatHistory.filter((m) => m.id !== id),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });

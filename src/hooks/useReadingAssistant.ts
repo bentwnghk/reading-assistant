@@ -335,8 +335,9 @@ function useReadingAssistant() {
       }
       setAdaptedText(text);
 
-      // Log for achievements
-      logActivity("adapted_text_generate", { sessionId: readingStore.id || undefined });
+      if (text.trim()) {
+        logActivity("adapted_text_generate", { sessionId: readingStore.id || undefined });
+      }
 
       setStoreStatus("idle");
       setStatus("idle");
@@ -392,8 +393,9 @@ function useReadingAssistant() {
       }
       setSimplifiedText(text);
 
-      // Log for achievements
-      logActivity("simplified_text_generate", { sessionId: readingStore.id || undefined });
+      if (text.trim()) {
+        logActivity("simplified_text_generate", { sessionId: readingStore.id || undefined });
+      }
 
       setStoreStatus("idle");
       setStatus("idle");
@@ -447,8 +449,9 @@ function useReadingAssistant() {
       }
       setMindMap(text);
 
-      // Log for achievements
-      logActivity("mindmap_generate", { sessionId: readingStore.id || undefined });
+      if (text.trim()) {
+        logActivity("mindmap_generate", { sessionId: readingStore.id || undefined });
+      }
 
       setStoreStatus("idle");
       setStatus("idle");
