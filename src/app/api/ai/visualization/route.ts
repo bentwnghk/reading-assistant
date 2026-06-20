@@ -4,8 +4,10 @@ import { generateVisualizationPrompt } from "@/constants/readingPrompts";
 import { multiApiKeyPolling } from "@/utils/model";
 import { getPool } from "@/lib/db";
 import { verifySubscriptionAccess } from "@/lib/subscription";
+import { verifySignature, parseAccessPasswords } from "@/utils/signature";
 
 const ZENMUX_API_KEY = process.env.ZENMUX_API_KEY || "";
+const ACCESS_PASSWORDS = parseAccessPasswords(process.env.ACCESS_PASSWORD || "");
 
 const DAILY_LIMIT_SUBSCRIPTION = parseInt(
   process.env.VISUALIZATION_DAILY_LIMIT_SUBSCRIPTION || "2",
@@ -172,6 +174,33 @@ function extractFromOpenAIResponse(data: any): string | null {
 
 const ADMIN_ROLES = new Set(["admin", "super-admin"]);
 
+const FORBIDDEN_RESPONSE = NextResponse.json(
+  { error: { code: 403, message: "No permissions", status: "FORBIDDEN" } },
+  { status: 403 }
+);
+
+async function verifyModeAccess(
+  userId: string,
+  mode: string | undefined,
+  signature: string | undefined
+): Promise<boolean> {
+  if (mode === "subscription") {
+    try {
+      return await verifySubscriptionAccess(userId);
+    } catch {
+      return false;
+    }
+  }
+  if (mode === "proxy") {
+    if (!signature || ACCESS_PASSWORDS.length === 0) return false;
+    return verifySignature(signature, ACCESS_PASSWORDS, Date.now());
+  }
+  if (mode === "local") {
+    return true;
+  }
+  return false;
+}
+
 async function getDailyLimitInfo(
   userId: string,
   role?: string,
@@ -217,7 +246,13 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const isMeterMode = searchParams.get("mode") === "local";
+    const mode = searchParams.get("mode") || undefined;
+    const signature = request.headers.get("x-access-signature") || undefined;
+    const hasAccess = await verifyModeAccess(session.user.id, mode, signature);
+    if (!hasAccess) {
+      return FORBIDDEN_RESPONSE;
+    }
+    const isMeterMode = mode === "local";
     const info = await getDailyLimitInfo(session.user.id, session.user.role, isMeterMode);
     return NextResponse.json(info);
   } catch (error) {
@@ -243,6 +278,12 @@ export async function POST(request: NextRequest) {
       useChinese?: boolean;
       mode?: string;
     };
+
+    const signature = request.headers.get("x-access-signature") || undefined;
+    const hasAccess = await verifyModeAccess(session.user.id, body.mode, signature);
+    if (!hasAccess) {
+      return FORBIDDEN_RESPONSE;
+    }
 
     const isMeterMode = body.mode === "local";
     const limitInfo = await getDailyLimitInfo(session.user.id, session.user.role, isMeterMode);

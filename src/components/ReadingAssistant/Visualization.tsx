@@ -10,13 +10,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
+import { generateSignature } from "@/utils/signature";
 
 function Visualization() {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const userRole = session?.user?.role || "student";
   const isRateLimitedRole = userRole === "student" || userRole === "teacher";
-  const { mode } = useSettingStore();
+  const { mode, accessPassword } = useSettingStore();
   const isMeterMode = mode === "local";
   const { extractedText, visualizationImage, docTitle, source } = useReadingStore();
   const { status, generateVisualization } = useReadingAssistant();
@@ -31,13 +32,17 @@ function Visualization() {
   const fetchRemaining = useCallback(async () => {
     if (!session?.user?.id || isMeterMode || !isRateLimitedRole) return;
     try {
-      const res = await fetch(`/api/ai/visualization?mode=${mode}`);
+      const headers: Record<string, string> = {};
+      if (mode === "proxy") {
+        headers["x-access-signature"] = generateSignature(accessPassword, Date.now());
+      }
+      const res = await fetch(`/api/ai/visualization?mode=${mode}`, { headers });
       if (res.ok) {
         const data = await res.json();
         setRemaining(data.remaining);
       }
     } catch {}
-  }, [session?.user?.id, isMeterMode, isRateLimitedRole]);
+  }, [session?.user?.id, isMeterMode, isRateLimitedRole, mode, accessPassword]);
 
   useEffect(() => {
     fetchRemaining();

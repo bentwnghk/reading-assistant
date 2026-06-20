@@ -29,6 +29,7 @@ import {
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
 import { logActivity } from "@/utils/activityLogger";
+import { generateSignature } from "@/utils/signature";
 
 function smoothTextStream(type: "character" | "word" | "line") {
   return smoothStream({
@@ -470,19 +471,47 @@ function useReadingAssistant() {
       return null;
     }
 
+    const { mode, accessPassword, provider, openAIApiKey, openaicompatibleApiKey } = useSettingStore.getState();
+
+    if (mode === "local") {
+      const hasKey =
+        (provider === "openai" && openAIApiKey.length > 0) ||
+        (provider === "openaicompatible" && openaicompatibleApiKey.length > 0);
+      if (!hasKey) {
+        toast.error("Please configure your API key in settings first.");
+        return null;
+      }
+    }
+
     setStoreStatus("visualization");
     setStatus("visualization");
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (mode === "proxy") {
+        headers["x-access-signature"] = generateSignature(accessPassword, Date.now());
+      }
+
       const response = await fetch("/api/ai/visualization", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: extractedText, studentAge, useChinese, mode: useSettingStore.getState().mode }),
+        headers,
+        body: JSON.stringify({ text: extractedText, studentAge, useChinese, mode }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        throw new Error(errorData.error || `Request failed (${response.status})`);
+        const err = errorData.error;
+        const errorMsg =
+          typeof err === "string"
+            ? err
+            : err && typeof err === "object" && "status" in err && "message" in err
+              ? `[${err.status}]: ${err.message}`
+              : `Request failed (${response.status})`;
+        toast.error(errorMsg);
+        setError(errorMsg);
+        setStoreStatus("error");
+        setStatus("idle");
+        return null;
       }
 
       const data = await response.json();
