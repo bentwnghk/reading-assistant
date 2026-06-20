@@ -555,6 +555,11 @@ Analyze why this sentence might be difficult for this student to understand. Str
 ## 學習建議
 [2-3 practical tips for understanding similar sentences in the future - make them actionable and age-appropriate]
 
+CRITICAL RULES:
+- Your response MUST start EXACTLY with the bolded sentence "**${sentence}**" as the very first line.
+- Do NOT include any greeting, acknowledgment, preamble, or conversational filler before it (e.g., no "好的", "以下是", "我將分析", etc.).
+- Output the analysis sections immediately after the bolded sentence.
+
 Keep explanations age-appropriate and use clear, simple language throughout. Respond entirely in Traditional Chinese (繁體中文).`;
 }
 

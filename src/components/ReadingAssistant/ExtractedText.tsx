@@ -11,6 +11,7 @@ import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { parseError } from "@/utils/error";
+import { sanitizeSentenceAnalysis } from "@/utils/text";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -301,7 +302,7 @@ function ExtractedText() {
         prompt: analyzeSentencePrompt(studentAge, sentence, context),
       });
 
-      setSentenceAnalysis(sentence, result.text);
+      setSentenceAnalysis(sentence, sanitizeSentenceAnalysis(result.text, sentence));
       setActiveSentence(sentence);
       setSelection(null);
       selectionObj?.removeAllRanges();

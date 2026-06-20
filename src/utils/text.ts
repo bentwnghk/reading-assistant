@@ -140,3 +140,38 @@ export class ThinkTagStreamProcessor {
     this.hasSkippedThinkBlock = false;
   }
 }
+
+export function sanitizeSentenceAnalysis(
+  analysis: string,
+  sentence: string
+): string {
+  const trimmed = analysis.trim();
+  if (!trimmed) return trimmed;
+
+  const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
+  const normalizedSentence = normalize(sentence);
+
+  const boldRegex = /\*\*([^*]+)\*\*/g;
+  let match: RegExpExecArray | null;
+  while ((match = boldRegex.exec(trimmed)) !== null) {
+    if (normalize(match[1]) === normalizedSentence) {
+      return trimmed.slice(match.index).trim();
+    }
+  }
+
+  const firstBold = trimmed.search(/\*\*/);
+  const firstHeading = trimmed.search(/^##\s/m);
+  let cutIndex = -1;
+  if (firstBold >= 0 && firstHeading >= 0) {
+    cutIndex = Math.min(firstBold, firstHeading);
+  } else if (firstBold >= 0) {
+    cutIndex = firstBold;
+  } else if (firstHeading >= 0) {
+    cutIndex = firstHeading;
+  }
+  if (cutIndex > 0) {
+    return trimmed.slice(cutIndex).trim();
+  }
+
+  return trimmed;
+}

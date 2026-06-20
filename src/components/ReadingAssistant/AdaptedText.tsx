@@ -66,6 +66,7 @@ import { useGlobalStore } from "@/store/global";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { parseError } from "@/utils/error";
+import { sanitizeSentenceAnalysis } from "@/utils/text";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
@@ -928,7 +929,7 @@ function AdaptedText() {
           prompt: analyzeSentencePrompt(studentAge, sentence, context),
         });
 
-        setSentenceAnalysis(sentence, result.text);
+        setSentenceAnalysis(sentence, sanitizeSentenceAnalysis(result.text, sentence));
         setActiveSentence(sentence);
         setSelection(null);
         selectionObj?.removeAllRanges();
