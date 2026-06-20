@@ -1197,6 +1197,7 @@ function AdaptedText() {
                     <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
                       <li>{t("reading.adaptedText.help.features.edit")}</li>
                       <li>{t("reading.adaptedText.help.features.highlight")}</li>
+                      <li>{t("reading.adaptedText.help.features.glossaryBadge")}</li>
                       <li>{t("reading.adaptedText.help.features.suggestVocabulary")}</li>
                       <li>{t("reading.adaptedText.help.features.tts")}</li>
                       <li>{t("reading.adaptedText.help.features.sentenceAnalysis")}</li>
@@ -1331,14 +1332,6 @@ function AdaptedText() {
                   💡 {t("reading.extractedText.highlightTip")}
                 </p>
               </div>
-
-              {glossary.length > 0 && (
-                <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md">
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
-                    {t("reading.extractedText.glossaryHint")}
-                  </p>
-                </div>
-              )}
 
               {/* AI vocabulary suggestion */}
               <div className="mb-4 flex flex-wrap items-center gap-2 p-3 bg-muted/50 rounded-md">
