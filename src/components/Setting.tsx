@@ -262,23 +262,23 @@ function Setting({ open, onClose }: SettingProps) {
         <Form {...form}>
           <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="w-full">
-                <TabsTrigger value="general" className="flex-1 gap-1">
-                  <Settings className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t("setting.tabGeneral")}</span>
+              <TabsList className="w-full h-auto">
+                <TabsTrigger value="general" className="flex-1 gap-1 whitespace-normal">
+                  <Settings className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("setting.tabGeneral")}</span>
                 </TabsTrigger>
-                <TabsTrigger value="models" className="flex-1 gap-1">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t("setting.tabModels")}</span>
+                <TabsTrigger value="models" className="flex-1 gap-1 whitespace-normal">
+                  <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("setting.tabModels")}</span>
                 </TabsTrigger>
-                <TabsTrigger value="tts" className="flex-1 gap-1">
-                  <Volume2 className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{t("setting.tabTTS")}</span>
+                <TabsTrigger value="tts" className="flex-1 gap-1 whitespace-normal">
+                  <Volume2 className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("setting.tabTTS")}</span>
                 </TabsTrigger>
                 {isAuthenticated && (
-                  <TabsTrigger value="notifications" className="flex-1 gap-1">
-                    <Bell className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{t("reminder.tabNotifications")}</span>
+                  <TabsTrigger value="notifications" className="flex-1 gap-1 whitespace-normal">
+                    <Bell className="h-3.5 w-3.5 shrink-0" />
+                    <span>{t("reminder.tabNotifications")}</span>
                   </TabsTrigger>
                 )}
               </TabsList>
