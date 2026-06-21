@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { BarChart3, Loader2, Eye, EyeOff } from "lucide-react";
+import { BarChart3, Loader2, Eye, EyeOff, FileText, FileEdit, FileMinus, Gauge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { analyzeTextDifficulty, getCefrBadgeColor } from "@/utils/textDifficulty";
@@ -170,29 +170,34 @@ export default function TextDifficultyAnalyzer() {
             disabled={!hasAnyText || isAnalyzing || !showCards}
             size="sm"
             variant="outline"
+            className="gap-1"
           >
             {isAnalyzing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 <span>{t("reading.difficulty.analyzing")}</span>
               </>
             ) : (
-              <span>{t("reading.difficulty.analyze")}</span>
+              <>
+                <Gauge className="h-3 w-3" />
+                <span>{t("reading.difficulty.analyze")}</span>
+              </>
             )}
           </Button>
           <Button
             onClick={() => setShowCards(!showCards)}
             size="sm"
             variant={showCards ? "default" : "outline"}
+            className="gap-1"
           >
             {showCards ? (
               <>
-                <EyeOff className="h-3 w-3 mr-1" />
+                <EyeOff className="h-3 w-3" />
                 {t("reading.difficulty.hideCards")}
               </>
             ) : (
               <>
-                <Eye className="h-3 w-3 mr-1" />
+                <Eye className="h-3 w-3" />
                 {t("reading.difficulty.showCards")}
               </>
             )}
@@ -231,6 +236,7 @@ export default function TextDifficultyAnalyzer() {
             onClick={() => setHighlightTextType("original")}
             disabled={!extractedText}
           >
+            <FileText className="h-3 w-3 mr-1" />
             {t("reading.difficulty.original")}
           </Button>
           <Button
@@ -239,6 +245,7 @@ export default function TextDifficultyAnalyzer() {
             onClick={() => setHighlightTextType("adapted")}
             disabled={!adaptedText}
           >
+            <FileEdit className="h-3 w-3 mr-1" />
             {t("reading.difficulty.adapted")}
           </Button>
           <Button
@@ -247,6 +254,7 @@ export default function TextDifficultyAnalyzer() {
             onClick={() => setHighlightTextType("simplified")}
             disabled={!simplifiedText}
           >
+            <FileMinus className="h-3 w-3 mr-1" />
             {t("reading.difficulty.simplified")}
           </Button>
         </div>

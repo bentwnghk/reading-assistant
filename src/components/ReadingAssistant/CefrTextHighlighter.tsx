@@ -119,15 +119,16 @@ export default function CefrTextHighlighter({
           onClick={onToggle}
           size="sm"
           variant={showHighlighter ? "default" : "outline"}
+          className="gap-1"
         >
           {showHighlighter ? (
             <>
-              <X className="h-3 w-3 mr-1" />
+              <X className="h-3 w-3" />
               {t("reading.difficulty.hideHighlight")}
             </>
           ) : (
             <>
-              <Highlighter className="h-3 w-3 mr-1" />
+              <Highlighter className="h-3 w-3" />
               {t("reading.difficulty.showHighlight")}
             </>
           )}
