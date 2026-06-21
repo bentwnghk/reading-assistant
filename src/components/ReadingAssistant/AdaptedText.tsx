@@ -433,6 +433,8 @@ function AdaptedText() {
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
+  const [vocabListOpen, setVocabListOpen] = useState(true);
+  const [analyzedSentencesOpen, setAnalyzedSentencesOpen] = useState(true);
   const isTouchDeviceRef = useRef(false);
   const sentenceListRef = useRef<string[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -1393,56 +1395,84 @@ function AdaptedText() {
               {/* Vocabulary list chips */}
               {highlightedWords.length > 0 && (
                 <div className="mb-4 p-3 bg-muted/50 rounded-md">
-                  <p className="text-sm font-medium mb-2">
-                    {t("reading.extractedText.highlightedWords")} (
-                    {highlightedWords.length}):
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {highlightedWords.map((word) => (
-                      <span
-                        key={word}
-                        className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-sm cursor-pointer hover:opacity-75"
-                        onClick={() => removeHighlightedWord(word)}
-                        title={t("reading.extractedText.clickToRemove")}
-                      >
-                        {word}
-                      </span>
-                    ))}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setVocabListOpen((v) => !v)}
+                    className="flex w-full items-center justify-between text-sm font-medium mb-2"
+                  >
+                    <span>
+                      {t("reading.extractedText.highlightedWords")} (
+                      {highlightedWords.length}):
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        vocabListOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {vocabListOpen && (
+                    <div className="flex flex-wrap gap-2">
+                      {highlightedWords.map((word) => (
+                        <span
+                          key={word}
+                          className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded text-sm cursor-pointer hover:opacity-75"
+                          onClick={() => removeHighlightedWord(word)}
+                          title={t("reading.extractedText.clickToRemove")}
+                        >
+                          {word}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Analyzed sentences chips */}
               {analyzedSentencesKeys.length > 0 && (
                 <div className="mb-4 p-3 bg-muted/50 rounded-md">
-                  <p className="text-sm font-medium mb-2">
-                    {t("reading.extractedText.analyzedSentences")} (
-                    {analyzedSentencesKeys.length}):
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {analyzedSentencesKeys.map((key) => {
-                      const item = analyzedSentences[key];
-                      const displayText =
-                        item.sentence.length > 40
-                          ? item.sentence.slice(0, 40) + "..."
-                          : item.sentence;
-                      return (
-                        <span
-                          key={key}
-                          className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm cursor-pointer hover:opacity-75 border-b-2 border-blue-500 dark:border-blue-400"
-                          onClick={() => {
-                            if (activeSentence === item.sentence) {
-                              setActiveSentence(null);
-                            }
-                            removeSentenceAnalysis(item.sentence);
-                          }}
-                          title={t("reading.extractedText.clickToRemoveAnalysis")}
-                        >
-                          {displayText}
-                        </span>
-                      );
-                    })}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAnalyzedSentencesOpen((v) => !v)}
+                    className="flex w-full items-center justify-between text-sm font-medium mb-2"
+                  >
+                    <span>
+                      {t("reading.extractedText.analyzedSentences")} (
+                      {analyzedSentencesKeys.length}):
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        analyzedSentencesOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {analyzedSentencesOpen && (
+                    <div className="flex flex-wrap gap-2">
+                      {analyzedSentencesKeys.map((key) => {
+                        const item = analyzedSentences[key];
+                        const displayText =
+                          item.sentence.length > 40
+                            ? item.sentence.slice(0, 40) + "..."
+                            : item.sentence;
+                        return (
+                          <span
+                            key={key}
+                            className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm cursor-pointer hover:opacity-75 border-b-2 border-blue-500 dark:border-blue-400"
+                            onClick={() => {
+                              if (activeSentence === item.sentence) {
+                                setActiveSentence(null);
+                              }
+                              removeSentenceAnalysis(item.sentence);
+                            }}
+                            title={t(
+                              "reading.extractedText.clickToRemoveAnalysis"
+                            )}
+                          >
+                            {displayText}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
