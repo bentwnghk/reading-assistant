@@ -16,6 +16,7 @@ import {
   Check,
   X,
   Wand2,
+  ChevronDown,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
 import GrammarTextHighlighter from "./GrammarTextHighlighter";
@@ -41,9 +42,15 @@ import { toast } from "sonner";
 import { generateText } from "ai";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -1225,33 +1232,39 @@ function AdaptedText() {
             </PopoverContent>
           </Popover>
         </h3>
-        <div className="flex flex-wrap items-center justify-end gap-4">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="include-glossary"
-              checked={includeGlossary}
-              onCheckedChange={setIncludeGlossary}
-              disabled={glossary.length === 0}
-            />
-            <Label htmlFor="include-glossary" className="text-sm cursor-pointer">
-              {t("reading.extractedText.includeGlossary")}
-            </Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              id="include-sentence-analysis"
-              checked={includeSentenceAnalysis}
-              onCheckedChange={setIncludeSentenceAnalysis}
-              disabled={Object.keys(analyzedSentences).length === 0}
-            />
-            <Label htmlFor="include-sentence-analysis" className="text-sm cursor-pointer">
-              {t("reading.extractedText.includeSentenceAnalysis")}
-            </Label>
-          </div>
-          <Button onClick={handleDownloadWord} variant="outline" size="sm">
-            <FileDown className="h-4 w-4" />
-            <span>{t("reading.extractedText.downloadWord")}</span>
-          </Button>
+        <div className="flex flex-wrap items-center justify-end gap-2 ml-auto">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("reading.extractedText.downloadWord")}</span>
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuCheckboxItem
+                checked={includeGlossary}
+                onCheckedChange={setIncludeGlossary}
+                disabled={glossary.length === 0}
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("reading.extractedText.includeGlossary")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={includeSentenceAnalysis}
+                onCheckedChange={setIncludeSentenceAnalysis}
+                disabled={Object.keys(analyzedSentences).length === 0}
+                onSelect={(e) => e.preventDefault()}
+              >
+                {t("reading.extractedText.includeSentenceAnalysis")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleDownloadWord}>
+                <FileDown className="h-4 w-4 mr-1" />
+                {t("reading.extractedText.exportDownload")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
