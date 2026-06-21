@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import {
   BookOpen,
   LoaderCircle,
@@ -1350,7 +1350,15 @@ function AdaptedText() {
               {/* Tip banner */}
               <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-800 rounded-md">
                 <p className="text-sm text-green-800 dark:text-green-200">
-                  💡 {t("reading.extractedText.highlightTip")}
+                  💡{" "}
+                  <Trans
+                    i18nKey="reading.extractedText.highlightTip"
+                    components={[
+                      <Brain key="brain" className="inline h-3.5 w-3.5 align-text-bottom" />,
+                      <Volume2 key="volume" className="inline h-3.5 w-3.5 align-text-bottom" />,
+                      <Plus key="plus" className="inline h-3.5 w-3.5 align-text-bottom" />,
+                    ]}
+                  />
                 </p>
               </div>
 

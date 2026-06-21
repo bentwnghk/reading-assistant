@@ -410,7 +410,7 @@
       "clickToRemove": "Click to remove word",
       "analyzedSentences": "Analyzed Sentences",
       "clickToRemoveAnalysis": "Click to remove sentence",
-      "highlightTip": "Select a word or phrase in the text below, then click [+ Add to vocabulary]; or select a sentence, then click [🧠 Analyze sentence]; or select any vocabulary, sentence, or paragraph, then click [🔊 Read aloud].",
+      "highlightTip": "Select a word or phrase in the text below, then click [<2/> Add to vocabulary]; or select a sentence, then click [<0/> Analyze sentence]; or select any vocabulary, sentence, or paragraph, then click [<1/> Read aloud].",
       "downloadWord": "Download Word",
       "includeGlossary": "Include Glossary",
       "includeSentenceAnalysis": "Include Sentence Analysis",
