@@ -80,7 +80,7 @@
       },
       "roles": {
         "title": "For Schools & Teachers",
-        "intro": "Complete user management for classrooms and schools! Organize students into classes, assign teachers, track learning progress in real-time, and export detailed reports. Three roles with tailored permissions:",
+        "intro": "Complete user management for classrooms and schools! Organize students into classes, assign teachers, track learning progress in real-time, and export detailed reports.",
         "admin": {
           "title": "👑 Admin",
           "manageSchools": "Manage schools",
