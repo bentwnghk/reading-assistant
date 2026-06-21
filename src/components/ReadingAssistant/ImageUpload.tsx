@@ -2,7 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
-import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, Plus, Maximize2 } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, Plus, Maximize2, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -217,8 +217,14 @@ function ImageUpload() {
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "upload" | "repository")}>
         <TabsList className="mb-4">
-          <TabsTrigger value="upload">{t("reading.imageUpload.tabUpload")}</TabsTrigger>
-          <TabsTrigger value="repository">{t("reading.imageUpload.tabRepository")}</TabsTrigger>
+          <TabsTrigger value="upload" className="gap-1">
+            <ImageIcon className="h-3.5 w-3.5" />
+            {t("reading.imageUpload.tabUpload")}
+          </TabsTrigger>
+          <TabsTrigger value="repository" className="gap-1">
+            <Library className="h-3.5 w-3.5" />
+            {t("reading.imageUpload.tabRepository")}
+          </TabsTrigger>
         </TabsList>
 
         {/* ── Tab: Upload Image ── */}
