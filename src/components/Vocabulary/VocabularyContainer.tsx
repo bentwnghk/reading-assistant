@@ -373,7 +373,7 @@ function VocabularyContainer() {
             </>
           )}
 
-          <div className="flex gap-1 mb-4 border-b">
+          <div className="flex flex-wrap gap-1 mb-4 border-b">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -386,7 +386,7 @@ function VocabularyContainer() {
                   reviewQueue.length === 0
                 }
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-2 px-3 py-2 sm:px-4 text-sm font-medium transition-colors",
                   "border-b-2 -mb-px",
                   activeTab === tab.key
                     ? "border-primary text-primary"
@@ -400,7 +400,7 @@ function VocabularyContainer() {
                 )}
               >
                 {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>
