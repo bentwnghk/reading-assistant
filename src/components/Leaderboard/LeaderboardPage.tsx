@@ -26,6 +26,10 @@ import {
   Gamepad2,
   Dices,
   BarChart3,
+  Users,
+  School,
+  Globe,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -185,6 +189,11 @@ export function LeaderboardPage() {
   }, [tab, fetchPersonal]);
 
   const scopes: LeaderboardScope[] = ["class", "school", "global"];
+  const scopeIcons: Record<LeaderboardScope, LucideIcon> = {
+    class: Users,
+    school: School,
+    global: Globe,
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -303,20 +312,24 @@ export function LeaderboardPage() {
         <div className="space-y-4">
           {/* Scope selector */}
           <div className="flex gap-2">
-            {scopes.map(s => (
-              <button
-                key={s}
-                onClick={() => setScope(s)}
-                className={cn(
-                  "flex-1 py-1.5 text-xs font-medium rounded-lg border-2 transition-all",
-                  scope === s
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:border-primary/50"
-                )}
-              >
-                {t(`leaderboard.scope.${s}`)}
-              </button>
-            ))}
+            {scopes.map(s => {
+              const ScopeIcon = scopeIcons[s];
+              return (
+                <button
+                  key={s}
+                  onClick={() => setScope(s)}
+                  className={cn(
+                    "flex-1 py-1.5 text-xs font-medium rounded-lg border-2 transition-all flex items-center justify-center gap-1",
+                    scope === s
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  <ScopeIcon className="h-3 w-3 shrink-0" />
+                  {t(`leaderboard.scope.${s}`)}
+                </button>
+              );
+            })}
           </div>
 
           {/* Class filter for teachers and super-admins */}
