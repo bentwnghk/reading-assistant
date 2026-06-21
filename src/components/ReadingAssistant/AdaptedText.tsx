@@ -17,6 +17,9 @@ import {
   X,
   Wand2,
   ChevronDown,
+  FileText,
+  FileEdit,
+  FileMinus,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
 import GrammarTextHighlighter from "./GrammarTextHighlighter";
@@ -1270,14 +1273,16 @@ function AdaptedText() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full">
-          <TabsTrigger value="original" className="flex-1">
+          <TabsTrigger value="original" className="flex-1 gap-1">
+            <FileText className="h-3.5 w-3.5" />
             {t("reading.adaptedText.originalTab")}
           </TabsTrigger>
           <TabsTrigger
             value="adapted"
-            className="flex-1"
+            className="flex-1 gap-1"
             disabled={!adaptedText && !isAdapting}
           >
+            <FileEdit className="h-3.5 w-3.5" />
             <span>{t("reading.adaptedText.adaptedTab")}</span>
             {isAdapting && (
               <LoaderCircle className="ml-1.5 h-3 w-3 animate-spin" />
@@ -1285,9 +1290,10 @@ function AdaptedText() {
           </TabsTrigger>
           <TabsTrigger
             value="simplified"
-            className="flex-1"
+            className="flex-1 gap-1"
             disabled={!adaptedText && !isSimplifying}
           >
+            <FileMinus className="h-3.5 w-3.5" />
             <span>{t("reading.adaptedText.simplifiedTab")}</span>
             {isSimplifying && (
               <LoaderCircle className="ml-1.5 h-3 w-3 animate-spin" />
