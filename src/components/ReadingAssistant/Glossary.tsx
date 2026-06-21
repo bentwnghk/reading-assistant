@@ -33,16 +33,13 @@ import {
 } from "@/components/ui/table";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useReadingStore } from "@/store/reading";
-import { useHistoryStore } from "@/store/history";
 import { useVocabularyStore } from "@/store/vocabulary";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 import { cn } from "@/utils/style";
-import { mergeGlossariesFromSessions } from "@/utils/vocabulary";
 import VocabularyFlashcard from "./VocabularyFlashcard";
 import VocabularyQuiz from "./VocabularyQuiz";
 import VocabularySpelling from "./VocabularySpelling";
-import SessionGlossarySelector from "./SessionGlossarySelector";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling";
 type SortField = "word" | "partOfSpeech" | null;
@@ -50,30 +47,17 @@ type SortOrder = "asc" | "desc";
 
 function Glossary() {
   const { t } = useTranslation();
-  const { extractedText, highlightedWords, glossary, glossaryRatings, id: currentSessionId } = useReadingStore();
-  const { history } = useHistoryStore();
+  const { extractedText, highlightedWords, glossary } = useReadingStore();
   const { status, generateGlossary } = useReadingAssistant();
   const [activeTab, setActiveTab] = useState<TabType>("table");
-  const [selectedSessionIds, setSelectedSessionIds] = useState<string[]>([]);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
   const isGenerating = status === "glossary";
 
-  const mergedResult = useMemo(() => {
-    if (selectedSessionIds.length === 0) {
-      return { entries: glossary, ratings: glossaryRatings, addedCount: 0 };
-    }
-    return mergeGlossariesFromSessions(glossary, glossaryRatings, selectedSessionIds, history);
-  }, [glossary, glossaryRatings, selectedSessionIds, history]);
-
-  const mergedGlossary = mergedResult.entries;
-  const mergedRatings = mergedResult.ratings;
-  const _addedCount = mergedResult.addedCount;
-
   const sortedGlossary = useMemo(() => {
-    if (!sortField) return mergedGlossary;
-    const sorted = [...mergedGlossary];
+    if (!sortField) return glossary;
+    const sorted = [...glossary];
     sorted.sort((a, b) => {
       let comparison = 0;
       if (sortField === "word") {
@@ -84,7 +68,7 @@ function Glossary() {
       return sortOrder === "asc" ? comparison : -comparison;
     });
     return sorted;
-  }, [mergedGlossary, sortField, sortOrder]);
+  }, [glossary, sortField, sortOrder]);
 
   const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
@@ -236,7 +220,7 @@ function Glossary() {
   }, [sortedGlossary, t]);
 
   const handleDownloadExcel = useCallback(async () => {
-    if (mergedGlossary.length === 0) return;
+    if (glossary.length === 0) return;
 
     try {
       const docTitle = useReadingStore.getState().docTitle || "Glossary";
@@ -277,7 +261,7 @@ function Glossary() {
         { header: colHeaders[5], key: "example", width: 45 },
       ];
 
-      mergedGlossary.forEach((entry) => {
+      glossary.forEach((entry) => {
         worksheet.addRow({
           word: entry.word,
           syllabification: entry.syllabification || "",
@@ -351,7 +335,7 @@ function Glossary() {
     } catch (error) {
       console.error("Failed to generate Excel document:", error);
     }
-  }, [mergedGlossary, t]);
+  }, [glossary, t]);
 
   if (!extractedText) {
     return null;
@@ -385,11 +369,11 @@ function Glossary() {
 
     switch (activeTab) {
       case "flashcard":
-        return <VocabularyFlashcard glossary={mergedGlossary} mergedRatings={mergedRatings} onWordAction={handleSRSAction} />;
+        return <VocabularyFlashcard glossary={glossary} onWordAction={handleSRSAction} />;
       case "quiz":
-        return <VocabularyQuiz glossary={mergedGlossary} mergedRatings={mergedRatings} />;
+        return <VocabularyQuiz glossary={glossary} />;
       case "spelling":
-        return <VocabularySpelling glossary={mergedGlossary} mergedRatings={mergedRatings} />;
+        return <VocabularySpelling glossary={glossary} />;
       default:
         return (
           <div className="overflow-x-auto">
@@ -505,18 +489,7 @@ function Glossary() {
       </div>
 
       {glossary.length > 0 && (
-        <>
-          <div className="mb-4">
-            <SessionGlossarySelector
-              selectedSessionIds={selectedSessionIds}
-              onSelectionChange={setSelectedSessionIds}
-              currentGlossary={glossary}
-              currentRatings={glossaryRatings}
-              currentSessionId={currentSessionId}
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-1 mb-4 border-b">
+        <div className="flex flex-wrap gap-1 mb-4 border-b">
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -534,7 +507,6 @@ function Glossary() {
             </button>
           ))}
         </div>
-        </>
       )}
 
       {renderContent()}

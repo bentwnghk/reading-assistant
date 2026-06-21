@@ -417,7 +417,6 @@ Grammar data is stored on the `reading_sessions` table:
 |-----------|---------|
 | `LearningRecommendationDialog.tsx` | Adaptive dialog suggesting next learning activities based on session progress |
 | `RepositoryUploadDialog.tsx` | Upload extracted text to the shared text repository |
-| `SessionGlossarySelector.tsx` | Merge glossaries from multiple past sessions into flashcard review |
 | `WorkflowProgress.tsx` | Step progress indicator at top of main page |
 | `TocDrawer.tsx` | Table of contents drawer for all workflow sections |
 | `TocFab.tsx` | Floating button to open TOC drawer on mobile |
@@ -508,7 +507,7 @@ Next.js App Router pages in `src/app/`:
 |--------|---------|
 | `textDifficulty.ts` | Multi-metric readability analysis (Flesch, CEFR, etc.) |
 | `vocabularyExport.ts` | Export vocabulary to PDF, Word (docx), CSV, text-as-image |
-| `vocabulary.ts` | Glossary sorting, merging across sessions, deduplication |
+| `vocabulary.ts` | Glossary sorting and priority helpers |
 | `srs.ts` | Leitner SRS algorithm for spaced repetition |
 | `reading-assistant/provider.ts` | AI provider factory (creates Vercel AI SDK provider instances) |
 | `parser/` | File content extraction (`pdfParser.ts`, `officeParser.ts`, `textParser.ts`) |
