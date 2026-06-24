@@ -14,7 +14,7 @@ function UnsubscribeContent() {
 
   if (status === "success") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--lp-paper)] p-4">
         <div className="w-full max-w-md text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
             <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -38,7 +38,7 @@ function UnsubscribeContent() {
 
   if (status === "invalid") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--lp-paper)] p-4">
         <div className="w-full max-w-md text-center">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
             <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
@@ -61,7 +61,7 @@ function UnsubscribeContent() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--lp-paper)] p-4">
       <div className="w-full max-w-md text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
           <Mail className="h-8 w-8 text-muted-foreground" />
@@ -87,7 +87,7 @@ export default function UnsubscribePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex min-h-screen items-center justify-center bg-[var(--lp-paper)]">
           <div className="text-muted-foreground">Loading...</div>
         </div>
       }
