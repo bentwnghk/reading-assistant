@@ -332,11 +332,63 @@ export function PracticeMockup() {
         </div>
       </div>
 
-      {/* grammar chip */}
-      <div className="mt-3 flex items-center gap-2 rounded-xl border border-[var(--lp-highlight)] bg-[var(--lp-highlight)]/20 p-3">
-        <Trophy className="h-4 w-4 text-[var(--lp-ink)]" />
-        <span className="text-xs font-semibold text-[var(--lp-ink)]">Grammar Roulette</span>
-        <span className="ml-auto font-mono text-xs text-[var(--lp-ink-soft)]">1,240 pts</span>
+      {/* grammar workshop — fill-the-blank from a word bank */}
+      <div className="mt-3 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
+              Grammar Workshop
+            </span>
+            <span className="rounded-full border border-[var(--lp-rule)] px-2 py-0.5 text-[10px] text-[var(--lp-ink-soft)]">
+              Past Tense
+            </span>
+          </div>
+          <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">3 / 10 · 120 pts</span>
+        </div>
+        <div className="mb-3 h-1 overflow-hidden rounded-full bg-[var(--lp-rule)]">
+          <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: "30%" }} />
+        </div>
+
+        {/* sentence with inline slots */}
+        <div className="rounded-lg bg-[var(--lp-paper-2)] p-3 text-sm leading-relaxed text-[var(--lp-ink)]">
+          The children{" "}
+          <span className="mx-0.5 inline-flex items-center rounded-md border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--lp-accent)]">
+            went
+          </span>{" "}
+          to the park{" "}
+          <span className="mx-0.5 inline-flex min-w-[56px] items-center justify-center rounded-md border border-dashed border-[var(--lp-ink-soft)]/40 bg-[var(--lp-paper-2)] px-2 py-0.5 text-[10px] text-[var(--lp-ink-soft)]">
+            Time
+          </span>
+          .
+        </div>
+
+        {/* pattern hint */}
+        <p className="mt-2 font-mono text-[10px] text-[var(--lp-ink-soft)]">Pattern: [Verb] + [Time]</p>
+
+        {/* word bank */}
+        <div className="mt-2">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">Word Bank</span>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {[
+              { w: "went", used: true },
+              { w: "go", used: false },
+              { w: "played", used: false },
+              { w: "yesterday", used: false },
+              { w: "tomorrow", used: false },
+            ].map((c) => (
+              <span
+                key={c.w}
+                className={`rounded-lg border px-2.5 py-1 text-xs ${
+                  c.used
+                    ? "border-[var(--lp-rule)] bg-[var(--lp-paper-2)] text-[var(--lp-ink-soft)] opacity-40"
+                    : "border-[var(--lp-rule)] bg-[var(--lp-surface)] text-[var(--lp-ink)]"
+                }`}
+              >
+                {c.w}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </MockupFrame>
   );
