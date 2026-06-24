@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Upload,
   FileText,
@@ -6,10 +9,13 @@ import {
   RotateCw,
   Volume2,
   Trophy,
-  Medal,
   BarChart3,
   Sparkles,
   Check,
+  Target,
+  BookOpen,
+  BookText,
+  Gamepad2,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -136,8 +142,8 @@ export function UploadMockup() {
             <FileText className="h-4.5 w-4.5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-[var(--lp-ink)]">DSE 2023 · Paper 1, Passage A</p>
-            <p className="truncate text-xs text-[var(--lp-ink-soft)]">“The city that never sleeps woke to silence…”</p>
+            <p className="truncate text-sm font-semibold text-[var(--lp-ink)]">DSE 2023 Paper 1 Part A Text 1</p>
+            <p className="truncate text-xs text-[var(--lp-ink-soft)]">Flash Fiction Writing Tips for Short Stories</p>
           </div>
           <span className="shrink-0 rounded-lg bg-[var(--lp-accent)] px-3 py-1.5 text-xs font-semibold text-white">
             Read
@@ -149,25 +155,39 @@ export function UploadMockup() {
 }
 
 /* ── 3. UNDERSTAND — text versions + mind map + AI visualization ── */
+const TEXT_VERSIONS = {
+  Original:
+    "Deep beneath the ocean's surface, frigid currents stir the perpetual darkness. Here, bioluminescent organisms drift past one another, their ephemeral glow the sole illumination across vast, silent distances.",
+  Adapted:
+    "Deep under the sea it is cold and dark. Strange animals float by, lit only by their own soft glow. Most of this world is still a mystery to us.",
+  Simplified:
+    "It is very cold and dark deep under the sea. Some animals there can make their own light. They glow in the dark water. We still do not know a lot about this place.",
+} as const;
+
+type TextVersion = keyof typeof TEXT_VERSIONS;
+
 export function UnderstandMockup() {
+  const [version, setVersion] = useState<TextVersion>("Adapted");
+  const tabs: TextVersion[] = ["Original", "Adapted", "Simplified"];
   return (
     <MockupFrame label="Understand">
       <div className="mb-3 inline-flex rounded-lg border border-[var(--lp-rule)] p-0.5 font-mono text-[11px]">
-        {["Original", "Adapted", "Simplified"].map((t, i) => (
-          <span
+        {tabs.map((t) => (
+          <button
             key={t}
-            className={`rounded-md px-3 py-1 ${
-              i === 1 ? "bg-[var(--lp-accent)] text-white" : "text-[var(--lp-ink-soft)]"
+            type="button"
+            onClick={() => setVersion(t)}
+            className={`rounded-md px-3 py-1 transition-colors ${
+              version === t
+                ? "bg-[var(--lp-accent)] text-white"
+                : "text-[var(--lp-ink-soft)] hover:text-[var(--lp-ink)]"
             }`}
           >
             {t}
-          </span>
+          </button>
         ))}
       </div>
-      <p className="text-sm leading-relaxed text-[var(--lp-ink)]">
-        Deep under the sea it is cold and dark. Strange animals float by, lit only
-        by their own soft glow. Most of this world is still a mystery to us.
-      </p>
+      <p className="text-sm leading-relaxed text-[var(--lp-ink)]">{TEXT_VERSIONS[version]}</p>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         {/* mind map */}
@@ -252,7 +272,7 @@ export function PracticeMockup() {
   );
 }
 
-/* ── 5. MASTER — test scorecard + vocabulary + leaderboard ── */
+/* ── 5. MASTER — test scorecard + vocabulary + achievements + leaderboard ── */
 export function MasterMockup() {
   const skills = [
     { l: "Main idea", v: 90 },
@@ -261,48 +281,56 @@ export function MasterMockup() {
   ];
   return (
     <MockupFrame label="Master">
-      <div className="grid gap-4 sm:grid-cols-2">
-        {/* scorecard */}
-        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-14 w-14 items-center justify-center">
-              <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--lp-rule)" strokeWidth="4" />
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15.5"
-                  fill="none"
-                  stroke="var(--lp-accent)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeDasharray="78 100"
-                />
-              </svg>
-              <span className="absolute font-display text-base font-bold text-[var(--lp-ink)]">8/10</span>
-            </div>
-            <div>
-              <p className="font-display text-sm font-semibold text-[var(--lp-ink)]">Reading test</p>
-              <p className="text-xs text-[var(--lp-ink-soft)]">+2 from last time</p>
-            </div>
-          </div>
-          <div className="mt-3 space-y-1.5">
-            {skills.map((s) => (
-              <div key={s.l}>
-                <div className="flex justify-between text-[10px] text-[var(--lp-ink-soft)]">
-                  <span>{s.l}</span>
-                  <span className="font-mono">{s.v}%</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
-                  <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: `${s.v}%` }} />
-                </div>
+      <div className="grid items-start gap-4 sm:grid-cols-2">
+        {/* Column 1 — your stats: scorecard + vocabulary */}
+        <div className="flex flex-col gap-4">
+          {/* scorecard */}
+          <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
+            <div className="flex items-center gap-3">
+              <div className="relative flex h-14 w-14 items-center justify-center">
+                <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--lp-rule)" strokeWidth="4" />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.5"
+                    fill="none"
+                    stroke="var(--lp-accent)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="78 100"
+                  />
+                </svg>
+                <span className="absolute font-display text-base font-bold text-[var(--lp-ink)]">8/10</span>
               </div>
-            ))}
+              <div>
+                <p className="font-display text-sm font-semibold text-[var(--lp-ink)]">Reading test</p>
+                <p className="text-xs text-[var(--lp-ink-soft)]">+2 from last time</p>
+              </div>
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {skills.map((s) => (
+                <div key={s.l}>
+                  <div className="flex justify-between text-[10px] text-[var(--lp-ink-soft)]">
+                    <span>{s.l}</span>
+                    <span className="font-mono">{s.v}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                    <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: `${s.v}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--lp-accent)]/40 bg-[var(--lp-accent)]/5 px-3 py-2 text-xs font-semibold text-[var(--lp-accent)] transition-colors hover:bg-[var(--lp-accent)]/10"
+            >
+              <Target className="h-3.5 w-3.5" />
+              Targeted practice
+            </button>
           </div>
-        </div>
 
-        {/* vocabulary + leaderboard */}
-        <div className="flex flex-col gap-3">
+          {/* vocabulary */}
           <div className="rounded-xl border border-[var(--lp-rule)] p-3">
             <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
               My vocabulary
@@ -327,15 +355,52 @@ export function MasterMockup() {
               </div>
             ))}
           </div>
-          <div className="flex items-end justify-center gap-2 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
+        </div>
+
+        {/* Column 2 — rewards & ranking: achievements + leaderboard */}
+        <div className="flex flex-col gap-4">
+          <div className="rounded-xl border border-[var(--lp-rule)] p-3">
+            <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
+              Achievements
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              {[
+                { icon: BookOpen, label: "Avid Reader", c: "bg-blue-100 text-blue-600" },
+                { icon: BookText, label: "Word Collector", c: "bg-green-100 text-green-600" },
+                { icon: Gamepad2, label: "Grammar Gamer", c: "bg-amber-100 text-amber-600" },
+                { icon: Sparkles, label: "Curious Learner", c: "bg-cyan-100 text-cyan-600" },
+              ].map((a) => (
+                <div key={a.label} className="flex items-center gap-2">
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${a.c}`}>
+                    <a.icon className="h-4 w-4" />
+                  </span>
+                  <span className="text-xs font-medium leading-tight text-[var(--lp-ink)]">{a.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
+            <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
+              <Trophy className="h-3.5 w-3.5" />
+              <span className="font-mono text-[10px] uppercase tracking-wider">Leaderboard</span>
+            </div>
             {[
-              { h: "h-8", icon: Medal, c: "text-slate-400" },
-              { h: "h-12", icon: Trophy, c: "text-[var(--lp-ink)]" },
-              { h: "h-6", icon: Medal, c: "text-orange-500" },
-            ].map((p, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <p.icon className={`mb-1 h-4 w-4 ${p.c}`} />
-                <div className={`w-7 ${p.h} rounded-t bg-[var(--lp-accent)]/80`} />
+              { r: 1, n: "Chloe L.", pts: "1,240", you: false },
+              { r: 2, n: "Marcus T.", pts: "1,180", you: false },
+              { r: 3, n: "Priya K.", pts: "1,090", you: false },
+              { r: 4, n: "You", pts: "1,050", you: true },
+            ].map((row) => (
+              <div
+                key={row.r}
+                className={`flex items-center gap-2 rounded-md px-2 py-1 text-sm ${
+                  row.you
+                    ? "bg-[var(--lp-accent)]/10 font-semibold text-[var(--lp-accent)]"
+                    : "text-[var(--lp-ink)]"
+                }`}
+              >
+                <span className="w-4 font-mono text-xs text-[var(--lp-ink-soft)]">{row.r}</span>
+                <span className="flex-1">{row.n}</span>
+                <span className="font-mono text-xs text-[var(--lp-ink-soft)]">{row.pts}</span>
               </div>
             ))}
           </div>
