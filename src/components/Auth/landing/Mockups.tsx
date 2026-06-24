@@ -197,14 +197,168 @@ export function UnderstandMockup() {
             <circle cx="80" cy="44" r="6" fill="var(--lp-highlight)" />
           </svg>
         </div>
-        {/* visualization thumbnail */}
+        {/* visualization thumbnail — infographic poster */}
         <div className="relative flex flex-col rounded-xl border border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-accent)]/15 via-[var(--lp-highlight)]/20 to-transparent p-3">
           <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
             <ImageIcon className="h-3.5 w-3.5" />
             <span className="font-mono text-[10px] uppercase tracking-wider">AI image</span>
           </div>
           <div className="flex flex-1 items-center justify-center">
-            <Sparkles className="h-7 w-7 text-[var(--lp-accent)]" />
+            <svg
+              viewBox="0 0 220 150"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-full w-full"
+              role="img"
+              aria-label="Infographic: The recycling movement is ready to flourish"
+            >
+              {/* poster paper */}
+              <rect width="220" height="150" fill="white" rx="3" />
+              <rect
+                x="0.5"
+                y="0.5"
+                width="219"
+                height="149"
+                fill="none"
+                stroke="var(--lp-rule)"
+                rx="3"
+              />
+
+              {/* eyebrow */}
+              <text
+                x="110"
+                y="18"
+                textAnchor="middle"
+                fontSize="6"
+                fontWeight="700"
+                letterSpacing="1.5"
+                fill="var(--lp-accent)"
+                style={{ fontFamily: "var(--font-mono), monospace" }}
+              >
+                THE RECYCLING MOVEMENT
+              </text>
+
+              {/* headline */}
+              <text
+                x="110"
+                y="40"
+                textAnchor="middle"
+                fontSize="11"
+                fontStyle="italic"
+                fill="var(--lp-ink)"
+                style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+              >
+                ready to
+              </text>
+              {/* highlighter stroke behind FLOURISH */}
+              <rect
+                x="50"
+                y="46"
+                width="120"
+                height="20"
+                fill="var(--lp-highlight)"
+                opacity="0.55"
+                rx="1"
+              />
+              <text
+                x="110"
+                y="62"
+                textAnchor="middle"
+                fontSize="20"
+                fontWeight="900"
+                fill="var(--lp-ink)"
+                style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+              >
+                FLOURISH
+              </text>
+
+              {/* small leaf accent */}
+              <g transform="translate(178, 52)">
+                <path
+                  d="M 0,0 Q 5,-7 10,-2 Q 5,3 0,0 Z"
+                  fill="#22C55E"
+                  opacity="0.85"
+                />
+                <path
+                  d="M 2,-1 L 6,-4"
+                  stroke="#15803D"
+                  strokeWidth="0.5"
+                  opacity="0.6"
+                />
+              </g>
+
+              {/* timeline */}
+              <line
+                x1="30"
+                y1="100"
+                x2="190"
+                y2="100"
+                stroke="var(--lp-rule)"
+                strokeWidth="1"
+              />
+              {/* growth curve */}
+              <path
+                d="M 46,100 Q 110,82 174,100"
+                stroke="var(--lp-accent)"
+                strokeWidth="1.5"
+                fill="none"
+                strokeDasharray="3 2"
+              />
+
+              {/* start point — just begun */}
+              <circle cx="40" cy="100" r="3.5" fill="var(--lp-ink-soft)" />
+              <text
+                x="40"
+                y="116"
+                textAnchor="middle"
+                fontSize="6"
+                fontWeight="700"
+                fill="var(--lp-ink)"
+                style={{ fontFamily: "var(--font-mono), monospace" }}
+              >
+                JUST BEGUN
+              </text>
+              <text
+                x="40"
+                y="125"
+                textAnchor="middle"
+                fontSize="5"
+                fill="var(--lp-ink-soft)"
+                style={{ fontFamily: "var(--font-sans), sans-serif" }}
+              >
+                a few years ago
+              </text>
+
+              {/* end point — mature / industry grows */}
+              <circle
+                cx="180"
+                cy="100"
+                r="5"
+                fill="var(--lp-highlight)"
+                stroke="var(--lp-accent)"
+                strokeWidth="0.8"
+              />
+              <text
+                x="180"
+                y="116"
+                textAnchor="middle"
+                fontSize="6"
+                fontWeight="700"
+                fill="var(--lp-accent)"
+                style={{ fontFamily: "var(--font-mono), monospace" }}
+              >
+                MATURE
+              </text>
+              <text
+                x="180"
+                y="125"
+                textAnchor="middle"
+                fontSize="5"
+                fill="var(--lp-ink-soft)"
+                style={{ fontFamily: "var(--font-sans), sans-serif" }}
+              >
+                industry &amp; public learn
+              </text>
+            </svg>
           </div>
         </div>
       </div>
