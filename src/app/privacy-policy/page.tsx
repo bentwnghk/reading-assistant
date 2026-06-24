@@ -273,7 +273,7 @@ export default function PrivacyPolicyPage() {
   const content = i18n.language?.startsWith("zh") ? zhHK : en;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-[var(--lp-paper)]">
       <div className="mx-auto max-w-3xl px-6 py-12">
         <Link
           href="/"
