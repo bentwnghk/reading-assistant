@@ -482,8 +482,9 @@ export function MasterMockup() {
 
 /* ── 6. CLASSROOMS — teacher dashboard ── */
 export function DashboardMockup() {
-  const bars = [40, 65, 50, 80, 55, 90, 70];
+  const bars = [50, 75, 40, 88, 60, 92, 68];
   const days = ["M", "T", "W", "T", "F", "S", "S"];
+  const highlight = [1, 3, 5];
   return (
     <MockupFrame label="Teacher Dashboard · Form 3B">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -493,7 +494,7 @@ export function DashboardMockup() {
               <BarChart3 className="h-3.5 w-3.5" />
               <span className="font-mono text-[10px] uppercase tracking-wider">Daily activity</span>
             </div>
-            <span className="font-mono text-[10px]">this week</span>
+            <span className="font-mono text-[10px]">last 7 days</span>
           </div>
           <div className="relative h-24">
             {/* gridlines */}
@@ -508,7 +509,7 @@ export function DashboardMockup() {
                 <div
                   key={i}
                   className={`flex-1 rounded-t ${
-                    i === 5 ? "bg-[var(--lp-accent)]" : "bg-[var(--lp-accent)]/60"
+                    highlight.includes(i) ? "bg-[var(--lp-accent)]" : "bg-[var(--lp-accent)]/60"
                   }`}
                   style={{ height: `${b}%` }}
                 />
@@ -520,7 +521,7 @@ export function DashboardMockup() {
               <span
                 key={i}
                 className={`flex-1 text-center font-mono text-[9px] ${
-                  i === 5 ? "font-bold text-[var(--lp-accent)]" : "text-[var(--lp-ink-soft)]"
+                  highlight.includes(i) ? "font-bold text-[var(--lp-accent)]" : "text-[var(--lp-ink-soft)]"
                 }`}
               >
                 {d}
