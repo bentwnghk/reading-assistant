@@ -889,11 +889,11 @@ export function DashboardMockup() {
 
   // Chart 3: Reading Texts — quartile-colored bars
   const readingData = [
-    { name: "Chloe", val: 18, q: 3 },
-    { name: "Marcus", val: 11, q: 2 },
-    { name: "Priya", val: 6, q: 1 },
-    { name: "Ethan", val: 15, q: 3 },
-    { name: "Sofia", val: 23, q: 4 },
+    { name: "Chloe", val: 88, q: 4 },
+    { name: "Marcus", val: 72, q: 3 },
+    { name: "Priya", val: 42, q: 2 },
+    { name: "Ethan", val: 55, q: 3 },
+    { name: "Sofia", val: 95, q: 4 },
   ];
   const quartileColors = ["#ef4444", "#f97316", "#22c55e", "#3b82f6"];
 
@@ -1027,22 +1027,22 @@ export function DashboardMockup() {
           </div>
         </div>
 
-        {/* ── Chart 3: Reading Texts ── */}
+        {/* ── Chart 3: Reading Test Score ── */}
         <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
-          <p className="text-xs font-semibold text-[var(--lp-ink)]">Reading Texts</p>
+          <p className="text-xs font-semibold text-[var(--lp-ink)]">Reading Test Score</p>
           <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">
-            Avg: <span className="font-bold text-[var(--lp-ink)]">15</span>
+            Avg: <span className="font-bold text-[var(--lp-ink)]">70</span>
           </p>
           <svg viewBox="0 0 200 110" className="w-full">
             {gridLines.map((y) => (
               <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
             ))}
             {/* dashed class-average reference line */}
-            <line x1="0" y1="50" x2="200" y2="50" stroke="var(--lp-ink)" strokeDasharray="4 3" strokeWidth="0.6" opacity="0.4" />
-            <text x="197" y="48" textAnchor="end" fontSize="5" fill="var(--lp-ink-soft)">avg 15</text>
+            <line x1="0" y1="39" x2="200" y2="39" stroke="var(--lp-ink)" strokeDasharray="4 3" strokeWidth="0.6" opacity="0.4" />
+            <text x="197" y="37" textAnchor="end" fontSize="5" fill="var(--lp-ink-soft)">avg 70</text>
             <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
             {readingData.map((s, si) => {
-              const barH = s.val * 3;
+              const barH = s.val * 0.8;
               return (
                 <rect
                   key={s.name}
