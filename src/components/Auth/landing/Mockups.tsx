@@ -72,7 +72,7 @@ function Tag({ children, tone = "muted" }: { children: React.ReactNode; tone?: "
 /* ── 1. HERO — the signature: passage + highlighted word + glossary popover ── */
 export function HeroReadingMockup() {
   return (
-    <MockupFrame label="Reading · Deep-Sea Wonders">
+    <MockupFrame label="READING · Mr.🆖 ProReader">
       <p className="font-display text-lg sm:text-xl leading-relaxed text-[var(--lp-ink)]">
         Deep beneath the surface, currents stir the cold darkness. Here,{" "}
         <span className="lp-marker lp-marker--draw relative whitespace-nowrap font-semibold">
@@ -110,7 +110,7 @@ export function HeroReadingMockup() {
 /* ── 2. ENCOUNTER — upload / OCR + Text Repository ── */
 export function UploadMockup() {
   return (
-    <MockupFrame label="Select Text">
+    <MockupFrame label="SELECT TEXT · Mr.🆖 ProReader">
       <div className="rounded-xl border-2 border-dashed border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 px-4 py-7 text-center">
         <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]">
           <Upload className="h-5 w-5" />
@@ -159,7 +159,7 @@ export function UnderstandMockup() {
   const [version, setVersion] = useState<TextVersion>("Adapted");
   const tabs: TextVersion[] = ["Original", "Adapted", "Simplified"];
   return (
-    <MockupFrame label="Understand">
+    <MockupFrame label="TEXT ADAPTATION · Mr.🆖 ProReader">
       <div className="mb-3 inline-flex rounded-lg border border-[var(--lp-rule)] p-0.5 font-mono text-[11px]">
         {tabs.map((t) => (
           <button
@@ -463,7 +463,7 @@ export function UnderstandMockup() {
 /* ── 3b. AI TUTOR — context-aware reading coach chat ── */
 export function AITutorMockup() {
   return (
-    <MockupFrame label="AI Tutor">
+    <MockupFrame label="AI TUTOR · Mr.🆖 ProReader">
       {/* messages */}
       <div className="space-y-3">
         {/* user (right) */}
@@ -549,7 +549,7 @@ export function AITutorMockup() {
 export function PracticeMockup() {
   const [flipped, setFlipped] = useState(false);
   return (
-    <MockupFrame label="Practice">
+    <MockupFrame label="PRACTICE · Mr.🆖 ProReader">
       {/* flashcard header — remaining counter */}
       <div className="mb-2 flex items-center justify-between">
         <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">Flashcards</span>
@@ -737,7 +737,7 @@ export function MasterMockup() {
     { l: "Vocabulary", v: 85 },
   ];
   return (
-    <MockupFrame label="Master">
+    <MockupFrame label="DASHBOARD · Mr.🆖 ProReader">
       <div className="grid items-start gap-4 sm:grid-cols-2">
         {/* Column 1 — your stats: scorecard + vocabulary */}
         <div className="flex flex-col gap-4">
@@ -912,7 +912,7 @@ export function DashboardMockup() {
   const studentNames = dailyData.map((d) => d.name);
 
   return (
-    <MockupFrame label="Teacher Dashboard · Form 3B">
+    <MockupFrame label="TEACHER DASHBOARD · Mr.🆖 ProReader">
       {/* header / filter bar */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
