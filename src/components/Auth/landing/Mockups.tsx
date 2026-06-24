@@ -185,16 +185,58 @@ export function UnderstandMockup() {
             <Brain className="h-3.5 w-3.5" />
             <span className="font-mono text-[10px] uppercase tracking-wider">Mind map</span>
           </div>
-          <svg viewBox="0 0 100 56" className="w-full">
-            <line x1="50" y1="28" x2="20" y2="12" stroke="var(--lp-rule)" strokeWidth="1" />
-            <line x1="50" y1="28" x2="80" y2="12" stroke="var(--lp-rule)" strokeWidth="1" />
-            <line x1="50" y1="28" x2="20" y2="44" stroke="var(--lp-rule)" strokeWidth="1" />
-            <line x1="50" y1="28" x2="80" y2="44" stroke="var(--lp-rule)" strokeWidth="1" />
-            <circle cx="50" cy="28" r="9" fill="var(--lp-accent)" />
-            <circle cx="20" cy="12" r="6" fill="var(--lp-highlight)" />
-            <circle cx="80" cy="12" r="6" fill="var(--lp-highlight)" />
-            <circle cx="20" cy="44" r="6" fill="var(--lp-highlight)" />
-            <circle cx="80" cy="44" r="6" fill="var(--lp-highlight)" />
+          <svg viewBox="0 0 200 130" className="w-full" role="img" aria-label="Mind map: Recycling">
+            {/* ── connectors (curved, colored per branch) ── */}
+            {/* root → branches */}
+            <path d="M 90,57 Q 72,40 83,22" stroke="#26A69A" strokeWidth="1" fill="none" />
+            <path d="M 90,73 Q 72,90 83,109" stroke="#42A5F5" strokeWidth="1" fill="none" />
+            <path d="M 110,57 Q 128,40 117,22" stroke="#AB47BC" strokeWidth="1" fill="none" />
+            <path d="M 110,73 Q 128,90 117,109" stroke="#FFA726" strokeWidth="1" fill="none" />
+            {/* branch → leaves */}
+            <path d="M 37,18 Q 30,14 32,11" stroke="#26A69A" strokeWidth="0.8" fill="none" />
+            <path d="M 37,26 Q 30,30 32,28" stroke="#26A69A" strokeWidth="0.8" fill="none" />
+            <path d="M 37,106 Q 30,102 32,101" stroke="#42A5F5" strokeWidth="0.8" fill="none" />
+            <path d="M 37,114 Q 30,118 32,119" stroke="#42A5F5" strokeWidth="0.8" fill="none" />
+            <path d="M 163,18 Q 170,14 168,11" stroke="#AB47BC" strokeWidth="0.8" fill="none" />
+            <path d="M 163,26 Q 170,30 168,28" stroke="#AB47BC" strokeWidth="0.8" fill="none" />
+            <path d="M 163,106 Q 170,102 168,101" stroke="#FFA726" strokeWidth="0.8" fill="none" />
+            <path d="M 163,114 Q 170,118 168,119" stroke="#FFA726" strokeWidth="0.8" fill="none" />
+
+            {/* ── leaves (lighter tints) ── */}
+            {/* left top — teal leaves */}
+            <rect x="2" y="6" width="30" height="10" rx="2" fill="#B2DFDB" />
+            <text x="17" y="12" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Costly</text>
+            <rect x="2" y="23" width="30" height="10" rx="2" fill="#B2DFDB" />
+            <text x="17" y="29" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Wasteful</text>
+            {/* left bottom — blue leaves */}
+            <rect x="2" y="96" width="30" height="10" rx="2" fill="#BBDEFB" />
+            <text x="17" y="101" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Early</text>
+            <rect x="2" y="114" width="30" height="10" rx="2" fill="#BBDEFB" />
+            <text x="17" y="119" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Growing</text>
+            {/* right top — purple leaves */}
+            <rect x="168" y="6" width="30" height="10" rx="2" fill="#E1BEE7" />
+            <text x="183" y="12" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Too soon</text>
+            <rect x="168" y="23" width="30" height="10" rx="2" fill="#E1BEE7" />
+            <text x="183" y="29" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Promising</text>
+            {/* right bottom — amber leaves */}
+            <rect x="168" y="96" width="30" height="10" rx="2" fill="#FFE0B2" />
+            <text x="183" y="101" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Matures</text>
+            <rect x="168" y="114" width="30" height="10" rx="2" fill="#FFE0B2" />
+            <text x="183" y="119" textAnchor="middle" dominantBaseline="central" fontSize="4.5" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Flourish</text>
+
+            {/* ── branches (medium fills, white text) ── */}
+            <rect x="35" y="15" width="48" height="14" rx="3" fill="#26A69A" />
+            <text x="59" y="22" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Criticism</text>
+            <rect x="35" y="102" width="48" height="14" rx="3" fill="#42A5F5" />
+            <text x="59" y="109" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Growth</text>
+            <rect x="117" y="15" width="48" height="14" rx="3" fill="#AB47BC" />
+            <text x="141" y="22" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Defense</text>
+            <rect x="117" y="102" width="48" height="14" rx="3" fill="#FFA726" />
+            <text x="141" y="109" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Future</text>
+
+            {/* ── root (circle, indigo) ── */}
+            <circle cx="100" cy="65" r="14" fill="#5C6BC0" />
+            <text x="100" y="66" textAnchor="middle" dominantBaseline="central" fontSize="6.5" fontWeight="700" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Recycling</text>
           </svg>
         </div>
         {/* visualization thumbnail — infographic poster */}
