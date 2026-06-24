@@ -6,7 +6,6 @@ import {
   FileText,
   Brain,
   Image as ImageIcon,
-  RotateCw,
   Volume2,
   Trophy,
   BarChart3,
@@ -157,11 +156,11 @@ export function UploadMockup() {
 /* ── 3. UNDERSTAND — text versions + mind map + AI visualization ── */
 const TEXT_VERSIONS = {
   Original:
-    "Deep beneath the ocean's surface, frigid currents stir the perpetual darkness. Here, bioluminescent organisms drift past one another, their ephemeral glow the sole illumination across vast, silent distances.",
+    "I presented plenty of evidence that recycling was costly and inefficient, but its defenders said that it was unfair to rush to judgment. Noting that the modern recycling movement had really just begun a few years earlier, they predicted it would flourish as the industry matured and the public learned how to recycle properly.",
   Adapted:
-    "Deep under the sea it is cold and dark. Strange animals float by, lit only by their own soft glow. Most of this world is still a mystery to us.",
+    "I gave a lot of proof that recycling cost too much and was not efficient. But people who supported recycling said it was unfair to judge too quickly. They said the modern recycling movement had just started a few years earlier. They predicted it would get better as the industry grew and people learned how to recycle.",
   Simplified:
-    "It is very cold and dark deep under the sea. Some animals there can make their own light. They glow in the dark water. We still do not know a lot about this place.",
+    "I showed it cost too much. It was not efficient (not working well). Supporters said it was unfair to judge. They said recycling was new. It would get better.",
 } as const;
 
 type TextVersion = keyof typeof TEXT_VERSIONS;
@@ -225,47 +224,123 @@ export function UnderstandMockup() {
 
 /* ── 4. PRACTICE — flashcard flip + scramble + grammar game ── */
 export function PracticeMockup() {
+  const [flipped, setFlipped] = useState(false);
   return (
     <MockupFrame label="Practice">
-      <div className="grid gap-3 sm:grid-cols-2">
-        {/* flashcard */}
-        <div className="group perspective-1000">
-          <div className="transform-style-preserve-3d relative h-32 transition-transform duration-500 group-hover:rotate-y-180">
-            <div className="backface-hidden absolute inset-0 flex flex-col items-center justify-center rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]">
-              <span className="font-display text-2xl font-semibold text-[var(--lp-ink)]">ephemeral</span>
-              <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
-                <RotateCw className="h-3 w-3" /> hover to flip
-              </span>
+      {/* flashcard header — remaining counter */}
+      <div className="mb-2 flex items-center justify-between">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">Flashcards</span>
+        <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">3 / 12 remaining</span>
+      </div>
+
+      {/* click-to-flip flashcard */}
+      <div className="perspective-1000">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setFlipped((f) => !f)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setFlipped((f) => !f);
+            }
+          }}
+          className={`relative h-64 w-full cursor-pointer transform-style-preserve-3d transition-transform duration-500 ${
+            flipped ? "rotate-y-180" : ""
+          }`}
+        >
+          {/* FRONT */}
+          <div className="backface-hidden absolute inset-0 flex flex-col items-center justify-center rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] p-4 text-center">
+            <div className="flex items-center gap-2">
+              <span className="font-display text-4xl font-bold text-[var(--lp-ink)]">flourish</span>
+              <Volume2 className="h-5 w-5 text-[var(--lp-ink-soft)]" aria-hidden />
             </div>
-            <div className="backface-hidden rotate-y-180 absolute inset-0 flex flex-col justify-center rounded-xl border border-[var(--lp-accent)]/30 bg-[var(--lp-accent)]/5 p-4">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-accent)]">adjective</span>
-              <span className="mt-1 text-sm text-[var(--lp-ink)]">Lasting for a very short time.</span>
+            <span className="mt-2 font-mono text-xs text-[var(--lp-ink-soft)]">flour·ish</span>
+            <span className="mt-2 rounded-full bg-[var(--lp-accent)]/10 px-2.5 py-0.5 text-xs text-[var(--lp-accent)]">
+              verb
+            </span>
+            <span className="mt-4 text-[10px] text-[var(--lp-ink-soft)]">Click to flip</span>
+          </div>
+
+          {/* BACK */}
+          <div className="backface-hidden rotate-y-180 absolute inset-0 flex flex-col rounded-xl border border-emerald-300 bg-[var(--lp-surface)] p-3 text-left">
+            <div className="flex items-center gap-2">
+              <span className="font-display text-xl font-bold text-[var(--lp-ink)]">flourish</span>
+              <Volume2 className="h-4 w-4 text-[var(--lp-ink-soft)]" aria-hidden />
+            </div>
+            <span className="mt-0.5 font-mono text-[10px] text-[var(--lp-ink-soft)]">flour·ish · verb</span>
+            <div className="mt-2 space-y-1.5">
+              <div className="rounded-lg bg-[var(--lp-paper-2)] p-2">
+                <p className="text-[9px] font-semibold uppercase tracking-wide text-[var(--lp-ink-soft)]">
+                  English Definition
+                </p>
+                <p className="text-[11px] leading-snug text-[var(--lp-ink)]">
+                  to grow or develop successfully; to thrive
+                </p>
+              </div>
+              <div className="rounded-lg bg-[var(--lp-paper-2)] p-2">
+                <p className="text-[9px] font-semibold uppercase tracking-wide text-[var(--lp-ink-soft)]">中文解釋</p>
+                <p className="text-[11px] leading-snug text-[var(--lp-ink)]">茁壯成長；繁榮</p>
+              </div>
+              <div className="rounded-lg bg-[var(--lp-paper-2)] p-2">
+                <p className="text-[9px] font-semibold uppercase tracking-wide text-[var(--lp-ink-soft)]">
+                  Example 例句
+                </p>
+                <p className="text-[11px] leading-snug italic text-[var(--lp-ink)]">
+                  “They predicted recycling would{" "}
+                  <span className="not-italic font-semibold text-[var(--lp-accent)]">flourish</span> as the industry
+                  matured.”
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* scramble + grammar chip */}
-        <div className="flex flex-col gap-3">
-          <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
-              Word scramble
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {"REVEL".split("").map((ch, i) => (
-                <span
-                  key={i}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] font-display text-sm font-semibold text-[var(--lp-ink)]"
-                >
-                  {["L", "E", "R", "V", "E"][i]}
-                </span>
-              ))}
-            </div>
+      {/* SRS rating buttons — appear when flipped, like the real app */}
+      {flipped && (
+        <div className="mt-3">
+          <p className="mb-1.5 text-center text-[10px] text-[var(--lp-ink-soft)]">How well did you know this?</p>
+          <div className="grid grid-cols-4 gap-1.5">
+            <span className="rounded-lg border border-rose-300 px-2 py-1.5 text-center text-xs font-semibold text-rose-600">
+              Again
+            </span>
+            <span className="rounded-lg border border-orange-300 px-2 py-1.5 text-center text-xs font-semibold text-orange-600">
+              Hard
+            </span>
+            <span className="rounded-lg border border-blue-300 px-2 py-1.5 text-center text-xs font-semibold text-blue-600">
+              Good
+            </span>
+            <span className="rounded-lg border border-green-300 px-2 py-1.5 text-center text-xs font-semibold text-green-600">
+              Easy
+            </span>
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-[var(--lp-highlight)] bg-[var(--lp-highlight)]/20 p-3">
+        </div>
+      )}
+
+      {/* scramble + grammar chip */}
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
+            Word scramble
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {["L", "E", "V", "E", "R"].map((ch, i) => (
+              <span
+                key={i}
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] font-display text-sm font-semibold text-[var(--lp-ink)]"
+              >
+                {ch}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col justify-center gap-1 rounded-xl border border-[var(--lp-highlight)] bg-[var(--lp-highlight)]/20 p-3">
+          <div className="flex items-center gap-2">
             <Trophy className="h-4 w-4 text-[var(--lp-ink)]" />
             <span className="text-xs font-semibold text-[var(--lp-ink)]">Grammar Roulette</span>
-            <span className="ml-auto font-mono text-xs text-[var(--lp-ink)]">1,240 pts</span>
           </div>
+          <span className="font-mono text-xs text-[var(--lp-ink-soft)]">1,240 pts</span>
         </div>
       </div>
     </MockupFrame>
@@ -336,9 +411,9 @@ export function MasterMockup() {
               My vocabulary
             </div>
             {[
-              { w: "luminous", m: 5 },
-              { w: "ephemeral", m: 3 },
-              { w: "currents", m: 4 },
+              { w: "inefficient", m: 3 },
+              { w: "defenders", m: 4 },
+              { w: "flourish", m: 5 },
             ].map((row) => (
               <div key={row.w} className="flex items-center justify-between py-1 text-sm">
                 <span className="text-[var(--lp-ink)]">{row.w}</span>
@@ -386,9 +461,9 @@ export function MasterMockup() {
             </div>
             {[
               { r: 1, n: "Chloe L.", pts: "1,240", you: false },
-              { r: 2, n: "Marcus T.", pts: "1,180", you: false },
-              { r: 3, n: "Priya K.", pts: "1,090", you: false },
-              { r: 4, n: "You", pts: "1,050", you: true },
+              { r: 2, n: "You", pts: "1,180", you: true },
+              { r: 3, n: "Marcus T.", pts: "1,090", you: false },
+              { r: 4, n: "Priya K.", pts: "1,050", you: false },
             ].map((row) => (
               <div
                 key={row.r}
