@@ -205,159 +205,253 @@ export function UnderstandMockup() {
           </div>
           <div className="flex flex-1 items-center justify-center">
             <svg
-              viewBox="0 0 220 150"
+              viewBox="0 0 240 200"
               xmlns="http://www.w3.org/2000/svg"
               className="h-full w-full"
               role="img"
-              aria-label="Infographic: The recycling movement is ready to flourish"
+              aria-label="Infographic poster: The recycling movement is ready to flourish"
             >
-              {/* poster paper */}
-              <rect width="220" height="150" fill="white" rx="3" />
-              <rect
-                x="0.5"
-                y="0.5"
-                width="219"
-                height="149"
-                fill="none"
-                stroke="var(--lp-rule)"
-                rx="3"
-              />
+              <defs>
+                <clipPath id="lpPosterClip">
+                  <rect width="240" height="200" rx="4" />
+                </clipPath>
+              </defs>
+              <g clipPath="url(#lpPosterClip)">
+                {/* ── poster paper ── */}
+                <rect width="240" height="200" fill="#FBF8F1" />
 
-              {/* eyebrow */}
-              <text
-                x="110"
-                y="18"
-                textAnchor="middle"
-                fontSize="6"
-                fontWeight="700"
-                letterSpacing="1.5"
-                fill="var(--lp-accent)"
-                style={{ fontFamily: "var(--font-mono), monospace" }}
-              >
-                THE RECYCLING MOVEMENT
-              </text>
+                {/* ── top accent bars ── */}
+                <rect x="0" y="0" width="240" height="5" fill="#1E3A8A" />
+                <rect x="0" y="5" width="240" height="1.5" fill="#F5C842" />
 
-              {/* headline */}
-              <text
-                x="110"
-                y="40"
-                textAnchor="middle"
-                fontSize="11"
-                fontStyle="italic"
-                fill="var(--lp-ink)"
-                style={{ fontFamily: "var(--font-display), Georgia, serif" }}
-              >
-                ready to
-              </text>
-              {/* highlighter stroke behind FLOURISH */}
-              <rect
-                x="50"
-                y="46"
-                width="120"
-                height="20"
-                fill="var(--lp-highlight)"
-                opacity="0.55"
-                rx="1"
-              />
-              <text
-                x="110"
-                y="62"
-                textAnchor="middle"
-                fontSize="20"
-                fontWeight="900"
-                fill="var(--lp-ink)"
-                style={{ fontFamily: "var(--font-display), Georgia, serif" }}
-              >
-                FLOURISH
-              </text>
+                {/* ── title ── */}
+                <text
+                  x="120"
+                  y="22"
+                  textAnchor="middle"
+                  fontSize="16"
+                  fontWeight="900"
+                  fill="#17161A"
+                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                >
+                  RECYCLING
+                </text>
+                <text
+                  x="120"
+                  y="31"
+                  textAnchor="middle"
+                  fontSize="5.5"
+                  fontWeight="600"
+                  letterSpacing="1.5"
+                  fill="#5C5751"
+                  style={{ fontFamily: "var(--font-mono), monospace" }}
+                >
+                  A MOVEMENT IN PROGRESS
+                </text>
+                <line x1="85" y1="36" x2="155" y2="36" stroke="#DCD5C6" strokeWidth="0.8" />
+                <circle cx="120" cy="36" r="2" fill="#F5C842" />
 
-              {/* small leaf accent */}
-              <g transform="translate(178, 52)">
-                <path
-                  d="M 0,0 Q 5,-7 10,-2 Q 5,3 0,0 Z"
-                  fill="#22C55E"
-                  opacity="0.85"
-                />
-                <path
-                  d="M 2,-1 L 6,-4"
-                  stroke="#15803D"
+                {/* ── debate: critics panel (left) ── */}
+                <rect
+                  x="14"
+                  y="42"
+                  width="100"
+                  height="46"
+                  rx="4"
+                  fill="#FEF2F2"
+                  stroke="#FCA5A5"
                   strokeWidth="0.5"
-                  opacity="0.6"
                 />
+                <text
+                  x="64"
+                  y="51"
+                  textAnchor="middle"
+                  fontSize="5.5"
+                  fontWeight="700"
+                  letterSpacing="1"
+                  fill="#B91C1C"
+                  style={{ fontFamily: "var(--font-mono), monospace" }}
+                >
+                  CRITICS SAY
+                </text>
+                {/* down-trend arrows */}
+                <g transform="translate(56, 54)" stroke="#DC2626" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M -5,0 L -5,5 M -7,3 L -5,5 L -3,3" />
+                  <path d="M 1,0 L 1,7 M -1,5 L 1,7 L 3,5" />
+                  <path d="M 7,0 L 7,6 M 5,4 L 7,6 L 9,4" />
+                </g>
+                <text
+                  x="64"
+                  y="76"
+                  textAnchor="middle"
+                  fontSize="7"
+                  fontWeight="700"
+                  fill="#17161A"
+                  style={{ fontFamily: "var(--font-sans), sans-serif" }}
+                >
+                  &ldquo;Costly&rdquo;
+                </text>
+                <text
+                  x="64"
+                  y="84"
+                  textAnchor="middle"
+                  fontSize="5"
+                  fill="#5C5751"
+                  style={{ fontFamily: "var(--font-sans), sans-serif" }}
+                >
+                  inefficient &middot; rush to judge
+                </text>
+
+                {/* ── VS badge ── */}
+                <circle cx="120" cy="65" r="9" fill="#17161A" />
+                <text
+                  x="120"
+                  y="68"
+                  textAnchor="middle"
+                  fontSize="7"
+                  fontWeight="900"
+                  fill="#F5C842"
+                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                >
+                  VS
+                </text>
+
+                {/* ── debate: defenders panel (right) ── */}
+                <rect
+                  x="126"
+                  y="42"
+                  width="100"
+                  height="46"
+                  rx="4"
+                  fill="#EFF6FF"
+                  stroke="#93C5FD"
+                  strokeWidth="0.5"
+                />
+                <text
+                  x="176"
+                  y="51"
+                  textAnchor="middle"
+                  fontSize="5.5"
+                  fontWeight="700"
+                  letterSpacing="1"
+                  fill="#1E40AF"
+                  style={{ fontFamily: "var(--font-mono), monospace" }}
+                >
+                  DEFENDERS SAY
+                </text>
+                {/* up-trend arrows */}
+                <g transform="translate(168, 54)" stroke="#2563EB" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M -5,8 L -5,3 M -7,5 L -5,3 L -3,5" />
+                  <path d="M 1,8 L 1,1 M -1,3 L 1,1 L 3,3" />
+                  <path d="M 7,8 L 7,2 M 5,4 L 7,2 L 9,4" />
+                </g>
+                <text
+                  x="176"
+                  y="76"
+                  textAnchor="middle"
+                  fontSize="7"
+                  fontWeight="700"
+                  fill="#17161A"
+                  style={{ fontFamily: "var(--font-sans), sans-serif" }}
+                >
+                  &ldquo;Too soon&rdquo;
+                </text>
+                <text
+                  x="176"
+                  y="84"
+                  textAnchor="middle"
+                  fontSize="5"
+                  fill="#5C5751"
+                  style={{ fontFamily: "var(--font-sans), sans-serif" }}
+                >
+                  just begun &middot; will flourish
+                </text>
+
+                {/* ── growth chart ── */}
+                <text
+                  x="14"
+                  y="100"
+                  fontSize="5.5"
+                  fontWeight="700"
+                  letterSpacing="0.8"
+                  fill="#5C5751"
+                  style={{ fontFamily: "var(--font-mono), monospace" }}
+                >
+                  PROJECTED GROWTH
+                </text>
+                {/* gridlines */}
+                <line x1="14" y1="115" x2="226" y2="115" stroke="#DCD5C6" strokeWidth="0.4" strokeDasharray="2 2" />
+                <line x1="14" y1="127" x2="226" y2="127" stroke="#DCD5C6" strokeWidth="0.4" strokeDasharray="2 2" />
+                <line x1="14" y1="132" x2="226" y2="132" stroke="#DCD5C6" strokeWidth="0.8" />
+                {/* ascending bars */}
+                <rect x="24" y="125" width="28" height="7" rx="1" fill="#1E3A8A" opacity="0.25" />
+                <rect x="62" y="120" width="28" height="12" rx="1" fill="#1E3A8A" opacity="0.4" />
+                <rect x="100" y="115" width="28" height="17" rx="1" fill="#1E3A8A" opacity="0.58" />
+                <rect x="138" y="109" width="28" height="23" rx="1" fill="#1E3A8A" opacity="0.78" />
+                <rect x="176" y="102" width="28" height="30" rx="1" fill="#F5C842" />
+                <rect x="176" y="102" width="28" height="30" rx="1" fill="none" stroke="#1E3A8A" strokeWidth="0.5" />
+                {/* trend line over bars */}
+                <path
+                  d="M 38,125 L 76,120 L 114,115 L 152,109 L 190,102"
+                  stroke="#17161A"
+                  strokeWidth="0.8"
+                  fill="none"
+                  strokeDasharray="1.5 1.5"
+                  opacity="0.4"
+                />
+                {/* bar labels */}
+                <text x="38" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>
+                  now
+                </text>
+                <text x="76" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>
+                  early
+                </text>
+                <text x="114" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>
+                  growing
+                </text>
+                <text x="152" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>
+                  maturing
+                </text>
+                <text x="190" y="140" textAnchor="middle" fontSize="4.5" fontWeight="700" fill="#1E3A8A" style={{ fontFamily: "var(--font-sans), sans-serif" }}>
+                  flourish!
+                </text>
+
+                {/* ── key takeaway box ── */}
+                <rect x="14" y="148" width="212" height="44" rx="4" fill="#17161A" />
+                <text
+                  x="120"
+                  y="162"
+                  textAnchor="middle"
+                  fontSize="6"
+                  fontStyle="italic"
+                  fill="#9CA3AF"
+                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                >
+                  the verdict?
+                </text>
+                {/* highlighter behind FLOURISH */}
+                <rect x="62" y="167" width="104" height="16" fill="#F5C842" opacity="0.9" rx="1" />
+                <text
+                  x="114"
+                  y="179"
+                  textAnchor="middle"
+                  fontSize="14"
+                  fontWeight="900"
+                  fill="#17161A"
+                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                >
+                  FLOURISH
+                </text>
+                {/* sprout icon */}
+                <g transform="translate(182, 158)">
+                  <line x1="5" y1="20" x2="5" y2="10" stroke="#15803D" strokeWidth="0.9" />
+                  <path d="M 5,12 Q 0,11 0.5,6 Q 5,7 5,12 Z" fill="#22C55E" />
+                  <path d="M 5,10 Q 10,9 9.5,4 Q 5,5 5,10 Z" fill="#16A34A" />
+                </g>
               </g>
 
-              {/* timeline */}
-              <line
-                x1="30"
-                y1="100"
-                x2="190"
-                y2="100"
-                stroke="var(--lp-rule)"
-                strokeWidth="1"
-              />
-              {/* growth curve */}
-              <path
-                d="M 46,100 Q 110,82 174,100"
-                stroke="var(--lp-accent)"
-                strokeWidth="1.5"
-                fill="none"
-                strokeDasharray="3 2"
-              />
-
-              {/* start point — just begun */}
-              <circle cx="40" cy="100" r="3.5" fill="var(--lp-ink-soft)" />
-              <text
-                x="40"
-                y="116"
-                textAnchor="middle"
-                fontSize="6"
-                fontWeight="700"
-                fill="var(--lp-ink)"
-                style={{ fontFamily: "var(--font-mono), monospace" }}
-              >
-                JUST BEGUN
-              </text>
-              <text
-                x="40"
-                y="125"
-                textAnchor="middle"
-                fontSize="5"
-                fill="var(--lp-ink-soft)"
-                style={{ fontFamily: "var(--font-sans), sans-serif" }}
-              >
-                a few years ago
-              </text>
-
-              {/* end point — mature / industry grows */}
-              <circle
-                cx="180"
-                cy="100"
-                r="5"
-                fill="var(--lp-highlight)"
-                stroke="var(--lp-accent)"
-                strokeWidth="0.8"
-              />
-              <text
-                x="180"
-                y="116"
-                textAnchor="middle"
-                fontSize="6"
-                fontWeight="700"
-                fill="var(--lp-accent)"
-                style={{ fontFamily: "var(--font-mono), monospace" }}
-              >
-                MATURE
-              </text>
-              <text
-                x="180"
-                y="125"
-                textAnchor="middle"
-                fontSize="5"
-                fill="var(--lp-ink-soft)"
-                style={{ fontFamily: "var(--font-sans), sans-serif" }}
-              >
-                industry &amp; public learn
-              </text>
+              {/* outer border */}
+              <rect x="0.5" y="0.5" width="239" height="199" fill="none" stroke="#DCD5C6" rx="4" />
             </svg>
           </div>
         </div>
