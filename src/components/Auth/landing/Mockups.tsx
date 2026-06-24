@@ -23,6 +23,8 @@ import {
   MessageSquareQuote,
   ArrowLeft,
   ChevronRight,
+  Lock,
+  CheckCircle2,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -781,6 +783,64 @@ export function MasterMockup() {
     { l: "Inference", v: 70 },
     { l: "Vocabulary", v: 85 },
   ];
+  const achievements = [
+    {
+      name: "Avid Reader",
+      icon: BookOpen,
+      colorBg: "bg-blue-500",
+      colorText: "text-blue-600 dark:text-blue-400",
+      colorRing: "#3b82f6",
+      colorDot: "bg-blue-500",
+      desc: "Read 10 texts",
+      progress: 60,
+      current: "8",
+      target: "10",
+      unlocked: true,
+      dotsEarned: 1,
+    },
+    {
+      name: "Word Collector",
+      icon: BookText,
+      colorBg: "bg-green-500",
+      colorText: "text-green-600 dark:text-green-400",
+      colorRing: "#22c55e",
+      colorDot: "bg-green-500",
+      desc: "Collect 100 vocabulary items",
+      progress: 44,
+      current: "72",
+      target: "100",
+      unlocked: true,
+      dotsEarned: 1,
+    },
+    {
+      name: "Grammar Gamer",
+      icon: Gamepad2,
+      colorBg: "bg-amber-500",
+      colorText: "text-amber-600 dark:text-amber-400",
+      colorRing: "#f59e0b",
+      colorDot: "bg-amber-500",
+      desc: "Play 5 grammar games",
+      progress: 60,
+      current: "3",
+      target: "5",
+      unlocked: false,
+      dotsEarned: 0,
+    },
+    {
+      name: "Curious Learner",
+      icon: Sparkles,
+      colorBg: "bg-cyan-500",
+      colorText: "text-cyan-600 dark:text-cyan-400",
+      colorRing: "#06b6d4",
+      colorDot: "bg-cyan-500",
+      desc: "Ask AI Tutor 20 questions",
+      progress: 47,
+      current: "12",
+      target: "20",
+      unlocked: true,
+      dotsEarned: 1,
+    },
+  ];
   return (
     <MockupFrame label="DASHBOARD · Mr.🆖 ProReader">
       <div className="grid items-start gap-4 sm:grid-cols-2">
@@ -950,21 +1010,100 @@ export function MasterMockup() {
         {/* Column 2 — rewards & ranking: achievements + leaderboard */}
         <div className="flex flex-col gap-4">
           <div className="rounded-xl border border-[var(--lp-rule)] p-3">
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
-              Achievements
+            <div className="mb-2 flex items-center gap-1.5">
+              <Trophy className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
+                Achievements
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
-              {[
-                { icon: BookOpen, label: "Avid Reader", c: "bg-blue-100 text-blue-600" },
-                { icon: BookText, label: "Word Collector", c: "bg-green-100 text-green-600" },
-                { icon: Gamepad2, label: "Grammar Gamer", c: "bg-amber-100 text-amber-600" },
-                { icon: Sparkles, label: "Curious Learner", c: "bg-cyan-100 text-cyan-600" },
-              ].map((a) => (
-                <div key={a.label} className="flex items-center gap-2">
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${a.c}`}>
-                    <a.icon className="h-4 w-4" />
+              {achievements.map((a) => (
+                <div
+                  key={a.name}
+                  className={`flex flex-col items-center rounded-2xl border-2 p-2.5 ${
+                    a.unlocked
+                      ? "border-transparent bg-[var(--lp-surface)] shadow-sm"
+                      : "border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40"
+                  }`}
+                >
+                  {/* medal circle with progress ring */}
+                  <div className="relative mb-2 h-12 w-12">
+                    <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full -rotate-90">
+                      <circle cx="50" cy="50" r="44" fill="none" stroke="var(--lp-rule)" strokeWidth="5" />
+                      {a.unlocked ? (
+                        <circle cx="50" cy="50" r="44" fill="none" stroke={a.colorRing} strokeWidth="5" />
+                      ) : (
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="44"
+                          fill="none"
+                          stroke={a.colorRing}
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeDasharray="276"
+                          strokeDashoffset={276 - Math.round((a.progress / 100) * 276)}
+                        />
+                      )}
+                    </svg>
+                    {/* inner circle */}
+                    <div
+                      className={`absolute inset-[10px] flex items-center justify-center rounded-full ${
+                        a.unlocked ? `${a.colorBg} shadow-sm` : "bg-[var(--lp-paper-2)]"
+                      }`}
+                    >
+                      {a.unlocked ? (
+                        <a.icon className="h-4 w-4 text-white" />
+                      ) : (
+                        <Lock className="h-3.5 w-3.5 text-[var(--lp-ink-soft)] opacity-50" />
+                      )}
+                    </div>
+                    {/* check badge */}
+                    {a.unlocked && (
+                      <span className="absolute -bottom-0.5 -right-0.5 rounded-full bg-[var(--lp-surface)] p-0.5">
+                        <CheckCircle2 className={`h-3 w-3 ${a.colorText}`} />
+                      </span>
+                    )}
+                  </div>
+                  {/* title */}
+                  <span
+                    className={`text-center text-[10px] font-bold leading-tight ${
+                      a.unlocked ? "text-[var(--lp-ink)]" : "text-[var(--lp-ink-soft)]"
+                    }`}
+                  >
+                    {a.name}
                   </span>
-                  <span className="text-xs font-medium leading-tight text-[var(--lp-ink)]">{a.label}</span>
+                  {/* milestone label */}
+                  <span
+                    className={`mt-0.5 text-center text-[8px] leading-tight ${
+                      a.unlocked ? a.colorText : "text-[var(--lp-ink-soft)] opacity-70"
+                    }`}
+                  >
+                    {a.desc}
+                  </span>
+                  {/* progress bar */}
+                  <div className="mt-1.5 w-full">
+                    <div className="h-0.5 w-full overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                      <div
+                        className={`h-full rounded-full ${a.unlocked ? a.colorBg : "bg-[var(--lp-ink-soft)] opacity-40"}`}
+                        style={{ width: `${a.progress}%` }}
+                      />
+                    </div>
+                    <span className="mt-0.5 block text-center text-[7px] text-[var(--lp-ink-soft)]">
+                      {a.current} / {a.target}
+                    </span>
+                  </div>
+                  {/* milestone dots */}
+                  <div className="mt-1 flex justify-center gap-0.5">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1 w-1 rounded-full ${
+                          i < a.dotsEarned ? a.colorDot : "bg-[var(--lp-ink-soft)] opacity-30"
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
