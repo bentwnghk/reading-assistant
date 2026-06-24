@@ -118,6 +118,80 @@
   size: "A4";
 }
 
+/* ── Landing page editorial tokens ────────────────────────────── */
+:root {
+  --lp-paper: #fbf8f1;
+  --lp-paper-2: #f4efe3;
+  --lp-ink: #17161a;
+  --lp-ink-soft: #5c5751;
+  --lp-rule: #dcd5c6;
+  --lp-surface: #ffffff;
+  --lp-accent: #1e3a8a;
+  --lp-accent-2: #2545a8;
+  --lp-highlight: #f5c842;
+  --lp-highlight-soft: #fbe7a1;
+}
+.dark {
+  --lp-paper: #15140f;
+  --lp-paper-2: #1c1b15;
+  --lp-ink: #f4efe3;
+  --lp-ink-soft: #b3ad9d;
+  --lp-rule: #34322a;
+  --lp-surface: #211f18;
+  --lp-accent: #93b4ff;
+  --lp-accent-2: #a8c2ff;
+  --lp-highlight: #f5c842;
+  --lp-highlight-soft: #5c4a14;
+}
+
+/* Highlighter marker stroke behind text — the signature motif. */
+.lp-marker {
+  background-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 18%,
+    var(--lp-highlight-soft) 18%,
+    var(--lp-highlight-soft) 92%,
+    transparent 92%
+  );
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  padding: 0 0.12em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.lp-marker--draw {
+  background-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 18%,
+    var(--lp-highlight-soft) 18%,
+    var(--lp-highlight-soft) 92%,
+    transparent 92%
+  );
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  animation: lp-draw-marker 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
+}
+@keyframes lp-draw-marker {
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+.lp-hairline {
+  border-color: var(--lp-rule);
+}
+
+/* Reduced motion: disable the draw-on animation. */
+@media (prefers-reduced-motion: reduce) {
+  .lp-marker--draw {
+    animation: none;
+    background-size: 100% 100%;
+  }
+}
+
 .dialog-safe-width {
   max-width: min(28rem, calc(100dvw - 2rem));
   width: calc(100dvw - 2rem);

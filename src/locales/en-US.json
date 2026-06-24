@@ -263,6 +263,70 @@
       }
     }
   },
+  "landing": {
+    "hero": {
+      "title": "Turn any English text into a lesson you'll actually",
+      "titleHighlight": "remember.",
+      "seeItWork": "See how it works",
+      "finalTitle": "Your next reading lesson is one sign-in away."
+    },
+    "chapters": {
+      "encounter": {
+        "eyebrow": "Encounter",
+        "title": "Any text in. A lesson out.",
+        "lede": "Snap a photo, drop a PDF, or pick from the Text Repository — every DSE past paper is already there. The AI pulls out the text, and the lesson begins.",
+        "bullets": [
+          "Snap a photo or upload a PDF",
+          "Browse the shared Text Repository",
+          "Every DSE past paper, ready to read"
+        ]
+      },
+      "understand": {
+        "eyebrow": "Understand",
+        "title": "Make sense of it.",
+        "lede": "Flip between Original, Adapted, and Simplified versions. Pull up a mind map, watch the AI visualization, and let the difficulty metrics tell you exactly what you're dealing with.",
+        "bullets": [
+          "Original · Adapted · Simplified",
+          "Mind map & AI visualization",
+          "CEFR levels & readability scores"
+        ]
+      },
+      "practice": {
+        "eyebrow": "Practice",
+        "title": "Practice until it sticks.",
+        "lede": "Flashcards with spaced repetition resurface the words you're about to forget. Spelling and grammar games turn review into something you'll actually look forward to.",
+        "bullets": [
+          "Flashcards with spaced repetition",
+          "Spelling & vocabulary games",
+          "Five grammar games"
+        ]
+      },
+      "master": {
+        "eyebrow": "Master",
+        "title": "Watch yourself improve.",
+        "lede": "Take the reading test and see your skill scores climb. Build a vocabulary that travels with you, compete on the leaderboard, and earn achievements along the way.",
+        "bullets": [
+          "Reading test with skill breakdown",
+          "My Vocabulary hub with mastery tracking",
+          "Leaderboards & achievements"
+        ]
+      }
+    },
+    "classrooms": {
+      "eyebrow": "For classrooms & schools",
+      "title": "Everything a teacher needs to run with it.",
+      "bullets": [
+        "Track class activity & scores in real time",
+        "Share vocabulary & review lists with students",
+        "Export detailed Excel reports",
+        "Upload texts for your classes or school"
+      ]
+    },
+    "faq": {
+      "more": "See more questions",
+      "fewer": "Show fewer"
+    }
+  },
   "reading": {
     "primary3to6": "Primary 3-6",
     "form1to3": "Secondary 1-3",
