@@ -9,8 +9,8 @@ import {
   Volume2,
   Trophy,
   BarChart3,
+  FileDown,
   Sparkles,
-  Check,
   Target,
   BookOpen,
   BookText,
@@ -867,78 +867,269 @@ export function MasterMockup() {
   );
 }
 
-/* ── 6. CLASSROOMS — teacher dashboard ── */
+/* ── 6. CLASSROOMS — teacher dashboard with 4 real charts ── */
 export function DashboardMockup() {
-  const bars = [50, 75, 40, 88, 60, 92, 68];
-  const days = ["M", "T", "W", "T", "F", "S", "S"];
-  const highlight = [1, 3, 5];
+  // Chart 1: Daily Learning Activity — stacked bars (5 series)
+  const dailyData = [
+    { name: "Chloe", segs: [12, 9, 7, 5, 3] },
+    { name: "Marcus", segs: [8, 7, 5, 4] },
+    { name: "Priya", segs: [6, 5, 4, 3] },
+    { name: "Ethan", segs: [10, 8, 6, 4, 2] },
+    { name: "Sofia", segs: [11, 9, 7, 6, 4] },
+  ];
+  const dailyColors = ["#3b82f6", "#8b5cf6", "#22c55e", "#f97316", "#eab308"];
+  const dailyLabels = ["Read", "Summary", "Mind Map", "Glossary", "Test"];
+
+  // Chart 2: Vocabulary Growth — multi-line area
+  const vocabLines = [
+    { color: "#3b82f6", name: "Chloe", pts: "10,85 45,75 80,62 115,48 150,35 185,20" },
+    { color: "#22c55e", name: "Sofia", pts: "10,87 45,80 80,70 115,58 150,45 185,32" },
+    { color: "#ef4444", name: "Ethan", pts: "10,89 45,84 80,78 115,70 150,62 185,52" },
+  ];
+
+  // Chart 3: Reading Texts — quartile-colored bars
+  const readingData = [
+    { name: "Chloe", val: 18, q: 3 },
+    { name: "Marcus", val: 11, q: 2 },
+    { name: "Priya", val: 6, q: 1 },
+    { name: "Ethan", val: 15, q: 3 },
+    { name: "Sofia", val: 23, q: 4 },
+  ];
+  const quartileColors = ["#ef4444", "#f97316", "#22c55e", "#3b82f6"];
+
+  // Chart 4: AI Features Usage — stacked bars (4 series)
+  const aiData = [
+    { name: "Chloe", segs: [8, 5, 4, 3] },
+    { name: "Marcus", segs: [6, 4, 3, 2] },
+    { name: "Priya", segs: [4, 3, 2, 2] },
+    { name: "Ethan", segs: [7, 5, 4, 3] },
+    { name: "Sofia", segs: [9, 6, 5, 4] },
+  ];
+  const aiColors = ["#3b82f6", "#8b5cf6", "#0ea5e9", "#22c55e"];
+  const aiLabels = ["Summary", "Mind Map", "Adapted", "Glossary"];
+
+  const gridLines = [15, 38, 61];
+  const studentNames = dailyData.map((d) => d.name);
+
   return (
     <MockupFrame label="Teacher Dashboard · Form 3B">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
-          <div className="mb-3 flex items-center justify-between text-[var(--lp-ink-soft)]">
-            <div className="flex items-center gap-1.5">
-              <BarChart3 className="h-3.5 w-3.5" />
-              <span className="font-mono text-[10px] uppercase tracking-wider">Daily activity</span>
-            </div>
-            <span className="font-mono text-[10px]">last 7 days</span>
-          </div>
-          <div className="relative h-24">
-            {/* gridlines */}
-            <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="border-t border-dashed border-[var(--lp-rule)]" />
-              ))}
-            </div>
-            {/* bars */}
-            <div className="absolute inset-0 flex items-end gap-2">
-              {bars.map((b, i) => (
-                <div
-                  key={i}
-                  className={`flex-1 rounded-t ${
-                    highlight.includes(i) ? "bg-[var(--lp-accent)]" : "bg-[var(--lp-accent)]/60"
-                  }`}
-                  style={{ height: `${b}%` }}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="mt-1.5 flex gap-2">
-            {days.map((d, i) => (
-              <span
-                key={i}
-                className={`flex-1 text-center font-mono text-[9px] ${
-                  highlight.includes(i) ? "font-bold text-[var(--lp-accent)]" : "text-[var(--lp-ink-soft)]"
-                }`}
+      {/* header / filter bar */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-[var(--lp-accent)]" />
+          <span className="text-xs font-semibold text-[var(--lp-ink)]">Form 3B</span>
+          <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">28 students</span>
+        </div>
+        <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] px-2 py-1 text-[10px] font-medium text-[var(--lp-ink-soft)]">
+          <FileDown className="h-3 w-3" /> Export
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        {/* ── Chart 1: Daily Learning Activity ── */}
+        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+          <p className="text-xs font-semibold text-[var(--lp-ink)]">Daily Learning Activity</p>
+          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">
+            Total: <span className="font-bold text-[var(--lp-ink)]">247</span>
+          </p>
+          <svg viewBox="0 0 200 110" className="w-full">
+            {gridLines.map((y) => (
+              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
+            ))}
+            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
+            {dailyData.map((student, si) => {
+              let cumY = 95;
+              const barX = si * 36 + 14;
+              return student.segs.map((h, hi) => {
+                cumY -= h;
+                return (
+                  <rect
+                    key={`d-${si}-${hi}`}
+                    x={barX}
+                    y={cumY}
+                    width={20}
+                    height={h}
+                    fill={dailyColors[hi]}
+                  />
+                );
+              });
+            })}
+            {studentNames.map((nm, si) => (
+              <text
+                key={nm}
+                x={si * 36 + 24}
+                y={106}
+                textAnchor="end"
+                fontSize="6"
+                fill="var(--lp-ink-soft)"
+                transform={`rotate(-30 ${si * 36 + 24} 106)`}
               >
-                {d}
+                {nm}
+              </text>
+            ))}
+          </svg>
+          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            {dailyLabels.map((l, i) => (
+              <span key={l} className="inline-flex items-center gap-0.5 text-[8px] text-[var(--lp-ink-soft)]">
+                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: dailyColors[i] }} />
+                {l}
               </span>
             ))}
           </div>
         </div>
-        <div className="rounded-xl border border-[var(--lp-rule)] p-3">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
-            Students
-          </div>
-          {[
-            { n: "Chloe L.", s: "92%", ok: true },
-            { n: "Marcus T.", s: "78%", ok: true },
-            { n: "Priya K.", s: "61%", ok: false },
-          ].map((st) => (
-            <div key={st.n} className="flex items-center justify-between py-1 text-sm">
-              <span className="flex items-center gap-2 text-[var(--lp-ink)]">
-                <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full ${
-                    st.ok ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"
-                  }`}
-                >
-                  <Check className="h-3 w-3" />
-                </span>
-                {st.n}
+
+        {/* ── Chart 2: Vocabulary Growth ── */}
+        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+          <p className="text-xs font-semibold text-[var(--lp-ink)]">Vocabulary Growth</p>
+          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">Last 30 days</p>
+          <svg viewBox="0 0 200 110" className="w-full">
+            {gridLines.map((y) => (
+              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
+            ))}
+            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
+            {/* area fills */}
+            {vocabLines.map((line) => (
+              <polygon
+                key={`fill-${line.name}`}
+                points={`${line.pts} 185,95 10,95`}
+                fill={line.color}
+                opacity="0.08"
+              />
+            ))}
+            {/* trend lines */}
+            {vocabLines.map((line) => (
+              <polyline
+                key={`line-${line.name}`}
+                points={line.pts}
+                fill="none"
+                stroke={line.color}
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            ))}
+            {/* endpoint dots */}
+            {vocabLines.map((line) => {
+              const lastPt = line.pts.split(" ").pop()!.split(",");
+              return <circle key={`dot-${line.name}`} cx={lastPt[0]} cy={lastPt[1]} r="2" fill={line.color} />;
+            })}
+            <text x="10" y="106" textAnchor="middle" fontSize="5" fill="var(--lp-ink-soft)">Jun 1</text>
+            <text x="80" y="106" textAnchor="middle" fontSize="5" fill="var(--lp-ink-soft)">Jun 10</text>
+            <text x="150" y="106" textAnchor="middle" fontSize="5" fill="var(--lp-ink-soft)">Jun 20</text>
+          </svg>
+          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            {vocabLines.map((line) => (
+              <span key={line.name} className="inline-flex items-center gap-0.5 text-[8px] text-[var(--lp-ink-soft)]">
+                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: line.color }} />
+                {line.name}
               </span>
-              <span className="font-mono text-xs text-[var(--lp-ink-soft)]">{st.s}</span>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* ── Chart 3: Reading Texts ── */}
+        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+          <p className="text-xs font-semibold text-[var(--lp-ink)]">Reading Texts</p>
+          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">
+            Avg: <span className="font-bold text-[var(--lp-ink)]">15</span>
+          </p>
+          <svg viewBox="0 0 200 110" className="w-full">
+            {gridLines.map((y) => (
+              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
+            ))}
+            {/* dashed class-average reference line */}
+            <line x1="0" y1="50" x2="200" y2="50" stroke="var(--lp-ink)" strokeDasharray="4 3" strokeWidth="0.6" opacity="0.4" />
+            <text x="197" y="48" textAnchor="end" fontSize="5" fill="var(--lp-ink-soft)">avg 15</text>
+            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
+            {readingData.map((s, si) => {
+              const barH = s.val * 3;
+              return (
+                <rect
+                  key={s.name}
+                  x={si * 36 + 14}
+                  y={95 - barH}
+                  width={20}
+                  height={barH}
+                  fill={quartileColors[s.q - 1]}
+                  rx={2}
+                />
+              );
+            })}
+            {readingData.map((s, si) => (
+              <text
+                key={s.name}
+                x={si * 36 + 24}
+                y={106}
+                textAnchor="end"
+                fontSize="6"
+                fill="var(--lp-ink-soft)"
+                transform={`rotate(-30 ${si * 36 + 24} 106)`}
+              >
+                {s.name}
+              </text>
+            ))}
+          </svg>
+          <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-0.5">
+            {["Q1", "Q2", "Q3", "Q4"].map((l, i) => (
+              <span key={l} className="inline-flex items-center gap-0.5 text-[7px] text-[var(--lp-ink-soft)]">
+                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: quartileColors[i] }} />
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Chart 4: AI Features Usage ── */}
+        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+          <p className="text-xs font-semibold text-[var(--lp-ink)]">AI Features Usage</p>
+          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">
+            Total: <span className="font-bold text-[var(--lp-ink)]">189</span>
+          </p>
+          <svg viewBox="0 0 200 110" className="w-full">
+            {gridLines.map((y) => (
+              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
+            ))}
+            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
+            {aiData.map((student, si) => {
+              let cumY = 95;
+              const barX = si * 36 + 14;
+              return student.segs.map((h, hi) => {
+                const scaledH = h * 2;
+                cumY -= scaledH;
+                return (
+                  <rect
+                    key={`a-${si}-${hi}`}
+                    x={barX}
+                    y={cumY}
+                    width={20}
+                    height={scaledH}
+                    fill={aiColors[hi]}
+                  />
+                );
+              });
+            })}
+            {studentNames.map((nm, si) => (
+              <text
+                key={nm}
+                x={si * 36 + 24}
+                y={106}
+                textAnchor="end"
+                fontSize="6"
+                fill="var(--lp-ink-soft)"
+                transform={`rotate(-30 ${si * 36 + 24} 106)`}
+              >
+                {nm}
+              </text>
+            ))}
+          </svg>
+          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            {aiLabels.map((l, i) => (
+              <span key={l} className="inline-flex items-center gap-0.5 text-[8px] text-[var(--lp-ink-soft)]">
+                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: aiColors[i] }} />
+                {l}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </MockupFrame>
