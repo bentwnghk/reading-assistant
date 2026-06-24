@@ -821,22 +821,21 @@ export function MasterMockup() {
                 <div className="mb-2 flex items-center gap-1.5">
                   <span className="text-xs font-bold text-[var(--lp-accent)]">1.</span>
                   <span className="rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
-                    Vocabulary in Context
+                    Inference
                   </span>
                   <span className="rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
-                    Vocabulary
+                    Inference
                   </span>
                 </div>
                 <p className="mb-3 text-sm font-medium text-[var(--lp-ink)]">
-                  The word <span className="font-semibold">“flourish”</span> in the passage most nearly
-                  means…
+                  What can we infer about why the defenders believe recycling will improve?
                 </p>
                 <div className="space-y-1.5">
                   {[
-                    { letter: "A", text: "to disappear completely", selected: false },
-                    { letter: "B", text: "to grow or develop successfully", selected: true },
-                    { letter: "C", text: "to remain unchanged", selected: false },
-                    { letter: "D", text: "to cause problems", selected: false },
+                    { letter: "A", text: "They have proof that costs will decrease", selected: false },
+                    { letter: "B", text: "They trust that time and experience will help", selected: true },
+                    { letter: "C", text: "They plan to redesign the process themselves", selected: false },
+                    { letter: "D", text: "They think the critics lied about the costs", selected: false },
                   ].map((opt) => (
                     <div
                       key={opt.letter}
