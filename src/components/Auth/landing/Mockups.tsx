@@ -96,22 +96,6 @@ export function HeroReadingMockup() {
         <p className="mt-1.5 text-sm italic text-[var(--lp-ink-soft)]">
           “The luminous jellyfish pulsed gently in the dark water.”
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {[
-            { l: "Again", t: "<1d", c: "border-rose-300 text-rose-600 hover:bg-rose-50" },
-            { l: "Hard", t: "1d", c: "border-amber-300 text-amber-700 hover:bg-amber-50" },
-            { l: "Good", t: "3d", c: "border-[var(--lp-accent)]/40 text-[var(--lp-accent)] hover:bg-[var(--lp-accent)]/5" },
-            { l: "Easy", t: "7d", c: "border-emerald-300 text-emerald-700 hover:bg-emerald-50" },
-          ].map((b) => (
-            <span
-              key={b.l}
-              className={`inline-flex items-center gap-1.5 rounded-lg border bg-[var(--lp-surface)] px-3 py-1.5 text-xs font-semibold ${b.c}`}
-            >
-              {b.l}
-              <span className="font-mono text-[10px] opacity-60">{b.t}</span>
-            </span>
-          ))}
-        </div>
       </div>
     </MockupFrame>
   );
@@ -318,30 +302,41 @@ export function PracticeMockup() {
         </div>
       )}
 
-      {/* scramble + grammar chip */}
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
-            Word scramble
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {["L", "E", "V", "E", "R"].map((ch, i) => (
-              <span
-                key={i}
-                className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] font-display text-sm font-semibold text-[var(--lp-ink)]"
-              >
-                {ch}
-              </span>
-            ))}
-          </div>
+      {/* word scramble — flourish */}
+      <div className="mt-3 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
+          Word scramble
         </div>
-        <div className="flex flex-col justify-center gap-1 rounded-xl border border-[var(--lp-highlight)] bg-[var(--lp-highlight)]/20 p-3">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-[var(--lp-ink)]" />
-            <span className="text-xs font-semibold text-[var(--lp-ink)]">Grammar Roulette</span>
-          </div>
-          <span className="font-mono text-xs text-[var(--lp-ink-soft)]">1,240 pts</span>
+        <p className="text-xs text-[var(--lp-ink)]">to grow or develop successfully; to thrive</p>
+        <p className="text-xs text-[var(--lp-ink-soft)]">茁壯成長；繁榮</p>
+        {/* blanks — 8 letters to guess */}
+        <div className="mt-2.5 flex gap-1.5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <span
+              key={i}
+              className="h-6 w-4 border-b-2 border-[var(--lp-ink-soft)]/50"
+              aria-hidden
+            />
+          ))}
         </div>
+        {/* scrambled letter tiles */}
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {["L", "O", "U", "R", "I", "S", "H", "F"].map((ch, i) => (
+            <span
+              key={i}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] font-display text-sm font-semibold text-[var(--lp-ink)]"
+            >
+              {ch}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* grammar chip */}
+      <div className="mt-3 flex items-center gap-2 rounded-xl border border-[var(--lp-highlight)] bg-[var(--lp-highlight)]/20 p-3">
+        <Trophy className="h-4 w-4 text-[var(--lp-ink)]" />
+        <span className="text-xs font-semibold text-[var(--lp-ink)]">Grammar Roulette</span>
+        <span className="ml-auto font-mono text-xs text-[var(--lp-ink-soft)]">1,240 pts</span>
       </div>
     </MockupFrame>
   );
@@ -488,21 +483,48 @@ export function MasterMockup() {
 /* ── 6. CLASSROOMS — teacher dashboard ── */
 export function DashboardMockup() {
   const bars = [40, 65, 50, 80, 55, 90, 70];
+  const days = ["M", "T", "W", "T", "F", "S", "S"];
   return (
     <MockupFrame label="Teacher Dashboard · Form 3B">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
-          <div className="mb-3 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span className="font-mono text-[10px] uppercase tracking-wider">Daily activity</span>
+          <div className="mb-3 flex items-center justify-between text-[var(--lp-ink-soft)]">
+            <div className="flex items-center gap-1.5">
+              <BarChart3 className="h-3.5 w-3.5" />
+              <span className="font-mono text-[10px] uppercase tracking-wider">Daily activity</span>
+            </div>
+            <span className="font-mono text-[10px]">this week</span>
           </div>
-          <div className="flex h-20 items-end gap-1.5">
-            {bars.map((b, i) => (
-              <div
+          <div className="relative h-24">
+            {/* gridlines */}
+            <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="border-t border-dashed border-[var(--lp-rule)]" />
+              ))}
+            </div>
+            {/* bars */}
+            <div className="absolute inset-0 flex items-end gap-2">
+              {bars.map((b, i) => (
+                <div
+                  key={i}
+                  className={`flex-1 rounded-t ${
+                    i === 5 ? "bg-[var(--lp-accent)]" : "bg-[var(--lp-accent)]/60"
+                  }`}
+                  style={{ height: `${b}%` }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="mt-1.5 flex gap-2">
+            {days.map((d, i) => (
+              <span
                 key={i}
-                className="flex-1 rounded-t bg-[var(--lp-accent)]/70"
-                style={{ height: `${b}%` }}
-              />
+                className={`flex-1 text-center font-mono text-[9px] ${
+                  i === 5 ? "font-bold text-[var(--lp-accent)]" : "text-[var(--lp-ink-soft)]"
+                }`}
+              >
+                {d}
+              </span>
             ))}
           </div>
         </div>
