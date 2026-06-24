@@ -86,7 +86,7 @@ type ChapterProps = {
 
 function Chapter({ num, eyebrow, title, lede, bullets, mockup, flip }: ChapterProps) {
   const text = (
-    <div className="flex flex-col justify-center">
+    <div className="flex min-w-0 flex-col justify-center">
       <motion.div variants={fadeUp} className="mb-4 flex items-baseline gap-4">
         <span className="font-mono text-5xl font-light text-[var(--lp-accent)]/30 sm:text-6xl">{num}</span>
         <span className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--lp-accent)]">{eyebrow}</span>
@@ -113,7 +113,7 @@ function Chapter({ num, eyebrow, title, lede, bullets, mockup, flip }: ChapterPr
   );
 
   const visual = (
-    <motion.div variants={fadeUp} className={flip ? "lg:order-first" : ""}>
+    <motion.div variants={fadeUp} className={`min-w-0 ${flip ? "lg:order-first" : ""}`}>
       {mockup}
     </motion.div>
   );
