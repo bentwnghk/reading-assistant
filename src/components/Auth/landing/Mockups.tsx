@@ -241,24 +241,43 @@ export function AITutorMockup() {
         </div>
       </div>
 
-      {/* quick questions */}
+      {/* quick questions + answer help */}
       <div className="mt-3 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-2.5">
-        <p className="mb-1.5 flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
-          <Lightbulb className="h-3 w-3" /> Quick Questions:
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {[
-            { icon: Lightbulb, label: "Main idea" },
-            { icon: BookOpen, label: "Vocab help" },
-            { icon: MessageSquareQuote, label: "Explain" },
-          ].map((q) => (
-            <span
-              key={q.label}
-              className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1 text-[11px] text-[var(--lp-ink)]"
-            >
-              <q.icon className="h-3 w-3" /> {q.label}
-            </span>
-          ))}
+        {/* quick questions */}
+        <div>
+          <p className="mb-1.5 flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+            <Lightbulb className="h-3 w-3" /> Quick Questions:
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { icon: Lightbulb, label: "Main idea" },
+              { icon: BookOpen, label: "Vocab help" },
+              { icon: MessageSquareQuote, label: "Explain" },
+            ].map((q) => (
+              <span
+                key={q.label}
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1 text-[11px] text-[var(--lp-ink)]"
+              >
+                <q.icon className="h-3 w-3" /> {q.label}
+              </span>
+            ))}
+          </div>
+        </div>
+        {/* answer help */}
+        <div className="mt-2.5">
+          <p className="mb-1.5 flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+            <ImagePlus className="h-3 w-3" /> Answer Help:
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {["Hint me", "Step-by-step", "Give answer"].map((label) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1 text-[11px] text-[var(--lp-ink)]"
+              >
+                <ImagePlus className="h-3 w-3" /> {label}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
