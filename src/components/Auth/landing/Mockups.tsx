@@ -340,7 +340,7 @@ export function PracticeMockup() {
               Grammar Workshop
             </span>
             <span className="rounded-full border border-[var(--lp-rule)] px-2 py-0.5 text-[10px] text-[var(--lp-ink-soft)]">
-              Past Tense
+              Present Perfect Tense
             </span>
           </div>
           <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">3 / 10 · 120 pts</span>
@@ -349,32 +349,28 @@ export function PracticeMockup() {
           <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: "30%" }} />
         </div>
 
-        {/* sentence with inline slots */}
+        {/* sentence with inline slot */}
         <div className="rounded-lg bg-[var(--lp-paper-2)] p-3 text-sm leading-relaxed text-[var(--lp-ink)]">
-          The children{" "}
+          She{" "}
           <span className="mx-0.5 inline-flex items-center rounded-md border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--lp-accent)]">
-            went
+            has
           </span>{" "}
-          to the park{" "}
-          <span className="mx-0.5 inline-flex min-w-[56px] items-center justify-center rounded-md border border-dashed border-[var(--lp-ink-soft)]/40 bg-[var(--lp-paper-2)] px-2 py-0.5 text-[10px] text-[var(--lp-ink-soft)]">
-            Time
-          </span>
-          .
+          finished her homework.
         </div>
 
         {/* pattern hint */}
-        <p className="mt-2 font-mono text-[10px] text-[var(--lp-ink-soft)]">Pattern: [Verb] + [Time]</p>
+        <p className="mt-2 font-mono text-[10px] text-[var(--lp-ink-soft)]">Pattern: [auxiliary] + [past participle]</p>
 
         {/* word bank */}
         <div className="mt-2">
           <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">Word Bank</span>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {[
-              { w: "went", used: true },
-              { w: "go", used: false },
-              { w: "played", used: false },
-              { w: "yesterday", used: false },
-              { w: "tomorrow", used: false },
+              { w: "had", used: false },
+              { w: "was", used: false },
+              { w: "is", used: false },
+              { w: "has", used: true },
+              { w: "did", used: false },
             ].map((c) => (
               <span
                 key={c.w}
