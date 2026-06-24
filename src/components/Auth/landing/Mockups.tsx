@@ -44,7 +44,7 @@ function MockupFrame({
         <span className="h-2.5 w-2.5 rounded-full bg-[var(--lp-rule)]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[var(--lp-rule)]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[var(--lp-rule)]" />
-        <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]">
+        <span className="ml-2 font-mono text-[10px] tracking-[0.18em] text-[var(--lp-ink-soft)]">
           {label}
         </span>
       </div>
