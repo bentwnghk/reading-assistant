@@ -15,6 +15,12 @@ import {
   BookOpen,
   BookText,
   Gamepad2,
+  Bot,
+  User,
+  Send,
+  ImagePlus,
+  Lightbulb,
+  MessageSquareQuote,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -201,6 +207,72 @@ export function UnderstandMockup() {
             <Sparkles className="h-7 w-7 text-[var(--lp-accent)]" />
           </div>
         </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 3b. AI TUTOR — context-aware reading coach chat ── */
+export function AITutorMockup() {
+  return (
+    <MockupFrame label="AI Tutor">
+      {/* messages */}
+      <div className="space-y-3">
+        {/* user (right) */}
+        <div className="flex flex-row-reverse gap-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white dark:bg-blue-600">
+            <User className="h-4 w-4" />
+          </span>
+          <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-blue-500 px-3 py-2 text-sm text-white dark:bg-blue-600">
+            Why do defenders say it’s unfair to rush to judgment?
+          </div>
+        </div>
+        {/* assistant (left) */}
+        <div className="flex gap-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] text-[var(--lp-ink-soft)]">
+            <Bot className="h-4 w-4" />
+          </span>
+          <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-3 py-2 text-sm leading-relaxed text-[var(--lp-ink)]">
+            Good thinking! 🤔 The defenders point out recycling has only{" "}
+            <em className="not-italic font-semibold text-[var(--lp-accent)]">just begun</em> — so
+            they feel it’s too early to judge. What might happen as the industry{" "}
+            <em className="not-italic font-semibold text-[var(--lp-accent)]">matures</em>?
+          </div>
+        </div>
+      </div>
+
+      {/* quick questions */}
+      <div className="mt-3 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-2.5">
+        <p className="mb-1.5 flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <Lightbulb className="h-3 w-3" /> Quick Questions:
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { icon: Lightbulb, label: "Main idea" },
+            { icon: BookOpen, label: "Vocab help" },
+            { icon: MessageSquareQuote, label: "Explain" },
+          ].map((q) => (
+            <span
+              key={q.label}
+              className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1 text-[11px] text-[var(--lp-ink)]"
+            >
+              <q.icon className="h-3 w-3" /> {q.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* input */}
+      <div className="mt-3 flex items-center gap-2">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--lp-rule)] text-[var(--lp-ink-soft)]">
+          <ImagePlus className="h-4 w-4" />
+        </span>
+        <div className="flex-1 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-3 py-2.5 text-xs text-[var(--lp-ink-soft)]">
+          Type your question...
+        </div>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--lp-accent)] text-white">
+          <Send className="h-4 w-4" />
+        </span>
       </div>
     </MockupFrame>
   );

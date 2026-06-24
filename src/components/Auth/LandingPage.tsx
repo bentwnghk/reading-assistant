@@ -21,6 +21,7 @@ import {
   HeroReadingMockup,
   UploadMockup,
   UnderstandMockup,
+  AITutorMockup,
   PracticeMockup,
   MasterMockup,
   DashboardMockup,
@@ -146,7 +147,17 @@ export function LandingPage() {
 
   const chapters: Array<{ key: string; num: string; mockup: React.ReactNode; flip?: boolean }> = [
     { key: "encounter", num: "01", mockup: <UploadMockup /> },
-    { key: "understand", num: "02", mockup: <UnderstandMockup />, flip: true },
+    {
+      key: "understand",
+      num: "02",
+      mockup: (
+        <div className="flex flex-col gap-4">
+          <UnderstandMockup />
+          <AITutorMockup />
+        </div>
+      ),
+      flip: true,
+    },
     { key: "practice", num: "03", mockup: <PracticeMockup /> },
     { key: "master", num: "04", mockup: <MasterMockup />, flip: true },
   ];
