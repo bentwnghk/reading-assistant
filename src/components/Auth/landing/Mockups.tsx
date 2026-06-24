@@ -21,6 +21,8 @@ import {
   ImagePlus,
   Lightbulb,
   MessageSquareQuote,
+  ArrowLeft,
+  ChevronRight,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -773,6 +775,7 @@ export function PracticeMockup() {
 
 /* ── 5. MASTER — test scorecard + vocabulary + achievements + leaderboard ── */
 export function MasterMockup() {
+  const [practiceMode, setPracticeMode] = useState(false);
   const skills = [
     { l: "Main idea", v: 90 },
     { l: "Inference", v: 70 },
@@ -783,51 +786,140 @@ export function MasterMockup() {
       <div className="grid items-start gap-4 sm:grid-cols-2">
         {/* Column 1 — your stats: scorecard + vocabulary */}
         <div className="flex flex-col gap-4">
-          {/* scorecard */}
-          <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="relative flex h-14 w-14 items-center justify-center">
-                <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--lp-rule)" strokeWidth="4" />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15.5"
-                    fill="none"
-                    stroke="var(--lp-accent)"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeDasharray="78 100"
-                  />
-                </svg>
-                <span className="absolute font-display text-base font-bold text-[var(--lp-ink)]">8/10</span>
-              </div>
-              <div>
-                <p className="font-display text-sm font-semibold text-[var(--lp-ink)]">Reading test</p>
-                <p className="text-xs text-[var(--lp-ink-soft)]">+2 from last time</p>
-              </div>
-            </div>
-            <div className="mt-3 space-y-1.5">
-              {skills.map((s) => (
-                <div key={s.l}>
-                  <div className="flex justify-between text-[10px] text-[var(--lp-ink-soft)]">
-                    <span>{s.l}</span>
-                    <span className="font-mono">{s.v}%</span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
-                    <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: `${s.v}%` }} />
-                  </div>
+          {practiceMode ? (
+            /* ── targeted practice — question-by-question quiz view ── */
+            <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
+              {/* header */}
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPracticeMode(false)}
+                    className="text-[var(--lp-ink-soft)] transition-colors hover:text-[var(--lp-ink)]"
+                    aria-label="Back to results"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="text-xs font-semibold text-[var(--lp-ink)]">Reading Test</span>
                 </div>
-              ))}
+                <span className="rounded-md bg-[var(--lp-accent)] px-2.5 py-1 text-[10px] font-semibold text-white">
+                  Submit Answers
+                </span>
+              </div>
+
+              {/* progress */}
+              <div className="mb-1 flex items-center justify-between text-[10px] text-[var(--lp-ink-soft)]">
+                <span>Question 1 of 6</span>
+                <span>Press →/←</span>
+              </div>
+              <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: "17%" }} />
+              </div>
+
+              {/* question card */}
+              <div className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+                <div className="mb-2 flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-[var(--lp-accent)]">1.</span>
+                  <span className="rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
+                    Vocabulary in Context
+                  </span>
+                  <span className="rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
+                    Vocabulary
+                  </span>
+                </div>
+                <p className="mb-3 text-sm font-medium text-[var(--lp-ink)]">
+                  The word <span className="font-semibold">“flourish”</span> in the passage most nearly
+                  means…
+                </p>
+                <div className="space-y-1.5">
+                  {[
+                    { letter: "A", text: "to disappear completely", selected: false },
+                    { letter: "B", text: "to grow or develop successfully", selected: true },
+                    { letter: "C", text: "to remain unchanged", selected: false },
+                    { letter: "D", text: "to cause problems", selected: false },
+                  ].map((opt) => (
+                    <div
+                      key={opt.letter}
+                      className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs ${
+                        opt.selected
+                          ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/5 text-[var(--lp-ink)]"
+                          : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border ${
+                          opt.selected
+                            ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]"
+                            : "border-[var(--lp-rule)]"
+                        }`}
+                      >
+                        {opt.selected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                      </span>
+                      <span className="font-mono text-[10px]">{opt.letter})</span>
+                      <span>{opt.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* navigation */}
+              <div className="mt-3 flex items-center justify-between">
+                <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] px-2.5 py-1.5 text-[10px] text-[var(--lp-ink-soft)] opacity-50">
+                  <ArrowLeft className="h-3 w-3" /> Previous
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-[var(--lp-accent)] px-2.5 py-1.5 text-[10px] font-semibold text-white">
+                  Next <ChevronRight className="h-3 w-3" />
+                </span>
+              </div>
             </div>
-            <button
-              type="button"
-              className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--lp-accent)]/40 bg-[var(--lp-accent)]/5 px-3 py-2 text-xs font-semibold text-[var(--lp-accent)] transition-colors hover:bg-[var(--lp-accent)]/10"
-            >
-              <Target className="h-3.5 w-3.5" />
-              Targeted practice
-            </button>
-          </div>
+          ) : (
+            /* ── scorecard (default) ── */
+            <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
+              <div className="flex items-center gap-3">
+                <div className="relative flex h-14 w-14 items-center justify-center">
+                  <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
+                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--lp-rule)" strokeWidth="4" />
+                    <circle
+                      cx="18"
+                      cy="18"
+                      r="15.5"
+                      fill="none"
+                      stroke="var(--lp-accent)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeDasharray="78 100"
+                    />
+                  </svg>
+                  <span className="absolute font-display text-base font-bold text-[var(--lp-ink)]">8/10</span>
+                </div>
+                <div>
+                  <p className="font-display text-sm font-semibold text-[var(--lp-ink)]">Reading test</p>
+                  <p className="text-xs text-[var(--lp-ink-soft)]">+2 from last time</p>
+                </div>
+              </div>
+              <div className="mt-3 space-y-1.5">
+                {skills.map((s) => (
+                  <div key={s.l}>
+                    <div className="flex justify-between text-[10px] text-[var(--lp-ink-soft)]">
+                      <span>{s.l}</span>
+                      <span className="font-mono">{s.v}%</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                      <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: `${s.v}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setPracticeMode(true)}
+                className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--lp-accent)]/40 bg-[var(--lp-accent)]/5 px-3 py-2 text-xs font-semibold text-[var(--lp-accent)] transition-colors hover:bg-[var(--lp-accent)]/10"
+              >
+                <Target className="h-3.5 w-3.5" />
+                Targeted practice
+              </button>
+            </div>
+          )}
 
           {/* vocabulary */}
           <div className="rounded-xl border border-[var(--lp-rule)] p-3">
