@@ -538,7 +538,7 @@ function useReadingAssistant() {
     }
   }
 
-  async function generateReadingTest() {
+  async function generateReadingTest(questionCounts: ReadingTestQuestionCounts) {
     const { studentAge, extractedText, setReadingTest, setStatus: setStoreStatus, setError } = readingStore;
     
     if (!extractedText) {
@@ -553,7 +553,7 @@ function useReadingAssistant() {
 
     try {
       const text = await readingTestGenerateText(
-        generateReadingTestPrompt(extractedText, studentAge),
+        generateReadingTestPrompt(extractedText, studentAge, questionCounts),
         getSystemPrompt(),
       );
 

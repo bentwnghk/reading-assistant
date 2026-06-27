@@ -11,6 +11,8 @@ type ReadingTestQuestionType =
   | "vocab-context" 
   | "referencing";
 
+type ReadingTestQuestionCounts = Record<ReadingTestQuestionType, number>;
+
 type ReadingTestSkill = "main-idea" | "detail" | "inference" | "vocabulary" | "purpose";
 
 type DifficultyLevel = "foundation" | "intermediate" | "advanced";

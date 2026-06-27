@@ -194,35 +194,53 @@ mindmap
 **Respond with ONLY the Mermaid code block, no additional text.**`;
 }
 
-export function generateReadingTestPrompt(text: string, age: number) {
+export function getReadingTestPreset(age: number): ReadingTestQuestionCounts {
+  const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
+  switch (schoolLevel) {
+    case "primary":
+      return {
+        "multiple-choice": 4,
+        "true-false-not-given": 2,
+        "inference": 0,
+        "vocab-context": 2,
+        "referencing": 1,
+        "short-answer": 1,
+      };
+    case "secondary":
+      return {
+        "multiple-choice": 2,
+        "true-false-not-given": 2,
+        "inference": 2,
+        "vocab-context": 2,
+        "referencing": 1,
+        "short-answer": 1,
+      };
+    case "dse":
+      return {
+        "multiple-choice": 2,
+        "true-false-not-given": 1,
+        "inference": 3,
+        "vocab-context": 2,
+        "referencing": 1,
+        "short-answer": 1,
+      };
+  }
+}
+
+export function generateReadingTestPrompt(text: string, age: number, questionCounts: ReadingTestQuestionCounts) {
   const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
   const difficultyLevel = age <= 11 ? "foundation" : age <= 15 ? "intermediate" : "advanced";
-  
-  const questionDistribution = {
-    primary: {
-      multipleChoice: 4,
-      trueFalseNotGiven: 2,
-      vocabContext: 2,
-      referencing: 1,
-      shortAnswer: 1,
-    },
-    secondary: {
-      multipleChoice: 2,
-      trueFalseNotGiven: 2,
-      vocabContext: 2,
-      inference: 2,
-      referencing: 1,
-      shortAnswer: 1,
-    },
-    dse: {
-      multipleChoice: 2,
-      trueFalseNotGiven: 1,
-      vocabContext: 2,
-      inference: 3,
-      referencing: 1,
-      shortAnswer: 1,
-    },
-  };
+
+  const total = (Object.values(questionCounts) as number[]).reduce((sum, n) => sum + n, 0);
+
+  const distributionLines = [
+    `Multiple Choice (type "multiple-choice"): ${questionCounts["multiple-choice"]}`,
+    `True/False/Not Given (type "true-false-not-given"): ${questionCounts["true-false-not-given"]}`,
+    `Inference (type "inference"): ${questionCounts["inference"]}`,
+    `Vocabulary in Context (type "vocab-context"): ${questionCounts["vocab-context"]}`,
+    `Pronoun Reference (type "referencing"): ${questionCounts["referencing"]}`,
+    `Short Answer (type "short-answer"): ${questionCounts["short-answer"]}`,
+  ].join("\n");
 
   return `Create a reading comprehension test for a ${age}-year-old Hong Kong ${schoolLevel} student based on this text.
 
@@ -230,7 +248,7 @@ export function generateReadingTestPrompt(text: string, age: number) {
 ${text}
 </text>
 
-Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+Generate exactly ${total} questions in JSON format. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
 
 [
   {
@@ -321,8 +339,10 @@ Generate 10 questions in JSON format. You MUST respond with ONLY a valid JSON ar
   }
 ]
 
-**Question Distribution for this student (${age} years old, ${schoolLevel}):**
-${JSON.stringify(questionDistribution[schoolLevel], null, 2)}
+**Question Distribution for this student (${age} years old, ${schoolLevel}) — TOTAL ${total} questions:**
+${distributionLines}
+
+**CRITICAL: You MUST generate EXACTLY the number of questions specified above for each type, summing to exactly ${total} questions. Do NOT generate any questions for a type whose count is 0. The JSON examples below show the required format/schema for each type — they are templates, not a count specification.**
 
 **Guidelines:**
 - Questions should test comprehension, not just memory.

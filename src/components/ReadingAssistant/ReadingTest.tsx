@@ -53,6 +53,12 @@ import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { useSession } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { logActivity } from "@/utils/activityLogger";
+import { getReadingTestPreset } from "@/constants/readingPrompts";
+import NumberStepper from "@/components/Internal/NumberStepper";
+
+const MIN_TOTAL_QUESTIONS = 10;
+const MAX_TOTAL_QUESTIONS = 20;
+const MAX_PER_TYPE = 10;
 
 type QuizState = "idle" | "in-progress" | "completed";
 
@@ -148,6 +154,7 @@ function ReadingTest() {
     testMode,
     setTestShowChinese,
     setTestMode,
+    studentAge,
   } = useReadingStore();
   const { status, generateReadingTest, generateTargetedPractice, calculateTestScore, evaluateShortAnswer } = useReadingAssistant();
   const { data: session } = useSession();
@@ -158,8 +165,25 @@ function ReadingTest() {
   const [showReview, setShowReview] = useState(false);
   const [evaluatingShortAnswer, setEvaluatingShortAnswer] = useState(false);
   const [retryMissedIds, setRetryMissedIds] = useState<Set<string>>(new Set());
+  const [questionCounts, setQuestionCounts] = useState<ReadingTestQuestionCounts>(() => getReadingTestPreset(studentAge));
 
   const isGenerating = status === "testing";
+
+  const totalQuestionCount = (Object.values(questionCounts) as number[]).reduce((sum, n) => sum + n, 0);
+  const isTotalValid = totalQuestionCount >= MIN_TOTAL_QUESTIONS && totalQuestionCount <= MAX_TOTAL_QUESTIONS;
+
+  const updateQuestionCount = (type: ReadingTestQuestionType, value: number) => {
+    setQuestionCounts((prev) => {
+      const next = { ...prev, [type]: value };
+      const nextTotal = (Object.values(next) as number[]).reduce((sum, n) => sum + n, 0);
+      if (nextTotal > MAX_TOTAL_QUESTIONS) {
+        return prev;
+      }
+      return next;
+    });
+  };
+
+  const resetQuestionCounts = () => setQuestionCounts(getReadingTestPreset(studentAge));
 
   const handleAnswerChange = (questionId: string, answer: string) => {
     useReadingStore.getState().setUserAnswer(questionId, answer);
@@ -688,8 +712,8 @@ function ReadingTest() {
             </Popover>
           </h3>
           <Button
-            onClick={() => generateReadingTest()}
-            disabled={isGenerating}
+            onClick={() => generateReadingTest(questionCounts)}
+            disabled={isGenerating || !isTotalValid}
             size="sm"
           >
             {isGenerating ? (
@@ -705,9 +729,67 @@ function ReadingTest() {
             )}
           </Button>
         </div>
-        <div className="text-center py-8 text-muted-foreground">
-          <ClipboardCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>{t("reading.readingTest.emptyTip")}</p>
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium">{t("reading.readingTest.setupTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("reading.readingTest.setupDesc")}</p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={resetQuestionCounts}
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                {t("reading.readingTest.resetPreset")}
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {(["multiple-choice", "true-false-not-given", "inference", "vocab-context", "referencing", "short-answer"] as ReadingTestQuestionType[]).map((type) => (
+                <div
+                  key={type}
+                  className="flex items-center justify-between gap-2 rounded-md border px-3 py-2"
+                >
+                  <Label className="text-sm font-medium cursor-default">
+                    {t(`reading.readingTest.${QUESTION_TYPE_LABELS[type]}`)}
+                  </Label>
+                  <NumberStepper
+                    value={questionCounts[type]}
+                    onChange={(v) => updateQuestionCount(type, v)}
+                    min={0}
+                    max={Math.min(MAX_PER_TYPE, questionCounts[type] + (MAX_TOTAL_QUESTIONS - totalQuestionCount))}
+                    disabled={isGenerating}
+                    aria-label={t(`reading.readingTest.${QUESTION_TYPE_LABELS[type]}`)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div
+            className={cn(
+              "flex items-center justify-between rounded-md border px-3 py-2 text-sm",
+              isTotalValid
+                ? "border-muted bg-muted/30"
+                : "border-destructive/40 bg-destructive/5",
+            )}
+          >
+            <span className="font-medium">{t("reading.readingTest.totalQuestions")}</span>
+            <span className={cn("font-semibold tabular-nums", isTotalValid ? "text-foreground" : "text-destructive")}>
+              {totalQuestionCount} / {MIN_TOTAL_QUESTIONS}–{MAX_TOTAL_QUESTIONS}
+            </span>
+          </div>
+          {!isTotalValid && (
+            <p className="text-xs text-destructive">
+              {t("reading.readingTest.totalRangeError", { min: MIN_TOTAL_QUESTIONS, max: MAX_TOTAL_QUESTIONS })}
+            </p>
+          )}
+          <div className="text-center py-2 text-muted-foreground">
+            <ClipboardCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>{t("reading.readingTest.emptyTip")}</p>
+          </div>
         </div>
       </section>
     );
@@ -794,7 +876,7 @@ function ReadingTest() {
                     <p className="text-muted-foreground">
                       {t("reading.readingTest.completedTip")}
                     </p>
-                    <Button onClick={() => generateReadingTest()} disabled={isGenerating} size="lg">
+                    <Button onClick={() => generateReadingTest(questionCounts)} disabled={isGenerating} size="lg">
                       {isGenerating ? (
                         <>
                           <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />

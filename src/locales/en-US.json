@@ -631,6 +631,11 @@
       "submit": "Submit Answers",
       "retry": "Retry",
       "emptyTip": "Click the button above to generate a reading comprehension test (Please wait 1-2 minutes)",
+      "setupTitle": "Question Setup",
+      "setupDesc": "Choose how many questions of each type to generate.",
+      "resetPreset": "Reset",
+      "totalQuestions": "Total questions",
+      "totalRangeError": "Total must be between {{min}} and {{max}} questions.",
       "startTest": "Start Test",
       "multipleChoice": "Multiple Choice",
       "trueFalseNG": "True/False/Not Given",
@@ -660,7 +665,7 @@
       "hideChinese": "Hide Chinese",
       "chineseDesc": "Display Chinese translations for questions and explanations",
       "questionsAvailable": "{{count}} questions ready",
-      "completedTip": "Generate a new set of 10 questions to practice more",
+      "completedTip": "Generate a new set of questions to practice more",
       "generateNew": "Generate New Test",
       "lastScore": "Last Score:",
       "question": "Question",
@@ -692,7 +697,7 @@
       "help": {
         "title": "Reading Test Guide",
         "purpose": "Purpose: The Reading Test section assesses your comprehension of the reading material through various question types, helping you identify areas of strength and weakness in your reading skills.",
-        "features": "Features: AI generates 10 questions covering 6 types (Multiple Choice, True/False/Not Given, Short Answer, Inference, Vocabulary in Context, Pronoun Reference) and 5 skills (Main Idea, Detail, Inference, Vocabulary, Author's Purpose). Get detailed explanations, skill breakdown, and download as Word document.",
+        "features": "Features: AI generates questions covering 6 types (Multiple Choice, True/False/Not Given, Short Answer, Inference, Vocabulary in Context, Pronoun Reference) and 5 skills (Main Idea, Detail, Inference, Vocabulary, Author's Purpose). Customize the number of each question type (total 10–20), get detailed explanations, skill breakdown, and download as Word document.",
         "usage": "Usage: Click 'Generate Test' to create questions. Choose 'One Question at a Time' mode for focused practice or answer all at once. Toggle 'Show Chinese' for translations. After submitting, review answers, retry missed questions, or practice weak skills with additional targeted questions."
       }
     },
