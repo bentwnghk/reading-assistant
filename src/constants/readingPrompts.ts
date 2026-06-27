@@ -298,8 +298,8 @@ Generate exactly ${total} questions in JSON format. You MUST respond with ONLY a
   {
     "id": "q4",
     "type": "vocab-context",
-    "question": "In paragraph [X], what does the word '___' most likely mean?",
-    "questionZh": "在第[X]段，'___'這個詞最可能是什麼意思？",
+    "question": "In paragraph [X], what does the word/phrase '___' most likely mean?",
+    "questionZh": "在第[X]段，'___'這個詞／短語最可能是什麼意思？",
     "options": ["A) Meaning 1", "B) Meaning 2", "C) Meaning 3", "D) Meaning 4"],
     "optionsZh": ["A) 意思一", "B) 意思二", "C) 意思三", "D) 意思四"],
     "correctAnswer": "C",
@@ -353,7 +353,7 @@ ${distributionLines}
   - "True" = statement agrees with the text
   - "False" = statement contradicts the text  
   - "Not Given" = text does not provide enough information
-- For vocabulary-in-context: choose words that can be understood from surrounding text.
+- For vocabulary-in-context: choose words, phrasal verbs, collocations, or idiomatic phrases that can be understood from surrounding text. Include multi-word expressions (e.g. "look forward to", "in spite of") when they are worth testing.
 - For inference questions: answer should be logically deducible but not explicitly stated.
 - For referencing questions:
   - Identify pronouns (it, they, them, this, that, these, those, he, she, etc.)
@@ -441,7 +441,7 @@ ${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${
 - For referencing: 
   - Ask what a pronoun or phrase refers to
   - **If the same pronoun appears multiple times in the paragraph, include surrounding context (5-8 words before and after) to uniquely identify which occurrence. Format: "In paragraph [X], what does 'they' refer to in '...they went to the store...'?"**
-- For vocabulary-in-context: choose words understandable from surrounding text
+- For vocabulary-in-context: choose words, phrasal verbs, collocations, or idiomatic phrases understandable from surrounding text. Include multi-word expressions when worth testing.
 - For inference: answer should be logically deducible but not explicitly stated
 - Include ALL required metadata fields
 - **IMPORTANT: When referencing paragraphs in questions, use square-bracketed format (e.g., "paragraph [1]", "paragraph [2]") to match the extracted text. NEVER use line numbers or "line X" references.**
