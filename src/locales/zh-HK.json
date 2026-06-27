@@ -1606,7 +1606,8 @@
       "avgProgress": "平均學習進度",
       "aiFeatures": "AI 功能使用",
       "spellingScore": "拼字分數",
-      "vocabularyGrowth": "詞彙增長"
+      "vocabularyGrowth": "詞彙增長",
+      "pickDate": "選擇日期"
     },
     "quartiles": {
       "q1": "Q1 (0-25%)",

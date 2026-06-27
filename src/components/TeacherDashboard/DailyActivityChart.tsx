@@ -17,8 +17,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { enUS, zhHK } from "date-fns/locale";
 
 interface DailyActivityChartProps {
   students: StudentMetrics[];
@@ -64,6 +67,9 @@ export default function DailyActivityChart({ students }: DailyActivityChartProps
     d.setHours(0, 0, 0, 0);
     return d;
   });
+  const [open, setOpen] = useState(false);
+
+  const calendarLocale = i18n.language?.toLowerCase().startsWith("zh") ? zhHK : enUS;
 
   const dateStr = useMemo(() => {
     return `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
@@ -102,7 +108,35 @@ export default function DailyActivityChart({ students }: DailyActivityChartProps
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={goBack}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-xs font-medium tabular-nums min-w-[120px] text-center">{dateLabel}</span>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label={t("teacherDashboard.charts.pickDate")}
+                title={t("teacherDashboard.charts.pickDate")}
+                className="inline-flex min-w-[120px] items-center justify-center gap-1 rounded-md px-1.5 py-0.5 text-center text-xs font-medium tabular-nums transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <CalendarIcon className="h-3 w-3 shrink-0 opacity-70" />
+                <span>{dateLabel}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(d) => {
+                  if (!d) return;
+                  d.setHours(0, 0, 0, 0);
+                  if (d > today) return;
+                  setSelectedDate(d);
+                  setOpen(false);
+                }}
+                disabled={{ after: today }}
+                locale={calendarLocale}
+                autoFocus
+              />
+            </PopoverContent>
+          </Popover>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={goForward} disabled={isToday}>
             <ChevronRight className="h-4 w-4" />
           </Button>
