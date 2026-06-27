@@ -607,6 +607,7 @@
       "title": "視覺化",
       "generate": "生成視覺化圖像",
       "generating": "正在生成...",
+      "generatingWait": "正在生成視覺化圖像...通常需要 1-2 分鐘，請稍候。",
       "regenerate": "重新生成",
       "download": "下載",
       "chineseLabel": "中文",

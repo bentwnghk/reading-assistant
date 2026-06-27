@@ -607,6 +607,7 @@
       "title": "Visualization",
       "generate": "Generate Visualization",
       "generating": "Generating...",
+      "generatingWait": "Generating visualization... This usually takes 1-2 minutes. Please wait.",
       "regenerate": "Regenerate",
       "download": "Download",
       "chineseLabel": "Chinese",

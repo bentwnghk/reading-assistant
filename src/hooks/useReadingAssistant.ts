@@ -494,6 +494,8 @@ function useReadingAssistant() {
       }
     }
 
+    const toastId = toast.info(i18next.t("reading.visualization.generatingWait"), { duration: Infinity });
+
     setStoreStatus("visualization");
     setStatus("visualization");
 
@@ -518,6 +520,7 @@ function useReadingAssistant() {
             : err && typeof err === "object" && "status" in err && "message" in err
               ? `[${err.status}]: ${err.message}`
               : `Request failed (${response.status})`;
+        toast.dismiss(toastId);
         toast.error(errorMsg);
         setError(errorMsg);
         setStoreStatus("error");
@@ -534,10 +537,12 @@ function useReadingAssistant() {
 
       logActivity("visualization_generate", { sessionId: readingStore.id || undefined });
 
+      toast.dismiss(toastId);
       setStoreStatus("idle");
       setStatus("idle");
       return typeof data.remaining === "number" ? data.remaining : null;
     } catch (error) {
+      toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
       setStoreStatus("error");
