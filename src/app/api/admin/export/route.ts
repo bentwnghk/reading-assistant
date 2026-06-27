@@ -151,7 +151,6 @@ export async function GET() {
 
     // ── Reading Images ───────────────────────────────────────────────────────
     // image_data is stored as BYTEA; convert to base64 data-URI for portability.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let readingImages: any[] = []
     try {
       const imagesResult = await client.query(
@@ -170,7 +169,6 @@ export async function GET() {
     }
 
     // ── Activity Logs ────────────────────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let activityLogs: any[] = []
     try {
       const activityResult = await client.query(
@@ -192,7 +190,6 @@ export async function GET() {
     }
 
     // ── Weekly Stats ─────────────────────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let weeklyStats: any[] = []
     try {
       const weeklyResult = await client.query(
@@ -229,7 +226,6 @@ export async function GET() {
     }
 
     // ── User Achievements ────────────────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let userAchievements: any[] = []
     try {
       const achievementsResult = await client.query(
@@ -250,7 +246,6 @@ export async function GET() {
     }
 
     // ── Chat Questions ───────────────────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let chatQuestions: any[] = []
     try {
       const chatQuestionsResult = await client.query(
@@ -275,7 +270,6 @@ export async function GET() {
     }
 
     // ── User Settings ────────────────────────────────────────────────────────
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let userSettings: any[] = []
     try {
       const settingsResult = await client.query(

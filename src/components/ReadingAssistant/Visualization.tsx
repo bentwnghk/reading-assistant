@@ -167,6 +167,7 @@ function Visualization() {
             onClick={() => setZoomed(true)}
             className="relative group cursor-pointer"
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={visualizationImage}
               alt={t("reading.visualization.title")}
@@ -202,6 +203,7 @@ function Visualization() {
           >
             <X className="h-8 w-8" />
           </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={visualizationImage}
             alt={t("reading.visualization.title")}

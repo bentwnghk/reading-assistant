@@ -44,6 +44,7 @@ function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
         {message.images && message.images.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {message.images.map((img, index) => (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={index}
                 src={img}

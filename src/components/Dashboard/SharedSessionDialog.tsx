@@ -115,7 +115,7 @@ export default function SharedSessionDialog() {
         setProcessing(null);
       }
     },
-    [backup, restore, reset, update, setPendingShares, setShowSharedDialog, markShareAccepted, t]
+    [backup, restore, reset, update, setPendingShares, setShowSharedDialog, markShareAccepted, t, router]
   );
 
   const handleReject = useCallback(

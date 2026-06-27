@@ -63,7 +63,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     if (initialSelectedTextRef.current && inputRef.current) {
       inputRef.current.focus();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -398,6 +398,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
           <div className="mb-2 flex flex-wrap gap-2">
             {pendingImages.map((img, index) => (
               <div key={index} className="relative group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img}
                   alt={`Pending ${index + 1}`}

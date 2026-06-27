@@ -174,6 +174,8 @@ export default async function Config(phase: string) {
       swSrc: "src/app/sw.ts",
       swDest: "public/sw.js",
       register: false,
+      // Allow large vendor chunks (e.g. mermaid) to be precached.
+      maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
     });
 
     return withSerwist(nextConfig);

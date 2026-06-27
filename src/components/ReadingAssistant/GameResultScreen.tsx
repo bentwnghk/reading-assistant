@@ -206,7 +206,7 @@ export default function GameResultScreen({
 
         <div
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-500 delay-[600ms]",
+            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-500 [transition-delay:600ms]",
             animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
             tier === "master" && "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
             tier === "great" && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
@@ -235,7 +235,7 @@ export default function GameResultScreen({
 
       <div
         className={cn(
-          "border rounded-lg divide-y transition-all duration-500 delay-[400ms]",
+          "border rounded-lg divide-y transition-all duration-500 [transition-delay:400ms]",
           animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}
       >
@@ -246,7 +246,7 @@ export default function GameResultScreen({
 
       <div
         className={cn(
-          "flex gap-2 transition-all duration-500 delay-[600ms]",
+          "flex gap-2 transition-all duration-500 [transition-delay:600ms]",
           animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}
       >

@@ -236,7 +236,7 @@ function VocabQuizResultScreen({
             {t("reading.glossary.quiz.scoreFormat", { correct, total })}
           </p>
         </div>
-        <div className={cn("transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+        <div className={cn("transition-all duration-500 [transition-delay:600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
           <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}>
             <TierIcon className="h-3.5 w-3.5" />
             {t(`reading.glossary.quiz.resultTier.${tier}`)}
@@ -247,7 +247,7 @@ function VocabQuizResultScreen({
         )}
       </div>
 
-      <div className={cn("flex gap-2 justify-center flex-wrap transition-all duration-500 delay-[400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+      <div className={cn("flex gap-2 justify-center flex-wrap transition-all duration-500 [transition-delay:400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
         {downloadContent}
         <Button variant="outline" size="sm" onClick={onReview}>
           <Eye className="h-4 w-4 mr-1" />
@@ -425,7 +425,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete }: V
         clearInterval(timerRef.current);
       }
     };
-  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, id, backup, update, save, setVocabularyQuizScore, onWordResult]);
+  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, id, backup, update, save, setVocabularyQuizScore, onWordResult, onComplete]);
 
   const missedQuestions = useMemo(() => {
     return questions.filter((q) => answers[q.id] !== q.correctAnswer);

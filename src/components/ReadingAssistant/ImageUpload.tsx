@@ -234,6 +234,7 @@ function ImageUpload() {
               <div className="flex flex-wrap gap-2">
                 {originalImages.map((image, index) => (
                   <div key={index} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={image}
                       alt={`Uploaded ${index + 1}`}

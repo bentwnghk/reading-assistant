@@ -396,6 +396,7 @@ function RepositoryUploadDialog({
               <div className="flex flex-wrap gap-2 mt-2">
                 {images.map((src, i) => (
                   <div key={i} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={src}
                       alt={`Image ${i + 1}`}

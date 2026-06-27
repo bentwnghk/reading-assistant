@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, type ReactNode } from "react";
+import { useRef, useEffect, useState, useCallback, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import copy from "copy-to-clipboard";
@@ -152,7 +152,7 @@ function Mermaid({ children }: Props) {
     setModalKey(prev => prev + 1);
   };
 
-  const fitToView = (retries = 5) => {
+  const fitToView = useCallback((retries = 5) => {
     requestAnimationFrame(() => {
       const container = containerRef.current;
       const target = mermaidContainerRef.current;
@@ -197,7 +197,7 @@ function Mermaid({ children }: Props) {
         transformRef.current.resetTransform(0);
       }
     });
-  };
+  }, []);
 
   useEffect(() => {
     const target = mermaidContainerRef.current;
@@ -205,7 +205,7 @@ function Mermaid({ children }: Props) {
       setContent(target.innerText);
       loadMermaid(target, target.innerText).then(() => fitToView());
     }
-  }, [children]);
+  }, [children, fitToView]);
 
   useEffect(() => {
     const container = containerRef.current;

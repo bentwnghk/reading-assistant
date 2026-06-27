@@ -183,7 +183,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         }
       }
     },
-    [currentEntry, reviewQueue, id, totalOriginal, incrementFlashcardReviewCount, onWordAction]
+    [currentEntry, reviewQueue, id, totalOriginal, incrementFlashcardReviewCount, onWordAction, onComplete, srsCounts]
   );
 
   // ── TTS ──────────────────────────────────────────────────────────────────

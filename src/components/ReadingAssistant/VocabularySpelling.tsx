@@ -109,12 +109,12 @@ function SpellingResultScreen({
           <div className={cn("text-5xl font-black", config.color)}>{accuracy}%</div>
           <p className="text-sm text-muted-foreground mt-1">{score} {t("reading.glossary.spelling.points")}</p>
         </div>
-        <div className={cn("transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+        <div className={cn("transition-all duration-500 [transition-delay:600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
           <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}><TierIcon className="h-3.5 w-3.5" />{t(`reading.glossary.spelling.resultTier.${tier}`)}</span>
         </div>
         {tier === "master" && <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />}
       </div>
-      <div className={cn("border rounded-lg divide-y transition-all duration-500 delay-[400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+      <div className={cn("border rounded-lg divide-y transition-all duration-500 [transition-delay:400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
         <div className="flex justify-between px-5 py-3.5">
           <span className="text-muted-foreground text-sm">{t("reading.glossary.spelling.accuracy")}</span>
           <span className={cn("font-semibold text-sm", config.color)}>{accuracy}%</span>
@@ -131,7 +131,7 @@ function SpellingResultScreen({
           <span className="font-semibold">{maxStreak}</span>
         </div>
       </div>
-      <div className={cn("text-center transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+      <div className={cn("text-center transition-all duration-500 [transition-delay:600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
         <Button onClick={onPlayAgain} variant="outline" size="lg">
           <RotateCcw className="h-4 w-4 mr-2" />
           {t("reading.glossary.spelling.playAgain")}

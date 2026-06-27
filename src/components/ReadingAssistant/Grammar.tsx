@@ -187,7 +187,7 @@ function QuizResultScreen({
             {t("reading.grammar.quiz.pointsFormat", { earned: earnedPoints, total: totalPoints })}
           </p>
         </div>
-        <div className={cn("transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+        <div className={cn("transition-all duration-500 [transition-delay:600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
           <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}>
             <TierIcon className="h-3.5 w-3.5" />
             {t(`reading.grammar.quiz.resultTier.${tier}`)}
@@ -197,10 +197,10 @@ function QuizResultScreen({
           <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />
         )}
       </div>
-      <div className={cn("border rounded-lg p-4 space-y-2 transition-all duration-500 delay-[400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+      <div className={cn("border rounded-lg p-4 space-y-2 transition-all duration-500 [transition-delay:400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
         {topicBreakdown}
       </div>
-      <div className={cn("flex gap-2 transition-all duration-500 delay-[600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+      <div className={cn("flex gap-2 transition-all duration-500 [transition-delay:600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
         <Button variant="outline" size="sm" onClick={onReview}>
           {showReview ? t("reading.grammar.quiz.hideReview") : t("reading.grammar.quiz.reviewAnswers")}
         </Button>

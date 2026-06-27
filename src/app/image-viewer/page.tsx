@@ -91,6 +91,7 @@ function ImageViewerContent() {
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/30 border-t-white" />
           </div>
         )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={index}
           src={src}
