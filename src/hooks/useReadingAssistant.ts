@@ -38,6 +38,14 @@ function smoothTextStream(type: "character" | "word" | "line") {
   });
 }
 
+function sortQuestionsByParagraph(questions: ReadingTestQuestion[]): ReadingTestQuestion[] {
+  return [...questions].sort((a, b) => {
+    const aRef = typeof a.paragraphRef === "number" ? a.paragraphRef : Infinity;
+    const bRef = typeof b.paragraphRef === "number" ? b.paragraphRef : Infinity;
+    return aRef - bRef;
+  });
+}
+
 function handleError(error: unknown) {
   console.error(error);
   const errorMessage = parseError(error);
@@ -558,12 +566,13 @@ function useReadingAssistant() {
       );
 
       const questions: ReadingTestQuestion[] = JSON.parse(text);
-      setReadingTest(questions);
+      const sorted = sortQuestionsByParagraph(questions);
+      setReadingTest(sorted);
 
       toast.dismiss(toastId);
       setStoreStatus("idle");
       setStatus("idle");
-      return questions;
+      return sorted;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
@@ -798,7 +807,8 @@ Guidelines:
       );
 
       const questions: ReadingTestQuestion[] = JSON.parse(text);
-      setReadingTest(questions);
+      const sorted = sortQuestionsByParagraph(questions);
+      setReadingTest(sorted);
 
       // Log for achievements
       logActivity("targeted_practice_complete", { sessionId: readingStore.id || undefined });
@@ -806,7 +816,7 @@ Guidelines:
       toast.dismiss(toastId);
       setStoreStatus("idle");
       setStatus("idle");
-      return questions;
+      return sorted;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
