@@ -185,17 +185,17 @@ export default function AssignRosterDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[88vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>{t("assignments.create.title")}</DialogTitle>
           <DialogDescription className="truncate">
             {sessionTitle}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+        <div className="space-y-4 flex-1 min-h-0 flex flex-col overflow-hidden">
           {/* Metadata fields */}
-          <div className="grid gap-3">
+          <div className="grid gap-3 flex-shrink-0">
             <div className="space-y-1.5">
               <Label htmlFor="assign-title">{t("assignments.create.titleLabel")}</Label>
               <Input
@@ -246,8 +246,8 @@ export default function AssignRosterDialog({
           </div>
 
           {/* Roster picker */}
-          <div className="border-t pt-3">
-            <Label className="text-sm font-medium mb-2 block">
+          <div className="border-t pt-3 flex-1 min-h-0 flex flex-col">
+            <Label className="text-sm font-medium mb-2 block flex-shrink-0">
               {t("assignments.create.selectStudents")}
             </Label>
 
@@ -261,7 +261,7 @@ export default function AssignRosterDialog({
               </div>
             ) : (
               <>
-                <div className="relative mb-2">
+                <div className="relative mb-2 flex-shrink-0">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
@@ -273,7 +273,7 @@ export default function AssignRosterDialog({
                 </div>
 
                 {filteredGroups.length > 1 && (
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-shrink-0">
                     <Checkbox
                       id="assign-select-all"
                       checked={allSelected}
@@ -293,7 +293,7 @@ export default function AssignRosterDialog({
                   </div>
                 )}
 
-                <ScrollArea className="max-h-72">
+                <ScrollArea className="flex-1 min-h-0 max-h-[60vh]">
                   <div className="space-y-4 pr-3">
                     {filteredGroupedBySchool.map((schoolBlock) => (
                       <div key={schoolBlock.schoolId ?? "__none__"}>
@@ -378,7 +378,7 @@ export default function AssignRosterDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
