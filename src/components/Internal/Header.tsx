@@ -314,29 +314,6 @@ function Header() {
                 </span>
               )}
             </Button>
-            {pathname === "/vocabulary" ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 gap-1.5 opacity-50 cursor-default"
-                disabled
-              >
-                <BookOpen className="h-4 w-4" />
-                <span className="text-sm">{t("vocabulary.title")}</span>
-              </Button>
-            ) : (
-              <Link href="/vocabulary" prefetch={false}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 gap-1.5"
-                  title={t("vocabulary.title")}
-                >
-                  <BookOpen className="h-4 w-4" />
-                  <span className="text-sm">{t("vocabulary.title")}</span>
-                </Button>
-              </Link>
-            )}
             {pathname === "/assignments" ? (
               <Button
                 variant="ghost"
@@ -357,6 +334,29 @@ function Header() {
                 >
                   <ClipboardList className="h-4 w-4" />
                   <span className="text-sm">{t("assignments.navTitle")}</span>
+                </Button>
+              </Link>
+            )}
+            {pathname === "/vocabulary" ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5 opacity-50 cursor-default"
+                disabled
+              >
+                <BookOpen className="h-4 w-4" />
+                <span className="text-sm">{t("vocabulary.title")}</span>
+              </Button>
+            ) : (
+              <Link href="/vocabulary" prefetch={false}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1.5"
+                  title={t("vocabulary.title")}
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span className="text-sm">{t("vocabulary.title")}</span>
                 </Button>
               </Link>
             )}
