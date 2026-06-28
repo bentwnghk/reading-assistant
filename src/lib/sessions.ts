@@ -5,6 +5,7 @@ import type { ReadingStore } from "@/store/reading"
 
 export interface SessionWithImages extends ReadingStore {
   userId: string
+  assignmentId?: string
 }
 
 export async function createReadingSession(
@@ -449,6 +450,7 @@ export async function getReadingSession(
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,
+      assignmentId: row.assignment_id ?? undefined,
     }
   } finally {
     client.release()

@@ -343,6 +343,12 @@ function StudentAssignmentDetail({ assignment }: { assignment: Assignment }) {
   const { t, i18n } = useTranslation()
   const router = useRouter()
   const progress = assignment.avgProgress ?? 0
+
+  // Track that the student has viewed this assignment (fires once on mount)
+  useEffect(() => {
+    fetch(`/api/assignments/${assignment.id}/view`, { method: "POST" }).catch(() => {})
+  }, [assignment.id])
+
   const ctaKey =
     progress === 0
       ? "assignments.studentView.start"

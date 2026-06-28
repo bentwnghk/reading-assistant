@@ -4,6 +4,7 @@ import {
   updateReadingSession,
   deleteReadingSession
 } from "@/lib/sessions"
+import { markSubmissionViewed } from "@/lib/assignments"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -21,6 +22,11 @@ export async function GET(
 
     if (!sessionData) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 })
+    }
+
+    // If this session belongs to an assignment, stamp last_viewed_at (fire-and-forget)
+    if (sessionData.assignmentId) {
+      markSubmissionViewed(sessionData.assignmentId, session.user.id).catch(() => {})
     }
 
     return NextResponse.json(sessionData)
