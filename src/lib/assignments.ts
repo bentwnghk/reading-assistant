@@ -445,13 +445,17 @@ export async function getAssignment(
     if (requesterRole === "teacher") {
       return assignment.teacherId === requesterId ? assignment : null
     }
-    // Student: only if on roster
+    // Student: only if on roster — also attach their personal session id
     const sub = await client.query(
-      `SELECT 1 FROM assignment_submissions
+      `SELECT student_session_id FROM assignment_submissions
        WHERE assignment_id = $1 AND student_id = $2`,
       [assignmentId, requesterId],
     )
-    return sub.rows.length > 0 ? assignment : null
+    if (sub.rows.length === 0) return null
+    return {
+      ...assignment,
+      studentSessionId: sub.rows[0].student_session_id ?? undefined,
+    }
   } finally {
     client.release()
   }
