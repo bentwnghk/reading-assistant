@@ -2887,6 +2887,87 @@
       "forbidden": "You don't have access to this assignment",
       "loadFailed": "Failed to load assignment"
     },
+    "help": {
+      "title": "How it works",
+      "tabs": {
+        "overview": "Overview",
+        "tracking": "Tracking",
+        "manage": "Manage"
+      },
+      "overview": {
+        "intro": "The Assignments page lists every reading task your teacher has shared with you, or that you have assigned to your students.",
+        "list": {
+          "name": "Assignment cards",
+          "desc": "Each card shows the title, subject, description, status, due date and progress at a glance."
+        },
+        "status": {
+          "name": "Status badges",
+          "desc": "Active assignments are in progress; archived ones are hidden from students but kept for reference."
+        },
+        "due": {
+          "name": "Due dates",
+          "desc": "When a due date passes and progress is below 100%, an Overdue badge highlights what needs attention."
+        },
+        "detail": {
+          "name": "Open details",
+          "desc": "Click any assignment title to open its detail page with the full roster, scores and per-student progress."
+        }
+      },
+      "tracking": {
+        "intro": "Track how students are doing at a glance and spot assignments that need follow-up.",
+        "avgProgress": {
+          "name": "Average progress",
+          "desc": "The TrendingUp icon shows the average completion across all assigned students for each assignment."
+        },
+        "studentCount": {
+          "name": "Student count",
+          "desc": "See how many students are included in each assignment at a glance."
+        },
+        "overdue": {
+          "name": "Overdue alerts",
+          "desc": "Past-due assignments with incomplete work are flagged in red so you can follow up quickly."
+        },
+        "roster": {
+          "name": "Per-student breakdown",
+          "desc": "Open an assignment to view test scores, vocabulary, spelling, grammar scores and the last-viewed time for each student."
+        },
+        "srs": {
+          "title": "Tip:",
+          "desc": "Sort any column on the detail page by clicking its header to find students who need help fastest."
+        }
+      },
+      "manage": {
+        "intro": "Teachers and admins can create, edit and track assignments from this page.",
+        "gettingStarted": {
+          "title": "Getting started",
+          "step1": "Click the \"Create assignment\" button in the top-right corner.",
+          "step2": "In the dialog that opens, find the reading session you want to assign.",
+          "step3": "Click the graduation-cap icon next to that session to select it.",
+          "step4": "Pick your students (or load a saved roster), then optionally set a title, subject, due date and instructions.",
+          "step5": "Click \"Create assignment (N)\" to confirm — students will see it on their Assignments page immediately."
+        },
+        "create": {
+          "name": "Create assignment",
+          "desc": "Click \"Create assignment\", pick a reading session with the graduation-cap icon, select students and optionally set a due date."
+        },
+        "presets": {
+          "name": "Class presets",
+          "desc": "Save reusable groups of students as rosters so you can assign work to the same class in one click next time."
+        },
+        "edit": {
+          "name": "Edit, archive, delete",
+          "desc": "Use the actions at the bottom of each card to update details, archive when done, or permanently delete an assignment."
+        },
+        "export": {
+          "name": "Export to Excel",
+          "desc": "On the detail page, export the full roster with scores and progress to an Excel file for grading or records."
+        },
+        "tip": {
+          "title": "Note:",
+          "content": "Archiving hides an assignment from students without deleting their work — useful at the end of a term."
+        }
+      }
+    },
     "cancel": "Cancel",
     "close": "Close",
     "back": "Back"
