@@ -2865,7 +2865,7 @@
       "studentCount": "{{count}} 位學生",
       "staleWarning": "此名單中有 {{count}} 位學生已不可用。",
       "createdBy": "建立者：{{name}}",
-      "create": "建立",
+      "create": "建立名單",
       "creating": "儲存中⋯",
       "edit": "編輯名單",
       "updateFromSelection": "以目前選擇更新",

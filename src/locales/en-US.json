@@ -2865,7 +2865,7 @@
       "studentCount": "{{count}} students",
       "staleWarning": "{{count}} students in this roster are no longer available.",
       "createdBy": "by {{name}}",
-      "create": "Create",
+      "create": "Create roster",
       "creating": "Saving…",
       "edit": "Edit roster",
       "updateFromSelection": "Update with current selection",
