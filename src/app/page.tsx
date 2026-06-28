@@ -87,8 +87,20 @@ function HomeContent() {
         router.replace("/");
       });
     } else {
-      // Session not in history (yet). Drop the param to avoid a loop.
-      router.replace("/");
+      // Session not in localforage — fetch from the API (e.g. assignment sessions
+      // that have never been opened by this student on this device).
+      fetch(`/api/sessions/${sessionId}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((apiData) => {
+          if (apiData) {
+            restore(apiData).then(() => {
+              router.replace("/");
+            });
+          } else {
+            router.replace("/");
+          }
+        })
+        .catch(() => router.replace("/"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoreReady, searchParams]);

@@ -354,25 +354,33 @@ export async function getReadingSession(
             ORDER BY ri.image_order
           ) FILTER (WHERE ri.id IS NOT NULL),
           '[]'::json
-        ) as images
+        ) as images,
+        asgn.source_session_snapshot AS assignment_snapshot
        FROM reading_sessions rs
        LEFT JOIN reading_images ri ON rs.id = ri.session_id
+       LEFT JOIN assignments asgn ON rs.assignment_id = asgn.id
        WHERE rs.id = $1 AND rs.user_id = $2
-       GROUP BY rs.id`,
+       GROUP BY rs.id, asgn.source_session_snapshot`,
       [sessionId, userId]
     )
     
     if (result.rows.length === 0) return null
     
     const row = result.rows[0]
+    // Assignment sessions store images only in the assignment snapshot (not in
+    // reading_images) to avoid per-student duplication of heavy data.
+    const originalImages: string[] =
+      row.images.length > 0
+        ? row.images.map((img: { image_data: Buffer; content_type: string }) =>
+            bufferToBase64(img.image_data, img.content_type)
+          )
+        : (row.assignment_snapshot?.originalImages ?? [])
     return {
       id: row.id,
       docTitle: row.doc_title,
       studentAge: row.student_age,
       source: row.source || ("repository" as const),
-      originalImages: row.images.map((img: any) => 
-        bufferToBase64(img.image_data, img.content_type)
-      ),
+      originalImages,
       extractedText: row.extracted_text,
       summary: row.summary,
       adaptedText: row.adapted_text,
