@@ -34,7 +34,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import {
@@ -203,8 +202,8 @@ export default function AssignmentsList() {
                   a.status === "archived" ? "opacity-60" : ""
                 }`}
               >
-                <CardHeader className="pb-3">
-                  <div className="w-full flex items-start justify-between gap-3">
+                <div className="p-6 pb-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1 overflow-hidden">
                       <Link
                         href={`/assignments/${a.id}`}
@@ -231,7 +230,7 @@ export default function AssignmentsList() {
                       )}
                     </div>
                   </div>
-                </CardHeader>
+                </div>
                 <CardContent className="space-y-2">
                   {a.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2">
