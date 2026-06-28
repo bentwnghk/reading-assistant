@@ -2784,7 +2784,7 @@
     "navTitle": "功課",
     "title": "功課",
     "teacherView": {
-      "empty": "尚未建立任何功課。請到儀表板從閱讀 session 建立一份。",
+      "empty": "尚未建立任何功課。建立方式：點擊上方的「建立功課」按鈕，在彈出的對話框中找到想指派的閱讀工作階段，再點擊旁邊的學士帽（graduation-cap）圖示，接著選擇學生、視需要設定截止日期並提交。",
       "new": "建立功課",
       "studentCount": "{{count}} 位學生",
       "avgProgress": "平均進度：{{progress}}%",
