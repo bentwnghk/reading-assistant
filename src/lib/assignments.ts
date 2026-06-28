@@ -1,7 +1,9 @@
 import { getClient } from "./db"
 import { logActivity } from "./activity"
 import { getSchoolForUser } from "./users"
+import { mapSessionRowToStore } from "./sessions"
 import type { ReadingStore } from "@/store/reading"
+import type { SessionWithImages } from "./sessions"
 
 /**
  * Strip a reading session down to its assignable form: keep all AI-generated
@@ -750,6 +752,65 @@ export async function syncSubmissionMetrics(
         studentSessionId,
       ],
     )
+  } finally {
+    client.release()
+  }
+}
+
+/**
+ * Fetch a student's reading session in ReadingStore format for a teacher who
+ * owns (or administers) the assignment. Bypasses the normal user_id ownership
+ * check on reading_sessions; instead verifies access via assignment ownership.
+ * Returns the session plus the student's display name.
+ */
+export async function getStudentSessionForTeacher(
+  assignmentId: string,
+  studentId: string,
+  requesterId: string,
+  requesterRole: UserRole,
+): Promise<{ session: SessionWithImages; studentName: string | null; studentEmail: string | null } | null> {
+  const client = await getClient()
+  try {
+    // 1. Verify the requester can see this assignment at all
+    const assignment = await getAssignment(assignmentId, requesterId, requesterRole)
+    if (!assignment) return null
+
+    // 2. Teachers can only view their own assignments (admins/super-admins can view any)
+    if (
+      requesterRole !== "super-admin" &&
+      requesterRole !== "admin" &&
+      assignment.teacherId !== requesterId
+    ) return null
+
+    // 3. Fetch the submission row → get student_session_id + student info
+    const subRes = await client.query(
+      `SELECT s.student_session_id, u.name AS student_name, u.email AS student_email
+       FROM assignment_submissions s
+       JOIN users u ON u.id = s.student_id
+       WHERE s.assignment_id = $1 AND s.student_id = $2`,
+      [assignmentId, studentId],
+    )
+    if (subRes.rows.length === 0 || !subRes.rows[0].student_session_id) return null
+
+    const { student_session_id, student_name, student_email } = subRes.rows[0]
+
+    // 4. Fetch the reading session (no user_id filter — teacher is allowed here)
+    const sessionRes = await client.query(
+      `SELECT rs.*, asgn.source_session_snapshot AS assignment_snapshot
+       FROM reading_sessions rs
+       LEFT JOIN assignments asgn ON rs.assignment_id = asgn.id
+       WHERE rs.id = $1`,
+      [student_session_id],
+    )
+    if (sessionRes.rows.length === 0) return null
+
+    const row = sessionRes.rows[0]
+    // Images live in the assignment snapshot (not duplicated per-student)
+    const originalImages: string[] =
+      row.assignment_snapshot?.originalImages ?? []
+
+    const session = mapSessionRowToStore(row, originalImages)
+    return { session, studentName: student_name ?? null, studentEmail: student_email ?? null }
   } finally {
     client.release()
   }

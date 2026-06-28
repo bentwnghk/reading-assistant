@@ -2873,6 +2873,10 @@
     },
     "cancel": "Cancel",
     "close": "Close",
-    "back": "Back"
+    "back": "Back",
+    "viewOnly": {
+      "banner": "Viewing {{student}}'s session (read-only)",
+      "close": "Close tab"
+    }
   }
 }

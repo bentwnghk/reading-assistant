@@ -311,10 +311,12 @@ export default function AssignmentDetailPage({
                             size="icon"
                             title={t("assignments.teacherView.viewWork")}
                             onClick={() =>
-                              router.push(
-                                `/assignments/${assignment.id}/students/${s.studentId}`,
+                              window.open(
+                                `/?viewSession=${encodeURIComponent(s.studentSessionId ?? "")}&assignment=${encodeURIComponent(assignment.id)}&student=${encodeURIComponent(s.studentId)}`,
+                                "_blank",
                               )
                             }
+                            disabled={!s.studentSessionId}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>

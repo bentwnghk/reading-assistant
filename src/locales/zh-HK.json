@@ -2873,6 +2873,10 @@
     },
     "cancel": "取消",
     "close": "關閉",
-    "back": "返回"
+    "back": "返回",
+    "viewOnly": {
+      "banner": "正在查看 {{student}} 的作業（唯讀）",
+      "close": "關閉標籤"
+    }
   }
 }
