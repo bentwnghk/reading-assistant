@@ -4,6 +4,7 @@ import { getClient } from "@/lib/db"
 import {
   canAccessClass,
   getClassMembers,
+  getClassSchoolId,
   getSchoolForUser,
   getUsersInSchool,
   getAllUsers,
@@ -23,9 +24,11 @@ async function getAssignedStudentIds(): Promise<Set<string>> {
  * GET /api/classes/[id]/available-students
  *
  * Returns students who can be added to this class:
- * - For teachers/admins with a school: students from the same school who are not already members
- * - For admins without a school (edge case): all students not already members
- * - Excludes students who are already assigned to any other class
+ * - Candidates are taken from the CLASS's school (so a super-admin managing a class
+ *   in school X only sees students from school X).
+ * - If the class has no school, falls back to the caller's school, then to all users.
+ * - Excludes students who are already members of this class or any other class
+ *   (a student may belong to at most one class).
  */
 export async function GET(
   _request: Request,
@@ -48,24 +51,24 @@ export async function GET(
   }
 
   try {
-    const [members, callerSchoolId, assignedStudentIds] = await Promise.all([
+    const [members, classSchoolId, callerSchoolId, assignedStudentIds] = await Promise.all([
       getClassMembers(id),
+      getClassSchoolId(id),
       getSchoolForUser(session.user.id),
       getAssignedStudentIds(),
     ])
 
     const memberIds = new Set(members.map(m => m.studentId))
 
-    let candidates
-    if (callerSchoolId) {
-      candidates = await getUsersInSchool(callerSchoolId)
-    } else {
-      // Admin with no school assigned — fall back to all users
-      candidates = await getAllUsers()
-    }
+    // Prefer the class's school; fall back to caller's school, then to all users
+    // for orphan classes managed by a school-less super-admin.
+    const scopeSchoolId = classSchoolId ?? callerSchoolId
+    const candidates = scopeSchoolId
+      ? await getUsersInSchool(scopeSchoolId)
+      : await getAllUsers()
 
-    const available = candidates.filter(u => 
-      u.role === "student" && 
+    const available = candidates.filter(u =>
+      u.role === "student" &&
       !memberIds.has(u.id) &&
       !assignedStudentIds.has(u.id)
     )

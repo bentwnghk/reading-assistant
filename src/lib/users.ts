@@ -795,6 +795,20 @@ export async function getSchoolForUser(userId: string): Promise<string | null> {
   }
 }
 
+/** Returns the school_id of a class, or null if the class has no school (or does not exist). */
+export async function getClassSchoolId(classId: string): Promise<string | null> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT school_id FROM classes WHERE id = $1`,
+      [classId]
+    )
+    return result.rows.length > 0 ? (result.rows[0].school_id ?? null) : null
+  } finally {
+    client.release()
+  }
+}
+
 /** All users (of any role) belonging to a given school */
 export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]> {
   const client = await getClient()
