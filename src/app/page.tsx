@@ -1,9 +1,10 @@
 "use client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState, useLayoutEffect, useEffect } from "react";
+import { Suspense, useState, useLayoutEffect, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
+import { useSearchParams, useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useSettingStore } from "@/store/setting";
@@ -31,13 +32,15 @@ const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
 const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
 
-function Home() {
+function HomeContent() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
-  const { extractedText, docTitle } = useReadingStore();
+  const { extractedText, docTitle, restore } = useReadingStore();
   const { generateTitle } = useReadingAssistant();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useAutoSave();
   useVocabularySync();
@@ -64,6 +67,31 @@ function Home() {
       useHistoryStore.getState().syncToHistory(readingStore);
     });
   }, []);
+
+  // Deep-link support: /?session=<id> loads a specific session into the reading
+  // store on mount. Used by the Assignments feature's "Start / Continue" CTA so
+  // students can jump straight into their assigned reading session.
+  useEffect(() => {
+    if (!restoreReady) return;
+    const sessionId = searchParams.get("session");
+    if (!sessionId) return;
+    const current = useReadingStore.getState();
+    // If the requested session is already loaded, just clean up the URL.
+    if (current.id === sessionId) {
+      router.replace("/");
+      return;
+    }
+    const data = useHistoryStore.getState().load(sessionId);
+    if (data) {
+      restore(data).then(() => {
+        router.replace("/");
+      });
+    } else {
+      // Session not in history (yet). Drop the param to avoid a loop.
+      router.replace("/");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restoreReady, searchParams]);
 
   // Recover title generation after an iOS PWA page refresh that interrupted the
   // extraction flow. If the store has extracted text but no title (because the
@@ -156,4 +184,10 @@ function Home() {
   );
 }
 
-export default Home;
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
+  );
+}

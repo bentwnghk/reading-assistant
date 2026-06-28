@@ -251,7 +251,7 @@ interface TextDifficultyResult {
   analyzedAt: number;
 }
 
-type UserRole = 'admin' | 'teacher' | 'student';
+type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student';
 
 interface SchoolInfo {
   id: string;
@@ -284,6 +284,48 @@ interface ClassInfo {
   schoolName?: string;
   studentCount?: number;
   createdAt: number;
+}
+
+type AssignmentStatus = 'active' | 'archived';
+
+interface Assignment {
+  id: string;
+  teacherId: string;
+  teacherName?: string;
+  title: string;
+  description?: string;
+  subject?: string;
+  sourceSessionId?: string;
+  sourceDocTitle?: string;
+  dueDate?: string | null;
+  status: AssignmentStatus;
+  studentCount?: number;
+  avgProgress?: number;
+  /** Only populated for student-side queries (their own working session id). */
+  studentSessionId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AssignmentSubmission {
+  id: string;
+  assignmentId: string;
+  studentId: string;
+  studentName?: string | null;
+  studentEmail?: string | null;
+  studentImage?: string | null;
+  studentSessionId?: string | null;
+  progress: number;
+  testScore?: number | null;
+  testCompleted: boolean;
+  vocabularyQuizScore?: number | null;
+  spellingGameBestScore?: number | null;
+  grammarQuizScore?: number | null;
+  grammarGameBestScore?: number | null;
+  grammarGameAccuracy?: number | null;
+  lastViewedAt?: string | null;
+  submittedAt?: string | null;
+  createdAt: string;
 }
 
 interface ClassMember {

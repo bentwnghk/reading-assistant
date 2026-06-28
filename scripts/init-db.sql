@@ -73,7 +73,7 @@ CREATE TABLE reading_sessions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   doc_title TEXT DEFAULT '',
-  source TEXT NOT NULL DEFAULT 'repository' CHECK (source IN ('upload', 'repository', 'shared')),
+  source TEXT NOT NULL DEFAULT 'repository' CHECK (source IN ('upload', 'repository', 'shared', 'assignment')),
   student_age INTEGER DEFAULT 13,
   extracted_text TEXT NOT NULL,
   summary TEXT DEFAULT '',
@@ -147,10 +147,14 @@ CREATE TABLE reading_sessions (
   grammar_scramble_challenges  JSONB DEFAULT '[]'::jsonb,
   grammar_workshop_challenges  JSONB DEFAULT '[]'::jsonb,
   grammar_game_questions       JSONB DEFAULT '[]'::jsonb,
+  assignment_id                TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT fk_user_session UNIQUE(id, user_id)
 );
+
+CREATE INDEX idx_reading_sessions_assignment
+  ON reading_sessions(assignment_id);
 
 -- Separate images table with BYTEA binary storage
 CREATE TABLE reading_images (
@@ -286,7 +290,10 @@ CREATE TABLE activity_logs (
       'grammar_roulette_complete',
       'grammar_duel_complete',
       'ai_tutor_question',
-      'visualization_generate'
+      'visualization_generate',
+      'assignment_create',
+      'assignment_start',
+      'assignment_submit'
     )),
   session_id    TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
   score         INTEGER,          -- raw score/percentage (0-100 for tests; raw points for spelling)
@@ -617,6 +624,54 @@ CREATE TABLE shared_review_lists (
 
 CREATE INDEX idx_shared_review_lists_recipient ON shared_review_lists(recipient_id, status);
 CREATE INDEX idx_shared_review_lists_sender ON shared_review_lists(sender_id);
+
+-- ─── Assignments (Language-across-the-Curriculum homework) ────────────────────
+
+CREATE TABLE assignments (
+  id                       TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  teacher_id               TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title                    TEXT NOT NULL,
+  description              TEXT DEFAULT '',
+  subject                  TEXT DEFAULT '',
+  source_session_id        TEXT,
+  source_session_snapshot  JSONB NOT NULL,
+  source_doc_title         TEXT DEFAULT '',
+  due_date                 TIMESTAMP WITH TIME ZONE,
+  status                   TEXT NOT NULL DEFAULT 'active'
+                           CHECK (status IN ('active', 'archived')),
+  created_at               TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at               TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_assignments_teacher ON assignments(teacher_id, status);
+CREATE INDEX idx_assignments_due ON assignments(due_date);
+
+CREATE TRIGGER update_assignments_updated_at
+    BEFORE UPDATE ON assignments
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TABLE assignment_submissions (
+  id                         TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  assignment_id              TEXT NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
+  student_id                 TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  student_session_id         TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
+  progress                   INTEGER NOT NULL DEFAULT 0,
+  test_score                 INTEGER,
+  test_completed             BOOLEAN NOT NULL DEFAULT FALSE,
+  vocabulary_quiz_score      INTEGER,
+  spelling_game_best_score   INTEGER,
+  grammar_quiz_score         INTEGER,
+  grammar_game_best_score    INTEGER,
+  grammar_game_accuracy      INTEGER,
+  last_viewed_at             TIMESTAMP WITH TIME ZONE,
+  submitted_at               TIMESTAMP WITH TIME ZONE,
+  created_at                 TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (assignment_id, student_id)
+);
+
+CREATE INDEX idx_submissions_student ON assignment_submissions(student_id);
+CREATE INDEX idx_submissions_assignment ON assignment_submissions(assignment_id);
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;

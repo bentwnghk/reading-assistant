@@ -1,5 +1,6 @@
 import { getClient, base64ToBuffer, bufferToBase64 } from "./db"
 import { logActivity } from "./activity"
+import { syncSubmissionMetrics } from "./assignments"
 import type { ReadingStore } from "@/store/reading"
 
 export interface SessionWithImages extends ReadingStore {
@@ -595,6 +596,19 @@ export async function updateReadingSession(
     }
     
     await client.query("COMMIT")
+
+    // If this session belongs to an assignment, refresh the cached metrics on
+    // the matching assignment_submissions row. Run after COMMIT so a failure
+    // here doesn't roll back the user's session save. Fire-and-forget.
+    client.query(`SELECT assignment_id FROM reading_sessions WHERE id = $1`, [sessionId])
+      .then((res) => {
+        if (res.rows.length > 0 && res.rows[0].assignment_id) {
+          return syncSubmissionMetrics(sessionId, sessionData as ReadingStore)
+        }
+        return null
+      })
+      .catch((err) => console.error("[assignments] Failed to sync metrics:", err))
+
     return true
   } catch (error) {
     await client.query("ROLLBACK")

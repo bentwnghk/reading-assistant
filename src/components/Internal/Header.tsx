@@ -337,6 +337,29 @@ function Header() {
                 </Button>
               </Link>
             )}
+            {pathname === "/assignments" ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5 opacity-50 cursor-default"
+                disabled
+              >
+                <ClipboardList className="h-4 w-4" />
+                <span className="hidden sm:inline text-sm">{t("assignments.navTitle")}</span>
+              </Button>
+            ) : (
+              <Link href="/assignments" prefetch={false}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1.5"
+                  title={t("assignments.navTitle")}
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  <span className="hidden sm:inline text-sm">{t("assignments.navTitle")}</span>
+                </Button>
+              </Link>
+            )}
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

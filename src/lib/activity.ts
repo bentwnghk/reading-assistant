@@ -21,6 +21,9 @@ export type ActivityType =
   | "grammar_duel_complete"
   | "ai_tutor_question"
   | "visualization_generate"
+  | "assignment_create"
+  | "assignment_start"
+  | "assignment_submit"
 
 export interface ActivityDetails {
   cardsReviewed?: number
@@ -28,6 +31,9 @@ export interface ActivityDetails {
   mode?: string
   difficulty?: string
   streak?: number
+  assignmentId?: string
+  title?: string
+  studentCount?: number
 }
 
 export interface ActivityLog {

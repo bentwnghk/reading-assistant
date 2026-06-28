@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { TrashIcon, FileOutput, Download, Upload, Share2 } from "lucide-react";
+import { TrashIcon, FileOutput, Download, Upload, Share2, GraduationCap } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
@@ -20,6 +20,7 @@ import { useHistoryStore, type ReadingHistory } from "@/store/history";
 import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
 import ShareSessionDialog from "@/components/Dashboard/ShareSessionDialog";
+import AssignRosterDialog from "@/components/Assignments/AssignRosterDialog";
 
 interface SessionsTabProps {
   onClose: () => void;
@@ -146,6 +147,8 @@ function SessionsTab({ onClose }: SessionsTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [shareSession, setShareSession] = useState<ReadingHistory | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [assignSession, setAssignSession] = useState<ReadingHistory | null>(null);
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const showLoadMore = useMemo(() => {
     return history.length > currentPage * PAGE_SIZE;
@@ -356,6 +359,17 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title={t("assignments.create.actionTitle")}
+                          onClick={() => {
+                            setAssignSession(item);
+                            setAssignOpen(true);
+                          }}
+                        >
+                          <GraduationCap className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           title={t("history.load")}
                           onClick={() => loadHistory(item.id)}
                         >
@@ -409,6 +423,11 @@ function SessionsTab({ onClose }: SessionsTabProps) {
         open={shareOpen}
         onOpenChange={setShareOpen}
         session={shareSession}
+      />
+      <AssignRosterDialog
+        open={assignOpen}
+        onOpenChange={setAssignOpen}
+        session={assignSession}
       />
     </div>
   );
