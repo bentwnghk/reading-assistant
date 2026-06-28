@@ -102,7 +102,6 @@ interface ExportOptions {
     grammarQuizScore?: number | null
     grammarGameBestScore?: number | null
     lastViewedAt?: string | null
-    submittedAt?: string | null
   }>
   locale?: string
   t: (key: string, opts?: Record<string, unknown>) => string
@@ -121,7 +120,7 @@ export async function exportAssignmentRoster(opts: ExportOptions): Promise<void>
   })
 
   // ─── Metadata block (rows 1–4) ────────────────────────────────────────────
-  sheet.mergeCells("A1:I1")
+  sheet.mergeCells("A1:H1")
   const titleCell = sheet.getCell("A1")
   titleCell.value = assignment.title
   titleCell.font = { bold: true, size: 16, color: { argb: "FF2D5A8A" } }
@@ -158,7 +157,7 @@ export async function exportAssignmentRoster(opts: ExportOptions): Promise<void>
     labelCell.value = label
     labelCell.font = { bold: true }
     labelCell.fill = META_FILL
-    sheet.mergeCells(`B${2 + i}:I${2 + i}`)
+    sheet.mergeCells(`B${2 + i}:H${2 + i}`)
     const valueCell = row.getCell(2)
     valueCell.value = value
     valueCell.alignment = { vertical: "middle", horizontal: "left", wrapText: true }
@@ -176,7 +175,6 @@ export async function exportAssignmentRoster(opts: ExportOptions): Promise<void>
     t("assignments.teacherView.grammarQuizCol"),
     t("assignments.teacherView.grammarGameCol"),
     t("assignments.teacherView.lastViewedCol"),
-    t("assignments.teacherView.submittedCol"),
   ]
   headers.forEach((h, i) => {
     const cell = headerRow.getCell(i + 1)
@@ -221,12 +219,18 @@ export async function exportAssignmentRoster(opts: ExportOptions): Promise<void>
     colorScoreCell(row.getCell(7), s.grammarGameBestScore)
 
     row.getCell(8).value = s.lastViewedAt
-    row.getCell(8).numFmt = "yyyy-mm-dd hh:mm"
-    row.getCell(9).value = s.submittedAt
-    row.getCell(9).numFmt = "yyyy-mm-dd hh:mm"
+      ? new Date(s.lastViewedAt).toLocaleString(locale, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Asia/Hong_Kong",
+        })
+      : "-"
 
     if (idx % 2 === 1) {
-      for (let i = 1; i <= 9; i++) {
+      for (let i = 1; i <= 8; i++) {
         const cell = row.getCell(i)
         const fill = cell.fill as ExcelJS.Fill | undefined
         if (
@@ -249,8 +253,7 @@ export async function exportAssignmentRoster(opts: ExportOptions): Promise<void>
     { width: 12 },
     { width: 14 },
     { width: 14 },
-    { width: 18 },
-    { width: 18 },
+    { width: 22 },
   ]
   autoFitColumns(sheet)
 

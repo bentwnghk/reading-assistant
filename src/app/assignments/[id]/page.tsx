@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -13,6 +13,9 @@ import {
   Loader2,
   Download,
   TrendingUp,
+  ChevronsUpDown,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -44,6 +47,22 @@ function formatDate(iso: string | null | undefined, locale: string): string {
   }
 }
 
+function formatDateTime(iso: string | null | undefined, locale: string): string {
+  if (!iso) return ""
+  try {
+    return new Date(iso).toLocaleString(locale, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Hong_Kong",
+    })
+  } catch {
+    return ""
+  }
+}
+
 function isOverdue(iso?: string | null): boolean {
   if (!iso) return false
   return new Date(iso).getTime() < Date.now()
@@ -52,6 +71,36 @@ function isOverdue(iso?: string | null): boolean {
 function scoreCell(score: number | null | undefined): string {
   if (score == null) return "-"
   return String(score)
+}
+
+function SortableHead({
+  col,
+  current,
+  dir,
+  onSort,
+  className,
+  children,
+}: {
+  col: string
+  current: string
+  dir: "asc" | "desc"
+  onSort: (col: never) => void
+  className?: string
+  children: React.ReactNode
+}) {
+  const active = col === current
+  const Icon = active ? (dir === "asc" ? ChevronUp : ChevronDown) : ChevronsUpDown
+  return (
+    <TableHead className={className}>
+      <button
+        onClick={() => onSort(col as never)}
+        className="flex items-center gap-1 hover:text-foreground transition-colors select-none w-full"
+      >
+        <span className="flex-1">{children}</span>
+        <Icon className={`h-3.5 w-3.5 shrink-0 ${active ? "text-foreground" : "text-muted-foreground/50"}`} />
+      </button>
+    </TableHead>
+  )
 }
 
 export default function AssignmentDetailPage({
@@ -76,6 +125,56 @@ export default function AssignmentDetailPage({
 
   const role = session?.user?.role
   const isTeacher = role === "teacher" || role === "admin" || role === "super-admin"
+
+  type SortKey = "student" | "progress" | "testScore" | "vocabScore" | "spellingScore" | "grammarQuizScore" | "grammarGameScore" | "lastViewedAt"
+  const [sortKey, setSortKey] = useState<SortKey>("student")
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
+
+  function handleSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+    } else {
+      setSortKey(key)
+      setSortDir(key === "student" ? "asc" : "desc")
+    }
+  }
+
+  const sortedRoster = useMemo(() => {
+    return [...roster].sort((a, b) => {
+      let cmp = 0
+      switch (sortKey) {
+        case "student":
+          cmp = (a.studentName || a.studentEmail || "").localeCompare(
+            b.studentName || b.studentEmail || "",
+          )
+          break
+        case "progress":
+          cmp = (a.progress ?? 0) - (b.progress ?? 0)
+          break
+        case "testScore":
+          cmp = (a.testScore ?? -1) - (b.testScore ?? -1)
+          break
+        case "vocabScore":
+          cmp = (a.vocabularyQuizScore ?? -1) - (b.vocabularyQuizScore ?? -1)
+          break
+        case "spellingScore":
+          cmp = (a.spellingGameBestScore ?? -1) - (b.spellingGameBestScore ?? -1)
+          break
+        case "grammarQuizScore":
+          cmp = (a.grammarQuizScore ?? -1) - (b.grammarQuizScore ?? -1)
+          break
+        case "grammarGameScore":
+          cmp = (a.grammarGameBestScore ?? -1) - (b.grammarGameBestScore ?? -1)
+          break
+        case "lastViewedAt":
+          cmp =
+            (a.lastViewedAt ? new Date(a.lastViewedAt).getTime() : 0) -
+            (b.lastViewedAt ? new Date(b.lastViewedAt).getTime() : 0)
+          break
+      }
+      return sortDir === "asc" ? cmp : -cmp
+    })
+  }, [roster, sortKey, sortDir])
 
   const load = useCallback(async () => {
     const { id } = await params
@@ -244,14 +343,30 @@ export default function AssignmentDetailPage({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t("assignments.teacherView.student") || "Student"}</TableHead>
-                    <TableHead className="w-24">{t("assignments.teacherView.progressCol")}</TableHead>
-                    <TableHead className="w-20">{t("assignments.teacherView.testScoreCol")}</TableHead>
-                    <TableHead className="w-20">{t("assignments.teacherView.vocabCol")}</TableHead>
-                    <TableHead className="w-20">{t("assignments.teacherView.spellingCol")}</TableHead>
-                    <TableHead className="w-20">{t("assignments.teacherView.grammarQuizCol")}</TableHead>
-                    <TableHead className="w-20">{t("assignments.teacherView.grammarGameCol")}</TableHead>
-                    <TableHead className="w-32">{t("assignments.teacherView.lastViewedCol")}</TableHead>
+                    <SortableHead col="student" current={sortKey} dir={sortDir} onSort={handleSort}>
+                      {t("assignments.teacherView.student") || "Student"}
+                    </SortableHead>
+                    <SortableHead col="progress" current={sortKey} dir={sortDir} onSort={handleSort} className="w-24">
+                      {t("assignments.teacherView.progressCol")}
+                    </SortableHead>
+                    <SortableHead col="testScore" current={sortKey} dir={sortDir} onSort={handleSort} className="w-20">
+                      {t("assignments.teacherView.testScoreCol")}
+                    </SortableHead>
+                    <SortableHead col="vocabScore" current={sortKey} dir={sortDir} onSort={handleSort} className="w-20">
+                      {t("assignments.teacherView.vocabCol")}
+                    </SortableHead>
+                    <SortableHead col="spellingScore" current={sortKey} dir={sortDir} onSort={handleSort} className="w-20">
+                      {t("assignments.teacherView.spellingCol")}
+                    </SortableHead>
+                    <SortableHead col="grammarQuizScore" current={sortKey} dir={sortDir} onSort={handleSort} className="w-20">
+                      {t("assignments.teacherView.grammarQuizCol")}
+                    </SortableHead>
+                    <SortableHead col="grammarGameScore" current={sortKey} dir={sortDir} onSort={handleSort} className="w-20">
+                      {t("assignments.teacherView.grammarGameCol")}
+                    </SortableHead>
+                    <SortableHead col="lastViewedAt" current={sortKey} dir={sortDir} onSort={handleSort} className="w-36">
+                      {t("assignments.teacherView.lastViewedCol")}
+                    </SortableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -262,7 +377,7 @@ export default function AssignmentDetailPage({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    roster.map((s) => (
+                    sortedRoster.map((s) => (
                       <TableRow key={s.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -300,7 +415,7 @@ export default function AssignmentDetailPage({
                         <TableCell className="tabular-nums">{scoreCell(s.grammarGameBestScore)}</TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {s.lastViewedAt
-                            ? formatDate(s.lastViewedAt, i18n.language)
+                            ? formatDateTime(s.lastViewedAt, i18n.language)
                             : t("assignments.teacherView.never")}
                         </TableCell>
                       </TableRow>
