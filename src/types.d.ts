@@ -328,6 +328,24 @@ interface AssignmentSubmission {
   createdAt: string;
 }
 
+/**
+ * A saved, reusable group of student ids. Shared school-wide — any
+ * teacher/admin in the same school can see and use a preset. Only the
+ * creator (or an admin/super-admin) can edit or delete it.
+ */
+interface AssignmentPreset {
+  id: string;
+  teacherId: string;
+  createdByName?: string | null;
+  schoolId: string;
+  name: string;
+  description?: string;
+  studentIds: string[];
+  studentCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ClassMember {
   studentId: string;
   studentName?: string;

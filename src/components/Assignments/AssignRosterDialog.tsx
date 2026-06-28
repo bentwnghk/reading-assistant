@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Search, Building2, Loader2 } from "lucide-react"
+import { Search, Building2, Loader2, BookmarkPlus, Save } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,13 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { ReadingHistory } from "@/store/history"
 import type { ShareTargetGroup } from "@/lib/shared-sessions"
 
@@ -61,6 +68,12 @@ export default function AssignRosterDialog({
   const [subject, setSubject] = useState("")
   const [dueDate, setDueDate] = useState("")
 
+  // Preset (saved roster) state
+  const [presets, setPresets] = useState<AssignmentPreset[]>([])
+  const [showSavePreset, setShowSavePreset] = useState(false)
+  const [presetName, setPresetName] = useState("")
+  const [savingPreset, setSavingPreset] = useState(false)
+
   useEffect(() => {
     if (!open) {
       setGroups([])
@@ -70,6 +83,8 @@ export default function AssignRosterDialog({
       setDescription("")
       setSubject("")
       setDueDate("")
+      setShowSavePreset(false)
+      setPresetName("")
       return
     }
     // Pre-fill title from the source session
@@ -82,6 +97,10 @@ export default function AssignRosterDialog({
       .then((data: ShareTargetGroup[]) => setGroups(data))
       .catch(() => setGroups([]))
       .finally(() => setLoading(false))
+    fetch("/api/assignments/presets")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: AssignmentPreset[]) => setPresets(data))
+      .catch(() => setPresets([]))
   }, [open, session])
 
   const hasSchools = groups.some((g) => g.schoolId)
@@ -149,6 +168,65 @@ export default function AssignRosterDialog({
     if (allSelected) setSelectedIds(new Set())
     else setSelectedIds(allFilteredIds)
   }, [allSelected, allFilteredIds])
+
+  // Set of all user ids currently available in the roster (used to drop
+  // stale ids when applying a preset whose members have since left).
+  const availableIds = useMemo(
+    () => new Set(groups.flatMap((g) => g.users.map((u) => u.id))),
+    [groups],
+  )
+
+  const applyPreset = useCallback(
+    (presetId: string) => {
+      const preset = presets.find((p) => p.id === presetId)
+      if (!preset) return
+      const valid = preset.studentIds.filter((id) => availableIds.has(id))
+      const dropped = preset.studentIds.length - valid.length
+      setSelectedIds(new Set(valid))
+      if (dropped > 0) {
+        toast.info(
+          t("assignments.presets.staleWarning", { count: dropped }),
+        )
+      }
+      toast.success(t("assignments.presets.loaded"))
+    },
+    [presets, availableIds, t],
+  )
+
+  async function handleSavePreset() {
+    if (!presetName.trim()) {
+      toast.error(t("assignments.presets.nameRequired"))
+      return
+    }
+    if (selectedIds.size === 0) {
+      toast.error(t("assignments.presets.noneSelected"))
+      return
+    }
+    setSavingPreset(true)
+    try {
+      const res = await fetch("/api/assignments/presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: presetName.trim().slice(0, 100),
+          studentIds: [...selectedIds],
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed")
+      }
+      const preset: AssignmentPreset = await res.json()
+      setPresets((prev) => [...prev, preset].sort((a, b) => a.name.localeCompare(b.name)))
+      toast.success(t("assignments.presets.saved"))
+      setShowSavePreset(false)
+      setPresetName("")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("assignments.presets.error"))
+    } finally {
+      setSavingPreset(false)
+    }
+  }
 
   async function handleSubmit() {
     if (!session) return
@@ -273,6 +351,74 @@ export default function AssignRosterDialog({
               </div>
             ) : (
               <>
+                {/* Preset (saved roster) bar */}
+                {presets.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <Select onValueChange={applyPreset}>
+                      <SelectTrigger className="h-8 w-auto min-w-[180px] text-xs">
+                        <SelectValue placeholder={t("assignments.presets.applyPlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {presets.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name} ({p.studentCount})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Save current selection as a preset */}
+                {showSavePreset ? (
+                  <div className="flex items-center gap-2 mb-2">
+                    <Input
+                      autoFocus
+                      value={presetName}
+                      onChange={(e) => setPresetName(e.target.value)}
+                      placeholder={t("assignments.presets.namePlaceholder")}
+                      className="h-8 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSavePreset()
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={handleSavePreset}
+                      disabled={savingPreset || selectedIds.size === 0}
+                    >
+                      {savingPreset ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Save className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowSavePreset(false)
+                        setPresetName("")
+                      }}
+                    >
+                      {t("assignments.cancel")}
+                    </Button>
+                  </div>
+                ) : (
+                  selectedIds.size > 0 && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mb-2 h-8 text-xs"
+                      onClick={() => setShowSavePreset(true)}
+                    >
+                      <BookmarkPlus className="h-3.5 w-3.5 mr-1" />
+                      {t("assignments.presets.saveAs")}
+                    </Button>
+                  )
+                )}
+
                 <div className="relative mb-2">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <input

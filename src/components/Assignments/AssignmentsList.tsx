@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useGlobalStore } from "@/store/global"
+import PresetsSection from "./PresetsSection"
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -146,6 +147,8 @@ export default function AssignmentsList() {
           </Button>
         )}
       </div>
+
+      {isTeacher && <PresetsSection />}
 
       {assignments.length === 0 ? (
         <Card>

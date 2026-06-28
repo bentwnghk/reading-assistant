@@ -673,6 +673,28 @@ CREATE TABLE assignment_submissions (
 CREATE INDEX idx_submissions_student ON assignment_submissions(student_id);
 CREATE INDEX idx_submissions_assignment ON assignment_submissions(assignment_id);
 
+-- ─── Assignment Presets (saved reusable student rosters, shared school-wide) ──
+
+CREATE TABLE assignment_presets (
+  id          TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  teacher_id  TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  school_id   TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+  name        TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  student_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (school_id, name)
+);
+
+CREATE INDEX idx_assignment_presets_teacher ON assignment_presets(teacher_id);
+CREATE INDEX idx_assignment_presets_school ON assignment_presets(school_id);
+
+CREATE TRIGGER update_assignment_presets_updated_at
+    BEFORE UPDATE ON assignment_presets
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;
