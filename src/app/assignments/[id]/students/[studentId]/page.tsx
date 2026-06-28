@@ -22,7 +22,7 @@ const MagicDown = dynamic(() => import("@/components/MagicDown/View"), { ssr: fa
 
 interface SubmissionDetail {
   submission: AssignmentSubmissionShape
-  sessionRow: Record<string, unknown>
+  session: Record<string, unknown>
 }
 
 interface AssignmentSubmissionShape {
@@ -127,7 +127,7 @@ export default function StudentSubmissionPage({
     )
   }
 
-  const { submission: s, sessionRow: session } = detail
+  const { submission: s, session } = detail
 
   // Read fields defensively from the raw session row.
   const extractedText = asString(session.extracted_text)
