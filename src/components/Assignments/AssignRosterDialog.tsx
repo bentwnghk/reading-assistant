@@ -205,7 +205,7 @@ export default function AssignRosterDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           {/* Metadata fields */}
           <div className="grid gap-3">
             <div className="space-y-1.5">
