@@ -603,7 +603,7 @@ export async function updateReadingSession(
     client.query(`SELECT assignment_id FROM reading_sessions WHERE id = $1`, [sessionId])
       .then((res) => {
         if (res.rows.length > 0 && res.rows[0].assignment_id) {
-          return syncSubmissionMetrics(sessionId, sessionData as ReadingStore)
+          return syncSubmissionMetrics(sessionId)
         }
         return null
       })

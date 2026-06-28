@@ -169,10 +169,12 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
 
     // 2. For each student, create a personal session + submission row
     const { nanoid } = await import("nanoid")
+    const studentSessionIds: string[] = []
     for (const studentId of input.studentIds) {
       if (studentId === input.teacherId) continue
 
       const studentSessionId = nanoid()
+      studentSessionIds.push(studentSessionId)
       const now = Date.now()
 
       // Slimmed-down session: heavy originalImages omitted; content present.
@@ -310,6 +312,12 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
 
     await client.query("COMMIT")
 
+    // Seed initial progress for every student session now that content is in the DB.
+    // Fire-and-forget — failures here don't affect the assignment creation response.
+    for (const sessionId of studentSessionIds) {
+      syncSubmissionMetrics(sessionId).catch(() => {})
+    }
+
     // Non-blocking activity log
     logActivity(input.teacherId, "assignment_create", {
       details: {
@@ -445,9 +453,10 @@ export async function getAssignment(
     if (requesterRole === "teacher") {
       return assignment.teacherId === requesterId ? assignment : null
     }
-    // Student: only if on roster — also attach their personal session id
+    // Student: only if on roster — also attach their personal session id and
+    // their individual progress (not the cross-student AVG from the main query)
     const sub = await client.query(
-      `SELECT student_session_id FROM assignment_submissions
+      `SELECT student_session_id, progress FROM assignment_submissions
        WHERE assignment_id = $1 AND student_id = $2`,
       [assignmentId, requesterId],
     )
@@ -455,6 +464,7 @@ export async function getAssignment(
     return {
       ...assignment,
       studentSessionId: sub.rows[0].student_session_id ?? undefined,
+      avgProgress: sub.rows[0].progress ?? 0,
     }
   } finally {
     client.release()
@@ -663,18 +673,59 @@ export async function markSubmissionViewed(
 
 /**
  * Sync cached metrics on an assignment_submissions row from the student's
- * latest session data. Called from updateReadingSession whenever a session
- * that has an assignment_id is updated. No-op if the session isn't linked to
- * any assignment.
+ * latest session data. Reads the FULL session row from the DB so that partial
+ * updates (which only carry the changed fields) don't zero-out fields that
+ * weren't included in the current save payload.
+ * Called from updateReadingSession after COMMIT. No-op if the session isn't
+ * linked to any assignment.
  */
 export async function syncSubmissionMetrics(
   studentSessionId: string,
-  session: ReadingStore,
 ): Promise<void> {
   const client = await getClient()
   try {
-    const progress = calculateAssignmentProgress(session)
-    const grammarGameBest = maxGrammarGameScore(session)
+    // Fetch the full session row so calculateAssignmentProgress sees all fields
+    const sessionRes = await client.query(
+      `SELECT extracted_text, summary, mind_map, visualization_image,
+              adapted_text, test_completed, analyzed_sentences, highlighted_words,
+              glossary, spelling_game_best_score, vocabulary_quiz_score,
+              grammar_quiz_completed, grammar_quiz_score,
+              grammar_scramble_high_score, grammar_workshop_high_score,
+              grammar_surgery_high_score, grammar_roulette_high_score,
+              grammar_duel_high_score, grammar_game_accuracy,
+              test_score, grammar_game_accuracy
+       FROM reading_sessions WHERE id = $1`,
+      [studentSessionId],
+    )
+    if (sessionRes.rows.length === 0) return
+
+    const row = sessionRes.rows[0]
+    // Map DB row to the shape expected by calculateAssignmentProgress
+    const session: Partial<ReadingStore> = {
+      extractedText: row.extracted_text ?? "",
+      summary: row.summary ?? "",
+      mindMap: row.mind_map ?? "",
+      visualizationImage: row.visualization_image ?? "",
+      adaptedText: row.adapted_text ?? "",
+      testCompleted: row.test_completed ?? false,
+      analyzedSentences: row.analyzed_sentences ?? {},
+      highlightedWords: row.highlighted_words ?? [],
+      glossary: row.glossary ?? [],
+      spellingGameBestScore: row.spelling_game_best_score ?? 0,
+      vocabularyQuizScore: row.vocabulary_quiz_score ?? 0,
+      grammarQuizCompleted: row.grammar_quiz_completed ?? false,
+      grammarQuizScore: row.grammar_quiz_score ?? 0,
+      grammarScrambleHighScore: row.grammar_scramble_high_score ?? 0,
+      grammarWorkshopHighScore: row.grammar_workshop_high_score ?? 0,
+      grammarSurgeryHighScore: row.grammar_surgery_high_score ?? 0,
+      grammarRouletteHighScore: row.grammar_roulette_high_score ?? 0,
+      grammarDuelHighScore: row.grammar_duel_high_score ?? 0,
+      grammarGameAccuracy: row.grammar_game_accuracy ?? 0,
+      testScore: row.test_score ?? 0,
+    }
+
+    const progress = calculateAssignmentProgress(session as ReadingStore)
+    const grammarGameBest = maxGrammarGameScore(session as ReadingStore)
 
     await client.query(
       `UPDATE assignment_submissions SET
