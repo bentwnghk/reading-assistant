@@ -5,6 +5,7 @@ import {
   addStudentToClass,
   removeStudentFromClass,
   canAccessClass,
+  getClassSchoolId,
   getSchoolForUser,
 } from "@/lib/users"
 
@@ -66,11 +67,11 @@ export async function POST(
       return NextResponse.json({ error: "Student ID is required" }, { status: 400 })
     }
 
-    const callerSchoolId = await getSchoolForUser(session.user.id)
-    if (callerSchoolId) {
+    const classSchoolId = await getClassSchoolId(id)
+    if (classSchoolId) {
       for (const sid of idsToAdd) {
         const studentSchoolId = await getSchoolForUser(sid)
-        if (studentSchoolId !== callerSchoolId) {
+        if (studentSchoolId !== classSchoolId) {
           return NextResponse.json(
             { error: "Student does not belong to the same school as this class" },
             { status: 403 }
