@@ -77,12 +77,17 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
   }, [loadData])
 
   const uniqueClasses = useMemo(() => {
+    const scopedUsers = schoolFilter === "all"
+      ? users
+      : schoolFilter === "__none__"
+        ? users.filter(u => !u.schoolId)
+        : users.filter(u => u.schoolId === schoolFilter)
     const classSet = new Set<string>()
-    users.forEach(u => {
+    scopedUsers.forEach(u => {
       if (u.className) classSet.add(u.className)
     })
     return Array.from(classSet).sort()
-  }, [users])
+  }, [users, schoolFilter])
 
   const currentUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
 
@@ -141,7 +146,12 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
 
   useEffect(() => {
     setPage(1)
-  }, [roleFilter, classFilter, schoolFilter, sortField, sortOrder])
+    setClassFilter("all")
+  }, [schoolFilter])
+
+  useEffect(() => {
+    setPage(1)
+  }, [roleFilter, classFilter, sortField, sortOrder])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -517,11 +527,13 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                         <SelectItem value="__none__">
                           <span className="text-muted-foreground">{t("userManagement.users.noClass")}</span>
                         </SelectItem>
-                        {classes.map((cls) => (
-                          <SelectItem key={cls.id} value={cls.id}>
-                            {cls.name}
-                          </SelectItem>
-                        ))}
+                        {classes
+                          .filter(c => c.schoolId === user.schoolId || c.id === user.classId)
+                          .map((cls) => (
+                            <SelectItem key={cls.id} value={cls.id}>
+                              {cls.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   ) : (
