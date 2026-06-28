@@ -2144,6 +2144,8 @@
       "description": "Manage classes. Teachers can create and edit classes within their school.",
       "name": "Class Name",
       "school": "School",
+      "selectSchool": "Select a school",
+      "noSchool": "No school assigned",
       "namePlaceholder": "Enter class name",
       "nameRequired": "Class name is required",
       "descriptionLabel": "Description",

@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import type { ClassInfo, UserWithRole } from "@/lib/users"
+import type { ClassInfo, UserWithRole, SchoolInfo } from "@/lib/users"
 import ClassMembers from "./ClassMembers"
 
 interface ClassListProps {
@@ -50,11 +50,12 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
 
   const [classes, setClasses] = useState<ClassInfo[]>([])
   const [teachers, setTeachers] = useState<UserWithRole[]>([])
+  const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [membersDialogOpen, setMembersDialogOpen] = useState(false)
   const [selectedClass, setSelectedClass] = useState<ClassInfo | null>(null)
-  const [formData, setFormData] = useState({ name: "", description: "", teacherId: "" })
+  const [formData, setFormData] = useState({ name: "", description: "", teacherId: "", schoolId: "" })
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
   const [page, setPage] = useState(1)
@@ -63,13 +64,31 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const classesRes = await fetch("/api/classes")
+      const fetches: Promise<Response>[] = [fetch("/api/classes")]
+      if (isSuperAdmin) {
+        fetches.push(fetch("/api/schools"))
+      }
+      if (!isTeacher) {
+        fetches.push(fetch("/api/users"))
+      }
+
+      const responses = await Promise.all(fetches)
+      const classesRes = responses[0]
       if (classesRes.ok) {
         setClasses(await classesRes.json())
       }
 
+      let respIndex = 1
+      if (isSuperAdmin) {
+        const schoolsRes = responses[respIndex]
+        if (schoolsRes?.ok) {
+          setSchools(await schoolsRes.json())
+        }
+        respIndex += 1
+      }
+
       if (!isTeacher) {
-        const usersRes = await fetch("/api/users")
+        const usersRes = responses[respIndex]
         if (usersRes?.ok) {
           const users: UserWithRole[] = await usersRes.json()
           setTeachers(users.filter(u => u.role === "teacher" || u.role === "admin" || u.role === "super-admin"))
@@ -81,16 +100,17 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
     } finally {
       setLoading(false)
     }
-  }, [t, isTeacher])
+  }, [t, isTeacher, isSuperAdmin])
 
   useEffect(() => {
     loadData()
   }, [loadData])
 
   const filteredTeachers = useMemo(() => {
-    if (isSuperAdmin) return teachers
-    return teachers
-  }, [teachers, isSuperAdmin])
+    if (!isSuperAdmin) return teachers
+    if (!formData.schoolId || formData.schoolId === "__none__") return teachers
+    return teachers.filter(t => t.schoolId === formData.schoolId)
+  }, [teachers, isSuperAdmin, formData.schoolId])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -156,7 +176,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
 
   const openCreateDialog = () => {
     setSelectedClass(null)
-    setFormData({ name: "", description: "", teacherId: "__none__" })
+    setFormData({ name: "", description: "", teacherId: "__none__", schoolId: "__none__" })
     setEditDialogOpen(true)
   }
 
@@ -166,6 +186,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
       name: classInfo.name,
       description: classInfo.description || "",
       teacherId: classInfo.teacherId || "__none__",
+      schoolId: classInfo.schoolId || "__none__",
     })
     setEditDialogOpen(true)
   }
@@ -192,6 +213,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
           name: formData.name.trim(),
           description: formData.description.trim(),
           teacherId: formData.teacherId === "__none__" ? null : formData.teacherId,
+          ...(isSuperAdmin ? { schoolId: formData.schoolId === "__none__" ? null : formData.schoolId } : {}),
         }),
       })
 
@@ -395,6 +417,32 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {isSuperAdmin && (
+              <div>
+                <label className="text-sm font-medium">{t("userManagement.classes.school")}</label>
+                <Select
+                  value={formData.schoolId}
+                  onValueChange={(value) => {
+                    const nextTeacher = filteredTeachers.some(t => t.id === formData.teacherId)
+                      ? formData.teacherId
+                      : "__none__"
+                    setFormData({ ...formData, schoolId: value, teacherId: nextTeacher })
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("userManagement.classes.selectSchool")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("userManagement.classes.noSchool")}</SelectItem>
+                    {schools.map((school) => (
+                      <SelectItem key={school.id} value={school.id}>
+                        {school.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <label className="text-sm font-medium">{t("userManagement.classes.name")}</label>
               <Input
