@@ -281,8 +281,8 @@ function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden">
-        <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex justify-between items-center h-14">
-          <Link href="/" className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
+        <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center sm:h-14 gap-y-1 py-1 sm:py-0">
+          <Link href="/" className="self-center sm:self-auto text-left text-xl font-semibold flex items-center gap-1.5 relative group">
             <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
             <span className="text-blue-600 dark:text-blue-400">Mr.</span>
             <span className="text-2xl leading-none">🆖</span>
@@ -291,7 +291,7 @@ function Header() {
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
             </span>
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap">
             <Button
               className="h-8 w-8 relative"
               variant="ghost"
