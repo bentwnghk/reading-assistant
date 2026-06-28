@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { BarChart3, HelpCircle, Clock } from "lucide-react";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGlobalStore } from "@/store/global";
 import { OverviewTab } from "./OverviewTab";
 import SessionsTab from "./SessionsTab";
 import DashboardGuide from "./DashboardGuide";
@@ -24,6 +25,18 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showHelp, setShowHelp] = useState(false);
+  const dashboardInitialTab = useGlobalStore((s) => s.dashboardInitialTab);
+  const setDashboardInitialTab = useGlobalStore((s) => s.setDashboardInitialTab);
+
+  // When the dialog opens, honor any caller-requested initial tab (e.g. "sessions"
+  // from the Assignments page's "Create assignment" button) and then clear the
+  // intent so the next open returns to the default.
+  useEffect(() => {
+    if (open && dashboardInitialTab) {
+      setActiveTab(dashboardInitialTab);
+      setDashboardInitialTab("");
+    }
+  }, [open, dashboardInitialTab, setDashboardInitialTab]);
 
   function handleClose(dialogOpen: boolean) {
     if (!dialogOpen) onClose();

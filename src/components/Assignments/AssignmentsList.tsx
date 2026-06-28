@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -35,6 +34,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { useGlobalStore } from "@/store/global"
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -57,7 +57,7 @@ function isOverdue(iso: string | null | undefined): boolean {
 export default function AssignmentsList() {
   const { data: session } = useSession()
   const { t, i18n } = useTranslation()
-  const router = useRouter()
+  const setOpenDashboard = useGlobalStore((s) => s.setOpenDashboard)
 
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
@@ -138,7 +138,8 @@ export default function AssignmentsList() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => setOpenDashboard(true, "sessions")}
+            title={t("assignments.teacherView.new")}
           >
             <Plus className="h-4 w-4 mr-1" />
             {t("assignments.teacherView.new")}
