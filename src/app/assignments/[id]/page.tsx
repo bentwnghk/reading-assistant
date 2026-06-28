@@ -261,8 +261,8 @@ export default function AssignmentDetailPage({
 
         <Card>
           <CardContent className="pt-6 space-y-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-              <div className="min-w-0 sm:flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1 overflow-hidden">
                 <h1 className="text-2xl font-bold truncate">{assignment.title}</h1>
                 {assignment.subject && (
                   <p className="text-sm text-muted-foreground mt-0.5">
