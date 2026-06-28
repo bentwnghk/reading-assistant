@@ -188,7 +188,7 @@ export default function AssignmentsList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3">
+        <div className="grid gap-3 min-w-0">
           {assignments.map((a) => {
             const overdue =
               a.status === "active" &&
@@ -198,7 +198,7 @@ export default function AssignmentsList() {
             return (
               <Card
                 key={a.id}
-                className={`transition-colors hover:bg-accent/40 ${
+                className={`overflow-hidden transition-colors hover:bg-accent/40 ${
                   a.status === "archived" ? "opacity-60" : ""
                 }`}
               >
