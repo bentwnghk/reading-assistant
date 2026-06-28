@@ -303,6 +303,12 @@ interface Assignment {
   avgProgress?: number;
   /** Only populated for student-side queries (their own working session id). */
   studentSessionId?: string;
+  /** Only populated for student-side queries (their cached scores). */
+  testScore?: number | null;
+  vocabularyQuizScore?: number | null;
+  spellingGameBestScore?: number | null;
+  grammarQuizScore?: number | null;
+  grammarGameBestScore?: number | null;
   createdAt: string;
   updatedAt: string;
 }

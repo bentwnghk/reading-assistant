@@ -453,18 +453,28 @@ export async function getAssignment(
     if (requesterRole === "teacher") {
       return assignment.teacherId === requesterId ? assignment : null
     }
-    // Student: only if on roster — also attach their personal session id and
-    // their individual progress (not the cross-student AVG from the main query)
+    // Student: only if on roster — also attach their personal session id,
+    // their individual progress (not the cross-student AVG from the main
+    // query), and their cached scores for the scores summary card.
     const sub = await client.query(
-      `SELECT student_session_id, progress FROM assignment_submissions
+      `SELECT student_session_id, progress,
+              test_score, vocabulary_quiz_score, spelling_game_best_score,
+              grammar_quiz_score, grammar_game_best_score
+       FROM assignment_submissions
        WHERE assignment_id = $1 AND student_id = $2`,
       [assignmentId, requesterId],
     )
     if (sub.rows.length === 0) return null
+    const r = sub.rows[0]
     return {
       ...assignment,
-      studentSessionId: sub.rows[0].student_session_id ?? undefined,
-      avgProgress: sub.rows[0].progress ?? 0,
+      studentSessionId: r.student_session_id ?? undefined,
+      avgProgress: r.progress ?? 0,
+      testScore: r.test_score,
+      vocabularyQuizScore: r.vocabulary_quiz_score,
+      spellingGameBestScore: r.spelling_game_best_score,
+      grammarQuizScore: r.grammar_quiz_score,
+      grammarGameBestScore: r.grammar_game_best_score,
     }
   } finally {
     client.release()

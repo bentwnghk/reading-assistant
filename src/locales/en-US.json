@@ -2821,6 +2821,7 @@
       "overdue": "Overdue",
       "noDueDate": "No due date",
       "progress": "Progress: {{progress}}%",
+      "yourScores": "Your scores",
       "start": "Start assignment",
       "continue": "Continue",
       "review": "Review",

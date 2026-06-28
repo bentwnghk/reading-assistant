@@ -2821,6 +2821,7 @@
       "overdue": "已逾期",
       "noDueDate": "無截止日期",
       "progress": "進度：{{progress}}%",
+      "yourScores": "你的成績",
       "start": "開始作答",
       "continue": "繼續作答",
       "review": "檢視作答",
