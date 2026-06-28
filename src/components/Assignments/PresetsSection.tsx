@@ -76,11 +76,11 @@ export default function PresetsSection() {
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground"
+          className="text-muted-foreground min-w-0"
           onClick={() => setOpen((o) => !o)}
         >
           <Bookmark className="h-4 w-4 mr-1.5" />

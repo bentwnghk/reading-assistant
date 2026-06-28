@@ -133,7 +133,7 @@ export default function AssignmentsList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">{t("assignments.title")}</h1>
         {isTeacher && (
           <Button
@@ -174,7 +174,7 @@ export default function AssignmentsList() {
                 }`}
               >
                 <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <Link
                         href={`/assignments/${a.id}`}
