@@ -174,7 +174,7 @@ export default function AssignmentsList() {
                 }`}
               >
                 <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="w-full flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1 overflow-hidden">
                       <Link
                         href={`/assignments/${a.id}`}
