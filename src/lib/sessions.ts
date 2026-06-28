@@ -8,120 +8,6 @@ export interface SessionWithImages extends ReadingStore {
   assignmentId?: string
 }
 
-/**
- * Map a raw reading_sessions DB row (+ pre-resolved originalImages array) to
- * the ReadingStore / SessionWithImages shape. Shared by getReadingSession and
- * getStudentSessionForTeacher so the field mapping is never duplicated.
- */
-export function mapSessionRowToStore(
-  row: Record<string, unknown>,
-  originalImages: string[],
-): SessionWithImages {
-  return {
-    id: row.id as string,
-    docTitle: row.doc_title as string,
-    studentAge: row.student_age as number,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    source: ((row.source as string) || "repository") as any,
-    originalImages,
-    extractedText: row.extracted_text as string,
-    summary: row.summary as string,
-    adaptedText: row.adapted_text as string,
-    simplifiedText: row.simplified_text as string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    highlightedWords: row.highlighted_words as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    analyzedSentences: row.analyzed_sentences as any,
-    mindMap: row.mind_map as string,
-    visualizationImage: (row.visualization_image as string) ?? "",
-    visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    readingTest: row.reading_test as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    glossary: row.glossary as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    glossaryRatings: (row.glossary_ratings as any) ?? {},
-    testScore: row.test_score as number,
-    testCompleted: row.test_completed as boolean,
-    testEarnedPoints: row.test_earned_points as number,
-    testTotalPoints: row.test_total_points as number,
-    testShowChinese: row.test_show_chinese as boolean,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    testMode: ((row.test_mode as string) ?? "all-at-once") as any,
-    vocabularyQuizScore: row.vocabulary_quiz_score as number,
-    spellingGameBestScore: row.spelling_game_best_score as number,
-    testsCompleted: (row.tests_completed as number) ?? 0,
-    vocabQuizzesCompleted: (row.vocab_quizzes_completed as number) ?? 0,
-    spellingGamesCompleted: (row.spelling_games_completed as number) ?? 0,
-    flashcardReviewDates: ((row.flashcard_review_dates as number[]) ?? []),
-    summaryGeneratedAt: Number(row.summary_generated_at ?? 0),
-    mindMapGeneratedAt: Number(row.mind_map_generated_at ?? 0),
-    adaptedTextGeneratedAt: Number(row.adapted_text_generated_at ?? 0),
-    simplifiedTextGeneratedAt: Number(row.simplified_text_generated_at ?? 0),
-    glossaryGeneratedAt: Number(row.glossary_generated_at ?? 0),
-    spellingGameCompletedAt: Number(row.spelling_game_completed_at ?? 0),
-    vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at ?? 0),
-    readingTestCompletedAt: Number(row.reading_test_completed_at ?? 0),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    chatHistory: row.chat_history as any,
-    status: "idle" as const,
-    error: null,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    originalDifficulty: row.original_difficulty as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    adaptedDifficulty: row.adapted_difficulty as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    simplifiedDifficulty: row.simplified_difficulty as any,
-    includeGlossary: (row.include_glossary as boolean) ?? true,
-    includeSentenceAnalysis: (row.include_sentence_analysis as boolean) ?? true,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    grammarTopics: ((row.grammar_topics as any) ?? []),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    grammarQuiz: ((row.grammar_quiz as any) ?? []),
-    grammarQuizScore: (row.grammar_quiz_score as number) ?? 0,
-    grammarQuizCompleted: (row.grammar_quiz_completed as boolean) ?? false,
-    grammarQuizzesCompleted: (row.grammar_quizzes_completed as number) ?? 0,
-    grammarQuizEarnedPoints: (row.grammar_quiz_earned_points as number) ?? 0,
-    grammarQuizTotalPoints: (row.grammar_quiz_total_points as number) ?? 0,
-    grammarGeneratedAt: Number(row.grammar_generated_at ?? 0),
-    grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
-    grammarHighlightEnabled: (row.grammar_highlight_enabled as boolean) ?? false,
-    grammarHighlightTopicId: (row.grammar_highlight_topic_id as string) ?? null,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    grammarQuizMode: ((row.grammar_quiz_mode as string) ?? "all-at-once") as any,
-    grammarScrambleHighScore: (row.grammar_scramble_high_score as number) ?? 0,
-    grammarWorkshopHighScore: (row.grammar_workshop_high_score as number) ?? 0,
-    grammarSurgeryHighScore: (row.grammar_surgery_high_score as number) ?? 0,
-    grammarRouletteHighScore: (row.grammar_roulette_high_score as number) ?? 0,
-    grammarDuelHighScore: (row.grammar_duel_high_score as number) ?? 0,
-    grammarGameAccuracy: (row.grammar_game_accuracy as number) ?? 0,
-    grammarGamesCompleted: (row.grammar_games_completed as number) ?? 0,
-    grammarGameCompletedAt: Number(row.grammar_game_completed_at ?? 0),
-    grammarScrambleAccuracy: (row.grammar_scramble_accuracy as number) ?? 0,
-    grammarWorkshopAccuracy: (row.grammar_workshop_accuracy as number) ?? 0,
-    grammarSurgeryAccuracy: (row.grammar_surgery_accuracy as number) ?? 0,
-    grammarRouletteAccuracy: (row.grammar_roulette_accuracy as number) ?? 0,
-    grammarDuelAccuracy: (row.grammar_duel_accuracy as number) ?? 0,
-    grammarScrambleCompleted: (row.grammar_scramble_completed as number) ?? 0,
-    grammarWorkshopCompleted: (row.grammar_workshop_completed as number) ?? 0,
-    grammarSurgeryCompleted: (row.grammar_surgery_completed as number) ?? 0,
-    grammarRouletteCompleted: (row.grammar_roulette_completed as number) ?? 0,
-    grammarDuelCompleted: (row.grammar_duel_completed as number) ?? 0,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    grammarErrorChallenges: ((row.grammar_error_challenges as any) ?? []),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    grammarScrambleChallenges: ((row.grammar_scramble_challenges as any) ?? []),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    grammarWorkshopChallenges: ((row.grammar_workshop_challenges as any) ?? []),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    grammarGameQuestions: ((row.grammar_game_questions as any) ?? []),
-    createdAt: new Date(row.created_at as string).getTime(),
-    updatedAt: new Date(row.updated_at as string).getTime(),
-    userId: row.user_id as string,
-    assignmentId: (row.assignment_id as string) ?? undefined,
-  }
-}
-
 export async function createReadingSession(
   userId: string,
   sessionData: ReadingStore
@@ -489,7 +375,91 @@ export async function getReadingSession(
             bufferToBase64(img.image_data, img.content_type)
           )
         : (row.assignment_snapshot?.originalImages ?? [])
-    return mapSessionRowToStore(row, originalImages)
+    return {
+      id: row.id,
+      docTitle: row.doc_title,
+      studentAge: row.student_age,
+      source: row.source || ("repository" as const),
+      originalImages,
+      extractedText: row.extracted_text,
+      summary: row.summary,
+      adaptedText: row.adapted_text,
+      simplifiedText: row.simplified_text,
+      highlightedWords: row.highlighted_words,
+      analyzedSentences: row.analyzed_sentences,
+      mindMap: row.mind_map,
+      visualizationImage: row.visualization_image ?? "",
+      visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
+      readingTest: row.reading_test,
+      glossary: row.glossary,
+      glossaryRatings: row.glossary_ratings,
+      testScore: row.test_score,
+      testCompleted: row.test_completed,
+      testEarnedPoints: row.test_earned_points,
+      testTotalPoints: row.test_total_points,
+      testShowChinese: row.test_show_chinese,
+      testMode: row.test_mode,
+      vocabularyQuizScore: row.vocabulary_quiz_score,
+      spellingGameBestScore: row.spelling_game_best_score,
+      testsCompleted: row.tests_completed ?? 0,
+      vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
+      spellingGamesCompleted: row.spelling_games_completed ?? 0,
+      flashcardReviewDates: row.flashcard_review_dates ?? [],
+      summaryGeneratedAt: Number(row.summary_generated_at ?? 0),
+      mindMapGeneratedAt: Number(row.mind_map_generated_at ?? 0),
+      adaptedTextGeneratedAt: Number(row.adapted_text_generated_at ?? 0),
+      simplifiedTextGeneratedAt: Number(row.simplified_text_generated_at ?? 0),
+      glossaryGeneratedAt: Number(row.glossary_generated_at ?? 0),
+      spellingGameCompletedAt: Number(row.spelling_game_completed_at ?? 0),
+      vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at ?? 0),
+      readingTestCompletedAt: Number(row.reading_test_completed_at ?? 0),
+      chatHistory: row.chat_history,
+      status: "idle" as const,
+      error: null,
+      originalDifficulty: row.original_difficulty,
+      adaptedDifficulty: row.adapted_difficulty,
+      simplifiedDifficulty: row.simplified_difficulty,
+      includeGlossary: row.include_glossary ?? true,
+      includeSentenceAnalysis: row.include_sentence_analysis ?? true,
+      grammarTopics: row.grammar_topics ?? [],
+      grammarQuiz: row.grammar_quiz ?? [],
+      grammarQuizScore: row.grammar_quiz_score ?? 0,
+      grammarQuizCompleted: row.grammar_quiz_completed ?? false,
+      grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
+      grammarQuizEarnedPoints: row.grammar_quiz_earned_points ?? 0,
+      grammarQuizTotalPoints: row.grammar_quiz_total_points ?? 0,
+      grammarGeneratedAt: Number(row.grammar_generated_at ?? 0),
+      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at ?? 0),
+      grammarHighlightEnabled: row.grammar_highlight_enabled ?? false,
+      grammarHighlightTopicId: row.grammar_highlight_topic_id ?? null,
+      grammarQuizMode: row.grammar_quiz_mode ?? "all-at-once",
+      grammarScrambleHighScore: row.grammar_scramble_high_score ?? 0,
+      grammarWorkshopHighScore: row.grammar_workshop_high_score ?? 0,
+      grammarSurgeryHighScore: row.grammar_surgery_high_score ?? 0,
+      grammarRouletteHighScore: row.grammar_roulette_high_score ?? 0,
+      grammarDuelHighScore: row.grammar_duel_high_score ?? 0,
+      grammarGameAccuracy: row.grammar_game_accuracy ?? 0,
+      grammarGamesCompleted: row.grammar_games_completed ?? 0,
+      grammarGameCompletedAt: Number(row.grammar_game_completed_at ?? 0),
+      grammarScrambleAccuracy: row.grammar_scramble_accuracy ?? 0,
+      grammarWorkshopAccuracy: row.grammar_workshop_accuracy ?? 0,
+      grammarSurgeryAccuracy: row.grammar_surgery_accuracy ?? 0,
+      grammarRouletteAccuracy: row.grammar_roulette_accuracy ?? 0,
+      grammarDuelAccuracy: row.grammar_duel_accuracy ?? 0,
+      grammarScrambleCompleted: row.grammar_scramble_completed ?? 0,
+      grammarWorkshopCompleted: row.grammar_workshop_completed ?? 0,
+      grammarSurgeryCompleted: row.grammar_surgery_completed ?? 0,
+      grammarRouletteCompleted: row.grammar_roulette_completed ?? 0,
+      grammarDuelCompleted: row.grammar_duel_completed ?? 0,
+      grammarErrorChallenges: row.grammar_error_challenges ?? [],
+      grammarScrambleChallenges: row.grammar_scramble_challenges ?? [],
+      grammarWorkshopChallenges: row.grammar_workshop_challenges ?? [],
+      grammarGameQuestions: row.grammar_game_questions ?? [],
+      createdAt: new Date(row.created_at).getTime(),
+      updatedAt: new Date(row.updated_at).getTime(),
+      userId: row.user_id,
+      assignmentId: row.assignment_id ?? undefined,
+    }
   } finally {
     client.release()
   }

@@ -2810,9 +2810,6 @@
       "grammarGameCol": "Grammar game",
       "accuracyCol": "Accuracy",
       "lastViewedCol": "Last viewed",
-      "submittedCol": "Submitted",
-      "actionsCol": "Actions",
-      "viewWork": "View work",
       "notStarted": "Not started",
       "never": "Never"
     },
@@ -2832,17 +2829,6 @@
     "status": {
       "active": "Active",
       "archived": "Archived"
-    },
-    "submission": {
-      "title": "Submission by {{student}}",
-      "backToRoster": "Back to roster",
-      "noSession": "This student hasn't started the assignment yet.",
-      "progress": "Progress",
-      "summary": "Summary",
-      "readingTest": "Reading test",
-      "glossary": "Glossary",
-      "chatHistory": "Chat history",
-      "noChat": "No questions asked yet."
     },
     "create": {
       "actionTitle": "Assign as homework",
@@ -2873,10 +2859,6 @@
     },
     "cancel": "Cancel",
     "close": "Close",
-    "back": "Back",
-    "viewOnly": {
-      "banner": "Viewing {{student}}'s session (read-only)",
-      "close": "Close tab"
-    }
+    "back": "Back"
   }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useReadingStore, isStreamingActive, isViewOnly } from "@/store/reading";
+import { useReadingStore, isStreamingActive } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 
 function useAutoSave() {
@@ -30,11 +30,6 @@ function useAutoSave() {
     const { save, update, history } = useHistoryStore.getState();
 
     if (!extractedText) {
-      return;
-    }
-
-    // Never save to localforage in view-only mode (teacher viewing student work)
-    if (isViewOnly()) {
       return;
     }
 

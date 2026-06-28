@@ -12,7 +12,6 @@ import {
   Users,
   Loader2,
   Download,
-  Eye,
   TrendingUp,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -253,13 +252,12 @@ export default function AssignmentDetailPage({
                     <TableHead className="w-20">{t("assignments.teacherView.grammarQuizCol")}</TableHead>
                     <TableHead className="w-20">{t("assignments.teacherView.grammarGameCol")}</TableHead>
                     <TableHead className="w-32">{t("assignments.teacherView.lastViewedCol")}</TableHead>
-                    <TableHead className="w-16">{t("assignments.teacherView.actionsCol")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {roster.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                         {t("assignments.teacherView.notStarted")}
                       </TableCell>
                     </TableRow>
@@ -304,22 +302,6 @@ export default function AssignmentDetailPage({
                           {s.lastViewedAt
                             ? formatDate(s.lastViewedAt, i18n.language)
                             : t("assignments.teacherView.never")}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title={t("assignments.teacherView.viewWork")}
-                            onClick={() =>
-                              window.open(
-                                `/?viewSession=${encodeURIComponent(s.studentSessionId ?? "")}&assignment=${encodeURIComponent(assignment.id)}&student=${encodeURIComponent(s.studentId)}`,
-                                "_blank",
-                              )
-                            }
-                            disabled={!s.studentSessionId}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
                         </TableCell>
                       </TableRow>
                     ))

@@ -9,7 +9,7 @@ import { LoaderCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useSettingStore } from "@/store/setting";
 import { useHistoryStore } from "@/store/history";
-import { setHistorySyncFn, useReadingStore, isRestoreComplete, setViewOnly } from "@/store/reading";
+import { setHistorySyncFn, useReadingStore, isRestoreComplete } from "@/store/reading";
 import { isShareCheckComplete } from "@/store/sharing";
 import useAutoSave from "@/hooks/useAutoSave";
 import { useVocabularySync } from "@/hooks/useVocabularySync";
@@ -37,7 +37,7 @@ function HomeContent() {
   const { data: session, status } = useSession();
   const { theme } = useSettingStore();
   const { setTheme } = useTheme();
-  const { extractedText, docTitle, restore, restoreReadOnly } = useReadingStore();
+  const { extractedText, docTitle, restore } = useReadingStore();
   const { generateTitle } = useReadingAssistant();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -46,7 +46,6 @@ function HomeContent() {
   useVocabularySync();
 
   const [restoreReady, setRestoreReady] = useState(false);
-  const [viewOnlyBanner, setViewOnlyBanner] = useState<{ studentName: string } | null>(null);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -106,30 +105,6 @@ function HomeContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoreReady, searchParams]);
 
-  // View-only mode: teacher viewing a student's session in a new tab.
-  // Fetches the student session via the teacher-auth endpoint, loads it into
-  // the store without marking it as "created in API" (so syncToAPI is a no-op),
-  // and shows a read-only banner at the top.
-  useEffect(() => {
-    if (!restoreReady) return;
-    const viewSessionId = searchParams.get("viewSession");
-    const assignmentId = searchParams.get("assignment");
-    const studentId = searchParams.get("student");
-    if (!viewSessionId || !assignmentId || !studentId) return;
-    setViewOnly(true);
-    fetch(`/api/assignments/${assignmentId}/submissions/${studentId}/session`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.session) {
-          restoreReadOnly(data.session).then(() => {
-            setViewOnlyBanner({ studentName: data.studentName || data.studentEmail || studentId });
-          });
-        }
-      })
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restoreReady]);
-
   // Recover title generation after an iOS PWA page refresh that interrupted the
   // extraction flow. If the store has extracted text but no title (because the
   // async chain in ImageUpload was killed before generateTitle() ran), re-run it.
@@ -165,19 +140,6 @@ function HomeContent() {
 
   return (
     <>
-      {viewOnlyBanner && (
-        <div className="sticky top-0 z-50 flex items-center justify-between gap-3 bg-amber-100 dark:bg-amber-950 border-b border-amber-300 dark:border-amber-800 px-4 py-2 text-sm text-amber-900 dark:text-amber-200 print:hidden">
-          <span>
-            {t("assignments.viewOnly.banner", { student: viewOnlyBanner.studentName })}
-          </span>
-          <button
-            onClick={() => window.close()}
-            className="rounded px-2 py-0.5 text-xs font-medium hover:bg-amber-200 dark:hover:bg-amber-900 transition-colors"
-          >
-            {t("assignments.viewOnly.close")}
-          </button>
-        </div>
-      )}
       <Header />
       <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
         <SettingsBanner />

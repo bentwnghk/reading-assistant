@@ -28,16 +28,6 @@ export function isWelcomeDialogChecked() {
   return _welcomeDialogChecked;
 }
 
-// When true the store is loaded in view-only (teacher-viewing-student) mode:
-// syncToAPI and localforage saves are both suppressed.
-let _viewOnly = false;
-export function setViewOnly(value: boolean) {
-  _viewOnly = value;
-}
-export function isViewOnly() {
-  return _viewOnly;
-}
-
 let currentUserId: string | null = null;
 export function setUserId(id: string | null) {
   currentUserId = id;
@@ -66,7 +56,6 @@ function syncToHistoryIfNeeded(state: ReadingStore) {
 }
 
 async function syncToAPI(sessionId: string, data: Partial<ReadingStore>) {
-  if (_viewOnly) return;
   if (!currentUserId || !sessionId) return;
   if (!isSessionCreatedInApi(sessionId)) return;
   
@@ -278,7 +267,6 @@ interface ReadingActions {
   reset: () => void;
   backup: () => ReadingStore;
   restore: (session: ReadingStore) => Promise<void>;
-  restoreReadOnly: (session: ReadingStore) => Promise<void>;
 }
 
 const defaultValues: ReadingStore = {
@@ -1227,17 +1215,6 @@ export const useReadingStore = create(
         if (currentUserId && session.id) {
           markSessionCreated(session.id);
         }
-      },
-      restoreReadOnly: async (session: ReadingStore) => {
-        // Load a session in view-only mode (teacher viewing student work).
-        // Does NOT call markSessionCreated, so syncToAPI is permanently a no-op.
-        // Sets the module-level _viewOnly flag so useAutoSave also skips saves.
-        _viewOnly = true;
-        set(() => ({
-          ...defaultValues,
-          ...session,
-          originalImages: session.originalImages || [],
-        }));
       },
     }),
     {
