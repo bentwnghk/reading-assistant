@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import type { ReadingHistory } from "@/store/history"
 import type { ShareTargetGroup } from "@/lib/shared-sessions"
 
@@ -306,8 +305,8 @@ export default function AssignRosterDialog({
                   </div>
                 )}
 
-                <ScrollArea className="max-h-[50vh]">
-                  <div className="space-y-4 pr-3">
+                <div className="max-h-[50vh] overflow-auto border rounded p-2">
+                  <div className="space-y-4">
                     {filteredGroupedBySchool.map((schoolBlock) => (
                       <div key={schoolBlock.schoolId ?? "__none__"}>
                         {hasSchools && (
@@ -385,7 +384,7 @@ export default function AssignRosterDialog({
                       </div>
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
               </>
             )}
           </div>
