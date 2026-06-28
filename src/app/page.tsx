@@ -82,13 +82,16 @@ function HomeContent() {
       return;
     }
     const data = useHistoryStore.getState().load(sessionId);
-    if (data) {
+    // Assignment sessions must always be fetched fresh from the API so that
+    // originalImages are served from the assignment snapshot (they are stripped
+    // from the per-student DB row and from localforage to avoid duplication).
+    const isAssignment = data?.source === "assignment";
+    if (data && !isAssignment) {
       restore(data).then(() => {
         router.replace("/");
       });
     } else {
-      // Session not in localforage — fetch from the API (e.g. assignment sessions
-      // that have never been opened by this student on this device).
+      // Not in localforage, or it's an assignment session — fetch from the API.
       fetch(`/api/sessions/${sessionId}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((apiData) => {
@@ -96,11 +99,19 @@ function HomeContent() {
             restore(apiData).then(() => {
               router.replace("/");
             });
+          } else if (data) {
+            // API fetch failed but we have a localforage copy — use it as fallback.
+            restore(data).then(() => {
+              router.replace("/");
+            });
           } else {
             router.replace("/");
           }
         })
-        .catch(() => router.replace("/"));
+        .catch(() => {
+          if (data) restore(data).then(() => router.replace("/"));
+          else router.replace("/");
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoreReady, searchParams]);

@@ -355,12 +355,13 @@ export async function getReadingSession(
           ) FILTER (WHERE ri.id IS NOT NULL),
           '[]'::json
         ) as images,
-        asgn.source_session_snapshot AS assignment_snapshot
+        (SELECT a.source_session_snapshot
+           FROM assignments a
+          WHERE a.id = rs.assignment_id) AS assignment_snapshot
        FROM reading_sessions rs
        LEFT JOIN reading_images ri ON rs.id = ri.session_id
-       LEFT JOIN assignments asgn ON rs.assignment_id = asgn.id
        WHERE rs.id = $1 AND rs.user_id = $2
-       GROUP BY rs.id, asgn.source_session_snapshot`,
+       GROUP BY rs.id`,
       [sessionId, userId]
     )
     
