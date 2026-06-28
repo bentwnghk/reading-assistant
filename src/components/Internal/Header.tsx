@@ -345,7 +345,7 @@ function Header() {
                 disabled
               >
                 <ClipboardList className="h-4 w-4" />
-                <span className="hidden sm:inline text-sm">{t("assignments.navTitle")}</span>
+                <span className="text-sm">{t("assignments.navTitle")}</span>
               </Button>
             ) : (
               <Link href="/assignments" prefetch={false}>
@@ -356,7 +356,7 @@ function Header() {
                   title={t("assignments.navTitle")}
                 >
                   <ClipboardList className="h-4 w-4" />
-                  <span className="hidden sm:inline text-sm">{t("assignments.navTitle")}</span>
+                  <span className="text-sm">{t("assignments.navTitle")}</span>
                 </Button>
               </Link>
             )}
