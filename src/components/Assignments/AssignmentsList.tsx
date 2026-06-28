@@ -174,8 +174,8 @@ export default function AssignmentsList() {
                 }`}
               >
                 <CardHeader className="pb-3">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                    <div className="min-w-0 sm:flex-1">
                       <Link
                         href={`/assignments/${a.id}`}
                         className="block hover:underline"
