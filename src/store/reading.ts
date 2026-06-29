@@ -174,6 +174,7 @@ export interface ReadingStore {
   vocabularyQuizScore: number;
   vocabQuizzesCompleted: number;
   spellingGameBestScore: number;
+  spellingGameAccuracy: number;
   spellingGamesCompleted: number;
   flashcardReviewDates: number[];
   summaryGeneratedAt: number;
@@ -247,7 +248,7 @@ interface ReadingActions {
   setTestShowChinese: (show: boolean) => void;
   setTestMode: (mode: ReadingTestMode) => void;
   setVocabularyQuizScore: (score: number) => void;
-  setSpellingGameBestScore: (score: number) => void;
+  setSpellingGameBestScore: (score: number, accuracy: number) => void;
   incrementFlashcardReviewCount: () => void; // appends Date.now() to flashcardReviewDates
   addChatMessage: (message: ChatMessage) => void;
   removeChatMessage: (id: string) => void;
@@ -330,8 +331,9 @@ const defaultValues: ReadingStore = {
   testsCompleted: 0,
   vocabularyQuizScore: 0,
   vocabQuizzesCompleted: 0,
-  spellingGameBestScore: 0,
-  spellingGamesCompleted: 0,
+    spellingGameBestScore: 0,
+    spellingGameAccuracy: 0,
+    spellingGamesCompleted: 0,
   flashcardReviewDates: [],
   summaryGeneratedAt: 0,
   mindMapGeneratedAt: 0,
@@ -991,11 +993,15 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      setSpellingGameBestScore: (score) =>
+      setSpellingGameBestScore: (score, accuracy) =>
         set((state) => {
+          const count = state.spellingGamesCompleted + 1;
           const newState = {
             spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
-            spellingGamesCompleted: state.spellingGamesCompleted + 1,
+            spellingGameAccuracy: Math.round(
+              (state.spellingGameAccuracy * state.spellingGamesCompleted + accuracy) / count
+            ),
+            spellingGamesCompleted: count,
             spellingGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };

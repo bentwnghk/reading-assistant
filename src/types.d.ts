@@ -307,6 +307,7 @@ interface Assignment {
   testScore?: number | null;
   vocabularyQuizScore?: number | null;
   spellingGameBestScore?: number | null;
+  spellingGameAccuracy?: number | null;
   grammarQuizScore?: number | null;
   grammarGameBestScore?: number | null;
   createdAt: string;
@@ -326,6 +327,7 @@ interface AssignmentSubmission {
   testCompleted: boolean;
   vocabularyQuizScore?: number | null;
   spellingGameBestScore?: number | null;
+  spellingGameAccuracy?: number | null;
   grammarQuizScore?: number | null;
   grammarGameBestScore?: number | null;
   grammarGameAccuracy?: number | null;
@@ -373,6 +375,7 @@ interface StudentSessionData {
   testCompleted?: boolean;
   vocabularyQuizScore?: number;
   spellingGameBestScore?: number;
+  spellingGameAccuracy?: number;
   glossaryCount: number;
   progress: number;
   createdAt: number;

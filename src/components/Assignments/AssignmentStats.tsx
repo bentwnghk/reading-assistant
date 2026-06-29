@@ -57,7 +57,7 @@ const ACTIVITY_META: Record<
     icon: <ClipboardList className="h-3.5 w-3.5" />,
     accent: "#3b82f6", // blue
   },
-  spellingGameBestScore: {
+  spellingGameAccuracy: {
     labelKey: "assignments.teacherView.spellingCol",
     icon: <SpellCheck className="h-3.5 w-3.5" />,
     accent: "#ec4899", // pink

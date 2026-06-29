@@ -6,27 +6,26 @@
  * friendly (no I/O) so the teacher's assignment detail page can render them
  * synchronously from the already-fetched roster.
  *
- * CRITICAL — activities are NOT on a single scale:
- *   - "percentage" activities (testScore, vocabularyQuizScore, grammarQuizScore,
- *     grammarGameAccuracy) are bounded 0–100, computed as earned/total × 100 or
- *     correct/total × 100. The 50/70 thresholds, tier classification, pass rate,
- *     distribution buckets and the 0–100 bar chart axis are valid for these.
- *   - "points" activities (spellingGameBestScore) are raw, cumulative, unbounded
- *     point totals. They have NO persisted accuracy field, so percentage-based
- *     analysis is impossible. They are reported with participation rate and the
- *     raw mean only, and are excluded from the bar chart, tier thresholds, pass
- *     rate, the class average, and at-risk detection.
+ * CRITICAL — activities are NOT all stored as their "raw" game metric:
+ *   - Quizzes/tests (testScore, vocabularyQuizScore, grammarQuizScore) are stored
+ *     directly as a bounded 0–100 percentage.
+ *   - Game activities (spelling, grammar games) store BOTH an unbounded point
+ *     total (best score) AND a bounded 0–100 *accuracy*. This module analyses the
+ *     accuracy fields (spellingGameAccuracy, grammarGameAccuracy) so every
+ *     activity is on a common 0–100 scale and the 50/70 thresholds, tier
+ *     classification, pass rate, distribution buckets and the 0–100 bar chart
+ *     axis are all valid.
  *
  *   - `null` score → the student has not attempted that activity (renders "-")
- *   - score < 50   → "struggling" tier (red)        [percentage scale only]
- *   - 50 ≤ s < 70  → "developing" tier (amber)      [percentage scale only]
- *   - score ≥ 70   → "pass" / mastery tier (green)  [percentage scale only]
+ *   - score < 50   → "struggling" tier (red)
+ *   - 50 ≤ s < 70  → "developing" tier (amber)
+ *   - score ≥ 70   → "pass" / mastery tier (green)
  */
 
 export type ActivityKey =
   | "testScore"
   | "vocabularyQuizScore"
-  | "spellingGameBestScore"
+  | "spellingGameAccuracy"
   | "grammarQuizScore"
   // Grammar games store unbounded point high scores; `grammarGameAccuracy` is the
   // real 0–100 accuracy and is the analytically correct metric here.
@@ -44,16 +43,20 @@ export const STRUGGLE_THRESHOLD = 50
 export const ACTIVITY_KEYS: readonly ActivityKey[] = [
   "testScore",
   "vocabularyQuizScore",
-  "spellingGameBestScore",
+  "spellingGameAccuracy",
   "grammarQuizScore",
   "grammarGameAccuracy",
 ] as const
 
-/** How each activity's stored value is scaled. Governs which analyses apply. */
+/**
+ * How each activity's stored value is scaled. Governs which analyses apply.
+ * All five activities now persist a bounded 0–100 value (spelling and grammar
+ * games use their persisted *accuracy* rather than their unbounded point scores).
+ */
 export const ACTIVITY_SCALE: Record<ActivityKey, ScoreScale> = {
   testScore: "percentage",
   vocabularyQuizScore: "percentage",
-  spellingGameBestScore: "points", // unbounded cumulative points; no accuracy persisted
+  spellingGameAccuracy: "percentage", // 0–100 running average (not the unbounded best-score points)
   grammarQuizScore: "percentage",
   grammarGameAccuracy: "percentage", // 0–100 accuracy (not the unbounded best-score points)
 }

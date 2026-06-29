@@ -579,7 +579,8 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
 
   useEffect(() => {
     if (gameStatus === "completed" && score > 0) {
-      setSpellingGameBestScore(score);
+      const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
+      setSpellingGameBestScore(score, accuracy);
       logActivity("spelling_complete", {
         sessionId: id || undefined,
         score,
@@ -609,7 +610,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
         }
       }
     }
-  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete]);
+  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete, correctCount, challenges]);
 
   if (glossary.length < 3) {
     return (

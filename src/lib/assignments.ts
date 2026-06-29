@@ -28,6 +28,7 @@ export function stripSessionForAssignment(sessionData: ReadingStore): Record<str
     // Vocabulary / spelling
     vocabularyQuizScore: 0,
     spellingGameBestScore: 0,
+    spellingGameAccuracy: 0,
     spellingGamesCompleted: 0,
     vocabQuizzesCompleted: 0,
     testsCompleted: 0,
@@ -198,7 +199,7 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
            adapted_text, simplified_text, highlighted_words, analyzed_sentences,
            mind_map, visualization_image, visualization_generated_at, reading_test, glossary, glossary_ratings, test_score,
            test_completed, test_earned_points, test_total_points, test_show_chinese,
-           test_mode, vocabulary_quiz_score, spelling_game_best_score, chat_history,
+           test_mode, vocabulary_quiz_score, spelling_game_best_score, spelling_game_accuracy, chat_history,
            tests_completed, vocab_quizzes_completed, spelling_games_completed,
            original_difficulty, adapted_difficulty, simplified_difficulty,
            include_glossary, include_sentence_analysis,
@@ -226,9 +227,9 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
             $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
             $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
-            $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
-            $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70
-          )`,
+             $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
+             $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71
+           )`,
         [
           studentSession.id,
           studentId,
@@ -255,6 +256,7 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
           studentSession.testMode ?? "all-at-once",
           studentSession.vocabularyQuizScore ?? 0,
           studentSession.spellingGameBestScore ?? 0,
+          studentSession.spellingGameAccuracy ?? 0,
           JSON.stringify(studentSession.chatHistory ?? []),
           studentSession.testsCompleted ?? 0,
           studentSession.vocabQuizzesCompleted ?? 0,
@@ -459,7 +461,7 @@ export async function getAssignment(
     const sub = await client.query(
       `SELECT student_session_id, progress,
               test_score, vocabulary_quiz_score, spelling_game_best_score,
-              grammar_quiz_score, grammar_game_best_score
+              spelling_game_accuracy, grammar_quiz_score, grammar_game_best_score
        FROM assignment_submissions
        WHERE assignment_id = $1 AND student_id = $2`,
       [assignmentId, requesterId],
@@ -473,6 +475,7 @@ export async function getAssignment(
       testScore: r.test_score,
       vocabularyQuizScore: r.vocabulary_quiz_score,
       spellingGameBestScore: r.spelling_game_best_score,
+      spellingGameAccuracy: r.spelling_game_accuracy,
       grammarQuizScore: r.grammar_quiz_score,
       grammarGameBestScore: r.grammar_game_best_score,
     }
@@ -516,6 +519,7 @@ export async function getAssignmentRoster(
       testCompleted: row.test_completed ?? false,
       vocabularyQuizScore: row.vocabulary_quiz_score,
       spellingGameBestScore: row.spelling_game_best_score,
+      spellingGameAccuracy: row.spelling_game_accuracy,
       grammarQuizScore: row.grammar_quiz_score,
       grammarGameBestScore: row.grammar_game_best_score,
       grammarGameAccuracy: row.grammar_game_accuracy,
@@ -637,7 +641,7 @@ export async function syncSubmissionMetrics(
     const sessionRes = await client.query(
       `SELECT extracted_text, summary, mind_map, visualization_image,
               adapted_text, test_completed, analyzed_sentences, highlighted_words,
-              glossary, spelling_game_best_score, vocabulary_quiz_score,
+              glossary, spelling_game_best_score, spelling_game_accuracy, vocabulary_quiz_score,
               grammar_quiz_completed, grammar_quiz_score,
               grammar_scramble_high_score, grammar_workshop_high_score,
               grammar_surgery_high_score, grammar_roulette_high_score,
@@ -662,6 +666,7 @@ export async function syncSubmissionMetrics(
       highlightedWords: row.highlighted_words ?? [],
       glossary: row.glossary ?? [],
       spellingGameBestScore: row.spelling_game_best_score ?? 0,
+      spellingGameAccuracy: row.spelling_game_accuracy ?? 0,
       vocabularyQuizScore: row.vocabulary_quiz_score ?? 0,
       grammarQuizCompleted: row.grammar_quiz_completed ?? false,
       grammarQuizScore: row.grammar_quiz_score ?? 0,
@@ -686,6 +691,8 @@ export async function syncSubmissionMetrics(
       (row.vocab_quizzes_completed || 0) > 0 ? row.vocabulary_quiz_score ?? 0 : null
     const cachedSpellingScore =
       (row.spelling_games_completed || 0) > 0 ? row.spelling_game_best_score ?? 0 : null
+    const cachedSpellingAccuracy =
+      (row.spelling_games_completed || 0) > 0 ? row.spelling_game_accuracy ?? 0 : null
     const cachedGrammarQuizScore = row.grammar_quiz_completed
       ? row.grammar_quiz_score ?? 0
       : null
@@ -701,8 +708,9 @@ export async function syncSubmissionMetrics(
          spelling_game_best_score = $5,
          grammar_quiz_score = $6,
          grammar_game_best_score = $7,
-         grammar_game_accuracy = $8
-       WHERE student_session_id = $9`,
+         grammar_game_accuracy = $8,
+         spelling_game_accuracy = $9
+       WHERE student_session_id = $10`,
       [
         progress,
         cachedTestScore,
@@ -712,6 +720,7 @@ export async function syncSubmissionMetrics(
         cachedGrammarQuizScore,
         cachedGrammarGameBest,
         cachedGrammarGameAccuracy,
+        cachedSpellingAccuracy,
         studentSessionId,
       ],
     )

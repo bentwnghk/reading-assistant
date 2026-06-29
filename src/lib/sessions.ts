@@ -23,7 +23,7 @@ export async function createReadingSession(
         adapted_text, simplified_text, highlighted_words, analyzed_sentences,
         mind_map, visualization_image, visualization_generated_at, reading_test, glossary, glossary_ratings, test_score,
         test_completed, test_earned_points, test_total_points, test_show_chinese,
-        test_mode, vocabulary_quiz_score, spelling_game_best_score, chat_history,
+        test_mode, vocabulary_quiz_score, spelling_game_best_score, spelling_game_accuracy, chat_history,
         tests_completed, vocab_quizzes_completed, spelling_games_completed,
         original_difficulty, adapted_difficulty, simplified_difficulty,
         include_glossary, include_sentence_analysis,
@@ -47,7 +47,7 @@ export async function createReadingSession(
         grammar_scramble_challenges, grammar_workshop_challenges,
         grammar_game_questions,
         created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70)
       ON CONFLICT (id) DO UPDATE SET
         doc_title = EXCLUDED.doc_title,
         source = EXCLUDED.source,
@@ -72,6 +72,7 @@ export async function createReadingSession(
         test_mode = EXCLUDED.test_mode,
         vocabulary_quiz_score = EXCLUDED.vocabulary_quiz_score,
         spelling_game_best_score = EXCLUDED.spelling_game_best_score,
+        spelling_game_accuracy = EXCLUDED.spelling_game_accuracy,
         chat_history = EXCLUDED.chat_history,
         tests_completed = EXCLUDED.tests_completed,
         vocab_quizzes_completed = EXCLUDED.vocab_quizzes_completed,
@@ -141,6 +142,7 @@ export async function createReadingSession(
         sessionData.testMode,
         sessionData.vocabularyQuizScore,
         sessionData.spellingGameBestScore,
+        sessionData.spellingGameAccuracy ?? 0,
         JSON.stringify(sessionData.chatHistory),
         sessionData.testsCompleted ?? 0,
         sessionData.vocabQuizzesCompleted ?? 0,
@@ -271,6 +273,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       testMode: row.test_mode,
       vocabularyQuizScore: row.vocabulary_quiz_score,
       spellingGameBestScore: row.spelling_game_best_score,
+      spellingGameAccuracy: row.spelling_game_accuracy ?? 0,
       testsCompleted: row.tests_completed ?? 0,
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
@@ -402,6 +405,7 @@ export async function getReadingSession(
       testMode: row.test_mode,
       vocabularyQuizScore: row.vocabulary_quiz_score,
       spellingGameBestScore: row.spelling_game_best_score,
+      spellingGameAccuracy: row.spelling_game_accuracy ?? 0,
       testsCompleted: row.tests_completed ?? 0,
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
@@ -504,6 +508,7 @@ export async function updateReadingSession(
       testMode: "test_mode",
       vocabularyQuizScore: "vocabulary_quiz_score",
       spellingGameBestScore: "spelling_game_best_score",
+      spellingGameAccuracy: "spelling_game_accuracy",
       testsCompleted: "tests_completed",
       vocabQuizzesCompleted: "vocab_quizzes_completed",
       spellingGamesCompleted: "spelling_games_completed",
