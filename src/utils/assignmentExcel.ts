@@ -99,8 +99,10 @@ interface ExportOptions {
     testCompleted?: boolean
     vocabularyQuizScore?: number | null
     spellingGameBestScore?: number | null
+    spellingGameAccuracy?: number | null
     grammarQuizScore?: number | null
     grammarGameBestScore?: number | null
+    grammarGameAccuracy?: number | null
     lastViewedAt?: string | null
   }>
   locale?: string
@@ -214,9 +216,9 @@ export async function exportAssignmentRoster(opts: ExportOptions): Promise<void>
 
     colorScoreCell(row.getCell(3), s.testScore)
     colorScoreCell(row.getCell(4), s.vocabularyQuizScore)
-    colorScoreCell(row.getCell(5), s.spellingGameBestScore)
+    colorScoreCell(row.getCell(5), s.spellingGameAccuracy)
     colorScoreCell(row.getCell(6), s.grammarQuizScore)
-    colorScoreCell(row.getCell(7), s.grammarGameBestScore)
+    colorScoreCell(row.getCell(7), s.grammarGameAccuracy)
 
     row.getCell(8).value = s.lastViewedAt
       ? new Date(s.lastViewedAt).toLocaleString(locale, {

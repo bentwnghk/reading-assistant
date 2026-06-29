@@ -461,7 +461,8 @@ export async function getAssignment(
     const sub = await client.query(
       `SELECT student_session_id, progress,
               test_score, vocabulary_quiz_score, spelling_game_best_score,
-              spelling_game_accuracy, grammar_quiz_score, grammar_game_best_score
+              spelling_game_accuracy, grammar_quiz_score, grammar_game_best_score,
+              grammar_game_accuracy
        FROM assignment_submissions
        WHERE assignment_id = $1 AND student_id = $2`,
       [assignmentId, requesterId],
@@ -478,6 +479,7 @@ export async function getAssignment(
       spellingGameAccuracy: r.spelling_game_accuracy,
       grammarQuizScore: r.grammar_quiz_score,
       grammarGameBestScore: r.grammar_game_best_score,
+      grammarGameAccuracy: r.grammar_game_accuracy,
     }
   } finally {
     client.release()

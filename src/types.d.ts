@@ -310,6 +310,7 @@ interface Assignment {
   spellingGameAccuracy?: number | null;
   grammarQuizScore?: number | null;
   grammarGameBestScore?: number | null;
+  grammarGameAccuracy?: number | null;
   createdAt: string;
   updatedAt: string;
 }

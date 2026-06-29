@@ -169,13 +169,13 @@ export default function AssignmentDetailPage({
           cmp = (a.vocabularyQuizScore ?? -1) - (b.vocabularyQuizScore ?? -1)
           break
         case "spellingScore":
-          cmp = (a.spellingGameBestScore ?? -1) - (b.spellingGameBestScore ?? -1)
+          cmp = (a.spellingGameAccuracy ?? -1) - (b.spellingGameAccuracy ?? -1)
           break
         case "grammarQuizScore":
           cmp = (a.grammarQuizScore ?? -1) - (b.grammarQuizScore ?? -1)
           break
         case "grammarGameScore":
-          cmp = (a.grammarGameBestScore ?? -1) - (b.grammarGameBestScore ?? -1)
+          cmp = (a.grammarGameAccuracy ?? -1) - (b.grammarGameAccuracy ?? -1)
           break
         case "lastViewedAt":
           cmp =
@@ -423,9 +423,9 @@ export default function AssignmentDetailPage({
                         </TableCell>
                         <TableCell className="tabular-nums">{scoreCell(s.testScore)}</TableCell>
                         <TableCell className="tabular-nums">{scoreCell(s.vocabularyQuizScore)}</TableCell>
-                        <TableCell className="tabular-nums">{scoreCell(s.spellingGameBestScore)}</TableCell>
+                        <TableCell className="tabular-nums">{scoreCell(s.spellingGameAccuracy)}</TableCell>
                         <TableCell className="tabular-nums">{scoreCell(s.grammarQuizScore)}</TableCell>
-                        <TableCell className="tabular-nums">{scoreCell(s.grammarGameBestScore)}</TableCell>
+                        <TableCell className="tabular-nums">{scoreCell(s.grammarGameAccuracy)}</TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {s.lastViewedAt
                             ? formatDateTime(s.lastViewedAt, i18n.language)
@@ -540,7 +540,7 @@ function StudentAssignmentDetail({ assignment }: { assignment: Assignment }) {
                 },
                 {
                   key: "assignments.teacherView.spellingCol",
-                  value: assignment.spellingGameBestScore,
+                  value: assignment.spellingGameAccuracy,
                   icon: <SpellCheck className="h-3 w-3 text-pink-500" />,
                 },
                 {
@@ -550,7 +550,7 @@ function StudentAssignmentDetail({ assignment }: { assignment: Assignment }) {
                 },
                 {
                   key: "assignments.teacherView.grammarGameCol",
-                  value: assignment.grammarGameBestScore,
+                  value: assignment.grammarGameAccuracy,
                   icon: <Gamepad2 className="h-3 w-3 text-amber-500" />,
                 },
               ] as const
