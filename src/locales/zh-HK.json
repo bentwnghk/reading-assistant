@@ -2813,6 +2813,48 @@
       "notStarted": "尚未開始",
       "never": "從未"
     },
+    "stats": {
+      "sectionTitle": "班級分析",
+      "sectionSubtitle": "所有指派學生的整體表現分析。",
+      "overview": {
+        "assessed": "已評量學生",
+        "assessedSub": "至少有一項成績",
+        "participation": "平均參與率",
+        "participationSub": "橫跨所有活動",
+        "classAvg": "班級平均",
+        "classAvgSub": "所有作答",
+        "atRisk": "需要關注",
+        "atRiskSub": "低於 {{threshold}} 分"
+      },
+      "performance": {
+        "title": "各項活動表現",
+        "subtitle": "平均分數，最弱的在最上方",
+        "noData": "尚無任何作答"
+      },
+      "participation": {
+        "title": "參與率與精熟度",
+        "attempted": "已作答",
+        "passed": "及格",
+        "avg": "平均"
+      },
+      "atRisk": {
+        "title": "需要關注的學生",
+        "subtitle": "在至少一項活動中得分低於 {{threshold}}",
+        "weakAreas": "需要加強",
+        "none": "目前沒有需要關注的學生，班級表現良好。"
+      },
+      "legend": {
+        "below": "待加強",
+        "mid": "發展中",
+        "pass": "精熟",
+        "passLine": "及格（{{threshold}}）"
+      },
+      "tooltip": {
+        "mean": "平均",
+        "median": "中位數",
+        "participated": "參與人數"
+      }
+    },
     "studentView": {
       "empty": "尚無任何功課。",
       "from": "來自：{{teacher}}",

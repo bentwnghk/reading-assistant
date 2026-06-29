@@ -43,6 +43,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { exportAssignmentRoster } from "@/utils/assignmentExcel"
+import { AssignmentStats } from "@/components/Assignments/AssignmentStats"
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -345,6 +346,8 @@ export default function AssignmentDetailPage({
             </Button>
           </div>
         )}
+
+        {isTeacher && roster.length > 0 && <AssignmentStats roster={roster} />}
 
         {/* Teacher: roster table; Student: rendered by StudentAssignmentDetail below */}
         {isTeacher ? (

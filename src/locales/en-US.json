@@ -2813,6 +2813,48 @@
       "notStarted": "Not started",
       "never": "Never"
     },
+    "stats": {
+      "sectionTitle": "Class insights",
+      "sectionSubtitle": "Aggregated performance across all assigned students.",
+      "overview": {
+        "assessed": "Students assessed",
+        "assessedSub": "have at least one score",
+        "participation": "Avg participation",
+        "participationSub": "across all activities",
+        "classAvg": "Class average",
+        "classAvgSub": "all attempts",
+        "atRisk": "Needing attention",
+        "atRiskSub": "below {{threshold}}"
+      },
+      "performance": {
+        "title": "Performance by activity",
+        "subtitle": "Mean score, hardest at the top",
+        "noData": "No attempts yet"
+      },
+      "participation": {
+        "title": "Participation & mastery",
+        "attempted": "attempted",
+        "passed": "passed",
+        "avg": "Avg"
+      },
+      "atRisk": {
+        "title": "Students needing attention",
+        "subtitle": "Scored below {{threshold}} in at least one activity",
+        "weakAreas": "Needs support in",
+        "none": "No students are currently flagged. The class is on track."
+      },
+      "legend": {
+        "below": "Struggling",
+        "mid": "Developing",
+        "pass": "Mastery",
+        "passLine": "Pass ({{threshold}})"
+      },
+      "tooltip": {
+        "mean": "Average",
+        "median": "Median",
+        "participated": "Participated"
+      }
+    },
     "studentView": {
       "empty": "No assignments yet.",
       "from": "From {{teacher}}",
