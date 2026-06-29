@@ -6,12 +6,21 @@
  * friendly (no I/O) so the teacher's assignment detail page can render them
  * synchronously from the already-fetched roster.
  *
- * Score conventions (kept consistent with the Excel exports in
- * `assignmentExcel.ts` / `teacherDashboardExcel.ts`):
- *   - `null` score  → the student has not attempted that activity (renders "-")
- *   - score < 50    → "struggling" tier (red)
- *   - 50 ≤ score < 70 → "developing" tier (amber)
- *   - score ≥ 70    → "pass" / mastery tier (green)
+ * CRITICAL — activities are NOT on a single scale:
+ *   - "percentage" activities (testScore, vocabularyQuizScore, grammarQuizScore,
+ *     grammarGameAccuracy) are bounded 0–100, computed as earned/total × 100 or
+ *     correct/total × 100. The 50/70 thresholds, tier classification, pass rate,
+ *     distribution buckets and the 0–100 bar chart axis are valid for these.
+ *   - "points" activities (spellingGameBestScore) are raw, cumulative, unbounded
+ *     point totals. They have NO persisted accuracy field, so percentage-based
+ *     analysis is impossible. They are reported with participation rate and the
+ *     raw mean only, and are excluded from the bar chart, tier thresholds, pass
+ *     rate, the class average, and at-risk detection.
+ *
+ *   - `null` score → the student has not attempted that activity (renders "-")
+ *   - score < 50   → "struggling" tier (red)        [percentage scale only]
+ *   - 50 ≤ s < 70  → "developing" tier (amber)      [percentage scale only]
+ *   - score ≥ 70   → "pass" / mastery tier (green)  [percentage scale only]
  */
 
 export type ActivityKey =
@@ -19,7 +28,11 @@ export type ActivityKey =
   | "vocabularyQuizScore"
   | "spellingGameBestScore"
   | "grammarQuizScore"
-  | "grammarGameBestScore"
+  // Grammar games store unbounded point high scores; `grammarGameAccuracy` is the
+  // real 0–100 accuracy and is the analytically correct metric here.
+  | "grammarGameAccuracy"
+
+export type ScoreScale = "percentage" | "points"
 
 /** Score ≥ this value counts as a pass (mastery). Mirrors the 70 threshold in the Excel exports. */
 export const PASS_THRESHOLD = 70
@@ -33,8 +46,22 @@ export const ACTIVITY_KEYS: readonly ActivityKey[] = [
   "vocabularyQuizScore",
   "spellingGameBestScore",
   "grammarQuizScore",
-  "grammarGameBestScore",
+  "grammarGameAccuracy",
 ] as const
+
+/** How each activity's stored value is scaled. Governs which analyses apply. */
+export const ACTIVITY_SCALE: Record<ActivityKey, ScoreScale> = {
+  testScore: "percentage",
+  vocabularyQuizScore: "percentage",
+  spellingGameBestScore: "points", // unbounded cumulative points; no accuracy persisted
+  grammarQuizScore: "percentage",
+  grammarGameAccuracy: "percentage", // 0–100 accuracy (not the unbounded best-score points)
+}
+
+/** Activities whose stored value is a bounded 0–100 percentage. */
+export const PERCENTAGE_KEYS: readonly ActivityKey[] = ACTIVITY_KEYS.filter(
+  (k) => ACTIVITY_SCALE[k] === "percentage",
+)
 
 export type PerformanceTier = "none" | "below" | "mid" | "pass"
 
@@ -46,6 +73,10 @@ export const TIER_COLORS: Record<PerformanceTier, string> = {
   pass: "#22c55e", // green-500 — mastery
 }
 
+/**
+ * Classify a percentage-scale score into a performance tier. Returns "none" for
+ * null/undefined. Only meaningful for {@link ScoreScale.percentage} activities.
+ */
 export function tierOf(score: number | null | undefined): PerformanceTier {
   if (score == null) return "none"
   if (score < STRUGGLE_THRESHOLD) return "below"
@@ -66,6 +97,7 @@ export interface ScoreDistribution {
 
 export interface ActivityStat {
   key: ActivityKey
+  scale: ScoreScale
   values: number[]
   /** Number of students who attempted (non-null score). */
   attempted: number
@@ -77,9 +109,10 @@ export interface ActivityStat {
   median: number | null
   min: number | null
   max: number | null
-  /** share of attempts that reached the pass threshold (0–100), or null if none. */
+  /** Share of attempts that reached the pass threshold (0–100). Null for points-scale or no attempts. */
   passRate: number | null
-  distribution: ScoreDistribution
+  /** Tiered bucket counts. Null for points-scale activities. */
+  distribution: ScoreDistribution | null
 }
 
 export interface OverviewStats {
@@ -88,7 +121,7 @@ export interface OverviewStats {
   assessedStudents: number
   /** Average of per-activity participation rates (0–100). */
   avgParticipation: number
-  /** Mean of every non-null score across all activities and students. */
+  /** Mean of every non-null PERCENTAGE-scale score across all activities and students. */
   classAverage: number | null
   atRiskCount: number
 }
@@ -98,7 +131,7 @@ export interface AtRiskStudent {
   studentName: string | null
   studentEmail: string | null
   studentImage: string | null
-  /** Activities where the student scored below the struggle threshold, lowest first. */
+  /** Percentage-scale activities where the student scored below the struggle threshold, lowest first. */
   weakAreas: { key: ActivityKey; score: number }[]
 }
 
@@ -132,16 +165,24 @@ export function computeActivityStat(
   key: ActivityKey,
 ): ActivityStat {
   const total = roster.length
+  const scale = ACTIVITY_SCALE[key]
   const values = extractValues(roster, key)
   const attempted = values.length
-  const distribution: ScoreDistribution = {
-    attempted,
-    below: values.filter((v) => v < STRUGGLE_THRESHOLD).length,
-    mid: values.filter((v) => v >= STRUGGLE_THRESHOLD && v < PASS_THRESHOLD).length,
-    pass: values.filter((v) => v >= PASS_THRESHOLD).length,
-  }
+
+  // Distribution / pass rate only make sense for bounded 0–100 scores.
+  const distribution: ScoreDistribution | null =
+    scale === "percentage"
+      ? {
+          attempted,
+          below: values.filter((v) => v < STRUGGLE_THRESHOLD).length,
+          mid: values.filter((v) => v >= STRUGGLE_THRESHOLD && v < PASS_THRESHOLD).length,
+          pass: values.filter((v) => v >= PASS_THRESHOLD).length,
+        }
+      : null
+
   return {
     key,
+    scale,
     values,
     attempted,
     participationRate: total > 0 ? (attempted / total) * 100 : 0,
@@ -149,7 +190,10 @@ export function computeActivityStat(
     median: computeMedian(values),
     min: attempted > 0 ? Math.min(...values) : null,
     max: attempted > 0 ? Math.max(...values) : null,
-    passRate: attempted > 0 ? (distribution.pass / attempted) * 100 : null,
+    passRate:
+      distribution != null && attempted > 0
+        ? (distribution.pass / attempted) * 100
+        : null,
     distribution,
   }
 }
@@ -161,7 +205,11 @@ export function computeActivityStats(roster: AssignmentSubmission[]): ActivitySt
 export function computeOverview(roster: AssignmentSubmission[]): OverviewStats {
   const total = roster.length
   const activityStats = computeActivityStats(roster)
-  const allScores = activityStats.flatMap((a) => a.values)
+  // Class average is only defined over bounded percentage-scale scores; mixing
+  // in raw point totals would be meaningless.
+  const percentageScores = activityStats
+    .filter((a) => a.scale === "percentage")
+    .flatMap((a) => a.values)
   const assessedStudents = roster.filter((s) =>
     ACTIVITY_KEYS.some((k) => pickScore(s, k) != null),
   ).length
@@ -173,7 +221,7 @@ export function computeOverview(roster: AssignmentSubmission[]): OverviewStats {
     totalStudents: total,
     assessedStudents,
     avgParticipation,
-    classAverage: computeMean(allScores),
+    classAverage: computeMean(percentageScores),
     atRiskCount: computeAtRiskStudents(roster).length,
   }
 }
@@ -185,7 +233,8 @@ export function computeAtRiskStudents(
   return roster
     .map((s) => {
       const weakAreas: { key: ActivityKey; score: number }[] = []
-      for (const key of ACTIVITY_KEYS) {
+      // Only percentage-scale activities support a meaningful "below threshold" test.
+      for (const key of PERCENTAGE_KEYS) {
         const v = pickScore(s, key)
         if (v != null && v < threshold) weakAreas.push({ key, score: v })
       }

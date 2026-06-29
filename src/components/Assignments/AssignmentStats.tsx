@@ -67,7 +67,7 @@ const ACTIVITY_META: Record<
     icon: <GraduationCap className="h-3.5 w-3.5" />,
     accent: "#d946ef", // fuchsia
   },
-  grammarGameBestScore: {
+  grammarGameAccuracy: {
     labelKey: "assignments.teacherView.grammarGameCol",
     icon: <Gamepad2 className="h-3.5 w-3.5" />,
     accent: "#f59e0b", // amber
@@ -140,11 +140,12 @@ export function AssignmentStats({ roster }: { roster: AssignmentSubmission[] }) 
   const hasAnyAttempt = activityStats.some((a) => a.attempted > 0)
 
   // Hardest-first bar chart data. Descending by mean so, in a vertical chart,
-  // the lowest-scoring (hardest) activity sits at the top. Activities with no
-  // attempts are excluded — they have nothing to compare.
+  // the lowest-scoring (hardest) activity sits at the top. Only percentage-scale
+  // activities belong here — the axis is fixed at 0–100, so raw point totals
+  // (spelling) would be meaningless. Activities with no attempts are excluded.
   const chartData: PerformanceBarDatum[] = useMemo(() => {
     return activityStats
-      .filter((a) => a.mean != null)
+      .filter((a) => a.scale === "percentage" && a.mean != null)
       .map((a) => toDatum(a, t, overview.totalStudents))
       .sort((a, b) => (b.mean ?? 0) - (a.mean ?? 0))
   }, [activityStats, t, overview.totalStudents])
@@ -364,15 +365,20 @@ function toDatum(
 function ParticipationCard({ stat, total }: { stat: ActivityStat; total: number }) {
   const { t } = useTranslation()
   const meta = ACTIVITY_META[stat.key]
+  const isPercentage = stat.scale === "percentage"
   const dist = stat.distribution
-  const totalBar = dist.attempted || 0
-  // Build a 4-segment stacked strip: below / mid / pass / not-started.
-  const segments = [
-    { count: dist.below, color: TIER_COLORS.below },
-    { count: dist.mid, color: TIER_COLORS.mid },
-    { count: dist.pass, color: TIER_COLORS.pass },
-  ]
-  const notStarted = total - dist.attempted
+  const notStarted = total - stat.attempted
+
+  // Percentage activities: a 4-segment tier strip (below / mid / pass / not-started).
+  // Points activities: a neutral participation-only strip (attempted / not-started).
+  const tierSegments =
+    dist != null
+      ? [
+          { count: dist.below, color: TIER_COLORS.below },
+          { count: dist.mid, color: TIER_COLORS.mid },
+          { count: dist.pass, color: TIER_COLORS.pass },
+        ]
+      : [{ count: stat.attempted, color: meta.accent }]
 
   return (
     <div className="rounded-lg border bg-muted/30 px-3 py-2.5 space-y-2">
@@ -387,22 +393,35 @@ function ParticipationCard({ stat, total }: { stat: ActivityStat; total: number 
             {pct(stat.participationRate)}
           </div>
           <div className="text-[10px] text-muted-foreground mt-0.5">
-            {t("assignments.stats.participation.attempted")} {dist.attempted}/{total}
+            {t("assignments.stats.participation.attempted")} {stat.attempted}/{total}
           </div>
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold leading-none tabular-nums">
-            {stat.passRate == null ? "—" : `${Math.round(stat.passRate)}%`}
-          </div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">
-            {t("assignments.stats.participation.passed")}
-          </div>
+          {isPercentage ? (
+            <>
+              <div className="text-lg font-bold leading-none tabular-nums">
+                {stat.passRate == null ? "—" : `${Math.round(stat.passRate)}%`}
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">
+                {t("assignments.stats.participation.passed")}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-lg font-bold leading-none tabular-nums">
+                {num(stat.mean)}
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">
+                {t("assignments.stats.participation.avgPts")}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* distribution strip */}
+      {/* distribution / participation strip */}
       <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        {segments.map((seg, i) =>
+        {tierSegments.map((seg, i) =>
           total > 0 ? (
             <div
               key={i}
@@ -422,11 +441,15 @@ function ParticipationCard({ stat, total }: { stat: ActivityStat; total: number 
       </div>
       <div className="flex items-center justify-between text-[10px] text-muted-foreground">
         <span className="tabular-nums">
-          {t("assignments.stats.participation.avg")}: {num(stat.mean)}
+          {isPercentage
+            ? `${t("assignments.stats.participation.avg")}: ${num(stat.mean)}`
+            : t("assignments.stats.participation.pointsNote")}
         </span>
-        <span className="tabular-nums">
-          {totalBar > 0 ? `${dist.pass}/${dist.attempted}` : ""}
-        </span>
+        {isPercentage && dist != null && (
+          <span className="tabular-nums">
+            {stat.attempted > 0 ? `${dist.pass}/${dist.attempted}` : ""}
+          </span>
+        )}
       </div>
     </div>
   )

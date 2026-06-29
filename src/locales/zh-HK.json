@@ -2828,14 +2828,16 @@
       },
       "performance": {
         "title": "各項活動表現",
-        "subtitle": "平均分數，最弱的在最上方",
+        "subtitle": "平均分數（0–100），最弱的在最上方",
         "noData": "尚無任何作答"
       },
       "participation": {
         "title": "參與率與精熟度",
         "attempted": "已作答",
         "passed": "及格",
-        "avg": "平均"
+        "avg": "平均",
+        "avgPts": "平均分數",
+        "pointsNote": "累計分數（非百分比）"
       },
       "atRisk": {
         "title": "需要關注的學生",
