@@ -33,6 +33,7 @@ import AvgProgressChart from "./AvgProgressChart";
 import AiFeaturesChart from "./AiFeaturesChart";
 import ScoreDistChart from "./ScoreDistChart";
 import SpellingScoreChart from "./SpellingScoreChart";
+import SpellingAccuracyChart from "./SpellingAccuracyChart";
 import GrammarGameChart from "./GrammarGameChart";
 import VocabularyGrowthChart from "./VocabularyGrowthChart";
 import TeacherDashboardGuide from "./TeacherDashboardGuide";
@@ -58,7 +59,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const [showHelp, setShowHelp] = useState(false);
 
   // Refs for each chart card — order matches the JSX render order below
-  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(12).fill(null));
+  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(13).fill(null));
 
   const filteredClasses = useMemo(() => {
     if (!isSuperAdmin || selectedSchoolId === "all") return allClasses;
@@ -134,6 +135,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
     `${t("dashboard.scores.grammarGame")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
     `${t("dashboard.scores.grammarGameAccuracy")} — ${t("teacherDashboard.excel.scoreDistribution")}`,
     t("teacherDashboard.charts.spellingScore"),
+    t("teacherDashboard.charts.spellingAccuracy"),
     t("teacherDashboard.charts.vocabularyGrowth"),
   ];
 
@@ -380,6 +382,13 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
             </div>
 
             <div ref={(el) => { chartRefs.current[11] = el; }}>
+              <SpellingAccuracyChart
+                students={metrics.students}
+                classAvg={metrics.classAvgSpellingAccuracy}
+              />
+            </div>
+
+            <div ref={(el) => { chartRefs.current[12] = el; }}>
               <VocabularyGrowthChart students={metrics.students} />
             </div>
           </div>

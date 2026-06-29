@@ -22,6 +22,7 @@ export interface StudentMetrics {
   testScores: number[];
   quizScores: number[];
   spellingScores: number[];
+  spellingAccuracies: number[];
   grammarQuizScores: number[];
   grammarGameScores: number[];
   grammarGameAccuracies: number[];
@@ -58,6 +59,7 @@ export interface TeacherDashboardMetrics {
   classAvgTestScore: number;
   classAvgQuizScore: number;
   classAvgSpellingScore: number;
+  classAvgSpellingAccuracy: number;
   classAvgGrammarQuizScore: number;
   classAvgGrammarGameScore: number;
   classAvgGrammarGameAccuracy: number;
@@ -219,6 +221,7 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
       testScores: [],
       quizScores: [],
       spellingScores: [],
+      spellingAccuracies: [],
       grammarQuizScores: [],
       grammarGameScores: [],
       grammarGameAccuracies: [],
@@ -276,6 +279,7 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
   const testScores = sorted.filter((s) => s.testCompleted && s.testScore != null && s.testScore > 0).map((s) => s.testScore!);
   const quizScores = sorted.filter((s) => s.vocabularyQuizScore != null && s.vocabularyQuizScore > 0).map((s) => s.vocabularyQuizScore!);
   const spellingScores = sorted.filter((s) => s.spellingGameBestScore != null && s.spellingGameBestScore > 0).map((s) => s.spellingGameBestScore!);
+  const spellingAccuracies = sorted.filter((s) => s.spellingGameAccuracy != null && s.spellingGameAccuracy > 0).map((s) => s.spellingGameAccuracy!);
   const grammarQuizScores = sorted.filter((s) => s.grammarQuizCompleted && s.grammarQuizScore != null && s.grammarQuizScore > 0).map((s) => s.grammarQuizScore!);
   const grammarGameScores = sorted.filter((s) => s.grammarGameBestScore != null && s.grammarGameBestScore > 0).map((s) => s.grammarGameBestScore!);
   const grammarGameAccuracies = sorted.filter((s) => s.grammarGameAccuracy != null && s.grammarGameAccuracy > 0).map((s) => s.grammarGameAccuracy!);
@@ -341,6 +345,7 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     testScores,
     quizScores,
     spellingScores,
+    spellingAccuracies,
     grammarQuizScores,
     grammarGameScores,
     grammarGameAccuracies,
@@ -361,6 +366,7 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
       classAvgTestScore: 0,
       classAvgQuizScore: 0,
       classAvgSpellingScore: 0,
+      classAvgSpellingAccuracy: 0,
       classAvgGrammarQuizScore: 0,
       classAvgGrammarGameScore: 0,
       classAvgGrammarGameAccuracy: 0,
@@ -396,12 +402,14 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
   const allTestScores = students.flatMap((s) => s.testScores);
   const allQuizScores = students.flatMap((s) => s.quizScores);
   const allSpellingScores = students.flatMap((s) => s.spellingScores);
+  const allSpellingAccuracies = students.flatMap((s) => s.spellingAccuracies);
   const allGrammarQuizScores = students.flatMap((s) => s.grammarQuizScores);
   const allGrammarGameScores = students.flatMap((s) => s.grammarGameScores);
   const allGrammarGameAccuracies = students.flatMap((s) => s.grammarGameAccuracies);
   const classAvgTestScore = allTestScores.length > 0 ? Math.round(allTestScores.reduce((a, b) => a + b, 0) / allTestScores.length) : 0;
   const classAvgQuizScore = allQuizScores.length > 0 ? Math.round(allQuizScores.reduce((a, b) => a + b, 0) / allQuizScores.length) : 0;
   const classAvgSpellingScore = allSpellingScores.length > 0 ? Math.round(allSpellingScores.reduce((a, b) => a + b, 0) / allSpellingScores.length) : 0;
+  const classAvgSpellingAccuracy = allSpellingAccuracies.length > 0 ? Math.round(allSpellingAccuracies.reduce((a, b) => a + b, 0) / allSpellingAccuracies.length) : 0;
   const classAvgGrammarQuizScore = allGrammarQuizScores.length > 0 ? Math.round(allGrammarQuizScores.reduce((a, b) => a + b, 0) / allGrammarQuizScores.length) : 0;
   const classAvgGrammarGameScore = allGrammarGameScores.length > 0 ? Math.round(allGrammarGameScores.reduce((a, b) => a + b, 0) / allGrammarGameScores.length) : 0;
   const classAvgGrammarGameAccuracy = allGrammarGameAccuracies.length > 0 ? Math.round(allGrammarGameAccuracies.reduce((a, b) => a + b, 0) / allGrammarGameAccuracies.length) : 0;
@@ -441,6 +449,7 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
     classAvgTestScore,
     classAvgQuizScore,
     classAvgSpellingScore,
+    classAvgSpellingAccuracy,
     classAvgGrammarQuizScore,
     classAvgGrammarGameScore,
     classAvgGrammarGameAccuracy,

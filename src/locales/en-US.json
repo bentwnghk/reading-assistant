@@ -1414,6 +1414,7 @@
       "readingTest": "Reading Test Score",
       "vocabQuiz": "Vocab Quiz Score",
       "spelling": "Spelling Score",
+      "spellingAccuracy": "Spelling Accuracy",
       "grammarQuiz": "Grammar Quiz Score",
       "grammarGame": "Grammar Game Score",
       "grammarGameAccuracy": "Grammar Game Accuracy"
@@ -1508,6 +1509,10 @@
           "spellingTrend": {
             "name": "Spelling Score Trend",
             "desc": "A line chart tracking your spelling scores across sessions. Watch your scores improve over time."
+          },
+          "spellingAccuracy": {
+            "name": "Spelling Accuracy",
+            "desc": "A line chart tracking your spelling accuracy percentage across sessions. Shows your precision in spelling challenges."
           },
           "grammarQuizDist": {
             "name": "Grammar Quiz Score Distribution",
@@ -1612,6 +1617,7 @@
       "avgProgress": "Avg Learning Progress",
       "aiFeatures": "AI Features Usage",
       "spellingScore": "Spelling Score",
+      "spellingAccuracy": "Spelling Accuracy",
       "vocabularyGrowth": "Vocabulary Growth",
       "pickDate": "Pick a date"
     },
@@ -1690,6 +1696,10 @@
             "name": "Spelling Score",
             "desc": "A bar chart displaying each student's average spelling score. Useful for tracking spelling proficiency across the class."
           },
+          "spellingAccuracy": {
+            "name": "Spelling Accuracy",
+            "desc": "A bar chart displaying each student's average spelling accuracy. The dashed line shows the class average. Helps identify students who struggle with spelling."
+          },
           "vocabularyGrowth": {
             "name": "Vocabulary Growth",
             "desc": "A multi-line area chart tracking cumulative vocabulary growth over time for each student. Choose from 13 time ranges (1W to 3Y) and toggle individual students on/off."
@@ -1697,7 +1707,7 @@
         },
         "tip": {
           "title": "Pro Tip:",
-          "content": "Use the Excel export to capture all 12 charts with detailed student data for offline analysis, parent meetings, or progress reports."
+          "content": "Use the Excel export to capture all 13 charts with detailed student data for offline analysis, parent meetings, or progress reports."
         }
       },
       "functions": {
@@ -1776,6 +1786,7 @@
     "testScore": "Reading Test Score",
     "glossaryWords": "Vocabulary Count",
     "spellingScore": "Spelling Challenge Score",
+    "spellingAccuracy": "Spelling Challenge Accuracy",
     "quizScore": "Vocabulary Quiz Score",
     "grammarQuizScore": "Grammar Quiz Score",
     "grammarGameScore": "Grammar Game",
@@ -2211,6 +2222,7 @@
       "testScore": "Reading Test",
       "vocabulary": "Vocabulary Count",
       "spelling": "Spelling Challenge",
+      "spellingAccuracy": "Spelling Challenge Accuracy",
       "quiz": "Vocabulary Quiz",
       "grammarQuiz": "Grammar Quiz",
       "grammarGame": "Grammar Game",

@@ -59,6 +59,7 @@ export interface StudentSessionData {
   testCompleted?: boolean
   vocabularyQuizScore?: number
   spellingGameBestScore?: number
+  spellingGameAccuracy?: number
   grammarQuizScore?: number
   grammarQuizCompleted?: boolean
   grammarGameBestScore?: number
@@ -84,6 +85,7 @@ export interface TeacherSessionData {
   testCompleted: boolean
   vocabularyQuizScore: number | null
   spellingGameBestScore: number | null
+  spellingGameAccuracy: number | null
   testsCompleted: number
   vocabQuizzesCompleted: number
   spellingGamesCompleted: number
@@ -130,6 +132,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         COALESCE(rs.tests_completed, 0) as tests_completed,
         COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
         COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
+        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
         COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
         GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
@@ -169,6 +172,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       testCompleted: !!row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score || null,
       spellingGameBestScore: row.spelling_game_best_score || null,
+      spellingGameAccuracy: row.spelling_game_accuracy || null,
       testsCompleted: row.tests_completed ?? 0,
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
@@ -221,6 +225,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         COALESCE(rs.tests_completed, 0) as tests_completed,
         COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
         COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
+        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
         COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
         GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
@@ -260,6 +265,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       testCompleted: !!row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score || null,
       spellingGameBestScore: row.spelling_game_best_score || null,
+      spellingGameAccuracy: row.spelling_game_accuracy || null,
       testsCompleted: row.tests_completed ?? 0,
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
@@ -312,6 +318,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         COALESCE(rs.tests_completed, 0) as tests_completed,
         COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
         COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
+        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
         COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
         GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
@@ -350,6 +357,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       testCompleted: !!row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score || null,
       spellingGameBestScore: row.spelling_game_best_score || null,
+      spellingGameAccuracy: row.spelling_game_accuracy || null,
       testsCompleted: row.tests_completed ?? 0,
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
@@ -1016,6 +1024,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
+        rs.spelling_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -1040,6 +1049,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       testCompleted: row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score,
       spellingGameBestScore: row.spelling_game_best_score,
+      spellingGameAccuracy: row.spelling_game_accuracy || 0,
       grammarQuizScore: row.grammar_quiz_score || 0,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
       grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
@@ -1076,6 +1086,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
+        rs.spelling_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -1099,6 +1110,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       testCompleted: row.test_completed,
       vocabularyQuizScore: row.vocabulary_quiz_score,
       spellingGameBestScore: row.spelling_game_best_score,
+      spellingGameAccuracy: row.spelling_game_accuracy || 0,
       grammarQuizScore: row.grammar_quiz_score || 0,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
       grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,

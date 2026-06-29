@@ -216,6 +216,7 @@ function buildStudentOverviewSheet(
     "Avg Vocab\nQuiz Score",
     "Avg Grammar\nQuiz Score",
     "Avg Spelling\nScore",
+    "Avg Spelling\nAccuracy",
     "Avg Grammar\nGame Score",
     "Avg Grammar Game\nAccuracy",
     "Total\nAI Actions",
@@ -228,6 +229,7 @@ function buildStudentOverviewSheet(
     const avgQuiz = average(s.quizScores)
     const avgGrammarQuiz = average(s.grammarQuizScores)
     const avgSpelling = average(s.spellingScores)
+    const avgSpellingAccuracy = average(s.spellingAccuracies)
     const avgGrammarGame = average(s.grammarGameScores)
     const avgGrammarGameAccuracy = average(s.grammarGameAccuracies)
     const totalAi = Object.values(s.aiUsage).reduce((a, b) => a + b, 0)
@@ -241,6 +243,7 @@ function buildStudentOverviewSheet(
       avgQuiz ?? "-",
       avgGrammarQuiz ?? "-",
       avgSpelling ?? "-",
+      avgSpellingAccuracy ?? "-",
       avgGrammarGame ?? "-",
       avgGrammarGameAccuracy ?? "-",
       totalAi,
@@ -263,11 +266,11 @@ function buildStudentOverviewSheet(
       }
     }
 
-    // Test score (col 5), Quiz score (col 6), Grammar quiz score (col 7)
+    // Test score (col 5), Quiz score (col 6), Grammar quiz score (col 7), Spelling accuracy (col 9)
     colourScoreCell(row.getCell(5))
     colourScoreCell(row.getCell(6))
     colourScoreCell(row.getCell(7))
-    colourScoreCell(row.getCell(10))
+    colourScoreCell(row.getCell(9))
   })
 
   // Class average footer
@@ -275,6 +278,7 @@ function buildStudentOverviewSheet(
   const allQuiz = metrics.students.flatMap((s) => s.quizScores)
   const allGrammarQuiz = metrics.students.flatMap((s) => s.grammarQuizScores)
   const allSpelling = metrics.students.flatMap((s) => s.spellingScores)
+  const allSpellingAccuracy = metrics.students.flatMap((s) => s.spellingAccuracies)
   const allGrammarGame = metrics.students.flatMap((s) => s.grammarGameScores)
   const allGrammarGameAccuracy = metrics.students.flatMap((s) => s.grammarGameAccuracies)
 
@@ -287,6 +291,7 @@ function buildStudentOverviewSheet(
     average(allQuiz) ?? "-",
     average(allGrammarQuiz) ?? "-",
     average(allSpelling) ?? "-",
+    average(allSpellingAccuracy) ?? "-",
     average(allGrammarGame) ?? "-",
     average(allGrammarGameAccuracy) ?? "-",
     "",
@@ -294,7 +299,7 @@ function buildStudentOverviewSheet(
   applyFooterRowStyle(footerRow)
   const fpCell = footerRow.getCell(4)
   if (typeof fpCell.value === "number") fpCell.numFmt = '0"%"'
-  ;[5, 6, 7, 10].forEach((col) => {
+  ;[5, 6, 7, 9, 11].forEach((col) => {
     const cell = footerRow.getCell(col)
     if (typeof cell.value === "number") cell.numFmt = '0"%"'
   })
@@ -398,6 +403,7 @@ function buildScoreDetailsSheet(
     "Spelling\nAttempts",
     "Avg Spelling\nScore",
     "Best Spelling\nScore",
+    "Avg Spelling\nAccuracy",
     "Grammar Game\nAttempts",
     "Avg Grammar\nGame Score",
     "Best Grammar\nGame Score",
@@ -416,6 +422,7 @@ function buildScoreDetailsSheet(
     const avgGrammarQuiz = average(s.grammarQuizScores)
     const avgSpelling = average(s.spellingScores)
     const bestSpelling = s.spellingScores.length > 0 ? Math.max(...s.spellingScores) : null
+    const avgSpellingAccuracy = average(s.spellingAccuracies)
     const avgGrammarGame = average(s.grammarGameScores)
     const bestGrammarGame = s.grammarGameScores.length > 0 ? Math.max(...s.grammarGameScores) : null
     const avgGrammarGameAccuracy = average(s.grammarGameAccuracies)
@@ -432,6 +439,7 @@ function buildScoreDetailsSheet(
       s.spellingScores.length,
       avgSpelling ?? "-",
       bestSpelling ?? "-",
+      avgSpellingAccuracy ?? "-",
       s.grammarGameScores.length,
       avgGrammarGame ?? "-",
       bestGrammarGame ?? "-",
@@ -445,7 +453,8 @@ function buildScoreDetailsSheet(
     colourScoreCell(row.getCell(4)) // pass rate
     colourScoreCell(row.getCell(6)) // avg quiz
     colourScoreCell(row.getCell(8)) // avg grammar quiz
-    colourScoreCell(row.getCell(15)) // avg grammar game accuracy
+    colourScoreCell(row.getCell(12)) // avg spelling accuracy
+    colourScoreCell(row.getCell(16)) // avg grammar game accuracy
   })
 
   // Class averages footer
@@ -453,6 +462,7 @@ function buildScoreDetailsSheet(
   const allQuiz = metrics.students.flatMap((s) => s.quizScores)
   const allGrammarQuiz = metrics.students.flatMap((s) => s.grammarQuizScores)
   const allSpelling = metrics.students.flatMap((s) => s.spellingScores)
+  const allSpellingAccuracy = metrics.students.flatMap((s) => s.spellingAccuracies)
   const allGrammarGame = metrics.students.flatMap((s) => s.grammarGameScores)
   const allGrammarGameAccuracy = metrics.students.flatMap((s) => s.grammarGameAccuracies)
   const classTestPassRate =
@@ -472,13 +482,14 @@ function buildScoreDetailsSheet(
     metrics.students.reduce((sum, s) => sum + s.spellingScores.length, 0),
     average(allSpelling) ?? "-",
     allSpelling.length > 0 ? Math.max(...allSpelling) : "-",
+    average(allSpellingAccuracy) ?? "-",
     metrics.students.reduce((sum, s) => sum + s.grammarGameScores.length, 0),
     average(allGrammarGame) ?? "-",
     allGrammarGame.length > 0 ? Math.max(...allGrammarGame) : "-",
     average(allGrammarGameAccuracy) ?? "-",
   ])
   applyFooterRowStyle(footerRow)
-  ;[3, 4, 6, 8, 15].forEach((col) => {
+  ;[3, 4, 6, 8, 12, 16].forEach((col) => {
     const cell = footerRow.getCell(col)
     if (typeof cell.value === "number") cell.numFmt = '0"%"'
   })

@@ -267,6 +267,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     .map((h) => ({
       title: getSessionTitle(h),
       score: h.spellingGameBestScore!,
+      accuracy: h.spellingGameAccuracy || 0,
       date: h.updatedAt || h.createdAt,
     }));
 

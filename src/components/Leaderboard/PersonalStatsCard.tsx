@@ -125,7 +125,7 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
         <StatItem
           icon={<Gamepad2 className="h-3.5 w-3.5" />}
           label={t("leaderboard.stats.spellingScore")}
-          value={Math.round(cw?.avgSpellingScore ?? 0)}
+          value={`${Math.round(cw?.avgSpellingScore ?? 0)} (${Math.round(cw?.avgSpellingAccuracy ?? 0)}%)`}
           sub={cw?.spellingGamesCompleted
             ? `${cw.spellingGamesCompleted} ${t("leaderboard.stats.spellingGamesCompleted")}`
             : undefined}
@@ -194,7 +194,7 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
           </div>
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.avgSpellingScore")}</div>
-            <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeSpellingScore}</div>
+            <div className="font-bold text-lg tabular-nums">{stats.allTime.avgAllTimeSpellingScore} ({stats.allTime.avgAllTimeSpellingAccuracy}%)</div>
           </div>
           <div>
             <div className="text-muted-foreground text-xs">{t("leaderboard.personal.totalFlashcards")}</div>

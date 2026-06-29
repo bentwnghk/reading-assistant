@@ -46,6 +46,7 @@ const OVERVIEW_ITEMS: { key: string; icon: React.ElementType; bgClass: string; i
   { key: "readingTestDist", icon: FileCheck, bgClass: "bg-red-500/10", iconClass: "text-red-500" },
   { key: "vocabQuizDist", icon: Brain, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
   { key: "spellingTrend", icon: PenTool, bgClass: "bg-pink-500/10", iconClass: "text-pink-500" },
+  { key: "spellingAccuracy", icon: Target, bgClass: "bg-rose-500/10", iconClass: "text-rose-500" },
   { key: "grammarQuizDist", icon: GraduationCap, bgClass: "bg-fuchsia-500/10", iconClass: "text-fuchsia-500" },
   { key: "grammarGameTrend", icon: Gamepad2, bgClass: "bg-lime-500/10", iconClass: "text-lime-500" },
   { key: "grammarGameAccuracy", icon: Target, bgClass: "bg-emerald-500/10", iconClass: "text-emerald-500" },

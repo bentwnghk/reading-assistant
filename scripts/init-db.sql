@@ -324,6 +324,7 @@ CREATE TABLE weekly_stats (
   total_flashcard_reviews   INTEGER       DEFAULT 0,
   avg_quiz_score            NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   avg_spelling_score        NUMERIC(10,2) DEFAULT 0,  -- raw game points, unbounded
+  avg_spelling_accuracy     NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   avg_grammar_quiz_score    NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   avg_grammar_game_score    NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %
   avg_grammar_game_accuracy NUMERIC(6,2)  DEFAULT 0,  -- 0–100 %

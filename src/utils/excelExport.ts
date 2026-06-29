@@ -15,6 +15,7 @@ interface SessionWithSchool {
   testCompleted?: boolean
   vocabularyQuizScore?: number
   spellingGameBestScore?: number
+  spellingGameAccuracy?: number
   grammarQuizScore?: number
   grammarQuizCompleted?: boolean
   grammarGameBestScore?: number
@@ -60,6 +61,7 @@ interface SummaryStats {
   vocabularyCompletedCount: number
   avgSpellingScore: number
   spellingCompletedCount: number
+  avgSpellingAccuracy: number
   avgQuizScore: number
   quizCompletedCount: number
   avgGrammarQuizScore: number
@@ -81,6 +83,7 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       vocabularyCompletedCount: 0,
       avgSpellingScore: 0,
       spellingCompletedCount: 0,
+      avgSpellingAccuracy: 0,
       avgQuizScore: 0,
       quizCompletedCount: 0,
       grammarQuizCompletedCount: 0,
@@ -99,6 +102,8 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
 
   const spellingCompletedSessions = sessions.filter(s => s.spellingGameBestScore !== undefined && s.spellingGameBestScore > 0)
   const totalSpellingScore = spellingCompletedSessions.reduce((sum, s) => sum + (s.spellingGameBestScore || 0), 0)
+  const spellingAccuracySessions = sessions.filter(s => s.spellingGameAccuracy !== undefined && s.spellingGameAccuracy > 0)
+  const totalSpellingAccuracy = spellingAccuracySessions.reduce((sum, s) => sum + (s.spellingGameAccuracy || 0), 0)
 
   const quizCompletedSessions = sessions.filter(s => s.vocabularyQuizScore !== undefined && s.vocabularyQuizScore > 0)
   const totalQuizScore = quizCompletedSessions.reduce((sum, s) => sum + (s.vocabularyQuizScore || 0), 0)
@@ -185,6 +190,7 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
     vocabularyCompletedCount: vocabularySessions.length,
     avgSpellingScore: spellingCompletedSessions.length > 0 ? Math.round(totalSpellingScore / spellingCompletedSessions.length) : 0,
     spellingCompletedCount: spellingCompletedSessions.length,
+    avgSpellingAccuracy: spellingAccuracySessions.length > 0 ? Math.round(totalSpellingAccuracy / spellingAccuracySessions.length) : 0,
     avgQuizScore: quizCompletedSessions.length > 0 ? Math.round(totalQuizScore / quizCompletedSessions.length) : 0,
     quizCompletedCount: quizCompletedSessions.length,
     avgGrammarQuizScore: grammarQuizCompletedSessions.length > 0 ? Math.round(totalGrammarQuizScore / grammarQuizCompletedSessions.length) : 0,
@@ -205,8 +211,8 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   })
 
   const headers = isAdmin
-    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
-    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
+    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Spelling Challenge Accuracy", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
+    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Spelling Challenge Accuracy", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
 
   dataSheet.columns = headers.map(header => ({
     header,
@@ -271,6 +277,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.progress,
           session.glossaryCount,
           session.spellingGameBestScore || "-",
+          (session.spellingGameAccuracy || 0) > 0 ? `${session.spellingGameAccuracy}%` : "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
           session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? session.grammarQuizScore : "-",
           (session.grammarGameBestScore || 0) > 0 ? session.grammarGameBestScore : "-",
@@ -285,6 +292,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
           session.progress,
           session.glossaryCount,
           session.spellingGameBestScore || "-",
+          (session.spellingGameAccuracy || 0) > 0 ? `${session.spellingGameAccuracy}%` : "-",
           session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore > 0 ? session.vocabularyQuizScore : "-",
           session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? session.grammarQuizScore : "-",
           (session.grammarGameBestScore || 0) > 0 ? session.grammarGameBestScore : "-",
@@ -317,11 +325,12 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
       }
 
       const progressColIndex = isAdmin ? 5 : 4
-      const quizColIndex = isAdmin ? 8 : 7
-      const grammarColIndex = isAdmin ? 9 : 8
-      const grammarGameColIndex = isAdmin ? 10 : 9
-      const grammarGameAccuracyColIndex = isAdmin ? 11 : 10
-      const testColIndex = isAdmin ? 12 : 11
+      const spellingAccuracyColIndex = isAdmin ? 8 : 7
+      const quizColIndex = isAdmin ? 9 : 8
+      const grammarColIndex = isAdmin ? 10 : 9
+      const grammarGameColIndex = isAdmin ? 11 : 10
+      const grammarGameAccuracyColIndex = isAdmin ? 12 : 11
+      const testColIndex = isAdmin ? 13 : 12
 
       if (colNumber === progressColIndex && typeof cell.value === "number") {
         cell.numFmt = "0\"%\""
@@ -374,7 +383,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
         }
       }
 
-      if (colNumber === grammarGameAccuracyColIndex && typeof cell.value === "string" && cell.value !== "-") {
+      if ((colNumber === grammarGameAccuracyColIndex || colNumber === spellingAccuracyColIndex) && typeof cell.value === "string" && cell.value !== "-") {
         const accVal = parseInt(cell.value, 10)
         if (!isNaN(accVal)) {
           if (accVal >= 70) {
@@ -465,6 +474,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
     ["Average Vocabulary Collected", stats.avgVocabulary],
     ["Spelling Challenges Completed", stats.spellingCompletedCount],
     ["Average Spelling Challenge Score (Completed)", stats.avgSpellingScore],
+    ["Average Spelling Challenge Accuracy (Completed)", `${stats.avgSpellingAccuracy}%`],
     ["Vocabulary Quizzes Completed", stats.quizCompletedCount],
     ["Average Vocabulary Quiz Score (Completed)", `${stats.avgQuizScore}%`],
     ["Grammar Quizzes Completed", stats.grammarQuizCompletedCount],

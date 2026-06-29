@@ -273,6 +273,9 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                     {t("history.spellingScore")}
                   </TableHead>
                   <TableHead className="w-16 text-center whitespace-normal break-words">
+                    {t("history.spellingAccuracy")}
+                  </TableHead>
+                  <TableHead className="w-16 text-center whitespace-normal break-words">
                     {t("history.quizScore")}
                   </TableHead>
                   <TableHead className="w-16 text-center whitespace-normal break-words">
@@ -317,6 +320,9 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {item.spellingGameBestScore || 0}
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
+                      {item.spellingGameAccuracy ? `${item.spellingGameAccuracy}%` : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {item.vocabularyQuizScore !== undefined && item.vocabularyQuizScore !== null ? `${item.vocabularyQuizScore}%` : "0%"}

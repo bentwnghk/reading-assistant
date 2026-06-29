@@ -53,6 +53,7 @@ const CHART_ITEMS: { key: string; icon: React.ElementType; bgClass: string; icon
   { key: "grammarGameScore", icon: Gamepad2, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
   { key: "grammarGameAccuracy", icon: Target, bgClass: "bg-lime-500/10", iconClass: "text-lime-500" },
   { key: "spellingScore", icon: PenTool, bgClass: "bg-pink-500/10", iconClass: "text-pink-500" },
+  { key: "spellingAccuracy", icon: Target, bgClass: "bg-rose-500/10", iconClass: "text-rose-500" },
   { key: "vocabularyGrowth", icon: LineChart, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
 ];
 

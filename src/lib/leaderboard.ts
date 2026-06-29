@@ -62,6 +62,7 @@ export interface PersonalStats {
     avgAllTimeGrammarGameScore: number
     avgAllTimeGrammarGameAccuracy: number
     avgAllTimeSpellingScore: number
+    avgAllTimeSpellingAccuracy: number
     totalFlashcardReviews: number
   }
   rankInClass: number | null
@@ -78,6 +79,7 @@ interface WeeklyStatsRow {
   totalFlashcardReviews: number
   avgQuizScore: number
   avgSpellingScore: number
+  avgSpellingAccuracy: number
   avgGrammarQuizScore: number
   avgGrammarGameScore: number
   avgGrammarGameAccuracy: number
@@ -151,7 +153,8 @@ export async function refreshWeeklyStatsForUser(
          COUNT(CASE WHEN activity_type = 'quiz_complete' THEN 1 END)    AS quizzes_completed,
          AVG(CASE WHEN activity_type = 'quiz_complete' THEN score END)  AS avg_quiz_score,
          COUNT(CASE WHEN activity_type = 'spelling_complete' THEN 1 END) AS spelling_games,
-         AVG(CASE WHEN activity_type = 'spelling_complete' THEN score END) AS avg_spelling_score,
+          AVG(CASE WHEN activity_type = 'spelling_complete' THEN score END) AS avg_spelling_score,
+          AVG(CASE WHEN activity_type = 'spelling_complete' THEN accuracy END) AS avg_spelling_accuracy,
           COUNT(CASE WHEN activity_type = 'grammar_quiz_complete' THEN 1 END) AS grammar_quizzes,
           AVG(CASE WHEN activity_type = 'grammar_quiz_complete' THEN score END) AS avg_grammar_quiz_score,
           COUNT(CASE WHEN activity_type IN ('grammar_scramble_complete','grammar_workshop_complete','grammar_surgery_complete','grammar_roulette_complete','grammar_duel_complete') THEN 1 END) AS grammar_games,
@@ -187,6 +190,7 @@ export async function refreshWeeklyStatsForUser(
     const avgQuizScore    = parseFloat(agg.avg_quiz_score ?? "0") || 0
     const spellingGamesCompleted = parseInt(agg.spelling_games ?? "0") || 0
     const avgSpellingScore = parseFloat(agg.avg_spelling_score ?? "0") || 0
+    const avgSpellingAccuracy = parseFloat(agg.avg_spelling_accuracy ?? "0") || 0
     const grammarQuizzesCompleted = parseInt(agg.grammar_quizzes ?? "0") || 0
     const avgGrammarQuizScore = parseFloat(agg.avg_grammar_quiz_score ?? "0") || 0
     const grammarGamesCompleted = parseInt(agg.grammar_games ?? "0") || 0
@@ -223,11 +227,11 @@ export async function refreshWeeklyStatsForUser(
          user_id, week_start_date,
          total_sessions, reading_streak_days,
          avg_test_score, total_flashcard_reviews,
-         avg_quiz_score, avg_spelling_score, avg_grammar_quiz_score, avg_grammar_game_score, avg_grammar_game_accuracy,
+         avg_quiz_score, avg_spelling_score, avg_spelling_accuracy, avg_grammar_quiz_score, avg_grammar_game_score, avg_grammar_game_accuracy,
          total_vocabulary_words,
          tests_completed, quizzes_completed, spelling_games_completed, grammar_quizzes_completed, grammar_games_completed,
          weekly_score, improvement_score
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
        ON CONFLICT (user_id, week_start_date)
        DO UPDATE SET
          total_sessions            = EXCLUDED.total_sessions,
@@ -236,6 +240,7 @@ export async function refreshWeeklyStatsForUser(
          total_flashcard_reviews   = EXCLUDED.total_flashcard_reviews,
          avg_quiz_score            = EXCLUDED.avg_quiz_score,
          avg_spelling_score        = EXCLUDED.avg_spelling_score,
+         avg_spelling_accuracy     = EXCLUDED.avg_spelling_accuracy,
          avg_grammar_quiz_score    = EXCLUDED.avg_grammar_quiz_score,
          avg_grammar_game_score    = EXCLUDED.avg_grammar_game_score,
          avg_grammar_game_accuracy = EXCLUDED.avg_grammar_game_accuracy,
@@ -257,6 +262,7 @@ export async function refreshWeeklyStatsForUser(
         totalFlashcardReviews,
         avgQuizScore,
         avgSpellingScore,
+        avgSpellingAccuracy,
         avgGrammarQuizScore,
         avgGrammarGameScore,
         avgGrammarGameAccuracy,
@@ -280,6 +286,7 @@ export async function refreshWeeklyStatsForUser(
       totalFlashcardReviews,
       avgQuizScore,
       avgSpellingScore,
+      avgSpellingAccuracy,
       avgGrammarQuizScore,
       avgGrammarGameScore,
       avgGrammarGameAccuracy,
@@ -586,13 +593,15 @@ export async function getPersonalStats(
     const avgAllTimeGrammarGameAccuracy = Math.round(parseFloat(grammarGameResult.rows[0]?.avg_grammar_game_accuracy ?? "0") || 0)
 
     const spellingResult = await client.query(
-      `SELECT COALESCE(AVG(score), 0) AS avg_spelling_score
+      `SELECT COALESCE(AVG(score), 0) AS avg_spelling_score,
+              COALESCE(AVG(accuracy), 0) AS avg_spelling_accuracy
        FROM activity_logs
        WHERE user_id = $1
          AND activity_type = 'spelling_complete'`,
       [userId]
     )
     const avgAllTimeSpellingScore = Math.round(parseFloat(spellingResult.rows[0]?.avg_spelling_score ?? "0") || 0)
+    const avgAllTimeSpellingAccuracy = Math.round(parseFloat(spellingResult.rows[0]?.avg_spelling_accuracy ?? "0") || 0)
 
     // ── All-time: flashcard reviews from activity_logs separately ──
     const flashcardResult = await client.query(
@@ -687,6 +696,7 @@ export async function getPersonalStats(
       totalFlashcardReviews:   parseInt(row.total_flashcard_reviews as string) || 0,
       avgQuizScore:            parseFloat(row.avg_quiz_score as string) || 0,
       avgSpellingScore:        parseFloat(row.avg_spelling_score as string) || 0,
+      avgSpellingAccuracy:     parseFloat(row.avg_spelling_accuracy as string) || 0,
       avgGrammarQuizScore:     parseFloat(row.avg_grammar_quiz_score as string) || 0,
       avgGrammarGameScore:     parseFloat(row.avg_grammar_game_score as string) || 0,
       avgGrammarGameAccuracy:  parseFloat(row.avg_grammar_game_accuracy as string) || 0,
@@ -718,6 +728,7 @@ export async function getPersonalStats(
         avgAllTimeGrammarGameScore,
         avgAllTimeGrammarGameAccuracy,
         avgAllTimeSpellingScore,
+        avgAllTimeSpellingAccuracy,
         totalFlashcardReviews:      parseInt(flashcardResult.rows[0]?.total_flashcard_reviews ?? "0") || 0,
       },
       rankInClass:  rankClass,

@@ -31,7 +31,7 @@ interface StudentDataViewProps {
   currentUserId?: string
 }
 
-type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "quizScore" | "grammarQuizScore" | "grammarGameScore" | "grammarGameAccuracy"
+type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "spellingAccuracy" | "quizScore" | "grammarQuizScore" | "grammarGameScore" | "grammarGameAccuracy"
 type SortOrder = "asc" | "desc"
 type DateRange = "7" | "30" | "90" | "180" | "360" | "all"
 
@@ -198,6 +198,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           break
         case "spellingScore":
           comparison = (b.spellingGameBestScore || 0) - (a.spellingGameBestScore || 0)
+          break
+        case "spellingAccuracy":
+          comparison = (b.spellingGameAccuracy || 0) - (a.spellingGameAccuracy || 0)
           break
         case "quizScore":
           comparison = (b.vocabularyQuizScore || 0) - (a.vocabularyQuizScore || 0)
@@ -406,6 +409,12 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </Button>
                 </TableHead>
                 <TableHead className="w-20 text-center whitespace-normal break-words">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("spellingAccuracy")} className="h-auto py-1 whitespace-normal">
+                    {t("userManagement.studentData.spellingAccuracy")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-20 text-center whitespace-normal break-words">
                   <Button variant="ghost" size="sm" onClick={() => handleSort("quizScore")} className="h-auto py-1 whitespace-normal">
                     {t("userManagement.studentData.quiz")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -472,6 +481,15 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </TableCell>
                   <TableCell className="text-center">
                     {session.spellingGameBestScore || 0}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {(session.spellingGameAccuracy || 0) > 0 ? (
+                      <Badge variant={session.spellingGameAccuracy! >= 70 ? "default" : "destructive"}>
+                        {session.spellingGameAccuracy}%
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     {session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore !== null ? (

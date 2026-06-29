@@ -1414,6 +1414,7 @@
       "readingTest": "閱讀測驗得分",
       "vocabQuiz": "詞彙測驗得分",
       "spelling": "拼字挑戰得分",
+      "spellingAccuracy": "拼字正確率",
       "grammarQuiz": "語法測驗得分",
       "grammarGame": "語法遊戲得分",
       "grammarGameAccuracy": "語法遊戲正確率"
@@ -1508,6 +1509,10 @@
           "spellingTrend": {
             "name": "拼字分數趨勢",
             "desc": "折線圖追蹤你在各工作階段的拼字分數。觀察你的分數如何隨時間進步。"
+          },
+          "spellingAccuracy": {
+            "name": "拼字正確率",
+            "desc": "折線圖追蹤你在各工作階段的拼字正確率百分比。顯示你在拼字挑戰中的精確度。"
           },
           "grammarQuizDist": {
             "name": "語法測驗分數分佈",
@@ -1612,6 +1617,7 @@
       "avgProgress": "平均學習進度",
       "aiFeatures": "AI 功能使用",
       "spellingScore": "拼字分數",
+      "spellingAccuracy": "拼字正確率",
       "vocabularyGrowth": "詞彙增長",
       "pickDate": "選擇日期"
     },
@@ -1690,6 +1696,10 @@
             "name": "拼字分數",
             "desc": "長條圖顯示每位學生的拼字平均分。適用於追蹤全班的拼字能力。"
           },
+          "spellingAccuracy": {
+            "name": "拼字正確率",
+            "desc": "長條圖顯示每位學生的拼字平均正確率。虛線顯示全班平均。有助找出拼字有困難的學生。"
+          },
           "vocabularyGrowth": {
             "name": "詞彙增長",
             "desc": "多線面積圖追蹤每位學生隨時間累積的詞彙增長。可選擇 13 個時間範圍（1週至3年），並切換顯示個別學生。"
@@ -1697,7 +1707,7 @@
         },
         "tip": {
           "title": "小秘訣：",
-          "content": "使用 Excel 匯出功能擷取全部 12 個圖表及詳細學生資料，方便離線分析、家長會議或進度報告。"
+          "content": "使用 Excel 匯出功能擷取全部 13 個圖表及詳細學生資料，方便離線分析、家長會議或進度報告。"
         }
       },
       "functions": {
@@ -1776,6 +1786,7 @@
     "testScore": "閱讀測驗得分",
     "glossaryWords": "詞彙量",
     "spellingScore": "拼字挑戰得分",
+    "spellingAccuracy": "拼字挑戰正確率",
     "quizScore": "詞彙測驗得分",
     "grammarQuizScore": "語法測驗得分",
     "grammarGameScore": "語法遊戲",
@@ -2211,6 +2222,7 @@
       "testScore": "閱讀測驗",
       "vocabulary": "詞彙量",
       "spelling": "拼字挑戰",
+      "spellingAccuracy": "拼字挑戰正確率",
       "quiz": "詞彙測驗",
       "grammarQuiz": "語法測驗",
       "grammarGame": "語法遊戲",

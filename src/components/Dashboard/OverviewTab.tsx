@@ -513,6 +513,26 @@ export function OverviewTab() {
           color="#a855f7"
           emptyMessage={t("dashboard.charts.noData")}
         />
+        {m.spellingScores.length > 0 && (
+          <ChartCard title={t("dashboard.scores.spellingAccuracy")}>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={m.spellingScores.map((s, i) => ({ ...s, idx: i + 1 }))}>
+                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="accuracy"
+                  name={t("dashboard.scores.spellingAccuracy")}
+                  stroke="#ec4899"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        )}
         <ScoreDistributionChart
           title={t("dashboard.scores.grammarQuiz")}
           scores={m.grammarQuizScores}

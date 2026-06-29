@@ -584,6 +584,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
       logActivity("spelling_complete", {
         sessionId: id || undefined,
         score,
+        accuracy,
         details: { mode: gameMode, difficulty, streak: maxStreak },
       });
 
