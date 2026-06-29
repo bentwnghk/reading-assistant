@@ -630,7 +630,10 @@ export async function syncSubmissionMetrics(
 ): Promise<void> {
   const client = await getClient()
   try {
-    // Fetch the full session row so calculateAssignmentProgress sees all fields
+    // Fetch the full session row so calculateAssignmentProgress sees all fields.
+    // The per-activity completion counters are also fetched so the cached
+    // scores below can distinguish "not started" (→ NULL, renders as "-" in the
+    // roster) from a genuine 0 score (→ 0, renders as "0").
     const sessionRes = await client.query(
       `SELECT extracted_text, summary, mind_map, visualization_image,
               adapted_text, test_completed, analyzed_sentences, highlighted_words,
@@ -639,7 +642,8 @@ export async function syncSubmissionMetrics(
               grammar_scramble_high_score, grammar_workshop_high_score,
               grammar_surgery_high_score, grammar_roulette_high_score,
               grammar_duel_high_score, grammar_game_accuracy,
-              test_score, grammar_game_accuracy
+              test_score, vocab_quizzes_completed, spelling_games_completed,
+              grammar_games_completed
        FROM reading_sessions WHERE id = $1`,
       [studentSessionId],
     )
@@ -673,6 +677,21 @@ export async function syncSubmissionMetrics(
     const progress = calculateAssignmentProgress(session as ReadingStore)
     const grammarGameBest = maxGrammarGameScore(session as ReadingStore)
 
+    // Derive cached scores using each activity's completion flag as the
+    // discriminator: not-yet-played → NULL (renders "-"), completed → the real
+    // score (including a legitimate 0).
+    const grammarGamesPlayed = (row.grammar_games_completed || 0) > 0
+    const cachedTestScore = row.test_completed ? row.test_score ?? 0 : null
+    const cachedVocabScore =
+      (row.vocab_quizzes_completed || 0) > 0 ? row.vocabulary_quiz_score ?? 0 : null
+    const cachedSpellingScore =
+      (row.spelling_games_completed || 0) > 0 ? row.spelling_game_best_score ?? 0 : null
+    const cachedGrammarQuizScore = row.grammar_quiz_completed
+      ? row.grammar_quiz_score ?? 0
+      : null
+    const cachedGrammarGameBest = grammarGamesPlayed ? grammarGameBest : null
+    const cachedGrammarGameAccuracy = grammarGamesPlayed ? row.grammar_game_accuracy ?? 0 : null
+
     await client.query(
       `UPDATE assignment_submissions SET
          progress = $1,
@@ -686,13 +705,13 @@ export async function syncSubmissionMetrics(
        WHERE student_session_id = $9`,
       [
         progress,
-        session.testScore ?? null,
+        cachedTestScore,
         session.testCompleted ?? false,
-        session.vocabularyQuizScore ?? null,
-        session.spellingGameBestScore ?? null,
-        session.grammarQuizScore ?? null,
-        grammarGameBest || null,
-        session.grammarGameAccuracy ?? null,
+        cachedVocabScore,
+        cachedSpellingScore,
+        cachedGrammarQuizScore,
+        cachedGrammarGameBest,
+        cachedGrammarGameAccuracy,
         studentSessionId,
       ],
     )
