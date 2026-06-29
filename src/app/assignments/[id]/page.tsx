@@ -8,14 +8,24 @@ import Link from "next/link"
 import { toast } from "sonner"
 import {
   ArrowLeft,
+  ArrowRight,
   Calendar,
+  CalendarClock,
   Users,
   Loader2,
   Download,
   TrendingUp,
+  Award,
   ChevronsUpDown,
   ChevronUp,
   ChevronDown,
+  Play,
+  Eye,
+  BookOpenCheck,
+  ClipboardList,
+  SpellCheck,
+  GraduationCap,
+  Gamepad2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -469,7 +479,8 @@ function StudentAssignmentDetail({ assignment }: { assignment: Assignment }) {
       <CardContent className="py-6 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <TrendingUp className="h-3.5 w-3.5" />
               {t("assignments.studentView.progress", { progress })}
             </div>
             <div className="mt-1 h-2 w-48 rounded-full bg-muted overflow-hidden">
@@ -481,15 +492,23 @@ function StudentAssignmentDetail({ assignment }: { assignment: Assignment }) {
           </div>
           {assignment.dueDate && (
             <span
-              className={`text-sm ${
+              className={`inline-flex items-center gap-1 text-sm ${
                 isOverdue(assignment.dueDate) ? "text-destructive" : "text-muted-foreground"
               }`}
             >
-              {isOverdue(assignment.dueDate)
-                ? t("assignments.studentView.overdue")
-                : t("assignments.studentView.due", {
+              {isOverdue(assignment.dueDate) ? (
+                <>
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  {t("assignments.studentView.overdue")}
+                </>
+              ) : (
+                <>
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  {t("assignments.studentView.due", {
                     date: formatDate(assignment.dueDate, i18n.language),
                   })}
+                </>
+              )}
             </span>
           )}
         </div>
@@ -499,25 +518,47 @@ function StudentAssignmentDetail({ assignment }: { assignment: Assignment }) {
           </p>
         )}
         <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            <Award className="h-3.5 w-3.5" />
             {t("assignments.studentView.yourScores")}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
             {(
               [
-                ["assignments.teacherView.testScoreCol", assignment.testScore],
-                ["assignments.teacherView.vocabCol", assignment.vocabularyQuizScore],
-                ["assignments.teacherView.spellingCol", assignment.spellingGameBestScore],
-                ["assignments.teacherView.grammarQuizCol", assignment.grammarQuizScore],
-                ["assignments.teacherView.grammarGameCol", assignment.grammarGameBestScore],
+                {
+                  key: "assignments.teacherView.testScoreCol",
+                  value: assignment.testScore,
+                  icon: <BookOpenCheck className="h-3 w-3 text-teal-500" />,
+                },
+                {
+                  key: "assignments.teacherView.vocabCol",
+                  value: assignment.vocabularyQuizScore,
+                  icon: <ClipboardList className="h-3 w-3 text-blue-500" />,
+                },
+                {
+                  key: "assignments.teacherView.spellingCol",
+                  value: assignment.spellingGameBestScore,
+                  icon: <SpellCheck className="h-3 w-3 text-pink-500" />,
+                },
+                {
+                  key: "assignments.teacherView.grammarQuizCol",
+                  value: assignment.grammarQuizScore,
+                  icon: <GraduationCap className="h-3 w-3 text-fuchsia-500" />,
+                },
+                {
+                  key: "assignments.teacherView.grammarGameCol",
+                  value: assignment.grammarGameBestScore,
+                  icon: <Gamepad2 className="h-3 w-3 text-amber-500" />,
+                },
               ] as const
-            ).map(([labelKey, value]) => (
+            ).map(({ key, value, icon }) => (
               <div
-                key={labelKey}
+                key={key}
                 className="rounded-lg border bg-muted/30 px-3 py-2"
               >
-                <div className="text-xs text-muted-foreground truncate">
-                  {t(labelKey)}
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  {icon}
+                  <span className="truncate">{t(key)}</span>
                 </div>
                 <div className="text-lg font-semibold tabular-nums">
                   {scoreCell(value)}
@@ -527,6 +568,13 @@ function StudentAssignmentDetail({ assignment }: { assignment: Assignment }) {
           </div>
         </div>
         <Button onClick={handleStart} disabled={!studentSessionId}>
+          {ctaKey === "assignments.studentView.start" ? (
+            <Play className="h-4 w-4 mr-1" />
+          ) : ctaKey === "assignments.studentView.continue" ? (
+            <ArrowRight className="h-4 w-4 mr-1" />
+          ) : (
+            <Eye className="h-4 w-4 mr-1" />
+          )}
           {t(ctaKey)}
         </Button>
       </CardContent>

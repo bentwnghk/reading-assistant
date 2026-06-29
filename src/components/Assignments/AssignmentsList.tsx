@@ -247,7 +247,8 @@ export default function AssignmentsList() {
                       </span>
                     )}
                     {!isTeacher && a.teacherName && (
-                      <span>
+                      <span className="inline-flex items-center gap-1">
+                        <GraduationCap className="h-3.5 w-3.5" />
                         {t("assignments.studentView.from", { teacher: a.teacherName })}
                       </span>
                     )}
