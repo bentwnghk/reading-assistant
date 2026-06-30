@@ -37,6 +37,7 @@ import {
   Bell,
   BookOpenCheck,
   Library,
+  ClipboardCheck,
   LogOut,
   LogIn,
   CircleHelp,
@@ -694,6 +695,13 @@ function Header() {
                     <div className="text-xs text-muted-foreground">{t("header.about.features.wordExport.desc")}</div>
                   </div>
                 </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <ClipboardCheck className="h-4 w-4 mt-0.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.assignments.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.assignments.desc")}</div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -725,6 +733,7 @@ function Header() {
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">
                     <li>• {t("header.about.roles.teacher.manageStudents")}</li>
+                    <li>• {t("header.about.roles.teacher.assignHomework")}</li>
                     <li>• {t("header.about.roles.teacher.uploadTexts")}</li>
                     <li>• {t("header.about.roles.teacher.shareVocabulary")}</li>
                     <li>• {t("header.about.roles.teacher.viewAiQuestions")}</li>

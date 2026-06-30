@@ -91,6 +91,7 @@
         "teacher": {
           "title": "🎓 Teacher",
           "manageStudents": "Add students & track their learning progress through Teacher Dashboard",
+          "assignHomework": "Turn reading sessions into trackable class assignments",
           "uploadTexts": "Upload reading materials to Text Repository to share with your classes",
           "shareVocabulary": "Share curated vocabulary & review lists with students",
           "exportData": "Export detailed Excel reports",
@@ -186,6 +187,10 @@
         "vocabularyPage": {
           "title": "📚 My Vocabulary Hub",
           "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Teachers can share curated review lists with students!"
+        },
+        "assignments": {
+          "title": "📋 Assignments",
+          "desc": "Turn any reading session into homework for a whole class. Track each student's live progress, flag who's stuck, and export the roster to Excel."
         }
       },
       "workflow": {
@@ -316,12 +321,27 @@
     "classrooms": {
       "eyebrow": "For classrooms & schools",
       "title": "Everything a teacher needs to run with it.",
-      "bullets": [
-        "Track class activity & scores in real time",
-        "Share vocabulary & review lists with students",
-        "Export detailed Excel reports",
-        "Upload texts for and share them with your classes or school"
-      ]
+      "assignments": {
+        "eyebrow": "Assign",
+        "title": "Turn any lesson into homework.",
+        "lede": "Send a reading session to a whole class in a couple of clicks. Every student gets their own copy to work through, while you watch live progress, spot who's stuck, and export the results.",
+        "bullets": [
+          "One-click assign to a class or roster",
+          "Live progress & at-a-glance scorecards",
+          "Flag struggling students automatically",
+          "Export the whole roster to Excel"
+        ]
+      },
+      "insights": {
+        "eyebrow": "Insights",
+        "title": "See the whole class at a glance.",
+        "bullets": [
+          "Track class activity & scores in real time",
+          "Share vocabulary & review lists with students",
+          "Export detailed Excel reports",
+          "Upload texts for and share them with your classes or school"
+        ]
+      }
     },
     "faq": {
       "more": "See more questions",

@@ -25,6 +25,7 @@ import {
   PracticeMockup,
   MasterMockup,
   DashboardMockup,
+  AssignmentsMockup,
 } from "@/components/Auth/landing/Mockups";
 
 const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
@@ -103,6 +104,60 @@ function Chapter({ num, eyebrow, title, lede, bullets, mockup, flip }: ChapterPr
         {lede}
       </motion.p>
       <motion.ul variants={fadeUp} className="mt-6 space-y-2.5">
+        {bullets.map((b) => (
+          <li key={b} className="flex items-start gap-2.5 text-sm text-[var(--lp-ink)]">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-accent)]" />
+            <span>{b}</span>
+          </li>
+        ))}
+      </motion.ul>
+    </div>
+  );
+
+  const visual = (
+    <motion.div variants={fadeUp} className={`min-w-0 ${flip ? "lg:order-first" : ""}`}>
+      {mockup}
+    </motion.div>
+  );
+
+  return (
+    <Reveal className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+      {text}
+      {visual}
+    </Reveal>
+  );
+}
+
+type FeatureBlockProps = {
+  eyebrow: string;
+  title: string;
+  lede?: string;
+  bullets: string[];
+  mockup: React.ReactNode;
+  flip?: boolean;
+};
+
+function FeatureBlock({ eyebrow, title, lede, bullets, mockup, flip }: FeatureBlockProps) {
+  const text = (
+    <div className="flex min-w-0 flex-col justify-center">
+      <motion.div variants={fadeUp} className="mb-3 flex items-center gap-2.5">
+        <span className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--lp-accent)]">
+          {eyebrow}
+        </span>
+      </motion.div>
+      <motion.h3
+        variants={fadeUp}
+        className="font-display text-2xl font-semibold leading-[1.1] tracking-tight text-[var(--lp-ink)] sm:text-3xl"
+        style={{ fontVariationSettings: '"SOFT" 50, "WONK" 1' }}
+      >
+        {title}
+      </motion.h3>
+      {lede && (
+        <motion.p variants={fadeUp} className="mt-3 max-w-md text-base leading-relaxed text-[var(--lp-ink-soft)]">
+          {lede}
+        </motion.p>
+      )}
+      <motion.ul variants={fadeUp} className="mt-5 grid gap-2.5 sm:grid-cols-2">
         {bullets.map((b) => (
           <li key={b} className="flex items-start gap-2.5 text-sm text-[var(--lp-ink)]">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-accent)]" />
@@ -268,36 +323,41 @@ export function LandingPage() {
       {/* ── For classrooms & schools ── */}
       <section className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
         <div className="rounded-3xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-6 py-12 sm:px-12 sm:py-16">
-          <Reveal className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <motion.div variants={fadeUp} className="mb-4 flex items-center gap-2.5">
-                <span className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--lp-accent)]">
-                  {t("landing.classrooms.eyebrow")}
-                </span>
-              </motion.div>
-              <motion.h2
-                variants={fadeUp}
-                className="font-display text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl"
-                style={{ fontVariationSettings: '"SOFT" 50, "WONK" 1' }}
-              >
-                {t("landing.classrooms.title")}
-              </motion.h2>
-              <motion.p variants={fadeUp} className="mt-4 max-w-md text-base leading-relaxed text-[var(--lp-ink-soft)]">
-                {t("header.about.roles.intro")}
-              </motion.p>
-              <motion.ul variants={fadeUp} className="mt-6 grid gap-2.5 sm:grid-cols-2">
-                {(t(`landing.classrooms.bullets`, { returnObjects: true }) as string[]).map((b) => (
-                  <li key={b} className="flex items-start gap-2.5 text-sm text-[var(--lp-ink)]">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-accent)]" />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </motion.ul>
-            </div>
-            <motion.div variants={fadeUp}>
-              <DashboardMockup />
+          {/* shared section intro */}
+          <Reveal className="mx-auto mb-16 max-w-2xl text-center">
+            <motion.div variants={fadeUp} className="mb-3">
+              <span className="font-mono text-xs uppercase tracking-[0.22em] text-[var(--lp-accent)]">
+                {t("landing.classrooms.eyebrow")}
+              </span>
             </motion.div>
+            <motion.h2
+              variants={fadeUp}
+              className="font-display text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl"
+              style={{ fontVariationSettings: '"SOFT" 50, "WONK" 1' }}
+            >
+              {t("landing.classrooms.title")}
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mx-auto mt-4 max-w-md text-base leading-relaxed text-[var(--lp-ink-soft)]">
+              {t("header.about.roles.intro")}
+            </motion.p>
           </Reveal>
+
+          <div className="space-y-20">
+            <FeatureBlock
+              eyebrow={t("landing.classrooms.assignments.eyebrow")}
+              title={t("landing.classrooms.assignments.title")}
+              lede={t("landing.classrooms.assignments.lede")}
+              bullets={t(`landing.classrooms.assignments.bullets`, { returnObjects: true }) as string[]}
+              mockup={<AssignmentsMockup />}
+            />
+            <FeatureBlock
+              eyebrow={t("landing.classrooms.insights.eyebrow")}
+              title={t("landing.classrooms.insights.title")}
+              bullets={t(`landing.classrooms.insights.bullets`, { returnObjects: true }) as string[]}
+              mockup={<DashboardMockup />}
+              flip
+            />
+          </div>
         </div>
       </section>
 

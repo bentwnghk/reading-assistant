@@ -25,6 +25,9 @@ import {
   ChevronRight,
   Lock,
   CheckCircle2,
+  ClipboardCheck,
+  Calendar,
+  Users,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -1402,6 +1405,130 @@ export function DashboardMockup() {
               </span>
             ))}
           </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 7. ASSIGNMENTS — turn a session into homework & track the roster ── */
+export function AssignmentsMockup() {
+  const roster = [
+    { name: "Chloe L.", init: "C", progress: 100, score: 92 },
+    { name: "Marcus T.", init: "M", progress: 78, score: 74 },
+    { name: "Priya K.", init: "P", progress: 52, score: 61 },
+    { name: "Ethan W.", init: "E", progress: 24, score: null },
+  ];
+  const stats = [
+    { label: "Assessed", value: "24/28" },
+    { label: "Participation", value: "86%" },
+    { label: "Class avg", value: "74" },
+    { label: "At-risk", value: "3", warn: true },
+  ];
+  return (
+    <MockupFrame label="ASSIGNMENTS · Mr.🆖 ProReader">
+      {/* header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-display text-base font-semibold text-[var(--lp-ink)]">
+            DSE 2023 Paper 1 — Reading
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--lp-ink-soft)]">
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3 w-3" /> 28 students
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3 w-3" /> Due Fri, Jun 12
+            </span>
+          </div>
+        </div>
+        <Tag tone="accent">
+          <ClipboardCheck className="h-3 w-3" /> Assigned
+        </Tag>
+      </div>
+
+      {/* overview stat tiles */}
+      <div className="mt-4 grid grid-cols-4 gap-2">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-2"
+          >
+            <div
+              className={`font-display text-base font-bold ${
+                s.warn ? "text-amber-500" : "text-[var(--lp-ink)]"
+              }`}
+            >
+              {s.value}
+            </div>
+            <div className="text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
+              {s.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* roster */}
+      <div className="mt-4">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
+            Roster
+          </span>
+          <span className="inline-flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+            <FileDown className="h-3 w-3" /> Export
+          </span>
+        </div>
+        <div className="space-y-1.5">
+          {roster.map((s) => {
+            const risk = s.score != null ? s.score < 65 : s.progress < 40;
+            return (
+              <div
+                key={s.name}
+                className="flex items-center gap-2.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-2"
+              >
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${
+                    risk ? "bg-amber-500" : "bg-[var(--lp-accent)]"
+                  }`}
+                >
+                  {s.init}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs font-medium text-[var(--lp-ink)]">
+                      {s.name}
+                    </span>
+                    <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">
+                      {s.progress}%
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                    <div
+                      className={`h-full rounded-full ${
+                        risk ? "bg-amber-500" : "bg-[var(--lp-accent)]"
+                      }`}
+                      style={{ width: `${s.progress}%` }}
+                    />
+                  </div>
+                </div>
+                {s.score != null ? (
+                  <span
+                    className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
+                      s.score >= 70
+                        ? "bg-emerald-500/10 text-emerald-600"
+                        : "bg-amber-500/10 text-amber-600"
+                    }`}
+                  >
+                    {s.score}
+                  </span>
+                ) : (
+                  <span className="shrink-0 rounded-md bg-[var(--lp-paper-2)] px-2 py-0.5 text-[10px] text-[var(--lp-ink-soft)]">
+                    —
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </MockupFrame>
