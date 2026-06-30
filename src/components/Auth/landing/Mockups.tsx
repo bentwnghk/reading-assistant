@@ -247,7 +247,7 @@ export function UnderstandMockup() {
         <div className="relative flex flex-col rounded-xl border border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-accent)]/15 via-[var(--lp-highlight)]/20 to-transparent p-3">
           <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
             <ImageIcon className="h-3.5 w-3.5" />
-            <span className="font-mono text-[10px] uppercase tracking-wider">AI image</span>
+            <span className="font-mono text-[10px] uppercase tracking-wider">AI Visualization</span>
           </div>
           <div className="flex flex-1 items-center justify-center">
             <svg
