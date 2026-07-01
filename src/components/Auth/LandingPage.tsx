@@ -338,8 +338,16 @@ export function LandingPage() {
               {t("landing.classrooms.title")}
             </motion.h2>
             <motion.p variants={fadeUp} className="mx-auto mt-4 max-w-md text-base leading-relaxed text-[var(--lp-ink-soft)]">
-              {t("header.about.roles.intro")}
+              {t("landing.classrooms.intro")}
             </motion.p>
+            <motion.ul variants={fadeUp} className="mx-auto mt-6 grid max-w-lg gap-2.5 text-left sm:grid-cols-2">
+              {(t(`landing.classrooms.bullets`, { returnObjects: true }) as string[]).map((b) => (
+                <li key={b} className="flex items-start gap-2.5 text-sm text-[var(--lp-ink)]">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--lp-accent)]" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </motion.ul>
           </Reveal>
 
           <div className="space-y-20">
@@ -353,6 +361,7 @@ export function LandingPage() {
             <FeatureBlock
               eyebrow={t("landing.classrooms.insights.eyebrow")}
               title={t("landing.classrooms.insights.title")}
+              lede={t("landing.classrooms.insights.lede")}
               bullets={t(`landing.classrooms.insights.bullets`, { returnObjects: true }) as string[]}
               mockup={<DashboardMockup />}
               flip

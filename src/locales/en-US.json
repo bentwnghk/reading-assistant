@@ -321,6 +321,13 @@
     "classrooms": {
       "eyebrow": "For classrooms & schools",
       "title": "Everything a teacher needs to run with it.",
+      "intro": "From a shared text repository to live class dashboards, every teaching tool lives in one place — so you spend less time juggling apps and more time with your students.",
+      "bullets": [
+        "Upload texts and share them with your classes or school",
+        "Share curated vocabulary & review lists with students",
+        "Export detailed Excel reports in one click",
+        "Manage students, classes & monitor leaderboards"
+      ],
       "assignments": {
         "eyebrow": "Assign",
         "title": "Turn any lesson into homework.",
@@ -335,11 +342,12 @@
       "insights": {
         "eyebrow": "Insights",
         "title": "See the whole class at a glance.",
+        "lede": "The Teacher Dashboard turns everyday reading into clear charts — who's active, who's growing, and where the class needs a hand next.",
         "bullets": [
           "Track class activity & scores in real time",
-          "Share vocabulary & review lists with students",
-          "Export detailed Excel reports",
-          "Upload texts for and share them with your classes or school"
+          "Watch vocabulary growth over the term",
+          "See reading-test scores by quartile",
+          "Monitor AI-feature usage per student"
         ]
       }
     },
