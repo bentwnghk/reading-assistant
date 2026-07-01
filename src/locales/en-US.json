@@ -321,11 +321,11 @@
       "master": {
         "eyebrow": "Master",
         "title": "Watch yourself improve.",
-        "lede": "Take the reading test and see your skill scores climb. Build a vocabulary that travels with you, compete on the leaderboard, and earn achievements along the way.",
+        "lede": "Take the reading test and see your skill scores climb. Compete on the leaderboard, earn achievements along the way, and build a vocabulary that travels with you.",
         "bullets": [
           "Reading test with skill breakdown",
-          "My Vocabulary hub with mastery tracking",
-          "Leaderboards & achievements"
+          "Leaderboards & achievements",
+          "My Vocabulary hub with mastery tracking"
         ]
       }
     },
