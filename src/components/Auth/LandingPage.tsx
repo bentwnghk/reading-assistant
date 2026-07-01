@@ -372,8 +372,16 @@ export function LandingPage() {
         </div>
       </section>
 
+      <div className="mx-auto max-w-6xl px-6">
+        <hr className="border-[var(--lp-rule)]" />
+      </div>
+
       {/* ── Powerful features (collapsible) ── */}
       <FeaturesShowcase />
+
+      <div className="mx-auto max-w-6xl px-6">
+        <hr className="border-[var(--lp-rule)]" />
+      </div>
 
       {/* ── FAQ ── */}
       <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">
