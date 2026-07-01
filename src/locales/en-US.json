@@ -290,12 +290,22 @@
       "understand": {
         "eyebrow": "Understand",
         "title": "Make sense of it.",
-        "lede": "Flip between Original, Adapted, and Simplified versions. Pull up a mind map, watch the AI visualization, and let the difficulty metrics tell you exactly what you're dealing with. Stuck on something? Ask the AI Tutor anything about the text.",
+        "lede": "Flip between Original, Adapted, and Simplified versions. Pull up a mind map, watch the AI visualization, and let the difficulty metrics tell you exactly what you're dealing with.",
         "bullets": [
           "Original · Adapted · Simplified",
           "Mind map & AI visualization",
-          "CEFR levels & readability scores",
-          "AI Tutor — ask anything about the text"
+          "CEFR levels & readability scores"
+        ]
+      },
+      "tutor": {
+        "eyebrow": "AI Tutor",
+        "title": "A patient coach that knows your text.",
+        "lede": "The AI Tutor reads the passage with you, so every answer stays grounded in what you're reading. Snap a photo of a comprehension question and pick the help you need — a nudge, a guided walkthrough, or the full solution.",
+        "bullets": [
+          "Hint me — guiding questions, never the answer",
+          "Step-by-step — walks you to the answer",
+          "Give answer — the solution with a clear explanation",
+          "Upload a question photo · context-aware · EN / 繁中"
         ]
       },
       "practice": {
