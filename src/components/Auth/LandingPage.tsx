@@ -28,6 +28,7 @@ import {
   AssignmentsMockup,
   VocabularyMockup,
 } from "@/components/Auth/landing/Mockups";
+import { FeaturesShowcase } from "@/components/Auth/landing/FeaturesShowcase";
 
 const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
@@ -370,6 +371,9 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Powerful features (collapsible) ── */}
+      <FeaturesShowcase />
 
       {/* ── FAQ ── */}
       <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">

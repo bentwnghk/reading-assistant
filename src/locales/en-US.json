@@ -361,6 +361,13 @@
         ]
       }
     },
+    "features": {
+      "eyebrow": "Powerful features",
+      "title": "Every tool, all in one place.",
+      "lede": "Every feature works together on each text you bring — from OCR and level adaptation to grammar games and exports.",
+      "show": "Show all features",
+      "hide": "Hide features"
+    },
     "faq": {
       "more": "See more questions",
       "fewer": "Show fewer"
