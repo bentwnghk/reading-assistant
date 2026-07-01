@@ -25,9 +25,16 @@ import {
   ChevronRight,
   Lock,
   CheckCircle2,
-  ClipboardCheck,
   Calendar,
   Users,
+  TrendingUp,
+  Download,
+  Award,
+  TriangleAlert,
+  BookOpenCheck,
+  ClipboardList,
+  SpellCheck,
+  GraduationCap,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -1411,125 +1418,166 @@ export function DashboardMockup() {
   );
 }
 
-/* ── 7. ASSIGNMENTS — turn a session into homework & track the roster ── */
+/* ── 7. ASSIGNMENTS — faithful mockup of the teacher assignment detail page ── */
 export function AssignmentsMockup() {
-  const roster = [
-    { name: "Chloe L.", init: "C", progress: 100, score: 92 },
-    { name: "Marcus T.", init: "M", progress: 78, score: 74 },
-    { name: "Priya K.", init: "P", progress: 52, score: 61 },
-    { name: "Ethan W.", init: "E", progress: 24, score: null },
-  ];
+  // Mirrors the AssignmentStats overview strip (4 StatCards).
   const stats = [
-    { label: "Assessed", value: "24/28" },
-    { label: "Participation", value: "86%" },
-    { label: "Class avg", value: "74" },
-    { label: "At-risk", value: "3", warn: true },
+    { label: "Assessed", value: "24/28", icon: Users, color: "text-[var(--lp-accent)]" },
+    { label: "Participation", value: "86%", icon: TrendingUp, color: "text-emerald-500" },
+    { label: "Class avg", value: "74", icon: Award, color: "text-indigo-500" },
+    { label: "At-risk", value: "3", icon: TriangleAlert, color: "text-amber-500" },
   ];
+
+  // Mirrors the 8-column sortable roster table. Score columns match the real
+  // activity meta: testScore / vocab / spelling / grammarQuiz / grammarGame.
+  type Row = {
+    name: string;
+    init: string;
+    email: string;
+    progress: number;
+    test: number | null;
+    vocab: number | null;
+    spell: number | null;
+    gq: number | null;
+    gg: number | null;
+    viewed: string;
+  };
+  const rows: Row[] = [
+    { name: "Chloe L.", init: "C", email: "chloe.l@school.edu", progress: 100, test: 92, vocab: 88, spell: 90, gq: 85, gg: 80, viewed: "Jun 9, 14:22" },
+    { name: "Marcus T.", init: "M", email: "marcus.t@school.edu", progress: 80, test: 74, vocab: 70, spell: 78, gq: 72, gg: 68, viewed: "Jun 8, 09:10" },
+    { name: "Priya K.", init: "P", email: "priya.k@school.edu", progress: 52, test: 61, vocab: 55, spell: 60, gq: 58, gg: 50, viewed: "Jun 7, 16:40" },
+    { name: "Ethan W.", init: "E", email: "ethan.w@school.edu", progress: 24, test: null, vocab: null, spell: null, gq: null, gg: null, viewed: "—" },
+  ];
+
+  const scoreCols = [
+    { key: "test" as const, icon: BookOpenCheck, color: "text-teal-500", title: "Test" },
+    { key: "vocab" as const, icon: ClipboardList, color: "text-blue-500", title: "Vocab" },
+    { key: "spell" as const, icon: SpellCheck, color: "text-pink-500", title: "Spelling" },
+    { key: "gq" as const, icon: GraduationCap, color: "text-fuchsia-500", title: "Grammar Quiz" },
+    { key: "gg" as const, icon: Gamepad2, color: "text-amber-500", title: "Grammar Game" },
+  ];
+
+  const cell = (v: number | null) => (v == null ? "—" : String(v));
+
   return (
     <MockupFrame label="ASSIGNMENTS · Mr.🆖 ProReader">
-      {/* header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-display text-base font-semibold text-[var(--lp-ink)]">
-            DSE 2023 Paper 1 — Reading
-          </p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--lp-ink-soft)]">
-            <span className="inline-flex items-center gap-1">
-              <Users className="h-3 w-3" /> 28 students
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Calendar className="h-3 w-3" /> Due Fri, Jun 12
-            </span>
+      {/* ── header card: title / subject / status + meta row ── */}
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3.5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate font-display text-base font-bold text-[var(--lp-ink)]">
+              DSE 2023 Paper 1 — Reading
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--lp-ink-soft)]">English · Paper 1</p>
           </div>
+          <span className="shrink-0 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+            Active
+          </span>
         </div>
-        <Tag tone="accent">
-          <ClipboardCheck className="h-3 w-3" /> Assigned
-        </Tag>
+        <p className="mt-2 text-[11px] leading-snug text-[var(--lp-ink-soft)]">
+          Read the passage and complete all sections before the deadline.
+        </p>
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 border-t border-[var(--lp-rule)] pt-2.5 text-[11px] text-[var(--lp-ink-soft)]">
+          <span className="inline-flex items-center gap-1">
+            <Users className="h-3 w-3" /> 28 students
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Calendar className="h-3 w-3" /> Due Jun 12
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <TrendingUp className="h-3 w-3" /> Avg 64%
+          </span>
+        </div>
       </div>
 
-      {/* overview stat tiles */}
-      <div className="mt-4 grid grid-cols-4 gap-2">
+      {/* ── export button (right-aligned, like the real page) ── */}
+      <div className="mt-3 flex justify-end">
+        <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--lp-ink)]">
+          <Download className="h-3.5 w-3.5" /> Export to Excel
+        </span>
+      </div>
+
+      {/* ── AssignmentStats overview strip (4 StatCards) ── */}
+      <div className="mt-3 grid grid-cols-4 gap-2">
         {stats.map((s) => (
           <div
             key={s.label}
             className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-2"
           >
-            <div
-              className={`font-display text-base font-bold ${
-                s.warn ? "text-amber-500" : "text-[var(--lp-ink)]"
-              }`}
-            >
+            <s.icon className={`h-3 w-3 ${s.color}`} />
+            <div className="mt-1 font-display text-base font-bold text-[var(--lp-ink)]">
               {s.value}
             </div>
-            <div className="text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
+            <div className="text-[8px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
               {s.label}
             </div>
           </div>
         ))}
       </div>
 
-      {/* roster */}
-      <div className="mt-4">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
-            Roster
-          </span>
-          <span className="inline-flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
-            <FileDown className="h-3 w-3" /> Export
-          </span>
-        </div>
-        <div className="space-y-1.5">
-          {roster.map((s) => {
-            const risk = s.score != null ? s.score < 65 : s.progress < 40;
-            return (
-              <div
-                key={s.name}
-                className="flex items-center gap-2.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-2"
+      {/* ── roster table (8 sortable columns) ── */}
+      <div className="mt-3 overflow-hidden rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
+        <table className="w-full border-collapse text-[var(--lp-ink)]">
+          <thead>
+            <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
+              <th className="px-2 py-1.5 text-left font-semibold">Student</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">Prog</th>
+              {scoreCols.map((c) => (
+                <th key={c.key} className="px-1 py-1.5 text-center font-semibold" title={c.title}>
+                  <c.icon className={`mx-auto h-3 w-3 ${c.color}`} />
+                </th>
+              ))}
+              <th className="px-2 py-1.5 text-right font-semibold">Viewed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr
+                key={r.name}
+                className={`text-[11px] ${i !== rows.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}
               >
-                <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${
-                    risk ? "bg-amber-500" : "bg-[var(--lp-accent)]"
-                  }`}
-                >
-                  {s.init}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-xs font-medium text-[var(--lp-ink)]">
-                      {s.name}
+                <td className="px-2 py-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--lp-accent)] text-[8px] font-bold text-white">
+                      {r.init}
                     </span>
-                    <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">
-                      {s.progress}%
+                    <span className="truncate font-medium">{r.name}</span>
+                  </div>
+                </td>
+                <td className="px-1.5 py-1.5">
+                  <div className="flex items-center gap-1">
+                    <div className="h-1.5 w-8 overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                      <div
+                        className="h-full rounded-full bg-[var(--lp-accent)]"
+                        style={{ width: `${r.progress}%` }}
+                      />
+                    </div>
+                    <span className="font-mono text-[9px] tabular-nums text-[var(--lp-ink-soft)]">
+                      {r.progress}%
                     </span>
                   </div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
-                    <div
-                      className={`h-full rounded-full ${
-                        risk ? "bg-amber-500" : "bg-[var(--lp-accent)]"
-                      }`}
-                      style={{ width: `${s.progress}%` }}
-                    />
-                  </div>
-                </div>
-                {s.score != null ? (
-                  <span
-                    className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
-                      s.score >= 70
-                        ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-amber-500/10 text-amber-600"
+                </td>
+                {scoreCols.map((c) => (
+                  <td
+                    key={c.key}
+                    className={`px-1 py-1.5 text-center font-mono tabular-nums ${
+                      r[c.key] == null
+                        ? "text-[var(--lp-ink-soft)]"
+                        : (r[c.key] ?? 0) >= 70
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-[var(--lp-ink)]"
                     }`}
                   >
-                    {s.score}
-                  </span>
-                ) : (
-                  <span className="shrink-0 rounded-md bg-[var(--lp-paper-2)] px-2 py-0.5 text-[10px] text-[var(--lp-ink-soft)]">
-                    —
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                    {cell(r[c.key])}
+                  </td>
+                ))}
+                <td className="px-2 py-1.5 text-right font-mono text-[9px] tabular-nums text-[var(--lp-ink-soft)]">
+                  {r.viewed}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </MockupFrame>
   );
