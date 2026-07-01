@@ -35,6 +35,14 @@ import {
   ClipboardList,
   SpellCheck,
   GraduationCap,
+  BookMarked,
+  Clock,
+  HelpCircle,
+  Table as TableIcon,
+  ListPlus,
+  History,
+  Wand2,
+  Layers,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -785,7 +793,7 @@ export function PracticeMockup() {
   );
 }
 
-/* ── 5. MASTER — test scorecard + vocabulary + achievements + leaderboard ── */
+/* ── 5. MASTER — test scorecard + leaderboard + achievements ── */
 export function MasterMockup() {
   const [practiceMode, setPracticeMode] = useState(false);
   const skills = [
@@ -854,7 +862,7 @@ export function MasterMockup() {
   return (
     <MockupFrame label="DASHBOARD · Mr.🆖 ProReader">
       <div className="grid items-start gap-4 sm:grid-cols-2">
-        {/* Column 1 — your stats: scorecard + vocabulary */}
+        {/* Column 1 — your stats: scorecard + leaderboard */}
         <div className="flex flex-col gap-4">
           {practiceMode ? (
             /* ── targeted practice — question-by-question quiz view ── */
@@ -990,34 +998,35 @@ export function MasterMockup() {
             </div>
           )}
 
-          {/* vocabulary */}
-          <div className="rounded-xl border border-[var(--lp-rule)] p-3">
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
-              My vocabulary
+          {/* leaderboard */}
+          <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
+            <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
+              <Trophy className="h-3.5 w-3.5" />
+              <span className="font-mono text-[10px] uppercase tracking-wider">Leaderboard</span>
             </div>
             {[
-              { w: "inefficient", m: 3 },
-              { w: "defenders", m: 4 },
-              { w: "flourish", m: 5 },
+              { r: 1, n: "Chloe L.", pts: "1,240", you: false },
+              { r: 2, n: "You", pts: "1,180", you: true },
+              { r: 3, n: "Marcus T.", pts: "1,090", you: false },
+              { r: 4, n: "Priya K.", pts: "1,050", you: false },
             ].map((row) => (
-              <div key={row.w} className="flex items-center justify-between py-1 text-sm">
-                <span className="text-[var(--lp-ink)]">{row.w}</span>
-                <span className="flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        i < row.m ? "bg-[var(--lp-accent)]" : "bg-[var(--lp-rule)]"
-                      }`}
-                    />
-                  ))}
-                </span>
+              <div
+                key={row.r}
+                className={`flex items-center gap-2 rounded-md px-2 py-1 text-sm ${
+                  row.you
+                    ? "bg-[var(--lp-accent)]/10 font-semibold text-[var(--lp-accent)]"
+                    : "text-[var(--lp-ink)]"
+                }`}
+              >
+                <span className="w-4 font-mono text-xs text-[var(--lp-ink-soft)]">{row.r}</span>
+                <span className="flex-1">{row.n}</span>
+                <span className="font-mono text-xs text-[var(--lp-ink-soft)]">{row.pts}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Column 2 — rewards & ranking: achievements + leaderboard */}
+        {/* Column 2 — rewards: achievements */}
         <div className="flex flex-col gap-4">
           <div className="rounded-xl border border-[var(--lp-rule)] p-3">
             <div className="mb-2 flex items-center gap-1.5">
@@ -1117,31 +1126,6 @@ export function MasterMockup() {
                 </div>
               ))}
             </div>
-          </div>
-          <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
-            <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
-              <Trophy className="h-3.5 w-3.5" />
-              <span className="font-mono text-[10px] uppercase tracking-wider">Leaderboard</span>
-            </div>
-            {[
-              { r: 1, n: "Chloe L.", pts: "1,240", you: false },
-              { r: 2, n: "You", pts: "1,180", you: true },
-              { r: 3, n: "Marcus T.", pts: "1,090", you: false },
-              { r: 4, n: "Priya K.", pts: "1,050", you: false },
-            ].map((row) => (
-              <div
-                key={row.r}
-                className={`flex items-center gap-2 rounded-md px-2 py-1 text-sm ${
-                  row.you
-                    ? "bg-[var(--lp-accent)]/10 font-semibold text-[var(--lp-accent)]"
-                    : "text-[var(--lp-ink)]"
-                }`}
-              >
-                <span className="w-4 font-mono text-xs text-[var(--lp-ink-soft)]">{row.r}</span>
-                <span className="flex-1">{row.n}</span>
-                <span className="font-mono text-xs text-[var(--lp-ink-soft)]">{row.pts}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -1578,6 +1562,204 @@ export function AssignmentsMockup() {
             ))}
           </tbody>
         </table>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 8. VOCABULARY — faithful mockup of the My Vocabulary page ── */
+export function VocabularyMockup() {
+  // 4 overview stat cards (Total / Due / Mastered / New). Colors match the real page.
+  const stats = [
+    { label: "Total Words", value: "128", icon: BookMarked, color: "text-[var(--lp-ink)]", sub: "Own: 96 · Teacher: 32" },
+    { label: "Due for Review", value: "14", icon: Clock, color: "text-orange-500", sub: null },
+    { label: "Mastered", value: "47", icon: CheckCircle2, color: "text-green-500", sub: null },
+    { label: "New Words", value: "21", icon: Brain, color: "text-blue-500", sub: null },
+  ];
+
+  // Tab strip — note Spelling precedes Quiz, matching the real page.
+  const tabs = [
+    { key: "table", label: "Table", icon: TableIcon, active: true },
+    { key: "flashcard", label: "Flashcard", icon: Layers, active: false },
+    { key: "spelling", label: "Spelling", icon: SpellCheck, active: false },
+    { key: "quiz", label: "Quiz", icon: ClipboardList, active: false },
+    { key: "lists", label: "Review Lists", icon: ListPlus, active: false },
+    { key: "history", label: "History", icon: History, active: false },
+  ];
+
+  // Mastery level badges: 0 New → 5 Mastered (gray→red→orange→yellow→blue→green ramp).
+  const masteryStyle: Record<string, string> = {
+    "5": "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
+    "4": "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
+    "3": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400",
+    "2": "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400",
+    "1": "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400",
+    "0": "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+  };
+  const masteryLabel: Record<string, string> = {
+    "5": "Mastered", "4": "L4", "3": "L3", "2": "L2", "1": "L1", "0": "New",
+  };
+
+  // Rating dots: hard red / medium yellow / easy green / unrated gray.
+  const ratingDot: Record<string, string> = {
+    easy: "bg-green-500",
+    medium: "bg-yellow-500",
+    hard: "bg-red-500",
+    none: "bg-gray-300 dark:bg-gray-600",
+  };
+  const ratingLabel: Record<string, string> = { easy: "Easy", medium: "Medium", hard: "Hard", none: "—" };
+
+  type Level = "0" | "1" | "2" | "3" | "4" | "5";
+  type Rating = "easy" | "medium" | "hard" | "none";
+  type Row = {
+    word: string;
+    pos: string;
+    def: string;
+    zh: string;
+    source: "own" | "teacher";
+    rating: Rating;
+    level: Level;
+  };
+  const rows: Row[] = [
+    { word: "flourish", pos: "verb", def: "to grow or develop successfully", zh: "茁壯成長", source: "own", rating: "easy", level: "5" },
+    { word: "luminous", pos: "adj.", def: "full of light; brightly glowing", zh: "發光的", source: "own", rating: "medium", level: "4" },
+    { word: "inefficient", pos: "adj.", def: "not using time or energy well", zh: "效率低的", source: "teacher", rating: "hard", level: "2" },
+    { word: "defenders", pos: "noun", def: "people who support or protect", zh: "捍衛者", source: "teacher", rating: "hard", level: "1" },
+    { word: "verdict", pos: "noun", def: "a formal decision or judgment", zh: "裁決", source: "own", rating: "none", level: "0" },
+  ];
+
+  return (
+    <MockupFrame label="MY VOCABULARY · Mr.🆖 ProReader">
+      {/* title row */}
+      <div className="flex items-center gap-2">
+        <BookMarked className="h-4 w-4 text-indigo-500" />
+        <span className="font-display text-base font-semibold text-[var(--lp-ink)]">My Vocabulary</span>
+        <HelpCircle className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+      </div>
+
+      {/* 4 stat cards */}
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2"
+          >
+            <div className="flex items-center gap-1 text-[var(--lp-ink-soft)]">
+              <s.icon className={`h-3 w-3 ${s.color}`} />
+              <span className="truncate text-[8px] uppercase tracking-wide">{s.label}</span>
+            </div>
+            <div className={`mt-0.5 font-display text-lg font-bold ${s.color}`}>{s.value}</div>
+            {s.sub && <div className="text-[7px] leading-tight text-[var(--lp-ink-soft)]">{s.sub}</div>}
+          </div>
+        ))}
+      </div>
+
+      {/* tabs */}
+      <div className="mt-3 flex flex-wrap gap-1 border-b border-[var(--lp-rule)]">
+        {tabs.map((tb) => (
+          <span
+            key={tb.key}
+            className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium -mb-px border-b-2 ${
+              tb.active
+                ? "border-[var(--lp-accent)] text-[var(--lp-accent)]"
+                : "border-transparent text-[var(--lp-ink-soft)]"
+            }`}
+          >
+            <tb.icon className="h-3 w-3" />
+            {tb.label}
+          </span>
+        ))}
+      </div>
+
+      {/* toolbar: Auto Select | spacer | Export */}
+      <div className="mt-2.5 flex items-center gap-2">
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Wand2 className="h-3 w-3 text-[var(--lp-accent)]" /> Auto Select
+        </span>
+        <span className="flex-1" />
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Download className="h-3 w-3" /> Export
+        </span>
+      </div>
+
+      {/* meta row */}
+      <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+        <span>Showing 5 of 128 words</span>
+        <span>Page 1 of 3</span>
+      </div>
+
+      {/* word table */}
+      <div className="mt-1.5 overflow-hidden rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[8px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
+              <th className="px-2 py-1.5 text-left font-semibold">Word</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">PoS</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">Definition</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">中文</th>
+              <th className="px-1.5 py-1.5 text-center font-semibold">Source</th>
+              <th className="px-1.5 py-1.5 text-center font-semibold">Rating</th>
+              <th className="px-2 py-1.5 text-center font-semibold">Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr
+                key={r.word}
+                className={`text-[10px] text-[var(--lp-ink)] ${i !== rows.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}
+              >
+                <td className="px-2 py-1.5 font-medium">{r.word}</td>
+                <td className="px-1.5 py-1.5 italic text-[var(--lp-ink-soft)]">{r.pos}</td>
+                <td className="max-w-[110px] truncate px-1.5 py-1.5">{r.def}</td>
+                <td className="px-1.5 py-1.5 text-[var(--lp-ink-soft)]">{r.zh}</td>
+                <td className="px-1.5 py-1.5 text-center">
+                  <span
+                    className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${
+                      r.source === "teacher"
+                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                    }`}
+                  >
+                    {r.source === "teacher" ? "Teacher" : "Own"}
+                  </span>
+                </td>
+                <td className="px-1.5 py-1.5 text-center">
+                  <span className="inline-flex items-center gap-1 text-[9px] text-[var(--lp-ink-soft)]">
+                    <span className={`h-1.5 w-1.5 rounded-full ${ratingDot[r.rating]}`} />
+                    {ratingLabel[r.rating]}
+                  </span>
+                </td>
+                <td className="px-2 py-1.5 text-center">
+                  <span className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${masteryStyle[r.level]}`}>
+                    {masteryLabel[r.level]}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* pagination: Per page 25/50/75/100 (50 default) + page nav */}
+      <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+        <span className="inline-flex items-center gap-1">
+          Per page:
+          {[25, 50, 75, 100].map((n, idx) => (
+            <span
+              key={n}
+              className={`rounded px-1 py-0.5 ${idx === 1 ? "bg-[var(--lp-accent)] font-medium text-white" : ""}`}
+            >
+              {n}
+            </span>
+          ))}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <ChevronRight className="h-3 w-3 rotate-180" />
+          <span className="rounded bg-[var(--lp-accent)] px-1.5 py-0.5 font-medium text-white">1</span>
+          <span>2</span>
+          <span>3</span>
+          <ChevronRight className="h-3 w-3" />
+        </span>
       </div>
     </MockupFrame>
   );

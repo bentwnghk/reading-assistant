@@ -26,6 +26,7 @@ import {
   MasterMockup,
   DashboardMockup,
   AssignmentsMockup,
+  VocabularyMockup,
 } from "@/components/Auth/landing/Mockups";
 
 const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
@@ -214,7 +215,17 @@ export function LandingPage() {
       flip: true,
     },
     { key: "practice", num: "03", mockup: <PracticeMockup /> },
-    { key: "master", num: "04", mockup: <MasterMockup />, flip: true },
+    {
+      key: "master",
+      num: "04",
+      mockup: (
+        <div className="flex flex-col gap-4">
+          <MasterMockup />
+          <VocabularyMockup />
+        </div>
+      ),
+      flip: true,
+    },
   ];
 
   const faqCount = faqExpanded ? 10 : 5;
