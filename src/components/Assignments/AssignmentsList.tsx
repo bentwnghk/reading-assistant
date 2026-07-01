@@ -16,7 +16,6 @@ import {
   ArchiveRestore,
   ClipboardCheck,
   HelpCircle,
-  Sparkles,
   TrendingUp,
   ListChecks,
   BadgeCheck,
@@ -345,7 +344,7 @@ export default function AssignmentsList() {
         <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
+              <HelpCircle className="h-5 w-5 text-primary" />
               {t("assignments.help.title")}
             </DialogTitle>
           </DialogHeader>

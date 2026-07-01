@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, HelpCircle, Info, Sparkles } from "lucide-react";
+import { GraduationCap, HelpCircle, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -107,7 +107,7 @@ export default function GuideDialog({
         <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
+              <HelpCircle className="h-5 w-5 text-primary" />
               {t(titleKey)}
             </DialogTitle>
           </DialogHeader>
