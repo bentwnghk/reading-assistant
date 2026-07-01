@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, HelpCircle, ArrowUpDown, ExternalLink } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import {
   Document,
@@ -31,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -424,21 +424,26 @@ function Glossary() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <BookMarked className="h-5 w-5 text-muted-foreground" />
           {t("reading.glossary.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px]" align="start">
-              <div className="space-y-3 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.glossary.help.title")}</h4>
-                <div className="space-y-2">
-                  <p className="text-muted-foreground">{t("reading.glossary.help.purpose")}</p>
-                  <p className="text-muted-foreground">{t("reading.glossary.help.features")}</p>
-                  <p className="text-muted-foreground">{t("reading.glossary.help.usage")}</p>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.glossary.help.title"
+            introKey="reading.glossary.help.intro"
+            itemsBaseKey="reading.glossary.help.items"
+            items={[
+              { key: "table", icon: Table, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "flashcard", icon: Layers, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
+              { key: "spelling", icon: SpellCheck, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+              { key: "quiz", icon: ClipboardList, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
+            ]}
+            stepsTitleKey="reading.glossary.help.stepsTitle"
+            stepsKeys={[
+              "reading.glossary.help.steps.s1",
+              "reading.glossary.help.steps.s2",
+              "reading.glossary.help.steps.s3",
+              "reading.glossary.help.steps.s4",
+            ]}
+            tipTitleKey="reading.glossary.help.tipTitle"
+            tipContentKey="reading.glossary.help.tipContent"
+          />
         </h3>
         <div className="flex flex-wrap justify-end gap-2 ml-auto">
           {glossary.length > 0 && (

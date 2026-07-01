@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
-import { ImageIcon, LoaderCircle, HelpCircle, Download, ZoomIn, X, Lock } from "lucide-react";
+import { ImageIcon, LoaderCircle, Download, ZoomIn, X, Lock, Wand2, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -83,25 +83,24 @@ function Visualization() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <ImageIcon className="h-5 w-5 text-muted-foreground" />
           {t("reading.visualization.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[380px]" align="start">
-              <div className="space-y-3 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.visualization.help.title")}</h4>
-                <p className="text-muted-foreground">{t("reading.visualization.help.purpose")}</p>
-                <div className="space-y-2">
-                  <h5 className="font-medium">{t("reading.visualization.help.featuresTitle")}</h5>
-                  <p className="text-muted-foreground">{t("reading.visualization.help.features")}</p>
-                </div>
-                <div className="space-y-2">
-                  <h5 className="font-medium">{t("reading.visualization.help.usageTitle")}</h5>
-                  <p className="text-muted-foreground">{t("reading.visualization.help.usage")}</p>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.visualization.help.title"
+            introKey="reading.visualization.help.intro"
+            itemsBaseKey="reading.visualization.help.items"
+            items={[
+              { key: "style", icon: Wand2, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "zoom", icon: ZoomIn, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+              { key: "bilingual", icon: Languages, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+            ]}
+            stepsTitleKey="reading.visualization.help.stepsTitle"
+            stepsKeys={[
+              "reading.visualization.help.steps.s1",
+              "reading.visualization.help.steps.s2",
+              "reading.visualization.help.steps.s3",
+            ]}
+            tipTitleKey="reading.visualization.help.tipTitle"
+            tipContentKey="reading.visualization.help.tipContent"
+          />
         </h3>
         <div className="flex items-center gap-2 ml-auto">
           {visualizationImage && (

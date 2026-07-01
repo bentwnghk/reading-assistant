@@ -3,10 +3,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
-import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon, HelpCircle, Languages } from "lucide-react";
+import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon, Languages, TextSelect, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { Switch } from "@/components/ui/switch";
 import { useReadingStore } from "@/store/reading";
 import { useGlobalStore } from "@/store/global";
@@ -261,22 +261,26 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
           <MessageCircle className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-sm flex items-center gap-2">
             {t("reading.tutor.title")}
-            <Popover>
-              <PopoverTrigger asChild>
-                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-              </PopoverTrigger>
-              <PopoverContent className="w-[400px]" align="start">
-                <div className="space-y-3 text-sm">
-                  <h4 className="font-semibold text-base">{t("reading.tutor.help.title")}</h4>
-                  <div className="space-y-2">
-                    <p className="text-muted-foreground">{t("reading.tutor.help.purpose")}</p>
-                    <p className="text-muted-foreground">{t("reading.tutor.help.features")}</p>
-                    <p className="text-muted-foreground">{t("reading.tutor.help.usage")}</p>
-                    <p className="text-muted-foreground">{t("reading.tutor.help.language")}</p>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <GuideDialog
+              titleKey="reading.tutor.help.title"
+              introKey="reading.tutor.help.intro"
+              itemsBaseKey="reading.tutor.help.items"
+              items={[
+                { key: "context", icon: MessageCircle, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                { key: "selection", icon: TextSelect, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+                { key: "image", icon: ImagePlus, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+                { key: "quick", icon: Lightbulb, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
+              ]}
+              stepsTitleKey="reading.tutor.help.stepsTitle"
+              stepsKeys={[
+                "reading.tutor.help.steps.s1",
+                "reading.tutor.help.steps.s2",
+                "reading.tutor.help.steps.s3",
+                "reading.tutor.help.steps.s4",
+              ]}
+              tipTitleKey="reading.tutor.help.tipTitle"
+              tipContentKey="reading.tutor.help.tipContent"
+            />
           </h3>
         </div>
         <div className="flex items-center gap-1">

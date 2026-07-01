@@ -5,7 +5,6 @@ import {
   BookOpen,
   BookOpenCheck,
   LoaderCircle,
-  HelpCircle,
   GraduationCap,
   CheckCircle2,
   XCircle,
@@ -22,6 +21,7 @@ import {
   ArrowLeft,
   ChevronRight,
   ListChecks,
+  ClipboardList,
 } from "lucide-react";
 import {
   Document,
@@ -55,11 +55,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
@@ -67,6 +62,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { Progress } from "@/components/ui/progress";
 import GrammarGames from "./GrammarGames";
 
@@ -1241,21 +1237,27 @@ function Grammar() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <BookOpenCheck className="h-5 w-5 text-muted-foreground" />
           {t("reading.grammar.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px]" align="start">
-              <div className="space-y-3 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.grammar.help.title")}</h4>
-                <div className="space-y-2">
-                  <p className="text-muted-foreground">{t("reading.grammar.help.purpose")}</p>
-                  <p className="text-muted-foreground">{t("reading.grammar.help.features")}</p>
-                  <p className="text-muted-foreground">{t("reading.grammar.help.usage")}</p>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.grammar.help.title"
+            introKey="reading.grammar.help.intro"
+            itemsBaseKey="reading.grammar.help.items"
+            items={[
+              { key: "topics", icon: BookOpenCheck, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "lessons", icon: GraduationCap, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+              { key: "games", icon: Gamepad2, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+              { key: "quiz", icon: ClipboardList, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
+              { key: "highlight", icon: Highlighter, bgClass: "bg-yellow-500/10", iconClass: "text-yellow-500" },
+            ]}
+            stepsTitleKey="reading.grammar.help.stepsTitle"
+            stepsKeys={[
+              "reading.grammar.help.steps.s1",
+              "reading.grammar.help.steps.s2",
+              "reading.grammar.help.steps.s3",
+              "reading.grammar.help.steps.s4",
+            ]}
+            tipTitleKey="reading.grammar.help.tipTitle"
+            tipContentKey="reading.grammar.help.tipContent"
+          />
         </h3>
         <div className="flex flex-wrap justify-end gap-2 ml-auto">
           {grammarTopics.length > 0 && (

@@ -1,9 +1,9 @@
 "use client";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, Rocket, HelpCircle } from "lucide-react";
+import { Check, Rocket, ListChecks, MousePointerClick } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
@@ -45,25 +45,24 @@ function WorkflowProgress() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <Rocket className="h-5 w-5 text-muted-foreground" />
           {t("reading.workflow.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[380px]" align="start">
-              <div className="space-y-3 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.workflow.help.title")}</h4>
-                <p className="text-muted-foreground">{t("reading.workflow.help.intro")}</p>
-                <div className="space-y-2">
-                  <h5 className="font-medium">{t("reading.workflow.help.navigation.title")}</h5>
-                  <p className="text-muted-foreground">{t("reading.workflow.help.navigation.desc")}</p>
-                </div>
-                <div className="space-y-2">
-                  <h5 className="font-medium">{t("reading.workflow.help.progress.title")}</h5>
-                  <p className="text-muted-foreground">{t("reading.workflow.help.progress.desc")}</p>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.workflow.help.title"
+            introKey="reading.workflow.help.intro"
+            itemsBaseKey="reading.workflow.help.items"
+            items={[
+              { key: "steps", icon: Check, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "order", icon: ListChecks, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
+              { key: "navigation", icon: MousePointerClick, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+            ]}
+            stepsTitleKey="reading.workflow.help.stepsTitle"
+            stepsKeys={[
+              "reading.workflow.help.steps.s1",
+              "reading.workflow.help.steps.s2",
+              "reading.workflow.help.steps.s3",
+            ]}
+            tipTitleKey="reading.workflow.help.tipTitle"
+            tipContentKey="reading.workflow.help.tipContent"
+          />
         </h3>
         <span className="text-sm text-muted-foreground">
           {t("reading.workflow.progress", { percent: progress })}

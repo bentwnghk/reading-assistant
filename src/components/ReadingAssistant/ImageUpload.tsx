@@ -2,10 +2,10 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
-import { Upload, Image as ImageIcon, LoaderCircle, X, HelpCircle, Plus, Maximize2, Library } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, Plus, Maximize2, Library, ScanText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
@@ -189,21 +189,24 @@ function ImageUpload() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <Upload className="h-5 w-5 text-muted-foreground" />
           {t("reading.imageUpload.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px]" align="start">
-              <div className="space-y-3 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.imageUpload.help.title")}</h4>
-                <div className="space-y-2">
-                  <p className="text-muted-foreground">{t("reading.imageUpload.help.purpose")}</p>
-                  <p className="text-muted-foreground">{t("reading.imageUpload.help.features")}</p>
-                  <p className="text-muted-foreground">{t("reading.imageUpload.help.usage")}</p>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.imageUpload.help.title"
+            introKey="reading.imageUpload.help.intro"
+            itemsBaseKey="reading.imageUpload.help.items"
+            items={[
+              { key: "upload", icon: Upload, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+              { key: "extract", icon: ScanText, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "repository", icon: Library, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+            ]}
+            stepsTitleKey="reading.imageUpload.help.stepsTitle"
+            stepsKeys={[
+              "reading.imageUpload.help.steps.s1",
+              "reading.imageUpload.help.steps.s2",
+              "reading.imageUpload.help.steps.s3",
+            ]}
+            tipTitleKey="reading.imageUpload.help.tipTitle"
+            tipContentKey="reading.imageUpload.help.tipContent"
+          />
         </h3>
         <div className="flex items-center gap-2">
           {hasContent && (

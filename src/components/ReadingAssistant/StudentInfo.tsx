@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { User, HelpCircle, Trophy, BarChart3 } from "lucide-react";
+import { User, Trophy, BarChart3, GraduationCap, Sparkles } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
 import { useGlobalStore } from "@/store/global";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { cn } from "@/utils/style";
 
 function StudentInfo() {
@@ -44,21 +44,24 @@ function StudentInfo() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <User className="h-5 w-5 text-muted-foreground" />
           {t("reading.studentInfo.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[calc(100vw-2rem)] max-w-[480px] max-h-[70vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" align="start">
-              <div className="space-y-4 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.studentInfo.help.title")}</h4>
-                <div className="space-y-3">
-                  <p className="text-muted-foreground">{t("reading.studentInfo.help.ageSlider")}</p>
-                  <p className="text-muted-foreground">{t("reading.studentInfo.help.estimatedLevel")}</p>
-                  <div className="text-muted-foreground whitespace-pre-line">{t("reading.studentInfo.help.usage")}</div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.studentInfo.help.title"
+            introKey="reading.studentInfo.help.intro"
+            itemsBaseKey="reading.studentInfo.help.items"
+            items={[
+              { key: "age", icon: User, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
+              { key: "level", icon: GraduationCap, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+              { key: "personalised", icon: Sparkles, bgClass: "bg-primary/10", iconClass: "text-primary" },
+            ]}
+            stepsTitleKey="reading.studentInfo.help.stepsTitle"
+            stepsKeys={[
+              "reading.studentInfo.help.steps.s1",
+              "reading.studentInfo.help.steps.s2",
+              "reading.studentInfo.help.steps.s3",
+            ]}
+            tipTitleKey="reading.studentInfo.help.tipTitle"
+            tipContentKey="reading.studentInfo.help.tipContent"
+          />
         </h3>
         <div className="flex items-center gap-2 ml-auto">
           <Button size="sm" onClick={() => setOpenDashboard(true)}>

@@ -11,7 +11,9 @@ import {
   Loader2,
   Brain,
   FileDown,
-  HelpCircle,
+  Highlighter,
+  FileSearch,
+  BarChart3,
   Pencil,
   Check,
   X,
@@ -45,7 +47,6 @@ import { toast } from "sonner";
 import { generateText } from "ai";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +56,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import {
   Select,
   SelectContent,
@@ -1185,54 +1187,27 @@ function AdaptedText() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-muted-foreground" />
           {t("reading.adaptedText.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[calc(100vw-2rem)] max-w-[480px] max-h-[70vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" align="start">
-              <div className="space-y-4 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.adaptedText.help.title")}</h4>
-                <div className="space-y-3">
-                  <div>
-                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.tabs.title")}</h5>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
-                      <li>{t("reading.adaptedText.help.tabs.original")}</li>
-                      <li>{t("reading.adaptedText.help.tabs.adapted")}</li>
-                      <li>{t("reading.adaptedText.help.tabs.simplified")}</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.features.title")}</h5>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
-                      <li>{t("reading.adaptedText.help.features.edit")}</li>
-                      <li>{t("reading.adaptedText.help.features.highlight")}</li>
-                      <li>{t("reading.adaptedText.help.features.glossaryBadge")}</li>
-                      <li>{t("reading.adaptedText.help.features.suggestVocabulary")}</li>
-                      <li>{t("reading.adaptedText.help.features.tts")}</li>
-                      <li>{t("reading.adaptedText.help.features.sentenceAnalysis")}</li>
-                      <li>{t("reading.adaptedText.help.features.paragraphNav")}</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.difficulty.title")}</h5>
-                    <p className="text-muted-foreground mt-1">{t("reading.adaptedText.help.difficulty.desc")}</p>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
-                      <li>{t("reading.adaptedText.help.difficulty.metrics")}</li>
-                      <li>{t("reading.adaptedText.help.difficulty.cefr")}</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-foreground">{t("reading.adaptedText.help.export.title")}</h5>
-                    <p className="text-muted-foreground mt-1">{t("reading.adaptedText.help.export.desc")}</p>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
-                      <li>{t("reading.adaptedText.help.export.glossary")}</li>
-                      <li>{t("reading.adaptedText.help.export.analysis")}</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.adaptedText.help.title"
+            introKey="reading.adaptedText.help.intro"
+            itemsBaseKey="reading.adaptedText.help.items"
+            items={[
+              { key: "versions", icon: BookOpen, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "highlight", icon: Highlighter, bgClass: "bg-yellow-500/10", iconClass: "text-yellow-500" },
+              { key: "analysis", icon: FileSearch, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+              { key: "tts", icon: Volume2, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
+              { key: "difficulty", icon: BarChart3, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
+            ]}
+            stepsTitleKey="reading.adaptedText.help.stepsTitle"
+            stepsKeys={[
+              "reading.adaptedText.help.steps.s1",
+              "reading.adaptedText.help.steps.s2",
+              "reading.adaptedText.help.steps.s3",
+              "reading.adaptedText.help.steps.s4",
+            ]}
+            tipTitleKey="reading.adaptedText.help.tipTitle"
+            tipContentKey="reading.adaptedText.help.tipContent"
+          />
         </h3>
         <div className="flex flex-wrap items-center justify-end gap-2 ml-auto">
           <DropdownMenu>

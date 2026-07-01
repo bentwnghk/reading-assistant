@@ -1,9 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { FileText, LoaderCircle, HelpCircle } from "lucide-react";
+import { FileText, LoaderCircle, ListChecks, BookMarked, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
@@ -25,21 +25,26 @@ function Summary() {
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <FileText className="h-5 w-5 text-muted-foreground" />
           {t("reading.summary.title")}
-          <Popover>
-            <PopoverTrigger asChild>
-              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px]" align="start">
-              <div className="space-y-3 text-sm">
-                <h4 className="font-semibold text-base">{t("reading.summary.help.title")}</h4>
-                <div className="space-y-2">
-                  <p className="text-muted-foreground">{t("reading.summary.help.purpose")}</p>
-                  <p className="text-muted-foreground">{t("reading.summary.help.features")}</p>
-                  <p className="text-muted-foreground">{t("reading.summary.help.usage")}</p>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <GuideDialog
+            titleKey="reading.summary.help.title"
+            introKey="reading.summary.help.intro"
+            itemsBaseKey="reading.summary.help.items"
+            items={[
+              { key: "tldr", icon: Lightbulb, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "mainPoints", icon: ListChecks, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
+              { key: "keyWords", icon: BookMarked, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+              { key: "reflect", icon: FileText, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
+            ]}
+            stepsTitleKey="reading.summary.help.stepsTitle"
+            stepsKeys={[
+              "reading.summary.help.steps.s1",
+              "reading.summary.help.steps.s2",
+              "reading.summary.help.steps.s3",
+              "reading.summary.help.steps.s4",
+            ]}
+            tipTitleKey="reading.summary.help.tipTitle"
+            tipContentKey="reading.summary.help.tipContent"
+          />
         </h3>
         <Button
           onClick={() => generateSummary()}
