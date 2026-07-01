@@ -1583,7 +1583,7 @@
         }
       },
       "sessions": {
-        "intro": "The Sessions tab lets you browse, search, import, share, and manage all your reading sessions in a detailed table view.",
+        "intro": "The Sessions tab lets you browse, search, import, assign, share, and manage all your reading sessions in a detailed table view.",
         "items": {
           "importSessions": {
             "name": "Import Sessions",
@@ -1596,6 +1596,10 @@
           "sessionTable": {
             "name": "Session Table",
             "desc": "A detailed table showing each session's reading text title, learning progress %, vocabulary count, spelling score, quiz score, test score, grammar quiz score, grammar game score, accuracy, and last update date."
+          },
+          "assignHomework": {
+            "name": "Assign as Homework",
+            "desc": "Turn a reading session into a trackable class assignment. Opens a dialog to set a title, subject, due date, and select students to distribute the homework to."
           },
           "shareSession": {
             "name": "Share Session",

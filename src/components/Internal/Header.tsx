@@ -294,9 +294,9 @@ function Header() {
           </Link>
           <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap">
             <Button
-              className="h-8 w-8 relative"
+              className="h-8 gap-1.5 relative"
               variant="ghost"
-              size="icon"
+              size="sm"
               title={t("share.bellTitle")}
               onClick={() => {
                 if (pendingCount > 0) {
@@ -308,12 +308,15 @@ function Header() {
                 }
               }}
             >
-              <Bell className="h-5 w-5" />
-              {totalPending > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                  {totalPending > 9 ? "9+" : totalPending}
-                </span>
-              )}
+              <span className="relative">
+                <Bell className="h-4 w-4" />
+                {totalPending > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                    {totalPending > 9 ? "9+" : totalPending}
+                  </span>
+                )}
+              </span>
+              <span className="text-sm">{t("share.bellTitle")}</span>
             </Button>
             {pathname === "/assignments" ? (
               <Button

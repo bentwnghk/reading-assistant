@@ -354,17 +354,6 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          title={t("history.share")}
-                          onClick={() => {
-                            setShareSession(item);
-                            setShareOpen(true);
-                          }}
-                        >
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
                           title={t("assignments.create.actionTitle")}
                           onClick={() => {
                             setAssignSession(item);
@@ -372,6 +361,17 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                           }}
                         >
                           <GraduationCap className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title={t("history.share")}
+                          onClick={() => {
+                            setShareSession(item);
+                            setShareOpen(true);
+                          }}
+                        >
+                          <Share2 className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"

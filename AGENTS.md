@@ -114,7 +114,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 - **Dynamic Imports**: Use Next.js `dynamic()` for heavy components or those that rely on browser-only libraries (e.g., `MagicDown`, `Mermaid`).
 - **Hooks**: Prefer custom hooks for complex logic (e.g., `useReadingAssistant`, `useAiProvider`, `useDashboardMetrics`, `useTeacherDashboard`, `useSubscription`).
 - **All Hooks** (in `src/hooks/`):
-  - `useReadingAssistant` — Core reading session business logic (AI generation, games, vocabulary)
+  - `useReadingAssistant` — Core reading session business logic (AI generation, games, vocabulary). Returns `activeGenerations` (not a local `status` enum) so loading state survives SPA navigation
   - `useAiProvider` — AI model provider factory for streaming/generation
   - `useDashboardMetrics` — Student dashboard data aggregation
   - `useTeacherDashboard` — Teacher dashboard data aggregation
@@ -141,6 +141,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 - **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts`, `sharing.ts` — all in `src/store/`.
 - **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`.
 - **Radash**: Use **radash** utilities for common operations like `pick`, `isString`, `isObject`, etc.
+- **AI Generation Tracking**: All AI generation loading state lives in the reading store's `activeGenerations: Record<string, boolean>` field (keyed by `GenerationType`). Components read `!!activeGenerations["type"]` for spinners/disabled state. This **must** be store-level (not component-local `useState`) so loading indicators and button-disable survive SPA navigation — the user can navigate to `/leaderboard` mid-generation, come back, and still see the spinner. See [AI Generation Tracking](#ai-generation-tracking-activegenerations) below.
 
 ### 5. Imports
 
@@ -442,6 +443,79 @@ Both features use AI image generation from the extracted text:
 
 ---
 
+## AI Generation Tracking (`activeGenerations`)
+
+All AI generation loading state is tracked in the reading store via `activeGenerations: Record<string, boolean>`, keyed by `GenerationType`. This replaces the former component-local `useState<ReadingStatus>` and per-component `isGenerating`/`isLoading` flags. The store-level design ensures loading indicators survive SPA navigation (e.g., user navigates to `/leaderboard` mid-generation, returns, and still sees the spinner + disabled button).
+
+### `GenerationType` Values
+
+| Type | Generation Function | Hook or Component |
+|------|-------------------|-------------------|
+| `"extracting"` | `extractTextFromImage` | Hook |
+| `"title"` | `generateTitle` | Hook |
+| `"summary"` | `generateSummary` | Hook |
+| `"adapted-text"` | `adaptText` | Hook |
+| `"simplified-text"` | `simplifyText` | Hook |
+| `"mindmap"` | `generateMindMap` | Hook |
+| `"visualization"` | `generateVisualization` | Hook |
+| `"reading-test"` | `generateReadingTest` | Hook |
+| `"targeted-practice"` | `generateTargetedPractice` | Hook |
+| `"glossary"` | `generateGlossary` | Hook |
+| `"vocabulary-suggest"` | `suggestVocabulary` | Hook |
+| `"grammar-topics"` | `analyzeGrammarTopics` | Hook |
+| `"grammar-quiz"` | `generateGrammarQuiz` | Hook |
+| `"grammar-scramble"` | `generateGrammarScrambleContent` | Hook |
+| `"grammar-workshop"` | `generateGrammarWorkshopContent` | Hook |
+| `"grammar-surgery"` | `generateErrorSurgeryContent` | Hook |
+| `"grammar-questions"` | `generateGrammarQuestions` | Hook (shared by Roulette + Duel) |
+| `"sentence-analysis"` | `handleAnalyzeSentence` | `AdaptedText.tsx` (direct `generateText`) |
+| `"tutor"` | `askTutor` | Hook |
+
+### Store API
+
+- **`activeGenerations: Record<string, boolean>`** — in the reading store. Not persisted to localStorage or DB (excluded from `partialize`, reset to `{}` in `onRehydrateStorage` and `restore()`).
+- **`setGenerating(type: GenerationType, active: boolean)`** — sets the flag. When `active=true`, also clears `error` (matching the old `setStatus` error-clearing behavior).
+- **Legacy `status: ReadingStatus`** — kept in the store for DB backward compatibility (`sessions.ts` maps it as `"idle"`), but **no longer drives UI**. Do not read it in components.
+
+### How to Use
+
+**In generation functions** (hook or component):
+```ts
+// Guard at start — prevents duplicate concurrent generation
+if (useReadingStore.getState().activeGenerations["my-type"]) return;
+
+setGenerating("my-type", true);
+try {
+  // ... AI call ...
+} finally {
+  setGenerating("my-type", false);
+}
+```
+
+**In components** — read flags for spinners/disabled state:
+```tsx
+const { activeGenerations } = useReadingStore();
+// or from the hook: const { activeGenerations } = useReadingAssistant();
+const isGenerating = !!activeGenerations["my-type"];
+```
+
+**Grammar games `isAutoGenerating` pattern** — derived from the flag + cache emptiness:
+```tsx
+const isGenerating = !!activeGenerations["grammar-surgery"];
+const isAutoGenerating = isGenerating && challenges.length === 0;
+```
+
+### What NOT to move to `activeGenerations`
+
+These remain component-local because they are not AI generation state:
+- `isTTSLoading` (text-to-speech playback)
+- `evaluatingId` / `evaluatingShortAnswer` (per-question evaluation, granular)
+- `isAiThinking` (game logic timing in GrammarDuel)
+- `streamingContent` (ephemeral live-stream text in tutor chat)
+- `isProcessingPdf` (PDF parsing, not AI)
+
+---
+
 ## Session Sharing
 
 Teachers and admins can share completed reading sessions with students. Shared sessions strip user-specific data (answers, scores, chat history) and create a clean copy for the recipient.
@@ -659,3 +733,11 @@ When a new field is added to the Zustand store (`src/store/reading.ts`), it is n
 | **Read** | `src/lib/sessions.ts` `getUserReadingSessions()` + `getReadingSession()` | Field mapped from `row.column_name` with correct fallback default |
 
 A field that exists in the store and `fieldMappings` but is missing from the DB schema and INSERT will silently fail: the column doesn't exist in the table, so reads return `undefined`, and fallback logic determines the displayed value. This was the root cause of the `source` field bug where all sessions appeared as "from repository" — the `source` column had never been added to the database.
+
+### 8. Generation Loading State Must Be Store-Level (Not Component-Local)
+
+AI generation loading indicators (`isGenerating`, `isLoading`, etc.) **must** live in the Zustand store (`activeGenerations`), not in component-local `useState`. This was learned the hard way:
+
+- **The bug**: Loading state was tracked via `useState<ReadingStatus>` inside `useReadingAssistant` (component-local). When the user navigated to `/leaderboard` mid-generation, the component unmounted, the local state reset to `"idle"`, and the spinner disappeared. On return, the user saw no indication that generation was still running, could click "Generate" again, and two concurrent streams would interleave tokens into the same store field — corrupting the output.
+- **The fix**: All generation flags now live in `activeGenerations: Record<string, boolean>` in the reading store. The store is a module-level singleton that survives SPA navigation. Components read from the store, so spinners persist and buttons stay disabled across page transitions. Each generation function also has an early-return guard (`if (activeGenerations["type"]) return;`) as a belt-and-suspenders check.
+- **Key principle**: Any state that tracks an async operation whose lifecycle spans component unmount/remount (which includes ALL AI generations, since the user can navigate freely) must be in the store, not in `useState`. Component-local state is fine for ephemeral UI concerns (popups, selected items, streaming preview text) that have no meaning after unmount.

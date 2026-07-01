@@ -57,6 +57,7 @@ const SESSION_ITEMS: { key: string; icon: React.ElementType; bgClass: string; ic
   { key: "importSessions", icon: Upload, bgClass: "bg-violet-500/10", iconClass: "text-violet-500" },
   { key: "search", icon: Search, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
   { key: "sessionTable", icon: BookOpen, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
+  { key: "assignHomework", icon: GraduationCap, bgClass: "bg-fuchsia-500/10", iconClass: "text-fuchsia-500" },
   { key: "shareSession", icon: Share2, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
   { key: "loadSession", icon: FileOutput, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
   { key: "exportSession", icon: Download, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
