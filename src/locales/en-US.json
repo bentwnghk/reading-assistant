@@ -2826,7 +2826,7 @@
     "warning": "You will be signed out soon due to inactivity."
   },
   "assignments": {
-    "navTitle": "Assignments",
+    "navTitle": "My Assignments",
     "title": "Assignments",
     "teacherView": {
       "empty": "No assignments yet. To create one, click \"Create assignment\" above. In the dialog that opens, find the reading session you want to assign, and click the graduation-cap icon next to it. Then pick your students, optionally set a due date, and submit.",
