@@ -1521,7 +1521,7 @@ export function AssignmentsMockup() {
           <thead>
             <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
               <th className="px-2 py-1.5 text-left font-semibold">Student</th>
-              <th className="px-1.5 py-1.5 text-left font-semibold">Prog</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">Progress</th>
               {scoreCols.map((c) => (
                 <th key={c.key} className="px-1 py-1.5 text-center font-semibold" title={c.title}>
                   <c.icon className={`mx-auto h-3 w-3 ${c.color}`} />
