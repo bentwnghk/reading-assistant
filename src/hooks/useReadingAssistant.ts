@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { streamText, smoothStream, generateText } from "ai";
 import { z } from "zod";
 import { toast } from "sonner";
 import i18next from "i18next";
 import { markLastOpenedSession, useSettingStore } from "@/store/setting";
-import { useReadingStore, setStreamingFlag, type ReadingStatus } from "@/store/reading";
+import { useReadingStore, setStreamingFlag } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import useModelProvider from "@/hooks/useAiProvider";
 import {
@@ -81,7 +80,7 @@ function useReadingAssistant() {
   } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
-  const [status, setStatus] = useState<ReadingStatus>("idle");
+  const { setGenerating } = readingStore;
 
   async function grammarGenerateText(prompt: string, system: string): Promise<string> {
     const { grammarModel: model } = useSettingStore.getState();
@@ -146,9 +145,9 @@ function useReadingAssistant() {
   }
 
   async function extractTextFromImage(imageData: string) {
-    const { setStatus: setStoreStatus, setExtractedText, setError, addOriginalImage } = readingStore;
-    setStoreStatus("extracting");
-    setStatus("extracting");
+    if (useReadingStore.getState().activeGenerations["extracting"]) return "";
+    const { setExtractedText, setError, addOriginalImage } = readingStore;
+    setGenerating("extracting", true);
     addOriginalImage(imageData);
 
     try {
@@ -176,8 +175,7 @@ function useReadingAssistant() {
         onError: (error) => {
           const msg = handleError(error);
           setError(msg);
-          setStoreStatus("error");
-          setStatus("idle");
+          setGenerating("extracting", false);
         },
       });
 
@@ -202,26 +200,24 @@ function useReadingAssistant() {
         markLastOpenedSession(id);
       }
 
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("extracting", false);
       return text;
     } catch (error) {
       setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("extracting", false);
       return "";
     }
   }
 
   async function generateTitle() {
-    const { extractedText, setDocTitle, setStatus: setStoreStatus } = useReadingStore.getState();
+    if (useReadingStore.getState().activeGenerations["title"]) return "";
+    const { extractedText, setDocTitle } = useReadingStore.getState();
     
     if (!extractedText) return "";
 
-    setStoreStatus("summarizing");
-    setStatus("summarizing");
+    setGenerating("title", true);
 
     try {
       const titleModel = await createModelProvider(summaryModel);
@@ -240,28 +236,26 @@ function useReadingAssistant() {
         if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
       }
 
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("title", false);
       return cleaned;
     } catch {
       const fallbackTitle = extractedText.split(/\n/).find((l) => l.trim()) ?? "";
       if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("title", false);
       return fallbackTitle.slice(0, 80);
     }
   }
 
   async function generateSummary() {
-    const { studentAge, extractedText, setSummary, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["summary"]) return "";
+    const { studentAge, extractedText, setSummary, setError } = readingStore;
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return "";
     }
 
-    setStoreStatus("summarizing");
-    setStatus("summarizing");
+    setGenerating("summary", true);
 
     try {
       const thinkingModel = await createModelProvider(summaryModel);
@@ -274,8 +268,7 @@ function useReadingAssistant() {
         onError: (error) => {
           const msg = handleError(error);
           setError(msg);
-          setStoreStatus("error");
-          setStatus("idle");
+          setGenerating("summary", false);
         },
       });
 
@@ -291,29 +284,27 @@ function useReadingAssistant() {
       }
       setSummary(text);
 
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("summary", false);
       return text;
     } catch (error) {
       setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("summary", false);
       return "";
     }
   }
 
   async function adaptText() {
-    const { studentAge, extractedText, setAdaptedText, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["adapted-text"]) return "";
+    const { studentAge, extractedText, setAdaptedText, setError } = readingStore;
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return "";
     }
 
-    setStoreStatus("adapting");
-    setStatus("adapting");
+    setGenerating("adapted-text", true);
 
     try {
       const thinkingModel = await createModelProvider(adaptedTextModel);
@@ -326,8 +317,7 @@ function useReadingAssistant() {
         onError: (error) => {
           const msg = handleError(error);
           setError(msg);
-          setStoreStatus("error");
-          setStatus("idle");
+          setGenerating("adapted-text", false);
         },
       });
 
@@ -347,21 +337,20 @@ function useReadingAssistant() {
         logActivity("adapted_text_generate", { sessionId: readingStore.id || undefined });
       }
 
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("adapted-text", false);
       return text;
     } catch (error) {
       setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("adapted-text", false);
       return "";
     }
   }
 
   async function simplifyText() {
-    const { studentAge, adaptedText, simplifiedText, setSimplifiedText, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["simplified-text"]) return "";
+    const { studentAge, adaptedText, simplifiedText, setSimplifiedText, setError } = readingStore;
     
     const textToSimplify = simplifiedText || adaptedText;
     
@@ -370,8 +359,7 @@ function useReadingAssistant() {
       return "";
     }
 
-    setStoreStatus("simplifying");
-    setStatus("simplifying");
+    setGenerating("simplified-text", true);
 
     try {
       const thinkingModel = await createModelProvider(simplifyModel);
@@ -384,8 +372,7 @@ function useReadingAssistant() {
         onError: (error) => {
           const msg = handleError(error);
           setError(msg);
-          setStoreStatus("error");
-          setStatus("idle");
+          setGenerating("simplified-text", false);
         },
       });
 
@@ -405,29 +392,27 @@ function useReadingAssistant() {
         logActivity("simplified_text_generate", { sessionId: readingStore.id || undefined });
       }
 
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("simplified-text", false);
       return text;
     } catch (error) {
       setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("simplified-text", false);
       return "";
     }
   }
 
   async function generateMindMap(useChinese: boolean = false) {
-    const { studentAge, extractedText, setMindMap, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["mindmap"]) return "";
+    const { studentAge, extractedText, setMindMap, setError } = readingStore;
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return "";
     }
 
-    setStoreStatus("mindmap");
-    setStatus("mindmap");
+    setGenerating("mindmap", true);
 
     try {
       const thinkingModel = await createModelProvider(mindMapModel);
@@ -440,8 +425,7 @@ function useReadingAssistant() {
         onError: (error) => {
           const msg = handleError(error);
           setError(msg);
-          setStoreStatus("error");
-          setStatus("idle");
+          setGenerating("mindmap", false);
         },
       });
 
@@ -461,21 +445,20 @@ function useReadingAssistant() {
         logActivity("mindmap_generate", { sessionId: readingStore.id || undefined });
       }
 
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("mindmap", false);
       return text;
     } catch (error) {
       setStreamingFlag(false);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("mindmap", false);
       return "";
     }
   }
 
   async function generateVisualization(useChinese: boolean = false): Promise<number | null> {
-    const { studentAge, extractedText, setVisualizationImage, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["visualization"]) return null;
+    const { studentAge, extractedText, setVisualizationImage, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -496,8 +479,7 @@ function useReadingAssistant() {
 
     const toastId = toast.info(i18next.t("reading.visualization.generatingWait"), { duration: Infinity });
 
-    setStoreStatus("visualization");
-    setStatus("visualization");
+    setGenerating("visualization", true);
 
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -523,8 +505,7 @@ function useReadingAssistant() {
         toast.dismiss(toastId);
         toast.error(errorMsg);
         setError(errorMsg);
-        setStoreStatus("error");
-        setStatus("idle");
+        setGenerating("visualization", false);
         return null;
       }
 
@@ -538,21 +519,20 @@ function useReadingAssistant() {
       logActivity("visualization_generate", { sessionId: readingStore.id || undefined });
 
       toast.dismiss(toastId);
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("visualization", false);
       return typeof data.remaining === "number" ? data.remaining : null;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("visualization", false);
       return null;
     }
   }
 
   async function generateReadingTest(questionCounts: ReadingTestQuestionCounts) {
-    const { studentAge, extractedText, setReadingTest, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["reading-test"]) return [];
+    const { studentAge, extractedText, setReadingTest, setError } = readingStore;
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -561,8 +541,7 @@ function useReadingAssistant() {
 
     const toastId = toast.info(i18next.t("reading.readingTest.generatingWait"), { duration: Infinity });
 
-    setStoreStatus("testing");
-    setStatus("testing");
+    setGenerating("reading-test", true);
 
     try {
       const text = await readingTestGenerateText(
@@ -575,21 +554,20 @@ function useReadingAssistant() {
       setReadingTest(sorted);
 
       toast.dismiss(toastId);
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("reading-test", false);
       return sorted;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("reading-test", false);
       return [];
     }
   }
 
   async function generateGlossary() {
-    const { extractedText, highlightedWords, setGlossary, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["glossary"]) return [];
+    const { extractedText, highlightedWords, setGlossary, setError } = readingStore;
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -601,8 +579,7 @@ function useReadingAssistant() {
       return [];
     }
 
-    setStoreStatus("glossary");
-    setStatus("glossary");
+    setGenerating("glossary", true);
 
     const toastId = toast.info(i18next.t("reading.glossary.generatingWait"), { duration: Infinity });
 
@@ -623,20 +600,19 @@ function useReadingAssistant() {
       });
 
       toast.dismiss(toastId);
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("glossary", false);
       return entries;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("glossary", false);
       return [];
     }
   }
 
   async function suggestVocabulary(count: number) {
+    if (useReadingStore.getState().activeGenerations["vocabulary-suggest"]) return [];
     const { extractedText, studentAge, highlightedWords, setHighlightedWords } = readingStore;
 
     if (!extractedText) {
@@ -644,6 +620,7 @@ function useReadingAssistant() {
       return [];
     }
 
+    setGenerating("vocabulary-suggest", true);
     const toastId = toast.info(i18next.t("reading.adaptedText.suggesting"), { duration: Infinity });
 
     try {
@@ -683,10 +660,12 @@ function useReadingAssistant() {
           total: highlightedWords.length + newWords.length,
         }),
       );
+      setGenerating("vocabulary-suggest", false);
       return newWords;
     } catch (error) {
       toast.dismiss(toastId);
       handleError(error);
+      setGenerating("vocabulary-suggest", false);
       return [];
     }
   }
@@ -788,7 +767,8 @@ Guidelines:
   }
 
   async function generateTargetedPractice(missedSkills: ReadingTestSkill[]) {
-    const { studentAge, extractedText, setReadingTest, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["targeted-practice"]) return [];
+    const { studentAge, extractedText, setReadingTest, setError } = readingStore;
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -800,8 +780,7 @@ Guidelines:
       return [];
     }
 
-    setStoreStatus("testing");
-    setStatus("testing");
+    setGenerating("targeted-practice", true);
 
     const toastId = toast.info(i18next.t("reading.readingTest.practiceGeneratingWait"), { duration: Infinity });
 
@@ -819,15 +798,13 @@ Guidelines:
       logActivity("targeted_practice_complete", { sessionId: readingStore.id || undefined });
 
       toast.dismiss(toastId);
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("targeted-practice", false);
       return sorted;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("targeted-practice", false);
       return [];
     }
   }
@@ -891,6 +868,7 @@ Guidelines:
 
     let fullResponse = "";
 
+    setGenerating("tutor", true);
     try {
       const result = streamText({
         model: visionModel,
@@ -909,23 +887,25 @@ Guidelines:
         }
       }
 
+      setGenerating("tutor", false);
       return fullResponse;
     } catch (error) {
       handleError(error);
+      setGenerating("tutor", false);
       return "";
     }
   }
 
   async function analyzeGrammarTopics() {
-    const { studentAge, extractedText, setGrammarTopics, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["grammar-topics"]) return [];
+    const { studentAge, extractedText, setGrammarTopics, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return [];
     }
 
-    setStoreStatus("grammar");
-    setStatus("grammar");
+    setGenerating("grammar-topics", true);
 
     const toastId = toast.info(i18next.t("reading.grammar.analyzingWait"), { duration: Infinity });
 
@@ -949,21 +929,20 @@ Guidelines:
       logActivity("grammar_analyze", { sessionId: readingStore.id || undefined });
 
       toast.dismiss(toastId);
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("grammar-topics", false);
       return topics;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("grammar-topics", false);
       return [];
     }
   }
 
   async function generateGrammarQuiz() {
-    const { studentAge, extractedText, grammarTopics, setGrammarQuiz, setStatus: setStoreStatus, setError } = readingStore;
+    if (useReadingStore.getState().activeGenerations["grammar-quiz"]) return [];
+    const { studentAge, extractedText, grammarTopics, setGrammarQuiz, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -975,8 +954,7 @@ Guidelines:
       return [];
     }
 
-    setStoreStatus("grammar");
-    setStatus("grammar");
+    setGenerating("grammar-quiz", true);
 
     const toastId = toast.info(i18next.t("reading.grammar.quiz.generatingWait"), { duration: Infinity });
 
@@ -1004,15 +982,13 @@ Guidelines:
       setGrammarQuiz(questions);
 
       toast.dismiss(toastId);
-      setStoreStatus("idle");
-      setStatus("idle");
+      setGenerating("grammar-quiz", false);
       return questions;
     } catch (error) {
       toast.dismiss(toastId);
       const msg = handleError(error);
       setError(msg);
-      setStoreStatus("error");
-      setStatus("idle");
+      setGenerating("grammar-quiz", false);
       return [];
     }
   }
@@ -1092,10 +1068,12 @@ Guidelines:
 
   /** Generates (or refreshes) Error Surgery challenges using grammarTopics. */
   async function generateErrorSurgeryContent(): Promise<ErrorSurgeryChallenge[]> {
+    if (useReadingStore.getState().activeGenerations["grammar-surgery"]) return [];
     const { grammarTopics, studentAge, setGrammarErrorChallenges } = readingStore;
 
     if (grammarTopics.length === 0) return [];
 
+    setGenerating("grammar-surgery", true);
     try {
       const text = await grammarGenerateText(
         generateErrorSurgeryPrompt(grammarTopics, studentAge),
@@ -1104,19 +1082,23 @@ Guidelines:
 
       const challenges: ErrorSurgeryChallenge[] = JSON.parse(text);
       setGrammarErrorChallenges(challenges);
+      setGenerating("grammar-surgery", false);
       return challenges;
     } catch (error) {
       handleError(error);
+      setGenerating("grammar-surgery", false);
       return [];
     }
   }
 
   /** Generates (or refreshes) Word Order Scramble challenges, persisted to store. */
   async function generateGrammarScrambleContent(): Promise<GrammarScrambleChallenge[]> {
+    if (useReadingStore.getState().activeGenerations["grammar-scramble"]) return [];
     const { grammarTopics, studentAge, setGrammarScrambleChallenges } = readingStore;
 
     if (grammarTopics.length === 0) return [];
 
+    setGenerating("grammar-scramble", true);
     try {
       const text = await grammarGenerateText(
         generateGrammarScramblePrompt(grammarTopics, studentAge),
@@ -1125,19 +1107,23 @@ Guidelines:
 
       const challenges = JSON.parse(text) as GrammarScrambleChallenge[];
       setGrammarScrambleChallenges(challenges);
+      setGenerating("grammar-scramble", false);
       return challenges;
     } catch (error) {
       handleError(error);
+      setGenerating("grammar-scramble", false);
       return [];
     }
   }
 
   /** Generates (or refreshes) Grammar Workshop slot-fill challenges, persisted to store. */
   async function generateGrammarWorkshopContent(): Promise<GrammarWorkshopChallenge[]> {
+    if (useReadingStore.getState().activeGenerations["grammar-workshop"]) return [];
     const { grammarTopics, studentAge, setGrammarWorkshopChallenges } = readingStore;
 
     if (grammarTopics.length === 0) return [];
 
+    setGenerating("grammar-workshop", true);
     try {
       const text = await grammarGenerateText(
         generateGrammarWorkshopPrompt(grammarTopics, studentAge),
@@ -1154,19 +1140,23 @@ Guidelines:
         return { ...c, wordBank: shuffled };
       });
       setGrammarWorkshopChallenges(challenges);
+      setGenerating("grammar-workshop", false);
       return challenges;
     } catch (error) {
       handleError(error);
+      setGenerating("grammar-workshop", false);
       return [];
     }
   }
 
   /** Generates (or refreshes) MCQ questions for Grammar Roulette + Duel, persisted to store. */
   async function generateGrammarQuestions(): Promise<GrammarGameQuestion[]> {
+    if (useReadingStore.getState().activeGenerations["grammar-questions"]) return [];
     const { grammarTopics, studentAge, setGrammarGameQuestions } = readingStore;
 
     if (grammarTopics.length === 0) return [];
 
+    setGenerating("grammar-questions", true);
     try {
       const text = await grammarGenerateText(
         generateGrammarQuestionsPrompt(grammarTopics, studentAge),
@@ -1184,9 +1174,11 @@ Guidelines:
         return { ...q, options: shuffled, correctIndex: shuffled.indexOf(correctOpt) };
       });
       setGrammarGameQuestions(questions);
+      setGenerating("grammar-questions", false);
       return questions;
     } catch (error) {
       handleError(error);
+      setGenerating("grammar-questions", false);
       return [];
     }
   }
@@ -1210,7 +1202,7 @@ Guidelines:
   }
 
   return {
-    status,
+    activeGenerations: readingStore.activeGenerations,
     extractTextFromImage,
     generateTitle,
     generateSummary,

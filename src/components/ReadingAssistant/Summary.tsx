@@ -12,8 +12,8 @@ const MagicDown = dynamic(() => import("@/components/MagicDown"));
 function Summary() {
   const { t } = useTranslation();
   const { extractedText, summary } = useReadingStore();
-  const { status, generateSummary } = useReadingAssistant();
-  const isGenerating = status === "summarizing";
+  const { activeGenerations, generateSummary } = useReadingAssistant();
+  const isGenerating = !!activeGenerations["summary"];
 
   if (!extractedText) {
     return null;

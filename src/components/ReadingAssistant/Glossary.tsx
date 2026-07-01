@@ -48,12 +48,12 @@ type SortOrder = "asc" | "desc";
 function Glossary() {
   const { t } = useTranslation();
   const { extractedText, highlightedWords, glossary } = useReadingStore();
-  const { status, generateGlossary } = useReadingAssistant();
+  const { activeGenerations, generateGlossary } = useReadingAssistant();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
-  const isGenerating = status === "glossary";
+  const isGenerating = !!activeGenerations["glossary"];
 
   const sortedGlossary = useMemo(() => {
     if (!sortField) return glossary;

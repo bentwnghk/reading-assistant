@@ -257,7 +257,7 @@ function Grammar() {
     grammarQuizMode,
     setGrammarQuizMode,
   } = useReadingStore();
-  const { status, analyzeGrammarTopics, generateGrammarQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer } = useReadingAssistant();
+  const { activeGenerations, analyzeGrammarTopics, generateGrammarQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer } = useReadingAssistant();
   const { data: session } = useSession();
   const isTeacherOrAbove = session?.user?.role === "teacher" || session?.user?.role === "admin" || session?.user?.role === "super-admin";
 
@@ -266,23 +266,18 @@ function Grammar() {
   const [quizState, setQuizState] = useState<GrammarQuizState>("idle");
   const [showReview, setShowReview] = useState(false);
   const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
-  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [exportSections, setExportSections] = useState<Set<string>>(new Set());
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  const isAnalyzing = status === "grammar";
+  const isAnalyzing = !!activeGenerations["grammar-topics"];
+  const isGeneratingQuiz = !!activeGenerations["grammar-quiz"];
 
   const handleAnalyze = useCallback(async () => {
     await analyzeGrammarTopics();
   }, [analyzeGrammarTopics]);
 
   const handleGenerateQuiz = useCallback(async () => {
-    setIsGeneratingQuiz(true);
-    try {
-      await generateGrammarQuiz();
-    } finally {
-      setIsGeneratingQuiz(false);
-    }
+    await generateGrammarQuiz();
   }, [generateGrammarQuiz]);
 
   const handleStartQuiz = useCallback(() => {

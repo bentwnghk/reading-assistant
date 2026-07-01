@@ -14,8 +14,8 @@ const MagicDown = dynamic(() => import("@/components/MagicDown/View"));
 function MindMap() {
   const { t } = useTranslation();
   const { extractedText, mindMap } = useReadingStore();
-  const { status, generateMindMap } = useReadingAssistant();
-  const isGenerating = status === "mindmap";
+  const { activeGenerations, generateMindMap } = useReadingAssistant();
+  const isGenerating = !!activeGenerations["mindmap"];
   const [useChinese, setUseChinese] = useState(false);
 
   if (!extractedText) {

@@ -48,6 +48,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
   const {
     grammarTopics,
     grammarScrambleChallenges,
+    activeGenerations,
     grammarScrambleHighScore,
     grammarScrambleAccuracy,
     setGrammarScrambleHighScore,
@@ -69,8 +70,8 @@ export default function GrammarWordScramble({ onBack }: Props) {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
+  const isGenerating = !!activeGenerations["grammar-scramble"];
+  const isAutoGenerating = isGenerating && challenges.length === 0;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Sync store cache → local challenges ──────────────────────────────────
@@ -82,10 +83,9 @@ export default function GrammarWordScramble({ onBack }: Props) {
 
   // ── Auto-generate on first entry if cache is empty ───────────────────────
   useEffect(() => {
-    if (grammarScrambleChallenges.length === 0 && grammarTopics.length > 0) {
-      setIsAutoGenerating(true);
+    if (grammarScrambleChallenges.length === 0 && grammarTopics.length > 0 && !activeGenerations["grammar-scramble"]) {
       const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
-      generateGrammarScrambleContent().finally(() => { setIsAutoGenerating(false); toast.dismiss(tid); });
+      generateGrammarScrambleContent().finally(() => { toast.dismiss(tid); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -215,12 +215,10 @@ export default function GrammarWordScramble({ onBack }: Props) {
 
   // ── AI refresh ────────────────────────────────────────────────────────────
   const handleGenerateNew = async () => {
-    setIsGenerating(true);
     const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
     try {
       await generateGrammarScrambleContent();
     } finally {
-      setIsGenerating(false);
       toast.dismiss(tid);
     }
   };

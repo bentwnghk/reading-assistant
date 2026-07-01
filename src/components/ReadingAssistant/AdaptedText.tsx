@@ -368,8 +368,9 @@ function AdaptedText() {
     sentenceAnalysisModel,
   } = useSettingStore();
 
-  const { status, adaptText, simplifyText, suggestVocabulary } = useReadingAssistant();
+  const { activeGenerations, adaptText, simplifyText, suggestVocabulary } = useReadingAssistant();
   const { createModelProvider } = useModelProvider();
+  const { setGenerating } = useReadingStore();
 
 // tab state
   const [activeTab, setActiveTab] = useState<string>("original");
@@ -377,10 +378,11 @@ function AdaptedText() {
   const [editText, setEditText] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [suggestCount, setSuggestCount] = useState(20);
-  const [isSuggesting, setIsSuggesting] = useState(false);
 
-  const isAdapting = status === "adapting";
-  const isSimplifying = status === "simplifying";
+  const isAdapting = !!activeGenerations["adapted-text"];
+  const isSimplifying = !!activeGenerations["simplified-text"];
+  const isSuggesting = !!activeGenerations["vocabulary-suggest"];
+  const isAnalysisLoading = !!activeGenerations["sentence-analysis"];
 
   // ── interactive-text state ──
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -431,7 +433,6 @@ function AdaptedText() {
     above: boolean;
   } | null>(null);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
-  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const [vocabListOpen, setVocabListOpen] = useState(true);
   const [analyzedSentencesOpen, setAnalyzedSentencesOpen] = useState(true);
@@ -510,12 +511,7 @@ function AdaptedText() {
   }, [editText, setExtractedText, clearDerivedData]);
 
   const handleSuggestVocabulary = useCallback(async () => {
-    setIsSuggesting(true);
-    try {
-      await suggestVocabulary(suggestCount);
-    } finally {
-      setIsSuggesting(false);
-    }
+    await suggestVocabulary(suggestCount);
   }, [suggestVocabulary, suggestCount]);
 
   const handleSelectionChange = useCallback(() => {
@@ -930,7 +926,7 @@ function AdaptedText() {
         return;
       }
 
-      setIsAnalysisLoading(true);
+      setGenerating("sentence-analysis", true);
 
       try {
         const context = getContextAround(extractedText, sentence, 150);
@@ -951,7 +947,7 @@ function AdaptedText() {
       } catch (error) {
         toast.error(parseError(error));
       } finally {
-        setIsAnalysisLoading(false);
+        setGenerating("sentence-analysis", false);
       }
     },
     [
@@ -960,6 +956,7 @@ function AdaptedText() {
       studentAge,
       sentenceAnalysisModel,
       createModelProvider,
+      setGenerating,
       setSentenceAnalysis,
       getSentenceAnalysis,
     ]

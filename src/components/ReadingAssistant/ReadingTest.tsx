@@ -156,7 +156,7 @@ function ReadingTest() {
     setTestMode,
     studentAge,
   } = useReadingStore();
-  const { status, generateReadingTest, generateTargetedPractice, calculateTestScore, evaluateShortAnswer } = useReadingAssistant();
+  const { activeGenerations, generateReadingTest, generateTargetedPractice, calculateTestScore, evaluateShortAnswer } = useReadingAssistant();
   const { data: session } = useSession();
   const isTeacherOrAbove = session?.user?.role === "teacher" || session?.user?.role === "admin" || session?.user?.role === "super-admin";
   
@@ -167,7 +167,7 @@ function ReadingTest() {
   const [retryMissedIds, setRetryMissedIds] = useState<Set<string>>(new Set());
   const [questionCounts, setQuestionCounts] = useState<ReadingTestQuestionCounts>(() => getReadingTestPreset(studentAge));
 
-  const isGenerating = status === "testing";
+  const isGenerating = !!activeGenerations["reading-test"] || !!activeGenerations["targeted-practice"];
 
   const totalQuestionCount = (Object.values(questionCounts) as number[]).reduce((sum, n) => sum + n, 0);
   const isTotalValid = totalQuestionCount >= MIN_TOTAL_QUESTIONS && totalQuestionCount <= MAX_TOTAL_QUESTIONS;

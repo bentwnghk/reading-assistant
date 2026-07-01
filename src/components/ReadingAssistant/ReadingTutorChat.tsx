@@ -25,7 +25,7 @@ interface ReadingTutorChatProps {
 function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { chatHistory, addChatMessage, removeChatMessage, clearChatHistory, extractedText, id: sessionId, docTitle } = useReadingStore();
+  const { chatHistory, addChatMessage, removeChatMessage, clearChatHistory, extractedText, id: sessionId, docTitle, activeGenerations } = useReadingStore();
   const { tutorChatSelectedText, setTutorChatSelectedText } = useGlobalStore();
   const { tutorLanguage, update } = useSettingStore();
   const { askTutor } = useReadingAssistant();
@@ -33,7 +33,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const useChinese = tutorLanguage === "zh";
   
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const isLoading = !!activeGenerations["tutor"];
   const [streamingContent, setStreamingContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [pendingImages, setPendingImages] = useState<string[]>([]);
@@ -122,7 +122,6 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     };
 
     addChatMessage(userMessage);
-    setIsLoading(true);
     setStreamingContent("");
     setTutorChatSelectedText("");
 
@@ -157,7 +156,6 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       removeChatMessage(userMessage.id);
     }
 
-    setIsLoading(false);
     setStreamingContent("");
   };
 
@@ -187,7 +185,6 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     if (!images) {
       setPendingImages([]);
     }
-    setIsLoading(true);
     setStreamingContent("");
     setTutorChatSelectedText("");
 
@@ -222,7 +219,6 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       removeChatMessage(userMessage.id);
     }
 
-    setIsLoading(false);
     setStreamingContent("");
   };
 

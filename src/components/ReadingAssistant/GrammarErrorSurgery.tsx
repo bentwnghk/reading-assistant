@@ -47,6 +47,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   const {
     grammarTopics,
     grammarErrorChallenges,
+    activeGenerations,
     grammarSurgeryHighScore,
     grammarSurgeryAccuracy,
     setGrammarSurgeryHighScore,
@@ -71,8 +72,8 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   const [maxStreak, setMaxStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(20);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
+  const isGenerating = !!activeGenerations["grammar-surgery"];
+  const isAutoGenerating = isGenerating && challenges.length === 0;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Sync store cache → local challenges ──────────────────────────────────
@@ -84,10 +85,9 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
 
   // ── Auto-generate on first entry if cache is empty ───────────────────────
   useEffect(() => {
-    if (grammarErrorChallenges.length === 0 && grammarTopics.length > 0) {
-      setIsAutoGenerating(true);
+    if (grammarErrorChallenges.length === 0 && grammarTopics.length > 0 && !activeGenerations["grammar-surgery"]) {
       const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
-      generateErrorSurgeryContent().finally(() => { setIsAutoGenerating(false); toast.dismiss(tid); });
+      generateErrorSurgeryContent().finally(() => { toast.dismiss(tid); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -222,12 +222,10 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   }, [gameStatus]);
 
   const handleGenerateNew = async () => {
-    setIsGenerating(true);
     const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
     try {
       await generateErrorSurgeryContent();
     } finally {
-      setIsGenerating(false);
       toast.dismiss(tid);
     }
   };

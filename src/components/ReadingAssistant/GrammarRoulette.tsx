@@ -37,6 +37,7 @@ export default function GrammarRoulette({ onBack }: Props) {
   const {
     grammarTopics,
     grammarGameQuestions,
+    activeGenerations,
     grammarRouletteHighScore,
     grammarRouletteAccuracy,
     setGrammarRouletteHighScore,
@@ -63,8 +64,8 @@ export default function GrammarRoulette({ onBack }: Props) {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [landedTopicIndex, setLandedTopicIndex] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
+  const isGenerating = !!activeGenerations["grammar-questions"];
+  const isAutoGenerating = isGenerating && questions.length === 0;
   const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const usedQuestionIds = useRef<Set<string>>(new Set());
@@ -84,10 +85,9 @@ export default function GrammarRoulette({ onBack }: Props) {
 
   // ── Auto-generate on first entry if cache is empty ───────────────────────
   useEffect(() => {
-    if (grammarGameQuestions.length === 0 && grammarTopics.length > 0) {
-      setIsAutoGenerating(true);
+    if (grammarGameQuestions.length === 0 && grammarTopics.length > 0 && !activeGenerations["grammar-questions"]) {
       const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
-      generateGrammarQuestions().finally(() => { setIsAutoGenerating(false); toast.dismiss(tid); });
+      generateGrammarQuestions().finally(() => { toast.dismiss(tid); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -252,12 +252,10 @@ export default function GrammarRoulette({ onBack }: Props) {
   }, [gameStatus]);
 
   const handleGenerateNew = async () => {
-    setIsGenerating(true);
     const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
     try {
       await generateGrammarQuestions();
     } finally {
-      setIsGenerating(false);
       toast.dismiss(tid);
     }
   };

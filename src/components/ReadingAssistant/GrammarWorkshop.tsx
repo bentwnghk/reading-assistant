@@ -23,6 +23,7 @@ export default function GrammarWorkshop({ onBack }: Props) {
   const {
     grammarTopics,
     grammarWorkshopChallenges,
+    activeGenerations,
     grammarWorkshopHighScore,
     grammarWorkshopAccuracy,
     setGrammarWorkshopHighScore,
@@ -46,8 +47,8 @@ export default function GrammarWorkshop({ onBack }: Props) {
   const [maxStreak, setMaxStreak] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
+  const isGenerating = !!activeGenerations["grammar-workshop"];
+  const isAutoGenerating = isGenerating && challenges.length === 0;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // ── Sync store cache → local challenges ──────────────────────────────────
@@ -59,10 +60,9 @@ export default function GrammarWorkshop({ onBack }: Props) {
 
   // ── Auto-generate on first entry if cache is empty ───────────────────────
   useEffect(() => {
-    if (grammarWorkshopChallenges.length === 0 && grammarTopics.length > 0) {
-      setIsAutoGenerating(true);
+    if (grammarWorkshopChallenges.length === 0 && grammarTopics.length > 0 && !activeGenerations["grammar-workshop"]) {
       const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
-      generateGrammarWorkshopContent().finally(() => { setIsAutoGenerating(false); toast.dismiss(tid); });
+      generateGrammarWorkshopContent().finally(() => { toast.dismiss(tid); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -193,12 +193,10 @@ export default function GrammarWorkshop({ onBack }: Props) {
   }, [gameStatus]);
 
   const handleGenerateNew = async () => {
-    setIsGenerating(true);
     const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
     try {
       await generateGrammarWorkshopContent();
     } finally {
-      setIsGenerating(false);
       toast.dismiss(tid);
     }
   };

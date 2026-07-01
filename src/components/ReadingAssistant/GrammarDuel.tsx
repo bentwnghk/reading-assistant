@@ -38,6 +38,7 @@ export default function GrammarDuel({ onBack }: Props) {
   const {
     grammarTopics,
     grammarGameQuestions,
+    activeGenerations,
     grammarDuelHighScore,
     grammarDuelAccuracy,
     setGrammarDuelHighScore,
@@ -50,7 +51,6 @@ export default function GrammarDuel({ onBack }: Props) {
   const [gameStatus, setGameStatus] = useState<GrammarGameStatus>("setup");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [questions, setQuestions] = useState<GrammarGameQuestion[]>([]);
-  const [isAutoGenerating, setIsAutoGenerating] = useState(false);
   const [queueIndex, setQueueIndex] = useState(0);
 
   const [playerHp, setPlayerHp] = useState(MAX_HP);
@@ -66,7 +66,8 @@ export default function GrammarDuel({ onBack }: Props) {
   const [hitAnimation, setHitAnimation] = useState<"player" | "ai" | null>(null);
   const [isPowerMove, setIsPowerMove] = useState(false);
   const [roundResult, setRoundResult] = useState<"player-wins" | "ai-wins" | "draw" | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const isGenerating = !!activeGenerations["grammar-questions"];
+  const isAutoGenerating = isGenerating && questions.length === 0;
 
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const usedQIndices = useRef<Set<number>>(new Set());
@@ -80,10 +81,9 @@ export default function GrammarDuel({ onBack }: Props) {
 
   // ── Auto-generate on first entry if cache is empty ───────────────────────
   useEffect(() => {
-    if (grammarGameQuestions.length === 0 && grammarTopics.length > 0) {
-      setIsAutoGenerating(true);
+    if (grammarGameQuestions.length === 0 && grammarTopics.length > 0 && !activeGenerations["grammar-questions"]) {
       const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
-      generateGrammarQuestions().finally(() => { setIsAutoGenerating(false); toast.dismiss(tid); });
+      generateGrammarQuestions().finally(() => { toast.dismiss(tid); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -227,12 +227,10 @@ export default function GrammarDuel({ onBack }: Props) {
   }, [gameStatus]);
 
   const handleGenerateNew = async () => {
-    setIsGenerating(true);
     const tid = toast.info(t("reading.grammar.games.generatingWait"), { duration: Infinity, position: "bottom-right" });
     try {
       await generateGrammarQuestions();
     } finally {
-      setIsGenerating(false);
       toast.dismiss(tid);
     }
   };

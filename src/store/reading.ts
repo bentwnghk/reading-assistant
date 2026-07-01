@@ -107,6 +107,27 @@ export type ReadingStatus =
   | "grammar"
   | "error";
 
+export type GenerationType =
+  | "extracting"
+  | "title"
+  | "summary"
+  | "adapted-text"
+  | "simplified-text"
+  | "mindmap"
+  | "visualization"
+  | "reading-test"
+  | "targeted-practice"
+  | "glossary"
+  | "vocabulary-suggest"
+  | "grammar-topics"
+  | "grammar-quiz"
+  | "grammar-scramble"
+  | "grammar-workshop"
+  | "grammar-surgery"
+  | "grammar-questions"
+  | "sentence-analysis"
+  | "tutor";
+
 type ReadingTestMode = "all-at-once" | "question-by-question";
 type TextSource = "upload" | "repository" | "shared" | "assignment";
 
@@ -188,6 +209,7 @@ export interface ReadingStore {
   chatHistory: ChatMessage[];
   status: ReadingStatus;
   error: string | null;
+  activeGenerations: Record<string, boolean>;
   originalDifficulty: TextDifficultyResult | null;
   adaptedDifficulty: TextDifficultyResult | null;
   simplifiedDifficulty: TextDifficultyResult | null;
@@ -255,6 +277,7 @@ interface ReadingActions {
   clearChatHistory: () => void;
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
+  setGenerating: (type: GenerationType, active: boolean) => void;
   setStreaming: (value: boolean) => void;
   setOriginalDifficulty: (result: TextDifficultyResult | null) => void;
   setAdaptedDifficulty: (result: TextDifficultyResult | null) => void;
@@ -346,6 +369,7 @@ const defaultValues: ReadingStore = {
   chatHistory: [],
   status: "idle",
   error: null,
+  activeGenerations: {},
   originalDifficulty: null,
   adaptedDifficulty: null,
   simplifiedDifficulty: null,
@@ -1069,6 +1093,11 @@ export const useReadingStore = create(
           error,
           status: error ? "error" : get().status,
         })),
+      setGenerating: (type, active) =>
+        set((state) => ({
+          activeGenerations: { ...state.activeGenerations, [type]: active },
+          ...(active ? { error: null as string | null } : {}),
+        })),
       setStreaming: (value) => {
         setStreamingFlag(value);
       },
@@ -1216,6 +1245,7 @@ export const useReadingStore = create(
         set(() => ({
           ...defaultValues,
           ...session,
+          activeGenerations: {},
           originalImages: session.originalImages || [],
         }));
         if (currentUserId && session.id) {
@@ -1243,7 +1273,7 @@ export const useReadingStore = create(
           return {} as ReadingStore & ReadingActions;
         }
         const keysToPersist = (Object.keys(defaultValues) as (keyof ReadingStore)[]).filter(
-          (key) => key !== "originalImages" && key !== "visualizationImage"
+          (key) => key !== "originalImages" && key !== "visualizationImage" && key !== "activeGenerations"
         );
         return pick(state, keysToPersist) as ReadingStore & ReadingActions;
       },
@@ -1252,6 +1282,7 @@ export const useReadingStore = create(
         if (state.status !== "idle" && state.status !== "error") {
           state.status = "idle";
         }
+        state.activeGenerations = {};
       },
       migrate: (persistedState) => persistedState as ReadingStore & ReadingActions,
     }
