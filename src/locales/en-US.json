@@ -80,7 +80,7 @@
       },
       "roles": {
         "title": "For Schools & Teachers",
-        "intro": "Complete user management for classrooms and schools! Organize students into classes, assign teachers, track learning progress in real-time, and export detailed reports.",
+        "intro": "Complete user management for classrooms and schools! Organize students into classes, assign teachers and reading assignments, track learning progress in real-time, and export detailed reports.",
         "admin": {
           "title": "👑 Admin",
           "manageSchools": "Manage schools",
@@ -101,6 +101,7 @@
         "student": {
           "title": "👥 Student",
           "learn": "Full access to all features",
+          "assignments": "Complete teacher-assigned reading & track your progress",
           "cloudSync": "Automatic cloud sync",
           "history": "Track reading and learning activity in Learning Journey",
           "leaderboard": "Compete in leaderboards & unlock achievements"
@@ -190,7 +191,7 @@
         },
         "assignments": {
           "title": "📋 Assignments",
-          "desc": "Turn any reading session into homework for a whole class. Track each student's live progress, flag who's stuck, and export the roster to Excel."
+          "desc": "Turn any reading session into homework for a whole class. Track each student's live progress and scores, flag who's stuck, and export the roster to Excel."
         }
       },
       "workflow": {
