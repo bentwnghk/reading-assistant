@@ -1,6 +1,5 @@
 "use client";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { Suspense, useState, useLayoutEffect, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
@@ -15,6 +14,7 @@ import useAutoSave from "@/hooks/useAutoSave";
 import { useVocabularySync } from "@/hooks/useVocabularySync";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { LandingPage } from "@/components/Auth/LandingPage";
+import { Footer } from "@/components/Internal/Footer";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
 const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
@@ -187,21 +187,7 @@ function HomeContent() {
       <TocFab />
       <TutorChatFab />
       <LearningRecommendationDialog />
-      <footer className="my-4 text-center text-sm text-gray-600 print:hidden">
-        <a href="https://api.mr5ai.com/" target="_blank">
-          {t("copyright", {
-            name: "Mr.🆖 AI Hub",
-          })}
-        </a>
-        <span className="mx-2">·</span>
-        <Link href="/terms-of-service" className="hover:underline">
-          {t("termsOfService")}
-        </Link>
-        <span className="mx-2">·</span>
-        <Link href="/privacy-policy" className="hover:underline">
-          {t("privacyPolicy")}
-        </Link>
-      </footer>
+      <Footer />
     </div>
     </>
   );
