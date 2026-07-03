@@ -224,7 +224,8 @@
         "grammar": "📐 Grammar"
       },
       "builtWith": "Built with ❤️ by Mr.🆖 for students learning English",
-      "builtWithPoweredBy": ". Powered by <hubLink>Mr.🆖 AI Hub</hubLink>.",
+      "builtWithPoweredByPrefix": ". Powered by ",
+      "builtWithPoweredBySuffix": ".",
       "faqs": {
         "title": "Frequently Asked Questions",
         "q1": {
