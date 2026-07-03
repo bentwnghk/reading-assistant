@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Upload,
-  FileText,
   Brain,
   Image as ImageIcon,
   Volume2,
@@ -43,6 +42,12 @@ import {
   History,
   Wand2,
   Layers,
+  Library,
+  Search,
+  Globe,
+  Building2,
+  ChevronDown,
+  ChevronsUpDown,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -75,18 +80,34 @@ function MockupFrame({
   );
 }
 
-/* Small label used inside mockups */
-function Tag({ children, tone = "muted" }: { children: React.ReactNode; tone?: "muted" | "accent" | "highlight" }) {
-  const tones = {
-    muted: "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]",
-    accent: "border-[var(--lp-accent)]/40 text-[var(--lp-accent)] bg-[var(--lp-accent)]/5",
-    highlight: "border-[var(--lp-highlight)] text-[var(--lp-ink)] bg-[var(--lp-highlight)]/30",
-  };
+/* Visibility badge — mirrors the real TextRepository VisibilityBadge (public/school/class) */
+function RepoVisBadge({
+  visibility,
+  label,
+}: {
+  visibility: "public" | "school" | "class";
+  label: string;
+}) {
+  if (visibility === "public") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-accent)]/40 bg-[var(--lp-accent)]/5 px-2 py-0.5 text-[9px] font-medium text-[var(--lp-accent)]">
+        <Globe className="h-2.5 w-2.5" />
+        {label}
+      </span>
+    );
+  }
+  if (visibility === "school") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] px-2 py-0.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">
+        <Building2 className="h-2.5 w-2.5" />
+        {label}
+      </span>
+    );
+  }
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider ${tones[tone]}`}
-    >
-      {children}
+    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-2 py-0.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">
+      <Users className="h-2.5 w-2.5" />
+      {label}
     </span>
   );
 }
@@ -131,34 +152,123 @@ export function HeroReadingMockup() {
 
 /* ── 2. ENCOUNTER — upload / OCR + Text Repository ── */
 export function UploadMockup() {
+  const repoRows = [
+    {
+      name: "DSE 2023 Paper 1 Part A Text 1",
+      sub: "Flash Fiction Writing Tips for Short Stories",
+      creator: "Ms. Chan",
+      date: "Sep 12",
+      visibility: "public" as const,
+      visLabel: "Public",
+    },
+    {
+      name: "DSE 2024 Paper 1 Part B2 Text 5",
+      sub: "Exposing Flaws in Science and Media",
+      creator: "Ms. Wong",
+      date: "Sep 8",
+      visibility: "public" as const,
+      visLabel: "Public",
+    },
+    {
+      name: "DSE 2026 Paper 1 Part B1 Text 2",
+      sub: "Grow your YouTube channel with key tips",
+      creator: "Mr. Lee",
+      date: "Sep 5",
+      visibility: "public" as const,
+      visLabel: "Public",
+    },
+  ];
   return (
     <MockupFrame label="SELECT TEXT · Mr.🆖 ProReader">
-      <div className="rounded-xl border-2 border-dashed border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 px-4 py-7 text-center">
-        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]">
-          <Upload className="h-5 w-5" />
+      {/* compact upload drop zone (Upload tab) */}
+      <div className="rounded-xl border-2 border-dashed border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 px-4 py-5 text-center">
+        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]">
+          <Upload className="h-4.5 w-4.5" />
         </div>
-        <p className="mt-3 text-sm font-semibold text-[var(--lp-ink)]">Drop an image or PDF here</p>
+        <p className="mt-2 text-sm font-semibold text-[var(--lp-ink)]">Drop an image or PDF here</p>
         <p className="text-xs text-[var(--lp-ink-soft)]">or click to select · PNG, JPG, PDF</p>
       </div>
 
-      <div className="mt-4">
-        <div className="mb-2 flex items-center justify-between">
+      {/* ── Text Repository — faithful student table view ── */}
+      <div className="mt-5">
+        <div className="mb-2 flex items-center gap-1.5">
+          <Library className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]">
             Text Repository
           </span>
-          <Tag tone="highlight">DSE ready</Tag>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]">
-            <FileText className="h-4.5 w-4.5" />
+
+        {/* toolbar — search + visibility filter (students see no upload / import / export) */}
+        <div className="mb-2 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--lp-ink-soft)]" />
+            <div className="w-full rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] py-1.5 pl-8 pr-3 text-[11px] text-[var(--lp-ink-soft)]">
+              Search texts…
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-[var(--lp-ink)]">DSE 2023 Paper 1 Part A Text 1</p>
-            <p className="truncate text-xs text-[var(--lp-ink-soft)]">Flash Fiction Writing Tips for Short Stories</p>
+          <div className="flex shrink-0 items-center gap-1 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1.5 text-[11px] text-[var(--lp-ink-soft)]">
+            All <ChevronDown className="h-3 w-3" />
           </div>
-          <span className="shrink-0 rounded-lg bg-[var(--lp-accent)] px-3 py-1.5 text-xs font-semibold text-white">
-            Read
-          </span>
+        </div>
+
+        {/* table — Name · Read · Creator · Date · Visibility */}
+        <div className="overflow-x-auto rounded-xl border border-[var(--lp-rule)]">
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/60">
+                <th className="px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)]">
+                  <span className="flex items-center gap-1">
+                    Name <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
+                  </span>
+                </th>
+                <th className="w-[1%] px-2 py-1.5"></th>
+                <th className="hidden px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)] sm:table-cell">
+                  <span className="flex items-center gap-1">
+                    Creator <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
+                  </span>
+                </th>
+                <th className="hidden px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)] sm:table-cell">
+                  <span className="flex items-center gap-1">
+                    Date <ChevronDown className="h-2.5 w-2.5" />
+                  </span>
+                </th>
+                <th className="px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)]">
+                  <span className="flex items-center gap-1">
+                    Visibility <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {repoRows.map((r) => (
+                <tr key={r.name} className="border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]">
+                  <td className="px-3 py-2 align-middle">
+                    <p className="text-[11px] font-semibold leading-snug text-[var(--lp-ink)]">{r.name}</p>
+                    {r.sub && (
+                      <p className="mt-0.5 max-w-[180px] truncate text-[10px] text-[var(--lp-ink-soft)]" title={r.sub}>
+                        {r.sub}
+                      </p>
+                    )}
+                  </td>
+                  <td className="px-2 py-2 align-middle text-right">
+                    {/* students get only a Read action — no edit / rename / delete */}
+                    <span className="inline-flex items-center gap-1 rounded-md bg-[var(--lp-accent)] px-2 py-1 text-[10px] font-semibold text-white">
+                      <BookOpen className="h-3 w-3" /> Read
+                    </span>
+                  </td>
+                  <td className="hidden px-3 py-2 align-middle text-[10px] text-[var(--lp-ink-soft)] sm:table-cell">
+                    {r.creator}
+                  </td>
+                  <td className="hidden whitespace-nowrap px-3 py-2 align-middle text-[10px] text-[var(--lp-ink-soft)] sm:table-cell">
+                    {r.date}
+                  </td>
+                  <td className="px-3 py-2 align-middle">
+                    <RepoVisBadge visibility={r.visibility} label={r.visLabel} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </MockupFrame>
