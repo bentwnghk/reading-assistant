@@ -445,25 +445,22 @@ export function LandingPage() {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </motion.div>
-          <motion.p
-            variants={fadeUp}
-            className="mt-8 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]"
-          >
-            {t("header.about.builtWith")}
-          </motion.p>
         </Reveal>
       </section>
 
       {/* ── Footer ── */}
       <footer className="border-t border-[var(--lp-rule)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-6 py-8 text-xs text-[var(--lp-ink-soft)]">
-          <Link href="/terms-of-service" className="transition-colors hover:text-[var(--lp-ink)]">
-            {t("termsOfService")}
-          </Link>
-          <span>·</span>
-          <Link href="/privacy-policy" className="transition-colors hover:text-[var(--lp-ink)]">
-            {t("privacyPolicy")}
-          </Link>
+        <div className="mx-auto max-w-6xl px-6 py-8 text-center text-xs text-[var(--lp-ink-soft)]">
+          <p className="mb-3">{t("header.about.builtWith")}</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            <Link href="/terms-of-service" className="transition-colors hover:text-[var(--lp-ink)]">
+              {t("termsOfService")}
+            </Link>
+            <span>·</span>
+            <Link href="/privacy-policy" className="transition-colors hover:text-[var(--lp-ink)]">
+              {t("privacyPolicy")}
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
