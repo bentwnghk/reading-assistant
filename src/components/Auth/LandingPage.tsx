@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
 import locales from "@/constants/locales";
 import { resolveLanguagePreference } from "@/utils/i18n";
@@ -451,7 +451,22 @@ export function LandingPage() {
       {/* ── Footer ── */}
       <footer className="border-t border-[var(--lp-rule)]">
         <div className="mx-auto max-w-6xl px-6 py-8 text-center text-xs text-[var(--lp-ink-soft)]">
-          <p className="mb-3">{t("header.about.builtWith")}</p>
+          <p className="mb-3">
+            {t("header.about.builtWith")}
+            <Trans
+              i18nKey="header.about.builtWithPoweredBy"
+              components={{
+                hubLink: (
+                  <a
+                    href="https://api.mr5ai.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-[var(--lp-ink)]"
+                  />
+                ),
+              }}
+            />
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link href="/terms-of-service" className="transition-colors hover:text-[var(--lp-ink)]">
               {t("termsOfService")}
