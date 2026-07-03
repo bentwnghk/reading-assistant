@@ -8,6 +8,7 @@ import { useTheme } from "next-themes";
 import { useLayoutEffect } from "react";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
+const Footer = dynamic(() => import("@/components/Internal/Footer").then((m) => ({ default: m.Footer })));
 const VocabularyContainer = dynamic(
   () => import("@/components/Vocabulary/VocabularyContainer"),
   { ssr: false }
@@ -45,6 +46,7 @@ export default function Page() {
       <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
         <VocabularyContainer />
       </div>
+      <Footer />
     </div>
   );
 }
