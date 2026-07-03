@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/table"
 import { exportAssignmentRoster } from "@/utils/assignmentExcel"
 import { AssignmentStats } from "@/components/Assignments/AssignmentStats"
+import { Footer } from "@/components/Internal/Footer"
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -442,6 +443,7 @@ export default function AssignmentDetailPage({
           <StudentAssignmentDetail assignment={assignment} />
         )}
       </div>
+      <Footer />
     </div>
   )
 }
