@@ -78,6 +78,7 @@ import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
 import { useSharingStore } from "@/store/sharing";
 import { useVocabularyStore } from "@/store/vocabulary";
+import { useAssignmentsStore } from "@/store/assignments";
 
 const Setting = dynamic(() => import("@/components/Setting"));
 const History = dynamic(() => import("@/components/Dashboard/Dashboard"));
@@ -121,6 +122,7 @@ function Header() {
     pendingReviewListShareCount,
     fetchPendingReviewListShareCount,
   } = useVocabularyStore();
+  const { overdueCount, fetchOverdueAssignmentCount } = useAssignmentsStore();
   const totalPending = pendingCount + pendingReviewListShareCount;
   const {
     extractedText,
@@ -167,12 +169,14 @@ function Header() {
     if (!session?.user?.id) return;
     fetchPendingCount();
     fetchPendingReviewListShareCount();
+    if (session.user.role === "student") fetchOverdueAssignmentCount();
     const interval = setInterval(() => {
       fetchPendingCount();
       fetchPendingReviewListShareCount();
+      if (session.user.role === "student") fetchOverdueAssignmentCount();
     }, 60_000);
     return () => clearInterval(interval);
-  }, [session?.user?.id, fetchPendingCount, fetchPendingReviewListShareCount]);
+  }, [session?.user?.id, session?.user?.role, fetchPendingCount, fetchPendingReviewListShareCount, fetchOverdueAssignmentCount]);
 
   const exportSnapshot = useCallback(() => {
     const { backup } = useReadingStore.getState();
@@ -325,7 +329,14 @@ function Header() {
                 className="h-8 gap-1.5 opacity-50 cursor-default"
                 disabled
               >
-                <ClipboardList className="h-4 w-4" />
+                <span className="relative">
+                  <ClipboardList className="h-4 w-4" />
+                  {overdueCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                      {overdueCount > 9 ? "9+" : overdueCount}
+                    </span>
+                  )}
+                </span>
                 <span className="text-sm">{t("assignments.navTitle")}</span>
               </Button>
             ) : (
@@ -336,7 +347,14 @@ function Header() {
                   className="h-8 gap-1.5"
                   title={t("assignments.navTitle")}
                 >
-                  <ClipboardList className="h-4 w-4" />
+                  <span className="relative">
+                    <ClipboardList className="h-4 w-4" />
+                    {overdueCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                        {overdueCount > 9 ? "9+" : overdueCount}
+                      </span>
+                    )}
+                  </span>
                   <span className="text-sm">{t("assignments.navTitle")}</span>
                 </Button>
               </Link>

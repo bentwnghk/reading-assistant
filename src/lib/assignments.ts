@@ -405,7 +405,7 @@ export async function getAssignmentsForStudent(studentId: string): Promise<Assig
        FROM assignment_submissions s
        JOIN assignments a ON a.id = s.assignment_id
        LEFT JOIN users u ON u.id = a.teacher_id
-       WHERE s.student_id = $1
+       WHERE s.student_id = $1 AND a.status = 'active'
        ORDER BY a.created_at DESC`,
       [studentId],
     )
@@ -415,6 +415,26 @@ export async function getAssignmentsForStudent(studentId: string): Promise<Assig
       ...a,
       studentSessionId: result.rows[i].student_session_id ?? undefined,
     }))
+  } finally {
+    client.release()
+  }
+}
+
+export async function getOverdueAssignmentCount(studentId: string): Promise<number> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT COUNT(*)::int AS count
+       FROM assignment_submissions s
+       JOIN assignments a ON a.id = s.assignment_id
+       WHERE s.student_id = $1
+         AND a.status = 'active'
+         AND a.due_date IS NOT NULL
+         AND a.due_date < NOW()
+         AND COALESCE(s.progress, 0) < 100`,
+      [studentId],
+    )
+    return result.rows[0]?.count ?? 0
   } finally {
     client.release()
   }
@@ -468,6 +488,8 @@ export async function getAssignment(
       [assignmentId, requesterId],
     )
     if (sub.rows.length === 0) return null
+    // Archived assignments are hidden from students (kept for teacher reference)
+    if (assignment.status === "archived") return null
     const r = sub.rows[0]
     return {
       ...assignment,
