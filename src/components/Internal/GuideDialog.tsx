@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, HelpCircle, Info } from "lucide-react";
+import { HelpCircle, Info, ListOrdered } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -133,7 +133,7 @@ export default function GuideDialog({
               <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
                 {stepsTitleKey && (
                   <h4 className="font-semibold text-sm flex items-center gap-2 mb-3">
-                    <GraduationCap className="h-4 w-4 text-primary" />
+                    <ListOrdered className="h-4 w-4 text-primary" />
                     {t(stepsTitleKey)}
                   </h4>
                 )}
