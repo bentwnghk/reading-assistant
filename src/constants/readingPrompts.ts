@@ -676,6 +676,102 @@ Identify ${maxTopics} notable grammar topics present in this text. For each topi
 **Respond with ONLY the JSON array, no markdown, no code blocks.**`;
 }
 
+export function generateGrammarLessonPrompt(topic: GrammarTopic, text: string, age: number) {
+  const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
+  return `Create a detailed, age-appropriate "full lesson" for ONE English grammar topic to help a ${age}-year-old Hong Kong ${schoolLevel} student truly understand and master it.
+
+<grammar-topic>
+Name: ${topic.name} (${topic.nameZh})
+Pattern: ${topic.pattern}
+Explanation: ${topic.explanation}
+</grammar-topic>
+
+<source-text>
+${text}
+</source-text>
+
+You MUST respond with ONLY a valid JSON object (no markdown code blocks, no extra text) with EXACTLY this shape:
+
+{
+  "whenToUse": "2-3 sentences in English explaining WHEN and WHY we choose this structure (situations, time references, communicative purpose). Age-appropriate.",
+  "whenToUseZh": "繁體中文，2-3句",
+  "signalWords": ["since", "for", "already", "yet"],
+  "forms": {
+    "affirmative": "Subject + has/have + past participle  (e.g. She has finished.)",
+    "negative": "Subject + has/have + not + past participle  (e.g. She has not finished.)",
+    "question": "Has/Have + subject + past participle?  (e.g. Has she finished?)"
+  },
+  "compareWith": {
+    "structure": "The single most-confused counterpart structure for HK students of this age (e.g. Simple Past Tense)",
+    "difference": "Clear English explanation of the key difference and when to choose each.",
+    "differenceZh": "繁體中文解釋",
+    "example": "A side-by-side mini-example contrasting the two, e.g. 'I lived in London (past). I have lived in London for 10 years (present perfect).'"
+  },
+  "pronunciationTips": "Notes on contractions, stress, weak forms, linking, or intonation that HK students should know when saying this structure (1-3 sentences).",
+  "commonMistakePairs": [
+    { "wrong": "I have went to the store.", "right": "I have gone to the store. / I went to the store.", "explanation": "'have' needs the past participle 'gone', not 'went'." }
+  ],
+  "ccqs": [
+    { "question": "Does the action continue to the present?", "answer": "Yes" },
+    { "question": "Is the time of the action finished and in the past?", "answer": "No" }
+  ],
+  "guidedPractice": [
+    {
+      "prompt": "Complete: She _____ (live) here since 2010.",
+      "type": "fill-in",
+      "acceptableAnswers": ["has lived"],
+      "explanation": "'since 2010' + third person singular → has lived."
+    },
+    {
+      "prompt": "Rewrite in the present perfect: I started this book last week (and I am still reading it).",
+      "type": "transformation",
+      "acceptableAnswers": ["i have been reading this book since last week", "i have read this book since last week"],
+      "explanation": "An action starting in the past and continuing → present perfect."
+    },
+    {
+      "prompt": "Which sentence is grammatically correct?",
+      "type": "choice",
+      "options": ["A) I have seen him yesterday.", "B) I saw him yesterday.", "C) I have saw him yesterday.", "D) I seen him yesterday."],
+      "acceptableAnswers": ["b", "b) i saw him yesterday", "i saw him yesterday"],
+      "explanation": "With a finished time word 'yesterday', use the simple past 'saw'."
+    }
+  ]
+}
+
+**Guidelines:**
+- This is ONE topic only — go deep, not broad.
+- "signalWords": give 4-8 trigger words/phrases. Prefer ones that genuinely appear in the <source-text> when relevant; otherwise give the standard triggers for this structure.
+- "forms": must show affirmative, negative, AND question forms (this completes the "Form" picture).
+- "compareWith.structure": choose the ONE structure that HK students of this age most often confuse with this topic. Keep the comparison focused and concrete.
+- "commonMistakePairs": give exactly 3 pairs of realistic errors Hong Kong students actually make. Each "wrong" must be a realistic student error, not an obviously absurd one.
+- "ccqs": 2-3 Concept Checking Questions. Each must be answerable with a short yes/no or single phrase. The answer must be ≤ 5 words.
+- "guidedPractice": exactly 3 items. Mix the types (at least one "fill-in" or "transformation", at least one "choice"). For "choice", provide exactly 4 options labeled A) B) C) D). Put ALL acceptable variants (lowercased) into "acceptableAnswers" — the option letter alone, the option text, and the bare answer. Items should test THIS topic's structure, not unrelated grammar.
+- All Chinese MUST be in Traditional Chinese (繁體中文).
+- ${age <= 11 ? "Keep all English simple and concrete; prefer everyday examples (school, family, food)." : age <= 15 ? "Examples may cover school life, travel, technology, and personal experience." : "Examples may use abstract topics, current affairs, and academic register."}
+- Do NOT wrap the JSON in markdown code fences. Respond with ONLY the JSON object.`;
+}
+
+export function evaluateGrammarPracticePrompt(
+  item: GrammarGuidedPracticeItem,
+  userAnswer: string
+) {
+  return `A Hong Kong student learning English attempted a grammar practice item. Evaluate their answer.
+
+Practice item:
+- Prompt: ${item.prompt}
+- Type: ${item.type}
+${item.options ? `- Options: ${item.options.join(" | ")}` : ""}
+- Known acceptable answers: ${item.acceptableAnswers.join(" | ")}
+Student's answer: ${userAnswer || "(blank)"}
+
+Decide whether the student's answer is acceptable (correct) and give brief, encouraging feedback.
+Respond with ONLY a JSON object (no markdown, no code blocks):
+{
+  "correct": true,
+  "feedback": "Short, friendly feedback (1-2 sentences). If wrong, explain the rule and give the right answer. Use Traditional Chinese (繁體中文) for a short closing hint if helpful."
+}`;
+}
+
 export function generateGrammarQuizPrompt(text: string, age: number, topics: GrammarTopic[]) {
   const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
   const topicSummaries = topics.map(t => `- ${t.name} (${t.id}): ${t.pattern}`).join("\n");

@@ -82,11 +82,49 @@ interface GrammarTopic {
   commonMistakesZh: string;
   occurrences: number;
   textSentences: string[];
+  // ── On-demand "Full Lesson" enrichment (Tier 1 + Tier 2) ──
+  // All optional: present only after the user clicks "Load Full Lesson" for this topic.
+  whenToUse?: string;
+  whenToUseZh?: string;
+  signalWords?: string[];
+  forms?: { affirmative: string; negative: string; question: string };
+  compareWith?: {
+    structure: string;
+    difference: string;
+    differenceZh: string;
+    example: string;
+  };
+  pronunciationTips?: string;
+  commonMistakePairs?: { wrong: string; right: string; explanation: string }[];
+  ccqs?: { question: string; answer: string }[];
+  guidedPractice?: GrammarGuidedPracticeItem[];
 }
 
 interface GrammarExample {
   sentence: string;
   source: "text" | "generated";
+}
+
+/** One inline practice item for the Lessons tab "Quick Practice" section. */
+interface GrammarGuidedPracticeItem {
+  prompt: string;
+  type: "fill-in" | "transformation" | "choice";
+  options?: string[];
+  acceptableAnswers: string[];
+  explanation: string;
+}
+
+/** Shape returned by the on-demand grammar-lesson AI call. */
+interface GrammarLessonEnrichment {
+  whenToUse: string;
+  whenToUseZh: string;
+  signalWords: string[];
+  forms: { affirmative: string; negative: string; question: string };
+  compareWith: { structure: string; difference: string; differenceZh: string; example: string };
+  pronunciationTips: string;
+  commonMistakePairs: { wrong: string; right: string; explanation: string }[];
+  ccqs: { question: string; answer: string }[];
+  guidedPractice: GrammarGuidedPracticeItem[];
 }
 
 interface GrammarQuizQuestion {

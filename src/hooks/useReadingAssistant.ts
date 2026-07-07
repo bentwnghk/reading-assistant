@@ -19,6 +19,8 @@ import {
   suggestVocabularyPrompt,
   readingTutorSystemPrompt,
   analyzeGrammarTopicsPrompt,
+  generateGrammarLessonPrompt,
+  evaluateGrammarPracticePrompt,
   generateGrammarQuizPrompt,
   evaluateGrammarRewritePrompt,
   generateGrammarScramblePrompt,
@@ -940,6 +942,53 @@ Guidelines:
     }
   }
 
+  // Generates the on-demand "Full Lesson" enrichment for a single grammar topic.
+  async function generateGrammarLesson(topicId: string) {
+    const key = `grammar-lesson:${topicId}`;
+    if (useReadingStore.getState().activeGenerations[key]) return;
+    const { studentAge, extractedText, grammarTopics } = readingStore;
+    const topic = grammarTopics.find((t) => t.id === topicId);
+    if (!topic || !extractedText) return;
+
+    setGenerating(key, true);
+    const toastId = toast.info(i18next.t("reading.grammar.lesson.generatingWait"), { duration: Infinity });
+    try {
+      const text = await grammarGenerateText(
+        generateGrammarLessonPrompt(topic, extractedText, studentAge),
+        getSystemPrompt(),
+      );
+      const enrichment: GrammarLessonEnrichment = JSON.parse(text);
+      readingStore.enrichGrammarTopic(topicId, enrichment);
+      toast.dismiss(toastId);
+    } catch (error) {
+      toast.dismiss(toastId);
+      handleError(error);
+    } finally {
+      setGenerating(key, false);
+    }
+  }
+
+  // Hybrid "Ask AI for help" — evaluates a single guided-practice item.
+  async function evaluateGrammarPracticeItem(
+    item: GrammarGuidedPracticeItem,
+    userAnswer: string
+  ): Promise<{ correct: boolean; feedback: string }> {
+    try {
+      const text = await grammarGenerateText(
+        evaluateGrammarPracticePrompt(item, userAnswer),
+        getSystemPrompt(),
+      );
+      const result = JSON.parse(text);
+      return {
+        correct: !!result.correct,
+        feedback: result.feedback || "",
+      };
+    } catch (error) {
+      console.error("Error evaluating grammar practice item:", error);
+      return { correct: false, feedback: i18next.t("reading.grammar.lesson.practiceAiError") };
+    }
+  }
+
   async function generateGrammarQuiz() {
     if (useReadingStore.getState().activeGenerations["grammar-quiz"]) return [];
     const { studentAge, extractedText, grammarTopics, setGrammarQuiz, setError } = readingStore;
@@ -1215,6 +1264,8 @@ Guidelines:
     generateGlossary,
     suggestVocabulary,
     analyzeGrammarTopics,
+    generateGrammarLesson,
+    evaluateGrammarPracticeItem,
     generateGrammarQuiz,
     calculateGrammarQuizScore,
     evaluateGrammarOpenAnswer,

@@ -22,6 +22,13 @@ import {
   ChevronRight,
   ListChecks,
   ClipboardList,
+  Lightbulb,
+  Volume2,
+  GitCompare,
+  Wand2,
+  Sparkles,
+  RotateCcw,
+  Tag,
 } from "lucide-react";
 import {
   Document,
@@ -235,6 +242,412 @@ const CEFR_COLORS: Record<string, string> = {
   C2: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
 };
 
+// Normalizes an answer string for client-side comparison: lowercase, trim, strip
+// punctuation and extra whitespace, strip a leading "A)/B)/..." option marker.
+function normalizeAnswer(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/^[a-d]\)\s*/, "")
+    .replace(/[.,!?;:'"\u201c\u201d\u2018\u2019]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function matchesAcceptable(userAnswer: string, acceptable: string[]): boolean {
+  const norm = normalizeAnswer(userAnswer);
+  if (!norm) return false;
+  return acceptable.some((a) => normalizeAnswer(a) === norm);
+}
+
+/** One enriched grammar lesson inside an accordion item. Holds its own CCQ/practice state. */
+function GrammarLessonItem({
+  topic,
+  isLoading,
+  onLoadLesson,
+  onHighlight,
+  highlightActive,
+  evaluatePracticeItem,
+}: {
+  topic: GrammarTopic;
+  isLoading: boolean;
+  onLoadLesson: () => void;
+  onHighlight: () => void;
+  highlightActive: boolean;
+  evaluatePracticeItem: (item: GrammarGuidedPracticeItem, userAnswer: string) => Promise<{ correct: boolean; feedback: string }>;
+}) {
+  const { t } = useTranslation();
+  const [revealedCcqs, setRevealedCcqs] = useState<Set<number>>(new Set());
+  // practiceAttempts: per-item-index state for the Quick Practice section
+  const [practiceInputs, setPracticeInputs] = useState<Record<number, string>>({});
+  const [practiceResults, setPracticeResults] = useState<Record<number, { correct: boolean; aiFeedback?: string; aiLoading?: boolean; source: "instant" | "ai" }>>({});
+
+  const isEnriched = !!(topic.whenToUse || topic.forms || topic.signalWords || topic.compareWith || topic.ccqs || topic.guidedPractice);
+
+  const toggleCcq = (i: number) => {
+    setRevealedCcqs((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+  };
+
+  const handleInstantCheck = (item: GrammarGuidedPracticeItem, index: number) => {
+    const answer = practiceInputs[index] || "";
+    if (!answer.trim()) return;
+    const correct = matchesAcceptable(answer, item.acceptableAnswers);
+    setPracticeResults((prev) => ({ ...prev, [index]: { correct, source: "instant" } }));
+  };
+
+  const handleAiHelp = async (item: GrammarGuidedPracticeItem, index: number) => {
+    const answer = practiceInputs[index] || "";
+    setPracticeResults((prev) => ({ ...prev, [index]: { ...(prev[index] || { correct: false }), aiLoading: true, source: "ai" } }));
+    const result = await evaluatePracticeItem(item, answer);
+    setPracticeResults((prev) => ({ ...prev, [index]: { correct: result.correct, aiFeedback: result.feedback, aiLoading: false, source: "ai" } }));
+  };
+
+  const resetPracticeItem = (index: number) => {
+    setPracticeInputs((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+    setPracticeResults((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-4 pt-2">
+      {/* ── Basic content (always shown) ── */}
+      <div>
+        <h5 className="font-medium text-sm mb-1">{t("reading.grammar.whatIsIt")}</h5>
+        <p className="text-sm text-muted-foreground">{topic.explanation}</p>
+        <p className="text-sm text-muted-foreground font-noto-sans-tc mt-1">{topic.explanationZh}</p>
+      </div>
+
+      <div>
+        <h5 className="font-medium text-sm mb-1">{t("reading.grammar.pattern")}</h5>
+        <div className="font-mono bg-muted px-3 py-2 rounded text-sm">{topic.pattern}</div>
+      </div>
+
+      <div>
+        <h5 className="font-medium text-sm mb-1">{t("reading.grammar.examples")}</h5>
+        <div className="space-y-2">
+          {topic.textSentences.map((s, i) => (
+            <div
+              key={`ts-${i}`}
+              className="text-sm px-3 py-2 rounded bg-blue-50 dark:bg-blue-950 border-l-2 border-blue-400"
+            >
+              <p className="italic">&ldquo;{s}&rdquo;</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t("reading.grammar.fromThisText")}
+              </p>
+            </div>
+          ))}
+          {topic.examples.filter((ex) => ex.source !== "text").map((ex, i) => (
+            <div key={`ex-${i}`} className="bg-muted text-sm px-3 py-2 rounded">
+              <p className="italic">&ldquo;{ex.sentence}&rdquo;</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("reading.grammar.example")}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h5 className="font-medium text-sm mb-1">{t("reading.grammar.commonMistakes")}</h5>
+        <div className="bg-red-50 dark:bg-red-950 px-3 py-2 rounded text-sm">
+          <p>{topic.commonMistakes}</p>
+          <p className="font-noto-sans-tc mt-1 text-muted-foreground">{topic.commonMistakesZh}</p>
+        </div>
+      </div>
+
+      {/* ── Full Lesson trigger ── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant={isEnriched ? "outline" : "default"} size="sm" onClick={onLoadLesson} disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+              <span>{t("reading.grammar.lesson.generatingWait").split("...")[0]}…</span>
+            </>
+          ) : isEnriched ? (
+            <>
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>{t("reading.grammar.lesson.reloadLesson")}</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>{t("reading.grammar.lesson.loadFullLesson")}</span>
+            </>
+          )}
+        </Button>
+        <Button variant="outline" size="sm" onClick={onHighlight}>
+          <Highlighter className="h-3 w-3 mr-1" />
+          {highlightActive ? t("reading.grammar.hideHighlight") : t("reading.grammar.showHighlight")}
+        </Button>
+      </div>
+
+      {/* ── Enriched sections (only when the lesson has been loaded) ── */}
+      {isEnriched && !isLoading && (
+        <div className="space-y-4 border-t pt-4 mt-2">
+          {/* When to Use + Signal Words */}
+          {topic.whenToUse && (
+            <div>
+              <h5 className="font-medium text-sm mb-1 flex items-center gap-1.5">
+                <Lightbulb className="h-4 w-4 text-amber-500" />
+                {t("reading.grammar.lesson.whenToUse")}
+              </h5>
+              <p className="text-sm text-muted-foreground">{topic.whenToUse}</p>
+              {topic.whenToUseZh && (
+                <p className="text-sm text-muted-foreground font-noto-sans-tc mt-1">{topic.whenToUseZh}</p>
+              )}
+              {topic.signalWords && topic.signalWords.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Tag className="h-3 w-3" />
+                    {t("reading.grammar.lesson.signalWords")}:
+                  </span>
+                  {topic.signalWords.map((w, i) => (
+                    <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 font-medium">
+                      {w}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Forms table */}
+          {topic.forms && (
+            <div>
+              <h5 className="font-medium text-sm mb-1">{t("reading.grammar.lesson.forms")}</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="border rounded p-2">
+                  <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">{t("reading.grammar.lesson.affirmative")}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{topic.forms.affirmative}</p>
+                </div>
+                <div className="border rounded p-2">
+                  <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">{t("reading.grammar.lesson.negative")}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{topic.forms.negative}</p>
+                </div>
+                <div className="border rounded p-2">
+                  <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">{t("reading.grammar.lesson.question")}</p>
+                  <p className="text-xs font-mono text-muted-foreground">{topic.forms.question}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Compare With */}
+          {topic.compareWith && (
+            <div>
+              <h5 className="font-medium text-sm mb-1 flex items-center gap-1.5">
+                <GitCompare className="h-4 w-4 text-purple-500" />
+                {t("reading.grammar.lesson.compareWith")}: <span className="text-purple-600 dark:text-purple-400">{topic.compareWith.structure}</span>
+              </h5>
+              <div className="bg-purple-50 dark:bg-purple-950/40 border-l-2 border-purple-400 px-3 py-2 rounded text-sm">
+                <p>{topic.compareWith.difference}</p>
+                {topic.compareWith.differenceZh && (
+                  <p className="font-noto-sans-tc mt-1 text-muted-foreground">{topic.compareWith.differenceZh}</p>
+                )}
+                {topic.compareWith.example && (
+                  <p className="italic mt-2 text-foreground">&ldquo;{topic.compareWith.example}&rdquo;</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Pronunciation Tips */}
+          {topic.pronunciationTips && (
+            <div>
+              <h5 className="font-medium text-sm mb-1 flex items-center gap-1.5">
+                <Volume2 className="h-4 w-4 text-cyan-500" />
+                {t("reading.grammar.lesson.pronunciationTips")}
+              </h5>
+              <div className="bg-cyan-50 dark:bg-cyan-950/40 px-3 py-2 rounded text-sm text-muted-foreground">
+                {topic.pronunciationTips}
+              </div>
+            </div>
+          )}
+
+          {/* Common Mistake Pairs (wrong → right) */}
+          {topic.commonMistakePairs && topic.commonMistakePairs.length > 0 && (
+            <div>
+              <h5 className="font-medium text-sm mb-1 flex items-center gap-1.5">
+                <XCircle className="h-4 w-4 text-rose-500" />
+                {t("reading.grammar.lesson.mistakePairs")}
+              </h5>
+              <div className="space-y-2">
+                {topic.commonMistakePairs.map((pair, i) => (
+                  <div key={i} className="border rounded overflow-hidden text-sm">
+                    <div className="flex items-start gap-2 bg-red-50 dark:bg-red-950/50 px-3 py-2">
+                      <span className="text-xs font-bold text-red-600 dark:text-red-400 shrink-0 mt-0.5">{t("reading.grammar.lesson.wrong")}</span>
+                      <span className="line-through text-muted-foreground">{pair.wrong}</span>
+                    </div>
+                    <div className="flex items-start gap-2 bg-green-50 dark:bg-green-950/50 px-3 py-2">
+                      <span className="text-xs font-bold text-green-600 dark:text-green-400 shrink-0 mt-0.5">{t("reading.grammar.lesson.right")}</span>
+                      <span className="text-foreground">{pair.right}</span>
+                    </div>
+                    <p className="px-3 py-1.5 text-xs text-muted-foreground border-t">{pair.explanation}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* CCQs — Check Your Understanding */}
+          {topic.ccqs && topic.ccqs.length > 0 && (
+            <div>
+              <h5 className="font-medium text-sm mb-1 flex items-center gap-1.5">
+                <ListChecks className="h-4 w-4 text-indigo-500" />
+                {t("reading.grammar.lesson.ccqTitle")}
+              </h5>
+              <div className="space-y-2">
+                {topic.ccqs.map((ccq, i) => (
+                  <div key={i} className="border rounded px-3 py-2 text-sm">
+                    <p className="font-medium">{ccq.question}</p>
+                    {revealedCcqs.has(i) ? (
+                      <p className="mt-1 text-green-600 dark:text-green-400 font-medium flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        {ccq.answer}
+                      </p>
+                    ) : (
+                      <Button variant="ghost" size="sm" className="mt-1 h-7 text-xs" onClick={() => toggleCcq(i)}>
+                        <Lightbulb className="h-3 w-3 mr-1" />
+                        {t("reading.grammar.lesson.ccqReveal")}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick Practice */}
+          {topic.guidedPractice && topic.guidedPractice.length > 0 && (
+            <div>
+              <h5 className="font-medium text-sm mb-1 flex items-center gap-1.5">
+                <Wand2 className="h-4 w-4 text-teal-500" />
+                {t("reading.grammar.lesson.practiceTitle")}
+              </h5>
+              <p className="text-xs text-muted-foreground mb-2">{t("reading.grammar.lesson.practiceHint")}</p>
+              <div className="space-y-3">
+                {topic.guidedPractice.map((item, index) => {
+                  const result = practiceResults[index];
+                  const isAnswered = !!result;
+                  return (
+                    <div key={index} className="border rounded p-3 text-sm">
+                      <p className="font-medium mb-2">{item.prompt}</p>
+                      {item.type === "choice" && item.options ? (
+                        <RadioGroup
+                          value={practiceInputs[index] || ""}
+                          onValueChange={(val) => setPracticeInputs((prev) => ({ ...prev, [index]: val }))}
+                          disabled={isAnswered && result.source === "instant"}
+                        >
+                          {item.options.map((opt, oi) => {
+                            const isCorrectOpt = isAnswered && (result.source === "instant"
+                              ? matchesAcceptable(opt, item.acceptableAnswers)
+                              : matchesAcceptable(opt, item.acceptableAnswers) && result.correct);
+                            return (
+                              <div key={oi} className="flex items-center gap-2 mb-1.5">
+                                <RadioGroupItem value={opt} id={`gp-${topic.id}-${index}-${oi}`} />
+                                <Label
+                                  htmlFor={`gp-${topic.id}-${index}-${oi}`}
+                                  className={cn(
+                                    "text-sm font-normal cursor-pointer",
+                                    isAnswered && matchesAcceptable(opt, item.acceptableAnswers) && "text-green-600 dark:text-green-400 font-medium"
+                                  )}
+                                >
+                                  {opt}
+                                </Label>
+                                {isCorrectOpt && <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />}
+                              </div>
+                            );
+                          })}
+                        </RadioGroup>
+                      ) : (
+                        <Input
+                          placeholder={t("reading.grammar.quiz.typeAnswer")}
+                          value={practiceInputs[index] || ""}
+                          onChange={(e) => setPracticeInputs((prev) => ({ ...prev, [index]: e.target.value }))}
+                          disabled={isAnswered && result.source === "instant"}
+                          className="text-sm"
+                        />
+                      )}
+
+                      {/* Result feedback */}
+                      {isAnswered && (
+                        <div className={cn(
+                          "mt-2 rounded px-2 py-1.5 text-xs",
+                          result.correct
+                            ? "bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-300"
+                            : "bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300"
+                        )}>
+                          <p className="font-medium flex items-center gap-1.5">
+                            {result.correct ? (
+                              <><CheckCircle2 className="h-3.5 w-3.5" /> {t("reading.grammar.lesson.practiceCorrect")}</>
+                            ) : (
+                              <><XCircle className="h-3.5 w-3.5" /> {t("reading.grammar.lesson.practiceIncorrect")}</>
+                            )}
+                            {result.source === "ai" && (
+                              <span className="text-muted-foreground font-normal">({result.correct ? t("reading.grammar.lesson.practiceAiCorrect") : t("reading.grammar.lesson.practiceAiIncorrect")})</span>
+                            )}
+                          </p>
+                          {!result.correct && result.source === "instant" && (
+                            <p className="mt-0.5 text-muted-foreground">
+                              {item.acceptableAnswers[0] && (
+                                <>{t("reading.grammar.quiz.correctAnswer")}: <span className="font-medium text-green-600 dark:text-green-400">{item.acceptableAnswers[0]}</span></>
+                              )}
+                            </p>
+                          )}
+                          <p className="mt-0.5">{result.aiFeedback || item.explanation}</p>
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2 mt-2">
+                        {!isAnswered && (
+                          <Button size="sm" variant="default" onClick={() => handleInstantCheck(item, index)} disabled={!(practiceInputs[index] || "").trim()}>
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            {t("reading.grammar.lesson.practiceSubmit")}
+                          </Button>
+                        )}
+                        {(!isAnswered || result.source !== "ai") && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAiHelp(item, index)}
+                            disabled={result?.aiLoading}
+                          >
+                            {result?.aiLoading ? (
+                              <><LoaderCircle className="h-3 w-3 mr-1 animate-spin" /> {t("reading.grammar.lesson.practiceAiThinking")}</>
+                            ) : (
+                              <><Sparkles className="h-3 w-3 mr-1" /> {t("reading.grammar.lesson.practiceAskAi")}</>
+                            )}
+                          </Button>
+                        )}
+                        {isAnswered && (
+                          <Button size="sm" variant="ghost" onClick={() => resetPracticeItem(index)}>
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            {t("reading.grammar.lesson.practiceTryAgain")}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Grammar() {
   const { t } = useTranslation();
   const {
@@ -253,7 +666,7 @@ function Grammar() {
     grammarQuizMode,
     setGrammarQuizMode,
   } = useReadingStore();
-  const { activeGenerations, analyzeGrammarTopics, generateGrammarQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer } = useReadingAssistant();
+  const { activeGenerations, analyzeGrammarTopics, generateGrammarLesson, evaluateGrammarPracticeItem, generateGrammarQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer } = useReadingAssistant();
   const { data: session } = useSession();
   const isTeacherOrAbove = session?.user?.role === "teacher" || session?.user?.role === "admin" || session?.user?.role === "super-admin";
 
@@ -529,8 +942,167 @@ function Grammar() {
           new Paragraph({ children: [new TextRun({ text: topic.commonMistakes })], spacing: { after: 40 } })
         );
         children.push(
-          new Paragraph({ children: [new TextRun({ text: topic.commonMistakesZh, color: "666666" })], spacing: { after: 200 } })
+          new Paragraph({ children: [new TextRun({ text: topic.commonMistakesZh, color: "666666" })], spacing: { after: 80 } })
         );
+
+        // ── Enriched lesson content (only when "Load Full Lesson" has run for this topic) ──
+        if (topic.whenToUse) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: t("reading.grammar.lesson.whenToUse"), bold: true })],
+              spacing: { before: 120, after: 40 },
+            })
+          );
+          children.push(new Paragraph({ children: [new TextRun({ text: topic.whenToUse })], spacing: { after: 40 } }));
+          children.push(new Paragraph({ children: [new TextRun({ text: topic.whenToUseZh, color: "666666" })], spacing: { after: 40 } }));
+          if (topic.signalWords && topic.signalWords.length > 0) {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `${t("reading.grammar.lesson.signalWords")}: `, bold: true }),
+                  new TextRun({ text: topic.signalWords.join(", ") }),
+                ],
+                spacing: { after: 80 },
+              })
+            );
+          }
+        }
+
+        if (topic.forms) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: t("reading.grammar.lesson.forms"), bold: true })],
+              spacing: { before: 120, after: 40 },
+            })
+          );
+          children.push(new Paragraph({
+            children: [
+              new TextRun({ text: `${t("reading.grammar.lesson.affirmative")}: `, bold: true }),
+              new TextRun({ text: topic.forms.affirmative }),
+            ],
+            spacing: { after: 40 },
+          }));
+          children.push(new Paragraph({
+            children: [
+              new TextRun({ text: `${t("reading.grammar.lesson.negative")}: `, bold: true }),
+              new TextRun({ text: topic.forms.negative }),
+            ],
+            spacing: { after: 40 },
+          }));
+          children.push(new Paragraph({
+            children: [
+              new TextRun({ text: `${t("reading.grammar.lesson.question")}: `, bold: true }),
+              new TextRun({ text: topic.forms.question }),
+            ],
+            spacing: { after: 80 },
+          }));
+        }
+
+        if (topic.compareWith) {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${t("reading.grammar.lesson.compareWith")}: `, bold: true }),
+                new TextRun({ text: topic.compareWith.structure }),
+              ],
+              spacing: { before: 120, after: 40 },
+            })
+          );
+          children.push(new Paragraph({ children: [new TextRun({ text: topic.compareWith.difference })], spacing: { after: 40 } }));
+          if (topic.compareWith.differenceZh) {
+            children.push(new Paragraph({ children: [new TextRun({ text: topic.compareWith.differenceZh, color: "666666" })], spacing: { after: 40 } }));
+          }
+          if (topic.compareWith.example) {
+            children.push(new Paragraph({ children: [new TextRun({ text: `\u201C${topic.compareWith.example}\u201D`, italics: true })], spacing: { after: 80 } }));
+          }
+        }
+
+        if (topic.pronunciationTips) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: t("reading.grammar.lesson.pronunciationTips"), bold: true })],
+              spacing: { before: 120, after: 40 },
+            })
+          );
+          children.push(new Paragraph({ children: [new TextRun({ text: topic.pronunciationTips })], spacing: { after: 80 } }));
+        }
+
+        if (topic.commonMistakePairs && topic.commonMistakePairs.length > 0) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: t("reading.grammar.lesson.mistakePairs"), bold: true })],
+              spacing: { before: 120, after: 40 },
+            })
+          );
+          topic.commonMistakePairs.forEach((pair) => {
+            children.push(new Paragraph({
+              children: [
+                new TextRun({ text: `${t("reading.grammar.lesson.wrong")}: `, bold: true, color: "EF4444" }),
+                new TextRun({ text: pair.wrong, color: "EF4444" }),
+              ],
+              spacing: { after: 20 },
+            }));
+            children.push(new Paragraph({
+              children: [
+                new TextRun({ text: `${t("reading.grammar.lesson.right")}: `, bold: true, color: "22C55E" }),
+                new TextRun({ text: pair.right, color: "22C55E" }),
+              ],
+              spacing: { after: 20 },
+            }));
+            children.push(new Paragraph({ children: [new TextRun({ text: pair.explanation, italics: true, size: 20 })], spacing: { after: 60 } }));
+          });
+        }
+
+        if (topic.ccqs && topic.ccqs.length > 0) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: t("reading.grammar.lesson.ccqTitle"), bold: true })],
+              spacing: { before: 120, after: 40 },
+            })
+          );
+          topic.ccqs.forEach((ccq, ci) => {
+            children.push(new Paragraph({
+              children: [
+                new TextRun({ text: `${ci + 1}. ${ccq.question} `, }),
+                new TextRun({ text: ccq.answer, bold: true, color: "22C55E" }),
+              ],
+              spacing: { after: 40 },
+            }));
+          });
+        }
+
+        if (topic.guidedPractice && topic.guidedPractice.length > 0) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: t("reading.grammar.lesson.practiceTitle"), bold: true })],
+              spacing: { before: 120, after: 40 },
+            })
+          );
+          topic.guidedPractice.forEach((item, pi) => {
+            children.push(new Paragraph({
+              children: [
+                new TextRun({ text: `${pi + 1}. ` }),
+                ...questionToTextRuns(item.prompt),
+              ],
+              spacing: { after: 40 },
+            }));
+            if (item.options) {
+              item.options.forEach((opt) => {
+                children.push(new Paragraph({ children: [new TextRun({ text: `   \u25EF ${opt}` })], spacing: { after: 20 } }));
+              });
+            }
+            children.push(new Paragraph({
+              children: [
+                new TextRun({ text: `${t("reading.grammar.quiz.correctAnswer")}: `, bold: true }),
+                new TextRun({ text: item.acceptableAnswers[0] || "", color: "22C55E" }),
+              ],
+              spacing: { after: 20 },
+            }));
+            children.push(new Paragraph({ children: [new TextRun({ text: item.explanation, italics: true, size: 20 })], spacing: { after: 80 } }));
+          });
+        }
+
+        children.push(new Paragraph({ children: [new TextRun({ text: "" })], spacing: { after: 200 } }));
       });
     }
 
@@ -822,68 +1394,23 @@ function Grammar() {
               </span>
               <span>{topic.name}</span>
               <span className="text-xs text-muted-foreground font-noto-sans-tc">({topic.nameZh})</span>
+              {topic.whenToUse && (
+                <span className="text-xs px-1.5 py-0.5 rounded bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 flex items-center gap-1">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  {t("reading.grammar.lesson.loadedHint")}
+                </span>
+              )}
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4 pt-2">
-              <div>
-                <h5 className="font-medium text-sm mb-1">{t("reading.grammar.whatIsIt")}</h5>
-                <p className="text-sm text-muted-foreground">{topic.explanation}</p>
-                <p className="text-sm text-muted-foreground font-noto-sans-tc mt-1">{topic.explanationZh}</p>
-              </div>
-
-              <div>
-                <h5 className="font-medium text-sm mb-1">{t("reading.grammar.pattern")}</h5>
-                <div className="font-mono bg-muted px-3 py-2 rounded text-sm">{topic.pattern}</div>
-              </div>
-
-              <div>
-                <h5 className="font-medium text-sm mb-1">{t("reading.grammar.examples")}</h5>
-                <div className="space-y-2">
-                  {topic.textSentences.map((s, i) => (
-                    <div
-                      key={`ts-${i}`}
-                      className="text-sm px-3 py-2 rounded bg-blue-50 dark:bg-blue-950 border-l-2 border-blue-400"
-                    >
-                      <p className="italic">&ldquo;{s}&rdquo;</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t("reading.grammar.fromThisText")}
-                      </p>
-                    </div>
-                  ))}
-                  {topic.examples.filter((ex) => ex.source !== "text").map((ex, i) => (
-                    <div
-                      key={`ex-${i}`}
-                      className="bg-muted text-sm px-3 py-2 rounded"
-                    >
-                      <p className="italic">&ldquo;{ex.sentence}&rdquo;</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t("reading.grammar.example")}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h5 className="font-medium text-sm mb-1">{t("reading.grammar.commonMistakes")}</h5>
-                <div className="bg-red-50 dark:bg-red-950 px-3 py-2 rounded text-sm">
-                  <p>{topic.commonMistakes}</p>
-                  <p className="font-noto-sans-tc mt-1 text-muted-foreground">{topic.commonMistakesZh}</p>
-                </div>
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleHighlightTopic(topic.id)}
-              >
-                <Highlighter className="h-3 w-3 mr-1" />
-                {grammarHighlightEnabled && grammarHighlightTopicId === topic.id
-                  ? t("reading.grammar.hideHighlight")
-                  : t("reading.grammar.showHighlight")}
-              </Button>
-            </div>
+            <GrammarLessonItem
+              topic={topic}
+              isLoading={!!activeGenerations[`grammar-lesson:${topic.id}`]}
+              onLoadLesson={() => generateGrammarLesson(topic.id)}
+              onHighlight={() => handleHighlightTopic(topic.id)}
+              highlightActive={grammarHighlightEnabled && grammarHighlightTopicId === topic.id}
+              evaluatePracticeItem={evaluateGrammarPracticeItem}
+            />
           </AccordionContent>
         </AccordionItem>
       ))}

@@ -125,6 +125,7 @@ export type GenerationType =
   | "grammar-workshop"
   | "grammar-surgery"
   | "grammar-questions"
+  | "grammar-lesson"
   | "sentence-analysis"
   | "tutor";
 
@@ -243,6 +244,7 @@ interface ReadingActions {
   setGlossary: (entries: GlossaryEntry[]) => void;
   setGlossaryRating: (word: string, rating: GlossaryRating) => void;
   setGrammarTopics: (topics: GrammarTopic[]) => void;
+  enrichGrammarTopic: (topicId: string, enrichment: Partial<GrammarTopic>) => void;
   setGrammarQuiz: (questions: GrammarQuizQuestion[]) => void;
   setGrammarQuizAnswer: (questionId: string, answer: string) => void;
   setGrammarQuizQuestionPoints: (questionId: string, points: number) => void;
@@ -277,7 +279,7 @@ interface ReadingActions {
   clearChatHistory: () => void;
   setStatus: (status: ReadingStatus) => void;
   setError: (error: string | null) => void;
-  setGenerating: (type: GenerationType, active: boolean) => void;
+  setGenerating: (type: string, active: boolean) => void;
   setStreaming: (value: boolean) => void;
   setOriginalDifficulty: (result: TextDifficultyResult | null) => void;
   setAdaptedDifficulty: (result: TextDifficultyResult | null) => void;
@@ -684,6 +686,20 @@ export const useReadingStore = create(
           const newState = {
             grammarTopics: topics,
             grammarGeneratedAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      enrichGrammarTopic: (topicId, enrichment) =>
+        set((state) => {
+          const newState = {
+            grammarTopics: state.grammarTopics.map((t) =>
+              t.id === topicId ? { ...t, ...enrichment } : t
+            ),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
