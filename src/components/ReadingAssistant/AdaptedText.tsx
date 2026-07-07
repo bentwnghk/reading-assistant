@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Suspense } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import {
   BookOpen,
@@ -1800,11 +1800,29 @@ function AdaptedText() {
                 <span>{t("reading.extractedText.analyzing")}</span>
               </div>
             ) : activeAnalysis?.analysis ? (
-              <MagicDown
-                value={activeAnalysis.analysis}
-                onChange={() => {}}
-                hideTools
-              />
+              // MagicDown is lazy-loaded via next/dynamic with no Suspense
+              // boundary of its own. Without a local <Suspense> here, the
+              // very first time it's rendered in the session its pending
+              // import bubbles up to the app's root Suspense boundary
+              // (page.tsx), which blanks the *entire* page until the chunk
+              // loads — collapsing document height to 0 and forcing
+              // window.scrollY to 0, which looks like the page "scrolling to
+              // the top". Scoping the fallback here keeps that loading state
+              // local to the dialog.
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                    <span>{t("reading.extractedText.analyzing")}</span>
+                  </div>
+                }
+              >
+                <MagicDown
+                  value={activeAnalysis.analysis}
+                  onChange={() => {}}
+                  hideTools
+                />
+              </Suspense>
             ) : null}
           </div>
         </DialogContent>
