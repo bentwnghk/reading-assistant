@@ -3162,7 +3162,7 @@
       "titleLabel": "Title",
       "titlePlaceholder": "Enter a title for this assignment",
       "subjectLabel": "Subject",
-      "subjectPlaceholder": "e.g. History, Geography, Science",
+      "subjectPlaceholder": "e.g. English, Geography, Science",
       "dueDateLabel": "Due date",
       "descriptionLabel": "Instructions (optional)",
       "descriptionPlaceholder": "Add any instructions for students…",
