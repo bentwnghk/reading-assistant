@@ -35,18 +35,19 @@ interface AssignRosterDialogProps {
 }
 
 const COMMON_SUBJECTS: Array<{ en: string; zh: string }> = [
-  { en: "History", zh: "歷史" },
+  { en: "English", zh: "英文" },
+  { en: "Math", zh: "數學" },
+  { en: "CES", zh: "公經社" },
   { en: "Geography", zh: "地理" },
+  { en: "History", zh: "歷史" },
   { en: "Science", zh: "科學" },
   { en: "Biology", zh: "生物" },
   { en: "Chemistry", zh: "化學" },
   { en: "Physics", zh: "物理" },
-  { en: "Math", zh: "數學" },
-  { en: "CES", zh: "公經社" },
   { en: "ICT", zh: "電腦" },
-  { en: "RS", zh: "宗教" },
   { en: "Music", zh: "音樂" },
-  { en: "Other", zh: "其他" },
+  { en: "RS", zh: "宗教" },
+  { en: "Others", zh: "其他" },
 ]
 
 export default function AssignRosterDialog({
