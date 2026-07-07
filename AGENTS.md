@@ -741,3 +741,34 @@ AI generation loading indicators (`isGenerating`, `isLoading`, etc.) **must** li
 - **The bug**: Loading state was tracked via `useState<ReadingStatus>` inside `useReadingAssistant` (component-local). When the user navigated to `/leaderboard` mid-generation, the component unmounted, the local state reset to `"idle"`, and the spinner disappeared. On return, the user saw no indication that generation was still running, could click "Generate" again, and two concurrent streams would interleave tokens into the same store field — corrupting the output.
 - **The fix**: All generation flags now live in `activeGenerations: Record<string, boolean>` in the reading store. The store is a module-level singleton that survives SPA navigation. Components read from the store, so spinners persist and buttons stay disabled across page transitions. Each generation function also has an early-return guard (`if (activeGenerations["type"]) return;`) as a belt-and-suspenders check.
 - **Key principle**: Any state that tracks an async operation whose lifecycle spans component unmount/remount (which includes ALL AI generations, since the user can navigate freely) must be in the store, not in `useState`. Component-local state is fine for ephemeral UI concerns (popups, selected items, streaming preview text) that have no meaning after unmount.
+
+### 9. `next/dynamic()` Components Need a Local `<Suspense>` Boundary
+
+Components loaded via `next/dynamic(() => import(...))` **without a `loading` option and without a local `<Suspense>` wrapper** will, on their very first render in a page session, suspend while their chunk loads. React bubbles that suspension up to the **nearest ancestor `<Suspense>`** — and in this app that is the root-level `<Suspense fallback={null}>` wrapping all of `<HomeContent />` in `src/app/page.tsx`. The result: the **entire page** is replaced by `null` (a blank document) until the chunk resolves (~100–400ms in dev, faster but still nonzero in production). Once the chunk loads, React restores the full tree and the browser recovers the prior scroll position.
+
+**Why this is deceptive**: The symptom usually reported is "the page scrolls to the top", but the actual cause is a **document height collapse**, not a scroll operation. No `scrollTo`/`focus`/`scrollTop` assignment is involved — it's invisible to JS-level instrumentation. `document.body.scrollHeight` reads `0` (with `documentElement.scrollHeight` reading exactly the viewport height) during the blank window.
+
+**The "only the first time" signature**: This class of bug **only reproduces once per page load** because the lazy chunk's import promise is cached in memory for the remainder of the session. If a user reports a symptom that happens on the first interaction after reload and never again, suspect a `next/dynamic()` / `React.lazy()` first-load suspension.
+
+**The fix**: Always wrap `<MagicDown>` (and any other `next/dynamic()` component) in a local `<Suspense fallback={...}>` at each call site so the loading state is scoped to that subtree instead of blanking the whole app:
+
+```tsx
+import { Suspense } from "react";
+
+<Suspense fallback={<LoadingSpinner />}>
+  <MagicDown value={...} onChange={...} hideTools />
+</Suspense>
+```
+
+**Diagnostic checklist** when investigating a "scroll jumps to top" / "page flashes blank" symptom:
+
+| Step | What to check | How |
+|------|---------------|-----|
+| 1. Is it a real scroll, or a document collapse? | Log `document.body.scrollHeight` in a `requestAnimationFrame` loop around the trigger | If it reads `0` during the symptom, the page content is gone, not scrolled |
+| 2. Is a lazy component mounting for the first time? | Look for `next/dynamic()` / `React.lazy()` in the subtree that just rendered | These suspend on first render only |
+| 3. Is there a local `<Suspense>` around it? | Check the JSX context of the lazy component usage | If not, the suspension bubbles to the root |
+| 4. Does the symptom only happen once per page load? | Reload and try the same action twice | "Only first time" = cached chunk promise afterwards |
+
+**Known call sites of `MagicDown` (all loaded via `next/dynamic()` without local Suspense — potential blank-page sites)**: `AdaptedText.tsx` (Sentence Analysis dialog — fixed), `Summary.tsx`, `MindMap.tsx`. If a similar symptom appears in those sections after a fresh page load, apply the same local `<Suspense>` wrap.
+
+**Why `onOpenAutoFocus={(e) => e.preventDefault()}` on the Radix `DialogContent` does NOT fix this**: That guards against focus-driven scroll (a real but different Radix behavior). It was the first attempted fix for the Sentence Analysis scroll-to-top bug and had zero effect, because the cause was the lazy import's Suspense suspension, not focus management. Don't conflate the two.
