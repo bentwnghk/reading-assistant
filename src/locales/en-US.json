@@ -940,7 +940,7 @@
         "items": {
           "topics": {
             "name": "Topics",
-            "desc": "AI finds grammar structures in the text (tenses, conditionals, passive voice and more) and shows quick overview cards."
+            "desc": "AI finds grammar structures in the text (tenses, conditionals, passive voice and more) and shows quick overview cards. Click 'View Lesson' on any card to jump straight to its lesson."
           },
           "lessons": {
             "name": "Lessons",
@@ -966,7 +966,7 @@
         "stepsTitle": "How to learn grammar here",
         "steps": {
           "s1": "Click Analyze Grammar to find the topics.",
-          "s2": "Browse the Topics, then open a topic under Lessons and click 'Load Full Lesson' for a complete breakdown.",
+          "s2": "Pick a Topic card and click 'View Lesson' to jump to it, then 'Load Full Lesson' for a complete breakdown.",
           "s3": "Use 'Highlight in Text' to spot each structure in the passage.",
           "s4": "Play the Games and take the Quiz to practise."
         },
