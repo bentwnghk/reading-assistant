@@ -260,13 +260,18 @@ function matchesAcceptable(userAnswer: string, acceptable: string[]): boolean {
   return acceptable.some((a) => normalizeAnswer(a) === norm);
 }
 
-// A practice item is "multi-part" when it is a fill-in item whose answer contains
-// a comma — e.g. "had not watered, would die". We use this to switch the input
-// placeholder to a hint asking the student to separate the parts with a comma.
+// A practice item is "multi-part" when the student must supply more than one
+// answer part. We detect this two ways so it works even if the AI omits commas:
+//   1. The answer contains a comma (e.g. "had not watered, would die"), OR
+//   2. The prompt itself shows 2+ blank markers (___), e.g.
+//      "___ ___ not easy _____ understand this lesson."
 // Rewrite/transformation answers are single full sentences that may contain
 // commas naturally, so they always use the default placeholder.
 function isMultiPartAnswer(item: GrammarGuidedPracticeItem): boolean {
-  return item.type === "fill-in" && item.acceptableAnswers.some((a) => a.includes(","));
+  if (item.type !== "fill-in") return false;
+  if (item.acceptableAnswers.some((a) => a.includes(","))) return true;
+  const blankCount = (item.prompt.match(/_{2,}/g) || []).length;
+  return blankCount >= 2;
 }
 
 /** One enriched grammar lesson inside an accordion item. Holds its own CCQ/practice state. */
