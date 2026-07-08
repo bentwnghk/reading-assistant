@@ -1765,6 +1765,7 @@ function Grammar() {
             items={[
               { key: "topics", icon: BookOpenCheck, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "lessons", icon: GraduationCap, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+              { key: "fullLesson", icon: Sparkles, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
               { key: "games", icon: Gamepad2, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
               { key: "quiz", icon: ClipboardList, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
               { key: "highlight", icon: Highlighter, bgClass: "bg-yellow-500/10", iconClass: "text-yellow-500" },

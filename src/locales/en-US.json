@@ -942,7 +942,11 @@
           },
           "lessons": {
             "name": "Lessons",
-            "desc": "Detailed explanations with the pattern, examples from your text and common mistakes."
+            "desc": "Each topic opens to an explanation, the pattern, examples from your text and common mistakes."
+          },
+          "fullLesson": {
+            "name": "Full Lesson",
+            "desc": "On any topic in Lessons, click 'Load Full Lesson' to unlock when-to-use notes, signal words, all three forms (affirmative / negative / question), a comparison with the most-confused structure, pronunciation tips, wrong→right pairs, concept questions and a quick practice the AI checks for you."
           },
           "games": {
             "name": "Grammar Games",
@@ -960,12 +964,12 @@
         "stepsTitle": "How to learn grammar here",
         "steps": {
           "s1": "Click Analyze Grammar to find the topics.",
-          "s2": "Browse the Topics or read the detailed Lessons.",
+          "s2": "Browse the Topics, then open a topic under Lessons and click 'Load Full Lesson' for a complete breakdown.",
           "s3": "Use 'Highlight in Text' to spot each structure in the passage.",
           "s4": "Play the Games and take the Quiz to practise."
         },
         "tipTitle": "Good to know",
-        "tipContent": "Game results come with performance tiers (Master / Great / Good / Keep Practicing) and fun celebratory effects!"
+        "tipContent": "In a Full Lesson, the Quick Practice is checked by the AI — so even open-ended answers get helpful feedback. Game results come with performance tiers (Master / Great / Good / Keep Practicing) and fun celebratory effects!"
       },
       "quiz": {
         "generate": "Generate Quiz",
