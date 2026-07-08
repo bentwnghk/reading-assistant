@@ -922,15 +922,13 @@
         "ccqHide": "隱藏答案",
         "practiceTitle": "快速練習",
         "practiceHint": "自己試一試，然後核對答案。",
+        "practiceTypeAnswerMulti": "輸入答案，各部分以逗號分隔（例如：had not watered, would die）…",
         "practiceSubmit": "核對",
         "practiceCorrect": "答對了！",
         "practiceIncorrect": "未完全正確。",
         "practiceTryAgain": "再試一次",
-        "practiceAskAi": "問 AI 協助",
         "practiceAiThinking": "思考中…",
-        "practiceAiError": "抱歉，AI 暫時無法評估這個答案，請改用即時核對。",
-        "practiceAiCorrect": "AI 表示：答對了！",
-        "practiceAiIncorrect": "AI 表示：未完全正確。"
+        "practiceAiError": "抱歉，AI 暫時無法評估這個答案，請稍後再試。"
       },
       "sentencesHighlighted": "{{count}} 個句子已標記",
       "sentenceHighlighted": "1 個句子已標記",

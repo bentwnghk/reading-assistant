@@ -922,15 +922,13 @@
         "ccqHide": "Hide Answer",
         "practiceTitle": "Quick Practice",
         "practiceHint": "Try it yourself, then check.",
+        "practiceTypeAnswerMulti": "Type your answers, separating each part with a comma (e.g. had not watered, would die)...",
         "practiceSubmit": "Check",
         "practiceCorrect": "Correct!",
         "practiceIncorrect": "Not quite.",
         "practiceTryAgain": "Try Again",
-        "practiceAskAi": "Ask AI for Help",
         "practiceAiThinking": "Thinking...",
-        "practiceAiError": "Sorry, the AI couldn't evaluate this answer. Try the instant check instead.",
-        "practiceAiCorrect": "The AI says: Correct!",
-        "practiceAiIncorrect": "The AI says: Not quite."
+        "practiceAiError": "Sorry, the AI couldn't evaluate this answer. Try again in a moment."
       },
       "sentencesHighlighted": "{{count}} sentences highlighted",
       "sentenceHighlighted": "1 sentence highlighted",

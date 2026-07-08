@@ -29,6 +29,7 @@ import {
   Sparkles,
   RotateCcw,
   Tag,
+  TriangleAlert,
 } from "lucide-react";
 import {
   Document,
@@ -259,6 +260,15 @@ function matchesAcceptable(userAnswer: string, acceptable: string[]): boolean {
   return acceptable.some((a) => normalizeAnswer(a) === norm);
 }
 
+// A practice item is "multi-part" when it is a fill-in item whose answer contains
+// a comma — e.g. "had not watered, would die". We use this to switch the input
+// placeholder to a hint asking the student to separate the parts with a comma.
+// Rewrite/transformation answers are single full sentences that may contain
+// commas naturally, so they always use the default placeholder.
+function isMultiPartAnswer(item: GrammarGuidedPracticeItem): boolean {
+  return item.type === "fill-in" && item.acceptableAnswers.some((a) => a.includes(","));
+}
+
 /** One enriched grammar lesson inside an accordion item. Holds its own CCQ/practice state. */
 function GrammarLessonItem({
   topic,
@@ -277,9 +287,11 @@ function GrammarLessonItem({
 }) {
   const { t } = useTranslation();
   const [revealedCcqs, setRevealedCcqs] = useState<Set<number>>(new Set());
-  // practiceAttempts: per-item-index state for the Quick Practice section
+  // Per-item-index state for the Quick Practice section. Answers are evaluated
+  // exclusively by the AI (client-side checking removed), because some practice
+  // answers are too complex for reliable normalized string comparison.
   const [practiceInputs, setPracticeInputs] = useState<Record<number, string>>({});
-  const [practiceResults, setPracticeResults] = useState<Record<number, { correct: boolean; aiFeedback?: string; aiLoading?: boolean; source: "instant" | "ai" }>>({});
+  const [practiceResults, setPracticeResults] = useState<Record<number, { correct: boolean; feedback?: string; loading?: boolean }>>({});
 
   const isEnriched = !!(topic.whenToUse || topic.forms || topic.signalWords || topic.compareWith || topic.ccqs || topic.guidedPractice);
 
@@ -292,18 +304,11 @@ function GrammarLessonItem({
     });
   };
 
-  const handleInstantCheck = (item: GrammarGuidedPracticeItem, index: number) => {
+  const handleCheck = async (item: GrammarGuidedPracticeItem, index: number) => {
     const answer = practiceInputs[index] || "";
-    if (!answer.trim()) return;
-    const correct = matchesAcceptable(answer, item.acceptableAnswers);
-    setPracticeResults((prev) => ({ ...prev, [index]: { correct, source: "instant" } }));
-  };
-
-  const handleAiHelp = async (item: GrammarGuidedPracticeItem, index: number) => {
-    const answer = practiceInputs[index] || "";
-    setPracticeResults((prev) => ({ ...prev, [index]: { ...(prev[index] || { correct: false }), aiLoading: true, source: "ai" } }));
+    setPracticeResults((prev) => ({ ...prev, [index]: { correct: false, loading: true } }));
     const result = await evaluatePracticeItem(item, answer);
-    setPracticeResults((prev) => ({ ...prev, [index]: { correct: result.correct, aiFeedback: result.feedback, aiLoading: false, source: "ai" } }));
+    setPracticeResults((prev) => ({ ...prev, [index]: { correct: result.correct, feedback: result.feedback, loading: false } }));
   };
 
   const resetPracticeItem = (index: number) => {
@@ -477,7 +482,7 @@ function GrammarLessonItem({
           {topic.commonMistakePairs && topic.commonMistakePairs.length > 0 && (
             <div>
               <h5 className="font-medium text-sm mb-1 flex items-center gap-1.5">
-                <XCircle className="h-4 w-4 text-rose-500" />
+                <TriangleAlert className="h-4 w-4 text-rose-500" />
                 {t("reading.grammar.lesson.mistakePairs")}
               </h5>
               <div className="space-y-2">
@@ -537,7 +542,7 @@ function GrammarLessonItem({
               <div className="space-y-3">
                 {topic.guidedPractice.map((item, index) => {
                   const result = practiceResults[index];
-                  const isAnswered = !!result;
+                  const isResolved = !!result && !result.loading;
                   return (
                     <div key={index} className="border rounded p-3 text-sm">
                       <p className="font-medium mb-2">{item.prompt}</p>
@@ -545,12 +550,10 @@ function GrammarLessonItem({
                         <RadioGroup
                           value={practiceInputs[index] || ""}
                           onValueChange={(val) => setPracticeInputs((prev) => ({ ...prev, [index]: val }))}
-                          disabled={isAnswered && result.source === "instant"}
+                          disabled={!!result}
                         >
                           {item.options.map((opt, oi) => {
-                            const isCorrectOpt = isAnswered && (result.source === "instant"
-                              ? matchesAcceptable(opt, item.acceptableAnswers)
-                              : matchesAcceptable(opt, item.acceptableAnswers) && result.correct);
+                            const isCorrectOpt = isResolved && matchesAcceptable(opt, item.acceptableAnswers);
                             return (
                               <div key={oi} className="flex items-center gap-2 mb-1.5">
                                 <RadioGroupItem value={opt} id={`gp-${topic.id}-${index}-${oi}`} />
@@ -558,7 +561,7 @@ function GrammarLessonItem({
                                   htmlFor={`gp-${topic.id}-${index}-${oi}`}
                                   className={cn(
                                     "text-sm font-normal cursor-pointer",
-                                    isAnswered && matchesAcceptable(opt, item.acceptableAnswers) && "text-green-600 dark:text-green-400 font-medium"
+                                    isCorrectOpt && "text-green-600 dark:text-green-400 font-medium"
                                   )}
                                 >
                                   {opt}
@@ -570,16 +573,18 @@ function GrammarLessonItem({
                         </RadioGroup>
                       ) : (
                         <Input
-                          placeholder={t("reading.grammar.quiz.typeAnswer")}
+                          placeholder={isMultiPartAnswer(item)
+                            ? t("reading.grammar.lesson.practiceTypeAnswerMulti")
+                            : t("reading.grammar.quiz.typeAnswer")}
                           value={practiceInputs[index] || ""}
                           onChange={(e) => setPracticeInputs((prev) => ({ ...prev, [index]: e.target.value }))}
-                          disabled={isAnswered && result.source === "instant"}
+                          disabled={!!result}
                           className="text-sm"
                         />
                       )}
 
-                      {/* Result feedback */}
-                      {isAnswered && (
+                      {/* AI result feedback */}
+                      {isResolved && (
                         <div className={cn(
                           "mt-2 rounded px-2 py-1.5 text-xs",
                           result.correct
@@ -592,44 +597,28 @@ function GrammarLessonItem({
                             ) : (
                               <><XCircle className="h-3.5 w-3.5" /> {t("reading.grammar.lesson.practiceIncorrect")}</>
                             )}
-                            {result.source === "ai" && (
-                              <span className="text-muted-foreground font-normal">({result.correct ? t("reading.grammar.lesson.practiceAiCorrect") : t("reading.grammar.lesson.practiceAiIncorrect")})</span>
-                            )}
                           </p>
-                          {!result.correct && result.source === "instant" && (
-                            <p className="mt-0.5 text-muted-foreground">
-                              {item.acceptableAnswers[0] && (
-                                <>{t("reading.grammar.quiz.correctAnswer")}: <span className="font-medium text-green-600 dark:text-green-400">{item.acceptableAnswers[0]}</span></>
-                              )}
-                            </p>
-                          )}
-                          <p className="mt-0.5">{result.aiFeedback || item.explanation}</p>
+                          {result.feedback && <p className="mt-0.5">{result.feedback}</p>}
                         </div>
                       )}
 
                       {/* Action buttons */}
                       <div className="flex gap-2 mt-2">
-                        {!isAnswered && (
-                          <Button size="sm" variant="default" onClick={() => handleInstantCheck(item, index)} disabled={!(practiceInputs[index] || "").trim()}>
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            {t("reading.grammar.lesson.practiceSubmit")}
-                          </Button>
-                        )}
-                        {(!isAnswered || result.source !== "ai") && (
+                        {!isResolved && (
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => handleAiHelp(item, index)}
-                            disabled={result?.aiLoading}
+                            variant="default"
+                            onClick={() => handleCheck(item, index)}
+                            disabled={result?.loading || !(practiceInputs[index] || "").trim()}
                           >
-                            {result?.aiLoading ? (
+                            {result?.loading ? (
                               <><LoaderCircle className="h-3 w-3 mr-1 animate-spin" /> {t("reading.grammar.lesson.practiceAiThinking")}</>
                             ) : (
-                              <><Sparkles className="h-3 w-3 mr-1" /> {t("reading.grammar.lesson.practiceAskAi")}</>
+                              <><Sparkles className="h-3 w-3 mr-1" /> {t("reading.grammar.lesson.practiceSubmit")}</>
                             )}
                           </Button>
                         )}
-                        {isAnswered && (
+                        {isResolved && (
                           <Button size="sm" variant="ghost" onClick={() => resetPracticeItem(index)}>
                             <RotateCcw className="h-3 w-3 mr-1" />
                             {t("reading.grammar.lesson.practiceTryAgain")}
