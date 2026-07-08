@@ -4,6 +4,10 @@ import { toast } from "sonner";
 import i18next from "i18next";
 import { markLastOpenedSession, useSettingStore } from "@/store/setting";
 import { useReadingStore, setStreamingFlag } from "@/store/reading";
+import {
+  getAbortController,
+  removeAbortController,
+} from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import useModelProvider from "@/hooks/useAiProvider";
 import {
@@ -70,6 +74,29 @@ function getFallbackModel(): Promise<string> {
   return _fallbackModelPromise;
 }
 
+/**
+ * Creates a closure that captures the current session ID and returns true as
+ * long as the reading store still holds that same session.  Used to guard
+ * writes inside async generation functions so a stale generation (whose
+ * session was replaced via restore/reset) never clobbers the new session.
+ */
+function createSessionGuard(): () => boolean {
+  const sessionId = useReadingStore.getState().id;
+  return () => useReadingStore.getState().id === sessionId;
+}
+
+/** True when the error is (or wraps) an AbortError. */
+function isAbortError(error: unknown): boolean {
+  if (!error) return false;
+  if (typeof error === "object" && "name" in error && (error as { name: string }).name === "AbortError") return true;
+  return false;
+}
+
+/** Notifies the user that a generation was cancelled by a session switch. */
+function notifyGenerationCancelled() {
+  toast.warning(i18next.t("reading.generationCancelled"));
+}
+
 function useReadingAssistant() {
   const { 
     smoothTextStreamType, 
@@ -84,19 +111,20 @@ function useReadingAssistant() {
   const { createModelProvider } = useModelProvider();
   const { setGenerating } = readingStore;
 
-  async function grammarGenerateText(prompt: string, system: string): Promise<string> {
+  async function grammarGenerateText(prompt: string, system: string, signal?: AbortSignal): Promise<string> {
     const { grammarModel: model } = useSettingStore.getState();
     const FALLBACK_MODEL = await getFallbackModel();
     try {
       const aiModel = await createModelProvider(model);
-      const result = await generateText({ model: aiModel, system, prompt });
+      const result = await generateText({ model: aiModel, system, prompt, abortSignal: signal });
       return stripMarkdownFences(result.text);
     } catch (primaryError) {
+      if (signal?.aborted || isAbortError(primaryError)) throw primaryError;
       if (model === FALLBACK_MODEL) throw primaryError;
       console.warn("Grammar model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
       try {
         const fbModel = await createModelProvider(FALLBACK_MODEL);
-        const result = await generateText({ model: fbModel, system, prompt });
+        const result = await generateText({ model: fbModel, system, prompt, abortSignal: signal });
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Grammar fallback also failed:", fallbackError);
@@ -105,19 +133,20 @@ function useReadingAssistant() {
     }
   }
 
-  async function readingTestGenerateText(prompt: string, system: string): Promise<string> {
+  async function readingTestGenerateText(prompt: string, system: string, signal?: AbortSignal): Promise<string> {
     const { readingTestModel: model } = useSettingStore.getState();
     const FALLBACK_MODEL = await getFallbackModel();
     try {
       const aiModel = await createModelProvider(model);
-      const result = await generateText({ model: aiModel, system, prompt });
+      const result = await generateText({ model: aiModel, system, prompt, abortSignal: signal });
       return stripMarkdownFences(result.text);
     } catch (primaryError) {
+      if (signal?.aborted || isAbortError(primaryError)) throw primaryError;
       if (model === FALLBACK_MODEL) throw primaryError;
       console.warn("Reading test model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
       try {
         const fbModel = await createModelProvider(FALLBACK_MODEL);
-        const result = await generateText({ model: fbModel, system, prompt });
+        const result = await generateText({ model: fbModel, system, prompt, abortSignal: signal });
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Reading test fallback also failed:", fallbackError);
@@ -126,18 +155,19 @@ function useReadingAssistant() {
     }
   }
 
-  async function glossaryGenerateText(prompt: string, system: string, model: string): Promise<string> {
+  async function glossaryGenerateText(prompt: string, system: string, model: string, signal?: AbortSignal): Promise<string> {
     const FALLBACK_MODEL = await getFallbackModel();
     try {
       const aiModel = await createModelProvider(model);
-      const result = await generateText({ model: aiModel, system, prompt });
+      const result = await generateText({ model: aiModel, system, prompt, abortSignal: signal });
       return stripMarkdownFences(result.text);
     } catch (primaryError) {
+      if (signal?.aborted || isAbortError(primaryError)) throw primaryError;
       if (model === FALLBACK_MODEL) throw primaryError;
       console.warn("Glossary model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
       try {
         const fbModel = await createModelProvider(FALLBACK_MODEL);
-        const result = await generateText({ model: fbModel, system, prompt });
+        const result = await generateText({ model: fbModel, system, prompt, abortSignal: signal });
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Glossary fallback also failed:", fallbackError);
@@ -148,6 +178,8 @@ function useReadingAssistant() {
 
   async function extractTextFromImage(imageData: string) {
     if (useReadingStore.getState().activeGenerations["extracting"]) return "";
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("extracting");
     const { setExtractedText, setError, addOriginalImage } = readingStore;
     setGenerating("extracting", true);
     addOriginalImage(imageData);
@@ -174,7 +206,9 @@ function useReadingAssistant() {
           },
         ],
         experimental_transform: smoothTextStream(smoothTextStreamType),
+        abortSignal: ac.signal,
         onError: (error) => {
+          if (!isSameSession() || ac.signal.aborted) return;
           const msg = handleError(error);
           setError(msg);
           setGenerating("extracting", false);
@@ -189,12 +223,20 @@ function useReadingAssistant() {
       setStreamingFlag(true);
       try {
         for await (const textPart of result.textStream) {
+          if (!isSameSession() || ac.signal.aborted) break;
           text += textPart;
           setExtractedText(text);
         }
       } finally {
         setStreamingFlag(false);
       }
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("extracting", false);
+        return "";
+      }
+
       setExtractedText(text);
 
       const { id } = useReadingStore.getState();
@@ -206,15 +248,24 @@ function useReadingAssistant() {
       return text;
     } catch (error) {
       setStreamingFlag(false);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("extracting", false);
+        return "";
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("extracting", false);
       return "";
+    } finally {
+      removeAbortController("extracting");
     }
   }
 
   async function generateTitle() {
     if (useReadingStore.getState().activeGenerations["title"]) return "";
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("title");
     const { extractedText, setDocTitle } = useReadingStore.getState();
     
     if (!extractedText) return "";
@@ -228,8 +279,15 @@ function useReadingAssistant() {
       const { text: llmTitle } = await generateText({
         model: titleModel,
         prompt: `You are a helpful assistant. Read the following text and reply with ONLY a concise, descriptive title for it (5–10 words, no punctuation at the end, no quotation marks).\n\n${titleText}`,
+        abortSignal: ac.signal,
       });
       
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("title", false);
+        return "";
+      }
+
       const cleaned = llmTitle.trim().replace(/^["'""'']|["'""'']$/g, "");
       if (cleaned) {
         setDocTitle(cleaned);
@@ -241,15 +299,23 @@ function useReadingAssistant() {
       setGenerating("title", false);
       return cleaned;
     } catch {
+      if (!isSameSession()) {
+        setGenerating("title", false);
+        return "";
+      }
       const fallbackTitle = extractedText.split(/\n/).find((l) => l.trim()) ?? "";
       if (fallbackTitle) setDocTitle(fallbackTitle.slice(0, 80));
       setGenerating("title", false);
       return fallbackTitle.slice(0, 80);
+    } finally {
+      removeAbortController("title");
     }
   }
 
   async function generateSummary() {
     if (useReadingStore.getState().activeGenerations["summary"]) return "";
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("summary");
     const { studentAge, extractedText, setSummary, setError } = readingStore;
     
     if (!extractedText) {
@@ -267,7 +333,9 @@ function useReadingAssistant() {
         system: getSystemPrompt(),
         prompt: generateSummaryPrompt(studentAge, extractedText),
         experimental_transform: smoothTextStream(smoothTextStreamType),
+        abortSignal: ac.signal,
         onError: (error) => {
+          if (!isSameSession() || ac.signal.aborted) return;
           const msg = handleError(error);
           setError(msg);
           setGenerating("summary", false);
@@ -278,27 +346,44 @@ function useReadingAssistant() {
       setStreamingFlag(true);
       try {
         for await (const textPart of result.textStream) {
+          if (!isSameSession() || ac.signal.aborted) break;
           text += textPart;
           setSummary(text);
         }
       } finally {
         setStreamingFlag(false);
       }
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("summary", false);
+        return "";
+      }
+
       setSummary(text);
 
       setGenerating("summary", false);
       return text;
     } catch (error) {
       setStreamingFlag(false);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("summary", false);
+        return "";
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("summary", false);
       return "";
+    } finally {
+      removeAbortController("summary");
     }
   }
 
   async function adaptText() {
     if (useReadingStore.getState().activeGenerations["adapted-text"]) return "";
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("adapted-text");
     const { studentAge, extractedText, setAdaptedText, setError } = readingStore;
     
     if (!extractedText) {
@@ -316,7 +401,9 @@ function useReadingAssistant() {
         system: getSystemPrompt(),
         prompt: adaptTextPrompt(studentAge, extractedText),
         experimental_transform: smoothTextStream(smoothTextStreamType),
+        abortSignal: ac.signal,
         onError: (error) => {
+          if (!isSameSession() || ac.signal.aborted) return;
           const msg = handleError(error);
           setError(msg);
           setGenerating("adapted-text", false);
@@ -327,12 +414,20 @@ function useReadingAssistant() {
       setStreamingFlag(true);
       try {
         for await (const textPart of result.textStream) {
+          if (!isSameSession() || ac.signal.aborted) break;
           text += textPart;
           setAdaptedText(text);
         }
       } finally {
         setStreamingFlag(false);
       }
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("adapted-text", false);
+        return "";
+      }
+
       setAdaptedText(text);
 
       if (text.trim()) {
@@ -343,15 +438,24 @@ function useReadingAssistant() {
       return text;
     } catch (error) {
       setStreamingFlag(false);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("adapted-text", false);
+        return "";
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("adapted-text", false);
       return "";
+    } finally {
+      removeAbortController("adapted-text");
     }
   }
 
   async function simplifyText() {
     if (useReadingStore.getState().activeGenerations["simplified-text"]) return "";
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("simplified-text");
     const { studentAge, adaptedText, simplifiedText, setSimplifiedText, setError } = readingStore;
     
     const textToSimplify = simplifiedText || adaptedText;
@@ -371,7 +475,9 @@ function useReadingAssistant() {
         system: getSystemPrompt(),
         prompt: simplifyTextPrompt(studentAge, textToSimplify),
         experimental_transform: smoothTextStream(smoothTextStreamType),
+        abortSignal: ac.signal,
         onError: (error) => {
+          if (!isSameSession() || ac.signal.aborted) return;
           const msg = handleError(error);
           setError(msg);
           setGenerating("simplified-text", false);
@@ -382,12 +488,20 @@ function useReadingAssistant() {
       setStreamingFlag(true);
       try {
         for await (const textPart of result.textStream) {
+          if (!isSameSession() || ac.signal.aborted) break;
           text += textPart;
           setSimplifiedText(text);
         }
       } finally {
         setStreamingFlag(false);
       }
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("simplified-text", false);
+        return "";
+      }
+
       setSimplifiedText(text);
 
       if (text.trim()) {
@@ -398,15 +512,24 @@ function useReadingAssistant() {
       return text;
     } catch (error) {
       setStreamingFlag(false);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("simplified-text", false);
+        return "";
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("simplified-text", false);
       return "";
+    } finally {
+      removeAbortController("simplified-text");
     }
   }
 
   async function generateMindMap(useChinese: boolean = false) {
     if (useReadingStore.getState().activeGenerations["mindmap"]) return "";
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("mindmap");
     const { studentAge, extractedText, setMindMap, setError } = readingStore;
     
     if (!extractedText) {
@@ -424,7 +547,9 @@ function useReadingAssistant() {
         system: getSystemPrompt(),
         prompt: generateMindMapPrompt(studentAge, extractedText, useChinese),
         experimental_transform: smoothTextStream(smoothTextStreamType),
+        abortSignal: ac.signal,
         onError: (error) => {
+          if (!isSameSession() || ac.signal.aborted) return;
           const msg = handleError(error);
           setError(msg);
           setGenerating("mindmap", false);
@@ -435,12 +560,20 @@ function useReadingAssistant() {
       setStreamingFlag(true);
       try {
         for await (const textPart of result.textStream) {
+          if (!isSameSession() || ac.signal.aborted) break;
           text += textPart;
           setMindMap(text);
         }
       } finally {
         setStreamingFlag(false);
       }
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("mindmap", false);
+        return "";
+      }
+
       setMindMap(text);
 
       if (text.trim()) {
@@ -451,15 +584,24 @@ function useReadingAssistant() {
       return text;
     } catch (error) {
       setStreamingFlag(false);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("mindmap", false);
+        return "";
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("mindmap", false);
       return "";
+    } finally {
+      removeAbortController("mindmap");
     }
   }
 
   async function generateVisualization(useChinese: boolean = false): Promise<number | null> {
     if (useReadingStore.getState().activeGenerations["visualization"]) return null;
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("visualization");
     const { studentAge, extractedText, setVisualizationImage, setError } = readingStore;
 
     if (!extractedText) {
@@ -493,6 +635,7 @@ function useReadingAssistant() {
         method: "POST",
         headers,
         body: JSON.stringify({ text: extractedText, studentAge, useChinese, mode }),
+        signal: ac.signal,
       });
 
       if (!response.ok) {
@@ -516,6 +659,12 @@ function useReadingAssistant() {
         throw new Error("No image in response");
       }
 
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("visualization", false);
+        return null;
+      }
+
       setVisualizationImage(data.image);
 
       logActivity("visualization_generate", { sessionId: readingStore.id || undefined });
@@ -525,15 +674,24 @@ function useReadingAssistant() {
       return typeof data.remaining === "number" ? data.remaining : null;
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("visualization", false);
+        return null;
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("visualization", false);
       return null;
+    } finally {
+      removeAbortController("visualization");
     }
   }
 
   async function generateReadingTest(questionCounts: ReadingTestQuestionCounts) {
     if (useReadingStore.getState().activeGenerations["reading-test"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("reading-test");
     const { studentAge, extractedText, setReadingTest, setError } = readingStore;
     
     if (!extractedText) {
@@ -549,7 +707,15 @@ function useReadingAssistant() {
       const text = await readingTestGenerateText(
         generateReadingTestPrompt(extractedText, studentAge, questionCounts),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("reading-test", false);
+        return [];
+      }
 
       const questions: ReadingTestQuestion[] = JSON.parse(text);
       const sorted = sortQuestionsByParagraph(questions);
@@ -560,15 +726,24 @@ function useReadingAssistant() {
       return sorted;
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("reading-test", false);
+        return [];
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("reading-test", false);
       return [];
+    } finally {
+      removeAbortController("reading-test");
     }
   }
 
   async function generateGlossary() {
     if (useReadingStore.getState().activeGenerations["glossary"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("glossary");
     const { extractedText, highlightedWords, setGlossary, setError } = readingStore;
     
     if (!extractedText) {
@@ -590,7 +765,15 @@ function useReadingAssistant() {
         generateGlossaryPrompt(extractedText, highlightedWords),
         getSystemPrompt(),
         glossaryModel,
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("glossary", false);
+        return [];
+      }
 
       const entries: GlossaryEntry[] = JSON.parse(text);
       setGlossary(entries);
@@ -606,15 +789,24 @@ function useReadingAssistant() {
       return entries;
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("glossary", false);
+        return [];
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("glossary", false);
       return [];
+    } finally {
+      removeAbortController("glossary");
     }
   }
 
   async function suggestVocabulary(count: number) {
     if (useReadingStore.getState().activeGenerations["vocabulary-suggest"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("vocabulary-suggest");
     const { extractedText, studentAge, highlightedWords, setHighlightedWords } = readingStore;
 
     if (!extractedText) {
@@ -630,7 +822,15 @@ function useReadingAssistant() {
         suggestVocabularyPrompt(studentAge, extractedText, count),
         getSystemPrompt(),
         glossaryModel,
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("vocabulary-suggest", false);
+        return [];
+      }
 
       const parsed = z
         .array(z.string())
@@ -666,9 +866,16 @@ function useReadingAssistant() {
       return newWords;
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("vocabulary-suggest", false);
+        return [];
+      }
       handleError(error);
       setGenerating("vocabulary-suggest", false);
       return [];
+    } finally {
+      removeAbortController("vocabulary-suggest");
     }
   }
 
@@ -721,6 +928,7 @@ function useReadingAssistant() {
     userAnswer: string,
     maxPoints: number
   ) {
+    const isSameSession = createSessionGuard();
     const { setQuestionEarnedPoints } = readingStore;
     
     if (!userAnswer.trim()) {
@@ -755,6 +963,8 @@ Guidelines:
         getSystemPrompt(),
       );
 
+      if (!isSameSession()) return { earnedPoints: 0, feedback: "Session changed." };
+
       const evaluation = JSON.parse(text);
       const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
       
@@ -763,6 +973,7 @@ Guidelines:
       return { earnedPoints, feedback: evaluation.feedback };
     } catch (error) {
       console.error("Error evaluating short answer:", error);
+      if (!isSameSession()) return { earnedPoints: 0, feedback: "Session changed." };
       setQuestionEarnedPoints(questionId, 0);
       return { earnedPoints: 0, feedback: "Could not evaluate answer." };
     }
@@ -770,6 +981,8 @@ Guidelines:
 
   async function generateTargetedPractice(missedSkills: ReadingTestSkill[]) {
     if (useReadingStore.getState().activeGenerations["targeted-practice"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("targeted-practice");
     const { studentAge, extractedText, setReadingTest, setError } = readingStore;
     
     if (!extractedText) {
@@ -790,7 +1003,15 @@ Guidelines:
       const text = await readingTestGenerateText(
         generateTargetedPracticePrompt(extractedText, studentAge, missedSkills),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("targeted-practice", false);
+        return [];
+      }
 
       const questions: ReadingTestQuestion[] = JSON.parse(text);
       const sorted = sortQuestionsByParagraph(questions);
@@ -804,10 +1025,17 @@ Guidelines:
       return sorted;
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("targeted-practice", false);
+        return [];
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("targeted-practice", false);
       return [];
+    } finally {
+      removeAbortController("targeted-practice");
     }
   }
 
@@ -819,6 +1047,8 @@ Guidelines:
     onChunk?: (chunk: string) => void,
     useChinese: boolean = false
   ): Promise<string> {
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("tutor");
     const { studentAge, extractedText } = useReadingStore.getState();
     const { tutorModel, basicTutorModel } = useSettingStore.getState();
     
@@ -877,29 +1107,47 @@ Guidelines:
         system: readingTutorSystemPrompt(studentAge, extractedText, useChinese),
         messages,
         experimental_transform: smoothTextStream(smoothTextStreamType),
+        abortSignal: ac.signal,
         onError: (error) => {
+          if (!isSameSession() || ac.signal.aborted) return;
           handleError(error);
         },
       });
 
       for await (const textPart of result.textStream) {
+        if (!isSameSession() || ac.signal.aborted) break;
         fullResponse += textPart;
         if (onChunk) {
           onChunk(fullResponse);
         }
       }
 
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("tutor", false);
+        return "";
+      }
+
       setGenerating("tutor", false);
       return fullResponse;
     } catch (error) {
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("tutor", false);
+        return "";
+      }
       handleError(error);
       setGenerating("tutor", false);
       return "";
+    } finally {
+      removeAbortController("tutor");
     }
   }
 
   async function analyzeGrammarTopics() {
     if (useReadingStore.getState().activeGenerations["grammar-topics"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("grammar-topics");
     const { studentAge, extractedText, setGrammarTopics, setError } = readingStore;
 
     if (!extractedText) {
@@ -915,7 +1163,15 @@ Guidelines:
       const text = await grammarGenerateText(
         analyzeGrammarTopicsPrompt(studentAge, extractedText),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("grammar-topics", false);
+        return [];
+      }
 
       const topics: GrammarTopic[] = JSON.parse(text);
       setGrammarTopics(topics);
@@ -935,10 +1191,17 @@ Guidelines:
       return topics;
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-topics", false);
+        return [];
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("grammar-topics", false);
       return [];
+    } finally {
+      removeAbortController("grammar-topics");
     }
   }
 
@@ -946,6 +1209,8 @@ Guidelines:
   async function generateGrammarLesson(topicId: string) {
     const key = `grammar-lesson:${topicId}`;
     if (useReadingStore.getState().activeGenerations[key]) return;
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController(key);
     const { studentAge, extractedText, grammarTopics } = readingStore;
     const topic = grammarTopics.find((t) => t.id === topicId);
     if (!topic || !extractedText) return;
@@ -956,15 +1221,26 @@ Guidelines:
       const text = await grammarGenerateText(
         generateGrammarLessonPrompt(topic, extractedText, studentAge),
         getSystemPrompt(),
+        ac.signal,
       );
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        return;
+      }
       const enrichment: GrammarLessonEnrichment = JSON.parse(text);
       readingStore.enrichGrammarTopic(topicId, enrichment);
       toast.dismiss(toastId);
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        return;
+      }
       handleError(error);
     } finally {
-      setGenerating(key, false);
+      if (isSameSession()) setGenerating(key, false);
+      removeAbortController(key);
     }
   }
 
@@ -973,11 +1249,13 @@ Guidelines:
     item: GrammarGuidedPracticeItem,
     userAnswer: string
   ): Promise<{ correct: boolean; feedback: string }> {
+    const isSameSession = createSessionGuard();
     try {
       const text = await grammarGenerateText(
         evaluateGrammarPracticePrompt(item, userAnswer),
         getSystemPrompt(),
       );
+      if (!isSameSession()) return { correct: false, feedback: "Session changed." };
       const result = JSON.parse(text);
       return {
         correct: !!result.correct,
@@ -991,6 +1269,8 @@ Guidelines:
 
   async function generateGrammarQuiz() {
     if (useReadingStore.getState().activeGenerations["grammar-quiz"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("grammar-quiz");
     const { studentAge, extractedText, grammarTopics, setGrammarQuiz, setError } = readingStore;
 
     if (!extractedText) {
@@ -1011,7 +1291,15 @@ Guidelines:
       const text = await grammarGenerateText(
         generateGrammarQuizPrompt(extractedText, studentAge, grammarTopics),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("grammar-quiz", false);
+        return [];
+      }
 
       const raw: GrammarQuizQuestion[] = JSON.parse(text);
       const questions = raw.map((q) => {
@@ -1035,10 +1323,17 @@ Guidelines:
       return questions;
     } catch (error) {
       toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-quiz", false);
+        return [];
+      }
       const msg = handleError(error);
       setError(msg);
       setGenerating("grammar-quiz", false);
       return [];
+    } finally {
+      removeAbortController("grammar-quiz");
     }
   }
 
@@ -1087,6 +1382,7 @@ Guidelines:
     userAnswer: string,
     maxPoints: number
   ) {
+    const isSameSession = createSessionGuard();
     const { setGrammarQuizQuestionPoints } = readingStore;
 
     if (!userAnswer.trim()) {
@@ -1100,6 +1396,8 @@ Guidelines:
         getSystemPrompt(),
       );
 
+      if (!isSameSession()) return { earnedPoints: 0, feedback: "Session changed." };
+
       const evaluation = JSON.parse(text);
       const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
 
@@ -1108,6 +1406,7 @@ Guidelines:
       return { earnedPoints, feedback: evaluation.feedback };
     } catch (error) {
       console.error("Error evaluating grammar answer:", error);
+      if (!isSameSession()) return { earnedPoints: 0, feedback: "Session changed." };
       setGrammarQuizQuestionPoints(questionId, 0);
       return { earnedPoints: 0, feedback: "Could not evaluate answer." };
     }
@@ -1118,6 +1417,8 @@ Guidelines:
   /** Generates (or refreshes) Error Surgery challenges using grammarTopics. */
   async function generateErrorSurgeryContent(): Promise<ErrorSurgeryChallenge[]> {
     if (useReadingStore.getState().activeGenerations["grammar-surgery"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("grammar-surgery");
     const { grammarTopics, studentAge, setGrammarErrorChallenges } = readingStore;
 
     if (grammarTopics.length === 0) return [];
@@ -1127,22 +1428,38 @@ Guidelines:
       const text = await grammarGenerateText(
         generateErrorSurgeryPrompt(grammarTopics, studentAge),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-surgery", false);
+        return [];
+      }
 
       const challenges: ErrorSurgeryChallenge[] = JSON.parse(text);
       setGrammarErrorChallenges(challenges);
       setGenerating("grammar-surgery", false);
       return challenges;
     } catch (error) {
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-surgery", false);
+        return [];
+      }
       handleError(error);
       setGenerating("grammar-surgery", false);
       return [];
+    } finally {
+      removeAbortController("grammar-surgery");
     }
   }
 
   /** Generates (or refreshes) Word Order Scramble challenges, persisted to store. */
   async function generateGrammarScrambleContent(): Promise<GrammarScrambleChallenge[]> {
     if (useReadingStore.getState().activeGenerations["grammar-scramble"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("grammar-scramble");
     const { grammarTopics, studentAge, setGrammarScrambleChallenges } = readingStore;
 
     if (grammarTopics.length === 0) return [];
@@ -1152,22 +1469,38 @@ Guidelines:
       const text = await grammarGenerateText(
         generateGrammarScramblePrompt(grammarTopics, studentAge),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-scramble", false);
+        return [];
+      }
 
       const challenges = JSON.parse(text) as GrammarScrambleChallenge[];
       setGrammarScrambleChallenges(challenges);
       setGenerating("grammar-scramble", false);
       return challenges;
     } catch (error) {
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-scramble", false);
+        return [];
+      }
       handleError(error);
       setGenerating("grammar-scramble", false);
       return [];
+    } finally {
+      removeAbortController("grammar-scramble");
     }
   }
 
   /** Generates (or refreshes) Grammar Workshop slot-fill challenges, persisted to store. */
   async function generateGrammarWorkshopContent(): Promise<GrammarWorkshopChallenge[]> {
     if (useReadingStore.getState().activeGenerations["grammar-workshop"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("grammar-workshop");
     const { grammarTopics, studentAge, setGrammarWorkshopChallenges } = readingStore;
 
     if (grammarTopics.length === 0) return [];
@@ -1177,7 +1510,14 @@ Guidelines:
       const text = await grammarGenerateText(
         generateGrammarWorkshopPrompt(grammarTopics, studentAge),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-workshop", false);
+        return [];
+      }
 
       const raw = JSON.parse(text) as GrammarWorkshopChallenge[];
       const challenges = raw.map((c) => {
@@ -1192,15 +1532,24 @@ Guidelines:
       setGenerating("grammar-workshop", false);
       return challenges;
     } catch (error) {
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-workshop", false);
+        return [];
+      }
       handleError(error);
       setGenerating("grammar-workshop", false);
       return [];
+    } finally {
+      removeAbortController("grammar-workshop");
     }
   }
 
   /** Generates (or refreshes) MCQ questions for Grammar Roulette + Duel, persisted to store. */
   async function generateGrammarQuestions(): Promise<GrammarGameQuestion[]> {
     if (useReadingStore.getState().activeGenerations["grammar-questions"]) return [];
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("grammar-questions");
     const { grammarTopics, studentAge, setGrammarGameQuestions } = readingStore;
 
     if (grammarTopics.length === 0) return [];
@@ -1210,7 +1559,14 @@ Guidelines:
       const text = await grammarGenerateText(
         generateGrammarQuestionsPrompt(grammarTopics, studentAge),
         getSystemPrompt(),
+        ac.signal,
       );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-questions", false);
+        return [];
+      }
 
       const raw = JSON.parse(text) as GrammarGameQuestion[];
       const questions = raw.map((q) => {
@@ -1226,9 +1582,16 @@ Guidelines:
       setGenerating("grammar-questions", false);
       return questions;
     } catch (error) {
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("grammar-questions", false);
+        return [];
+      }
       handleError(error);
       setGenerating("grammar-questions", false);
       return [];
+    } finally {
+      removeAbortController("grammar-questions");
     }
   }
 

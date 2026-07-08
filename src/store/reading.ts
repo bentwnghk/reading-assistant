@@ -41,6 +41,36 @@ export function isSessionCreatedInApi(sessionId: string) {
   return sessionCreatedInApi.has(sessionId);
 }
 
+// ── AbortController registry for AI generations ──────────────────────────
+// When a session is switched (restore/reset/loadFromRepository), all in-flight
+// generations are aborted so their results don't clobber the new session.
+const activeAbortControllers = new Map<string, AbortController>();
+
+/** Gets (or creates) the AbortController for a generation type. */
+export function getAbortController(type: string): AbortController {
+  let controller = activeAbortControllers.get(type);
+  if (!controller || controller.signal.aborted) {
+    controller = new AbortController();
+    activeAbortControllers.set(type, controller);
+  }
+  return controller;
+}
+
+/** Removes a completed generation's controller from the registry. */
+export function removeAbortController(type: string): void {
+  activeAbortControllers.delete(type);
+}
+
+/** Aborts ALL active generations. Called when switching sessions. */
+export function abortAllGenerations(): void {
+  for (const controller of activeAbortControllers.values()) {
+    if (!controller.signal.aborted) {
+      controller.abort();
+    }
+  }
+  activeAbortControllers.clear();
+}
+
 let syncToHistoryFn: ((store: ReadingStore) => void) | null = null;
 
 export function setHistorySyncFn(fn: (store: ReadingStore) => void) {
@@ -1220,6 +1250,7 @@ export const useReadingStore = create(
           return newState;
         }),
       loadFromRepository: (text) => {
+        abortAllGenerations();
         const newId = nanoid();
         const now = Date.now();
         const newState: Partial<ReadingStore> = {
@@ -1247,6 +1278,7 @@ export const useReadingStore = create(
         markLastOpenedSession(newId);
       },
       reset: () => {
+        abortAllGenerations();
         set(() => ({
           ...defaultValues,
         }));
@@ -1258,6 +1290,7 @@ export const useReadingStore = create(
         } as ReadingStore;
       },
       restore: async (session) => {
+        abortAllGenerations();
         set(() => ({
           ...defaultValues,
           ...session,

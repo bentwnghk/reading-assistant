@@ -374,6 +374,7 @@
     }
   },
   "reading": {
+    "generationCancelled": "AI generation was cancelled because you switched to another reading session.",
     "primary3to6": "Primary 3-6",
     "form1to3": "Secondary 1-3",
     "form4to6": "Secondary 4-6",
@@ -2095,6 +2096,9 @@
     "grammarGameScore": "Grammar Game",
     "grammarGameAccuracy": "Grammar Game Accuracy",
     "totalVocabulary": "Total Vocabulary",
+    "confirmSwitchTitle": "AI Generation in Progress",
+    "confirmSwitchDesc": "An AI generation is currently in progress. Switching to another session will cancel it. Do you want to continue?",
+    "confirmSwitch": "Switch Session",
     "help": {
       "title": "Reading History Guide",
       "purpose": "The Reading History keeps a record of all your past reading sessions, including learning progress, vocabulary collected, and test scores.",

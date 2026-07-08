@@ -374,6 +374,7 @@
     }
   },
   "reading": {
+    "generationCancelled": "AI 生成已取消，因為您切換到另一個閱讀工作階段。",
     "primary3to6": "小三至小六",
     "form1to3": "中一至中三",
     "form4to6": "中四至中六",
@@ -2095,6 +2096,9 @@
     "grammarGameScore": "語法遊戲",
     "grammarGameAccuracy": "語法遊戲正確率",
     "totalVocabulary": "總詞彙量",
+    "confirmSwitchTitle": "AI 生成進行中",
+    "confirmSwitchDesc": "目前有 AI 生成正在進行。切換到另一個工作階段將會取消它。您想繼續嗎？",
+    "confirmSwitch": "切換工作階段",
     "help": {
       "title": "閱讀記錄指南",
       "purpose": "閱讀記錄會保留你所有過去的閱讀工作階段，包括學習進度、收集的詞彙及測驗得分。",

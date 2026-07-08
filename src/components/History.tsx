@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -103,6 +104,7 @@ function History({ open, onClose }: HistoryProps) {
   const { history, save, load, update, remove } = useHistoryStore();
   const [historyList, setHistoryList] = useState<ReadingHistory[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pendingSwitchId, setPendingSwitchId] = useState<string | null>(null);
   
   const showLoadMore = useMemo(() => {
     return history.length > currentPage * PAGE_SIZE;
@@ -137,6 +139,15 @@ function History({ open, onClose }: HistoryProps) {
   }
 
   async function loadHistory(id: string) {
+    const hasActiveGen = Object.values(useReadingStore.getState().activeGenerations).some(Boolean);
+    if (hasActiveGen) {
+      setPendingSwitchId(id);
+      return;
+    }
+    await doLoadHistory(id);
+  }
+
+  async function doLoadHistory(id: string) {
     const { id: currentId } = useReadingStore.getState();
     const data = load(id);
     if (data) {
@@ -148,6 +159,14 @@ function History({ open, onClose }: HistoryProps) {
       markLastOpenedSession(data.id);
     }
     onClose();
+  }
+
+  async function confirmSwitch() {
+    const id = pendingSwitchId;
+    setPendingSwitchId(null);
+    if (id) {
+      await doLoadHistory(id);
+    }
   }
 
   function downloadSession(id: string) {
@@ -366,6 +385,22 @@ function History({ open, onClose }: HistoryProps) {
           hidden
           onChange={(ev) => handleFileUpload(ev.target.files)}
         />
+        <Dialog open={pendingSwitchId !== null} onOpenChange={(open) => { if (!open) setPendingSwitchId(null); }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("history.confirmSwitchTitle")}</DialogTitle>
+              <DialogDescription>{t("history.confirmSwitchDesc")}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPendingSwitchId(null)}>
+                {t("setting.cancel")}
+              </Button>
+              <Button onClick={confirmSwitch}>
+                {t("history.confirmSwitch")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );

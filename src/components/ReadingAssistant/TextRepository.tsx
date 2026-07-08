@@ -350,9 +350,19 @@ function RowActions({
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [newName, setNewName] = useState(item.name);
+  const [pendingLoad, setPendingLoad] = useState(false);
   const { loadFromRepository } = useReadingStore();
 
   const handleLoad = async () => {
+    const hasActiveGen = Object.values(useReadingStore.getState().activeGenerations).some(Boolean);
+    if (hasActiveGen) {
+      setPendingLoad(true);
+      return;
+    }
+    await doLoad();
+  };
+
+  const doLoad = async () => {
     setIsLoading(true);
     try {
       const res = await fetch(`/api/repository/${item.id}`);
@@ -501,6 +511,23 @@ function RowActions({
           ? t("reading.repository.loading")
           : t("reading.repository.loadText")}
       </Button>
+
+      <Dialog open={pendingLoad} onOpenChange={setPendingLoad}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("history.confirmSwitchTitle")}</DialogTitle>
+            <DialogDescription>{t("history.confirmSwitchDesc")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingLoad(false)}>
+              {t("setting.cancel")}
+            </Button>
+            <Button onClick={() => { setPendingLoad(false); doLoad(); }}>
+              {t("history.confirmSwitch")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

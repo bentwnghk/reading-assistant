@@ -2,6 +2,7 @@
 import dynamic from "next/dynamic";
 import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, Suspense } from "react";
 import { useTranslation, Trans } from "react-i18next";
+import i18next from "i18next";
 import {
   BookOpen,
   LoaderCircle,
@@ -70,7 +71,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useReadingStore } from "@/store/reading";
+import { useReadingStore, getAbortController, removeAbortController } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import { useGlobalStore } from "@/store/global";
 import { generateSignature } from "@/utils/signature";
@@ -927,6 +928,8 @@ function AdaptedText() {
       }
 
       setGenerating("sentence-analysis", true);
+      const sessionId = useReadingStore.getState().id;
+      const ac = getAbortController("sentence-analysis");
 
       try {
         const context = getContextAround(extractedText, sentence, 150);
@@ -935,19 +938,32 @@ function AdaptedText() {
         const result = await generateText({
           model: provider,
           prompt: analyzeSentencePrompt(studentAge, sentence, context),
+          abortSignal: ac.signal,
         });
+
+        if (useReadingStore.getState().id !== sessionId || ac.signal.aborted) {
+          toast.warning(i18next.t("reading.generationCancelled"));
+          return;
+        }
 
         setSentenceAnalysis(sentence, sanitizeSentenceAnalysis(result.text, sentence));
         setActiveSentence(sentence);
         setSelection(null);
         selectionObj?.removeAllRanges();
         // Log for achievements
-        const { id: sessionId } = useReadingStore.getState();
-        logActivity("sentence_analyze", { sessionId: sessionId || undefined });
+        const { id: sid } = useReadingStore.getState();
+        logActivity("sentence_analyze", { sessionId: sid || undefined });
       } catch (error) {
+        if (useReadingStore.getState().id !== sessionId || ac.signal.aborted) {
+          toast.warning(i18next.t("reading.generationCancelled"));
+          return;
+        }
         toast.error(parseError(error));
       } finally {
-        setGenerating("sentence-analysis", false);
+        if (useReadingStore.getState().id === sessionId) {
+          setGenerating("sentence-analysis", false);
+        }
+        removeAbortController("sentence-analysis");
       }
     },
     [

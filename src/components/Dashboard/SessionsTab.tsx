@@ -8,6 +8,14 @@ import Fuse from "fuse.js";
 import SearchArea from "@/components/Internal/SearchArea";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -149,6 +157,7 @@ function SessionsTab({ onClose }: SessionsTabProps) {
   const [shareOpen, setShareOpen] = useState(false);
   const [assignSession, setAssignSession] = useState<ReadingHistory | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
+  const [pendingSwitchId, setPendingSwitchId] = useState<string | null>(null);
 
   const showLoadMore = useMemo(() => {
     return history.length > currentPage * PAGE_SIZE;
@@ -173,6 +182,15 @@ function SessionsTab({ onClose }: SessionsTabProps) {
   }
 
   async function loadHistory(id: string) {
+    const hasActiveGen = Object.values(useReadingStore.getState().activeGenerations).some(Boolean);
+    if (hasActiveGen) {
+      setPendingSwitchId(id);
+      return;
+    }
+    await doLoadHistory(id);
+  }
+
+  async function doLoadHistory(id: string) {
     const { id: currentId } = useReadingStore.getState();
     const data = load(id);
     if (data) {
@@ -184,6 +202,14 @@ function SessionsTab({ onClose }: SessionsTabProps) {
       markLastOpenedSession(data.id);
     }
     onClose();
+  }
+
+  async function confirmSwitch() {
+    const id = pendingSwitchId;
+    setPendingSwitchId(null);
+    if (id) {
+      await doLoadHistory(id);
+    }
   }
 
   function downloadSession(id: string) {
@@ -435,6 +461,22 @@ function SessionsTab({ onClose }: SessionsTabProps) {
         onOpenChange={setAssignOpen}
         session={assignSession}
       />
+      <Dialog open={pendingSwitchId !== null} onOpenChange={(open) => { if (!open) setPendingSwitchId(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("history.confirmSwitchTitle")}</DialogTitle>
+            <DialogDescription>{t("history.confirmSwitchDesc")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingSwitchId(null)}>
+              {t("setting.cancel")}
+            </Button>
+            <Button onClick={confirmSwitch}>
+              {t("history.confirmSwitch")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
