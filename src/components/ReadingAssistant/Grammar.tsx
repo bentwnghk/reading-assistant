@@ -666,6 +666,7 @@ function Grammar() {
 
   const [activeTab, setActiveTab] = useState<TabType>("topics");
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const [openLessonItems, setOpenLessonItems] = useState<string[]>([]);
   const [quizState, setQuizState] = useState<GrammarQuizState>("idle");
   const [showReview, setShowReview] = useState(false);
   const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
@@ -739,6 +740,18 @@ function Grammar() {
     },
     [grammarHighlightEnabled, grammarHighlightTopicId, setGrammarHighlightEnabled, setGrammarHighlightTopicId]
   );
+
+  // Jump from a Topic card to the matching lesson: switch to the Lessons tab,
+  // expand the accordion item, and scroll it into view.
+  const goToLesson = useCallback((topicId: string) => {
+    setOpenLessonItems([topicId]);
+    setActiveTab("lessons");
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById(`lesson-acc-${topicId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }, []);
 
   const toggleExportSection = useCallback((section: string, checked: boolean | "indeterminate") => {
     setExportSections((prev) => {
@@ -1356,20 +1369,32 @@ function Grammar() {
                   ))}
                 </div>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleHighlightTopic(topic.id);
-                }}
-              >
-                <Highlighter className="h-3 w-3 mr-1" />
-                {grammarHighlightEnabled && grammarHighlightTopicId === topic.id
-                  ? t("reading.grammar.hideHighlight")
-                  : t("reading.grammar.showHighlight")}
-              </Button>
+              <div className="flex flex-wrap gap-2 mt-1">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToLesson(topic.id);
+                  }}
+                >
+                  <GraduationCap className="h-3 w-3 mr-1" />
+                  {t("reading.grammar.openLesson")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleHighlightTopic(topic.id);
+                  }}
+                >
+                  <Highlighter className="h-3 w-3 mr-1" />
+                  {grammarHighlightEnabled && grammarHighlightTopicId === topic.id
+                    ? t("reading.grammar.hideHighlight")
+                    : t("reading.grammar.showHighlight")}
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -1378,9 +1403,9 @@ function Grammar() {
   );
 
   const renderLessons = () => (
-    <Accordion type="multiple" className="w-full">
+    <Accordion type="multiple" className="w-full" value={openLessonItems} onValueChange={setOpenLessonItems}>
       {grammarTopics.map((topic) => (
-        <AccordionItem key={topic.id} value={topic.id}>
+        <AccordionItem key={topic.id} value={topic.id} id={`lesson-acc-${topic.id}`}>
           <AccordionTrigger className="text-sm hover:no-underline">
             <div className="flex items-center gap-2 text-left">
               <span className={cn("text-xs px-1.5 py-0.5 rounded font-medium", CEFR_COLORS[topic.cefrLevel])}>
