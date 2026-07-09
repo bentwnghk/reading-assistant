@@ -120,7 +120,7 @@ export default function TextDifficultyAnalyzer() {
   } = useReadingStore();
 
   const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-  const [showCards, setShowCards] = React.useState(() => !adaptedDifficulty && !simplifiedDifficulty);
+  const [showCards, setShowCards] = React.useState(false);
   const [showCefrHighlight, setShowCefrHighlight] = React.useState(false);
   const [highlightTextType, setHighlightTextType] = React.useState<"original" | "adapted" | "simplified">("original");
 
