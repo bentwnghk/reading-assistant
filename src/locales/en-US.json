@@ -3107,6 +3107,8 @@
     "readyToRead": "Ready to read something new?",
     "uploadFile": "Upload image / PDF",
     "uploadFileDesc": "Upload photos or PDFs of articles for AI text extraction",
+    "generateWithAi": "Generate with AI",
+    "generateWithAiDesc": "Let AI craft a brand-new reading text on any topic for you!",
     "activities": {
       "readingTest": {
         "title": "Complete your reading comprehension test",

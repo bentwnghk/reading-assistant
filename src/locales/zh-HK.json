@@ -3107,6 +3107,8 @@
     "readyToRead": "準備好閱讀新文本了嗎？",
     "uploadFile": "上傳圖片 / PDF",
     "uploadFileDesc": "上傳文章的照片或 PDF 讓 AI 提取文字",
+    "generateWithAi": "用 AI 生成",
+    "generateWithAiDesc": "讓 AI 為你撰寫任何主題的全新閱讀文章！",
     "activities": {
       "readingTest": {
         "title": "完成你的閱讀理解測驗",

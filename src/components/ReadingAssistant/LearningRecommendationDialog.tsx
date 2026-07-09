@@ -20,6 +20,7 @@ import {
   LoaderCircle,
   User,
   Upload,
+  GraduationCap,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -76,6 +77,7 @@ const COLOR_BG: Record<string, string> = {
   cyan: "bg-cyan-500",
   yellow: "bg-yellow-500",
   amber: "bg-amber-500",
+  violet: "bg-violet-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -90,6 +92,7 @@ const COLOR_GLOW: Record<string, string> = {
   cyan: "shadow-cyan-400/50",
   yellow: "shadow-yellow-400/50",
   amber: "shadow-amber-400/50",
+  violet: "shadow-violet-400/50",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -104,6 +107,7 @@ const COLOR_TEXT: Record<string, string> = {
   cyan: "text-cyan-600 dark:text-cyan-300",
   yellow: "text-yellow-600 dark:text-yellow-300",
   amber: "text-amber-600 dark:text-amber-300",
+  violet: "text-violet-600 dark:text-violet-300",
 };
 
 const COLOR_BORDER: Record<string, string> = {
@@ -118,10 +122,12 @@ const COLOR_BORDER: Record<string, string> = {
   cyan: "border-cyan-500/20",
   yellow: "border-yellow-500/20",
   amber: "border-amber-500/20",
+  violet: "border-violet-500/20",
 };
 
 const REPO_COLOR = "amber";
 const UPLOAD_COLOR = "teal";
+const AI_COLOR = "violet";
 
 function ActivityIcon({ activity }: { activity: LearningActivity }) {
   const IconComp = ICON_MAP[activity.icon] ?? BookOpen;
@@ -343,6 +349,17 @@ export default function LearningRecommendationDialog() {
     fileInputRef.current?.click();
   }, []);
 
+  const handleChooseAiGenerator = useCallback(() => {
+    setOpen(false);
+    requestAnimationFrame(() => {
+      const el = document.getElementById("section-upload");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      window.dispatchEvent(new CustomEvent("open-ai-text-generator"));
+    });
+  }, []);
+
   const activityColor = activity?.color ?? "amber";
 
   return (
@@ -401,7 +418,7 @@ export default function LearningRecommendationDialog() {
                   onClick={handleContinueLearning}
                 >
                   <div className="flex items-start gap-3">
-                    <Sparkles
+                    <GraduationCap
                       className={cn(
                         "w-5 h-5 mt-0.5 shrink-0",
                         COLOR_TEXT[activityColor] ?? "text-primary"
@@ -495,6 +512,40 @@ export default function LearningRecommendationDialog() {
                     className={cn(
                       "w-4 h-4 mt-1 shrink-0",
                       COLOR_TEXT[UPLOAD_COLOR]
+                    )}
+                  />
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className={cn(
+                  "w-full p-4 rounded-xl border text-left transition-all",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                  COLOR_BORDER[AI_COLOR],
+                  "bg-background/60 backdrop-blur-sm"
+                )}
+                onClick={handleChooseAiGenerator}
+              >
+                <div className="flex items-start gap-3">
+                  <Sparkles
+                    className={cn(
+                      "w-5 h-5 mt-0.5 shrink-0",
+                      COLOR_TEXT[AI_COLOR]
+                    )}
+                  />
+                  <div className="flex-1 space-y-1">
+                    <p className="font-semibold text-foreground">
+                      {t("recommendation.generateWithAi")}
+                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {t("recommendation.generateWithAiDesc")}
+                    </p>
+                  </div>
+                  <ArrowRight
+                    className={cn(
+                      "w-4 h-4 mt-1 shrink-0",
+                      COLOR_TEXT[AI_COLOR]
                     )}
                   />
                 </div>

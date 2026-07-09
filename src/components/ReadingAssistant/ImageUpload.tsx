@@ -82,6 +82,14 @@ function ImageUpload() {
     };
   }, [isBusy, acquireWakeLock]);
 
+  // Allow the Welcome Back dialog (and other callers) to route the user
+  // straight into the AI Text Generator tab by dispatching a custom event.
+  useEffect(() => {
+    const handler = () => setActiveTab("ai-generate");
+    window.addEventListener("open-ai-text-generator", handler);
+    return () => window.removeEventListener("open-ai-text-generator", handler);
+  }, []);
+
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
       const fileArray = Array.from(files);
