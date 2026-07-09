@@ -707,7 +707,7 @@
           },
           "highlight": {
             "name": "Highlight Vocabulary",
-            "desc": "Select any word in the Original tab to add it to your vocabulary. Tap Suggest to let AI pick words worth learning."
+            "desc": "Select any word in the Original tab to add it to your vocabulary — it gets highlighted. Next, open the Vocabulary section, click Generate Glossary to define your words, then review them with flashcards, spelling games and quizzes. Tap Suggest to let AI pick words worth learning."
           },
           "analysis": {
             "name": "Sentence Analysis",
