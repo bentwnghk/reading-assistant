@@ -225,7 +225,7 @@ function ImageUpload() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "upload" | "repository")}>
-        <TabsList className="mb-4 w-full flex-wrap h-auto">
+        <TabsList className="mb-4 w-full flex-wrap h-auto justify-start">
           <TabsTrigger value="upload" className="gap-1">
             <ImageIcon className="h-3.5 w-3.5" />
             {t("reading.imageUpload.tabUpload")}
