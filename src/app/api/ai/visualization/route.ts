@@ -138,7 +138,7 @@ async function callOpenAICompatibleApi(
         responseFormat: {
           image: {
             aspectRatio: "16:9",
-            imageSize: "2K",
+            imageSize: "1K",
           },
         },
       }),

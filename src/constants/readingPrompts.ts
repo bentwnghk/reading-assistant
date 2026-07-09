@@ -162,8 +162,8 @@ Make this text even simpler while preserving its core meaning.
 export function generateMindMapPrompt(age: number, text: string, useChinese: boolean = false) {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
   const languageInstruction = useChinese 
-    ? "Use Traditional Chinese (繁體中文) for all text in the mind map." 
-    : "Use the same language as the original text.";
+    ? "Use Traditional Chinese (繁體中文) for ALL text in the mind map." 
+    : "Use English for ALL text in the mind map.";
   return `Create a mind map for this text to help a ${age}-year-old Hong Kong ${schoolLevel} student visualize and connect the main ideas.
 
 <text>
@@ -1052,7 +1052,7 @@ export function generateVisualizationPrompt(age: number, text: string, useChines
   const schoolLevel = age <= 11 ? "primary" : "secondary";
   const languageInstruction = useChinese
     ? "Use Traditional Chinese (繁體中文) for ALL text labels, captions, headings, and any readable text in the image."
-    : "Use the same language as the original text for all text labels, captions, headings, and any readable text in the image.";
+    : "Use English for ALL text labels, captions, headings, and any readable text in the image.";
   return `You are generating an image to help a ${age}-year-old Hong Kong ${schoolLevel} student visualize the main ideas of a reading passage. Analyze the text below, determine its genre and nature, then create a vivid, educational image.
 
 <text>
@@ -1071,7 +1071,7 @@ ${text}
    - **Educational** — convey the main ideas, key concepts, and important details from the text
    - **Age-appropriate** — suitable for a ${age}-year-old student
    - **Clear and readable** — any text in the image should be legible and concise
-   - **2K resolution (2048x1152), 16:9 aspect ratio, PNG format**
+    - **1K resolution (1280x720), 16:9 aspect ratio, PNG format**
 4. ${languageInstruction}
 
 Generate the image now.`;
