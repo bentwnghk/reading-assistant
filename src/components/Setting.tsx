@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, TTS_VOICES, TTS_PLAYBACK_RATES } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_PLAYBACK_RATES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -70,6 +70,7 @@ const formSchema = z.object({
   glossaryModel: z.enum(AVAILABLE_MODELS),
   sentenceAnalysisModel: z.enum(AVAILABLE_MODELS),
   grammarModel: z.enum(AVAILABLE_MODELS),
+  readingTextModel: z.enum(READING_TEXT_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
   basicTutorModel: z.enum(BASIC_TUTOR_MODELS),
   ttsVoice: z.enum(TTS_VOICES),
@@ -666,7 +667,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {VISION_MODELS.map((m) => (
+                            {READING_TEXT_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -908,6 +909,37 @@ function Setting({ open, onClose }: SettingProps) {
                           onValueChange={(value) => {
                             field.onChange(value);
                             updateSetting("grammarModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AVAILABLE_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="readingTextModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.readingTextModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("readingTextModel", value);
                           }}
                         >
                           <SelectTrigger className="form-field">

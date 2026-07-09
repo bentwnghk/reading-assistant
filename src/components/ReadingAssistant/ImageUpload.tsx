@@ -2,7 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
-import { Upload, Image as ImageIcon, LoaderCircle, X, Plus, Maximize2, Library, ScanText } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, Plus, Maximize2, Library, ScanText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GuideDialog from "@/components/Internal/GuideDialog";
@@ -14,6 +14,11 @@ import dynamic from "next/dynamic";
 
 const TextRepository = dynamic(
   () => import("@/components/ReadingAssistant/TextRepository"),
+  { ssr: false }
+);
+
+const AiTextGenerator = dynamic(
+  () => import("@/components/ReadingAssistant/AiTextGenerator"),
   { ssr: false }
 );
 
@@ -33,7 +38,7 @@ function ImageUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
-  const [activeTab, setActiveTab] = useState<"upload" | "repository">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "repository" | "ai-generate">("upload");
   const { originalImages, extractedText, activeGenerations } = useReadingStore();
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = !!activeGenerations["extracting"];
@@ -228,6 +233,10 @@ function ImageUpload() {
             <Library className="h-3.5 w-3.5" />
             {t("reading.imageUpload.tabRepository")}
           </TabsTrigger>
+          <TabsTrigger value="ai-generate" className="gap-1">
+            <Sparkles className="h-3.5 w-3.5" />
+            {t("reading.imageUpload.tabAiGenerate")}
+          </TabsTrigger>
         </TabsList>
 
         {/* ── Tab: Upload Image ── */}
@@ -355,6 +364,11 @@ function ImageUpload() {
         {/* ── Tab: Text Repository ── */}
         <TabsContent value="repository">
           <TextRepository onTextLoaded={() => setActiveTab("upload")} />
+        </TabsContent>
+
+        {/* ── Tab: AI Text Generator ── */}
+        <TabsContent value="ai-generate">
+          <AiTextGenerator onTextLoaded={() => setActiveTab("upload")} />
         </TabsContent>
       </Tabs>
     </section>

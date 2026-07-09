@@ -435,6 +435,7 @@
       "title": "選擇文本",
       "tabUpload": "上傳圖片/PDF",
       "tabRepository": "文本庫",
+      "tabAiGenerate": "AI 生成",
       "dropHere": "拖放圖片或 PDF 到這裡",
       "orClick": "或點擊選擇",
       "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP、PDF",
@@ -460,16 +461,59 @@
           "repository": {
             "name": "文本庫",
             "desc": "瀏覽老師儲存的文本，點擊即可立即開始閱讀。"
+          },
+          "aiGenerate": {
+            "name": "AI 文本生成器",
+            "desc": "輸入主題並選擇文體，AI 會為你撰寫一篇適齡的閱讀文章。"
           }
         },
         "stepsTitle": "如何取得文本",
         "steps": {
-          "s1": "選擇「上傳」或「文本庫」標籤。",
-          "s2": "上傳：拖放檔案並等待文字提取。文本庫：點擊文本以載入。",
+          "s1": "選擇「上傳」、「文本庫」或「AI 生成」標籤。",
+          "s2": "上傳：拖放檔案並等待文字提取。文本庫：點擊文本以載入。AI 生成：輸入主題並點擊生成。",
           "s3": "文字出現後，所有閱讀工具即會解鎖。點擊「新文本」可重新開始。"
         },
         "tipTitle": "小貼士",
         "tipContent": "你可以一次過上傳多張圖片（每頁一張）。支援格式：PNG、JPG、JPEG、WEBP 及 PDF。"
+      }
+    },
+    "aiGenerate": {
+      "title": "AI 文本生成器",
+      "topicLabel": "主題 / 主旨",
+      "topicPlaceholder": "例如：海灘的一天、太空探索、網絡安全",
+      "topicRequired": "請輸入主題或主旨。",
+      "descriptionLabel": "補充描述（選填）",
+      "descriptionPlaceholder": "例如：主角是一位害羞的 14 歲學生；加入意想不到的結局",
+      "textTypeLabel": "文體",
+      "lengthLabel": "大約字數",
+      "approxWords": "約 {{count}} 字",
+      "longTextNote": "較長的文本難度浮動可能較大。",
+      "cefrLabel": "難度等級（CEFR）",
+      "cefrAutoHint": "根據年齡 {{age}} 歲自動建議。可為較強或較弱的學生調整。",
+      "reset": "自動",
+      "generateButton": "生成閱讀文本",
+      "generating": "生成中...",
+      "generatingWait": "正在生成你的閱讀文本，請稍候...",
+      "regenerateEasier": "較易",
+      "regenerateHarder": "較難",
+      "qcTitle": "生成文本資料",
+      "wordCount": "字數",
+      "estimatedFkGrade": "預估 FK 年級",
+      "newVocabulary": "需學習的新詞彙",
+      "parseError": "AI 回應格式不正確，請再試一次。",
+      "invalidTextType": "選擇的文體無效。",
+      "textTypes": {
+        "article": "文章",
+        "reportInformational": "報告 / 資訊性文本",
+        "blogPost": "網誌 / 網上貼文",
+        "review": "評論",
+        "emailLetter": "電郵 / 書信",
+        "editorialArgumentative": "社論 / 議論文",
+        "interview": "訪問",
+        "shortStory": "短篇故事",
+        "advertisementBrochure": "廣告 / 小冊子 / 單張",
+        "noticeAnnouncement": "通告 / 公告 / 公共資訊文本",
+        "profileFeature": "人物簡介 / 專題文章"
       }
     },
     "repository": {
@@ -2153,6 +2197,7 @@
     "glossaryModel": "詞彙表模型",
     "sentenceAnalysisModel": "句子分析模型",
     "grammarModel": "語法模型",
+    "readingTextModel": "閱讀文本生成模型",
     "tutorModel": "高級 AI 導師模型",
     "basicTutorModel": "基礎 AI 導師模型",
     "ttsVoice": "語音選擇",

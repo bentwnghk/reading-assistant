@@ -1080,3 +1080,128 @@ Generate the image now.`;
 export function getSystemPrompt(): string {
   return systemInstruction.replace("{now}", new Date().toLocaleDateString(i18next.language));
 }
+
+// ─── AI reading-text generator ────────────────────────────────────────────────
+
+/**
+ * Maps a student's age to a target CEFR band and an approximate Flesch-Kincaid
+ * grade-level range. Based on the research that FK scores of 60-70 correspond
+ * to grade 8-9, matching learners around 13-15 years old. Extends the spec's
+ * table (10-18) down to age 8 for primary students.
+ */
+export interface AgeLevelMapping {
+  cefr: CEFRLevel;
+  fkMin: number;
+  fkMax: number;
+}
+
+export function getAgeLevelMapping(age: number): AgeLevelMapping {
+  if (age <= 9) return { cefr: "A1", fkMin: 1, fkMax: 3 };
+  if (age <= 12) return { cefr: "A2", fkMin: 3, fkMax: 5 };
+  if (age <= 14) return { cefr: "B1", fkMin: 5, fkMax: 7 };
+  if (age <= 16) return { cefr: "B2", fkMin: 7, fkMax: 9 };
+  return { cefr: "C1", fkMin: 9, fkMax: 11 };
+}
+
+/** Ordered CEFR levels, used to step up/down for the "regenerate at level" flow. */
+export const CEFR_ORDER: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
+/** Shifts a CEFR level by one band in the given direction, clamped at the ends. */
+export function shiftCefrLevel(level: CEFRLevel, direction: "easier" | "harder"): CEFRLevel {
+  const idx = CEFR_ORDER.indexOf(level);
+  if (idx === -1) return level;
+  const next = direction === "easier" ? Math.max(0, idx - 1) : Math.min(CEFR_ORDER.length - 1, idx + 1);
+  return CEFR_ORDER[next];
+}
+
+export const READING_TEXT_TYPES = [
+  { id: "article", labelKey: "reading.aiGenerate.textTypes.article" },
+  { id: "report-informational", labelKey: "reading.aiGenerate.textTypes.reportInformational" },
+  { id: "blog-post", labelKey: "reading.aiGenerate.textTypes.blogPost" },
+  { id: "review", labelKey: "reading.aiGenerate.textTypes.review" },
+  { id: "email-letter", labelKey: "reading.aiGenerate.textTypes.emailLetter" },
+  { id: "editorial-argumentative", labelKey: "reading.aiGenerate.textTypes.editorialArgumentative" },
+  { id: "interview", labelKey: "reading.aiGenerate.textTypes.interview" },
+  { id: "short-story", labelKey: "reading.aiGenerate.textTypes.shortStory" },
+  { id: "advertisement-brochure", labelKey: "reading.aiGenerate.textTypes.advertisementBrochure" },
+  { id: "notice-announcement", labelKey: "reading.aiGenerate.textTypes.noticeAnnouncement" },
+  { id: "profile-feature", labelKey: "reading.aiGenerate.textTypes.profileFeature" },
+] as const;
+
+export type ReadingTextType = (typeof READING_TEXT_TYPES)[number]["id"];
+
+export const READING_TEXT_LENGTHS = [250, 400, 550, 700, 850, 1000, 1150] as const;
+
+export interface GenerateReadingTextArgs {
+  age: number;
+  cefrLevel: CEFRLevel;
+  topic: string;
+  description?: string;
+  textTypeId: ReadingTextType;
+  textTypeLabel: string;
+  wordCount: number;
+}
+
+/**
+ * Builds the user prompt for AI reading-text generation. Adapted from the
+ * EFL-materials-writer research prompt: combines an explicit CEFR band with
+ * concrete vocabulary/grammar/sentence-length rules and a self-check step,
+ * then requests structured JSON output (title, body, metadata) for easy
+ * rendering and quality control.
+ */
+export function generateReadingTextPrompt(args: GenerateReadingTextArgs): string {
+  const { age, cefrLevel, topic, description, textTypeLabel, wordCount } = args;
+  const mapping = getAgeLevelMapping(age);
+
+  const grammarGuidance =
+    cefrLevel === "A1" || cefrLevel === "A2"
+      ? "simple and compound sentences; present/past/future simple; basic modals (can, must, should); basic comparisons."
+      : cefrLevel === "B1"
+        ? "patterns typical of A2 plus: present perfect; first and second conditional; relative clauses; reported speech; basic passive."
+        : "patterns typical of B1 plus: passive voice; third conditional; complex clause combinations; a wider range of modals.";
+
+  const sentenceLengthGuidance =
+    cefrLevel === "A1" || cefrLevel === "A2" || cefrLevel === "B1"
+      ? "Average 10-15 words per sentence, varying naturally rather than uniformly."
+      : "Average 15-20 words per sentence, varying naturally rather than uniformly.";
+
+  const descriptionBlock = description?.trim()
+    ? `\nADDITIONAL DIRECTION FROM THE STUDENT/TEACHER:\n${description.trim()}\n`
+    : "";
+
+  return `You are an expert EFL materials writer creating a reading text for a Hong Kong secondary school student.
+
+INPUTS:
+- Age: ${age}
+- CEFR level: ${cefrLevel} (auto-mapped from age, user-adjustable)
+- Topic/theme: ${topic}
+- Text type: ${textTypeLabel}
+- Target length: ${wordCount} words (+/-10%)
+${descriptionBlock}
+WRITING RULES:
+1. Vocabulary: Use only words at or below ${cefrLevel} according to the English Vocabulary Profile / CEFR word lists. You may introduce up to 5 new words above this level only if they are essential to the topic; if used, list every one of them in the "new_vocabulary" field.
+2. Grammar: Restrict sentence structures to patterns typical of ${cefrLevel} (e.g., ${grammarGuidance}).
+3. Sentence length: ${sentenceLengthGuidance}
+4. Avoid cultural references unfamiliar to a Hong Kong teenager unless clearly explained in context.
+5. Structure the text appropriately for ${textTypeLabel} (e.g., report/informational: clear heading + organized body; short story: setup, complication, resolution; blog post: informal tone, first person; email/letter: greeting, body, sign-off; editorial/argumentative: claim, reasons, conclusion; interview: question-and-answer turns; advertisement/brochure: catchy headline, persuasive points; notice/announcement: clear who/what/when/where; profile/feature: engaging opening, key facts, closing).
+6. Make the topic "${topic}" engaging and age-appropriate for a ${age}-year-old, avoiding mature, violent, or culturally biased content.
+7. Prefer settings, names, and references that feel natural to a Hong Kong or broader Asian context when relevant, without stereotyping.
+
+SELF-CHECK BEFORE OUTPUT:
+- Re-read the text and confirm vocabulary and grammar match ${cefrLevel}.
+- Estimate the Flesch-Kincaid grade level; the target range for ${cefrLevel} is roughly ${mapping.fkMin}-${mapping.fkMax}. If your text deviates significantly, revise to simplify or enrich accordingly.
+- Confirm the word count is within ${wordCount} +/-10%.
+
+OUTPUT FORMAT (valid JSON only, no markdown code blocks, no additional text):
+{
+  "title": "string",
+  "text_type": "${textTypeLabel}",
+  "cefr_level": "${cefrLevel}",
+  "word_count": integer,
+  "estimated_fk_grade": number,
+  "new_vocabulary": ["word1", "word2"],
+  "body": ["paragraph1", "paragraph2", "..."]
+}
+
+Respond with ONLY the JSON object, no markdown, no code blocks, no commentary.`;
+}

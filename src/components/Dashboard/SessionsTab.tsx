@@ -40,7 +40,7 @@ const readingSessionSchema = z.object({
   id: z.string(),
   docTitle: z.string().optional(),
   studentAge: z.number(),
-  source: z.enum(["upload", "repository", "shared"]).optional(),
+  source: z.enum(["upload", "repository", "shared", "assignment", "ai-generated"]).optional(),
   originalImage: z.string().optional(),
   originalImages: z.array(z.string()).optional(),
   extractedText: z.string(),

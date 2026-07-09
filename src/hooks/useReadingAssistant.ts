@@ -31,6 +31,11 @@ import {
   generateGrammarWorkshopPrompt,
   generateErrorSurgeryPrompt,
   generateGrammarQuestionsPrompt,
+  generateReadingTextPrompt,
+  getAgeLevelMapping,
+  shiftCefrLevel,
+  READING_TEXT_TYPES,
+  type ReadingTextType,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
 import { logActivity } from "@/utils/activityLogger";
@@ -171,6 +176,28 @@ function useReadingAssistant() {
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Glossary fallback also failed:", fallbackError);
+        throw primaryError;
+      }
+    }
+  }
+
+  async function readingTextGenerateText(prompt: string, system: string, signal?: AbortSignal): Promise<string> {
+    const { readingTextModel: model } = useSettingStore.getState();
+    const FALLBACK_MODEL = await getFallbackModel();
+    try {
+      const aiModel = await createModelProvider(model);
+      const result = await generateText({ model: aiModel, system, prompt, abortSignal: signal });
+      return stripMarkdownFences(result.text);
+    } catch (primaryError) {
+      if (signal?.aborted || isAbortError(primaryError)) throw primaryError;
+      if (model === FALLBACK_MODEL) throw primaryError;
+      console.warn("Reading-text model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
+      try {
+        const fbModel = await createModelProvider(FALLBACK_MODEL);
+        const result = await generateText({ model: fbModel, system, prompt, abortSignal: signal });
+        return stripMarkdownFences(result.text);
+      } catch (fallbackError) {
+        console.error("Reading-text fallback also failed:", fallbackError);
         throw primaryError;
       }
     }
@@ -1602,6 +1629,147 @@ Guidelines:
     return save(session);
   }
 
+  // Zod schema for parsing the AI-generated reading-text JSON. Uses safeParse
+  // (per the suggestVocabulary precedent) so a malformed model response surfaces
+  // a clear error instead of an opaque JSON.parse failure.
+  const generatedTextSchema = z.object({
+    title: z.string().min(1),
+    text_type: z.string(),
+    cefr_level: z.string(),
+    word_count: z.number(),
+    estimated_fk_grade: z.number(),
+    new_vocabulary: z.array(z.string()).catch([]),
+    body: z.array(z.string().min(1)).min(1),
+  });
+
+  interface GenerateReadingTextParams {
+    topic: string;
+    description?: string;
+    textTypeId: ReadingTextType;
+    targetWordCount: number;
+    cefrOverride?: CEFRLevel;
+  }
+
+  /**
+   * Generates an age-appropriate, CEFR-banded reading text via the
+   * readingTextModel. Parses the structured JSON response, then loads it into
+   * the store via `loadGeneratedText` — which mints a fresh session, sets
+   * `source: "ai-generated"`, and lights up the entire downstream pipeline
+   * (summary, glossary, reading test, etc.) the same way Upload/Repository do.
+   */
+  async function generateReadingText(params: GenerateReadingTextParams) {
+    if (useReadingStore.getState().activeGenerations["reading-text"]) return false;
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("reading-text");
+    const { studentAge, loadGeneratedText, setError } = readingStore;
+
+    const topic = params.topic.trim();
+    if (!topic) {
+      toast.error(i18next.t("reading.aiGenerate.topicRequired"));
+      return false;
+    }
+
+    const textType = READING_TEXT_TYPES.find((tt) => tt.id === params.textTypeId);
+    if (!textType) {
+      toast.error(i18next.t("reading.aiGenerate.invalidTextType"));
+      return false;
+    }
+
+    const cefrLevel = params.cefrOverride ?? getAgeLevelMapping(studentAge).cefr;
+    const textTypeLabel = i18next.t(textType.labelKey);
+
+    setGenerating("reading-text", true);
+    const toastId = toast.info(i18next.t("reading.aiGenerate.generatingWait"), { duration: Infinity });
+
+    try {
+      const text = await readingTextGenerateText(
+        generateReadingTextPrompt({
+          age: studentAge,
+          cefrLevel,
+          topic,
+          description: params.description,
+          textTypeId: params.textTypeId,
+          textTypeLabel,
+          wordCount: params.targetWordCount,
+        }),
+        getSystemPrompt(),
+        ac.signal,
+      );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("reading-text", false);
+        return false;
+      }
+
+      const parsed = generatedTextSchema.safeParse(JSON.parse(text));
+      if (!parsed.success) {
+        throw new Error(i18next.t("reading.aiGenerate.parseError"));
+      }
+      const gen = parsed.data as GeneratedReadingText;
+
+      const meta: GeneratedTextMeta = {
+        topic,
+        description: params.description?.trim() || undefined,
+        textType: params.textTypeId,
+        textTypeLabel,
+        targetWordCount: params.targetWordCount,
+        cefrLevel,
+        ageGeneratedFor: studentAge,
+        generatedAt: Date.now(),
+        actualWordCount: gen.word_count,
+        estimatedFkGrade: gen.estimated_fk_grade,
+        newVocabulary: gen.new_vocabulary ?? [],
+      };
+
+      loadGeneratedText(gen.title, gen.body, meta);
+
+      logActivity("reading_text_generate", {
+        details: {
+          wordCount: gen.word_count,
+          difficulty: cefrLevel,
+        },
+      });
+
+      toast.dismiss(toastId);
+      setGenerating("reading-text", false);
+      return true;
+    } catch (error) {
+      toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("reading-text", false);
+        return false;
+      }
+      const msg = handleError(error);
+      setError(msg);
+      setGenerating("reading-text", false);
+      return false;
+    } finally {
+      removeAbortController("reading-text");
+    }
+  }
+
+  /**
+   * Re-runs generation one CEFR band easier or harder than the last generation,
+   * reusing the stored topic/text-type/length. Used by the "regenerate at
+   * slightly higher/lower level" buttons — a single generation may not always
+   * land at the intended difficulty on the first try.
+   */
+  async function regenerateReadingText(direction: "easier" | "harder") {
+    const { generatedTextMeta } = readingStore;
+    if (!generatedTextMeta) return false;
+    const newLevel = shiftCefrLevel(generatedTextMeta.cefrLevel, direction);
+    return generateReadingText({
+      topic: generatedTextMeta.topic,
+      description: generatedTextMeta.description,
+      textTypeId: generatedTextMeta.textType as ReadingTextType,
+      targetWordCount: generatedTextMeta.targetWordCount,
+      cefrOverride: newLevel,
+    });
+  }
+
   async function loadSession(id: string) {
     const { load } = useHistoryStore.getState();
     const session = load(id);
@@ -1639,6 +1807,8 @@ Guidelines:
     calculateTestScore,
     evaluateShortAnswer,
     askTutor,
+    generateReadingText,
+    regenerateReadingText,
     saveSession,
     loadSession,
   };

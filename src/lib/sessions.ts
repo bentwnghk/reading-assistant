@@ -19,7 +19,7 @@ export async function createReadingSession(
     
     await client.query(
       `INSERT INTO reading_sessions (
-        id, user_id, doc_title, source, student_age, extracted_text, summary,
+        id, user_id, doc_title, source, student_age, extracted_text, generated_text_meta, summary,
         adapted_text, simplified_text, highlighted_words, analyzed_sentences,
         mind_map, visualization_image, visualization_generated_at, reading_test, glossary, glossary_ratings, test_score,
         test_completed, test_earned_points, test_total_points, test_show_chinese,
@@ -47,12 +47,13 @@ export async function createReadingSession(
         grammar_scramble_challenges, grammar_workshop_challenges,
         grammar_game_questions,
         created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71)
       ON CONFLICT (id) DO UPDATE SET
         doc_title = EXCLUDED.doc_title,
         source = EXCLUDED.source,
         student_age = EXCLUDED.student_age,
         extracted_text = EXCLUDED.extracted_text,
+        generated_text_meta = EXCLUDED.generated_text_meta,
         summary = EXCLUDED.summary,
         adapted_text = EXCLUDED.adapted_text,
         simplified_text = EXCLUDED.simplified_text,
@@ -123,6 +124,7 @@ export async function createReadingSession(
         sessionData.source || "upload",
         sessionData.studentAge,
         sessionData.extractedText,
+        sessionData.generatedTextMeta ? JSON.stringify(sessionData.generatedTextMeta) : null,
         sessionData.summary,
         sessionData.adaptedText,
         sessionData.simplifiedText,
@@ -254,6 +256,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
         bufferToBase64(img.image_data, img.content_type)
       ),
       extractedText: row.extracted_text,
+      generatedTextMeta: row.generated_text_meta ?? null,
       summary: row.summary,
       adaptedText: row.adapted_text,
       simplifiedText: row.simplified_text,
@@ -387,6 +390,7 @@ export async function getReadingSession(
       source: row.source || ("repository" as const),
       originalImages,
       extractedText: row.extracted_text,
+      generatedTextMeta: row.generated_text_meta ?? null,
       summary: row.summary,
       adaptedText: row.adapted_text,
       simplifiedText: row.simplified_text,
@@ -491,6 +495,7 @@ export async function updateReadingSession(
       studentAge: "student_age",
       source: "source",
       extractedText: "extracted_text",
+      generatedTextMeta: "generated_text_meta",
       summary: "summary",
       adaptedText: "adapted_text",
       simplifiedText: "simplified_text",
@@ -575,7 +580,7 @@ export async function updateReadingSession(
              "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates",
              "grammarTopics", "grammarQuiz", "grammarErrorChallenges",
              "grammarScrambleChallenges", "grammarWorkshopChallenges",
-             "grammarGameQuestions"].includes(key)) {
+             "grammarGameQuestions", "generatedTextMeta"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else if (key === "grammarGameCompletedAt") {
           values.push(value ? new Date(value as number) : null)

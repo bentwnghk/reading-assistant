@@ -435,6 +435,7 @@
       "title": "Select Text",
       "tabUpload": "Upload Image/PDF",
       "tabRepository": "Text Repository",
+      "tabAiGenerate": "AI Generate",
       "dropHere": "Drop image or PDF here",
       "orClick": "or click to select",
       "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP, PDF",
@@ -460,16 +461,59 @@
           "repository": {
             "name": "Text Repository",
             "desc": "Browse texts saved by your teachers and tap one to start reading instantly."
+          },
+          "aiGenerate": {
+            "name": "AI Text Generator",
+            "desc": "Type a topic and pick a text type — AI writes an age-appropriate reading passage for you."
           }
         },
         "stepsTitle": "How to get your text",
         "steps": {
-          "s1": "Pick the Upload tab or the Text Repository tab.",
-          "s2": "Upload: drop your files and wait for the text to be extracted. Repository: tap a text to load it.",
+          "s1": "Pick the Upload tab, the Text Repository tab, or the AI Generate tab.",
+          "s2": "Upload: drop your files and wait for the text to be extracted. Repository: tap a text to load it. AI Generate: enter a topic and tap Generate.",
           "s3": "Once the text appears, all reading tools unlock. Tap New Text to start over."
         },
         "tipTitle": "Good to know",
         "tipContent": "You can upload several images at once (one per page). Supported formats: PNG, JPG, JPEG, WEBP and PDF."
+      }
+    },
+    "aiGenerate": {
+      "title": "AI Text Generator",
+      "topicLabel": "Topic / Theme",
+      "topicPlaceholder": "e.g., A day at the beach, Space exploration, Online safety",
+      "topicRequired": "Please enter a topic or theme.",
+      "descriptionLabel": "Further Description (optional)",
+      "descriptionPlaceholder": "e.g., The main character is a shy 14-year-old; include a surprising ending",
+      "textTypeLabel": "Text Type",
+      "lengthLabel": "Approximate Length",
+      "approxWords": "≈ {{count}} words",
+      "longTextNote": "Longer texts may vary more in difficulty.",
+      "cefrLabel": "Difficulty Level (CEFR)",
+      "cefrAutoHint": "Auto-suggested for age {{age}}. Adjust for stronger or weaker students.",
+      "reset": "Auto",
+      "generateButton": "Generate Reading Text",
+      "generating": "Generating...",
+      "generatingWait": "Generating your reading text — this may take a moment...",
+      "regenerateEasier": "Easier",
+      "regenerateHarder": "Harder",
+      "qcTitle": "Generated Text Details",
+      "wordCount": "Words",
+      "estimatedFkGrade": "Est. FK Grade",
+      "newVocabulary": "New vocabulary to learn",
+      "parseError": "The AI response was not in the expected format. Please try again.",
+      "invalidTextType": "Invalid text type selected.",
+      "textTypes": {
+        "article": "Article",
+        "reportInformational": "Report / Informational text",
+        "blogPost": "Blog post / Online posting",
+        "review": "Review",
+        "emailLetter": "Email / Letter",
+        "editorialArgumentative": "Editorial / Argumentative essay",
+        "interview": "Interview",
+        "shortStory": "Short story",
+        "advertisementBrochure": "Advertisement / Brochure / Leaflet",
+        "noticeAnnouncement": "Notice / Announcement / Public information text",
+        "profileFeature": "Profile / Feature piece"
       }
     },
     "repository": {
@@ -2153,6 +2197,7 @@
     "glossaryModel": "Glossary Model",
     "sentenceAnalysisModel": "Sentence Analysis Model",
     "grammarModel": "Grammar Model",
+    "readingTextModel": "Reading Text Generator Model",
     "tutorModel": "Advanced AI Tutor Model",
     "basicTutorModel": "Basic AI Tutor Model",
     "ttsVoice": "TTS Voice",

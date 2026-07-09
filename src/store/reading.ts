@@ -157,10 +157,11 @@ export type GenerationType =
   | "grammar-questions"
   | "grammar-lesson"
   | "sentence-analysis"
-  | "tutor";
+  | "tutor"
+  | "reading-text";
 
 type ReadingTestMode = "all-at-once" | "question-by-question";
-type TextSource = "upload" | "repository" | "shared" | "assignment";
+type TextSource = "upload" | "repository" | "shared" | "assignment" | "ai-generated";
 
 export interface ReadingStore {
   id: string;
@@ -169,6 +170,7 @@ export interface ReadingStore {
   source: TextSource;
   originalImages: string[];
   extractedText: string;
+  generatedTextMeta: GeneratedTextMeta | null;
   summary: string;
   adaptedText: string;
   simplifiedText: string;
@@ -319,6 +321,8 @@ interface ReadingActions {
   setIncludeSentenceAnalysis: (include: boolean) => void;
   clearDerivedData: () => void;
   loadFromRepository: (text: RepositoryText) => void;
+  loadGeneratedText: (title: string, body: string[], meta: GeneratedTextMeta) => void;
+  setGeneratedTextMeta: (meta: GeneratedTextMeta | null) => void;
   setSource: (source: TextSource) => void;
   reset: () => void;
   backup: () => ReadingStore;
@@ -332,6 +336,7 @@ const defaultValues: ReadingStore = {
   source: "upload" as TextSource,
   originalImages: [],
   extractedText: "",
+  generatedTextMeta: null,
   summary: "",
   adaptedText: "",
   simplifiedText: "",
@@ -1277,6 +1282,44 @@ export const useReadingStore = create(
         // previously-opened one.
         markLastOpenedSession(newId);
       },
+      loadGeneratedText: (title, body, meta) => {
+        abortAllGenerations();
+        const newId = nanoid();
+        const now = Date.now();
+        const renderedText = body.length > 0 ? body.join("\n\n") : "";
+        const newState: Partial<ReadingStore> = {
+          ...defaultValues,
+          id: newId,
+          docTitle: title,
+          extractedText: renderedText,
+          generatedTextMeta: meta,
+          source: "ai-generated",
+          createdAt: now,
+          updatedAt: now,
+          status: "idle",
+        };
+        set(() => newState as ReadingStore);
+        // Sync to the in-memory history store immediately so that useAutoSave
+        // sees the session as already existing and does not issue a duplicate
+        // POST /api/sessions alongside the one fired below.
+        syncToHistoryIfNeeded(newState as ReadingStore);
+        if (currentUserId) {
+          createSessionInAPI({ ...newState } as ReadingStore);
+        }
+        markLastOpenedSession(newId);
+      },
+      setGeneratedTextMeta: (meta) =>
+        set((state) => {
+          const newState = {
+            generatedTextMeta: meta,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
       reset: () => {
         abortAllGenerations();
         set(() => ({

@@ -289,6 +289,38 @@ interface TextDifficultyResult {
   analyzedAt: number;
 }
 
+// ─── AI reading-text generator ────────────────────────────────────────────────
+
+/** Raw JSON object returned by the model for an AI-generated reading text. */
+interface GeneratedReadingText {
+  title: string;
+  text_type: string;
+  cefr_level: CEFRLevel;
+  word_count: number;
+  estimated_fk_grade: number;
+  new_vocabulary: string[];
+  body: string[];
+}
+
+/**
+ * Quality-control metadata for an AI-generated reading text. Persisted to the
+ * `generated_text_meta` JSONB column so the "regenerate at level" flow and
+ * long-term QC analysis survive reloads.
+ */
+interface GeneratedTextMeta {
+  topic: string;
+  description?: string;
+  textType: string;
+  textTypeLabel: string;
+  targetWordCount: number;
+  cefrLevel: CEFRLevel;
+  ageGeneratedFor: number;
+  generatedAt: number;
+  actualWordCount?: number;
+  estimatedFkGrade?: number;
+  newVocabulary?: string[];
+}
+
 type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student';
 
 interface SchoolInfo {

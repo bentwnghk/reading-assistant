@@ -21,6 +21,7 @@ export type ActivityType =
   | "grammar_duel_complete"
   | "ai_tutor_question"
   | "visualization_generate"
+  | "reading_text_generate"
   | "assignment_create"
   | "assignment_start"
   | "assignment_submit"
