@@ -487,9 +487,9 @@
     },
     "aiGenerate": {
       "title": "AI 文本生成器",
-      "topicLabel": "主題 / 主旨",
+      "topicLabel": "主題 / 話題",
       "topicPlaceholder": "例如：海灘的一天、太空探索、網絡安全",
-      "topicRequired": "請輸入主題或主旨。",
+      "topicRequired": "請輸入主題或話題。",
       "descriptionLabel": "補充描述（選填）",
       "descriptionPlaceholder": "例如：主角是一位害羞的 14 歲學生；加入意想不到的結局",
       "textTypeLabel": "文體",
