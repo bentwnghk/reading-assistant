@@ -1286,7 +1286,13 @@ export const useReadingStore = create(
         abortAllGenerations();
         const newId = nanoid();
         const now = Date.now();
-        const renderedText = body.length > 0 ? body.join("\n\n") : "";
+        // Prepend the title so it appears as the heading of the reading passage,
+        // matching the OCR upload flow (where the title is the first line of
+        // extracted text). Skip if the model already placed the title as the
+        // first body paragraph to avoid duplication.
+        const alreadyTitled = body.length > 0 && body[0].trim() === title.trim();
+        const paragraphs = title && !alreadyTitled ? [title, ...body] : body;
+        const renderedText = paragraphs.join("\n\n");
         const newState: Partial<ReadingStore> = {
           ...defaultValues,
           id: newId,
