@@ -21,6 +21,8 @@ import {
   Lightbulb,
   MessageSquareQuote,
   ArrowLeft,
+  ArrowDown,
+  ArrowUp,
   ChevronRight,
   Lock,
   CheckCircle2,
@@ -46,6 +48,7 @@ import {
   Search,
   Globe,
   Building2,
+  RotateCcw,
   ChevronDown,
   ChevronsUpDown,
 } from "lucide-react";
@@ -150,8 +153,12 @@ export function HeroReadingMockup() {
   );
 }
 
-/* ── 2. ENCOUNTER — upload / OCR + Text Repository ── */
+/* ── 2. ENCOUNTER — Select Text: three clickable sources ── */
+type SourceTab = "upload" | "repository" | "ai";
+
 export function UploadMockup() {
+  const [tab, setTab] = useState<SourceTab>("ai");
+  const newVocab = ["shimmering", "reluctantly", "horizon", "tide pool"];
   const repoRows = [
     {
       name: "DSE 2023 Paper 1 Part A Text 1",
@@ -178,99 +185,213 @@ export function UploadMockup() {
       visLabel: "Public",
     },
   ];
+  const tabs: { key: SourceTab; label: string; icon: React.ReactNode }[] = [
+    { key: "upload", label: "Upload Image/PDF", icon: <ImageIcon className="h-3 w-3" /> },
+    { key: "repository", label: "Text Repository", icon: <Library className="h-3 w-3" /> },
+    { key: "ai", label: "AI Generate", icon: <Sparkles className="h-3 w-3" /> },
+  ];
+
   return (
     <MockupFrame label="SELECT TEXT · Mr.🆖 ProReader">
-      {/* compact upload drop zone (Upload tab) */}
-      <div className="rounded-xl border-2 border-dashed border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 px-4 py-5 text-center">
-        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]">
-          <Upload className="h-4.5 w-4.5" />
-        </div>
-        <p className="mt-2 text-sm font-semibold text-[var(--lp-ink)]">Drop an image or PDF here</p>
-        <p className="text-xs text-[var(--lp-ink-soft)]">or click to select · PNG, JPG, PDF</p>
+      {/* clickable tab strip — three text sources */}
+      <div className="flex gap-1 border-b border-[var(--lp-rule)]">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => setTab(t.key)}
+            className={`flex items-center gap-1 border-b-2 px-2 py-1.5 text-[10px] font-medium transition-colors ${
+              tab === t.key
+                ? "-mb-px border-[var(--lp-accent)] text-[var(--lp-accent)]"
+                : "border-transparent text-[var(--lp-ink-soft)] hover:text-[var(--lp-ink)]"
+            }`}
+          >
+            {t.icon}
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {/* ── Text Repository — faithful student table view ── */}
-      <div className="mt-5">
-        <div className="mb-2 flex items-center gap-1.5">
-          <Library className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]">
-            Text Repository
-          </span>
+      {/* ── Upload Image/PDF tab ── */}
+      {tab === "upload" && (
+        <div className="mt-3 rounded-xl border-2 border-dashed border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 px-4 py-7 text-center">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]">
+            <Upload className="h-4.5 w-4.5" />
+          </div>
+          <p className="mt-2 text-sm font-semibold text-[var(--lp-ink)]">Drop an image or PDF here</p>
+          <p className="text-xs text-[var(--lp-ink-soft)]">or click to select · PNG, JPG, PDF</p>
         </div>
+      )}
 
-        {/* toolbar — search + visibility filter (students see no upload / import / export) */}
-        <div className="mb-2 flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--lp-ink-soft)]" />
-            <div className="w-full rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] py-1.5 pl-8 pr-3 text-[11px] text-[var(--lp-ink-soft)]">
-              Search texts…
+      {/* ── Text Repository tab ── */}
+      {tab === "repository" && (
+        <div className="mt-3">
+          {/* toolbar — search + visibility filter */}
+          <div className="mb-2 flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--lp-ink-soft)]" />
+              <div className="w-full rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] py-1.5 pl-8 pr-3 text-[11px] text-[var(--lp-ink-soft)]">
+                Search texts…
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1.5 text-[11px] text-[var(--lp-ink-soft)]">
+              All <ChevronDown className="h-3 w-3" />
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-1 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1.5 text-[11px] text-[var(--lp-ink-soft)]">
-            All <ChevronDown className="h-3 w-3" />
+          {/* table — Name · Read · Creator · Date · Visibility */}
+          <div className="overflow-x-auto rounded-xl border border-[var(--lp-rule)]">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/60">
+                  <th className="px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)]">
+                    <span className="flex items-center gap-1">
+                      Name <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
+                    </span>
+                  </th>
+                  <th className="w-[1%] px-2 py-1.5"></th>
+                  <th className="hidden px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)] sm:table-cell">
+                    <span className="flex items-center gap-1">
+                      Creator <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
+                    </span>
+                  </th>
+                  <th className="hidden px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)] sm:table-cell">
+                    <span className="flex items-center gap-1">
+                      Date <ChevronDown className="h-2.5 w-2.5" />
+                    </span>
+                  </th>
+                  <th className="px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)]">
+                    <span className="flex items-center gap-1">
+                      Visibility <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {repoRows.map((r) => (
+                  <tr key={r.name} className="border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]">
+                    <td className="px-3 py-2 align-middle">
+                      <p className="text-[11px] font-semibold leading-snug text-[var(--lp-ink)]">{r.name}</p>
+                      {r.sub && (
+                        <p className="mt-0.5 max-w-[180px] truncate text-[10px] text-[var(--lp-ink-soft)]" title={r.sub}>
+                          {r.sub}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-2 py-2 align-middle text-right">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-[var(--lp-accent)] px-2 py-1 text-[10px] font-semibold text-white">
+                        <BookOpen className="h-3 w-3" /> Read
+                      </span>
+                    </td>
+                    <td className="hidden px-3 py-2 align-middle text-[10px] text-[var(--lp-ink-soft)] sm:table-cell">
+                      {r.creator}
+                    </td>
+                    <td className="hidden whitespace-nowrap px-3 py-2 align-middle text-[10px] text-[var(--lp-ink-soft)] sm:table-cell">
+                      {r.date}
+                    </td>
+                    <td className="px-3 py-2 align-middle">
+                      <RepoVisBadge visibility={r.visibility} label={r.visLabel} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
+      )}
 
-        {/* table — Name · Read · Creator · Date · Visibility */}
-        <div className="overflow-x-auto rounded-xl border border-[var(--lp-rule)]">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/60">
-                <th className="px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)]">
-                  <span className="flex items-center gap-1">
-                    Name <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
+      {/* ── AI Generate tab ── */}
+      {tab === "ai" && (
+        <>
+          {/* AI Text Generator form card */}
+          <div className="mt-3 space-y-3 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-violet-500" />
+              <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">AI Text Generator</span>
+            </div>
+
+            {/* Topic input */}
+            <div>
+              <span className="text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">Topic / Theme</span>
+              <div className="mt-0.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5 text-[11px] text-[var(--lp-ink)]">
+                A day at the beach
+              </div>
+            </div>
+
+            {/* Description */}
+            <div>
+              <span className="text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">Further Description (optional)</span>
+              <div className="mt-0.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5 text-[11px] text-[var(--lp-ink-soft)]">
+                The main character is a shy 14-year-old; include a surprising ending
+              </div>
+            </div>
+
+            {/* 3-col row: Text Type · Approx. Length · Level (CEFR) */}
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <span className="text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">Text Type</span>
+                <div className="mt-0.5 flex items-center justify-between rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5 text-[11px] text-[var(--lp-ink)]">
+                  <span>Short story</span>
+                  <ChevronDown className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+                </div>
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">Approx. Length</span>
+                <div className="mt-0.5 flex items-center justify-between rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5 text-[11px] text-[var(--lp-ink)]">
+                  <span>≈ 400 words</span>
+                  <ChevronDown className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+                </div>
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">Level (CEFR)</span>
+                <div className="mt-0.5 flex items-center justify-between rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5 text-[11px] text-[var(--lp-ink)]">
+                  <span>B1</span>
+                  <RotateCcw className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Generate button */}
+            <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[var(--lp-accent)] px-3 py-2 text-[11px] font-semibold text-white">
+              <Sparkles className="h-3.5 w-3.5" /> Generate Reading Text
+            </div>
+          </div>
+
+          {/* QC details card (the result) */}
+          <div className="mt-3 space-y-2 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 p-3">
+            <div className="flex items-center gap-1.5">
+              <Lightbulb className="h-3.5 w-3.5 text-[var(--lp-accent)]" />
+              <span className="text-[11px] font-semibold text-[var(--lp-ink)]">Generated Text Details</span>
+            </div>
+            {/* badges: Words · Est. FK Grade · CEFR (color-coded) · text type */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-md bg-[var(--lp-rule)]/60 px-1.5 py-0.5 text-[9px] font-medium text-[var(--lp-ink)]">Words: 248</span>
+              <span className="rounded-md bg-[var(--lp-rule)]/60 px-1.5 py-0.5 text-[9px] font-medium text-[var(--lp-ink)]">Est. FK Grade: 6.2</span>
+              <span className="rounded-md bg-cyan-100 px-1.5 py-0.5 text-[9px] font-medium text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">CEFR B1</span>
+              <span className="rounded-md border border-[var(--lp-rule)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">Short story</span>
+            </div>
+            {/* new vocabulary chips */}
+            <div>
+              <p className="text-[9px] text-[var(--lp-ink-soft)]">New vocabulary to learn</p>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {newVocab.map((w) => (
+                  <span key={w} className="rounded-md border border-[var(--lp-rule)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
+                    {w}
                   </span>
-                </th>
-                <th className="w-[1%] px-2 py-1.5"></th>
-                <th className="hidden px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)] sm:table-cell">
-                  <span className="flex items-center gap-1">
-                    Creator <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
-                  </span>
-                </th>
-                <th className="hidden px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)] sm:table-cell">
-                  <span className="flex items-center gap-1">
-                    Date <ChevronDown className="h-2.5 w-2.5" />
-                  </span>
-                </th>
-                <th className="px-3 py-1.5 align-middle font-mono text-[9px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)]">
-                  <span className="flex items-center gap-1">
-                    Visibility <ChevronsUpDown className="h-2.5 w-2.5 opacity-40" />
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {repoRows.map((r) => (
-                <tr key={r.name} className="border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]">
-                  <td className="px-3 py-2 align-middle">
-                    <p className="text-[11px] font-semibold leading-snug text-[var(--lp-ink)]">{r.name}</p>
-                    {r.sub && (
-                      <p className="mt-0.5 max-w-[180px] truncate text-[10px] text-[var(--lp-ink-soft)]" title={r.sub}>
-                        {r.sub}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-2 py-2 align-middle text-right">
-                    {/* students get only a Read action — no edit / rename / delete */}
-                    <span className="inline-flex items-center gap-1 rounded-md bg-[var(--lp-accent)] px-2 py-1 text-[10px] font-semibold text-white">
-                      <BookOpen className="h-3 w-3" /> Read
-                    </span>
-                  </td>
-                  <td className="hidden px-3 py-2 align-middle text-[10px] text-[var(--lp-ink-soft)] sm:table-cell">
-                    {r.creator}
-                  </td>
-                  <td className="hidden whitespace-nowrap px-3 py-2 align-middle text-[10px] text-[var(--lp-ink-soft)] sm:table-cell">
-                    {r.date}
-                  </td>
-                  <td className="px-3 py-2 align-middle">
-                    <RepoVisBadge visibility={r.visibility} label={r.visLabel} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                ))}
+              </div>
+            </div>
+            {/* regenerate one CEFR band up/down */}
+            <div className="flex gap-2 pt-0.5">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+                <ArrowDown className="h-3 w-3" /> Easier
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+                <ArrowUp className="h-3 w-3" /> Harder
+              </span>
+            </div>
+          </div>
+        </>
+      )}
     </MockupFrame>
   );
 }
