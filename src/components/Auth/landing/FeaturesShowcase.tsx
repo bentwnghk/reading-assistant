@@ -7,6 +7,7 @@ import {
   Plus,
   Minus,
   Camera,
+  Sparkles,
   Brain,
   BarChart3,
   Highlighter,
@@ -45,6 +46,7 @@ const stagger = {
 // grid (header.about.features.*). Titles/descriptions are pulled from i18n.
 const FEATURES: { key: string; icon: LucideIcon; color: string }[] = [
   { key: "ocr", icon: Camera, color: "text-blue-500" },
+  { key: "aiTextGenerator", icon: Sparkles, color: "text-violet-500" },
   { key: "visual", icon: Brain, color: "text-purple-500" },
   { key: "visualization", icon: ImageIcon, color: "text-sky-500" },
   { key: "difficulty", icon: BarChart3, color: "text-emerald-500" },

@@ -584,6 +584,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <Sparkles className="h-4 w-4 mt-0.5 text-violet-500 shrink-0" />
+                  <div>
+                    <div className="font-medium">{t("header.about.features.aiTextGenerator.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.aiTextGenerator.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <Brain className="h-4 w-4 mt-0.5 text-purple-500 shrink-0" />
                   <div>
                     <div className="font-medium">{t("header.about.features.visual.title")}</div>
@@ -894,7 +901,7 @@ function Header() {
                 {t("header.about.faqs.title")}
               </h3>
               <Accordion type="single" collapsible className="space-y-2">
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                {Array.from({ length: 11 }, (_, i) => i + 1).map((n) => (
                   <AccordionItem key={n} value={`faq-${n}`} className="border-b-0">
                     <AccordionTrigger className="px-4 py-3 text-left text-sm font-semibold hover:no-underline hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       {t(`header.about.faqs.q${n}.q`)}

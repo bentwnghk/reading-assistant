@@ -202,6 +202,7 @@ function ImageUpload() {
               { key: "upload", icon: Upload, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
               { key: "extract", icon: ScanText, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "repository", icon: Library, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+              { key: "aiGenerate", icon: Sparkles, bgClass: "bg-violet-500/10", iconClass: "text-violet-500" },
             ]}
             stepsTitleKey="reading.imageUpload.help.stepsTitle"
             stepsKeys={[
