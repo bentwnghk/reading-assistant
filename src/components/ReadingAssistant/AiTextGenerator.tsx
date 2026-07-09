@@ -132,11 +132,13 @@ function AiTextGenerator({ onTextLoaded }: AiTextGeneratorProps) {
       setTopic("");
       return;
     }
-    // Warn before overwriting an existing session that has content and isn't
-    // already an AI-generated text (mirrors the TextRepository load guard).
-    const hasContent = !!useReadingStore.getState().extractedText;
+    // Only warn if an AI generation is actively running — loadGeneratedText
+    // calls abortAllGenerations(), which would cancel it. Mirrors the
+    // TextRepository load guard. Existing content alone is not a reason to
+    // block: the user explicitly clicked "Generate", signalling intent to
+    // replace the current text.
     const hasActiveGen = Object.values(useReadingStore.getState().activeGenerations).some(Boolean);
-    if (hasContent || hasActiveGen) {
+    if (hasActiveGen) {
       setConfirmOverwrite(true);
       return;
     }
