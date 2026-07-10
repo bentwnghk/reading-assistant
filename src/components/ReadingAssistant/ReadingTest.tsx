@@ -1153,28 +1153,31 @@ function ReadingTest() {
             >
               <Languages className="h-4 w-4" />
             </Button>
-            <Button
-              onClick={handleSubmit}
-              size="sm"
-              disabled={evaluatingShortAnswer}
-            >
-              {evaluatingShortAnswer ? (
-                <>
-                  <LoaderCircle className="h-4 w-4 animate-spin" />
-                  <span>{t("reading.readingTest.evaluating")}</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="h-4 w-4" />
-                  <span>{t("reading.readingTest.submit")}</span>
-                </>
-              )}
-            </Button>
           </div>
         </div>
 
       <div className="space-y-6">
         {questionsToDisplay.map((question, index) => renderQuestion(question, index, false))}
+
+        <div className="flex justify-center pt-2">
+          <Button
+            onClick={handleSubmit}
+            size="lg"
+            disabled={evaluatingShortAnswer}
+          >
+            {evaluatingShortAnswer ? (
+              <>
+                <LoaderCircle className="h-5 w-5 mr-2 animate-spin" />
+                {t("reading.readingTest.evaluating")}
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-5 w-5 mr-2" />
+                {t("reading.readingTest.submit")}
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </section>
   );
