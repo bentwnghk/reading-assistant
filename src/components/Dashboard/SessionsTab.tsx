@@ -345,13 +345,13 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                       {item.glossary?.length || 0}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {item.spellingGameBestScore || 0}
+                      {(item.spellingGameBestScore ?? 0) > 0 ? item.spellingGameBestScore : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {item.spellingGameAccuracy ? `${item.spellingGameAccuracy}%` : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {item.vocabularyQuizScore !== undefined && item.vocabularyQuizScore !== null ? `${item.vocabularyQuizScore}%` : "0%"}
+                      {(item.vocabularyQuizScore ?? 0) > 0 ? `${item.vocabularyQuizScore}%` : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}

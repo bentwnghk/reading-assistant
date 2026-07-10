@@ -480,7 +480,11 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     <Badge variant="outline">{session.glossaryCount}</Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    {session.spellingGameBestScore || 0}
+                    {(session.spellingGameBestScore ?? 0) > 0 ? (
+                      session.spellingGameBestScore
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     {(session.spellingGameAccuracy || 0) > 0 ? (
@@ -492,8 +496,8 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     )}
                   </TableCell>
                   <TableCell className="text-center">
-                    {session.vocabularyQuizScore !== undefined && session.vocabularyQuizScore !== null ? (
-                      <Badge variant={session.vocabularyQuizScore >= 70 ? "default" : "destructive"}>
+                    {(session.vocabularyQuizScore ?? 0) > 0 ? (
+                      <Badge variant={session.vocabularyQuizScore! >= 70 ? "default" : "destructive"}>
                         {session.vocabularyQuizScore}%
                       </Badge>
                     ) : (
