@@ -369,7 +369,7 @@ export default function LearningRecommendationDialog() {
         if (!v) handleDismiss();
       }}
     >
-      <DialogContent className="max-w-sm text-center overflow-hidden">
+      <DialogContent className="max-w-sm max-h-[80vh] text-center overflow-x-hidden overflow-y-auto scrollbar-hide">
         {step === "choices" && (
           <>
             <div
