@@ -862,6 +862,12 @@ export function AITutorMockup() {
 /* ── 4. PRACTICE — flashcard flip + scramble + grammar game ── */
 export function PracticeMockup() {
   const [flipped, setFlipped] = useState(false);
+  // Auto-flip the flashcard every 2s. Re-runs on every `flipped` change
+  // (including manual clicks), so each face shows for a full 2s.
+  useEffect(() => {
+    const id = setTimeout(() => setFlipped((f) => !f), 2000);
+    return () => clearTimeout(id);
+  }, [flipped]);
   return (
     <MockupFrame label="PRACTICE · Mr.🆖 ProReader">
       {/* flashcard header — remaining counter */}
@@ -1046,6 +1052,12 @@ export function PracticeMockup() {
 /* ── 5. MASTER — test scorecard + leaderboard + achievements ── */
 export function MasterMockup() {
   const [practiceMode, setPracticeMode] = useState(false);
+  // Auto-toggle the "Targeted practice" view every 2s. Re-runs on every
+  // `practiceMode` change (including manual clicks), so each view holds 2s.
+  useEffect(() => {
+    const id = setTimeout(() => setPracticeMode((p) => !p), 2000);
+    return () => clearTimeout(id);
+  }, [practiceMode]);
   const skills = [
     { l: "Main idea", v: 90 },
     { l: "Inference", v: 70 },
