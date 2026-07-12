@@ -1570,6 +1570,8 @@
     "example": "例句",
     "rating": "評級",
     "mastery": "等級",
+    "lastReviewed": "上次複習",
+    "never": "從未",
     "ratings": {
       "hard": "困難",
       "medium": "中等",

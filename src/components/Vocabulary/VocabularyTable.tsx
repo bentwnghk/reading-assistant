@@ -26,6 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { getMasteryColor, isDueForReview } from "@/utils/srs";
+import { formatDateLong } from "@/utils/formatDate";
 import { cn } from "@/utils/style";
 
 type SortField =
@@ -39,7 +40,7 @@ type SortOrder = "asc" | "desc";
 const RATING_SORT: Record<string, number> = { hard: 3, medium: 2, easy: 1 };
 
 function VocabularyTable() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const {
     words,
     selectedWordIds,
@@ -392,6 +393,17 @@ function VocabularyTable() {
                   <ArrowUpDown className="ml-1 h-3 w-3" />
                 </Button>
               </TableHead>
+              <TableHead className="w-[140px]">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSort("lastReviewed")}
+                  className="-ml-3"
+                >
+                  {t("vocabulary.lastReviewed")}
+                  <ArrowUpDown className="ml-1 h-3 w-3" />
+                </Button>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -450,11 +462,16 @@ function VocabularyTable() {
                     {t(`vocabulary.masteryLevels.${w.masteryLevel}`)}
                   </span>
                 </TableCell>
+                <TableCell className="text-xs text-muted-foreground whitespace-normal leading-tight">
+                  {w.lastReviewedAt
+                    ? formatDateLong(w.lastReviewedAt, i18n.language)
+                    : t("vocabulary.never")}
+                </TableCell>
               </TableRow>
             ))}
             {pagedWords.length === 0 && (
               <TableRow>
-                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   {t("vocabulary.noWordsMatch")}
                 </TableCell>
               </TableRow>
