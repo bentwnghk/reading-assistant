@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useInView } from "motion/react";
 import {
   Upload,
   Brain,
@@ -61,13 +62,16 @@ function MockupFrame({
   label,
   children,
   className = "",
+  frameRef,
 }: {
   label: string;
   children: React.ReactNode;
   className?: string;
+  frameRef?: React.Ref<HTMLDivElement>;
 }) {
   return (
     <div
+      ref={frameRef}
       className={`relative rounded-2xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] shadow-[0_24px_60px_-28px_rgba(23,22,26,0.35)] overflow-hidden ${className}`}
     >
       <div className="flex items-center gap-2 border-b border-[var(--lp-rule)] px-4 py-2.5">
@@ -157,6 +161,8 @@ export function HeroReadingMockup() {
 type SourceTab = "upload" | "repository" | "ai";
 
 export function UploadMockup() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref);
   const [tab, setTab] = useState<SourceTab>("ai");
   const newVocab = ["shimmering", "reluctantly", "horizon", "tide pool"];
   const repoRows = [
@@ -192,17 +198,19 @@ export function UploadMockup() {
   ];
 
   // Auto-cycle the tabs every 2s. Re-runs on every `tab` change (including
-  // manual clicks), so each tab gets a full 2s before advancing.
+  // manual clicks), so each tab gets a full 2s before advancing. Paused when
+  // the mockup is scrolled out of view.
   useEffect(() => {
+    if (!inView) return;
     const order: SourceTab[] = ["upload", "repository", "ai"];
     const id = setTimeout(() => {
       setTab((cur) => order[(order.indexOf(cur) + 1) % order.length]);
     }, 2000);
     return () => clearTimeout(id);
-  }, [tab]);
+  }, [tab, inView]);
 
   return (
-    <MockupFrame label="SELECT TEXT · Mr.🆖 ProReader">
+    <MockupFrame label="SELECT TEXT · Mr.🆖 ProReader" frameRef={ref}>
       {/* clickable tab strip — three text sources */}
       <div className="flex gap-1 border-b border-[var(--lp-rule)]">
         {tabs.map((t) => (
@@ -419,19 +427,23 @@ const TEXT_VERSIONS = {
 type TextVersion = keyof typeof TEXT_VERSIONS;
 
 export function UnderstandMockup() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref);
   const [version, setVersion] = useState<TextVersion>("Adapted");
   const tabs: TextVersion[] = ["Original", "Adapted", "Simplified"];
   // Auto-cycle the versions every 2s. Re-runs on every `version` change
   // (including manual clicks), so each version gets a full 2s before advancing.
+  // Paused when the mockup is scrolled out of view.
   useEffect(() => {
+    if (!inView) return;
     const order: TextVersion[] = ["Original", "Adapted", "Simplified"];
     const id = setTimeout(() => {
       setVersion((cur) => order[(order.indexOf(cur) + 1) % order.length]);
     }, 2000);
     return () => clearTimeout(id);
-  }, [version]);
+  }, [version, inView]);
   return (
-    <MockupFrame label="TEXT ADAPTATION · Mr.🆖 ProReader">
+    <MockupFrame label="TEXT ADAPTATION · Mr.🆖 ProReader" frameRef={ref}>
       <div className="mb-3 inline-flex rounded-lg border border-[var(--lp-rule)] p-0.5 font-mono text-[11px]">
         {tabs.map((t) => (
           <button
@@ -861,15 +873,19 @@ export function AITutorMockup() {
 
 /* ── 4. PRACTICE — flashcard flip + scramble + grammar game ── */
 export function PracticeMockup() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref);
   const [flipped, setFlipped] = useState(false);
   // Auto-flip the flashcard every 2s. Re-runs on every `flipped` change
   // (including manual clicks), so each face shows for a full 2s.
+  // Paused when the mockup is scrolled out of view.
   useEffect(() => {
+    if (!inView) return;
     const id = setTimeout(() => setFlipped((f) => !f), 2000);
     return () => clearTimeout(id);
-  }, [flipped]);
+  }, [flipped, inView]);
   return (
-    <MockupFrame label="PRACTICE · Mr.🆖 ProReader">
+    <MockupFrame label="PRACTICE · Mr.🆖 ProReader" frameRef={ref}>
       {/* flashcard header — remaining counter */}
       <div className="mb-2 flex items-center justify-between">
         <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">Flashcards</span>
@@ -1051,13 +1067,17 @@ export function PracticeMockup() {
 
 /* ── 5. MASTER — test scorecard + leaderboard + achievements ── */
 export function MasterMockup() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref);
   const [practiceMode, setPracticeMode] = useState(false);
   // Auto-toggle the "Targeted practice" view every 2s. Re-runs on every
   // `practiceMode` change (including manual clicks), so each view holds 2s.
+  // Paused when the mockup is scrolled out of view.
   useEffect(() => {
+    if (!inView) return;
     const id = setTimeout(() => setPracticeMode((p) => !p), 2000);
     return () => clearTimeout(id);
-  }, [practiceMode]);
+  }, [practiceMode, inView]);
   const skills = [
     { l: "Main idea", v: 90 },
     { l: "Inference", v: 70 },
@@ -1122,7 +1142,7 @@ export function MasterMockup() {
     },
   ];
   return (
-    <MockupFrame label="DASHBOARD · Mr.🆖 ProReader">
+    <MockupFrame label="DASHBOARD · Mr.🆖 ProReader" frameRef={ref}>
       <div className="grid items-start gap-4 sm:grid-cols-2">
         {/* Column 1 — your stats: scorecard + leaderboard */}
         <div className="flex flex-col gap-4">
