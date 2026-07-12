@@ -454,6 +454,9 @@
       "clearAll": "New Text",
       "addMore": "Add more images/PDFs",
       "openInNewTab": "Open image in new tab",
+      "untitled": "Untitled",
+      "aiGeneratedBadge": "AI-generated",
+      "repositoryBadge": "Repository",
       "help": {
         "title": "Select Text Guide",
         "intro": "Choose how to load your reading material: upload your own photos or PDFs, pick a text your teacher has shared, or let AI generate one from a topic.",

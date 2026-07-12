@@ -2,8 +2,9 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
-import { Upload, Image as ImageIcon, LoaderCircle, X, Plus, Maximize2, Library, ScanText, Sparkles } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, Plus, Maximize2, Library, ScanText, Sparkles, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
@@ -39,7 +40,7 @@ function ImageUpload() {
   const [extractionProgress, setExtractionProgress] = useState<{ current: number; total: number } | null>(null);
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "repository" | "ai-generate">("upload");
-  const { originalImages, extractedText, activeGenerations } = useReadingStore();
+  const { originalImages, extractedText, activeGenerations, docTitle, source } = useReadingStore();
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = !!activeGenerations["extracting"];
   const isBusy = isExtracting || isProcessingPdf;
@@ -313,6 +314,40 @@ function ImageUpload() {
                   {t("reading.imageUpload.addMore")}
                 </p>
               </div>
+            </div>
+          ) : extractedText ? (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 rounded-lg border bg-card p-4">
+                <div className="shrink-0 rounded-lg bg-muted p-3">
+                  <FileText className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="font-semibold text-sm truncate">
+                      {docTitle || t("reading.imageUpload.untitled")}
+                    </h4>
+                    {source === "ai-generated" && (
+                      <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 gap-1">
+                        <Sparkles className="h-3 w-3" />
+                        {t("reading.imageUpload.aiGeneratedBadge")}
+                      </Badge>
+                    )}
+                    {source === "repository" && (
+                      <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 gap-1">
+                        <Library className="h-3 w-3" />
+                        {t("reading.imageUpload.repositoryBadge")}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-3 whitespace-pre-wrap">
+                    {extractedText.slice(0, 300)}
+                    {extractedText.length > 300 ? "…" : ""}
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t("reading.imageUpload.uploadNew")}
+              </p>
             </div>
           ) : (
             <div

@@ -454,6 +454,9 @@
       "clearAll": "新文本",
       "addMore": "添加更多圖片/PDF",
       "openInNewTab": "在新分頁中開啟圖片",
+      "untitled": "無標題",
+      "aiGeneratedBadge": "AI 生成",
+      "repositoryBadge": "文本庫",
       "help": {
         "title": "選擇文本指南",
         "intro": "選擇載入閱讀材料的方式：上傳你自己的相片或 PDF、挑選老師分享的文本，或讓 AI 根據主題生成一篇。",
