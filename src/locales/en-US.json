@@ -1844,7 +1844,7 @@
           },
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing your daily learning activities across 15 types including reading, summaries, mind maps, visualizations, tests, quizzes, spelling games, and more. Use the time range buttons to adjust the window."
+            "desc": "A stacked bar chart showing your daily learning activities across 15 types including reading, summaries, mind maps, text visualizations, tests, quizzes, spelling games, and more. Use the time range buttons to adjust the window."
           },
           "readingActivity": {
             "name": "Reading Activity",
@@ -1852,7 +1852,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A horizontal bar chart breaking down your usage of 9 AI-powered features: summaries, mind maps (English and Chinese separately), visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI tutor questions."
+            "desc": "A horizontal bar chart breaking down your usage of 9 AI-powered features: summaries, mind maps (English and Chinese separately), text visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI tutor questions."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",

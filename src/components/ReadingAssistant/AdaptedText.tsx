@@ -1696,27 +1696,10 @@ function AdaptedText() {
           <Button
             size="sm"
             variant="ghost"
-            onClick={handleReadAloud}
-            onTouchEnd={handleReadAloud}
-            disabled={isTTSLoading}
-            className="border-r"
-          >
-            {isTTSLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">
-              {t("reading.extractedText.readAloud")}
-            </span>
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
             onClick={handleAnalyzeSentence}
             onTouchEnd={handleAnalyzeSentence}
             disabled={isAnalysisLoading}
-            className="rounded-l-none"
+            className="border-r"
           >
             {isAnalysisLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -1725,6 +1708,23 @@ function AdaptedText() {
             )}
             <span className="hidden sm:inline">
               {t("reading.extractedText.analyze")}
+            </span>
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleReadAloud}
+            onTouchEnd={handleReadAloud}
+            disabled={isTTSLoading}
+            className="rounded-l-none"
+          >
+            {isTTSLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Volume2 className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">
+              {t("reading.extractedText.readAloud")}
             </span>
           </Button>
         </div>
