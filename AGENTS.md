@@ -121,7 +121,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
   - `useSubscription` — Stripe subscription state management
   - `useSchoolSubscription` — School subscription state management
   - `useVocabularySync` — Auto-syncs glossary changes to vocabulary DB on change
-  - `useAutoSave` — Auto-saves reading session to localforage history (skips during streaming)
+  - `useAutoSave` — Auto-saves reading session to localforage history (skips during streaming; excludes `originalImages`/`visualizationImage` from its dependency array because they are lazy-loaded asynchronously — see [Lesson 10](#10-lazy-loaded-large-fields-originalimages--visualizationimage))
   - `useMobile` — Responsive breakpoint detection
   - `useAccurateTimer` — High-precision countdown timer for games
   - `useSubmitShortcut` — Keyboard shortcut (Ctrl+Enter) for form submission
@@ -141,6 +141,7 @@ scripts/                        # SQL migrations (init-db.sql + incremental migr
 - **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts`, `sharing.ts` — all in `src/store/`.
 - **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`.
 - **Radash**: Use **radash** utilities for common operations like `pick`, `isString`, `isObject`, etc.
+- **History store lightweight/full split**: The `src/store/history.ts` store tracks sessions in two states. `loadFromAPI` populates the array with **lightweight** entries (no `originalImages`/`visualizationImage` — these large base64 payloads are stripped by `getUserSessions()`). The async `loadFull(id)` method fetches the complete session (including media) on demand via `/api/sessions/[id]`, deduplicates concurrent fetches, and merges via `hydrate(id, data)`. A module-level `hydratedSessionIds` Set records which entries already contain full media. Use `loadFull` (not `load`) whenever media fields are needed (restore, download, assignment snapshots); use `load` only for synchronous reads of already-present text fields. See [Lesson 10](#10-lazy-loaded-large-fields-originalimages--visualizationimage).
 - **AI Generation Tracking**: All AI generation loading state lives in the reading store's `activeGenerations: Record<string, boolean>` field (keyed by `GenerationType`). Components read `!!activeGenerations["type"]` for spinners/disabled state. This **must** be store-level (not component-local `useState`) so loading indicators and button-disable survive SPA navigation — the user can navigate to `/leaderboard` mid-generation, come back, and still see the spinner. See [AI Generation Tracking](#ai-generation-tracking-activegenerations) below.
 
 ### 5. Imports
@@ -772,3 +773,22 @@ import { Suspense } from "react";
 **Known call sites of `MagicDown` (all loaded via `next/dynamic()` without local Suspense — potential blank-page sites)**: `AdaptedText.tsx` (Sentence Analysis dialog — fixed), `Summary.tsx`, `MindMap.tsx`. If a similar symptom appears in those sections after a fresh page load, apply the same local `<Suspense>` wrap.
 
 **Why `onOpenAutoFocus={(e) => e.preventDefault()}` on the Radix `DialogContent` does NOT fix this**: That guards against focus-driven scroll (a real but different Radix behavior). It was the first attempted fix for the Sentence Analysis scroll-to-top bug and had zero effect, because the cause was the lazy import's Suspense suspension, not focus management. Don't conflate the two.
+
+### 10. Lazy-Loaded Large Fields (`originalImages` / `visualizationImage`)
+
+`originalImages` (base64 image arrays) and `visualizationImage` (base64 data URL) are the two largest payloads on a reading session. Loading them for every row in the session list (on sign-in, dashboard, history) is expensive and unnecessary for list/metric views. As of v2.859 these fields are **stripped from the list query** (`getUserSessions()` in `src/lib/sessions.ts` no longer joins `reading_images` and returns `originalImages: []` / `visualizationImage: ""`). Full media is fetched **on demand** via `getReadingSession` / the history store's `loadFull(id)`, with concurrent-fetch deduplication and a `hydratedSessionIds` Set tracking which entries already contain media.
+
+This lightweight/full split is correct, but it silently broke two classes of consumers and required follow-up fixes (v2.860, v2.861). **Any time you stop eager-loading a field, audit every consumer**:
+
+| Failure mode | What happens | Fix pattern |
+|--------------|--------------|-------------|
+| **Presence-as-completion proxy** | Code used `!!row.visualization_image` to mean "visualization was generated". With the field stripped, this is always `false`, so progress bars / dashboard counts / activity tallies report 0%. | Switch to a **lightweight proxy** that *is* returned by the list query — here `visualization_generated_at > 0` (a BIGINT timestamp). Update *every* `calculateProgress` copy: `src/utils/dashboardMetrics.ts`, `src/components/Dashboard/SessionsTab.tsx`, and `src/lib/users.ts` (`getStudentSessions`/`getStudentSessionsForClass` must also `SELECT` the timestamp column). |
+| **Autosave dependency array** | `useAutoSave` had `originalImages`/`visualizationImage` in its `useEffect` deps. After lazy-loading, these arrive **asynchronously** (background merge in `AuthProvider`), transitioning the store field from `[]`/`""` (lightweight) to populated (hydrated). That transition fires the autosave effect, which persists the *current* store state — potentially clobbering the just-fetched media, or triggering a redundant write before hydration lands. | Remove lazy-loaded media fields from the autosave dependency array. They are not user-editable text and are persisted by their own generation/save paths. |
+
+**The background-merge race (AuthProvider)**: On sign-in, `AuthProvider` restores the **lightweight** session immediately (so the "Welcome back!" UI isn't blocked), then fetches the full session and merges **only** `originalImages`/`visualizationImage` into the store. The merge is guarded by two checks to avoid clobbering user edits made in the window between restore and fetch:
+1. `syncedUserIdRef.current !== expectedUserId` — user hasn't signed out / switched accounts.
+2. `useReadingStore.getState().id !== sessionToRestore.id` — user hasn't switched to a different session.
+
+**Rule of thumb**: "If I stop returning this column from the list query, what else reads it?" Answer that question *before* merging the query change, not after users report zeroed-out dashboards.
+
+**Lesson 7 interaction**: This is the read-path mirror of [Lesson 7](#7-full-persistence-layer-check-for-new-store-fields). Lesson 7 says "a field missing from the DB/INSERT silently fails on write"; this lesson says "a field missing from the SELECT silently fails on read." Both produce `undefined`/fallback values with no error, so they are invisible to tests that don't assert the specific field.
