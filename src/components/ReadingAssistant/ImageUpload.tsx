@@ -197,6 +197,17 @@ function ImageUpload() {
 
   const hasContent = originalImages.length > 0 || !!extractedText;
 
+  // For text-only sources (AI-generated, text-only Repository) the title is
+  // prepended as the first paragraph of extractedText. Strip it from the
+  // preview so the title isn't shown twice (once in the card heading, once in
+  // the preview body).
+  const previewText = (() => {
+    if (!extractedText) return "";
+    const parts = extractedText.split("\n\n");
+    const startIdx = docTitle && parts[0]?.trim() === docTitle.trim() ? 1 : 0;
+    return parts.slice(startIdx).join("\n\n");
+  })();
+
   return (
     <section className="p-4 border rounded-md mt-4">
       <div className="flex items-center justify-between border-b pb-4 mb-4">
@@ -340,8 +351,8 @@ function ImageUpload() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-3 whitespace-pre-wrap">
-                    {extractedText.slice(0, 300)}
-                    {extractedText.length > 300 ? "…" : ""}
+                    {previewText.slice(0, 300)}
+                    {previewText.length > 300 ? "…" : ""}
                   </p>
                 </div>
               </div>
