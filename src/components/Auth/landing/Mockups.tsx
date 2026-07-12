@@ -421,6 +421,15 @@ type TextVersion = keyof typeof TEXT_VERSIONS;
 export function UnderstandMockup() {
   const [version, setVersion] = useState<TextVersion>("Adapted");
   const tabs: TextVersion[] = ["Original", "Adapted", "Simplified"];
+  // Auto-cycle the versions every 2s. Re-runs on every `version` change
+  // (including manual clicks), so each version gets a full 2s before advancing.
+  useEffect(() => {
+    const order: TextVersion[] = ["Original", "Adapted", "Simplified"];
+    const id = setTimeout(() => {
+      setVersion((cur) => order[(order.indexOf(cur) + 1) % order.length]);
+    }, 2000);
+    return () => clearTimeout(id);
+  }, [version]);
   return (
     <MockupFrame label="TEXT ADAPTATION · Mr.🆖 ProReader">
       <div className="mb-3 inline-flex rounded-lg border border-[var(--lp-rule)] p-0.5 font-mono text-[11px]">
