@@ -3,17 +3,15 @@ import { useReadingStore, isStreamingActive } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 
 function useAutoSave() {
-  const { 
-    id, 
+  const {
+    id,
     docTitle,
-    originalImages, 
-    extractedText, 
-    summary, 
-    adaptedText, 
-    simplifiedText, 
-    mindMap, 
-    visualizationImage,
-    readingTest, 
+    extractedText,
+    summary,
+    adaptedText,
+    simplifiedText,
+    mindMap,
+    readingTest,
     glossary,
     highlightedWords,
     analyzedSentences,
@@ -53,7 +51,7 @@ function useAutoSave() {
     }
 
     prevIdRef.current = id;
-  }, [id, docTitle, originalImages, extractedText, summary, adaptedText, simplifiedText, mindMap, visualizationImage, readingTest, glossary, highlightedWords, analyzedSentences, testScore, testCompleted, testEarnedPoints, testTotalPoints]);
+  }, [id, docTitle, extractedText, summary, adaptedText, simplifiedText, mindMap, readingTest, glossary, highlightedWords, analyzedSentences, testScore, testCompleted, testEarnedPoints, testTotalPoints]);
 }
 
 export default useAutoSave;
