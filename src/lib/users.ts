@@ -967,7 +967,7 @@ function calculateProgress(row: {
   extracted_text: string
   summary?: string
   mind_map?: string
-  visualization_image?: string
+  visualization_generated_at?: number | string
   adapted_text?: string
   test_completed?: boolean
   analyzed_sentences?: Record<string, unknown>
@@ -988,7 +988,7 @@ function calculateProgress(row: {
     hasExtractedText,
     !!row.summary,
     !!row.mind_map,
-    !!row.visualization_image,
+    (Number(row.visualization_generated_at ?? 0)) > 0,
     !!row.adapted_text,
     row.test_completed,
     Object.keys(row.analyzed_sentences || {}).length > 0,
@@ -1026,6 +1026,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
+        rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
@@ -1088,6 +1089,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
+        rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
