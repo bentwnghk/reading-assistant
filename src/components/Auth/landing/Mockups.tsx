@@ -1080,7 +1080,7 @@ export function MasterMockup() {
   }, [practiceMode, inView]);
   const skills = [
     { l: "Main idea", v: 90 },
-    { l: "Inference", v: 70 },
+    { l: "Inference", v: 45 },
     { l: "Vocabulary", v: 85 },
   ];
   const achievements = [
