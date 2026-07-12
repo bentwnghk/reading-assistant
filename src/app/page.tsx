@@ -81,38 +81,18 @@ function HomeContent() {
       router.replace("/");
       return;
     }
-    const data = useHistoryStore.getState().load(sessionId);
-    // Assignment sessions must always be fetched fresh from the API so that
-    // originalImages are served from the assignment snapshot (they are stripped
-    // from the per-student DB row and from localforage to avoid duplication).
-    const isAssignment = data?.source === "assignment";
-    if (data && !isAssignment) {
-      restore(data).then(() => {
-        router.replace("/");
-      });
-    } else {
-      // Not in localforage, or it's an assignment session — fetch from the API.
-      fetch(`/api/sessions/${sessionId}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((apiData) => {
-          if (apiData) {
-            restore(apiData).then(() => {
-              router.replace("/");
-            });
-          } else if (data) {
-            // API fetch failed but we have a localforage copy — use it as fallback.
-            restore(data).then(() => {
-              router.replace("/");
-            });
-          } else {
-            router.replace("/");
-          }
-        })
-        .catch(() => {
-          if (data) restore(data).then(() => router.replace("/"));
-          else router.replace("/");
+    // loadFull fetches the complete session (including originalImages and
+    // visualizationImage) from the API if not already hydrated in memory. This
+    // correctly serves assignment snapshot images via getReadingSession.
+    useHistoryStore.getState().loadFull(sessionId).then((data) => {
+      if (data) {
+        restore(data).then(() => {
+          router.replace("/");
         });
-    }
+      } else {
+        router.replace("/");
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoreReady, searchParams]);
 

@@ -101,7 +101,7 @@ function History({ open, onClose }: HistoryProps) {
   const { t, i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { backup, restore, reset } = useReadingStore();
-  const { history, save, load, update, remove } = useHistoryStore();
+  const { history, save, loadFull, update, remove } = useHistoryStore();
   const [historyList, setHistoryList] = useState<ReadingHistory[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pendingSwitchId, setPendingSwitchId] = useState<string | null>(null);
@@ -149,7 +149,7 @@ function History({ open, onClose }: HistoryProps) {
 
   async function doLoadHistory(id: string) {
     const { id: currentId } = useReadingStore.getState();
-    const data = load(id);
+    const data = await loadFull(id);
     if (data) {
       if (currentId) {
         update(currentId, backup());
@@ -169,8 +169,8 @@ function History({ open, onClose }: HistoryProps) {
     }
   }
 
-  function downloadSession(id: string) {
-    const data = load(id);
+  async function downloadSession(id: string) {
+    const data = await loadFull(id);
     if (data) {
       const title = data.docTitle || data.extractedText?.slice(0, 50) || "reading-session";
       downloadFile(

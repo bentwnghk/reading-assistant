@@ -82,6 +82,9 @@ function AuthStateManager() {
             sessions.find((item) => item.id === preferredSessionId) ?? sessions[0]
 
           if (sessionToRestore) {
+            // Restore the lightweight session immediately so the UI (and the
+            // "Welcome back!" dialog) is not blocked on a network request. The
+            // session list omits originalImages/visualizationImage for speed.
             useReadingStore.getState().restore(sessionToRestore)
             markLastOpenedSession(sessionToRestore.id)
 
@@ -90,6 +93,24 @@ function AuthStateManager() {
               sessionToRestore.extractedText.slice(0, 40) ||
               sessionToRestore.id
             toast.message(t("history.restored", { title: sessionTitle }))
+
+            // Then fetch the full session (with media) in the background and
+            // merge only the missing media fields, so any quick user edits to
+            // text content are not overwritten.
+            fetch(`/api/sessions/${sessionToRestore.id}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .then((fullData) => {
+                if (!fullData) return
+                if (syncedUserIdRef.current !== expectedUserId) return
+                // Only merge if the user hasn't switched to another session.
+                if (useReadingStore.getState().id !== sessionToRestore.id) return
+                useReadingStore.setState({
+                  originalImages: fullData.originalImages ?? [],
+                  visualizationImage: fullData.visualizationImage ?? "",
+                })
+                useHistoryStore.getState().hydrate(sessionToRestore.id, fullData)
+              })
+              .catch(() => {})
           }
         }
 

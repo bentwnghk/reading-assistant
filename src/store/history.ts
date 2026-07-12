@@ -17,7 +17,9 @@ export interface HistoryStore {
 interface HistoryActions {
   save: (readingStore: ReadingStore) => Promise<string>;
   load: (id: string) => ReadingHistory | void;
+  loadFull: (id: string) => Promise<ReadingHistory | void>;
   update: (id: string, readingStore: ReadingStore) => boolean;
+  hydrate: (id: string, data: ReadingHistory) => void;
   remove: (id: string) => Promise<boolean>;
   syncToHistory: (readingStore: ReadingStore) => void;
   loadFromAPI: () => Promise<ReadingHistory[]>;
@@ -32,6 +34,13 @@ export function setAuthState(authenticated: boolean, userId?: string | null) {
   isAuthenticated = authenticated;
   currentUserId = userId || null;
 }
+
+// Tracks which sessions in the history array already contain full media
+// (originalImages + visualizationImage). Sessions loaded via loadFromAPI are
+// lightweight; they are hydrated on demand by loadFull / hydrate.
+const hydratedSessionIds = new Set<string>();
+// Deduplicates concurrent loadFull fetches for the same session id.
+const inflightFullFetches = new Map<string, Promise<ReadingHistory | void>>();
 
 export const useHistoryStore = create(
   persist<HistoryStore & HistoryActions>(
@@ -63,6 +72,7 @@ export const useHistoryStore = create(
           }
           
           set((state) => ({ history: [newHistory, ...state.history] }));
+          hydratedSessionIds.add(id);
           return id;
         }
         return "";
@@ -70,6 +80,37 @@ export const useHistoryStore = create(
       load: (id) => {
         const current = get().history.find((item) => item.id === id);
         if (current) return clone(current);
+      },
+      loadFull: async (id) => {
+        const existing = get().history.find((item) => item.id === id);
+        // Fast path: already hydrated with full media data.
+        if (existing && hydratedSessionIds.has(id)) {
+          return clone(existing);
+        }
+        // Deduplicate concurrent fetches for the same id.
+        const inflight = inflightFullFetches.get(id);
+        if (inflight) return inflight;
+        const promise = (async () => {
+          try {
+            const response = await fetch(`/api/sessions/${id}`);
+            if (response.ok) {
+              const full = (await response.json()) as ReadingHistory;
+              get().hydrate(id, full);
+              const updated = get().history.find((item) => item.id === id);
+              return updated ? clone(updated) : undefined;
+            }
+          } catch (error) {
+            console.error("Failed to load full session:", error);
+          }
+          // Fallback to lightweight data if the fetch failed.
+          return existing ? clone(existing) : undefined;
+        })();
+        inflightFullFetches.set(id, promise);
+        try {
+          return await promise;
+        } finally {
+          inflightFullFetches.delete(id);
+        }
       },
       update: (id, session) => {
         const history = get().history;
@@ -83,7 +124,24 @@ export const useHistoryStore = create(
           updatedAt: Date.now(),
         } as ReadingHistory;
         set(() => ({ history: newHistory }));
+        hydratedSessionIds.add(id);
         return true;
+      },
+      hydrate: (id, data) => {
+        const history = get().history;
+        const index = history.findIndex((item) => item.id === id);
+        if (index === -1) return;
+        const existing = history[index];
+        const newHistory = [...history];
+        // Replace the lightweight entry with the full data, but preserve the
+        // original timestamps so the list order does not change.
+        newHistory[index] = {
+          ...clone(data),
+          createdAt: existing.createdAt || data.createdAt,
+          updatedAt: existing.updatedAt ?? data.updatedAt,
+        } as ReadingHistory;
+        set(() => ({ history: newHistory }));
+        hydratedSessionIds.add(id);
       },
       remove: async (id) => {
         if (isAuthenticated) {
@@ -103,6 +161,7 @@ export const useHistoryStore = create(
         set((state) => ({
           history: state.history.filter((item) => item.id !== id),
         }));
+        hydratedSessionIds.delete(id);
         return true;
       },
       syncToHistory: (session) => {
@@ -119,6 +178,7 @@ export const useHistoryStore = create(
             updatedAt: Date.now(),
           };
           set((state) => ({ history: [newHistory, ...state.history] }));
+          hydratedSessionIds.add(session.id);
         } else {
           const newHistory = [...history];
           newHistory[index] = {
@@ -127,6 +187,7 @@ export const useHistoryStore = create(
             updatedAt: Date.now(),
           } as ReadingHistory;
           set(() => ({ history: newHistory }));
+          hydratedSessionIds.add(session.id);
         }
       },
       loadFromAPI: async () => {
@@ -137,6 +198,9 @@ export const useHistoryStore = create(
           if (response.ok) {
             const sessions = (await response.json()) as ReadingHistory[];
             set(() => ({ history: sessions }));
+            // API sessions are lightweight (no media); reset hydration tracking.
+            hydratedSessionIds.clear();
+            inflightFullFetches.clear();
             return sessions;
           }
           return [];

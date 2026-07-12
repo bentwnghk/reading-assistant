@@ -117,7 +117,7 @@ function calculateProgress(item: ReadingHistory): number {
     hasExtractedText,
     !!item.summary,
     !!item.mindMap,
-    !!item.visualizationImage,
+    (item.visualizationGeneratedAt || 0) > 0,
     !!item.adaptedText,
     item.testCompleted,
     Object.keys(item.analyzedSentences || {}).length > 0,
@@ -232,7 +232,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
   const mindMapsChinese = mindMaps.filter((h) => detectMindMapLanguage(h.mindMap!) === "zh").length;
   const mindMapsEnglish = mindMapsGenerated - mindMapsChinese;
 
-  const visualizationsGenerated = sorted.filter((h) => !!h.visualizationImage).length;
+  const visualizationsGenerated = sorted.filter((h) => (h.visualizationGeneratedAt || 0) > 0).length;
 
   const adaptedTextsGenerated = sorted.filter((h) => !!h.adaptedText).length;
   const simplifiedTextsGenerated = sorted.filter((h) => !!h.simplifiedText).length;
@@ -361,7 +361,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     if (item.mindMap) {
       getDay(dailyMap, toDateString(item.mindMapGeneratedAt || item.createdAt)).mindMap += 1;
     }
-    if (item.visualizationImage) {
+    if ((item.visualizationGeneratedAt || 0) > 0) {
       getDay(dailyMap, toDateString(item.visualizationGeneratedAt || item.createdAt)).visualization += 1;
     }
     if (item.adaptedText) {

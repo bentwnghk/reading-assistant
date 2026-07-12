@@ -223,38 +223,25 @@ export async function createReadingSession(
 
 export async function getUserSessions(userId: string): Promise<SessionWithImages[]> {
   const client = await getClient()
-  
+
   try {
+    // Lightweight list query: originalImages and visualizationImage are
+    // intentionally omitted (they are large base64 payloads). Sessions are
+    // hydrated with full media on demand via getReadingSession / loadFull.
     const result = await client.query(
-      `SELECT 
-        rs.*,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'image_data', ri.image_data,
-              'image_order', ri.image_order,
-              'content_type', ri.content_type
-            )
-            ORDER BY ri.image_order
-          ) FILTER (WHERE ri.id IS NOT NULL),
-          '[]'::json
-        ) as images
+      `SELECT *
        FROM reading_sessions rs
-       LEFT JOIN reading_images ri ON rs.id = ri.session_id
        WHERE rs.user_id = $1
-       GROUP BY rs.id
        ORDER BY rs.updated_at DESC`,
       [userId]
     )
-    
+
     return result.rows.map(row => ({
       id: row.id,
       docTitle: row.doc_title,
       studentAge: row.student_age,
       source: row.source || ("repository" as const),
-      originalImages: row.images.map((img: any) => 
-        bufferToBase64(img.image_data, img.content_type)
-      ),
+      originalImages: [],
       extractedText: row.extracted_text,
       generatedTextMeta: row.generated_text_meta ?? null,
       summary: row.summary,
@@ -263,7 +250,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       highlightedWords: row.highlighted_words,
       analyzedSentences: row.analyzed_sentences,
       mindMap: row.mind_map,
-      visualizationImage: row.visualization_image ?? "",
+      visualizationImage: "",
       visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
       readingTest: row.reading_test,
       glossary: row.glossary,
