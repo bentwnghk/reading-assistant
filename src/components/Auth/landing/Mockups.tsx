@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Upload,
   Brain,
@@ -190,6 +190,16 @@ export function UploadMockup() {
     { key: "repository", label: "Text Repository", icon: <Library className="h-3 w-3" /> },
     { key: "ai", label: "AI Generate", icon: <Sparkles className="h-3 w-3" /> },
   ];
+
+  // Auto-cycle the tabs every 2s. Re-runs on every `tab` change (including
+  // manual clicks), so each tab gets a full 2s before advancing.
+  useEffect(() => {
+    const order: SourceTab[] = ["upload", "repository", "ai"];
+    const id = setTimeout(() => {
+      setTab((cur) => order[(order.indexOf(cur) + 1) % order.length]);
+    }, 2000);
+    return () => clearTimeout(id);
+  }, [tab]);
 
   return (
     <MockupFrame label="SELECT TEXT · Mr.🆖 ProReader">
