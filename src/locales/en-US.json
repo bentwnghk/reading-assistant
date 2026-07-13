@@ -67,7 +67,7 @@
           }
         },
         "private": {
-          "title": "📊 Data Insights",
+          "title": "📊 Data Visualization",
           "desc": "See your learning at a glance",
           "features": {
             "dashboards": "Track progress with rich dashboards & charts",
