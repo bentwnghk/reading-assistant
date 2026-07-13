@@ -67,12 +67,12 @@
           }
         },
         "private": {
-          "title": "☁️ Cloud Sync",
-          "desc": "Your learning journey, always in sync",
+          "title": "📊 Data Insights",
+          "desc": "See your learning at a glance",
           "features": {
-            "autoSync": "Progress syncs automatically across devices",
-            "crossDevice": "Access your data from anywhere with sign-in",
-            "history": "Never lose your reading sessions or vocabulary"
+            "dashboards": "Track progress with rich dashboards & charts",
+            "analytics": "Visualize text difficulty, vocabulary mastery & more",
+            "exports": "Export detailed Excel reports anytime"
           }
         }
       },

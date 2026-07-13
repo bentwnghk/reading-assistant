@@ -23,9 +23,9 @@ Transform any English reading material into an interactive learning experience w
 
 ## Why Students & Teachers Love Mr.🆖 ProReader
 
-| **Personalized** | **Gamified** | **Cloud Sync** | **Collaborative** |
+| **Personalized** | **Gamified** | **Data Insights** | **Collaborative** |
 |:---:|:---:|:---:|:---:|
-| Adapts to your age & level (8-18) | 10+ games & 5 grammar challenges | Your progress syncs automatically—access your data from any device with every sign-in | Share sessions, vocab lists & texts |
+| Adapts to your age & level (8-18) | 10+ games & 5 grammar challenges | Rich dashboards & charts visualize progress, readability, and vocabulary mastery | Share sessions, vocab lists & texts |
 
 ---
 

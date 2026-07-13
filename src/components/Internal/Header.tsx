@@ -20,7 +20,6 @@ import {
   Target,
   MessageSquareText,
   Zap,
-  Cloud,
   Trophy,
   CheckCircle2,
   Star,
@@ -549,21 +548,21 @@ function Header() {
                   </ul>
                 </div>
                 <div className="bg-card border rounded-lg p-3 text-center">
-                  <Cloud className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+                  <BarChart3 className="h-5 w-5 mx-auto mb-1 text-blue-500" />
                   <div className="font-medium text-xs">{t("header.about.whyLove.private.title")}</div>
                   <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.private.desc")}</div>
                   <ul className="text-xs text-muted-foreground mt-2 space-y-1 text-left">
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-blue-500" />
-                      <span>{t("header.about.whyLove.private.features.autoSync")}</span>
+                      <span>{t("header.about.whyLove.private.features.dashboards")}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-blue-500" />
-                      <span>{t("header.about.whyLove.private.features.crossDevice")}</span>
+                      <span>{t("header.about.whyLove.private.features.analytics")}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-blue-500" />
-                      <span>{t("header.about.whyLove.private.features.history")}</span>
+                      <span>{t("header.about.whyLove.private.features.exports")}</span>
                     </li>
                   </ul>
                 </div>
