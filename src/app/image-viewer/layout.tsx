@@ -2,6 +2,10 @@ import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   title: "Image Viewer",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export const viewport: Viewport = {

@@ -9,6 +9,14 @@ import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import Debugger from "@/components/Internal/Debugger";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  APP_DEFAULT_TITLE,
+  APP_DESCRIPTION,
+  APP_KEYWORDS,
+  APP_NAME,
+  APP_TITLE_TEMPLATE,
+  SITE_URL,
+} from "@/constants/site";
 
 import "./globals.css";
 
@@ -32,50 +40,66 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const HEAD_SCRIPTS = process.env.HEAD_SCRIPTS as string;
-const APP_NAME = "Mr.🆖 ProReader";
-const APP_DEFAULT_TITLE = "Mr.🆖 ProReader";
-const APP_TITLE_TEMPLATE = "%s - Mr.🆖 ProReader";
-const APP_DESCRIPTION =
-  "Transform any English reading material into an interactive learning experience! 🚀 With AI-powered tools, personalized content, and gamified learning, mastering English reading has never been this exciting!";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   applicationName: APP_NAME,
   title: {
     default: APP_DEFAULT_TITLE,
     template: APP_TITLE_TEMPLATE,
   },
-  icons: {
-    icon: {
-      type: "image/svg+xml",
-      url: "./logo.svg",
-    },
-  },
   description: APP_DESCRIPTION,
+  keywords: APP_KEYWORDS,
+  authors: [{ name: APP_NAME }],
+  creator: APP_NAME,
+  publisher: APP_NAME,
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: [
+      { url: "/logo.svg", type: "image/svg+xml" },
+      { url: "/logo.png", type: "image/png", sizes: "128x128" },
+    ],
+    shortcut: ["/logo.png"],
+    apple: [{ url: "/logo.png", sizes: "128x128" }],
+  },
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: APP_DEFAULT_TITLE,
-    // startUpImage: [],
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
+    locale: "en",
     siteName: APP_NAME,
+    url: SITE_URL,
     title: {
       default: APP_DEFAULT_TITLE,
       template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: APP_NAME,
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: {
       default: APP_DEFAULT_TITLE,
       template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
 };
 
@@ -83,10 +107,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
   minimumScale: 1.0,
-  maximumScale: 1.0,
   viewportFit: "cover",
-  userScalable: false,
-  themeColor: "#FFFFFF",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({
