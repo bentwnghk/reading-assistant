@@ -86,6 +86,12 @@ function VocabularyContainer() {
     loadReviewListIntoQueue,
     acceptedReviewListWords,
     setAcceptedReviewListWords,
+    filterMastery,
+    filterSource,
+    setSearchQuery,
+    setFilterRating,
+    setFilterMastery,
+    setFilterSource,
   } = useVocabularyStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [shareOpen, setShareOpen] = useState(false);
@@ -158,6 +164,20 @@ function VocabularyContainer() {
       setActiveTab(tab);
     },
     [selectedWordIds, reviewQueue]
+  );
+
+  const handleCardFilter = useCallback(
+    (opts: {
+      mastery?: "all" | "due" | "new" | "mastered";
+      source?: "all" | "own" | "teacher";
+    }) => {
+      setSearchQuery("");
+      setFilterRating("all");
+      setFilterMastery(opts.mastery ?? "all");
+      setFilterSource(opts.source ?? "all");
+      setActiveTab("table");
+    },
+    [setSearchQuery, setFilterRating, setFilterMastery, setFilterSource]
   );
 
   const handleReviewComplete = useCallback(
@@ -276,18 +296,56 @@ function VocabularyContainer() {
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            <div className="bg-card border rounded-lg p-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <BookMarked className="h-4 w-4" />
-                {t("vocabulary.stats.total")}
-              </div>
-              <div className="text-2xl font-bold">{stats.totalWords}</div>
+            <div className={cn(
+              "bg-card border rounded-lg p-3 transition-all",
+              filterMastery === "all" && filterSource === "all" && "ring-2 ring-primary/40"
+            )}>
+              <button
+                type="button"
+                onClick={() => handleCardFilter({})}
+                title={t("vocabulary.stats.clickToFilter")}
+                className="text-left w-full cursor-pointer hover:bg-accent/50 rounded-md transition-colors"
+              >
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                  <BookMarked className="h-4 w-4" />
+                  {t("vocabulary.stats.total")}
+                </div>
+                <div className="text-2xl font-bold">{stats.totalWords}</div>
+              </button>
               <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
-                <span>{t("vocabulary.stats.own")}: {stats.ownWords}</span>
-                <span>{t("vocabulary.stats.teacher")}: {stats.teacherWords}</span>
+                <button
+                  type="button"
+                  onClick={() => handleCardFilter({ source: "own" })}
+                  title={t("vocabulary.stats.ownHint")}
+                  className={cn(
+                    "cursor-pointer hover:text-foreground transition-colors",
+                    filterSource === "own" && "text-foreground font-medium underline underline-offset-2"
+                  )}
+                >
+                  {t("vocabulary.stats.own")}: {stats.ownWords}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCardFilter({ source: "teacher" })}
+                  title={t("vocabulary.stats.teacherHint")}
+                  className={cn(
+                    "cursor-pointer hover:text-foreground transition-colors",
+                    filterSource === "teacher" && "text-foreground font-medium underline underline-offset-2"
+                  )}
+                >
+                  {t("vocabulary.stats.teacher")}: {stats.teacherWords}
+                </button>
               </div>
             </div>
-            <div className="bg-card border rounded-lg p-3">
+            <button
+              type="button"
+              onClick={() => handleCardFilter({ mastery: "due" })}
+              title={t("vocabulary.stats.clickToFilter")}
+              className={cn(
+                "bg-card border rounded-lg p-3 text-left cursor-pointer hover:bg-accent/50 hover:shadow-md active:scale-[0.98] transition-all",
+                filterMastery === "due" && "ring-2 ring-orange-400"
+              )}
+            >
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Clock className="h-4 w-4 text-orange-500" />
                 {t("vocabulary.stats.due")}
@@ -295,8 +353,16 @@ function VocabularyContainer() {
               <div className="text-2xl font-bold text-orange-500">
                 {stats.dueForReview}
               </div>
-            </div>
-            <div className="bg-card border rounded-lg p-3">
+            </button>
+            <button
+              type="button"
+              onClick={() => handleCardFilter({ mastery: "mastered" })}
+              title={t("vocabulary.stats.clickToFilter")}
+              className={cn(
+                "bg-card border rounded-lg p-3 text-left cursor-pointer hover:bg-accent/50 hover:shadow-md active:scale-[0.98] transition-all",
+                filterMastery === "mastered" && "ring-2 ring-green-400"
+              )}
+            >
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
                 {t("vocabulary.stats.mastered")}
@@ -304,8 +370,16 @@ function VocabularyContainer() {
               <div className="text-2xl font-bold text-green-500">
                 {stats.mastered}
               </div>
-            </div>
-            <div className="bg-card border rounded-lg p-3">
+            </button>
+            <button
+              type="button"
+              onClick={() => handleCardFilter({ mastery: "new" })}
+              title={t("vocabulary.stats.clickToFilter")}
+              className={cn(
+                "bg-card border rounded-lg p-3 text-left cursor-pointer hover:bg-accent/50 hover:shadow-md active:scale-[0.98] transition-all",
+                filterMastery === "new" && "ring-2 ring-blue-400"
+              )}
+            >
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Brain className="h-4 w-4 text-blue-500" />
                 {t("vocabulary.stats.new")}
@@ -313,7 +387,7 @@ function VocabularyContainer() {
               <div className="text-2xl font-bold text-blue-500">
                 {stats.newWords}
               </div>
-            </div>
+            </button>
           </div>
 
           {activeTab === "table" && (

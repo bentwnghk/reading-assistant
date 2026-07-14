@@ -1591,7 +1591,10 @@
       "teacher": "Teacher",
       "due": "Due for Review",
       "mastered": "Mastered",
-      "new": "New Words"
+      "new": "New Words",
+      "clickToFilter": "Click to filter the table",
+      "ownHint": "Show words from your own reading",
+      "teacherHint": "Show words shared by teachers"
     },
     "export": {
       "title": "Export",

@@ -1591,7 +1591,10 @@
       "teacher": "老師",
       "due": "待複習",
       "mastered": "已掌握",
-      "new": "新詞"
+      "new": "新詞",
+      "clickToFilter": "點擊以篩選表格",
+      "ownHint": "顯示自己閱讀所得的詞彙",
+      "teacherHint": "顯示老師分享的詞彙"
     },
     "export": {
       "title": "匯出",

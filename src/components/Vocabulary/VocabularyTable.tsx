@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowUpDown,
@@ -64,6 +64,10 @@ function VocabularyTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const hasEverSelected = selectedWordIds.size > 0;
   const effectiveShowSelectedOnly = showSelectedOnly && hasEverSelected;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterMastery, filterSource]);
 
   const filteredWords = useMemo(() => {
     let result = activeReviewListWordIds
