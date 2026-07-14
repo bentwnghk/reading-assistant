@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_PLAYBACK_RATES } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -1044,7 +1044,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {TTS_VOICES.map((voice) => (
                               <SelectItem key={voice} value={voice}>
-                                {voice}
+                                {TTS_VOICE_LABELS[voice]}
                               </SelectItem>
                             ))}
                           </SelectContent>

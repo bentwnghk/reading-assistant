@@ -42,6 +42,15 @@ export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] 
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
 
+export const TTS_VOICE_LABELS: Record<TTSVoice, string> = {
+  alloy: "Alloy (US male)",
+  nova: "Nova (US female)",
+  echo: "Adam (US male)",
+  fable: "Phoebe (US female)",
+  onyx: "Ollie (UK male)",
+  shimmer: "Ava (US female)",
+};
+
 export const TTS_PLAYBACK_RATES = [0.25, 0.5, 0.75, 1.0] as const;
 
 export type TTSPlaybackRate = (typeof TTS_PLAYBACK_RATES)[number];
