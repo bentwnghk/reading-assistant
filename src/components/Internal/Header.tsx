@@ -120,6 +120,8 @@ function Header() {
   const {
     pendingReviewListShareCount,
     fetchPendingReviewListShareCount,
+    dueForReviewCount,
+    fetchDueForReviewCount,
   } = useVocabularyStore();
   const { overdueCount, fetchOverdueAssignmentCount } = useAssignmentsStore();
   const totalPending = pendingCount + pendingReviewListShareCount;
@@ -168,14 +170,16 @@ function Header() {
     if (!session?.user?.id) return;
     fetchPendingCount();
     fetchPendingReviewListShareCount();
+    fetchDueForReviewCount();
     if (session.user.role === "student") fetchOverdueAssignmentCount();
     const interval = setInterval(() => {
       fetchPendingCount();
       fetchPendingReviewListShareCount();
+      fetchDueForReviewCount();
       if (session.user.role === "student") fetchOverdueAssignmentCount();
     }, 60_000);
     return () => clearInterval(interval);
-  }, [session?.user?.id, session?.user?.role, fetchPendingCount, fetchPendingReviewListShareCount, fetchOverdueAssignmentCount]);
+  }, [session?.user?.id, session?.user?.role, fetchPendingCount, fetchPendingReviewListShareCount, fetchDueForReviewCount, fetchOverdueAssignmentCount]);
 
   const exportSnapshot = useCallback(() => {
     const { backup } = useReadingStore.getState();
@@ -365,7 +369,14 @@ function Header() {
                 className="h-8 gap-1.5 opacity-50 cursor-default"
                 disabled
               >
-                <BookOpen className="h-4 w-4" />
+                <span className="relative">
+                  <BookOpen className="h-4 w-4" />
+                  {dueForReviewCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white">
+                      {dueForReviewCount > 9 ? "9+" : dueForReviewCount}
+                    </span>
+                  )}
+                </span>
                 <span className="text-sm">{t("vocabulary.title")}</span>
               </Button>
             ) : (
@@ -374,9 +385,20 @@ function Header() {
                   variant="ghost"
                   size="sm"
                   className="h-8 gap-1.5"
-                  title={t("vocabulary.title")}
+                  title={
+                    dueForReviewCount > 0
+                      ? t("vocabulary.dueBadgeHint", { count: dueForReviewCount })
+                      : t("vocabulary.title")
+                  }
                 >
-                  <BookOpen className="h-4 w-4" />
+                  <span className="relative">
+                    <BookOpen className="h-4 w-4" />
+                    {dueForReviewCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white">
+                        {dueForReviewCount > 9 ? "9+" : dueForReviewCount}
+                      </span>
+                    )}
+                  </span>
                   <span className="text-sm">{t("vocabulary.title")}</span>
                 </Button>
               </Link>

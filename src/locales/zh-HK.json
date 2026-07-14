@@ -1467,6 +1467,7 @@
   },
   "vocabulary": {
     "title": "我的詞彙",
+    "dueBadgeHint": "{{count}} 個詞彙待複習",
     "close": "返回應用程式",
     "tabTable": "表格",
     "tabFlashcard": "字卡",

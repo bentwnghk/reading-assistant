@@ -21,6 +21,7 @@ interface VocabularyStoreState {
   filterMastery: "all" | "due" | "new" | "mastered";
   filterSource: "all" | "own" | "teacher";
   isLoading: boolean;
+  dueForReviewCount: number;
   pendingReviewListShares: SharedReviewList[];
   pendingReviewListShareCount: number;
   showReviewListShareDialog: boolean;
@@ -49,6 +50,7 @@ interface VocabularyStoreActions {
     correct: boolean
   ) => Promise<void>;
   setSearchQuery: (query: string) => void;
+  fetchDueForReviewCount: () => Promise<void>;
   setSortBy: (sortBy: SortField) => void;
   setSortOrder: (order: SortOrder) => void;
   setFilterRating: (filter: GlossaryRating | "all") => void;
@@ -88,6 +90,7 @@ export const useVocabularyStore = create<
   filterMastery: "all",
   filterSource: "all",
   isLoading: false,
+  dueForReviewCount: 0,
   pendingReviewListShares: [],
   pendingReviewListShareCount: 0,
   showReviewListShareDialog: false,
@@ -119,6 +122,17 @@ export const useVocabularyStore = create<
     } catch (error) {
       console.error("Failed to fetch vocabulary:", error);
       set({ isLoading: false });
+    }
+  },
+
+  fetchDueForReviewCount: async () => {
+    try {
+      const res = await fetch("/api/vocabulary?type=stats");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      set({ dueForReviewCount: data.stats?.dueForReview ?? 0 });
+    } catch {
+      set({ dueForReviewCount: 0 });
     }
   },
 

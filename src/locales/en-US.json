@@ -1467,6 +1467,7 @@
   },
   "vocabulary": {
     "title": "My Vocabulary",
+    "dueBadgeHint": "{{count}} words due for review",
     "close": "Back to app",
     "tabTable": "Table",
     "tabFlashcard": "Flashcard",
