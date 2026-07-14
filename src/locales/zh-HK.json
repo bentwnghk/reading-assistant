@@ -2890,7 +2890,7 @@
     "allClasses": "所有班級",
     "allSchools": "所有學校",
     "help": {
-      "title": "功能說明",
+      "title": "成就與排行榜指南",
       "tabs": {
         "leaderboard": "排行榜",
         "achievements": "成就"
@@ -3188,7 +3188,7 @@
   },
   "assignments": {
     "navTitle": "我的功課",
-    "title": "功課",
+    "title": "我的功課",
     "teacherView": {
       "empty": "尚未建立任何功課。建立方式：點擊上方的「建立功課」按鈕，在彈出的對話框中找到想指派的閱讀工作階段，再點擊旁邊的學士帽（graduation-cap）圖示，接著選擇學生、視需要設定截止日期並提交。",
       "new": "建立功課",
@@ -3339,7 +3339,7 @@
       "loadFailed": "載入功課失敗"
     },
     "help": {
-      "title": "使用說明",
+      "title": "我的功課指南",
       "tabs": {
         "overview": "概覽",
         "tracking": "追蹤",

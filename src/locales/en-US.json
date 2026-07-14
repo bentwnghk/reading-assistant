@@ -2890,7 +2890,7 @@
     "allClasses": "All Classes",
     "allSchools": "All Schools",
     "help": {
-      "title": "How It Works",
+      "title": "Achievements & Leaderboard Guide",
       "tabs": {
         "leaderboard": "Leaderboard",
         "achievements": "Achievements"
@@ -3188,7 +3188,7 @@
   },
   "assignments": {
     "navTitle": "My Assignments",
-    "title": "Assignments",
+    "title": "My Assignments",
     "teacherView": {
       "empty": "No assignments yet. To create one, click \"Create assignment\" above. In the dialog that opens, find the reading session you want to assign, and click the graduation-cap icon next to it. Then pick your students, optionally set a due date, and submit.",
       "new": "Create assignment",
@@ -3339,7 +3339,7 @@
       "loadFailed": "Failed to load assignment"
     },
     "help": {
-      "title": "How it works",
+      "title": "My Assignments Guide",
       "tabs": {
         "overview": "Overview",
         "tracking": "Tracking",
