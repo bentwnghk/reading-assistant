@@ -2251,7 +2251,7 @@
     "provider": "AI Provider",
     "providerTip": "AI service provider",
     "mode": "Billing Mode",
-    "modeTip": "In Subscription mode, you pay a flat monthly or yearly fee. In meter mode, you pay for your exact AI usage only. In Free mode, Mr.🆖 pays all AI costs for you.",
+    "modeTip": "In Subscription mode, you pay a flat monthly or yearly fee. In meter mode, you pay for your exact AI usage only. In Free mode, Mr.🆖 pays all costs for you.",
     "local": "Meter",
     "subscription": "Subscription",
     "proxy": "Free",
