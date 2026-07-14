@@ -6,7 +6,6 @@ import {
   Settings,
   Info,
   BookOpen,
-  BookCopy,
   PenTool,
   Volume2,
   Camera,
@@ -291,7 +290,6 @@ function Header() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden">
         <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center sm:h-14 gap-y-1 py-1 sm:py-0">
           <Link href="/" className="self-center sm:self-auto text-left text-xl font-semibold flex items-center gap-1.5 relative group">
-            <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0" />
             <span className="text-blue-600 dark:text-blue-400">Mr.</span>
             <span className="text-2xl leading-none">🆖</span>
             <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
@@ -511,7 +509,6 @@ function Header() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-hide">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <BookCopy className="h-5 w-5 text-blue-500 dark:text-blue-400" />
               {t("header.about.title")}
             </DialogTitle>
             <p className="text-muted-foreground text-sm mt-1">
