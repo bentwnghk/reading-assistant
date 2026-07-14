@@ -130,7 +130,7 @@ export const useVocabularyStore = create<
       const res = await fetch("/api/vocabulary?type=stats");
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
-      set({ dueForReviewCount: data.stats?.dueForReview ?? 0 });
+      set({ dueForReviewCount: data.dueForReview ?? 0 });
     } catch {
       set({ dueForReviewCount: 0 });
     }
