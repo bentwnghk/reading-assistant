@@ -1634,7 +1634,7 @@
       "deleteError": "Failed to delete review session."
     },
     "help": {
-      "title": "How It Works",
+      "title": "My Vocabulary Guide",
       "tabs": {
         "overview": "Overview",
         "review": "Review Modes",
@@ -1705,7 +1705,29 @@
         "intro": "Additional tools to help you manage and share your vocabulary.",
         "autoSelect": {
           "name": "Auto Select",
-          "desc": "Automatically pick words based on a strategy: Due for Review, Hardest, Newest, Random Mix, or Weakest. Choose how many words to select."
+          "desc": "Automatically pick words based on a strategy. Choose how many words to select, then pick the strategy that fits your goal.",
+          "strategies": {
+            "due": {
+              "name": "Due for Review",
+              "desc": "Words whose scheduled review time has arrived — the most overdue appear first. Your daily SRS checklist."
+            },
+            "hardest": {
+              "name": "Hardest Words",
+              "desc": "Words you labelled \"Hard\" with the SRS buttons, starting from the lowest mastery level. Tackle stubborn words you struggle with."
+            },
+            "newest": {
+              "name": "Newest Words",
+              "desc": "Words you've never reviewed, most recently added first. Ideal for learning fresh vocabulary."
+            },
+            "random": {
+              "name": "Random Mix",
+              "desc": "All your words shuffled at random. Great for a varied, balanced study session."
+            },
+            "weakest": {
+              "name": "Weakest Words",
+              "desc": "Lowest accuracy in past reviews — the words you get wrong most often. Ranked by fewest correct answers per attempt."
+            }
+          }
         },
         "export": {
           "name": "Export",

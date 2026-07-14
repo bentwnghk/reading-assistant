@@ -21,6 +21,10 @@ import {
   FileDown,
   ListChecks,
   RotateCcw,
+  Flame,
+  Sparkles,
+  Shuffle,
+  TrendingDown,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -606,6 +610,28 @@ function VocabularyContainer() {
                       <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.autoSelect.name")}</h4>
                       <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.autoSelect.desc")}</p>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 ml-4">
+                    {(
+                      [
+                        { key: "due", icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
+                        { key: "hardest", icon: Flame, color: "text-rose-500", bg: "bg-rose-500/10" },
+                        { key: "newest", icon: Sparkles, color: "text-sky-500", bg: "bg-sky-500/10" },
+                        { key: "random", icon: Shuffle, color: "text-violet-500", bg: "bg-violet-500/10" },
+                        { key: "weakest", icon: TrendingDown, color: "text-amber-500", bg: "bg-amber-500/10" },
+                      ] as { key: string; icon: typeof Clock; color: string; bg: string }[]
+                    ).map(({ key, icon: Icon, color, bg }) => (
+                      <div key={key} className="flex gap-2 p-2 rounded-md bg-muted/30">
+                        <div className={cn("shrink-0 w-6 h-6 rounded-full flex items-center justify-center", bg, color)}>
+                          <Icon className="h-3.5 w-3.5" />
+                        </div>
+                        <div>
+                          <span className="text-xs font-semibold">{t(`vocabulary.help.extras.autoSelect.strategies.${key}.name`)}</span>
+                          <p className="text-[10px] text-muted-foreground leading-tight">{t(`vocabulary.help.extras.autoSelect.strategies.${key}.desc`)}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
 
                   <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
