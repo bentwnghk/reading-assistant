@@ -2900,7 +2900,7 @@
         "categories": {
           "weeklyScore": {
             "title": "Weekly Score",
-            "desc": "Your all-around performance metric. Every reading session, reading test, vocab quiz, and spelling game contributes points to your weekly total."
+            "desc": "Your all-around performance metric. Every reading session, reading test, vocab quiz, spelling game, grammar quiz, and grammar game contributes points to your weekly total."
           },
           "streak": {
             "title": "Reading Streak",

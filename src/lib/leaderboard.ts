@@ -102,6 +102,8 @@ interface WeeklyStatsRow {
 //   avgTestScore × 1.0 +
 //   avgQuizScore × 1.0 +
 //   avgSpellingScore × 0.5 +
+//   avgGrammarQuizScore × 1.0 +
+//   avgGrammarGameScore × 0.5 +
 //   flashcardReviews × 5 +
 //   totalVocabWords × 1 +
 //   max(0, improvementBonus)    ← up to +20% of base score
@@ -111,6 +113,8 @@ function calcWeeklyScore(
   avgTestScore: number,
   avgQuizScore: number,
   avgSpellingScore: number,
+  avgGrammarQuizScore: number,
+  avgGrammarGameScore: number,
   flashcardReviews: number,
   totalVocabWords: number,
   priorWeekScore: number
@@ -120,6 +124,8 @@ function calcWeeklyScore(
     avgTestScore * 1.0 +
     avgQuizScore * 1.0 +
     avgSpellingScore * 0.5 +
+    avgGrammarQuizScore * 1.0 +
+    avgGrammarGameScore * 0.5 +
     flashcardReviews * 5 +
     totalVocabWords * 1
 
@@ -214,6 +220,8 @@ export async function refreshWeeklyStatsForUser(
       avgTestScore,
       avgQuizScore,
       avgSpellingScore,
+      avgGrammarQuizScore,
+      avgGrammarGameScore,
       totalFlashcardReviews,
       totalVocabWords,
       priorWeekScore
