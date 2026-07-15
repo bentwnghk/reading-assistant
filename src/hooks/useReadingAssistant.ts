@@ -1091,9 +1091,10 @@ Guidelines:
     const messages: any[] = history
       .slice(-20)
       .map((msg) => {
+        const messageText = msg.promptContent || msg.content;
         const textContent = msg.selectedText 
-          ? `${msg.content}\n\n[Context: The student is asking about this text: "${msg.selectedText}"]`
-          : msg.content;
+          ? `${messageText}\n\n[Context: The student is asking about this text: "${msg.selectedText}"]`
+          : messageText;
         
         if (msg.role === "user" && msg.images && msg.images.length > 0 && hasImages) {
           return {

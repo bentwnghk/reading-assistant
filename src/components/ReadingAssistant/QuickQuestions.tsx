@@ -14,7 +14,7 @@ interface QuickQuestionItem {
 }
 
 interface QuickQuestionsProps {
-  onSelectQuestion: (question: string, action?: "text" | "upload-image") => void;
+  onSelectQuestion: (question: string, action?: "text" | "upload-image", displayLabel?: string) => void;
   disabled?: boolean;
 }
 
@@ -87,8 +87,8 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
               key={index}
               variant="outline"
               size="sm"
-              onClick={() => onSelectQuestion(q.question, q.action)}
-              onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action); }}
+              onClick={() => onSelectQuestion(q.question, q.action, q.label)}
+              onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
               disabled={disabled}
               className="h-7 text-xs"
             >
@@ -110,8 +110,8 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
                 key={index}
                 variant="outline"
                 size="sm"
-                onClick={() => onSelectQuestion(q.question, q.action)}
-                onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action); }}
+                onClick={() => onSelectQuestion(q.question, q.action, q.label)}
+                onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
                 disabled={disabled}
                 className="h-7 text-xs"
               >

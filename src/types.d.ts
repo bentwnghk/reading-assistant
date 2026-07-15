@@ -265,6 +265,7 @@ interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  promptContent?: string;
   timestamp: number;
   selectedText?: string;
   images?: string[];
