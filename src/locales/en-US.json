@@ -161,7 +161,7 @@
         },
         "achievements": {
           "title": "🏆 Achievements",
-          "desc": "Unlock badges and milestones as you learn! Track your progress across 12 achievement types—from reading sessions to vocabulary quizzes. Every step counts!"
+          "desc": "Unlock badges and milestones as you learn! Track your progress across 15 achievement types—from reading sessions to vocabulary quizzes. Every step counts!"
         },
         "leaderboard": {
           "title": "🏅 Leaderboard",
@@ -177,7 +177,7 @@
         },
         "grammar": {
           "title": "📐 Grammar Analysis & Quiz",
-          "desc": "AI identifies grammar structures in your text with CEFR levels, bilingual explanations, patterns, and examples. Test your understanding with interactive quizzes featuring 4 question types and AI-scored open answers!"
+          "desc": "AI identifies grammar structures in your text with CEFR levels, bilingual explanations, patterns, and examples. Test your understanding with interactive exercises and quizzes featuring 4 question types and AI-scored open answers!"
         },
         "grammarGames": {
           "title": "🎮 Grammar Games",
