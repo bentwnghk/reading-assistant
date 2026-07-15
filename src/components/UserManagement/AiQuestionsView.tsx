@@ -42,8 +42,51 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import type { ClassInfo, SchoolInfo } from "@/lib/users"
+import enUsMessages from "@/locales/en-US.json"
+import zhHkMessages from "@/locales/zh-HK.json"
 
 const View = dynamic(() => import("@/components/MagicDown/View"), { ssr: false })
+
+const QUICK_QUESTION_KEYS: Array<{ questionKey: string; labelKey: string }> = [
+  { questionKey: "reading.tutor.quickQuestions.mainIdeaQuestion", labelKey: "reading.tutor.quickQuestions.mainIdea" },
+  { questionKey: "reading.tutor.quickQuestions.vocabHelpQuestion", labelKey: "reading.tutor.quickQuestions.vocabHelp" },
+  { questionKey: "reading.tutor.quickQuestions.explainQuestion", labelKey: "reading.tutor.quickQuestions.explain" },
+  { questionKey: "reading.tutor.quickQuestions.summarizeQuestion", labelKey: "reading.tutor.quickQuestions.summarize" },
+  { questionKey: "reading.tutor.quickQuestions.helpWithImageHintQuestion", labelKey: "reading.tutor.quickQuestions.helpWithImageHint" },
+  { questionKey: "reading.tutor.quickQuestions.helpWithImageStepByStepQuestion", labelKey: "reading.tutor.quickQuestions.helpWithImageStepByStep" },
+  { questionKey: "reading.tutor.quickQuestions.helpWithImageAnswerQuestion", labelKey: "reading.tutor.quickQuestions.helpWithImageAnswer" },
+]
+
+function getNestedValue(obj: unknown, path: string): string | undefined {
+  const value = path.split(".").reduce<unknown>((acc, key) => {
+    if (acc && typeof acc === "object" && key in (acc as Record<string, unknown>)) {
+      return (acc as Record<string, unknown>)[key]
+    }
+    return undefined
+  }, obj)
+  return typeof value === "string" ? value : undefined
+}
+
+const QUICK_QUESTION_TEXT_TO_LABEL_KEY: Map<string, string> = (() => {
+  const map = new Map<string, string>()
+  for (const localeMessages of [enUsMessages, zhHkMessages]) {
+    for (const { questionKey, labelKey } of QUICK_QUESTION_KEYS) {
+      const text = getNestedValue(localeMessages, questionKey)
+      if (text) {
+        map.set(text.trim(), labelKey)
+      }
+    }
+  }
+  return map
+})()
+
+function getDisplayQuestionText(
+  questionText: string,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  const labelKey = QUICK_QUESTION_TEXT_TO_LABEL_KEY.get(questionText.trim())
+  return labelKey ? t(labelKey) : questionText
+}
 
 interface AggregatedQuestion {
   questionHash: string
@@ -162,14 +205,18 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
 
   const filteredQuestions = useMemo(() => {
     const result = searchQuery
-      ? questions.filter(q => q.questionText.toLowerCase().includes(searchQuery.toLowerCase()))
+      ? questions.filter(q => {
+          if (q.questionText.toLowerCase().includes(searchQuery.toLowerCase())) return true
+          const label = getDisplayQuestionText(q.questionText, t).toLowerCase()
+          return label.includes(searchQuery.toLowerCase())
+        })
       : [...questions]
 
     result.sort((a, b) => {
       let comparison = 0
       switch (sortField) {
         case "question":
-          comparison = a.questionText.localeCompare(b.questionText)
+          comparison = getDisplayQuestionText(a.questionText, t).localeCompare(getDisplayQuestionText(b.questionText, t))
           break
         case "frequency":
           comparison = b.frequency - a.frequency
@@ -185,7 +232,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
     })
 
     return result
-  }, [questions, searchQuery, sortField, sortOrder])
+  }, [questions, searchQuery, sortField, sortOrder, t])
 
   const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE))
   const paginatedQuestions = useMemo(() => {
@@ -447,7 +494,7 @@ function QuestionRow({ question, isExpanded, isLoading, instances, onToggle, t, 
           )}
         </TableCell>
         <TableCell>
-          <span className="line-clamp-2">{question.questionText}</span>
+          <span className="line-clamp-2">{getDisplayQuestionText(question.questionText, t)}</span>
         </TableCell>
         <TableCell className="text-center">
           <Badge variant="secondary">{question.frequency}</Badge>
