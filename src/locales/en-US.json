@@ -1453,7 +1453,7 @@
         "summarize": "Summarize",
         "summarizeQuestion": "Can you summarize this text in a few sentences?",
         "vocabHelp": "Vocab help",
-        "vocabHelpQuestion": "What does this word or phrase mean?",
+        "vocabHelpQuestion": "Please turn the selected word or phrase into a glossary entry. Provide all of the following on separate lines: 1) the word with its syllable breakdown, using middle dots and showing the stressed syllable in CAPITALS (e.g. ex·AM·ple); 2) its part of speech (noun, verb, adjective, adverb, preposition, conjunction, interjection, pronoun, or phrase); 3) a simple, student-friendly English definition; 4) a Traditional Chinese (繁體中文) definition; 5) a short example sentence using the word in context. Include both the English and Chinese definitions even if the reply language is set to English. If I haven't selected anything, choose a useful or challenging word from the text.",
         "explain": "Explain",
         "explainQuestion": "Can you explain what this text is about?",
         "helpWithImageStepByStep": "Step-by-step",
