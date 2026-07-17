@@ -49,7 +49,7 @@
       "whyLove": {
         "title": "Learning Reimagined",
         "personalized": {
-          "title": "🎯 Personalized",
+          "title": "Personalized",
           "desc": "AI-powered learning tailored just for you",
           "features": {
             "adaptive": "Adapts content to your age & level",
@@ -58,7 +58,7 @@
           }
         },
         "gamified": {
-          "title": "🎮 Gamified",
+          "title": "Gamified",
           "desc": "Learning that feels like play",
           "features": {
             "games": "Learn through fun interactive games",
@@ -67,7 +67,7 @@
           }
         },
         "private": {
-          "title": "📊 Data Visualization",
+          "title": "Data Visualization",
           "desc": "See your learning at a glance",
           "features": {
             "dashboards": "Track progress with rich dashboards & charts",
@@ -80,14 +80,14 @@
         "title": "For Schools & Teachers",
         "intro": "Complete user management for classrooms and schools! Organize students into classes, assign teachers and reading assignments, track learning progress in real-time, and export detailed reports.",
         "admin": {
-          "title": "👑 Admin",
+          "title": "Admin",
           "manageSchools": "Manage schools",
           "manageUsers": "Assign roles to any user",
           "manageClasses": "Oversee all classes & teachers",
           "uploadTexts": "Upload reading materials to Text Repository to share with your school"
         },
         "teacher": {
-          "title": "🎓 Teacher",
+          "title": "Teacher",
           "manageStudents": "Add students & track their learning progress through Teacher Dashboard",
           "assignHomework": "Turn reading sessions into trackable class assignments",
           "uploadTexts": "Upload reading materials to Text Repository to share with your classes",
@@ -97,7 +97,7 @@
           "viewAiQuestions": "Track questions students ask AI Tutor"
         },
         "student": {
-          "title": "👥 Student",
+          "title": "Student",
           "learn": "Full access to all features",
           "assignments": "Complete teacher-assigned reading & track your progress",
           "cloudSync": "Automatic cloud sync",
@@ -108,91 +108,91 @@
       "features": {
         "title": "Powerful Features",
         "ocr": {
-          "title": "📷 Smart OCR & Text Repository",
+          "title": "Smart OCR & Text Repository",
           "desc": "Upload images or PDFs to extract text using AI, or browse the Text Repository to select reading materials shared by your school or teachers!"
         },
         "difficulty": {
-          "title": "📊 Difficulty Analysis",
+          "title": "Difficulty Analysis",
           "desc": "Know your text before reading! Get CEFR levels, Flesch Reading Ease, grade level, and 5 scientific readability metrics. Compare original vs adapted vs simplified versions side-by-side!"
         },
         "cefrHighlight": {
-          "title": "🎨 CEFR Word Highlight",
+          "title": "CEFR Word Highlight",
           "desc": "See vocabulary difficulty at a glance! Every word color-coded by CEFR level (A1-C2). Toggle levels on/off, see word counts per level, and identify challenging vocabulary instantly."
         },
         "adaptation": {
-          "title": "✏️ Level Adaptation",
+          "title": "Level Adaptation",
           "desc": "AI rewrites text to match YOUR reading level. Switch between Original, Adapted, and Simplified versions instantly."
         },
         "visual": {
-          "title": "🧠 Visual Learning",
+          "title": "Visual Learning",
           "desc": "AI generates quick summaries and interactive mind maps to help you understand key concepts and relationships."
         },
         "tutor": {
-          "title": "🤖 AI Tutor",
+          "title": "AI Tutor",
           "desc": "Your personal reading coach! Ask questions, get hints, upload reading comprehension questions for guided help, and learn at your own pace."
         },
         "sentenceAnalysis": {
-          "title": "💬 Sentence Analysis",
+          "title": "Sentence Analysis",
           "desc": "Click any sentence for a complete AI breakdown: meaning, vocabulary, grammar, language in use, and learning tips!"
         },
         "glossary": {
-          "title": "📖 Smart Glossary",
+          "title": "Smart Glossary",
           "desc": "AI provides bilingual definitions (English + Chinese), syllable breakdowns, and example sentences for every word you mark."
         },
         "visualization": {
-          "title": "🖼️ AI Text Visualization",
+          "title": "AI Text Visualization",
           "desc": "AI generates a vivid, colorful image to help you visualize the main ideas! Automatically picks the best style — infographic, comic strip, cartoon, or painting — based on the text's genre. Supports English and Chinese."
         },
         "flashcard": {
-          "title": "🃏 Flashcard Review",
+          "title": "Flashcard Review",
           "desc": "Anki-style spaced repetition with Again/Hard/Good/Easy buttons. Cards you struggle with reappear sooner; cards you know are removed. Prioritize hard words to focus review on what matters most!"
         },
         "spelling": {
-          "title": "🎮 Spelling Games",
+          "title": "Spelling Games",
           "desc": "4 exciting modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed! Earn streaks and beat your best score!"
         },
         "quiz": {
-          "title": "📋 Vocabulary Quiz",
+          "title": "Vocabulary Quiz",
           "desc": "Test your vocabulary knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions."
         },
         "test": {
-          "title": "📝 Reading Test",
+          "title": "Reading Test",
           "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and targeted practice for weak areas!"
         },
         "achievements": {
-          "title": "🏆 Achievements",
+          "title": "Achievements",
           "desc": "Unlock badges and milestones as you learn! Track your progress across 15 achievement types—from reading sessions to vocabulary quizzes. Every step counts!"
         },
         "leaderboard": {
-          "title": "🏅 Leaderboard",
+          "title": "Leaderboard",
           "desc": "Compete with classmates and climb the ranks! Compare your reading stats, track streaks, and earn top spots across multiple categories."
         },
         "tts": {
-          "title": "🔊 Text-to-Speech",
+          "title": "Text-to-Speech",
           "desc": "Perfect your pronunciation! Listen to any word, sentence, or paragraph read aloud in natural voice."
         },
         "wordExport": {
-          "title": "📄 Word Export",
+          "title": "Word Export",
           "desc": "Export learning materials as Word documents: adapted text with vocabulary & sentence analysis, glossary, vocabulary quiz, reading comprehension test, and grammar analysis (topics, lessons, quiz blank & answer key)."
         },
         "grammar": {
-          "title": "📐 Grammar Analysis & Quiz",
+          "title": "Grammar Analysis & Quiz",
           "desc": "AI identifies grammar structures in your text with CEFR levels, bilingual explanations, patterns, and examples. Test your understanding with interactive exercises and quizzes featuring 4 question types and AI-scored open answers!"
         },
         "grammarGames": {
-          "title": "🎮 Grammar Games",
+          "title": "Grammar Games",
           "desc": "Reinforce grammar skills through 5 interactive games: Roulette, Surgery, Workshop, Duel, and Scramble. Earn points, track accuracy, and compete on the leaderboard!"
         },
         "vocabularyPage": {
-          "title": "📚 My Vocabulary Hub",
+          "title": "My Vocabulary Hub",
           "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Teachers can share curated review lists with students!"
         },
         "assignments": {
-          "title": "📋 Assignments",
+          "title": "Assignments",
           "desc": "Turn any reading session into homework for a whole class. Track each student's live progress and scores, flag who's stuck, and export the roster to Excel."
         },
         "aiTextGenerator": {
-          "title": "✨ AI Text Generator",
+          "title": "AI Text Generator",
           "desc": "No text on hand? Type a topic, pick a text type and length, and AI writes an age-appropriate reading passage at the right CEFR level — complete with a difficulty check and one-tap regenerate easier/harder."
         }
       },
