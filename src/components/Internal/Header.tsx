@@ -7,8 +7,6 @@ import {
   Info,
   BookOpen,
   PenTool,
-  Volume2,
-  Camera,
   Brain,
   Sparkles,
   Gamepad2,
@@ -23,19 +21,15 @@ import {
   CheckCircle2,
   Star,
   Rocket,
-  Download,
   MessageCircle,
   BarChart3,
-  Medal,
   Highlighter,
   Users,
   GraduationCap,
-  Crown,
   School,
   Bell,
   BookOpenCheck,
   Library,
-  ClipboardCheck,
   LogOut,
   LogIn,
   CircleHelp,
@@ -529,7 +523,7 @@ function Header() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-card border rounded-lg p-3 text-center">
-                  <Target className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+                  <span className="block text-2xl mb-1">🎯</span>
                   <div className="font-medium text-xs">{t("header.about.whyLove.personalized.title")}</div>
                   <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.personalized.desc")}</div>
                   <ul className="text-xs text-muted-foreground mt-2 space-y-1 text-left">
@@ -548,7 +542,7 @@ function Header() {
                   </ul>
                 </div>
                 <div className="bg-card border rounded-lg p-3 text-center">
-                  <Trophy className="h-5 w-5 mx-auto mb-1 text-amber-500" />
+                  <span className="block text-2xl mb-1">🎮</span>
                   <div className="font-medium text-xs">{t("header.about.whyLove.gamified.title")}</div>
                   <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.gamified.desc")}</div>
                   <ul className="text-xs text-muted-foreground mt-2 space-y-1 text-left">
@@ -567,7 +561,7 @@ function Header() {
                   </ul>
                 </div>
                 <div className="bg-card border rounded-lg p-3 text-center">
-                  <BarChart3 className="h-5 w-5 mx-auto mb-1 text-blue-500" />
+                  <span className="block text-2xl mb-1">📊</span>
                   <div className="font-medium text-xs">{t("header.about.whyLove.private.title")}</div>
                   <div className="text-xs text-muted-foreground mt-1">{t("header.about.whyLove.private.desc")}</div>
                   <ul className="text-xs text-muted-foreground mt-2 space-y-1 text-left">
@@ -595,154 +589,154 @@ function Header() {
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Camera className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📷</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.ocr.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.ocr.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Sparkles className="h-4 w-4 mt-0.5 text-violet-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">✨</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.aiTextGenerator.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.aiTextGenerator.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Brain className="h-4 w-4 mt-0.5 text-purple-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🧠</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.visual.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.visual.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <ImageIcon className="h-4 w-4 mt-0.5 text-sky-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🖼️</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.visualization.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.visualization.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <BarChart3 className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📊</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.difficulty.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.difficulty.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Highlighter className="h-4 w-4 mt-0.5 text-sky-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🎨</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.cefrHighlight.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.cefrHighlight.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <PenTool className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">✏️</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.adaptation.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.adaptation.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Volume2 className="h-4 w-4 mt-0.5 text-teal-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🔊</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.tts.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.tts.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <MessageCircle className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🤖</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.tutor.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.tutor.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <MessageSquareText className="h-4 w-4 mt-0.5 text-orange-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">💬</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.sentenceAnalysis.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.sentenceAnalysis.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <BookOpen className="h-4 w-4 mt-0.5 text-indigo-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📖</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.glossary.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.glossary.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Layers className="h-4 w-4 mt-0.5 text-cyan-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🃏</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.flashcard.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.flashcard.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Gamepad2 className="h-4 w-4 mt-0.5 text-pink-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🎮</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.spelling.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.spelling.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <ClipboardList className="h-4 w-4 mt-0.5 text-violet-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📋</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.quiz.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.quiz.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Target className="h-4 w-4 mt-0.5 text-red-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📝</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.test.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.test.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <BookOpenCheck className="h-4 w-4 mt-0.5 text-fuchsia-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📐</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.grammar.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.grammar.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Gamepad2 className="h-4 w-4 mt-0.5 text-lime-600 dark:text-lime-400 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🎮</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.grammarGames.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.grammarGames.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Library className="h-4 w-4 mt-0.5 text-sky-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📚</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.vocabularyPage.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.vocabularyPage.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <ClipboardCheck className="h-4 w-4 mt-0.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📋</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.assignments.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.assignments.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Medal className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🏆</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.achievements.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.achievements.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Trophy className="h-4 w-4 mt-0.5 text-yellow-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🏅</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.leaderboard.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.leaderboard.desc")}</div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <Download className="h-4 w-4 mt-0.5 text-rose-500 shrink-0" />
+                  <span className="text-lg leading-none mt-0.5 shrink-0">📄</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.wordExport.title")}</div>
                     <div className="text-xs text-muted-foreground">{t("header.about.features.wordExport.desc")}</div>
@@ -762,7 +756,7 @@ function Header() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <Crown className="h-4 w-4 text-amber-500" />
+                    <span className="text-lg leading-none">👑</span>
                     <span className="font-medium text-sm">{t("header.about.roles.admin.title")}</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">
@@ -774,7 +768,7 @@ function Header() {
                 </div>
                 <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <GraduationCap className="h-4 w-4 text-blue-500" />
+                    <span className="text-lg leading-none">🎓</span>
                     <span className="font-medium text-sm">{t("header.about.roles.teacher.title")}</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">
@@ -789,7 +783,7 @@ function Header() {
                 </div>
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-4 w-4 text-green-500" />
+                    <span className="text-lg leading-none">👥</span>
                     <span className="font-medium text-sm">{t("header.about.roles.student.title")}</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">

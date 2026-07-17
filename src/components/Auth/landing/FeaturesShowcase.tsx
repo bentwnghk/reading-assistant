@@ -3,32 +3,7 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useInView } from "motion/react";
-import {
-  Plus,
-  Minus,
-  Camera,
-  Sparkles,
-  Brain,
-  BarChart3,
-  Highlighter,
-  PenTool,
-  Volume2,
-  MessageCircle,
-  MessageSquareText,
-  BookOpen,
-  Layers,
-  Gamepad2,
-  ClipboardList,
-  Target,
-  BookOpenCheck,
-  Library,
-  ClipboardCheck,
-  Medal,
-  Trophy,
-  Download,
-  Image as ImageIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 
 const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
@@ -42,31 +17,31 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.04 } },
 };
 
-// Same features, icons, and colors as the About dialog's "Powerful Features"
+// Same features and emojis as the About dialog's "Powerful Features"
 // grid (header.about.features.*). Titles/descriptions are pulled from i18n.
-const FEATURES: { key: string; icon: LucideIcon; color: string }[] = [
-  { key: "ocr", icon: Camera, color: "text-blue-500" },
-  { key: "aiTextGenerator", icon: Sparkles, color: "text-violet-500" },
-  { key: "visual", icon: Brain, color: "text-purple-500" },
-  { key: "visualization", icon: ImageIcon, color: "text-sky-500" },
-  { key: "difficulty", icon: BarChart3, color: "text-emerald-500" },
-  { key: "cefrHighlight", icon: Highlighter, color: "text-sky-500" },
-  { key: "adaptation", icon: PenTool, color: "text-green-500" },
-  { key: "tts", icon: Volume2, color: "text-teal-500" },
-  { key: "tutor", icon: MessageCircle, color: "text-[var(--lp-accent)]" },
-  { key: "sentenceAnalysis", icon: MessageSquareText, color: "text-orange-500" },
-  { key: "glossary", icon: BookOpen, color: "text-indigo-500" },
-  { key: "flashcard", icon: Layers, color: "text-cyan-500" },
-  { key: "spelling", icon: Gamepad2, color: "text-pink-500" },
-  { key: "quiz", icon: ClipboardList, color: "text-violet-500" },
-  { key: "test", icon: Target, color: "text-red-500" },
-  { key: "grammar", icon: BookOpenCheck, color: "text-fuchsia-500" },
-  { key: "grammarGames", icon: Gamepad2, color: "text-lime-600 dark:text-lime-400" },
-  { key: "vocabularyPage", icon: Library, color: "text-sky-500" },
-  { key: "assignments", icon: ClipboardCheck, color: "text-teal-600 dark:text-teal-400" },
-  { key: "achievements", icon: Medal, color: "text-amber-500" },
-  { key: "leaderboard", icon: Trophy, color: "text-yellow-500" },
-  { key: "wordExport", icon: Download, color: "text-rose-500" },
+const FEATURES: { key: string; emoji: string }[] = [
+  { key: "ocr", emoji: "📷" },
+  { key: "aiTextGenerator", emoji: "✨" },
+  { key: "visual", emoji: "🧠" },
+  { key: "visualization", emoji: "🖼️" },
+  { key: "difficulty", emoji: "📊" },
+  { key: "cefrHighlight", emoji: "🎨" },
+  { key: "adaptation", emoji: "✏️" },
+  { key: "tts", emoji: "🔊" },
+  { key: "tutor", emoji: "🤖" },
+  { key: "sentenceAnalysis", emoji: "💬" },
+  { key: "glossary", emoji: "📖" },
+  { key: "flashcard", emoji: "🃏" },
+  { key: "spelling", emoji: "🎮" },
+  { key: "quiz", emoji: "📋" },
+  { key: "test", emoji: "📝" },
+  { key: "grammar", emoji: "📐" },
+  { key: "grammarGames", emoji: "🎮" },
+  { key: "vocabularyPage", emoji: "📚" },
+  { key: "assignments", emoji: "📋" },
+  { key: "achievements", emoji: "🏆" },
+  { key: "leaderboard", emoji: "🏅" },
+  { key: "wordExport", emoji: "📄" },
 ];
 
 export function FeaturesShowcase() {
@@ -128,7 +103,7 @@ export function FeaturesShowcase() {
               variants={fadeUp}
               className="flex items-start gap-2.5 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3"
             >
-              <f.icon className={`mt-0.5 h-4 w-4 shrink-0 ${f.color}`} />
+              <span className="mt-0.5 text-lg leading-none shrink-0">{f.emoji}</span>
               <div className="min-w-0">
                 <div className="text-sm font-semibold text-[var(--lp-ink)]">
                   {t(`header.about.features.${f.key}.title`)}
