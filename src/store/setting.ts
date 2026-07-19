@@ -17,7 +17,7 @@ export type VisionModel = (typeof VISION_MODELS)[number];
 export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3-flash-preview",
-  "gpt-5.1",
+  "gpt-5.6-luna",
 ] as const;
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
@@ -33,7 +33,7 @@ export const READING_TEXT_MODELS = [
   "gpt-5.4-mini",
   "gpt-5.1",
   "deepseek-v4-flash",
-  "gemini-3.5-flash",
+  "gemini-3-flash-preview",
 ] as const;
 
 export type ReadingTextModel = (typeof READING_TEXT_MODELS)[number];
