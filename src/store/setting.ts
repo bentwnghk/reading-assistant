@@ -17,7 +17,8 @@ export type VisionModel = (typeof VISION_MODELS)[number];
 export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3-flash-preview",
-  "gpt-5.6-luna",
+  "minimax-m3",
+  "mimo-v2.5",
 ] as const;
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
