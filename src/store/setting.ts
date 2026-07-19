@@ -18,7 +18,7 @@ export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3-flash-preview",
   "qwen3.7-plus",
-  "claude-sonnet-5",
+  "gpt-5.6-terra",
 ] as const;
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
