@@ -1,5 +1,6 @@
 import type { GoogleVertexProviderSettings } from "@ai-sdk/google-vertex/edge";
 import type { AzureOpenAIProviderSettings } from "@ai-sdk/azure";
+import { isClaudeReasoningModel } from "@/utils/model";
 
 export interface AIProviderOptions {
   provider: string;
@@ -76,6 +77,25 @@ export async function createAIProvider({
       baseURL,
       apiKey,
       headers,
+      // Claude 5-family reasoning models reject `temperature` as deprecated.
+      // The Vercel AI SDK defaults temperature to 0 when unset, so strip it
+      // for these models at the fetch layer to avoid API errors regardless
+      // of which mode (subscription/proxy/local) is in use.
+      fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.body && typeof init.body === "string") {
+          try {
+            const body = JSON.parse(init.body);
+            if (
+              typeof body.model === "string" &&
+              isClaudeReasoningModel(body.model)
+            ) {
+              delete body.temperature;
+              init = { ...init, body: JSON.stringify(body) };
+            }
+          } catch {}
+        }
+        return fetch(input, init);
+      },
     });
     return anthropic(model, settings);
   } else if (provider === "deepseek") {

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ANTHROPIC_BASE_URL } from "@/constants/urls";
+import { isClaudeReasoningModel } from "@/utils/model";
 
 export const runtime = "edge";
 export const preferredRegion = [
@@ -29,6 +30,16 @@ async function handler(req: NextRequest) {
   try {
     let url = `${API_PROXY_BASE_URL}/${decodeURIComponent(path.join("/"))}`;
     if (params) url += `?${params}`;
+    // Claude 5-family reasoning models reject `temperature` as deprecated.
+    // The Vercel AI SDK defaults temperature to 0 when unset, so strip it
+    // for these models to avoid API errors.
+    if (
+      body &&
+      typeof body.model === "string" &&
+      isClaudeReasoningModel(body.model)
+    ) {
+      delete body.temperature;
+    }
     const payload: RequestInit = {
       method: req.method,
       headers: {

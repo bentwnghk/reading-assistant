@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { verifyIndividualSubscriptionAccess, ensureSubscriptionTable } from "@/lib/subscription";
 import { recordSeatUsage, ensureSchoolSubscriptionTables, verifySchoolSubscriptionAccess } from "@/lib/school-subscription";
 import { getSchoolForUser } from "@/lib/users";
+import { isClaudeReasoningModel } from "@/utils/model";
 import { NextResponse, type NextRequest } from "next/server";
 
 const API_PROXY_BASE_URL = process.env.OPENAI_COMPATIBLE_API_BASE_URL || "";
@@ -77,6 +78,15 @@ async function handleRequest(req: NextRequest) {
     if (body) {
       if (body.model === "deepseek-v4-flash") {
         body.max_tokens = 384000;
+      }
+      // Claude 5-family reasoning models reject `temperature` as deprecated.
+      // The Vercel AI SDK defaults temperature to 0 when unset, so strip it
+      // for these models to avoid API errors.
+      if (
+        typeof body.model === "string" &&
+        isClaudeReasoningModel(body.model)
+      ) {
+        delete body.temperature;
       }
       payload.body = JSON.stringify(body);
     }

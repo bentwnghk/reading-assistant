@@ -27,6 +27,20 @@ export function isOpenRouterFreeModel(model: string) {
   return model.endsWith(":free");
 }
 
+/**
+ * Claude 5-family reasoning models reject the `temperature` request parameter
+ * as deprecated. The Vercel AI SDK defaults `temperature` to 0 when unset, so
+ * callers must strip it before forwarding requests for these models.
+ */
+export function isClaudeReasoningModel(model: string) {
+  return (
+    model.startsWith("claude-") &&
+    (model.includes("sonnet-5") ||
+      model.includes("opus-5") ||
+      model.includes("haiku-5"))
+  );
+}
+
 export function filterThinkingModelList(modelList: string[]) {
   const thinkingModelList: string[] = [];
   const nonThinkingModelList: string[] = [];
