@@ -18,7 +18,7 @@ export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3-flash-preview",
   "minimax-m3",
-  "mimo-v2.5",
+  "claude-haiku-4-5",
 ] as const;
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
