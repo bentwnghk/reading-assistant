@@ -17,7 +17,7 @@ export type VisionModel = (typeof VISION_MODELS)[number];
 export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3-flash-preview",
-  "grok-4.5",
+  "qwen3.7-plus",
   "claude-sonnet-5",
 ] as const;
 
