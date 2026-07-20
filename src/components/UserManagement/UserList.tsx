@@ -489,7 +489,12 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
           {paginatedUsers.map((user) => {
             const isSelectable = user.role !== "super-admin" && user.role !== "admin" && !!user.schoolId
             const isRevoked = !!user.schoolManuallyRemoved && !user.schoolId
-            const billingMode = user.billingMode
+            const rawBillingMode = user.billingMode
+            const billingMode =
+              rawBillingMode &&
+              !(rawBillingMode === "subscription" && !user.hasActiveSubscription)
+                ? rawBillingMode
+                : null
             const BillingIcon = billingMode ? BILLING_MODE_ICON[billingMode] : null
             return (
               <TableRow key={user.id} data-state={selectedIds.has(user.id) ? "selected" : undefined}>

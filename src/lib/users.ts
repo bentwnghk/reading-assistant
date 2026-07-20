@@ -1,4 +1,5 @@
 import { getClient } from "./db"
+import { ensureSchoolSubscriptionTables } from "./school-subscription"
 
 export type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student'
 
@@ -33,6 +34,7 @@ export interface UserWithRole {
   schoolAccessEndsAt?: string | null
   schoolManuallyRemoved?: boolean
   billingMode?: BillingMode | null
+  hasActiveSubscription?: boolean
   createdAt?: number
 }
 
@@ -505,6 +507,7 @@ export async function setUserRole(userId: string, role: UserRole): Promise<boole
 }
 
 export async function getAllUsers(): Promise<UserWithRole[]> {
+  await ensureSchoolSubscriptionTables()
   const client = await getClient()
   try {
     const result = await client.query(
@@ -518,6 +521,16 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
         u.school_access_ends_at as "schoolAccessEndsAt",
         COALESCE(u.school_manually_removed, FALSE) as "schoolManuallyRemoved",
         us.settings->>'mode' as "billingMode",
+        (
+          EXISTS (
+            SELECT 1 FROM subscriptions ps
+            WHERE ps.user_id = u.id AND ps.status IN ('active', 'trialing')
+          )
+          OR EXISTS (
+            SELECT 1 FROM school_subscriptions ss
+            WHERE ss.school_id = u.school_id AND ss.status IN ('active', 'trialing')
+          )
+        ) as "hasActiveSubscription",
         (
           SELECT COALESCE(json_agg(c2.id), '[]'::json)
           FROM classes c2
@@ -552,6 +565,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       schoolAccessEndsAt: row.schoolAccessEndsAt || null,
       schoolManuallyRemoved: row.schoolManuallyRemoved || false,
       billingMode: normalizeBillingMode(row.billingMode),
+      hasActiveSubscription: !!row.hasActiveSubscription,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
@@ -834,6 +848,7 @@ export async function getClassSchoolId(classId: string): Promise<string | null> 
 
 /** All users (of any role) belonging to a given school */
 export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]> {
+  await ensureSchoolSubscriptionTables()
   const client = await getClient()
   try {
     const result = await client.query(
@@ -845,6 +860,16 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
         u.school_access_ends_at as "schoolAccessEndsAt",
         COALESCE(u.school_manually_removed, FALSE) as "schoolManuallyRemoved",
         us.settings->>'mode' as "billingMode",
+        (
+          EXISTS (
+            SELECT 1 FROM subscriptions ps
+            WHERE ps.user_id = u.id AND ps.status IN ('active', 'trialing')
+          )
+          OR EXISTS (
+            SELECT 1 FROM school_subscriptions ss
+            WHERE ss.school_id = u.school_id AND ss.status IN ('active', 'trialing')
+          )
+        ) as "hasActiveSubscription",
         cm.class_id as "classId",
         c.name as "className",
         (
@@ -878,6 +903,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       schoolAccessEndsAt: row.schoolAccessEndsAt || null,
       schoolManuallyRemoved: row.schoolManuallyRemoved || false,
       billingMode: normalizeBillingMode(row.billingMode),
+      hasActiveSubscription: !!row.hasActiveSubscription,
       classId: row.classId,
       className: row.className,
       taughtClassIds: row.taughtClassIds || [],
