@@ -19,6 +19,9 @@ export const TUTOR_MODELS = [
   "gemini-3-flash-preview",
   "qwen3.7-plus",
   "gpt-5.6-terra",
+  "mimo-v2.5-pro",
+  "step-3.7-flash",
+  "doubao-seed-2.1-pro",
 ] as const;
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
