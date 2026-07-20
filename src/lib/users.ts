@@ -35,6 +35,7 @@ export interface UserWithRole {
   schoolManuallyRemoved?: boolean
   billingMode?: BillingMode | null
   hasActiveSubscription?: boolean
+  hasMeterApiKey?: boolean
   createdAt?: number
 }
 
@@ -532,6 +533,15 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
           )
         ) as "hasActiveSubscription",
         (
+          us.settings->>'mode' = 'local'
+          AND (
+            (us.settings->>'provider' = 'openai'
+             AND COALESCE(us.settings->>'openAIApiKey', '') <> '')
+            OR (us.settings->>'provider' = 'openaicompatible'
+             AND COALESCE(us.settings->>'openaicompatibleApiKey', '') <> '')
+          )
+        ) as "hasMeterApiKey",
+        (
           SELECT COALESCE(json_agg(c2.id), '[]'::json)
           FROM classes c2
           WHERE c2.teacher_id = u.id
@@ -566,6 +576,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       schoolManuallyRemoved: row.schoolManuallyRemoved || false,
       billingMode: normalizeBillingMode(row.billingMode),
       hasActiveSubscription: !!row.hasActiveSubscription,
+      hasMeterApiKey: !!row.hasMeterApiKey,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
@@ -870,6 +881,15 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
             WHERE ss.school_id = u.school_id AND ss.status IN ('active', 'trialing')
           )
         ) as "hasActiveSubscription",
+        (
+          us.settings->>'mode' = 'local'
+          AND (
+            (us.settings->>'provider' = 'openai'
+             AND COALESCE(us.settings->>'openAIApiKey', '') <> '')
+            OR (us.settings->>'provider' = 'openaicompatible'
+             AND COALESCE(us.settings->>'openaicompatibleApiKey', '') <> '')
+          )
+        ) as "hasMeterApiKey",
         cm.class_id as "classId",
         c.name as "className",
         (
@@ -904,6 +924,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       schoolManuallyRemoved: row.schoolManuallyRemoved || false,
       billingMode: normalizeBillingMode(row.billingMode),
       hasActiveSubscription: !!row.hasActiveSubscription,
+      hasMeterApiKey: !!row.hasMeterApiKey,
       classId: row.classId,
       className: row.className,
       taughtClassIds: row.taughtClassIds || [],
