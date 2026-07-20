@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -475,6 +475,7 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
         <TableBody>
           {paginatedUsers.map((user) => {
             const isSelectable = user.role !== "super-admin" && user.role !== "admin" && !!user.schoolId
+            const isRevoked = !!user.schoolManuallyRemoved && !user.schoolId
             return (
               <TableRow key={user.id} data-state={selectedIds.has(user.id) ? "selected" : undefined}>
                 <TableCell>
@@ -486,10 +487,20 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.image || undefined} />
-                      <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
-                    </Avatar>
+                    <div className="relative shrink-0">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.image || undefined} />
+                        <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
+                      </Avatar>
+                      {isRevoked && (
+                        <span
+                          className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground ring-2 ring-background"
+                          title={t("userManagement.users.accessRevoked")}
+                        >
+                          <Ban className="h-2.5 w-2.5" />
+                        </span>
+                      )}
+                    </div>
                     <span className="truncate max-w-32" title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
                     {user.schoolAccessEndsAt && new Date(user.schoolAccessEndsAt) > new Date() && (
                       <Badge variant="outline" className="flex items-center gap-1 text-xs text-amber-600 border-amber-300 bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:bg-amber-950 shrink-0">

@@ -2532,7 +2532,8 @@
       "revokeFailed": "Failed to revoke school access.",
       "revokePartial": "Revoked access for {{success}} user(s), {{failed}} failed.",
       "selectedCount": "{{count}} selected",
-      "accessRevoking": "Access ending"
+      "accessRevoking": "Access ending",
+      "accessRevoked": "School access revoked"
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",
