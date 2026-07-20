@@ -493,7 +493,8 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
             const billingMode =
               rawBillingMode &&
               !(rawBillingMode === "subscription" && !user.hasActiveSubscription) &&
-              !(rawBillingMode === "local" && !user.hasMeterApiKey)
+              !(rawBillingMode === "local" && !user.hasMeterApiKey) &&
+              !(rawBillingMode === "proxy" && !user.hasAccessPassword)
                 ? rawBillingMode
                 : null
             const BillingIcon = billingMode ? BILLING_MODE_ICON[billingMode] : null
