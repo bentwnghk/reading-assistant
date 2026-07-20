@@ -792,3 +792,44 @@ This lightweight/full split is correct, but it silently broke two classes of con
 **Rule of thumb**: "If I stop returning this column from the list query, what else reads it?" Answer that question *before* merging the query change, not after users report zeroed-out dashboards.
 
 **Lesson 7 interaction**: This is the read-path mirror of [Lesson 7](#7-full-persistence-layer-check-for-new-store-fields). Lesson 7 says "a field missing from the DB/INSERT silently fails on write"; this lesson says "a field missing from the SELECT silently fails on read." Both produce `undefined`/fallback values with no error, so they are invisible to tests that don't assert the specific field.
+
+### 11. Changing an AI Model Default — What to Update, and Why No Client-Side Migration Is Needed
+
+Changing the default value of an AI model setting (e.g., making `step-3.7-flash` the default Advanced AI Tutor Model instead of `gpt-5.4-mini`) touches **two code locations** and, if you want existing users to adopt the new default, **one SQL migration**. The Settings dialog label itself lives in `src/locales/*.json` (`setting.<fieldName>`).
+
+#### Code changes (in `src/store/setting.ts`)
+
+| What | Where | Notes |
+|------|-------|-------|
+| **Model list** | `const` array (e.g., `TUTOR_MODELS`, `READING_TEXT_MODELS`, `VISION_MODELS`, `AVAILABLE_MODELS`, `BASIC_TUTOR_MODELS`) | Add/remove/rename entries. The Zod schema in `Setting.tsx` uses `z.enum(<ARRAY>)`, so it picks up the change automatically — **do not** hand-maintain a parallel literal in the schema. |
+| **Default value** | `defaultValues` object (e.g., `tutorModel: "step-3.7-flash"`) | New users and `reset()` calls get this. |
+
+The `getItem` validation in the persist config only resets a stored value to the default when it is **not in the model list** (i.e., invalid). It does **not** force a *valid* old selection to the new default — so a user who previously chose `gpt-5.4-mini` keeps it unless you migrate them.
+
+#### Force-applying the new default to existing users
+
+Because the app is auth-gated and `setItem` short-circuits when `currentUserId` is set (`if (currentUserId) return;` in the persist storage), **authenticated users never read or write the model fields to localStorage**. Their settings are loaded from the server via `loadFromServer` on each sign-in (`{ ...defaultValues, ...serverSettings }`). The DB (`user_settings.settings` JSONB) is therefore the **single source of truth** — a **SQL migration alone** is sufficient, and a client-side localStorage migration is dead code that should not be added.
+
+Create a migration in `scripts/` (see `migrate-tutor-model-step-3.7-flash.sql` for the template):
+
+```sql
+UPDATE user_settings
+SET settings =
+    jsonb_set(
+      settings,
+      '{tutorModel}', '"step-3.7-flash"'::jsonb
+    ),
+    updated_at = NOW();
+```
+
+- **No `WHERE` clause** → applies to all users unconditionally (true "force").
+- Add a `WHERE settings->>'tutorModel' = '<old-value>'` clause if you only want to migrate users on a specific previous model.
+- Update `scripts/init-db.sql` if the default seed data embeds the old model name.
+
+#### Anti-pattern: client-side localStorage migration
+
+Do **not** add a one-time override in the persist `getItem` (e.g., a `localStorage.getItem("...-migrated-...")` flag that force-sets the field). For authenticated users, `loadFromServer` overwrites whatever `getItem` produced, so the override has no lasting effect; for unauthenticated users, there is no meaningful persisted setting to migrate. It is unreachable code that adds maintenance burden.
+
+#### Related: [Lesson 3](#3-model-list-reuse-in-settings) (Model List Reuse)
+
+Lesson 3 says to **reuse existing model lists** rather than creating per-feature lists. This lesson covers the *operational* side of those same lists — how to change a default and roll it out. Reuse + this lesson together prevent both the Zod enum mismatch bugs (Lesson 3) and the "stale default in the DB" gap (this lesson).
