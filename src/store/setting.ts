@@ -17,11 +17,8 @@ export type VisionModel = (typeof VISION_MODELS)[number];
 export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3-flash-preview",
-  "qwen3.7-plus",
-  "gpt-5.6-terra",
-  "mimo-v2.5-pro",
   "step-3.7-flash",
-  "doubao-seed-2.1-pro",
+  "gpt-5.6-terra",
 ] as const;
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
@@ -175,7 +172,7 @@ export const defaultValues: SettingStore = {
   sentenceAnalysisModel: "deepseek-v4-flash",
   grammarModel: "deepseek-v4-flash",
   readingTextModel: "deepseek-v4-flash",
-  tutorModel: "gpt-5.4-mini",
+  tutorModel: "step-3.7-flash",
   basicTutorModel: "deepseek-v4-flash",
   ttsVoice: "alloy",
   ttsPlaybackRate: 1.0 as TTSPlaybackRate,
