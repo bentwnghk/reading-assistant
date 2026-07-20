@@ -2533,7 +2533,13 @@
       "revokePartial": "已撤銷 {{success}} 個用戶的存取權限，{{failed}} 個失敗。",
       "selectedCount": "已選 {{count}} 個",
       "accessRevoking": "存取即將結束",
-      "accessRevoked": "學校存取權已撤銷"
+      "accessRevoked": "學校存取權已撤銷",
+      "billingModeLabel": "計費：{{mode}}",
+      "billingMode": {
+        "subscription": "訂閱",
+        "local": "計量",
+        "proxy": "免費"
+      }
     },
     "roleUpdated": "角色已更新",
     "roleUpdateFailed": "更新角色失敗",

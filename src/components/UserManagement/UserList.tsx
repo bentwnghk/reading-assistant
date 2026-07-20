@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -23,10 +23,23 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
-import type { UserWithRole, UserRole, SchoolInfo, ClassInfo } from "@/lib/users"
+import type { UserWithRole, UserRole, SchoolInfo, ClassInfo, BillingMode } from "@/lib/users"
+import { cn } from "@/utils/style"
 
 type SortField = "name" | "email" | "className" | "schoolName"
 type SortOrder = "asc" | "desc"
+
+const BILLING_MODE_ICON: Record<BillingMode, typeof CreditCard> = {
+  subscription: CreditCard,
+  local: Gauge,
+  proxy: Gift,
+}
+
+const BILLING_MODE_STYLES: Record<BillingMode, string> = {
+  subscription: "bg-blue-500 text-white",
+  local: "bg-amber-500 text-white",
+  proxy: "bg-emerald-500 text-white",
+}
 
 interface UserListProps {
   isSuperAdmin: boolean
@@ -476,6 +489,8 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
           {paginatedUsers.map((user) => {
             const isSelectable = user.role !== "super-admin" && user.role !== "admin" && !!user.schoolId
             const isRevoked = !!user.schoolManuallyRemoved && !user.schoolId
+            const billingMode = user.billingMode
+            const BillingIcon = billingMode ? BILLING_MODE_ICON[billingMode] : null
             return (
               <TableRow key={user.id} data-state={selectedIds.has(user.id) ? "selected" : undefined}>
                 <TableCell>
@@ -492,6 +507,17 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                         <AvatarImage src={user.image || undefined} />
                         <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
                       </Avatar>
+                      {billingMode && BillingIcon && (
+                        <span
+                          className={cn(
+                            "absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full ring-2 ring-background",
+                            BILLING_MODE_STYLES[billingMode]
+                          )}
+                          title={t("userManagement.users.billingModeLabel", { mode: t(`userManagement.users.billingMode.${billingMode}`) })}
+                        >
+                          <BillingIcon className="h-2.5 w-2.5" />
+                        </span>
+                      )}
                       {isRevoked && (
                         <span
                           className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground ring-2 ring-background"

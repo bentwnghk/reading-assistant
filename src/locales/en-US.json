@@ -2533,7 +2533,13 @@
       "revokePartial": "Revoked access for {{success}} user(s), {{failed}} failed.",
       "selectedCount": "{{count}} selected",
       "accessRevoking": "Access ending",
-      "accessRevoked": "School access revoked"
+      "accessRevoked": "School access revoked",
+      "billingModeLabel": "Billing: {{mode}}",
+      "billingMode": {
+        "subscription": "Subscription",
+        "local": "Meter",
+        "proxy": "Free"
+      }
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",

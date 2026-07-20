@@ -2,6 +2,14 @@ import { getClient } from "./db"
 
 export type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student'
 
+export type BillingMode = 'subscription' | 'local' | 'proxy'
+
+export const VALID_BILLING_MODES: readonly BillingMode[] = ['subscription', 'local', 'proxy'] as const
+
+export function normalizeBillingMode(raw: unknown): BillingMode | null {
+  return VALID_BILLING_MODES.includes(raw as BillingMode) ? (raw as BillingMode) : null
+}
+
 export interface SchoolInfo {
   id: string
   name: string
@@ -24,6 +32,7 @@ export interface UserWithRole {
   schoolName?: string
   schoolAccessEndsAt?: string | null
   schoolManuallyRemoved?: boolean
+  billingMode?: BillingMode | null
   createdAt?: number
 }
 
@@ -508,6 +517,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
         s.name as "schoolName",
         u.school_access_ends_at as "schoolAccessEndsAt",
         COALESCE(u.school_manually_removed, FALSE) as "schoolManuallyRemoved",
+        us.settings->>'mode' as "billingMode",
         (
           SELECT COALESCE(json_agg(c2.id), '[]'::json)
           FROM classes c2
@@ -523,6 +533,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
        LEFT JOIN class_members cm ON u.id = cm.student_id
        LEFT JOIN classes c ON cm.class_id = c.id
        LEFT JOIN schools s ON u.school_id = s.id
+       LEFT JOIN user_settings us ON u.id = us.user_id
        ORDER BY u."createdAt" DESC`
     )
     
@@ -540,6 +551,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       schoolName: row.schoolName,
       schoolAccessEndsAt: row.schoolAccessEndsAt || null,
       schoolManuallyRemoved: row.schoolManuallyRemoved || false,
+      billingMode: normalizeBillingMode(row.billingMode),
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
@@ -832,6 +844,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
         s.name as "schoolName",
         u.school_access_ends_at as "schoolAccessEndsAt",
         COALESCE(u.school_manually_removed, FALSE) as "schoolManuallyRemoved",
+        us.settings->>'mode' as "billingMode",
         cm.class_id as "classId",
         c.name as "className",
         (
@@ -847,6 +860,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN schools s ON u.school_id = s.id
+       LEFT JOIN user_settings us ON u.id = us.user_id
        LEFT JOIN class_members cm ON u.id = cm.student_id
        LEFT JOIN classes c ON cm.class_id = c.id
        WHERE u.school_id = $1
@@ -863,6 +877,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       schoolName: row.schoolName,
       schoolAccessEndsAt: row.schoolAccessEndsAt || null,
       schoolManuallyRemoved: row.schoolManuallyRemoved || false,
+      billingMode: normalizeBillingMode(row.billingMode),
       classId: row.classId,
       className: row.className,
       taughtClassIds: row.taughtClassIds || [],
