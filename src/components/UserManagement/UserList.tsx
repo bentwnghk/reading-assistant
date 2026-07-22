@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -59,6 +59,7 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
   const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [revoking, setRevoking] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const PAGE_SIZE = 20
 
   const loadData = useCallback(async () => {
@@ -360,6 +361,35 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
     }
   }
 
+  const handleDeleteUser = async (userId: string, userName: string, userEmail: string) => {
+    const displayName = userName || userEmail
+    const confirmMsg = t("userManagement.users.deleteConfirm", { name: displayName })
+    if (!confirm(confirmMsg)) return
+
+    setDeletingId(userId)
+    try {
+      const response = await fetch(`/api/users/${userId}`, { method: "DELETE" })
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        toast.error((err as { error?: string }).error || t("userManagement.users.deleteFailed"))
+        return
+      }
+
+      toast.success(t("userManagement.users.deleteSuccess", { name: displayName }))
+      setUsers(prev => prev.filter(u => u.id !== userId))
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        next.delete(userId)
+        return next
+      })
+    } catch {
+      toast.error(t("userManagement.users.deleteFailed"))
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -654,6 +684,27 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
                           ))}
                         </SelectContent>
                       </Select>
+                    )}
+                    {isSuperAdmin && user.role !== "super-admin" && user.id !== currentUserId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-fit h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        disabled={deletingId === user.id}
+                        onClick={() => handleDeleteUser(
+                          user.id,
+                          user.name || t("userManagement.users.noName"),
+                          user.email || ""
+                        )}
+                        title={t("userManagement.users.deleteUser")}
+                      >
+                        {deletingId === user.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5" />
+                        )}
+                        {t("userManagement.users.deleteUser")}
+                      </Button>
                     )}
                   </div>
                 </TableCell>

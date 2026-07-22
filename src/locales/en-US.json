@@ -2539,7 +2539,11 @@
         "subscription": "Subscription",
         "local": "Meter",
         "proxy": "Free"
-      }
+      },
+      "deleteUser": "Delete",
+      "deleteConfirm": "Permanently delete {{name}} and ALL associated data (sessions, vocabulary, subscriptions, achievements, etc.)? This action cannot be undone.",
+      "deleteSuccess": "Deleted {{name}} and all associated data.",
+      "deleteFailed": "Failed to delete user."
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",

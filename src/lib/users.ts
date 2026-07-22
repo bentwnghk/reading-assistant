@@ -1438,3 +1438,19 @@ export async function cleanupExpiredSchoolAccess(): Promise<number> {
     client.release()
   }
 }
+
+export async function deleteUser(userId: string): Promise<boolean> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `DELETE FROM users WHERE id = $1`,
+      [userId]
+    )
+    return (result.rowCount ?? 0) > 0
+  } catch (error) {
+    console.error("Failed to delete user:", error)
+    return false
+  } finally {
+    client.release()
+  }
+}
