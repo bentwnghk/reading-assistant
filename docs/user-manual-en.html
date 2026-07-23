@@ -236,9 +236,168 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
   .lang-divider,.toc-sidebar,.no-print{display:none}
 }
 .print-footer{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ============ FAITHFUL UI ATOMS (real Shadcn/Tailwind fidelity) ============ */
+.ic{display:inline-block;width:16px;height:16px;flex:none;color:currentColor;vertical-align:-2px}
+.ic.sm{width:13px;height:13px}.ic.lg{width:20px;height:20px}.ic.xl{width:28px;height:28px}
+.ic.muted{color:var(--muted)}.ic.pri{color:var(--primary)}
+.muted{color:var(--muted)}
+/* section header inside mock bar */
+.sec-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:var(--fg);flex:1}
+.sec-h .ic{color:var(--muted)}
+/* shadcn-style switch */
+.switch{display:inline-block;width:36px;height:20px;border-radius:999px;background:var(--border-strong);position:relative;vertical-align:middle;flex:none;transition:.15s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:var(--shadow);transition:.15s}
+.switch.on{background:var(--primary)}
+.switch.on::after{left:18px}
+.switch.sm{width:28px;height:16px}.switch.sm::after{width:12px;height:12px}.switch.sm.on::after{left:14px}
+/* tabs with icon */
+.faketab span{display:inline-flex;align-items:center;gap:6px}
+.faketab span .ic{color:var(--muted)}
+.faketab span.active .ic{color:var(--primary)}
+/* radio option row */
+.opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;margin:4px 0}
+.opt.sel{border-color:var(--primary);background:var(--primary-soft)}
+.opt .radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border-strong);flex:none;background:#fff}
+.opt.sel .radio{border-color:var(--primary);box-shadow:inset 0 0 0 3px var(--primary)}
+.opt.ok{border-color:var(--green);background:var(--green-bg)}
+.opt.ok .radio{border-color:var(--green);background:var(--green);box-shadow:none}
+/* number stepper */
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden}
+.stepper b{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--subtle);color:var(--muted-fg);font-weight:700}
+.stepper input{width:42px;text-align:center;border:none;font-size:13px;padding:4px 0;background:#fff}
+/* tier result card */
+.tiercard{border:2px solid var(--border-strong);border-radius:16px;padding:22px;text-align:center;position:relative;overflow:hidden}
+.tiercard .big{font-size:2.8rem;line-height:1;font-weight:900}
+.tiercard .tpill{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;font-weight:700;padding:3px 12px;border-radius:999px}
+/* segmented control */
+.seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden}
+.seg span{padding:6px 12px;font-size:12px;font-weight:600;color:var(--muted-fg);background:#fff;display:inline-flex;align-items:center;gap:5px}
+.seg span.on{background:var(--primary);color:#fff}
+.seg span.on .ic{color:#fff}
+/* help dot */
+.helpdot{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--border-strong);color:var(--muted);font-size:10px;font-weight:700;vertical-align:1px}
+/* menu item row */
+.menuitem{display:flex;align-items:center;gap:10px;padding:7px 10px;font-size:13px;color:var(--fg);border-radius:6px}
+.menuitem .ic{color:var(--muted)}
+.menuitem.danger{color:var(--red)}.menuitem.danger .ic{color:var(--red)}
+/* small avatar circle w/ lucide */
+.avic{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;flex:none}
+/* dropzone circle */
+.dropcircle{width:64px;height:64px;border-radius:50%;background:var(--subtle);display:flex;align-items:center;justify-content:center;margin:0 auto}
+/* progress ring (medal) */
+.ringwrap{position:relative;width:80px;height:80px;margin:0 auto}
+.ringwrap svg{transform:rotate(-90deg)}
+.ringwrap .inner{position:absolute;inset:6px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+/* hp bar duel */
+.duelcard{border:2px solid;border-radius:12px;padding:12px;text-align:center;flex:1}
+
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-google" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A10.99 10.99 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18A10.99 10.99 0 0 0 1 12c0 1.77.42 3.45 1.18 4.94l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.29 9.14 5.38 12 5.38z"/></symbol>
+  <symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" key="1yt0o3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M12 18h.01" key="mhygvu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" key="ih7n3h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="7 10 12 15 17 10" key="2ggqvy" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="12" x2="12" y1="15" y2="3" key="1vk2je" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" key="1b2hhj" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="16 6 12 2 8 6" key="m901s6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="12" x2="12" y1="2" y2="15" key="1p0rca" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14" key="1ays0h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 5v14" key="s699le" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18" key="1bl5f8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m6 6 12 12" key="d8bk6v" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" key="1gmf2c" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" key="1qme2f" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="12" r="3" key="1v7zrd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" key="4pj2yx" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20 3v4" key="1olli1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 5h-4" key="1gvqau" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 17v2" key="vumght" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 18H3" key="zchphs" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-volume-2" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" key="uqj9uw" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 9a5 5 0 0 1 0 6" key="1q6k2b" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19.364 18.364a9 9 0 0 0 0-12.728" key="ijwkga" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0" key="vwvbt9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" key="11g9vi" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" key="1mglay" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" key="13o1zl" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 12h20" key="9i4pu4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" key="975kel" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="7" r="4" key="17ys0d" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-bar-chart-3" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16" key="c24i48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 17V9" key="2bz60n" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 17V5" key="1frdt8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 17v-3" key="17ska0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" key="17hqa7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" key="lmptdp" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 22h16" key="57wxv0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" key="1nw9bq" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" key="1np0yb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" key="u46fv3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-graduation-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" key="j76jl0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 10v6" key="1lu8f3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" key="1r8lef" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" key="1yyitq" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="7" r="4" key="nufk8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87" key="kshegd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 3.13a4 4 0 0 1 0 7.75" key="1da9ce" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" key="1mglay" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="M12 16v-4" key="1dtifu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 8h.01" key="e9boi3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" key="1uf3rs" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="16 17 21 12 16 7" key="1gabdz" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="21" x2="9" y1="12" y2="12" key="1uyos4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-log-in" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" key="u53s6r" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="10 17 15 12 10 7" key="1ail0h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="15" x2="3" y1="12" y2="12" key="v6grx8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14" key="1ays0h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m12 5 7 7-7 7" key="xquz4c" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14" key="s699le" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m19 12-7 7-7-7" key="1idqje" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" key="1rqfz7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 2v4a2 2 0 0 0 2 2h4" key="tnqrlb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 9H8" key="b1mrlr" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 13H8" key="t4e002" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 17H8" key="z1uh3a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-waypoints" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.5" key="r5ysbb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="m10.2 6.3-3.9 3.9" key="1nzqf6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="4.5" cy="12" r="2.5" key="jydg6v" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="M7 12h10" key="b7w52i" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="19.5" cy="12" r="2.5" key="1piiel" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="m13.8 17.7 3.9-3.9" key="1wyg1y" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="19.5" r="2.5" key="13o1pw" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" key="1m3agn" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><circle cx="9" cy="9" r="2" key="af1f0g" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" key="1xmnt7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 7v14" key="1akyts" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" key="ruj8y" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-book-marked" viewBox="0 0 24 24"><path d="M10 2v8l3-3 3 3V2" key="sqw3rj" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" key="k3hazp" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" key="l5xja" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" key="ep3f8r" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" key="1p4c4q" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17.599 6.5a3 3 0 0 0 .399-1.375" key="tmeiqw" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5" key="105sqy" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.477 10.896a4 4 0 0 1 .585-.396" key="ql3yin" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19.938 10.5a4 4 0 0 1 .585.396" key="1qfode" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 18a4 4 0 0 1-1.967-.516" key="2e4loj" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19.967 17.484A4 4 0 0 1 18 18" key="159ez6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" key="1a8usu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m15 5 4 4" key="1mk7zo" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-wand-2" viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72" key="ul74o6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m14 7 3 3" key="1r5n42" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 6v4" key="ilb8ba" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 14v4" key="blhpug" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 2v2" key="7u0qdc" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7 8H3" key="zfb6yr" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 16h-4" key="1cnmox" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 3H9" key="1obp7u" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-highlighter" viewBox="0 0 24 24"><path d="m9 11-6 6v3h9l3-3" key="1a3l36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" key="14a9rk" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4" key="9kzdfg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.34 19a10 10 0 1 1 17.32 0" key="19p75a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" key="1nclc0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="12" r="3" key="1v7zrd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" key="ct8e1f" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" key="151rxh" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" key="13bj9a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m2 2 20 20" key="1ooewy" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" key="zw3jo" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" key="1wduqc" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" key="kqbvx6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-spell-check" viewBox="0 0 24 24"><path d="m6 16 6-12 6 12" key="1b4byz" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 12h8" key="1wcyev" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m16 20 2 2 4-4" key="13tcca" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-clipboard-list" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" key="tgr4d6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" key="116196" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 11h4" key="1jrz19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 16h4" key="n85exb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 11h.01" key="1dfujw" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 16h.01" key="18s6g9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-clipboard-check" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" key="tgr4d6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" key="116196" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 14 2 2 4-4" key="df797q" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3" key="1oa8hb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polygon></symbol>
+  <symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" key="1gvzjb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 18h6" key="x1upvd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 22h4" key="ceow96" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><line x1="10" x2="14" y1="2" y2="2" key="14vaq8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="12" x2="15" y1="14" y2="11" key="17fdiu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><circle cx="12" cy="14" r="8" key="1e1u0o" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" key="96xj49" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" key="1mglay" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><circle cx="12" cy="12" r="6" key="1vlfrh" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><circle cx="12" cy="12" r="2" key="1c9p78" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" key="1357e3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" key="1xhq8a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="m18 14 4 4-4 4" key="10pe0f" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m18 2 4 4-4 4" key="pucp1d" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22" key="1ailkh" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2" key="km57vx" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45" key="os18l9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-message-circle" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" key="vv11sd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8" key="hb8ula" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><rect width="16" height="12" x="4" y="8" rx="2" key="enze0r" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M2 14h2" key="vft8re" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20 14h2" key="4cs60a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 13v2" key="1xurst" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 13v2" key="rq6x2g" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" key="1ffxy3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m21.854 2.147-10.94 10.939" key="12cjpa" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-image-plus" viewBox="0 0 24 24"><path d="M16 5h6" key="1vod17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 2v6" key="4bpg5p" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5" key="1ue2ih" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" key="1xmnt7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="9" cy="9" r="2" key="af1f0g" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18" key="d0wm0j" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" key="4alrt4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" key="v07s0e" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><line x1="10" x2="10" y1="11" y2="17" key="1uufr5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="14" x2="14" y1="11" y2="17" key="xtxkd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-languages" viewBox="0 0 24 24"><path d="m5 8 6 6" key="1wu5hv" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m4 14 6-6 2-3" key="1k1g8d" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 5h12" key="or177f" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7 2h1" key="1t2jsx" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m22 22-5-10-5 10" key="don7ne" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 18h6" key="1m8k6r" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-maximize-2" viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9" key="mznyad" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><polyline points="9 21 3 21 3 15" key="1avn1i" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="21" x2="14" y1="3" y2="10" key="ota7mn" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="3" x2="10" y1="21" y2="14" key="1atl0r" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" key="m3kijz" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" key="1fmvmk" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" key="1f8sc4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" key="qeys4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" key="ih7n3h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="17 8 12 3 7 8" key="t8dd8p" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="12" x2="12" y1="3" y2="15" key="widbto" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14" key="ji33uf" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 6v14" key="1n7gus" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 8v12" key="1gg7y9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 4v16" key="6qkkli" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-file-edit" viewBox="0 0 24 24"><path d="M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5" key="1couwa" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 2v4a2 2 0 0 0 2 2h4" key="tnqrlb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" key="1y4qbx" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-file-minus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" key="1rqfz7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 2v4a2 2 0 0 0 2 2h4" key="tnqrlb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 15h6" key="cctwl0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" key="qrunsl" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" key="mthhwq" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-gamepad-2" viewBox="0 0 24 24"><line x1="6" x2="10" y1="11" y2="11" key="1gktln" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="8" x2="8" y1="9" y2="13" key="qnk9ow" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="15" x2="15.01" y1="12" y2="12" key="krot7o" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="18" x2="18.01" y1="10" y2="10" key="1lcuu1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z" key="mfqc10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-circle-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" key="1mglay" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><circle cx="12" cy="12" r="1" key="41hilf" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-stethoscope" viewBox="0 0 24 24"><path d="M11 2v2" key="1539x4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 2v2" key="1yf1q8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" key="rb5t3r" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 15a6 6 0 0 0 12 0v-3" key="x18d4x" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="20" cy="10" r="2" key="ts1r5v" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" key="cbrjhi" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-swords" viewBox="0 0 24 24"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" key="1hfsw2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="13" x2="19" y1="19" y2="13" key="1vrmhu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="16" x2="20" y1="16" y2="20" key="1bron3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="19" x2="21" y1="21" y2="19" key="13pww6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" key="hbey2j" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="5" x2="9" y1="14" y2="18" key="1hf58s" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="7" x2="4" y1="17" y2="20" key="pidxm4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="3" x2="5" y1="19" y2="21" key="1pehsh" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" key="1xq2db" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" key="1vdc57" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 21h14" key="11awu3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" key="r04s7s" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" key="c3ymky" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-check-circle-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" key="1mglay" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="m9 12 2 2 4-4" key="dzmm74" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" key="v9h5vc" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 3v5h-5" key="1q7to0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" key="3uifl3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 16H3v5" key="1cv678" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-list-checks" viewBox="0 0 24 24"><path d="m3 17 2 2 4-4" key="1jhpwq" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m3 7 2 2 4-4" key="1obspn" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 6h8" key="15sg57" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 12h8" key="h98zly" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 18h8" key="oe0vm4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-medal" viewBox="0 0 24 24"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15" key="143lza" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M11 12 5.12 2.2" key="qhuxz6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m13 12 5.88-9.8" key="hbye0f" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 7h8" key="i86dvs" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="17" r="5" key="qbz8iq" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="M12 18v-2h-.5" key="fawc4q" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-school" viewBox="0 0 24 24"><path d="M14 22v-4a2 2 0 1 0-4 0v4" key="hhkicm" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m18 10 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7.382a1 1 0 0 1 .553-.894L6 10" key="1xqip1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 5v17" key="1sw6gf" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m4 6 7.106-3.553a2 2 0 0 1 1.788 0L20 6" key="9d2mlk" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 5v17" key="1xfsm0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="9" r="2" key="1092wv" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-network" viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1" key="4q2zg0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><rect x="2" y="16" width="6" height="6" rx="1" key="8cvhb9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><rect x="9" y="2" width="6" height="6" rx="1" key="1egb70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" key="1jsf9p" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 12V8" key="2874zd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-file-check" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" key="1rqfz7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 2v4a2 2 0 0 0 2 2h4" key="tnqrlb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 15 2 2 4-4" key="1grp1n" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-pen-tool" viewBox="0 0 24 24"><path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z" key="nt11vn" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18" key="15qc1e" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m2.3 2.3 7.286 7.286" key="1wuzzi" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="2" key="xmgehs" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle></symbol>
+  <symbol id="i-book-open-check" viewBox="0 0 24 24"><path d="M12 21V7" key="gj6g52" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m16 12 2 2 4-4" key="mdajum" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M22 6V4a1 1 0 0 0-1-1h-5a4 4 0 0 0-4 4 4 4 0 0 0-4-4H3a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h6a3 3 0 0 1 3 3 3 3 0 0 1 3-3h6a1 1 0 0 0 1-1v-1.3" key="8arnkb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-dices" viewBox="0 0 24 24"><rect width="12" height="12" x="2" y="10" rx="2" ry="2" key="6agr2n" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" key="1o487t" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 18h.01" key="uhywen" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 14h.01" key="ssrbsk" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 6h.01" key="cblpky" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 9h.01" key="2061c0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-trending-up" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" key="126l90" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><polyline points="16 7 22 7 22 13" key="kwv8wd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></symbol>
+  <symbol id="i-list-plus" viewBox="0 0 24 24"><path d="M11 12H3" key="51ecnj" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 6H3" key="1wxfjs" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 18H3" key="12xzn7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 9v6" key="1twb98" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 12h-6" key="bt1uis" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-share-2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" key="gq8acd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><circle cx="6" cy="12" r="3" key="w7nqdw" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><circle cx="18" cy="19" r="3" key="1xt0gg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49" key="47mynk" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49" key="1n3mei" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7" key="1l729n" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 12H5" key="x3x0zl" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-arrow-right-left" viewBox="0 0 24 24"><path d="m16 3 4 4-4 4" key="1x1c3m" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M20 7H4" key="zbl0bi" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m8 21-4-4 4-4" key="h9nckh" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 17h16" key="g4d7ey" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-external-link" viewBox="0 0 24 24"><path d="M15 3h6v6" key="1q9fwt" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 14 21 3" key="gplh6r" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" key="a6xqqp" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" key="ynyp8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><line x1="2" x2="22" y1="10" y2="10" key="1b3vmo" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" key="1w4ew1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4" key="fwvmzm" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1" key="bkv52" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M12 8v13" key="1c76mn" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" key="6wjy6b" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" key="1ihvrl" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" key="4ej97u" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="m21 21-4.3-4.3" key="1qie3q" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" key="1ays0h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-file-down" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" key="1rqfz7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 2v4a2 2 0 0 0 2 2h4" key="tnqrlb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 18v-6" key="17g6i2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 15 3 3 3-3" key="1npd3o" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-file-spreadsheet" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" key="1rqfz7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 2v4a2 2 0 0 0 2 2h4" key="tnqrlb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 13h2" key="yr2amv" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 13h2" key="un5t4a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 17h2" key="2yhykz" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M14 17h2" key="10kma7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M8 2v4" key="1cmpym" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 2v4" key="4m81vk" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><rect width="18" height="18" x="3" y="4" rx="2" key="1hopcy" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M3 10h18" key="8toen8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" key="wmoenq" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 9v4" key="juzpu7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 17h.01" key="p32p05" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" key="oel41y" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 12 2 2 4-4" key="dzmm74" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-building-2" viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" key="1b4qmf" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" key="i71pzd" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" key="10jefs" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 6h4" key="1itunk" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 10h4" key="tcdvrf" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 14h4" key="kelpxr" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 18h4" key="1ulq68" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+
+  <symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18" key="108xh3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><rect width="18" height="18" x="3" y="3" rx="2" key="afitv7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M3 9h18" key="1pudct" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 15h18" key="5xshup" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" key="oel41y" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" key="1mglay" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><polyline points="12 6 12 12 16 14" key="68esgv" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" key="1357e3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" key="1xhq8a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 7v5l4 2" key="1fdv2h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-book-text" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" key="k3hazp" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 11h8" key="vwpz6n" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 7h6" key="1f0q6e" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+</svg>
 
 <!-- ============ COVER PAGE ============ -->
 <div class="cover no-print">
@@ -320,31 +479,35 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <p>You can run Mr.🆖 ProReader entirely in the browser, but installing it gives a native-app-like experience with an icon on your home screen. On your first visit a dialog offers to install it. The steps differ by device:</p>
 
       <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
-        <div style="flex:1;min-width:240px">
+        <div style="flex:1;min-width:250px">
           <div class="mock">
-            <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span></div>
-            <div class="mock-body" style="text-align:center">
-              <div style="font-size:30px;margin-bottom:6px">📱</div>
-              <div style="font-weight:700;font-size:14px;margin-bottom:4px">Install App</div>
-              <p class="small" style="margin-bottom:12px">Install Mr.🆖 ProReader on your device for quick access and a native app-like experience.</p>
-              <span class="btn primary">⬇ Install App</span> &nbsp; <span class="btn outline">Not now</span>
+            <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span><span class="pill">dialog</span></div>
+            <div class="mock-body" style="max-width:340px;margin:0 auto">
+              <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;margin-bottom:4px"><svg class="ic"><use href="#i-smartphone"/></svg> Install App</div>
+              <p class="small" style="margin-bottom:14px">Install Mr.🆖 ProReader on your device for quick access and a native app-like experience.</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span class="btn primary" style="justify-content:center"><svg class="ic"><use href="#i-download"/></svg> Install App</span>
+                <span class="btn outline" style="justify-content:center">Not now</span>
+              </div>
             </div>
           </div>
-          <div class="mock-cap">Standard browsers (Chrome / Edge / Android): one-tap install prompt.</div>
+          <div class="mock-cap">Standard browsers (Chrome / Edge / Android): centered dialog with a primary "Install App" + ghost "Not now".</div>
         </div>
-        <div style="flex:1;min-width:240px">
+        <div style="flex:1;min-width:250px">
           <div class="mock">
-            <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com — iOS Safari</span></div>
-            <div class="mock-body">
-              <div style="font-weight:700;font-size:13px;margin-bottom:8px">📱 Install App</div>
-              <ol style="font-size:12px;margin:0;padding-left:18px">
-                <li style="margin:5px 0"><b>①</b> Tap the Share button <span class="pill">􀈂</span></li>
-                <li style="margin:5px 0"><b>②</b> Scroll down and tap "Add to Home Screen" <span class="pill">＋</span></li>
-                <li style="margin:5px 0"><b>③</b> Tap "Add" to confirm</li>
-              </ol>
+            <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com — iOS Safari</span><span class="pill">dialog</span></div>
+            <div class="mock-body" style="max-width:340px;margin:0 auto">
+              <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;margin-bottom:4px"><svg class="ic"><use href="#i-smartphone"/></svg> Install App</div>
+              <p class="small" style="margin-bottom:10px">Install Mr.🆖 ProReader on your iPhone for quick access.</p>
+              <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none">1</span> Tap the Share button <svg class="ic sm" style="color:var(--blue)"><use href="#i-share"/></svg></div>
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none">2</span> Scroll down and tap "Add to Home Screen" <svg class="ic sm" style="color:var(--blue)"><use href="#i-plus"/></svg></div>
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none">3</span> Tap "Add" to confirm</div>
+              </div>
+              <span class="btn outline" style="justify-content:center;margin-top:12px;width:100%">Not now</span>
             </div>
           </div>
-          <div class="mock-cap">iPhone / iPad (Safari): use the Share → Add to Home Screen menu.</div>
+          <div class="mock-cap">iPhone / iPad (Safari): no install button — numbered steps with Share &amp; Plus icons, then "Not now".</div>
         </div>
       </div>
       <div class="callout tip"><strong>Tip</strong> Installing is optional. If you click "Not now", the prompt won't reappear during your current browser session but will offer again next time. Already-installed copies never show the prompt.</div>
@@ -377,14 +540,31 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com — Landing page</span></div>
-        <div class="mock-body" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;text-align:center;padding:34px 20px">
-          <div style="font-size:1.9rem;font-weight:800;white-space:nowrap">Mr.🆖 ProReader</div>
-          <p style="opacity:.92;max-width:420px;margin:0 auto 16px">Your AI reading companion — understand, practice, and master any text.</p>
-          <span class="btn" style="background:#fff;color:#1e3a8a;font-weight:700">🔴 Sign in with Google</span>
-          <div style="margin-top:14px"><span class="pill" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4)">🌐 Language: English</span></div>
+        <div class="mock-body" style="padding:0;background:#fbf8f1;color:#17161a">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px">
+            <div style="font-weight:600;font-size:15px">Mr.<span style="font-size:1.1rem;vertical-align:baseline">🆖</span> <span style="color:#5c5751">ProReader</span></div>
+            <span class="btn outline" style="background:transparent;border:none;padding:4px"><svg class="ic"><use href="#i-globe"/></svg></span>
+          </div>
+          <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:18px;padding:8px 20px 22px">
+            <div>
+              <p style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:#1e3a8a;margin:0 0 8px">Snap. Learn. Master.</p>
+              <h2 style="font-size:1.5rem;font-weight:600;line-height:1.15;margin:0 0 8px">Turn any English text into a lesson you'll actually <span style="background:linear-gradient(#fde68a,#fcd34d);padding:0 4px">remember.</span></h2>
+              <p class="small" style="margin:0 0 12px;color:#5c5751">Transform any English reading material into an interactive learning experience! 🚀 With AI-powered tools, personalized content, and gamified learning…</p>
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+                <span class="btn" style="background:#1e3a8a;color:#fff;border:none;padding:9px 16px"><svg class="ic"><use href="#i-google"/></svg> Sign in with Google <svg class="ic"><use href="#i-arrow-right"/></svg></span>
+                <span style="font-size:13px;color:#1e3a8a;font-weight:600">See how it works <svg class="ic sm"><use href="#i-arrow-down"/></svg></span>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #eee9dd;border-radius:12px;padding:12px;font-size:11px;color:#5c5751;display:flex;flex-direction:column;gap:6px">
+              <div style="background:#f1f5f9;border-radius:6px;padding:6px">Coral reefs are among the most diverse…</div>
+              <div style="display:flex;gap:4px"><span class="chip yellow">ecosystem</span><span class="chip yellow">biodiversity</span></div>
+              <div style="background:#ecfdf5;border-radius:6px;padding:6px;color:#047857">✓ Mind Map generated</div>
+              <div style="display:flex;gap:4px"><span class="pill" style="font-size:9px">A. ✓</span><span class="pill" style="font-size:9px">B.</span><span class="pill" style="font-size:9px">C.</span></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="mock-cap">The landing page with the Google sign-in button and a language switcher.</div>
+      <div class="mock-cap">Real landing page: cream paper background (#fbf8f1), 2-column hero, multicolor Google sign-in button, Globe-icon language menu (top-right).</div>
 
       <h3>2.2 What happens on first sign-in</h3>
       <p>Two things are set up for you automatically — you don't choose them:</p>
@@ -434,43 +614,49 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:230px">
           <div class="mock">
-            <div class="mock-bar"><span class="pill">⚙ Settings · Subscription</span></div>
+            <div class="mock-bar"><span class="pill">⚙ Settings → General → Subscription</span></div>
             <div class="mock-body">
+              <div class="small" style="font-weight:700;margin-bottom:2px">Personal Subscription</div>
+              <div class="small" style="margin-bottom:10px;color:var(--muted)">Subscribe individually to access all features.</div>
               <div style="display:flex;gap:10px">
-                <div class="card-mini" style="flex:1;text-align:center;border:2px solid var(--border)">
-                  <div class="b-slate badge">MONTHLY</div>
-                  <div style="font-size:1.5rem;font-weight:800;margin:6px 0">$9.99</div>
-                  <div class="small">/ month</div>
-                  <span class="btn outline sm" style="margin-top:8px">Choose</span>
+                <div class="card-mini" style="flex:1;text-align:center">
+                  <div style="font-weight:600;font-size:13px;margin-bottom:4px">Monthly</div>
+                  <div style="font-size:1.4rem;font-weight:800">$9.99 <span class="small" style="font-weight:400">/month</span></div>
+                  <div class="small" style="margin:2px 0 6px">Billed monthly</div>
+                  <div class="small" style="margin-bottom:8px"><svg class="ic sm" style="color:var(--green)"><use href="#i-gift"/></svg> 1-day free trial</div>
+                  <span class="btn outline sm" style="width:100%;justify-content:center">Subscribe</span>
                 </div>
-                <div class="card-mini" style="flex:1;text-align:center;border:2px solid var(--primary);background:var(--primary-soft)">
-                  <div class="b-blue badge">YEARLY · Save 2 months</div>
-                  <div style="font-size:1.5rem;font-weight:800;margin:6px 0">$99.90</div>
-                  <div class="small">/ year</div>
-                  <span class="btn primary sm" style="margin-top:8px">Choose</span>
+                <div class="card-mini" style="flex:1;text-align:center;border:2px solid var(--primary);background:#fff;position:relative">
+                  <span style="position:absolute;top:-10px;right:10px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px">Save 2 months</span>
+                  <div style="font-weight:600;font-size:13px;margin:6px 0 4px">Yearly</div>
+                  <div style="font-size:1.4rem;font-weight:800">$99.90 <span class="small" style="font-weight:400">/year</span></div>
+                  <div class="small" style="margin:2px 0 6px">$8.33 /month effective</div>
+                  <div class="small" style="margin-bottom:8px"><svg class="ic sm" style="color:var(--green)"><use href="#i-gift"/></svg> 1-day free trial</div>
+                  <span class="btn primary sm" style="width:100%;justify-content:center"><svg class="ic sm"><use href="#i-sparkles"/></svg> Subscribe</span>
                 </div>
               </div>
-              <p class="small" style="margin-top:8px;margin-bottom:0">🎁 Free trial available for new accounts</p>
             </div>
           </div>
-          <div class="mock-cap">Pricing cards (yearly highlighted).</div>
+          <div class="mock-cap">Pricing cards. Yearly has a floating "Save 2 months" badge; both buttons say "Subscribe".</div>
         </div>
         <div style="flex:1;min-width:230px">
           <div class="mock">
             <div class="mock-bar"><span class="pill">⚙ Subscription status</span></div>
             <div class="mock-body">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                <span class="b-green badge">● ACTIVE</span><span class="b-blue badge">Yearly</span>
+              <div class="small" style="font-weight:700;margin-bottom:8px">Personal Subscription</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <span class="small" style="display:inline-flex;align-items:center;gap:6px"><svg class="ic sm pri"><use href="#i-credit-card"/></svg> Current plan</span>
+                <span style="display:inline-flex;gap:5px"><span class="badge b-slate">Yearly</span><span class="badge b-green">Active</span></span>
               </div>
-              <div class="small">Next billing: <b>23 Aug 2026</b></div>
+              <div class="small">Next billing date: <b>23 Aug 2026</b></div>
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
-                <span class="btn sm outline">Manage</span>
-                <span class="btn sm">Switch plan</span>
-                <span class="btn sm" style="background:var(--red);color:#fff;border-color:var(--red)">Cancel</span>
+                <span class="btn sm outline"><svg class="ic sm"><use href="#i-external-link"/></svg> Manage Subscription</span>
+                <span class="btn sm outline"><svg class="ic sm"><use href="#i-arrow-right-left"/></svg> Switch to Monthly</span>
+                <span class="btn sm" style="color:var(--red)">Cancel Subscription</span>
               </div>
             </div>
           </div>
-          <div class="mock-cap">Active subscription status card.</div>
+          <div class="mock-cap">Active status: plan badge left of status; "Current plan" row; full button labels; Cancel is ghost/destructive (not filled red).</div>
         </div>
       </div>
 
@@ -485,13 +671,13 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
         <li>Click <b>Save</b>. Your key is sent directly to the provider on each AI call; Mr.🆖 does not store or charge it.</li>
       </ol>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">⚙ Settings · General</span></div>
+        <div class="mock-bar"><span class="pill">⚙ Settings → General</span></div>
         <div class="mock-body">
-          <div style="margin-bottom:10px"><span class="small">Billing Mode</span><br><span class="input-fake" style="width:auto;display:inline-block">Meter (pay per use)</span></div>
-          <div style="margin-bottom:10px"><span class="small">AI Provider</span><br><span class="input-fake" style="width:auto;display:inline-block">Mr.🆖 AI Hub</span></div>
-          <div style="margin-bottom:10px"><span class="small">API Key</span><br><span class="input-fake">sk-••••••••••••••••••••••••••••••••</span></div>
-          <div><span class="small">API Base URL</span> <span class="pill">read-only</span><br><span class="input-fake">https://api.mr5ai.com</span></div>
-          <p class="small" style="margin-top:8px;margin-bottom:0">💡 Get your API Key at https://api.mr5ai.com</p>
+          <div style="margin-bottom:10px"><span class="small">Billing Mode <span class="helpdot">?</span></span><br><span class="input-fake" style="width:auto;display:inline-block">Meter ▾</span></div>
+          <div style="margin-bottom:10px"><span class="small">AI Provider</span><br><span class="input-fake" style="width:auto;display:inline-block">Mr.🆖 AI Hub ▾</span></div>
+          <div style="margin-bottom:10px"><span class="small">API Key</span><br><span class="input-fake">Enter your API key</span></div>
+          <p class="small" style="margin:0 0 10px">💡 Get your API Key at https://api.mr5ai.com</p>
+          <div><span class="small">API Base URL</span><br><span class="input-fake" style="background:var(--subtle);color:var(--muted-fg)">https://api.mr5ai.com</span></div>
         </div>
       </div>
       <div class="callout tip"><strong>Why Meter?</strong> You get <b>unlimited</b> image generation and pay only for your actual usage through your own provider. Ideal for power users.</div>
@@ -516,29 +702,59 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
       <p>The Settings dialog is where you configure AI access (Chapter 2), choose which AI model powers each feature, set text-to-speech voices, and manage email reminders. Open it from the <b>user menu</b> (your avatar, top-right) → <b>Settings</b>. Your choices are saved to your account and restored on every sign-in, on any device.</p>
 
-      <div class="mock">
-        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span><span class="pill">▾ Alex (Teacher)</span></div>
-        <div class="mock-body" style="padding:0">
-          <div style="display:flex">
-            <div style="width:200px;background:var(--subtle);padding:14px;border-right:1px solid var(--border);font-size:13px">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span class="av">A</span><div><b style="font-size:13px">Alex Chan</b><br><span class="role teacher" style="font-size:10px">teacher</span></div></div>
-              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px;margin-bottom:4px">📊 Dashboard</div>
-              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px;margin-bottom:4px">🏆 Leaderboard</div>
-              <div class="small" style="padding:6px 8px;background:var(--primary-soft);border-radius:6px;margin-bottom:4px;color:var(--primary);font-weight:600">⚙ Settings</div>
-              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px;margin-bottom:4px">👩‍🏫 Teacher Dashboard</div>
-              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px">⤴ Sign out</div>
-            </div>
-            <div style="flex:1;padding:16px">
-              <b style="font-size:15px">Settings</b>
-              <div class="faketab" style="margin-top:10px">
-                <span class="active">General</span><span>Models</span><span>TTS</span><span>🔔 Notifications</span>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:240px">
+          <div class="mock">
+            <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span><span class="pill">avatar dropdown</span></div>
+            <div class="mock-body" style="padding:0">
+              <div style="max-width:224px;margin:0 auto;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--shadow-md);font-size:13px;background:#fff">
+                <div style="padding:10px 12px;border-bottom:1px solid var(--border)">
+                  <div style="font-weight:600;font-size:13px">Alex Chan</div>
+                  <div style="display:inline-flex;gap:5px;align-items:center;margin-top:3px"><span class="badge" style="background:#dbeafe;color:#1d4ed8;font-size:10px">Teacher</span><span class="small" style="font-size:11px">alex@school.edu</span></div>
+                </div>
+                <div style="padding:4px">
+                  <div class="menuitem"><svg class="ic"><use href="#i-bar-chart-3"/></svg> Learning Journey</div>
+                  <div class="menuitem"><svg class="ic"><use href="#i-trophy"/></svg> Achievements &amp; Leaderboard</div>
+                  <div class="menuitem"><svg class="ic"><use href="#i-graduation-cap"/></svg> Teacher Dashboard</div>
+                  <div class="menuitem"><svg class="ic"><use href="#i-users"/></svg> User Management</div>
+                  <div class="menuitem"><svg class="ic"><use href="#i-settings"/></svg> Settings</div>
+                  <div class="menuitem"><svg class="ic"><use href="#i-info"/></svg> About Mr.🆖 ProReader</div>
+                  <div style="height:1px;background:var(--border);margin:4px 0"></div>
+                  <div class="menuitem danger"><svg class="ic"><use href="#i-log-out"/></svg> Sign Out</div>
+                </div>
               </div>
-              <p class="small" style="margin:0">…billing mode, provider, language, theme, danger zone (see tables below)…</p>
             </div>
           </div>
+          <div class="mock-cap">The user menu is a dropdown popover (w-56) from the header avatar — not a sidebar. Order: Dashboard, Leaderboard, Teacher Dashboard, User Management, Settings, About, Sign Out.</div>
+        </div>
+        <div style="flex:1.3;min-width:280px">
+          <div class="mock">
+            <div class="mock-bar"><span class="pill">⚙ Settings dialog (centered modal)</span></div>
+            <div class="mock-body">
+              <div style="font-weight:700;font-size:15px">Settings</div>
+              <div class="small" style="margin:2px 0 10px">Configure general, AI models, text-to-speech, and notifications settings.</div>
+              <div class="faketab">
+                <span class="active"><svg class="ic sm"><use href="#i-settings"/></svg> General</span>
+                <span><svg class="ic sm"><use href="#i-sparkles"/></svg> Models</span>
+                <span><svg class="ic sm"><use href="#i-volume-2"/></svg> TTS</span>
+                <span><svg class="ic sm"><use href="#i-bell"/></svg> Notifications</span>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;background:var(--subtle)">
+                <div class="small">Billing Mode <span class="helpdot">?</span> &nbsp; <span class="pill">Meter ▾</span></div>
+                <div class="small" style="margin-top:6px">AI Provider &nbsp; <span class="pill">Mr.🆖 AI Hub ▾</span></div>
+                <div class="small" style="margin-top:6px">UI Language &nbsp; <span class="pill">English ▾</span> &nbsp; UI Theme &nbsp; <span class="pill">System ▾</span></div>
+                <div class="small" style="margin-top:6px">Jailbreak Mode <span class="switch" style="vertical-align:-3px"></span> &nbsp; Show 'Give Answer' <span class="switch" style="vertical-align:-3px"></span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+                <span class="btn primary" style="justify-content:center">Save</span>
+                <span class="btn outline" style="justify-content:center">Reset all settings</span>
+              </div>
+            </div>
+          </div>
+          <div class="mock-cap">Settings is a separate centered modal: 4 horizontal icon tabs + stacked full-width Save / Reset all settings.</div>
         </div>
       </div>
-      <div class="mock-cap">The Settings dialog opens from the user menu. Notifications tab is hidden until signed in.</div>
+      <div class="mock-cap" style="margin-top:8px">Notifications tab is hidden until signed in.</div>
 
       <h3>3.1 General tab</h3>
       <table class="ref">
@@ -577,7 +793,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>3.3 TTS tab — text-to-speech</h3>
       <table class="ref">
         <tr><th>Setting</th><th>Options</th><th>Notes</th></tr>
-        <tr><td><strong>TTS Voice</strong></td><td>Alloy (US male) · Nova (US female) · Echo/Adam (US male) · Fable/Phoebe (US female) · Onyx/Ollie (UK male) · Shimmer/Ava (US female)</td><td>Used by glossary speak buttons, flashcards, spelling game.</td></tr>
+        <tr><td><strong>TTS Voice</strong></td><td>Alloy (US male) · Nova (US female) · Adam (US male) · Phoebe (US female) · Ollie (UK male) · Ava (US female)</td><td>Used by glossary speak buttons, flashcards, spelling game.</td></tr>
         <tr><td><strong>Playback Speed</strong></td><td>0.25× · 0.5× · 0.75× · 1.0×</td><td>Slower speeds help language learners.</td></tr>
         <tr><td><strong>Auto-speak Flashcard</strong></td><td>on / off</td><td>Reads each word aloud automatically when a flashcard loads. On by default.</td></tr>
       </table>
@@ -610,15 +826,24 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>4.0 The Workflow Progress tracker</h3>
       <p>A bordered card appears after you upload text, showing 13 numbered steps. Completed steps show ✓; click any accessible step to jump there. The percentage at the top is your completion for this reading session.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">📊 Workflow Progress · 62%</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-rocket"/></svg> Learning Progress</div><span class="small">62% complete</span></div>
         <div class="mock-body">
-          <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <span class="badge b-green">✓ Upload</span><span class="badge b-green">✓ Summary</span><span class="badge b-green">✓ Mind Map</span>
-            <span class="badge b-green">✓ Visualization</span><span class="badge b-green">✓ Adapted</span><span class="badge b-green">✓ Sentence</span>
-            <span class="badge b-green">✓ Highlight</span><span class="badge b-green">✓ Glossary</span><span class="badge b-slate">9 Spelling</span>
-            <span class="badge b-slate">10 Quiz</span><span class="badge b-slate">11 Reading Test</span><span class="badge b-slate">12 Grammar Game</span><span class="badge b-slate">13 Grammar Quiz</span>
+          <div class="progress" style="margin-bottom:14px"><i style="width:62%"></i></div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px 10px">
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Select Text</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Summary</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Mind Map</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Text Visual…</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Adapt Text</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Analyze Sent…</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Highlight…</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg class="ic sm"><use href="#i-check"/></svg></div><div class="small" style="margin-top:3px;color:var(--primary);font-weight:600">Vocabulary</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--subtle);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:700;font-size:12px">9</div><div class="small" style="margin-top:3px">Spelling Game</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--subtle);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:700;font-size:12px">10</div><div class="small" style="margin-top:3px">Vocab Quiz</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--subtle);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:700;font-size:12px">11</div><div class="small" style="margin-top:3px">Reading Test</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--subtle);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:700;font-size:12px">12</div><div class="small" style="margin-top:3px">Grammar Game</div></div>
+            <div style="text-align:center;width:54px"><div style="width:30px;height:30px;border-radius:50%;background:var(--subtle);color:var(--muted);display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:700;font-size:12px">13</div><div class="small" style="margin-top:3px">Grammar Quiz</div></div>
           </div>
-          <p class="small" style="margin:10px 0 0">8 of 13 complete. Tap any step to scroll to it.</p>
         </div>
       </div>
 
@@ -627,26 +852,28 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <table class="ref"><tr><th>Age</th><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
       <tr><th>Grade</th><td>P3</td><td>P4</td><td>P5</td><td>P6</td><td>F1</td><td>F2</td><td>F3</td><td>F4</td><td>F5</td><td>F6</td><td>DSE</td></tr></table>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🎒 Student Info</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-user"/></svg> User Information</div><span class="btn sm"><svg class="ic sm"><use href="#i-bar-chart-3"/></svg> Dashboard</span><span class="btn sm"><svg class="ic sm"><use href="#i-trophy"/></svg> Leaderboard</span></div>
         <div class="mock-body">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Your Age</span><span style="font-weight:700;color:var(--primary)">13 years old</span></div>
           <div class="slider-track"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
-          <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Age 8</span><span style="font-weight:800;font-size:1.2rem">13</span><span class="small">18</span></div>
-          <span class="badge b-blue" style="margin-top:8px">Form 2 (Junior Secondary)</span>
+          <div style="display:flex;justify-content:space-between"><span class="small">8</span><span class="small">13</span><span class="small">18</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px;background:var(--subtle);border-radius:8px"><span class="small">Estimated Level:</span><span class="badge" style="background:#dcfce7;color:#15803d">Secondary 2</span></div>
         </div>
       </div>
 
       <h3>4.2 Step 2 — Uploading text (3 sources)</h3>
       <p>The Upload section has three tabs for getting text in:</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">⬆ Upload</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-upload"/></svg> Select Text</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-plus"/></svg> New Text</span></div>
         <div class="mock-body">
           <div class="faketab">
-            <span class="active">📁 Upload</span><span>📚 Repository</span><span>✨ AI Generate</span>
+            <span class="active"><svg class="ic sm"><use href="#i-image"/></svg> Upload Image/PDF</span><span><svg class="ic sm"><use href="#i-library"/></svg> Text Repository</span><span><svg class="ic sm"><use href="#i-sparkles"/></svg> AI Generate</span>
           </div>
           <div style="border:2px dashed var(--border-strong);border-radius:10px;padding:26px;text-align:center;background:var(--subtle)">
-            <div style="font-size:28px">🖼️ 📄</div>
-            <p style="margin:6px 0;font-weight:600">Drag &amp; drop images or PDFs here</p>
-            <p class="small" style="margin:0">or click to browse · PNG, JPG, PDF supported · Wake Lock keeps extraction alive on iOS</p>
+            <div class="dropcircle"><svg class="ic lg muted"><use href="#i-upload"/></svg></div>
+            <p style="margin:8px 0 2px;font-weight:600">Drop image or PDF here</p>
+            <p class="small" style="margin:0 0 4px">or click to select</p>
+            <p class="small" style="margin:0">Supported: PNG, JPG, JPEG, WEBP, PDF</p>
           </div>
         </div>
       </div>
@@ -661,7 +888,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>4.3 Summary</h3>
       <p>Click <b>Generate</b> to get a streaming AI summary: a TL;DR, main points, key words, and a reflection question, rendered as Markdown.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">📝 Summary</span><span class="btn primary sm">Generate</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-file-text"/></svg> Summary</div><span class="btn primary sm"><svg class="ic sm"><use href="#i-file-text"/></svg> Generate Summary</span></div>
         <div class="mock-body">
           <p style="margin:0 0 6px"><b>TL;DR</b></p>
           <p class="small">The article explores how coral reefs… <span style="color:var(--primary)">▍</span></p>
@@ -673,7 +900,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>4.4 Mind Map</h3>
       <p>A toggle lets you choose <b>Chinese or English</b>, then Generate produces a Markdown mind map (scrollable). Regenerate any time.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🧠 Mind Map</span><span class="pill">中文: off</span><span class="btn primary sm">Generate</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-waypoints"/></svg> Mind Map</div><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> Chinese</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-waypoints"/></svg> Generate Mind Map</span></div>
         <div class="mock-body" style="font-family:var(--mono);font-size:12px;background:#0f172a;color:#cbd5e1">
           <div># Coral Reefs</div>
           <div style="padding-left:14px">## Importance</div>
@@ -687,7 +914,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>4.5 Visualization</h3>
       <p>AI generates an illustration of the text's content (toggle Chinese/English for the prompt). After generation you can <b>Download (PNG)</b> or click the image for a fullscreen zoom. <strong>Rate-limited</strong>: Free = 1/day, Subscription = 2/day, Meter = unlimited. A "remaining: N" counter shows your quota; when 0 a lock screen appears.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🎨 Visualization</span><span class="pill">remaining: 1</span><span class="btn primary sm">Generate</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-image"/></svg> Text Visualization</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-download"/></svg> Download</span><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> Chinese</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-image"/></svg> Regenerate</span><span class="small">1 left today</span></div>
         <div class="mock-body">
           <div style="height:110px;border-radius:8px;background:linear-gradient(135deg,#67e8f9,#a78bfa,#f472b6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.3)">🐠 Coral reef scene</div>
         </div>
@@ -696,14 +923,18 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>4.6 Adapted Text — the interactive reading hub</h3>
       <p>The largest section. Three tabs let you read the <b>Original</b>, an <b>Adapted</b> (age-simplified) version, and a <b>Simplified</b> (even simpler) version side by side, with paragraph navigation between them.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">📖 Adapted Text</span><span class="btn primary sm">Adapt (age 13) ▾</span><span class="btn sm">⬇ Word</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-book-open"/></svg> Text Analysis &amp; Adaptation</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-file-down"/></svg> Download Word <svg class="ic sm"><use href="#i-chevron-down"/></svg></span></div>
         <div class="mock-body">
-          <div class="faketab"><span class="active">Original</span><span>Adapted</span><span>Simplified</span></div>
-          <p class="small" style="margin:0 0 8px">Highlight: <span class="chip yellow">biodiversity</span> <span class="chip yellow">ecosystem</span> &nbsp; Analyzed: <span class="chip blue">Coral reefs…</span></p>
-          <div style="background:var(--subtle);border-radius:6px;padding:10px;font-size:13px;line-height:1.7">
-            Coral reefs are among the most diverse <span style="background:#fef9c3;padding:0 2px">ecosystems</span> on Earth. They provide a home for thousands of marine species. <span style="color:var(--blue);border-bottom:2px solid var(--blue)">However, rising ocean temperatures threaten their survival.</span>
+          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-file-text"/></svg> Original</span><span><svg class="ic sm"><use href="#i-file-edit"/></svg> Adapted</span><span><svg class="ic sm"><use href="#i-file-minus"/></svg> Simplified</span></div>
+          <div style="display:flex;justify-content:flex-end;margin-bottom:6px"><span class="btn sm outline"><svg class="ic sm"><use href="#i-pencil"/></svg> Edit</span></div>
+          <div style="background:#dcfce7;border-radius:6px;padding:8px 10px;font-size:11.5px;color:#166534;margin-bottom:8px">💡 Select a word or phrase → <b>Add to vocabulary</b> · <b>Analyze sentence</b> · <b>Read aloud</b></div>
+          <div style="background:var(--subtle);border-radius:6px;padding:8px 10px;font-size:12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><svg class="ic sm pri"><use href="#i-wand-2"/></svg> Auto-highlight words worth learning: <span class="pill">20 ▾</span> <span class="btn sm"><svg class="ic sm"><use href="#i-wand-2"/></svg> Suggest</span></div>
+          <div style="background:var(--subtle);border-radius:6px;padding:8px 10px;font-size:11.5px;margin-bottom:8px"><svg class="ic sm"><use href="#i-chevron-down"/></svg> Vocabulary List (2): <span class="chip yellow">biodiversity</span> <span class="chip yellow">ecosystem</span> &nbsp; <svg class="ic sm"><use href="#i-chevron-down"/></svg> Analyzed Sentences (1): <span class="chip blue">However, rising ocean…</span></div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:13px;line-height:1.7">
+            Coral reefs are among the most diverse <mark style="background:#fef9c3;padding:0 2px">ecosystems<sup style="color:#d97706">●</sup></mark> on Earth. They provide a home for thousands of marine species. <span style="border-bottom:2px solid var(--blue)">However, rising ocean temperatures threaten their survival.</span> <span class="small" style="display:inline-flex;gap:3px;margin-left:6px"><span class="pill" style="font-size:9px;padding:1px 5px">O</span><span class="pill" style="font-size:9px;padding:1px 5px">A</span><span class="pill" style="font-size:9px;padding:1px 5px">S</span></span>
           </div>
-          <p class="small" style="margin:8px 0 0">Select any text → <span class="pill">＋ Add word</span> <span class="pill">🧠 Analyze</span> <span class="pill">🔊 Read aloud</span></p>
+          <div style="text-align:center;margin-top:10px"><span class="btn sm"><svg class="ic sm"><use href="#i-book-open"/></svg> Adapt (13)</span></div>
+          <p class="small" style="margin:10px 0 0">Floating selection toolbar: <span class="pill">＋ Add to vocabulary</span> <span class="pill">🧠 Analyze sentence</span> <span class="pill">🔊 Read aloud</span></p>
         </div>
       </div>
       <table class="ref">
@@ -722,27 +953,26 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:200px">
           <div class="card-mini">
-            <div class="ttl">Original <span class="b-red badge">B2</span></div>
-            <div class="small">214 words · 11 sentences</div>
-            <div class="small">Flesch: <b>54</b> (Fairly hard) · Grade: <b>S6</b></div>
-          </div>
-          <div class="card-mini" style="margin-top:8px">
-            <div class="ttl">Adapted <span class="b-amber badge">B1</span></div>
-            <div class="small">180 words · 9 sentences · Flesch <b>68</b> · Grade <b>S3</b></div>
+            <div class="ttl"><svg class="ic sm muted"><use href="#i-bar-chart-3"/></svg> Text Difficulty Analysis <span class="btn sm outline" style="float:right"><svg class="ic sm"><use href="#i-gauge"/></svg> Analyze Difficulty</span></div>
+            <div style="display:flex;gap:6px;margin:4px 0 8px"><span class="seg"><span class="on">Original</span></span><span class="seg"><span>Adapted</span></span><span class="seg"><span>Simplified</span></span></div>
+            <div class="small"><b>Original</b> <span class="badge" style="background:#fed7aa;color:#9a3412">B2</span></div>
+            <div class="small">CEFR: B2 · Words: 214 · Sentences: 11 · Avg Words/Sentence: 19.5</div>
+            <div class="small">Flesch Reading Ease: <b>54</b> · Grade Level (US): <b>S6</b></div>
           </div>
         </div>
         <div style="flex:1.3;min-width:240px">
-          <div class="card-mini">
-            <div class="ttl">CEFR Highlight <span class="btn sm outline">Analyze</span></div>
+          <div class="card-mini" style="margin-top:0">
+            <div class="ttl"><svg class="ic sm muted"><use href="#i-highlighter"/></svg> CEFR Word Highlight <span class="btn sm outline" style="float:right"><svg class="ic sm"><use href="#i-highlighter"/></svg> Highlight Words</span></div>
             <p class="small" style="margin:6px 0">
-              <span class="cefr-word a1">Coral</span> reefs are among the most <span class="cefr-word b1">diverse</span>
-              <span class="cefr-word a2">ecosystems</span> on Earth, yet <span class="cefr-word c1">unprecedented</span> warming…
+              <span style="background:#cffafe;padding:0 2px;border-radius:3px">Coral</span> reefs are among the most <span style="background:#fde68a;padding:0 2px;border-radius:3px">diverse</span>
+              <span style="background:#bbf7d0;padding:0 2px;border-radius:3px">ecosystems</span> on Earth, yet <span style="background:#fecaca;padding:0 2px;border-radius:3px">unprecedented</span> warming…
             </p>
             <div class="legend">
-              <span><i style="background:var(--cefr-a1)"></i>A1 12</span><span><i style="background:var(--cefr-a2)"></i>A2 8</span>
-              <span><i style="background:var(--cefr-b1)"></i>B1 6</span><span><i style="background:var(--cefr-b2)"></i>B2 4</span>
-              <span><i style="background:var(--cefr-c1)"></i>C1 2</span><span><i style="background:var(--cefr-c2)"></i>C2 1</span>
+              <span><i style="background:#06b6d4"></i>A1 (12)</span><span><i style="background:#16a34a"></i>A2 (8)</span>
+              <span><i style="background:#d97706"></i>B1 (6)</span><span><i style="background:#ea580c"></i>B2 (4)</span>
+              <span><i style="background:#dc2626"></i>C1 (2)</span><span><i style="background:#9333ea"></i>C2 (1)</span>
             </div>
+            <p class="small" style="margin-top:6px;color:var(--muted)">CEFR levels use vocabulary frequency; Flesch &amp; Grade use standard readability formulas.</p>
           </div>
         </div>
       </div>
@@ -761,14 +991,15 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
       <h3>5.1 The Glossary hub</h3>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">📖 Glossary · 18 words</span><span class="btn primary sm">Generate</span><span class="btn sm">⬇ Word</span><span class="btn sm">⬇ Excel</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-book-marked"/></svg> Vocabulary</div><span class="btn sm"><svg class="ic sm"><use href="#i-file-down"/></svg> Download Word</span><span class="btn sm"><svg class="ic sm"><use href="#i-file-spreadsheet"/></svg> Download Excel</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-book-marked"/></svg> Generate Glossary</span></div>
         <div class="mock-body">
-          <div class="faketab"><span class="active">Table</span><span>Flashcard</span><span>Spelling</span><span>Quiz</span></div>
+          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-table"/></svg> Table</span><span><svg class="ic sm"><use href="#i-layers"/></svg> Flashcard</span><span><svg class="ic sm"><use href="#i-spell-check"/></svg> Spelling</span><span><svg class="ic sm"><use href="#i-clipboard-list"/></svg> Quiz</span></div>
           <table class="ref" style="margin:0">
-            <tr><th>Word</th><th>Syllables</th><th>POS</th><th>English</th><th>中文</th></tr>
-            <tr><td><b>biodiversity</b></td><td>bi-o-div-er-si-ty</td><td>n.</td><td>variety of life</td><td>生物多樣性</td></tr>
-            <tr><td><b>ecosystem</b></td><td>e-co-sys-tem</td><td>n.</td><td>community of organisms</td><td>生態系統</td></tr>
+            <tr><th>Word <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>Syllables</th><th>PoS</th><th>English Definition</th><th>Chinese Definition</th><th>Example</th></tr>
+            <tr><td><b>biodiversity</b></td><td class="small">bi-o-div-er-si-ty</td><td class="small">n.</td><td>variety of life</td><td>生物多樣性</td><td class="small">-</td></tr>
+            <tr><td><b>ecosystem</b></td><td class="small">e-co-sys-tem</td><td class="small">n.</td><td>community of organisms</td><td>生態系統</td><td class="small">-</td></tr>
           </table>
+          <div style="margin-top:10px"><span class="btn sm outline" style="width:100%;justify-content:center"><svg class="ic sm"><use href="#i-external-link"/></svg> My Vocabulary</span></div>
         </div>
       </div>
       <ul>
@@ -779,57 +1010,74 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
       <h3>5.2 Flashcards (SRS-powered)</h3>
       <p>Flip cards to study. Front: word + syllabification + POS + speak button. Back: definitions + example. Rate each card to schedule its next review.</p>
-      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
-        <div class="flipcard">
-          <div class="inner">
-            <div class="face"><div style="font-size:1.3rem;font-weight:700">biodiversity</div><div class="small">bi-o-div-er-si-ty · noun</div><div class="small" style="margin-top:6px">🔊</div></div>
-            <div class="face back"><b>biodiversity</b><div class="small">noun</div><div class="small" style="margin:6px 0">variety of life in the world</div><div style="color:var(--primary);font-weight:600">生物多樣性</div></div>
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-layers"/></svg> Flashcard</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-target"/></svg> Prioritize hard words</span><span class="btn sm outline"><svg class="ic sm"><use href="#i-shuffle"/></svg> Shuffle</span></div>
+        <div class="mock-body">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px"><span>3 / 18 remaining</span><span><span style="color:#f43f5e">Again: 0</span> | <span style="color:#f97316">Hard: 1</span> | <span style="color:#3b82f6">Good: 2</span> | <span style="color:#22c55e">Easy: 0</span></span></div>
+          <div class="progress" style="margin-bottom:12px"><i style="width:83%"></i></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+            <div style="width:180px;height:230px;margin:0 auto;border:2px solid var(--border-strong);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;text-align:center;background:linear-gradient(180deg,#fff,#eff6ff)">
+              <div style="display:flex;align-items:center;gap:8px"><span style="font-size:1.4rem;font-weight:800">biodiversity</span><svg class="ic muted"><use href="#i-volume-2"/></svg></div>
+              <div class="small" style="margin-top:4px">bi-o-div-er-si-ty</div>
+              <span class="badge" style="background:#dbeafe;color:#1d4ed8;margin-top:6px">noun</span>
+              <div class="small" style="margin-top:auto;color:var(--muted)">Click to flip</div>
+            </div>
+            <div style="flex:1;min-width:200px">
+              <p class="small" style="margin:0 0 6px;color:var(--muted)">Back face shows three boxes:</p>
+              <div style="background:var(--subtle);border-radius:8px;padding:8px;font-size:11px;margin-bottom:5px"><div class="small" style="font-size:10px;color:var(--muted)">English Definition</div>variety of life in the world</div>
+              <div style="background:var(--subtle);border-radius:8px;padding:8px;font-size:11px;margin-bottom:5px"><div class="small" style="font-size:10px;color:var(--muted)">中文解釋</div><span style="color:var(--primary);font-weight:600">生物多樣性</span></div>
+              <div style="background:var(--subtle);border-radius:8px;padding:8px;font-size:11px"><div class="small" style="font-size:10px;color:var(--muted)">Example 例句</div><i>“…the <b>biodiversity</b> of reefs.”</i></div>
+            </div>
           </div>
-        </div>
-        <div style="flex:1;min-width:200px">
-          <p style="margin:0 0 8px"><b>Rate this card:</b></p>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <span class="badge b-rose">Again — re-show soon</span>
-            <span class="badge b-orange">Hard — show soon</span>
-            <span class="badge b-blue">Good — move to end</span>
-            <span class="badge b-green">Easy — done (dismiss)</span>
+          <p class="small" style="margin:12px 0 6px;text-align:center">How well did you know this?</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+            <span class="btn sm outline" style="justify-content:center;border-color:#f9a8d4;color:#e11d48">Again</span>
+            <span class="btn sm outline" style="justify-content:center;border-color:#fdba74;color:#ea580c">Hard</span>
+            <span class="btn sm outline" style="justify-content:center;border-color:#93c5fd;color:#2563eb">Good</span>
+            <span class="btn sm outline" style="justify-content:center;border-color:#86efac;color:#16a34a">Easy</span>
           </div>
-          <p class="small" style="margin-top:8px">Space/Enter to flip · "Prioritize Hard" / "Shuffle" in toolbar</p>
+          <p class="small" style="margin-top:8px;text-align:center">Space/Enter to flip · Esc to skip</p>
         </div>
       </div>
-      <div class="mock-cap">A flashcard front and back, with the four SRS rating buttons.</div>
 
       <h3>5.3 Spelling game</h3>
       <p>Type words from memory across four modes. Requires ≥3 words.</p>
       <table class="ref">
         <tr><th>Mode</th><th>What you do</th></tr>
         <tr><td><b>Listen &amp; Type</b></td><td>Hear the word (TTS), then type it.</td></tr>
-        <tr><td><b>Scramble</b></td><td>Reorder shuffled letters into the word.</td></tr>
-        <tr><td><b>Fill-blanks</b></td><td>Type the missing letters (shown as blanks).</td></tr>
-        <tr><td><b>Mixed</b></td><td>A random mode per word.</td></tr>
+        <tr><td><b>Letter Scramble</b></td><td>Reorder shuffled letters into the word.</td></tr>
+        <tr><td><b>Fill Blanks</b></td><td>Type the missing letters (shown as blanks).</td></tr>
+        <tr><td><b>Mixed Mode</b></td><td>A random mode per word.</td></tr>
       </table>
       <p>Difficulty (Easy/Medium/Hard) sets the time limit, hints allowed (5/3/1), and blank ratio. Earn points for speed + streaks; lose points for hints. Shortcuts: <b>Enter</b> submit, <b>Ctrl+Space</b> hint, <b>Esc</b> replay audio.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">✍ Spelling · Listen &amp; Type</span><span class="pill">🔥 Streak 4</span><span class="pill">⏱ 0:12</span></div>
-        <div class="mock-body" style="text-align:center">
-          <span class="btn sm">🔊 Play</span>
-          <div class="input-fake" style="max-width:240px;margin:10px auto">bio_iversity_</div>
-          <div style="margin-top:8px"><span class="btn sm outline">💡 Hint (3 left)</span> <span class="btn primary sm">Check</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-spell-check"/></svg> Spelling Challenge · <span class="badge" style="background:var(--subtle);font-weight:600">Listen &amp; Type</span></div><span class="small" style="color:#f97316">🔥 ×4</span><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 12s</span></div>
+        <div class="mock-body">
+          <div style="text-align:center">
+            <span class="btn" style="background:#dbeafe;border-radius:50%;padding:14px;width:48px;height:48px"><svg class="ic lg pri"><use href="#i-volume-2"/></svg></span>
+            <div class="small" style="margin:4px 0">Click to hear the word</div>
+            <div style="font-family:var(--mono);font-size:1.4rem;letter-spacing:.3em;color:var(--muted)">b i _ d i v e r s _ t _</div>
+            <div class="input-fake" style="max-width:240px;margin:8px auto">Type the word you hear...</div>
+            <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;align-items:center"><span class="btn sm outline"><svg class="ic sm"><use href="#i-lightbulb"/></svg> 3</span> <span class="btn primary sm">Submit</span></div>
+          </div>
+          <p class="small" style="margin-top:8px;text-align:center">Score: 320 | 🔥 4 · Enter submit · Ctrl+Space hint · Esc replay</p>
         </div>
       </div>
 
       <h3>5.4 Vocabulary Quiz</h3>
       <p>Multiple-choice quiz (requires ≥4 words). Questions are randomly one of three types: <b>Word→Definition</b>, <b>Definition→Word</b>, or <b>Fill-blank</b> (cloze from the example). Optional <b>Time Challenge</b> (Easy 20s / Medium 15s / Hard 10s per question).</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🧠 Vocab Quiz · 3/10</span><span class="pill">⏱ 0:09</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-list"/></svg> Vocabulary Quiz</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 9s</span></div>
         <div class="mock-body">
-          <p style="margin:0 0 6px"><b>ecosystem</b> means…</p>
-          <div style="display:flex;flex-direction:column;gap:5px">
-            <span class="input-fake" style="width:auto">A. a type of coral</span>
-            <span class="input-fake" style="width:auto;background:var(--green-bg);border-color:var(--green)">B. a community of organisms and their environment ✓</span>
-            <span class="input-fake" style="width:auto">C. a measure of temperature</span>
-            <span class="input-fake" style="width:auto">D. a fishing technique</span>
-          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px"><span>Question 3 of 10</span><span>Press →/←</span></div>
+          <div class="progress" style="margin-bottom:12px"><i style="width:30%"></i></div>
+          <p class="small" style="margin:0 0 2px;color:var(--muted)">What does this word mean?</p>
+          <p style="margin:0 0 10px;font-size:1.1rem;font-weight:500">ecosystem</p>
+          <div class="opt"><span class="radio"></span> a type of coral</div>
+          <div class="opt sel"><span class="radio"></span> a community of organisms and their environment</div>
+          <div class="opt"><span class="radio"></span> a measure of temperature</div>
+          <div class="opt"><span class="radio"></span> a fishing technique</div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px"><span class="btn sm outline"><svg class="ic sm"><use href="#i-arrow-left"/></svg> Previous</span><span class="btn primary sm">Next <svg class="ic sm"><use href="#i-chevron-right"/></svg></span></div>
         </div>
       </div>
 
@@ -840,7 +1088,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
         <tr><td>0</td><td>New</td><td>immediate</td><td><span class="pill" style="background:var(--srs-0);color:#fff">gray</span></td></tr>
         <tr><td>1</td><td>L1</td><td>1 day</td><td><span class="pill" style="background:var(--srs-1);color:#fff">red</span></td></tr>
         <tr><td>2</td><td>L2</td><td>3 days</td><td><span class="pill" style="background:var(--srs-2);color:#fff">orange</span></td></tr>
-        <tr><td>3</td><td>L3</td><td>7 days</td><td><span class="pill" style="background:var(--srs-3);color:#fff">amber</span></td></tr>
+        <tr><td>3</td><td>L3</td><td>7 days</td><td><span class="pill" style="background:var(--srs-3);color:#fff">yellow</span></td></tr>
         <tr><td>4</td><td>L4</td><td>14 days</td><td><span class="pill" style="background:var(--srs-4);color:#fff">blue</span></td></tr>
         <tr><td>5</td><td>Mastered</td><td>30 days</td><td><span class="pill" style="background:var(--srs-5);color:#fff">green</span></td></tr>
       </table>
@@ -864,14 +1112,14 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <p>The Reading Test produces a multi-type comprehension quiz from your text. You configure how many of each question type (total 10–20), then take it. Short answers are graded by AI, and a skill breakdown shows exactly where to improve.</p>
 
       <h3>6.1 Setting up the test</h3>
-      <p>Before generating, set how many questions of each type using the steppers. "Reset Preset" restores age-based defaults. Constraints: total must be 10–20, max 10 per type.</p>
+      <p>Before generating, set how many questions of each type using the steppers. "Reset" restores age-based defaults. Constraints: total must be 10–20, max 10 per type.</p>
       <table class="ref">
         <tr><th>Question type</th><th>Skill assessed</th><th>Input</th></tr>
         <tr><td><b>Multiple Choice</b></td><td>Detail / main idea</td><td>radio (A–D)</td></tr>
         <tr><td><b>True / False / Not Given</b></td><td>Detail accuracy</td><td>radio (3 options)</td></tr>
         <tr><td><b>Inference</b></td><td>Reading between the lines</td><td>radio</td></tr>
-        <tr><td><b>Vocabulary-in-Context</b></td><td>Word meaning in passage</td><td>radio</td></tr>
-        <tr><td><b>Referencing</b></td><td>What a pronoun refers to</td><td>radio</td></tr>
+        <tr><td><b>Vocabulary in Context</b></td><td>Word meaning in passage</td><td>radio</td></tr>
+        <tr><td><b>Pronoun Reference</b></td><td>What a pronoun refers to</td><td>radio</td></tr>
         <tr><td><b>Short Answer</b></td><td>Free production</td><td>text (AI-graded)</td></tr>
       </table>
 
@@ -883,47 +1131,61 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
         <li>Each question shows type, skill, and paragraph badges for context.</li>
       </ul>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">📋 Reading Test · Q2/12</span><span class="badge b-amber">Inference</span><span class="pill">¶3</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-check"/></svg> Reading Test</div><span class="btn sm ghost"><svg class="ic sm"><use href="#i-languages"/></svg></span></div>
         <div class="mock-body">
-          <p style="margin:0 0 4px"><b>What can be inferred about the coral's recovery?</b></p>
-          <p class="small" style="margin:0 0 8px;color:var(--primary)">（可推斷珊瑚的復原會如何？）</p>
-          <div style="display:flex;flex-direction:column;gap:5px">
-            <span class="input-fake" style="width:auto">A. It happens within days</span>
-            <span class="input-fake" style="width:auto;background:var(--green-bg);border-color:var(--green)">B. It takes many years ✓</span>
-            <span class="input-fake" style="width:auto">C. It is impossible</span>
-            <span class="input-fake" style="width:auto">D. It depends on fishing</span>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px"><span>Question 2 of 12</span><span>Press →/←</span></div>
+          <div class="progress" style="margin-bottom:12px"><i style="width:16%"></i></div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:12px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="font-weight:700;color:var(--primary)">2.</span><span class="pill" style="font-size:10px">Inference</span><span class="pill" style="font-size:10px">Inference</span><span class="pill" style="font-size:10px">Para. 3</span></div>
+            <p style="margin:0 0 2px;font-weight:500">What can be inferred about the coral's recovery?</p>
+            <p class="small" style="margin:0 0 10px;color:var(--muted)">（可推斷珊瑚的復原會如何？）</p>
+            <div class="opt"><span class="radio"></span> A. It happens within days</div>
+            <div class="opt sel"><span class="radio"></span> B. It takes many years</div>
+            <div class="opt"><span class="radio"></span> C. It is impossible</div>
+            <div class="opt"><span class="radio"></span> D. It depends on fishing</div>
           </div>
-          <div class="progress" style="margin-top:10px"><i style="width:16%"></i></div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px"><span class="btn sm outline"><svg class="ic sm"><use href="#i-arrow-left"/></svg> Previous</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-check-circle-2"/></svg> Submit Answers</span></div>
         </div>
       </div>
       <div class="callout"><strong>Submitting</strong> On submit, any short-answer questions are sent to the AI for evaluation (it returns points earned + feedback). The overall score is then calculated as a percentage.</div>
 
       <h3>6.3 Result screen &amp; skill breakdown</h3>
       <p>A celebratory screen shows your tier, percentage, and points. Then a <b>Skill Breakdown</b> panel reveals per-skill progress bars (main idea, detail, inference, vocabulary, purpose, referencing) so you can see precisely which skills need work.</p>
-      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
-        <div style="text-align:center">
-          <div class="medal" style="background:var(--amber-bg);box-shadow:0 0 24px var(--amber-bg)"><span style="font-size:30px">👑</span></div>
-          <span class="tier-badge master">Master · 92%</span>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:0 0 200px">
+          <div class="tiercard" style="border-color:#fcd34d;background:linear-gradient(135deg,#fffbeb,#fef3c7);box-shadow:0 0 0 4px rgba(252,211,77,.4)">
+            <div style="font-size:2.6rem">👑</div>
+            <div class="big" style="color:#d97706">92%</div>
+            <div class="small">Excellent! Great understanding!</div>
+            <div class="small" style="margin-top:2px">23 out of 25 points</div>
+            <span class="tpill" style="background:#fef3c7;color:#b45309"><svg class="ic sm"><use href="#i-crown"/></svg> Reading Champion</span>
+          </div>
         </div>
         <div style="flex:1;min-width:220px">
-          <table class="ref" style="margin:0">
-            <tr><th>Skill</th><th>Score</th></tr>
-            <tr><td>Main Idea</td><td><div class="progress"><i style="width:100%;background:var(--green)"></i></div></td></tr>
-            <tr><td>Detail</td><td><div class="progress"><i style="width:75%;background:var(--amber)"></i></div></td></tr>
-            <tr><td>Inference</td><td><div class="progress"><i style="width:50%;background:var(--red)"></i></div></td></tr>
-            <tr><td>Vocabulary</td><td><div class="progress"><i style="width:100%;background:var(--green)"></i></div></td></tr>
-          </table>
+          <div class="card-mini">
+            <div class="ttl"><svg class="ic sm muted"><use href="#i-bar-chart-3"/></svg> Performance by Skill</div>
+            <div class="small" style="margin:4px 0;display:flex;justify-content:space-between"><span>Main Idea</span><span style="color:#16a34a">3/3 (100%)</span></div>
+            <div class="progress" style="margin-bottom:8px"><i style="width:100%"></i></div>
+            <div class="small" style="margin:4px 0;display:flex;justify-content:space-between"><span>Detail</span><span style="color:#d97706">3/4 (75%)</span></div>
+            <div class="progress" style="margin-bottom:8px"><i style="width:75%"></i></div>
+            <div class="small" style="margin:4px 0;display:flex;justify-content:space-between"><span>Inference</span><span style="color:#dc2626">1/2 (50%)</span></div>
+            <div class="progress" style="margin-bottom:8px"><i style="width:50%"></i></div>
+            <div class="small" style="margin:4px 0;display:flex;justify-content:space-between"><span>Vocabulary</span><span style="color:#16a34a">2/2 (100%)</span></div>
+            <div class="progress" style="margin-bottom:8px"><i style="width:100%"></i></div>
+            <div class="small" style="margin:4px 0;display:flex;justify-content:space-between"><span>Author's Purpose</span><span style="color:#16a34a">1/1 (100%)</span></div>
+            <div class="progress"><i style="width:100%"></i></div>
+          </div>
         </div>
       </div>
-      <div class="mock-cap">Result tiers: Master 👑 (≥90%) · Great 🌟 (≥70%) · Good 💪 (≥50%) · Keep Going ❤️ (&lt;50%).</div>
+      <div class="mock-cap">Reading Test tiers: Reading Champion 👑 (≥80%) · Skilled Reader 🌟 (≥60%) · Steady Reader 💪 (≥40%) · Keep Reading ❤️ (&lt;50%). Note: the 90/70/50 thresholds apply only to Grammar Games.</div>
 
       <h3>6.4 After the test</h3>
       <ul>
         <li><b>Review Answers</b> — see all questions colored green/red with explanations (and Chinese if enabled).</li>
         <li><b>Practice Missed Skills</b> — generates new questions only for skills below 100%.</li>
         <li><b>Retry Missed</b> — re-attempt just the questions you got wrong.</li>
-        <li><b>Generate New</b> — make a brand-new test from the same text.</li>
-        <li><b>Download Word</b> — export "Blank" or "With Answers". <span class="tag-teacher"></span> The "With Answers" version is visible to teachers/admins, or to students only <em>after</em> completing the test.</li>
+        <li><b>Retry</b> (top-right) — clears results and returns to the idle screen, where <b>Generate New Test</b> makes a brand-new test from the same text.</li>
+        <li><b>Download Word</b> — export "Download Blank Test" or "Download with Answers". <span class="tag-teacher"></span> "With Answers" is visible to teachers/admins, or to students only <em>after</em> completing the test.</li>
       </ul>
 
       </section>
@@ -939,24 +1201,24 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
       <h3>7.1 Topics &amp; Lessons</h3>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">📘 Grammar</span><span class="btn primary sm">Analyze</span><span class="btn sm">Generate Quiz</span><span class="btn sm">⬇ Word ▾</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-book-open-check"/></svg> Grammar</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-file-down"/></svg> Download Word <svg class="ic sm"><use href="#i-chevron-down"/></svg></span><span class="btn sm"><svg class="ic sm"><use href="#i-book-open-check"/></svg> Re-analyze</span><span class="btn sm"><svg class="ic sm"><use href="#i-check-circle-2"/></svg> Generate Quiz</span></div>
         <div class="mock-body">
-          <div class="faketab"><span class="active">Topics</span><span>Lessons</span><span>🎮 Games</span><span>Quiz</span></div>
+          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-book-open"/></svg> Topics</span><span><svg class="ic sm"><use href="#i-graduation-cap"/></svg> Lessons</span><span><svg class="ic sm"><use href="#i-gamepad-2"/></svg> Games</span><span><svg class="ic sm"><use href="#i-check-circle-2"/></svg> Quiz</span></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <div class="card-mini" style="flex:1;min-width:150px;border-left:4px solid var(--violet)">
-              <div style="display:flex;justify-content:space-between"><b>Present Perfect</b><span class="b-violet badge">B1</span></div>
-              <div class="small">現在完成式 · ×3 in text</div>
-              <div style="margin-top:6px"><span class="btn sm outline">Open Lesson</span> <span class="btn sm">Show Highlight</span></div>
+            <div class="card-mini" style="flex:1;min-width:160px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start"><div><b>Present Perfect</b><div class="small">現在完成式</div></div><span class="badge b-violet">B1</span></div>
+              <div class="small" style="margin:4px 0"><span class="chip-cat" style="background:#dbeafe;color:#1d4ed8">3×</span> in text</div>
+              <div style="margin-top:6px;display:flex;gap:4px"><span class="btn sm"><svg class="ic sm"><use href="#i-graduation-cap"/></svg> View Lesson</span> <span class="btn sm outline"><svg class="ic sm"><use href="#i-highlighter"/></svg> Highlight in Text</span></div>
             </div>
-            <div class="card-mini" style="flex:1;min-width:150px;border-left:4px solid var(--teal)">
-              <div style="display:flex;justify-content:space-between"><b>Passive Voice</b><span class="b-teal badge">B2</span></div>
-              <div class="small">被動語態 · ×2 in text</div>
+            <div class="card-mini" style="flex:1;min-width:160px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start"><div><b>Passive Voice</b><div class="small">被動語態</div></div><span class="badge b-orange">B2</span></div>
+              <div class="small" style="margin:4px 0"><span class="chip-cat" style="background:#dcfce7;color:#15803d">2×</span> in text</div>
             </div>
           </div>
         </div>
       </div>
       <ul>
-        <li><b>Topics tab</b> — grid of cards (EN + ZH name, CEFR badge, category color, occurrence count). Expand to see explanation, pattern, and sentences from your text. Buttons: <b>Open Lesson</b>, <b>Show Highlight</b> (color-codes that grammar pattern in the original text).</li>
+        <li><b>Topics tab</b> — grid of cards (EN + ZH name, CEFR badge, category color, occurrence count). Expand to see explanation, pattern, and sentences from your text. Buttons: <b>View Lesson</b>, <b>Highlight in Text</b> (color-codes that grammar pattern in the original text).</li>
         <li><b>Lessons tab</b> — accordion per topic. <b>Basic content</b> always shows: What is it, Pattern, Examples (from text + AI), Common Mistakes. <b>"Load Full Lesson"</b> enriches with: When to Use + signal words, Forms table, Compare With, Pronunciation Tips, CCQs (reveal-on-click check questions), and Quick Practice (AI-evaluated).</li>
         <li><b>Word export</b> — sections: Topics, Lessons, Quiz Blank, <b>Quiz Answer Key</b> <span class="tag-teacher"></span> (answer key visible to teachers/admins, or students after completion).</li>
       </ul>
@@ -972,41 +1234,47 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
         <tr><td><b>Arcade</b></td><td>Countdown per question (time bonus)</td><td>Allowed</td><td>Building speed</td></tr>
         <tr><td><b>Mastery</b></td><td>Countdown</td><td>Disabled</td><td>Proving mastery (hardest)</td></tr>
       </table>
-      <p><b>Shared scoring:</b> 100 pts base per correct; arcade adds a time bonus; streaks (3+) add up to +50%; hints subtract points. Every game shares a result screen with tiers (Master ≥90% / Great ≥70% / Good ≥50% / Keep Going), particle effects, a "New Best" badge, and Play Again / Generate New buttons. High scores &amp; accuracy persist to your session and history.</p>
+      <p><b>Shared scoring:</b> 100 pts base per correct; arcade adds a time bonus; streaks (3+) add up to +50%; hints subtract points. Every game shares a result screen with tiers (Outstanding Mastery! ≥90% / Excellent Work! ≥70% / Good Effort! ≥50% / Keep Practicing! &lt;50%), particle effects, a "New Best!" badge, and Play Again / New Challenges buttons. High scores &amp; accuracy persist to your session and history. Hub card order: Roulette, Error Surgery, Workshop, Duel, Word Order Scramble.</p>
 
-      <h3>7.4 Game 1 — Word Scramble <span class="b-blue badge">blue</span></h3>
-      <p>AI generates grammatically correct sentences. Words are shuffled into chips; tap them in order to rebuild the sentence. Tap a placed chip to remove it. Hint (Lightbulb) reveals the pattern; each hint −15 pts (disabled in Mastery).</p>
+      <h3>7.4 Game 1 — Word Order Scramble <span class="b-blue badge">blue</span></h3>
+      <p>AI generates grammatically correct sentences. Words are shuffled into chips; tap them in order to rebuild the sentence. Tap a placed chip to remove it. Hint (Lightbulb) reveals a tip; each hint −15 pts (disabled in Mastery).</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🔤 Word Scramble · Arcade</span><span class="pill">⏱ 0:18</span><span class="pill">🔥 3</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-shuffle"/></svg> Word Order Scramble · Arcade</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 18s</span><span class="small" style="color:#f97316">🔥 ×3</span><span class="small">2 / 10</span><span class="small">340 pts</span></div>
         <div class="mock-body">
-          <p class="small" style="margin:0 0 6px">Place: <span class="pill">[Subject]+[Verb]+[Object]</span> <span class="btn sm outline">💡</span></p>
+          <div style="background:var(--subtle);border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span class="pill" style="font-size:10px">Present Perfect</span> <span class="btn sm outline"><svg class="ic sm"><use href="#i-lightbulb"/></svg> Hint</span></div>
+          <p class="small" style="margin:0 0 6px">Answer:</p>
+          <div style="border:2px dashed var(--border-strong);border-radius:10px;padding:8px;min-height:38px;margin-bottom:8px;display:flex;gap:4px;flex-wrap:wrap"><span class="chip blue">Coral</span><span class="chip blue">reefs</span></div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><span class="chip">reefs</span><span class="chip">Coral</span><span class="chip">threaten</span><span class="chip">warmth</span></div>
-          <div style="border:1px dashed var(--border-strong);border-radius:6px;padding:8px;min-height:30px"><span class="chip blue">Coral</span><span class="chip blue">reefs</span></div>
+          <span class="btn primary sm" style="width:100%;justify-content:center"><svg class="ic sm"><use href="#i-check-circle-2"/></svg> Check Answer</span>
         </div>
       </div>
 
       <h3>7.5 Game 2 — Grammar Workshop <span class="b-green badge">green</span></h3>
       <p>Slot-fill (cloze) sentences with a word bank. Tap words to fill slots left-to-right; tap a filled slot to empty it. Pattern hint shows slot labels like <code>[Subject] + [Verb]</code> (hidden in Mastery).</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🛠 Workshop · Practice</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-wrench"/></svg> Grammar Workshop · Practice</div></div>
         <div class="mock-body">
-          <p class="small" style="margin:0 0 4px">[Subject] + [Verb] + [Object]</p>
-          <p style="margin:0 0 8px"><b>Many fish ___ by the reef.</b> → Many fish <span class="chip blue">are protected</span> ___</p>
-          <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="chip">protect</span><span class="chip">are protected</span><span class="chip">by</span><span class="chip">the</span></div>
+          <p class="small" style="margin:0 0 6px;font-family:var(--mono)">Pattern: [Subject] + [Verb] + [Object]</p>
+          <p style="margin:0 0 8px">Many fish <span class="chip blue">are protected</span> <span style="display:inline-block;border-bottom:2px dashed var(--border-strong);min-width:50px">&nbsp;</span> by the reef.</p>
+          <p class="small" style="margin:0 0 4px">Word Bank:</p>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><span class="chip">protect</span><span class="chip">are protected</span><span class="chip">by</span><span class="chip">the</span></div>
+          <span class="btn primary sm" style="width:100%;justify-content:center"><svg class="ic sm"><use href="#i-check-circle-2"/></svg> Check Answer</span>
         </div>
       </div>
 
       <h3>7.6 Game 3 — Error Surgery <span class="b-red badge">red</span></h3>
       <p>AI sentences each contain <em>one</em> grammatical error. Tap the erroneous word/phrase (multi-word errors auto-expand), then pick the correction from 4 options. Correct = right error <em>and</em> right fix. 20s timer.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🩺 Error Surgery · Arcade</span><span class="pill">⏱ 0:11</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-stethoscope"/></svg> Error Surgery · Arcade</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 11s</span></div>
         <div class="mock-body">
-          <p style="margin:0 0 8px">The reefs <span style="background:var(--red-bg);border-bottom:2px solid var(--red);padding:0 2px">has been</span> dying rapidly.</p>
-          <div style="display:flex;flex-direction:column;gap:5px">
-            <span class="input-fake" style="width:auto">A. have</span>
-            <span class="input-fake" style="width:auto;background:var(--green-bg);border-color:var(--green)">B. have been ✓</span>
-            <span class="input-fake" style="width:auto">C. is</span>
-            <span class="input-fake" style="width:auto">D. having</span>
+          <div style="background:#fee2e2;color:#991b1b;border-radius:6px;padding:6px 10px;font-size:12px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><svg class="ic sm"><use href="#i-stethoscope"/></svg> Tap the error word in the sentence</div>
+          <p style="margin:0 0 10px">The <span style="border-bottom:2px solid var(--red);background:#fee2e2;padding:0 2px">reefs</span> has been dying rapidly.</p>
+          <p class="small" style="margin:0 0 6px">Replace: reefs →</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <span class="opt" style="justify-content:center">have</span>
+            <span class="opt ok" style="justify-content:center">have been</span>
+            <span class="opt" style="justify-content:center">is</span>
+            <span class="opt" style="justify-content:center">having</span>
           </div>
         </div>
       </div>
@@ -1014,36 +1282,53 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>7.7 Game 4 — Grammar Roulette <span class="b-violet badge">purple</span></h3>
       <p>Fixed <b>10 rounds</b>. Click <b>Spin</b> — a color-coded wheel (one slice per grammar topic) spins for ~3s and lands on a topic, which yields a multiple-choice question. <b>Hot Topic bonus:</b> 2+ correct in a row on the same topic → 2× multiplier; 3+ → 3× (shown as 🔥). Score is in "coins" 💰.</p>
       <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-        <div class="wheel"></div>
+        <div style="position:relative;width:170px;height:170px;margin:0 auto">
+          <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:18px solid var(--primary);z-index:2"></div>
+          <div style="width:170px;height:170px;border-radius:50%;background:conic-gradient(#3b82f6 0 12.5%,#10b981 12.5% 25%,#f59e0b 25% 37.5%,#ef4444 37.5% 50%,#8b5cf6 50% 62.5%,#ec4899 62.5% 75%,#14b8a6 75% 87.5%,#f97316 87.5% 100%);box-shadow:0 0 0 6px #fff,0 0 0 8px #cbd5e1;position:relative"></div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:28px;height:28px;background:#fff;border-radius:50%;border:3px solid #0f172a;z-index:1"></div>
+        </div>
         <div>
-          <p style="margin:0 0 6px"><b>💰 240 coins</b> &nbsp; <span class="b-violet badge">🔥 Hot Topic ×2</span></p>
-          <p class="small" style="margin:0">Round 4/10 · 5 topics on the wheel · 30s per question</p>
+          <p style="margin:0 0 6px"><svg class="ic" style="color:#f59e0b;vertical-align:-3px"><use href="#i-trophy"/></svg> <b>240 coins</b> &nbsp; <span class="badge b-orange">🔥 ×2</span></p>
+          <p class="small" style="margin:0 0 8px">Round 4/10 · 8 slices (= grammar topics) · 30s per question</p>
+          <span class="btn primary" style="width:100%;justify-content:center"><svg class="ic sm"><use href="#i-circle-dot"/></svg> Spin!</span>
         </div>
       </div>
-      <div class="mock-cap">The Roulette wheel: each slice is a grammar topic color.</div>
+      <div class="mock-cap">Roulette wheel: 8-color cycle (one slice per grammar topic), top pointer, white center. Hot Topic: 2+ correct same-topic → ×2; 3+ → ×3.</div>
 
       <h3>7.8 Game 5 — Grammar Duel <span class="b-orange badge">orange</span></h3>
       <p>Turn-based battle vs the AI. Pick difficulty (Easy/Medium/Hard) — sets AI think-time (3–28s) and AI accuracy (40/60/80%). Both start at <b>100 HP</b>. Each round you and the AI race to answer an MCQ; correct answers deal 10 damage. <b>Power Move:</b> every 3rd correct in a row triggers double damage (⚡ +200 pts). Game ends when a HP hits 0.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">⚔️ Grammar Duel · Medium</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-swords"/></svg> Grammar Duel · Medium</div></div>
         <div class="mock-body">
-          <div style="display:flex;align-items:center;gap:12px;justify-content:space-between">
-            <div style="text-align:center"><span class="av lg">🧑</span><div class="small">You</div><div class="hpbar" style="width:110px;margin-top:4px"><i style="width:80%"></i></div><div class="small">80 HP</div></div>
-            <div style="font-size:1.4rem;font-weight:800;color:var(--orange)">VS</div>
-            <div style="text-align:center"><span class="av lg" style="background:var(--orange)">🤖</span><div class="small">AI</div><div class="hpbar" style="width:110px;margin-top:4px"><i style="width:50%"></i></div><div class="small">50 HP</div></div>
+          <div style="display:flex;gap:10px;margin-bottom:10px">
+            <div class="duelcard" style="border-color:#60a5fa">
+              <div style="display:flex;align-items:center;justify-content:center;gap:6px;color:#2563eb;font-weight:600"><svg class="ic sm"><use href="#i-shield"/></svg> You</div>
+              <div class="hpbar" style="width:100%;margin:6px 0"><i style="width:80%"></i></div>
+              <div class="small">80/100</div>
+            </div>
+            <div class="duelcard" style="border-color:#f87171">
+              <div style="display:flex;align-items:center;justify-content:center;gap:6px;color:#dc2626;font-weight:600"><svg class="ic sm"><use href="#i-swords"/></svg> Opponent <svg class="ic sm" style="animation:spin 1s linear infinite"><use href="#i-refresh-cw"/></svg></div>
+              <div class="hpbar" style="width:100%;margin:6px 0"><i style="width:50%"></i></div>
+              <div class="small">50/100</div>
+            </div>
           </div>
-          <p class="small" style="margin:10px 0 0;text-align:center">⚡ Power Move ready on next correct!</p>
+          <p class="small" style="margin:0;text-align:center"><svg class="ic sm" style="color:#ca8a04"><use href="#i-zap"/></svg> POWER MOVE ready — next correct deals double damage (+200 pts)</p>
         </div>
       </div>
 
       <h3>7.9 Shared result screen</h3>
       <div style="display:flex;gap:16px;flex-wrap:wrap">
-        <div style="flex:1;min-width:200px" class="card-mini">
-          <div style="display:flex;align-items:center;gap:12px">
-            <span style="font-size:30px">🌟</span>
-            <div><span class="tier-badge great">Great · 78%</span><div class="small">Score 780 · Max streak 5</div></div>
+        <div style="flex:1;min-width:220px" class="card-mini">
+          <div class="tiercard" style="border-color:#6ee7b7;background:linear-gradient(135deg,#ecfdf5,#d1fae5);box-shadow:0 0 0 4px rgba(110,231,183,.4);margin-bottom:10px">
+            <div style="font-size:2.4rem">🌟</div>
+            <div class="big" style="color:#059669">78%</div>
+            <span class="tpill" style="background:#d1fae5;color:#047857">Excellent Work!</span>
+            <div class="small" style="margin-top:4px"><span class="badge b-amber" style="font-size:10px"><svg class="ic sm"><use href="#i-trophy"/></svg> New Best!</span></div>
           </div>
-          <div style="margin-top:8px"><span class="btn primary sm">Play Again</span> <span class="btn sm">Generate New</span></div>
+          <div class="small" style="display:flex;justify-content:space-between"><span>Accuracy</span><b>78%</b></div>
+          <div class="small" style="display:flex;justify-content:space-between"><span>Best Streak</span><b>5</b></div>
+          <div class="small" style="display:flex;justify-content:space-between;margin-bottom:8px"><span>Rounds</span><b>8/10</b></div>
+          <div style="display:flex;gap:6px"><span class="btn primary sm" style="flex:1;justify-content:center"><svg class="ic sm"><use href="#i-flame"/></svg> Play Again</span><span class="btn sm outline" style="flex:1;justify-content:center"><svg class="ic sm"><use href="#i-refresh-cw"/></svg> New Challenges</span></div>
         </div>
       </div>
       <div class="callout"><strong>Persistence</strong> Each game's high score, accuracy %, and completion count are saved to the reading session and synced to your history — so the dashboard and leaderboard can track them.</div>
@@ -1061,25 +1346,27 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span></div>
-        <div class="mock-body" style="position:relative;min-height:280px;background:var(--subtle)">
+        <div class="mock-body" style="position:relative;min-height:300px;background:var(--subtle)">
           <p class="small" style="color:var(--muted);padding:20px">…(your reading workspace)…</p>
-          <div style="position:absolute;right:14px;bottom:14px;width:300px;background:var(--card);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--primary);color:#fff">
-              <b style="font-size:13px">🤖 AI Tutor</b>
-              <div style="display:flex;gap:8px"><span style="font-size:12px">EN</span><span class="btn sm" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:1px 7px">⛶</span></div>
+          <div style="position:absolute;right:14px;bottom:90px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#3b82f6cc);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:var(--shadow-md)"><svg class="ic lg"><use href="#i-message-circle"/></svg></div>
+          <div style="position:absolute;right:14px;bottom:14px;width:300px;background:var(--card);border:1px solid var(--border-strong);border-radius:16px;box-shadow:var(--shadow-md);overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border)">
+              <b style="font-size:13px;display:inline-flex;align-items:center;gap:6px"><svg class="ic sm pri"><use href="#i-message-circle"/></svg> AI Tutor</b>
+              <div style="display:inline-flex;align-items:center;gap:4px;font-size:11px;border:1px solid var(--border);border-radius:6px;padding:2px 6px"><svg class="ic sm"><use href="#i-languages"/></svg> EN <span class="switch sm"></span> 中文 <span class="btn sm ghost" style="padding:0 4px"><svg class="ic sm"><use href="#i-maximize-2"/></svg></span> <span class="btn sm ghost" style="padding:0 4px"><svg class="ic sm"><use href="#i-x"/></svg></span></div>
             </div>
-            <div style="padding:10px 12px;max-height:160px;overflow:auto;font-size:12px">
-              <div style="background:var(--primary);color:#fff;border-radius:10px 10px 2px 10px;padding:6px 10px;margin-bottom:6px;margin-left:30px;text-align:right">What is the main idea?</div>
-              <div style="display:flex;gap:6px"><span class="av sm" style="background:var(--primary)">🤖</span><div style="background:#fff;border:1px solid var(--border);border-radius:2px 10px 10px 10px;padding:6px 10px">The article argues that coral reefs…<span style="color:var(--primary)">▍</span></div></div>
+            <div style="padding:10px 12px;max-height:120px;overflow:auto;font-size:12px">
+              <div style="display:flex;flex-direction:row-reverse;gap:6px;margin-bottom:6px"><div style="width:24px;height:24px;border-radius:50%;background:#3b82f5;color:#fff;display:flex;align-items:center;justify-content:center;flex:none"><svg class="ic sm"><use href="#i-user"/></svg></div><div style="background:#3b82f5;color:#fff;border-radius:14px 14px 2px 14px;padding:5px 9px;max-width:75%">What is the main idea?</div></div>
+              <div style="display:flex;gap:6px"><div style="width:24px;height:24px;border-radius:50%;background:var(--subtle);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex:none"><svg class="ic sm"><use href="#i-bot"/></svg></div><div style="background:var(--subtle);border-radius:2px 14px 14px 14px;padding:5px 9px">The article argues that coral reefs…<span style="display:inline-block;width:7px;height:13px;background:var(--primary);vertical-align:-2px;margin-left:2px"></span></div></div>
             </div>
-            <div style="border-top:1px solid var(--border);padding:6px 8px">
-              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px"><span class="chip">Main Idea</span><span class="chip">Vocab Help</span><span class="chip">Explain</span></div>
-              <div style="display:flex;gap:4px;align-items:center"><span class="btn sm outline" style="padding:4px 8px">📎</span><span class="input-fake" style="flex:1;font-size:11px">Ask anything…</span><span class="btn primary sm">➤</span></div>
+            <div style="padding:8px 12px;border-top:1px solid var(--border);background:var(--subtle)">
+              <div class="small" style="font-size:11px;margin-bottom:4px"><svg class="ic sm" style="color:#d97706"><use href="#i-lightbulb"/></svg> Quick Questions: <span class="chip">Main idea</span> <span class="chip">Vocab help</span> <span class="chip">Explain</span></div>
+              <div class="small" style="font-size:11px;margin-bottom:6px"><svg class="ic sm pri"><use href="#i-image-plus"/></svg> Answer Help: <span class="chip">Hint me</span> <span class="chip">Step-by-step</span> <span class="chip">Give answer</span></div>
+              <div style="display:flex;gap:6px;align-items:center"><span class="btn sm ghost" style="padding:6px"><svg class="ic sm"><use href="#i-image-plus"/></svg></span><span class="input-fake" style="flex:1;font-size:11px">Type your question...</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-send"/></svg></span></div>
             </div>
           </div>
         </div>
       </div>
-      <div class="mock-cap">The floating tutor panel — language toggle, maximize, quick questions, image attach.</div>
+      <div class="mock-cap">Gradient MessageCircle FAB (bottom-right, above the TOC button). Panel header is plain (not colored); avatars use Bot/User icons; two quick-question groups; input uses ImagePlus + Send; Trash2 clears history.</div>
 
       <h3>8.1 Features</h3>
       <table class="ref">
@@ -1096,7 +1383,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <p>Three image-related quick questions exist. <b>"Help with image — Hint"</b> is always available (upload an image for a guided hint). The other two are gated behind <b>Jailbreak Mode</b> in Settings:</p>
       <table class="ref">
         <tr><th>Quick question</th><th>Requires</th><th>What it does</th></tr>
-        <tr><td>Help with image — Hint</td><td>—</td><td>Guides you toward the answer.</td></tr>
+        <tr><td>Hint me</td><td>—</td><td>Guides you toward the answer.</td></tr>
         <tr><td>Step-by-step</td><td>Jailbreak Mode ON</td><td>Walks through the image question fully.</td></tr>
         <tr><td>Give answer</td><td>Jailbreak Mode ON <b>and</b> Show "Give Answer" ON</td><td>Reveals the answer directly.</td></tr>
       </table>
@@ -1117,13 +1404,14 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com/vocabulary</span></div>
         <div class="mock-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><b style="font-size:15px;display:inline-flex;align-items:center;gap:6px"><svg class="ic pri"><use href="#i-book-marked"/></svg> My Vocabulary</b><svg class="ic muted"><use href="#i-info"/></svg></div>
           <div style="display:flex;gap:8px;margin-bottom:12px">
-            <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small">Total</div><b style="font-size:1.3rem">248</b><div class="small">210 own · 38 teacher</div></div>
-            <div class="card-mini" style="flex:1;margin:0;text-align:center;border-top:3px solid var(--orange)"><div class="small">Due</div><b style="font-size:1.3rem;color:var(--orange)">42</b></div>
-            <div class="card-mini" style="flex:1;margin:0;text-align:center;border-top:3px solid var(--green)"><div class="small">Mastered</div><b style="font-size:1.3rem;color:var(--green)">95</b></div>
-            <div class="card-mini" style="flex:1;margin:0;text-align:center;border-top:3px solid var(--blue)"><div class="small">New</div><b style="font-size:1.3rem;color:var(--blue)">31</b></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center;box-shadow:0 0 0 2px rgba(59,130,246,.4)"><div class="small"><svg class="ic sm" style="color:#6366f1"><use href="#i-book-marked"/></svg> Total Words</div><b style="font-size:1.2rem">248</b><div class="small" style="display:flex;gap:6px;justify-content:center"><span class="chip" style="font-size:10px">Own: 210</span><span class="chip" style="font-size:10px">Teacher: 38</span></div></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#f97316"><use href="#i-clock"/></svg> Due for Review</div><b style="font-size:1.2rem;color:#f97316">42</b></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#22c55e"><use href="#i-check-circle-2"/></svg> Mastered</div><b style="font-size:1.2rem;color:#22c55e">95</b></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#3b82f6"><use href="#i-brain"/></svg> New Words</div><b style="font-size:1.2rem;color:#3b82f6">31</b></div>
           </div>
-          <div class="faketab"><span class="active">Table</span><span>Flashcard</span><span>Spelling</span><span>Quiz</span><span>Lists</span><span>History</span></div>
+          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-table"/></svg> Table</span><span><svg class="ic sm"><use href="#i-layers"/></svg> Flashcard</span><span><svg class="ic sm"><use href="#i-spell-check"/></svg> Spelling</span><span><svg class="ic sm"><use href="#i-clipboard-list"/></svg> Quiz</span><span><svg class="ic sm"><use href="#i-list-plus"/></svg> Review Lists</span><span><svg class="ic sm"><use href="#i-history"/></svg> History</span></div>
         </div>
       </div>
       <p>Four stat cards double as filters — click one to filter the table. The six tabs are: <b>Table</b>, <b>Flashcard</b>, <b>Spelling</b>, <b>Quiz</b>, <b>Lists</b>, <b>History</b>. The review tabs (Flashcard/Spelling/Quiz) require you to select words first (or load a review list).</p>
@@ -1131,9 +1419,9 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>9.2 The word table</h3>
       <p>Sortable, filterable, paginated (25/50/75/100 per page). Columns include a <b>Source</b> badge (Own / Teacher-shared) and color-coded <b>Rating</b> (hard=red / medium=yellow / easy=green) and <b>Mastery</b> (L0–L5) badges.</p>
       <table class="ref">
-        <tr><th>Word ▲▼</th><th>POS</th><th>English</th><th>Source</th><th>Rating</th><th>Mastery</th><th>Last reviewed</th></tr>
-        <tr><td><b>ecosystem</b></td><td>n.</td><td>community of organisms</td><td><span class="b-slate badge">Own</span></td><td><span class="pill" style="background:var(--green-bg);color:var(--green)">easy</span></td><td><span class="badge" style="background:var(--srs-5);color:#fff">L5</span></td><td class="small">2 days ago</td></tr>
-        <tr><td><b>symbiosis</b></td><td>n.</td><td>close long-term interaction</td><td><span class="b-violet badge">Teacher</span></td><td><span class="pill" style="background:var(--red-bg);color:var(--red)">hard</span></td><td><span class="badge" style="background:var(--srs-1);color:#fff">L1</span></td><td class="small">Never</td></tr>
+        <tr><th style="width:28px">☐</th><th>Word <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>PoS</th><th>English Definition</th><th>Source</th><th>Rating <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>Level <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>Last Reviewed</th></tr>
+        <tr><td>☐</td><td><b>ecosystem</b></td><td>n.</td><td>community of organisms</td><td><span class="badge b-slate">Own</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>Easy</span></td><td><span class="badge b-green">Mastered</span></td><td class="small">2 days ago</td></tr>
+        <tr><td>☐</td><td><b>symbiosis</b></td><td>n.</td><td>close long-term interaction</td><td><span class="badge b-violet">Teacher</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>Hard</span></td><td><span class="badge" style="background:#fee2e2;color:#dc2626">L1</span></td><td class="small">Never</td></tr>
       </table>
       <p>Filters: <b>Rating</b> (all/hard/medium/easy), <b>Mastery</b> (all/due/new/mastered), <b>Source</b> (all/own/teacher), plus free-text <b>search</b>. Bulk-select with the header checkbox; a glowing "Start Review" bar appears when words are selected.</p>
 
@@ -1141,11 +1429,11 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <p>The Auto-Select panel picks words for you using one of five strategies (respects active filters):</p>
       <table class="ref">
         <tr><th>Strategy</th><th>Selects</th></tr>
-        <tr><td><b>Due for review</b></td><td>Words due now (never reviewed or interval elapsed), soonest first.</td></tr>
-        <tr><td><b>Hardest words</b></td><td>Rating = hard, lowest mastery first.</td></tr>
-        <tr><td><b>Newest</b></td><td>Never reviewed (mastery 0), most recently added first.</td></tr>
-        <tr><td><b>Weakest</b></td><td>Reviewed words with the lowest correct/total ratio.</td></tr>
-        <tr><td><b>Random</b></td><td>A shuffled selection.</td></tr>
+        <tr><td><b>Due for Review</b></td><td>Words due now (never reviewed or interval elapsed), soonest first.</td></tr>
+        <tr><td><b>Hardest Words</b></td><td>Rating = hard, lowest mastery first.</td></tr>
+        <tr><td><b>Newest Words</b></td><td>Never reviewed (mastery 0), most recently added first.</td></tr>
+        <tr><td><b>Random Mix</b></td><td>A shuffled selection.</td></tr>
+        <tr><td><b>Weakest Words</b></td><td>Reviewed words with the lowest correct/total ratio.</td></tr>
       </table>
 
       <h3>9.4 Review Lists <span style="font-weight:400;font-size:.8em">(named word sets)</span></h3>
@@ -1155,10 +1443,10 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <p>The Export panel exports either your selected words or all of them:</p>
       <table class="ref">
         <tr><th>Format</th><th>File</th><th>Content</th></tr>
-        <tr><td>Glossary</td><td>.docx</td><td>A formatted glossary table.</td></tr>
-        <tr><td>Flashcard</td><td>.pdf</td><td>Printable flashcards.</td></tr>
-        <tr><td>Fill-blank</td><td>.docx</td><td>Fill-in-the-blank exercise.</td></tr>
-        <tr><td>Matching</td><td>.docx</td><td>Word↔definition matching exercise.</td></tr>
+        <tr><td>Glossary</td><td>.docx</td><td>Word list with definitions in a table.</td></tr>
+        <tr><td>Flashcard Sheets</td><td>.pdf</td><td>Printable cut-out flashcards.</td></tr>
+        <tr><td>Fill-in-the-Blank</td><td>.docx</td><td>Worksheet with missing words.</td></tr>
+        <tr><td>Matching Exercise</td><td>.docx</td><td>Match words with definitions.</td></tr>
       </table>
 
       <h3>9.6 Review History</h3>
@@ -1173,11 +1461,20 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       </div>
       <p>The recipient picker groups targets by <b>school → class → user</b> with search, select-all/group/individual checkboxes. Incoming shares arrive as a <b>Bell</b> notification in the header (red badge). <b>Accept</b> loads the words; <b>Decline</b> dismisses. "Accept All / Decline All" appear when there are several.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🔔 Pending shares · 2</span></div>
+        <div class="mock-bar"><span class="pill">🔔 Shared Review List dialog (indigo)</span></div>
         <div class="mock-body">
-          <div class="card-mini" style="display:flex;align-items:center;justify-content:space-between">
-            <div><b>Unit 5 Vocab</b> · 24 words<br><span class="small">from Ms. Lee (Teacher)</span></div>
-            <div><span class="btn green sm">Accept</span> <span class="btn sm">Decline</span></div>
+          <div style="max-width:340px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+            <div style="height:8px;background:#6366f1"></div>
+            <div style="text-align:center;padding:16px">
+              <div style="width:48px;height:48px;border-radius:50%;background:#6366f1;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px"><svg class="ic lg"><use href="#i-list-checks"/></svg></div>
+              <b style="font-size:14px">Shared Review List</b>
+              <p class="small" style="margin:4px 0 10px">You have 2 pending review list share(s).</p>
+              <div class="card-mini" style="text-align:left;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <div><svg class="ic sm pri"><use href="#i-list-checks"/></svg> <b>Unit 5 Vocab</b><br><span class="small">Ms. Lee shared a review list with 24 words.</span></div>
+              </div>
+              <div style="display:flex;gap:6px"><span class="btn primary sm" style="flex:1;justify-content:center;background:#6366f1;border-color:#6366f1"><svg class="ic sm"><use href="#i-arrow-right"/></svg> Accept</span><span class="btn sm ghost" style="flex:1;justify-content:center">Decline</span></div>
+              <div style="display:flex;gap:6px;margin-top:6px"><span class="btn sm" style="flex:1;justify-content:center;background:#6366f1;border-color:#6366f1;color:#fff">Accept All</span><span class="btn sm ghost" style="flex:1;justify-content:center">Decline All</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1196,15 +1493,15 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>10.1 Student Dashboard</h3>
       <p>Two tabs: <b>Overview</b> (your analytics) and <b>Sessions</b> (your saved reading sessions). All metrics are computed from your history.</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">📊 Dashboard</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-bar-chart-3"/></svg> Learning Journey</div></div>
         <div class="mock-body">
-          <div class="faketab"><span class="active">Overview</span><span>Sessions</span></div>
+          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-bar-chart-3"/></svg> Overview</span><span><svg class="ic sm"><use href="#i-clock"/></svg> Sessions</span></div>
           <div style="display:flex;gap:8px;margin-bottom:10px">
-            <div class="card-mini" style="flex:1;margin:0"><div class="small">Total Texts</div><b style="font-size:1.2rem">38</b></div>
-            <div class="card-mini" style="flex:1;margin:0"><div class="small">Vocabulary</div><b style="font-size:1.2rem">248</b></div>
-            <div class="card-mini" style="flex:1;margin:0"><div class="small">Avg Progress</div><b style="font-size:1.2rem">64%</b></div>
+            <div class="card-mini" style="flex:1;margin:0;background:#eff6ff;border-color:#93c5fd"><div class="small"><svg class="ic sm pri"><use href="#i-book-open"/></svg> Reading Texts</div><b style="font-size:1.2rem;color:var(--primary)">38</b><div class="small">20 uploaded · 14 repository · 4 shared</div></div>
+            <div class="card-mini" style="flex:1;margin:0"><div class="small"><svg class="ic sm" style="color:#6366f1"><use href="#i-book-marked"/></svg> Total Vocabulary</div><b style="font-size:1.2rem">248</b></div>
+            <div class="card-mini" style="flex:1;margin:0"><div class="small"><svg class="ic sm" style="color:#10b981"><use href="#i-trending-up"/></svg> Avg Learning Progress</div><b style="font-size:1.2rem">64%</b></div>
           </div>
-          <div class="card-mini"><div class="ttl">Daily Activity <span class="small" style="float:right">7d ▾</span></div>
+          <div class="card-mini"><div class="ttl">Daily Learning Activity <span class="small" style="float:right"><span class="seg"><span class="on">7d</span><span>14d</span><span>30d</span><span>90d</span></span></span></div>
             <div class="barchart"><i style="height:30%"></i><i style="height:60%;background:var(--green)"></i><i style="height:45%"></i><i style="height:80%;background:var(--amber)"></i><i style="height:55%"></i><i style="height:70%;background:var(--violet)"></i><i style="height:40%"></i></div>
           </div>
         </div>
@@ -1241,10 +1538,17 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
         </div>
         <div style="flex:1;min-width:200px">
           <div class="mock">
-            <div class="mock-bar"><span class="pill">🔔 Incoming session</span></div>
+            <div class="mock-bar"><span class="pill">🔔 Shared Reading Session (blue)</span></div>
             <div class="mock-body">
-              <b>Coral Reefs</b><br><span class="small">from Ms. Lee (Teacher)</span>
-              <div style="margin-top:8px"><span class="btn green sm">Accept</span> <span class="btn sm">Decline</span></div>
+              <div style="max-width:300px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+                <div style="height:8px;background:#3b82f6"></div>
+                <div style="text-align:center;padding:16px">
+                  <div style="width:48px;height:48px;border-radius:50%;background:#3b82f6;color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px"><svg class="ic lg"><use href="#i-share-2"/></svg></div>
+                  <b style="font-size:14px">Shared Reading Session</b>
+                  <p class="small" style="margin:4px 0 8px"><svg class="ic sm pri"><use href="#i-book-open"/></svg> <b>Coral Reefs</b> — shared by Ms. Lee</p>
+                  <div style="display:flex;gap:6px"><span class="btn primary sm" style="flex:1;justify-content:center"><svg class="ic sm"><use href="#i-arrow-right"/></svg> Accept</span><span class="btn sm ghost" style="flex:1;justify-content:center">Decline</span></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="mock-cap">Recipient: accept/decline dialog from the Bell.</div>
@@ -1264,16 +1568,17 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <h3>11.1 Leaderboard <span style="font-weight:400;font-size:.8em">(<code>/leaderboard</code>)</span></h3>
       <p>Open from the header trophy icon or the Student Info "Leaderboard" button. Three tabs: <b>Achievements</b>, <b>My Stats</b>, <b>Leaderboard</b>. Rankings are <b>weekly</b> (Monday–Sunday) — use the week picker to browse past weeks. Scope: <b>Class / School / Global</b> (global lists students only).</p>
       <div class="mock">
-        <div class="mock-bar"><span class="pill">🏆 Leaderboard · This Week · Class 2B</span></div>
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-trophy"/></svg> Achievements &amp; Leaderboard</div><span class="small">This Week</span></div>
         <div class="mock-body">
-          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
-            <span style="font-size:1.3rem">🥇</span><span class="av sm">J</span><div style="flex:1"><b>Jamie L.</b> <span class="pill">You</span><br><span class="small">Class 2B</span></div><b>342</b>
+          <div class="seg" style="margin-bottom:10px"><span><svg class="ic sm"><use href="#i-users"/></svg> My Class</span><span class="on"><svg class="ic sm"><use href="#i-school"/></svg> My School</span><span><svg class="ic sm"><use href="#i-globe"/></svg> Global</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde047">
+            <span style="font-size:1.3rem">🥇</span><span class="av sm">J</span><div style="flex:1"><b>Jamie L.</b> <span class="pill" style="background:#dbeafe;color:#1d4ed8;font-size:10px">You</span><br><span class="small">Class 2B</span></div><b>342</b><span class="small" style="color:#16a34a">▲3</span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
-            <span style="font-size:1.3rem">🥈</span><span class="av sm">S</span><div style="flex:1"><b>Sam K.</b><br><span class="small">Class 2B</span></div><b>298</b>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 8px">
+            <span style="font-size:1.3rem">🥈</span><span class="av sm">S</span><div style="flex:1"><b>Sam K.</b><br><span class="small">Class 2B</span></div><b>298</b><span class="small" style="color:#dc2626">▼1</span>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-            <b>#3</b><span class="av sm">P</span><div style="flex:1"><b>Pat M.</b><br><span class="small">Class 2B</span></div><b>271</b>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 8px">
+            <span style="font-size:1.3rem">🥉</span><span class="av sm">P</span><div style="flex:1"><b>Pat M.</b><br><span class="small">Class 2B</span></div><b>271</b><span class="small" style="color:var(--muted)">—</span>
           </div>
         </div>
       </div>
@@ -1284,24 +1589,36 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <p>Rank chips (class/school/global), a 9-card current-week grid (score delta, reading streak, averages, flashcards, vocab), and an all-time row (total sessions, longest streak via gap-and-islands, lifetime averages).</p>
 
       <h3>11.3 Achievements</h3>
-      <p>15 achievement types, each with 7 doubling milestones (5, 10, 20, 40, 80, 160, 320). Each medal shows a progress ring toward the next milestone and unlocks with a celebration dialog.</p>
+      <p>15 achievement types, each with 7 doubling milestones. Most start at 5 → 5, 10, 20, 40, 80, 160, 320; <b>Vocabulary Collected</b> and <b>Flashcard Reviews</b> start at 50 → 50, 100, 200, 400, 800, 1600, 3200. Each medal shows a progress ring toward the next milestone and unlocks with a celebration dialog.</p>
       <div style="display:flex;flex-wrap:wrap;gap:12px;margin:14px 0">
-        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--blue-bg);box-shadow:0 0 14px var(--blue-bg)"><span style="font-size:22px">📖</span></div><div class="small">Sessions Read</div><span class="badge b-blue">L3 · 20</span></div>
-        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--green-bg);box-shadow:0 0 14px var(--green-bg)"><span style="font-size:22px">📚</span></div><div class="small">Vocabulary</div><span class="badge b-green">L4 · 80</span></div>
-        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--subtle)"><span style="font-size:22px;opacity:.4">🎮</span></div><div class="small" style="opacity:.5">Grammar Games</div><span class="badge b-slate">locked</span></div>
-        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--cyan-bg)"><span style="font-size:22px">✨</span></div><div class="small">AI Tutor Qs</div><span class="badge b-cyan">L2 · 10</span></div>
+        <div style="text-align:center;width:84px">
+          <div class="ringwrap"><svg width="80" height="80"><circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" stroke-width="6"/><circle cx="40" cy="40" r="34" fill="none" stroke="#3b82f6" stroke-width="6" stroke-dasharray="128" stroke-dashoffset="64" stroke-linecap="round"/></svg><div class="inner" style="background:#3b82f6;color:#fff"><svg class="ic lg"><use href="#i-book-open"/></svg></div></div>
+          <div class="small">Avid Reader</div><span class="badge b-blue">12 / 20</span>
+        </div>
+        <div style="text-align:center;width:84px">
+          <div class="ringwrap"><svg width="80" height="80"><circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" stroke-width="6"/><circle cx="40" cy="40" r="34" fill="none" stroke="#22c55e" stroke-width="6" stroke-dasharray="128" stroke-dashoffset="32" stroke-linecap="round"/></svg><div class="inner" style="background:#22c55e;color:#fff"><svg class="ic lg"><use href="#i-book-text"/></svg></div></div>
+          <div class="small">Word Collector</div><span class="badge b-green">120 / 200</span>
+        </div>
+        <div style="text-align:center;width:84px">
+          <div class="ringwrap"><svg width="80" height="80"><circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" stroke-width="6"/></svg><div class="inner" style="background:var(--subtle);color:var(--muted)"><svg class="ic lg"><use href="#i-lock"/></svg></div></div>
+          <div class="small" style="opacity:.5">Grammar Gamer</div><span class="badge b-slate">locked</span>
+        </div>
+        <div style="text-align:center;width:84px">
+          <div class="ringwrap"><svg width="80" height="80"><circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" stroke-width="6"/><circle cx="40" cy="40" r="34" fill="none" stroke="#06b6d4" stroke-width="6" stroke-dasharray="128" stroke-dashoffset="96" stroke-linecap="round"/></svg><div class="inner" style="background:#06b6d4;color:#fff"><svg class="ic lg"><use href="#i-sparkles"/></svg></div></div>
+          <div class="small">Curious Learner</div><span class="badge b-cyan">8 / 10</span>
+        </div>
       </div>
       <table class="ref">
-        <tr><th>Achievement</th><th>Icon</th><th>Tracks</th></tr>
-        <tr><td>Sessions Read</td><td>📖</td><td>session_create</td></tr>
-        <tr><td>Vocabulary Collected</td><td>📚</td><td>glossary_add</td></tr>
-        <tr><td>Flashcard Reviews</td><td>🗂️</td><td>flashcard_review</td></tr>
-        <tr><td>Mind Maps / Adapted / Simplified Texts</td><td>🧠 / ✏️ / ➖</td><td>each generate type</td></tr>
-        <tr><td>Sentences Analyzed</td><td>🔍</td><td>sentence_analyze</td></tr>
-        <tr><td>Tests / Targeted Practices</td><td>✅ / 🎯</td><td>each complete type</td></tr>
-        <tr><td>Spelling / Vocab Quizzes</td><td>✍️ / 🧠</td><td>each complete type</td></tr>
-        <tr><td>Grammar Analysis / Quizzes / Games</td><td>📘 / 🎓 / 🎮</td><td>each grammar type</td></tr>
-        <tr><td>AI Tutor Questions</td><td>✨</td><td>ai_tutor_question</td></tr>
+        <tr><th>Achievement (display name)</th><th>Icon</th><th>Tracks</th></tr>
+        <tr><td>Avid Reader</td><td><svg class="ic sm"><use href="#i-book-open"/></svg> BookOpen</td><td>sessions read</td></tr>
+        <tr><td>Word Collector</td><td><svg class="ic sm"><use href="#i-book-text"/></svg> BookText</td><td>vocabulary collected</td></tr>
+        <tr><td>Memory Master</td><td><svg class="ic sm"><use href="#i-layers"/></svg> Layers</td><td>flashcard reviews</td></tr>
+        <tr><td>Visual Thinker / Text Adapter / Simplifier</td><td><svg class="ic sm"><use href="#i-network"/></svg> Network · <svg class="ic sm"><use href="#i-file-edit"/></svg> FileEdit · <svg class="ic sm"><use href="#i-file-minus"/></svg> FileMinus</td><td>mind maps / adapted / simplified texts</td></tr>
+        <tr><td>Sentence Detective</td><td><svg class="ic sm"><use href="#i-search"/></svg> Search</td><td>sentences analyzed</td></tr>
+        <tr><td>Test Champion / Skill Sharpener</td><td><svg class="ic sm"><use href="#i-file-check"/></svg> FileCheck · <svg class="ic sm"><use href="#i-target"/></svg> Target</td><td>tests / targeted practices</td></tr>
+        <tr><td>Spelling Bee / Quiz Wizard</td><td><svg class="ic sm"><use href="#i-pen-tool"/></svg> PenTool · <svg class="ic sm"><use href="#i-brain"/></svg> Brain</td><td>spelling / vocab quizzes</td></tr>
+        <tr><td>Grammar Explorer / Grammar Ace / Grammar Gamer</td><td><svg class="ic sm"><use href="#i-book-open-check"/></svg> BookOpenCheck · <svg class="ic sm"><use href="#i-graduation-cap"/></svg> GraduationCap · <svg class="ic sm"><use href="#i-gamepad-2"/></svg> Gamepad2</td><td>grammar analysis / quizzes / games</td></tr>
+        <tr><td>Curious Learner</td><td><svg class="ic sm"><use href="#i-sparkles"/></svg> Sparkles</td><td>AI tutor questions</td></tr>
       </table>
 
       <h3>11.4 History management</h3>
