@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr.🆖 ProReader — User Manual</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — mirrors the app's Tailwind palette & Shadcn UI
+   ============================================================ */
+:root{
+  /* Brand / primary */
+  --primary:#3b82f6; --primary-fg:#ffffff; --primary-soft:#dbeafe; --primary-border:#93c5fd;
+  /* Slate neutrals */
+  --bg:#f8fafc; --card:#ffffff; --fg:#0f172a; --muted:#64748b; --muted-fg:#475569;
+  --border:#e2e8f0; --border-strong:#cbd5e1; --subtle:#f1f5f9;
+  /* Semantic */
+  --green:#16a34a; --green-bg:#dcfce7; --red:#dc2626; --red-bg:#fee2e2;
+  --amber:#d97706; --amber-bg:#fef3c7; --blue:#2563eb; --blue-bg:#dbeafe;
+  --violet:#7c3aed; --violet-bg:#ede9fe; --teal:#0d9488; --teal-bg:#ccfbf1;
+  --orange:#ea580c; --orange-bg:#ffedd5; --pink:#db2777; --pink-bg:#fce7f3;
+  --cyan:#0891b2; --cyan-bg:#cffafe; --fuchsia:#c026d3; --fuchsia-bg:#fae8ff;
+  --indigo:#4f46e5; --indigo-bg:#e0e7ff; --rose:#e11d48; --rose-bg:#ffe4e6;
+  /* CEFR levels */
+  --cefr-a1:#06b6d4; --cefr-a2:#16a34a; --cefr-b1:#d97706; --cefr-b2:#ea580c; --cefr-c1:#dc2626; --cefr-c2:#9333ea;
+  /* Role badges */
+  --role-super:#9333ea; --role-admin:#dc2626; --role-teacher:#2563eb; --role-student:#16a34a;
+  /* SRS boxes */
+  --srs-0:#94a3b8; --srs-1:#dc2626; --srs-2:#ea580c; --srs-3:#d97706; --srs-4:#2563eb; --srs-5:#16a34a;
+  /* code */
+  --code-bg:#0f172a; --code-fg:#e2e8f0; --inline-code:#f1f5f9;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.08),0 2px 4px -2px rgba(0,0,0,.05);
+  --radius:10px; --radius-sm:6px; --radius-lg:16px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","PingFang HK","Microsoft JhengHei",sans-serif;
+  --mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font);color:var(--fg);background:var(--bg);line-height:1.6;font-size:15px;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Layout */
+.page{max-width:1180px;margin:0 auto;padding:0 24px}
+.main-wrap{display:flex;gap:32px;align-items:flex-start;padding:32px 24px 120px}
+.toc-sidebar{position:sticky;top:24px;flex:0 0 250px;max-height:calc(100vh - 48px);overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);font-size:13px}
+.content{flex:1;min-width:0}
+
+/* TOC sidebar */
+.toc-sidebar h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px}
+.toc-sidebar ol{list-style:none;padding:0;margin:0 0 14px}
+.toc-sidebar ol li{margin:2px 0}
+.toc-sidebar ol ol{padding-left:14px;margin:2px 0}
+.toc-sidebar a{color:var(--muted-fg);display:block;padding:3px 6px;border-radius:5px}
+.toc-sidebar a:hover{background:var(--subtle);color:var(--primary);text-decoration:none}
+.toc-sidebar .lang-jump{display:flex;gap:6px;margin-bottom:14px}
+.toc-sidebar .lang-jump a{flex:1;text-align:center;background:var(--subtle);font-weight:600;font-size:11px;padding:6px 0}
+
+/* Typography */
+h1{font-size:2rem;margin:0 0 8px;letter-spacing:-.02em;line-height:1.15}
+h2.section-title{font-size:1.9rem;margin:0 0 4px;letter-spacing:-.02em;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h3{font-size:1.3rem;margin:32px 0 10px}
+h4{font-size:1.08rem;margin:24px 0 8px}
+p{margin:0 0 12px}
+.small{font-size:13px;color:var(--muted)}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:4px 0}
+strong{font-weight:650}
+code{font-family:var(--mono);font-size:.86em;background:var(--inline-code);padding:1px 5px;border-radius:4px;border:1px solid var(--border)}
+pre{background:var(--code-bg);color:var(--code-fg);padding:14px 16px;border-radius:var(--radius-sm);overflow:auto;font-size:12.5px;line-height:1.55}
+pre code{background:none;border:none;color:inherit;padding:0;font-size:inherit}
+
+/* Section wrapper */
+section.chapter{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:34px 38px;margin-bottom:40px}
+.chapter-head{border-bottom:2px solid var(--border);padding-bottom:18px;margin-bottom:24px}
+.chapter-num{display:inline-block;background:var(--primary);color:#fff;font-weight:700;font-size:13px;padding:3px 10px;border-radius:20px;letter-spacing:.04em;margin-bottom:10px}
+.lang-divider{display:flex;align-items:center;gap:14px;margin:38px 0 22px;color:var(--primary);font-weight:700}
+.lang-divider::before,.lang-divider::after{content:"";flex:1;height:1px;background:var(--border-strong)}
+.callout{border-left:4px solid var(--primary);background:var(--primary-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px}
+.callout.tip{border-color:var(--green);background:var(--green-bg)}
+.callout.warn{border-color:var(--amber);background:var(--amber-bg)}
+.callout.danger{border-color:var(--red);background:var(--red-bg)}
+.callout.teacher{border-color:var(--role-teacher);background:var(--blue-bg)}
+.callout strong{display:block;margin-bottom:2px}
+
+/* Badges & pills */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;line-height:1.7;white-space:nowrap;border:1px solid transparent}
+.role{font-size:10.5px}
+.role.student{background:var(--green-bg);color:var(--role-student);border-color:var(--role-student)}
+.role.teacher{background:var(--blue-bg);color:var(--role-teacher);border-color:var(--role-teacher)}
+.role.admin{background:var(--red-bg);color:var(--role-admin);border-color:var(--role-admin)}
+.role.super{background:var(--violet-bg);color:var(--role-super);border-color:var(--role-super)}
+.tag-teacher::before{content:"👩‍🏫 Teacher only";font-size:10.5px;font-weight:700;background:var(--role-teacher);color:#fff;padding:2px 8px;border-radius:20px;margin-right:8px}
+.tag-admin::before{content:"🔐 Admin only";font-size:10.5px;font-weight:700;background:var(--role-admin);color:#fff;padding:2px 8px;border-radius:20px;margin-right:8px}
+.tag-super::before{content:"👑 Super-admin only";font-size:10.5px;font-weight:700;background:var(--role-super);color:#fff;padding:2px 8px;border-radius:20px;margin-right:8px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--subtle);border:1px solid var(--border)}
+.b-green{background:var(--green-bg);color:var(--green)} .b-red{background:var(--red-bg);color:var(--red)}
+.b-amber{background:var(--amber-bg);color:var(--amber)} .b-blue{background:var(--blue-bg);color:var(--blue)}
+.b-violet{background:var(--violet-bg);color:var(--violet)} .b-teal{background:var(--teal-bg);color:var(--teal)}
+.b-orange{background:var(--orange-bg);color:var(--orange)} .b-pink{background:var(--pink-bg);color:var(--pink)}
+.b-cyan{background:var(--cyan-bg);color:var(--cyan)} .b-fuchsia{background:var(--fuchsia-bg);color:var(--fuchsia)}
+.b-indigo{background:var(--indigo-bg);color:var(--indigo)} .b-slate{background:var(--subtle);color:var(--muted-fg)}
+.b-rose{background:var(--rose-bg);color:var(--rose)}
+
+/* Tables */
+table.ref{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+table.ref th,table.ref td{text-align:left;padding:8px 11px;border:1px solid var(--border);vertical-align:top}
+table.ref th{background:var(--subtle);font-weight:650;font-size:12.5px}
+table.ref tr:nth-child(even) td{background:#fafbfc}
+caption{caption-side:bottom;font-size:12px;color:var(--muted);margin-top:6px;text-align:left}
+.yes{color:var(--green);font-weight:700} .no{color:var(--muted);opacity:.5}
+
+/* Steps */
+ol.steps{counter-reset:s;list-style:none;padding-left:0}
+ol.steps>li{counter-increment:s;position:relative;padding:8px 0 8px 44px;border-bottom:1px dashed var(--border)}
+ol.steps>li:last-child{border-bottom:none}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30px;height:30px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+
+/* ============ MOCKUP COMPONENTS (fake UI) ============ */
+.mock{border:1px solid var(--border-strong);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md);background:var(--card);margin:18px 0}
+.mock-cap{font-size:11.5px;color:var(--muted);text-align:center;margin-top:8px;font-style:italic}
+.mock-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--subtle);border-bottom:1px solid var(--border);font-size:12px}
+.mock-bar .dots{display:flex;gap:6px}
+.mock-bar .dots i{width:11px;height:11px;border-radius:50%;background:#cbd5e1;display:block}
+.mock-bar .dots i:nth-child(1){background:#ef4444}.mock-bar .dots i:nth-child(2){background:#f59e0b}.mock-bar .dots i:nth-child(3){background:#22c55e}
+.mock-bar .url{background:#fff;border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--muted);flex:1}
+.mock-body{padding:16px}
+.mock-dark .mock-body,.mock-dark .mock-bar{background:#0f172a;color:#cbd5e1;border-color:#1e293b}
+.mock-dark{background:#0f172a}
+
+/* fake UI atoms */
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:#fff;color:var(--fg);cursor:default}
+.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn.green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn.outline{background:transparent}
+.btn.sm{font-size:11px;padding:3px 9px}
+.btn:empty{display:none}
+.faketab{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:14px}
+.faketab span{padding:8px 16px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:default}
+.faketab span.active{color:var(--primary);border-color:var(--primary)}
+.card-mini{border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;background:#fff}
+.card-mini .ttl{font-weight:650;font-size:13px;margin-bottom:6px}
+.progress{height:8px;background:var(--border);border-radius:20px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--primary)}
+.input-fake{border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px;background:#fff;color:var(--muted);display:block;width:100%}
+.chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--subtle);border:1px solid var(--border);margin:2px 3px 2px 0}
+.chip.yellow{background:#fef9c3;border-color:#fde047}
+.chip.blue{background:var(--blue-bg);border-color:var(--primary-border);text-decoration:underline}
+.slider-track{height:6px;background:var(--border);border-radius:20px;position:relative;margin:18px 0}
+.slider-track>i{position:absolute;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;background:#fff;border:3px solid var(--primary);border-radius:50%;box-shadow:var(--shadow)}
+.slider-fill{position:absolute;left:0;top:0;height:100%;background:var(--primary);border-radius:20px}
+
+/* CEFR highlight legend */
+.cefr-word{border-radius:3px;padding:0 2px;color:#fff;font-size:12px;font-weight:600}
+.cefr-word.a1{background:var(--cefr-a1)}.cefr-word.a2{background:var(--cefr-a2)}.cefr-word.b1{background:var(--cefr-b1)}
+.cefr-word.b2{background:var(--cefr-b2)}.cefr-word.c1{background:var(--cefr-c1)}.cefr-word.c2{background:var(--cefr-c2)}
+
+/* flip card */
+.flipcard{width:200px;height:270px;margin:10px auto;perspective:1000px}
+.flipcard .inner{width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d;position:relative}
+.flipcard.flipped .inner{transform:rotateY(180deg)}
+.flipcard .face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;border:2px solid var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px}
+.flipcard .back{transform:rotateY(180deg);background:var(--subtle)}
+
+/* charts (CSS) */
+.barchart{display:flex;align-items:flex-end;gap:6px;height:120px;padding:6px 0;border-bottom:1px solid var(--border)}
+.barchart i{flex:1;display:block;background:var(--primary);border-radius:4px 4px 0 0;position:relative;min-height:4px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:11.5px;margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:2px;display:block}
+.donut{width:90px;height:90px;border-radius:50%;background:conic-gradient(var(--green) 0 62%,var(--amber) 62% 82%,var(--red) 82% 100%);display:flex;align-items:center;justify-content:center}
+.donut b{width:58px;height:58px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+
+/* roulette wheel */
+.wheel{width:170px;height:170px;border-radius:50%;margin:0 auto;
+  background:conic-gradient(#7c3aed 0 20%,#dc2626 20% 40%,#16a34a 40% 60%,#ea580c 60% 80%,#2563eb 80% 100%);
+  position:relative;box-shadow:0 0 0 6px #fff,0 0 0 8px #cbd5e1}
+.wheel::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;background:#fff;border-radius:50%;border:3px solid #0f172a}
+
+/* duel HP */
+.hpbar{height:14px;border-radius:8px;background:var(--red);position:relative;overflow:hidden}
+.hpbar i{position:absolute;left:0;top:0;height:100%;background:var(--green)}
+
+/* avatar */
+.av{width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.av.sm{width:24px;height:24px;font-size:11px}
+.av.lg{width:48px;height:48px;font-size:18px}
+
+/* medal */
+.medal{width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;margin:0 auto;font-size:22px}
+.medal .ring{position:absolute;inset:0;border-radius:50%}
+.tier-badge{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px}
+.tier.master{background:#fef9c3;color:#a16207;border:1px solid #fde047}
+.tier.great{background:#dbeafe;color:#1d4ed8}
+.tier.good{background:#dcfce7;color:#15803d}
+.tier.keep{background:#fee2e2;color:#b91c1c}
+
+/* cover page */
+.cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 50%,#7c3aed 100%);color:#fff;padding:60px 24px;page-break-after:always;position:relative;overflow:hidden}
+.cover .logo{font-size:5rem;line-height:1;margin-bottom:20px}
+.cover h1{color:#fff;font-size:3.4rem;margin-bottom:8px}
+.cover .sub{font-size:1.3rem;opacity:.92;margin-bottom:6px}
+.cover .zh{font-size:1.05rem;opacity:.85;margin-bottom:40px}
+.cover .meta{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:18px 30px;font-size:14px;backdrop-filter:blur(4px)}
+.cover .meta div{margin:5px 0}
+.cover .pillrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:34px}
+.cover .pillrow .p{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:6px 16px;border-radius:30px;font-size:13px}
+.cover .tofcue{position:absolute;bottom:30px;font-size:13px;opacity:.7}
+
+/* responsive */
+@media (max-width:900px){
+  .toc-sidebar{display:none}
+  .main-wrap{padding:20px 14px 80px}
+  .page{padding:0 14px}
+  section.chapter{padding:22px 18px}
+  h1{font-size:1.6rem}h2.section-title{font-size:1.5rem}
+}
+
+/* ============ PRINT ============ */
+@media print{
+  @page{size:A4;margin:16mm 14mm}
+  body{background:#fff;font-size:11.5px}
+  .toc-sidebar{display:none!important}
+  .main-wrap{padding:0;max-width:100%;display:block}
+  .page{padding:0}
+  .content{max-width:100%}
+  section.chapter{box-shadow:none;border:1px solid var(--border);border-radius:0;padding:0 0 8mm;margin:0;page-break-before:always}
+  section.chapter:first-of-type{page-break-before:avoid}
+  .cover{min-height:auto;border-radius:0}
+  h2.section-title,h3,h4{page-break-after:avoid}
+  .mock,.callout,table.ref,ol.steps,.card-mini{page-break-inside:avoid}
+  .lang-divider{page-break-after:avoid}
+  .print-footer{position:fixed;bottom:6mm;left:14mm;right:14mm;font-size:9px;color:var(--muted);border-top:1px solid var(--border);padding-top:4px;display:flex;justify-content:space-between}
+  a{color:var(--primary)}
+  .lang-divider,.toc-sidebar,.no-print{display:none}
+}
+.print-footer{display:none}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER PAGE ============ -->
+<div class="cover no-print">
+  <div class="logo">Mr.🆖</div>
+  <h1>ProReader</h1>
+  <div class="sub">User Manual</div>
+  <div class="zh">用戶手冊 · A Bilingual Guide for Teachers &amp; Students</div>
+  <div class="meta">
+    <div><strong>Version</strong> 2.899 &nbsp;·&nbsp; <strong>Platform</strong> Mr.🆖 ProReader</div>
+    <div><strong>Audience</strong> Students · Teachers · Administrators · Super-admins</div>
+    <div><strong>Languages</strong> English &amp; 繁體中文 (stacked)</div>
+  </div>
+  <div class="pillrow">
+    <span class="p">📖 Reading Assistant</span>
+    <span class="p">🧠 Vocabulary &amp; SRS</span>
+    <span class="p">🎮 Grammar Games</span>
+    <span class="p">🏆 Leaderboard</span>
+    <span class="p">👩‍🏫 Teacher Tools</span>
+  </div>
+  <div class="tofcue">↓ A printable, single-file reference. Use Ctrl/Cmd + P to print or save as PDF.</div>
+</div>
+
+<div class="main-wrap">
+  <!-- ============ TOC SIDEBAR (screen only) ============ -->
+  <nav class="toc-sidebar no-print">
+    <div class="lang-jump">
+      <a href="#ch1">EN</a><a href="#ch1-zh">中文</a>
+    </div>
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#ch1">1. Introduction</a></li>
+      <li><a href="#ch2">2. Getting Started &amp; AI Access</a></li>
+      <li><a href="#ch3">3. Settings Reference</a></li>
+      <li><a href="#ch4">4. The Reading Workflow</a></li>
+      <li><a href="#ch5">5. Vocabulary Tools &amp; SRS</a></li>
+      <li><a href="#ch6">6. Reading Test</a></li>
+      <li><a href="#ch7">7. Grammar Suite &amp; Games</a></li>
+      <li><a href="#ch8">8. AI Reading Tutor</a></li>
+      <li><a href="#ch9">9. My Vocabulary Page</a></li>
+      <li><a href="#ch10">10. Dashboards &amp; Sharing</a></li>
+      <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
+      <li><a href="#appendix">Appendices</a></li>
+    </ol>
+    <h3>Legend</h3>
+    <p class="small"><span class="role student">student</span> <span class="role teacher">teacher</span><br><span class="role admin">admin</span> <span class="role super">super-admin</span></p>
+    <p class="small"><span class="tag-teacher"></span><br><span class="tag-admin"></span><br><span class="tag-super"></span></p>
+  </nav>
+
+  <!-- ============ CONTENT ============ -->
+  <main class="content">
+    <!-- ============ CHAPTER 1: INTRODUCTION ============ -->
+    <section class="chapter" id="ch1">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 1</span>
+        <h2 class="section-title">1. Introduction &amp; Welcome</h2>
+        <p class="small">What Mr.🆖 ProReader is, who this guide is for, and how to install the app.</p>
+      </div>
+
+      <h3>Welcome to Mr.🆖 ProReader</h3>
+      <p>Mr.🆖 ProReader is an AI-powered reading-comprehension assistant designed for classrooms and self-study. You can photograph a page of text (or upload a PDF, paste a link, or pull a text from your school's repository), and the platform will instantly produce summaries, simplified versions, mind maps, image visualizations, vocabulary glossaries, comprehension tests, grammar lessons, and gamified practice — all calibrated to the reader's age.</p>
+      <p>It works in the browser and can be <strong>installed as a mobile / desktop app</strong> (a Progressive Web App, PWA). Sign-in uses a Google account. Under the hood, every AI feature can be powered by your school's subscription, your own API key, or a free access password — you choose.</p>
+
+      <h3>Who this guide is for</h3>
+      <p>This manual documents <strong>every feature</strong>, from first sign-in to advanced teacher dashboards. Most features are available to everyone; a few are reserved for teachers or administrators. Throughout the guide, role-restricted items are clearly flagged:</p>
+      <table class="ref">
+        <tr><th>Marker</th><th>Means</th><th>Who can use it</th></tr>
+        <tr><td><span class="role student">student</span></td><td>Default learner account</td><td>All signed-in users</td></tr>
+        <tr><td><span class="tag-teacher"></span></td><td>Teacher-only</td><td>Teachers, admins &amp; super-admins</td></tr>
+        <tr><td><span class="tag-admin"></span></td><td>Administrator-only</td><td>Admins &amp; super-admins</td></tr>
+        <tr><td><span class="tag-super"></span></td><td>Super-admin-only</td><td>Super-admins only</td></tr>
+      </table>
+      <div class="callout"><strong>The four roles</strong> Roles are: <b>student</b> (default — every new Google sign-in starts here), <b>teacher</b> (assigned manually by an admin), <b>admin</b> (an email pre-listed by the deployment), and <b>super-admin</b> (an email pre-listed for global control). Admins manage one school; super-admins manage all schools. You will see your role as a colored badge in the top-right user menu.</div>
+
+      <h3>How to read this guide</h3>
+      <ul>
+        <li><strong>Numbered tutorials</strong> walk you through key first-time flows (sign-in, AI setup, your first reading session).</li>
+        <li><strong>Reference tables</strong> list every option, model, and shortcut for quick lookup.</li>
+        <li><strong>Illustrations</strong> are faithful recreations of the real interface, not screenshots — colors and layouts match what you will see on screen.</li>
+        <li>Each chapter is written first in <strong>English</strong>, then repeated in <strong>繁體中文</strong> under a divider marked 中文版.</li>
+      </ul>
+
+      <h3>Installing the app (PWA)</h3>
+      <p>You can run Mr.🆖 ProReader entirely in the browser, but installing it gives a native-app-like experience with an icon on your home screen. On your first visit a dialog offers to install it. The steps differ by device:</p>
+
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:240px">
+          <div class="mock">
+            <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span></div>
+            <div class="mock-body" style="text-align:center">
+              <div style="font-size:30px;margin-bottom:6px">📱</div>
+              <div style="font-weight:700;font-size:14px;margin-bottom:4px">Install App</div>
+              <p class="small" style="margin-bottom:12px">Install Mr.🆖 ProReader on your device for quick access and a native app-like experience.</p>
+              <span class="btn primary">⬇ Install App</span> &nbsp; <span class="btn outline">Not now</span>
+            </div>
+          </div>
+          <div class="mock-cap">Standard browsers (Chrome / Edge / Android): one-tap install prompt.</div>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <div class="mock">
+            <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com — iOS Safari</span></div>
+            <div class="mock-body">
+              <div style="font-weight:700;font-size:13px;margin-bottom:8px">📱 Install App</div>
+              <ol style="font-size:12px;margin:0;padding-left:18px">
+                <li style="margin:5px 0"><b>①</b> Tap the Share button <span class="pill">􀈂</span></li>
+                <li style="margin:5px 0"><b>②</b> Scroll down and tap "Add to Home Screen" <span class="pill">＋</span></li>
+                <li style="margin:5px 0"><b>③</b> Tap "Add" to confirm</li>
+              </ol>
+            </div>
+          </div>
+          <div class="mock-cap">iPhone / iPad (Safari): use the Share → Add to Home Screen menu.</div>
+        </div>
+      </div>
+      <div class="callout tip"><strong>Tip</strong> Installing is optional. If you click "Not now", the prompt won't reappear during your current browser session but will offer again next time. Already-installed copies never show the prompt.</div>
+
+      <h3>What you'll need before you start</h3>
+      <ul>
+        <li>A <strong>Google account</strong> (personal, school, or workspace — any Google login works).</li>
+        <li>One of three <strong>AI access methods</strong> (covered in Chapter 2): a subscription, your own API key, or a free access password from Mr.🆖.</li>
+        <li>Reading material: a photo/scan, a PDF, a web link, or a text from your school's repository.</li>
+      </ul>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <h3>歡迎使用 Mr.🆖 ProReader</h3>
+      <p>Mr.🆖 ProReader 是一個以人工智能驅動的閱讀理解助手，專為課堂及自學而設。你可以拍攝一頁文字（或上傳 PDF、貼上網址，或從學校的文字庫選取），平台便會即時生成摘要、簡化版本、心智圖、圖像視覺化、生字詞彙表、閱讀理解測驗、文法課程及遊戲化練習——全部根據讀者的年齡自動調校。</p>
+      <p>它可在瀏覽器中運行，亦可<strong>安裝為手機／桌面應用程式</strong>（漸進式網頁應用，PWA）。登入使用 Google 帳戶。每項 AI 功能可由學校訂閱、你自己的 API 金鑰，或免費存取密碼來驅動——由你選擇。</p>
+
+      <h3>本手冊的對象</h3>
+      <p>本手冊涵蓋<strong>所有功能</strong>，由首次登入到進階教師儀表板。大部分功能人人可用；少數僅限教師或管理員。全手冊中，受角色限制的項目均有清楚標示：</p>
+      <table class="ref">
+        <tr><th>標記</th><th>意思</th><th>誰可使用</th></tr>
+        <tr><td><span class="role student">student</span></td><td>預設學生帳戶</td><td>所有已登入用戶</td></tr>
+        <tr><td><span class="tag-teacher"></span></td><td>僅限教師</td><td>教師、管理員及超級管理員</td></tr>
+        <tr><td><span class="tag-admin"></span></td><td>僅限管理員</td><td>管理員及超級管理員</td></tr>
+        <tr><td><span class="tag-super"></span></td><td>僅限超級管理員</td><td>僅超級管理員</td></tr>
+      </table>
+      <div class="callout"><strong>四個角色</strong> 角色包括：<b>student 學生</b>（預設——每個新的 Google 登入皆由此開始）、<b>teacher 教師</b>（由管理員手動指派）、<b>admin 管理員</b>（部署時預先登記的電郵），以及 <b>super-admin 超級管理員</b>（預先登記以作全域控制）。管理員管理一間學校；超級管理員管理所有學校。你的角色會在右上角用戶選單中以彩色徽章顯示。</div>
+
+      <h3>如何閱讀本手冊</h3>
+      <ul>
+        <li><strong>編號教學</strong>帶你走過首次關鍵流程（登入、AI 設定、第一次閱讀）。</li>
+        <li><strong>參考表格</strong>列出每個選項、模型及捷徑以便快速查閱。</li>
+        <li><strong>插圖</strong>是真實介面的忠實重現，並非截圖——顏色與版面與螢幕所見一致。</li>
+        <li>每章先以<strong>英文</strong>撰寫，然後在標有「中文版」的分隔線下重複<strong>繁體中文</strong>版本。</li>
+      </ul>
+
+      <h3>安裝應用程式（PWA）</h3>
+      <p>你可以完全在瀏覽器中使用 Mr.🆖 ProReader，但安裝後可獲得近似原生應用程式的體驗，並在主畫面上建立圖示。首次到訪時會彈出安裝對話框。步驟因裝置而異（見上方插圖）。</p>
+      <div class="callout tip"><strong>提示</strong> 安裝是可選的。若點擊「Not now / 暫不」，該提示在當前瀏覽器工作階段內不會再出現，但下次會再次提示。已安裝的副本永不顯示提示。</div>
+
+      <h3>開始前你需要準備</h3>
+      <ul>
+        <li>一個 <strong>Google 帳戶</strong>（個人、學校或工作場所皆可）。</li>
+        <li>三種<strong> AI 存取方式</strong>之一（見第 2 章）：訂閱、自己的 API 金鑰，或 Mr.🆖 提供的免費存取密碼。</li>
+        <li>閱讀材料：照片／掃描、PDF、網址，或學校文字庫中的文章。</li>
+      </ul>
+    </section>
+    <!-- ============ CHAPTER 2: GETTING STARTED ============ -->
+    <section class="chapter" id="ch2">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 2</span>
+        <h2 class="section-title">2. Getting Started &amp; AI Access</h2>
+        <p class="small">Signing in, understanding roles, and choosing how AI usage is paid for.</p>
+      </div>
+
+      <h3>2.1 Signing in</h3>
+      <p>Mr.🆖 ProReader uses <strong>Google sign-in</strong> only (no separate passwords to remember). From the landing page, click <b>Sign in</b>; you'll be redirected to Google's consent screen and back to the app.</p>
+
+      <ol class="steps">
+        <li>Open the app URL in your browser (or tap the home-screen icon if installed).</li>
+        <li>Click the <b>Sign in</b> button (top-right of the landing page).</li>
+        <li>Choose your Google account and approve the sign-in.</li>
+        <li>You return to the app already logged in. On your <em>very first</em> sign-in, your role and school are assigned automatically (see below).</li>
+      </ol>
+
+      <div class="mock">
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com — Landing page</span></div>
+        <div class="mock-body" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;text-align:center;padding:34px 20px">
+          <div style="font-size:34px">Mr.🆖</div>
+          <div style="font-size:1.4rem;font-weight:800;margin:4px 0">ProReader</div>
+          <p style="opacity:.92;max-width:420px;margin:0 auto 16px">Your AI reading companion — understand, practice, and master any text.</p>
+          <span class="btn" style="background:#fff;color:#1e3a8a;font-weight:700">🔴 Sign in with Google</span>
+          <div style="margin-top:14px"><span class="pill" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4)">🌐 Language: English</span></div>
+        </div>
+      </div>
+      <div class="mock-cap">The landing page with the Google sign-in button and a language switcher.</div>
+
+      <h3>2.2 What happens on first sign-in</h3>
+      <p>Two things are set up for you automatically — you don't choose them:</p>
+      <table class="ref">
+        <tr><th>Auto-assigned</th><th>How it's decided</th></tr>
+        <tr><td><strong>Your role</strong></td><td>If your email is on the deployment's admin/super-admin lists you get that role; otherwise you start as <b>student</b>. Teachers are promoted later by an admin.</td></tr>
+        <tr><td><strong>Your school</strong></td><td>Your email <b>domain</b> (the part after <code>@</code>) is matched to a school record. If none exists yet, one is created for that domain.</td></tr>
+      </table>
+      <div class="callout"><strong>Roles at a glance</strong> &nbsp; <span class="role student">student</span> reads &amp; practices · <span class="role teacher">teacher</span> manages classes, shares content, views class analytics · <span class="role admin">admin</span> runs a whole school (users, classes, billing) · <span class="role super">super-admin</span> runs every school.</div>
+
+      <h3>2.3 Choosing your AI access mode <span style="font-weight:400;font-size:.85em;color:var(--muted)">(the one setup decision)</span></h3>
+      <p>Before any AI feature will work, you must pick a <strong>Billing Mode</strong> in <b>Settings → General</b>. There are three options. The app auto-suggests one when you first open Settings, but you can change it any time.</p>
+
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin:18px 0">
+        <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--green)">
+          <div class="b-green badge">SUBSCRIPTION</div>
+          <p class="small" style="margin:8px 0 0">Flat monthly/yearly fee. Best for regular classroom use. No keys to manage.</p>
+        </div>
+        <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--blue)">
+          <div class="b-blue badge">METER (API KEY)</div>
+          <p class="small" style="margin:8px 0 0">Bring your own provider key. Pay exactly for what you use. Unlimited image generation.</p>
+        </div>
+        <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--violet)">
+          <div class="b-violet badge">FREE (ACCESS PASSWORD)</div>
+          <p class="small" style="margin:8px 0 0">A password from Mr.🆖. Mr.🆖 pays the AI cost for you. Strict daily limits apply.</p>
+        </div>
+      </div>
+
+      <p>The table below compares them. All three give access to <em>every</em> feature — they only differ in billing and rate limits.</p>
+      <table class="ref">
+        <tr><th></th><th>Subscription</th><th>Meter (API Key)</th><th>Free (Password)</th></tr>
+        <tr><th>Who pays</th><td>You (Stripe)</td><td>You (your provider)</td><td>Mr.🆖</td></tr>
+        <tr><th>What you enter</th><td>Nothing (after checkout)</td><td>API key + base URL</td><td>Access password</td></tr>
+        <tr><th>Image generation</th><td>2 / day</td><td class="yes">Unlimited</td><td>1 / day</td></tr>
+        <tr><th>Setup difficulty</th><td>Easiest</td><td>Technical</td><td>Easy (need a password)</td></tr>
+        <tr><th>Best for</th><td>Most users</td><td>Power users / devs</td><td>Trying it out</td></tr>
+      </table>
+
+      <h4>Mode A — Subscription</h4>
+      <ol class="steps">
+        <li>In <b>Settings → General → Billing Mode</b>, choose <b>Subscription</b>.</li>
+        <li>Scroll to the <b>Subscription</b> panel and pick <b>Monthly</b> or <b>Yearly</b> (yearly saves ~2 months).</li>
+        <li>You're taken to <b>Stripe Checkout</b> to enter payment. New accounts may get a free trial (typically 1 day; one trial per account).</li>
+        <li>On success, AI features unlock immediately. Manage billing via <b>Manage Subscription</b> (Stripe portal), or <b>Cancel</b> / <b>Reactivate</b> from the status card.</li>
+      </ol>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:230px">
+          <div class="mock">
+            <div class="mock-bar"><span class="pill">⚙ Settings · Subscription</span></div>
+            <div class="mock-body">
+              <div style="display:flex;gap:10px">
+                <div class="card-mini" style="flex:1;text-align:center;border:2px solid var(--border)">
+                  <div class="b-slate badge">MONTHLY</div>
+                  <div style="font-size:1.5rem;font-weight:800;margin:6px 0">$9.99</div>
+                  <div class="small">/ month</div>
+                  <span class="btn outline sm" style="margin-top:8px">Choose</span>
+                </div>
+                <div class="card-mini" style="flex:1;text-align:center;border:2px solid var(--primary);background:var(--primary-soft)">
+                  <div class="b-blue badge">YEARLY · Save 2 months</div>
+                  <div style="font-size:1.5rem;font-weight:800;margin:6px 0">$99.90</div>
+                  <div class="small">/ year</div>
+                  <span class="btn primary sm" style="margin-top:8px">Choose</span>
+                </div>
+              </div>
+              <p class="small" style="margin-top:8px;margin-bottom:0">🎁 Free trial available for new accounts</p>
+            </div>
+          </div>
+          <div class="mock-cap">Pricing cards (yearly highlighted).</div>
+        </div>
+        <div style="flex:1;min-width:230px">
+          <div class="mock">
+            <div class="mock-bar"><span class="pill">⚙ Subscription status</span></div>
+            <div class="mock-body">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <span class="b-green badge">● ACTIVE</span><span class="b-blue badge">Yearly</span>
+              </div>
+              <div class="small">Next billing: <b>23 Aug 2026</b></div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+                <span class="btn sm outline">Manage</span>
+                <span class="btn sm">Switch plan</span>
+                <span class="btn sm" style="background:var(--red);color:#fff;border-color:var(--red)">Cancel</span>
+              </div>
+            </div>
+          </div>
+          <div class="mock-cap">Active subscription status card.</div>
+        </div>
+      </div>
+
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>School Subscription</strong> If your school has an active bulk (school) subscription arranged by an admin, the personal subscription panel is disabled — you're already covered. Admins see seat-management controls instead of pricing cards (see Chapter 11).</div>
+
+      <h4>Mode B — Meter (your own API key)</h4>
+      <p>Choose this if you have a key from an AI provider. In the current app the provider is <b>Mr.🆖 AI Hub</b> (an OpenAI-compatible endpoint at <code>https://api.mr5ai.com</code>); you obtain your key there.</p>
+      <ol class="steps">
+        <li>In <b>Settings → General → Billing Mode</b>, choose <b>Meter</b>.</li>
+        <li><b>AI Provider</b> stays on <i>Mr.🆖 AI Hub</i>.</li>
+        <li>Enter your <b>API Key</b> in the field that appears. The <b>API Base URL</b> is pre-filled and read-only.</li>
+        <li>Click <b>Save</b>. Your key is sent directly to the provider on each AI call; Mr.🆖 does not store or charge it.</li>
+      </ol>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">⚙ Settings · General</span></div>
+        <div class="mock-body">
+          <div style="margin-bottom:10px"><span class="small">Billing Mode</span><br><span class="input-fake" style="width:auto;display:inline-block">Meter (pay per use)</span></div>
+          <div style="margin-bottom:10px"><span class="small">AI Provider</span><br><span class="input-fake" style="width:auto;display:inline-block">Mr.🆖 AI Hub</span></div>
+          <div style="margin-bottom:10px"><span class="small">API Key</span><br><span class="input-fake">sk-••••••••••••••••••••••••••••••••</span></div>
+          <div><span class="small">API Base URL</span> <span class="pill">read-only</span><br><span class="input-fake">https://api.mr5ai.com</span></div>
+          <p class="small" style="margin-top:8px;margin-bottom:0">💡 Get your API Key at https://api.mr5ai.com</p>
+        </div>
+      </div>
+      <div class="callout tip"><strong>Why Meter?</strong> You get <b>unlimited</b> image generation and pay only for your actual usage through your own provider. Ideal for power users.</div>
+
+      <h4>Mode C — Free (Access Password)</h4>
+      <p>Choose this if Mr.🆖 gave you an access password. In this mode Mr.🆖 pays the AI cost, so daily limits are tighter (1 AI image per day).</p>
+      <ol class="steps">
+        <li>In <b>Settings → General → Billing Mode</b>, choose <b>Free</b>.</li>
+        <li>Enter the <b>Access Password</b> you received.</li>
+        <li>Save. Done.</li>
+      </ol>
+      <div class="callout"><strong>How the password stays safe (no need to memorize the detail)</strong> Your password is never sent in plain text. Each request signs it with the current time using a one-way hash (HMAC-style). The server verifies the signature within a ±10-second window and only then swaps in the real server-side API key. This means the password can't be intercepted and reused later.</div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <h3>2.1 登入</h3>
+      <p>Mr.🆖 ProReader 只使用<strong> Google 登入</strong>（無須另記密碼）。在登入頁點擊 <b>Sign in</b>，會跳轉至 Google 同意畫面，再返回應用程式。</p>
+      <ol class="steps">
+        <li>在瀏覽器開啟應用程式網址（或點擊已安裝的主畫面圖示）。</li>
+        <li>點擊 <b>Sign in</b> 按鈕（登入頁右上角）。</li>
+        <li>選擇你的 Google 帳戶並批准登入。</li>
+        <li>返回應用程式時已自動登入。首次登入時，你的角色與學校會自動指派（見下）。</li>
+      </ol>
+
+      <h3>2.2 首次登入時發生的事</h3>
+      <p>有兩件事會自動為你設定——你無須選擇：</p>
+      <table class="ref">
+        <tr><th>自動指派</th><th>決定方式</th></tr>
+        <tr><td><strong>你的角色</strong></td><td>若你的電郵在部署的管理員／超級管理員清單上，即獲該角色；否則由 <b>student 學生</b> 開始。教師其後由管理員晉升。</td></tr>
+        <tr><td><strong>你的學校</strong></td><td>你的電郵<b>域名</b>（<code>@</code> 之後的部分）會與學校記錄比對。若尚無記錄，會為該域名建立一間。</td></tr>
+      </table>
+      <div class="callout"><strong>角色概覽</strong> &nbsp; <span class="role student">student</span> 閱讀與練習 · <span class="role teacher">teacher</span> 管理班別、分享內容、查看班級數據 · <span class="role admin">admin</span> 管理整間學校（用戶、班別、帳單） · <span class="role super">super-admin</span> 管理所有學校。</div>
+
+      <h3>2.3 選擇你的 AI 存取模式 <span style="font-weight:400;font-size:.85em;color:var(--muted)">（唯一的設定決定）</span></h3>
+      <p>任何 AI 功能運作前，你必須在 <b>Settings → General</b> 選擇一個 <strong>計費模式</strong>。共有三個選項。首次開啟設定時應用程式會自動建議一個，但你可隨時更改。</p>
+      <p>三種模式的比較見上方英文版的表格。三者皆可使用<em>所有</em>功能——只在乎計費與限額。</p>
+
+      <h4>模式 A — Subscription 訂閱</h4>
+      <p>在 <b>Settings → General → Billing Mode</b> 選 <b>Subscription</b>，到 <b>Subscription</b> 面板選月費或年費（年費約省兩個月），經 Stripe 結帳後即解鎖。新帳戶或有一次免費試用。</p>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>School Subscription 學校訂閱</strong> 若你的學校已有管理員安排的學校批量訂閱，個人訂閱面板會被停用——你已受涵蓋。管理員所見為席位管理控件（見第 11 章）。</div>
+
+      <h4>模式 B — Meter 計量（自有 API 金鑰）</h4>
+      <p>選 <b>Meter</b>，供應商保持為 <b>Mr.🆖 AI Hub</b>，輸入你的 <b>API Key</b>（在 <code>https://api.mr5ai.com</code> 取得），API Base URL 已預填且唯讀。每次 AI 呼叫直接把金鑰送往供應商；Mr.🆖 不會儲存或計費。</p>
+      <div class="callout tip"><strong>為何用 Meter？</strong> 可享<b>無限</b>圖像生成，並只為實際用量向自己的供應商付款。適合進階用戶。</div>
+
+      <h4>模式 C — Free 免費（存取密碼）</h4>
+      <p>若 Mr.🆖 給了你存取密碼，選 <b>Free</b> 並輸入密碼即可。此模式下 Mr.🆖 承擔 AI 成本，故每日限額較緊（每天 1 張 AI 圖像）。</p>
+      <div class="callout"><strong>密碼如何保持安全（毋須牢記細節）</strong> 你的密碼永不以明文傳送。每次請求會以當前時間對它簽署（單向雜湊，HMAC 風格）。伺服器在 ±10 秒視窗內驗證簽章，通過後才換入真正的伺服器端 API 金鑰。換言之密碼無法被攔截後重用。</div>
+    </section>
+    <!-- ============ CHAPTER 3: SETTINGS REFERENCE ============ -->
+    <section class="chapter" id="ch3">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 3</span>
+        <h2 class="section-title">3. Settings Reference</h2>
+        <p class="small">Open Settings from the top-right user menu. Four tabs: General, Models, TTS, Notifications.</p>
+      </div>
+
+      <p>The Settings dialog is where you configure AI access (Chapter 2), choose which AI model powers each feature, set text-to-speech voices, and manage email reminders. Open it from the <b>user menu</b> (your avatar, top-right) → <b>Settings</b>. Your choices are saved to your account and restored on every sign-in, on any device.</p>
+
+      <div class="mock">
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span><span class="pill">▾ Alex (Teacher)</span></div>
+        <div class="mock-body" style="padding:0">
+          <div style="display:flex">
+            <div style="width:200px;background:var(--subtle);padding:14px;border-right:1px solid var(--border);font-size:13px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span class="av">A</span><div><b style="font-size:13px">Alex Chan</b><br><span class="role teacher" style="font-size:10px">teacher</span></div></div>
+              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px;margin-bottom:4px">📊 Dashboard</div>
+              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px;margin-bottom:4px">🏆 Leaderboard</div>
+              <div class="small" style="padding:6px 8px;background:var(--primary-soft);border-radius:6px;margin-bottom:4px;color:var(--primary);font-weight:600">⚙ Settings</div>
+              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px;margin-bottom:4px">👩‍🏫 Teacher Dashboard</div>
+              <div class="small" style="padding:6px 8px;background:#fff;border-radius:6px">⤴ Sign out</div>
+            </div>
+            <div style="flex:1;padding:16px">
+              <b style="font-size:15px">Settings</b>
+              <div class="faketab" style="margin-top:10px">
+                <span class="active">General</span><span>Models</span><span>TTS</span><span>🔔 Notifications</span>
+              </div>
+              <p class="small" style="margin:0">…billing mode, provider, language, theme, danger zone (see tables below)…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mock-cap">The Settings dialog opens from the user menu. Notifications tab is hidden until signed in.</div>
+
+      <h3>3.1 General tab</h3>
+      <table class="ref">
+        <tr><th>Setting</th><th>Options / field</th><th>Notes</th></tr>
+        <tr><td><strong>Billing Mode</strong></td><td>Subscription · Meter · Free</td><td>See Chapter 2. Hidden in static "export" builds.</td></tr>
+        <tr><td><strong>AI Provider</strong></td><td>Mr.🆖 AI Hub</td><td>Single option in the UI.</td></tr>
+        <tr><td><strong>API Key</strong> / <strong>API Base URL</strong></td><td>text (password)</td><td>Shown only when mode = Meter. Base URL read-only (<code>https://api.mr5ai.com</code>).</td></tr>
+        <tr><td><strong>Access Password</strong></td><td>text (password)</td><td>Shown only when mode = Free.</td></tr>
+        <tr><td><strong>Subscription panels</strong></td><td>Pricing / status cards</td><td>Shown when mode = Subscription &amp; signed in. School sub disables personal.</td></tr>
+        <tr><td><strong>UI Language</strong></td><td>System · English · 繁體中文</td><td>Changes all interface text.</td></tr>
+        <tr><td><strong>UI Theme</strong></td><td>System · Light · Dark</td><td>Follows your OS by default.</td></tr>
+        <tr><td><strong>Jailbreak Mode</strong></td><td>on / off switch</td><td>Unlocks "advanced Answer Help" in the tutor (see Ch. 8).</td></tr>
+        <tr><td><strong>Show "Give Answer"</strong></td><td>on / off switch</td><td>Requires Jailbreak Mode on. Turning off Jailbreak also turns this off.</td></tr>
+        <tr><td><strong>Delete Account</strong> <span class="tag-super" style="border:none"></span></td><td>Danger Zone button</td><td>Hidden for super-admins. Requires re-typing your email to confirm. Irreversible.</td></tr>
+      </table>
+
+      <h3>3.2 Models tab — choose the AI engine per feature</h3>
+      <p>Each AI-powered feature can use a different model. Lighter/faster models are cheaper; larger models are smarter. You can mix and match. If a stored model is ever removed from the app, it auto-resets to the default.</p>
+      <table class="ref">
+        <tr><th>Feature (label)</th><th>Field</th><th>Available models</th><th>Default</th></tr>
+        <tr><td>Vision (OCR) Model</td><td><code>visionModel</code></td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
+        <tr><td>Summary Model</td><td><code>summaryModel</code></td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Mind Map Model</td><td><code>mindMapModel</code></td><td rowspan="7">same list as Summary</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Adapt Text Model</td><td><code>adaptedTextModel</code></td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Simplify Text Model</td><td><code>simplifyModel</code></td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Reading Test Model</td><td><code>readingTestModel</code></td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Glossary Model</td><td><code>glossaryModel</code></td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Sentence Analysis Model</td><td><code>sentenceAnalysisModel</code></td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Grammar Model</td><td><code>grammarModel</code></td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Reading Text Generator Model</td><td><code>readingTextModel</code></td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Basic AI Tutor Model</td><td><code>basicTutorModel</code></td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Advanced AI Tutor Model</td><td><code>tutorModel</code></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
+      </table>
+      <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code> for the most capable (and costliest) reasoning.</div>
+
+      <h3>3.3 TTS tab — text-to-speech</h3>
+      <table class="ref">
+        <tr><th>Setting</th><th>Options</th><th>Notes</th></tr>
+        <tr><td><strong>TTS Voice</strong></td><td>Alloy (US male) · Nova (US female) · Echo/Adam (US male) · Fable/Phoebe (US female) · Onyx/Ollie (UK male) · Shimmer/Ava (US female)</td><td>Used by glossary speak buttons, flashcards, spelling game.</td></tr>
+        <tr><td><strong>Playback Speed</strong></td><td>0.25× · 0.5× · 0.75× · 1.0×</td><td>Slower speeds help language learners.</td></tr>
+        <tr><td><strong>Auto-speak Flashcard</strong></td><td>on / off</td><td>Reads each word aloud automatically when a flashcard loads. On by default.</td></tr>
+      </table>
+
+      <h3>3.4 Notifications tab <span style="font-weight:400;font-size:.8em">(signed-in only)</span></h3>
+      <p>Controls reading-reminder emails sent on a schedule by the server.</p>
+      <table class="ref">
+        <tr><th>Setting</th><th>Options</th></tr>
+        <tr><td><strong>Email Reminders</strong></td><td>on / off</td></tr>
+        <tr><td><strong>Remind me every</strong></td><td>1 · 2 · 3 · 5 · 7 · 14 days (default 3)</td></tr>
+      </table>
+
+      <h3>3.5 Footer buttons</h3>
+      <ul>
+        <li><b>Save</b> — applies your changes to the store (and syncs to the server if signed in).</li>
+        <li><b>Reset all settings</b> — restores every option to its factory default.</li>
+      </ul>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>「設定」對話框讓你配置 AI 存取（第 2 章）、為每項功能選擇 AI 模型、設定語音朗讀聲線，以及管理電郵提醒。從右上角<b>用戶選單</b>（你的頭像）→ <b>Settings</b> 開啟。你的選擇會儲存至帳戶，並在每次以任何裝置登入時還原。</p>
+
+      <h3>3.1 General 一般</h3>
+      <table class="ref">
+        <tr><th>設定</th><th>選項</th><th>備註</th></tr>
+        <tr><td><strong>計費模式 Billing Mode</strong></td><td>Subscription · Meter · Free</td><td>見第 2 章。</td></tr>
+        <tr><td><strong>AI 供應商</strong></td><td>Mr.🆖 AI Hub</td><td>介面中唯一選項。</td></tr>
+        <tr><td><strong>API 金鑰 / API Base URL</strong></td><td>文字（密碼欄）</td><td>僅於 Meter 模式顯示。Base URL 唯讀。</td></tr>
+        <tr><td><strong>存取密碼 Access Password</strong></td><td>文字（密碼欄）</td><td>僅於 Free 模式顯示。</td></tr>
+        <tr><td><strong>訂閱面板</strong></td><td>定價 / 狀態卡</td><td>Subscription 模式且已登入時顯示。</td></tr>
+        <tr><td><strong>介面語言</strong></td><td>跟隨系統 · English · 繁體中文</td><td>更改全部介面文字。</td></tr>
+        <tr><td><strong>主題</strong></td><td>跟隨系統 · 淺色 · 深色</td><td>預設跟隨作業系統。</td></tr>
+        <tr><td><strong>越獄模式 Jailbreak Mode</strong></td><td>開 / 關</td><td>解鎖導師的「進階答案協助」（見第 8 章）。</td></tr>
+        <tr><td><strong>顯示「給出答案」</strong></td><td>開 / 關</td><td>需先開啟越獄模式。</td></tr>
+        <tr><td><strong>刪除帳戶</strong> <span class="tag-super" style="border:none"></span></td><td>危險區域按鈕</td><td>超級管理員不顯示。需重新輸入電郵確認，無法復原。</td></tr>
+      </table>
+
+      <h3>3.2 Models 模型 — 為每項功能選擇 AI 引擎</h3>
+      <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。各模型清單見上方英文版表格。</p>
+      <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>step-3.7-flash</code> 為推薦之選；切換至 <code>gpt-5.6-terra</code> 可得最強（亦最貴）的推理能力。</div>
+
+      <h3>3.3 TTS 語音朗讀</h3>
+      <p>聲線選項：Alloy（美式男）· Nova（美式女）· Echo/Adam（美式男）· Fable/Phoebe（美式女）· Onyx/Ollie（英式男）· Shimmer/Ava（美式女）。速度 0.25×–1.0×。可開啟「自動朗讀生字卡」。</p>
+
+      <h3>3.4 Notifications 通知 <span style="font-weight:400;font-size:.8em">（須登入）</span></h3>
+      <p>控制伺服器按計劃發送的閱讀提醒電郵。電郵提醒開關、提醒頻率（每 1/2/3/5/7/14 天，預設 3）。</p>
+
+      <h3>3.5 底部按鈕</h3>
+      <ul><li><b>Save 儲存</b>——套用變更（已登入則同步至伺服器）。</li><li><b>Reset all settings 重設全部</b>——還原所有選項至出廠預設值。</li></ul>
+    </section>
+    <!-- ============ CHAPTER 4: READING WORKFLOW ============ -->
+    <section class="chapter" id="ch4">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 4</span>
+        <h2 class="section-title">4. The Reading Workflow</h2>
+        <p class="small">The core experience: from uploading a text to producing summaries, mind maps, adapted text, and difficulty analysis.</p>
+      </div>
+
+      <p>After sign-in you land on the <b>main page</b> — the reading workspace. Work flows top-to-bottom through a 13-step tracker. The <b>Table of Contents</b> floating button (bottom-right) and the <b>AI Tutor</b> button sit above it. Everything is auto-saved to your History continuously.</p>
+
+      <h3>4.0 The Workflow Progress tracker</h3>
+      <p>A bordered card appears after you upload text, showing 13 numbered steps. Completed steps show ✓; click any accessible step to jump there. The percentage at the top is your completion for this reading session.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📊 Workflow Progress · 62%</span></div>
+        <div class="mock-body">
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="badge b-green">✓ Upload</span><span class="badge b-green">✓ Summary</span><span class="badge b-green">✓ Mind Map</span>
+            <span class="badge b-green">✓ Visualization</span><span class="badge b-green">✓ Adapted</span><span class="badge b-green">✓ Sentence</span>
+            <span class="badge b-green">✓ Highlight</span><span class="badge b-green">✓ Glossary</span><span class="badge b-slate">9 Spelling</span>
+            <span class="badge b-slate">10 Quiz</span><span class="badge b-slate">11 Reading Test</span><span class="badge b-slate">12 Grammar Game</span><span class="badge b-slate">13 Grammar Quiz</span>
+          </div>
+          <p class="small" style="margin:10px 0 0">8 of 13 complete. Tap any step to scroll to it.</p>
+        </div>
+      </div>
+
+      <h3>4.1 Step 1 — Student Info</h3>
+      <p>First, drag the slider to set your <strong>age (8–18)</strong>. The app shows an estimated HK grade level, and this age is used to <em>calibrate every AI output</em> that follows — a 9-year-old gets simpler summaries and adapted text than a 16-year-old.</p>
+      <table class="ref"><tr><th>Age</th><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+      <tr><th>Grade</th><td>P3</td><td>P4</td><td>P5</td><td>P6</td><td>F1</td><td>F2</td><td>F3</td><td>F4</td><td>F5</td><td>F6</td><td>DSE</td></tr></table>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🎒 Student Info</span></div>
+        <div class="mock-body">
+          <div class="slider-track"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Age 8</span><span style="font-weight:800;font-size:1.2rem">13</span><span class="small">18</span></div>
+          <span class="badge b-blue" style="margin-top:8px">Form 2 (Junior Secondary)</span>
+        </div>
+      </div>
+
+      <h3>4.2 Step 2 — Uploading text (3 sources)</h3>
+      <p>The Upload section has three tabs for getting text in:</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">⬆ Upload</span></div>
+        <div class="mock-body">
+          <div class="faketab">
+            <span class="active">📁 Upload</span><span>📚 Repository</span><span>✨ AI Generate</span>
+          </div>
+          <div style="border:2px dashed var(--border-strong);border-radius:10px;padding:26px;text-align:center;background:var(--subtle)">
+            <div style="font-size:28px">🖼️ 📄</div>
+            <p style="margin:6px 0;font-weight:600">Drag &amp; drop images or PDFs here</p>
+            <p class="small" style="margin:0">or click to browse · PNG, JPG, PDF supported · Wake Lock keeps extraction alive on iOS</p>
+          </div>
+        </div>
+      </div>
+      <table class="ref">
+        <tr><th>Tab</th><th>What it does</th></tr>
+        <tr><td><b>Upload</b></td><td>Drop images (PNG/JPG) or PDFs. Each page is read by vision-AI OCR and combined into text. Thumbnails show per-file actions (maximize, delete). A document title is auto-generated.</td></tr>
+        <tr><td><b>Repository</b></td><td>Choose a pre-shared text from your school/class/public repository (texts your teacher added).</td></tr>
+        <tr><td><b>AI Generate</b></td><td>Have AI write a fresh text: pick a Topic, Text Type, Word Count, and CEFR level (auto-suggested from your age). Marked as "AI Generated".</td></tr>
+      </table>
+      <div class="callout tip"><strong>Tip</strong> Once text is extracted you can <b>edit it</b> (pencil icon in the Original tab) — handy for fixing OCR errors. Editing clears AI-derived content (adapted text, glossary, etc.) after a confirmation prompt.</div>
+
+      <h3>4.3 Summary</h3>
+      <p>Click <b>Generate</b> to get a streaming AI summary: a TL;DR, main points, key words, and a reflection question, rendered as Markdown.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📝 Summary</span><span class="btn primary sm">Generate</span></div>
+        <div class="mock-body">
+          <p style="margin:0 0 6px"><b>TL;DR</b></p>
+          <p class="small">The article explores how coral reefs… <span style="color:var(--primary)">▍</span></p>
+          <p style="margin:0 0 6px"><b>Main Points</b></p>
+          <ul class="small" style="margin:0"><li>Coral reefs cover less than 1% of the ocean…</li><li>Rising sea temperatures cause bleaching…</li></ul>
+        </div>
+      </div>
+
+      <h3>4.4 Mind Map</h3>
+      <p>A toggle lets you choose <b>Chinese or English</b>, then Generate produces a Markdown mind map (scrollable). Regenerate any time.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🧠 Mind Map</span><span class="pill">中文: off</span><span class="btn primary sm">Generate</span></div>
+        <div class="mock-body" style="font-family:var(--mono);font-size:12px;background:#0f172a;color:#cbd5e1">
+          <div># Coral Reefs</div>
+          <div style="padding-left:14px">## Importance</div>
+          <div style="padding-left:28px">- Biodiversity hotspots</div>
+          <div style="padding-left:28px">- Coastal protection</div>
+          <div style="padding-left:14px">## Threats</div>
+          <div style="padding-left:28px">- Bleaching</div>
+        </div>
+      </div>
+
+      <h3>4.5 Visualization</h3>
+      <p>AI generates an illustration of the text's content (toggle Chinese/English for the prompt). After generation you can <b>Download (PNG)</b> or click the image for a fullscreen zoom. <strong>Rate-limited</strong>: Free = 1/day, Subscription = 2/day, Meter = unlimited. A "remaining: N" counter shows your quota; when 0 a lock screen appears.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🎨 Visualization</span><span class="pill">remaining: 1</span><span class="btn primary sm">Generate</span></div>
+        <div class="mock-body">
+          <div style="height:110px;border-radius:8px;background:linear-gradient(135deg,#67e8f9,#a78bfa,#f472b6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.3)">🐠 Coral reef scene</div>
+        </div>
+      </div>
+
+      <h3>4.6 Adapted Text — the interactive reading hub</h3>
+      <p>The largest section. Three tabs let you read the <b>Original</b>, an <b>Adapted</b> (age-simplified) version, and a <b>Simplified</b> (even simpler) version side by side, with paragraph navigation between them.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📖 Adapted Text</span><span class="btn primary sm">Adapt (age 13) ▾</span><span class="btn sm">⬇ Word</span></div>
+        <div class="mock-body">
+          <div class="faketab"><span class="active">Original</span><span>Adapted</span><span>Simplified</span></div>
+          <p class="small" style="margin:0 0 8px">Highlight: <span class="chip yellow">biodiversity</span> <span class="chip yellow">ecosystem</span> &nbsp; Analyzed: <span class="chip blue">Coral reefs…</span></p>
+          <div style="background:var(--subtle);border-radius:6px;padding:10px;font-size:13px;line-height:1.7">
+            Coral reefs are among the most diverse <span style="background:#fef9c3;padding:0 2px">ecosystems</span> on Earth. They provide a home for thousands of marine species. <span style="color:var(--blue);border-bottom:2px solid var(--blue)">However, rising ocean temperatures threaten their survival.</span>
+          </div>
+          <p class="small" style="margin:8px 0 0">Select any text → <span class="pill">＋ Add word</span> <span class="pill">🧠 Analyze</span> <span class="pill">🔊 Read aloud</span></p>
+        </div>
+      </div>
+      <table class="ref">
+        <tr><th>Feature</th><th>How to use</th></tr>
+        <tr><td><b>Original / Adapted / Simplified</b></td><td>Tabs to switch reading level. "O/A/S" buttons on each paragraph jump to the matching paragraph in the other tabs (amber dot warns if paragraph counts differ).</td></tr>
+        <tr><td><b>Edit text</b></td><td>Pencil icon → edit raw text. Saving clears derived AI content (with confirmation).</td></tr>
+        <tr><td><b>AI Vocabulary Suggest</b></td><td>Wand icon → pick 10/20/30/40/50 → AI suggests vocabulary words from the text (adds to highlighted words).</td></tr>
+        <tr><td><b>Highlighted words</b></td><td>Yellow chips in text. Click a glossary word for a popover (definition, syllabification, example, speak).</td></tr>
+        <tr><td><b>Sentence Analysis</b></td><td>Select text → <b>Analyze</b> (Brain icon) → AI explains grammar/meaning of that sentence in a dialog.</td></tr>
+        <tr><td><b>Selection toolbar</b></td><td>Select any text → floating toolbar: <b>Add Word</b> (to vocabulary), <b>Analyze</b>, <b>Read Aloud</b> (TTS).</td></tr>
+        <tr><td><b>Download Word</b></td><td>Export a styled .docx with checkboxes to include Glossary and/or Sentence Analysis, plus adapted/simplified sections.</td></tr>
+      </table>
+
+      <h3>4.7 Text Difficulty &amp; CEFR Highlighting</h3>
+      <p>Below the Adapted Text, toggle <b>Show Cards</b> to compare readability metrics across Original/Adapted/Simplified, and toggle <b>CEFR Highlight</b> to color-code every word by its difficulty level.</p>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:200px">
+          <div class="card-mini">
+            <div class="ttl">Original <span class="b-red badge">B2</span></div>
+            <div class="small">214 words · 11 sentences</div>
+            <div class="small">Flesch: <b>54</b> (Fairly hard) · Grade: <b>S6</b></div>
+          </div>
+          <div class="card-mini" style="margin-top:8px">
+            <div class="ttl">Adapted <span class="b-amber badge">B1</span></div>
+            <div class="small">180 words · 9 sentences · Flesch <b>68</b> · Grade <b>S3</b></div>
+          </div>
+        </div>
+        <div style="flex:1.3;min-width:240px">
+          <div class="card-mini">
+            <div class="ttl">CEFR Highlight <span class="btn sm outline">Analyze</span></div>
+            <p class="small" style="margin:6px 0">
+              <span class="cefr-word a1">Coral</span> reefs are among the most <span class="cefr-word b1">diverse</span>
+              <span class="cefr-word a2">ecosystems</span> on Earth, yet <span class="cefr-word c1">unprecedented</span> warming…
+            </p>
+            <div class="legend">
+              <span><i style="background:var(--cefr-a1)"></i>A1 12</span><span><i style="background:var(--cefr-a2)"></i>A2 8</span>
+              <span><i style="background:var(--cefr-b1)"></i>B1 6</span><span><i style="background:var(--cefr-b2)"></i>B2 4</span>
+              <span><i style="background:var(--cefr-c1)"></i>C1 2</span><span><i style="background:var(--cefr-c2)"></i>C2 1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="callout"><strong>Difficulty metrics</strong> computed locally: Flesch Reading Ease, Flesch-Kincaid Grade, ARI, Coleman-Liau, SMOG, and CEFR (A1–C2) via <code>cefr-analyzer</code>. These are estimates for guidance.</div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>登入後進入<b>主頁面</b>——閱讀工作區。工作流程由上而下貫穿 13 步追蹤器。<b>目錄</b>浮動按鈕（右下角）及 <b>AI 導師</b>按鈕在其上方。一切持續自動儲存至你的歷史記錄。</p>
+
+      <h3>4.0 工作流程進度追蹤器</h3>
+      <p>上傳文字後會出現一張邊框卡片，顯示 13 個編號步驟。完成的步驟顯示 ✓；點擊任何可達步驟即可跳至該處。頂部百分比為本閱讀工作階段的完成度。</p>
+
+      <h3>4.1 第 1 步 — 學生資訊</h3>
+      <p>拖動滑桿設定你的<strong>年齡（8–18）</strong>。應用程式會顯示對應的香港年級，此年齡用於<em>校準隨後所有 AI 輸出</em>——9 歲者所得的摘要與改寫版本會比 16 歲者簡單。年齡對照：8=P3 … 13=F2 … 18=DSE。</p>
+
+      <h3>4.2 第 2 步 — 上傳文字（三種來源）</h3>
+      <table class="ref">
+        <tr><th>分頁</th><th>作用</th></tr>
+        <tr><td><b>Upload 上傳</b></td><td>拖放圖片（PNG/JPG）或 PDF。每頁由視覺 AI OCR 讀取並合併為文字。會自動產生文件標題。</td></tr>
+        <tr><td><b>Repository 文字庫</b></td><td>從學校／班別／公開文字庫選取預先分享的文章（由老師加入）。</td></tr>
+        <tr><td><b>AI Generate AI 生成</b></td><td>讓 AI 撰寫全新文章：選主題、文體、字數及 CEFR 級別（按年齡自動建議）。標記為「AI Generated」。</td></tr>
+      </table>
+      <div class="callout tip"><strong>提示</strong> 提取文字後可<b>編輯</b>（Original 分頁的鉛筆圖示）——便於修正 OCR 錯誤。編輯會在確認後清除 AI 衍生內容。</div>
+
+      <h3>4.3 摘要</h3>
+      <p>點擊 <b>Generate</b> 取得串流 AI 摘要：要點速覽、主要論點、關鍵詞及反思問題，以 Markdown 呈現。</p>
+
+      <h3>4.4 心智圖</h3>
+      <p>切換<b>中文／英文</b>後生成 Markdown 心智圖（可橫向捲動），可隨時重新生成。</p>
+
+      <h3>4.5 視覺化</h3>
+      <p>AI 根據文字內容生成插圖（可切換中／英文提示）。生成後可<b>下載（PNG）</b>或點擊圖片全螢幕縮放。<strong>設有額度</strong>：Free 每天 1 張、Subscription 每天 2 張、Meter 無限。</p>
+
+      <h3>4.6 改寫文本 — 互動閱讀中樞</h3>
+      <p>最大的區塊。三個分頁讓你並排閱讀<b>原文 Original</b>、<b>改寫 Adapted</b>（按年齡簡化）及<b>進一步簡化 Simplified</b>版本，並可在段落間導航。功能包括：編輯文字、AI 詞彙建議（魔杖圖示，選 10–50 個）、高亮詞彙（黃色，點擊看定義）、句子分析（選取文字→分析）、選取工具列（加詞／分析／朗讀）、下載 Word（可勾選包含詞彙表／句子分析）。</p>
+
+      <h3>4.7 文本難度與 CEFR 高亮</h3>
+      <p>在改寫文本下方，切換 <b>Show Cards</b> 比較原文／改寫／簡化的可讀性指標，切換 <b>CEFR Highlight</b> 按難度為每個詞著色。CEFR 顏色：A1 青、A2 綠、B1 琥珀、B2 橙、C1 紅、C2 紫。</p>
+      <div class="callout"><strong>難度指標</strong> 於本機計算：Flesch Reading Ease、Flesch-Kincaid Grade、ARI、Coleman-Liau、SMOG，以及 CEFR（A1–C2）。這些僅為參考估計值。</div>
+    </section>
+    <!-- ============ CHAPTER 5: VOCABULARY TOOLS & SRS ============ -->
+    <section class="chapter" id="ch5">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 5</span>
+        <h2 class="section-title">5. Vocabulary Tools &amp; Spaced Repetition</h2>
+        <p class="small">The in-session Glossary hub: table, flashcards, spelling game, and quiz — all powered by the Leitner SRS algorithm.</p>
+      </div>
+
+      <p>Once you have <b>highlighted words</b> (from AI Vocabulary Suggest or by selecting text), the <strong>Glossary</strong> section can generate definitions. It then becomes a hub with four sub-tabs: <b>Table</b>, <b>Flashcard</b>, <b>Spelling</b>, and <b>Quiz</b>. Every word you practice is tracked by a spaced-repetition system (SRS) so you review the right words at the right time.</p>
+
+      <h3>5.1 The Glossary hub</h3>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📖 Glossary · 18 words</span><span class="btn primary sm">Generate</span><span class="btn sm">⬇ Word</span><span class="btn sm">⬇ Excel</span></div>
+        <div class="mock-body">
+          <div class="faketab"><span class="active">Table</span><span>Flashcard</span><span>Spelling</span><span>Quiz</span></div>
+          <table class="ref" style="margin:0">
+            <tr><th>Word</th><th>Syllables</th><th>POS</th><th>English</th><th>中文</th></tr>
+            <tr><td><b>biodiversity</b></td><td>bi-o-div-er-si-ty</td><td>n.</td><td>variety of life</td><td>生物多樣性</td></tr>
+            <tr><td><b>ecosystem</b></td><td>e-co-sys-tem</td><td>n.</td><td>community of organisms</td><td>生態系統</td></tr>
+          </table>
+        </div>
+      </div>
+      <ul>
+        <li><b>Table tab</b> — sortable by Word or Part of Speech. Columns: word, syllabification, POS, English/Chinese definition, example.</li>
+        <li><b>Export</b> — "Download Word" (styled glossary .docx) or "Download Excel" (.xlsx with filter, frozen header, Chinese font).</li>
+        <li><b>"My Vocabulary" link</b> — jumps to the full My Vocabulary page (Chapter 9).</li>
+      </ul>
+
+      <h3>5.2 Flashcards (SRS-powered)</h3>
+      <p>Flip cards to study. Front: word + syllabification + POS + speak button. Back: definitions + example. Rate each card to schedule its next review.</p>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+        <div class="flipcard">
+          <div class="inner">
+            <div class="face"><div style="font-size:1.3rem;font-weight:700">biodiversity</div><div class="small">bi-o-div-er-si-ty · noun</div><div class="small" style="margin-top:6px">🔊</div></div>
+            <div class="face back"><b>biodiversity</b><div class="small">noun</div><div class="small" style="margin:6px 0">variety of life in the world</div><div style="color:var(--primary);font-weight:600">生物多樣性</div></div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <p style="margin:0 0 8px"><b>Rate this card:</b></p>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span class="badge b-rose">Again — re-show soon</span>
+            <span class="badge b-orange">Hard — show soon</span>
+            <span class="badge b-blue">Good — move to end</span>
+            <span class="badge b-green">Easy — done (dismiss)</span>
+          </div>
+          <p class="small" style="margin-top:8px">Space/Enter to flip · "Prioritize Hard" / "Shuffle" in toolbar</p>
+        </div>
+      </div>
+      <div class="mock-cap">A flashcard front and back, with the four SRS rating buttons.</div>
+
+      <h3>5.3 Spelling game</h3>
+      <p>Type words from memory across four modes. Requires ≥3 words.</p>
+      <table class="ref">
+        <tr><th>Mode</th><th>What you do</th></tr>
+        <tr><td><b>Listen &amp; Type</b></td><td>Hear the word (TTS), then type it.</td></tr>
+        <tr><td><b>Scramble</b></td><td>Reorder shuffled letters into the word.</td></tr>
+        <tr><td><b>Fill-blanks</b></td><td>Type the missing letters (shown as blanks).</td></tr>
+        <tr><td><b>Mixed</b></td><td>A random mode per word.</td></tr>
+      </table>
+      <p>Difficulty (Easy/Medium/Hard) sets the time limit, hints allowed (5/3/1), and blank ratio. Earn points for speed + streaks; lose points for hints. Shortcuts: <b>Enter</b> submit, <b>Ctrl+Space</b> hint, <b>Esc</b> replay audio.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">✍ Spelling · Listen &amp; Type</span><span class="pill">🔥 Streak 4</span><span class="pill">⏱ 0:12</span></div>
+        <div class="mock-body" style="text-align:center">
+          <span class="btn sm">🔊 Play</span>
+          <div class="input-fake" style="max-width:240px;margin:10px auto">bio_iversity_</div>
+          <div style="margin-top:8px"><span class="btn sm outline">💡 Hint (3 left)</span> <span class="btn primary sm">Check</span></div>
+        </div>
+      </div>
+
+      <h3>5.4 Vocabulary Quiz</h3>
+      <p>Multiple-choice quiz (requires ≥4 words). Questions are randomly one of three types: <b>Word→Definition</b>, <b>Definition→Word</b>, or <b>Fill-blank</b> (cloze from the example). Optional <b>Time Challenge</b> (Easy 20s / Medium 15s / Hard 10s per question).</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🧠 Vocab Quiz · 3/10</span><span class="pill">⏱ 0:09</span></div>
+        <div class="mock-body">
+          <p style="margin:0 0 6px"><b>ecosystem</b> means…</p>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <span class="input-fake" style="width:auto">A. a type of coral</span>
+            <span class="input-fake" style="width:auto;background:var(--green-bg);border-color:var(--green)">B. a community of organisms and their environment ✓</span>
+            <span class="input-fake" style="width:auto">C. a measure of temperature</span>
+            <span class="input-fake" style="width:auto">D. a fishing technique</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>5.5 The SRS algorithm explained</h3>
+      <p>Mr.🆖 ProReader uses the <strong>Leitner 5-box</strong> system. Each word sits in a "box" (mastery level 0–5). Answering correctly moves it up a box (longer interval until next review); answering incorrectly moves it down. The goal: review hard words often, easy words rarely, until mastered.</p>
+      <table class="ref">
+        <tr><th>Box / Level</th><th>Label</th><th>Review interval</th><th>Color</th></tr>
+        <tr><td>0</td><td>New</td><td>immediate</td><td><span class="pill" style="background:var(--srs-0);color:#fff">gray</span></td></tr>
+        <tr><td>1</td><td>L1</td><td>1 day</td><td><span class="pill" style="background:var(--srs-1);color:#fff">red</span></td></tr>
+        <tr><td>2</td><td>L2</td><td>3 days</td><td><span class="pill" style="background:var(--srs-2);color:#fff">orange</span></td></tr>
+        <tr><td>3</td><td>L3</td><td>7 days</td><td><span class="pill" style="background:var(--srs-3);color:#fff">amber</span></td></tr>
+        <tr><td>4</td><td>L4</td><td>14 days</td><td><span class="pill" style="background:var(--srs-4);color:#fff">blue</span></td></tr>
+        <tr><td>5</td><td>Mastered</td><td>30 days</td><td><span class="pill" style="background:var(--srs-5);color:#fff">green</span></td></tr>
+      </table>
+      <table class="ref">
+        <tr><th>Flashcard button</th><th>Counts as</th><th>Effect</th></tr>
+        <tr><td><b>Again</b> / <b>Hard</b></td><td>incorrect ("hard")</td><td>level down by 1; re-shown soon</td></tr>
+        <tr><td><b>Good</b></td><td>correct ("medium")</td><td>level up by 1</td></tr>
+        <tr><td><b>Easy</b></td><td>not counted</td><td>dismisses the card for this session</td></tr>
+      </table>
+      <div class="callout tip"><strong>"Due for review"</strong> A word is due if it has <em>never</em> been reviewed (<code>next review = 0</code>) <em>or</em> its scheduled review time has passed. The "Due for review" stat card (Chapter 9) counts these. Review them daily for the best retention.</div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>當你有<b>高亮詞彙</b>後（來自 AI 詞彙建議或選取文字），<strong>詞彙表 Glossary</strong> 可生成定義，並成為含四個子分頁的中樞：<b>表格 Table</b>、<b>生字卡 Flashcard</b>、<b>拼字 Spelling</b>、<b>測驗 Quiz</b>。你練習的每個詞都由間隔重複系統（SRS）追蹤，使你在適當時間複習適當的詞。</p>
+
+      <h3>5.1 詞彙表中樞</h3>
+      <p><b>表格分頁</b>可按詞或詞性排序，欄含音節、詞性、英／中定義、例句。可<b>下載 Word</b>或<b>下載 Excel</b>。「My Vocabulary」連結跳至完整生字頁（第 9 章）。</p>
+
+      <h3>5.2 生字卡（SRS 驅動）</h3>
+      <p>翻轉卡片溫習。正面：詞＋音節＋詞性＋朗讀；背面：定義＋例句。為每張卡評級以排程下次複習：<b>Again 再來</b>／<b>Hard 困難</b>（不久後再現）、<b>Good 普通</b>（移至末尾）、<b>Easy 容易</b>（本節不再出現）。Space/Enter 翻卡。</p>
+
+      <h3>5.3 拼字遊戲</h3>
+      <p>四種模式：<b>聆聽並輸入</b>（聽 TTS 後拼出）、<b>字母重組</b>、<b>填空</b>（輸入缺失字母）、<b>混合</b>（每詞隨機模式）。難度設時限、提示次數（5/3/1）及空白比例。捷徑：Enter 提交、Ctrl+Space 提示、Esc 重播。</p>
+
+      <h3>5.4 詞彙測驗</h3>
+      <p>選擇題（需 ≥4 詞）。題型隨機為<b>詞→定義</b>、<b>定義→詞</b>或<b>填空</b>。可選<b>計時挑戰</b>（易 20 秒／中 15 秒／難 10 秒）。</p>
+
+      <h3>5.5 SRS 演算法詳解</h3>
+      <p>採用 <strong>Leitner 五格</strong>系統。每個詞位於一個「格」（熟練度 0–5）。答對升一格（下次複習間隔更長）；答錯降一格。目標：困難的詞常複習、容易的詞少複習，直至掌握。</p>
+      <p>間隔：L0 即時 → L1 一天 → L2 三天 → L3 七天 → L4 十四天 → L5（已掌握）三十天。</p>
+      <div class="callout tip"><strong>「到期複習」</strong> 一個詞若<em>從未</em>被複習，或其排定複習時間已過，即屬到期。每日複習到期詞效果最佳。</div>
+    </section>
+    <!-- ============ CHAPTER 6: READING TEST ============ -->
+    <section class="chapter" id="ch6">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 6</span>
+        <h2 class="section-title">6. Reading Test</h2>
+        <p class="small">AI-generated comprehension questions across six skill types, with AI-graded short answers and a skill-breakdown report.</p>
+      </div>
+
+      <p>The Reading Test produces a multi-type comprehension quiz from your text. You configure how many of each question type (total 10–20), then take it. Short answers are graded by AI, and a skill breakdown shows exactly where to improve.</p>
+
+      <h3>6.1 Setting up the test</h3>
+      <p>Before generating, set how many questions of each type using the steppers. "Reset Preset" restores age-based defaults. Constraints: total must be 10–20, max 10 per type.</p>
+      <table class="ref">
+        <tr><th>Question type</th><th>Skill assessed</th><th>Input</th></tr>
+        <tr><td><b>Multiple Choice</b></td><td>Detail / main idea</td><td>radio (A–D)</td></tr>
+        <tr><td><b>True / False / Not Given</b></td><td>Detail accuracy</td><td>radio (3 options)</td></tr>
+        <tr><td><b>Inference</b></td><td>Reading between the lines</td><td>radio</td></tr>
+        <tr><td><b>Vocabulary-in-Context</b></td><td>Word meaning in passage</td><td>radio</td></tr>
+        <tr><td><b>Referencing</b></td><td>What a pronoun refers to</td><td>radio</td></tr>
+        <tr><td><b>Short Answer</b></td><td>Free production</td><td>text (AI-graded)</td></tr>
+      </table>
+
+      <h3>6.2 Taking the test</h3>
+      <p>After generation you choose options, then <b>Start Test</b>:</p>
+      <ul>
+        <li><b>Mode</b> — <i>Question-by-question</i> (one at a time, with Prev/Next + progress bar) or <i>all-at-once</i>.</li>
+        <li><b>Show Chinese</b> — reveals Chinese translations of each question, its options, and the explanation (great for lower levels).</li>
+        <li>Each question shows type, skill, and paragraph badges for context.</li>
+      </ul>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📋 Reading Test · Q2/12</span><span class="badge b-amber">Inference</span><span class="pill">¶3</span></div>
+        <div class="mock-body">
+          <p style="margin:0 0 4px"><b>What can be inferred about the coral's recovery?</b></p>
+          <p class="small" style="margin:0 0 8px;color:var(--primary)">（可推斷珊瑚的復原會如何？）</p>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <span class="input-fake" style="width:auto">A. It happens within days</span>
+            <span class="input-fake" style="width:auto;background:var(--green-bg);border-color:var(--green)">B. It takes many years ✓</span>
+            <span class="input-fake" style="width:auto">C. It is impossible</span>
+            <span class="input-fake" style="width:auto">D. It depends on fishing</span>
+          </div>
+          <div class="progress" style="margin-top:10px"><i style="width:16%"></i></div>
+        </div>
+      </div>
+      <div class="callout"><strong>Submitting</strong> On submit, any short-answer questions are sent to the AI for evaluation (it returns points earned + feedback). The overall score is then calculated as a percentage.</div>
+
+      <h3>6.3 Result screen &amp; skill breakdown</h3>
+      <p>A celebratory screen shows your tier, percentage, and points. Then a <b>Skill Breakdown</b> panel reveals per-skill progress bars (main idea, detail, inference, vocabulary, purpose, referencing) so you can see precisely which skills need work.</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+        <div style="text-align:center">
+          <div class="medal" style="background:var(--amber-bg);box-shadow:0 0 24px var(--amber-bg)"><span style="font-size:30px">👑</span></div>
+          <span class="tier-badge master">Master · 92%</span>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <table class="ref" style="margin:0">
+            <tr><th>Skill</th><th>Score</th></tr>
+            <tr><td>Main Idea</td><td><div class="progress"><i style="width:100%;background:var(--green)"></i></div></td></tr>
+            <tr><td>Detail</td><td><div class="progress"><i style="width:75%;background:var(--amber)"></i></div></td></tr>
+            <tr><td>Inference</td><td><div class="progress"><i style="width:50%;background:var(--red)"></i></div></td></tr>
+            <tr><td>Vocabulary</td><td><div class="progress"><i style="width:100%;background:var(--green)"></i></div></td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="mock-cap">Result tiers: Master 👑 (≥90%) · Great 🌟 (≥70%) · Good 💪 (≥50%) · Keep Going ❤️ (&lt;50%).</div>
+
+      <h3>6.4 After the test</h3>
+      <ul>
+        <li><b>Review Answers</b> — see all questions colored green/red with explanations (and Chinese if enabled).</li>
+        <li><b>Practice Missed Skills</b> — generates new questions only for skills below 100%.</li>
+        <li><b>Retry Missed</b> — re-attempt just the questions you got wrong.</li>
+        <li><b>Generate New</b> — make a brand-new test from the same text.</li>
+        <li><b>Download Word</b> — export "Blank" or "With Answers". <span class="tag-teacher"></span> The "With Answers" version is visible to teachers/admins, or to students only <em>after</em> completing the test.</li>
+      </ul>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>閱讀測驗會根據你的文章生成多題型的理解測驗。你配置每種題型的數量（總計 10–20 題），然後作答。簡答題由 AI 評分，技能分析顯示確切需改善之處。</p>
+
+      <h3>6.1 設定測驗</h3>
+      <p>生成前用步進器設定每種題型數量。「Reset Preset」還原按年齡的預設。限制：總數 10–20，每類最多 10。</p>
+      <table class="ref">
+        <tr><th>題型</th><th>考查技能</th><th>作答方式</th></tr>
+        <tr><td><b>多項選擇</b></td><td>細節／主旨</td><td>單選（A–D）</td></tr>
+        <tr><td><b>正確／錯誤／未提及</b></td><td>細節準確度</td><td>單選（3 項）</td></tr>
+        <tr><td><b>推論</b></td><td>言外之意</td><td>單選</td></tr>
+        <tr><td><b>語境詞彙</b></td><td>詞在文中之意</td><td>單選</td></tr>
+        <tr><td><b>指代</b></td><td>代詞所指</td><td>單選</td></tr>
+        <tr><td><b>簡答</b></td><td>自由作答</td><td>文字（AI 評分）</td></tr>
+      </table>
+
+      <h3>6.2 作答</h3>
+      <ul>
+        <li><b>模式</b>——<i>逐題</i>（一題一題，含上／下題及進度條）或<i>全部一次</i>。</li>
+        <li><b>顯示中文</b>——顯示每題、選項及解釋的中文翻譯。</li>
+      </ul>
+      <div class="callout"><strong>提交</strong> 提交時簡答題會送交 AI 評估（返回得分＋回饋），再計算總分百分比。</div>
+
+      <h3>6.3 結果畫面與技能分析</h3>
+      <p>慶祝畫面顯示你的等級、百分比及得分。接着<b>技能分析</b>面板顯示各技能進度條（主旨、細節、推論、詞彙、目的、指代）。等級：Master 👑（≥90%）· Great 🌟（≥70%）· Good 💪（≥50%）· Keep Going ❤️（&lt;50%）。</p>
+
+      <h3>6.4 測驗之後</h3>
+      <ul>
+        <li><b>檢視答案</b>——所有題目以綠／紅標示並附解釋。</li>
+        <li><b>練習失分技能</b>——只為低於 100% 的技能生成新題。</li>
+        <li><b>重試失分題</b>——只重做答錯的題。</li>
+        <li><b>生成新測驗</b>——從同一文章生成全新測驗。</li>
+        <li><b>下載 Word</b>——匯出「空白卷」或「附答案」。<span class="tag-teacher"></span>「附答案」版本教師／管理員可見；學生須完成測驗後才可見。</li>
+      </ul>
+    </section>
+    <!-- ============ CHAPTER 7: GRAMMAR SUITE & GAMES ============ -->
+    <section class="chapter" id="ch7">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 7</span>
+        <h2 class="section-title">7. Grammar Suite &amp; Games</h2>
+        <p class="small">Grammar analysis, lessons, quizzes, and five gamified practice modes — plus three difficulty modes shared by every game.</p>
+      </div>
+
+      <p>The Grammar section has four tabs — <b>Topics</b>, <b>Lessons</b>, <b>Games</b>, and <b>Quiz</b>. First click <b>Analyze</b> to have AI extract grammar topics from your text (with automatic fallback to a backup model if the primary fails). All grammar AI calls gracefully fall back, so they're resilient.</p>
+
+      <h3>7.1 Topics &amp; Lessons</h3>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📘 Grammar</span><span class="btn primary sm">Analyze</span><span class="btn sm">Generate Quiz</span><span class="btn sm">⬇ Word ▾</span></div>
+        <div class="mock-body">
+          <div class="faketab"><span class="active">Topics</span><span>Lessons</span><span>🎮 Games</span><span>Quiz</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div class="card-mini" style="flex:1;min-width:150px;border-left:4px solid var(--violet)">
+              <div style="display:flex;justify-content:space-between"><b>Present Perfect</b><span class="b-violet badge">B1</span></div>
+              <div class="small">現在完成式 · ×3 in text</div>
+              <div style="margin-top:6px"><span class="btn sm outline">Open Lesson</span> <span class="btn sm">Show Highlight</span></div>
+            </div>
+            <div class="card-mini" style="flex:1;min-width:150px;border-left:4px solid var(--teal)">
+              <div style="display:flex;justify-content:space-between"><b>Passive Voice</b><span class="b-teal badge">B2</span></div>
+              <div class="small">被動語態 · ×2 in text</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><b>Topics tab</b> — grid of cards (EN + ZH name, CEFR badge, category color, occurrence count). Expand to see explanation, pattern, and sentences from your text. Buttons: <b>Open Lesson</b>, <b>Show Highlight</b> (color-codes that grammar pattern in the original text).</li>
+        <li><b>Lessons tab</b> — accordion per topic. <b>Basic content</b> always shows: What is it, Pattern, Examples (from text + AI), Common Mistakes. <b>"Load Full Lesson"</b> enriches with: When to Use + signal words, Forms table, Compare With, Pronunciation Tips, CCQs (reveal-on-click check questions), and Quick Practice (AI-evaluated).</li>
+        <li><b>Word export</b> — sections: Topics, Lessons, Quiz Blank, <b>Quiz Answer Key</b> <span class="tag-teacher"></span> (answer key visible to teachers/admins, or students after completion).</li>
+      </ul>
+
+      <h3>7.2 Grammar Quiz</h3>
+      <p>Requires topics first. Three question types: <b>identify</b> (pick the structure), <b>error-spot</b> (find &amp; fix the error, radio), and <b>rewrite / fill-in</b> (text, AI-evaluated). Mode toggle (question-by-question vs all-at-once). Result screen with tier animation, topic breakdown bars, review answers, retry.</p>
+
+      <h3>7.3 Grammar Games hub</h3>
+      <p>Five games, each auto-generating AI content on first entry. Choose one of <b>three shared modes</b> before playing:</p>
+      <table class="ref">
+        <tr><th>Mode</th><th>Timer</th><th>Hints/patterns</th><th>Best for</th></tr>
+        <tr><td><b>Practice</b></td><td>None</td><td>Allowed</td><td>Learning the rules</td></tr>
+        <tr><td><b>Arcade</b></td><td>Countdown per question (time bonus)</td><td>Allowed</td><td>Building speed</td></tr>
+        <tr><td><b>Mastery</b></td><td>Countdown</td><td>Disabled</td><td>Proving mastery (hardest)</td></tr>
+      </table>
+      <p><b>Shared scoring:</b> 100 pts base per correct; arcade adds a time bonus; streaks (3+) add up to +50%; hints subtract points. Every game shares a result screen with tiers (Master ≥90% / Great ≥70% / Good ≥50% / Keep Going), particle effects, a "New Best" badge, and Play Again / Generate New buttons. High scores &amp; accuracy persist to your session and history.</p>
+
+      <h3>7.4 Game 1 — Word Scramble <span class="b-blue badge">blue</span></h3>
+      <p>AI generates grammatically correct sentences. Words are shuffled into chips; tap them in order to rebuild the sentence. Tap a placed chip to remove it. Hint (Lightbulb) reveals the pattern; each hint −15 pts (disabled in Mastery).</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🔤 Word Scramble · Arcade</span><span class="pill">⏱ 0:18</span><span class="pill">🔥 3</span></div>
+        <div class="mock-body">
+          <p class="small" style="margin:0 0 6px">Place: <span class="pill">[Subject]+[Verb]+[Object]</span> <span class="btn sm outline">💡</span></p>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><span class="chip">reefs</span><span class="chip">Coral</span><span class="chip">threaten</span><span class="chip">warmth</span></div>
+          <div style="border:1px dashed var(--border-strong);border-radius:6px;padding:8px;min-height:30px"><span class="chip blue">Coral</span><span class="chip blue">reefs</span></div>
+        </div>
+      </div>
+
+      <h3>7.5 Game 2 — Grammar Workshop <span class="b-green badge">green</span></h3>
+      <p>Slot-fill (cloze) sentences with a word bank. Tap words to fill slots left-to-right; tap a filled slot to empty it. Pattern hint shows slot labels like <code>[Subject] + [Verb]</code> (hidden in Mastery).</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🛠 Workshop · Practice</span></div>
+        <div class="mock-body">
+          <p class="small" style="margin:0 0 4px">[Subject] + [Verb] + [Object]</p>
+          <p style="margin:0 0 8px"><b>Many fish ___ by the reef.</b> → Many fish <span class="chip blue">are protected</span> ___</p>
+          <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="chip">protect</span><span class="chip">are protected</span><span class="chip">by</span><span class="chip">the</span></div>
+        </div>
+      </div>
+
+      <h3>7.6 Game 3 — Error Surgery <span class="b-red badge">red</span></h3>
+      <p>AI sentences each contain <em>one</em> grammatical error. Tap the erroneous word/phrase (multi-word errors auto-expand), then pick the correction from 4 options. Correct = right error <em>and</em> right fix. 20s timer.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🩺 Error Surgery · Arcade</span><span class="pill">⏱ 0:11</span></div>
+        <div class="mock-body">
+          <p style="margin:0 0 8px">The reefs <span style="background:var(--red-bg);border-bottom:2px solid var(--red);padding:0 2px">has been</span> dying rapidly.</p>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <span class="input-fake" style="width:auto">A. have</span>
+            <span class="input-fake" style="width:auto;background:var(--green-bg);border-color:var(--green)">B. have been ✓</span>
+            <span class="input-fake" style="width:auto">C. is</span>
+            <span class="input-fake" style="width:auto">D. having</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>7.7 Game 4 — Grammar Roulette <span class="b-violet badge">purple</span></h3>
+      <p>Fixed <b>10 rounds</b>. Click <b>Spin</b> — a color-coded wheel (one slice per grammar topic) spins for ~3s and lands on a topic, which yields a multiple-choice question. <b>Hot Topic bonus:</b> 2+ correct in a row on the same topic → 2× multiplier; 3+ → 3× (shown as 🔥). Score is in "coins" 💰.</p>
+      <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+        <div class="wheel"></div>
+        <div>
+          <p style="margin:0 0 6px"><b>💰 240 coins</b> &nbsp; <span class="b-violet badge">🔥 Hot Topic ×2</span></p>
+          <p class="small" style="margin:0">Round 4/10 · 5 topics on the wheel · 30s per question</p>
+        </div>
+      </div>
+      <div class="mock-cap">The Roulette wheel: each slice is a grammar topic color.</div>
+
+      <h3>7.8 Game 5 — Grammar Duel <span class="b-orange badge">orange</span></h3>
+      <p>Turn-based battle vs the AI. Pick difficulty (Easy/Medium/Hard) — sets AI think-time (3–28s) and AI accuracy (40/60/80%). Both start at <b>100 HP</b>. Each round you and the AI race to answer an MCQ; correct answers deal 10 damage. <b>Power Move:</b> every 3rd correct in a row triggers double damage (⚡ +200 pts). Game ends when a HP hits 0.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">⚔️ Grammar Duel · Medium</span></div>
+        <div class="mock-body">
+          <div style="display:flex;align-items:center;gap:12px;justify-content:space-between">
+            <div style="text-align:center"><span class="av lg">🧑</span><div class="small">You</div><div class="hpbar" style="width:110px;margin-top:4px"><i style="width:80%"></i></div><div class="small">80 HP</div></div>
+            <div style="font-size:1.4rem;font-weight:800;color:var(--orange)">VS</div>
+            <div style="text-align:center"><span class="av lg" style="background:var(--orange)">🤖</span><div class="small">AI</div><div class="hpbar" style="width:110px;margin-top:4px"><i style="width:50%"></i></div><div class="small">50 HP</div></div>
+          </div>
+          <p class="small" style="margin:10px 0 0;text-align:center">⚡ Power Move ready on next correct!</p>
+        </div>
+      </div>
+
+      <h3>7.9 Shared result screen</h3>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px" class="card-mini">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:30px">🌟</span>
+            <div><span class="tier-badge great">Great · 78%</span><div class="small">Score 780 · Max streak 5</div></div>
+          </div>
+          <div style="margin-top:8px"><span class="btn primary sm">Play Again</span> <span class="btn sm">Generate New</span></div>
+        </div>
+      </div>
+      <div class="callout"><strong>Persistence</strong> Each game's high score, accuracy %, and completion count are saved to the reading session and synced to your history — so the dashboard and leaderboard can track them.</div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>文法區有四個分頁——<b>主題 Topics</b>、<b>課程 Lessons</b>、<b>遊戲 Games</b>、<b>測驗 Quiz</b>。先點 <b>Analyze</b> 讓 AI 從你的文章抽取文法主題（主模型失敗會自動切換後備模型，所有文法 AI 呼叫皆有此容錯）。</p>
+
+      <h3>7.1 主題與課程</h3>
+      <ul>
+        <li><b>主題分頁</b>——卡片格（英＋中名稱、CEFR 徽章、類別色、出現次數）。展開可看解釋、句型、來自原文的例句。按鈕：<b>Open Lesson</b>、<b>Show Highlight</b>（在原文為該文法模式著色）。</li>
+        <li><b>課程分頁</b>——每主題的手風琴。<b>基本內容</b>恒顯：是甚麼、句型、例句、常見錯誤。<b>「Load Full Lesson」</b>增補：何時使用＋信號詞、形式表、易混淆比較、發音提示、CCQ（點擊揭示的核對問題）、快速練習（AI 評分）。</li>
+        <li><b>Word 匯出</b>——章節：主題、課程、測驗空白卷、<b>測驗答案</b><span class="tag-teacher"></span>（答案卷教師／管理員可見；學生完成後可見）。</li>
+      </ul>
+
+      <h3>7.2 文法測驗</h3>
+      <p>須先有主題。三類題目：<b>辨識</b>、<b>找錯</b>（單選）、<b>改寫／填空</b>（文字，AI 評分）。可切換逐題／全部模式。結果畫面含等級動畫、主題分析條、檢視答案、重試。</p>
+
+      <h3>7.3 遊戲中樞</h3>
+      <p>五款遊戲，首次進入皆自動生成 AI 內容。先選三種<b>共用模式</b>之一：<b>練習</b>（無計時、可提示）、<b>街機</b>（每題倒數，計時加分）、<b>精通</b>（倒數且禁提示，最難）。<b>計分：</b>每答對 100 分；街機加時間分；連擊（3+）加至 +50%；用提示扣分。共用結果畫面分四級（Master ≥90%／Great ≥70%／Good ≥50%／Keep Going），含粒子效果、「新紀錄」徽章、再玩／生成新題。高分與準確度會儲存。</p>
+
+      <h3>7.4 遊戲 1 — 字母重組 Word Scramble（藍）</h3>
+      <p>AI 生成合語法句子。詞被打亂為方塊，按順序點擊重建句子。提示（燈泡）揭示句型，每次 −15 分（精通模式禁用）。</p>
+
+      <h3>7.5 遊戲 2 — 工坊 Grammar Workshop（綠）</h3>
+      <p>附詞庫的填空（cloze）句。點詞填入空位（由左至右），點已填空位可清空。句型提示顯示空位標籤（精通模式隱藏）。</p>
+
+      <h3>7.6 遊戲 3 — 錯誤手術 Error Surgery（紅）</h3>
+      <p>AI 句子各含<em>一個</em>文法錯誤。點擊錯誤詞（多詞錯誤自動展開），再從 4 選項中選修正。答對 = 找對錯誤<em>且</em>改對。20 秒計時。</p>
+
+      <h3>7.7 遊戲 4 — 文法輪盤 Grammar Roulette（紫）</h3>
+      <p>固定 <b>10 回合</b>。點 <b>Spin</b>——彩色輪盤（每格一個文法主題）旋轉約 3 秒停在某一主題，隨即出一道選擇題。<b>熱門主題獎勵：</b>同一主題連續答對 2+ → 2 倍乘數；3+ → 3 倍（顯示 🔥）。以「金幣」💰 計分。</p>
+
+      <h3>7.8 遊戲 5 — 文法決鬥 Grammar Duel（橙）</h3>
+      <p>回合制對戰 AI。選難度（易／中／難）——設 AI 思考時間（3–28 秒）及 AI 準確度（40/60/80%）。雙方各 <b>100 HP</b>。每回合你與 AI 爭答選擇題；答對造成 10 傷害。<b>強力一擊：</b>每連續第 3 次答對觸發雙倍傷害（⚡ +200 分）。HP 歸零即敗。</p>
+
+      <h3>7.9 共用結果畫面</h3>
+      <div class="callout"><strong>儲存</strong> 每款遊戲的高分、準確度％ 及完成次數都會存入閱讀工作階段並同步至歷史記錄，供儀表板與排行榜追蹤。</div>
+    </section>
+    <!-- ============ CHAPTER 8: AI READING TUTOR ============ -->
+    <section class="chapter" id="ch8">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 8</span>
+        <h2 class="section-title">8. AI Reading Tutor</h2>
+        <p class="small">A streaming chat assistant that knows your text — ask anything, attach images, and get hints or answers.</p>
+      </div>
+
+      <p>A floating gradient button (bottom-right, above the TOC button) opens the <b>AI Reading Tutor</b> once you have extracted text. It's a resizable chat panel that can be maximized to near-fullscreen. The tutor knows the article you're reading and answers in context.</p>
+
+      <div class="mock">
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com</span></div>
+        <div class="mock-body" style="position:relative;min-height:280px;background:var(--subtle)">
+          <p class="small" style="color:var(--muted);padding:20px">…(your reading workspace)…</p>
+          <div style="position:absolute;right:14px;bottom:14px;width:300px;background:var(--card);border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--primary);color:#fff">
+              <b style="font-size:13px">🤖 AI Tutor</b>
+              <div style="display:flex;gap:8px"><span style="font-size:12px">EN</span><span class="btn sm" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:1px 7px">⛶</span></div>
+            </div>
+            <div style="padding:10px 12px;max-height:160px;overflow:auto;font-size:12px">
+              <div style="background:var(--primary);color:#fff;border-radius:10px 10px 2px 10px;padding:6px 10px;margin-bottom:6px;margin-left:30px;text-align:right">What is the main idea?</div>
+              <div style="display:flex;gap:6px"><span class="av sm" style="background:var(--primary)">🤖</span><div style="background:#fff;border:1px solid var(--border);border-radius:2px 10px 10px 10px;padding:6px 10px">The article argues that coral reefs…<span style="color:var(--primary)">▍</span></div></div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding:6px 8px">
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px"><span class="chip">Main Idea</span><span class="chip">Vocab Help</span><span class="chip">Explain</span></div>
+              <div style="display:flex;gap:4px;align-items:center"><span class="btn sm outline" style="padding:4px 8px">📎</span><span class="input-fake" style="flex:1;font-size:11px">Ask anything…</span><span class="btn primary sm">➤</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mock-cap">The floating tutor panel — language toggle, maximize, quick questions, image attach.</div>
+
+      <h3>8.1 Features</h3>
+      <table class="ref">
+        <tr><th>Feature</th><th>How to use</th></tr>
+        <tr><td><b>Ask a question</b></td><td>Type in the box and press <b>Enter</b> (use <b>Shift+Enter</b> for a newline). The answer streams in.</td></tr>
+        <tr><td><b>Language toggle</b></td><td>Switch the tutor's replies between <b>English</b> and <b>Chinese</b> (remembers your choice).</td></tr>
+        <tr><td><b>Selected-text context</b></td><td>Select any text in the original text area — it appears as a quoted "context chip" above the input, so the tutor answers <em>about that specific passage</em>.</td></tr>
+        <tr><td><b>Attach an image</b></td><td>Paperclip button → upload an image with your question (uses the vision-capable Advanced Tutor model).</td></tr>
+        <tr><td><b>Quick questions</b></td><td>One-tap buttons: <i>Main Idea</i>, <i>Vocab Help</i>, <i>Explain</i>, plus image-based help (see below).</td></tr>
+        <tr><td><b>Clear history</b></td><td>Trash button wipes the conversation. Up to 20 messages are kept as context.</td></tr>
+      </table>
+
+      <h3>8.2 Image help &amp; "Jailbreak" mode</h3>
+      <p>Three image-related quick questions exist. <b>"Help with image — Hint"</b> is always available (upload an image for a guided hint). The other two are gated behind <b>Jailbreak Mode</b> in Settings:</p>
+      <table class="ref">
+        <tr><th>Quick question</th><th>Requires</th><th>What it does</th></tr>
+        <tr><td>Help with image — Hint</td><td>—</td><td>Guides you toward the answer.</td></tr>
+        <tr><td>Step-by-step</td><td>Jailbreak Mode ON</td><td>Walks through the image question fully.</td></tr>
+        <tr><td>Give answer</td><td>Jailbreak Mode ON <b>and</b> Show "Give Answer" ON</td><td>Reveals the answer directly.</td></tr>
+      </table>
+      <div class="callout warn"><strong>Why "Jailbreak"?</strong> These two toggles are intended for teachers or self-learners who want full solutions. In a classroom, keep them <b>off</b> so students must reason themselves. Both live in <b>Settings → General</b>.</div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>一個漸層浮動按鈕（右下角，目錄按鈕上方）會在提取文字後開啟 <b>AI 閱讀導師</b>。它是一個可縮放、可放大至近全螢幕的聊天面板。導師認識你正在讀的文章，並會結合語境作答。</p>
+
+      <h3>8.1 功能</h3>
+      <table class="ref">
+        <tr><th>功能</th><th>用法</th></tr>
+        <tr><td><b>發問</b></td><td>在輸入框打字並按 <b>Enter</b>（<b>Shift+Enter</b> 換行）。答案會串流顯示。</td></tr>
+        <tr><td><b>語言切換</b></td><td>切換導師回覆為<b>英文</b>或<b>中文</b>（會記住選擇）。</td></tr>
+        <tr><td><b>選取文字語境</b></td><td>在原文選取任何文字——會作為「語境方塊」顯示於輸入框上方，導師便會<em>針對該段落</em>作答。</td></tr>
+        <tr><td><b>附加圖片</b></td><td>迴紋針按鈕→上傳圖片連同問題（使用具視覺能力的進階導師模型）。</td></tr>
+        <tr><td><b>快捷問題</b></td><td>一鍵按鈕：主旨、詞彙協助、解釋，另見下方圖片協助。</td></tr>
+        <tr><td><b>清除記錄</b></td><td>垃圾桶按鈕清除對話。最多保留 20 則訊息作為語境。</td></tr>
+      </table>
+
+      <h3>8.2 圖片協助與「越獄」模式</h3>
+      <p>三個與圖片相關的快捷問題。<b>「圖片提示」</b>恒常可用；另外兩個受設定中的<b>越獄模式</b>管制：「逐步」需開啟越獄模式；「給出答案」需同時開啟越獄模式<b>及</b>「顯示給出答案」。</p>
+      <div class="callout warn"><strong>為何要「越獄」？</strong> 這兩個開關供教師或想看完整解答的自學者使用。課堂中請保持<b>關閉</b>，讓學生自行推理。兩者位於 <b>Settings → General</b>。</div>
+    </section>
+    <!-- ============ CHAPTER 9: MY VOCABULARY PAGE ============ -->
+    <section class="chapter" id="ch9">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 9</span>
+        <h2 class="section-title">9. My Vocabulary Page</h2>
+        <p class="small">A dedicated hub at <code>/vocabulary</code> for systematic vocabulary review across <em>all</em> your reading sessions.</p>
+      </div>
+
+      <p>Open it from the header's <b>BookOpen</b> icon or the "My Vocabulary" link inside the Glossary section. It aggregates every word you've ever collected into one searchable, sortable bank, with stats, auto-selection strategies, named review lists, exports, and history.</p>
+
+      <h3>9.1 Layout &amp; stats</h3>
+      <div class="mock">
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com/vocabulary</span></div>
+        <div class="mock-body">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small">Total</div><b style="font-size:1.3rem">248</b><div class="small">210 own · 38 teacher</div></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center;border-top:3px solid var(--orange)"><div class="small">Due</div><b style="font-size:1.3rem;color:var(--orange)">42</b></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center;border-top:3px solid var(--green)"><div class="small">Mastered</div><b style="font-size:1.3rem;color:var(--green)">95</b></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center;border-top:3px solid var(--blue)"><div class="small">New</div><b style="font-size:1.3rem;color:var(--blue)">31</b></div>
+          </div>
+          <div class="faketab"><span class="active">Table</span><span>Flashcard</span><span>Spelling</span><span>Quiz</span><span>Lists</span><span>History</span></div>
+        </div>
+      </div>
+      <p>Four stat cards double as filters — click one to filter the table. The six tabs are: <b>Table</b>, <b>Flashcard</b>, <b>Spelling</b>, <b>Quiz</b>, <b>Lists</b>, <b>History</b>. The review tabs (Flashcard/Spelling/Quiz) require you to select words first (or load a review list).</p>
+
+      <h3>9.2 The word table</h3>
+      <p>Sortable, filterable, paginated (25/50/75/100 per page). Columns include a <b>Source</b> badge (Own / Teacher-shared) and color-coded <b>Rating</b> (hard=red / medium=yellow / easy=green) and <b>Mastery</b> (L0–L5) badges.</p>
+      <table class="ref">
+        <tr><th>Word ▲▼</th><th>POS</th><th>English</th><th>Source</th><th>Rating</th><th>Mastery</th><th>Last reviewed</th></tr>
+        <tr><td><b>ecosystem</b></td><td>n.</td><td>community of organisms</td><td><span class="b-slate badge">Own</span></td><td><span class="pill" style="background:var(--green-bg);color:var(--green)">easy</span></td><td><span class="badge" style="background:var(--srs-5);color:#fff">L5</span></td><td class="small">2 days ago</td></tr>
+        <tr><td><b>symbiosis</b></td><td>n.</td><td>close long-term interaction</td><td><span class="b-violet badge">Teacher</span></td><td><span class="pill" style="background:var(--red-bg);color:var(--red)">hard</span></td><td><span class="badge" style="background:var(--srs-1);color:#fff">L1</span></td><td class="small">Never</td></tr>
+      </table>
+      <p>Filters: <b>Rating</b> (all/hard/medium/easy), <b>Mastery</b> (all/due/new/mastered), <b>Source</b> (all/own/teacher), plus free-text <b>search</b>. Bulk-select with the header checkbox; a glowing "Start Review" bar appears when words are selected.</p>
+
+      <h3>9.3 Auto-Select strategies</h3>
+      <p>The Auto-Select panel picks words for you using one of five strategies (respects active filters):</p>
+      <table class="ref">
+        <tr><th>Strategy</th><th>Selects</th></tr>
+        <tr><td><b>Due for review</b></td><td>Words due now (never reviewed or interval elapsed), soonest first.</td></tr>
+        <tr><td><b>Hardest words</b></td><td>Rating = hard, lowest mastery first.</td></tr>
+        <tr><td><b>Newest</b></td><td>Never reviewed (mastery 0), most recently added first.</td></tr>
+        <tr><td><b>Weakest</b></td><td>Reviewed words with the lowest correct/total ratio.</td></tr>
+        <tr><td><b>Random</b></td><td>A shuffled selection.</td></tr>
+      </table>
+
+      <h3>9.4 Review Lists <span style="font-weight:400;font-size:.8em">(named word sets)</span></h3>
+      <p>Create named lists from selected words (via "Add to Review List"), then manage them in the <b>Lists tab</b>: <b>Play</b> (load into the review queue), <b>Edit</b> (rename / remove words), <b>Share</b> <span class="tag-teacher"></span>, <b>Delete</b>. Paginated 10/20/30/50 per page.</p>
+
+      <h3>9.5 Export <span style="font-weight:400;font-size:.8em">(4 formats)</span></h3>
+      <p>The Export panel exports either your selected words or all of them:</p>
+      <table class="ref">
+        <tr><th>Format</th><th>File</th><th>Content</th></tr>
+        <tr><td>Glossary</td><td>.docx</td><td>A formatted glossary table.</td></tr>
+        <tr><td>Flashcard</td><td>.pdf</td><td>Printable flashcards.</td></tr>
+        <tr><td>Fill-blank</td><td>.docx</td><td>Fill-in-the-blank exercise.</td></tr>
+        <tr><td>Matching</td><td>.docx</td><td>Word↔definition matching exercise.</td></tr>
+      </table>
+
+      <h3>9.6 Review History</h3>
+      <p>A paginated log of past review sessions (flashcard/quiz/spelling). Each row shows mode, word count, accuracy % (color-coded), and timestamp. Expand a row to see per-rating counts (flashcard) or per-word results (quiz/spelling), with resulting mastery badges.</p>
+
+      <h3>9.7 Sharing <span class="tag-teacher"></span></h3>
+      <div class="callout teacher"><strong>Teacher / admin / super-admin only</strong> Two kinds of sharing exist, both hidden from students:
+      <ul style="margin:6px 0 0">
+        <li><b>Share individual words</b> — send selected words to same-school users (super-admins: any user). Recipients who already have a word are skipped.</li>
+        <li><b>Share a named review list</b> — send an entire list. On accept, the words are written to the recipient's vocabulary with you as the source (<code>shared_by</code>), and a copy is added to their review lists.</li>
+      </ul>
+      </div>
+      <p>The recipient picker groups targets by <b>school → class → user</b> with search, select-all/group/individual checkboxes. Incoming shares arrive as a <b>Bell</b> notification in the header (red badge). <b>Accept</b> loads the words; <b>Decline</b> dismisses. "Accept All / Decline All" appear when there are several.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🔔 Pending shares · 2</span></div>
+        <div class="mock-body">
+          <div class="card-mini" style="display:flex;align-items:center;justify-content:space-between">
+            <div><b>Unit 5 Vocab</b> · 24 words<br><span class="small">from Ms. Lee (Teacher)</span></div>
+            <div><span class="btn green sm">Accept</span> <span class="btn sm">Decline</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>從頂欄的 <b>BookOpen</b> 圖示或詞彙表內的「My Vocabulary」連結開啟。它把你歷來收集的所有詞彙匯聚為一個可搜尋、可排序的詞庫，並附統計、自動選取策略、命名複習清單、匯出及歷史記錄。</p>
+
+      <h3>9.1 佈局與統計</h3>
+      <p>四張統計卡同時兼作篩選器——點擊即篩選表格：總數（含自有／教師分享）、到期（橙）、已掌握（綠）、新詞（藍）。六個分頁：表格、生字卡、拼字、測驗、清單、歷史。複習分頁須先選詞（或載入清單）。</p>
+
+      <h3>9.2 詞彙表格</h3>
+      <p>可排序、篩選、分頁（每頁 25/50/75/100）。欄含<b>來源</b>徽章（自有／教師）、彩色<b>評級</b>（困難紅／中等黃／容易綠）及<b>熟練度</b>（L0–L5）。篩選：評級、熟練度、來源、文字搜尋。可批量選取，選取後出現「開始複習」浮動條。</p>
+
+      <h3>9.3 自動選取策略</h3>
+      <p>五種（受現用篩選影響）：<b>到期複習</b>、<b>最困難</b>（hard，低熟練度優先）、<b>最新</b>（從未複習，新加入優先）、<b>最弱</b>（複習過但正確率最低）、<b>隨機</b>。</p>
+
+      <h3>9.4 複習清單（命名詞集）</h3>
+      <p>從已選詞建立命名清單（「Add to Review List」），再於<b>清單分頁</b>管理：<b>播放</b>（載入複習佇列）、<b>編輯</b>（改名／移除詞）、<b>分享</b><span class="tag-teacher"></span>、<b>刪除</b>。分頁每頁 10/20/30/50。</p>
+
+      <h3>9.5 匯出（4 種格式）</h3>
+      <p>詞彙表（.docx）、生字卡（.pdf）、填空（.docx）、配對（.docx）。匯出已選詞或全部。</p>
+
+      <h3>9.6 複習歷史</h3>
+      <p>過往複習工作階段（生字卡／測驗／拼字）的分頁記錄。每列顯示模式、詞數、準確度％（彩色）、時間。展開可看每評級次數或逐詞結果與熟練度徽章。</p>
+
+      <h3>9.7 分享 <span class="tag-teacher"></span></h3>
+      <div class="callout teacher"><strong>僅限教師／管理員／超級管理員</strong> 兩種分享，學生介面皆隱藏：
+      <ul style="margin:6px 0 0"><li><b>分享個別詞</b>——發送給同校用戶（超級管理員可發任何用戶）。已有該詞者會跳過。</li>
+      <li><b>分享命名清單</b>——發送整份清單。接收者接受後，詞會以其為來源寫入其詞彙庫，並在其複習清單加一份副本。</li></ul></div>
+      <p>接收者選擇器按<b>學校→班別→用戶</b>分組，含搜尋、全選／組選／個別選。送達的分享以頂欄<b>鈴鐺</b>通知（紅色徽章）。<b>接受</b>載入詞彙；<b>拒絕</b>取消。多個時顯示「全部接受／全部拒絕」。</p>
+    </section>
+    <!-- ============ CHAPTER 10: DASHBOARDS & SHARING ============ -->
+    <section class="chapter" id="ch10">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 10</span>
+        <h2 class="section-title">10. Dashboards &amp; Session Sharing</h2>
+        <p class="small">Personal analytics, class-wide teacher analytics, and sharing reading sessions with others.</p>
+      </div>
+
+      <p>Both dashboards open as dialogs from the top-right <b>user menu</b>. The Student Dashboard is available to everyone; the Teacher Dashboard is teacher/admin/super-admin only.</p>
+
+      <h3>10.1 Student Dashboard</h3>
+      <p>Two tabs: <b>Overview</b> (your analytics) and <b>Sessions</b> (your saved reading sessions). All metrics are computed from your history.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📊 Dashboard</span></div>
+        <div class="mock-body">
+          <div class="faketab"><span class="active">Overview</span><span>Sessions</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div class="card-mini" style="flex:1;margin:0"><div class="small">Total Texts</div><b style="font-size:1.2rem">38</b></div>
+            <div class="card-mini" style="flex:1;margin:0"><div class="small">Vocabulary</div><b style="font-size:1.2rem">248</b></div>
+            <div class="card-mini" style="flex:1;margin:0"><div class="small">Avg Progress</div><b style="font-size:1.2rem">64%</b></div>
+          </div>
+          <div class="card-mini"><div class="ttl">Daily Activity <span class="small" style="float:right">7d ▾</span></div>
+            <div class="barchart"><i style="height:30%"></i><i style="height:60%;background:var(--green)"></i><i style="height:45%"></i><i style="height:80%;background:var(--amber)"></i><i style="height:55%"></i><i style="height:70%;background:var(--violet)"></i><i style="height:40%"></i></div>
+          </div>
+        </div>
+      </div>
+      <p><b>Overview</b> shows: 3 summary stat cards (texts, vocabulary, avg progress); a stacked-bar <b>Daily Activity</b> chart (15 activity types, selectable time range); a weekly <b>Reading Activity</b> area chart; an <b>AI Features</b> usage bar chart; a 2×2 <b>score grid</b> (test/quiz/spelling/grammar distributions &amp; trends); and a <b>Vocabulary Growth</b> area chart (1 week → 3 years).</p>
+      <p><b>Sessions</b> is a table of every saved session with a search box (fuzzy), <b>Import</b> (.json), and per-row actions: <b>Create Assignment</b> <span class="tag-teacher"></span>, <b>Share</b>, <b>Load</b> (restore into workspace), <b>Download</b> (.json), <b>Delete</b>. Columns include all scores + progress %. If you try to load while an AI generation is active, a confirm dialog protects against corrupting a stream.</p>
+
+      <h3>10.2 Teacher Dashboard <span class="tag-teacher"></span></h3>
+      <p>Class-wide analytics. The filter bar adapts to your role: <b>teachers</b> see only their classes; <b>admins</b> see all classes in their school; <b>super-admins</b> get a School selector <em>and</em> a Class selector. An <b>Export to Excel</b> button captures all 13 charts as images plus metric tables into one <code>.xlsx</code> report.</p>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>13 chart cards</strong> Daily Activity · Reading Texts (per-student) · Total Vocabulary · Average Progress (quartile-colored) · AI Features · Reading Test / Vocab Quiz / Grammar Quiz score distributions · Grammar Game score &amp; accuracy · Spelling score &amp; accuracy · Vocabulary Growth. Each includes class totals &amp; averages.</div>
+
+      <h3>10.3 Session sharing</h3>
+      <p>Share a completed reading session so a recipient gets a <b>clean copy</b> (your answers, scores, and chat history are stripped). Open it from a session's <b>Share</b> button in the Sessions tab.</p>
+      <table class="ref">
+        <tr><th>Your role</th><th>Who you can share with</th></tr>
+        <tr><td><span class="role student">student</span></td><td>Classmates in the same class</td></tr>
+        <tr><td><span class="role teacher">teacher</span></td><td>Students in your classes</td></tr>
+        <tr><td><span class="role admin">admin</span></td><td>All users in your school</td></tr>
+        <tr><td><span class="role super">super-admin</span></td><td>All users across all schools</td></tr>
+      </table>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:1;min-width:200px">
+          <div class="mock">
+            <div class="mock-bar"><span class="pill">↗ Share "Coral Reefs"</span></div>
+            <div class="mock-body" style="font-size:12px">
+              <div class="input-fake" style="margin-bottom:6px">🔍 Search recipients…</div>
+              <div>🏫 <b>Springfield School</b> <span class="pill">all</span></div>
+              <div style="padding-left:14px">▸ Class 2B <span class="pill">group</span></div>
+              <div style="padding-left:28px"><input type="checkbox" checked> Jamie L. <input type="checkbox" checked> Sam K. <input type="checkbox"> Pat M.</div>
+              <span class="btn primary sm" style="margin-top:6px">Share (2)</span>
+            </div>
+          </div>
+          <div class="mock-cap">Sender: recipient picker grouped by school→class→user.</div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div class="mock">
+            <div class="mock-bar"><span class="pill">🔔 Incoming session</span></div>
+            <div class="mock-body">
+              <b>Coral Reefs</b><br><span class="small">from Ms. Lee (Teacher)</span>
+              <div style="margin-top:8px"><span class="btn green sm">Accept</span> <span class="btn sm">Decline</span></div>
+            </div>
+          </div>
+          <div class="mock-cap">Recipient: accept/decline dialog from the Bell.</div>
+        </div>
+      </div>
+      <div class="callout"><strong>What gets stripped</strong> On accept, the recipient receives a fresh copy: test answers/scores reset, quiz/spelling scores zeroed, flashcard review dates cleared, glossary ratings cleared, and chat history removed. A new session ID &amp; timestamps are assigned. This makes shared sessions perfect as <b>assignments</b>.</div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <p>兩個儀表板皆從右上角<b>用戶選單</b>以對話框開啟。學生儀表板人人可用；教師儀表板僅限教師／管理員／超級管理員。</p>
+
+      <h3>10.1 學生儀表板</h3>
+      <p>兩個分頁：<b>概覽</b>（你的數據）及<b>工作階段</b>（已儲存的閱讀工作階段）。<b>概覽</b>含 3 張統計卡（文本數、詞彙數、平均進度）、堆疊長條<b>每日活動</b>圖（15 種活動、可選時段）、每週<b>閱讀活動</b>面積圖、<b>AI 功能</b>用量長條圖、2×2<b>成績格</b>（測驗／詞彙測驗／拼字／文法的分佈與趨勢）、<b>詞彙增長</b>面積圖（1 週至 3 年）。</p>
+      <p><b>工作階段</b>為每個已存工作階段的表格，含模糊搜尋、<b>匯入</b>（.json），及每列操作：<b>建立功課</b><span class="tag-teacher"></span>、<b>分享</b>、<b>載入</b>、<b>下載</b>、<b>刪除</b>。若 AI 生成進行中嘗試載入，會有確認對話框保護串流。</p>
+
+      <h3>10.2 教師儀表板 <span class="tag-teacher"></span></h3>
+      <p>班級數據。篩選列按角色調整：<b>教師</b>只見自己的班；<b>管理員</b>見校內所有班；<b>超級管理員</b>另有學校選擇器。<b>匯出 Excel</b> 把全部 13 張圖表截圖及數據表整合為一份 <code>.xlsx</code> 報告。</p>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>13 張圖表卡</strong> 每日活動、閱讀文本（每生）、總詞彙、平均進度（四分位著色）、AI 功能、閱讀測驗／詞彙測驗／文法測驗分數分佈、文法遊戲分數及準確度、拼字分數及準確度、詞彙增長。各含班級總計與平均。</div>
+
+      <h3>10.3 工作階段分享</h3>
+      <p>分享一個已完成的閱讀工作階段，接收者會得到<b>乾淨副本</b>（你的答案、分數及聊天記錄已被剔除）。可分享對象按角色而異（見上表）：學生→同班同學；教師→其班中學生；管理員→全校；超級管理員→所有學校。</p>
+      <div class="callout"><strong>會被剔除的內容</strong> 接受後，接收者得到全新副本：測驗答案／分數重設、測驗／拼字分數歸零、生字卡複習日期清除、詞彙評級清除、聊天記錄移除，並指派新的工作階段 ID 及時間戳。這使分享的工作階段非常適合作<b>功課</b>。</div>
+    </section>
+    <!-- ============ CHAPTER 11: LEADERBOARD, ACHIEVEMENTS, ADMIN, ACCOUNT ============ -->
+    <section class="chapter" id="ch11">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 11</span>
+        <h2 class="section-title">11. Leaderboard, Achievements, Admin &amp; Account</h2>
+        <p class="small">Rankings, medals, history management, user administration, and session security.</p>
+      </div>
+
+      <h3>11.1 Leaderboard <span style="font-weight:400;font-size:.8em">(<code>/leaderboard</code>)</span></h3>
+      <p>Open from the header trophy icon or the Student Info "Leaderboard" button. Three tabs: <b>Achievements</b>, <b>My Stats</b>, <b>Leaderboard</b>. Rankings are <b>weekly</b> (Monday–Sunday) — use the week picker to browse past weeks. Scope: <b>Class / School / Global</b> (global lists students only).</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">🏆 Leaderboard · This Week · Class 2B</span></div>
+        <div class="mock-body">
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:1.3rem">🥇</span><span class="av sm">J</span><div style="flex:1"><b>Jamie L.</b> <span class="pill">You</span><br><span class="small">Class 2B</span></div><b>342</b>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:1.3rem">🥈</span><span class="av sm">S</span><div style="flex:1"><b>Sam K.</b><br><span class="small">Class 2B</span></div><b>298</b>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+            <b>#3</b><span class="av sm">P</span><div style="flex:1"><b>Pat M.</b><br><span class="small">Class 2B</span></div><b>271</b>
+          </div>
+        </div>
+      </div>
+      <p>10 sortable columns: weekly score, reading streak, avg test/quiz/spelling/grammar-quiz/grammar-game scores, total vocabulary, flashcard reviews, improvement. Top-3 get medal emojis; your row is highlighted with a "You" badge. Rank trend arrows show movement vs last week.</p>
+      <div class="callout"><strong>Weekly score formula</strong> Rewards sustained reading &amp; vocabulary growth: streak×10 + avg test + avg quiz + avg spelling×0.5 + avg grammar quiz + avg grammar game×0.5 + flashcard reviews×5 + total vocab, plus up to +20% improvement bonus over the prior week.</div>
+
+      <h3>11.2 My Stats</h3>
+      <p>Rank chips (class/school/global), a 9-card current-week grid (score delta, reading streak, averages, flashcards, vocab), and an all-time row (total sessions, longest streak via gap-and-islands, lifetime averages).</p>
+
+      <h3>11.3 Achievements</h3>
+      <p>15 achievement types, each with 7 doubling milestones (5, 10, 20, 40, 80, 160, 320). Each medal shows a progress ring toward the next milestone and unlocks with a celebration dialog.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin:14px 0">
+        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--blue-bg);box-shadow:0 0 14px var(--blue-bg)"><span style="font-size:22px">📖</span></div><div class="small">Sessions Read</div><span class="badge b-blue">L3 · 20</span></div>
+        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--green-bg);box-shadow:0 0 14px var(--green-bg)"><span style="font-size:22px">📚</span></div><div class="small">Vocabulary</div><span class="badge b-green">L4 · 80</span></div>
+        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--subtle)"><span style="font-size:22px;opacity:.4">🎮</span></div><div class="small" style="opacity:.5">Grammar Games</div><span class="badge b-slate">locked</span></div>
+        <div style="text-align:center;width:80px"><div class="medal" style="background:var(--cyan-bg)"><span style="font-size:22px">✨</span></div><div class="small">AI Tutor Qs</div><span class="badge b-cyan">L2 · 10</span></div>
+      </div>
+      <table class="ref">
+        <tr><th>Achievement</th><th>Icon</th><th>Tracks</th></tr>
+        <tr><td>Sessions Read</td><td>📖</td><td>session_create</td></tr>
+        <tr><td>Vocabulary Collected</td><td>📚</td><td>glossary_add</td></tr>
+        <tr><td>Flashcard Reviews</td><td>🗂️</td><td>flashcard_review</td></tr>
+        <tr><td>Mind Maps / Adapted / Simplified Texts</td><td>🧠 / ✏️ / ➖</td><td>each generate type</td></tr>
+        <tr><td>Sentences Analyzed</td><td>🔍</td><td>sentence_analyze</td></tr>
+        <tr><td>Tests / Targeted Practices</td><td>✅ / 🎯</td><td>each complete type</td></tr>
+        <tr><td>Spelling / Vocab Quizzes</td><td>✍️ / 🧠</td><td>each complete type</td></tr>
+        <tr><td>Grammar Analysis / Quizzes / Games</td><td>📘 / 🎓 / 🎮</td><td>each grammar type</td></tr>
+        <tr><td>AI Tutor Questions</td><td>✨</td><td>ai_tutor_question</td></tr>
+      </table>
+
+      <h3>11.4 History management</h3>
+      <p>Reachable from the Dashboard's Sessions tab. Browse, <b>search</b> (fuzzy), <b>import</b> (.json, multi-select, validated), <b>load</b>, <b>download</b>, or <b>delete</b> any past session. Loading while an AI generation runs triggers a safety confirm.</p>
+
+      <h3>11.5 User Management <span class="tag-teacher"></span></h3>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>Teacher / admin / super-admin only</strong> Hidden from students. Six role-gated tabs manage the whole deployment.</div>
+      <table class="ref">
+        <tr><th>Tab</th><th>Visible to</th><th>Purpose</th></tr>
+        <tr><td><b>Schools</b></td><td><span class="role super">super-admin</span></td><td>CRUD schools</td></tr>
+        <tr><td><b>Users</b></td><td>super-admin + admin</td><td>Change role, assign school/class, bulk-revoke access, delete</td></tr>
+        <tr><td><b>Classes</b></td><td>all staff</td><td>CRUD classes; view members</td></tr>
+        <tr><td><b>Student Data</b></td><td>all staff</td><td>Cross-student session analytics + Excel export</td></tr>
+        <tr><td><b>AI Questions</b></td><td>all staff</td><td>Browse AI tutor questions students asked</td></tr>
+        <tr><td><b>Subscriptions</b></td><td>super-admin + admin</td><td>Manage Stripe subscriptions</td></tr>
+      </table>
+      <p>Header-level tools <span class="tag-super"></span>: full <b>Export</b> (.zip backup of schools/users/classes/sessions), <b>Import</b> (.zip/.json), and <b>Send Test Email</b> (9 template types).</p>
+
+      <h3>11.6 Account &amp; session security</h3>
+      <p>Three layers protect your account — you don't configure these, but it helps to know they exist:</p>
+      <table class="ref">
+        <tr><th>Layer</th><th>Default</th><th>Effect</th></tr>
+        <tr><td><b>Session max lifetime</b></td><td>3 days</td><td>Hard ceiling — you're signed out after this period regardless of activity.</td></tr>
+        <tr><td><b>Concurrent session limit</b></td><td>3</td><td>Signing in a 4th time signs out your oldest session.</td></tr>
+        <tr><td><b>Idle timeout</b></td><td>30 minutes</td><td>If you stop interacting, you're signed out (with a 1-minute warning). Synced across all your open tabs.</td></tr>
+      </table>
+      <div class="callout tip"><strong>Reminder emails</strong> Configure in <b>Settings → Notifications</b>: toggle on/off and pick a frequency (1–14 days). Sent by the server on a schedule.</div>
+      <div class="callout danger"><strong>Delete account</strong> In <b>Settings → General → Danger Zone</b> <span class="tag-super" style="border:none">(hidden for super-admins)</span>. Requires re-typing your email to confirm. <b>Irreversible</b> — all your data is removed.</div>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <h3>11.1 排行榜（<code>/leaderboard</code>）</h3>
+      <p>三個分頁：<b>成就</b>、<b>我的統計</b>、<b>排行榜</b>。排名為<b>每週</b>（週一至週日）——用週選擇器瀏覽往週。範圍：<b>班別／學校／全球</b>（全球僅列學生）。</p>
+      <p>10 個可排序欄：週分、閱讀連續天數、各項平均分、總詞彙、生字卡複習、進步分。前三名有獎牌圖示；你的列會高亮並標「You」。趨勢箭頭顯示與上週的變化。</p>
+      <div class="callout"><strong>週分公式</strong> 獎勵持續閱讀與詞彙增長：連續天數×10 + 平均測驗 + 平均詞彙測驗 + 平均拼字×0.5 + 平均文法測驗 + 平均文法遊戲×0.5 + 生字卡複習×5 + 總詞彙，另加最高 +20% 進步獎勵。</div>
+
+      <h3>11.2 我的統計</h3>
+      <p>排名方塊（班／校／全球）、9 卡當週格（分數差、閱讀連續天數、各平均、生字卡、詞彙），及終身列（總工作階段、最長連續天數、終身平均）。</p>
+
+      <h3>11.3 成就</h3>
+      <p>15 種成就，各含 7 個倍增里程碑（5、10、20、40、80、160、320）。每枚獎牌顯示邁向下一里程碑的進度環，解鎖時有慶祝對話框。15 種類型見上表（涵蓋閱讀、詞彙、生字卡、心智圖、改寫、句子分析、測驗、拼字、文法、AI 導師問題等）。</p>
+
+      <h3>11.4 歷史記錄管理</h3>
+      <p>從儀表板的工作階段分頁進入。可瀏覽、<b>搜尋</b>（模糊）、<b>匯入</b>（.json，可多選並驗證）、<b>載入</b>、<b>下載</b>或<b>刪除</b>任何過往工作階段。AI 生成進行中載入會觸發安全確認。</p>
+
+      <h3>11.5 用戶管理 <span class="tag-teacher"></span></h3>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>僅限教師／管理員／超級管理員</strong> 學生介面隱藏。六個按角色控管的分頁管理整個部署：學校（超級）、用戶（超級＋管理）、班別（全體職員）、學生數據（全體職員）、AI 問題（全體職員）、訂閱（超級＋管理）。頂層工具 <span class="tag-super"></span>：完整<b>匯出</b>（.zip）、<b>匯入</b>、<b>發送測試電郵</b>（9 種範本）。</div>
+
+      <h3>11.6 帳戶與工作階段安全</h3>
+      <p>三層保護你的帳戶——你毋須設定，但了解有益：</p>
+      <table class="ref">
+        <tr><th>層級</th><th>預設</th><th>效果</th></tr>
+        <tr><td><b>工作階段最長壽命</b></td><td>3 天</td><td>硬性上限——無論活動如何，逾時即登出。</td></tr>
+        <tr><td><b>並行工作階段上限</b></td><td>3</td><td>第 4 次登入會登出你最舊的工作階段。</td></tr>
+        <tr><td><b>閒置逾時</b></td><td>30 分鐘</td><td>停止互動即登出（前 1 分鐘警告），並跨所有分頁同步。</td></tr>
+      </table>
+      <div class="callout tip"><strong>提醒電郵</strong> 於 <b>Settings → Notifications</b> 配置：開關及頻率（1–14 天），由伺服器按計劃發送。</div>
+      <div class="callout danger"><strong>刪除帳戶</strong> 於 <b>Settings → General → Danger Zone</b><span class="tag-super" style="border:none">（超級管理員隱藏）</span>。須重新輸入電郵確認。<b>無法復原</b>——所有資料會被移除。</div>
+    </section>
+    <!-- ============ APPENDICES ============ -->
+    <section class="chapter" id="appendix">
+      <div class="chapter-head">
+        <span class="chapter-num">APPENDICES</span>
+        <h2 class="section-title">Appendices</h2>
+        <p class="small">Quick-reference tables: AI models, role capabilities, troubleshooting, and a glossary of terms.</p>
+      </div>
+
+      <h3>A. AI model reference</h3>
+      <table class="ref">
+        <tr><th>Model list</th><th>Members</th><th>Default</th></tr>
+        <tr><td><b>Vision</b> (OCR)</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
+        <tr><td><b>Available</b> (summary, mind map, adapt, simplify, test, glossary, sentence-analysis, grammar)</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Reading Text</b> (AI text generator)</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Basic Tutor</b></td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Advanced Tutor</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
+      </table>
+      <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>.</p>
+
+      <h3>B. Role-capability matrix</h3>
+      <table class="ref">
+        <tr><th>Capability</th><th><span class="role student">student</span></th><th><span class="role teacher">teacher</span></th><th><span class="role admin">admin</span></th><th><span class="role super">super-admin</span></th></tr>
+        <tr><td>Reading workflow (all features)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>My Vocabulary page &amp; review</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Leaderboard &amp; Achievements</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Student Dashboard</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Share reading sessions</td><td class="small">classmates</td><td class="small">own students</td><td class="small">whole school</td><td class="small">all schools</td></tr>
+        <tr><td>Share vocabulary / review lists</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Upload to text repository</td><td class="small">limited</td><td class="small">class</td><td class="small">school</td><td class="small">public</td></tr>
+        <tr><td>Create assignments</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Teacher Dashboard</td><td class="no">—</td><td class="small">own classes</td><td class="small">all classes</td><td class="small">all schools</td></tr>
+        <tr><td>User Management (classes)</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>User Management (users / data)</td><td class="no">—</td><td class="small">view</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Schools / Subscriptions / Import-Export</td><td class="no">—</td><td class="no">—</td><td class="small">partial</td><td class="yes">✓</td></tr>
+        <tr><td>Buy School Subscription</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Delete own account</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>
+      </table>
+
+      <h3>C. Troubleshooting / FAQ</h3>
+      <table class="ref">
+        <tr><th>Problem</th><th>Likely cause &amp; fix</th></tr>
+        <tr><td><b>AI features do nothing / error</b></td><td>No Billing Mode set, or key/password missing. Open <b>Settings → General</b> and complete one of the three setup modes (Chapter 2).</td></tr>
+        <tr><td><b>"Limit reached" on image generation</b></td><td>Daily visualization quota hit. Free = 1/day, Subscription = 2/day. Resets daily, or switch to Meter mode for unlimited.</td></tr>
+        <tr><td><b>Signed out unexpectedly</b></td><td>The idle timeout (default 30 min) or the 3-day session ceiling was reached. A 1-minute warning toast precedes idle sign-out.</td></tr>
+        <tr><td><b>Spinner vanished mid-generation after navigating</b></td><td>Not a bug — generation continues in the background; the loading state lives in the store and survives navigation. Return to the section to see results.</td></tr>
+        <tr><td><b>Grammar/test call fell back to another model</b></td><td>By design — grammar &amp; reading-test calls auto-fall back to a backup model if the primary fails. No action needed.</td></tr>
+        <tr><td><b>Settings won't change after editing</b></td><td>Click <b>Save</b> at the bottom of Settings. Authenticated users' settings are stored in the DB and reload on each sign-in.</td></tr>
+        <tr><td><b>"With Answers" export is greyed out</b></td><td>Students see answers only after completing the test/quiz. Teachers/admins always see them.</td></tr>
+        <tr><td><b>Page flashed blank / scrolled to top once</b></td><td>A lazy-loaded component loaded for the first time. It recovers instantly and won't recur in that session.</td></tr>
+        <tr><td><b>Shared session missing my answers</b></td><td>Expected — sharing strips answers/scores/chat to give recipients a clean copy. Your original is untouched.</td></tr>
+        <tr><td><b>iOS extraction stopped mid-way</b></td><td>iOS may suspend long requests; a Screen Wake Lock is used to prevent this. Keep the screen on during extraction.</td></tr>
+      </table>
+
+      <h3>D. Glossary of terms</h3>
+      <table class="ref">
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td><b>Billing Mode</b></td><td>How AI usage is paid for: Subscription, Meter (your key), or Free (access password).</td></tr>
+        <tr><td><b>CEFR</b></td><td>Common European Framework of Reference — six language levels A1 (beginner) → C2 (mastery), used for word-difficulty highlighting.</td></tr>
+        <tr><td><b>SRS</b></td><td>Spaced Repetition System — the Leitner 5-box algorithm that schedules vocabulary reviews at increasing intervals.</td></tr>
+        <tr><td><b>HMAC signature</b></td><td>The one-way hash used to send your access password safely (combined with the current time) so it can't be replayed.</td></tr>
+        <tr><td><b>Mastery level</b></td><td>A word's SRS box (0–5). Level 5 = "Mastered" (30-day review interval).</td></tr>
+        <tr><td><b>Repository</b></td><td>A shared library of texts your teachers/admin added (class, school, or public scope).</td></tr>
+        <tr><td><b>Shared session</b></td><td>A reading session sent to a recipient as a clean (answer-stripped) copy, often used as an assignment.</td></tr>
+        <tr><td><b>PWA</b></td><td>Progressive Web App — the installable, app-like version of the site.</td></tr>
+        <tr><td><b>Jailbreak Mode</b></td><td>A setting that unlocks answer-revealing tutor quick questions (intended for teachers/self-study).</td></tr>
+        <tr><td><b>OCR</b></td><td>Optical Character Recognition — the vision-AI step that reads text from uploaded images/PDFs.</td></tr>
+      </table>
+
+      <div class="lang-divider">中文版 · 繁體中文</div>
+
+      <h3>A. AI 模型參考</h3>
+      <table class="ref">
+        <tr><th>模型清單</th><th>成員</th><th>預設</th></tr>
+        <tr><td><b>視覺 Vision</b>（OCR）</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
+        <tr><td><b>通用 Available</b>（摘要、心智圖、改寫、簡化、測驗、詞彙、句子分析、文法）</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>閱讀文本生成</b></td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>進階導師</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
+      </table>
+      <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。</p>
+
+      <h3>B. 角色能力對照表</h3>
+      <p>完整對照見上方英文版表格（B 表）。要點：閱讀、詞彙、排行榜、學生儀表板人人可用；分享詞彙／清單、建立功課、教師儀表板、用戶管理為教師以上專屬；學校／訂閱／匯入匯出為超級管理員專屬。學生可與同班同學分享工作階段。</p>
+
+      <h3>C. 疑難排解／常見問題</h3>
+      <table class="ref">
+        <tr><th>問題</th><th>原因與解決</th></tr>
+        <tr><td><b>AI 功能無反應／報錯</b></td><td>未設定計費模式，或缺金鑰／密碼。到 <b>Settings → General</b> 完成一種設定（第 2 章）。</td></tr>
+        <tr><td><b>圖像生成「額度已滿」</b></td><td>當日視覺化配額已用罄。Free 每天 1 張、Subscription 每天 2 張，每日重設；或改用 Meter 模式享無限。</td></tr>
+        <tr><td><b>意外被登出</b></td><td>閒置逾時（預設 30 分鐘）或 3 天工作階段上限已到。閒置登出前 1 分鐘會有警告。</td></tr>
+        <tr><td><b>導航後旋轉圖消失</b></td><td>非錯誤——生成在背景繼續；載入狀態存於 store，跨頁面保留。返回該區段即可見結果。</td></tr>
+        <tr><td><b>文法／測驗用了別的模型</b></td><td>設計如此——文法與閱讀測驗呼叫在主模型失敗時自動切換後備模型。無需處理。</td></tr>
+        <tr><td><b>編輯後設定沒變</b></td><td>須點設定底部的 <b>Save</b>。已登入用戶的設定存於資料庫，每次登入重新載入。</td></tr>
+        <tr><td><b>「附答案」匯出變灰</b></td><td>學生須完成測驗／測驗後才見答案。教師／管理員恒常可見。</td></tr>
+        <tr><td><b>頁面曾閃空白／捲到頂一次</b></td><td>延遲載入元件首次載入所致。即時恢復且本工作階段不再出現。</td></tr>
+        <tr><td><b>分享的工作階段沒有我的答案</b></td><td>預期行為——分享會剔除答案／分數／聊天以提供乾淨副本。你的原件不受影響。</td></tr>
+      </table>
+
+      <h3>D. 詞彙表</h3>
+      <table class="ref">
+        <tr><th>術語</th><th>含義</th></tr>
+        <tr><td><b>計費模式 Billing Mode</b></td><td>AI 用量的付費方式：訂閱、計量（自有金鑰）或免費（存取密碼）。</td></tr>
+        <tr><td><b>CEFR</b></td><td>歐洲共同語文參考架構——六個語言級別 A1（初學）→ C2（精通），用於詞彙難度高亮。</td></tr>
+        <tr><td><b>SRS</b></td><td>間隔重複系統——Leitner 五格演算法，按遞增間隔排程詞彙複習。</td></tr>
+        <tr><td><b>HMAC 簽章</b></td><td>用以安全傳送存取密碼的單向雜湊（結合當前時間），無法被重用。</td></tr>
+        <tr><td><b>熟練度</b></td><td>詞的 SRS 格（0–5）。第 5 級 =「已掌握」（30 天複習間隔）。</td></tr>
+        <tr><td><b>文字庫 Repository</b></td><td>教師／管理員加入的共享文章庫（班別、學校或公開範圍）。</td></tr>
+        <tr><td><b>分享工作階段</b></td><td>發送給接收者的乾淨（剔除答案）閱讀工作階段副本，常作功課用。</td></tr>
+        <tr><td><b>PWA</b></td><td>漸進式網頁應用——可安裝、近似應用程式的網站版本。</td></tr>
+        <tr><td><b>越獄模式</b></td><td>解鎖導師「給出答案」快捷問題的設定（供教師／自學者）。</td></tr>
+        <tr><td><b>OCR</b></td><td>光學字元辨識——視覺 AI 從上傳圖片／PDF 讀取文字的步驟。</td></tr>
+      </table>
+
+      <hr style="margin:40px 0 10px;border:none;border-top:1px solid var(--border)">
+      <p class="small" style="text-align:center;color:var(--muted)">Mr.🆖 ProReader User Manual · v2.899 · Bilingual (EN / 繁體中文)<br>Generated for product documentation. Screen recreations are illustrative; the live interface may evolve between releases.</p>
+    </section>
+  </main>
+</div>
+<div class="print-footer"><span>Mr.🆖 ProReader — User Manual</span><span>v2.899</span></div>
+</body>
+</html>
