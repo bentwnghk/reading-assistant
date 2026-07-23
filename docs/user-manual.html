@@ -198,8 +198,8 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
 /* cover page */
 .cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 50%,#7c3aed 100%);color:#fff;padding:60px 24px;page-break-after:always;position:relative;overflow:hidden}
-.cover .logo{font-size:5rem;line-height:1;margin-bottom:20px}
-.cover h1{color:#fff;font-size:3.4rem;margin-bottom:8px}
+.cover .logo{font-size:1em;line-height:1;margin-right:.12em;vertical-align:baseline}
+.cover h1{color:#fff;font-size:3.4rem;margin:0 0 8px;white-space:nowrap}
 .cover .sub{font-size:1.3rem;opacity:.92;margin-bottom:6px}
 .cover .zh{font-size:1.05rem;opacity:.85;margin-bottom:40px}
 .cover .meta{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:18px 30px;font-size:14px;backdrop-filter:blur(4px)}
@@ -242,8 +242,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 
 <!-- ============ COVER PAGE ============ -->
 <div class="cover no-print">
-  <div class="logo">Mr.🆖</div>
-  <h1>ProReader</h1>
+  <h1><span class="logo">Mr.🆖</span> ProReader</h1>
   <div class="sub">User Manual</div>
   <div class="zh">用戶手冊 · A Bilingual Guide for Teachers &amp; Students</div>
   <div class="meta">
@@ -417,8 +416,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">mr5ai.com — Landing page</span></div>
         <div class="mock-body" style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;text-align:center;padding:34px 20px">
-          <div style="font-size:34px">Mr.🆖</div>
-          <div style="font-size:1.4rem;font-weight:800;margin:4px 0">ProReader</div>
+          <div style="font-size:1.9rem;font-weight:800;white-space:nowrap">Mr.🆖 ProReader</div>
           <p style="opacity:.92;max-width:420px;margin:0 auto 16px">Your AI reading companion — understand, practice, and master any text.</p>
           <span class="btn" style="background:#fff;color:#1e3a8a;font-weight:700">🔴 Sign in with Google</span>
           <div style="margin-top:14px"><span class="pill" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4)">🌐 Language: English</span></div>
