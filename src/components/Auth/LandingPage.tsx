@@ -7,7 +7,7 @@ import { useSettingStore } from "@/store/setting";
 import locales from "@/constants/locales";
 import { resolveLanguagePreference } from "@/utils/i18n";
 import { motion, useInView } from "motion/react";
-import { ArrowRight, ArrowDown, Globe, Check, Plus, Minus } from "lucide-react";
+import { ArrowRight, ArrowDown, Globe, Check, Plus, Minus, BookOpen } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -189,6 +189,7 @@ export function LandingPage() {
   const { language, update } = useSettingStore();
   const [loading, setLoading] = useState(false);
   const [faqExpanded, setFaqExpanded] = useState(false);
+  const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -229,7 +230,12 @@ export function LandingPage() {
           Mr.<span className="align-middle text-2xl">🆖</span>{" "}
           <span className="text-[var(--lp-ink-soft)]">ProReader</span>
         </span>
-        <DropdownMenu>
+        <div className="flex items-center gap-4">
+          <a href={manualUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-[var(--lp-ink-soft)] hover:text-[var(--lp-ink)] transition-colors inline-flex items-center gap-1">
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>{t("userManual")}</span>
+          </a>
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="text-[var(--lp-ink-soft)] hover:text-[var(--lp-ink)]">
               <Globe className="h-5 w-5" />
@@ -250,7 +256,7 @@ export function LandingPage() {
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu></div>
       </header>
 
       {/* ── Hero ── */}

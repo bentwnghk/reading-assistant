@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 export function Footer() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
   return (
     <footer className="border-t border-[var(--lp-rule)]">
       <div className="mx-auto max-w-6xl px-6 py-8 text-center text-xs text-[var(--lp-ink-soft)]">
@@ -29,6 +30,10 @@ export function Footer() {
           <Link href="/privacy-policy" className="transition-colors hover:text-[var(--lp-ink)]">
             {t("privacyPolicy")}
           </Link>
+          <span>·</span>
+          <a href={manualUrl} className="transition-colors hover:text-[var(--lp-ink)]" target="_blank" rel="noopener noreferrer">
+            {t("userManual")}
+          </a>
         </div>
       </div>
     </footer>
