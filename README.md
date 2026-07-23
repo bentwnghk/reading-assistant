@@ -25,7 +25,7 @@ Transform any English reading material into an interactive learning experience w
 
 | **Personalized** | **Gamified** | **Data Insights** | **Collaborative** |
 |:---:|:---:|:---:|:---:|
-| Adapts to your age & level (8-18) | 10+ games & 5 grammar challenges | Rich dashboards & charts visualize progress, readability, and vocabulary mastery | Share sessions, vocab lists & texts |
+| Adapts to your age & level (8-18) | 5 grammar games + spelling & vocab challenges | Rich dashboards & charts visualize progress, readability, and vocabulary mastery | Share sessions, assignments, vocab lists & texts |
 
 ---
 
@@ -34,7 +34,7 @@ Transform any English reading material into an interactive learning experience w
 ```mermaid
 flowchart LR
     subgraph INPUT["📷 Start"]
-        A[Upload Image/PDF/URL]
+        A[Upload Image/PDF/URL or Generate Text]
     end
     
     subgraph UNDERSTAND["🧠 Understand"]
@@ -161,7 +161,20 @@ Transform physical reading materials into digital text instantly.
 
 ---
 
-### 📄 5. AI Text Adaptation
+### ✨ 5. AI Text Generator
+
+No reading material on hand? Generate one instantly. Type a topic, pick a text type and length, and AI writes an age-appropriate reading passage at the right CEFR level.
+
+| Feature | Description |
+|---------|-------------|
+| 🎯 **Topic-Based** | Enter any subject and AI writes a passage about it |
+| 📏 **Length & Level Control** | Choose text type, length, and target difficulty |
+| 📊 **Built-in Difficulty Check** | Generated text is analyzed for CEFR level on the spot |
+| 🔁 **Regenerate** | One tap to make the text easier or harder |
+
+---
+
+### 📄 6. AI Text Adaptation
 
 Read at YOUR level, not the author's.
 
@@ -174,7 +187,7 @@ Read at YOUR level, not the author's.
 
 ---
 
-### 🧠 6. Sentence Analysis
+### 🧠 7. Sentence Analysis
 
 Click any sentence for a complete AI breakdown:
 
@@ -188,7 +201,7 @@ Click any sentence for a complete AI breakdown:
 
 ---
 
-### 🗺️ 7. Visual Learning Tools
+### 🗺️ 8. Visual Learning Tools
 
 | Tool | Purpose |
 |------|---------|
@@ -449,7 +462,22 @@ Download your learning materials for offline study.
 
 ---
 
-### 📬 16. Session Sharing
+### 📋 16. Assignments
+
+Turn any reading session into homework for a whole class. Track each student's live progress and scores, flag who's stuck, and export the roster to Excel.
+
+| Feature | Description |
+|---------|-------------|
+| 📤 **Assign Sessions** | Send a reading session to an entire class or selected students |
+| 📊 **Live Progress** | See each student's progress and scores in real time |
+| ⚠️ **Stuck Tracking** | Spot students who haven't started or are falling behind |
+| 💾 **Presets** | Save frequently used assignment setups for one-click reuse |
+| 📥 **Excel Export** | Download the full roster with results |
+| 🔗 **Deep Links** | Students jump straight into their assignment from `/assignments` |
+
+---
+
+### 📬 17. Session Sharing
 
 Teachers can share reading sessions with students — complete with all AI-generated content but stripped of answers and scores.
 
@@ -464,7 +492,20 @@ Teachers can share reading sessions with students — complete with all AI-gener
 
 ---
 
-### 📊 17. Student Dashboard
+### 📬 18. Email Reminders
+
+Gentle nudges to keep students reading regularly.
+
+| Feature | Description |
+|---------|-------------|
+| ⏰ **Scheduled Reminders** | Emails sent via a cron trigger when a student hasn't read in a while |
+| 🔧 **Frequency Control** | Each user configures their own reminder frequency |
+| ✉️ **Mailtrap Delivery** | Transactional email via Mailtrap |
+| 🔕 **One-Click Unsubscribe** | Opt out directly from the email footer (`/unsubscribe`) |
+
+---
+
+### 📊 19. Student Dashboard
 
 Track your learning journey with personal analytics.
 
@@ -478,7 +519,7 @@ Track your learning journey with personal analytics.
 
 ---
 
-### 🏫 18. Teacher Dashboard
+### 🏫 20. Teacher Dashboard
 
 Comprehensive class-level analytics for educators.
 
@@ -491,13 +532,14 @@ Comprehensive class-level analytics for educators.
 | 🤖 **AI Feature Usage** | Which AI tools students use most |
 | 📉 **Score Distribution** | Test and quiz score breakdown |
 | 🎮 **Spelling Scores** | Spelling game performance |
+| 🎯 **Spelling Accuracy** | Spelling accuracy breakdown |
 | 🎯 **Grammar Game Stats** | Grammar game accuracy by type |
 | 📊 **Vocabulary Over Time** | Cumulative vocabulary charts |
 | 📥 **Excel Export** | Download class data as spreadsheet |
 
 ---
 
-### 🏆 19. Leaderboard & Achievements
+### 🏆 21. Leaderboard & Achievements
 
 Compete with classmates and track your learning journey!
 
@@ -520,23 +562,29 @@ Compete with classmates and track your learning journey!
 | 📖 **Vocabulary Words** | Words in your collection |
 
 #### Achievement System
-Unlock medals by reaching learning milestones:
+Unlock medals across **15 achievement types**. Each type generates 7 milestones that **double** from a base target (e.g., 5 → 10 → 20 → 40 → 80 → 160 → 320):
 
-| Achievement Type | Milestones |
-|-----------------|------------|
-| 📚 **Sessions Read** | 1, 5, 10, 25, 50, 100 sessions |
-| 📖 **Vocabulary Collected** | 10, 50, 100, 250, 500 words |
-| 🃏 **Flashcard Reviews** | 50, 200, 500, 1000 reviews |
-| 📝 **Tests Completed** | 5, 15, 30, 50 tests |
-| 🎮 **Spelling Challenges** | 10, 30, 50, 100 games |
-| 📋 **Quizzes Completed** | 5, 15, 30, 50 quizzes |
-| 📐 **Grammar Analysis** | Topics identified across reading sessions |
-| 🎓 **Grammar Quizzes** | Quizzes completed with high scores |
+| Achievement Type | What It Tracks |
+|-----------------|----------------|
+| 📚 **Sessions Read** | Reading sessions completed |
+| 📖 **Vocabulary Collected** | Words added to your collection |
+| 🃏 **Flashcard Reviews** | Flashcards reviewed |
+| 🧠 **Mind Maps Generated** | Mind maps created |
+| ✏️ **Adapted Texts** | AI text adaptations generated |
+| ⬇️ **Simplified Texts** | Simplified text versions generated |
+| 💬 **Sentences Analyzed** | Sentence analyses performed |
+| 📝 **Tests Completed** | Comprehension tests taken |
+| 🎯 **Targeted Practices** | Targeted practice questions generated |
+| 🎮 **Spelling Challenges** | Spelling games played |
+| 📋 **Vocabulary Quizzes** | Vocabulary quizzes completed |
+| 📐 **Grammar Analysis** | Grammar topics identified across sessions |
+| 🎓 **Grammar Quizzes** | Grammar quizzes completed |
 | 🎮 **Grammar Games** | Games played across all 5 game types |
+| ✨ **AI Tutor Questions** | Questions asked to the AI Tutor |
 
 ---
 
-### 📚 20. Text Repository
+### 📚 22. Text Repository
 
 Share and reuse reading materials across your school or class.
 
@@ -551,7 +599,7 @@ Share and reuse reading materials across your school or class.
 
 ---
 
-### 🏫 21. School & Class Management
+### 🏫 23. School & Class Management
 
 Built for educational institutions with multi-tenant support.
 
@@ -560,7 +608,7 @@ Built for educational institutions with multi-tenant support.
 |---------|-------------|
 | 👨‍🏫 **Class Creation** | Create and manage classes |
 | 👥 **Student Management** | Add/remove students from classes |
-| 📊 **Teacher Dashboard** | 9 analytics charts tracking class progress |
+| 📊 **Teacher Dashboard** | 10 analytics charts tracking class progress |
 | 📚 **Shared Materials** | Distribute reading texts to classes |
 | 📬 **Session Sharing** | Share reading sessions with students |
 | 📁 **Vocab List Sharing** | Share review word lists with students |
@@ -576,7 +624,7 @@ Built for educational institutions with multi-tenant support.
 
 ---
 
-### 🔐 22. Authentication & Security
+### 🔐 24. Authentication & Security
 
 Secure login with Google OAuth integration.
 
@@ -589,7 +637,7 @@ Secure login with Google OAuth integration.
 
 ---
 
-### 📱 23. PWA Support
+### 📱 25. PWA Support
 
 Install Mr.🆖 ProReader as a native app on your device!
 
@@ -602,7 +650,7 @@ Install Mr.🆖 ProReader as a native app on your device!
 
 ---
 
-### 💳 24. Subscriptions & Billing
+### 💳 26. Subscriptions & Billing
 
 Full subscription lifecycle powered by Stripe for both individual users and schools.
 
@@ -625,37 +673,21 @@ Full subscription lifecycle powered by Stripe for both individual users and scho
 
 ## AI Models Supported
 
-| Provider | Models/Description |
-|----------|-------------------|
-| 🟢 **Google Gemini** | gemini-3-flash and more |
-| 🔷 **Google Vertex AI** | Enterprise Google AI via Vertex |
-| 🔵 **OpenAI** | gpt-5.1, gpt-5-mini, gpt-5-nano |
-| 🟣 **Anthropic** | Claude models |
-| 🟠 **OpenRouter** | Multi-model gateway |
-| 🔴 **DeepSeek** | deepseek-chat |
-| ⚡ **xAI** | Grok models |
-| 🌊 **Mistral** | Mistral AI models |
-| ☁️ **Azure OpenAI** | Enterprise OpenAI via Azure |
-| 🔌 **OpenAI Compatible** | Any OpenAI-compatible endpoint |
-| 🌸 **Pollinations** | Free AI access |
-| 🦙 **Ollama** | Local AI models |
-| 🤖 **Subscription Mode** | Built-in EDU access (no API key needed) |
+All models are served through the **Mr.🆖 AI Hub** (an OpenAI-compatible gateway):
 
-### Search Providers
-| Provider | Description |
-|----------|-------------|
-| 🔍 **Tavily** | AI-optimized search |
-| 🔥 **Firecrawl** | Web scraping & search |
-| 🎯 **Exa** | Neural search engine |
-| 🌐 **Bocha** | Multi-modal search |
-| 🦁 **Brave** | Privacy-focused search |
-| 🔎 **SearXNG** | Self-hosted meta search |
+| Provider | Models |
+|----------|--------|
+| 🟢 **Google Gemini** | gemini-3-flash-preview |
+| 🔵 **OpenAI** | gpt-5.1, gpt-5.4-mini, gpt-5.4-nano, gpt-5-nano, gpt-5.6-terra |
+| 🔴 **DeepSeek** | deepseek-v4-flash |
+| 🟠 **OpenRouter** | step-3.7-flash |
 
-### Access Modes
+### Billing Modes
 | Mode | Description |
 |------|-------------|
-| 💰 **Paid Mode** | Use your own API keys, pay per usage |
-| 🎓 **EDU Mode** | Free access provided by Mr.🆖 (password required) |
+| ⚡ **Meter** | Pay for your exact AI usage only — connect with your own API key |
+| 🎓 **Free** | Mr.🆖 pays all costs for you (access password required) |
+| 🤖 **Subscription** | Flat monthly or yearly fee, no API key needed |
 
 ---
 
@@ -693,9 +725,11 @@ Full subscription lifecycle powered by Stripe for both individual users and scho
 src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes (AI, auth, admin, subscriptions, etc.)
+│   ├── assignments/       # Assignments page (list, detail, roster)
 │   ├── leaderboard/       # Leaderboard page
 │   ├── vocabulary/        # My Vocabulary page
 │   ├── image-viewer/      # Standalone image viewer
+│   ├── unsubscribe/       # Email unsubscribe handler
 │   ├── privacy-policy/    # Privacy policy page
 │   ├── terms-of-service/  # Terms of service page
 │   └── page.tsx           # Main application
@@ -705,7 +739,8 @@ src/
 │   ├── ReadingAssistant/  # Core feature components (37 files)
 │   ├── Vocabulary/        # Vocabulary page components (table, flashcards, quiz, spelling, review lists, export, sharing)
 │   ├── Dashboard/         # Student dashboard + session sharing dialogs
-│   ├── TeacherDashboard/  # Teacher dashboard (9 charts + guide)
+│   ├── TeacherDashboard/  # Teacher dashboard (10 charts + guide)
+│   ├── Assignments/       # Assignment list, stats, roster dialog, presets
 │   ├── Leaderboard/       # Leaderboard & achievements
 │   ├── Subscription/      # Subscription/billing UI (individual + school)
 │   ├── MagicDown/         # Markdown rendering and editing
