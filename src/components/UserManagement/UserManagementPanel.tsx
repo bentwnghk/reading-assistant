@@ -76,6 +76,14 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     setActiveTab("users")
   }, [])
 
+  const handleTabChange = (next: string) => {
+    if (next !== "users") {
+      setUsersSchoolFilter("all")
+      setUsersClassFilter("all")
+    }
+    setActiveTab(next)
+  }
+
   const handleClose = (open: boolean) => {
     if (!open) onClose()
   }
@@ -327,7 +335,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             )}
           </div>
         </DialogHeader>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 overflow-hidden flex flex-col">
           <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide shrink-0 flex-nowrap">
             {isSuperAdmin && (
               <TabsTrigger value="schools">{t("userManagement.tabs.schools")}</TabsTrigger>
