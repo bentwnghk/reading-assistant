@@ -99,7 +99,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 function Header() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -118,6 +118,7 @@ function Header() {
   } = useVocabularyStore();
   const { overdueCount, fetchOverdueAssignmentCount } = useAssignmentsStore();
   const totalPending = pendingCount + pendingReviewListShareCount;
+  const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
   const {
     extractedText,
     summary,
@@ -462,6 +463,10 @@ function Header() {
                   >
                     <Info className="h-4 w-4" />
                     {t("header.about.title")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.open(manualUrl, '_blank', 'noopener,noreferrer')}>
+                    <BookOpen className="h-4 w-4" />
+                    {t("userManual")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => signOut()}>
