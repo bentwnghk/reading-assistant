@@ -38,12 +38,13 @@ interface ClassListProps {
   isSuperAdmin: boolean
   isAdmin: boolean
   currentUserId?: string
+  onViewStudents?: (className: string, schoolId?: string) => void
 }
 
 type SortField = "name" | "teacherName" | "schoolName" | "studentCount"
 type SortOrder = "asc" | "desc"
 
-export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _currentUserId }: ClassListProps) {
+export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, onViewStudents }: ClassListProps) {
   const { t } = useTranslation()
   const { data: session } = useSession()
   const isTeacher = session?.user?.role === "teacher"
@@ -338,7 +339,18 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                 )}
               </TableCell>
               <TableCell className="text-center">
-                <Badge variant="secondary">{classInfo.studentCount || 0}</Badge>
+                {onViewStudents && (classInfo.studentCount || 0) > 0 ? (
+                  <button
+                    type="button"
+                    className="inline-flex cursor-pointer rounded-full transition hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    onClick={() => onViewStudents(classInfo.name, classInfo.schoolId ?? undefined)}
+                    title={t("userManagement.classes.viewStudents", { name: classInfo.name })}
+                  >
+                    <Badge variant="secondary" className="cursor-pointer">{classInfo.studentCount || 0}</Badge>
+                  </button>
+                ) : (
+                  <Badge variant="secondary">{classInfo.studentCount || 0}</Badge>
+                )}
               </TableCell>
               <TableCell>
                 <div className="flex gap-1">

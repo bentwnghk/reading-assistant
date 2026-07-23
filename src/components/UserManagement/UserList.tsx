@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -43,9 +43,11 @@ const BILLING_MODE_STYLES: Record<BillingMode, string> = {
 
 interface UserListProps {
   isSuperAdmin: boolean
+  initialSchoolFilter?: string
+  initialClassFilter?: string
 }
 
-export default function UserList({ isSuperAdmin }: UserListProps) {
+export default function UserList({ isSuperAdmin, initialSchoolFilter, initialClassFilter }: UserListProps) {
   const { t } = useTranslation()
   const [users, setUsers] = useState<UserWithRole[]>([])
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -54,8 +56,8 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
   const [roleFilter, setRoleFilter] = useState<string>("all")
-  const [classFilter, setClassFilter] = useState<string>("all")
-  const [schoolFilter, setSchoolFilter] = useState<string>("all")
+  const [classFilter, setClassFilter] = useState<string>(initialClassFilter ?? "all")
+  const [schoolFilter, setSchoolFilter] = useState<string>(initialSchoolFilter ?? "all")
   const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [revoking, setRevoking] = useState(false)
@@ -158,10 +160,28 @@ export default function UserList({ isSuperAdmin }: UserListProps) {
     return filteredAndSortedUsers.slice(start, start + PAGE_SIZE)
   }, [filteredAndSortedUsers, page])
 
+  const skipClassResetRef = useRef(true)
   useEffect(() => {
+    if (skipClassResetRef.current) {
+      skipClassResetRef.current = false
+      return
+    }
     setPage(1)
     setClassFilter("all")
   }, [schoolFilter])
+
+  useEffect(() => {
+    if (initialSchoolFilter !== undefined) {
+      setSchoolFilter(initialSchoolFilter)
+    }
+  }, [initialSchoolFilter])
+
+  useEffect(() => {
+    if (initialClassFilter !== undefined) {
+      setClassFilter(initialClassFilter)
+      setPage(1)
+    }
+  }, [initialClassFilter])
 
   useEffect(() => {
     setPage(1)

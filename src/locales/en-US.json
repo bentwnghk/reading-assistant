@@ -2580,7 +2580,8 @@
       "deleteFailed": "Failed to delete class",
       "deleteConfirm": "Are you sure you want to delete this class? This will remove all student assignments.",
       "noClasses": "No classes found",
-      "membersTitle": "Members of {{name}}"
+      "membersTitle": "Members of {{name}}",
+      "viewStudents": "View students in {{name}}"
     },
     "members": {
       "description": "Manage students in this class. Each student can only be in one class.",
@@ -2656,7 +2657,8 @@
       "saveFailed": "Failed to save school",
       "deleteFailed": "Failed to delete school",
       "deleteConfirm": "Delete school \"{{name}}\"? Users from this school will become unassigned.",
-      "noSchools": "No schools found. Schools are created automatically when users sign in."
+      "noSchools": "No schools found. Schools are created automatically when users sign in.",
+      "viewUsers": "View users in {{name}}"
     },
     "aiQuestions": {
       "descriptionSuperAdmin": "Track questions students ask the AI tutor across all schools. Filter by school and class.",

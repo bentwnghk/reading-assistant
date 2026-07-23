@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useMemo } from "react"
+import { useRef, useState, useMemo, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { Download, HelpCircle, Info, Loader2, Mail, Upload, ChevronDown } from "lucide-react"
@@ -59,6 +59,22 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     if (isAdmin) return "users"
     return "students"
   }, [isSuperAdmin, isAdmin])
+
+  const [activeTab, setActiveTab] = useState(defaultTab)
+  const [usersSchoolFilter, setUsersSchoolFilter] = useState<string>("all")
+  const [usersClassFilter, setUsersClassFilter] = useState<string>("all")
+
+  const handleViewSchoolUsers = useCallback((schoolId: string) => {
+    setUsersSchoolFilter(schoolId)
+    setUsersClassFilter("all")
+    setActiveTab("users")
+  }, [])
+
+  const handleViewClassStudents = useCallback((className: string, schoolId?: string) => {
+    setUsersSchoolFilter(schoolId || "all")
+    setUsersClassFilter(className)
+    setActiveTab("users")
+  }, [])
 
   const handleClose = (open: boolean) => {
     if (!open) onClose()
@@ -311,7 +327,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             )}
           </div>
         </DialogHeader>
-        <Tabs defaultValue={defaultTab} className="flex-1 overflow-hidden flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
           <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide shrink-0 flex-nowrap">
             {isSuperAdmin && (
               <TabsTrigger value="schools">{t("userManagement.tabs.schools")}</TabsTrigger>
@@ -333,16 +349,21 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
           <div className="flex-1 overflow-auto mt-4">
             {isSuperAdmin && (
               <TabsContent value="schools" className="mt-0">
-                <SchoolList />
+                <SchoolList onViewUsers={handleViewSchoolUsers} />
               </TabsContent>
             )}
             {(isSuperAdmin || isAdmin) && (
               <TabsContent value="users" className="mt-0">
-                <UserList isSuperAdmin={isSuperAdmin} />
+                <UserList isSuperAdmin={isSuperAdmin} initialSchoolFilter={usersSchoolFilter} initialClassFilter={usersClassFilter} />
               </TabsContent>
             )}
             <TabsContent value="classes" className="mt-0">
-              <ClassList isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} />
+              <ClassList
+                isSuperAdmin={isSuperAdmin}
+                isAdmin={isAdmin}
+                currentUserId={currentUserId}
+                onViewStudents={isSuperAdmin || isAdmin ? handleViewClassStudents : undefined}
+              />
             </TabsContent>
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">

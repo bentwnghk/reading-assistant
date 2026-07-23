@@ -27,7 +27,11 @@ import type { SchoolInfo } from "@/lib/users"
 type SortField = "name" | "domain" | "userCount"
 type SortOrder = "asc" | "desc"
 
-export default function SchoolList() {
+interface SchoolListProps {
+  onViewUsers?: (schoolId: string) => void
+}
+
+export default function SchoolList({ onViewUsers }: SchoolListProps) {
   const { t } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [loading, setLoading] = useState(true)
@@ -205,7 +209,18 @@ export default function SchoolList() {
                 </Badge>
               </TableCell>
               <TableCell className="text-center">
-                <Badge variant="secondary">{school.userCount ?? 0}</Badge>
+                {onViewUsers && (school.userCount ?? 0) > 0 ? (
+                  <button
+                    type="button"
+                    className="inline-flex cursor-pointer rounded-full transition hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    onClick={() => onViewUsers(school.id)}
+                    title={t("userManagement.schools.viewUsers", { name: school.name })}
+                  >
+                    <Badge variant="secondary" className="cursor-pointer">{school.userCount ?? 0}</Badge>
+                  </button>
+                ) : (
+                  <Badge variant="secondary">{school.userCount ?? 0}</Badge>
+                )}
               </TableCell>
               <TableCell>
                 <div className="flex gap-1">

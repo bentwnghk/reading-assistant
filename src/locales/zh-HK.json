@@ -2580,7 +2580,8 @@
       "deleteConfirm": "確定要刪除此班別嗎？這將移除所有學生的分配。",
       "noClasses": "沒有班別",
       "nameRequired": "班別名稱為必填項",
-      "membersTitle": "{{name}} 的學生"
+      "membersTitle": "{{name}} 的學生",
+      "viewStudents": "查看「{{name}}」的學生"
     },
     "members": {
       "description": "管理此班別的學生。",
@@ -2656,7 +2657,8 @@
       "saveFailed": "保存學校失敗",
       "deleteFailed": "刪除學校失敗",
       "deleteConfirm": "確定要刪除學校「{{name}}」嗎？該學校的用戶將變為未分配狀態。",
-      "noSchools": "沒有學校記錄。學校會在用戶登入時自動建立。"
+      "noSchools": "沒有學校記錄。學校會在用戶登入時自動建立。",
+      "viewUsers": "查看「{{name}}」的用戶"
     },
     "aiQuestions": {
       "descriptionSuperAdmin": "追蹤所有學校學生向 AI 導師提出的問題。可按學校和班別篩選。",
