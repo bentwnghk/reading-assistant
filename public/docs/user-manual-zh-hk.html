@@ -466,7 +466,7 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch5">5. 詞彙工具與 SRS</a></li>
       <li><a href="#ch6">6. 閱讀測驗</a></li>
       <li><a href="#ch7">7. 文法套件與遊戲</a></li>
-      <li><a href="#ch8">8. AI 閱讀導師</a></li>
+      <li><a href="#ch8">8. AI 導師</a></li>
       <li><a href="#ch9">9. 我的詞彙頁面</a></li>
       <li><a href="#ch10">10. 儀表板與分享</a></li>
       <li><a href="#ch11">11. 排行榜與帳戶</a></li>
@@ -500,7 +500,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><span class="tag-admin"></span></td><td>僅限管理員</td><td>管理員及超級管理員</td></tr>
         <tr><td><span class="tag-super"></span></td><td>僅限超級管理員</td><td>僅超級管理員</td></tr>
       </table>
-      <div class="callout"><strong>四個角色</strong> 角色包括：<b>student 學生</b>（預設——每個新的 Google 登入皆由此開始）、<b>teacher 教師</b>（由管理員手動指派）、<b>admin 管理員</b>（部署時預先登記的電郵），以及 <b>super-admin 超級管理員</b>（預先登記以作全域控制）。管理員管理一間學校；超級管理員管理所有學校。你的角色會在右上角用戶選單中以彩色徽章顯示。</div>
+      <div class="callout"><strong>四個角色</strong> 角色包括：<b>學生</b>（預設——每個新的 Google 登入皆由此開始）、<b>教師</b>（由管理員手動指派）、<b>管理員</b>（部署時預先登記的電郵），以及 <b>超級管理員</b>（預先登記以作全域控制）。管理員管理一間學校；超級管理員管理所有學校。你的角色會在右上角用戶選單中以彩色徽章顯示。</div>
 
       <h3>如何閱讀本指南</h3>
       <ul>
@@ -564,11 +564,11 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>2.1 登入</h3>
-      <p>Mr.🆖 ProReader 只使用<strong> Google 登入</strong>（無須另記密碼）。在登入頁點擊 <b>Sign in</b>，會跳轉至 Google 同意畫面，再返回應用程式。</p>
+      <p>Mr.🆖 ProReader 只使用<strong> Google 登入</strong>（無須另記密碼）。在登入頁點擊 <b>登入</b>，會跳轉至 Google 同意畫面，再返回應用程式。</p>
 
       <ol class="steps">
         <li>在瀏覽器開啟應用程式網址（或點擊已安裝的主畫面圖示）。</li>
-        <li>點擊 <b>Sign in</b> 按鈕。</li>
+         <li>點擊 <b>登入</b> 按鈕。</li>
         <li>選擇你的 Google 帳戶並批准登入。</li>
         <li>返回應用程式時已自動登入。首次登入時，你的角色與學校會自動指派（見下）。</li>
       </ol>
@@ -610,25 +610,25 @@ body.toc-noscroll{overflow:hidden}
       <p>有兩件事會自動為你設定——你無須選擇：</p>
       <table class="ref">
         <tr><th>自動指派</th><th>決定方式</th></tr>
-        <tr><td><strong>你的角色</strong></td><td>若你的電郵在部署的管理員／超級管理員清單上，即獲該角色；否則由 <b>student 學生</b> 開始。教師其後由管理員晉升。</td></tr>
+        <tr><td><strong>你的角色</strong></td><td>若你的電郵在部署的管理員／超級管理員清單上，即獲該角色；否則由 <b>學生</b> 開始。教師其後由管理員晉升。</td></tr>
         <tr><td><strong>你的學校</strong></td><td>你的電郵<b>域名</b>（<code>@</code> 之後的部分）會與學校記錄比對。若尚無記錄，會為該域名建立一間。</td></tr>
       </table>
       <div class="callout"><strong>角色概覽</strong> &nbsp; <span class="role student">學生</span> 閱讀與練習 · <span class="role teacher">教師</span> 管理班別、分享內容、查看班級數據 · <span class="role admin">管理員</span> 管理整間學校（用戶、班別、帳單） · <span class="role super">超級管理員</span> 管理所有學校。</div>
 
-      <h3>2.3 選擇你的 AI 存取模式 <span style="font-weight:400;font-size:.85em;color:var(--muted)">（唯一的設定決定）</span></h3>
-      <p>任何 AI 功能運作前，你必須在 <b>Settings → General</b> 選擇一個 <strong>計費模式</strong>。共有三個選項。首次開啟設定時應用程式會自動建議一個，但你可隨時更改。</p>
+      <h3>2.3 選擇你的 AI 存取模式</h3>
+      <p>任何 AI 功能運作前，你必須在 <b>設定 → 一般</b> 選擇一個 <strong>計費模式</strong>。共有三個選項。首次開啟設定時應用程式會自動建議一個，但你可隨時更改。</p>
 
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:18px 0">
         <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--green)">
-          <div class="b-green badge">訂閱 SUBSCRIPTION</div>
+          <div class="b-green badge">訂閱</div>
           <p class="small" style="margin:8px 0 0">定額月費／年費。最適合常規課堂使用。無須管理金鑰。</p>
         </div>
         <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--blue)">
-          <div class="b-blue badge">計量 METER（API 金鑰）</div>
+          <div class="b-blue badge">計量（API 金鑰）</div>
           <p class="small" style="margin:8px 0 0">自帶供應商金鑰。只為實際用量付款。無限圖像生成。</p>
         </div>
         <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--violet)">
-          <div class="b-violet badge">免費 FREE（存取密碼）</div>
+          <div class="b-violet badge">免費（存取密碼）</div>
           <p class="small" style="margin:8px 0 0">Mr.🆖 提供的密碼。Mr.🆖 為你承擔 AI 成本。設有嚴格每日限額。</p>
         </div>
       </div>
@@ -643,12 +643,12 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>最適合</th><td>多數用戶</td><td>進階用戶／開發者</td><td>試用</td></tr>
       </table>
 
-      <h4>模式 A — 訂閱 Subscription</h4>
+      <h4>模式 A — 訂閱</h4>
       <ol class="steps">
-        <li>在 <b>Settings → General → Billing Mode</b> 選 <b>Subscription</b>。</li>
-        <li>捲至 <b>Subscription</b> 面板，選 <b>Monthly 月費</b>或 <b>Yearly 年費</b>（年費約省 2 個月）。</li>
-        <li>跳轉至 <b>Stripe Checkout</b> 輸入付款資料。新帳戶或有一次免費試用（通常 1 天；每帳戶一次）。</li>
-        <li>成功後 AI 功能即時解鎖。可經 <b>Manage Subscription</b>（Stripe 平台）管理帳單，或從狀態卡 <b>Cancel 取消</b>／<b>Reactivate 重新啟用</b>。</li>
+        <li>在 <b>設定 → 一般 → 計費模式</b> 選 <b>訂閱</b>。</li>
+        <li>捲至 <b>訂閱</b> 面板，選 <b> 月費</b>或 <b>年費</b>（年費約省 2 個月）。</li>
+        <li>跳轉至 <b>Stripe 結帳</b> 輸入付款資料。新帳戶或有一次免費試用（通常 1 天；每帳戶一次）。</li>
+        <li>成功後 AI 功能即時解鎖。可經 <b>管理訂閱</b>（Stripe 平台）管理帳單，或從狀態卡 <b>取消</b>／<b>重新啟用</b>。</li>
       </ol>
 
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
@@ -702,13 +702,13 @@ body.toc-noscroll{overflow:hidden}
 
       <div class="callout teacher"><strong><span class="tag-teacher"></span>學校訂閱</strong> 若你的學校已有管理員安排的批量（學校）訂閱，個人訂閱面板會被停用——你已受涵蓋。管理員所見為席位管理控件，而非定價卡（見第 11 章）。</div>
 
-      <h4>模式 B — 計量 Meter（自有 API 金鑰）</h4>
+      <h4>模式 B — 計量（自有 API 金鑰）</h4>
       <p>若你有 AI 供應商的金鑰則選此。目前應用程式的供應商為 <b>Mr.🆖 AI Hub</b>（OpenAI 相容端點，位於 <code>https://api.mr5ai.com</code>）；你可在該處取得金鑰。</p>
       <ol class="steps">
-        <li>在 <b>Settings → General → Billing Mode</b> 選 <b>Meter</b>。</li>
+        <li>在 <b>設定 → 一般 → 計費模式</b> 選 <b>計量</b>。</li>
         <li><b>AI 供應商</b>保持為 <i>Mr.🆖 AI Hub</i>。</li>
-        <li>在出現的欄位輸入你的 <b>API Key 金鑰</b>。<b>API Base URL</b> 已預填且唯讀。</li>
-        <li>點擊 <b>Save 儲存</b>。每次 AI 呼叫會把金鑰直接送往供應商；Mr.🆖 不會儲存或計費。</li>
+        <li>在出現的欄位輸入你的 <b>API 金鑰</b>。<b>API 基地 URL</b> 已預填且唯讀。</li>
+        <li>點擊 <b>儲存</b>。每次 AI 呼叫會把金鑰直接送往供應商；Mr.🆖 不會儲存或計費。</li>
       </ol>
       <div class="mock">
         <div class="mock-bar"><span class="pill">⚙ 設定 → 一般</span></div>
@@ -722,11 +722,11 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="callout tip"><strong>為何用 Meter？</strong> 可享<b>無限</b>圖像生成，並只為實際用量向自己的供應商付款。適合進階用戶。</div>
 
-      <h4>模式 C — 免費 Free（存取密碼）</h4>
+      <h4>模式 C — 免費（存取密碼）</h4>
       <p>若 Mr.🆖 給了你存取密碼則選此。此模式下 Mr.🆖 承擔 AI 成本，故每日限額較緊（每天 1 張 AI 圖像）。</p>
       <ol class="steps">
-        <li>在 <b>Settings → General → Billing Mode</b> 選 <b>Free</b>。</li>
-        <li>輸入你收到的 <b>Access Password 存取密碼</b>。</li>
+        <li>在 <b>設定 → 一般 → 計費模式</b> 選 <b>免費</b>。</li>
+        <li>輸入你收到的 <b>存取密碼</b>。</li>
         <li>儲存。完成。</li>
       </ol>
       <div class="mock">
@@ -745,10 +745,10 @@ body.toc-noscroll{overflow:hidden}
       <div class="chapter-head">
         <span class="chapter-num">第 3 章</span>
         <h2 class="section-title">3. 設定參考</h2>
-        <p class="small">從右上角用戶選單開啟「設定」。四個分頁：一般、模型、TTS、通知。</p>
+        <p class="small">從右上角用戶選單開啟「設定」。四個分頁：一般、模型、語音、通知。</p>
       </div>
 
-      <p>「設定」對話框讓你配置 AI 存取（第 2 章）、為每項功能選擇 AI 模型、設定語音朗讀聲線，以及管理電郵提醒。從右上角<b>用戶選單</b>（你的頭像）→ <b>Settings</b> 開啟。你的選擇會儲存至帳戶，並在每次以任何裝置登入時還原。</p>
+      <p>「設定」對話框讓你配置 AI 存取（第 2 章）、為每項功能選擇 AI 模型、設定語音朗讀聲線，以及管理電郵提醒。從右上角<b>用戶選單</b>（你的頭像）→ <b>設定</b> 開啟。你的選擇會儲存至帳戶，並在每次以任何裝置登入時還原。</p>
 
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:240px">
@@ -804,22 +804,22 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="mock-cap" style="margin-top:8px">通知分頁在登入後才顯示。</div>
 
-      <h3>3.1 General 一般分頁</h3>
+      <h3>3.1 一般分頁</h3>
       <table class="ref">
         <tr><th>設定</th><th>選項／欄位</th><th>備註</th></tr>
-        <tr><td><strong>計費模式 Billing Mode</strong></td><td>Subscription · Meter · Free</td><td>見第 2 章。靜態 "export" 版本中隱藏。</td></tr>
+        <tr><td><strong>計費模式</strong></td><td>訂閱 · 計量 · 免費</td><td>見第 2 章。</td></tr>
         <tr><td><strong>AI 供應商</strong></td><td>Mr.🆖 AI Hub</td><td>介面中唯一選項。</td></tr>
         <tr><td><strong>API 金鑰</strong>／<strong>API 基地 URL</strong></td><td>文字（密碼欄）</td><td>僅於 Meter 模式顯示。基地 URL 唯讀（<code>https://api.mr5ai.com</code>）。</td></tr>
-        <tr><td><strong>存取密碼 Access Password</strong></td><td>文字（密碼欄）</td><td>僅於 Free 模式顯示。</td></tr>
+        <tr><td><strong>存取密碼</strong></td><td>文字（密碼欄）</td><td>僅於 Free 模式顯示。</td></tr>
         <tr><td><strong>訂閱面板</strong></td><td>定價／狀態卡</td><td>Subscription 模式且已登入時顯示。學校訂閱會停用個人訂閱。</td></tr>
         <tr><td><strong>介面語言</strong></td><td>跟隨系統 · English · 繁體中文</td><td>更改全部介面文字。</td></tr>
         <tr><td><strong>介面主題</strong></td><td>跟隨系統 · 淺色 · 深色</td><td>預設跟隨作業系統。</td></tr>
-        <tr><td><strong>越獄模式 Jailbreak Mode</strong></td><td>開／關</td><td>解鎖導師的「進階答案協助」（見第 8 章）。</td></tr>
+        <tr><td><strong>越獄模式</strong></td><td>開／關</td><td>解鎖導師的「進階答案協助」（見第 8 章）。</td></tr>
         <tr><td><strong>顯示「給出答案」</strong></td><td>開／關</td><td>需先開啟越獄模式。關閉越獄模式亦會關閉此項。</td></tr>
         <tr><td><strong>刪除帳戶</strong> <span class="tag-super" style="border:none"></span></td><td>危險區域按鈕</td><td>超級管理員不顯示。需重新輸入電郵確認。無法復原。</td></tr>
       </table>
 
-      <h3>3.2 Models 模型分頁 — 為每項功能選擇 AI 引擎</h3>
+      <h3>3.2 模型分頁 — 為每項功能選擇 AI 引擎</h3>
       <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。</p>
       <table class="ref">
         <tr><th>功能（標籤）</th><th>欄位</th><th>可用模型</th><th>預設</th></tr>
@@ -838,26 +838,26 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>step-3.7-flash</code> 為推薦之選；切換至 <code>gpt-5.6-terra</code> 可得最強（亦最貴）的推理能力。</div>
 
-      <h3>3.3 TTS 語音朗讀分頁</h3>
+      <h3>3.3 語音分頁</h3>
       <table class="ref">
-        <tr><th>Setting</th><th>Options</th><th>Notes</th></tr>
-        <tr><td><strong>TTS 聲線</strong></td><td>Alloy（美式男）· Nova（美式女）· Adam（美式男）· Phoebe（美式女）· Ollie（英式男）· Ava（美式女）</td><td>用於詞彙朗讀按鈕、生字卡、拼字遊戲。</td></tr>
+        <tr><th>設定</th><th>選項</th><th>備註</th></tr>
+        <tr><td><strong>語音選擇</strong></td><td>Alloy（美式男）· Nova（美式女）· Adam（美式男）· Phoebe（美式女）· Ollie（英式男）· Ava（美式女）</td><td>用於詞彙朗讀按鈕、生字卡、拼字遊戲。</td></tr>
         <tr><td><strong>播放速度</strong></td><td>0.25× · 0.5× · 0.75× · 1.0×</td><td>較慢速度有助語言學習者。</td></tr>
         <tr><td><strong>自動朗讀生字卡</strong></td><td>開／關</td><td>生字卡載入時自動朗讀每個詞。預設開啟。</td></tr>
       </table>
 
-      <h3>3.4 Notifications 通知分頁 <span style="font-weight:400;font-size:.8em">（須登入）</span></h3>
+      <h3>3.4 通知分頁</h3>
       <p>控制伺服器按計劃發送的閱讀提醒電郵。</p>
       <table class="ref">
-        <tr><th>Setting</th><th>Options</th></tr>
+        <tr><th>設定</th><th>選項</th></tr>
         <tr><td><strong>電郵提醒</strong></td><td>開／關</td></tr>
         <tr><td><strong>提醒頻率</strong></td><td>每 1 · 2 · 3 · 5 · 7 · 14 天（預設 3）</td></tr>
       </table>
 
       <h3>3.5 底部按鈕</h3>
       <ul>
-        <li><b>Save 儲存</b>——套用變更至 store（已登入則同步至伺服器）。</li>
-        <li><b>Reset all settings 重設全部</b>——還原所有選項至出廠預設值。</li>
+        <li><b>儲存</b>——套用變更並同步至伺服器。</li>
+        <li><b>重設全部</b>——還原所有選項至出廠預設值。</li>
       </ul>
 
       </section>
@@ -927,14 +927,14 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <table class="ref">
         <tr><th>分頁</th><th>作用</th></tr>
-        <tr><td><b>Upload 上傳</b></td><td>拖放圖片（PNG/JPG）或 PDF。每頁由視覺 AI OCR 讀取並合併為文字。縮圖顯示每個檔案的操作（放大、刪除）。會自動產生文件標題。</td></tr>
-        <tr><td><b>Repository 文本庫</b></td><td>從學校／班別／公開文本庫選取預先分享的文章（由老師加入）。</td></tr>
-        <tr><td><b>AI Generate AI 生成</b></td><td>讓 AI 撰寫全新文章：選主題、文體、字數及 CEFR 級別（按年齡自動建議）。標記為「AI Generated」。</td></tr>
+        <tr><td><b>上傳</b></td><td>拖放圖片（PNG/JPG）或 PDF。每頁由視覺 AI OCR 讀取並合併為文字。縮圖顯示每個檔案的操作（放大、刪除）。會自動產生文件標題。</td></tr>
+        <tr><td><b>文本庫</b></td><td>從學校／班別／公開文本庫選取預先分享的文章（由老師加入）。</td></tr>
+        <tr><td><b>AI 生成</b></td><td>讓 AI 撰寫全新文章：選主題、文體、字數及 CEFR 級別（按年齡自動建議）。標記為「AI Generated」。</td></tr>
       </table>
-      <div class="callout tip"><strong>提示</strong> 提取文字後可<b>編輯</b>（Original 分頁的鉛筆圖示）——便於修正 OCR 錯誤。編輯會在確認後清除 AI 衍生內容（改寫文本、詞彙等）。</div>
+      <div class="callout tip"><strong>提示</strong> 提取文字後可<b>編輯</b>（原文分頁的鉛筆圖示）——便於修正 OCR 錯誤。編輯會在確認後清除 AI 衍生內容（改寫文本、詞彙等）。</div>
 
       <h3>4.3 摘要</h3>
-      <p>點擊 <b>Generate</b> 取得串流 AI 摘要：要點速覽、主要論點、關鍵詞及反思問題，以 Markdown 呈現。</p>
+      <p>點擊 <b>生成</b> 取得串流 AI 摘要：要點速覽、主要論點、關鍵詞及反思問題，以 Markdown 呈現。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-file-text"/></svg> 摘要</div><span class="btn primary sm"><svg class="ic sm"><use href="#i-file-text"/></svg> 生成摘要</span></div>
         <div class="mock-body">
@@ -1001,7 +1001,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>4.5 視覺化</h3>
-      <p>AI 根據文字內容生成插圖（可切換中／英文提示）。生成後可<b>下載（PNG）</b>或點擊圖片全螢幕縮放。<strong>設有額度</strong>：Free 每天 1 張、Subscription 每天 2 張、Meter 無限。「剩餘：N」計數器顯示配額；為 0 時出現鎖定畫面。</p>
+      <p>AI 根據文字內容生成插圖（可切換中／英文提示）。生成後可<b>下載（PNG）</b>或點擊圖片全螢幕縮放。<strong>設有額度</strong>：免費 每天 1 張、訂閱 每天 2 張、計量 無限。「剩餘：N」計數器顯示配額；為 0 時出現鎖定畫面。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-image"/></svg> 文本視覺化</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-download"/></svg> 下載</span><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> 中文</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-image"/></svg> 重新生成</span><span class="small">今日剩餘 1 次</span></div>
         <div class="mock-body" style="background:#fff">
@@ -1244,7 +1244,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>4.6 改寫文本 — 互動閱讀中樞</h3>
-      <p>最大的區塊。三個分頁讓你並排閱讀<b>原文 Original</b>、<b>改寫 Adapted</b>（按年齡簡化）及<b>簡化 Simplified</b>（更簡單）版本，並可在段落間導航。</p>
+      <p>最大的區塊。三個分頁讓你並排閱讀<b>原文</b>、<b>改寫</b>（按年齡簡化）及<b>簡化</b>（更簡單）版本，並可在段落間導航。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-book-open"/></svg> 文本分析和改寫</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-file-down"/></svg> 下載 Word <svg class="ic sm"><use href="#i-chevron-down"/></svg></span></div>
         <div class="mock-body">
@@ -1272,7 +1272,7 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <h3>4.7 文本難度與 CEFR 高亮</h3>
-      <p>在改寫文本下方，切換 <b>Show Cards</b> 比較原文／改寫／簡化的可讀性指標，切換 <b>CEFR Highlight</b> 按難度為每個詞著色。</p>
+      <p>在改寫文本下方，切換 <b>顯示卡牌</b> 比較原文／改寫／簡化的可讀性指標，切換 <b>CEFR 高亮</b> 按難度為每個詞著色。</p>
       <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:200px">
           <div class="card-mini">
@@ -1310,7 +1310,7 @@ body.toc-noscroll{overflow:hidden}
         <p class="small">工作階段內的詞彙表中樞：表格、生字卡、拼字遊戲及測驗——全部由 Leitner SRS 演算法驅動。</p>
       </div>
 
-      <p>當你有<b>高亮詞彙</b>後（來自 AI 詞彙建議或選取文字），<strong>詞彙表 Glossary</strong> 可生成定義，並成為含四個子分頁的中樞：<b>表格 Table</b>、<b>生字卡 Flashcard</b>、<b>拼字 Spelling</b>、<b>測驗 Quiz</b>。你練習的每個詞都由間隔重複系統（SRS）追蹤，使你在適當時間複習適當的詞。</p>
+      <p>當你有<b>高亮詞彙</b>後（來自 AI 詞彙建議或選取文字），<strong>詞彙表</strong> 可生成定義，並成為含四個子分頁的中樞：<b>表格</b>、<b>生字卡</b>、<b>拼字</b>、<b>測驗</b>。你練習的每個詞都由間隔重複系統（SRS）追蹤，使你在適當時間複習適當的詞。</p>
 
       <h3>5.1 詞彙表中樞</h3>
       <div class="mock">
@@ -1327,8 +1327,8 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <ul>
         <li><b>表格分頁</b>——可按詞或詞性排序。欄含詞、音節、詞性、英／中定義、例句。</li>
-        <li><b>匯出</b>——「Download Word」（格式化詞彙表 .docx）或「Download Excel」（.xlsx，含篩選、凍結標題列、中文字體）。</li>
-        <li><b>「My Vocabulary」連結</b>——跳至完整的我的詞彙頁面（第 9 章）。</li>
+        <li><b>匯出</b>——「下載 Word」（格式化詞彙表 .docx）或「下載 Excel」（.xlsx，含篩選、凍結標題列、中文字體）。</li>
+        <li><b>「我的詞彙」連結</b>——跳至完整的我的詞彙頁面（第 9 章）。</li>
       </ul>
 
       <h3>5.2 生字卡（SRS 驅動）</h3>
@@ -1372,7 +1372,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>填空</b></td><td>輸入缺失的字母（以空格顯示）。</td></tr>
         <tr><td><b>混合</b></td><td>每詞隨機一種模式。</td></tr>
       </table>
-      <p>難度（易／中／難）設時限、提示次數（5/3/1）及空白比例。速度＋連擊加分；用提示扣分。捷徑：<b>Enter</b> 提交、<b>Ctrl+Space</b> 提示、<b>Esc</b> 重播。</p>
+      <p>難度（易／中／難）設時限、提示次數（5/3/1）及空白比例。速度＋連擊加分；用提示扣分。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-spell-check"/></svg> 拼字挑戰 · <span class="badge" style="background:var(--subtle);font-weight:600">聆聽並輸入</span></div><span class="small" style="color:#f97316">🔥 ×4</span><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 12s</span></div>
         <div class="mock-body">
@@ -1383,7 +1383,7 @@ body.toc-noscroll{overflow:hidden}
             <div class="input-fake" style="max-width:240px;margin:8px auto">輸入你聽到的詞彙...</div>
             <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;align-items:center"><span class="btn sm outline"><svg class="ic sm"><use href="#i-lightbulb"/></svg> 3</span> <span class="btn primary sm">提交</span></div>
           </div>
-          <p class="small" style="margin-top:8px;text-align:center">分數：320 | 🔥 4 · Enter 提交 · Ctrl+Space 提示 · Esc 重播</p>
+          <p class="small" style="margin-top:8px;text-align:center">分數：320 | 🔥 4</p>
         </div>
       </div>
 
@@ -1446,9 +1446,9 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <table class="ref">
         <tr><th>生字卡按鈕</th><th>計為</th><th>效果</th></tr>
-        <tr><td><b>Again</b>／<b>Hard</b></td><td>錯誤（「困難」）</td><td>降一級；不久後再現</td></tr>
-        <tr><td><b>Good</b></td><td>正確（「中等」）</td><td>升一級</td></tr>
-        <tr><td><b>Easy</b></td><td>不計</td><td>本工作階段不再顯示此卡</td></tr>
+        <tr><td><b>再看</b>／<b>困難</b></td><td>錯誤（「困難」）</td><td>降一級；不久後再現</td></tr>
+        <tr><td><b>良好</b></td><td>正確（「中等」）</td><td>升一級</td></tr>
+        <tr><td><b>簡單</b></td><td>不計</td><td>本工作階段不再顯示此卡</td></tr>
       </table>
       <div class="callout tip"><strong>「到期複習」</strong> 一個詞若<em>從未</em>被複習（<code>next review = 0</code>），或其排定複習時間已過，即屬到期。「到期複習」統計卡（第 9 章）計算這些。每日複習效果最佳。</div>
 
@@ -1549,7 +1549,7 @@ body.toc-noscroll{overflow:hidden}
         <p class="small">文法分析、課程、測驗及五種遊戲化練習模式——另含每款遊戲共用的三種難度模式。</p>
       </div>
 
-      <p>文法區有四個分頁——<b>主題 Topics</b>、<b>課程 Lessons</b>、<b>遊戲 Games</b>、<b>測驗 Quiz</b>。先點 <b>Analyze</b> 讓 AI 從你的文章抽取文法主題（主模型失敗會自動切換後備模型，所有文法 AI 呼叫皆有此容錯，故十分穩健）。</p>
+      <p>文法區有四個分頁——<b>主題</b>、<b>課程</b>、<b>遊戲</b>、<b>測驗</b>。先點 <b>分析</b> 讓 AI 從你的文章抽取文法主題（主模型失敗會自動切換後備模型，所有文法 AI 呼叫皆有此容錯，故十分穩健）。</p>
 
       <h3>7.1 主題與課程</h3>
       <div class="mock">
@@ -1571,7 +1571,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <ul>
         <li><b>主題分頁</b>——卡片格（英＋中名稱、CEFR 徽章、類別色、出現次數）。展開可看解釋、句型及來自原文的例句。按鈕：<b>查看課程</b>、<b>在文本中標記</b>（在原文為該文法模式著色）。</li>
-        <li><b>課程分頁</b>——每主題的手風琴。<b>基本內容</b>恒顯：是甚麼、句型、例句（原文＋AI）、常見錯誤。<b>「Load Full Lesson」</b>增補：何時使用＋信號詞、形式表、易混淆比較、發音提示、CCQ（點擊揭示的核對問題）、快速練習（AI 評分）。</li>
+        <li><b>課程分頁</b>——每主題的手風琴。<b>基本內容</b>恒顯：是甚麼、句型、例句（原文＋AI）、常見錯誤。<b>「載入完整課程」</b>增補：何時使用＋信號詞、形式表、易混淆比較、發音提示、CCQ（點擊揭示的核對問題）、快速練習（AI 評分）。</li>
         <li><b>Word 匯出</b>——章節：主題、課程、測驗空白卷、<b>測驗答案</b><span class="tag-teacher"></span>（答案卷教師／管理員可見；學生完成後可見）。</li>
       </ul>
 
@@ -1582,9 +1582,9 @@ body.toc-noscroll{overflow:hidden}
       <p>五款遊戲，首次進入皆自動生成 AI 內容。遊玩前先選三種<b>共用模式</b>之一：</p>
       <table class="ref">
         <tr><th>模式</th><th>計時</th><th>提示／句型</th><th>最適合</th></tr>
-        <tr><td><b>練習 Practice</b></td><td>無</td><td>允許</td><td>學習規則</td></tr>
-        <tr><td><b>街機 Arcade</b></td><td>每題倒數（計時加分）</td><td>允許</td><td>建立速度</td></tr>
-        <tr><td><b>精通 Mastery</b></td><td>倒數</td><td>禁用</td><td>證明精通（最難）</td></tr>
+        <tr><td><b>練習</b></td><td>無</td><td>允許</td><td>學習規則</td></tr>
+        <tr><td><b>街機</b></td><td>每題倒數（計時加分）</td><td>允許</td><td>建立速度</td></tr>
+        <tr><td><b>精通</b></td><td>倒數</td><td>禁用</td><td>證明精通（最難）</td></tr>
       </table>
       <p><b>計分：</b>每答對 100 分；街機加時間分；連擊（3+）加至 +50%；用提示扣分。共用結果畫面分四級（精通大師！≥90%／出色表現！≥70%／不錯的努力！≥50%／繼續練習！），含粒子效果、「新紀錄！」徽章、再玩／新挑戰按鈕。高分與準確度會儲存至工作階段與歷史記錄。中樞卡片順序：輪盤、錯誤手術、工坊、決鬥、文字排列。</p>
 
@@ -1620,8 +1620,8 @@ body.toc-noscroll{overflow:hidden}
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-stethoscope"/></svg> 錯誤手術 · 街機</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 11s</span></div>
         <div class="mock-body">
           <div style="background:#fee2e2;color:#991b1b;border-radius:6px;padding:6px 10px;font-size:12px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><svg class="ic sm"><use href="#i-stethoscope"/></svg> 點擊句子中錯誤的詞</div>
-          <p style="margin:0 0 10px">The <span style="border-bottom:2px solid var(--red);background:#fee2e2;padding:0 2px">reefs</span> has been dying rapidly.</p>
-          <p class="small" style="margin:0 0 6px">替換：reefs →</p>
+          <p style="margin:0 0 10px">The reefs <span style="border-bottom:2px solid var(--red);background:#fee2e2;padding:0 2px">been</span> dying rapidly.</p>
+          <p class="small" style="margin:0 0 6px">替換：been →</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
             <span class="opt" style="justify-content:center">have</span>
             <span class="opt ok" style="justify-content:center">have been</span>
@@ -1632,7 +1632,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>7.7 遊戲 4 — 文法輪盤 Grammar Roulette <span class="b-violet badge">紫</span></h3>
-      <p>固定 <b>10 回合</b>。點 <b>Spin 轉</b>——彩色輪盤（每格一個文法主題）旋轉約 3 秒停在某一主題，隨即出一道選擇題。<b>熱門主題獎勵：</b>同一主題連續答對 2+ → 2 倍乘數；3+ → 3 倍（顯示 🔥）。以「金幣」💰 計分。</p>
+      <p>固定 <b>10 回合</b>。點 <b>轉</b>——彩色輪盤（每格一個文法主題）旋轉約 3 秒停在某一主題，隨即出一道選擇題。<b>熱門主題獎勵：</b>同一主題連續答對 2+ → 2 倍乘數；3+ → 3 倍（顯示 🔥）。以「金幣」💰 計分。</p>
       <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
         <div style="position:relative;width:170px;height:170px;margin:0 auto">
           <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:18px solid var(--primary);z-index:2"></div>
@@ -1690,11 +1690,11 @@ body.toc-noscroll{overflow:hidden}
     <section class="chapter" id="ch8">
       <div class="chapter-head">
         <span class="chapter-num">第 8 章</span>
-        <h2 class="section-title">8. AI 閱讀導師</h2>
+        <h2 class="section-title">8. AI 導師</h2>
         <p class="small">一個認識你文章的串流聊天助手——可發問、附加圖片，並取得提示或答案。</p>
       </div>
 
-      <p>一個漸層浮動按鈕（右下角，目錄按鈕上方）會在提取文字後開啟 <b>AI 閱讀導師</b>。它是一個可縮放、可放大至近全螢幕的聊天面板。導師認識你正在讀的文章，並會結合語境作答。</p>
+      <p>一個漸層浮動按鈕（右下角，目錄按鈕上方）會在提取文字後開啟 <b>AI 導師</b>。它是一個可縮放、可放大至近全螢幕的聊天面板。導師認識你正在讀的文章，並會結合語境作答。</p>
 
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span></div>
@@ -1739,7 +1739,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>逐步</td><td>開啟越獄模式</td><td>完整走過該圖片問題。</td></tr>
         <tr><td>給出答案</td><td>開啟越獄模式<b>及</b>「顯示給出答案」</td><td>直接揭示答案。</td></tr>
       </table>
-      <div class="callout warn"><strong>為何要「越獄」？</strong> 這兩個開關供教師或想看完整解答的自學者使用。課堂中請保持<b>關閉</b>，讓學生自行推理。兩者位於 <b>Settings → General</b>。</div>
+      <div class="callout warn"><strong>為何要「越獄」？</strong> 這兩個開關供教師或想看完整解答的自學者使用。課堂中請保持<b>關閉</b>，讓學生自行推理。兩者位於 <b>設定 → 一般</b>。</div>
 
       </section>
     <!-- ============ CHAPTER 9: MY VOCABULARY PAGE ============ -->
@@ -1750,7 +1750,7 @@ body.toc-noscroll{overflow:hidden}
         <p class="small">位於 <code>/vocabulary</code> 的專屬中樞，用於跨越<em>所有</em>閱讀工作階段的系統化詞彙複習。</p>
       </div>
 
-      <p>從頂欄的 <b>BookOpen</b> 圖示或詞彙表內的「My Vocabulary」連結開啟。它把你歷來收集的所有詞彙匯聚為一個可搜尋、可排序的詞庫，並附統計、自動選取策略、命名複習清單、匯出及歷史記錄。</p>
+      <p>從頂欄的 <b>BookOpen</b> 圖示或詞彙表內的「我的詞彙」連結開啟。它把你歷來收集的所有詞彙匯聚為一個可搜尋、可排序的詞庫，並附統計、自動選取策略、命名複習清單、匯出及歷史記錄。</p>
 
       <h3>9.1 佈局與統計</h3>
       <div class="mock">
@@ -1789,7 +1789,7 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <h3>9.4 複習清單 <span style="font-weight:400;font-size:.8em">（命名詞集）</span></h3>
-      <p>從已選詞建立命名清單（「Add to Review List」），再於<b>清單分頁</b>管理：<b>播放</b>（載入複習佇列）、<b>編輯</b>（改名／移除詞）、<b>分享</b><span class="tag-teacher"></span>、<b>刪除</b>。分頁每頁 10/20/30/50。</p>
+      <p>從已選詞建立命名清單（「加入複習清單」），再於<b>清單分頁</b>管理：<b>播放</b>（載入複習佇列）、<b>編輯</b>（改名／移除詞）、<b>分享</b><span class="tag-teacher"></span>、<b>刪除</b>。分頁每頁 10/20/30/50。</p>
 
       <h3>9.5 匯出 <span style="font-weight:400;font-size:.8em">（4 種格式）</span></h3>
       <p>匯出面板可匯出已選詞或全部：</p>
@@ -1918,7 +1918,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>11.1 排行榜 <span style="font-weight:400;font-size:.8em">（<code>/leaderboard</code>）</span></h3>
-      <p>從頂欄獎盃圖示或學生資訊的「Leaderboard」按鈕開啟。三個分頁：<b>成就</b>、<b>我的統計</b>、<b>排行榜</b>。排名為<b>每週</b>（週一至週日）——用週選擇器瀏覽往週。範圍：<b>班別／學校／全球</b>（全球僅列學生）。</p>
+      <p>從頂欄獎盃圖示或學生資訊的「排行榜」按鈕開啟。三個分頁：<b>成就</b>、<b>我的統計</b>、<b>排行榜</b>。排名為<b>每週</b>（週一至週日）——用週選擇器瀏覽往週。範圍：<b>班別／學校／全球</b>（全球僅列學生）。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-trophy"/></svg> 成就與排行榜</div><span class="small">本週</span></div>
         <div class="mock-body">
@@ -1997,8 +1997,8 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>並行工作階段上限</b></td><td>1</td><td>第 2 次登入會登出你上一個工作階段。</td></tr>
         <tr><td><b>閒置逾時</b></td><td>60 分鐘</td><td>停止互動即登出（前 1 分鐘警告），並跨所有分頁同步。</td></tr>
       </table>
-      <div class="callout tip"><strong>提醒電郵</strong> 於 <b>Settings → Notifications</b> 配置：開關及頻率（1–14 天），由伺服器按計劃發送。</div>
-      <div class="callout danger"><strong>刪除帳戶</strong> 於 <b>Settings → General → Danger Zone</b><span class="tag-super" style="border:none">（超級管理員隱藏）</span>。須重新輸入電郵確認。<b>無法復原</b>——所有資料會被移除。</div>
+      <div class="callout tip"><strong>提醒電郵</strong> 於 <b>設定 → 通知</b> 配置：開關及頻率（1–14 天），由伺服器按計劃發送。</div>
+      <div class="callout danger"><strong>刪除帳戶</strong> 於 <b>設定 → 一般 → 危險區域</b><span class="tag-super" style="border:none">（超級管理員隱藏）</span>。須重新輸入電郵確認。<b>無法復原</b>——所有資料會被移除。</div>
 
       </section>
     <!-- ============ APPENDICES ============ -->
@@ -2012,8 +2012,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>A. AI 模型參考</h3>
       <table class="ref">
         <tr><th>模型清單</th><th>成員</th><th>預設</th></tr>
-        <tr><td><b>視覺 Vision</b>（OCR）</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
-        <tr><td><b>通用 Available</b>（摘要、心智圖、改寫、簡化、測驗、詞彙、句子分析、文法）</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>視覺</b>（OCR）</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
+        <tr><td><b>通用</b>（摘要、心智圖、改寫、簡化、測驗、詞彙、句子分析、文法）</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>進階導師</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
@@ -2031,7 +2031,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>分享詞彙／複習清單</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>上傳至文本庫</td><td class="small">有限</td><td class="small">班別</td><td class="small">學校</td><td class="small">公開</td></tr>
         <tr><td>建立功課</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
-        <tr><td>教師儀表板</td><td class="no">—</td><td class="small">own classes</td><td class="small">all classes</td><td class="small">所有學校</td></tr>
+        <tr><td>教師儀表板</td><td class="no">—</td><td class="small">自己的班別</td><td class="small">所有班別</td><td class="small">所有學校</td></tr>
         <tr><td>用戶管理（班別）</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>用戶管理（用戶／數據）</td><td class="no">—</td><td class="small">查看</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>學校／訂閱／匯入匯出</td><td class="no">—</td><td class="no">—</td><td class="small">部分</td><td class="yes">✓</td></tr>
@@ -2042,12 +2042,12 @@ body.toc-noscroll{overflow:hidden}
       <h3>C. 疑難排解／常見問題</h3>
       <table class="ref">
         <tr><th>問題</th><th>可能原因與解決</th></tr>
-        <tr><td><b>AI 功能無反應／報錯</b></td><td>未設定計費模式，或缺金鑰／密碼。到 <b>Settings → General</b> 完成一種設定（第 2 章）。</td></tr>
-        <tr><td><b>圖像生成「額度已滿」</b></td><td>當日視覺化配額已用罄。Free 每天 1 張、Subscription 每天 2 張，每日重設；或改用 Meter 模式享無限。</td></tr>
+        <tr><td><b>AI 功能無反應／報錯</b></td><td>未設定計費模式，或缺金鑰／密碼。到 <b>設定 → 一般</b> 完成一種設定（第 2 章）。</td></tr>
+        <tr><td><b>圖像生成「額度已滿」</b></td><td>當日視覺化配額已用罄。免費 每天 1 張、訂閱 每天 2 張，每日重設；或改用 計量 模式享無限。</td></tr>
         <tr><td><b>意外被登出</b></td><td>閒置逾時（預設 60 分鐘）或 3 天工作階段上限已到。閒置登出前 1 分鐘會有警告。</td></tr>
         <tr><td><b>導航後旋轉圖消失</b></td><td>非錯誤——生成在背景繼續；載入狀態存於 store，跨頁面保留。返回該區段即可見結果。</td></tr>
         <tr><td><b>文法／測驗用了別的模型</b></td><td>設計如此——文法與閱讀測驗呼叫在主模型失敗時自動切換後備模型。無需處理。</td></tr>
-        <tr><td><b>編輯後設定沒變</b></td><td>須點設定底部的 <b>Save</b>。已登入用戶的設定存於資料庫，每次登入重新載入。</td></tr>
+        <tr><td><b>編輯後設定沒變</b></td><td>須點設定底部的 <b>儲存</b>。已登入用戶的設定存於資料庫，每次登入重新載入。</td></tr>
         <tr><td><b>「附答案」匯出變灰</b></td><td>學生須完成測驗／測驗後才見答案。教師／管理員恒常可見。</td></tr>
         <tr><td><b>頁面曾閃空白／捲到頂一次</b></td><td>延遲載入元件首次載入所致。即時恢復且本工作階段不再出現。</td></tr>
         <tr><td><b>分享的工作階段沒有我的答案</b></td><td>預期行為——分享會剔除答案／分數／聊天以提供乾淨副本。你的原件不受影響。</td></tr>
@@ -2057,12 +2057,12 @@ body.toc-noscroll{overflow:hidden}
       <h3>D. 詞彙表</h3>
       <table class="ref">
         <tr><th>術語</th><th>含義</th></tr>
-        <tr><td><b>計費模式 Billing Mode</b></td><td>AI 用量的付費方式：訂閱、計量（自有金鑰）或免費（存取密碼）。</td></tr>
+        <tr><td><b>計費模式</b></td><td>AI 用量的付費方式：訂閱、計量（自有金鑰）或免費（存取密碼）。</td></tr>
         <tr><td><b>CEFR</b></td><td>歐洲共同語文參考架構——六個語言級別 A1（初學）→ C2（精通），用於詞彙難度高亮。</td></tr>
         <tr><td><b>SRS</b></td><td>間隔重複系統——Leitner 五格演算法，按遞增間隔排程詞彙複習。</td></tr>
         <tr><td><b>HMAC 簽章</b></td><td>用以安全傳送存取密碼的單向雜湊（結合當前時間），無法被重用。</td></tr>
         <tr><td><b>熟練度</b></td><td>詞的 SRS 格（0–5）。第 5 級＝「已掌握」（30 天複習間隔）。</td></tr>
-        <tr><td><b>文本庫 Repository</b></td><td>教師／管理員加入的共享文章庫（班別、學校或公開範圍）。</td></tr>
+        <tr><td><b>文本庫</b></td><td>教師／管理員加入的共享文章庫（班別、學校或公開範圍）。</td></tr>
         <tr><td><b>分享工作階段</b></td><td>發送給接收者的乾淨（剔除答案）閱讀工作階段副本，常作功課用。</td></tr>
         <tr><td><b>PWA</b></td><td>漸進式網頁應用——可安裝、近似應用程式的網站版本。</td></tr>
         <tr><td><b>越獄模式</b></td><td>解鎖導師「給出答案」快捷問題的設定（供教師／自學者）。</td></tr>
@@ -2094,7 +2094,7 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch5">5. 詞彙工具與 SRS</a></li>
       <li><a href="#ch6">6. 閱讀測驗</a></li>
       <li><a href="#ch7">7. 文法套件與遊戲</a></li>
-      <li><a href="#ch8">8. AI 閱讀導師</a></li>
+      <li><a href="#ch8">8. AI 導師</a></li>
       <li><a href="#ch9">9. 我的詞彙頁面</a></li>
       <li><a href="#ch10">10. 儀表板與分享</a></li>
       <li><a href="#ch11">11. 排行榜與帳戶</a></li>

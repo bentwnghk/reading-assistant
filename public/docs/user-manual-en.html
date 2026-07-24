@@ -466,7 +466,7 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch5">5. Vocabulary Tools &amp; SRS</a></li>
       <li><a href="#ch6">6. Reading Test</a></li>
       <li><a href="#ch7">7. Grammar Suite &amp; Games</a></li>
-      <li><a href="#ch8">8. AI Reading Tutor</a></li>
+      <li><a href="#ch8">8. AI Tutor</a></li>
       <li><a href="#ch9">9. My Vocabulary Page</a></li>
       <li><a href="#ch10">10. Dashboards &amp; Sharing</a></li>
       <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
@@ -615,7 +615,7 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <div class="callout"><strong>Roles at a glance</strong> &nbsp; <span class="role student">student</span> reads &amp; practices · <span class="role teacher">teacher</span> manages classes, shares content, views class analytics · <span class="role admin">admin</span> runs a whole school (users, classes, billing) · <span class="role super">super-admin</span> runs every school.</div>
 
-      <h3>2.3 Choosing your AI access mode <span style="font-weight:400;font-size:.85em;color:var(--muted)">(the one setup decision)</span></h3>
+      <h3>2.3 Choosing your AI access mode</h3>
       <p>Before any AI feature will work, you must pick a <strong>Billing Mode</strong> in <b>Settings → General</b>. There are three options. The app auto-suggests one when you first open Settings, but you can change it any time.</p>
 
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:18px 0">
@@ -807,7 +807,7 @@ body.toc-noscroll{overflow:hidden}
       <h3>3.1 General tab</h3>
       <table class="ref">
         <tr><th>Setting</th><th>Options / field</th><th>Notes</th></tr>
-        <tr><td><strong>Billing Mode</strong></td><td>Subscription · Meter · Free</td><td>See Chapter 2. Hidden in static "export" builds.</td></tr>
+        <tr><td><strong>Billing Mode</strong></td><td>Subscription · Meter · Free</td><td>See Chapter 2.</td></tr>
         <tr><td><strong>AI Provider</strong></td><td>Mr.🆖 AI Hub</td><td>Single option in the UI.</td></tr>
         <tr><td><strong>API Key</strong> / <strong>API Base URL</strong></td><td>text (password)</td><td>Shown only when mode = Meter. Base URL read-only (<code>https://api.mr5ai.com</code>).</td></tr>
         <tr><td><strong>Access Password</strong></td><td>text (password)</td><td>Shown only when mode = Free.</td></tr>
@@ -856,7 +856,7 @@ body.toc-noscroll{overflow:hidden}
 
       <h3>3.5 Footer buttons</h3>
       <ul>
-        <li><b>Save</b> — applies your changes to the store (and syncs to the server if signed in).</li>
+        <li><b>Save</b> — applies your changes and syncs to the server.</li>
         <li><b>Reset all settings</b> — restores every option to its factory default.</li>
       </ul>
 
@@ -1372,7 +1372,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Fill Blanks</b></td><td>Type the missing letters (shown as blanks).</td></tr>
         <tr><td><b>Mixed Mode</b></td><td>A random mode per word.</td></tr>
       </table>
-      <p>Difficulty (Easy/Medium/Hard) sets the time limit, hints allowed (5/3/1), and blank ratio. Earn points for speed + streaks; lose points for hints. Shortcuts: <b>Enter</b> submit, <b>Ctrl+Space</b> hint, <b>Esc</b> replay audio.</p>
+      <p>Difficulty (Easy/Medium/Hard) sets the time limit, hints allowed (5/3/1), and blank ratio. Earn points for speed + streaks; lose points for hints.</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-spell-check"/></svg> Spelling Challenge · <span class="badge" style="background:var(--subtle);font-weight:600">Listen &amp; Type</span></div><span class="small" style="color:#f97316">🔥 ×4</span><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 12s</span></div>
         <div class="mock-body">
@@ -1383,7 +1383,7 @@ body.toc-noscroll{overflow:hidden}
             <div class="input-fake" style="max-width:240px;margin:8px auto">Type the word you hear...</div>
             <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;align-items:center"><span class="btn sm outline"><svg class="ic sm"><use href="#i-lightbulb"/></svg> 3</span> <span class="btn primary sm">Submit</span></div>
           </div>
-          <p class="small" style="margin-top:8px;text-align:center">Score: 320 | 🔥 4 · Enter submit · Ctrl+Space hint · Esc replay</p>
+          <p class="small" style="margin-top:8px;text-align:center">Score: 320 | 🔥 4</p>
         </div>
       </div>
 
@@ -1620,8 +1620,8 @@ body.toc-noscroll{overflow:hidden}
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-stethoscope"/></svg> Error Surgery · Arcade</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 11s</span></div>
         <div class="mock-body">
           <div style="background:#fee2e2;color:#991b1b;border-radius:6px;padding:6px 10px;font-size:12px;margin-bottom:10px;display:flex;align-items:center;gap:6px"><svg class="ic sm"><use href="#i-stethoscope"/></svg> Tap the error word in the sentence</div>
-          <p style="margin:0 0 10px">The <span style="border-bottom:2px solid var(--red);background:#fee2e2;padding:0 2px">reefs</span> has been dying rapidly.</p>
-          <p class="small" style="margin:0 0 6px">Replace: reefs →</p>
+          <p style="margin:0 0 10px">The reefs <span style="border-bottom:2px solid var(--red);background:#fee2e2;padding:0 2px">been</span> dying rapidly.</p>
+          <p class="small" style="margin:0 0 6px">Replace: been →</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
             <span class="opt" style="justify-content:center">have</span>
             <span class="opt ok" style="justify-content:center">have been</span>
@@ -1690,11 +1690,11 @@ body.toc-noscroll{overflow:hidden}
     <section class="chapter" id="ch8">
       <div class="chapter-head">
         <span class="chapter-num">CHAPTER 8</span>
-        <h2 class="section-title">8. AI Reading Tutor</h2>
+        <h2 class="section-title">8. AI Tutor</h2>
         <p class="small">A streaming chat assistant that knows your text — ask anything, attach images, and get hints or answers.</p>
       </div>
 
-      <p>A floating gradient button (bottom-right, above the TOC button) opens the <b>AI Reading Tutor</b> once you have extracted text. It's a resizable chat panel that can be maximized to near-fullscreen. The tutor knows the article you're reading and answers in context.</p>
+      <p>A floating gradient button (bottom-right, above the TOC button) opens the <b>AI Tutor</b> once you have extracted text. It's a resizable chat panel that can be maximized to near-fullscreen. The tutor knows the article you're reading and answers in context.</p>
 
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span></div>
@@ -2094,7 +2094,7 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch5">5. Vocabulary Tools &amp; SRS</a></li>
       <li><a href="#ch6">6. Reading Test</a></li>
       <li><a href="#ch7">7. Grammar Suite &amp; Games</a></li>
-      <li><a href="#ch8">8. AI Reading Tutor</a></li>
+      <li><a href="#ch8">8. AI Tutor</a></li>
       <li><a href="#ch9">9. My Vocabulary Page</a></li>
       <li><a href="#ch10">10. Dashboards &amp; Sharing</a></li>
       <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
