@@ -2116,6 +2116,19 @@ body.toc-noscroll{overflow:hidden}
   ov.addEventListener('click',close);
   d.addEventListener('click',function(e){if(e.target.closest('a'))close();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+  /* TOC links: smooth-scroll + update the URL via replaceState so they DON'T push
+     history entries — keeps the stack as [app, manual], so Back-to-App / the
+     browser back button returns to the app instead of the previous chapter. */
+  document.querySelectorAll('.toc-sidebar a[href^="#"],.toc-drawer a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var id=a.getAttribute('href');
+      var el=id&&id.length>1?document.querySelector(id):null;
+      if(!el)return;
+      e.preventDefault();
+      if(history.replaceState)history.replaceState(null,'',id);
+      el.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
   /* "Back to App" — visible only inside an installed PWA (iOS standalone / display-mode) */
   var ba=document.getElementById('backApp');
   if(ba){
