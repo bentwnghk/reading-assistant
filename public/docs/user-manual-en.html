@@ -468,7 +468,7 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch7">7. Grammar Suite &amp; Games</a></li>
       <li><a href="#ch8">8. AI Tutor</a></li>
       <li><a href="#ch9">9. My Vocabulary Page</a></li>
-      <li><a href="#ch10">10. Dashboards &amp; Sharing</a></li>
+      <li><a href="#ch10">10. Dashboards, Sharing &amp; Assignments</a></li>
       <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
       <li><a href="#appendix">Appendices</a></li>
     </ol>
@@ -1836,8 +1836,8 @@ body.toc-noscroll{overflow:hidden}
     <section class="chapter" id="ch10">
       <div class="chapter-head">
         <span class="chapter-num">CHAPTER 10</span>
-        <h2 class="section-title">10. Dashboards &amp; Session Sharing</h2>
-        <p class="small">Personal analytics, class-wide teacher analytics, and sharing reading sessions with others.</p>
+        <h2 class="section-title">10. Dashboards, Session Sharing &amp; Assignments</h2>
+        <p class="small">Personal analytics, class-wide teacher analytics, sharing reading sessions, and assigning work to students.</p>
       </div>
 
       <p>Both dashboards open as dialogs from the top-right <b>user menu</b>. The Student Dashboard is available to everyone; the Teacher Dashboard is teacher/admin/super-admin only.</p>
@@ -1859,7 +1859,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
       <p><b>Overview</b> shows: 3 summary stat cards (texts, vocabulary, avg progress); a stacked-bar <b>Daily Activity</b> chart (15 activity types, selectable time range); a weekly <b>Reading Activity</b> area chart; an <b>AI Features</b> usage bar chart; a 2×2 <b>score grid</b> (test/quiz/spelling/grammar distributions &amp; trends); and a <b>Vocabulary Growth</b> area chart (1 week → 3 years).</p>
-      <p><b>Sessions</b> is a table of every saved session with a search box (fuzzy), <b>Import</b> (.json), and per-row actions: <b>Create Assignment</b> <span class="tag-teacher"></span>, <b>Share</b>, <b>Load</b> (restore into workspace), <b>Download</b> (.json), <b>Delete</b>. Columns include all scores + progress %. If you try to load while an AI generation is active, a confirm dialog protects against corrupting a stream.</p>
+      <p><b>Sessions</b> is a table of every saved session with a search box (fuzzy), <b>Import</b> (.json), and per-row actions: <b>Create Assignment</b> <span class="tag-teacher"></span> (see §10.4), <b>Share</b>, <b>Load</b> (restore into workspace), <b>Download</b> (.json), <b>Delete</b>. Columns include all scores + progress %. If you try to load while an AI generation is active, a confirm dialog protects against corrupting a stream.</p>
 
       <h3>10.2 Teacher Dashboard <span class="tag-teacher"></span></h3>
       <p>Class-wide analytics. The filter bar adapts to your role: <b>teachers</b> see only their classes; <b>admins</b> see all classes in their school; <b>super-admins</b> get a School selector <em>and</em> a Class selector. An <b>Export to Excel</b> button captures all 13 charts as images plus metric tables into one <code>.xlsx</code> report.</p>
@@ -1907,6 +1907,104 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
       <div class="callout"><strong>What gets stripped</strong> On accept, the recipient receives a fresh copy: test answers/scores reset, quiz/spelling scores zeroed, flashcard review dates cleared, glossary ratings cleared, and chat history removed. A new session ID &amp; timestamps are assigned. This makes shared sessions perfect as <b>assignments</b>.</div>
+
+      <h3>10.4 My Assignments <span style="font-weight:400;font-size:.8em">(<code>/assignments</code>)</span></h3>
+      <p>A dedicated page for reading homework. Open it from the header <b>clipboard icon</b> (between the Bell and the Vocabulary icons). The page adapts to your role: <b>students</b> see work their teachers have assigned; <b>teachers / admins / super-admins</b> see assignments they've created, with controls to edit, archive and track them.</p>
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-check"/></svg> My Assignments</div><span class="btn sm ghost" style="color:var(--muted)"><svg class="ic sm"><use href="#i-info"/></svg></span><span class="btn sm ghost"><svg class="ic sm"><use href="#i-plus"/></svg> Create assignment</span></div>
+        <div class="mock-body" style="display:flex;flex-direction:column;gap:10px">
+          <div class="small" style="color:var(--muted)"><svg class="ic sm"><use href="#i-star"/></svg> Saved rosters: <span class="pill">2A Monday (28)</span> <span class="pill">3B Friday (22)</span></div>
+          <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+            <div style="display:flex;justify-content:space-between;gap:8px"><b>Coral Reefs — Quiz &amp; Vocabulary</b><span class="badge b-blue">Active</span></div>
+            <div class="small" style="color:var(--muted);margin:2px 0 6px">English</div>
+            <div class="small" style="margin-bottom:6px"><svg class="ic sm"><use href="#i-users"/></svg> 28 students &nbsp;·&nbsp; <svg class="ic sm"><use href="#i-calendar"/></svg> Due 12 Jun &nbsp;·&nbsp; <svg class="ic sm"><use href="#i-trending-up"/></svg> Avg progress: 64%</div>
+            <div style="display:flex;gap:4px;border-top:1px solid var(--border);padding-top:6px"><span class="btn sm ghost"><svg class="ic sm"><use href="#i-pencil"/></svg> Edit</span><span class="btn sm ghost">Archive</span><span class="btn sm ghost" style="color:#dc2626"><svg class="ic sm"><use href="#i-trash-2"/></svg> Delete</span></div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;opacity:.6">
+            <div style="display:flex;justify-content:space-between;gap:8px"><b>Volcanoes Reading Pack</b><span class="pill" style="background:var(--subtle);color:var(--muted)">Archived</span></div>
+            <div class="small" style="color:var(--muted);margin:2px 0 6px">Geography</div>
+            <div class="small" style="margin-bottom:6px"><svg class="ic sm"><use href="#i-users"/></svg> 24 students &nbsp;·&nbsp; <svg class="ic sm"><use href="#i-calendar"/></svg> No due date &nbsp;·&nbsp; <svg class="ic sm"><use href="#i-trending-up"/></svg> Avg progress: 92%</div>
+            <div style="display:flex;gap:4px;border-top:1px solid var(--border);padding-top:6px"><span class="btn sm ghost"><svg class="ic sm"><use href="#i-pencil"/></svg> Edit</span><span class="btn sm ghost">Unarchive</span><span class="btn sm ghost" style="color:#dc2626"><svg class="ic sm"><use href="#i-trash-2"/></svg> Delete</span></div>
+          </div>
+        </div>
+        <div class="mock-cap">Teacher view. Student cards show "From {teacher}" in place of the student count and omit the action buttons.</div>
+      </div>
+      <div class="callout"><strong>Overdue counter</strong> Students with unfinished assignments past their due date see a red counter on the header clipboard icon (capped at "9+"). An assignment is flagged <b>Overdue</b> only while it is still <i>active</i>, past due, and below 100% — completed work is never marked overdue.</div>
+      <p>Each card carries a <b>status badge</b>: <span class="badge b-blue">Active</span> assignments are visible to students and count toward the overdue counter; <span class="pill" style="background:var(--subtle);color:var(--muted)">Archived</span> ones are hidden from students but kept for the teacher's reference. A help (<svg class="ic sm"><use href="#i-info"/></svg>) button on the page heading opens an in-app guide with Overview, Tracking and Manage tabs.</p>
+
+      <h3>10.5 Doing an assignment <span style="font-weight:400;font-size:.8em">(student view)</span></h3>
+      <p>Students open an assignment card to see a detail page with their personal <b>progress bar</b>, the due date (or an <b>Overdue</b> marker), any instructions the teacher left, and five <b>score tiles</b> that fill in as they work:</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="btn sm ghost"><svg class="ic sm"><use href="#i-arrow-left"/></svg> Back</span></div>
+        <div class="mock-body" style="display:flex;flex-direction:column;gap:10px">
+          <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+            <div style="display:flex;justify-content:space-between;gap:8px"><b>Coral Reefs — Quiz &amp; Vocabulary</b><span><span class="badge b-blue">Active</span> <span class="badge" style="background:#dc2626;color:#fff">Overdue</span></span></div>
+            <div class="small" style="color:var(--muted);margin:2px 0 6px">English</div>
+            <div class="small" style="border-top:1px solid var(--border);padding-top:6px"><svg class="ic sm"><use href="#i-calendar"/></svg> Due 12 Jun &nbsp;·&nbsp; <svg class="ic sm"><use href="#i-trending-up"/></svg> Avg progress: 60%</div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+              <div><div class="small"><svg class="ic sm"><use href="#i-trending-up"/></svg> Progress: 60%</div><div style="height:8px;width:160px;background:var(--muted);border-radius:8px;overflow:hidden;margin-top:4px"><div style="height:100%;width:60%;background:var(--primary)"></div></div></div>
+              <span class="small" style="color:#dc2626"><svg class="ic sm"><use href="#i-clock"/></svg> Overdue</span>
+            </div>
+            <div class="small" style="font-weight:600;margin-bottom:6px"><svg class="ic sm"><use href="#i-medal"/></svg> Your scores</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px">
+              <div style="border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center"><div class="small" style="color:#14b8a6"><svg class="ic sm"><use href="#i-book-open-check"/></svg> Reading test</div><b>80</b></div>
+              <div style="border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center"><div class="small" style="color:#3b82f6"><svg class="ic sm"><use href="#i-clipboard-list"/></svg> Vocab quiz</div><b>75</b></div>
+              <div style="border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center"><div class="small" style="color:#ec4899"><svg class="ic sm"><use href="#i-spell-check"/></svg> Spelling</div><b>90%</b></div>
+              <div style="border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center"><div class="small" style="color:#d946ef"><svg class="ic sm"><use href="#i-graduation-cap"/></svg> Grammar quiz</div><b>—</b></div>
+              <div style="border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center"><div class="small" style="color:#f59e0b"><svg class="ic sm"><use href="#i-gamepad-2"/></svg> Grammar game</div><b>—</b></div>
+            </div>
+            <span class="btn primary"><svg class="ic sm"><use href="#i-arrow-right"/></svg> Continue</span>
+          </div>
+        </div>
+      </div>
+      <p>The single call-to-action adapts to progress: <b>Start assignment</b> (0%), <b>Continue</b> (1–99%), or <b>Review</b> (100%). It deep-links into the main reading page with the assignment's working session already loaded, so the student picks up exactly where they left off. A dash ("—") in a tile means that activity hasn't been attempted yet.</p>
+
+      <h3>10.6 Creating assignments <span class="tag-teacher"></span></h3>
+      <p>Teachers create an assignment from a saved reading session. In the Student Dashboard <b>Sessions</b> tab (§10.1), click the <svg class="ic sm"><use href="#i-graduation-cap"/></svg> graduation-cap icon on any session row. The create dialog lets you set a <b>title</b> (pre-filled from the session), <b>subject</b> (with common-subject suggestions), an optional <b>due date &amp; time</b>, and <b>instructions</b>.</p>
+      <p>Then pick recipients in the <b>student picker</b>, which groups students by school → class → individual, with search, per-group "select all", and a master "select all". The same role scoping as session sharing applies (see §10.3): teachers assign to their own students, admins to their whole school, super-admins across all schools.</p>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>Saved rosters (presets)</strong> Save a frequently-used group of students as a named roster (e.g. "2A Monday group"). Rosters are <b>shared school-wide</b> — any teacher/admin in the same school can load them. Loading a roster auto-drops students who have since left and warns you how many were removed; only the creator (or an admin/super-admin) can edit or delete a roster.</div>
+      <p>On submit, the platform takes a <b>frozen, answer-stripped snapshot</b> of your session and creates a fresh personal working copy for every selected student — each linked back to the assignment and tagged <code>source = assignment</code>. Students see the assignment on their page immediately; no accept/decline step is needed.</p>
+
+      <h3>10.7 Tracking &amp; analytics <span class="tag-teacher"></span></h3>
+      <p>Open any assignment to reach its detail page. The header shows status, due date, student count and <b>average progress</b>. Below it, a <b>Class insights</b> panel aggregates every student's scores, followed by a sortable <b>roster table</b>.</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="btn sm ghost"><svg class="ic sm"><use href="#i-arrow-left"/></svg> Back</span></div>
+        <div class="mock-body" style="display:flex;flex-direction:column;gap:10px">
+          <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+            <div style="display:flex;justify-content:space-between;gap:8px"><b>Coral Reefs — Quiz &amp; Vocabulary</b><span class="badge b-blue">Active</span></div>
+            <div class="small" style="color:var(--muted);margin:2px 0 6px">English</div>
+            <div class="small" style="border-top:1px solid var(--border);padding-top:6px"><svg class="ic sm"><use href="#i-users"/></svg> 28 students &nbsp;·&nbsp; <svg class="ic sm"><use href="#i-calendar"/></svg> Due 12 Jun &nbsp;·&nbsp; <svg class="ic sm"><use href="#i-trending-up"/></svg> Avg progress: 64%</div>
+          </div>
+          <div style="display:flex;justify-content:flex-end"><span class="btn sm ghost"><svg class="ic sm"><use href="#i-download"/></svg> Export to Excel</span></div>
+          <div>
+            <div class="small" style="font-weight:600;margin-bottom:6px"><svg class="ic sm pri"><use href="#i-sparkles"/></svg> Class insights</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">
+              <div class="card-mini" style="margin:0"><div class="small"><svg class="ic sm pri"><use href="#i-users"/></svg> Assessed</div><b>26<span class="small" style="color:var(--muted);font-weight:400"> / 28</span></b></div>
+              <div class="card-mini" style="margin:0"><div class="small" style="color:#10b981"><svg class="ic sm"><use href="#i-trending-up"/></svg> Participation</div><b>73%</b></div>
+              <div class="card-mini" style="margin:0"><div class="small" style="color:#6366f1"><svg class="ic sm"><use href="#i-medal"/></svg> Class avg</div><b>72</b></div>
+              <div class="card-mini" style="margin:0"><div class="small" style="color:#f59e0b"><svg class="ic sm"><use href="#i-alert-triangle"/></svg> At risk</div><b style="color:#f59e0b">3</b></div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px">
+              <div class="small" style="color:var(--muted);margin-bottom:4px">Performance by activity (mean, hardest first) · pass line 70</div>
+              <div style="display:flex;flex-direction:column;gap:3px;font-size:10px">
+                <div style="display:flex;align-items:center;gap:4px"><span style="width:70px;color:var(--muted)">Grammar quiz</span><span style="height:8px;width:38%;background:#d946ef;border-radius:3px"></span><b>38</b></div>
+                <div style="display:flex;align-items:center;gap:4px"><span style="width:70px;color:var(--muted)">Vocab quiz</span><span style="height:8px;width:62%;background:#3b82f6;border-radius:3px"></span><b>62</b></div>
+                <div style="display:flex;align-items:center;gap:4px"><span style="width:70px;color:var(--muted)">Reading test</span><span style="height:8px;width:78%;background:#14b8a6;border-radius:3px"></span><b>78</b></div>
+              </div>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:11px">
+            <div style="display:grid;grid-template-columns:1.3fr .55fr .42fr .42fr .42fr .5fr .5fr .72fr;background:var(--subtle);padding:6px 8px;font-weight:600"><span>Student</span><span>Progress</span><span>Test</span><span>Vocab</span><span>Spell</span><span>G.Quiz</span><span>G.Game</span><span>Last viewed</span></div>
+            <div style="display:grid;grid-template-columns:1.3fr .55fr .42fr .42fr .42fr .5fr .5fr .72fr;padding:6px 8px;border-top:1px solid var(--border);align-items:center"><span> Jamie L.</span><span style="display:flex;align-items:center;gap:3px"><span style="height:6px;width:26px;background:var(--muted);border-radius:4px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:90%;background:var(--primary)"></span></span>90%</span><span>80</span><span>75</span><span>90%</span><span>—</span><span>—</span><span class="small" style="color:var(--muted)">12 Jun 09:14</span></div>
+            <div style="display:grid;grid-template-columns:1.3fr .55fr .42fr .42fr .42fr .5fr .5fr .72fr;padding:6px 8px;border-top:1px solid var(--border);align-items:center"><span> Sam K.</span><span style="display:flex;align-items:center;gap:3px"><span style="height:6px;width:26px;background:var(--muted);border-radius:4px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:40%;background:var(--primary)"></span></span>40%</span><span style="color:#dc2626">35</span><span>—</span><span>—</span><span>—</span><span>—</span><span class="small" style="color:var(--muted)">Never</span></div>
+          </div>
+        </div>
+      </div>
+      <p><b>Class insights</b> includes: four overview cards (students assessed, average participation, class average, and those <b>needing attention</b>); a <b>performance-by-activity</b> bar chart (mean score 0–100, hardest first); a <b>participation &amp; mastery</b> breakdown; and an <b>at-risk</b> list naming students below the threshold and their weak areas. Scores use a three-tier scale: &lt;50 <b>struggling</b> (red), 50–69 <b>developing</b> (amber), ≥70 <b>mastery</b> (green); games are measured on their 0–100 <i>accuracy</i> so all activities share one scale.</p>
+      <p>The <b>roster table</b> has eight sortable columns — student, progress, reading test, vocab quiz, spelling (accuracy), grammar quiz, grammar game (accuracy), and last-viewed time. Click any header to sort and quickly find who needs help. <b>Export to Excel</b> downloads the full roster with scores and progress as an <code>.xlsx</code> for grading or records.</p>
+      <p>From the assignments list, each card offers <b>Edit</b> <svg class="ic sm"><use href="#i-pencil"/></svg> (title, subject, due date, instructions), <b>Archive</b> / <b>Unarchive</b> (hide from students without deleting work), and <b>Delete</b> <svg class="ic sm"><use href="#i-trash-2"/></svg> (permanent — student work is lost).</p>
 
       </section>
     <!-- ============ CHAPTER 11: LEADERBOARD, ACHIEVEMENTS, ADMIN, ACCOUNT ============ -->
@@ -2096,7 +2194,7 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch7">7. Grammar Suite &amp; Games</a></li>
       <li><a href="#ch8">8. AI Tutor</a></li>
       <li><a href="#ch9">9. My Vocabulary Page</a></li>
-      <li><a href="#ch10">10. Dashboards &amp; Sharing</a></li>
+      <li><a href="#ch10">10. Dashboards, Sharing &amp; Assignments</a></li>
       <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
       <li><a href="#appendix">Appendices</a></li>
     </ol>
