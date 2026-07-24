@@ -223,6 +223,29 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
   table.ref th,table.ref td{padding:6px 8px}
 }
 
+/* ============ MOBILE TOC (floating button + slide-in drawer) ============ */
+.toc-fab,.toc-drawer,.toc-overlay{display:none}
+.toc-fab{position:fixed;right:16px;bottom:16px;z-index:60;align-items:center;gap:8px;background:var(--primary);color:#fff;border:none;border-radius:999px;padding:12px 18px;font:700 14px/1 var(--font);box-shadow:0 6px 18px rgba(0,0,0,.22);cursor:pointer}
+.toc-fab .ic{color:#fff}
+.toc-overlay{position:fixed;inset:0;z-index:65;background:rgba(15,23,42,.45);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.toc-drawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,320px);z-index:70;background:var(--card);border-left:1px solid var(--border);box-shadow:-8px 0 30px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .25s ease}
+.toc-drawer .td-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border)}
+.toc-drawer .td-head b{display:inline-flex;align-items:center;gap:8px;font-size:15px}
+.toc-drawer .td-close{background:var(--subtle);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;font-size:20px;line-height:1;color:var(--muted-fg);cursor:pointer}
+.toc-drawer .td-body{padding:14px 16px;overflow:auto;-webkit-overflow-scrolling:touch}
+.toc-drawer ol{list-style:none;padding:0;margin:0;font-size:14px}
+.toc-drawer ol a{display:block;padding:8px 10px;border-radius:8px;color:var(--muted-fg)}
+.toc-drawer ol a:hover{background:var(--subtle);color:var(--primary);text-decoration:none}
+.toc-drawer .td-body h4{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 8px}
+.toc-overlay.open{opacity:1;visibility:visible}
+.toc-drawer.open{transform:translateX(0)}
+body.toc-noscroll{overflow:hidden}
+@media screen and (max-width:900px){
+  .toc-fab{display:inline-flex}
+  .toc-overlay{display:block}
+  .toc-drawer{display:flex;flex-direction:column}
+}
+
 /* ============ PRINT ============ */
 @media print{
   @page{size:A4;margin:16mm 14mm}
@@ -2046,5 +2069,47 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
    </main>
 </div>
 <div class="print-footer"><span>Mr.🆖 ProReader — User Manual</span><span>v2.899</span></div>
+
+<!-- ============ MOBILE TOC (floating button + slide-in drawer) ============ -->
+<button class="toc-fab no-print" id="tocFab" aria-label="Open contents"><svg class="ic"><use href="#i-list-checks"/></svg>Contents</button>
+<div class="toc-overlay no-print" id="tocOverlay"></div>
+<aside class="toc-drawer no-print" id="tocDrawer" aria-hidden="true">
+  <div class="td-head">
+    <b><svg class="ic pri"><use href="#i-book-text"/></svg> Contents</b>
+    <button class="td-close" id="tocClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="td-body">
+    <ol>
+      <li><a href="#ch1">1. Introduction</a></li>
+      <li><a href="#ch2">2. Getting Started &amp; AI Access</a></li>
+      <li><a href="#ch3">3. Settings Reference</a></li>
+      <li><a href="#ch4">4. The Reading Workflow</a></li>
+      <li><a href="#ch5">5. Vocabulary Tools &amp; SRS</a></li>
+      <li><a href="#ch6">6. Reading Test</a></li>
+      <li><a href="#ch7">7. Grammar Suite &amp; Games</a></li>
+      <li><a href="#ch8">8. AI Reading Tutor</a></li>
+      <li><a href="#ch9">9. My Vocabulary Page</a></li>
+      <li><a href="#ch10">10. Dashboards &amp; Sharing</a></li>
+      <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
+      <li><a href="#appendix">Appendices</a></li>
+    </ol>
+    <h4>Legend</h4>
+    <p class="small"><span class="role student">student</span> <span class="role teacher">teacher</span><br><span class="role admin">admin</span> <span class="role super">super-admin</span></p>
+    <p class="small"><span class="tag-teacher"></span><br><span class="tag-admin"></span><br><span class="tag-super"></span></p>
+  </div>
+</aside>
+<script>
+(function(){
+  var fab=document.getElementById('tocFab'),ov=document.getElementById('tocOverlay'),d=document.getElementById('tocDrawer'),cl=document.getElementById('tocClose');
+  if(!fab||!d)return;
+  function open(){d.classList.add('open');ov.classList.add('open');d.setAttribute('aria-hidden','false');document.body.classList.add('toc-noscroll');}
+  function close(){d.classList.remove('open');ov.classList.remove('open');d.setAttribute('aria-hidden','true');document.body.classList.remove('toc-noscroll');}
+  fab.addEventListener('click',open);
+  cl.addEventListener('click',close);
+  ov.addEventListener('click',close);
+  d.addEventListener('click',function(e){if(e.target.closest('a'))close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script>
 </body>
 </html>
