@@ -217,6 +217,12 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
   h1{font-size:1.6rem}h2.section-title{font-size:1.5rem}
 }
 
+/* wide reference tables scroll horizontally instead of overflowing the viewport */
+@media screen and (max-width:900px){
+  table.ref{display:block;width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.ref th,table.ref td{padding:6px 8px}
+}
+
 /* ============ PRINT ============ */
 @media print{
   @page{size:A4;margin:16mm 14mm}
