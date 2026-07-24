@@ -246,6 +246,12 @@ body.toc-noscroll{overflow:hidden}
   .toc-drawer{display:flex;flex-direction:column}
 }
 
+/* "Back to App" — shown only inside an installed PWA (iOS standalone / display-mode) */
+.back-app{display:none;position:fixed;left:16px;bottom:16px;z-index:60;align-items:center;gap:8px;background:var(--card);color:var(--primary);border:1px solid var(--primary-border);border-radius:999px;padding:12px 18px;font:700 14px/1 var(--font);box-shadow:0 6px 18px rgba(0,0,0,.18);cursor:pointer}
+.back-app:hover{background:var(--primary-soft)}
+.is-standalone .back-app{display:inline-flex}
+@media screen and (display-mode: standalone){.back-app{display:inline-flex}}
+
 /* ============ PRINT ============ */
 @media print{
   @page{size:A4;margin:16mm 14mm}
@@ -2071,6 +2077,7 @@ body.toc-noscroll{overflow:hidden}
 <div class="print-footer"><span>Mr.🆖 ProReader — User Manual</span><span>v2.899</span></div>
 
 <!-- ============ MOBILE TOC (floating button + slide-in drawer) ============ -->
+<button class="back-app no-print" id="backApp" aria-label="Back to app"><svg class="ic pri"><use href="#i-arrow-left"/></svg>Back to App</button>
 <button class="toc-fab no-print" id="tocFab" aria-label="Open contents"><svg class="ic"><use href="#i-list-checks"/></svg>Contents</button>
 <div class="toc-overlay no-print" id="tocOverlay"></div>
 <aside class="toc-drawer no-print" id="tocDrawer" aria-hidden="true">
@@ -2109,6 +2116,19 @@ body.toc-noscroll{overflow:hidden}
   ov.addEventListener('click',close);
   d.addEventListener('click',function(e){if(e.target.closest('a'))close();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+  /* "Back to App" — visible only inside an installed PWA (iOS standalone / display-mode) */
+  var ba=document.getElementById('backApp');
+  if(ba){
+    if(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true){document.body.classList.add('is-standalone');}
+    ba.addEventListener('click',function(){
+      if(window.history.length>1){
+        var done=false;
+        var bail=setTimeout(function(){if(!done)window.location.href='/';},400);
+        window.addEventListener('pagehide',function(){done=true;clearTimeout(bail);},{once:true});
+        window.history.back();
+      }else{window.location.href='/';}
+    });
+  }
 })();
 </script>
 </body>
