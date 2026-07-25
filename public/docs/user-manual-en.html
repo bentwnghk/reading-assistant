@@ -488,7 +488,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>Welcome to Mr.🆖 ProReader</h3>
-      <p>Mr.🆖 ProReader is an AI-powered reading-comprehension assistant designed for classrooms and self-study. You can photograph a page of text, upload a PDF, or pull a text from your school's repository, and the platform will instantly produce summaries, simplified versions, mind maps, image visualizations, vocabulary glossaries, comprehension tests, grammar lessons, and gamified practice — all calibrated to the reader's age.</p>
+      <p>Mr.🆖 ProReader is an AI-powered English reading assistant designed for classrooms and self-study. You can photograph a page of text, upload a PDF, or pull a text from your school's repository, and the platform will instantly produce summaries, simplified versions, mind maps, image visualizations, vocabulary glossaries, comprehension tests, grammar lessons, and gamified practice — all calibrated to the reader's age.</p>
       <p>It works in the browser and can be <strong>installed as a mobile / desktop app</strong> (a Progressive Web App, PWA). Sign-in uses a Google account. Under the hood, every AI feature can be powered by your school's subscription, your own API key, or a free access password — you choose.</p>
 
       <h3>Who this guide is for</h3>
@@ -610,7 +610,7 @@ body.toc-noscroll{overflow:hidden}
       <p>Two things are set up for you automatically — you don't choose them:</p>
       <table class="ref">
         <tr><th>Auto-assigned</th><th>How it's decided</th></tr>
-        <tr><td><strong>Your role</strong></td><td>If your email is on the deployment's admin/super-admin lists you get that role; otherwise you start as <b>student</b>. Teachers are promoted later by an admin.</td></tr>
+        <tr><td><strong>Your role</strong></td><td>If your email is on the deployment's admin/super-admin lists you get that role; otherwise you start as <b>student</b>. Teachers are assigned later by an admin.</td></tr>
         <tr><td><strong>Your school</strong></td><td>Your email <b>domain</b> (the part after <code>@</code>) is matched to a school record. If none exists yet, one is created for that domain.</td></tr>
       </table>
       <div class="callout"><strong>Roles at a glance</strong> &nbsp; <span class="role student">student</span> reads &amp; practices · <span class="role teacher">teacher</span> manages classes, shares content, views class analytics · <span class="role admin">admin</span> runs a whole school (users, classes, billing) · <span class="role super">super-admin</span> runs every school.</div>
@@ -814,7 +814,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>Subscription panels</strong></td><td>Pricing / status cards</td><td>Shown when mode = Subscription &amp; signed in. School sub disables personal.</td></tr>
         <tr><td><strong>UI Language</strong></td><td>System · English · 繁體中文</td><td>Changes all interface text.</td></tr>
         <tr><td><strong>UI Theme</strong></td><td>System · Light · Dark</td><td>Follows your OS by default.</td></tr>
-        <tr><td><strong>Jailbreak Mode</strong></td><td>on / off switch</td><td>Unlocks "advanced Answer Help" in the tutor (see Ch. 8).</td></tr>
+        <tr><td><strong>Jailbreak Mode</strong></td><td>on / off switch</td><td>Unlocks "advanced Answer Help" in the AI Tutor (see Ch. 8).</td></tr>
         <tr><td><strong>Show "Give Answer"</strong></td><td>on / off switch</td><td>Requires Jailbreak Mode on. Turning off Jailbreak also turns this off.</td></tr>
         <tr><td><strong>Delete Account</strong> <span class="tag-super" style="border:none"></span></td><td>Danger Zone button</td><td>Hidden for super-admins. Requires re-typing your email to confirm. Irreversible.</td></tr>
       </table>
@@ -836,7 +836,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Basic AI Tutor Model</td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Advanced AI Tutor Model</td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
-      <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code> for the most capable (and costliest) reasoning.</div>
+      <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code> for the most capable (and costliest) reasoning.</div>
 
       <h3>3.3 TTS tab — text-to-speech</h3>
       <table class="ref">
@@ -1266,8 +1266,8 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Edit text</b></td><td>Pencil icon → edit raw text. Saving clears derived AI content (with confirmation).</td></tr>
         <tr><td><b>AI Vocabulary Suggest</b></td><td>Wand icon → pick 10/20/30/40/50 → AI suggests vocabulary words from the text (adds to highlighted words).</td></tr>
         <tr><td><b>Highlighted words</b></td><td>Yellow chips in text. Click a glossary word for a popover (definition, syllabification, example, speak).</td></tr>
-        <tr><td><b>Sentence Analysis</b></td><td>Select text → <b>Analyze</b> (Brain icon) → AI explains grammar/meaning of that sentence in a dialog.</td></tr>
-        <tr><td><b>Selection toolbar</b></td><td>Select any text → floating toolbar: <b>Add Word</b> (to vocabulary), <b>Analyze</b>, <b>Read Aloud</b> (TTS).</td></tr>
+        <tr><td><b>Sentence Analysis</b></td><td>Select text → <b>Analyze sentence</b> (Brain icon) → AI explains grammar/meaning of that sentence in a dialog.</td></tr>
+        <tr><td><b>Selection toolbar</b></td><td>Select any text → floating toolbar: <b>Add to vocabulary</b>, <b>Analyze sentence</b>, <b>Read aloud</b> (TTS).</td></tr>
         <tr><td><b>Download Word</b></td><td>Export a styled .docx with checkboxes to include Glossary and/or Sentence Analysis, plus adapted/simplified sections.</td></tr>
       </table>
 
@@ -1359,7 +1359,6 @@ body.toc-noscroll{overflow:hidden}
             <span class="btn sm outline" style="justify-content:center;border-color:#93c5fd;color:#2563eb">Good</span>
             <span class="btn sm outline" style="justify-content:center;border-color:#86efac;color:#16a34a">Easy</span>
           </div>
-          <p class="small" style="margin-top:8px;text-align:center">Space/Enter to flip · Esc to skip</p>
         </div>
       </div>
 
@@ -1450,7 +1449,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Good</b></td><td>correct ("medium")</td><td>level up by 1</td></tr>
         <tr><td><b>Easy</b></td><td>not counted</td><td>dismisses the card for this session</td></tr>
       </table>
-      <div class="callout tip"><strong>"Due for review"</strong> A word is due if it has <em>never</em> been reviewed (<code>next review = 0</code>) <em>or</em> its scheduled review time has passed. The "Due for review" stat card (Chapter 9) counts these. Review them daily for the best retention.</div>
+      <div class="callout tip"><strong>"Due for review"</strong> A word is due if it has <em>never</em> been reviewed <em>or</em> its scheduled review time has passed. The "Due for review" stat card (Chapter 9) counts these. Review them daily for the best retention.</div>
 
       </section>
     <!-- ============ CHAPTER 6: READING TEST ============ -->
@@ -1576,7 +1575,7 @@ body.toc-noscroll{overflow:hidden}
       </ul>
 
       <h3>7.2 Grammar Quiz</h3>
-      <p>Requires topics first. Three question types: <b>identify</b> (pick the structure), <b>error-spot</b> (find &amp; fix the error, radio), and <b>rewrite / fill-in</b> (text, AI-evaluated). Mode toggle (question-by-question vs all-at-once). Result screen with tier animation, topic breakdown bars, review answers, retry.</p>
+      <p>Requires analyzing grammar topics first. Three question types: <b>identify</b> (pick the structure), <b>error-spot</b> (find &amp; fix the error, radio), and <b>rewrite / fill-in</b> (text, AI-evaluated). Mode toggle (question-by-question vs all-at-once). Result screen with tier animation, topic breakdown bars, review answers, retry.</p>
 
       <h3>7.3 Grammar Games hub</h3>
       <p>Five games, each auto-generating AI content on first entry. Choose one of <b>three shared modes</b> before playing:</p>
@@ -1694,7 +1693,7 @@ body.toc-noscroll{overflow:hidden}
         <p class="small">A streaming chat assistant that knows your text — ask anything, attach images, and get hints or answers.</p>
       </div>
 
-      <p>A floating gradient button (bottom-right, above the TOC button) opens the <b>AI Tutor</b> once you have extracted text. It's a resizable chat panel that can be maximized to near-fullscreen. The tutor knows the article you're reading and answers in context.</p>
+      <p>A floating gradient button (bottom-right, above the TOC button) opens the <b>AI Tutor</b> once you have extracted text. It's a resizable chat panel that can be maximized to near-fullscreen. The AI Tutor knows the article you're reading and answers in context.</p>
 
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span></div>
@@ -1724,8 +1723,8 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>Feature</th><th>How to use</th></tr>
         <tr><td><b>Ask a question</b></td><td>Type in the box and press <b>Enter</b> (use <b>Shift+Enter</b> for a newline). The answer streams in.</td></tr>
-        <tr><td><b>Language toggle</b></td><td>Switch the tutor's replies between <b>English</b> and <b>Chinese</b> (remembers your choice).</td></tr>
-        <tr><td><b>Selected-text context</b></td><td>Select any text in the original text area — it appears as a quoted "context chip" above the input, so the tutor answers <em>about that specific passage</em>.</td></tr>
+        <tr><td><b>Language toggle</b></td><td>Switch the AI Tutor's replies between <b>English</b> and <b>Chinese</b> (remembers your choice).</td></tr>
+        <tr><td><b>Selected-text context</b></td><td>Select any text in the original text area — it appears as a quoted "context chip" above the input, so the AI Tutor answers <em>about that specific passage</em>.</td></tr>
         <tr><td><b>Attach an image</b></td><td>Paperclip button → upload an image with your question (uses the vision-capable Advanced Tutor model).</td></tr>
         <tr><td><b>Quick questions</b></td><td>One-tap buttons: <i>Main Idea</i>, <i>Vocab Help</i>, <i>Explain</i>, plus image-based help (see below).</td></tr>
         <tr><td><b>Clear history</b></td><td>Trash button wipes the conversation. Up to 20 messages are kept as context.</td></tr>
@@ -1750,7 +1749,7 @@ body.toc-noscroll{overflow:hidden}
         <p class="small">A dedicated hub at <code>/vocabulary</code> for systematic vocabulary review across <em>all</em> your reading sessions.</p>
       </div>
 
-      <p>Open it from the header's <b>BookOpen</b> icon or the "My Vocabulary" link inside the Glossary section. It aggregates every word you've ever collected into one searchable, sortable bank, with stats, auto-selection strategies, named review lists, exports, and history.</p>
+      <p>Open it from the header's <b>My Vocabulary</b> icon or the "My Vocabulary" link inside the Glossary section. It aggregates every word you've ever collected into one searchable, sortable bank, with stats, auto-selection strategies, named review lists, exports, and history.</p>
 
       <h3>9.1 Layout &amp; stats</h3>
       <div class="mock">
@@ -1808,7 +1807,7 @@ body.toc-noscroll{overflow:hidden}
       <div class="callout teacher"><strong>Teacher / admin / super-admin only</strong> Two kinds of sharing exist, both hidden from students:
       <ul style="margin:6px 0 0">
         <li><b>Share individual words</b> — send selected words to same-school users (super-admins: any user). Recipients who already have a word are skipped.</li>
-        <li><b>Share a named review list</b> — send an entire list. On accept, the words are written to the recipient's vocabulary with you as the source (<code>shared_by</code>), and a copy is added to their review lists.</li>
+        <li><b>Share a named review list</b> — send an entire list. On accept, the words are written to the recipient's vocabulary with you as the source, and a copy is added to their review lists.</li>
       </ul>
       </div>
       <p>The recipient picker groups targets by <b>school → class → user</b> with search, select-all/group/individual checkboxes. Incoming shares arrive as a <b>Bell</b> notification in the header (red badge). <b>Accept</b> loads the words; <b>Decline</b> dismisses. "Accept All / Decline All" appear when there are several.</p>
@@ -1913,7 +1912,7 @@ body.toc-noscroll{overflow:hidden}
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-check"/></svg> My Assignments</div><span class="btn sm ghost" style="color:var(--muted)"><svg class="ic sm"><use href="#i-info"/></svg></span><span class="btn sm ghost"><svg class="ic sm"><use href="#i-plus"/></svg> Create assignment</span></div>
         <div class="mock-body" style="display:flex;flex-direction:column;gap:10px">
-          <div class="small" style="color:var(--muted)"><svg class="ic sm"><use href="#i-star"/></svg> Saved rosters: <span class="pill">2A Monday (28)</span> <span class="pill">3B Friday (22)</span></div>
+          <div class="small" style="color:var(--muted)"><svg class="ic sm"><use href="#i-star"/></svg> Saved rosters: <span class="pill">2A (28)</span> <span class="pill">3B (22)</span></div>
           <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px">
             <div style="display:flex;justify-content:space-between;gap:8px"><b>Coral Reefs — Quiz &amp; Vocabulary</b><span class="badge b-blue">Active</span></div>
             <div class="small" style="color:var(--muted);margin:2px 0 6px">English</div>
@@ -1964,8 +1963,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>10.6 Creating assignments <span class="tag-teacher"></span></h3>
       <p>Teachers create an assignment from a saved reading session. In the Student Dashboard <b>Sessions</b> tab (§10.1), click the <svg class="ic sm"><use href="#i-graduation-cap"/></svg> graduation-cap icon on any session row. The create dialog lets you set a <b>title</b> (pre-filled from the session), <b>subject</b> (with common-subject suggestions), an optional <b>due date &amp; time</b>, and <b>instructions</b>.</p>
       <p>Then pick recipients in the <b>student picker</b>, which groups students by school → class → individual, with search, per-group "select all", and a master "select all". The same role scoping as session sharing applies (see §10.3): teachers assign to their own students, admins to their whole school, super-admins across all schools.</p>
-      <div class="callout teacher"><strong><span class="tag-teacher"></span>Saved rosters (presets)</strong> Save a frequently-used group of students as a named roster (e.g. "2A Monday group"). Rosters are <b>shared school-wide</b> — any teacher/admin in the same school can load them. Loading a roster auto-drops students who have since left and warns you how many were removed; only the creator (or an admin/super-admin) can edit or delete a roster.</div>
-      <p>On submit, the platform takes a <b>frozen, answer-stripped snapshot</b> of your session and creates a fresh personal working copy for every selected student — each linked back to the assignment and tagged <code>source = assignment</code>. Students see the assignment on their page immediately; no accept/decline step is needed.</p>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>Saved rosters (presets)</strong> Save a frequently-used group of students as a named roster (e.g. "2A"). Rosters are <b>shared school-wide</b> — any teacher/admin in the same school can load them. Loading a roster auto-drops students who have since left and warns you how many were removed; only the creator (or an admin/super-admin) can edit or delete a roster.</div>
+      <p>On submit, the platform takes a <b>frozen, answer-stripped snapshot</b> of your session and creates a fresh personal working copy for every selected student — each linked back to the assignment. Students see the assignment on their page immediately; no accept/decline step is needed.</p>
 
       <h3>10.7 Tracking &amp; analytics <span class="tag-teacher"></span></h3>
       <p>Open any assignment to reach its detail page. The header shows status, due date, student count and <b>average progress</b>. Below it, a <b>Class insights</b> panel aggregates every student's scores, followed by a sortable <b>roster table</b>.</p>
@@ -2004,7 +2003,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <p><b>Class insights</b> includes: four overview cards (students assessed, average participation, class average, and those <b>needing attention</b>); a <b>performance-by-activity</b> bar chart (mean score 0–100, hardest first); a <b>participation &amp; mastery</b> breakdown; and an <b>at-risk</b> list naming students below the threshold and their weak areas. Scores use a three-tier scale: &lt;50 <b>struggling</b> (red), 50–69 <b>developing</b> (amber), ≥70 <b>mastery</b> (green); games are measured on their 0–100 <i>accuracy</i> so all activities share one scale.</p>
       <p>The <b>roster table</b> has eight sortable columns — student, progress, reading test, vocab quiz, spelling (accuracy), grammar quiz, grammar game (accuracy), and last-viewed time. Click any header to sort and quickly find who needs help. <b>Export to Excel</b> downloads the full roster with scores and progress as an <code>.xlsx</code> for grading or records.</p>
-      <p>From the assignments list, each card offers <b>Edit</b> <svg class="ic sm"><use href="#i-pencil"/></svg> (title, subject, due date, instructions), <b>Archive</b> / <b>Unarchive</b> (hide from students without deleting work), and <b>Delete</b> <svg class="ic sm"><use href="#i-trash-2"/></svg> (permanent — student work is lost).</p>
+      <p>From the assignments list, each card offers <svg class="ic sm"><use href="#i-pencil"/></svg> <b>Edit</b> (title, subject, due date, instructions), <b>Archive</b> / <b>Unarchive</b> (hide from students without deleting work), and <svg class="ic sm"><use href="#i-trash-2"/></svg> <b>Delete</b> (permanent — student work is lost).</p>
 
       </section>
     <!-- ============ CHAPTER 11: LEADERBOARD, ACHIEVEMENTS, ADMIN, ACCOUNT ============ -->
@@ -2068,7 +2067,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Test Champion / Skill Sharpener</td><td><svg class="ic sm"><use href="#i-file-check"/></svg> FileCheck · <svg class="ic sm"><use href="#i-target"/></svg> Target</td><td>tests / targeted practices</td></tr>
         <tr><td>Spelling Bee / Quiz Wizard</td><td><svg class="ic sm"><use href="#i-pen-tool"/></svg> PenTool · <svg class="ic sm"><use href="#i-brain"/></svg> Brain</td><td>spelling / vocab quizzes</td></tr>
         <tr><td>Grammar Explorer / Grammar Ace / Grammar Gamer</td><td><svg class="ic sm"><use href="#i-book-open-check"/></svg> BookOpenCheck · <svg class="ic sm"><use href="#i-graduation-cap"/></svg> GraduationCap · <svg class="ic sm"><use href="#i-gamepad-2"/></svg> Gamepad2</td><td>grammar analysis / quizzes / games</td></tr>
-        <tr><td>Curious Learner</td><td><svg class="ic sm"><use href="#i-sparkles"/></svg> Sparkles</td><td>AI tutor questions</td></tr>
+        <tr><td>Curious Learner</td><td><svg class="ic sm"><use href="#i-sparkles"/></svg> Sparkles</td><td>AI Tutor questions</td></tr>
       </table>
 
       <h3>11.4 History management</h3>
@@ -2082,7 +2081,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Users</b></td><td>super-admin + admin</td><td>Change role, assign school/class, bulk-revoke access, delete</td></tr>
         <tr><td><b>Classes</b></td><td>all staff</td><td>CRUD classes; view members</td></tr>
         <tr><td><b>Student Data</b></td><td>all staff</td><td>Cross-student session analytics + Excel export</td></tr>
-        <tr><td><b>AI Questions</b></td><td>all staff</td><td>Browse AI tutor questions students asked</td></tr>
+        <tr><td><b>AI Questions</b></td><td>all staff</td><td>Browse AI Tutor questions students asked</td></tr>
         <tr><td><b>Subscriptions</b></td><td>super-admin + admin</td><td>Manage Stripe subscriptions</td></tr>
       </table>
       <p>Header-level tools <span class="tag-super"></span>: full <b>Export</b> (.zip backup of schools/users/classes/sessions), <b>Import</b> (.zip/.json), and <b>Send Test Email</b> (9 template types).</p>
@@ -2093,7 +2092,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>Layer</th><th>Default</th><th>Effect</th></tr>
         <tr><td><b>Session max lifetime</b></td><td>3 days</td><td>Hard ceiling — you're signed out after this period regardless of activity.</td></tr>
         <tr><td><b>Concurrent session limit</b></td><td>1</td><td>Signing in a 2nd time signs out your previous session.</td></tr>
-        <tr><td><b>Idle timeout</b></td><td>60 minutes</td><td>If you stop interacting, you're signed out (with a 1-minute warning). Synced across all your open tabs.</td></tr>
+        <tr><td><b>Idle timeout</b></td><td>90 minutes</td><td>If you stop interacting, you're signed out (with a 1-minute warning). Synced across all your open tabs.</td></tr>
       </table>
       <div class="callout tip"><strong>Reminder emails</strong> Configure in <b>Settings → Notifications</b>: toggle on/off and pick a frequency (1–14 days). Sent by the server on a schedule.</div>
       <div class="callout danger"><strong>Delete account</strong> In <b>Settings → General → Danger Zone</b> <span class="tag-super" style="border:none">(hidden for super-admins)</span>. Requires re-typing your email to confirm. <b>Irreversible</b> — all your data is removed.</div>
@@ -2142,12 +2141,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>Problem</th><th>Likely cause &amp; fix</th></tr>
         <tr><td><b>AI features do nothing / error</b></td><td>No Billing Mode set, or key/password missing. Open <b>Settings → General</b> and complete one of the three setup modes (Chapter 2).</td></tr>
         <tr><td><b>"Limit reached" on image generation</b></td><td>Daily visualization quota hit. Free = 1/day, Subscription = 2/day. Resets daily, or switch to Meter mode for unlimited.</td></tr>
-        <tr><td><b>Signed out unexpectedly</b></td><td>The idle timeout (default 60 min) or the 3-day session ceiling was reached. A 1-minute warning toast precedes idle sign-out.</td></tr>
+        <tr><td><b>Signed out unexpectedly</b></td><td>The idle timeout (default 90 min) or the 3-day session ceiling was reached. A 1-minute warning toast precedes idle sign-out.</td></tr>
         <tr><td><b>Spinner vanished mid-generation after navigating</b></td><td>Not a bug — generation continues in the background; the loading state lives in the store and survives navigation. Return to the section to see results.</td></tr>
-        <tr><td><b>Grammar/test call fell back to another model</b></td><td>By design — grammar &amp; reading-test calls auto-fall back to a backup model if the primary fails. No action needed.</td></tr>
         <tr><td><b>Settings won't change after editing</b></td><td>Click <b>Save</b> at the bottom of Settings. Authenticated users' settings are stored in the DB and reload on each sign-in.</td></tr>
         <tr><td><b>"With Answers" export is greyed out</b></td><td>Students see answers only after completing the test/quiz. Teachers/admins always see them.</td></tr>
-        <tr><td><b>Page flashed blank / scrolled to top once</b></td><td>A lazy-loaded component loaded for the first time. It recovers instantly and won't recur in that session.</td></tr>
         <tr><td><b>Shared session missing my answers</b></td><td>Expected — sharing strips answers/scores/chat to give recipients a clean copy. Your original is untouched.</td></tr>
         <tr><td><b>iOS extraction stopped mid-way</b></td><td>iOS may suspend long requests; a Screen Wake Lock is used to prevent this. Keep the screen on during extraction.</td></tr>
       </table>
@@ -2163,7 +2160,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Repository</b></td><td>A shared library of texts your teachers/admin added (class, school, or public scope).</td></tr>
         <tr><td><b>Shared session</b></td><td>A reading session sent to a recipient as a clean (answer-stripped) copy, often used as an assignment.</td></tr>
         <tr><td><b>PWA</b></td><td>Progressive Web App — the installable, app-like version of the site.</td></tr>
-        <tr><td><b>Jailbreak Mode</b></td><td>A setting that unlocks answer-revealing tutor quick questions (intended for teachers/self-study).</td></tr>
+        <tr><td><b>Jailbreak Mode</b></td><td>A setting that unlocks answer-revealing AI Tutor quick questions (intended for teachers/self-study).</td></tr>
         <tr><td><b>OCR</b></td><td>Optical Character Recognition — the vision-AI step that reads text from uploaded images/PDFs.</td></tr>
       </table>
 

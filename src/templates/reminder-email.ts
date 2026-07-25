@@ -99,7 +99,7 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
       sentence_analyze: "analyzed sentences",
       targeted_practice_complete: "completed targeted practice",
       glossary_add: "built a vocabulary glossary",
-      ai_tutor_question: "asked the AI tutor",
+      ai_tutor_question: "asked the AI Tutor",
     },
     textIntro: (days, activity, date) =>
       `It\u2019s been ${days} since you last ${activity} on ${date}.`,

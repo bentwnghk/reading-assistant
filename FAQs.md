@@ -273,7 +273,7 @@ Yes! Mr.🆖 ProReader makes it easy to see the big picture of your learning jou
 
 Tap the **bar chart icon** in the header to open **"Learning Journey"**. It has two tabs:
 
-- **"Overview"** — A visual analytics dashboard showing your cumulative stats: total reading texts, summaries generated, mind maps created, adapted/simplified texts used, sentences analyzed, vocabulary collected, AI tutor questions asked, and average learning progress. You'll also see score trends for Reading Tests and Vocabulary Quizzes, and a breakdown of which AI features you've used most.
+- **"Overview"** — A visual analytics dashboard showing your cumulative stats: total reading texts, summaries generated, mind maps created, adapted/simplified texts used, sentences analyzed, vocabulary collected, AI Tutor questions asked, and average learning progress. You'll also see score trends for Reading Tests and Vocabulary Quizzes, and a breakdown of which AI features you've used most.
 
 - **"Sessions"** — A chronological list of all your past reading sessions with details like vocabulary count, test scores, and learning progress for each one.
 

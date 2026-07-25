@@ -265,7 +265,7 @@
         },
         "q9": {
           "q": "Can I track and see my learning progress and history?",
-          "a": "<p>Yes! Mr.🆖 ProReader makes it easy to see the big picture and dive into the details:</p><p><strong>1. Learning Journey</strong> — Tap the bar chart icon in the header to open \"Learning Journey.\" The <strong>Overview</strong> tab shows cumulative stats: total reading texts, summaries, mind maps, adapted texts, sentences analyzed, vocabulary collected, AI tutor questions, and average learning progress, plus score trends and AI feature usage breakdown. The <strong>Sessions</strong> tab lists all past reading sessions with details.</p><p><strong>2. Achievements</strong> — Automatically earn achievement badges across 12 different types — from reading sessions to vocabulary quizzes. Each badge tracks milestones and motivates you to keep going.</p><p><strong>3. Leaderboard</strong> — Compare your reading activity, test scores, and vocabulary growth with classmates or other students.</p><p><strong>4. My Vocabulary</strong> — See every word you've ever encountered with mastery levels (0–5), review counts, accuracy rates, and SRS scheduling status.</p><p><strong>Pro tip:</strong> Check the Overview tab in Learning Journey once a week. Seeing your stats grow over time is a powerful motivator. If you notice your Reading Test scores plateauing on a particular skill, that's your signal to focus targeted practice on that area.</p>"
+          "a": "<p>Yes! Mr.🆖 ProReader makes it easy to see the big picture and dive into the details:</p><p><strong>1. Learning Journey</strong> — Tap the bar chart icon in the header to open \"Learning Journey.\" The <strong>Overview</strong> tab shows cumulative stats: total reading texts, summaries, mind maps, adapted texts, sentences analyzed, vocabulary collected, AI Tutor questions, and average learning progress, plus score trends and AI feature usage breakdown. The <strong>Sessions</strong> tab lists all past reading sessions with details.</p><p><strong>2. Achievements</strong> — Automatically earn achievement badges across 12 different types — from reading sessions to vocabulary quizzes. Each badge tracks milestones and motivates you to keep going.</p><p><strong>3. Leaderboard</strong> — Compare your reading activity, test scores, and vocabulary growth with classmates or other students.</p><p><strong>4. My Vocabulary</strong> — See every word you've ever encountered with mastery levels (0–5), review counts, accuracy rates, and SRS scheduling status.</p><p><strong>Pro tip:</strong> Check the Overview tab in Learning Journey once a week. Seeing your stats grow over time is a powerful motivator. If you notice your Reading Test scores plateauing on a particular skill, that's your signal to focus targeted practice on that area.</p>"
         },
         "q10": {
           "q": "I'm a teacher / school administrator. What additional features are available for me?",
@@ -427,7 +427,7 @@
           },
           "personalised": {
             "name": "Personalised Learning",
-            "desc": "Your level shapes the summary, adapted text, reading test, vocabulary, grammar and the AI tutor — all adjusted to your year group."
+            "desc": "Your level shapes the summary, adapted text, reading test, vocabulary, grammar and the AI Tutor — all adjusted to your year group."
           }
         },
         "stepsTitle": "How to set it up",
@@ -1881,7 +1881,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A horizontal bar chart breaking down your usage of 9 AI-powered features: summaries, mind maps (English and Chinese separately), text visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI tutor questions."
+            "desc": "A horizontal bar chart breaking down your usage of 9 AI-powered features: summaries, mind maps (English and Chinese separately), text visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI Tutor questions."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",
@@ -2059,7 +2059,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A stacked bar chart breaking down how each student uses 9 AI-powered features: summaries, mind maps, visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar, and AI tutor."
+            "desc": "A stacked bar chart breaking down how each student uses 9 AI-powered features: summaries, mind maps, visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar, and AI Tutor."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",
@@ -2662,10 +2662,10 @@
       "viewUsers": "View users in {{name}}"
     },
     "aiQuestions": {
-      "descriptionSuperAdmin": "Track questions students ask the AI tutor across all schools. Filter by school and class.",
-      "descriptionAdmin": "Track questions students ask the AI tutor within your school. Filter by class.",
-      "descriptionTeacher": "Track questions students ask the AI tutor in your classes. Filter by your classes.",
-      "description": "Track questions students ask the AI tutor.",
+      "descriptionSuperAdmin": "Track questions students ask the AI Tutor across all schools. Filter by school and class.",
+      "descriptionAdmin": "Track questions students ask the AI Tutor within your school. Filter by class.",
+      "descriptionTeacher": "Track questions students ask the AI Tutor in your classes. Filter by your classes.",
+      "description": "Track questions students ask the AI Tutor.",
       "selectSchool": "Select a school",
       "selectClass": "Select a class",
       "allSchools": "All Schools",
@@ -2676,7 +2676,7 @@
       "users": "Users",
       "lastAsked": "Last Asked",
       "showing": "Showing {{count}} unique questions ({{total}} total)",
-      "noQuestions": "No AI tutor questions recorded yet",
+      "noQuestions": "No AI Tutor questions recorded yet",
       "noResults": "No questions match your search",
       "noInstances": "No instances found",
       "dateRange": {
@@ -2736,7 +2736,7 @@
           },
           "aiQuestions": {
             "name": "AI Questions",
-            "desc": "View aggregated AI tutor questions asked by students. See question frequency, unique user counts, and last-asked dates. Click any question to expand and view individual instances with AI responses."
+            "desc": "View aggregated AI Tutor questions asked by students. See question frequency, unique user counts, and last-asked dates. Click any question to expand and view individual instances with AI responses."
           },
           "subscriptions": {
             "name": "Subscriptions",
