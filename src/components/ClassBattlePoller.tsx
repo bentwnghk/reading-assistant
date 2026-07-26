@@ -115,7 +115,7 @@ export function ClassBattlePoller() {
     poll();
     const interval = setInterval(poll, 60_000);
     return () => clearInterval(interval);
-  }, [session?.user?.role]);
+  }, [session?.user?.role, t]);
 
   // Dismiss the toast immediately when the student joins a room (don't wait
   // for the next 60s poll).
