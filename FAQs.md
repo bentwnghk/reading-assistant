@@ -350,7 +350,22 @@ Purchase and manage a subscription for your entire school. Allocate seats, monit
 
 ---
 
-## Q11: How does the Multiplayer Spelling Battle work?
+## Q11: I want to practice reading but I don't have a text. Can Mr.🆖 ProReader generate one for me?
+
+Yes! The **AI Text Generator** writes a brand-new reading passage from scratch, tailored to your level. Open the **AI Generate** tab (next to Upload and Text Repository) and:
+
+1. **Enter a topic or theme** — Anything you're curious about: "space exploration", "online safety", "a day at the beach". Add an optional description for more direction (e.g. "the main character is a shy 14-year-old").
+2. **Pick a text type** — Article, report, blog post, review, email/letter, editorial/argumentative essay, interview, short story, advertisement/brochure, notice/announcement, or profile/feature.
+3. **Choose a length** — From ~250 to ~1150 words.
+4. **Set the difficulty** — A CEFR level (A1–C2) is auto-suggested from your age; adjust it up or down for stronger or weaker students.
+
+The AI follows explicit vocabulary and grammar rules for your CEFR band, self-checks the word count and Flesch-Kincaid grade level, and returns the text plus a quality-control summary (estimated grade, new vocabulary). Once generated, **every reading tool unlocks** — summary, glossary, mind map, reading test, grammar analysis, and more. Not quite right? Tap **Easier** or **Harder** to regenerate at one CEFR band up or down.
+
+**Pro tip:** Match the text type to the skill you're practicing. Working on argumentative writing for DSE? Generate an "editorial / argumentative essay". Practicing everyday reading? Try a "blog post" or "notice / announcement". The generated text is a fresh starting point — run the Reading Test on it for a complete practice cycle.
+
+---
+
+## Q12: How does the Multiplayer Spelling Battle work?
 
 A new **real-time** multiplayer mode inside the existing Spelling Challenge. Here's how it works:
 

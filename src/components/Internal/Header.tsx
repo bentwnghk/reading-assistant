@@ -931,7 +931,7 @@ function Header() {
                 {t("header.about.faqs.title")}
               </h3>
               <Accordion type="single" collapsible className="space-y-2">
-                {Array.from({ length: 11 }, (_, i) => i + 1).map((n) => (
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
                   <AccordionItem key={n} value={`faq-${n}`} className="border-b-0">
                     <AccordionTrigger className="px-4 py-3 text-left text-sm font-semibold hover:no-underline hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       {t(`header.about.faqs.q${n}.q`)}
