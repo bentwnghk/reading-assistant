@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { useBattleStore } from "@/store/battle";
@@ -49,6 +50,7 @@ async function fetchTicket(): Promise<string | null> {
 export function ClassBattlePoller() {
   const { data: session } = useSession();
   const { t } = useTranslation();
+  const router = useRouter();
   /** roomCodes that currently have an active persistent toast. */
   const activeToastsRef = useRef<Set<string>>(new Set());
 
@@ -104,7 +106,19 @@ export function ClassBattlePoller() {
               wordCount: invite.actualWordCount,
               roomCode: invite.roomCode,
             }),
-            { id: invite.roomCode, duration: Infinity },
+            {
+              id: invite.roomCode,
+              duration: Infinity,
+              action: {
+                label: t(`${M}.classBattleToastAction`),
+                onClick: () => {
+                  useBattleStore.getState().setShouldOpenBattle(true);
+                  useBattleStore.getState().dismissClassBattleInvite(invite.roomCode);
+                  router.push("/");
+                  toast.dismiss(invite.roomCode);
+                },
+              },
+            },
           );
         }
       } catch {
@@ -115,7 +129,7 @@ export function ClassBattlePoller() {
     poll();
     const interval = setInterval(poll, 60_000);
     return () => clearInterval(interval);
-  }, [session?.user?.role, t]);
+  }, [session?.user?.role, t, router]);
 
   // Dismiss the toast immediately when the student joins a room (don't wait
   // for the next 60s poll).
