@@ -7,6 +7,8 @@ import { toast } from "sonner";
 
 import { useBattleStore } from "@/store/battle";
 
+const M = "reading.glossary.spelling.multiplayer";
+
 /**
  * Mounted in the root layout. Polls the realtime server every 60s for
  * class-battle invites so students see them anywhere in the app — not just
@@ -97,8 +99,8 @@ export function ClassBattlePoller() {
           if (invite.roomCode === joinedRoom) continue;
           activeToastsRef.current.add(invite.roomCode);
           toast(
-            t("spellingBattle.classBattleToast", {
-              hostName: invite.hostName ?? t("spellingBattle.aTeacher"),
+            t(`${M}.classBattleToast`, {
+              hostName: invite.hostName ?? t(`${M}.aTeacher`),
               wordCount: invite.actualWordCount,
               roomCode: invite.roomCode,
             }),
