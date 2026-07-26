@@ -202,3 +202,21 @@ MAILTRAP_INBOX_ID=
 CRON_SECRET=
 # Public URL of the app, used for links in reminder emails (server-side runtime variable, not NEXT_PUBLIC_)
 APP_URL=https://your-domain.com
+
+# ─── Realtime / Multiplayer Spelling Battles ────────────────────────────────
+# The realtime (Socket.io) server runs as a separate service (see docker-compose.yml).
+# It shares AUTH_SECRET and DATABASE_URL with the app.
+#
+# Port the Socket.io + healthcheck HTTP server listens on (server-side runtime variable).
+REALTIME_PORT=3001
+# Comma-separated allowed CORS origins — the Next.js app origin(s) (server-side runtime variable).
+# Production example: https://read.mr5ai.com
+REALTIME_CORS_ORIGIN=http://localhost:3000
+#
+# Server-side runtime variable (NOT NEXT_PUBLIC_*) — the URL the browser uses to
+# connect to the realtime server. Exposed to the client at runtime via /api/config
+# so the same Docker image works across environments without rebuilding.
+# Empty string disables the multiplayer option in the UI.
+# Dev:     http://localhost:3001
+# Prod:    wss://battle.your-domain.com  (or https://...  — socket.io upgrades to ws)
+REALTIME_URL=http://localhost:3001

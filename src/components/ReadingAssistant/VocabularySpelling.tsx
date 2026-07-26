@@ -24,6 +24,7 @@ import {
   Star,
   Zap,
   Heart,
+  Swords,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import { completePath } from "@/utils/url";
 import { parseError } from "@/utils/error";
 import { cn } from "@/utils/style";
 import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
+import { SpellingBattleFlow } from "./SpellingBattleFlow";
 
 interface VocabularySpellingProps {
   glossary: GlossaryEntry[];
@@ -149,6 +151,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
   const effectiveRatings = mergedRatings ?? glossaryRatings;
 
   const [gameStatus, setGameStatus] = useState<GameStatus>("setup");
+  const [playMode, setPlayMode] = useState<"solo" | "battle">("solo");
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
   const [isTimed, setIsTimed] = useState(true);
@@ -621,6 +624,17 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
     );
   }
 
+  if (playMode === "battle") {
+    return (
+      <SpellingBattleFlow
+        defaultGlossarySessionId={id ?? undefined}
+        onWordResult={onWordResult}
+        onComplete={onComplete}
+        onExitToSolo={() => setPlayMode("solo")}
+      />
+    );
+  }
+
   if (gameStatus === "setup") {
     return (
       <div className="flex flex-col items-center gap-6 py-8">
@@ -829,6 +843,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
           <Button onClick={startGame} className="w-full" size="lg">
             <Play className="h-5 w-5 mr-2" />
             {t("reading.glossary.spelling.startGame")}
+          </Button>
+
+          <Button onClick={() => setPlayMode("battle")} variant="outline" className="w-full">
+            <Swords className="h-5 w-5 mr-2" />
+            {t("reading.glossary.spelling.multiplayer.title")}
           </Button>
 
           {spellingGameBestScore > 0 && (

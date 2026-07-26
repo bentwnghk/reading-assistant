@@ -209,6 +209,197 @@ interface SpellingGameResult {
   completedAt: number;
 }
 
+// ── Multiplayer Spelling Battle types ───────────────────────────────────────
+// Mirrored in realtime/src/game/types.ts (the realtime package is standalone
+// and does not import from src/). Keep both sides in sync.
+
+/** A single word in a battle's word list. Definitions feed the hint system. */
+interface BattleWord {
+  word: string;
+  englishDefinition?: string;
+  chineseDefinition?: string;
+  syllabification?: string;
+  partOfSpeech?: string;
+  example?: string;
+}
+
+type WordSourceType = "glossary" | "vocabulary" | "review-list" | "curated";
+
+/** Filter applied when the word source is the host's vocabulary bank. */
+type VocabularyFilter = "all" | "due-for-review" | "hard-words";
+
+interface WordSource {
+  type: WordSourceType;
+  /** glossary: reading_session id; review-list: review_lists id; curated: CEFR level (A2/B1/B2/C1). */
+  sourceId?: string;
+  /** vocabulary bank only. */
+  filter?: VocabularyFilter;
+}
+
+interface BattleRoomConfig {
+  source: WordSource;
+  difficulty: SpellingDifficulty;
+  /** Requested word count; server caps to the number actually available. */
+  wordCount: number;
+  timed: boolean;
+  classBattle: boolean;
+}
+
+interface BattlePlayerSummary {
+  userId: string;
+  name: string | null;
+  image: string | null;
+  role: UserRole;
+  isHost: boolean;
+  /** present = connected; disconnected = within reconnect grace window. */
+  status: "present" | "disconnected";
+  score: number;
+  streak: number;
+  correctCount: number;
+  finished: boolean;
+}
+
+type BattleRoomStatus = "lobby" | "countdown" | "playing" | "finished";
+
+interface BattleRoomState {
+  roomCode: string;
+  status: BattleRoomStatus;
+  config: BattleRoomConfig;
+  hostId: string;
+  players: BattlePlayerSummary[];
+  /** Resolved (capped) word count — may be < config.wordCount. */
+  actualWordCount: number;
+  classBattle: boolean;
+  currentIndex: number;
+}
+
+// ── Battle event payloads (mirror realtime/src/game/types.ts) ───────────────
+
+interface BattleCreateRoomPayload {
+  config: BattleRoomConfig;
+  /** For class battles: the target class id (teacher must own it). */
+  targetClassId?: string;
+}
+
+interface BattleJoinRoomPayload {
+  code: string;
+}
+
+interface BattleSetSourcePayload {
+  source: WordSource;
+  wordCount: number;
+}
+
+interface BattlePlayerJoinedPayload {
+  player: BattlePlayerSummary;
+}
+
+interface BattlePlayerLeftPayload {
+  userId: string;
+  newHostId: string | null;
+}
+
+interface BattleClassBattleAvailablePayload {
+  roomCode: string;
+  hostName: string | null;
+  className: string | null;
+  actualWordCount: number;
+  difficulty: SpellingDifficulty;
+}
+
+type BattleRoomErrorCode =
+  | "room_not_found"
+  | "room_full"
+  | "room_not_in_lobby"
+  | "already_in_room"
+  | "not_host"
+  | "too_many_rooms"
+  | "invalid_source"
+  | "not_connected"
+  | "class_not_allowed"
+  | "internal_error";
+
+interface BattleRoomErrorPayload {
+  /** Stable error code the client can i18n-translate. */
+  code: BattleRoomErrorCode;
+  message: string;
+}
+
+// ── Battle game-loop event payloads (mirror realtime/src/game/types.ts) ─────
+
+interface BattleCountdownPayload {
+  n: number;
+}
+
+interface BattleWordSubmitPayload {
+  index: number;
+  answer: string;
+  /** Client timestamp — logged but NOT used for scoring (server clock is authoritative). */
+  submittedAt: number;
+  hintsUsed: number;
+}
+
+interface BattleWordStartPayload {
+  index: number;
+  total: number;
+  word: string;
+  englishDefinition?: string;
+  chineseDefinition?: string;
+  syllabification?: string;
+  partOfSpeech?: string;
+  example?: string;
+  durationMs: number;
+  startedAt: number;
+  timed: boolean;
+}
+
+interface BattlePlayerProgressPayload {
+  userId: string;
+  index: number;
+  correct: boolean;
+  pointsAwarded: number;
+  total: number;
+  streak: number;
+}
+
+interface BattleWordEndResult {
+  userId: string;
+  correct: boolean;
+  pointsAwarded: number;
+  total: number;
+  streak: number;
+  /** false if the player timed out / didn't submit. */
+  submitted: boolean;
+}
+
+interface BattleWordEndPayload {
+  index: number;
+  word: string;
+  results: BattleWordEndResult[];
+}
+
+interface BattleRankingEntry {
+  rank: number;
+  userId: string;
+  name: string | null;
+  image: string | null;
+  total: number;
+  streak: number;
+  maxStreak: number;
+  correctCount: number;
+  isHost: boolean;
+}
+
+interface BattleLiveRankingPayload {
+  ranking: BattleRankingEntry[];
+  index: number;
+}
+
+interface BattleGameEndPayload {
+  finalRanking: BattleRankingEntry[];
+  totalWords: number;
+}
+
 interface VocabularyQuizQuestion {
   id: string;
   type: "word-to-definition" | "definition-to-word" | "fill-blank";

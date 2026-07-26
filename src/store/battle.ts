@@ -1,0 +1,136 @@
+import { create } from "zustand"
+
+import type { RealtimeConnectionStatus } from "@/lib/realtime-client"
+
+/**
+ * Multiplayer spelling battle client state.
+ *
+ * NON-PERSISTED: a battle is ephemeral and tied to a live Socket.io connection.
+ * State lives at module scope (Zustand) so it survives SPA navigation — a user
+ * can leave the spelling page mid-battle and return without losing connection
+ * or live ranking (per AGENTS.md Lesson 8).
+ *
+ * `currentUserId` is set by the hook on mount so the store can resolve `isHost`
+ * / "you" highlighting independently of which component is reading it.
+ */
+interface BattleStore {
+  // ── Connection ───────────────────────────────────────────────────────────
+  connectionStatus: RealtimeConnectionStatus
+  hasInitiated: boolean
+  error: string | null
+
+  // ── Identity ─────────────────────────────────────────────────────────────
+  currentUserId: string | null
+
+  // ── Room (populated from server `room:state` payloads) ───────────────────
+  roomCode: string | null
+  status: BattleRoomStatus | null
+  hostId: string | null
+  players: BattlePlayerSummary[]
+  config: BattleRoomConfig | null
+  actualWordCount: number
+  classBattle: boolean
+  currentIndex: number
+  /** Latest incoming class-battle invite (shown as a join prompt). */
+  classInvite: BattleClassBattleAvailablePayload | null
+
+  // ── Game loop (populated from countdown/word_start/word_end/etc.) ────────
+  countdownN: number | null
+  currentWord: BattleWordStartPayload | null
+  /** My latest per-word result (for immediate local feedback). */
+  myLastResult: { index: number; correct: boolean; pointsAwarded: number; total: number; streak: number } | null
+  /** Accumulated per-word results for SRS + review-session persistence. */
+  myWordResults: { word: string; correct: boolean }[]
+  liveRanking: BattleRankingEntry[]
+  finalRanking: BattleRankingEntry[]
+  totalWords: number
+
+  // ── Actions ──────────────────────────────────────────────────────────────
+  setConnectionStatus: (status: RealtimeConnectionStatus) => void
+  setHasInitiated: (value: boolean) => void
+  setError: (error: string | null) => void
+  setCurrentUserId: (userId: string | null) => void
+  setRoomState: (state: BattleRoomState) => void
+  setClassInvite: (invite: BattleClassBattleAvailablePayload | null) => void
+  setCountdown: (n: number | null) => void
+  setCurrentWord: (word: BattleWordStartPayload | null) => void
+  setMyLastResult: (result: BattleStore["myLastResult"]) => void
+  pushWordResult: (word: string, correct: boolean) => void
+  setLiveRanking: (ranking: BattleRankingEntry[]) => void
+  setGameEnd: (finalRanking: BattleRankingEntry[], totalWords: number) => void
+  reset: () => void
+}
+
+const initialRoomState = {
+  currentUserId: null,
+  roomCode: null,
+  status: null,
+  hostId: null,
+  players: [],
+  config: null,
+  actualWordCount: 0,
+  classBattle: false,
+  currentIndex: -1,
+  classInvite: null,
+  countdownN: null,
+  currentWord: null,
+  myLastResult: null,
+  myWordResults: [],
+  liveRanking: [],
+  finalRanking: [],
+  totalWords: 0,
+}
+
+export const useBattleStore = create<BattleStore>((set) => ({
+  connectionStatus: "idle",
+  hasInitiated: false,
+  error: null,
+  ...initialRoomState,
+
+  setConnectionStatus: (connectionStatus) => set({ connectionStatus }),
+  setHasInitiated: (hasInitiated) => set({ hasInitiated }),
+  setError: (error) => set({ error }),
+  setCurrentUserId: (currentUserId) => set({ currentUserId }),
+
+  setRoomState: (state) =>
+    set({
+      roomCode: state.roomCode,
+      status: state.status,
+      hostId: state.hostId,
+      players: state.players,
+      config: state.config,
+      actualWordCount: state.actualWordCount,
+      classBattle: state.classBattle,
+      currentIndex: state.currentIndex,
+      // Clear live game fields when the room is back in the lobby (rematch)
+      // or finished — the next word_start/game_end repopulates them.
+      ...(state.status === "lobby"
+        ? { countdownN: null, currentWord: null, myLastResult: null, liveRanking: [], finalRanking: [], myWordResults: [] }
+        : state.status === "countdown"
+          ? { finalRanking: [], myWordResults: [], currentWord: null } // fresh game
+          : {}),
+    }),
+
+  setClassInvite: (classInvite) => set({ classInvite }),
+
+  setCountdown: (countdownN) => set({ countdownN }),
+  setCurrentWord: (currentWord) => set({ currentWord }),
+  setMyLastResult: (myLastResult) => set({ myLastResult }),
+  pushWordResult: (word, correct) =>
+    set((state) => ({ myWordResults: [...state.myWordResults, { word, correct }] })),
+  setLiveRanking: (liveRanking) => set({ liveRanking }),
+  setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, countdownN: null }),
+
+  reset: () =>
+    set({
+      connectionStatus: "idle",
+      hasInitiated: false,
+      error: null,
+      ...initialRoomState,
+    }),
+}))
+
+/** Convenience selector: is the current user the host? */
+export function selectIsHost(state: BattleStore): boolean {
+  return state.currentUserId !== null && state.hostId === state.currentUserId
+}

@@ -27,6 +27,10 @@ interface ActivityDetails {
   mode?: string
   difficulty?: string
   streak?: number
+  /** Multiplayer spelling battle enrichment (omitted for solo). */
+  multiplayer?: boolean
+  opponentCount?: number
+  rank?: number
 }
 
 interface LogActivityOptions {

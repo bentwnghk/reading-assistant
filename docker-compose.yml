@@ -113,6 +113,43 @@ services:
       MAX_CONCURRENT_SESSIONS: "3"
       # Client-side idle timeout in minutes — users are signed out after this many minutes of inactivity (default: 30)
       SESSION_IDLE_TIMEOUT_MINUTES: "30"
+      # Realtime (Socket.io) server URL the browser connects to for multiplayer
+      # spelling battles. Server-side runtime variable exposed via /api/config.
+      # Empty string disables the multiplayer option in the UI.
+      REALTIME_URL: "${REALTIME_URL:-http://localhost:3001}"
+
+  # Realtime (Socket.io) server for multiplayer spelling battles.
+  # Shares AUTH_SECRET + DATABASE_URL with the app. The app issues short-lived
+  # HMAC tickets (signed with AUTH_SECRET) via /api/realtime/ticket; this server
+  # verifies them at connection time (no shared DB dependency for auth).
+  realtime:
+    build:
+      context: ./realtime
+    # To use a pre-built image from GHCR instead of building locally, comment
+    # out `build` above and uncomment `image` (set by CI in ghcr.yml):
+    # image: ghcr.io/bentwnghk/reading-assistant-realtime:latest
+    container_name: reading-assistant-realtime
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+        reservations:
+          memory: 128m
+    environment:
+      # Port the Socket.io + healthcheck HTTP server listens on (default: 3001)
+      REALTIME_PORT: "3001"
+      # Comma-separated allowed CORS origins (the Next.js app origin)
+      REALTIME_CORS_ORIGIN: "${REALTIME_CORS_ORIGIN:-http://localhost:3000}"
+      # Shared with the app — used to verify HMAC-signed auth tickets
+      AUTH_SECRET: ""
+      # Reused for word-list fetching (glossary / vocabulary bank / review lists)
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
 
 volumes:
   reading-assistant_postgres_data:

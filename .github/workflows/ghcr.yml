@@ -54,11 +54,51 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see [Using artifact attestations to establish provenance for builds](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds).
+      # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see [Using artifact attestations to establish provenance for builds](/actions/security-guides/using-artifact-attestation-to-establish-provenance-for-builds).
       - name: Generate artifact attestation
         if: ${{ !github.event.repository.private }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+  # ─── Realtime (Socket.io) server image ─────────────────────────────────────
+  # Publishes the multiplayer spelling battle server to GHCR under a "-realtime"
+  # suffixed image name. Runs in parallel with the app image job (no dependency).
+  build-and-push-realtime:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for realtime image
+        id: meta-realtime
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-realtime
+      - name: Build and push realtime Docker image
+        id: push-realtime
+        uses: docker/build-push-action@v4
+        with:
+          context: ./realtime
+          push: true
+          tags: ${{ steps.meta-realtime.outputs.tags }}
+          labels: ${{ steps.meta-realtime.outputs.labels }}
+      - name: Generate artifact attestation
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-realtime
+          subject-digest: ${{ steps.push-realtime.outputs.digest }}
           push-to-registry: true
