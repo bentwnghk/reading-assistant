@@ -149,6 +149,7 @@ export interface UseSpellingBattle {
   finalRanking: BattleRankingEntry[]
   totalWords: number
   config: BattleRoomConfig | null
+  resultPersisted: boolean
   // imperative API
   connect: () => Promise<void>
   disconnect: () => void
@@ -282,6 +283,7 @@ export function useSpellingBattle(): UseSpellingBattle {
   const finalRanking = useBattleStore((s) => s.finalRanking)
   const totalWords = useBattleStore((s) => s.totalWords)
   const config = useBattleStore((s) => s.config)
+  const resultPersisted = useBattleStore((s) => s.resultPersisted)
 
   return {
     connectionStatus,
@@ -304,6 +306,7 @@ export function useSpellingBattle(): UseSpellingBattle {
     finalRanking,
     totalWords,
     config,
+    resultPersisted,
     connect,
     disconnect,
     clearError,

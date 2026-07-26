@@ -50,6 +50,8 @@ interface BattleStore {
   liveRanking: BattleRankingEntry[]
   finalRanking: BattleRankingEntry[]
   totalWords: number
+  /** True after the results have been persisted (activity log, store, etc.). */
+  resultPersisted: boolean
 
   // ── Actions ──────────────────────────────────────────────────────────────
   setConnectionStatus: (status: RealtimeConnectionStatus) => void
@@ -92,6 +94,7 @@ const initialRoomState = {
   liveRanking: [],
   finalRanking: [],
   totalWords: 0,
+  resultPersisted: false,
 }
 
 export const useBattleStore = create<BattleStore>((set) => ({
@@ -118,9 +121,9 @@ export const useBattleStore = create<BattleStore>((set) => ({
       // Clear live game fields when the room is back in the lobby (rematch)
       // or finished — the next word_start/game_end repopulates them.
       ...(state.status === "lobby"
-        ? { countdownN: null, currentWord: null, myLastResult: null, liveRanking: [], finalRanking: [], myWordResults: [] }
+        ? { countdownN: null, currentWord: null, myLastResult: null, liveRanking: [], finalRanking: [], myWordResults: [], resultPersisted: false }
         : state.status === "countdown"
-          ? { finalRanking: [], myWordResults: [], currentWord: null } // fresh game
+          ? { finalRanking: [], myWordResults: [], currentWord: null, resultPersisted: false } // fresh game
           : {}),
     }),
 
@@ -140,7 +143,7 @@ export const useBattleStore = create<BattleStore>((set) => ({
   pushWordResult: (word, correct) =>
     set((state) => ({ myWordResults: [...state.myWordResults, { word, correct }] })),
   setLiveRanking: (liveRanking) => set({ liveRanking }),
-  setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, countdownN: null }),
+  setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, countdownN: null, resultPersisted: true }),
 
   reset: () =>
     set({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
@@ -45,8 +45,6 @@ export function SpellingBattleFlow({
   const { id, setSpellingGameBestScore, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
 
-  const persistedRef = useRef(false);
-
   const handleExit = useCallback(() => {
     battle.leaveRoom();
     battle.disconnect();
@@ -56,8 +54,7 @@ export function SpellingBattleFlow({
   // ── Persistence on game_end (runs once per battle) ───────────────────────
   useEffect(() => {
     if (battle.status !== "finished" || battle.finalRanking.length === 0) return;
-    if (persistedRef.current) return;
-    persistedRef.current = true;
+    if (battle.resultPersisted) return;
 
     const myUserId = session?.user?.id;
     const me = battle.finalRanking.find((r) => r.userId === myUserId);
@@ -109,16 +106,9 @@ export function SpellingBattleFlow({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [battle.status, battle.finalRanking]);
+  }, [battle.status, battle.finalRanking, battle.resultPersisted]);
 
-  // Reset the persistence guard when a new battle begins.
-  useEffect(() => {
-    if (battle.status === "countdown") {
-      persistedRef.current = false;
-    }
-  }, [battle.status]);
-
-  // Finished → show results (final ranking is populated by game_end).
+  // ── Rendering ────────────────────────────────────────────────────────────
   if (battle.status === "finished" && battle.finalRanking.length > 0) {
     return <SpellingBattleResults onExit={handleExit} />;
   }
