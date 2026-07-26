@@ -1320,6 +1320,12 @@
       "spelling": {
         "title": "Spelling Challenge",
         "subtitle": "Practice spelling {{count}} words",
+        "playMode": {
+          "heading": "Choose Your Challenge",
+          "solo": "Solo Practice",
+          "soloDesc": "Practice at your own pace",
+          "live": "LIVE"
+        },
         "notEnoughWords": "Need at least 3 words for spelling game",
         "selectMode": "Select Game Mode",
         "selectDifficulty": "Select Difficulty",

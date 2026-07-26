@@ -25,6 +25,7 @@ import {
   Zap,
   Heart,
   Swords,
+  User,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -725,6 +726,51 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
         <div className="w-full max-w-md space-y-6">
           <div>
             <label className="text-sm font-medium mb-3 block">
+              {t("reading.glossary.spelling.playMode.heading")}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Solo Practice — selected state (this screen is the solo setup) */}
+              <div
+                aria-pressed="true"
+                className="relative rounded-xl border-2 border-primary bg-primary/10 p-4 text-left"
+              >
+                <CheckCircle className="absolute top-2 right-2 h-4 w-4 text-primary" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 mb-2">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div className="text-sm font-semibold text-primary">
+                  {t("reading.glossary.spelling.playMode.solo")}
+                </div>
+                <div className="hidden sm:block text-xs text-muted-foreground mt-0.5">
+                  {t("reading.glossary.spelling.playMode.soloDesc")}
+                </div>
+              </div>
+
+              {/* Multiplayer Battle — bold & gamified entry */}
+              <button
+                type="button"
+                onClick={() => setPlayMode("battle")}
+                className="relative rounded-xl border-2 border-fuchsia-400/50 dark:border-fuchsia-500/40 bg-gradient-to-br from-fuchsia-500/15 via-violet-500/10 to-background p-4 text-left transition-all hover:scale-[1.03] hover:shadow-lg hover:shadow-fuchsia-500/20 hover:border-fuchsia-400 dark:hover:border-fuchsia-400"
+              >
+                <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-fuchsia-500 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                  {t("reading.glossary.spelling.playMode.live")}
+                </span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-fuchsia-500/15 mb-2">
+                  <Swords className="h-5 w-5 text-fuchsia-500" />
+                </div>
+                <div className="text-sm font-semibold text-fuchsia-600 dark:text-fuchsia-400">
+                  {t("reading.glossary.spelling.multiplayer.title")}
+                </div>
+                <div className="hidden sm:block text-xs text-muted-foreground mt-0.5">
+                  {t("reading.glossary.spelling.multiplayer.subtitle")}
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-3 block">
               {t("reading.glossary.spelling.selectMode")}
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -855,11 +901,6 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
           <Button onClick={startGame} className="w-full" size="lg">
             <Play className="h-5 w-5 mr-2" />
             {t("reading.glossary.spelling.startGame")}
-          </Button>
-
-          <Button onClick={() => setPlayMode("battle")} variant="outline" className="w-full">
-            <Swords className="h-5 w-5 mr-2" />
-            {t("reading.glossary.spelling.multiplayer.title")}
           </Button>
 
           {spellingGameBestScore > 0 && (

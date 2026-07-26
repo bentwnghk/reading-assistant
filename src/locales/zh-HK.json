@@ -1351,6 +1351,12 @@
       "spelling": {
         "title": "拼字挑戰",
         "subtitle": "練習拼寫 {{count}} 個生字",
+        "playMode": {
+          "heading": "選擇你的挑戰",
+          "solo": "單人練習",
+          "soloDesc": "按自己的節奏練習",
+          "live": "即時"
+        },
         "notEnoughWords": "至少需要3個生字才能玩拼字遊戲",
         "selectMode": "選擇遊戲模式",
         "selectDifficulty": "選擇難度",
