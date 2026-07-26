@@ -29,7 +29,7 @@ export const config = {
   /** Max concurrently active rooms a single user may host. */
   maxRoomsPerHost: 3,
   /** Max players per room. */
-  maxPlayersPerRoom: 8,
+  maxPlayersPerRoom: 35,
   /** Auth ticket lifetime (ms). Tickets are issued by /api/realtime/ticket. */
   ticketTtlMs: 30_000,
 } as const;
