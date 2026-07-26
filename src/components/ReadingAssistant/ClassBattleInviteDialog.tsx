@@ -2,9 +2,10 @@
 
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Sword, Copy, X, Users } from "lucide-react";
+import { Sword, Copy, X, Users, ArrowRight } from "lucide-react";
 import copy from "copy-to-clipboard";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { useBattleStore } from "@/store/battle";
 import {
@@ -22,9 +23,11 @@ const M = "reading.glossary.spelling.multiplayer";
 
 export function ClassBattleInviteDialog() {
   const { t } = useTranslation();
+  const router = useRouter();
   const show = useBattleStore((s) => s.showClassBattleInviteDialog);
   const invites = useBattleStore((s) => s.pendingClassBattleInvites);
   const setShow = useBattleStore((s) => s.setShowClassBattleInviteDialog);
+  const setShouldOpenBattle = useBattleStore((s) => s.setShouldOpenBattle);
   const dismiss = useBattleStore((s) => s.dismissClassBattleInvite);
 
   const handleCopy = useCallback((code: string) => {
@@ -34,10 +37,16 @@ export function ClassBattleInviteDialog() {
 
   const handleDismiss = useCallback((code: string) => {
     dismiss(code);
-    // Close the dialog if no invites remain.
     const remaining = useBattleStore.getState().pendingClassBattleInvites.filter((i) => i.roomCode !== code);
     if (remaining.length === 0) setShow(false);
   }, [dismiss, setShow]);
+
+  const handleJoinBattle = useCallback((code: string) => {
+    setShouldOpenBattle(true);
+    dismiss(code);
+    setShow(false);
+    router.push("/");
+  }, [setShouldOpenBattle, dismiss, setShow, router]);
 
   return (
     <Dialog open={show} onOpenChange={setShow}>
@@ -87,6 +96,14 @@ export function ClassBattleInviteDialog() {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">{t(`${M}.howToJoin`)}</p>
+                <Button
+                  onClick={() => handleJoinBattle(invite.roomCode)}
+                  className="w-full"
+                  size="sm"
+                >
+                  {t(`${M}.joinBattle`)}
+                  <ArrowRight className="h-3 w-3 ml-1" />
+                </Button>
               </div>
             ))}
             {invites.length === 0 && (

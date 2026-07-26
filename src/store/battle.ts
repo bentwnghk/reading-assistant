@@ -37,6 +37,8 @@ interface BattleStore {
   pendingClassBattleInvites: BattleClassBattleAvailablePayload[]
   /** Controls the class-battle-invite dialog opened from the header bell. */
   showClassBattleInviteDialog: boolean
+  /** Flag set by ClassBattleInviteDialog to auto-navigate into battle mode. */
+  shouldOpenBattle: boolean
 
   // ── Game loop (populated from countdown/word_start/word_end/etc.) ────────
   countdownN: number | null
@@ -59,6 +61,7 @@ interface BattleStore {
   setPendingClassBattleInvites: (invites: BattleClassBattleAvailablePayload[]) => void
   dismissClassBattleInvite: (roomCode: string) => void
   setShowClassBattleInviteDialog: (open: boolean) => void
+  setShouldOpenBattle: (open: boolean) => void
   setCountdown: (n: number | null) => void
   setCurrentWord: (word: BattleWordStartPayload | null) => void
   setMyLastResult: (result: BattleStore["myLastResult"]) => void
@@ -81,6 +84,7 @@ const initialRoomState = {
   classInvite: null,
   pendingClassBattleInvites: [],
   showClassBattleInviteDialog: false,
+  shouldOpenBattle: false,
   countdownN: null,
   currentWord: null,
   myLastResult: null,
@@ -128,6 +132,7 @@ export const useBattleStore = create<BattleStore>((set) => ({
       pendingClassBattleInvites: state.pendingClassBattleInvites.filter((i) => i.roomCode !== roomCode),
     })),
   setShowClassBattleInviteDialog: (showClassBattleInviteDialog) => set({ showClassBattleInviteDialog }),
+  setShouldOpenBattle: (shouldOpenBattle: boolean) => set({ shouldOpenBattle }),
 
   setCountdown: (countdownN) => set({ countdownN }),
   setCurrentWord: (currentWord) => set({ currentWord }),

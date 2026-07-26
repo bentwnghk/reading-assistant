@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
 import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
+import { useBattleStore } from "@/store/battle";
 import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
@@ -152,6 +153,17 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
 
   const [gameStatus, setGameStatus] = useState<GameStatus>("setup");
   const [playMode, setPlayMode] = useState<"solo" | "battle">("solo");
+
+  const shouldOpenBattle = useBattleStore((s) => s.shouldOpenBattle);
+  const setShouldOpenBattle = useBattleStore((s) => s.setShouldOpenBattle);
+
+  useEffect(() => {
+    if (shouldOpenBattle) {
+      setPlayMode("battle");
+      setShouldOpenBattle(false);
+    }
+  }, [shouldOpenBattle, setShouldOpenBattle]);
+
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
   const [isTimed, setIsTimed] = useState(true);

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword } from "lucide-react";
 import Link from "next/link";
@@ -34,6 +34,7 @@ import {
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
+import { useBattleStore } from "@/store/battle";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 
 import { cn } from "@/utils/style";
@@ -52,6 +53,15 @@ function Glossary() {
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  const shouldOpenBattle = useBattleStore((s) => s.shouldOpenBattle);
+
+  useEffect(() => {
+    if (shouldOpenBattle) {
+      setActiveTab("spelling");
+      document.getElementById("section-glossary")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [shouldOpenBattle]);
 
   const isGenerating = !!activeGenerations["glossary"];
 
