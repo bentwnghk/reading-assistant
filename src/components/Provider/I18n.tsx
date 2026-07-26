@@ -1,14 +1,23 @@
 "use client";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { I18nextProvider } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
 import i18n, { resolveLanguagePreference } from "@/utils/i18n";
 
 function I18Provider({ children }: { children: React.ReactNode }) {
   const { language } = useSettingStore();
+  const isHydrated = useRef(false);
 
   useLayoutEffect(() => {
-    const resolvedLanguage = resolveLanguagePreference(language);
+    let effectiveLanguage: string;
+    if (!isHydrated.current) {
+      isHydrated.current = true;
+      const storedLanguage = localStorage.getItem("language");
+      effectiveLanguage = storedLanguage ?? language;
+    } else {
+      effectiveLanguage = language;
+    }
+    const resolvedLanguage = resolveLanguagePreference(effectiveLanguage);
     i18n.changeLanguage(resolvedLanguage);
     document.documentElement.setAttribute("lang", resolvedLanguage);
     document.title = i18n.t("title");

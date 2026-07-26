@@ -97,6 +97,7 @@ interface SettingActions {
   update: (values: Partial<SettingStore>) => void;
   reset: () => void;
   loadFromServer: (settings: Partial<SettingStore>) => void;
+  syncNow: () => void;
 }
 
 let currentUserId: string | null = null;
@@ -218,6 +219,14 @@ export const useSettingStore = create(
           ...defaultValues,
           ...settings,
         }));
+      },
+      syncNow: () => {
+        if (!currentUserId) return;
+        if (syncTimeout) {
+          clearTimeout(syncTimeout);
+          syncTimeout = null;
+        }
+        syncToAPI(toSyncPayload(useSettingStore.getState()));
       },
     }),
     {

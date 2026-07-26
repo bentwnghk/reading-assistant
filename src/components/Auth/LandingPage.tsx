@@ -198,6 +198,7 @@ export function LandingPage() {
 
   const handleLocaleChange = (locale: string) => {
     update({ language: locale });
+    localStorage.setItem("language", locale);
     const resolvedLanguage = resolveLanguagePreference(locale);
     i18n.changeLanguage(resolvedLanguage);
     document.documentElement.setAttribute("lang", resolvedLanguage);

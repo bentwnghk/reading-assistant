@@ -185,6 +185,7 @@ function Setting({ open, onClose }: SettingProps) {
 
   function handleSubmit(values: z.infer<typeof formSchema>) {
     update(values);
+    useSettingStore.getState().syncNow();
     onClose();
   }
 
@@ -199,6 +200,7 @@ function Setting({ open, onClose }: SettingProps) {
   async function updateSetting(key: string, value?: string | number | boolean) {
     update({ [key]: value });
     if (key === "language" && typeof value === "string") {
+      localStorage.setItem("language", value);
       const resolvedLanguage = resolveLanguagePreference(value);
       i18n.changeLanguage(resolvedLanguage);
       document.documentElement.setAttribute("lang", resolvedLanguage);
