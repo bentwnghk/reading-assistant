@@ -432,6 +432,9 @@ body.toc-noscroll{overflow:hidden}
   <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" key="1mglay" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><polyline points="12 6 12 12 16 14" key="68esgv" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></symbol>
   <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" key="1357e3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" key="1xhq8a" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 7v5l4 2" key="1fdv2h" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
   <symbol id="i-book-text" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" key="k3hazp" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 11h8" key="vwpz6n" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 7h6" key="1f0q6e" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-door-open" viewBox="0 0 24 24"><path d="M13 4h3a2 2 0 0 1 2 2v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 20h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 20h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 12v.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
+  <symbol id="i-x-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle><path d="m15 9-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 9 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></symbol>
 </svg>
 
 <!-- ============ COVER PAGE ============ -->
@@ -1429,6 +1432,140 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="callout teacher"><strong><span class="tag-teacher"></span>班級對戰</strong> 老師可在建立房間時開啟<b>班級對戰</b>並選擇目標班級。該班所有學生會收到通知（彈窗提示 + 通知鈴聲徽章），顯示房間代碼 — 學生可從應用程式的任何位置加入。</div>
       <p class="small">對戰結果會計入拼字最高分、排行榜，以及在「我的詞彙」頁面影響 SRS 熟練度 — 與單人模式完全相同。</p>
+
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-swords"/></svg> 戰鬥房間 — 大廳</div><span class="badge" style="background:var(--subtle);color:var(--muted-fg)">Lobby</span></div>
+        <div class="mock-body" style="max-width:520px;margin:0 auto">
+          <!-- Room code -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--border);border-radius:8px;background:var(--subtle);padding:14px 18px;margin-bottom:6px">
+            <span style="font-family:var(--mono);font-size:1.8rem;font-weight:700;letter-spacing:.3em">A7X2K9</span>
+            <span class="btn sm outline" style="border:none;background:transparent;padding:4px"><svg class="ic sm"><use href="#i-copy"/></svg></span>
+          </div>
+          <p style="text-align:center;font-size:11px;color:var(--muted);margin:0 0 14px">分享此代碼給朋友</p>
+          <div style="height:1px;background:var(--border);margin:0 0 12px"></div>
+          <!-- Players -->
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;margin-bottom:6px">
+            <svg class="ic sm"><use href="#i-users"/></svg> 玩家 (3)
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:10px;border:2px solid var(--primary-border);border-radius:8px;padding:8px 12px;background:var(--primary-soft)">
+              <div class="av sm" style="background:var(--primary);font-size:10px;width:28px;height:28px">JD</div>
+              <span style="flex:1;font-size:13px;font-weight:500">陳大明</span>
+              <span class="badge" style="background:var(--subtle);color:var(--muted-fg);font-size:10px">你</span>
+              <svg class="ic sm" style="color:var(--amber)"><use href="#i-crown"/></svg>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:8px 12px">
+              <div class="av sm" style="background:var(--green);font-size:10px;width:28px;height:28px">AS</div>
+              <span style="flex:1;font-size:13px;font-weight:500">李小美</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:8px;padding:8px 12px">
+              <div class="av sm" style="background:var(--violet);font-size:10px;width:28px;height:28px">WZ</div>
+              <span style="flex:1;font-size:13px;font-weight:500">王子豪</span>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0 0 12px"></div>
+          <!-- Word count -->
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:16px">
+            <span style="color:var(--muted)">單詞</span>
+            <span class="badge" style="background:transparent;border:1px solid var(--border-strong)">10 個單詞</span>
+          </div>
+          <!-- Actions -->
+          <div style="display:flex;gap:8px">
+            <span class="btn primary" style="flex:1;justify-content:center"><svg class="ic sm"><use href="#i-play"/></svg> 開始對戰</span>
+            <span class="btn outline" style="gap:6px"><svg class="ic sm"><use href="#i-log-out"/></svg> 離開</span>
+          </div>
+        </div>
+      </div>
+      <div class="mock-cap">拼字對戰大廳 — 建立房間後分享代碼給朋友。主持人（皇冠圖示）準備就緒後開始遊戲。</div>
+
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-swords"/></svg> 對戰競技場 — 聽音拼字</div><span class="badge" style="background:var(--subtle);color:var(--muted-fg)">第 3 / 10 題</span></div>
+        <div class="mock-body" style="max-width:620px;margin:0 auto">
+          <!-- Top bar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px">
+            <span class="badge" style="background:var(--subtle);color:var(--muted-fg)">第 3 / 10 題</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="badge" style="background:transparent;border:1px solid var(--border-strong);display:flex;align-items:center;gap:4px"><svg class="ic sm" style="color:var(--amber)"><use href="#i-trophy"/></svg> 340</span>
+              <span class="badge" style="background:transparent;border:1px solid var(--border-strong);display:flex;align-items:center;gap:4px"><svg class="ic sm" style="color:var(--orange)"><use href="#i-flame"/></svg> 3</span>
+            </div>
+            <span class="btn sm outline" style="gap:4px"><svg class="ic sm"><use href="#i-log-out"/></svg> 離開</span>
+          </div>
+          <!-- Timer bar -->
+          <div style="margin-bottom:10px">
+            <div class="progress" style="height:4px"><i style="width:62%"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px">
+              <span style="display:inline-flex;align-items:center;gap:3px"><svg class="ic sm"><use href="#i-clock"/></svg> 12.4s</span>
+              <span>等待其他玩家...</span>
+            </div>
+          </div>
+          <!-- Two-column grid -->
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <!-- Main play area -->
+            <div style="flex:1;min-width:260px;border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--card)">
+              <!-- Mode badge -->
+              <div style="text-align:center;margin-bottom:12px">
+                <span class="badge" style="background:var(--subtle);color:var(--muted-fg);font-size:10px"><svg class="ic sm"><use href="#i-volume-2"/></svg> 聽音拼字</span>
+              </div>
+              <!-- Speaker button -->
+              <div style="text-align:center;margin-bottom:10px">
+                <span class="btn outline" style="width:56px;height:56px;border-radius:50%;align-items:center;justify-content:center;padding:0;margin:0 auto"><svg class="ic" style="width:24px;height:24px"><use href="#i-volume-2"/></svg></span>
+                <p style="font-size:10px;color:var(--muted);margin:6px 0 0">點擊聆聽</p>
+              </div>
+              <!-- Letter hints -->
+              <div style="text-align:center;font-family:var(--mono);font-size:1.4rem;letter-spacing:.15em;margin-bottom:10px">
+                e<span style="color:var(--muted)"> _ </span>o<span style="color:var(--muted)"> _ </span>y s t<span style="color:var(--muted)"> _ </span>m
+              </div>
+              <!-- Definition card -->
+              <div style="border:1px solid var(--border);border-radius:6px;background:var(--subtle);padding:10px;text-align:center;font-size:12px;margin-bottom:12px">
+                <p style="margin:0 0 2px">生物及其環境組成的群落</p>
+                <p style="color:var(--muted);margin:0 0 4px;font-size:11px">A community of organisms and their environment</p>
+                <span class="badge" style="background:var(--subtle);color:var(--muted-fg);font-size:10px">名詞</span>
+              </div>
+              <!-- Input + submit -->
+              <div style="display:flex;gap:6px;margin-bottom:10px">
+                <span class="input-fake" style="text-align:center;font-size:1rem;flex:1;border:2px solid var(--green);background:var(--green-bg)">ecosystem</span>
+                <span class="btn primary" style="padding:7px 10px"><svg class="ic sm"><use href="#i-send"/></svg></span>
+              </div>
+              <!-- Feedback -->
+              <div style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;margin-bottom:8px;color:var(--green)">
+                <svg class="ic"><use href="#i-check-circle-2"/></svg>
+                <span style="font-weight:600">正確 · +120</span>
+              </div>
+              <!-- Hint -->
+              <div style="text-align:center">
+                <span class="btn sm outline" style="border:none;background:transparent;gap:4px"><svg class="ic sm"><use href="#i-lightbulb"/></svg> 使用提示</span>
+              </div>
+            </div>
+            <!-- Live ranking sidebar -->
+            <div style="width:190px;flex:none;border:1px solid var(--border);border-radius:var(--radius);padding:12px;background:var(--card);align-self:flex-start">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-bottom:8px">
+                <svg class="ic sm" style="color:var(--amber)"><use href="#i-crown"/></svg> 即時排名
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:6px;padding:5px 8px">
+                  <span style="font-size:18px;line-height:1;width:20px;text-align:center">🥇</span>
+                  <div class="av sm" style="background:var(--primary);font-size:9px;width:22px;height:22px">CM</div>
+                  <span style="flex:1;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">陳大明<span style="font-size:10px;color:var(--primary)">（你）</span></span>
+                  <span style="font-size:11px;font-weight:700">340</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:6px;padding:5px 8px">
+                  <span style="font-size:18px;line-height:1;width:20px;text-align:center">🥈</span>
+                  <div class="av sm" style="background:var(--green);font-size:9px;width:22px;height:22px">LM</div>
+                  <span style="flex:1;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">李小美</span>
+                  <span style="font-size:11px;font-weight:700">280</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:6px;padding:5px 8px">
+                  <span style="font-size:18px;line-height:1;width:20px;text-align:center">🥉</span>
+                  <div class="av sm" style="background:var(--violet);font-size:9px;width:22px;height:22px">WZ</div>
+                  <span style="flex:1;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">王子豪</span>
+                  <span style="font-size:11px;font-weight:700">220</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mock-cap">拼字對戰競技場 — 即時對戰畫面（聽音拼字模式）。左側面板顯示當前單詞挑戰（喇叭、提示、輸入及回饋）；右側面板在每題結束後即時更新排名。</div>
 
       <h3>5.5 詞彙測驗</h3>
       <p>選擇題測驗（需 ≥4 生字）。題型隨機為三之一：<b>生字→定義</b>、<b>定義→生字</b>或<b>填空</b>（取自例句）。可選<b>計時挑戰</b>（易 20 秒／中 15 秒／難 10 秒）。</p>
