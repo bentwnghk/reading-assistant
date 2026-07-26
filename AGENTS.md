@@ -25,14 +25,15 @@ The project uses **npm** as the primary package manager (>= 9.8.0, Node >= 18.18
 
 ### Docker
 
-- **Dockerfile**: Multi-stage build on `node:18-alpine`, runs `build:standalone`, exposes port 3000.
-- **docker-compose.yml**: Two services — `postgres` (PostgreSQL 16 Alpine, port 5432) and `reading-assistant` (port 3000, depends on healthy postgres).
+- **Main app Dockerfile**: Multi-stage build on `node:18-alpine`, runs `build:standalone`, exposes port 3000.
+- **Realtime Dockerfile**: Multi-stage build on `node:18-alpine` at `realtime/Dockerfile`, builds TypeScript → JS, exposes port 3001. Uses a 3-stage layout (deps → builder → prod-deps → runner) for a slim final image.
+- **docker-compose.yml**: Three services — `postgres` (PostgreSQL 16 Alpine, port 5432), `reading-assistant` (port 3000, depends on healthy postgres), and `realtime` (port 3001, Socket.io server, depends on healthy postgres, shares `AUTH_SECRET` and `DATABASE_URL`).
 - **Build & Run**: `docker compose up --build`
 
 ### CI/CD
 
 - **`.github/workflows/docker.yml`**: Pushes multi-arch (amd64/arm64) Docker image to Docker Hub on `main`/`dev` pushes and `v*` tags.
-- **`.github/workflows/ghcr.yml`**: Pushes Docker image to GitHub Container Registry on `main`/`db` pushes and `v*` tags.
+- **`.github/workflows/ghcr.yml`**: Pushes Docker image to GitHub Container Registry on `main`/`db` pushes and `v*` tags. Also builds and pushes a separate `-realtime` image from `realtime/Dockerfile` in a parallel job.
 - **`.github/workflows/issue-translator.yml`**: Auto-translates non-English GitHub issues.
 
 ---
@@ -51,7 +52,7 @@ src/
 ├── components/
 │   ├── ui/                     # Shadcn UI primitives (do not modify directly)
 │   ├── Internal/               # Custom shared components
-│   ├── ReadingAssistant/       # Core reading assistance feature components (37 files — see Reading Assistant Features section)
+│   ├── ReadingAssistant/       # Core reading assistance feature components (41 files — see Reading Assistant Features section)
 │   ├── Vocabulary/             # My Vocabulary page components (table, flashcards, quiz, spelling, review lists, export, sharing)
 │   ├── MagicDown/              # Markdown rendering and editing components
 │   ├── Auth/                   # Authentication UI components
@@ -68,10 +69,12 @@ src/
 │   └── Setting.tsx             # Application settings panel
 ├── hooks/                      # Custom React hooks (see Hooks section)
 ├── store/                      # Zustand stores (global state, persisted)
-├── lib/                        # Server-side data access layer
+├── lib/                        # Server-side data access + realtime client
 │   ├── db.ts                   # PostgreSQL connection pool singleton
 │   ├── sessions.ts             # Session data access
 │   ├── users.ts                # User data access
+│   ├── realtime-client.ts      # Singleton Socket.io client (module-scope, SPA-safe)
+│   ├── realtime-ticket.ts      # HMAC ticket issuance for realtime server auth
 │   ├── vocabulary.ts           # Vocabulary data access (CRUD, stats, SRS, review sessions)
 │   ├── review-lists.ts         # Review list CRUD + sharing
 │   ├── achievements.ts         # Achievement logic
@@ -92,6 +95,20 @@ src/
 ├── locales/                    # I18n translation files (JSON)
 └── types.d.ts                  # Shared TypeScript type definitions
 scripts/                        # SQL migrations (init-db.sql + incremental migrations)
+realtime/                       # Standalone Socket.io server for multiplayer spelling battles
+├── Dockerfile                  # Multi-stage build (deps→builder→prod-deps→runner)
+├── src/
+│   ├── server.ts               # Socket.io bootstrap + room/game orchestration
+│   ├── auth.ts                 # HMAC ticket verification
+│   ├── config.ts               # Runtime env-driven configuration
+│   ├── db.ts                   # PostgreSQL pool + helper queries
+│   ├── presence.ts             # Connected-user presence tracker
+│   ├── rooms.ts                # Room CRUD, player management, host transfer
+│   └── game/
+│       ├── engine.ts           # Game loop (countdown→playing→finished)
+│       ├── scoring.ts          # Authoritative scoring + timing constants
+│       ├── types.ts            # Battle types (mirrored from src/types.d.ts)
+│       └── words.ts            # Word list resolution (glossary/vocab/review-list/curated)
 ```
 
 ---
@@ -369,6 +386,10 @@ The main reading page (`src/app/page.tsx`) is a multi-step workflow driven by `u
 | Vocabulary Flashcard | `VocabularyFlashcard.tsx` | In-session flashcard review with SRS integration |
 | Vocabulary Quiz | `VocabularyQuiz.tsx` | In-session word-to-definition / fill-blank quiz |
 | Vocabulary Spelling | `VocabularySpelling.tsx` | Spelling game with listen-type, scramble, and fill-blanks modes |
+| Spelling Battle Arena | `SpellingBattleArena.tsx` | Real-time multiplayer spelling along-side arena (word display, answer input, live ranking) |
+| Spelling Battle Lobby | `SpellingBattleLobby.tsx` | Multiplayer room create/join, word source selection, class-battle toggle |
+| Spelling Battle Flow | `SpellingBattleFlow.tsx` | Orchestrator: lobby → countdown → arena → results |
+| Spelling Battle Results | `SpellingBattleResults.tsx` | Final ranking, tier badges, accuracy, rematch button |
 | Reading Tutor | `ReadingTutorChat.tsx` | AI-powered reading comprehension tutor (accessed via `TutorChatFab.tsx`) |
 
 ### Grammar Games (5 games)
@@ -833,3 +854,214 @@ Do **not** add a one-time override in the persist `getItem` (e.g., a `localStora
 #### Related: [Lesson 3](#3-model-list-reuse-in-settings) (Model List Reuse)
 
 Lesson 3 says to **reuse existing model lists** rather than creating per-feature lists. This lesson covers the *operational* side of those same lists — how to change a default and roll it out. Reuse + this lesson together prevent both the Zod enum mismatch bugs (Lesson 3) and the "stale default in the DB" gap (this lesson).
+
+### 12. Adding a Standalone Realtime Service (Multiplayer Spelling Battle Lessons)
+
+The multiplayer spelling battle (v2.902–v2.907) introduced a **standalone Socket.io server** (`realtime/`) alongside the Next.js app. This is the first realtime feature in the project and established several architectural patterns.
+
+#### 12.1 Standalone Package Isolation
+
+The `realtime/` directory is a completely independent Node.js+TypeScript package:
+
+| Concern | How realtime/ handles it |
+|---------|--------------------------|
+| **Code deps** | Its own `package.json`, `tsconfig.json`, `vitest.config.ts`. No import from `src/` — types are **manually mirrored** in `realtime/src/game/types.ts` with a comment at the top of `src/types.d.ts` (`// Mirrored in realtime/src/game/types.ts — keep both sides in sync`). |
+| **Build** | `npm run build` in `realtime/` compiles `src/` → `dist/` (CommonJS, ES2022 target). |
+| **Docker** | Own multi-stage `realtime/Dockerfile` (3-stage: deps → builder → prod-deps → runner). Published as a separate `-realtime` image via `.github/workflows/ghcr.yml`. |
+| **Runtime** | Runs as a separate container in `docker-compose.yml` on port 3001. Shares `AUTH_SECRET` and `DATABASE_URL` env vars with the main app. |
+
+**Key decisions**:
+- The main app's `tsconfig.json` `exclude` list **must** include `"realtime"` (v2.904) to avoid TypeScript picking up the standalone package in the Next.js build.
+- The realtime server has its own `config.ts` with env-driven runtime configuration (`REALTIME_PORT`, `REALTIME_CORS_ORIGIN`, `AUTH_SECRET`, `DATABASE_URL`, timeout/max-room constants).
+- The realtime URL is a **server-side runtime env var** (`REALTIME_URL`, not `NEXT_PUBLIC_*`), exposed to the client via `/api/config`, so the same Docker image works across deployments.
+
+#### 12.2 HMAC-Ticket Auth for External Services
+
+Instead of sharing session state or using a DB lookup on every Socket.io connection, auth uses **short-lived HMAC-signed tickets**:
+
+1. **Issuance**: The Next.js app's `/api/realtime/ticket` endpoint creates a JSON payload (`userId`, `name`, `image`, `role`, `schoolId`, `classId`, `exp`) and signs it with `AUTH_SECRET` via HMAC-SHA256.
+2. **Delivery**: The client fetches the ticket via HTTP **before** connecting and passes it as Socket.io's `auth.token`.
+3. **Verification**: The realtime server's `auth.ts` verifies the HMAC signature + expiry on each connection.
+4. **Refresh**: The client's `auth` callback (in Socket.io config) fetches a fresh ticket on **every** connection attempt (initial + each reconnect), so tickets need only a 30s TTL.
+
+```
+Next.js API                    Client                       Realtime Server
+  /api/realtime/ticket
+       │                         │                               │
+       │─── HMAC ticket ────────>│                               │
+       │                         │─── connect({ auth.token }) ──>│
+       │                         │                               │── verify HMAC + exp
+       │                         │<────── connected ────────────│
+```
+
+**Why this pattern**:
+- **No shared session DB** — the realtime server never queries the NextAuth session table.
+- **Lightweight verification** — HMAC is stateless (no DB call per connection).
+- **Graceful degradation** — if the ticket endpoint is down, the client's reconnection loop retries and re-fetches.
+- **Class-battle routing** — the ticket embeds `classId` (resolved server-side during issuance) so the realtime server knows which class notifications to route without extra DB queries. Fallback DB resolution is included for older clients during rollout.
+
+#### 12.3 Module-Scope Socket Connection (Lesson 8 Extension)
+
+The Socket.io connection lives at **module scope** (`src/lib/realtime-client.ts` singleton), per Lesson 8's principle that state tracking an async operation whose lifecycle spans component unmount/remount must be at module level, not component-local:
+
+- `connectRealtime()` creates the singleton socket; subsequent calls are no-ops.
+- `disconnectRealtime()` tears it down (explicit lifecycle managed by UI, not React mount/unmount).
+- `getRealtimeSocket()` provides access for event wiring.
+- The battle Zustand store (`battle.ts`) is **non-persisted** — battle state is ephemeral and tied to the live connection, but lives at module scope so it survives SPA navigation.
+
+The `useSpellingBattle` hook's event wiring uses the **singleton pattern** with a module-level `eventsWired` guard:
+```ts
+let eventsWired = false
+function wireEventsOnce(socket) {
+  if (eventsWired) return
+  eventsWired = true
+  // ... register all server→store event handlers ...
+}
+```
+This ensures event listeners are registered exactly once, not re-attached on every hook mount. On Socket.io reconnect, the `connect` event handler re-joins the current room to restore the seat.
+
+**Socket.io client import**: Dynamically imported inside `connectRealtime()` (`const { io } = await import("socket.io-client")`) so it stays out of the SSR bundle and is code-split (only loaded when a user actually starts a battle).
+
+#### 12.4 Two-Channel Notification Pattern
+
+Class-battle invites reach students via **two independent channels**, covering both connected and non-connected users:
+
+| Channel | Mechanism | Latency | Coverage |
+|---------|-----------|---------|----------|
+| **Socket event** | `class_battle_available` emitted to connected classmates in the same class | Real-time (<100ms) | Students currently on the web app with an active WebSocket |
+| **HTTP poll** | `ClassBattlePoller` component (mounted in root layout) fetches `/api/battle/pending-class-invites` from the realtime server every 60s via `fetch()` | 60s max | **All** students (no WebSocket needed), works on any page |
+
+**Design notes**:
+- The poll endpoint is a **raw HTTP route** on the realtime server (not Socket.io), authenticated by the same HMAC ticket passed as a query parameter.
+- The `ClassBattlePoller` is mounted in `RootLayout` (outside the page router) so it lives across all SPA navigations.
+- The poll updates `pendingClassBattleInvites` in the battle store, which drives the **bell badge count** in `Header.tsx` (alongside pending shares and review list shares).
+- Clicking the bell when class-battle invites exist opens `ClassBattleInviteDialog` with room code, copy-button, and instructions.
+- The poller is **student-only** (early return for non-students).
+
+#### 12.5 Persistent Toast Lifecycle
+
+Class-battle invite toasts use `duration: Infinity` and are managed programmatically:
+
+- **Show**: On first discovery via poll, `toast(invite.roomCode, { id: invite.roomCode, duration: Infinity })`.
+- **Dismiss**: When the student joins the room (`useBattleStore.subscribe` watches `roomCode`) or the room is destroyed/starts (the invite disappears from the poll response).
+- **Idempotency**: A `useRef<Set<string>>` tracks which room codes currently have active toasts, preventing duplicates.
+- **Poll-driven cleanup**: On each poll cycle, invites that vanished from the response are dismissed.
+
+This is different from typical auto-dismiss toasts and requires explicit lifecycle management.
+
+#### 12.6 Grace-Based Reconnection for Realtime
+
+The realtime server distinguishes **new joiners** from **reconnecting members**:
+
+| Type | When allowed | Behavior |
+|------|-------------|----------|
+| **New joiner** | Lobby only | Must enter via room code; subject to class-membership check; triggers `player_joined` event |
+| **Reconnecting member** | Any game phase (lobby/countdown/playing/finished) | Re-binds the player's existing seat; skips membership check; no `player_joined` event — just fresh `room:state` |
+
+Implementation in `server.ts`:
+```ts
+const existingMember = room.players.get(user.userId);
+if (!existingMember && room.status !== "lobby") {
+  return emitRoomError(socket, "room_not_in_lobby", "That battle has already started");
+}
+```
+
+**Disconnect handling**:
+- On socket `disconnect`, the player is marked `status: "disconnected"` and a 15-second grace timer starts (`config.reconnectGraceMs`).
+- If the player reconnects within grace (Socket.io's reconnection loop fires a new `room:join`), the seat is restored.
+- If grace expires and the player is still disconnected, they are removed from the room.
+- If an in-progress game drops below 2 present players, the game is cancelled back to lobby.
+
+#### 12.7 Authoritative Server Scoring
+
+The game engine is **server-authoritative** for all scoring. Clients only report their typed answer + hint usage count; the server judges correctness and computes points:
+
+```ts
+// Server clock is authoritative — ignore the client's submittedAt for scoring
+const result = scoreAnswer({
+  correct,
+  timed: room.config.timed,
+  durationMs,
+  timeTakenMs: Date.now() - room.wordStartedAt,  // server clock
+  hintsUsed: payload.hintsUsed,
+  oldStreak: player.streak,
+});
+```
+
+Scoring formula (from `realtime/src/game/scoring.ts`, ported verbatim from the solo spelling game so scores are comparable):
+- Base 100 points for a correct answer
+- Speed bonus: `floor(remainingTimeFraction * 50)` if timed (0–50)
+- Streak bonus: +10% per streak level beyond 2, capped at +50% (streaks of 3–7)
+- Hint penalty: -10 per hint used
+- Floor: minimum 10 points per correct answer
+
+The per-word time limit and between-word pause are defined as constants at module scope and are not overridable per-room:
+
+| Difficulty | Word duration | Grace | Between-word pause |
+|-----------|--------------|-------|-------------------|
+| Easy | 30s | 500ms | 1.5s |
+| Medium | 20s | 500ms | 1.5s |
+| Hard | 12s | 500ms | 1.5s |
+
+#### 12.8 CORS for Mixed-Protocol Servers
+
+The realtime server serves two protocol layers on the same HTTP server:
+- **Socket.io (Engine.IO)**: CORS configured via `io.cors` — applies to WebSocket upgrade and long-polling transport.
+- **Raw HTTP routes** (`/health`, `/api/battle/pending-class-invites`): Need **explicit CORS headers** via `setCorsHeaders()` because browser `fetch()` calls use a separate CORS handshake from the Socket.io connection.
+
+```ts
+function setCorsHeaders(req: IncomingMessage, res: ServerResponse): void {
+  const origin = req.headers.origin;
+  if (origin && config.corsOrigin.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Vary", "Origin");
+  }
+}
+```
+
+This was missed in v2.902 and hotfixed in v2.906 — without it, browser `fetch()` calls to the raw HTTP endpoints fail with CORS errors in production.
+
+#### 12.9 CI/CD for Multi-Image Releases
+
+The GitHub Actions workflow (`ghcr.yml`) builds and publishes **two separate Docker images** in parallel jobs:
+
+| Image | Context | Tags | Purpose |
+|-------|---------|------|---------|
+| `ghcr.io/owner/repo` | `.` (app root) | `main`, `dev`, `v*` | Next.js app |
+| `ghcr.io/owner/repo-realtime` | `./realtime` | `main`, `dev`, `v*` | Socket.io server |
+
+Both images are pushed to the same container registry with a `-realtime` suffix for the second. Each has its own metadata step, build step, and artifact attestation step. Jobs are fully independent (no `needs` dependency).
+
+#### 12.10 Multi-System Integration Checklist for Realtime Features
+
+Building the multiplayer spelling battle confirmed that the checklist from [Lesson 1](#1-multi-system-integration-checklist) applies to realtime features too. The additional systems touched by a realtime feature:
+
+| System | Files | What to check |
+|--------|-------|---------------|
+| **Types (mirrored)** | `src/types.d.ts` + `realtime/src/game/types.ts` | Manually mirror all shared types; add sync comment |
+| **Store (non-persisted)** | `src/store/battle.ts` | Zustand store at module scope, NOT persisted (ephemeral connection state) |
+| **Hook** | `src/hooks/useSpellingBattle.ts` | Singleton event-wiring guard (`eventsWired`), connection lifecycle |
+| **Socket client** | `src/lib/realtime-client.ts` | Singleton module-level connection, dynamic `socket.io-client` import, auth ticket fetch |
+| **Ticket API** | `src/app/api/realtime/ticket/route.ts` | Short-lived HMAC ticket issuance (embeds userId + role + schoolId + classId) |
+| **Realtime package** | `realtime/` | Standalone package with own build, Dockerfile, CI pipeline |
+| **Docker compose** | `docker-compose.yml` | Add the realtime service alongside postgres and app |
+| **Env vars** | `env.tpl`, `realtime/src/config.ts` | `REALTIME_PORT`, `REALTIME_CORS_ORIGIN`, `REALTIME_URL` |
+| **CI/CD** | `.github/workflows/ghcr.yml` | Parallel job for `-realtime` image |
+| **Root layout** | `src/app/layout.tsx` | Mount `ClassBattlePoller` for cross-page notification polling |
+| **Header integration** | `src/components/Internal/Header.tsx` | Bell badge count includes `pendingClassBattleInvites`; about dialog feature cards |
+| **Landing page** | `src/components/Auth/landing/FeaturesShowcase.tsx` | Add multiplayer feature entry |
+| **I18n** | `src/locales/en-US.json`, `zh-HK.json` | All battle UI strings, error codes, toast messages, about dialog |
+| **User manuals** | `public/docs/user-manual-*.html` | Multiplayer spelling battle how-to + class battle section |
+| **README/FAQs** | `README.md`, `FAQs.md` | Feature description and Q&A |
+
+#### 12.11 Type Mirroring Pattern
+
+Types between the main app and the realtime package are **manually mirrored** rather than shared via a common package. This avoids adding a monorepo build step or package publishing requirement. The convention:
+
+1. Define all battle types in `src/types.d.ts` (the main app's canonical home).
+2. Copy them to `realtime/src/game/types.ts`, adding a comment at the top: `// Mirrored from src/types.d.ts — keep both sides in sync`.
+3. Add a comment at the source definition: `// Mirrored in realtime/src/game/types.ts`.
+
+This is manual and error-prone, but keeps each package independently buildable and deployable. If a type mismatch causes a runtime error, the fix is to update both files in the same commit.
