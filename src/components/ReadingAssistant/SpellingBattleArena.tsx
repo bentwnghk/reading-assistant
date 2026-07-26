@@ -51,6 +51,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   const [optimisticCorrect, setOptimisticCorrect] = useState<boolean | null>(null);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [inputType, setInputType] = useState<"password" | "text">("password");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -68,6 +69,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
     setShowDefinition(false);
     setOptimisticCorrect(null);
     setElapsedMs(0);
+    setInputType("password");
     // Speak the word shortly after mount (matches solo game pacing).
     const speakTimer = setTimeout(() => {
       void doSpeak(word.word);
@@ -250,12 +252,13 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
             <div className="flex gap-2">
               <Input
                 ref={inputRef}
-                type="password"
-                onFocus={(e) => {
-                  (e.target as HTMLInputElement).type = "text";
+                type={inputType}
+                onFocus={() => setInputType("text")}
+                onChange={(e) => {
+                  if (inputType === "password") setInputType("text");
+                  setUserInput(e.target.value);
                 }}
                 value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSubmit();
                 }}
