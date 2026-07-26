@@ -278,6 +278,10 @@
         "q11": {
           "q": "I want to practice reading but I don't have a text. Can Mr.🆖 ProReader generate one for me?",
           "a": "<p>Yes! The <strong>AI Text Generator</strong> writes a brand-new reading passage from scratch, tailored to your level. Open the <strong>AI Generate</strong> tab (next to Upload and Text Repository) and:</p><ol><li><strong>Enter a topic or theme</strong> — Anything you're curious about: \"space exploration\", \"online safety\", \"a day at the beach\". Add an optional description for more direction (e.g. \"the main character is a shy 14-year-old\").</li><li><strong>Pick a text type</strong> — Article, report, blog post, review, email/letter, editorial/argumentative essay, interview, short story, advertisement/brochure, notice/announcement, or profile/feature.</li><li><strong>Choose a length</strong> — From ~250 to ~1150 words.</li><li><strong>Set the difficulty</strong> — A CEFR level (A1–C2) is auto-suggested from your age; adjust it up or down for stronger or weaker students.</li></ol><p>The AI follows explicit vocabulary and grammar rules for your CEFR band, self-checks the word count and Flesch-Kincaid grade level, and returns the text plus a quality-control summary (estimated grade, new vocabulary). Once generated, <strong>every reading tool unlocks</strong> — summary, glossary, mind map, reading test, grammar analysis, and more. Not quite right? Tap <strong>Easier</strong> or <strong>Harder</strong> to regenerate at one CEFR band up or down.</p><p><strong>Pro tip:</strong> Match the text type to the skill you're practicing. Working on argumentative writing for DSE? Generate an \"editorial / argumentative essay\". Practicing everyday reading? Try a \"blog post\" or \"notice / announcement\". The generated text is a fresh starting point — run the Reading Test on it for a complete practice cycle.</p>"
+        },
+        "q12": {
+          "q": "Can I challenge my classmates to a live spelling battle?",
+          "a": "<p>Yes! The <strong>Multiplayer Spelling Battle</strong> turns the Listen &amp; Type mode into a real-time competition.</p><p><strong>For Students:</strong> Open <strong>Spelling Challenge</strong> → click <strong>Multiplayer Battle</strong>. Create a room (pick your word source) or join one with a 6-character code. The host starts the game — a 3-2-1 countdown begins, then each word is spoken via TTS. Type what you hear as fast as you can. A live ranking shows everyone's score after every word. At the end you see the final ranking, your tier badge, and accuracy. Results count toward your spelling best score, the leaderboard, and SRS mastery — just like solo play.</p><p><strong>For Teachers:</strong> Create or join rooms like any student. Additionally, toggle <strong>Class Battle</strong> when creating a room and pick a target class — all students in that class receive a notification (persistent toast + red badge on the header bell) with the room code. They can join from anywhere in the app, not just the spelling page.</p>"
         }
       }
     }
@@ -1450,10 +1454,14 @@
             "invalidCode": "Enter a valid room code.",
             "connection_failed": "Could not connect to the battle server.",
             "multiplayer_unavailable": "Multiplayer is not available."
-          }
+        },
+        "q12": {
+          "q": "Can I challenge my classmates to a live spelling battle?",
+          "a": "<p>Yes! The <strong>Multiplayer Spelling Battle</strong> turns the Listen &amp; Type mode into a real-time competition.</p><p><strong>For Students:</strong> Open <strong>Spelling Challenge</strong> → click <strong>Multiplayer Battle</strong>. Create a room (pick your word source) or join one with a 6-character code. The host starts the game — a 3-2-1 countdown begins, then each word is spoken via TTS. Type what you hear as fast as you can. A live ranking shows everyone's score after every word. At the end you see the final ranking, your tier badge, and accuracy. Results count toward your spelling best score, the leaderboard, and SRS mastery — just like solo play.</p><p><strong>For Teachers:</strong> Create or join rooms like any student. Additionally, toggle <strong>Class Battle</strong> when creating a room and pick a target class — all students in that class receive a notification (persistent toast + red badge on the header bell) with the room code. They can join from anywhere in the app, not just the spelling page.</p><p><strong>Tip:</strong> Host can start a rematch after the game ends. Up to 8 players per room.</p>"
         }
       }
-    },
+    }
+  },
     "workflow": {
       "title": "Learning Progress",
       "progress": "{{percent}}% complete",
