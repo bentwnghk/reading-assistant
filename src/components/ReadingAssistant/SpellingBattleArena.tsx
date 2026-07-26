@@ -250,6 +250,10 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
             <div className="flex gap-2">
               <Input
                 ref={inputRef}
+                type="password"
+                onFocus={(e) => {
+                  (e.target as HTMLInputElement).type = "text";
+                }}
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -257,6 +261,11 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                 }}
                 disabled={hasSubmitted || timedOut}
                 placeholder={t("reading.glossary.spelling.typeAnswer")}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
                 className={cn(
                   "text-center text-lg",
                   showCorrect === true && "border-green-500 bg-green-500/10",

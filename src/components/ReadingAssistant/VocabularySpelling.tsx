@@ -994,6 +994,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
               onChange={(e) => setUserInput(e.target.value)}
               placeholder={t("reading.glossary.spelling.typeAnswer")}
               className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
               autoFocus
               disabled={showFeedback}
             />
@@ -1093,6 +1098,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
               onChange={(e) => setUserInput(e.target.value)}
               placeholder={t("reading.glossary.spelling.typeMissing")}
               className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
               autoFocus
               disabled={showFeedback}
             />
