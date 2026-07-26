@@ -369,7 +369,7 @@ The AI follows explicit vocabulary and grammar rules for your CEFR band, self-ch
 
 A new **real-time** multiplayer mode inside the existing Spelling Challenge. Here's how it works:
 
-- **For Students:** Open **Spelling Challenge** → click **Multiplayer Battle**. Create a room (pick your word source) or join one with a 6-character code. The host starts the game → a 3-2-1 countdown → hear each word via TTS and type it. A live ranking shows everyone's score. At the end you see the final ranking, your tier badge, and accuracy. Results count toward your spelling best score, leaderboard, and SRS mastery.
+- **For Students:** Open **Spelling Challenge** → click **Multiplayer Battle**. Create a room (pick your game mode — Listen & Type, Letter Scramble, Fill Blanks, or Mixed — and your word source) or join one with a 6-character code. The host starts the game → a 3-2-1 countdown → each word challenge adapts to your chosen mode. A live ranking shows everyone's score. At the end you see the final ranking, your tier badge, and accuracy. Results count toward your spelling best score, leaderboard, and SRS mastery (just like solo play).
 
 - **For Teachers:** Create or join rooms like any student. Additionally, toggle **Class Battle** when creating a room and pick a target class — all students in that class receive a notification (toast + bell badge) with the room code. They can join from anywhere in the app, not just the spelling page.
 
