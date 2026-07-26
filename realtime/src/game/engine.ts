@@ -57,17 +57,27 @@ function buildRanking(room: BattleRoom): RankingEntry[] {
     if (b.correctCount !== a.correctCount) return b.correctCount - a.correctCount;
     return a.userId.localeCompare(b.userId);
   });
-  return sorted.map((p, i) => ({
-    rank: i + 1,
-    userId: p.userId,
-    name: p.name,
-    image: p.image,
-    total: p.score,
-    streak: p.streak,
-    maxStreak: p.maxStreak,
-    correctCount: p.correctCount,
-    isHost: room.hostId === p.userId,
-  }));
+  let rank = 0;
+  let prevScore = -1;
+  let prevCorrect = -1;
+  return sorted.map((p) => {
+    if (p.score !== prevScore || p.correctCount !== prevCorrect) {
+      rank += 1;
+      prevScore = p.score;
+      prevCorrect = p.correctCount;
+    }
+    return {
+      rank,
+      userId: p.userId,
+      name: p.name,
+      image: p.image,
+      total: p.score,
+      streak: p.streak,
+      maxStreak: p.maxStreak,
+      correctCount: p.correctCount,
+      isHost: room.hostId === p.userId,
+    };
+  });
 }
 
 function emitLiveRanking(io: SocketIOServer, room: BattleRoom, index: number): void {
