@@ -82,7 +82,30 @@ function handlePendingClassInvites(req: IncomingMessage, res: ServerResponse): v
   }
 }
 
+/**
+ * Set CORS headers on raw HTTP responses. The Socket.io server has its own
+ * CORS config (applied to Engine.IO endpoints only), but the raw HTTP routes
+ * (/health, /api/battle/pending-class-invites) need their own headers for
+ * browser fetch() calls to succeed cross-origin.
+ */
+function setCorsHeaders(req: IncomingMessage, res: ServerResponse): void {
+  const origin = req.headers.origin;
+  if (origin && config.corsOrigin.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Vary", "Origin");
+  }
+}
+
 const httpServer: HttpServer = createServer((req, res) => {
+  setCorsHeaders(req, res);
+  // Handle CORS preflight.
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
   if (req.url === "/health") return healthcheck(req, res);
   // Internal endpoint: returns class-battle invites for the ticket-holder's class.
   // Used by the app's 60s Header poll so students see invites anywhere in the app.
