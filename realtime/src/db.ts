@@ -77,6 +77,20 @@ export async function canTargetClass(
   }
 }
 
+/** Check whether a user is a member of the given class (student in class_members). */
+export async function isClassMember(userId: string, classId: string): Promise<boolean> {
+  try {
+    const p = getPool();
+    const result = await p.query(
+      `SELECT 1 FROM class_members WHERE student_id = $1 AND class_id = $2`,
+      [userId, classId],
+    );
+    return result.rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 /** Fetch a class name + the owner's name for the class-battle notification. */
 export async function getClassInfo(
   classId: string,

@@ -18,6 +18,7 @@ import type {
   PlayerSummary,
   RoomPlayer,
   RoomStatePayload,
+  SpellingDifficulty,
   WordSource,
 } from "./game/types";
 
@@ -207,6 +208,25 @@ export function pruneIdleRooms(now: number = Date.now()): string[] {
     }
   }
   return destroyed;
+}
+
+/** Return simplified invite objects for class-battle rooms targeting the given class. */
+export function findClassBattleInvites(
+  classId: string,
+): { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty }[] {
+  const invites: { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty }[] = [];
+  for (const room of rooms.values()) {
+    if (room.classBattle && room.classId === classId && room.status === "lobby") {
+      const hostPlayer = room.players.get(room.hostId);
+      invites.push({
+        roomCode: room.code,
+        hostName: hostPlayer?.name ?? null,
+        actualWordCount: room.actualWordCount,
+        difficulty: room.config.difficulty,
+      });
+    }
+  }
+  return invites;
 }
 
 /** Build the public room-state payload (canonical words are NOT included). */

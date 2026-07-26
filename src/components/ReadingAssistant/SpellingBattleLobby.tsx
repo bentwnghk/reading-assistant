@@ -163,6 +163,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
     const invite = useBattleStore.getState().classInvite;
     if (!invite) return;
     battle.clearError();
+    useBattleStore.getState().setClassInvite(null)
     battle.joinRoom(invite.roomCode);
   }, [battle]);
 

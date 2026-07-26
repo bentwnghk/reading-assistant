@@ -26,6 +26,7 @@ export interface AuthenticatedUser {
   image: string | null;
   role: UserRole;
   schoolId: string | null;
+  classId: string | null;
 }
 
 function base64UrlEncode(buf: Buffer): string {
@@ -80,6 +81,7 @@ export function verifyTicket(ticket: string | undefined): AuthenticatedUser | nu
     image?: unknown;
     role?: unknown;
     schoolId?: unknown;
+    classId?: unknown;
     exp?: unknown;
   };
   try {
@@ -98,5 +100,6 @@ export function verifyTicket(ticket: string | undefined): AuthenticatedUser | nu
     image: typeof payload.image === "string" ? payload.image : null,
     role: payload.role as UserRole,
     schoolId: typeof payload.schoolId === "string" ? payload.schoolId : null,
+    classId: typeof payload.classId === "string" ? payload.classId : null,
   };
 }

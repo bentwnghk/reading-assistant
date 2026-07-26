@@ -11,7 +11,7 @@ import { Server as SocketIOServer, type Socket } from "socket.io";
 
 import { config } from "./config";
 import { verifyTicket, type AuthenticatedUser } from "./auth";
-import { getPool, resolveClassId, canTargetClass, getClassInfo, closePool } from "./db";
+import { getPool, resolveClassId, canTargetClass, isClassMember, getClassInfo, closePool } from "./db";
 import {
   registerPresence,
   unregisterPresenceBySocket,
@@ -22,6 +22,7 @@ import {
   countActiveRoomsByHost,
   createRoom,
   destroyRoom,
+  findClassBattleInvites,
   findRoomByPlayer,
   getRoom,
   markDisconnected,
@@ -62,8 +63,32 @@ function healthcheck(_req: IncomingMessage, res: ServerResponse): void {
   );
 }
 
+function handlePendingClassInvites(req: IncomingMessage, res: ServerResponse): void {
+  try {
+    const parsedUrl = new URL(req.url ?? "", `http://${req.headers.host ?? "localhost"}`);
+    const ticket = parsedUrl.searchParams.get("ticket") ?? undefined;
+    const user = verifyTicket(ticket);
+    if (!user || !user.classId) {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ invites: [] }));
+      return;
+    }
+    const invites = findClassBattleInvites(user.classId);
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ invites }));
+  } catch {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ invites: [] }));
+  }
+}
+
 const httpServer: HttpServer = createServer((req, res) => {
   if (req.url === "/health") return healthcheck(req, res);
+  // Internal endpoint: returns class-battle invites for the ticket-holder's class.
+  // Used by the app's 60s Header poll so students see invites anywhere in the app.
+  if (req.method === "GET" && req.url?.startsWith("/api/battle/pending-class-invites")) {
+    return handlePendingClassInvites(req, res);
+  }
   res.writeHead(404, { "Content-Type": "application/json" });
   res.end(JSON.stringify({ ok: false, error: "not_found" }));
 });
@@ -148,7 +173,7 @@ io.on("connection", (socket: Socket) => {
   const { user } = (socket.data as ServerSocketData);
   console.log(`[realtime] connect   user=${user.userId} name=${user.name ?? "-"} role=${user.role} socket=${socket.id}`);
 
-  // Register presence; resolve classId best-effort (async, non-blocking).
+  // Register presence with the ticket's classId (if available).
   registerPresence({
     userId: user.userId,
     socketId: socket.id,
@@ -156,24 +181,26 @@ io.on("connection", (socket: Socket) => {
     image: user.image,
     role: user.role,
     schoolId: user.schoolId,
-    classId: null,
+    classId: user.classId ?? null,
   });
-  resolveClassId(user.userId)
-    .then((classId) => {
-      // Update the presence entry in place.
-      // (registerPresence created it above; we just set classId.)
-      // Re-register to ensure the entry reflects the resolved classId.
-      registerPresence({
-        userId: user.userId,
-        socketId: socket.id,
-        name: user.name,
-        image: user.image,
-        role: user.role,
-        schoolId: user.schoolId,
-        classId,
-      });
-    })
-    .catch(() => {});
+  // Fallback: resolve classId from DB if the ticket didn't carry it
+  // (older clients during rollout).
+  if (!user.classId) {
+    resolveClassId(user.userId)
+      .then((classId) => {
+        if (!classId) return;
+        registerPresence({
+          userId: user.userId,
+          socketId: socket.id,
+          name: user.name,
+          image: user.image,
+          role: user.role,
+          schoolId: user.schoolId,
+          classId,
+        });
+      })
+      .catch(() => {});
+  }
 
   // ── room:create ──────────────────────────────────────────────────────────
   socket.on("room:create", async (raw: unknown) => {
@@ -274,6 +301,17 @@ io.on("connection", (socket: Socket) => {
         leaveCurrentRoom(user.userId);
       }
       const isReconnect = !!existingMember;
+      // Class-battle membership: a new joiner must belong to the target class
+      // (student via class_members) or be a teacher/admin who can target it.
+      if (!isReconnect && room.classBattle && room.classId) {
+        const isClassMember_ = await isClassMember(user.userId, room.classId);
+        const canTarget = user.role === "teacher" || user.role === "admin" || user.role === "super-admin"
+          ? await canTargetClass(user.userId, user.role, user.schoolId, room.classId).catch(() => false)
+          : false;
+        if (!isClassMember_ && !canTarget) {
+          return emitRoomError(socket, "class_not_allowed", "You are not a member of the target class");
+        }
+      }
       const player = addPlayer(room, user, socket.id);
       if (!player) {
         return emitRoomError(socket, "room_full", "That room is full");

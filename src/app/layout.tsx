@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/Provider/AuthProvider";
 import { AchievementUnlockedDialog } from "@/components/Leaderboard/AchievementUnlockedDialog";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { ClassBattlePoller } from "@/components/ClassBattlePoller";
 import Debugger from "@/components/Internal/Debugger";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -141,6 +142,7 @@ export default function RootLayout({
               <PWAInstallPrompt />
               {children}
               <AchievementUnlockedDialog />
+              <ClassBattlePoller />
             </I18Provider>
           </AuthProvider>
         </ThemeProvider>

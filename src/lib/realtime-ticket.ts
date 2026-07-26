@@ -34,6 +34,7 @@ interface TicketPayload {
   image: string | null;
   role: UserRole;
   schoolId: string | null;
+  classId: string | null;
   exp: number;
 }
 
@@ -43,6 +44,7 @@ export interface RealtimeTicketUser {
   image: string | null;
   role: UserRole;
   schoolId: string | null;
+  classId: string | null;
 }
 
 /**
@@ -61,6 +63,7 @@ export function issueRealtimeTicket(
     image: user.image,
     role: user.role,
     schoolId: user.schoolId,
+    classId: user.classId,
     exp: Date.now() + ttlMs,
   };
   const payloadB64 = base64UrlEncode(Buffer.from(JSON.stringify(payload), "utf8"));
