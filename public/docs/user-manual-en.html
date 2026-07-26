@@ -1415,7 +1415,22 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.4 Vocabulary Quiz</h3>
+      <h3>5.4 Multiplayer Spelling Battle ⚔️</h3>
+      <p>Challenge your classmates to a <b>live, real-time Listen &amp; Type duel</b>. Multiple players spell the same words simultaneously, and a live ranking updates after every word.</p>
+      <div class="callout"><strong>How it works</strong>
+        <ol style="margin:6px 0 0;padding-left:20px">
+          <li>Open <b>Spelling Challenge</b> → click the <b>Multiplayer Battle</b> button.</li>
+          <li><b>Create a room</b> (pick a word source: current glossary, your vocabulary bank, a review list, or a curated CEFR pool) or <b>join</b> with a 6-character room code.</li>
+          <li>The host clicks <b>Start</b> → a 3-2-1 countdown begins.</li>
+          <li>Each word is spoken via TTS — type what you hear as fast as you can. The server judges correctness and awards points (speed bonus + streak bonus − hint penalty).</li>
+          <li>A <b>live ranking</b> panel shows everyone's score in real time.</li>
+          <li>At the end, the <b>final ranking</b> screen shows the winner, tier badges, and your accuracy. The host can trigger a rematch.</li>
+        </ol>
+      </div>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>Class battles</strong> Teachers can toggle <b>Class Battle</b> when creating a room and select a target class. All students in that class receive a notification (toast + bell badge) with the room code — they can join from anywhere in the app.</div>
+      <p class="small">Battle results count toward your spelling best score, the leaderboard, and (on the My Vocabulary page) SRS mastery — exactly like solo play.</p>
+
+      <h3>5.5 Vocabulary Quiz</h3>
       <p>Multiple-choice quiz (requires ≥4 words). Questions are randomly one of three types: <b>Word→Definition</b>, <b>Definition→Word</b>, or <b>Fill-blank</b> (cloze from the example). Optional <b>Time Challenge</b> (Easy 20s / Medium 15s / Hard 10s per question).</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-list"/></svg> Vocabulary Quiz</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 9s</span></div>
@@ -1432,7 +1447,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.5 The SRS algorithm explained</h3>
+      <h3>5.6 The SRS algorithm explained</h3>
       <p>Mr.🆖 ProReader uses the <strong>Leitner 5-box</strong> system. Each word sits in a "box" (mastery level 0–5). Answering correctly moves it up a box (longer interval until next review); answering incorrectly moves it down. The goal: review hard words often, easy words rarely, until mastered.</p>
       <table class="ref">
         <tr><th>Box / Level</th><th>Label</th><th>Review interval</th><th>Color</th></tr>

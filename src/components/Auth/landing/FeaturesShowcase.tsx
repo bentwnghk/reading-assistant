@@ -33,6 +33,7 @@ const FEATURES: { key: string; emoji: string }[] = [
   { key: "glossary", emoji: "📖" },
   { key: "flashcard", emoji: "🃏" },
   { key: "spelling", emoji: "🎮" },
+  { key: "multiplayer", emoji: "⚔️" },
   { key: "quiz", emoji: "📋" },
   { key: "test", emoji: "📝" },
   { key: "grammar", emoji: "📐" },

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword } from "lucide-react";
 import Link from "next/link";
 import {
   Document,
@@ -433,6 +433,7 @@ function Glossary() {
               { key: "flashcard", icon: Layers, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
               { key: "spelling", icon: SpellCheck, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
               { key: "quiz", icon: ClipboardList, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
+              { key: "multiplayer", icon: Sword, bgClass: "bg-fuchsia-500/10", iconClass: "text-fuchsia-500" },
             ]}
             stepsTitleKey="reading.glossary.help.stepsTitle"
             stepsKeys={[

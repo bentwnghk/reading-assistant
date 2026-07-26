@@ -347,3 +347,16 @@ Manage users within your school and assign teacher/student roles.
 Purchase and manage a subscription for your entire school. Allocate seats, monitor usage, and revoke access when needed. Students covered by a school subscription don't need individual subscriptions.
 
 **Pro tip:** Use the **AI Questions Tracker** to discover common misconceptions across your class. If you notice multiple students asking about the same concept, that's a clear signal to address it in your next lesson. Combined with the **Student Data** tab and Excel exports, you'll have everything you need for data-driven teaching — without any extra administrative overhead.
+
+---
+
+## Q11: How does the Multiplayer Spelling Battle work?
+
+A new **real-time** multiplayer mode inside the existing Spelling Challenge. Here's how it works:
+
+- **For Students:** Open **Spelling Challenge** → click **Multiplayer Battle**. Create a room (pick your word source) or join one with a 6-character code. The host starts the game → a 3-2-1 countdown → hear each word via TTS and type it. A live ranking shows everyone's score. At the end you see the final ranking, your tier badge, and accuracy. Results count toward your spelling best score, leaderboard, and SRS mastery.
+
+- **For Teachers:** Create or join rooms like any student. Additionally, toggle **Class Battle** when creating a room and pick a target class — all students in that class receive a notification (toast + bell badge) with the room code. They can join from anywhere in the app, not just the spelling page.
+
+- **Class-Battle Notification:** Students receive a persistent toast (doesn't auto-dismiss until the room is closed or they join) and a red badge on the header bell. Both disappear when they join the battle or the room is destroyed.
+

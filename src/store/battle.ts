@@ -33,6 +33,10 @@ interface BattleStore {
   currentIndex: number
   /** Latest incoming class-battle invite (shown as a join prompt). */
   classInvite: BattleClassBattleAvailablePayload | null
+  /** Pending class-battle invites discovered by the 60s poll (shown in the bell). */
+  pendingClassBattleInvites: BattleClassBattleAvailablePayload[]
+  /** Controls the class-battle-invite dialog opened from the header bell. */
+  showClassBattleInviteDialog: boolean
 
   // ── Game loop (populated from countdown/word_start/word_end/etc.) ────────
   countdownN: number | null
@@ -52,6 +56,9 @@ interface BattleStore {
   setCurrentUserId: (userId: string | null) => void
   setRoomState: (state: BattleRoomState) => void
   setClassInvite: (invite: BattleClassBattleAvailablePayload | null) => void
+  setPendingClassBattleInvites: (invites: BattleClassBattleAvailablePayload[]) => void
+  dismissClassBattleInvite: (roomCode: string) => void
+  setShowClassBattleInviteDialog: (open: boolean) => void
   setCountdown: (n: number | null) => void
   setCurrentWord: (word: BattleWordStartPayload | null) => void
   setMyLastResult: (result: BattleStore["myLastResult"]) => void
@@ -72,6 +79,8 @@ const initialRoomState = {
   classBattle: false,
   currentIndex: -1,
   classInvite: null,
+  pendingClassBattleInvites: [],
+  showClassBattleInviteDialog: false,
   countdownN: null,
   currentWord: null,
   myLastResult: null,
@@ -112,6 +121,13 @@ export const useBattleStore = create<BattleStore>((set) => ({
     }),
 
   setClassInvite: (classInvite) => set({ classInvite }),
+
+  setPendingClassBattleInvites: (pendingClassBattleInvites) => set({ pendingClassBattleInvites }),
+  dismissClassBattleInvite: (roomCode) =>
+    set((state) => ({
+      pendingClassBattleInvites: state.pendingClassBattleInvites.filter((i) => i.roomCode !== roomCode),
+    })),
+  setShowClassBattleInviteDialog: (showClassBattleInviteDialog) => set({ showClassBattleInviteDialog }),
 
   setCountdown: (countdownN) => set({ countdownN }),
   setCurrentWord: (currentWord) => set({ currentWord }),

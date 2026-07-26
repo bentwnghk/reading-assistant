@@ -1415,7 +1415,22 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.4 詞彙測驗</h3>
+      <h3>5.4 多人拼字對戰 ⚔️</h3>
+      <p>與同學進行<b>即時聽音拼字對決</b>。多位玩家同時拼寫相同的單詞，每題結束後即時更新排名。</p>
+      <div class="callout"><strong>玩法說明</strong>
+        <ol style="margin:6px 0 0;padding-left:20px">
+          <li>開啟<b>拼字挑戰</b> → 點擊<b>多人對戰</b>按鈕。</li>
+          <li>選擇<b>建立房間</b>（選取詞彙來源：當前詞彙表、我的詞彙庫、複習清單或精選詞庫）或輸入 6 位代碼<b>加入</b>。</li>
+          <li>主持人點擊<b>開始</b> → 3‑2‑1 倒數。</li>
+          <li>系統朗讀每個單詞 — 你輸入聽到的內容。伺服器判斷正確性並計分（速度加成 + 連勝加成 − 提示扣分）。</li>
+          <li><b>即時排名</b>面板顯示所有玩家的分數變化。</li>
+          <li>對戰結束後，<b>最終排名</b>畫面顯示冠軍、階級徽章與你的正確率。主持人可發起「再戰一場」。</li>
+        </ol>
+      </div>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>班級對戰</strong> 老師可在建立房間時開啟<b>班級對戰</b>並選擇目標班級。該班所有學生會收到通知（彈窗提示 + 通知鈴聲徽章），顯示房間代碼 — 學生可從應用程式的任何位置加入。</div>
+      <p class="small">對戰結果會計入拼字最高分、排行榜，以及在「我的詞彙」頁面影響 SRS 熟練度 — 與單人模式完全相同。</p>
+
+      <h3>5.5 詞彙測驗</h3>
       <p>選擇題測驗（需 ≥4 生字）。題型隨機為三之一：<b>生字→定義</b>、<b>定義→生字</b>或<b>填空</b>（取自例句）。可選<b>計時挑戰</b>（易 20 秒／中 15 秒／難 10 秒）。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-list"/></svg> 詞彙測驗</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 9s</span></div>
@@ -1432,7 +1447,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.5 SRS 演算法詳解</h3>
+      <h3>5.6 SRS 演算法詳解</h3>
       <p>Mr.🆖 ProReader 採用 <strong>Leitner 五格</strong>系統。每個生字位於一個「格」（熟練度 0–5）。答對升一格（下次複習間隔更長）；答錯降一格。目標：困難的生字常複習、容易的生字少複習，直至掌握。</p>
       <table class="ref">
         <tr><th>格／級別</th><th>標籤</th><th>複習間隔</th><th>顏色</th></tr>

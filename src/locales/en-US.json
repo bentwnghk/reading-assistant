@@ -152,6 +152,10 @@
           "title": "Spelling Games",
           "desc": "4 exciting modes: Listen & Type, Letter Scramble, Fill Blanks, and Mixed! Earn streaks and beat your best score!"
         },
+        "multiplayer": {
+          "title": "Multiplayer Spelling Battle",
+          "desc": "Challenge classmates to a live Listen & Type duel in real time! Create or join a battle room, race to spell words, and climb the live ranking. Teachers can launch class-wide battles with a single click."
+        },
         "quiz": {
           "title": "Vocabulary Quiz",
           "desc": "Test your vocabulary knowledge with word-to-definition, definition-to-word, and fill-in-the-blank questions."
@@ -1292,6 +1296,10 @@
           "quiz": {
             "name": "Vocabulary Quiz",
             "desc": "Test yourself matching words to meanings, with difficulty levels and Time Challenge."
+          },
+          "multiplayer": {
+            "name": "Multiplayer Battle",
+            "desc": "Challenge classmates to a live Listen & Type duel in real time! Create or join a room, race to spell words, and see live rankings."
           }
         },
         "stepsTitle": "How to learn words here",
@@ -1356,7 +1364,7 @@
         "tipHint": "Use hints wisely - they reveal letters but reduce your score",
         "tipTime": "Time bonus rewards faster responses",
         "multiplayer": {
-          "title": "Spelling Battle",
+          "title": "Multiplayer Spelling Battle",
           "subtitle": "Challenge other players to a live Listen & Type duel",
           "connecting": "Connecting to battle server…",
           "retry": "Retry",
@@ -1398,6 +1406,11 @@
           "rematch": "Rematch",
           "hostControlsRematch": "Only the host can start a rematch.",
           "noResult": "No result was recorded for this battle.",
+          "classBattleInvites": "Class Battle Invitations",
+          "classBattleInvitesDesc": "Your teacher started a spelling battle for your class.",
+          "codeCopied": "Room code copied to clipboard!",
+          "howToJoin": "Open Spelling Challenge → Multiplayer Battle → enter this code to join.",
+          "noInvites": "No pending invitations.",
           "filter": "Filter",
           "filterAll": "All words",
           "filterDue": "Due for review",

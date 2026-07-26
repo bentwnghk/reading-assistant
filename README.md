@@ -419,6 +419,14 @@ Available both in-session and on the My Vocabulary page across all your words.
 - 🏆 **Best Score Tracking**: Beat your personal record
 - 🎯 **Prioritize Hard Words**: Focus practice on words you rated as hard
 
+#### 🆕 Multiplayer Battle (Real-Time)
+- ⚔️ **Live Listen & Type Duels**: Challenge classmates in real-time — everyone spells the same words simultaneously
+- 🔑 **Room Codes**: Create a room (6-char code) or join one; share the code with friends
+- 👑 **Host Controls**: Pick the word source (glossary, vocabulary bank, review list, or curated CEFR pool), difficulty, and word count
+- 🏆 **Live Ranking**: See everyone's scores update after every word
+- 🎓 **Class Battles** (Teachers): Launch a battle for your whole class — students get a notification wherever they are
+- 📈 **Unified Stats**: Battle results count toward your best score, leaderboard, and SRS mastery — just like solo play
+
 ---
 
 ### 📋 13. Vocabulary Quiz

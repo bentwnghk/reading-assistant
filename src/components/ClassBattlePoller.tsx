@@ -4,13 +4,18 @@ import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
+import { useBattleStore } from "@/store/battle";
+
 /**
  * Mounted in the root layout. Polls the realtime server every 60s for
- * class-battle invites and shows a toast if any are found.
+ * class-battle invites so students see them anywhere in the app — not just
+ * when the multiplayer lobby is open.
  *
- * This catches students who are NOT currently connected to the WebSocket (and
- * thus would miss the socket-level `class_battle_available` event) — for
- * example, students browsing the dashboard, leaderboard, or reading page.
+ * Two outputs:
+ *   1. A persistent toast per invite (stays until the student joins OR the
+ *      room is destroyed/started — not a fixed timer).
+ *   2. Populates `pendingClassBattleInvites` in the battle store → drives the
+ *      red badge count on the header bell (alongside pending shares).
  */
 let cachedRealtimeUrl: string | null = null;
 
@@ -40,7 +45,8 @@ async function fetchTicket(): Promise<string | null> {
 
 export function ClassBattlePoller() {
   const { data: session } = useSession();
-  const shownInvitesRef = useRef<Set<string>>(new Set()); // avoid duplicate toasts
+  /** roomCodes that currently have an active persistent toast. */
+  const activeToastsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (session?.user?.role !== "student") return;
@@ -58,14 +64,39 @@ export function ClassBattlePoller() {
         );
         if (!res.ok) return;
         const body = (await res.json()) as {
-          invites: { roomCode: string; hostName: string | null; actualWordCount: number }[];
+          invites: { roomCode: string; hostName: string | null; className: string | null; actualWordCount: number; difficulty: string }[];
         };
-        for (const invite of body.invites) {
-          if (shownInvitesRef.current.has(invite.roomCode)) continue;
-          shownInvitesRef.current.add(invite.roomCode);
+
+        // Map to the store payload shape.
+        const storeInvites: BattleClassBattleAvailablePayload[] = body.invites.map((i) => ({
+          roomCode: i.roomCode,
+          hostName: i.hostName,
+          className: i.className ?? null,
+          actualWordCount: i.actualWordCount,
+          difficulty: i.difficulty as SpellingDifficulty,
+        }));
+        useBattleStore.getState().setPendingClassBattleInvites(storeInvites);
+
+        const currentCodes = new Set(storeInvites.map((i) => i.roomCode));
+        const joinedRoom = useBattleStore.getState().roomCode;
+
+        // Dismiss toasts for invites that vanished (room destroyed / battle
+        // started) or for the room the student just joined.
+        for (const code of activeToastsRef.current) {
+          if (!currentCodes.has(code) || code === joinedRoom) {
+            toast.dismiss(code);
+            activeToastsRef.current.delete(code);
+          }
+        }
+
+        // Show a persistent toast for new invites (not yet shown, not joined).
+        for (const invite of storeInvites) {
+          if (activeToastsRef.current.has(invite.roomCode)) continue;
+          if (invite.roomCode === joinedRoom) continue;
+          activeToastsRef.current.add(invite.roomCode);
           toast(
             `${invite.hostName ?? "A teacher"} started a spelling battle (${invite.actualWordCount} words)! Open Spelling Challenge → Multiplayer Battle → enter code: ${invite.roomCode}`,
-            { duration: 15_000 },
+            { id: invite.roomCode, duration: Infinity },
           );
         }
       } catch {
@@ -73,11 +104,22 @@ export function ClassBattlePoller() {
       }
     };
 
-    // Poll immediately on mount, then every 60s.
     poll();
     const interval = setInterval(poll, 60_000);
     return () => clearInterval(interval);
   }, [session?.user?.role]);
 
-  return null; // invisible — side effect only
+  // Dismiss the toast immediately when the student joins a room (don't wait
+  // for the next 60s poll).
+  useEffect(() => {
+    const unsubscribe = useBattleStore.subscribe((state) => {
+      if (state.roomCode && activeToastsRef.current.has(state.roomCode)) {
+        toast.dismiss(state.roomCode);
+        activeToastsRef.current.delete(state.roomCode);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  return null;
 }

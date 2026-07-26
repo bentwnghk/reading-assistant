@@ -69,6 +69,7 @@ import { useReadingStore } from "@/store/reading";
 import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
 import { useSharingStore } from "@/store/sharing";
+import { useBattleStore } from "@/store/battle";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { useAssignmentsStore } from "@/store/assignments";
 
@@ -76,6 +77,7 @@ const Setting = dynamic(() => import("@/components/Setting"));
 const History = dynamic(() => import("@/components/Dashboard/Dashboard"));
 const TeacherDashboard = dynamic(() => import("@/components/TeacherDashboard/TeacherDashboard"));
 const SharedSessionDialog = dynamic(() => import("@/components/Dashboard/SharedSessionDialog"));
+const ClassBattleInviteDialog = dynamic(() => import("@/components/ReadingAssistant/ClassBattleInviteDialog").then(m => m.ClassBattleInviteDialog));
 const ReviewListShareDialog = dynamic(() => import("@/components/Vocabulary/ReviewListShareDialog"));
 
 function getSafeFilename(value: string): string {
@@ -117,7 +119,9 @@ function Header() {
     fetchDueForReviewCount,
   } = useVocabularyStore();
   const { overdueCount, fetchOverdueAssignmentCount } = useAssignmentsStore();
-  const totalPending = pendingCount + pendingReviewListShareCount;
+  const pendingClassBattleCount = useBattleStore((s) => s.pendingClassBattleInvites.length);
+  const setShowClassBattleInviteDialog = useBattleStore((s) => s.setShowClassBattleInviteDialog);
+  const totalPending = pendingCount + pendingReviewListShareCount + pendingClassBattleCount;
   const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
   const {
     extractedText,
@@ -303,6 +307,8 @@ function Header() {
                   setShowSharedDialog(true);
                 } else if (pendingReviewListShareCount > 0) {
                   void router.push("/vocabulary?openReviewListShare=1");
+                } else if (pendingClassBattleCount > 0) {
+                  setShowClassBattleInviteDialog(true);
                 } else {
                   setOpenNoPending(true);
                 }
@@ -685,6 +691,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <span className="text-lg leading-none mt-0.5 shrink-0">⚔️</span>
+                  <div>
+                    <div className="font-medium">{t("header.about.features.multiplayer.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.multiplayer.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <span className="text-lg leading-none mt-0.5 shrink-0">📋</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.quiz.title")}</div>
@@ -958,6 +971,7 @@ function Header() {
       <TeacherDashboard open={openTeacherDashboard} onClose={() => setOpenTeacherDashboard(false)} />
       <SharedSessionDialog />
       <ReviewListShareDialog />
+      <ClassBattleInviteDialog />
       <input
         ref={fileInputRef}
         type="file"
