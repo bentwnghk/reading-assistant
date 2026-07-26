@@ -327,11 +327,12 @@
       "practice": {
         "eyebrow": "Practice",
         "title": "Practice until it sticks.",
-        "lede": "Flashcards with spaced repetition resurface the words you're about to forget. Spelling and grammar games turn review into something you'll actually look forward to.",
+        "lede": "Flashcards with spaced repetition resurface the words you're about to forget. Spelling and grammar games turn review into something you'll actually look forward to. Challenge classmates to a real-time spelling battle and see who spells faster.",
         "bullets": [
           "Flashcards with spaced repetition",
           "4 spelling & vocabulary games",
-          "5 grammar games"
+          "5 grammar games",
+          "Multiplayer spelling battles against classmates"
         ]
       },
       "master": {
