@@ -1458,6 +1458,37 @@
             "connection_failed": "Could not connect to the battle server.",
             "multiplayer_unavailable": "Multiplayer is not available."
         },
+        "help": {
+          "title": "How It Works — Multiplayer Spelling Battle",
+          "intro": "Challenge classmates to a live Listen & Type duel in real time! Create or join a battle room and race to spell words.",
+          "items": {
+            "create": {
+              "name": "Create & Host",
+              "desc": "Pick a word source (glossary, your vocabulary, a review list, or a curated pool), set the difficulty and word count, then create a room. Teachers can also launch class-wide battles."
+            },
+            "join": {
+              "name": "Join a Room",
+              "desc": "Enter the 6-character room code your friend or teacher shared to jump into their battle room."
+            },
+            "gameplay": {
+              "name": "Listen & Type Race",
+              "desc": "Each word is spoken aloud via TTS. Type the correct spelling as fast as you can — speed bonus, streak bonus and hint penalties all count toward your score."
+            },
+            "ranking": {
+              "name": "Live Ranking & Results",
+              "desc": "A live leaderboard updates after every word. After the final word you see the final ranking, your tier badge (Master / Great / Good / Keep Practicing) and accuracy."
+            }
+          },
+          "stepsTitle": "How to play",
+          "steps": {
+            "s1": "Create a room: choose a word source, set difficulty and word count.",
+            "s2": "Share the 6-character room code with opponents (teachers can toggle Class Battle to auto-notify the whole class).",
+            "s3": "The host presses Start Game — a 3-2-1 countdown begins, then words are spoken one by one.",
+            "s4": "After the last word, see the final ranking, your tier badge and accuracy. The host can start a rematch."
+          },
+          "tipTitle": "Good to know",
+          "tipContent": "Up to 35 players per room. Your score feeds into the same best-score, leaderboard and SRS mastery as solo spelling, so every battle counts!"
+        },
         "q12": {
           "q": "Can I challenge my classmates to a live spelling battle?",
           "a": "<p>Yes! The <strong>Multiplayer Spelling Battle</strong> turns the Listen &amp; Type mode into a real-time competition.</p><p><strong>For Students:</strong> Open <strong>Spelling Challenge</strong> → click <strong>Multiplayer Battle</strong>. Create a room (pick your word source) or join one with a 6-character code. The host starts the game — a 3-2-1 countdown begins, then each word is spoken via TTS. Type what you hear as fast as you can. A live ranking shows everyone's score after every word. At the end you see the final ranking, your tier badge, and accuracy. Results count toward your spelling best score, the leaderboard, and SRS mastery — just like solo play.</p><p><strong>For Teachers:</strong> Create or join rooms like any student. Additionally, toggle <strong>Class Battle</strong> when creating a room and pick a target class — all students in that class receive a notification (persistent toast + red badge on the header bell) with the room code. They can join from anywhere in the app, not just the spelling page.</p><p><strong>Tip:</strong> Host can start a rematch after the game ends. Up to 8 players per room.</p>"

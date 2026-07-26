@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import GuideDialog from "@/components/Internal/GuideDialog";
 
 interface SpellingBattleLobbyProps {
   /** Current reading-session id (reading-page context); enables the "current glossary" source. */
@@ -300,6 +301,26 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
           <CardTitle className="flex items-center gap-2 text-lg">
             <Swords className="h-5 w-5" />
             {t(`${M}.createRoom`)}
+            <GuideDialog
+              titleKey={`${M}.help.title`}
+              introKey={`${M}.help.intro`}
+              itemsBaseKey={`${M}.help.items`}
+              items={[
+                { key: "create", icon: Swords, bgClass: "bg-fuchsia-500/10", iconClass: "text-fuchsia-500" },
+                { key: "join", icon: DoorOpen, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+                { key: "gameplay", icon: Volume2, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+                { key: "ranking", icon: Crown, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
+              ]}
+              stepsTitleKey={`${M}.help.stepsTitle`}
+              stepsKeys={[
+                `${M}.help.steps.s1`,
+                `${M}.help.steps.s2`,
+                `${M}.help.steps.s3`,
+                `${M}.help.steps.s4`,
+              ]}
+              tipTitleKey={`${M}.help.tipTitle`}
+              tipContentKey={`${M}.help.tipContent`}
+            />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
