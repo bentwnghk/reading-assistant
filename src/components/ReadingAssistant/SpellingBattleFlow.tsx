@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useReadingStore } from "@/store/reading";
+import { useBattleStore } from "@/store/battle";
 import { useHistoryStore } from "@/store/history";
 import { logActivity } from "@/utils/activityLogger";
 import { SpellingBattleLobby } from "./SpellingBattleLobby";
@@ -105,6 +106,10 @@ export function SpellingBattleFlow({
         save(sessionSnapshot);
       }
     }
+
+    // Mark as persisted AFTER the side effects have fired so the guard
+    // survives component remounts (e.g. navigate away and back).
+    useBattleStore.getState().setResultPersisted(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [battle.status, battle.finalRanking, battle.resultPersisted]);
 

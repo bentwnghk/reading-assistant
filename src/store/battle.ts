@@ -70,6 +70,7 @@ interface BattleStore {
   pushWordResult: (word: string, correct: boolean) => void
   setLiveRanking: (ranking: BattleRankingEntry[]) => void
   setGameEnd: (finalRanking: BattleRankingEntry[], totalWords: number) => void
+  setResultPersisted: (value: boolean) => void
   reset: () => void
 }
 
@@ -143,7 +144,9 @@ export const useBattleStore = create<BattleStore>((set) => ({
   pushWordResult: (word, correct) =>
     set((state) => ({ myWordResults: [...state.myWordResults, { word, correct }] })),
   setLiveRanking: (liveRanking) => set({ liveRanking }),
-  setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, countdownN: null, resultPersisted: true }),
+  setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, countdownN: null }),
+
+  setResultPersisted: (resultPersisted) => set({ resultPersisted }),
 
   reset: () =>
     set({
