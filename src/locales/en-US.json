@@ -1413,6 +1413,7 @@
           "noResult": "No result was recorded for this battle.",
           "classBattleInvites": "Class Battle Invitations",
           "classBattleInvitesDesc": "Your teacher started a spelling battle for your class.",
+          "classBattleToast": "{{hostName}} started a spelling battle ({{wordCount}} words)! Open Spelling Challenge → Multiplayer Battle → enter code: {{roomCode}}",
           "codeCopied": "Room code copied to clipboard!",
           "howToJoin": "Click the button below to go directly to the battle lobby, then paste the room code to join.",
           "joinBattle": "Go to Battle Lobby",

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { useBattleStore } from "@/store/battle";
@@ -45,6 +46,7 @@ async function fetchTicket(): Promise<string | null> {
 
 export function ClassBattlePoller() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   /** roomCodes that currently have an active persistent toast. */
   const activeToastsRef = useRef<Set<string>>(new Set());
 
@@ -95,7 +97,11 @@ export function ClassBattlePoller() {
           if (invite.roomCode === joinedRoom) continue;
           activeToastsRef.current.add(invite.roomCode);
           toast(
-            `${invite.hostName ?? "A teacher"} started a spelling battle (${invite.actualWordCount} words)! Open Spelling Challenge → Multiplayer Battle → enter code: ${invite.roomCode}`,
+            t("spellingBattle.classBattleToast", {
+              hostName: invite.hostName ?? t("spellingBattle.aTeacher"),
+              wordCount: invite.actualWordCount,
+              roomCode: invite.roomCode,
+            }),
             { id: invite.roomCode, duration: Infinity },
           );
         }
