@@ -37,6 +37,26 @@ function normalize(s: string): string {
   return s.trim().toLowerCase();
 }
 
+/**
+ * Optimistic local answer check — mirrors the server's `judgeAnswer` so client
+ * feedback matches the authoritative server result.
+ * - listen-type / scramble: whole-word equality (case- + whitespace-insensitive).
+ * - fill-blanks: only the missing letters (NO trim — matches the solo game).
+ */
+function checkAnswer(
+  gameMode: SpellingGameMode,
+  wordStr: string,
+  answer: string,
+  blankPositions?: number[],
+): boolean {
+  if (gameMode === "fill-blanks") {
+    if (!blankPositions || blankPositions.length === 0) return false;
+    const missing = blankPositions.map((p) => wordStr[p].toLowerCase()).join("");
+    return answer.toLowerCase() === missing;
+  }
+  return normalize(answer) === normalize(wordStr);
+}
+
 export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -52,6 +72,11 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [inputType, setInputType] = useState<"password" | "text">("password");
+  // scramble: tiles selected so far + their indices into shuffledLetters.
+  const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
+  const [usedTileIndices, setUsedTileIndices] = useState<number[]>([]);
+  // listen-type / fill-blanks: letter positions revealed by hints.
+  const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -59,42 +84,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
 
   const word = battle.currentWord;
   const myUserId = session?.user?.id;
-
-  // Per-word lifecycle: reset state + speak the word when a new word arrives.
-  useEffect(() => {
-    if (!word) return;
-    setUserInput("");
-    setHasSubmitted(false);
-    setHintsUsed(0);
-    setShowDefinition(false);
-    setOptimisticCorrect(null);
-    setElapsedMs(0);
-    setInputType("password");
-    // Speak the word shortly after mount (matches solo game pacing).
-    const speakTimer = setTimeout(() => {
-      void doSpeak(word.word);
-    }, 250);
-    // Focus the input.
-    const focusTimer = setTimeout(() => inputRef.current?.focus(), 300);
-    return () => {
-      clearTimeout(speakTimer);
-      clearTimeout(focusTimer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [word?.index]);
-
-  // Per-word countdown ticker.
-  useEffect(() => {
-    if (!word) return;
-    const startedAt = word.startedAt;
-    tickerRef.current = setInterval(() => {
-      setElapsedMs(Date.now() - startedAt);
-    }, 100);
-    return () => {
-      if (tickerRef.current) clearInterval(tickerRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [word?.index, word?.startedAt]);
+  const gameMode: SpellingGameMode = word?.gameMode ?? "listen-type";
 
   const doSpeak = useCallback(
     async (text: string) => {
@@ -115,12 +105,56 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
     [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
   );
 
+  // Per-word lifecycle: reset state + speak the word (listen-type only) on a new word.
+  useEffect(() => {
+    if (!word) return;
+    setUserInput("");
+    setHasSubmitted(false);
+    setHintsUsed(0);
+    setShowDefinition(false);
+    setOptimisticCorrect(null);
+    setElapsedMs(0);
+    setInputType("password");
+    setSelectedLetters([]);
+    setUsedTileIndices([]);
+    setRevealedPositions([]);
+    // Only listen-type reveals the word via audio; the other modes show a visual clue.
+    const speakTimer = gameMode === "listen-type" ? setTimeout(() => { void doSpeak(word.word); }, 250) : null;
+    const focusTimer = setTimeout(() => inputRef.current?.focus(), 300);
+    return () => {
+      if (speakTimer) clearTimeout(speakTimer);
+      clearTimeout(focusTimer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [word?.index]);
+
+  // Per-word countdown ticker.
+  useEffect(() => {
+    if (!word) return;
+    const startedAt = word.startedAt;
+    tickerRef.current = setInterval(() => {
+      setElapsedMs(Date.now() - startedAt);
+    }, 100);
+    return () => {
+      if (tickerRef.current) clearInterval(tickerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [word?.index, word?.startedAt]);
+
   const handleSubmit = useCallback(() => {
     if (!word || hasSubmitted) return;
-    const answer = userInput.trim();
+    // Build the answer string per mode.
+    let answer: string;
+    if (gameMode === "scramble") {
+      answer = selectedLetters.join("");
+    } else if (gameMode === "fill-blanks") {
+      answer = userInput; // missing letters only — NO trim
+    } else {
+      answer = userInput.trim();
+    }
     if (!answer) return;
     // Optimistic local feedback (server judges identically).
-    setOptimisticCorrect(normalize(answer) === normalize(word.word));
+    setOptimisticCorrect(checkAnswer(gameMode, word.word, answer, word.blankPositions));
     setHasSubmitted(true);
     battle.submitAnswer({
       index: word.index,
@@ -128,13 +162,66 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
       submittedAt: Date.now(),
       hintsUsed,
     });
-  }, [word, hasSubmitted, userInput, hintsUsed, battle]);
+  }, [word, hasSubmitted, gameMode, userInput, selectedLetters, hintsUsed, battle]);
+
+  const handleTileClick = useCallback((letter: string, index: number) => {
+    setSelectedLetters((prev) => [...prev, letter]);
+    setUsedTileIndices((prev) => [...prev, index]);
+  }, []);
+
+  const handleScrambleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Backspace" && selectedLetters.length > 0) {
+        setSelectedLetters((prev) => prev.slice(0, -1));
+        setUsedTileIndices((prev) => prev.slice(0, -1));
+      } else if (e.key === "Enter") {
+        handleSubmit();
+      }
+    },
+    [selectedLetters.length, handleSubmit],
+  );
 
   const handleHint = useCallback(() => {
     if (!word || hasSubmitted) return;
-    setShowDefinition(true);
-    setHintsUsed((n) => n + 1);
-  }, [word, hasSubmitted]);
+    if (gameMode === "listen-type") {
+      if (!showDefinition) {
+        setShowDefinition(true);
+        setHintsUsed((n) => n + 1);
+        return;
+      }
+      // Reveal a random unrevealed letter position.
+      const unrevealed = word.word.split("").map((_, idx) => idx).filter((idx) => !revealedPositions.includes(idx));
+      if (unrevealed.length > 0) {
+        const hintPos = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+        setRevealedPositions((prev) => [...prev, hintPos].sort((a, b) => a - b));
+      }
+      setHintsUsed((n) => n + 1);
+    } else if (gameMode === "fill-blanks") {
+      // Reveal + auto-type the next missing letter.
+      const blanks = word.blankPositions ?? [];
+      const nextBlankIndex = userInput.length;
+      if (nextBlankIndex < blanks.length) {
+        const hintPos = blanks[nextBlankIndex];
+        setRevealedPositions((prev) => [...prev, hintPos].sort((a, b) => a - b));
+        setUserInput((prev) => prev + word.word[hintPos]);
+      }
+      setHintsUsed((n) => n + 1);
+    } else if (gameMode === "scramble") {
+      // Auto-place the next correct tile.
+      const tiles = word.shuffledLetters ?? [];
+      const nextCorrectLetter = word.word[selectedLetters.length];
+      if (nextCorrectLetter) {
+        const tileIndex = tiles.findIndex(
+          (letter, idx) => letter === nextCorrectLetter.toLowerCase() && !usedTileIndices.includes(idx),
+        );
+        if (tileIndex !== -1) {
+          setSelectedLetters((prev) => [...prev, nextCorrectLetter]);
+          setUsedTileIndices((prev) => [...prev, tileIndex]);
+        }
+      }
+      setHintsUsed((n) => n + 1);
+    }
+  }, [word, hasSubmitted, gameMode, showDefinition, revealedPositions, userInput, selectedLetters, usedTileIndices]);
 
   // Cleanup audio on unmount.
   useEffect(() => {
@@ -218,69 +305,212 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
         {/* Main play area */}
         <Card>
           <CardContent className="space-y-4 py-6">
-            {/* Listen + replay */}
-            <div className="flex flex-col items-center gap-2">
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-16 w-16 rounded-full"
-                onClick={() => void doSpeak(word.word)}
-                disabled={isTTSLoading}
-                title={t("reading.glossary.spelling.clickToHear")}
-              >
-                {isTTSLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Volume2 className="h-6 w-6" />}
-              </Button>
-              <span className="text-xs text-muted-foreground">{t("reading.glossary.spelling.clickToHear")}</span>
+            {/* Mode badge */}
+            <div className="text-center">
+              <Badge variant="secondary" className="text-xs">
+                {t(`reading.glossary.spelling.modes.${gameMode}`)}
+              </Badge>
             </div>
 
-            {/* Definition hint */}
-            {showDefinition && (word.englishDefinition || word.chineseDefinition) && (
-              <div className="rounded-lg border bg-muted/40 p-3 text-center text-sm">
-                {word.englishDefinition && <p>{word.englishDefinition}</p>}
-                {word.chineseDefinition && (
-                  <p className="text-muted-foreground">{word.chineseDefinition}</p>
+            {gameMode === "listen-type" && (
+              <div className="space-y-4">
+                {/* Listen + replay */}
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="h-16 w-16 rounded-full"
+                    onClick={() => void doSpeak(word.word)}
+                    disabled={isTTSLoading}
+                    title={t("reading.glossary.spelling.clickToHear")}
+                  >
+                    {isTTSLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Volume2 className="h-6 w-6" />}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">{t("reading.glossary.spelling.clickToHear")}</span>
+                </div>
+
+                {/* Letter-position hints */}
+                {revealedPositions.length > 0 && (
+                  <div className="text-center font-mono text-2xl tracking-widest">
+                    {word.word.split("").map((ch, idx) => (
+                      <span key={idx}>{revealedPositions.includes(idx) ? ch : "_"}</span>
+                    ))}
+                  </div>
                 )}
-                {word.partOfSpeech && (
-                  <Badge variant="secondary" className="mt-1 text-xs">
-                    {word.partOfSpeech}
-                  </Badge>
+
+                {/* Definition hint */}
+                {showDefinition && (word.englishDefinition || word.chineseDefinition) && (
+                  <div className="rounded-lg border bg-muted/40 p-3 text-center text-sm">
+                    {word.englishDefinition && <p>{word.englishDefinition}</p>}
+                    {word.chineseDefinition && <p className="text-muted-foreground">{word.chineseDefinition}</p>}
+                    {word.partOfSpeech && <Badge variant="secondary" className="mt-1 text-xs">{word.partOfSpeech}</Badge>}
+                  </div>
                 )}
+
+                {/* Input */}
+                <div className="flex gap-2">
+                  <Input
+                    ref={inputRef}
+                    type={inputType}
+                    onFocus={() => setInputType("text")}
+                    onChange={(e) => {
+                      if (inputType === "password") setInputType("text");
+                      setUserInput(e.target.value);
+                    }}
+                    value={userInput}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+                    disabled={hasSubmitted || timedOut}
+                    placeholder={t("reading.glossary.spelling.typeAnswer")}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
+                    className={cn(
+                      "text-center text-lg",
+                      showCorrect === true && "border-green-500 bg-green-500/10",
+                      showCorrect === false && "border-destructive bg-destructive/10",
+                    )}
+                  />
+                  <Button onClick={handleSubmit} disabled={hasSubmitted || timedOut || !userInput.trim()}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
 
-            {/* Input */}
-            <div className="flex gap-2">
-              <Input
-                ref={inputRef}
-                type={inputType}
-                onFocus={() => setInputType("text")}
-                onChange={(e) => {
-                  if (inputType === "password") setInputType("text");
-                  setUserInput(e.target.value);
-                }}
-                value={userInput}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmit();
-                }}
-                disabled={hasSubmitted || timedOut}
-                placeholder={t("reading.glossary.spelling.typeAnswer")}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
-                className={cn(
-                  "text-center text-lg",
-                  showCorrect === true && "border-green-500 bg-green-500/10",
-                  showCorrect === false && "border-destructive bg-destructive/10",
+            {gameMode === "fill-blanks" && (
+              <div className="space-y-4">
+                {/* Definition clue (always shown — the word isn't spoken) */}
+                {(word.englishDefinition || word.chineseDefinition) && (
+                  <div className="rounded-lg border bg-muted/40 p-3 text-center text-sm">
+                    {word.englishDefinition && <p>{word.englishDefinition}</p>}
+                    {word.chineseDefinition && <p className="text-muted-foreground">{word.chineseDefinition}</p>}
+                    {word.partOfSpeech && <Badge variant="secondary" className="mt-1 text-xs">{word.partOfSpeech}</Badge>}
+                  </div>
                 )}
-              />
-              <Button onClick={handleSubmit} disabled={hasSubmitted || timedOut || !userInput.trim()}>
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
 
-            {/* Feedback */}
+                {/* Masked word display: blanks show the Nth typed char / hint-revealed letter */}
+                <div className="text-center font-mono text-2xl tracking-wider">
+                  {word.word.split("").map((ch, idx) => {
+                    const blanks = word.blankPositions ?? [];
+                    const isBlank = blanks.includes(idx);
+                    const isRevealed = revealedPositions.includes(idx);
+                    const blankIdx = isBlank ? blanks.indexOf(idx) : -1;
+                    const userChar = blankIdx !== -1 && blankIdx < userInput.length ? userInput[blankIdx] : null;
+                    if (isBlank && !isRevealed && !userChar) {
+                      return <span key={idx} className="inline-block w-6 h-8 mx-0.5 border-b-2 border-primary align-bottom" />;
+                    }
+                    return (
+                      <span key={idx} className="inline-block w-6 h-8 mx-0.5">
+                        {isRevealed ? ch : isBlank && userChar ? userChar : ch}
+                      </span>
+                    );
+                  })}
+                </div>
+
+                {/* Missing-letters input */}
+                <div className="flex gap-2">
+                  <Input
+                    ref={inputRef}
+                    type={inputType}
+                    onFocus={() => setInputType("text")}
+                    onChange={(e) => {
+                      if (inputType === "password") setInputType("text");
+                      setUserInput(e.target.value);
+                    }}
+                    value={userInput}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+                    disabled={hasSubmitted || timedOut}
+                    placeholder={t("reading.glossary.spelling.typeMissing")}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
+                    className={cn(
+                      "text-center text-lg",
+                      showCorrect === true && "border-green-500 bg-green-500/10",
+                      showCorrect === false && "border-destructive bg-destructive/10",
+                    )}
+                  />
+                  <Button onClick={handleSubmit} disabled={hasSubmitted || timedOut || !userInput}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {gameMode === "scramble" && (
+              <div className="space-y-4">
+                {/* Definition clue (always shown — the word isn't spoken) */}
+                {(word.englishDefinition || word.chineseDefinition) && (
+                  <div className="rounded-lg border bg-muted/40 p-3 text-center text-sm">
+                    {word.englishDefinition && <p>{word.englishDefinition}</p>}
+                    {word.chineseDefinition && <p className="text-muted-foreground">{word.chineseDefinition}</p>}
+                    {word.partOfSpeech && <Badge variant="secondary" className="mt-1 text-xs">{word.partOfSpeech}</Badge>}
+                  </div>
+                )}
+
+                {/* Selected letters so far */}
+                <div className={cn(
+                  "text-center font-mono text-2xl tracking-wider min-h-[2.5rem] p-2 border-b-2 border-dashed",
+                  showCorrect === true && "border-green-500 text-green-600",
+                  showCorrect === false && "border-destructive text-destructive",
+                )}>
+                  {selectedLetters.length > 0 ? (
+                    selectedLetters.join("").toUpperCase()
+                  ) : (
+                    <span className="text-muted-foreground">_ _ _ _ _ _</span>
+                  )}
+                </div>
+
+                {/* Tile grid */}
+                <div
+                  className="flex flex-wrap justify-center gap-2 focus:outline-none"
+                  onKeyDown={handleScrambleKeyDown}
+                  tabIndex={0}
+                >
+                  {(word.shuffledLetters ?? []).map((letter, idx) => {
+                    const isSelected = usedTileIndices.includes(idx);
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => !isSelected && handleTileClick(letter, idx)}
+                        disabled={isSelected || hasSubmitted || timedOut}
+                        className={cn(
+                          "w-10 h-10 text-lg font-semibold rounded-lg border-2 transition-all",
+                          isSelected
+                            ? "border-muted bg-muted text-muted-foreground cursor-not-allowed"
+                            : "border-primary bg-primary/10 hover:bg-primary/20",
+                        )}
+                      >
+                        {letter.toUpperCase()}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Clear + submit */}
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setSelectedLetters([]); setUsedTileIndices([]); }}
+                    disabled={selectedLetters.length === 0 || hasSubmitted}
+                  >
+                    {t("reading.glossary.spelling.clear")}
+                  </Button>
+                  <Button size="sm" onClick={handleSubmit} disabled={hasSubmitted || timedOut || selectedLetters.length === 0}>
+                    <Send className="h-4 w-4 mr-1" />
+                    {t(`${M}.submit`)}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Feedback (shared) */}
             {hasSubmitted && (
               <div className="flex items-center justify-center gap-2 text-sm">
                 {showCorrect ? (
@@ -301,12 +531,12 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
               </div>
             )}
 
-            {/* Hint */}
+            {/* Hint (shared, mode-aware) */}
             {!hasSubmitted && !timedOut && (
               <div className="flex justify-center">
-                <Button variant="ghost" size="sm" onClick={handleHint} disabled={showDefinition}>
+                <Button variant="ghost" size="sm" onClick={handleHint} disabled={gameMode === "listen-type" && showDefinition}>
                   <Lightbulb className="h-4 w-4 mr-1" />
-                  {showDefinition ? t(`${M}.hintUsed`) : t("reading.glossary.spelling.useHint")}
+                  {gameMode === "listen-type" && showDefinition ? t(`${M}.hintUsed`) : t("reading.glossary.spelling.useHint")}
                 </Button>
               </div>
             )}

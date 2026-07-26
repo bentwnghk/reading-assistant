@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   scoreAnswer,
   normalizeWord,
+  judgeAnswer,
   WORD_DURATION_MS,
 } from "./scoring";
 
@@ -145,10 +146,15 @@ describe("scoreAnswer", () => {
     expect(r.points).toBe(10);
   });
 
-  it("difficulty durations match the solo game's listen-type values", () => {
-    expect(WORD_DURATION_MS.easy).toBe(30000);
-    expect(WORD_DURATION_MS.medium).toBe(20000);
-    expect(WORD_DURATION_MS.hard).toBe(12000);
+  it("difficulty durations match the solo game's per-mode values", () => {
+    expect(WORD_DURATION_MS["listen-type"].easy).toBe(30000);
+    expect(WORD_DURATION_MS["listen-type"].medium).toBe(20000);
+    expect(WORD_DURATION_MS["listen-type"].hard).toBe(12000);
+    expect(WORD_DURATION_MS["fill-blanks"].medium).toBe(20000);
+    // Scramble gets more time (matching the solo game).
+    expect(WORD_DURATION_MS.scramble.easy).toBe(45000);
+    expect(WORD_DURATION_MS.scramble.medium).toBe(30000);
+    expect(WORD_DURATION_MS.scramble.hard).toBe(20000);
   });
 
   it("streak resets to 0 on a wrong answer after a streak", () => {
@@ -161,5 +167,37 @@ describe("scoreAnswer", () => {
       oldStreak: 4,
     });
     expect(r.newStreak).toBe(0);
+  });
+});
+
+describe("judgeAnswer", () => {
+  it("listen-type: whole-word equality, case- + whitespace-insensitive", () => {
+    expect(judgeAnswer("listen-type", "Apple", "apple")).toBe(true);
+    expect(judgeAnswer("listen-type", " Apple ", "apple")).toBe(true);
+    expect(judgeAnswer("listen-type", "apple", "aple")).toBe(false);
+  });
+
+  it("scramble: tiles concatenated in selected order equal the word", () => {
+    expect(judgeAnswer("scramble", "cat", "cat")).toBe(true);
+    expect(judgeAnswer("scramble", "Cat", " cAt ")).toBe(true);
+    expect(judgeAnswer("scramble", "cat", "cta")).toBe(false);
+  });
+
+  it("fill-blanks: matches only the missing letters in blank-position order", () => {
+    // word "c_t" with positions [1] → missing letter "a"
+    expect(judgeAnswer("fill-blanks", "cat", "a", [1])).toBe(true);
+    expect(judgeAnswer("fill-blanks", "cat", "A", [1])).toBe(true);
+    // word "_a_" with positions [0, 2] → missing "ct"
+    expect(judgeAnswer("fill-blanks", "cat", "ct", [0, 2])).toBe(true);
+    expect(judgeAnswer("fill-blanks", "cat", "c", [0, 2])).toBe(false);
+  });
+
+  it("fill-blanks: does NOT trim (a blanked space must be preserved)", () => {
+    // word "a d" (length 3) with position [1] blanked → the blank is a space.
+    expect(judgeAnswer("fill-blanks", "a d", " ", [1])).toBe(true);
+  });
+
+  it("fill-blanks: returns false when no blank positions provided", () => {
+    expect(judgeAnswer("fill-blanks", "cat", "cat")).toBe(false);
   });
 });

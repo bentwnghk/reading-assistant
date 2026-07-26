@@ -31,9 +31,10 @@ import {
   setRoomSource,
   toRoomStatePayload,
 } from "./rooms";
-import { resolveWordList } from "./game/words";
+import { resolveWordList, enrichWords } from "./game/words";
 import { startGame, submitAnswer, rematch, cancelGame, clearTimers } from "./game/engine";
 import type {
+  BattleGameMode,
   BattleRoom,
   CreateRoomPayload,
   JoinRoomPayload,
@@ -46,6 +47,13 @@ import type {
 
 interface ServerSocketData {
   user: AuthenticatedUser;
+}
+
+const VALID_GAME_MODES: BattleGameMode[] = ["listen-type", "scramble", "fill-blanks", "mixed"];
+
+/** Normalize an incoming room config's gameMode (default + validate). Returns null if the whole config is unusable. */
+function normalizeGameMode(raw: unknown): BattleGameMode {
+  return VALID_GAME_MODES.includes(raw as BattleGameMode) ? (raw as BattleGameMode) : "listen-type";
 }
 
 // Disconnect-grace timers: userId -> timeout that removes the player after grace.
@@ -232,6 +240,8 @@ io.on("connection", (socket: Socket) => {
       if (!payload?.config || typeof payload.config.wordCount !== "number") {
         return emitRoomError(socket, "invalid_source", "Invalid room config");
       }
+      // Normalize the game mode (default to listen-type for older clients).
+      payload.config.gameMode = normalizeGameMode(payload.config.gameMode);
       // A user may host at most N active rooms.
       if (countActiveRoomsByHost(user.userId) >= config.maxRoomsPerHost) {
         return emitRoomError(socket, "too_many_rooms", "Too many active rooms");
@@ -262,6 +272,9 @@ io.on("connection", (socket: Socket) => {
       if (resolved.actualCount === 0) {
         return emitRoomError(socket, "invalid_source", "Word source is empty");
       }
+      // Precompute mode-specific challenge data (blanks / tiles / per-word mode)
+      // so the server judges authoritatively and all players see identical data.
+      resolved.words = enrichWords(resolved.words, payload.config.gameMode, payload.config.difficulty);
 
       const room = createRoom({
         host: user,
@@ -288,6 +301,7 @@ io.on("connection", (socket: Socket) => {
           className: info.className,
           actualWordCount: room.actualWordCount,
           difficulty: payload.config.difficulty,
+          gameMode: payload.config.gameMode,
         };
         for (const sid of classmateSocketIds) {
           if (sid !== socket.id) io.to(sid).emit("class_battle_available", notif);
@@ -384,6 +398,7 @@ io.on("connection", (socket: Socket) => {
       } catch (e) {
         return emitRoomError(socket, "invalid_source", e instanceof Error ? e.message : "Invalid word source");
       }
+      resolved.words = enrichWords(resolved.words, room.config.gameMode, room.config.difficulty);
       setRoomSource(room, payload.source, resolved);
       console.log(`[realtime] room:set_source code=${room.code} words=${resolved.actualCount}`);
       broadcastRoomState(room);
@@ -478,7 +493,7 @@ httpServer.listen(config.port, () => {
       .then(() => console.log("[realtime] database connected"))
       .catch((e) => console.warn("[realtime] database not reachable (word sources will fail):", e.message));
   } else {
-    console.warn("[realtime] DATABASE_URL not set — only curated word sources will work");
+    console.warn("[realtime] DATABASE_URL not set — all word sources require the database");
   }
 });
 

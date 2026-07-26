@@ -66,6 +66,7 @@ export function SpellingBattleFlow({
     const totalWords = battle.totalWords || battle.finalRanking.length;
     const accuracy = totalWords > 0 ? Math.round((me.correctCount / totalWords) * 100) : 0;
     const difficulty = battle.config?.difficulty ?? "medium";
+    const gameMode = battle.config?.gameMode ?? "listen-type";
 
     // 1. Reading store: best score + running accuracy (both call sites).
     setSpellingGameBestScore(me.total, accuracy);
@@ -77,7 +78,7 @@ export function SpellingBattleFlow({
       score: me.total,
       accuracy,
       details: {
-        mode: "listen-type",
+        mode: gameMode,
         difficulty,
         multiplayer: true,
         opponentCount: Math.max(0, battle.finalRanking.length - 1),

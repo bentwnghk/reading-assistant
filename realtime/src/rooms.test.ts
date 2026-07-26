@@ -16,12 +16,13 @@ import type { AuthenticatedUser } from "./auth";
 import type { BattleRoom, BattleRoomConfig } from "./game/types";
 
 function fakeUser(id: string): AuthenticatedUser {
-  return { userId: id, name: id, image: null, role: "student", schoolId: null };
+  return { userId: id, name: id, image: null, role: "student", schoolId: null, classId: null };
 }
 
 const baseConfig: BattleRoomConfig = {
-  source: { type: "curated", sourceId: "B1" },
+  source: { type: "vocabulary" },
   difficulty: "medium",
+  gameMode: "listen-type",
   wordCount: 5,
   timed: true,
   classBattle: false,

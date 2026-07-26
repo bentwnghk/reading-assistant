@@ -1381,6 +1381,8 @@
           "join": "Join",
           "enterCode": "Enter Room Code",
           "wordSource": "Word Source",
+          "selectMode": "Game Mode",
+          "submit": "Submit",
           "words": "words",
           "wordsLabel": "Words in this battle",
           "roomTitle": "Battle Room",
@@ -1432,8 +1434,7 @@
           "source": {
             "glossary": "Current session glossary",
             "vocabulary": "My vocabulary",
-            "reviewList": "A review list",
-            "curated": "Curated word pool"
+            "reviewList": "A review list"
           },
           "status": {
             "lobby": "Waiting",
@@ -1461,19 +1462,19 @@
         },
         "help": {
           "title": "How It Works — Multiplayer Spelling Battle",
-          "intro": "Challenge classmates to a live Listen & Type duel in real time! Create or join a battle room and race to spell words.",
+          "intro": "Challenge classmates to a live spelling duel in real time! Pick a game mode (Listen & Type, Letter Scramble, Fill Blanks, or Mixed), create or join a battle room, and race to master each word.",
           "items": {
             "create": {
               "name": "Create & Host",
-              "desc": "Pick a word source (glossary, your vocabulary, a review list, or a curated pool), set the difficulty and word count, then create a room. Teachers can also launch class-wide battles."
+              "desc": "Pick a game mode and word source (glossary, your vocabulary, or a review list), set the difficulty and word count, then create a room. Teachers can also launch class-wide battles."
             },
             "join": {
               "name": "Join a Room",
               "desc": "Enter the 6-character room code your friend or teacher shared to jump into their battle room."
             },
             "gameplay": {
-              "name": "Listen & Type Race",
-              "desc": "Each word is spoken aloud via TTS. Type the correct spelling as fast as you can — speed bonus, streak bonus and hint penalties all count toward your score."
+              "name": "Word Challenges",
+              "desc": "Each word is a challenge that adapts to the chosen mode — listen and type, unscramble the letters, or fill in the missing letters. Speed bonus, streak bonus and hint penalties all count toward your score."
             },
             "ranking": {
               "name": "Live Ranking & Results",
@@ -1482,9 +1483,9 @@
           },
           "stepsTitle": "How to play",
           "steps": {
-            "s1": "Create a room: choose a word source, set difficulty and word count.",
+            "s1": "Create a room: choose a game mode, word source, difficulty and word count.",
             "s2": "Share the 6-character room code with opponents (teachers can toggle Class Battle to auto-notify the whole class).",
-            "s3": "The host presses Start Game — a 3-2-1 countdown begins, then words are spoken one by one.",
+            "s3": "The host presses Start Game — a 3-2-1 countdown begins, then words are served one by one.",
             "s4": "After the last word, see the final ranking, your tier badge and accuracy. The host can start a rematch."
           },
           "tipTitle": "Good to know",

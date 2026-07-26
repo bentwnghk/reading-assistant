@@ -76,6 +76,7 @@ export function ClassBattleInviteDialog() {
                     <div className="mt-1 flex items-center gap-2">
                       <Badge variant="secondary">{invite.actualWordCount} {t(`${M}.words`)}</Badge>
                       <Badge variant="outline">{t(`reading.glossary.spelling.difficulty.${invite.difficulty}`)}</Badge>
+                      <Badge variant="outline">{t(`reading.glossary.spelling.modes.${invite.gameMode ?? "listen-type"}`)}</Badge>
                     </div>
                   </div>
                   <Button

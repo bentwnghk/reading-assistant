@@ -110,8 +110,9 @@ function emptyRoomState(): BattleRoomState {
     roomCode: "",
     status: "lobby",
     config: {
-      source: { type: "curated" },
+      source: { type: "vocabulary" },
       difficulty: "easy",
+      gameMode: "listen-type",
       wordCount: 0,
       timed: false,
       classBattle: false,

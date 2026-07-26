@@ -213,7 +213,9 @@ interface SpellingGameResult {
 // Mirrored in realtime/src/game/types.ts (the realtime package is standalone
 // and does not import from src/). Keep both sides in sync.
 
-/** A single word in a battle's word list. Definitions feed the hint system. */
+/** A single word in a battle's word list. Definitions feed the hint system.
+ * `blankPositions` / `shuffledLetters` / `perWordMode` are precomputed by the
+ * server (authoritative) so every player sees identical blanks/tiles. */
 interface BattleWord {
   word: string;
   englishDefinition?: string;
@@ -221,16 +223,22 @@ interface BattleWord {
   syllabification?: string;
   partOfSpeech?: string;
   example?: string;
+  /** fill-blanks: letter indices blanked out (sorted ascending). */
+  blankPositions?: number[];
+  /** scramble: the shuffled letter tiles shown to players. */
+  shuffledLetters?: string[];
+  /** mixed: the per-word mode assigned to this word. */
+  perWordMode?: SpellingGameMode;
 }
 
-type WordSourceType = "glossary" | "vocabulary" | "review-list" | "curated";
+type WordSourceType = "glossary" | "vocabulary" | "review-list";
 
 /** Filter applied when the word source is the host's vocabulary bank. */
 type VocabularyFilter = "all" | "due-for-review" | "hard-words";
 
 interface WordSource {
   type: WordSourceType;
-  /** glossary: reading_session id; review-list: review_lists id; curated: CEFR level (A2/B1/B2/C1). */
+  /** glossary: reading_session id; review-list: review_lists id. */
   sourceId?: string;
   /** vocabulary bank only. */
   filter?: VocabularyFilter;
@@ -239,6 +247,8 @@ interface WordSource {
 interface BattleRoomConfig {
   source: WordSource;
   difficulty: SpellingDifficulty;
+  /** Game mode (listen-type / scramble / fill-blanks / mixed). */
+  gameMode: SpellingGameMode;
   /** Requested word count; server caps to the number actually available. */
   wordCount: number;
   timed: boolean;
@@ -305,6 +315,7 @@ interface BattleClassBattleAvailablePayload {
   className: string | null;
   actualWordCount: number;
   difficulty: SpellingDifficulty;
+  gameMode: SpellingGameMode;
 }
 
 type BattleRoomErrorCode =
@@ -351,6 +362,12 @@ interface BattleWordStartPayload {
   durationMs: number;
   startedAt: number;
   timed: boolean;
+  /** Actual per-word mode (for "mixed", differs per word). */
+  gameMode: SpellingGameMode;
+  /** fill-blanks: letter indices blanked out (sorted ascending). */
+  blankPositions?: number[];
+  /** scramble: the shuffled letter tiles shown to players. */
+  shuffledLetters?: string[];
 }
 
 interface BattlePlayerProgressPayload {

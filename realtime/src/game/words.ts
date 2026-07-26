@@ -1,50 +1,17 @@
 /**
  * Word-list resolution for a battle room.
  *
- * Fetches words from one of four sources (all host-ownership-checked), shuffles,
- * and caps to the requested count. The resolved list is stored canonically on
- * the room and hidden from clients until each word is emitted (Phase 4).
+ * Fetches words from one of three sources (all host-ownership-checked),
+ * shuffles, and caps to the requested count. The resolved list is stored
+ * canonically on the room and hidden from clients until each word is emitted.
  *
  * Sources:
  *   - glossary:     reading_sessions.glossary (host-owned)
  *   - vocabulary:   user_vocabulary (host's bank, optional filter)
  *   - review-list:  review_lists.words (host-owned)
- *   - curated:      static CEFR pool (A2/B1/B2/C1) — no DB
  */
-import { readFileSync } from "fs";
-import { join } from "path";
-
 import { getPool } from "../db";
-import type { BattleWord, VocabularyFilter, WordSource } from "./types";
-
-// ── Curated pool (loaded once, cached) ───────────────────────────────────────
-
-type CuratedLevel = "A2" | "B1" | "B2" | "C1";
-type CuratedEntry = { word: string; englishDefinition: string; partOfSpeech?: string };
-type CuratedMap = Record<CuratedLevel, CuratedEntry[]>;
-
-let curatedCache: CuratedMap | null = null;
-
-function loadCuratedMap(): CuratedMap {
-  if (curatedCache) return curatedCache;
-  // Resolves to src/data/ (tsx dev) or dist/data/ (compiled prod) — the build
-  // copies src/data -> dist/data (see package.json build script).
-  const filePath = join(__dirname, "..", "data", "curated-word-lists.json");
-  curatedCache = JSON.parse(readFileSync(filePath, "utf8")) as CuratedMap;
-  return curatedCache;
-}
-
-function loadCurated(level: string | undefined): BattleWord[] {
-  if (!level) throw new Error("curated source requires a level (A2/B1/B2/C1)");
-  const map = loadCuratedMap();
-  const entries = map[level as CuratedLevel];
-  if (!entries) throw new Error(`unknown curated level: ${level}`);
-  return entries.map((e) => ({
-    word: e.word,
-    englishDefinition: e.englishDefinition,
-    partOfSpeech: e.partOfSpeech,
-  }));
-}
+import type { BattleGameMode, BattleWord, SpellingDifficulty, VocabularyFilter, WordSource } from "./types";
 
 // ── DB-backed sources ────────────────────────────────────────────────────────
 
@@ -143,6 +110,53 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
+// ── Mode-specific challenge precomputation ───────────────────────────────────
+
+/** Fraction of letters blanked in fill-blanks, by difficulty (matches solo game). */
+const BLANK_RATIO: Record<SpellingDifficulty, number> = {
+  easy: 0.2,
+  medium: 0.35,
+  hard: 0.5,
+};
+
+/** The three base modes "mixed" randomly picks from per word. */
+const BASE_MODES: BattleGameMode[] = ["listen-type", "scramble", "fill-blanks"];
+
+function computeBlankPositions(word: string, blankRatio: number): number[] {
+  const len = word.length;
+  if (len === 0) return [];
+  const blankCount = Math.max(1, Math.floor(len * blankRatio));
+  return shuffle([...Array(len).keys()]).slice(0, blankCount).sort((a, b) => a - b);
+}
+
+function computeShuffledLetters(word: string): string[] {
+  return shuffle(word.toLowerCase().split(""));
+}
+
+/**
+ * Precompute the mode-specific challenge data for each canonical word so the
+ * server judges authoritatively and every player sees identical blanks/tiles.
+ * Stored on `room.canonicalWords`; consumed by the engine in startWord/submitAnswer.
+ */
+export function enrichWords(
+  words: BattleWord[],
+  gameMode: BattleGameMode,
+  difficulty: SpellingDifficulty,
+): BattleWord[] {
+  const blankRatio = BLANK_RATIO[difficulty];
+  return words.map((w) => {
+    const perWordMode: BattleGameMode =
+      gameMode === "mixed" ? BASE_MODES[Math.floor(Math.random() * BASE_MODES.length)] : gameMode;
+    const enriched: BattleWord = { ...w, perWordMode };
+    if (perWordMode === "fill-blanks") {
+      enriched.blankPositions = computeBlankPositions(w.word, blankRatio);
+    } else if (perWordMode === "scramble") {
+      enriched.shuffledLetters = computeShuffledLetters(w.word);
+    }
+    return enriched;
+  });
+}
+
 export interface ResolvedWordList {
   words: BattleWord[];
   actualCount: number;
@@ -164,9 +178,6 @@ export async function resolveWordList(
       break;
     case "review-list":
       raw = await fetchReviewList(hostUserId, source.sourceId);
-      break;
-    case "curated":
-      raw = loadCurated(source.sourceId);
       break;
     default:
       throw new Error(`unknown word source type: ${(source as { type: string }).type}`);

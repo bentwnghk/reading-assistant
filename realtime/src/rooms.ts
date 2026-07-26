@@ -12,6 +12,7 @@
 import { config } from "./config";
 import type { AuthenticatedUser } from "./auth";
 import type {
+  BattleGameMode,
   BattleRoom,
   BattleRoomConfig,
   BattleWord,
@@ -213,8 +214,8 @@ export function pruneIdleRooms(now: number = Date.now()): string[] {
 /** Return simplified invite objects for class-battle rooms targeting the given class. */
 export function findClassBattleInvites(
   classId: string,
-): { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty }[] {
-  const invites: { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty }[] = [];
+): { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty; gameMode: BattleGameMode }[] {
+  const invites: { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty; gameMode: BattleGameMode }[] = [];
   for (const room of rooms.values()) {
     if (room.classBattle && room.classId === classId && room.status === "lobby") {
       const hostPlayer = room.players.get(room.hostId);
@@ -223,6 +224,7 @@ export function findClassBattleInvites(
         hostName: hostPlayer?.name ?? null,
         actualWordCount: room.actualWordCount,
         difficulty: room.config.difficulty,
+        gameMode: room.config.gameMode,
       });
     }
   }

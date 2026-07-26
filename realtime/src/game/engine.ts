@@ -12,9 +12,10 @@
  */
 import type { Server as SocketIOServer } from "socket.io";
 
-import { BETWEEN_WORDS_MS, SUBMIT_GRACE_MS, WORD_DURATION_MS, normalizeWord, scoreAnswer } from "./scoring";
+import { BETWEEN_WORDS_MS, SUBMIT_GRACE_MS, WORD_DURATION_MS, judgeAnswer, scoreAnswer } from "./scoring";
 import { toRoomStatePayload } from "../rooms";
 import type {
+  BattleGameMode,
   BattleRoom,
   CountdownPayload,
   GameEndPayload,
@@ -29,6 +30,17 @@ import type {
 
 const COUNTDOWN_FROM = 3;
 const COUNTDOWN_STEP_MS = 1_000;
+
+/**
+ * Resolve the actual per-word game mode. For "mixed", each canonical word
+ * carries its own `perWordMode` (assigned at resolve time); otherwise the
+ * room's configured mode applies to every word.
+ */
+function actualMode(room: BattleRoom, index: number): BattleGameMode {
+  const word = room.canonicalWords[index];
+  if (!word) return room.config.gameMode;
+  return room.config.gameMode === "mixed" ? word.perWordMode ?? room.config.gameMode : room.config.gameMode;
+}
 
 function broadcastRoomState(io: SocketIOServer, room: BattleRoom): void {
   io.to(room.code).emit("room:state", toRoomStatePayload(room));
@@ -144,7 +156,8 @@ function startWord(io: SocketIOServer, room: BattleRoom, index: number): void {
   room.wordResults.clear();
 
   const word = room.canonicalWords[index];
-  const durationMs = WORD_DURATION_MS[room.config.difficulty];
+  const mode = actualMode(room, index);
+  const durationMs = WORD_DURATION_MS[mode][room.config.difficulty];
   const payload: WordStartPayload = {
     index,
     total: room.canonicalWords.length,
@@ -157,6 +170,9 @@ function startWord(io: SocketIOServer, room: BattleRoom, index: number): void {
     durationMs,
     startedAt: room.wordStartedAt,
     timed: room.config.timed,
+    gameMode: mode,
+    blankPositions: word.blankPositions,
+    shuffledLetters: word.shuffledLetters,
   };
   broadcastRoomState(io, room);
   io.to(room.code).emit("word_start", payload);
@@ -180,8 +196,9 @@ export function submitAnswer(
   if (player.lastSubmittedIndex === payload.index) return; // double-submit guard
 
   const word = room.canonicalWords[room.currentIndex];
-  const correct = normalizeWord(payload.answer) === normalizeWord(word.word);
-  const durationMs = WORD_DURATION_MS[room.config.difficulty];
+  const mode = actualMode(room, room.currentIndex);
+  const correct = judgeAnswer(mode, word.word, payload.answer, word.blankPositions);
+  const durationMs = WORD_DURATION_MS[mode][room.config.difficulty];
   const result = scoreAnswer({
     correct,
     timed: room.config.timed,

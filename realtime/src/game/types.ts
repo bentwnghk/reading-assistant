@@ -11,7 +11,18 @@ export type UserRole = "super-admin" | "admin" | "teacher" | "student";
 
 export type SpellingDifficulty = "easy" | "medium" | "hard";
 
-/** A single word in a battle's word list. Definitions feed the hint system. */
+/**
+ * Battle game mode. Mirrors the solo spelling game's modes so the same lobby
+ * picker drives both. The server judges + times each mode; "mixed" assigns a
+ * random base mode per word (stored on the canonical word's `perWordMode`).
+ */
+export type BattleGameMode = "listen-type" | "scramble" | "fill-blanks" | "mixed";
+
+/**
+ * A single word in a battle's word list. Definitions feed the hint system.
+ * `blankPositions` / `shuffledLetters` / `perWordMode` are precomputed by the
+ * server (authoritative) so every player sees identical blanks/tiles.
+ */
 export interface BattleWord {
   word: string;
   englishDefinition?: string;
@@ -19,16 +30,22 @@ export interface BattleWord {
   syllabification?: string;
   partOfSpeech?: string;
   example?: string;
+  /** fill-blanks: letter indices blanked out (sorted ascending). */
+  blankPositions?: number[];
+  /** scramble: the shuffled letter tiles shown to players. */
+  shuffledLetters?: string[];
+  /** mixed: the per-word mode assigned to this word. */
+  perWordMode?: BattleGameMode;
 }
 
-export type WordSourceType = "glossary" | "vocabulary" | "review-list" | "curated";
+export type WordSourceType = "glossary" | "vocabulary" | "review-list";
 
 /** Filter applied when the word source is the host's vocabulary bank. */
 export type VocabularyFilter = "all" | "due-for-review" | "hard-words";
 
 export interface WordSource {
   type: WordSourceType;
-  /** glossary: reading_session id; review-list: review_lists id; curated: CEFR level (A2/B1/B2/C1). */
+  /** glossary: reading_session id; review-list: review_lists id. */
   sourceId?: string;
   /** vocabulary bank only. */
   filter?: VocabularyFilter;
@@ -37,6 +54,8 @@ export interface WordSource {
 export interface BattleRoomConfig {
   source: WordSource;
   difficulty: SpellingDifficulty;
+  /** Game mode (listen-type / scramble / fill-blanks / mixed). */
+  gameMode: BattleGameMode;
   /** Requested word count; server caps to the number actually available. */
   wordCount: number;
   timed: boolean;
@@ -149,6 +168,7 @@ export interface ClassBattleAvailablePayload {
   className: string | null;
   actualWordCount: number;
   difficulty: SpellingDifficulty;
+  gameMode: BattleGameMode;
 }
 
 export interface RoomErrorPayload {
@@ -199,6 +219,12 @@ export interface WordStartPayload {
   durationMs: number;
   startedAt: number;
   timed: boolean;
+  /** Actual per-word mode (for "mixed", differs per word). */
+  gameMode: BattleGameMode;
+  /** fill-blanks: letter indices blanked out (sorted ascending). */
+  blankPositions?: number[];
+  /** scramble: the shuffled letter tiles shown to players. */
+  shuffledLetters?: string[];
 }
 
 export interface PlayerProgressPayload {

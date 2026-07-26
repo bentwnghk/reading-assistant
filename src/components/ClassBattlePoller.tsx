@@ -70,7 +70,7 @@ export function ClassBattlePoller() {
         );
         if (!res.ok) return;
         const body = (await res.json()) as {
-          invites: { roomCode: string; hostName: string | null; className: string | null; actualWordCount: number; difficulty: string }[];
+          invites: { roomCode: string; hostName: string | null; className: string | null; actualWordCount: number; difficulty: string; gameMode?: string }[];
         };
 
         // Map to the store payload shape.
@@ -80,6 +80,7 @@ export function ClassBattlePoller() {
           className: i.className ?? null,
           actualWordCount: i.actualWordCount,
           difficulty: i.difficulty as SpellingDifficulty,
+          gameMode: (i.gameMode ?? "listen-type") as SpellingGameMode,
         }));
         useBattleStore.getState().setPendingClassBattleInvites(storeInvites);
 

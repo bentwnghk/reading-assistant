@@ -108,7 +108,7 @@ realtime/                       # Standalone Socket.io server for multiplayer sp
 │       ├── engine.ts           # Game loop (countdown→playing→finished)
 │       ├── scoring.ts          # Authoritative scoring + timing constants
 │       ├── types.ts            # Battle types (mirrored from src/types.d.ts)
-│       └── words.ts            # Word list resolution (glossary/vocab/review-list/curated)
+│       └── words.ts            # Word list resolution (glossary/vocab/review-list) + per-mode challenge precompute (enrichWords)
 ```
 
 ---

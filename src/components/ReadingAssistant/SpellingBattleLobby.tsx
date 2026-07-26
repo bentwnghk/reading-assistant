@@ -16,11 +16,15 @@ import {
   AlertCircle,
   WifiOff,
   Volume2,
+  Shuffle,
+  Keyboard,
+  HelpCircle,
 } from "lucide-react";
 import copy from "copy-to-clipboard";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useBattleStore } from "@/store/battle";
+import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,8 +53,15 @@ interface SpellingBattleLobbyProps {
 
 const M = "reading.glossary.spelling.multiplayer";
 
-const CURATED_LEVELS = ["A2", "B1", "B2", "C1"] as const;
 const DIFFICULTIES: SpellingDifficulty[] = ["easy", "medium", "hard"];
+
+/** Mode picker options (reuses the solo game's mode icons + i18n keys). */
+const MODE_OPTIONS: { value: SpellingGameMode; icon: React.ReactNode }[] = [
+  { value: "listen-type", icon: <Volume2 className="h-4 w-4" /> },
+  { value: "scramble", icon: <Shuffle className="h-4 w-4" /> },
+  { value: "fill-blanks", icon: <Keyboard className="h-4 w-4" /> },
+  { value: "mixed", icon: <HelpCircle className="h-4 w-4" /> },
+];
 
 export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: SpellingBattleLobbyProps) {
   const { t } = useTranslation();
@@ -62,11 +73,11 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
 
   // ── Create-form state ────────────────────────────────────────────────────
   const [sourceType, setSourceType] = useState<WordSourceType>(
-    defaultGlossarySessionId ? "glossary" : "curated",
+    defaultGlossarySessionId ? "glossary" : "vocabulary",
   );
-  const [curatedLevel, setCuratedLevel] = useState<string>("B1");
   const [vocabFilter, setVocabFilter] = useState<VocabularyFilter>("all");
   const [reviewListId, setReviewListId] = useState<string>("");
+  const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
   const [wordCount, setWordCount] = useState(10);
   const [timed, setTimed] = useState(true);
@@ -112,10 +123,8 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
         return { type: "vocabulary", filter: vocabFilter };
       case "review-list":
         return { type: "review-list", sourceId: reviewListId };
-      case "curated":
-        return { type: "curated", sourceId: curatedLevel };
     }
-  }, [sourceType, defaultGlossarySessionId, vocabFilter, reviewListId, curatedLevel]);
+  }, [sourceType, defaultGlossarySessionId, vocabFilter, reviewListId]);
 
   const handleCreate = useCallback(() => {
     const source = buildSource();
@@ -133,10 +142,10 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
     }
     battle.clearError();
     battle.createRoom({
-      config: { source, difficulty, wordCount, timed, classBattle },
+      config: { source, difficulty, gameMode, wordCount, timed, classBattle },
       targetClassId: classBattle ? targetClassId : undefined,
     });
-  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, difficulty, wordCount, timed, battle, t]);
+  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, difficulty, gameMode, wordCount, timed, battle, t]);
 
   const handleJoin = useCallback(() => {
     if (joinCode.trim().length < 4) {
@@ -339,28 +348,32 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
                 {reviewLists.length > 0 && (
                   <SelectItem value="review-list">{t(`${M}.source.reviewList`)}</SelectItem>
                 )}
-                <SelectItem value="curated">{t(`${M}.source.curated`)}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {sourceType === "curated" && (
-            <div className="space-y-2">
-              <Label className="text-xs uppercase text-muted-foreground">CEFR</Label>
-              <Select value={curatedLevel} onValueChange={setCuratedLevel}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURATED_LEVELS.map((lvl) => (
-                    <SelectItem key={lvl} value={lvl}>
-                      {lvl}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* Game mode */}
+          <div className="space-y-2">
+            <Label className="text-xs uppercase text-muted-foreground">{t(`${M}.selectMode`)}</Label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {MODE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setGameMode(opt.value)}
+                  className={cn(
+                    "flex items-center justify-center gap-1.5 rounded-lg border-2 px-2 py-2 text-xs font-medium transition-all",
+                    gameMode === opt.value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-muted hover:border-primary/40",
+                  )}
+                >
+                  {opt.icon}
+                  <span>{t(`reading.glossary.spelling.modes.${opt.value}`)}</span>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
           {sourceType === "vocabulary" && (
             <div className="space-y-2">
