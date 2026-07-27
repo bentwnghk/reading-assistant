@@ -813,6 +813,22 @@ function Grammar() {
     };
   }, [quizState, isTimed, grammarQuizMode, currentQuestionIndex, effectiveQuiz.length, timerConfig.timeLimit, completeQuiz]);
 
+  const restoredRef = useRef(false);
+
+  useEffect(() => {
+    if (quizState !== "idle" || grammarQuiz.length === 0) return;
+    const answeredIndices = grammarQuiz
+      .map((q, i) => (q.userAnswer?.trim() ? i : -1))
+      .filter((i) => i >= 0);
+    if (answeredIndices.length === 0) return;
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    const lastAnswered = Math.max(...answeredIndices);
+    setCurrentQuestionIndex(lastAnswered);
+    setTimeRemaining(timerConfig.timeLimit);
+    setQuizState("in-progress");
+  }, [quizState, grammarQuiz, timerConfig.timeLimit]);
+
   const handleHighlightTopic = useCallback(
     (topicId: string) => {
       if (grammarHighlightTopicId === topicId && grammarHighlightEnabled) {
