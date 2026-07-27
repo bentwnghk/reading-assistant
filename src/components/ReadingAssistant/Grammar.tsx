@@ -813,21 +813,55 @@ function Grammar() {
     };
   }, [quizState, isTimed, grammarQuizMode, currentQuestionIndex, effectiveQuiz.length, timerConfig.timeLimit, completeQuiz]);
 
-  const restoredRef = useRef(false);
-
+  // Latest quiz state captured in a ref so the unmount cleanup (empty deps) can
+  // read the value current at unmount time rather than the initial "idle".
+  const quizStateRef = useRef(quizState);
   useEffect(() => {
-    if (quizState !== "idle" || grammarQuiz.length === 0) return;
-    const answeredIndices = grammarQuiz
-      .map((q, i) => (q.userAnswer?.trim() ? i : -1))
-      .filter((i) => i >= 0);
-    if (answeredIndices.length === 0) return;
-    if (restoredRef.current) return;
-    restoredRef.current = true;
-    const lastAnswered = Math.max(...answeredIndices);
-    setCurrentQuestionIndex(lastAnswered);
-    setTimeRemaining(timerConfig.timeLimit);
-    setQuizState("in-progress");
-  }, [quizState, grammarQuiz, timerConfig.timeLimit]);
+    quizStateRef.current = quizState;
+  }, [quizState]);
+
+  // Discard partial answers / earned points for an un-submitted (in-progress)
+  // quiz from the Zustand store. Mirrors VocabularyQuiz, whose answers live in
+  // local useState and are destroyed when its host unmounts; the grammar quiz
+  // instead stores them on grammarQuiz[] (synced to the DB on each keystroke),
+  // so they must be cleared explicitly. Completed results are preserved.
+  const discardInProgressAnswers = useCallback(() => {
+    const { grammarQuiz: fullQuiz, setGrammarQuiz: setQuiz } = useReadingStore.getState();
+    if (!fullQuiz.some((q) => q.userAnswer?.trim() || q.earnedPoints !== undefined)) return;
+    setQuiz(
+      fullQuiz.map((q) => ({
+        ...q,
+        userAnswer: undefined,
+        earnedPoints: undefined,
+      }))
+    );
+  }, []);
+
+  // (1) Clear on full unmount — e.g. SPA navigation to /leaderboard.
+  useEffect(() => {
+    return () => {
+      if (quizStateRef.current === "in-progress") {
+        discardInProgressAnswers();
+      }
+    };
+  }, [discardInProgressAnswers]);
+
+  // (2) Clear when switching away from the Quiz tab to Topics/Lessons/Games.
+  // The Grammar component stays mounted across tab switches, so local quizState
+  // would otherwise survive — unlike VocabularyQuiz, which unmounts and loses
+  // its local answers. Reset local progress so returning to the tab shows the
+  // fresh start screen.
+  const prevTabRef = useRef(activeTab);
+  useEffect(() => {
+    const prev = prevTabRef.current;
+    prevTabRef.current = activeTab;
+    if (prev === "quiz" && activeTab !== "quiz" && quizState === "in-progress") {
+      discardInProgressAnswers();
+      setQuizState("idle");
+      setShowReview(false);
+      setCurrentQuestionIndex(0);
+    }
+  }, [activeTab, quizState, discardInProgressAnswers]);
 
   const handleHighlightTopic = useCallback(
     (topicId: string) => {
