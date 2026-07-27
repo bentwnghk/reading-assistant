@@ -402,7 +402,7 @@ Leitner 5-box algorithm tracks when to review each word:
 
 ### 🎮 12. Spelling Challenge - 4 Game Modes!
 
-Available both in-session and on the My Vocabulary page across all your words.
+Available both in-session and on the My Vocabulary page across all your words. Choose between **Solo Practice** and **Multiplayer Battle** directly from the game start screen, or enter the battle lobby from the Glossary tab.
 
 | Mode | How It Works | Best For |
 |------|--------------|----------|
@@ -418,13 +418,14 @@ Available both in-session and on the My Vocabulary page across all your words.
 - 📊 **Difficulty Levels**: Easy / Medium / Hard
 - 🏆 **Best Score Tracking**: Beat your personal record
 - 🎯 **Prioritize Hard Words**: Focus practice on words you rated as hard
+- 🧠 **SRS Integration**: Every correct or incorrect spelling automatically updates your spaced-repetition mastery levels
 
 #### 🆕 Multiplayer Battle (Real-Time)
-- ⚔️ **Live Listen & Type Duels**: Challenge classmates in real-time — everyone spells the same words simultaneously
-- 🔑 **Room Codes**: Create a room (6-char code) or join one; share the code with friends
-- 👑 **Host Controls**: Pick the game mode (Listen & Type, Letter Scramble, Fill Blanks, or Mixed) and word source (glossary, vocabulary bank, or review list), then set difficulty and word count
-- 🏆 **Live Ranking**: See everyone's scores update after every word
-- 🎓 **Class Battles** (Teachers): Launch a battle for your whole class — students get a notification wherever they are
+- ⚔️ **Live Duels**: Challenge classmates in real-time across all 4 game modes — everyone spells the same words simultaneously
+- 🔑 **Room Codes**: Create a room (6-char code, up to 35 players) or join one; share the code with friends
+- 👑 **Host Controls**: Pick the game mode (Listen & Type, Letter Scramble, Fill Blanks, or Mixed), word source (glossary, vocabulary bank, or review list), difficulty, and word count
+- 🏆 **Live Ranking**: See everyone's scores update after every word; ties share the same rank
+- 🎓 **Class Battles** (Teachers): Launch a battle for your whole class — students get a persistent notification with a one-click "Go to Battle" action
 - 📈 **Unified Stats**: Battle results count toward your best score, leaderboard, and SRS mastery — just like solo play
 
 ---
@@ -744,7 +745,7 @@ src/
 ├── components/
 │   ├── ui/                # Shadcn UI primitives
 │   ├── Internal/          # Shared components (Header, etc.)
-│   ├── ReadingAssistant/  # Core feature components (37 files)
+│   ├── ReadingAssistant/  # Core feature components (41 files)
 │   ├── Vocabulary/        # Vocabulary page components (table, flashcards, quiz, spelling, review lists, export, sharing)
 │   ├── Dashboard/         # Student dashboard + session sharing dialogs
 │   ├── TeacherDashboard/  # Teacher dashboard (10 charts + guide)

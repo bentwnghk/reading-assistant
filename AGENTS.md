@@ -1065,3 +1065,254 @@ Types between the main app and the realtime package are **manually mirrored** ra
 3. Add a comment at the source definition: `// Mirrored in realtime/src/game/types.ts`.
 
 This is manual and error-prone, but keeps each package independently buildable and deployable. If a type mismatch causes a runtime error, the fix is to update both files in the same commit.
+
+### 13. Zustand Persist Rehydration Is Async — i18n Must Read Persisted Values Before Hydration
+
+The `persist` middleware in Zustand is **asynchronous**. When a page loads, the store returns `defaultValues` on first render, then hydrates from localStorage asynchronously (via `setTimeout`). If i18n initialization reads `useSettingStore.getState().language` on first render, it gets the **default** language, not the persisted one — the UI briefly flashes the wrong language before switching.
+
+**The fix** (v2.914): In the `I18n.tsx` provider's first `useLayoutEffect`, bypass the Zustand store and read `localStorage.getItem("language")` directly:
+
+```ts
+const isHydrated = useRef(false);
+useLayoutEffect(() => {
+  let effectiveLanguage: string;
+  if (!isHydrated.current) {
+    isHydrated.current = true;
+    const storedLanguage = localStorage.getItem("language");
+    effectiveLanguage = storedLanguage ?? language;
+  } else {
+    effectiveLanguage = language;
+  }
+  const resolvedLanguage = resolveLanguagePreference(effectiveLanguage);
+  i18n.changeLanguage(resolvedLanguage);
+}, [language]);
+```
+
+Additionally, **write to localStorage explicitly** in `Setting.tsx` when the user changes language, because the Zustand persist middleware's `setItem` is also async and the next `getItem` call won't reflect the new value until the middleware flushes:
+
+```ts
+if (key === "language" && typeof value === "string") {
+  localStorage.setItem("language", value);
+}
+```
+
+**Key principle**: Any value that determines initial render output (language, theme, etc.) and is persisted via Zustand must be read from localStorage directly on first mount, because the store hasn't been rehydrated yet.
+
+### 14. Session Sharing: `stripUserData` Must Zero Every Score/Progress Field
+
+When `stripUserData` in `src/lib/shared-sessions.ts` was originally written, it only stripped reading test answers and a few score fields. But many grammar game fields were missed (v2.924):
+
+- `grammarQuiz` (JSONB array — `userAnswer`/`earnedPoints` in each item)
+- `grammarQuizScore`, `grammarQuizCompleted`, `grammarQuizzesCompleted`, `grammarQuizEarnedPoints`, `grammarQuizTotalPoints`
+- Per-game high scores (5 games): `grammarScrambleHighScore`, `grammarWorkshopHighScore`, `grammarSurgeryHighScore`, `grammarRouletteHighScore`, `grammarDuelHighScore`
+- Per-game accuracies (5 games): `grammarScrambleAccuracy`, `grammarWorkshopAccuracy`, etc.
+- Per-game completion counts (5 games): `grammarScrambleCompleted`, `grammarWorkshopCompleted`, etc.
+- Aggregates: `grammarGameAccuracy`, `grammarGamesCompleted`
+- Non-grammar fields: `testsCompleted`, `vocabQuizzesCompleted`, `spellingGamesCompleted`, `spellingGameAccuracy`
+
+A shared session without these zeroed leaked the teacher's game scores and progress to students.
+
+**Prevention rule**: **Every time a new score, progress, or completion field is added to the reading store (`src/store/reading.ts`)**, update `stripUserData` in `src/lib/shared-sessions.ts`. If it represents user-specific data (answers, scores, progress), it must be zeroed. Use the same checklist discipline as [Lesson 7](#7-full-persistence-layer-check-for-new-store-fields): when adding a field, audit all downwind consumers — `stripUserData` is one of them.
+
+Also: `grammarQuiz` is a JSONB array of question objects, so it needs the same `userAnswer`/`earnedPoints` strip treatment as `readingTest`, not just a scalar zero.
+
+### 15. Store-Level Flag for One-Shot Side Effects That Survive Navigation
+
+In `SpellingBattleFlow.tsx`, a `useRef<boolean>` (`persistedRef`) was used as a guard to ensure result persistence (activity log, history store) ran exactly once per battle. This worked — until the user navigated away from the page and came back (v2.920). React unmounts the component on navigation and recreates it on return, so the `useRef` was a fresh `false`.
+
+**The fix**: Replace the local `useRef` with a **store-level flag** (`resultPersisted: boolean` on `useBattleStore`). The store is a module-level singleton that survives SPA navigation. The flag is set to `true` after persistence completes and reset to `false` on `countdown`/`lobby` state transitions:
+
+```ts
+// In the component's persistence effect:
+if (battle.resultPersisted) return;
+// ... persist results ...
+useBattleStore.getState().setResultPersisted(true);
+
+// In the store's setRoomState:
+if (state.status === "lobby" || state.status === "countdown") {
+  // reset for fresh game
+  resultPersisted: false
+}
+```
+
+**Key principle**: This is an extension of [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local). Any flag whose meaning spans component unmount/remount (one-shot side effects, completion flags, phase guards) must be in the store, not in `useRef`/`useState`.
+
+### 16. Multi-Mode Game: Word Duration Must Be Per-Mode
+
+When adding multiple game modes (scramble, fill-blanks) to spelling, word durations must differ per mode (v2.917, v2.919). Scramble needs more time (45s/30s/20s for easy/medium/hard) than listen-type (30s/20s/12s) because tile reordering takes longer than transcription.
+
+The `WORD_DURATION_MS` constant changed from `Record<SpellingDifficulty, number>` to `Record<BattleGameMode, Record<SpellingDifficulty, number>>`:
+
+```ts
+export const WORD_DURATION_MS: Record<BattleGameMode, Record<SpellingDifficulty, number>> = {
+  "listen-type": { easy: 30_000, medium: 20_000, hard: 12_000 },
+  scramble: { easy: 45_000, medium: 30_000, hard: 20_000 },
+  "fill-blanks": { easy: 30_000, medium: 20_000, hard: 12_000 },
+  mixed: { easy: 30_000, medium: 20_000, hard: 12_000 },
+};
+```
+
+**Key principle**: When a game/feature supports multiple modes with different input mechanics, time constants must be per-mode, not global. The engine resolves the mode per-word via `actualMode()`:
+
+```ts
+function actualMode(room: BattleRoom, index: number): BattleGameMode {
+  const word = room.canonicalWords[index];
+  return room.config.gameMode === "mixed" ? word.perWordMode : room.config.gameMode;
+}
+```
+
+### 17. Authoritative Per-Word Mode Precomputation
+
+For "mixed" mode (v2.919), each canonical word gets a random base mode assigned at resolve time via `enrichWords()` in `realtime/src/game/words.ts`. This is **server-authoritative** so every player sees the same mode for the same word:
+
+```ts
+export function enrichWords(words: BattleWord[], gameMode: BattleGameMode, difficulty: SpellingDifficulty): BattleWord[] {
+  return words.map((w) => {
+    const perWordMode = gameMode === "mixed" ? BASE_MODES[Math.floor(Math.random() * BASE_MODES.length)] : gameMode;
+    const enriched: BattleWord = { ...w, perWordMode };
+    if (perWordMode === "fill-blanks") enriched.blankPositions = computeBlankPositions(w.word, blankRatio);
+    else if (perWordMode === "scramble") enriched.shuffledLetters = computeShuffledLetters(w.word);
+    return enriched;
+  });
+}
+```
+
+The per-word data (`blankPositions`, `shuffledLetters`, `perWordMode`) is stored on `room.canonicalWords` and emitted in each `word_start` payload. The client receives `gameMode`, `blankPositions`, and `shuffledLetters` per word.
+
+**Key principle**: Any randomized per-challenge data in a multiplayer game must be precomputed on the server (in the word resolution step, before the game starts), not on the client. This ensures identical experience for all players and authoritative judging.
+
+### 18. Mode-Specific Judging: Different Correctness Logic per Mode
+
+Different game modes require different answer judging (v2.919):
+
+- **listen-type / scramble**: Whole-word case-insensitive equality (`normalizeWord(answer) === normalizeWord(word)`)
+- **fill-blanks**: Only the missing letters are compared (case-insensitive, NO trim — a blanked space must be preserved)
+- **mixed**: Resolved to a base mode by the caller
+
+The server's `judgeAnswer()` function in `realtime/src/game/scoring.ts` must mirror the client's optimistic `checkAnswer()` in `SpellingBattleArena.tsx` so client feedback matches the authoritative result:
+
+```ts
+export function judgeAnswer(mode: BattleGameMode, word: string, answer: string, blankPositions?: number[]): boolean {
+  if (mode === "fill-blanks") {
+    if (!blankPositions || blankPositions.length === 0) return false;
+    const missingLetters = blankPositions.map((p) => word[p].toLowerCase()).join("");
+    return answer.toLowerCase() === missingLetters;
+  }
+  return normalizeWord(answer) === normalizeWord(word);
+}
+```
+
+**Key principle**: When answer format differs per mode, the judging function must be mode-aware on both server (authoritative) and client (optimistic feedback). Both implementations must be kept in sync.
+
+### 19. Tie Ranking: Shared Rank for Equal Scores
+
+Standard competition ranking gives players with the same score the **same rank** (v2.917). The naive `sorted.map((p, i) => ({ rank: i + 1 }))` assigns sequential ranks regardless of ties, which is incorrect:
+
+```ts
+let rank = 0;
+let prevScore = -1;
+let prevCorrect = -1;
+return sorted.map((p) => {
+  if (p.score !== prevScore || p.correctCount !== prevCorrect) {
+    rank += 1;
+    prevScore = p.score;
+    prevCorrect = p.correctCount;
+  }
+  return { rank, ... };
+});
+```
+
+### 20. Extending a Feature's Game Modes — Full Touch Checklist
+
+When adding new game modes to an existing multiplayer realtime feature (v2.919), every layer needs updating:
+
+| Layer | File(s) | What changed |
+|-------|---------|-------------|
+| **Types (mirrored)** | `src/types.d.ts` + `realtime/src/game/types.ts` | New `BattleGameMode`, `blankPositions`/`shuffledLetters`/`perWordMode` fields on `BattleWord`, `BattleWordStartPayload`, `BattleRoomConfig`, `BattleClassBattleAvailablePayload` |
+| **Word resolution** | `realtime/src/game/words.ts` | `enrichWords()` precomputes mode-specific data; removed `curated` source type |
+| **Scoring** | `realtime/src/game/scoring.ts` | `WORD_DURATION_MS` becomes per-mode; `judgeAnswer()` added for mode-specific judging |
+| **Engine** | `realtime/src/game/engine.ts` | `actualMode()` resolves per-word mode; `submitAnswer` uses `judgeAnswer`; `startWord` emits mode-specific payload fields |
+| **Room creation** | `realtime/src/rooms.ts`, `realtime/src/server.ts` | Accept `gameMode` from client; pass to `enrichWords` |
+| **Lobby UI** | `SpellingBattleLobby.tsx` | Mode picker UI (4 options); removed curated source |
+| **Arena UI** | `SpellingBattleArena.tsx` | Per-mode rendering (listener input, scramble tiles, fill-blank input); mode-specific hints; optimistic `checkAnswer` |
+| **Poller** | `ClassBattlePoller.tsx` | Map `gameMode` from poll response; pass to toast + invite dialog |
+| **Invite dialog** | `ClassBattleInviteDialog.tsx` | Show game mode in invite card |
+| **I18n** | Both locale files | Mode name strings |
+
+This is the same multi-system integration principle from [Lesson 1](#1-multi-system-integration-checklist) and [Lesson 12.10](#1210-multi-system-integration-checklist-for-realtime-features), but specifically for **game mode extension** which touches the scoring/judging layer on both sides of the realtime boundary.
+
+### 21. Spelling Game SRS Integration: Hook Up the Callbacks
+
+The in-glossary spelling game (solo) originally had no connection to the SRS system — word results were not persisted to `user_vocabulary` or `vocabulary_review_sessions` (v2.923). The fix connects `VocabularySpelling` to the vocabulary API via two callback props:
+
+1. **`onWordResult(word, correct)`**: Called per-word. Fires a `PATCH /api/vocabulary/word` with just `{ word, correct }`. The API route auto-loads the current mastery level via `getVocabularyWordMastery()`, computes the new SRS interval via `calculateNextReview()`, and updates the DB.
+
+2. **`onComplete(results[])`**: Called at game end. Fires a `POST /api/vocabulary/review-sessions` with `{ mode: "spelling", results }` to record the full session in `vocabulary_review_sessions`.
+
+Both callbacks are passed from `Glossary.tsx`:
+
+```tsx
+<VocabularySpelling
+  glossary={glossary}
+  onWordResult={handleSpellingWordResult}
+  onComplete={handleSpellingComplete}
+/>
+```
+
+The API route was also extended (v2.923) to handle the case where only `correct` (not `masteryLevel`/`nextReviewAt`) is sent — it auto-fetches the current mastery, computes the SRS transition, and applies it:
+
+```ts
+if (typeof correct === "boolean") {
+  const existing = await getVocabularyWordMastery(session.user.id, word);
+  const currentLevel = existing?.masteryLevel ?? 0;
+  const { newMastery, nextReviewAt: calculatedNext } = calculateNextReview(currentLevel, correct);
+  await updateVocabularyReview(session.user.id, word, correct, newMastery, calculatedNext);
+}
+```
+
+**Key principle**: Any interactive game/quiz component that generates word-results must have callback hooks into the vocabulary/SRS system. Without them, gameplay doesn't contribute to spaced repetition — the user plays but learns nothing from the SRS perspective.
+
+### 22. Keyboard Suggestion Suppression in Spelling Inputs
+
+Mobile and desktop browser autocomplete/autocorrect features interfere with spelling game inputs by suggesting words the player is supposed to spell (v2.910). The fix applies to both solo (`VocabularySpelling.tsx`) and multiplayer (`SpellingBattleArena.tsx`):
+
+```tsx
+<input
+  autoComplete="off"
+  autoCorrect="off"
+  autoCapitalize="off"
+  spellCheck={false}
+  {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
+/>
+```
+
+- `autoComplete="off"`: Prevents browser from suggesting previously typed words
+- `autoCorrect="off"` / `autoCapitalize="off"`: iOS Safari-specific
+- `spellCheck={false}`: Prevents red underline on "misspelled" words
+- `writingsuggestions="false"`: A non-standard attribute some browsers respect; spread via `{...(obj as ...)}` cast because it's not in React's `InputHTMLAttributes` types
+
+**Key principle**: Any text input whose purpose is to test user recall (spelling, typing, fill-in-the-blank) must suppress all keyboard suggestion features. Omitting any one of these attributes leaves a path for the browser to spoil the answer.
+
+### 23. Toast Action Buttons for Direct Navigation
+
+Persistent toast notifications (`duration: Infinity`) should provide an **action button** that navigates the user directly to the relevant UI (v2.909, v2.918). For class-battle invite toasts, the action chain is:
+
+```ts
+toast(message, {
+  id: invite.roomCode,
+  duration: Infinity,
+  action: {
+    label: t("reading.glossary.spelling.multiplayer.classBattleToastAction"),
+    onClick: () => {
+      useBattleStore.getState().setShouldOpenBattle(true);  // 1. flag for auto-entry
+      useBattleStore.getState().dismissClassBattleInvite(invite.roomCode);  // 2. clean up
+      router.push("/");                                       // 3. navigate to main
+      toast.dismiss(invite.roomCode);                        // 4. dismiss toast
+    },
+  },
+});
+```
+
+The `shouldOpenBattle` store flag is consumed by `SpellingBattleFlow` on the main page to auto-enter battle mode (skip the solo vs. battle choice screen). The `ClassBattleInviteDialog` also uses the same flag for its "Join Battle" button.
+
+**Key principle**: A notification visible outside the target UI must carry navigation state. A store flag (`shouldOpenBattle`) bridges the gap between the poller/dialog (which runs anywhere) and the flow component (which only renders on the main page). Without it, the user clicks the toast, lands on the main page, and sees nothing — they must manually navigate to the battle lobby.
