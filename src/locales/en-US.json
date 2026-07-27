@@ -1079,6 +1079,41 @@
           "fill-in": "Fill in",
           "rewrite": "Rewrite",
           "error-spot": "Error Spot"
+        },
+        "title": "Grammar Quiz",
+        "aboutTitle": "How It Works",
+        "aboutDesc": "Test your grammar knowledge with AI-generated questions in multiple formats. Questions target grammar topics identified in your text.",
+        "help": {
+          "items": {
+            "identify": {
+              "name": "Identify",
+              "desc": "Choose the correct grammar pattern or usage from multiple options."
+            },
+            "fillIn": {
+              "name": "Fill in",
+              "desc": "Complete the sentence with the correct word or phrase."
+            },
+            "rewrite": {
+              "name": "Rewrite",
+              "desc": "Rewrite a sentence correctly, fixing the grammar error."
+            },
+            "errorSpot": {
+              "name": "Error Spot",
+              "desc": "Identify the grammar error in a sentence."
+            }
+          },
+          "tip": "For fill-in and rewrite questions, the AI evaluates your open-ended answer and awards partial credit. Time Challenge mode auto-advances when time runs out."
+        },
+        "navigationMode": "Navigation Mode",
+        "allAtOnce": "All at Once",
+        "selectQuestionCount": "Number of Questions",
+        "allQuestions": "All",
+        "timeChallenge": "Time Challenge",
+        "selectDifficulty": "Select Difficulty",
+        "difficulty": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard"
         }
       },
       "games": {

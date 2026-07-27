@@ -1110,6 +1110,41 @@
           "fill-in": "填空",
           "rewrite": "改寫",
           "error-spot": "找錯"
+        },
+        "title": "語法測驗",
+        "aboutTitle": "使用說明",
+        "aboutDesc": "透過 AI 生成的多種題型測試你的語法知識。題目針對文本中識別的語法主題。",
+        "help": {
+          "items": {
+            "identify": {
+              "name": "辨識",
+              "desc": "從多個選項中選擇正確的語法模式或用法。"
+            },
+            "fillIn": {
+              "name": "填空",
+              "desc": "用正確的單詞或短語完成句子。"
+            },
+            "rewrite": {
+              "name": "改寫",
+              "desc": "改寫句子，修正語法錯誤。"
+            },
+            "errorSpot": {
+              "name": "找錯",
+              "desc": "識別句子中的語法錯誤。"
+            }
+          },
+          "tip": "對於填空和改寫題，AI 會評估你的開放式答案並給予部分分數。限時挑戰模式會在時間用完時自動前進。"
+        },
+        "navigationMode": "導航模式",
+        "allAtOnce": "全部顯示",
+        "selectQuestionCount": "題目數量",
+        "allQuestions": "全部",
+        "timeChallenge": "限時挑戰",
+        "selectDifficulty": "選擇難度",
+        "difficulty": {
+          "easy": "簡單",
+          "medium": "中等",
+          "hard": "困難"
         }
       },
       "games": {

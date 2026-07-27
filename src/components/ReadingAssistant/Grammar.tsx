@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen,
@@ -23,12 +23,15 @@ import {
   ListChecks,
   ClipboardList,
   Lightbulb,
+  PenLine,
+  Play,
   Volume2,
   GitCompare,
   Wand2,
   Sparkles,
   RotateCcw,
   Tag,
+  Timer,
   TriangleAlert,
 } from "lucide-react";
 import {
@@ -61,7 +64,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -140,6 +142,27 @@ const QUIZ_TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; colo
   good:          { emoji: "💪", icon: Zap, color: "text-blue-600 dark:text-blue-400", ring: "ring-4 ring-blue-400/40", glow: "shadow-blue-400/30", badgeBg: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300", particleColor: "#60a5fa", gradient: "linear-gradient(135deg, rgba(191,219,254,0.15) 0%, rgba(96,165,250,0.08) 50%, rgba(191,219,254,0.15) 100%)" },
   keepGoing:  { emoji: "❤️", icon: Heart, color: "text-rose-600 dark:text-rose-400", ring: "ring-4 ring-rose-400/30", glow: "shadow-rose-400/25", badgeBg: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300", particleColor: "#fb7185", gradient: "linear-gradient(135deg, rgba(254,205,211,0.15) 0%, rgba(251,113,133,0.08) 50%, rgba(254,205,211,0.15) 100%)" },
 };
+
+type QuizDifficulty = "easy" | "medium" | "hard";
+
+function generateQuestionCountOptions(total: number): (number | "all")[] {
+  const options: number[] = [5, 10, 15];
+  for (const n of options) {
+    if (n >= total) {
+      const result: (number | "all")[] = [5, 10, 15].filter((x) => x <= total);
+      result.push("all");
+      return result;
+    }
+  }
+  for (const n of [20, 25, 30]) {
+    if (n >= total) {
+      const result: (number | "all")[] = [5, 10, 15, 20, 25, 30].filter((x) => x <= total);
+      result.push("all");
+      return result;
+    }
+  }
+  return [5, 10, 15, 20, 25, 30, "all" as const] as (number | "all")[];
+}
 
 function QuizResultScreen({
   score,
@@ -672,6 +695,14 @@ function Grammar() {
   const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
   const [exportSections, setExportSections] = useState<Set<string>>(new Set());
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isTimed, setIsTimed] = useState(false);
+  const [difficulty, setDifficulty] = useState<QuizDifficulty>("medium");
+  const [questionCountLimit, setQuestionCountLimit] = useState<number | "all">("all");
+
+  const effectiveQuiz = useMemo(
+    () => questionCountLimit === "all" ? grammarQuiz : grammarQuiz.slice(0, questionCountLimit),
+    [grammarQuiz, questionCountLimit]
+  );
 
   const isAnalyzing = !!activeGenerations["grammar-topics"];
   const isGeneratingQuiz = !!activeGenerations["grammar-quiz"];
@@ -691,12 +722,12 @@ function Grammar() {
   }, []);
 
   const handleSubmitQuiz = useCallback(async () => {
-    const unanswered = grammarQuiz.filter((q) => !q.userAnswer?.trim());
+    const unanswered = effectiveQuiz.filter((q) => !q.userAnswer?.trim());
     if (unanswered.length > 0) {
       return;
     }
 
-    const openQuestions = grammarQuiz.filter(
+    const openQuestions = effectiveQuiz.filter(
       (q) => (q.type === "rewrite" || q.type === "fill-in") && q.userAnswer?.trim()
     );
 
@@ -709,12 +740,12 @@ function Grammar() {
     calculateGrammarQuizScore();
     setQuizState("completed");
     setShowReview(true);
-  }, [grammarQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer]);
+  }, [effectiveQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer]);
 
   const handleRetry = useCallback(() => {
     const { setGrammarQuiz: setQuiz } = useReadingStore.getState();
     setQuiz(
-      grammarQuiz.map((q) => ({
+      effectiveQuiz.map((q) => ({
         ...q,
         userAnswer: undefined,
         earnedPoints: undefined,
@@ -723,7 +754,7 @@ function Grammar() {
     setQuizState("in-progress");
     setShowReview(false);
     setCurrentQuestionIndex(0);
-  }, [grammarQuiz]);
+  }, [effectiveQuiz]);
 
   const handleHighlightTopic = useCallback(
     (topicId: string) => {
@@ -1437,7 +1468,7 @@ function Grammar() {
   );
 
   const goToNext = () => {
-    if (currentQuestionIndex < grammarQuiz.length - 1) {
+    if (currentQuestionIndex < effectiveQuiz.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
@@ -1473,46 +1504,154 @@ function Grammar() {
         );
       }
       return (
-        <div className="text-center py-6 space-y-6">
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <ListChecks className="h-4 w-4" />
-                <p className="font-medium">{t("reading.grammar.quiz.questionByQuestion")}</p>
-              </div>
-              <p className="text-sm text-muted-foreground">{t("reading.grammar.quiz.modeDesc")}</p>
+        <div className="flex flex-col gap-6 py-8">
+          <div className="text-center relative">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <h3 className="text-xl font-semibold">{t("reading.grammar.quiz.title")}</h3>
+              <GuideDialog
+                titleKey="reading.grammar.quiz.aboutTitle"
+                introKey="reading.grammar.quiz.aboutDesc"
+                itemsBaseKey="reading.grammar.quiz.help.items"
+                items={[
+                  { key: "identify", icon: CheckCircle2, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                  { key: "fillIn", icon: PenLine, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                  { key: "rewrite", icon: Wand2, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                  { key: "errorSpot", icon: TriangleAlert, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                ]}
+                tipContentKey="reading.grammar.quiz.help.tip"
+              />
             </div>
-            <Switch
-              checked={grammarQuizMode === "question-by-question"}
-              onCheckedChange={(checked: boolean) => setGrammarQuizMode(checked ? "question-by-question" : "all-at-once")}
-            />
+            <p className="text-muted-foreground text-sm">
+              {t("reading.grammar.quiz.ready", { count: grammarQuiz.length })}
+            </p>
           </div>
 
-          <p className="text-sm text-muted-foreground">
-            {t("reading.grammar.quiz.ready", { count: grammarQuiz.length })}
-          </p>
-          <Button onClick={handleStartQuiz} size="lg">
-            <CheckCircle2 className="h-5 w-5 mr-2" />
-            {t("reading.grammar.quiz.start")}
-          </Button>
-          {_grammarQuizCompleted && grammarQuizScore > 0 && (
-            <div className="flex justify-center mt-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
-                <Trophy className="h-4 w-4 text-yellow-500" />
-                <span className="text-sm font-medium">{t("reading.grammar.quiz.lastScore")}</span>
-                <span className={cn(
-                  "text-lg font-bold",
-                  grammarQuizScore >= 80
-                    ? "text-green-600 dark:text-green-400"
-                    : grammarQuizScore >= 60
-                      ? "text-yellow-600 dark:text-yellow-400"
-                      : "text-red-600 dark:text-red-400"
-                )}>
-                  {grammarQuizScore}%
-                </span>
+          <div className="w-full max-w-md mx-auto space-y-6">
+            <div>
+              <label className="text-sm font-medium mb-3 block">
+                {t("reading.grammar.quiz.navigationMode")}
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setGrammarQuizMode("question-by-question")}
+                  className={cn(
+                    "flex-1 px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
+                    grammarQuizMode === "question-by-question"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  {t("reading.grammar.quiz.questionByQuestion")}
+                </button>
+                <button
+                  onClick={() => setGrammarQuizMode("all-at-once")}
+                  className={cn(
+                    "flex-1 px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
+                    grammarQuizMode === "all-at-once"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:border-primary/50"
+                  )}
+                >
+                  {t("reading.grammar.quiz.allAtOnce")}
+                </button>
               </div>
             </div>
-          )}
+
+            {generateQuestionCountOptions(grammarQuiz.length).length > 1 && (
+              <div>
+                <label className="text-sm font-medium mb-3 block">
+                  {t("reading.grammar.quiz.selectQuestionCount")}
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {generateQuestionCountOptions(grammarQuiz.length).map((count) => (
+                    <button
+                      key={String(count)}
+                      onClick={() => setQuestionCountLimit(count)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-medium",
+                        questionCountLimit === count
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      {count === "all" ? t("reading.grammar.quiz.allQuestions") : count}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="border rounded-lg p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Timer className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{t("reading.grammar.quiz.timeChallenge")}</span>
+                </div>
+                <button
+                  onClick={() => setIsTimed(!isTimed)}
+                  className={cn(
+                    "w-12 h-6 rounded-full transition-colors relative",
+                    isTimed ? "bg-primary" : "bg-muted"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                      isTimed ? "translate-x-7" : "translate-x-1"
+                    )}
+                  />
+                </button>
+              </div>
+
+              {isTimed && (
+                <div className="pt-2 border-t">
+                  <label className="text-sm font-medium mb-3 block">
+                    {t("reading.grammar.quiz.selectDifficulty")}
+                  </label>
+                  <div className="flex gap-2">
+                    {(["easy", "medium", "hard"] as QuizDifficulty[]).map((d) => (
+                      <button
+                        key={d}
+                        onClick={() => setDifficulty(d)}
+                        className={cn(
+                          "flex-1 px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium",
+                          difficulty === d
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:border-primary/50"
+                        )}
+                      >
+                        {t(`reading.grammar.quiz.difficulty.${d}`)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button onClick={handleStartQuiz} className="w-full" size="lg">
+              <Play className="h-5 w-5 mr-2" />
+              {t("reading.grammar.quiz.start")}
+            </Button>
+
+            {_grammarQuizCompleted && grammarQuizScore > 0 && (
+              <div className="flex justify-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
+                  <Trophy className="h-4 w-4 text-yellow-500" />
+                  <span className="text-sm font-medium">{t("reading.grammar.quiz.lastScore")}</span>
+                  <span className={cn(
+                    "text-lg font-bold",
+                    grammarQuizScore >= 80
+                      ? "text-green-600 dark:text-green-400"
+                      : grammarQuizScore >= 60
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-red-600 dark:text-red-400"
+                  )}>
+                    {grammarQuizScore}%
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       );
     }
@@ -1539,7 +1678,7 @@ function Grammar() {
               <>
                 <h4 className="font-medium text-sm">{t("reading.grammar.quiz.topicBreakdown")}</h4>
                 {grammarTopics.map((topic) => {
-                  const topicQuestions = grammarQuiz.filter((q) => q.topicId === topic.id);
+                  const topicQuestions = effectiveQuiz.filter((q) => q.topicId === topic.id);
                   if (topicQuestions.length === 0) return null;
                   const topicCorrect = topicQuestions.filter((q) => {
                     if (q.type === "rewrite" || q.type === "fill-in") {
@@ -1566,7 +1705,7 @@ function Grammar() {
           />
           {showReview && (
             <div className="space-y-4 mt-4">
-              {grammarQuiz.map((q, i) => {
+              {effectiveQuiz.map((q, i) => {
                 const isCorrect =
                   q.type === "rewrite" || q.type === "fill-in"
                     ? (q.earnedPoints ?? 0) >= q.points
@@ -1622,7 +1761,7 @@ function Grammar() {
       );
     }
 
-    const allAnswered = grammarQuiz.every((q) => q.userAnswer?.trim());
+    const allAnswered = effectiveQuiz.every((q) => q.userAnswer?.trim());
 
     const renderQuestion = (q: GrammarQuizQuestion, i: number) => (
       <div key={q.id} className="border rounded-lg p-4">
@@ -1668,7 +1807,7 @@ function Grammar() {
     );
 
     if (grammarQuizMode === "question-by-question") {
-      const currentQuestion = grammarQuiz[currentQuestionIndex];
+      const currentQuestion = effectiveQuiz[currentQuestionIndex];
       const currentAnswer = currentQuestion?.userAnswer;
 
       return (
@@ -1677,13 +1816,13 @@ function Grammar() {
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>
                 {t("reading.grammar.quiz.question")} {currentQuestionIndex + 1}{" "}
-                {t("reading.grammar.quiz.of")} {grammarQuiz.length}
+                {t("reading.grammar.quiz.of")} {effectiveQuiz.length}
               </span>
               <span>
                 {t("reading.grammar.quiz.pressKey")} →/←
               </span>
             </div>
-            <Progress value={((currentQuestionIndex + 1) / grammarQuiz.length) * 100} className="h-2" />
+            <Progress value={((currentQuestionIndex + 1) / effectiveQuiz.length) * 100} className="h-2" />
           </div>
 
           {currentQuestion && renderQuestion(currentQuestion, currentQuestionIndex)}
@@ -1698,7 +1837,7 @@ function Grammar() {
               {t("reading.grammar.quiz.previous")}
             </Button>
 
-            {currentQuestionIndex === grammarQuiz.length - 1 ? (
+            {currentQuestionIndex === effectiveQuiz.length - 1 ? (
               <Button
                 onClick={handleSubmitQuiz}
                 disabled={!allAnswered || evaluatingId !== null}
@@ -1729,11 +1868,11 @@ function Grammar() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          {t("reading.grammar.quiz.questionsReady", { count: grammarQuiz.length })}
+          {t("reading.grammar.quiz.questionsReady", { count: effectiveQuiz.length })}
         </p>
 
         <div className="space-y-4">
-          {grammarQuiz.map((q, i) => renderQuestion(q, i))}
+          {effectiveQuiz.map((q, i) => renderQuestion(q, i))}
         </div>
 
         <div className="flex justify-center">
