@@ -45,11 +45,45 @@ function stripUserData(sessionData: ReadingStore): Record<string, unknown> {
           return clean
         })
       : sessionData.readingTest,
+    grammarQuiz: Array.isArray(sessionData.grammarQuiz)
+      ? sessionData.grammarQuiz.map((q) => {
+          const clean: Record<string, unknown> = { ...q }
+          delete clean.userAnswer
+          delete clean.earnedPoints
+          return clean
+        })
+      : sessionData.grammarQuiz,
     testScore: 0,
     testCompleted: false,
     testEarnedPoints: 0,
+    testsCompleted: 0,
     vocabularyQuizScore: 0,
+    vocabQuizzesCompleted: 0,
     spellingGameBestScore: 0,
+    spellingGameAccuracy: 0,
+    spellingGamesCompleted: 0,
+    grammarQuizScore: 0,
+    grammarQuizCompleted: false,
+    grammarQuizzesCompleted: 0,
+    grammarQuizEarnedPoints: 0,
+    grammarQuizTotalPoints: 0,
+    grammarScrambleHighScore: 0,
+    grammarWorkshopHighScore: 0,
+    grammarSurgeryHighScore: 0,
+    grammarRouletteHighScore: 0,
+    grammarDuelHighScore: 0,
+    grammarScrambleAccuracy: 0,
+    grammarWorkshopAccuracy: 0,
+    grammarSurgeryAccuracy: 0,
+    grammarRouletteAccuracy: 0,
+    grammarDuelAccuracy: 0,
+    grammarGameAccuracy: 0,
+    grammarScrambleCompleted: 0,
+    grammarWorkshopCompleted: 0,
+    grammarSurgeryCompleted: 0,
+    grammarRouletteCompleted: 0,
+    grammarDuelCompleted: 0,
+    grammarGamesCompleted: 0,
     flashcardReviewDates: [],
     glossaryRatings: {},
     chatHistory: [],
