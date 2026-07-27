@@ -1483,23 +1483,42 @@ function Grammar() {
     if (quizState === "idle") {
       if (grammarQuiz.length === 0) {
         return (
-          <div className="text-center py-6">
-            <p className="text-sm text-muted-foreground mb-4">
-              {t("reading.grammar.quiz.ready", { count: 0 })}
-            </p>
-            <Button onClick={handleGenerateQuiz} disabled={isGeneratingQuiz || isAnalyzing}>
-              {isGeneratingQuiz ? (
-                <>
-                  <LoaderCircle className="h-4 w-4 animate-spin" />
-                  <span>{t("reading.grammar.quiz.generating")}</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>{t("reading.grammar.quiz.generate")}</span>
-                </>
-              )}
-            </Button>
+          <div className="flex flex-col gap-6 py-8">
+            <div className="text-center relative">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <h3 className="text-xl font-semibold">{t("reading.grammar.quiz.title")}</h3>
+                <GuideDialog
+                  titleKey="reading.grammar.quiz.aboutTitle"
+                  introKey="reading.grammar.quiz.aboutDesc"
+                  itemsBaseKey="reading.grammar.quiz.help.items"
+                  items={[
+                    { key: "identify", icon: CheckCircle2, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                    { key: "fillIn", icon: PenLine, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                    { key: "rewrite", icon: Wand2, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                    { key: "errorSpot", icon: TriangleAlert, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                  ]}
+                  tipContentKey="reading.grammar.quiz.help.tip"
+                />
+              </div>
+              <p className="text-muted-foreground text-sm">
+                {t("reading.grammar.quiz.generateFirst")}
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <Button onClick={handleGenerateQuiz} disabled={isGeneratingQuiz || isAnalyzing} size="lg">
+                {isGeneratingQuiz ? (
+                  <>
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                    <span>{t("reading.grammar.quiz.generating")}</span>
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-5 w-5 mr-2" />
+                    <span>{t("reading.grammar.quiz.generate")}</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         );
       }
@@ -1906,9 +1925,42 @@ function Grammar() {
       case "quiz":
         if (grammarTopics.length === 0) {
           return (
-            <div className="text-center py-8 text-muted-foreground">
-              <BookOpenCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>{t("reading.grammar.analyzeFirst")}</p>
+            <div className="flex flex-col gap-6 py-8">
+              <div className="text-center relative">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <h3 className="text-xl font-semibold">{t("reading.grammar.quiz.title")}</h3>
+                  <GuideDialog
+                    titleKey="reading.grammar.quiz.aboutTitle"
+                    introKey="reading.grammar.quiz.aboutDesc"
+                    itemsBaseKey="reading.grammar.quiz.help.items"
+                    items={[
+                      { key: "identify", icon: CheckCircle2, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                      { key: "fillIn", icon: PenLine, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                      { key: "rewrite", icon: Wand2, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                      { key: "errorSpot", icon: TriangleAlert, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                    ]}
+                    tipContentKey="reading.grammar.quiz.help.tip"
+                  />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  {t("reading.grammar.quiz.analyzeFirst")}
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <Button onClick={handleAnalyze} disabled={isAnalyzing} size="lg">
+                  {isAnalyzing ? (
+                    <>
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      <span>{t("reading.grammar.analyzing")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpenCheck className="h-5 w-5 mr-2" />
+                      <span>{t("reading.grammar.analyze")}</span>
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           );
         }

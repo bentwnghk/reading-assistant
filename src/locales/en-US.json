@@ -1106,6 +1106,7 @@
         },
         "navigationMode": "Navigation Mode",
         "allAtOnce": "All at Once",
+        "analyzeFirst": "Analyze grammar topics first to unlock the quiz",
         "selectQuestionCount": "Number of Questions",
         "allQuestions": "All",
         "timeChallenge": "Time Challenge",

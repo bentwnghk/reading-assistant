@@ -1137,6 +1137,7 @@
         },
         "navigationMode": "導航模式",
         "allAtOnce": "全部顯示",
+        "analyzeFirst": "請先分析語法主題以解鎖測驗",
         "selectQuestionCount": "題目數量",
         "allQuestions": "全部",
         "timeChallenge": "限時挑戰",
