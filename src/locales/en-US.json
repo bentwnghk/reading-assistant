@@ -1174,7 +1174,32 @@
         "aboutRoulette": "Spin the wheel to land on a grammar topic, then answer questions correctly to earn coins. Hot topics give bonus multipliers!",
         "aboutDuel": "Face off against an AI opponent in a turn-based battle. Answer grammar questions correctly to deal damage and win the duel.",
         "aboutModes": "Practice mode is untimed with hints. Arcade mode adds time pressure and streak bonuses. Mastery mode has no hints for the ultimate challenge.",
-        "aboutResultTiers": "Your result screen features performance tiers: Mastery (90%+), Great (70-89%), Good (50-69%), and Keep Practicing (<50%), each with unique visual effects."
+        "aboutResultTiers": "Your result screen features performance tiers: Mastery (90%+), Great (70-89%), Good (50-69%), and Keep Practicing (<50%), each with unique visual effects.",
+        "help": {
+          "items": {
+            "roulette": {
+              "name": "Grammar Roulette",
+              "desc": "Spin the wheel to land on a grammar topic, then answer questions correctly to earn coins. Hot topics give bonus multipliers!"
+            },
+            "surgery": {
+              "name": "Error Surgery",
+              "desc": "Find and fix grammar errors in sentences. Tap the incorrect word, then select the right correction to improve grammatical accuracy."
+            },
+            "workshop": {
+              "name": "Grammar Workshop",
+              "desc": "Fill in the blank slots with correct words from the word bank. Each slot targets a specific part of speech or grammar pattern."
+            },
+            "duel": {
+              "name": "Grammar Duel",
+              "desc": "Face off against an AI opponent in a turn-based battle. Answer grammar questions correctly to deal damage and win the duel."
+            },
+            "scramble": {
+              "name": "Word Order Scramble",
+              "desc": "Rearrange jumbled words to form a grammatically correct sentence. Tap word chips in the right order to build proper sentence structure."
+            }
+          },
+          "tip": "Practice mode: untimed with hints. Arcade mode: timed with streak bonuses. Mastery mode: no hints for the ultimate challenge. Results show performance tiers: Master (90%+), Great (70-89%), Good (50-69%), Keep Practicing (<50%)."
+        }
       }
     },
     "glossary": {
@@ -1364,7 +1389,28 @@
           "hard": "Hard"
         },
         "aboutTitle": "How It Works",
-        "aboutDesc": "Practice spelling through interactive games designed to reinforce vocabulary learning.",
+        "aboutDesc": "Choose Solo Practice to learn at your own pace, or Multiplayer Battle to compete in real time. In solo mode, four interactive games reinforce vocabulary through spelling — pick one below and start playing.",
+        "help": {
+          "items": {
+            "listen-type": {
+              "name": "Listen & Type",
+              "desc": "Listen to the word pronunciation and type what you hear. Great for auditory learning!"
+            },
+            "scramble": {
+              "name": "Letter Scramble",
+              "desc": "Rearrange jumbled letters to form the correct word. A visual puzzle approach!"
+            },
+            "fill-blanks": {
+              "name": "Fill Blanks",
+              "desc": "Type the missing letters shown as underscores. Focus on specific letter patterns!"
+            },
+            "mixed": {
+              "name": "Mixed Mode",
+              "desc": "Randomly switches between all modes for variety and comprehensive practice!"
+            }
+          },
+          "tip": "Build streaks for bonus points (+10% per 3 consecutive). Use hints wisely — they reveal letters but reduce your score. Faster responses earn time bonuses."
+        },
         "modeDesc": {
           "listen-type": "Listen to the word pronunciation and type what you hear. Great for auditory learning!",
           "scramble": "Rearrange jumbled letters to form the correct word. A visual puzzle approach!",
