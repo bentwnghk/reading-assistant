@@ -763,18 +763,11 @@ function Grammar() {
   }, [effectiveQuiz, completeQuiz]);
 
   const handleRetry = useCallback(() => {
-    const { setGrammarQuiz: setQuiz } = useReadingStore.getState();
-    setQuiz(
-      effectiveQuiz.map((q) => ({
-        ...q,
-        userAnswer: undefined,
-        earnedPoints: undefined,
-      }))
-    );
+    useReadingStore.getState().clearGrammarQuizAnswers();
     setQuizState("in-progress");
     setShowReview(false);
     setCurrentQuestionIndex(0);
-  }, [effectiveQuiz]);
+  }, []);
 
   useEffect(() => {
     if (quizState !== "in-progress" || !isTimed) return;
@@ -826,15 +819,7 @@ function Grammar() {
   // instead stores them on grammarQuiz[] (synced to the DB on each keystroke),
   // so they must be cleared explicitly. Completed results are preserved.
   const discardInProgressAnswers = useCallback(() => {
-    const { grammarQuiz: fullQuiz, setGrammarQuiz: setQuiz } = useReadingStore.getState();
-    if (!fullQuiz.some((q) => q.userAnswer?.trim() || q.earnedPoints !== undefined)) return;
-    setQuiz(
-      fullQuiz.map((q) => ({
-        ...q,
-        userAnswer: undefined,
-        earnedPoints: undefined,
-      }))
-    );
+    useReadingStore.getState().clearGrammarQuizAnswers();
   }, []);
 
   // (1) Clear on full unmount — e.g. SPA navigation to /leaderboard.

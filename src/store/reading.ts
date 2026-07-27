@@ -278,6 +278,7 @@ interface ReadingActions {
   setGrammarTopics: (topics: GrammarTopic[]) => void;
   enrichGrammarTopic: (topicId: string, enrichment: Partial<GrammarTopic>) => void;
   setGrammarQuiz: (questions: GrammarQuizQuestion[]) => void;
+  clearGrammarQuizAnswers: () => void;
   setGrammarQuizAnswer: (questionId: string, answer: string) => void;
   setGrammarQuizQuestionPoints: (questionId: string, points: number) => void;
   setGrammarQuizScore: (score: number) => void;
@@ -751,6 +752,30 @@ export const useReadingStore = create(
             grammarQuizScore: 0,
             grammarQuizEarnedPoints: 0,
             grammarQuizTotalPoints: questions.reduce((sum, q) => sum + q.points, 0),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      // Clears per-question userAnswer / earnedPoints for an in-progress
+      // (un-submitted) quiz WITHOUT resetting the score. Used by retry and
+      // mid-quiz navigation cleanup so the last completed score survives —
+      // mirroring VocabularyQuiz, whose retry only resets local state and
+      // leaves vocabularyQuizScore intact. Score/completed/points are preserved.
+      clearGrammarQuizAnswers: () =>
+        set((state) => {
+          if (!state.grammarQuiz.some((q) => q.userAnswer !== undefined || q.earnedPoints !== undefined)) {
+            return state;
+          }
+          const newState = {
+            grammarQuiz: state.grammarQuiz.map((q) => ({
+              ...q,
+              userAnswer: undefined,
+              earnedPoints: undefined,
+            })),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
