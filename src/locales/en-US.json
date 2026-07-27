@@ -1292,6 +1292,23 @@
         "timeChallenge": "Time Challenge",
         "tipDifficulty": "Harder difficulty = less time per question",
         "tipTime": "Time Challenge mode auto-advances when time runs out",
+        "help": {
+          "items": {
+            "chooseDefinition": {
+              "name": "Choose Definition",
+              "desc": "Select the correct definition for a given word."
+            },
+            "chooseWord": {
+              "name": "Choose Word",
+              "desc": "Select the word that matches a given definition."
+            },
+            "fillBlank": {
+              "name": "Fill in the Blank",
+              "desc": "Fill in the missing word to complete the sentence."
+            }
+          },
+          "tip": "Harder difficulty gives you less time per question. Time Challenge mode auto-advances when time runs out. Each correct answer earns points toward your overall score."
+        },
         "correct": "Correct",
         "incorrect": "Incorrect",
         "scoreBreakdown": "Score Breakdown",

@@ -1323,6 +1323,23 @@
         "timeChallenge": "限時挑戰",
         "tipDifficulty": "難度越高 = 每題時間越少",
         "tipTime": "限時挑戰模式時間耗盡時自動跳到下一題",
+        "help": {
+          "items": {
+            "chooseDefinition": {
+              "name": "選擇釋義",
+              "desc": "為給定的生字選擇正確的釋義。"
+            },
+            "chooseWord": {
+              "name": "選擇生字",
+              "desc": "選擇符合給定釋義的生字。"
+            },
+            "fillBlank": {
+              "name": "填空",
+              "desc": "填入缺失的生字以完成句子。"
+            }
+          },
+          "tip": "難度越高，每題可用時間越少。限時挑戰模式時間耗盡時自動跳到下一題。每題正確答案可獲得分數。"
+        },
         "correct": "正確",
         "incorrect": "錯誤",
         "scoreBreakdown": "得分詳情",
