@@ -478,3 +478,16 @@ export async function shareVocabularyWords(
 
   return { inserted, skipped };
 }
+
+export async function getVocabularyWordMastery(
+  userId: string,
+  word: string
+): Promise<{ masteryLevel: VocabularyMasteryLevel } | null> {
+  const pool = getPool();
+  const { rows } = await pool.query(
+    `SELECT mastery_level FROM user_vocabulary WHERE user_id = $1 AND word = $2`,
+    [userId, word.toLowerCase()]
+  );
+  if (rows.length === 0) return null;
+  return { masteryLevel: (rows[0].mastery_level as number) as VocabularyMasteryLevel };
+}

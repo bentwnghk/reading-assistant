@@ -62,7 +62,7 @@
           "title": "遊戲化",
           "desc": "讓學習像遊戲一樣有趣",
           "features": {
-            "games": "透過有趣的互動遊戲學習",
+            "games": "透過有趣的互動遊戲與即時多人對戰學習",
             "leaderboards": "在每週排行榜上競爭",
             "achievements": "隨著進步解鎖成就"
           }
@@ -215,7 +215,7 @@
         "analyze": "詳細分析任何句子",
         "highlight": "標記生字建立詞彙表",
         "glossary": "用字卡複習生字",
-        "spelling": "用拼字遊戲練習",
+        "spelling": "用拼字遊戲練習或加入即時多人競賽",
         "vocabQuiz": "測試你的詞彙知識",
         "grammar": "分析語法結構並參加語法測驗",
         "grammarGames": "玩語法遊戲鞏固技能",

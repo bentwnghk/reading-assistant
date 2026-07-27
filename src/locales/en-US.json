@@ -62,7 +62,7 @@
           "title": "Gamified",
           "desc": "Learning that feels like play",
           "features": {
-            "games": "Learn through fun interactive games",
+            "games": "Learn through fun interactive games & live multiplayer battles",
             "leaderboards": "Compete on weekly leaderboards",
             "achievements": "Unlock achievements as you progress"
           }
@@ -215,7 +215,7 @@
         "analyze": "Analyze any sentence in detail",
         "highlight": "Highlight words to build vocabulary",
         "glossary": "Review vocabulary using flashcards",
-        "spelling": "Practice with spelling games",
+        "spelling": "Practice with spelling games, or join real-time multiplayer battles against classmates",
         "vocabQuiz": "Test your vocabulary knowledge",
         "grammar": "Analyze grammar structures & take quizzes",
         "grammarGames": "Play grammar games to reinforce skills",

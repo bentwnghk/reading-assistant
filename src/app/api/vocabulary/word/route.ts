@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { recordSRSAction, updateVocabularyReview } from "@/lib/vocabulary";
+import { recordSRSAction, updateVocabularyReview, getVocabularyWordMastery } from "@/lib/vocabulary";
+import { calculateNextReview } from "@/utils/srs";
 
 export async function PATCH(request: Request) {
   const session = await auth();
@@ -38,6 +39,18 @@ export async function PATCH(request: Request) {
 
     if (typeof correct === "boolean" && typeof masteryLevel === "number" && typeof nextReviewAt === "number") {
       await updateVocabularyReview(session.user.id, word, correct, masteryLevel, nextReviewAt);
+      return NextResponse.json({ success: true });
+    }
+
+    if (typeof correct === "boolean") {
+      const existing = await getVocabularyWordMastery(session.user.id, word);
+      const currentLevel = existing?.masteryLevel ?? 0;
+      const { newMastery, nextReviewAt: calculatedNext } = calculateNextReview(
+        currentLevel as 0 | 1 | 2 | 3 | 4 | 5,
+        correct
+      );
+      await updateVocabularyReview(session.user.id, word, correct, newMastery, calculatedNext);
+      return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ success: true });

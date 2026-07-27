@@ -94,6 +94,32 @@ function Glossary() {
     store.recordSRSAction(word, action);
   }, []);
 
+  const handleSpellingWordResult = useCallback((word: string, correct: boolean) => {
+    fetch("/api/vocabulary/word", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ word, correct }),
+    }).catch((_err) => {});
+  }, []);
+
+  const handleSpellingComplete = useCallback(
+    (results: { word: string; correct: boolean }[]) => {
+      if (results.length === 0) return;
+      const reviewResults: VocabularyReviewResult[] = results.map((r) => ({
+        word: r.word,
+        correct: r.correct,
+        masteryBefore: 0,
+        masteryAfter: 0,
+      }));
+      fetch("/api/vocabulary/review-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "spelling", results: reviewResults }),
+      }).catch((_err) => {});
+    },
+    [],
+  );
+
   const handleDownloadWord = useCallback(async () => {
     if (sortedGlossary.length === 0) return;
 
@@ -383,7 +409,13 @@ function Glossary() {
       case "quiz":
         return <VocabularyQuiz glossary={glossary} />;
       case "spelling":
-        return <VocabularySpelling glossary={glossary} />;
+        return (
+          <VocabularySpelling
+            glossary={glossary}
+            onWordResult={handleSpellingWordResult}
+            onComplete={handleSpellingComplete}
+          />
+        );
       default:
         return (
           <div className="overflow-x-auto">
