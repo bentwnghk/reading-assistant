@@ -3187,7 +3187,7 @@
         "categories": {
           "weeklyScore": {
             "title": "本週分數",
-            "desc": "綜合所有學習活動的表現指標。每次閱讀、閱讀測驗、詞彙測驗、拼字遊戲、文法測驗和文法遊戲都會為你的每週總分增添積分。"
+            "desc": "綜合所有學習活動的表現指標。每次閱讀、閱讀測驗、詞彙測驗、拼字遊戲、語法測驗和語法遊戲都會為你的每週總分增添積分。"
           },
           "streak": {
             "title": "連續天數",
@@ -3499,8 +3499,8 @@
       "testScoreCol": "閱讀測驗",
       "vocabCol": "詞彙測驗",
       "spellingCol": "拼字",
-      "grammarQuizCol": "文法測驗",
-      "grammarGameCol": "文法遊戲",
+      "grammarQuizCol": "語法測驗",
+      "grammarGameCol": "語法遊戲",
       "accuracyCol": "正確率",
       "lastViewedCol": "上次瀏覽",
       "notStarted": "尚未開始",
@@ -3667,7 +3667,7 @@
         },
         "roster": {
           "name": "個別學生明細",
-          "desc": "開啟功課可查看每位學生的閱讀測驗、詞彙、拼字、文法分數及上次瀏覽時間。"
+          "desc": "開啟功課可查看每位學生的閱讀測驗、詞彙、拼字、語法分數及上次瀏覽時間。"
         },
         "srs": {
           "title": "小秘訣：",
