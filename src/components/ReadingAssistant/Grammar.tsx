@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BookOpen,
@@ -144,6 +144,12 @@ const QUIZ_TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; colo
 };
 
 type QuizDifficulty = "easy" | "medium" | "hard";
+
+const DIFFICULTY_CONFIG: Record<QuizDifficulty, { timeLimit: number }> = {
+  easy: { timeLimit: 45 },
+  medium: { timeLimit: 30 },
+  hard: { timeLimit: 20 },
+};
 
 function generateQuestionCountOptions(total: number): (number | "all")[] {
   const options: number[] = [5, 10, 15];
@@ -698,6 +704,10 @@ function Grammar() {
   const [isTimed, setIsTimed] = useState(false);
   const [difficulty, setDifficulty] = useState<QuizDifficulty>("medium");
   const [questionCountLimit, setQuestionCountLimit] = useState<number | "all">("all");
+  const [timeRemaining, setTimeRemaining] = useState(DIFFICULTY_CONFIG.medium.timeLimit);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const timerConfig = DIFFICULTY_CONFIG[difficulty];
 
   const effectiveQuiz = useMemo(
     () => questionCountLimit === "all" ? grammarQuiz : grammarQuiz.slice(0, questionCountLimit),
@@ -719,28 +729,38 @@ function Grammar() {
     setQuizState("in-progress");
     setShowReview(false);
     setCurrentQuestionIndex(0);
-  }, []);
+    setTimeRemaining(
+      grammarQuizMode === "all-at-once"
+        ? timerConfig.timeLimit * effectiveQuiz.length
+        : timerConfig.timeLimit
+    );
+  }, [timerConfig.timeLimit, grammarQuizMode, effectiveQuiz.length]);
+
+  const completeQuiz = useCallback(async () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    const openQuestions = effectiveQuiz.filter(
+      (q) => (q.type === "rewrite" || q.type === "fill-in") && q.userAnswer?.trim()
+    );
+    for (const q of openQuestions) {
+      setEvaluatingId(q.id);
+      await evaluateGrammarOpenAnswer(q.id, q.question, q.correctAnswer, q.userAnswer!, q.points);
+    }
+    setEvaluatingId(null);
+    calculateGrammarQuizScore();
+    setQuizState("completed");
+    setShowReview(true);
+  }, [effectiveQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer]);
 
   const handleSubmitQuiz = useCallback(async () => {
     const unanswered = effectiveQuiz.filter((q) => !q.userAnswer?.trim());
     if (unanswered.length > 0) {
       return;
     }
-
-    const openQuestions = effectiveQuiz.filter(
-      (q) => (q.type === "rewrite" || q.type === "fill-in") && q.userAnswer?.trim()
-    );
-
-    for (const q of openQuestions) {
-      setEvaluatingId(q.id);
-      await evaluateGrammarOpenAnswer(q.id, q.question, q.correctAnswer, q.userAnswer!, q.points);
-    }
-    setEvaluatingId(null);
-
-    calculateGrammarQuizScore();
-    setQuizState("completed");
-    setShowReview(true);
-  }, [effectiveQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer]);
+    await completeQuiz();
+  }, [effectiveQuiz, completeQuiz]);
 
   const handleRetry = useCallback(() => {
     const { setGrammarQuiz: setQuiz } = useReadingStore.getState();
@@ -755,6 +775,43 @@ function Grammar() {
     setShowReview(false);
     setCurrentQuestionIndex(0);
   }, [effectiveQuiz]);
+
+  useEffect(() => {
+    if (quizState !== "in-progress" || !isTimed) return;
+
+    if (grammarQuizMode === "all-at-once") {
+      timerRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            completeQuiz();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      timerRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            if (currentQuestionIndex < effectiveQuiz.length - 1) {
+              setCurrentQuestionIndex((idx) => idx + 1);
+              return timerConfig.timeLimit;
+            } else {
+              completeQuiz();
+              return 0;
+            }
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [quizState, isTimed, grammarQuizMode, currentQuestionIndex, effectiveQuiz.length, timerConfig.timeLimit, completeQuiz]);
 
   const handleHighlightTopic = useCallback(
     (topicId: string) => {
@@ -1470,6 +1527,7 @@ function Grammar() {
   const goToNext = () => {
     if (currentQuestionIndex < effectiveQuiz.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
+      setTimeRemaining(timerConfig.timeLimit);
     }
   };
 
@@ -1841,6 +1899,15 @@ function Grammar() {
                 {t("reading.grammar.quiz.pressKey")} →/←
               </span>
             </div>
+            {isTimed && (
+              <div className={cn(
+                "flex items-center gap-1 text-sm font-medium",
+                timeRemaining <= 3 ? "text-red-500" : timeRemaining <= 7 ? "text-yellow-500" : "text-foreground"
+              )}>
+                <Timer className="h-4 w-4" />
+                {timeRemaining}s
+              </div>
+            )}
             <Progress value={((currentQuestionIndex + 1) / effectiveQuiz.length) * 100} className="h-2" />
           </div>
 
@@ -1886,9 +1953,20 @@ function Grammar() {
 
     return (
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          {t("reading.grammar.quiz.questionsReady", { count: effectiveQuiz.length })}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {t("reading.grammar.quiz.questionsReady", { count: effectiveQuiz.length })}
+          </p>
+          {isTimed && (
+            <div className={cn(
+              "flex items-center gap-1 text-sm font-medium",
+              timeRemaining <= 3 ? "text-red-500" : timeRemaining <= 7 ? "text-yellow-500" : "text-foreground"
+            )}>
+              <Timer className="h-4 w-4" />
+              {timeRemaining}s
+            </div>
+          )}
+        </div>
 
         <div className="space-y-4">
           {effectiveQuiz.map((q, i) => renderQuestion(q, i))}
