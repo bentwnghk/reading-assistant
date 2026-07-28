@@ -461,7 +461,9 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                   {selectedLetters.length > 0 ? (
                     selectedLetters.join("").toUpperCase()
                   ) : (
-                    <span className="text-muted-foreground">_ _ _ _ _ _</span>
+                    <span className="text-muted-foreground">
+                      {Array.from({ length: word.word.length }).fill("_").join(" ")}
+                    </span>
                   )}
                 </div>
 

@@ -1000,7 +1000,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
             </div>
 
             <div className="text-center font-mono text-2xl tracking-wider min-h-[2.5rem] p-2 border-b-2 border-dashed">
-              {userInput || <span className="text-muted-foreground">_ _ _ _ _ _</span>}
+              {userInput || (
+                <span className="text-muted-foreground">
+                  {Array.from({ length: currentChallenge.word.length }).fill("_").join(" ")}
+                </span>
+              )}
             </div>
 
             <div
