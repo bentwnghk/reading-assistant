@@ -322,7 +322,7 @@ body.toc-noscroll{overflow:hidden}
 .dropcircle{width:64px;height:64px;border-radius:50%;background:var(--subtle);display:flex;align-items:center;justify-content:center;margin:0 auto}
 /* progress ring (medal) */
 .ringwrap{position:relative;width:80px;height:80px;margin:0 auto}
-.ringwrap svg{transform:rotate(-90deg)}
+.ringwrap>svg{transform:rotate(-90deg)}
 .ringwrap .inner{position:absolute;inset:6px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 /* hp bar duel */
 .duelcard{border:2px solid;border-radius:12px;padding:12px;text-align:center;flex:1}
@@ -619,7 +619,70 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <div class="callout"><strong>角色概覽</strong> &nbsp; <span class="role student">學生</span> 閱讀與練習 · <span class="role teacher">教師</span> 管理班別、分享內容、查看班級數據 · <span class="role admin">管理員</span> 管理整間學校（用戶、班別、帳單） · <span class="role super">超級管理員</span> 管理所有學校。</div>
 
-      <h3>2.3 選擇你的 AI 存取模式</h3>
+      <h3>2.3「歡迎回來」對話框</h3>
+      <p>你再次登入時，一個友善的彈窗讓你一鍵開始閱讀。它於<b>每次登入顯示一次</b>，在你上次的學習環節還原後出現，並依照你的進度自動調整：</p>
+      <ul>
+        <li><b>帶著未完成的環節回來</b>&rarr; 標題顯示「<b>歡迎回來！</b>」，首張卡片建議下一個未完成的活動（例如「完成閱讀測驗」），讓你直接繼續。</li>
+        <li><b>尚無任何環節</b>&rarr; 標題顯示「<b>歡迎！</b>」並隱藏活動卡片——彈窗變成新閱讀的啟動台。</li>
+      </ul>
+      <div class="callout"><strong>收到分享環節時略過</strong> 若教師在你登入期間分享了閱讀環節，此對話框會自動關閉，改由分享環節對話框（§10.3）接手。</div>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">👋 歡迎回來對話框 — 主畫面</span></div>
+        <div class="mock-body">
+          <div style="max-width:340px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+            <div style="height:4px;background:#6366f1"></div>
+            <div style="text-align:center;padding:16px">
+              <div style="position:relative;width:56px;height:56px;margin:0 auto 8px"><div style="position:absolute;inset:0;border-radius:50%;background:#6366f1;opacity:.2;filter:blur(8px)"></div><div style="position:relative;width:56px;height:56px;border-radius:50%;background:#6366f1;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(99,102,241,.5)"><svg class="ic lg"><use href="#i-clipboard-check"/></svg></div></div>
+              <b style="font-size:17px">歡迎回來！</b>
+              <p class="small" style="margin:4px 0 12px;color:var(--muted)">準備好繼續學習了嗎？</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(99,102,241,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#6366f1;margin-top:2px"><use href="#i-graduation-cap"/></svg><div style="flex:1"><b style="font-size:13px">繼續目前的學習</b><div class="small" style="color:var(--muted);margin-top:2px">完成你的閱讀理解測驗</div><div class="small" style="color:var(--muted);margin-top:2px">+ 還有 3 個學習活動等著你</div></div><svg class="ic sm" style="color:#6366f1;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(245,158,11,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#f59e0b;margin-top:2px"><use href="#i-library"/></svg><div style="flex:1"><b style="font-size:13px">閱讀新文本</b><div class="small" style="color:var(--muted);margin-top:2px">從文本庫中挑選一篇新文本！</div></div><svg class="ic sm" style="color:#f59e0b;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(20,184,166,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#14b8a6;margin-top:2px"><use href="#i-upload"/></svg><div style="flex:1"><b style="font-size:13px">上傳圖片 / PDF</b><div class="small" style="color:var(--muted);margin-top:2px">上傳文章的照片或 PDF 讓 AI 提取文字</div></div><svg class="ic sm" style="color:#14b8a6;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(139,92,246,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#8b5cf6;margin-top:2px"><use href="#i-sparkles"/></svg><div style="flex:1"><b style="font-size:13px">用 AI 生成</b><div class="small" style="color:var(--muted);margin-top:2px">讓 AI 為你撰寫任何主題的閱讀文章！</div></div><svg class="ic sm" style="color:#8b5cf6;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+              </div>
+              <div style="margin-top:8px"><span class="btn sm ghost" style="width:100%;justify-content:center;color:var(--muted)">稍後再說</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mock-cap">頂部色條與圓形圖示採用建議活動的顏色（此處 <b style="color:#6366f1">靛藍</b>＝閱讀測驗）。「繼續目前的學習」卡片僅在有未完成環節時出現。</div>
+      <p>四張卡片：</p>
+      <table class="ref">
+        <tr><th>卡片</th><th>顏色</th><th>作用</th></tr>
+        <tr><td><b>繼續目前的學習</b><span class="small">（有環節時）</span></td><td><span class="badge" style="background:#e0e7ff;color:#4f46e5">活動色</span></td><td>捲動到上次環節的下一個未完成活動——摘要、思維導圖、詞彙表、閱讀測驗、語法等。「+ 還有 N 個」提示剩餘活動數量。</td></tr>
+        <tr><td><b>閱讀新文本</b></td><td><span class="badge b-amber">琥珀</span></td><td>開啟文本庫挑選器（見下）。</td></tr>
+        <tr><td><b>上傳圖片 / PDF</b></td><td><span class="badge b-teal">青綠</span></td><td>跳到上傳步驟（§4.2）並開啟檔案選擇器。</td></tr>
+        <tr><td><b>用 AI 生成</b></td><td><span class="badge b-violet">紫色</span></td><td>開啟 AI 文本產生器，讓 Mr.🆖 撰寫任何主題的新文章。</td></tr>
+      </table>
+      <p>選擇<b>閱讀新文本</b>，對話框會短暫顯示載入轉圈，接著從你學校的文本庫隨機挑選一篇文本，一鍵開始：</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📚 歡迎回來對話框 — 文本庫推薦</span></div>
+        <div class="mock-body">
+          <div style="max-width:340px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+            <div style="height:4px;background:#f59e0b"></div>
+            <div style="text-align:center;padding:16px">
+              <div style="position:relative;width:56px;height:56px;margin:0 auto 8px"><div style="position:absolute;inset:0;border-radius:50%;background:#f59e0b;opacity:.2;filter:blur(8px)"></div><div style="position:relative;width:56px;height:56px;border-radius:50%;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(245,158,11,.5)"><svg class="ic lg"><use href="#i-library"/></svg></div></div>
+              <b style="font-size:17px">為你推薦這篇文本！</b>
+              <p class="small" style="margin:4px 0 12px;color:var(--muted)">從文本庫中隨機挑選的一篇文本</p>
+              <div style="text-align:left;padding:14px;border:1px solid rgba(245,158,11,.4);border-radius:12px;background:rgba(255,255,255,.6)">
+                <p class="small" style="margin:0 0 2px;color:var(--muted)">海洋生物 · 五年級</p>
+                <b style="font-size:15px">發光的深海</b>
+                <p class="small" style="margin:6px 0 0;color:var(--muted)">海面之下，洋流攪動著冰冷的黑暗。在此處，發光的生物彼此擦身而過……</p>
+                <div style="display:flex;gap:10px;margin-top:8px;font-size:11px;color:var(--muted)"><span style="display:inline-flex;align-items:center;gap:4px"><svg class="ic sm"><use href="#i-user"/></svg> 陳老師</span><span style="display:inline-flex;align-items:center;gap:4px"><svg class="ic sm"><use href="#i-image"/></svg> 3 張圖片</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+                <span class="btn sm" style="background:#f59e0b;color:#fff;border-color:#f59e0b;justify-content:center">開始閱讀！ <svg class="ic sm"><use href="#i-arrow-right"/></svg></span>
+                <span class="btn sm outline" style="justify-content:center"><svg class="ic sm"><use href="#i-refresh-cw"/></svg> 換一篇</span>
+                <span class="btn sm ghost" style="justify-content:center;color:var(--muted)">稍後再說</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p>點按<b>開始閱讀！</b>載入文本並直接略過上傳步驟，或點按<b>換一篇</b>隨機另一篇。<b>稍後再說</b>關閉彈窗，停留在空白的閱讀頁面，可使用任何工作流程。</p>
+
+      <h3>2.4 選擇你的 AI 存取模式</h3>
       <p>任何 AI 功能運作前，你必須在 <b>設定 → 一般</b> 選擇一個 <strong>計費模式</strong>。共有三個選項。首次開啟設定時應用程式會自動建議一個，但你可隨時更改。</p>
 
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:18px 0">

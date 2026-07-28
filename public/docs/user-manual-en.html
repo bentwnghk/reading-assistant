@@ -322,7 +322,7 @@ body.toc-noscroll{overflow:hidden}
 .dropcircle{width:64px;height:64px;border-radius:50%;background:var(--subtle);display:flex;align-items:center;justify-content:center;margin:0 auto}
 /* progress ring (medal) */
 .ringwrap{position:relative;width:80px;height:80px;margin:0 auto}
-.ringwrap svg{transform:rotate(-90deg)}
+.ringwrap>svg{transform:rotate(-90deg)}
 .ringwrap .inner{position:absolute;inset:6px;border-radius:50%;display:flex;align-items:center;justify-content:center}
 /* hp bar duel */
 .duelcard{border:2px solid;border-radius:12px;padding:12px;text-align:center;flex:1}
@@ -619,7 +619,70 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <div class="callout"><strong>Roles at a glance</strong> &nbsp; <span class="role student">student</span> reads &amp; practices · <span class="role teacher">teacher</span> manages classes, shares content, views class analytics · <span class="role admin">admin</span> runs a whole school (users, classes, billing) · <span class="role super">super-admin</span> runs every school.</div>
 
-      <h3>2.3 Choosing your AI access mode</h3>
+      <h3>2.3 The "Welcome Back" dialog</h3>
+      <p>The moment you sign back in, a friendly popup gets you reading in one tap. It appears <b>once per sign-in</b>, right after your last session has been restored, and adapts to where you left off:</p>
+      <ul>
+        <li><b>Returning with an in-progress session</b> &rarr; the title reads "<b>Welcome back!</b>" and the first card suggests the next incomplete activity (e.g. "finish your reading test"), so you jump straight back in.</li>
+        <li><b>No session yet</b> &rarr; the title reads "<b>Welcome!</b>" and the activity card is hidden — the popup becomes a launch pad for new reading.</li>
+      </ul>
+      <div class="callout"><strong>Skipped when a session is shared to you</strong> If a teacher shares a reading session that lands while you're signing in, this dialog is dismissed automatically so the shared-session dialog (§10.3) can take over.</div>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">👋 Welcome Back dialog — main screen</span></div>
+        <div class="mock-body">
+          <div style="max-width:340px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+            <div style="height:4px;background:#6366f1"></div>
+            <div style="text-align:center;padding:16px">
+              <div style="position:relative;width:56px;height:56px;margin:0 auto 8px"><div style="position:absolute;inset:0;border-radius:50%;background:#6366f1;opacity:.2;filter:blur(8px)"></div><div style="position:relative;width:56px;height:56px;border-radius:50%;background:#6366f1;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(99,102,241,.5)"><svg class="ic lg"><use href="#i-clipboard-check"/></svg></div></div>
+              <b style="font-size:17px">Welcome back!</b>
+              <p class="small" style="margin:4px 0 12px;color:var(--muted)">Ready to continue learning?</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(99,102,241,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#6366f1;margin-top:2px"><use href="#i-graduation-cap"/></svg><div style="flex:1"><b style="font-size:13px">Continue your session</b><div class="small" style="color:var(--muted);margin-top:2px">Complete your reading comprehension test</div><div class="small" style="color:var(--muted);margin-top:2px">+ 3 more activities to explore</div></div><svg class="ic sm" style="color:#6366f1;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(245,158,11,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#f59e0b;margin-top:2px"><use href="#i-library"/></svg><div style="flex:1"><b style="font-size:13px">Read a new text</b><div class="small" style="color:var(--muted);margin-top:2px">Try a fresh text from the Text Repository!</div></div><svg class="ic sm" style="color:#f59e0b;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(20,184,166,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#14b8a6;margin-top:2px"><use href="#i-upload"/></svg><div style="flex:1"><b style="font-size:13px">Upload image / PDF</b><div class="small" style="color:var(--muted);margin-top:2px">Upload photos or PDFs of articles for AI text extraction</div></div><svg class="ic sm" style="color:#14b8a6;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(139,92,246,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#8b5cf6;margin-top:2px"><use href="#i-sparkles"/></svg><div style="flex:1"><b style="font-size:13px">Generate with AI</b><div class="small" style="color:var(--muted);margin-top:2px">Let AI craft a reading text on any topic for you!</div></div><svg class="ic sm" style="color:#8b5cf6;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+              </div>
+              <div style="margin-top:8px"><span class="btn sm ghost" style="width:100%;justify-content:center;color:var(--muted)">Maybe later</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mock-cap">Top bar &amp; circular icon take the recommended activity's color (here <b style="color:#6366f1">indigo</b> = reading test). The "Continue your session" card only appears when you have an in-progress session.</div>
+      <p>The four cards:</p>
+      <table class="ref">
+        <tr><th>Card</th><th>Color</th><th>What it does</th></tr>
+        <tr><td><b>Continue your session</b> <span class="small">(if you have one)</span></td><td><span class="badge" style="background:#e0e7ff;color:#4f46e5">activity</span></td><td>Scrolls to the next incomplete activity in your last session — summary, mind map, glossary, reading test, grammar, etc. The "+N more" hint counts the remaining activities.</td></tr>
+        <tr><td><b>Read a new text</b></td><td><span class="badge b-amber">amber</span></td><td>Opens the Text Repository picker (below).</td></tr>
+        <tr><td><b>Upload image / PDF</b></td><td><span class="badge b-teal">teal</span></td><td>Jumps to the upload step (§4.2) and opens the file picker.</td></tr>
+        <tr><td><b>Generate with AI</b></td><td><span class="badge b-violet">violet</span></td><td>Opens the AI text generator so Mr.🆖 writes a fresh passage on any topic.</td></tr>
+      </table>
+      <p>Choose <b>Read a new text</b> and the dialog briefly shows a loading spinner, then a randomly-picked text from your school's repository for a one-tap start:</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📚 Welcome Back dialog — repository pick</span></div>
+        <div class="mock-body">
+          <div style="max-width:340px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+            <div style="height:4px;background:#f59e0b"></div>
+            <div style="text-align:center;padding:16px">
+              <div style="position:relative;width:56px;height:56px;margin:0 auto 8px"><div style="position:absolute;inset:0;border-radius:50%;background:#f59e0b;opacity:.2;filter:blur(8px)"></div><div style="position:relative;width:56px;height:56px;border-radius:50%;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(245,158,11,.5)"><svg class="ic lg"><use href="#i-library"/></svg></div></div>
+              <b style="font-size:17px">Here's a text for you!</b>
+              <p class="small" style="margin:4px 0 12px;color:var(--muted)">A randomly selected text from the Text Repository</p>
+              <div style="text-align:left;padding:14px;border:1px solid rgba(245,158,11,.4);border-radius:12px;background:rgba(255,255,255,.6)">
+                <p class="small" style="margin:0 0 2px;color:var(--muted)">Ocean Life · Grade 5</p>
+                <b style="font-size:15px">The Bioluminescent Deep</b>
+                <p class="small" style="margin:6px 0 0;color:var(--muted)">Deep beneath the surface, currents stir the cold darkness. Here, luminous creatures drift past one another…</p>
+                <div style="display:flex;gap:10px;margin-top:8px;font-size:11px;color:var(--muted)"><span style="display:inline-flex;align-items:center;gap:4px"><svg class="ic sm"><use href="#i-user"/></svg> Ms. Chan</span><span style="display:inline-flex;align-items:center;gap:4px"><svg class="ic sm"><use href="#i-image"/></svg> 3 images</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+                <span class="btn sm" style="background:#f59e0b;color:#fff;border-color:#f59e0b;justify-content:center">Start reading! <svg class="ic sm"><use href="#i-arrow-right"/></svg></span>
+                <span class="btn sm outline" style="justify-content:center"><svg class="ic sm"><use href="#i-refresh-cw"/></svg> Pick another</span>
+                <span class="btn sm ghost" style="justify-content:center;color:var(--muted)">Maybe later</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p>Tap <b>Start reading!</b> to load the text and skip the upload step entirely, or <b>Pick another</b> to roll a different text. <b>Maybe later</b> dismisses the popup and leaves you on a blank reading page ready for any workflow.</p>
+
+      <h3>2.4 Choosing your AI access mode</h3>
       <p>Before any AI feature will work, you must pick a <strong>Billing Mode</strong> in <b>Settings → General</b>. There are three options. The app auto-suggests one when you first open Settings, but you can change it any time.</p>
 
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:18px 0">
