@@ -19,6 +19,7 @@ import {
   Shuffle,
   Keyboard,
   HelpCircle,
+  Zap,
 } from "lucide-react";
 import copy from "copy-to-clipboard";
 
@@ -441,11 +442,14 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
             />
           </div>
 
-          {/* Timed toggle */}
+          {/* Speed bonus toggle (per-word timer always applies; this only enables the speed-point bonus) */}
           <div className="flex items-center justify-between rounded-lg border p-3">
-            <div className="flex items-center gap-2">
-              <Volume2 className="h-4 w-4 text-muted-foreground" />
-              <Label className="text-sm">{t(`reading.glossary.spelling.timeChallenge`)}</Label>
+            <div className="flex items-start gap-2">
+              <Zap className="mt-0.5 h-4 w-4 text-muted-foreground" />
+              <div>
+                <Label className="text-sm">{t(`${M}.speedBonus`)}</Label>
+                <p className="text-xs text-muted-foreground">{t(`${M}.speedBonusDesc`)}</p>
+              </div>
             </div>
             <Switch checked={timed} onCheckedChange={setTimed} />
           </div>
