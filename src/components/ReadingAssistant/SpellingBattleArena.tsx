@@ -262,6 +262,11 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   const timedOut = timeRemainingMs === 0 && !hasSubmitted;
   const myResult = battle.myLastResult;
   const showCorrect = hasSubmitted ? (myResult?.correct ?? optimisticCorrect ?? false) : null;
+  // The current word is over for this player if they submitted, their local
+  // timer expired, or the server resolved the word (covers the case where all
+  // OTHER players submitted early). In any of these cases, reveal the answer.
+  const wordEndedForThisWord = !!battle.wordEnded && battle.wordEnded.index === word.index;
+  const locked = hasSubmitted || timedOut || wordEndedForThisWord;
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -359,7 +364,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                     }}
                     value={userInput}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
-                    disabled={hasSubmitted || timedOut}
+                    disabled={locked}
                     placeholder={t("reading.glossary.spelling.typeAnswer")}
                     autoComplete="off"
                     autoCorrect="off"
@@ -372,7 +377,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                       showCorrect === false && "border-destructive bg-destructive/10",
                     )}
                   />
-                  <Button onClick={handleSubmit} disabled={hasSubmitted || timedOut || !userInput.trim()}>
+                  <Button onClick={handleSubmit} disabled={locked || !userInput.trim()}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
@@ -421,7 +426,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                     }}
                     value={userInput}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
-                    disabled={hasSubmitted || timedOut}
+                    disabled={locked}
                     placeholder={t("reading.glossary.spelling.typeMissing")}
                     autoComplete="off"
                     autoCorrect="off"
@@ -434,7 +439,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                       showCorrect === false && "border-destructive bg-destructive/10",
                     )}
                   />
-                  <Button onClick={handleSubmit} disabled={hasSubmitted || timedOut || !userInput}>
+                  <Button onClick={handleSubmit} disabled={locked || !userInput}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
@@ -480,7 +485,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                         key={idx}
                         type="button"
                         onClick={() => !isSelected && handleTileClick(letter, idx)}
-                        disabled={isSelected || hasSubmitted || timedOut}
+                        disabled={isSelected || locked}
                         className={cn(
                           "w-10 h-10 text-lg font-semibold rounded-lg border-2 transition-all",
                           isSelected
@@ -500,11 +505,11 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => { setSelectedLetters([]); setUsedTileIndices([]); }}
-                    disabled={selectedLetters.length === 0 || hasSubmitted}
+                    disabled={selectedLetters.length === 0 || locked}
                   >
                     {t("reading.glossary.spelling.clear")}
                   </Button>
-                  <Button size="sm" onClick={handleSubmit} disabled={hasSubmitted || timedOut || selectedLetters.length === 0}>
+                  <Button size="sm" onClick={handleSubmit} disabled={locked || selectedLetters.length === 0}>
                     <Send className="h-4 w-4 mr-1" />
                     {t(`${M}.submit`)}
                   </Button>
@@ -513,7 +518,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
             )}
 
             {/* Feedback (shared) */}
-            {hasSubmitted && (
+            {locked && (
               <div className="flex items-center justify-center gap-2 text-sm">
                 {showCorrect ? (
                   <>
@@ -534,7 +539,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
             )}
 
             {/* Hint (shared, mode-aware) */}
-            {!hasSubmitted && !timedOut && (
+            {!locked && (
               <div className="flex justify-center">
                 <Button variant="ghost" size="sm" onClick={handleHint} disabled={gameMode === "listen-type" && showDefinition}>
                   <Lightbulb className="h-4 w-4 mr-1" />

@@ -86,6 +86,10 @@ function wireEventsOnce(socket: NonNullable<ReturnType<typeof getRealtimeSocket>
         useBattleStore.getState().pushWordResult(payload.word, myResult.correct)
       }
     }
+    // Signal the arena to reveal the correct answer — covers both the local
+    // timeout case and the "others submitted early" case where the server
+    // resolves the word before this player's timer expires.
+    useBattleStore.getState().setWordEnded({ index: payload.index, correctWord: payload.word })
   })
 
   socket.on("live_ranking", (payload: BattleLiveRankingPayload) => {
@@ -143,6 +147,7 @@ export interface UseSpellingBattle {
   // game-loop state
   countdownN: number | null
   currentWord: BattleWordStartPayload | null
+  wordEnded: { index: number; correctWord: string } | null
   myLastResult: { index: number; correct: boolean; pointsAwarded: number; total: number; streak: number } | null
   myWordResults: { word: string; correct: boolean }[]
   liveRanking: BattleRankingEntry[]
@@ -277,6 +282,7 @@ export function useSpellingBattle(): UseSpellingBattle {
   // Game-loop state (read from the store; updated by server events wired above).
   const countdownN = useBattleStore((s) => s.countdownN)
   const currentWord = useBattleStore((s) => s.currentWord)
+  const wordEnded = useBattleStore((s) => s.wordEnded)
   const myLastResult = useBattleStore((s) => s.myLastResult)
   const myWordResults = useBattleStore((s) => s.myWordResults)
   const liveRanking = useBattleStore((s) => s.liveRanking)
@@ -300,6 +306,7 @@ export function useSpellingBattle(): UseSpellingBattle {
     isHost,
     countdownN,
     currentWord,
+    wordEnded,
     myLastResult,
     myWordResults,
     liveRanking,

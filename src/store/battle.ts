@@ -43,6 +43,8 @@ interface BattleStore {
   // ── Game loop (populated from countdown/word_start/word_end/etc.) ────────
   countdownN: number | null
   currentWord: BattleWordStartPayload | null
+  /** The current word has ended (server `word_end`) — reveal the correct answer. */
+  wordEnded: { index: number; correctWord: string } | null
   /** My latest per-word result (for immediate local feedback). */
   myLastResult: { index: number; correct: boolean; pointsAwarded: number; total: number; streak: number } | null
   /** Accumulated per-word results for SRS + review-session persistence. */
@@ -66,6 +68,7 @@ interface BattleStore {
   setShouldOpenBattle: (open: boolean) => void
   setCountdown: (n: number | null) => void
   setCurrentWord: (word: BattleWordStartPayload | null) => void
+  setWordEnded: (info: { index: number; correctWord: string } | null) => void
   setMyLastResult: (result: BattleStore["myLastResult"]) => void
   pushWordResult: (word: string, correct: boolean) => void
   setLiveRanking: (ranking: BattleRankingEntry[]) => void
@@ -90,6 +93,7 @@ const initialRoomState = {
   shouldOpenBattle: false,
   countdownN: null,
   currentWord: null,
+  wordEnded: null,
   myLastResult: null,
   myWordResults: [],
   liveRanking: [],
@@ -122,9 +126,9 @@ export const useBattleStore = create<BattleStore>((set) => ({
       // Clear live game fields when the room is back in the lobby (rematch)
       // or finished — the next word_start/game_end repopulates them.
       ...(state.status === "lobby"
-        ? { countdownN: null, currentWord: null, myLastResult: null, liveRanking: [], finalRanking: [], myWordResults: [], resultPersisted: false }
+        ? { countdownN: null, currentWord: null, wordEnded: null, myLastResult: null, liveRanking: [], finalRanking: [], myWordResults: [], resultPersisted: false }
         : state.status === "countdown"
-          ? { finalRanking: [], myWordResults: [], currentWord: null, resultPersisted: false } // fresh game
+          ? { finalRanking: [], myWordResults: [], currentWord: null, wordEnded: null, resultPersisted: false } // fresh game
           : {}),
     }),
 
@@ -139,12 +143,13 @@ export const useBattleStore = create<BattleStore>((set) => ({
   setShouldOpenBattle: (shouldOpenBattle: boolean) => set({ shouldOpenBattle }),
 
   setCountdown: (countdownN) => set({ countdownN }),
-  setCurrentWord: (currentWord) => set({ currentWord }),
+  setCurrentWord: (currentWord) => set({ currentWord, wordEnded: null }),
+  setWordEnded: (wordEnded) => set({ wordEnded }),
   setMyLastResult: (myLastResult) => set({ myLastResult }),
   pushWordResult: (word, correct) =>
     set((state) => ({ myWordResults: [...state.myWordResults, { word, correct }] })),
   setLiveRanking: (liveRanking) => set({ liveRanking }),
-  setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, countdownN: null }),
+  setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, wordEnded: null, countdownN: null }),
 
   setResultPersisted: (resultPersisted) => set({ resultPersisted }),
 
