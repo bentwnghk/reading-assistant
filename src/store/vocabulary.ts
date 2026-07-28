@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import { calculateNextReview } from "@/utils/srs";
 
+let _studyPlanDialogChecked = false;
+export function setStudyPlanDialogChecked(value: boolean) {
+  _studyPlanDialogChecked = value;
+}
+export function isStudyPlanDialogChecked() {
+  return _studyPlanDialogChecked;
+}
+
 type SortField =
   | "word"
   | "rating"

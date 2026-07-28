@@ -1890,6 +1890,37 @@
       "random": "Random Mix",
       "weakest": "Weakest Words"
     },
+    "studyPlan": {
+      "title": "Ready to study?",
+      "subtitle": "Pick a plan to get started quickly.",
+      "maybeLater": "Maybe later",
+      "custom": "Custom plan",
+      "chooseMode": "Choose review mode",
+      "chooseModeTitle": "How do you want to review?",
+      "chooseModeDesc": "{{count}} words selected — choose a review mode.",
+      "back": "Back",
+      "gettingStarted": "Build your vocabulary!",
+      "gettingStartedDesc": "Start reading to collect words, then come back here to review them.",
+      "gettingStartedCta": "Start reading",
+      "presets": {
+        "due": "Review due words ({{count}})",
+        "dueDesc": "Words scheduled for review by your spaced-repetition plan.",
+        "new": "Learn new words ({{count}})",
+        "newDesc": "Fresh words you haven't practiced yet.",
+        "hard": "Drill hard words ({{count}})",
+        "hardDesc": "Words you've marked as difficult.",
+        "random": "Random mixed practice ({{count}})",
+        "randomDesc": "A random mix from your entire vocabulary."
+      },
+      "mode": {
+        "flashcard": "Flashcards",
+        "flashcardDesc": "Flip cards and rate your recall with SRS.",
+        "quiz": "Quiz",
+        "quizDesc": "Match words to definitions and fill in blanks.",
+        "spelling": "Spelling",
+        "spellingDesc": "Type, unscramble, and fill in missing letters."
+      }
+    },
     "reviewHistory": {
       "flashcard": "Flashcard Review",
       "quiz": "Vocabulary Quiz",

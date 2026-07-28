@@ -45,6 +45,7 @@ import ShareVocabularyDialog from "./ShareVocabularyDialog";
 import AddToReviewListDialog from "./AddToReviewListDialog";
 import ReviewListsTab from "./ReviewListsTab";
 import ReviewListShareDialog from "./ReviewListShareDialog";
+import StudyPlanDialog from "./StudyPlanDialog";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling" | "lists" | "history";
 
@@ -82,6 +83,7 @@ function VocabularyContainer() {
     selectedWordIds,
     fetchVocabulary,
     startReview,
+    autoSelectForReview,
     clearSelection,
     loadReviewListIntoQueue,
     acceptedReviewListWords,
@@ -148,6 +150,31 @@ function VocabularyContainer() {
     currentReviewMode.current = "flashcard";
     setActiveTab("flashcard");
   }, [startReview]);
+
+  const handleStartPlan = useCallback(
+    (
+      strategy: VocabularySelectionStrategy,
+      count: number,
+      mode: "flashcard" | "quiz" | "spelling"
+    ) => {
+      setFilterRating("all");
+      setFilterMastery("all");
+      setFilterSource("all");
+      setSearchQuery("");
+      autoSelectForReview(count, strategy);
+      startReview();
+      currentReviewMode.current = mode;
+      setActiveTab(mode);
+    },
+    [
+      autoSelectForReview,
+      startReview,
+      setFilterRating,
+      setFilterMastery,
+      setFilterSource,
+      setSearchQuery,
+    ]
+  );
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
@@ -515,6 +542,7 @@ function VocabularyContainer() {
             onOpenChange={setAddToListOpen}
           />
           <ReviewListShareDialog />
+          <StudyPlanDialog onStartPlan={handleStartPlan} />
 
           <Dialog open={showHelp} onOpenChange={setShowHelp}>
             <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">

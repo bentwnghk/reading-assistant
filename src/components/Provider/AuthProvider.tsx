@@ -17,7 +17,7 @@ import {
 import { useHistoryStore } from "@/store/history"
 import { initAchievementCallbacks } from "@/store/achievements"
 import { useSharingStore, setShareCheckComplete } from "@/store/sharing"
-import { useVocabularyStore } from "@/store/vocabulary"
+import { useVocabularyStore, setStudyPlanDialogChecked } from "@/store/vocabulary"
 import { useIdleTimer } from "@/hooks/useIdleTimer"
 
 function AuthStateManager() {
@@ -42,6 +42,7 @@ function AuthStateManager() {
       setRestoreComplete(false)
       setShareCheckComplete(false)
       setWelcomeDialogChecked(false)
+      setStudyPlanDialogChecked(false)
       const currentLanguage = useSettingStore.getState().language
       useSettingStore.getState().loadFromServer({ ...defaultValues, language: currentLanguage })
       return

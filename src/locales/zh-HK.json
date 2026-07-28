@@ -1911,11 +1911,42 @@
       "matchingDesc": "將詞彙與釋義配對"
     },
     "strategy": {
-      "due": "待複習",
-      "hardest": "最困難",
-      "newest": "最新",
-      "random": "隨機",
-      "weakest": "最薄弱"
+      "due": "到期複習",
+      "hardest": "最難詞彙",
+      "newest": "最新詞彙",
+      "random": "隨機混合",
+      "weakest": "最弱詞彙"
+    },
+    "studyPlan": {
+      "title": "準備好學習了嗎？",
+      "subtitle": "選擇一個計劃，快速開始複習。",
+      "maybeLater": "稍後再說",
+      "custom": "自訂計劃",
+      "chooseMode": "選擇複習模式",
+      "chooseModeTitle": "你想用甚麼方式複習？",
+      "chooseModeDesc": "已選 {{count}} 個詞彙 — 請選擇複習模式。",
+      "back": "返回",
+      "gettingStarted": "建立你的詞彙庫！",
+      "gettingStartedDesc": "開始閱讀以收集生詞，之後再回來這裡複習。",
+      "gettingStartedCta": "開始閱讀",
+      "presets": {
+        "due": "複習到期詞彙（{{count}}）",
+        "dueDesc": "根據你的間隔重複計劃已到期的詞彙。",
+        "new": "學習新詞彙（{{count}}）",
+        "newDesc": "你尚未練習過的新詞彙。",
+        "hard": "練習困難詞彙（{{count}}）",
+        "hardDesc": "你標記為困難的詞彙。",
+        "random": "隨機混合練習（{{count}}）",
+        "randomDesc": "從你所有詞彙中隨機抽取的混合練習。"
+      },
+      "mode": {
+        "flashcard": "閃卡",
+        "flashcardDesc": "翻轉卡片並以 SRS 評分你的記憶。",
+        "quiz": "測驗",
+        "quizDesc": "將詞彙配對至釋義並填空。",
+        "spelling": "拼寫",
+        "spellingDesc": "聽打、重組字母及填補缺失字母。"
+      }
     },
     "reviewHistory": {
       "flashcard": "字卡複習",

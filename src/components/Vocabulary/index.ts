@@ -7,3 +7,4 @@ export { default as ShareVocabularyDialog } from "./ShareVocabularyDialog";
 export { default as AddToReviewListDialog } from "./AddToReviewListDialog";
 export { default as ReviewListsTab } from "./ReviewListsTab";
 export { default as ReviewListShareDialog } from "./ReviewListShareDialog";
+export { default as StudyPlanDialog } from "./StudyPlanDialog";
