@@ -212,7 +212,13 @@ export const useVocabularyStore = create<
         break;
     }
 
-    const selected = pool.slice(0, count);
+    const candidateSize = Math.min(pool.length, count * 3);
+    const candidates = pool.slice(0, candidateSize);
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+    const selected = candidates.slice(0, count);
     set({ selectedWordIds: new Set(selected.map((w) => w.id)) });
   },
 
