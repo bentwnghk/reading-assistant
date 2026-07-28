@@ -499,6 +499,7 @@ function VocabularyContainer() {
               mergedRatings={reviewRatings}
               onWordResult={handleWordResult}
               onComplete={handleReviewComplete}
+              disableSessionGlossary
             />
           )}
           {activeTab === "history" && <ReviewHistory />}

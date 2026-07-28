@@ -44,6 +44,13 @@ interface VocabularySpellingProps {
   mergedRatings?: Record<string, GlossaryRating>;
   onWordResult?: (word: string, correct: boolean) => void;
   onComplete?: (results: { word: string; correct: boolean }[]) => void;
+  /**
+   * True when rendered outside the reading-session context (e.g. the
+   * /vocabulary page). Suppresses the battle's "current session glossary"
+   * source, since `useReadingStore().id` may still hold a stale session id
+   * left over from a previous reading session.
+   */
+  disableSessionGlossary?: boolean;
 }
 
 type GameStatus = "setup" | "playing" | "completed";
@@ -143,7 +150,7 @@ function SpellingResultScreen({
   );
 }
 
-function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete }: VocabularySpellingProps) {
+function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete, disableSessionGlossary }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
@@ -637,7 +644,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete 
   if (playMode === "battle") {
     return (
       <SpellingBattleFlow
-        defaultGlossarySessionId={id ?? undefined}
+        defaultGlossarySessionId={disableSessionGlossary ? undefined : (id ?? undefined)}
         selectedWords={glossary.map((g) => g.word)}
         onWordResult={onWordResult}
         onComplete={onComplete}
