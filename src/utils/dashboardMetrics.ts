@@ -5,6 +5,7 @@ export interface SessionScore {
   score: number;
   date: number;
   accuracy?: number;
+  source?: "reading" | "vocabulary";
 }
 
 export interface WeeklyCount {
@@ -62,6 +63,7 @@ export interface DashboardMetrics {
   totalTutorQuestions: number;
   totalFlashcardReviews: number;
   spellingScores: SessionScore[];
+  spellingAccuracyScores: SessionScore[];
   quizScores: SessionScore[];
   testScores: SessionScore[];
   grammarQuizScores: SessionScore[];
@@ -176,8 +178,12 @@ function emptyDailyActivity(date: string): DailyActivity {
   };
 }
 
-export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMetrics {
-  if (history.length === 0) {
+export function computeDashboardMetrics(
+  history: ReadingHistory[],
+  reviewSessions: VocabularyReviewSession[] = [],
+  vocabularyWordCount?: number,
+): DashboardMetrics {
+  if (history.length === 0 && reviewSessions.length === 0) {
     return {
       totalSessions: 0,
       sessionsBySource: { upload: 0, repository: 0, shared: 0 },
@@ -197,6 +203,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       totalTutorQuestions: 0,
       totalFlashcardReviews: 0,
       spellingScores: [],
+      spellingAccuracyScores: [],
       quizScores: [],
       testScores: [],
       grammarQuizScores: [],
@@ -245,7 +252,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     0
   );
 
-  const totalVocabulary = new Set(
+  const totalVocabulary = vocabularyWordCount ?? new Set(
     sorted.flatMap((item) =>
       (item.glossary || []).map((e) => e.word.toLowerCase())
     )
@@ -257,27 +264,62 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     0
   );
 
-  const totalFlashcardReviews = sorted.reduce(
-    (sum, item) => sum + (item.flashcardReviewDates || []).length,
-    0
-  );
+  const totalFlashcardReviews =
+    sorted.reduce(
+      (sum, item) => sum + (item.flashcardReviewDates || []).length,
+      0
+    ) +
+    reviewSessions.filter((s) => s.mode === "flashcard").length;
 
-  const spellingScores: SessionScore[] = sorted
+  const readingSpellingScores: SessionScore[] = sorted
     .filter((h) => (h.spellingGameBestScore || 0) > 0)
     .map((h) => ({
       title: getSessionTitle(h),
       score: h.spellingGameBestScore!,
       accuracy: h.spellingGameAccuracy || 0,
       date: h.updatedAt || h.createdAt,
+      source: "reading" as const,
     }));
 
-  const quizScores: SessionScore[] = sorted
+  const vocabSpellingAccuracies: SessionScore[] = reviewSessions
+    .filter((s) => s.mode === "spelling" && s.totalWords > 0)
+    .map((s) => ({
+      title: "Vocabulary Spelling",
+      score: s.accuracy,
+      accuracy: s.accuracy,
+      date: s.completedAt,
+      source: "vocabulary" as const,
+    }));
+
+  // Spelling score chart — reading-page only (points-based scale)
+  const spellingScores: SessionScore[] = readingSpellingScores;
+
+  // Spelling accuracy chart — both sources (both are 0–100%)
+  const spellingAccuracyScores: SessionScore[] = [...readingSpellingScores, ...vocabSpellingAccuracies].sort(
+    (a, b) => a.date - b.date,
+  );
+
+  const readingQuizScores: SessionScore[] = sorted
     .filter((h) => (h.vocabularyQuizScore || 0) > 0)
     .map((h) => ({
       title: getSessionTitle(h),
       score: h.vocabularyQuizScore!,
       date: h.updatedAt || h.createdAt,
+      source: "reading" as const,
     }));
+
+  const vocabQuizScores: SessionScore[] = reviewSessions
+    .filter((s) => s.mode === "quiz" && s.totalWords > 0)
+    .map((s) => ({
+      title: "Vocabulary Quiz",
+      score: s.accuracy,
+      date: s.completedAt,
+      source: "vocabulary" as const,
+    }));
+
+  const quizScores: SessionScore[] = [...readingQuizScores, ...vocabQuizScores].sort(
+    (a, b) => a.date - b.date,
+  );
 
   const testScores: SessionScore[] = sorted
     .filter((h) => h.testCompleted && (h.testScore ?? 0) > 0)
@@ -412,6 +454,19 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
       getDay(dailyMap, toDateString(ts)).flashcardReview += 1;
     }
   }
+
+  // Review sessions from the My Vocabulary page — add to daily activities
+  for (const s of reviewSessions) {
+    const dateKey = toDateString(s.completedAt);
+    if (s.mode === "quiz") {
+      getDay(dailyMap, dateKey).vocabQuiz += 1;
+    } else if (s.mode === "spelling") {
+      getDay(dailyMap, dateKey).spellingGame += 1;
+    } else if (s.mode === "flashcard") {
+      getDay(dailyMap, dateKey).flashcardReview += 1;
+    }
+  }
+
   const dailyActivities = Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
   return {
@@ -433,6 +488,7 @@ export function computeDashboardMetrics(history: ReadingHistory[]): DashboardMet
     totalTutorQuestions,
     totalFlashcardReviews,
     spellingScores,
+    spellingAccuracyScores,
     quizScores,
     testScores,
     grammarQuizScores,

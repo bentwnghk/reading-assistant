@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getTeacherDashboardData, getTeacherDashboardDataForSchool, getTeacherDashboardDataAllSchools, canAccessClass, getSchoolForUser } from "@/lib/users"
+import { getReviewSessionsForUsers, getVocabularyCountsForUsers } from "@/lib/vocabulary"
 
 export async function GET(
   request: Request,
@@ -22,29 +23,36 @@ export async function GET(
   const schoolId = searchParams.get("schoolId")
 
   try {
+    let sessions: Awaited<ReturnType<typeof getTeacherDashboardData>> = []
+
     if (id === "all") {
       if (role === "super-admin") {
         if (schoolId && schoolId !== "all") {
-          const data = await getTeacherDashboardDataForSchool(schoolId)
-          return NextResponse.json(data)
+          sessions = await getTeacherDashboardDataForSchool(schoolId)
+        } else {
+          sessions = await getTeacherDashboardDataAllSchools()
         }
-        const data = await getTeacherDashboardDataAllSchools()
-        return NextResponse.json(data)
+      } else {
+        const userSchoolId = await getSchoolForUser(session.user.id)
+        if (!userSchoolId) {
+          return NextResponse.json({ error: "No school assigned" }, { status: 400 })
+        }
+        sessions = await getTeacherDashboardDataForSchool(userSchoolId)
       }
-      const userSchoolId = await getSchoolForUser(session.user.id)
-      if (!userSchoolId) {
-        return NextResponse.json({ error: "No school assigned" }, { status: 400 })
+    } else {
+      if (!await canAccessClass(session.user.id, role, id)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
       }
-      const data = await getTeacherDashboardDataForSchool(userSchoolId)
-      return NextResponse.json(data)
+      sessions = await getTeacherDashboardData(id)
     }
 
-    if (!await canAccessClass(session.user.id, role, id)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-    }
+    const userIds = [...new Set(sessions.map((s) => s.userId))]
+    const [reviewSessions, vocabCounts] = await Promise.all([
+      getReviewSessionsForUsers(userIds),
+      getVocabularyCountsForUsers(userIds),
+    ])
 
-    const data = await getTeacherDashboardData(id)
-    return NextResponse.json(data)
+    return NextResponse.json({ sessions, reviewSessions, vocabCounts: Object.fromEntries(vocabCounts) })
   } catch (error) {
     console.error("Failed to get teacher dashboard data:", error)
     return NextResponse.json({ error: "Failed to get dashboard data" }, { status: 500 })

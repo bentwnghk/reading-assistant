@@ -156,6 +156,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
+  const effectiveId = disableSessionGlossary ? undefined : id;
 
   const [gameStatus, setGameStatus] = useState<GameStatus>("setup");
   const [playMode, setPlayMode] = useState<"solo" | "battle">("solo");
@@ -602,7 +603,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
       setSpellingGameBestScore(score, accuracy);
       logActivity("spelling_complete", {
-        sessionId: id || undefined,
+        sessionId: effectiveId || undefined,
         score,
         accuracy,
         details: { mode: gameMode, difficulty, streak: maxStreak },
@@ -631,7 +632,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         }
       }
     }
-  }, [gameStatus, score, setSpellingGameBestScore, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete, correctCount, challenges]);
+  }, [gameStatus, score, setSpellingGameBestScore, effectiveId, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete, correctCount, challenges]);
 
   if (glossary.length < 3) {
     return (

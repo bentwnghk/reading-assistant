@@ -38,6 +38,13 @@ interface VocabularyQuizProps {
   mergedRatings?: Record<string, GlossaryRating>;
   onWordResult?: (word: string, correct: boolean) => void;
   onComplete?: (results: { word: string; correct: boolean }[]) => void;
+  /**
+   * True when rendered outside the reading-session context (e.g. the
+   * /vocabulary page). Suppresses stale reading-store session id in
+   * activity logs, since `useReadingStore().id` may still hold a stale
+   * session id left over from a previous reading session.
+   */
+  disableSessionGlossary?: boolean;
 }
 
 type QuizState = "idle" | "in-progress" | "completed";
@@ -270,9 +277,10 @@ function VocabQuizResultScreen({
   );
 }
 
-function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete }: VocabularyQuizProps) {
+function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, disableSessionGlossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
   const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
+  const effectiveId = disableSessionGlossary ? undefined : id;
   const { update, save } = useHistoryStore();
   const { data: session } = useSession();
   const isTeacherOrAbove = session?.user?.role === "teacher" || session?.user?.role === "admin" || session?.user?.role === "super-admin";
@@ -333,7 +341,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete }: V
       const percentage = Math.round((correct / questions.length) * 100);
       setVocabularyQuizScore(percentage);
       setQuizState("completed");
-      logActivity("quiz_complete", { sessionId: id || undefined, score: percentage });
+      logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
 
       if (onWordResult) {
         for (const q of questions) {
@@ -390,7 +398,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete }: V
               const percentage = Math.round((correct / questions.length) * 100);
               setVocabularyQuizScore(percentage);
               setQuizState("completed");
-              logActivity("quiz_complete", { sessionId: id || undefined, score: percentage });
+              logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
 
               if (onWordResult) {
                 for (const q of questions) {
@@ -426,7 +434,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete }: V
         clearInterval(timerRef.current);
       }
     };
-  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, id, backup, update, save, setVocabularyQuizScore, onWordResult, onComplete]);
+  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, effectiveId, id, backup, update, save, setVocabularyQuizScore, onWordResult, onComplete]);
 
   const missedQuestions = useMemo(() => {
     return questions.filter((q) => answers[q.id] !== q.correctAnswer);

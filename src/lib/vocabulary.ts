@@ -333,6 +333,54 @@ export async function createReviewSession(
   return sessionId;
 }
 
+export interface ReviewSessionRecord {
+  userId: string;
+  mode: VocabularyReviewMode;
+  accuracy: number;
+  totalWords: number;
+  completedAt: number;
+}
+
+export async function getReviewSessionsForUsers(
+  userIds: string[]
+): Promise<ReviewSessionRecord[]> {
+  if (userIds.length === 0) return [];
+  const pool = getPool();
+  const { rows } = await pool.query(
+    `SELECT user_id, mode, accuracy, total_words, completed_at
+     FROM vocabulary_review_sessions
+     WHERE user_id = ANY($1::text[])
+     ORDER BY completed_at ASC`,
+    [userIds]
+  );
+  return rows.map((r) => ({
+    userId: r.user_id as string,
+    mode: r.mode as VocabularyReviewMode,
+    accuracy: Number(r.accuracy),
+    totalWords: Number(r.total_words),
+    completedAt: Number(r.completed_at),
+  }));
+}
+
+export async function getVocabularyCountsForUsers(
+  userIds: string[]
+): Promise<Map<string, number>> {
+  if (userIds.length === 0) return new Map();
+  const pool = getPool();
+  const { rows } = await pool.query(
+    `SELECT user_id, COUNT(*)::int AS word_count
+     FROM user_vocabulary
+     WHERE user_id = ANY($1::text[])
+     GROUP BY user_id`,
+    [userIds]
+  );
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    map.set(r.user_id as string, parseInt(r.word_count) || 0);
+  }
+  return map;
+}
+
 export async function getReviewSessions(
   userId: string,
   limit: number = 20

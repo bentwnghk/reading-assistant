@@ -1,4 +1,5 @@
 import type { TeacherSessionData } from "@/lib/users";
+import type { ReviewSessionRecord } from "@/lib/vocabulary";
 
 export interface StudentMetrics {
   userId: string;
@@ -207,8 +208,12 @@ function emptyDailyActivity(date: string): DailyStudentActivity {
   };
 }
 
-function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
-  if (sessions.length === 0) {
+function computeStudentMetrics(
+  sessions: TeacherSessionData[],
+  reviewSessions: ReviewSessionRecord[] = [],
+  vocabCount?: number,
+): StudentMetrics {
+  if (sessions.length === 0 && reviewSessions.length === 0) {
     return {
       userId: "",
       userName: "",
@@ -230,8 +235,8 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
   }
 
   const sorted = [...sessions].sort((a, b) => a.createdAt - b.createdAt);
-  const userId = sorted[0].userId;
-  const userName = sorted[0].userName || userId;
+  const userId = sorted.length > 0 ? sorted[0].userId : reviewSessions[0].userId;
+  const userName = sorted.length > 0 ? (sorted[0].userName || userId) : userId;
 
   const totalReadingTexts = sorted.length;
   const now = Date.now();
@@ -245,7 +250,7 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     }
   }
 
-  const totalVocabulary = sorted.reduce((sum, s) => sum + s.glossaryCount, 0);
+  const totalVocabulary = vocabCount ?? sorted.reduce((sum, s) => sum + s.glossaryCount, 0);
 
   const vocabDailyMap = new Map<string, number>();
   for (const item of sorted) {
@@ -262,7 +267,9 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     vocabularyTimeline.push({ date, cumulative });
   }
 
-  const avgProgress = Math.round(sorted.reduce((sum, s) => sum + s.progress, 0) / sorted.length);
+  const avgProgress = sorted.length > 0
+    ? Math.round(sorted.reduce((sum, s) => sum + s.progress, 0) / sorted.length)
+    : 0;
 
   const aiUsage = {
     summary: sorted.filter((s) => s.summary).length,
@@ -277,12 +284,26 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
   };
 
   const testScores = sorted.filter((s) => s.testCompleted && s.testScore != null && s.testScore > 0).map((s) => s.testScore!);
-  const quizScores = sorted.filter((s) => s.vocabularyQuizScore != null && s.vocabularyQuizScore > 0).map((s) => s.vocabularyQuizScore!);
-  const spellingScores = sorted.filter((s) => s.spellingGameBestScore != null && s.spellingGameBestScore > 0).map((s) => s.spellingGameBestScore!);
-  const spellingAccuracies = sorted.filter((s) => s.spellingGameAccuracy != null && s.spellingGameAccuracy > 0).map((s) => s.spellingGameAccuracy!);
+  const readingQuizScores = sorted.filter((s) => s.vocabularyQuizScore != null && s.vocabularyQuizScore > 0).map((s) => s.vocabularyQuizScore!);
+  const readingSpellingScores = sorted.filter((s) => s.spellingGameBestScore != null && s.spellingGameBestScore > 0).map((s) => s.spellingGameBestScore!);
+  const readingSpellingAccuracies = sorted.filter((s) => s.spellingGameAccuracy != null && s.spellingGameAccuracy > 0).map((s) => s.spellingGameAccuracy!);
   const grammarQuizScores = sorted.filter((s) => s.grammarQuizCompleted && s.grammarQuizScore != null && s.grammarQuizScore > 0).map((s) => s.grammarQuizScore!);
   const grammarGameScores = sorted.filter((s) => s.grammarGameBestScore != null && s.grammarGameBestScore > 0).map((s) => s.grammarGameBestScore!);
   const grammarGameAccuracies = sorted.filter((s) => s.grammarGameAccuracy != null && s.grammarGameAccuracy > 0).map((s) => s.grammarGameAccuracy!);
+
+  // Merge review sessions from the My Vocabulary page
+  const vocabQuizScores = reviewSessions
+    .filter((r) => r.mode === "quiz" && r.totalWords > 0)
+    .map((r) => r.accuracy);
+  const vocabSpellingAccuracies = reviewSessions
+    .filter((r) => r.mode === "spelling" && r.totalWords > 0)
+    .map((r) => r.accuracy);
+
+  // Spelling score chart — reading-page only (points-based scale)
+  const quizScores = [...readingQuizScores, ...vocabQuizScores];
+  const spellingScores = readingSpellingScores;
+  // Spelling accuracy chart — both sources (both are 0–100%)
+  const spellingAccuracies = [...readingSpellingAccuracies, ...vocabSpellingAccuracies];
 
   const dailyMap = new Map<string, DailyStudentActivity>();
   function getDay(date: string): DailyStudentActivity {
@@ -333,6 +354,18 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
     }
   }
 
+  // Review sessions from the My Vocabulary page — add to daily activities
+  for (const r of reviewSessions) {
+    const dateKey = toDateString(r.completedAt);
+    if (r.mode === "quiz") {
+      getDay(dateKey).vocabQuiz += 1;
+    } else if (r.mode === "spelling") {
+      getDay(dateKey).spellingGame += 1;
+    } else if (r.mode === "flashcard") {
+      getDay(dateKey).flashcardReview += 1;
+    }
+  }
+
   return {
     userId,
     userName,
@@ -353,8 +386,12 @@ function computeStudentMetrics(sessions: TeacherSessionData[]): StudentMetrics {
   };
 }
 
-export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): TeacherDashboardMetrics {
-  if (sessions.length === 0) {
+export function computeTeacherDashboardMetrics(
+  sessions: TeacherSessionData[],
+  reviewSessions: ReviewSessionRecord[] = [],
+  vocabCounts: Record<string, number> = {},
+): TeacherDashboardMetrics {
+  if (sessions.length === 0 && reviewSessions.length === 0) {
     return {
       students: [],
       dailyActivityDates: [],
@@ -381,7 +418,19 @@ export function computeTeacherDashboardMetrics(sessions: TeacherSessionData[]): 
     grouped.get(s.userId)!.push(s);
   }
 
-  const students = Array.from(grouped.values()).map(computeStudentMetrics);
+  const reviewByUser = new Map<string, ReviewSessionRecord[]>();
+  for (const r of reviewSessions) {
+    if (!reviewByUser.has(r.userId)) reviewByUser.set(r.userId, []);
+    reviewByUser.get(r.userId)!.push(r);
+  }
+
+  const studentUserIds = [...new Set([...grouped.keys(), ...reviewByUser.keys()])];
+  const students = studentUserIds.map((uid) => {
+    const userSessions = grouped.get(uid) ?? [];
+    const userReviews = reviewByUser.get(uid) ?? [];
+    const userVocabCount = vocabCounts[uid];
+    return computeStudentMetrics(userSessions, userReviews, userVocabCount);
+  });
   students.sort((a, b) => a.userName.localeCompare(b.userName));
 
   const dailyDatesSet = new Set<string>();

@@ -18,6 +18,12 @@ interface VocabularyFlashcardProps {
   mergedRatings?: Record<string, GlossaryRating>;
   onWordAction?: (word: string, action: "again" | "hard" | "good" | "easy") => void;
   onComplete?: (results: { word: string; correct: boolean; rating: SRSAction; attempts: number }[], ratingCounts: VocabularyRatingCounts) => void;
+  /**
+   * True when rendered outside the reading-session context (e.g. the
+   * /vocabulary page). Suppresses stale reading-store session id in
+   * activity logs.
+   */
+  disableSessionGlossary?: boolean;
 }
 
 type SRSAction = "again" | "hard" | "good" | "easy";
@@ -29,9 +35,10 @@ interface SRSCounts {
   easy: number;
 }
 
-function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete }: VocabularyFlashcardProps) {
+function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete, disableSessionGlossary }: VocabularyFlashcardProps) {
   const { t } = useTranslation();
   const { id, glossaryRatings, incrementFlashcardReviewCount } = useReadingStore();
+  const effectiveId = disableSessionGlossary ? undefined : id;
   const effectiveRatings = mergedRatings ?? glossaryRatings;
   const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
 
@@ -160,7 +167,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
       });
 
       logActivity("flashcard_review", {
-        sessionId: id || undefined,
+        sessionId: effectiveId || undefined,
         details: { cardsReviewed: 1, wordCount: totalOriginal },
       });
 
@@ -183,7 +190,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         }
       }
     },
-    [currentEntry, reviewQueue, id, totalOriginal, incrementFlashcardReviewCount, onWordAction, onComplete, srsCounts]
+    [currentEntry, reviewQueue, effectiveId, totalOriginal, incrementFlashcardReviewCount, onWordAction, onComplete, srsCounts]
   );
 
   // ── TTS ──────────────────────────────────────────────────────────────────

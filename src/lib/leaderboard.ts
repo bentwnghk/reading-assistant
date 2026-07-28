@@ -574,17 +574,33 @@ export async function getPersonalStats(
       [userId, priorWeekDateStr]
     )
 
-    // ── All-time: sessions and vocab from reading_sessions only ──
+    // ── All-time: sessions from reading_sessions ──
     const sessionStatsResult = await client.query(
       `SELECT
          COUNT(id)::int                                              AS total_sessions,
          COALESCE(AVG(NULLIF(test_score, 0)), 0)                    AS avg_test_score,
-         COALESCE(AVG(NULLIF(vocabulary_quiz_score, 0)), 0)         AS avg_quiz_score,
          COALESCE(AVG(NULLIF(grammar_quiz_score, 0))
-           FILTER (WHERE grammar_quiz_completed = true), 0)         AS avg_grammar_quiz_score,
-         COALESCE(SUM(jsonb_array_length(glossary)), 0)             AS total_vocab
+           FILTER (WHERE grammar_quiz_completed = true), 0)         AS avg_grammar_quiz_score
        FROM reading_sessions
        WHERE user_id = $1`,
+      [userId]
+    )
+
+    // ── All-time: total vocabulary from user_vocabulary (matches /vocabulary page) ──
+    const vocabResult = await client.query(
+      `SELECT COUNT(*)::int AS total_vocab
+       FROM user_vocabulary
+       WHERE user_id = $1`,
+      [userId]
+    )
+
+    // ── All-time: avg quiz score from activity_logs (includes My Vocabulary page attempts) ──
+    const quizResult = await client.query(
+      `SELECT COALESCE(AVG(score), 0) AS avg_quiz_score
+       FROM activity_logs
+       WHERE user_id = $1
+         AND activity_type = 'quiz_complete'
+         AND score IS NOT NULL`,
       [userId]
     )
 
@@ -729,8 +745,8 @@ export async function getPersonalStats(
       allTime: {
         totalSessions:              parseInt(sessionStats.total_sessions) || 0,
         longestStreak,
-        totalVocabWords:            parseInt(sessionStats.total_vocab) || 0,
-        avgAllTimeQuizScore:        Math.round(parseFloat(sessionStats.avg_quiz_score) || 0),
+        totalVocabWords:            parseInt(vocabResult.rows[0]?.total_vocab ?? "0") || 0,
+        avgAllTimeQuizScore:        Math.round(parseFloat(quizResult.rows[0]?.avg_quiz_score ?? "0") || 0),
         avgAllTimeTestScore:        Math.round(parseFloat(sessionStats.avg_test_score) || 0),
         avgAllTimeGrammarQuizScore: Math.round(parseFloat(sessionStats.avg_grammar_quiz_score) || 0),
         avgAllTimeGrammarGameScore,

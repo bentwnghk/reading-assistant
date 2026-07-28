@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { TeacherSessionData } from "@/lib/users";
+import type { ReviewSessionRecord } from "@/lib/vocabulary";
 import { computeTeacherDashboardMetrics, type TeacherDashboardMetrics } from "@/utils/teacherDashboardMetrics";
 
 interface UseTeacherDashboardReturn {
@@ -12,6 +13,8 @@ interface UseTeacherDashboardReturn {
 
 export function useTeacherDashboard(classId: string | "all", schoolId?: string | "all"): UseTeacherDashboardReturn {
   const [rawSessions, setRawSessions] = useState<TeacherSessionData[]>([]);
+  const [reviewSessions, setReviewSessions] = useState<ReviewSessionRecord[]>([]);
+  const [vocabCounts, setVocabCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,8 +31,16 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || "Failed to fetch");
       }
-      const data: TeacherSessionData[] = await response.json();
-      setRawSessions(data);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setRawSessions(data);
+        setReviewSessions([]);
+        setVocabCounts({});
+      } else {
+        setRawSessions(data.sessions ?? []);
+        setReviewSessions(data.reviewSessions ?? []);
+        setVocabCounts(data.vocabCounts ?? {});
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch");
     } finally {
@@ -42,8 +53,8 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
   }, [fetchData]);
 
   const metrics = useMemo(() => {
-    return computeTeacherDashboardMetrics(rawSessions);
-  }, [rawSessions]);
+    return computeTeacherDashboardMetrics(rawSessions, reviewSessions, vocabCounts);
+  }, [rawSessions, reviewSessions, vocabCounts]);
 
   return { metrics, loading, error, refetch: fetchData };
 }

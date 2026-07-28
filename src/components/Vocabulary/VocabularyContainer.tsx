@@ -510,6 +510,7 @@ function VocabularyContainer() {
               mergedRatings={reviewRatings}
               onWordAction={handleWordAction}
               onComplete={handleReviewComplete}
+              disableSessionGlossary
             />
           )}
           {activeTab === "quiz" && (
@@ -518,6 +519,7 @@ function VocabularyContainer() {
               mergedRatings={reviewRatings}
               onWordResult={handleWordResult}
               onComplete={handleReviewComplete}
+              disableSessionGlossary
             />
           )}
           {activeTab === "spelling" && (
