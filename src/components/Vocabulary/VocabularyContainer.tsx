@@ -396,30 +396,6 @@ function VocabularyContainer() {
                 <AutoSelectPanel />
                 <div className="flex-1" />
                 <div className="flex items-center gap-2 flex-wrap justify-end">
-                {selectedWordIds.size > 0 && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9"
-                      onClick={() => setAddToListOpen(true)}
-                    >
-                      <ListPlus className="h-4 w-4 mr-1" />
-                      {t("vocabulary.reviewLists.addToList")}
-                    </Button>
-                    {isTeacherOrAbove && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-9"
-                        onClick={() => setShareOpen(true)}
-                      >
-                        <Share2 className="h-4 w-4 mr-1" />
-                        {t("vocabulary.share.button")}
-                      </Button>
-                    )}
-                  </>
-                )}
                 <ExportPanel />
                 </div>
               </div>
@@ -434,16 +410,34 @@ function VocabularyContainer() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={clearSelection}
+                    onClick={() => setAddToListOpen(true)}
                   >
-                    {t("vocabulary.clearSelection")}
+                    <ListPlus className="h-4 w-4 mr-1" />
+                    {t("vocabulary.reviewLists.addToList")}
                   </Button>
+                  {isTeacherOrAbove && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShareOpen(true)}
+                    >
+                      <Share2 className="h-4 w-4 mr-1" />
+                      {t("vocabulary.share.button")}
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     onClick={handleStartReview}
                     className="shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
                   >
                     {t("vocabulary.startReview")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearSelection}
+                  >
+                    {t("vocabulary.clearSelection")}
                   </Button>
                 </div>
               )}
