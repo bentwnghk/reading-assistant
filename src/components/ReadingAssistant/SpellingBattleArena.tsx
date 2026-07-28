@@ -37,6 +37,18 @@ function normalize(s: string): string {
   return s.trim().toLowerCase();
 }
 
+// Mirror of the authoritative hint policy in `realtime/src/game/scoring.ts`.
+// The server clamps any client-reported hint count to MAX_HINTS_PER_WORD and
+// applies the escalating HINT_COSTS penalty, so the client UI must match to
+// avoid showing the player a misleading "next hint" cost or remaining count.
+// Keep both sides in sync.
+const MAX_HINTS_PER_WORD = 3;
+const HINT_COSTS: readonly number[] = [10, 20, 30];
+function nextHintCost(usedSoFar: number): number | null {
+  if (usedSoFar >= MAX_HINTS_PER_WORD) return null;
+  return HINT_COSTS[Math.min(usedSoFar, HINT_COSTS.length - 1)];
+}
+
 /**
  * Optimistic local answer check — mirrors the server's `judgeAnswer` so client
  * feedback matches the authoritative server result.
@@ -183,6 +195,10 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
 
   const handleHint = useCallback(() => {
     if (!word || hasSubmitted) return;
+    // Hard cap: no more hints once MAX_HINTS_PER_WORD is reached. The server
+    // also clamps, but we short-circuit here so the UI never lies about
+    // granting a hint that the server will ignore.
+    if (hintsUsed >= MAX_HINTS_PER_WORD) return;
     if (gameMode === "listen-type") {
       if (!showDefinition) {
         setShowDefinition(true);
@@ -221,7 +237,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
       }
       setHintsUsed((n) => n + 1);
     }
-  }, [word, hasSubmitted, gameMode, showDefinition, revealedPositions, userInput, selectedLetters, usedTileIndices]);
+  }, [word, hasSubmitted, gameMode, showDefinition, revealedPositions, userInput, selectedLetters, usedTileIndices, hintsUsed]);
 
   // Cleanup audio on unmount.
   useEffect(() => {
@@ -538,15 +554,37 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
               </div>
             )}
 
-            {/* Hint (shared, mode-aware) */}
-            {!locked && (
-              <div className="flex justify-center">
-                <Button variant="ghost" size="sm" onClick={handleHint} disabled={gameMode === "listen-type" && showDefinition}>
-                  <Lightbulb className="h-4 w-4 mr-1" />
-                  {gameMode === "listen-type" && showDefinition ? t(`${M}.hintUsed`) : t("reading.glossary.spelling.useHint")}
-                </Button>
-              </div>
-            )}
+            {/* Hint (shared, mode-aware). Hard cap of MAX_HINTS_PER_WORD per
+                word with an escalating point cost (10/20/30). The badge shows
+                remaining hints; the label previews the upcoming penalty. */}
+            {!locked && (() => {
+              const hintsRemaining = MAX_HINTS_PER_WORD - hintsUsed;
+              const upcomingCost = nextHintCost(hintsUsed);
+              const atCap = hintsRemaining <= 0;
+              return (
+                <div className="flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleHint}
+                    disabled={atCap}
+                    title={atCap ? t(`${M}.hintsExhausted`) : undefined}
+                  >
+                    <Lightbulb className="h-4 w-4 mr-1" />
+                    {atCap
+                      ? t(`${M}.hintsExhausted`)
+                      : upcomingCost !== null
+                        ? t(`${M}.useHintWithCost`, { cost: upcomingCost })
+                        : t("reading.glossary.spelling.useHint")}
+                    {!atCap && (
+                      <Badge variant="secondary" className="ml-2 h-5 min-w-[1.25rem] px-1 text-[10px] tabular-nums">
+                        {hintsRemaining}
+                      </Badge>
+                    )}
+                  </Button>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
 

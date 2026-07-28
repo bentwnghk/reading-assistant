@@ -1316,3 +1316,81 @@ toast(message, {
 The `shouldOpenBattle` store flag is consumed by `SpellingBattleFlow` on the main page to auto-enter battle mode (skip the solo vs. battle choice screen). The `ClassBattleInviteDialog` also uses the same flag for its "Join Battle" button.
 
 **Key principle**: A notification visible outside the target UI must carry navigation state. A store flag (`shouldOpenBattle`) bridges the gap between the poller/dialog (which runs anywhere) and the flow component (which only renders on the main page). Without it, the user clicks the toast, lands on the main page, and sees nothing — they must manually navigate to the battle lobby.
+
+### 24. Game Balance: Audit the Min-Max Bounds of Every Scoring Input
+
+The multiplayer spelling battle originally used a **flat `-10 points per hint` with no cap** on how many hints a player could use per word (`realtime/src/game/scoring.ts`). On paper this looked balanced: each hint costs 10 points, so 3 hints = −30. In practice it created an exploit:
+
+- A **wrong answer scores 0** and resets the streak to 0.
+- A **correct answer is always floored at 10 points** minimum, regardless of hints.
+- Therefore a player who spammed hints to *guarantee* correctness almost always outscored a player who guessed wrong — even with 9 hints (`100 − 90 = 10 > 0`).
+- Worse, the **streak bonus compounded the exploit**: a hint-using player who stayed correct racked up streaks of 3–7 for +10%…+50%, widening the gap further. The "soft" -10 penalty was dwarfed by the +50% streak multiplier it helped sustain.
+
+The lesson: a flat per-unit penalty looks harmless in the typical case but breaks at the **edges of the input range** (0 hints vs. many hints), and **compound mechanics** (streak × hints × speed bonus) amplify the breakage. When designing or rebalancing a scoring formula, enumerate the min and max value of *every* input and check the resulting score range — not just the "reasonable middle."
+
+#### The three-part rebalance
+
+The fix combined three orthogonal knobs (any one alone would have been insufficient):
+
+| Knob | Change | Why |
+|------|--------|-----|
+| **Hard cap** | `MAX_HINTS_PER_WORD = 3` — server clamps any higher client-reported value | Prevents the "burn 9 hints to guarantee correctness" extreme. Matches the solo game's `config.hintsAllowed` default of 3. |
+| **Escalating penalty** | `HINT_COSTS = [10, 20, 30]` — the Nth hint costs more than the (N−1)th | Makes the *third* hint feel costly enough that players won't reflexively burn all three. Total max penalty = −60 (was −30 for 3 hints under the flat model). |
+| **Streak skip** | Hint-aided correct answers do not advance the streak counter and earn no streak bonus (streak is preserved, not reset) | Decouples the hint mechanic from the streak multiplier, killing the compounding exploit. The player can resume streak growth on the next clean (hint-free) answer. |
+
+Worked example (medium word, untimed, no incoming streak):
+- Wrong, 0 hints → **0 pts**, streak reset
+- Right, 0 hints → **100 pts**, streak +1
+- Right, 3 hints → `100 − 60 = 40 pts`, streak unchanged (was 70 pts + streak advancement under the old model)
+
+The hint-using correct answer still beats a wrong answer (40 > 0), preserving the hint-as-lifeline role, but no longer dominates a clean correct answer (40 ≪ 100) and no longer feeds the streak multiplier.
+
+#### Server-side clamping is mandatory (Lesson 12.7 extension)
+
+[Lesson 12.7](#127-authoritative-server-scoring) establishes that the server is authoritative for scoring. This change extends it: **every client-reported scoring input must be server-clamped to its valid range**, not just trusted. The client UI disables the hint button at the cap, but a buggy or malicious client could still submit `hintsUsed: 0` after actually using 3 hints (or `hintsUsed: 99` for some other exploit). The server clamps in `engine.ts` before passing to `scoreAnswer`:
+
+```ts
+// engine.ts — clamp client input before scoring
+hintsUsed: clampHintsUsed(payload.hintsUsed),
+```
+
+```ts
+// scoring.ts — the clamp helper
+export function clampHintsUsed(reported: number): number {
+  if (!Number.isFinite(reported) || reported < 0) return 0;
+  return Math.min(Math.floor(reported), MAX_HINTS_PER_WORD);
+}
+```
+
+**Rule of thumb**: any number the client sends that affects the score (hint count, time taken, answer text) must pass through a server-side bounds check. The client UI is a suggestion; the server is the law.
+
+#### Gameplay constants are mirrored like types (Lesson 12.11 extension)
+
+[Lesson 12.11](#1211-type-mirroring-pattern) establishes that types are manually mirrored between `src/` and `realtime/`. The same applies to **gameplay constants** that the client needs for UI rendering. The client `SpellingBattleArena.tsx` needs `MAX_HINTS_PER_WORD` (to disable the button at the cap) and `HINT_COSTS` (to label the button with the upcoming penalty). These are mirrored as local consts with a sync comment:
+
+```ts
+// Mirror of the authoritative hint policy in `realtime/src/game/scoring.ts`.
+// The server clamps any client-reported hint count to MAX_HINTS_PER_WORD and
+// applies the escalating HINT_COSTS penalty, so the client UI must match to
+// avoid showing the player a misleading "next hint" cost or remaining count.
+// Keep both sides in sync.
+const MAX_HINTS_PER_WORD = 3;
+const HINT_COSTS: readonly number[] = [10, 20, 30];
+```
+
+If the server's `HINT_COSTS` changes but the client mirror doesn't, the UI will show the player one penalty while the server applies another — a subtle and confusing desync. Always update both files in the same commit, and prefer exporting a single `nextHintCost(usedSoFar)` helper from both sides rather than re-deriving the cost at each call site (fewer places to drift).
+
+#### Rebalance checklist
+
+When tuning any scoring input (hint cost, time bonus, streak threshold, etc.):
+
+| Step | What to check | How |
+|------|---------------|-----|
+| 1. Enumerate the input range | What are the min and max realistic values the player can produce? | Write them down before touching the formula |
+| 2. Compute score at both edges | What does the formula yield at min-input vs. max-input? | Unit tests for both bounds (not just the middle) |
+| 3. Audit compound mechanics | Does this input interact with streaks, multipliers, or other bonuses? | Trace every formula branch that reads the input |
+| 4. Server-clamp the input | Does the server bound the client-reported value before scoring? | Add a `clampX()` helper; call it at the engine boundary |
+| 5. Mirror UI constants | Does the client need the cap/cost array to render accurate UI? | Mirror with a sync comment (per Lesson 12.11) |
+| 6. Test the exploit shape | Does the rebalanced formula still let the intended strategy win? | Add a regression test: "clean correct > hint-aided correct > wrong" |
+
+**Related**: [Lesson 12.7](#127-authoritative-server-scoring) (authoritative scoring), [Lesson 12.11](#1211-type-mirroring-pattern) (type mirroring), [Lesson 18](#18-mode-specific-judging-different-correctness-logic-per-mode) (client/server judging mirror).

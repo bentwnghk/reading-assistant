@@ -20,6 +20,12 @@ import {
   Keyboard,
   HelpCircle,
   Zap,
+  Flame,
+  Lightbulb,
+  CheckCircle2,
+  XCircle,
+  ScrollText,
+  Timer,
 } from "lucide-react";
 import copy from "copy-to-clipboard";
 
@@ -63,6 +69,16 @@ const MODE_OPTIONS: { value: SpellingGameMode; icon: React.ReactNode }[] = [
   { value: "fill-blanks", icon: <Keyboard className="h-4 w-4" /> },
   { value: "mixed", icon: <HelpCircle className="h-4 w-4" /> },
 ];
+
+// Mirror of WORD_DURATION_MS in `realtime/src/game/scoring.ts` — used only to
+// display the per-word time limit in the lobby rules card. Keep in sync.
+const WORD_DURATION_MS: Record<SpellingGameMode, Record<SpellingDifficulty, number>> = {
+  "listen-type": { easy: 30_000, medium: 20_000, hard: 12_000 },
+  scramble: { easy: 45_000, medium: 30_000, hard: 20_000 },
+  "fill-blanks": { easy: 30_000, medium: 20_000, hard: 12_000 },
+  mixed: { easy: 30_000, medium: 20_000, hard: 12_000 },
+};
+const BASE_MODES: SpellingGameMode[] = ["listen-type", "scramble", "fill-blanks"];
 
 export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: SpellingBattleLobbyProps) {
   const { t } = useTranslation();
@@ -270,6 +286,11 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
                 {battle.actualWordCount} {t(`${M}.words`)}
               </Badge>
             </div>
+
+            <Separator />
+
+            {/* Game rules — scoring, hints, streak, speed bonus */}
+            <GameRulesCard config={battle.config} />
 
             {/* Actions */}
             <div className="flex gap-2 pt-2">
@@ -527,6 +548,138 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
 }
 
 // ── Sub-components ───────────────────────────────────────────────────────────
+
+/**
+ * Game rules card shown in the battle room while players wait for the host to
+ * start. Summarises the match config (mode, difficulty, timed) and explains
+ * the scoring formula (base points, speed bonus, streak bonus, hint policy,
+ * wrong-answer penalty) so players know the rules before play begins.
+ *
+ * The per-word time limits mirror `WORD_DURATION_MS` in
+ * `realtime/src/game/scoring.ts` (and the arena's local mirror). The hint
+ * policy (cap = 3, escalating 10/20/30) mirrors `MAX_HINTS_PER_WORD` /
+ * `HINT_COSTS`. Keep all three sites in sync.
+ */
+function GameRulesCard({ config }: { config: BattleRoomConfig | null }) {
+  const { t } = useTranslation();
+  const gameMode = config?.gameMode ?? "listen-type";
+  const difficulty = config?.difficulty ?? "medium";
+  const timed = config?.timed ?? false;
+
+  // Per-word time label. For mixed mode the per-word mode is randomised
+  // server-side, so show the min–max range across the three base modes.
+  let timeLabel: string | null = null;
+  if (timed) {
+    if (gameMode === "mixed") {
+      const secs = BASE_MODES.map((m) => WORD_DURATION_MS[m][difficulty] / 1000);
+      const min = Math.min(...secs);
+      const max = Math.max(...secs);
+      timeLabel = min === max ? `${min}s` : t(`${M}.rulesTimeRange`, { min, max });
+    } else {
+      timeLabel = `${WORD_DURATION_MS[gameMode][difficulty] / 1000}s`;
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <ScrollText className="h-4 w-4" />
+        {t(`${M}.rulesTitle`)}
+      </div>
+
+      {/* Match setup summary */}
+      <div className="grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg border bg-muted/30 p-3 text-xs">
+        <SetupItem label={t(`${M}.rulesMode`)} value={t(`reading.glossary.spelling.modes.${gameMode}`)} />
+        <SetupItem label={t(`${M}.rulesDifficulty`)} value={t(`reading.glossary.spelling.difficulty.${difficulty}`)} />
+        {timeLabel && <SetupItem label={t(`${M}.rulesTimePerWord`)} value={timeLabel} icon={<Timer className="h-3 w-3" />} />}
+        <SetupItem
+          label={t(`${M}.rulesTimed`)}
+          value={timed ? t(`${M}.rulesTimedOn`) : t(`${M}.rulesTimedOff`)}
+        />
+      </div>
+
+      {/* Scoring rules */}
+      <div className="space-y-1.5">
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {t(`${M}.rulesScoring`)}
+        </div>
+        <RuleRow
+          icon={<CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />}
+          title={t(`${M}.rulesCorrect`)}
+          desc={t(`${M}.rulesCorrectDesc`)}
+        />
+        {timed && (
+          <RuleRow
+            icon={<Zap className="h-4 w-4 shrink-0 text-amber-500" />}
+            title={t(`${M}.rulesSpeedBonus`)}
+            desc={t(`${M}.rulesSpeedBonusDesc`)}
+          />
+        )}
+        <RuleRow
+          icon={<Flame className="h-4 w-4 shrink-0 text-orange-500" />}
+          title={t(`${M}.rulesStreak`)}
+          desc={t(`${M}.rulesStreakDesc`)}
+        />
+        <RuleRow
+          icon={<Lightbulb className="h-4 w-4 shrink-0 text-yellow-500" />}
+          title={t(`${M}.rulesHints`)}
+          desc={t(`${M}.rulesHintsDesc`)}
+          note={t(`${M}.rulesHintNote`)}
+        />
+        <RuleRow
+          icon={<XCircle className="h-4 w-4 shrink-0 text-destructive" />}
+          title={t(`${M}.rulesWrong`)}
+          desc={t(`${M}.rulesWrongDesc`)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function SetupItem({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-0.5">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="flex items-center gap-1 font-medium">
+        {icon}
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function RuleRow({
+  icon,
+  title,
+  desc,
+  note,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  note?: string;
+}) {
+  return (
+    <div className="flex items-start gap-2 rounded-md border bg-card p-2">
+      {icon}
+      <div className="min-w-0 flex-1">
+        <div className="text-xs font-medium">{title}</div>
+        <div className="text-xs text-muted-foreground">{desc}</div>
+        {note && (
+          <div className="mt-0.5 text-[10px] italic text-muted-foreground/80">{note}</div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function PlayerRow({ player, currentUserId }: { player: BattlePlayerSummary; currentUserId?: string }) {
   const { t } = useTranslation();

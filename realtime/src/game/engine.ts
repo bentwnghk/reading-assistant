@@ -12,7 +12,7 @@
  */
 import type { Server as SocketIOServer } from "socket.io";
 
-import { BETWEEN_WORDS_MS, SUBMIT_GRACE_MS, WORD_DURATION_MS, judgeAnswer, scoreAnswer } from "./scoring";
+import { BETWEEN_WORDS_MS, SUBMIT_GRACE_MS, WORD_DURATION_MS, clampHintsUsed, judgeAnswer, scoreAnswer } from "./scoring";
 import { toRoomStatePayload } from "../rooms";
 import type {
   BattleGameMode,
@@ -204,8 +204,11 @@ export function submitAnswer(
     timed: room.config.timed,
     durationMs,
     // Server clock is authoritative — ignore the client's submittedAt for scoring.
+    // Clamp hintsUsed to MAX_HINTS_PER_WORD so a buggy/malicious client cannot
+    // self-report a low number after using more (the client also enforces the
+    // cap in the UI, but the server is the source of truth).
     timeTakenMs: Date.now() - room.wordStartedAt,
-    hintsUsed: payload.hintsUsed,
+    hintsUsed: clampHintsUsed(payload.hintsUsed),
     oldStreak: player.streak,
   });
 
