@@ -38,7 +38,7 @@ export interface BattleWord {
   perWordMode?: BattleGameMode;
 }
 
-export type WordSourceType = "glossary" | "vocabulary" | "review-list";
+export type WordSourceType = "glossary" | "vocabulary" | "review-list" | "selected";
 
 /** Filter applied when the word source is the host's vocabulary bank. */
 export type VocabularyFilter = "all" | "due-for-review" | "hard-words";
@@ -49,6 +49,8 @@ export interface WordSource {
   sourceId?: string;
   /** vocabulary bank only. */
   filter?: VocabularyFilter;
+  /** selected: inline word texts chosen by the host (validated against user_vocabulary). */
+  words?: string[];
 }
 
 export interface BattleRoomConfig {

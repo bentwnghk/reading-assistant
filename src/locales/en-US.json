@@ -1562,6 +1562,7 @@
           "classInviteTitle": "started a spelling battle",
           "source": {
             "glossary": "Current session glossary",
+            "selected": "Selected words ({{count}})",
             "vocabulary": "My vocabulary",
             "reviewList": "A review list"
           },
@@ -1584,6 +1585,7 @@
             "internal_error": "Something went wrong. Please try again.",
             "needGlossary": "Open a reading session first to use its glossary.",
             "needReviewList": "Select a review list first.",
+            "needSelected": "Need at least 3 selected words.",
             "needClass": "Select a target class first.",
             "invalidCode": "Enter a valid room code.",
             "connection_failed": "Could not connect to the battle server.",

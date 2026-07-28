@@ -54,6 +54,8 @@ import GuideDialog from "@/components/Internal/GuideDialog";
 interface SpellingBattleLobbyProps {
   /** Current reading-session id (reading-page context); enables the "current glossary" source. */
   defaultGlossarySessionId?: string;
+  /** Inline word texts from the host's current selection (vocabulary-page context); enables the "selected words" source. */
+  selectedWords?: string[];
   /** Called when the user exits multiplayer entirely. */
   onExit: () => void;
 }
@@ -80,7 +82,7 @@ const WORD_DURATION_MS: Record<SpellingGameMode, Record<SpellingDifficulty, numb
 };
 const BASE_MODES: SpellingGameMode[] = ["listen-type", "scramble", "fill-blanks"];
 
-export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: SpellingBattleLobbyProps) {
+export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, onExit }: SpellingBattleLobbyProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const battle = useSpellingBattle();
@@ -90,7 +92,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
 
   // ── Create-form state ────────────────────────────────────────────────────
   const [sourceType, setSourceType] = useState<WordSourceType>(
-    defaultGlossarySessionId ? "glossary" : "vocabulary",
+    defaultGlossarySessionId ? "glossary" : selectedWords && selectedWords.length > 0 ? "selected" : "vocabulary",
   );
   const [vocabFilter, setVocabFilter] = useState<VocabularyFilter>("all");
   const [reviewListId, setReviewListId] = useState<string>("");
@@ -140,8 +142,10 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
         return { type: "vocabulary", filter: vocabFilter };
       case "review-list":
         return { type: "review-list", sourceId: reviewListId };
+      case "selected":
+        return { type: "selected", words: selectedWords ?? [] };
     }
-  }, [sourceType, defaultGlossarySessionId, vocabFilter, reviewListId]);
+  }, [sourceType, defaultGlossarySessionId, vocabFilter, reviewListId, selectedWords]);
 
   const handleCreate = useCallback(() => {
     const source = buildSource();
@@ -151,6 +155,10 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
     }
     if (source.type === "review-list" && !reviewListId) {
       toast.error(t(`${M}.errors.needReviewList`));
+      return;
+    }
+    if (source.type === "selected" && (!source.words || source.words.length < 3)) {
+      toast.error(t(`${M}.errors.needSelected`));
       return;
     }
     if (classBattle && !targetClassId) {
@@ -365,6 +373,9 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, onExit }: Spelli
               <SelectContent>
                 {defaultGlossarySessionId && (
                   <SelectItem value="glossary">{t(`${M}.source.glossary`)}</SelectItem>
+                )}
+                {selectedWords && selectedWords.length > 0 && !defaultGlossarySessionId && (
+                  <SelectItem value="selected">{t(`${M}.source.selected`, { count: selectedWords.length })}</SelectItem>
                 )}
                 <SelectItem value="vocabulary">{t(`${M}.source.vocabulary`)}</SelectItem>
                 {reviewLists.length > 0 && (

@@ -15,6 +15,8 @@ import { SpellingBattleResults } from "./SpellingBattleResults";
 interface SpellingBattleFlowProps {
   /** Current reading-session id (reading-page context); enables the glossary source. */
   defaultGlossarySessionId?: string;
+  /** Inline word texts from the host's current selection (vocabulary-page context); enables the "selected" source. */
+  selectedWords?: string[];
   /** Per-word SRS callback (fired on the /vocabulary page; undefined on the reading page). */
   onWordResult?: (word: string, correct: boolean) => void;
   /** Review-session callback (fired on the /vocabulary page; undefined on the reading page). */
@@ -37,6 +39,7 @@ interface SpellingBattleFlowProps {
  */
 export function SpellingBattleFlow({
   defaultGlossarySessionId,
+  selectedWords,
   onWordResult,
   onComplete,
   onExitToSolo,
@@ -124,5 +127,5 @@ export function SpellingBattleFlow({
   }
 
   // Otherwise → lobby (create / join / waiting room).
-  return <SpellingBattleLobby defaultGlossarySessionId={defaultGlossarySessionId} onExit={onExitToSolo} />;
+  return <SpellingBattleLobby defaultGlossarySessionId={defaultGlossarySessionId} selectedWords={selectedWords} onExit={onExitToSolo} />;
 }

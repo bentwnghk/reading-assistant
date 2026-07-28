@@ -99,6 +99,24 @@ async function fetchReviewList(hostUserId: string, sourceId: string | undefined)
     }));
 }
 
+async function fetchSelectedWords(hostUserId: string, words: string[] | undefined): Promise<BattleWord[]> {
+  if (!words || words.length === 0) throw new Error("selected source requires a non-empty words array");
+  const pool = getPool();
+  const result = await pool.query<VocabularyRow>(
+    `SELECT word, syllabification, part_of_speech, english_definition, chinese_definition, example
+     FROM user_vocabulary WHERE user_id = $1 AND word = ANY($2::text[])`,
+    [hostUserId, words],
+  );
+  return result.rows.map((r) => ({
+    word: r.word,
+    englishDefinition: r.english_definition || undefined,
+    chineseDefinition: r.chinese_definition || undefined,
+    syllabification: r.syllabification || undefined,
+    partOfSpeech: r.part_of_speech || undefined,
+    example: r.example || undefined,
+  }));
+}
+
 // ── Public API ───────────────────────────────────────────────────────────────
 
 function shuffle<T>(arr: T[]): T[] {
@@ -178,6 +196,9 @@ export async function resolveWordList(
       break;
     case "review-list":
       raw = await fetchReviewList(hostUserId, source.sourceId);
+      break;
+    case "selected":
+      raw = await fetchSelectedWords(hostUserId, source.words);
       break;
     default:
       throw new Error(`unknown word source type: ${(source as { type: string }).type}`);

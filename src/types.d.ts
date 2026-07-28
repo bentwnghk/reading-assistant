@@ -231,7 +231,7 @@ interface BattleWord {
   perWordMode?: SpellingGameMode;
 }
 
-type WordSourceType = "glossary" | "vocabulary" | "review-list";
+type WordSourceType = "glossary" | "vocabulary" | "review-list" | "selected";
 
 /** Filter applied when the word source is the host's vocabulary bank. */
 type VocabularyFilter = "all" | "due-for-review" | "hard-words";
@@ -242,6 +242,8 @@ interface WordSource {
   sourceId?: string;
   /** vocabulary bank only. */
   filter?: VocabularyFilter;
+  /** selected: inline word texts chosen by the host (validated against user_vocabulary). */
+  words?: string[];
 }
 
 interface BattleRoomConfig {

@@ -1593,6 +1593,7 @@
           "classInviteTitle": "開始了一場拼字對戰",
           "source": {
             "glossary": "目前篇章詞彙表",
+            "selected": "已選詞彙（{{count}}）",
             "vocabulary": "我的詞彙庫",
             "reviewList": "複習清單"
           },
@@ -1615,6 +1616,7 @@
             "internal_error": "發生錯誤，請重試。",
             "needGlossary": "請先開啟一個閱讀篇章以使用其詞彙表。",
             "needReviewList": "請先選擇複習清單。",
+            "needSelected": "至少需要選擇 3 個詞彙。",
             "needClass": "請先選擇目標班級。",
             "invalidCode": "請輸入有效的房間代碼。",
             "connection_failed": "無法連線到對戰伺服器。",
