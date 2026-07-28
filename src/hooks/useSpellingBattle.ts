@@ -24,11 +24,11 @@ import { useBattleStore } from "@/store/battle"
  * successful connect; subsequent reconnects fire the socket "connect" event,
  * which re-joins the current room (if any) to restore the player's seat.
  */
-let eventsWired = false
+let wiredSocket: NonNullable<ReturnType<typeof getRealtimeSocket>> | null = null
 
 function wireEventsOnce(socket: NonNullable<ReturnType<typeof getRealtimeSocket>>): void {
-  if (eventsWired) return
-  eventsWired = true
+  if (wiredSocket === socket) return
+  wiredSocket = socket
 
   // Full room state — the source of truth for the lobby/arena UI.
   socket.on("room:state", (state: BattleRoomState) => {
