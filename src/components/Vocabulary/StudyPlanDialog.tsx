@@ -351,15 +351,6 @@ export default function StudyPlanDialog({ onStartPlan }: StudyPlanDialogProps) {
                 onClick={() => handleSelectMode("flashcard")}
               />
               <ModeButton
-                icon={ClipboardList}
-                color="bg-sky-500"
-                border="border-sky-500/40"
-                text="text-sky-500"
-                title={t("vocabulary.studyPlan.mode.quiz")}
-                desc={t("vocabulary.studyPlan.mode.quizDesc")}
-                onClick={() => handleSelectMode("quiz")}
-              />
-              <ModeButton
                 icon={SpellCheck}
                 color="bg-amber-500"
                 border="border-amber-500/40"
@@ -367,6 +358,15 @@ export default function StudyPlanDialog({ onStartPlan }: StudyPlanDialogProps) {
                 title={t("vocabulary.studyPlan.mode.spelling")}
                 desc={t("vocabulary.studyPlan.mode.spellingDesc")}
                 onClick={() => handleSelectMode("spelling")}
+              />
+              <ModeButton
+                icon={ClipboardList}
+                color="bg-sky-500"
+                border="border-sky-500/40"
+                text="text-sky-500"
+                title={t("vocabulary.studyPlan.mode.quiz")}
+                desc={t("vocabulary.studyPlan.mode.quizDesc")}
+                onClick={() => handleSelectMode("quiz")}
               />
             </div>
 
