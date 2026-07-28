@@ -443,7 +443,7 @@ body.toc-noscroll{overflow:hidden}
   <div class="sub">User Manual</div>
   <div class="zh">A Complete Guide for Teachers &amp; Students</div>
   <div class="meta">
-    <div><strong>Version</strong> 2.930</div>
+    <div><strong>Version</strong> 2.944</div>
     <div><strong>Audience</strong> Students · Teachers · Administrators</div>
     <div><strong>Language</strong> English</div>
   </div>
@@ -1920,7 +1920,51 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <p>Four stat cards double as filters — click one to filter the table. The six tabs are: <b>Table</b>, <b>Flashcard</b>, <b>Spelling</b>, <b>Quiz</b>, <b>Lists</b>, <b>History</b>. The review tabs (Flashcard/Spelling/Quiz) require you to select words first (or load a review list).</p>
 
-      <h3>9.2 The word table</h3>
+      <h3>9.2 Study Plan dialog <span style="font-weight:400;font-size:.8em">(on entry)</span></h3>
+      <p>When you open the My Vocabulary page, a one-time <b>Study Plan</b> popup helps you jump straight into practice — no need to select words manually. It appears once per page load (after your vocabulary has loaded) and won't reappear until you reload or sign back in. Pick a preset, optionally build a custom plan, choose a review mode, and you're reviewing in two taps.</p>
+      <div class="callout"><strong>Empty vocabulary?</strong> If you haven't collected any words yet, the dialog instead shows a single "Start reading" button that links to the main page.</div>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">📚 Study Plan dialog — plan picker</span></div>
+        <div class="mock-body">
+          <div style="max-width:340px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+            <div style="height:4px;background:#6366f1"></div>
+            <div style="text-align:center;padding:16px">
+              <div style="position:relative;width:56px;height:56px;margin:0 auto 8px"><div style="position:absolute;inset:0;border-radius:50%;background:#6366f1;opacity:.2;filter:blur(8px)"></div><div style="position:relative;width:56px;height:56px;border-radius:50%;background:#6366f1;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(99,102,241,.5)"><svg class="ic lg"><use href="#i-book-open"/></svg></div></div>
+              <b style="font-size:17px">Ready to study?</b>
+              <p class="small" style="margin:4px 0 12px;color:var(--muted)">Pick a plan to get started quickly.</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(249,115,22,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#f97316;margin-top:2px"><use href="#i-clock"/></svg><div style="flex:1"><b style="font-size:13px">Review due words (42)</b><div class="small" style="color:var(--muted);margin-top:2px">Words scheduled for review by your spaced-repetition plan.</div></div><svg class="ic sm" style="color:#f97316;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(59,130,246,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#3b82f6;margin-top:2px"><use href="#i-sparkles"/></svg><div style="flex:1"><b style="font-size:13px">Learn new words (31)</b><div class="small" style="color:var(--muted);margin-top:2px">Fresh words you haven't practiced yet.</div></div><svg class="ic sm" style="color:#3b82f6;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(239,68,68,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#ef4444;margin-top:2px"><use href="#i-flame"/></svg><div style="flex:1"><b style="font-size:13px">Drill hard words (18)</b><div class="small" style="color:var(--muted);margin-top:2px">Words you've marked as difficult.</div></div><svg class="ic sm" style="color:#ef4444;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(139,92,246,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><svg class="ic sm" style="color:#8b5cf6;margin-top:2px"><use href="#i-shuffle"/></svg><div style="flex:1"><b style="font-size:13px">Random mixed practice (20)</b><div class="small" style="color:var(--muted);margin-top:2px">A random mix from your entire vocabulary.</div></div><svg class="ic sm" style="color:#8b5cf6;margin-top:2px"><use href="#i-arrow-right"/></svg></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding:6px 10px;font-size:12px;color:var(--muted)"><span style="display:inline-flex;align-items:center;gap:6px"><svg class="ic sm"><use href="#i-wand-2"/></svg> Custom plan</span><svg class="ic sm"><use href="#i-chevron-down"/></svg></div>
+              <div style="margin-top:6px"><span class="btn sm ghost" style="width:100%;justify-content:center;color:var(--muted)">Maybe later</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p>Each preset shows the <b>live count</b> from your stats (capped at 20 due / 15 new / 15 hard / 20 random) and is hidden when its count is zero. Tapping one selects those words automatically and advances to a short <b>review-mode picker</b>:</p>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">▶ Study Plan dialog — review-mode picker</span></div>
+        <div class="mock-body">
+          <div style="max-width:340px;margin:0 auto;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-md);background:#fff">
+            <div style="text-align:center;padding:20px 16px">
+              <b style="font-size:17px">How do you want to review?</b>
+              <p class="small" style="margin:4px 0 12px;color:var(--muted)">20 words selected — choose a review mode.</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(16,185,129,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><div style="width:32px;height:32px;border-radius:8px;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="ic sm"><use href="#i-layers"/></svg></div><div style="flex:1"><b style="font-size:13px">Flashcards</b><div class="small" style="color:var(--muted);margin-top:2px">Flip cards and rate your recall with SRS.</div></div><svg class="ic sm" style="color:#10b981;margin-top:6px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(245,158,11,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><div style="width:32px;height:32px;border-radius:8px;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="ic sm"><use href="#i-spell-check"/></svg></div><div style="flex:1"><b style="font-size:13px">Spelling</b><div class="small" style="color:var(--muted);margin-top:2px">Type, unscramble, and fill in missing letters.</div></div><svg class="ic sm" style="color:#f59e0b;margin-top:6px"><use href="#i-arrow-right"/></svg></div>
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid rgba(14,165,233,.4);border-radius:12px;background:rgba(255,255,255,.6);text-align:left"><div style="width:32px;height:32px;border-radius:8px;background:#0ea5e9;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="ic sm"><use href="#i-clipboard-list"/></svg></div><div style="flex:1"><b style="font-size:13px">Quiz</b><div class="small" style="color:var(--muted);margin-top:2px">Match words to definitions and fill in blanks.</div></div><svg class="ic sm" style="color:#0ea5e9;margin-top:6px"><use href="#i-arrow-right"/></svg></div>
+              </div>
+              <div style="margin-top:10px;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)"><svg class="ic sm"><use href="#i-arrow-left"/></svg> Back</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p>Choose <b>Flashcards</b>, <b>Spelling</b>, or <b>Quiz</b> and the selected words launch straight into that review tab — the word table, filters, and "Start Review" button are skipped entirely. The <b>Custom plan</b> expander lets you pick any of the five Auto-Select strategies (§9.4) plus a word count (1–100) before reaching the same mode picker.</p>
+
+      <h3>9.3 The word table</h3>
       <p>Sortable, filterable, paginated (25/50/75/100 per page). Columns include a <b>Source</b> badge (Own / Teacher-shared) and color-coded <b>Rating</b> (hard=red / medium=yellow / easy=green) and <b>Mastery</b> (L0–L5) badges.</p>
       <table class="ref">
         <tr><th style="width:28px">☐</th><th>Word <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>PoS</th><th>English Definition</th><th>Source</th><th>Rating <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>Level <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>Last Reviewed</th></tr>
@@ -1929,7 +1973,7 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <p>Filters: <b>Rating</b> (all/hard/medium/easy), <b>Mastery</b> (all/due/new/mastered), <b>Source</b> (all/own/teacher), plus free-text <b>search</b>. Bulk-select with the header checkbox; a glowing "Start Review" bar appears when words are selected.</p>
 
-      <h3>9.3 Auto-Select strategies</h3>
+      <h3>9.4 Auto-Select strategies</h3>
       <p>The Auto-Select panel picks words for you using one of five strategies (respects active filters):</p>
       <table class="ref">
         <tr><th>Strategy</th><th>Selects</th></tr>
@@ -1940,10 +1984,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Weakest Words</b></td><td>Reviewed words with the lowest correct/total ratio.</td></tr>
       </table>
 
-      <h3>9.4 Review Lists <span style="font-weight:400;font-size:.8em">(named word sets)</span></h3>
+      <h3>9.5 Review Lists <span style="font-weight:400;font-size:.8em">(named word sets)</span></h3>
       <p>Create named lists from selected words (via "Add to Review List"), then manage them in the <b>Lists tab</b>: <b>Play</b> (load into the review queue), <b>Edit</b> (rename / remove words), <b>Share</b> <span class="tag-teacher"></span>, <b>Delete</b>. Paginated 10/20/30/50 per page.</p>
 
-      <h3>9.5 Export <span style="font-weight:400;font-size:.8em">(4 formats)</span></h3>
+      <h3>9.6 Export <span style="font-weight:400;font-size:.8em">(4 formats)</span></h3>
       <p>The Export panel exports either your selected words or all of them:</p>
       <table class="ref">
         <tr><th>Format</th><th>File</th><th>Content</th></tr>
@@ -1953,10 +1997,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Matching Exercise</td><td>.docx</td><td>Match words with definitions.</td></tr>
       </table>
 
-      <h3>9.6 Review History</h3>
+      <h3>9.7 Review History</h3>
       <p>A paginated log of past review sessions (flashcard/quiz/spelling). Each row shows mode, word count, accuracy % (color-coded), and timestamp. Expand a row to see per-rating counts (flashcard) or per-word results (quiz/spelling), with resulting mastery badges.</p>
 
-      <h3>9.7 Sharing <span class="tag-teacher"></span></h3>
+      <h3>9.8 Sharing <span class="tag-teacher"></span></h3>
       <div class="callout teacher"><strong>Teacher / admin / super-admin only</strong> Two kinds of sharing exist, both hidden from students:
       <ul style="margin:6px 0 0">
         <li><b>Share individual words</b> — send selected words to same-school users (super-admins: any user). Recipients who already have a word are skipped.</li>
