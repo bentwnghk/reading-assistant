@@ -110,6 +110,7 @@ export function ClassBattlePoller() {
             {
               id: invite.roomCode,
               duration: Infinity,
+              className: "bg-purple-600 text-white border-purple-700 dark:bg-purple-500 dark:border-purple-400",
               action: {
                 label: t(`${M}.classBattleToastAction`),
                 onClick: () => {
