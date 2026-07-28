@@ -436,11 +436,31 @@ io.on("connection", (socket: Socket) => {
     submitAnswer(io, room, user.userId, payload);
   });
 
-  // ── room:rematch (host only — reset to lobby) ────────────────────────────
-  socket.on("room:rematch", () => {
+  // ── room:rematch (host only — reset to lobby with a fresh word set) ───────
+  // Re-resolves words from the room's configured source so each rematch gets
+  // a new shuffle (and fresh per-word mode/blanks/scrambles for mixed mode)
+  // instead of replaying the previous battle's canonical words verbatim.
+  // Falls back to re-enriching the existing list if the source is no longer
+  // fetchable (e.g., the glossary session was deleted).
+  socket.on("room:rematch", async () => {
     const room = findRoomByPlayer(user.userId);
     if (!room) return;
     if (room.hostId !== user.userId) return emitRoomError(socket, "not_host", "Only the host can start a rematch");
+
+    try {
+      const resolved = await resolveWordList(user.userId, room.config.source, room.config.wordCount);
+      const enriched = enrichWords(resolved.words, room.config.gameMode, room.config.difficulty);
+      setRoomSource(room, room.config.source, { words: enriched, actualCount: resolved.actualCount });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn(`[realtime] room:rematch re-resolve failed code=${room.code}: ${msg}`);
+      if (room.canonicalWords.length > 0) {
+        // Source gone — keep the same word pool but refresh mode-specific data.
+        room.canonicalWords = enrichWords(room.canonicalWords, room.config.gameMode, room.config.difficulty);
+      } else {
+        return emitRoomError(socket, "invalid_source", "Word source is no longer available; please pick a new one");
+      }
+    }
     rematch(io, room);
     console.log(`[realtime] room:rematch code=${room.code}`);
   });
