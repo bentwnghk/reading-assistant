@@ -146,6 +146,9 @@ Got stuck on a passage? The AI Tutor is here to help! This interactive chat assi
 | 💡 **Hint Mode** | Get guided hints instead of direct answers (learn, don't cheat!) |
 | 📝 **Step-by-Step Explanations** | Understand how to approach reading questions |
 
+#### 🧭 Learning Recommendation Engine
+After each reading session, an adaptive dialog analyzes your progress across all activities — reading tests, grammar quizzes, vocabulary reviews, spelling games, and more — and suggests the most impactful next step. Recommendations are personalized based on incomplete activities, past performance, and session context. One click takes you straight to the recommended activity.
+
 ---
 
 ### 📷 4. Smart OCR - Snap & Extract
@@ -635,27 +638,40 @@ Built for educational institutions with multi-tenant support.
 
 ### 🔐 24. Authentication & Security
 
-Secure login with Google OAuth integration.
+Secure login with Google OAuth integration and three-layer session protection.
 
 | Feature | Description |
 |---------|-------------|
 | 🔑 **Google Sign-In** | One-click login with Google |
-| 👤 **Role-Based Access** | Student, Teacher, Admin roles |
+| 👤 **Role-Based Access** | Student, Teacher, Admin, Super-Admin roles |
 | 🏫 **School Scoping** | Data isolated by school |
 | 🔒 **Secure Sessions** | Auth.js powered authentication |
+
+#### Three-Layer Session Protection
+
+| Layer | Config Var | Default | How It Works |
+|-------|-----------|---------|--------------|
+| ⏱️ **Session max lifetime** | `SESSION_MAX_AGE` | 3 days | Hard ceiling — no extension on activity |
+| 🚫 **Concurrent session limit** | `MAX_CONCURRENT_SESSIONS` | 3 | Prunes oldest sessions on new sign-in |
+| ⏰ **Client-side idle timeout** | `SESSION_IDLE_TIMEOUT_MINUTES` | 30 min | Auto sign-out after inactivity; multi-tab sync via BroadcastChannel; shows warning toast 1 minute before |
+
+The idle timeout is configurable at deployment time (server-side env var exposed via `/api/config`, not a build-time `NEXT_PUBLIC_*` variable).
 
 ---
 
 ### 📱 25. PWA Support
 
-Install Mr.🆖 ProReader as a native app on your device!
+Install Mr.🆖 ProReader as a native app on your device! Powered by **Serwist** (Workbox successor) for service worker management.
 
 | Feature | Description |
 |---------|-------------|
-| 📲 **Installable** | Add to home screen on mobile/desktop |
-| 🔄 **Offline Ready** | Works without internet connection |
-| 🚀 **Fast Loading** | Cached assets for instant startup |
+| 📲 **Installable** | Add to home screen on mobile/desktop (iOS + standard browsers) |
+| 🔄 **Offline Ready** | Runtime caching via Serwist for offline access |
+| 🚀 **Fast Loading** | Precached assets for instant startup |
 | 📱 **Native Feel** | Full-screen, app-like experience |
+| 🔄 **Background Sync** | Navigation preload + runtime caching strategies |
+
+The service worker (`src/app/sw.ts`) is compiled during `next build` and registered client-side via `ServiceWorkerRegistrar.tsx`. It supports `skipWaiting`, `clientsClaim`, and `navigationPreload` for a seamless upgrade experience.
 
 ---
 
@@ -677,6 +693,43 @@ Full subscription lifecycle powered by Stripe for both individual users and scho
 | 🔀 **Plan Switching** | Switch between monthly and yearly |
 | 📧 **Email Notifications** | Activation, renewal, payment failed, and trial ending alerts |
 | 📊 **Admin Views** | Manage school subscriptions and billing |
+
+---
+
+## 🐳 27. Docker Deployment
+
+The application runs as three Docker containers managed by `docker-compose.yml`:
+
+| Service | Image | Port | Purpose |
+|---------|-------|------|---------|
+| 🗄️ **postgres** | `postgres:16-alpine` | 5432 | PostgreSQL database |
+| 📖 **reading-assistant** | Custom (Next.js standalone) | 3000 | Main Next.js application |
+| ⚡ **realtime** | Custom (Socket.io server) | 3001 | Multiplayer spelling battle server |
+
+### Quick Start
+
+```bash
+# 1. Clone and configure
+cp env.tpl .env   # Fill in all required environment variables
+
+# 2. Build and launch all services
+docker compose up --build
+
+# 3. Open http://localhost:3000
+```
+
+The `realtime` service is a standalone Socket.io server for real-time multiplayer spelling battles. It authenticates via HMAC-signed tickets issued by the Next.js app — no shared session database dependency. The realtime URL is configured via `REALTIME_URL` and exposed to the client at runtime through `/api/config`.
+
+### CI/CD
+
+Two GitHub Actions workflows publish Docker images automatically:
+
+| Workflow | Registry | Images | Trigger |
+|----------|----------|--------|---------|
+| **docker.yml** | Docker Hub | `reading-assistant` | `main`, `dev` pushes, `v*` tags |
+| **ghcr.yml** | GitHub Container Registry | `reading-assistant` + `reading-assistant-realtime` | `main`, `db` pushes, `v*` tags |
+
+Both workflows build multi-architecture images (linux/amd64 + linux/arm64).
 
 ---
 
@@ -725,6 +778,9 @@ All models are served through the **Mr.🆖 AI Hub** (an OpenAI-compatible gatew
 | 📊 **Diagrams** | Mermaid |
 | 📝 **Markdown** | react-markdown + KaTeX |
 | 🌍 **i18n** | react-i18next |
+| 🌐 **Realtime** | Socket.io (standalone server) |
+| 🔄 **PWA** | Serwist |
+| 🗺️ **OCR** | Tesseract.js |
 
 ---
 
@@ -765,6 +821,17 @@ src/
 ├── locales/               # i18n translations (en-US, zh-HK)
 └── types.d.ts            # TypeScript interfaces
 scripts/                   # SQL migrations (init-db.sql + incremental)
+realtime/                  # Standalone Socket.io server for multiplayer spelling battles
+├── src/
+│   ├── server.ts         # Socket.io bootstrap + room/game orchestration
+│   ├── auth.ts           # HMAC ticket verification
+│   ├── config.ts         # Runtime env-driven configuration
+│   ├── db.ts             # PostgreSQL pool
+│   ├── presence.ts       # Connected-user presence tracker
+│   ├── rooms.ts          # Room CRUD, player management, host transfer
+│   └── game/             # Game engine, scoring, word resolution
+├── Dockerfile            # Multi-stage build (3-stage: deps→builder→prod-deps→runner)
+└── package.json          # Independent package (own deps, tsconfig)
 ```
 
 ---

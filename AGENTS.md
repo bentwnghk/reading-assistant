@@ -1394,3 +1394,68 @@ When tuning any scoring input (hint cost, time bonus, streak threshold, etc.):
 | 6. Test the exploit shape | Does the rebalanced formula still let the intended strategy win? | Add a regression test: "clean correct > hint-aided correct > wrong" |
 
 **Related**: [Lesson 12.7](#127-authoritative-server-scoring) (authoritative scoring), [Lesson 12.11](#1211-type-mirroring-pattern) (type mirroring), [Lesson 18](#18-mode-specific-judging-different-correctness-logic-per-mode) (client/server judging mirror).
+
+### 25. Cross-Page Store State Bleed — Guard Against Stale Page-Specific Fields
+
+The reading store is a module-level singleton that survives SPA navigation (by design, per [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local)). This means `useReadingStore().id` retains its value even after the user navigates to `/vocabulary`. Components on the vocabulary page that read the reading store's `id` will get a **stale session ID** from the previous reading session, causing incorrect behavior (v2.940).
+
+**Example symptom**: The multiplayer spelling battle lobby on the `/vocabulary` page defaulted to "current session glossary" as the word source — even though the user was on the vocabulary page and had no active reading session. The stale `id` from a previous reading session made `defaultGlossarySessionId` non-null, overriding the intended "selected words" source.
+
+**The fix**: Add an explicit opt-out prop that the parent sets when the component renders outside its home page:
+
+```tsx
+// VocabularySpelling.tsx (reused on both / and /vocabulary)
+interface VocabularySpellingProps {
+  disableSessionGlossary?: boolean;
+  selectedWords?: string[];
+  // ...
+}
+
+// When rendering from /vocabulary — suppress stale reading store id
+defaultGlossarySessionId={disableSessionGlossary ? undefined : (id ?? undefined)}
+// Pass word data explicitly instead of relying on the store
+selectedWords={glossary.map((g) => g.word)}
+```
+
+```tsx
+// VocabularyContainer.tsx (on the /vocabulary page)
+<VocabularySpelling
+  glossary={glossary}
+  disableSessionGlossary // ← overrides the stale useReadingStore().id
+  selectedWords={glossary.map((g) => g.word)}
+  onWordResult={handleWordResult}
+  onComplete={handleReviewComplete}
+/>
+```
+
+**Key principle**: A store designed to survive SPA navigation (for resilience) becomes a source of stale cross-page data. Any component reused across pages that reads a page-specific store field must either:
+1. Accept an explicit override prop (`disableSessionGlossary`) that suppress the stale value, or
+2. Receive data explicitly via props (`selectedWords`) instead of reading the store directly.
+
+This is the **converse** of [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local): Lesson 8 says "put it in the store so it survives navigation"; this lesson says "that same survival creates a footgun for components on other pages." The fix is not to undo the store pattern, but to add explicit page-context props at component boundaries.
+
+### 26. Module-Level Boolean for One-Shot UI State That Survives Navigation
+
+For transient UI state that must (a) reset on full page reload, (b) survive SPA navigation, and (c) not require persistence to localStorage or the server, a **module-level boolean variable** is simpler than a Zustand store field (v2.942):
+
+```ts
+// src/store/vocabulary.ts — module scope, no persist middleware needed
+let _studyPlanDialogChecked = false;
+export function setStudyPlanDialogChecked(value: boolean) {
+  _studyPlanDialogChecked = value;
+}
+export function isStudyPlanDialogChecked() {
+  return _studyPlanDialogChecked;
+}
+```
+
+This pattern was used for the Study Plan Dialog's "show once per session" gate. It avoids:
+- Zustand persist middleware's async hydration lag (see [Lesson 13](#13-zustand-persist-rehydration-is-async--i18n-must-read-persisted-values-before-hydration))
+- localStorage writes for ephemeral state
+- Complex store boilerplate for a single boolean
+
+**When to use**: One-shot dialog flags, "first visit" nudges, or any UI state that resets on reload but must survive client-side navigation.
+
+**When NOT to use**: Any state that affects a user's data (scores, progress, settings) — those must go through the store + DB for consistency.
+
+**Related**: [Lesson 15](#15-store-level-flag-for-one-shot-side-effects-that-survive-navigation) — this is the lightweight alternative when a full Zustand store field is overkill.
