@@ -31,10 +31,8 @@ import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import { useBattleStore } from "@/store/battle";
 import { logActivity } from "@/utils/activityLogger";
-import { generateSignature } from "@/utils/signature";
-import { completePath } from "@/utils/url";
-import { parseError } from "@/utils/error";
 import { cn } from "@/utils/style";
+import { speakWord as speakWordShared, stopSpeaking, unlockAudio } from "@/utils/tts";
 import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
 import { SpellingBattleFlow } from "./SpellingBattleFlow";
 import GuideDialog from "@/components/Internal/GuideDialog";
@@ -247,6 +245,10 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   }, [config.blankRatio]);
 
   const startGame = useCallback(() => {
+    // Game start is a user gesture — resume the AudioContext now so the first
+    // word's auto-play (and every later one, incl. timed-out auto-advance) is
+    // permitted by iOS Safari / mobile Chrome autoplay policy.
+    void unlockAudio();
     let sortedGlossary = sortGlossaryByPriority(glossary, effectiveRatings, {
       prioritize: prioritizeHardWords,
       shuffle: true,
@@ -357,93 +359,28 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     }
   }, [currentIndex, challenges.length, gameMode, config.timeLimits]);
 
-  const speakWord = useCallback(async (word: string) => {
-    if (!word) return;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
-    setIsTTSLoading(true);
-
-    try {
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      let url: string;
-      if (mode === "local") {
-        url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
-        if (openaicompatibleApiKey) {
-          headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
-        }
-      } else if (mode === "subscription") {
-        url = "/api/ai/subscription/v1/audio/speech";
-      } else {
-        url = "/api/ai/openaicompatible/v1/audio/speech";
-        if (accessPassword) {
-          headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
-        }
-      }
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          model: "tts-1",
-          input: word,
-          voice: ttsVoice,
-          response_format: "mp3",
-          speed: ttsPlaybackRate,
-        }),
+  // Delegates to the shared tts utility (Web Audio API playback), which is the
+  // iOS-safe path: once the AudioContext is resumed inside a gesture (see
+  // `startGame` and the speaker button below), per-word auto-play works without
+  // further gestures — including the timed-out auto-advance path.
+  const speakWord = useCallback(
+    async (word: string) => {
+      await speakWordShared({
+        word,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        accessPassword,
+        openaicompatibleApiProxy,
+        audioRef,
+        onStart: () => setIsTTSLoading(true),
+        onEnd: () => setIsTTSLoading(false),
+        onError: (msg) => toast.error(msg),
       });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        let errorMsg = `TTS request failed (${response.status})`;
-        try {
-          const parsed = JSON.parse(errText);
-          if (parsed.error?.status && parsed.error?.message) {
-            errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
-          }
-        } catch {}
-        toast.error(errorMsg);
-        return;
-      }
-
-      const audioBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      await new Promise<void>((resolve, reject) => {
-        const audio = new Audio();
-        audioRef.current = audio;
-
-        audio.oncanplay = () => {
-          audio.play().then(resolve).catch(reject);
-        };
-
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-        };
-
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-          reject(new Error("Audio element error"));
-        };
-
-        audio.src = audioUrl;
-        audio.load();
-      });
-    } catch (error) {
-      toast.error(parseError(error));
-    } finally {
-      setIsTTSLoading(false);
-    }
-  }, [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+    },
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
+  );
 
   const checkAnswer = useCallback(() => {
     if (!currentChallenge) return;
@@ -582,6 +519,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
   useEffect(() => {
     return () => {
+      stopSpeaking();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
@@ -590,6 +528,13 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         clearInterval(timerRef.current);
       }
     };
+  }, []);
+
+  // Best-effort AudioContext unlock on mount. On desktop the context can often
+  // resume without a fresh gesture (sticky activation); on iOS Safari this will
+  // no-op until `startGame`'s click handler runs the real unlock.
+  useEffect(() => {
+    void unlockAudio();
   }, []);
 
   useEffect(() => {
@@ -955,7 +900,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
           <div className="space-y-6">
             <div className="text-center">
               <button
-                onClick={() => speakWord(currentChallenge.word)}
+                onClick={() => {
+                  // Genuine user gesture — (re)unlock the audio session, then
+                  // speak. A no-op once already running.
+                  void unlockAudio().then(() => speakWord(currentChallenge.word));
+                }}
                 disabled={isTTSLoading}
                 className="p-4 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
               >

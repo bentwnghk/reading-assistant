@@ -1,20 +1,18 @@
 /**
  * Shared text-to-speech utility.
  *
- * Extracted from `VocabularySpelling.speakWord` so the multiplayer battle arena
- * reuses the exact same provider logic (local / subscription / default proxy).
- * The solo spelling component keeps its own inline copy for now — consolidate
- * later as a low-risk cleanup.
- *
- * Playback uses the Web Audio API (AudioContext), not plain HTMLAudioElement.
- * This is required for iOS Safari: HTMLAudioElement.play() is rejected unless
- * called inside a user gesture, and a gesture-bound play does NOT transfer to
- * other (or freshly created) <audio> elements — so per-word auto-play (driven
- * by a socket event, not a gesture) keeps failing no matter how many times the
- * user taps. An AudioContext, by contrast, only needs ctx.resume() once inside
- * a gesture; afterwards the context stays "running" for the page's lifetime and
- * any number of decoded buffers can be scheduled (source.start()) WITHOUT
- * further gestures. See `unlockAudio()` / `isAudioUnlocked()`.
+ * Consumed by both the multiplayer spelling battle arena
+ * (`SpellingBattleArena.tsx`) and the solo spelling game
+ * (`VocabularySpelling.tsx`). Playback uses the Web Audio API (AudioContext),
+ * not plain HTMLAudioElement. This is required for iOS Safari:
+ * HTMLAudioElement.play() is rejected unless called inside a user gesture, and
+ * a gesture-bound play does NOT transfer to other (or freshly created) <audio>
+ * elements — so per-word auto-play (driven by a socket event or a timer, not a
+ * gesture) keeps failing no matter how many times the user taps. An
+ * AudioContext, by contrast, only needs ctx.resume() once inside a gesture;
+ * afterwards the context stays "running" for the page's lifetime and any
+ * number of decoded buffers can be scheduled (source.start()) WITHOUT further
+ * gestures. See `unlockAudio()` / `isAudioUnlocked()`.
  */
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
