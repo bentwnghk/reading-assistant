@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useSettingStore } from "@/store/setting";
-import { speakWord } from "@/utils/tts";
+import { speakWord, unlockAudio } from "@/utils/tts";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,9 +112,17 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
         onStart: () => setIsTTSLoading(true),
         onEnd: () => setIsTTSLoading(false),
         onError: (msg) => toast.error(msg),
+        onBlocked: () =>
+          toast(t(`${M}.audioBlocked`), {
+            description: t(`${M}.audioBlockedDesc`),
+            action: {
+              label: t("reading.glossary.spelling.clickToHear"),
+              onClick: () => void doSpeak(text),
+            },
+          }),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, t],
   );
 
   // Per-word lifecycle: reset state + speak the word (listen-type only) on a new word.
@@ -249,6 +257,24 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
     };
   }, []);
 
+  // iOS Safari / mobile Chrome: prime the media session on the first user
+  // gesture so that the per-word auto-speak (driven by a socket event, not a
+  // gesture) is permitted. The listener self-removes after the first trigger.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onGesture = () => {
+      void unlockAudio();
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("touchend", onGesture);
+    };
+    window.addEventListener("pointerdown", onGesture, { once: false });
+    window.addEventListener("touchend", onGesture, { once: false });
+    return () => {
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("touchend", onGesture);
+    };
+  }, []);
+
   // ── Countdown overlay ────────────────────────────────────────────────────
   if (!word && battle.countdownN !== null) {
     return (
@@ -341,7 +367,12 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                     variant="outline"
                     size="lg"
                     className="h-16 w-16 rounded-full"
-                    onClick={() => void doSpeak(word.word)}
+                    onClick={() => {
+                      // A genuine user gesture — unlock the media session
+                      // (iOS Safari) then speak. Subsequent auto-plays will
+                      // then be permitted.
+                      void unlockAudio().finally(() => void doSpeak(word.word));
+                    }}
                     disabled={isTTSLoading}
                     title={t("reading.glossary.spelling.clickToHear")}
                   >

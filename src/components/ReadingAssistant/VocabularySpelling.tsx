@@ -31,9 +31,7 @@ import { useReadingStore } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 import { useBattleStore } from "@/store/battle";
 import { logActivity } from "@/utils/activityLogger";
-import { generateSignature } from "@/utils/signature";
-import { completePath } from "@/utils/url";
-import { parseError } from "@/utils/error";
+import { speakWord as playWord, unlockAudio } from "@/utils/tts";
 import { cn } from "@/utils/style";
 import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
 import { SpellingBattleFlow } from "./SpellingBattleFlow";
@@ -357,93 +355,32 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     }
   }, [currentIndex, challenges.length, gameMode, config.timeLimits]);
 
-  const speakWord = useCallback(async (word: string) => {
-    if (!word) return;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
-    setIsTTSLoading(true);
-
-    try {
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-
-      let url: string;
-      if (mode === "local") {
-        url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
-        if (openaicompatibleApiKey) {
-          headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
-        }
-      } else if (mode === "subscription") {
-        url = "/api/ai/subscription/v1/audio/speech";
-      } else {
-        url = "/api/ai/openaicompatible/v1/audio/speech";
-        if (accessPassword) {
-          headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
-        }
-      }
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          model: "tts-1",
-          input: word,
-          voice: ttsVoice,
-          response_format: "mp3",
-          speed: ttsPlaybackRate,
-        }),
+  const speakWord = useCallback(
+    async (word: string) => {
+      await playWord({
+        word,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        accessPassword,
+        openaicompatibleApiProxy,
+        audioRef,
+        onStart: () => setIsTTSLoading(true),
+        onEnd: () => setIsTTSLoading(false),
+        onError: (msg) => toast.error(msg),
+        onBlocked: () =>
+          toast(t("reading.glossary.spelling.audioBlocked"), {
+            description: t("reading.glossary.spelling.audioBlockedDesc"),
+            action: {
+              label: t("reading.glossary.spelling.clickToHear"),
+              onClick: () => speakWord(word),
+            },
+          }),
       });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        let errorMsg = `TTS request failed (${response.status})`;
-        try {
-          const parsed = JSON.parse(errText);
-          if (parsed.error?.status && parsed.error?.message) {
-            errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
-          }
-        } catch {}
-        toast.error(errorMsg);
-        return;
-      }
-
-      const audioBuffer = await response.arrayBuffer();
-      const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      await new Promise<void>((resolve, reject) => {
-        const audio = new Audio();
-        audioRef.current = audio;
-
-        audio.oncanplay = () => {
-          audio.play().then(resolve).catch(reject);
-        };
-
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-        };
-
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-          reject(new Error("Audio element error"));
-        };
-
-        audio.src = audioUrl;
-        audio.load();
-      });
-    } catch (error) {
-      toast.error(parseError(error));
-    } finally {
-      setIsTTSLoading(false);
-    }
-  }, [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]);
+    },
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, t],
+  );
 
   const checkAnswer = useCallback(() => {
     if (!currentChallenge) return;
@@ -589,6 +526,24 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+    };
+  }, []);
+
+  // iOS Safari / mobile Chrome: prime the media session on the first user
+  // gesture so that the per-word auto-speak (driven by a state change, not a
+  // gesture) is permitted. The listener self-removes after the first trigger.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onGesture = () => {
+      void unlockAudio();
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("touchend", onGesture);
+    };
+    window.addEventListener("pointerdown", onGesture);
+    window.addEventListener("touchend", onGesture);
+    return () => {
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("touchend", onGesture);
     };
   }, []);
 
@@ -955,7 +910,12 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
           <div className="space-y-6">
             <div className="text-center">
               <button
-                onClick={() => speakWord(currentChallenge.word)}
+                onClick={() => {
+                  // A genuine user gesture — unlock the media session
+                  // (iOS Safari) then speak. Subsequent auto-plays will
+                  // then be permitted.
+                  void unlockAudio().finally(() => speakWord(currentChallenge.word));
+                }}
                 disabled={isTTSLoading}
                 className="p-4 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
               >

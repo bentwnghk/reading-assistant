@@ -1430,6 +1430,8 @@
         "typeMissing": "Type the missing letters...",
         "clear": "Clear",
         "submit": "Submit",
+        "audioBlocked": "Audio is muted by your browser",
+        "audioBlockedDesc": "Tap the speaker 🔊 to enable sound for the game.",
         "modes": {
           "listen-type": "Listen & Type",
           "scramble": "Letter Scramble",
@@ -1508,6 +1510,8 @@
           "timeUp": "Time's up!",
           "correct": "Correct!",
           "answerWas": "Answer:",
+          "audioBlocked": "Audio is muted by your browser",
+          "audioBlockedDesc": "Tap the speaker 🔊 to enable sound for the battle.",
           "hintUsed": "Hint used",
           "useHintWithCost": "Use Hint (−{{cost}} pts)",
           "hintsExhausted": "No hints left",
