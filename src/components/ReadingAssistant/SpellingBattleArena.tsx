@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useSettingStore } from "@/store/setting";
-import { speakWord, unlockAudio } from "@/utils/tts";
+import { speakWord, stopSpeaking, unlockAudio, isAudioUnlocked } from "@/utils/tts";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,6 +89,12 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   const [usedTileIndices, setUsedTileIndices] = useState<number[]>([]);
   // listen-type / fill-blanks: letter positions revealed by hints.
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
+  // Whether the Web Audio session is "running". On iOS Safari / mobile Chrome
+  // the AudioContext must be resumed inside a user gesture before any audio can
+  // play; until then the speaker button pulses and prompts for a tap. Once
+  // running it stays running for the page lifetime, so every later word
+  // auto-plays without another gesture.
+  const [soundEnabled, setSoundEnabled] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -112,17 +118,14 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
         onStart: () => setIsTTSLoading(true),
         onEnd: () => setIsTTSLoading(false),
         onError: (msg) => toast.error(msg),
-        onBlocked: () =>
-          toast(t(`${M}.audioBlocked`), {
-            description: t(`${M}.audioBlockedDesc`),
-            action: {
-              label: t("reading.glossary.spelling.clickToHear"),
-              onClick: () => void doSpeak(text),
-            },
-          }),
+        // Auto-play attempted before the user has unlocked the session. The
+        // always-visible speaker button is the persistent recovery affordance
+        // (it never disappears), so we just flag the UI to pulse it rather
+        // than relying on an ephemeral toast.
+        onBlocked: () => setSoundEnabled(false),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, t],
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
   );
 
   // Per-word lifecycle: reset state + speak the word (listen-type only) on a new word.
@@ -139,7 +142,15 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
     setUsedTileIndices([]);
     setRevealedPositions([]);
     // Only listen-type reveals the word via audio; the other modes show a visual clue.
-    const speakTimer = gameMode === "listen-type" ? setTimeout(() => { void doSpeak(word.word); }, 250) : null;
+    // Auto-play only when the audio session is already unlocked — otherwise iOS
+    // Safari blocks it. The speaker button (always visible) lets the user unlock
+    // with one tap, after which all later words auto-play.
+    const speakTimer =
+      gameMode === "listen-type" && isAudioUnlocked()
+        ? setTimeout(() => {
+            void doSpeak(word.word);
+          }, 250)
+        : null;
     const focusTimer = setTimeout(() => inputRef.current?.focus(), 300);
     return () => {
       if (speakTimer) clearTimeout(speakTimer);
@@ -250,6 +261,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   // Cleanup audio on unmount.
   useEffect(() => {
     return () => {
+      stopSpeaking();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
@@ -257,18 +269,27 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
     };
   }, []);
 
-  // iOS Safari / mobile Chrome: prime the media session on the first user
-  // gesture so that the per-word auto-speak (driven by a socket event, not a
-  // gesture) is permitted. The listener self-removes after the first trigger.
+  // Best-effort unlock on mount. On desktop the AudioContext can often resume
+  // without a fresh gesture (sticky activation), so sound works from the first
+  // word. On iOS Safari resume() will reject until a real gesture — handled by
+  // the listener + speaker button below.
+  useEffect(() => {
+    void unlockAudio().then((unlocked) => setSoundEnabled(unlocked));
+  }, []);
+
+  // iOS Safari / mobile Chrome: resume the AudioContext inside the user's
+  // gestures (any tap in the arena). Once "running" it stays running for the
+  // page lifetime, so every subsequent word auto-plays. unlockAudio() is a
+  // no-op when already running, so it's cheap to call on every gesture.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onGesture = () => {
-      void unlockAudio();
-      window.removeEventListener("pointerdown", onGesture);
-      window.removeEventListener("touchend", onGesture);
+      void unlockAudio().then((unlocked) => {
+        if (unlocked) setSoundEnabled(true);
+      });
     };
-    window.addEventListener("pointerdown", onGesture, { once: false });
-    window.addEventListener("touchend", onGesture, { once: false });
+    window.addEventListener("pointerdown", onGesture);
+    window.addEventListener("touchend", onGesture);
     return () => {
       window.removeEventListener("pointerdown", onGesture);
       window.removeEventListener("touchend", onGesture);
@@ -361,24 +382,35 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
 
             {gameMode === "listen-type" && (
               <div className="space-y-4">
-                {/* Listen + replay */}
+                {/* Listen + replay. The button is ALWAYS available (it is the
+                    persistent recovery affordance). Until the audio session is
+                    unlocked it pulses and prompts for a tap; one tap resumes
+                    the AudioContext inside the gesture and all later words
+                    auto-play. After that it replays the current word on tap. */}
                 <div className="flex flex-col items-center gap-2">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="h-16 w-16 rounded-full"
-                    onClick={() => {
-                      // A genuine user gesture — unlock the media session
-                      // (iOS Safari) then speak. Subsequent auto-plays will
-                      // then be permitted.
-                      void unlockAudio().finally(() => void doSpeak(word.word));
+                    className={cn(
+                      "h-16 w-16 rounded-full",
+                      !soundEnabled && "animate-pulse ring-2 ring-primary ring-offset-2 ring-offset-background",
+                    )}
+                    onClick={async () => {
+                      // Genuine user gesture — resume the AudioContext (iOS
+                      // unlock) then speak the current word.
+                      const unlocked = await unlockAudio();
+                      setSoundEnabled(unlocked || isAudioUnlocked());
+                      void doSpeak(word.word);
                     }}
-                    disabled={isTTSLoading}
                     title={t("reading.glossary.spelling.clickToHear")}
                   >
                     {isTTSLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Volume2 className="h-6 w-6" />}
                   </Button>
-                  <span className="text-xs text-muted-foreground">{t("reading.glossary.spelling.clickToHear")}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {soundEnabled
+                      ? t("reading.glossary.spelling.clickToHear")
+                      : t(`${M}.tapToEnableSound`)}
+                  </span>
                 </div>
 
                 {/* Letter-position hints */}

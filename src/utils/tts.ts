@@ -5,6 +5,16 @@
  * reuses the exact same provider logic (local / subscription / default proxy).
  * The solo spelling component keeps its own inline copy for now — consolidate
  * later as a low-risk cleanup.
+ *
+ * Playback uses the Web Audio API (AudioContext), not plain HTMLAudioElement.
+ * This is required for iOS Safari: HTMLAudioElement.play() is rejected unless
+ * called inside a user gesture, and a gesture-bound play does NOT transfer to
+ * other (or freshly created) <audio> elements — so per-word auto-play (driven
+ * by a socket event, not a gesture) keeps failing no matter how many times the
+ * user taps. An AudioContext, by contrast, only needs ctx.resume() once inside
+ * a gesture; afterwards the context stays "running" for the page's lifetime and
+ * any number of decoded buffers can be scheduled (source.start()) WITHOUT
+ * further gestures. See `unlockAudio()` / `isAudioUnlocked()`.
  */
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
@@ -18,65 +28,129 @@ export interface SpeakWordOptions {
   openaicompatibleApiKey?: string;
   openaicompatibleApiProxy?: string;
   accessPassword?: string;
-  /** Caller-owned audio ref — the utility sets/stops it. */
+  /** Caller-owned audio ref — only used by the HTMLAudioElement fallback path. */
   audioRef: { current: HTMLAudioElement | null };
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (message: string) => void;
   /**
-   * Fired when playback is blocked by the user agent's autoplay policy
-   * (iOS Safari / Chrome Android). This is a soft, expected failure — the
-   * caller should prompt the user to tap a play control (a user gesture),
-   * which both satisfies the policy and unlocks future programmatic plays.
+   * Fired when playback can't start because the AudioContext is not yet
+   * "running" (iOS Safari / Chrome Android autoplay policy). The caller should
+   * prompt for a tap (a user gesture) which calls `unlockAudio()`; once
+   * running, future auto-plays succeed automatically. Note: nothing is fetched
+   * when this fires, so no billed TTS request is wasted.
    */
   onBlocked?: () => void;
 }
 
-// ── iOS Safari / mobile Chrome autoplay unlock ────────────────────────────
-// These browsers reject audio.play() unless it originates inside a user
-// gesture handler. Once ANY audio has been played within a gesture, the
-// media session is "unlocked" and subsequent programmatic plays are allowed.
-// We prime a silent sample on the first gesture to unlock the session.
-let audioUnlocked = false;
+// ── Web Audio session (single, app-lifetime AudioContext) ─────────────────
+let audioCtx: AudioContext | null = null;
+// The currently-scheduled source, if any. Stopped/swapped when a new word
+// starts so words never overlap (mirrors the old audioRef.current.pause()).
+let currentSource: AudioBufferSourceNode | null = null;
 
-// Minimal valid silent WAV (44-byte header, zero data). Used purely to
-// satisfy the gesture-bound play() call that unlocks the media session.
-const SILENT_WAV_DATA_URI =
-  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (audioCtx) return audioCtx;
+  const Ctor: typeof AudioContext | undefined =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctor) return null;
+  try {
+    audioCtx = new Ctor();
+  } catch {
+    return null;
+  }
+  return audioCtx;
+}
 
 export function isAudioUnlocked(): boolean {
-  return audioUnlocked;
+  const ctx = getAudioContext();
+  return !!ctx && ctx.state === "running";
 }
 
 /**
- * Prime the audio session from within a user gesture handler (click / touch /
- * pointerdown). Safe to call multiple times — only the first call does work.
- * After this resolves, programmatic audio.play() (e.g. via setTimeout) is
- * permitted by iOS Safari / mobile Chrome autoplay policies.
+ * Resume the AudioContext from within a user gesture handler (click / touch /
+ * pointerdown). This is the one-time iOS unlock: once the context is "running"
+ * it stays running for the page's lifetime, and programmatic auto-play (from
+ * setTimeout / socket events) is permitted without further gestures. Safe to
+ * call many times — a no-op once running. Returns the post-call unlocked state.
  */
-export async function unlockAudio(): Promise<void> {
-  if (audioUnlocked) return;
-  if (typeof window === "undefined") return;
+export async function unlockAudio(): Promise<boolean> {
+  const ctx = getAudioContext();
+  if (!ctx) return false;
+  if (ctx.state === "running") return true;
   try {
-    const primer = new Audio(SILENT_WAV_DATA_URI);
-    primer.muted = false;
-    // play() must be awaited within the gesture for the unlock to take hold.
-    await primer.play();
-    primer.pause();
-    audioUnlocked = true;
+    await ctx.resume();
   } catch {
-    // Not in a gesture, or primer rejected — leave unlocked=false so the next
-    // gesture retries. Surface nothing; callers fall back to a tap prompt.
+    // Resume rejected (not in a fresh gesture / blocked by policy). Leave as
+    // is; the next gesture retries and the caller falls back to a tap prompt.
+  }
+  // Re-read via the helper: ctx.resume() may have changed state, and this
+  // avoids the stale post-await narrowing of ctx.state in the control flow.
+  return isAudioUnlocked();
+}
+
+/** Stop any in-flight playback immediately (e.g. on unmount / leave battle). */
+export function stopSpeaking(): void {
+  if (currentSource) {
+    try {
+      currentSource.stop();
+    } catch {
+      // Already ended/stopped.
+    }
+    try {
+      currentSource.disconnect();
+    } catch {
+      // Already disconnected.
+    }
+    currentSource = null;
   }
 }
 
+/**
+ * decodeAudioData wrapper that tolerates the legacy callback-only signature
+ * (older Safari) as well as the modern Promise form.
+ */
+function decodeAudioDataP(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBuffer> {
+  return new Promise<AudioBuffer>((resolve, reject) => {
+    let settled = false;
+    const ok = (buf: AudioBuffer) => {
+      if (!settled) {
+        settled = true;
+        resolve(buf);
+      }
+    };
+    const fail = (err: unknown) => {
+      if (!settled) {
+        settled = true;
+        reject(err instanceof Error ? err : new Error("Audio decode failed"));
+      }
+    };
+    try {
+      const ret = ctx.decodeAudioData(data, ok, fail);
+      if (ret && typeof (ret as Promise<AudioBuffer>).then === "function") {
+        (ret as Promise<AudioBuffer>).then(ok, fail);
+      }
+    } catch (err) {
+      fail(err);
+    }
+  });
+}
+
 export async function speakWord(opts: SpeakWordOptions): Promise<void> {
-  const { word, voice, speed, mode, audioRef } = opts;
+  const { word, voice, speed, mode } = opts;
   if (!word) return;
 
-  if (audioRef.current) {
-    audioRef.current.pause();
-    audioRef.current = null;
+  const ctx = getAudioContext();
+  // If an AudioContext exists but isn't "running", the autoplay policy will
+  // block playback. Ask the caller for a tap instead of fetching (and billing)
+  // a TTS request that can't be heard. The caller's speaker button runs
+  // unlockAudio() inside its click handler, flipping the context to "running";
+  // the next word's auto-speak then succeeds.
+  if (ctx && ctx.state !== "running") {
+    opts.onBlocked?.();
+    return;
   }
 
   opts.onStart?.();
@@ -122,47 +196,47 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
         // keep default message
       }
       opts.onError?.(errorMsg);
+      opts.onEnd?.();
       return;
     }
 
-    const audioBuffer = await response.arrayBuffer();
-    const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
-    const audioUrl = URL.createObjectURL(audioBlob);
+    const audioData = await response.arrayBuffer();
 
+    // Preferred path: Web Audio (deterministic auto-play after one unlock).
+    if (ctx) {
+      const decoded = await decodeAudioDataP(ctx, audioData);
+      stopSpeaking(); // cut off any still-playing previous word
+      const source = ctx.createBufferSource();
+      source.buffer = decoded;
+      source.connect(ctx.destination);
+      currentSource = source;
+      source.onended = () => {
+        if (currentSource === source) currentSource = null;
+        opts.onEnd?.();
+      };
+      source.start();
+      return; // onEnd fires from onended above; do NOT double-fire it.
+    }
+
+    // Fallback: HTMLAudioElement (only when AudioContext is unavailable — e.g.
+    // very old browsers). Subject to autoplay policy, but those environments
+    // are generally desktop and lenient.
+    const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+    const audioUrl = URL.createObjectURL(audioBlob);
     await new Promise<void>((resolve, reject) => {
       const audio = new Audio();
-      audioRef.current = audio;
+      opts.audioRef.current = audio;
       audio.oncanplay = () => {
-        audio
-          .play()
-          .then(resolve)
-          .catch((err: unknown) => {
-            const name = (err as { name?: string } | null)?.name;
-            // Benign interruption (e.g. paused/aborted by a subsequent speak
-            // or unmount): resolve silently, nothing to surface.
-            if (name === "AbortError") {
-              resolve();
-              return;
-            }
-            // Autoplay policy rejection (iOS Safari / mobile Chrome): play()
-            // was called outside a user gesture. Soft, expected failure — flag
-            // it so the caller can prompt for a tap, and resolve cleanly.
-            if (name === "NotAllowedError") {
-              opts.onBlocked?.();
-              resolve();
-              return;
-            }
-            reject(err instanceof Error ? err : new Error("Audio playback failed"));
-          });
+        audio.play().then(resolve).catch(reject);
       };
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
+        opts.audioRef.current = null;
         opts.onEnd?.();
       };
       audio.onerror = () => {
         URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
+        opts.audioRef.current = null;
         reject(new Error("Audio element error"));
       };
       audio.src = audioUrl;
@@ -170,7 +244,6 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
     });
   } catch (error) {
     opts.onError?.(error instanceof Error ? error.message : "TTS failed");
-  } finally {
     opts.onEnd?.();
   }
 }
