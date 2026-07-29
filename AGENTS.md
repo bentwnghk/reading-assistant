@@ -1459,3 +1459,112 @@ This pattern was used for the Study Plan Dialog's "show once per session" gate. 
 **When NOT to use**: Any state that affects a user's data (scores, progress, settings) — those must go through the store + DB for consistency.
 
 **Related**: [Lesson 15](#15-store-level-flag-for-one-shot-side-effects-that-survive-navigation) — this is the lightweight alternative when a full Zustand store field is overkill.
+
+### 27. Programmatic Audio on iOS Safari — Use a Web Audio `AudioContext`, Not `<audio>` Elements
+
+The spelling games (solo + multiplayer) auto-play a TTS pronunciation when each word appears. On iOS Safari this silently failed with `NotAllowedError` ("The request is not allowed by the user agent or the platform in the current context…"). The root cause and fix span two layers — the **browser policy** and the **game's transition trigger source** — and both must be understood to fix it correctly.
+
+#### 27.1 The policy: `HTMLAudioElement` gesture-blessing is per-element and non-transferable
+
+iOS Safari (and mobile Chrome) reject `audio.play()` unless it runs inside a user gesture. Two subtleties make this hard to work around with plain `<audio>` elements:
+
+1. **The blessing does NOT transfer across elements.** Playing one `<audio>` inside a gesture does **not** unlock subsequently-created `<audio>` elements. Each `new Audio()` needs its own gesture-bound `play()`. So the naive "primer" fix — create a separate silent `<audio>`, play+pause it on first gesture to "unlock the session" — has **no effect** on the per-word `new Audio()` elements the game creates later. This was the first attempted fix and it failed for exactly this reason.
+
+2. **A `setTimeout`/`fetch`/await chain breaks the gesture call stack.** Even within a gesture handler, if `play()` happens after an `await` or a `setTimeout`, iOS no longer considers it user-initiated.
+
+#### 27.2 The deterministic fix: Web Audio `AudioContext`
+
+The `AudioContext` API has different semantics: it only needs **`ctx.resume()` once, inside a gesture**. After that the context stays in the `"running"` state for the **page's lifetime**, and any number of decoded audio buffers can be scheduled via `source.start()` **without further gestures**. This is the only deterministic way to auto-play audio driven by a timer or a network event on iOS.
+
+The shared implementation lives in `src/utils/tts.ts`:
+
+```ts
+let audioCtx: AudioContext | null = null;           // single, app-lifetime context
+let currentSource: AudioBufferSourceNode | null = null; // currently-scheduled source
+
+export function isAudioUnlocked(): boolean {
+  const ctx = getAudioContext();
+  return !!ctx && ctx.state === "running";
+}
+
+// Call from inside a user gesture (click/touch/pointerdown).
+export async function unlockAudio(): Promise<boolean> {
+  const ctx = getAudioContext();
+  if (!ctx || ctx.state === "running") return !!ctx;
+  try { await ctx.resume(); } catch { /* not in a gesture — retry on next tap */ }
+  return ctx.state === "running";
+}
+```
+
+Playback fetches the MP3, decodes it, and schedules it through the running context (with an `HTMLAudioElement` fallback only when `AudioContext` is unavailable):
+
+```ts
+const decoded = await decodeAudioDataP(ctx, audioData);
+stopSpeaking();                       // cut off any still-playing previous word
+const source = ctx.createBufferSource();
+source.buffer = decoded;
+source.connect(ctx.destination);
+source.onended = () => { /* onEnd */ };
+source.start();
+```
+
+**Key API rules** the implementation enforces:
+- `speakWord()` short-circuits **before** the fetch when `ctx.state !== "running"` (via `onBlocked`) — so no billed TTS request is wasted on audio that can't be heard.
+- `stopSpeaking()` stops + disconnects `currentSource` on unmount and before each new word, mirroring the old `audioRef.current.pause()` so words never overlap.
+- `decodeAudioData` is wrapped to tolerate the legacy callback-only signature (older Safari) and the modern Promise form.
+
+#### 27.3 Why solo worked but multiplayer didn't — the transition trigger source
+
+Both games used the **same fragile pattern** (`setTimeout(() => speak(...), N)` on each new word). The difference was entirely in **what advances to the next word**:
+
+| Game | Word transition trigger | Recent user gesture when auto-play fires? | iOS result |
+|------|-------------------------|-------------------------------------------|------------|
+| **Solo** | Player taps Submit / presses Enter (`moveToNext`) | Yes — the gesture is ~300ms stale, still inside the transient-activation window | **Plays** (slips through) |
+| **Solo (timed-out)** | Countdown hits 0, 1500ms timer auto-advances | No — user idle, activation expired | **Blocked** (latent bug, rarely hit) |
+| **Multiplayer** | Server pushes `word_start` over Socket.io | No — server paces the game, player may be idle | **Blocked** (reported bug) |
+
+**Insight**: a game whose pacing is **user-driven** (each step is a player action) keeps the gesture "warm" and hides the latent autoplay bug. A game whose pacing is **server-driven** (a realtime event advances steps independent of input) lets the gesture go cold and exposes it. This is inherent to the architecture, not a coding mistake — and it means **any** server-paced audio feature (live multiplayer anything, push-notification-triggered sound, countdown beeps) needs the AudioContext approach, while the same code in a user-paced equivalent may appear to "just work."
+
+#### 27.4 Unlock UX — persistent affordance, not an ephemeral toast
+
+The first fix surfaced the block as an auto-dismissing toast with a "hear word" action button. This was wrong on three counts (all reported by users):
+
+1. **Ephemeral recovery**: if the user doesn't tap the toast before it disappears, there's no path to unlock.
+2. **Per-question repetition**: even when tapped, tapping a *different* element (the toast button) didn't bless the per-word elements, so the toast reappeared next word (see 27.1).
+3. **Lost replay**: relying on the toast meant the in-question speaker icon wasn't an obvious/available replay control.
+
+The correct UX:
+- **One persistent, always-available control** (the speaker button) is the unlock + replay affordance. It never disappears.
+- Before unlock, it **pulses** (`animate-pulse` + ring) with a "Tap to enable sound" label, drawing the eye. After one tap (gesture) it resumes the context and the label reverts to "Click to hear the word".
+- The control is **never disabled** by loading state (only briefly shows a spinner), so it's always tappable to (re)unlock after e.g. tab backgrounding.
+
+#### 27.5 Where to call `unlockAudio()`
+
+| Call site | Why |
+|-----------|-----|
+| **Game-start button** (`startGame`) | Guaranteed user gesture before the first word; ideal primary unlock for user-paced games |
+| **Speaker / play button** | Replay + re-unlock if the context was suspended (backgrounded tab) |
+| **Global `pointerdown`/`touchend` listener** (multiplayer arena) | Catches the *first* tap anywhere (hint, tile, submit) so the context unlocks even if the user never taps the speaker first |
+| **Mount effect (best-effort)** | On desktop, sticky activation often lets `resume()` succeed with no fresh gesture, so sound works from word 1 |
+
+`unlockAudio()` is idempotent (no-op when `"running"`), so calling it on every gesture is cheap and safe.
+
+#### 27.6 Consolidate TTS into one shared utility
+
+The solo game originally kept an **inline copy** of `speakWord` (~90 lines) while the multiplayer arena used the shared `@/utils/tts`. When applying this fix to solo, the inline copy was deleted in favor of a thin wrapper around the shared utility — net **−90 / +39 lines** and a single source of truth for the AudioContext logic. Any future TTS consumer should import from `@/utils/tts` rather than re-implementing.
+
+**Rule of thumb**: audio playback code is high-churn across browser policy changes. Keep exactly one implementation; do not fork it per feature.
+
+#### 27.7 Diagnostic checklist
+
+When audio auto-play is silent / throws `NotAllowedError` on mobile:
+
+| Step | What to check | How |
+|------|---------------|-----|
+| 1. Is the `play()` in a gesture, or after `setTimeout`/`await`? | Trace the call stack from the trigger event to `play()` | If an `await`/timer sits between the gesture and `play()`, the gesture is "cold" |
+| 2. What advances to the next sound — a user action or a server/timer event? | Find the state update that triggers the auto-play effect | Server/timer-driven → needs AudioContext; user-driven may slip through but is still fragile |
+| 3. Are you creating a `new Audio()` per play? | Search for `new Audio(` | Per-element creation can't be "pre-unlocked"; switch to a single `AudioContext` |
+| 4. Did you try priming a *separate* element? | Check if the primer and the real playback share an element | They don't transfer (27.1) — use `AudioContext.resume()` instead |
+| 5. Is the recovery affordance persistent? | Is the unlock prompt an auto-dismissing toast? | Replace with an always-visible control (speaker button) that pulses until tapped |
+
+**Related**: [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local) (the `AudioContext` is a module-level singleton that must survive SPA navigation, same principle), [Lesson 12.7](#127-authoritative-server-scoring) (the server-paced multiplayer transition that exposes the bug), [Lesson 22](#22-keyboard-suggestion-suppression-in-spelling-inputs) (same spelling components' mobile-specific quirks).
