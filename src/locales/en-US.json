@@ -2106,7 +2106,8 @@
       "spellingAccuracy": "Spelling Accuracy",
       "grammarQuiz": "Grammar Quiz Score",
       "grammarGame": "Grammar Game Score",
-      "grammarGameAccuracy": "Grammar Game Accuracy"
+      "grammarGameAccuracy": "Grammar Game Accuracy",
+      "average": "Avg"
     },
     "charts": {
       "dailyActivity": "Daily Learning Activity",

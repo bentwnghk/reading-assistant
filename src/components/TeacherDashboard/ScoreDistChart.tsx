@@ -11,7 +11,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
   Cell,
 } from "recharts";
 
@@ -117,7 +116,6 @@ export default function ScoreDistChart({ title, students, scoreKey, buckets, cla
           />
           <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
           <Tooltip content={<CustomTooltip />} />
-          {classAvg > 0 && <ReferenceLine y={classAvg} stroke="hsl(var(--foreground))" strokeDasharray="4 4" strokeWidth={1} />}
           {buckets.map((bucket) => (
             <Bar
               key={bucket.range}

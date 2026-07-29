@@ -20,6 +20,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useDashboardMetrics } from "@/hooks/useDashboardMetrics";
@@ -68,14 +69,19 @@ const SCORE_BUCKETS = [
 
 function ChartCard({
   title,
+  extra,
   children,
 }: {
   title: string;
+  extra?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border bg-card p-4">
-      <h3 className="text-sm font-semibold text-muted-foreground mb-3">{title}</h3>
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
+        {extra}
+      </div>
       {children}
     </div>
   );
@@ -147,6 +153,7 @@ function ScoreDistributionChart({
   emptyMessage: string;
   countLabel: string;
 }) {
+  const { t } = useTranslation();
   const data = useMemo(
     () =>
       SCORE_BUCKETS.map((bucket) => ({
@@ -167,8 +174,17 @@ function ScoreDistributionChart({
     );
   }
 
+  const avgScore = Math.round(scores.reduce((sum, s) => sum + s.score, 0) / scores.length);
+
   return (
-    <ChartCard title={title}>
+    <ChartCard
+      title={title}
+      extra={
+        <span className="text-xs font-medium text-muted-foreground">
+          {t("dashboard.scores.average")}: {avgScore}
+        </span>
+      }
+    >
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -197,6 +213,7 @@ function SpellingTrendChart({
   color: string;
   emptyMessage: string;
 }) {
+  const { t } = useTranslation();
   if (data.length === 0) {
     return (
       <ChartCard title={title}>
@@ -207,6 +224,7 @@ function SpellingTrendChart({
     );
   }
   const chartData = data.map((s, i) => ({ ...s, idx: i + 1 }));
+  const avgScore = Math.round(data.reduce((sum, s) => sum + s.score, 0) / data.length);
   return (
     <ChartCard title={title}>
       <ResponsiveContainer width="100%" height={200}>
@@ -215,9 +233,78 @@ function SpellingTrendChart({
           <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
           <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} />
           <Tooltip content={<CustomTooltip />} />
+          <ReferenceLine
+            y={avgScore}
+            stroke="#94a3b8"
+            strokeDasharray="4 4"
+            label={{
+              value: `${t("dashboard.scores.average")}: ${avgScore}`,
+              fill: "#94a3b8",
+              fontSize: 10,
+              position: "insideTopRight",
+            }}
+          />
           <Line
             type="monotone"
             dataKey="score"
+            name={title}
+            stroke={color}
+            strokeWidth={2}
+            dot={{ r: 3 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartCard>
+  );
+}
+
+function AccuracyTrendChart({
+  title,
+  data,
+  color,
+  emptyMessage,
+}: {
+  title: string;
+  data: SessionScore[];
+  color: string;
+  emptyMessage: string;
+}) {
+  const { t } = useTranslation();
+  if (data.length === 0) {
+    return (
+      <ChartCard title={title}>
+        <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
+          {emptyMessage}
+        </div>
+      </ChartCard>
+    );
+  }
+  const chartData = data.map((s, i) => ({ ...s, idx: i + 1 }));
+  const avgAccuracy = Math.round(
+    data.reduce((sum, s) => sum + (s.accuracy ?? 0), 0) / data.length
+  );
+  return (
+    <ChartCard title={title}>
+      <ResponsiveContainer width="100%" height={200}>
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+          <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+          <Tooltip content={<CustomTooltip />} />
+          <ReferenceLine
+            y={avgAccuracy}
+            stroke="#94a3b8"
+            strokeDasharray="4 4"
+            label={{
+              value: `${t("dashboard.scores.average")}: ${avgAccuracy}`,
+              fill: "#94a3b8",
+              fontSize: 10,
+              position: "insideTopRight",
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="accuracy"
             name={title}
             stroke={color}
             strokeWidth={2}
@@ -513,26 +600,12 @@ export function OverviewTab() {
           color="#a855f7"
           emptyMessage={t("dashboard.charts.noData")}
         />
-        {m.spellingAccuracyScores.length > 0 && (
-          <ChartCard title={t("dashboard.scores.spellingAccuracy")}>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={m.spellingAccuracyScores.map((s, i) => ({ ...s, idx: i + 1 }))}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="accuracy"
-                  name={t("dashboard.scores.spellingAccuracy")}
-                  stroke="#ec4899"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        )}
+        <AccuracyTrendChart
+          title={t("dashboard.scores.spellingAccuracy")}
+          data={m.spellingAccuracyScores}
+          color="#ec4899"
+          emptyMessage={t("dashboard.charts.noData")}
+        />
         <ScoreDistributionChart
           title={t("dashboard.scores.grammarQuiz")}
           scores={m.grammarQuizScores}
@@ -545,26 +618,12 @@ export function OverviewTab() {
           color="#84cc16"
           emptyMessage={t("dashboard.charts.noData")}
         />
-        {m.grammarGameScores.length > 0 && (
-          <ChartCard title={t("dashboard.scores.grammarGameAccuracy")}>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={m.grammarGameScores.map((s, i) => ({ ...s, idx: i + 1 }))}>
-                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                <XAxis dataKey="idx" tick={{ fontSize: 10 }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="accuracy"
-                  name={t("dashboard.scores.grammarGameAccuracy")}
-                  stroke="#84cc16"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        )}
+        <AccuracyTrendChart
+          title={t("dashboard.scores.grammarGameAccuracy")}
+          data={m.grammarGameScores}
+          color="#84cc16"
+          emptyMessage={t("dashboard.charts.noData")}
+        />
       </div>
 
       {/* Vocabulary Growth (full width) */}

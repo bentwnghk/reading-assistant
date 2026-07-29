@@ -2133,7 +2133,8 @@
       "spellingAccuracy": "拼字正確率",
       "grammarQuiz": "語法測驗得分",
       "grammarGame": "語法遊戲得分",
-      "grammarGameAccuracy": "語法遊戲正確率"
+      "grammarGameAccuracy": "語法遊戲正確率",
+      "average": "平均"
     },
     "charts": {
       "dailyActivity": "每日學習活動",
