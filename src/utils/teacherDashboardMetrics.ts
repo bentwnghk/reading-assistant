@@ -24,6 +24,7 @@ export interface StudentMetrics {
   quizScores: number[];
   spellingScores: number[];
   spellingAccuracies: number[];
+  spellingAttempts: number;
   grammarQuizScores: number[];
   grammarGameScores: number[];
   grammarGameAccuracies: number[];
@@ -227,6 +228,7 @@ function computeStudentMetrics(
       quizScores: [],
       spellingScores: [],
       spellingAccuracies: [],
+      spellingAttempts: 0,
       grammarQuizScores: [],
       grammarGameScores: [],
       grammarGameAccuracies: [],
@@ -286,7 +288,6 @@ function computeStudentMetrics(
   const testScores = sorted.filter((s) => s.testCompleted && s.testScore != null && s.testScore > 0).map((s) => s.testScore!);
   const readingQuizScores = sorted.filter((s) => s.vocabularyQuizScore != null && s.vocabularyQuizScore > 0).map((s) => s.vocabularyQuizScore!);
   const readingSpellingScores = sorted.filter((s) => s.spellingGameBestScore != null && s.spellingGameBestScore > 0).map((s) => s.spellingGameBestScore!);
-  const readingSpellingAccuracies = sorted.filter((s) => s.spellingGameAccuracy != null && s.spellingGameAccuracy > 0).map((s) => s.spellingGameAccuracy!);
   const grammarQuizScores = sorted.filter((s) => s.grammarQuizCompleted && s.grammarQuizScore != null && s.grammarQuizScore > 0).map((s) => s.grammarQuizScore!);
   const grammarGameScores = sorted.filter((s) => s.grammarGameBestScore != null && s.grammarGameBestScore > 0).map((s) => s.grammarGameBestScore!);
   const grammarGameAccuracies = sorted.filter((s) => s.grammarGameAccuracy != null && s.grammarGameAccuracy > 0).map((s) => s.grammarGameAccuracy!);
@@ -298,12 +299,16 @@ function computeStudentMetrics(
   const vocabSpellingAccuracies = reviewSessions
     .filter((r) => r.mode === "spelling" && r.totalWords > 0)
     .map((r) => r.accuracy);
+  const spellingAttempts = reviewSessions.filter((r) => r.mode === "spelling").length;
 
   // Spelling score chart — reading-page only (points-based scale)
   const quizScores = [...readingQuizScores, ...vocabQuizScores];
   const spellingScores = readingSpellingScores;
-  // Spelling accuracy chart — both sources (both are 0–100%)
-  const spellingAccuracies = [...readingSpellingAccuracies, ...vocabSpellingAccuracies];
+  // Spelling accuracy chart — review sessions only (per-game accuracy, covers
+  // both reading and vocabulary pages). readingSpellingAccuracies is excluded
+  // to avoid duplicating reading-page games that also create a review-session
+  // row via the onComplete callback.
+  const spellingAccuracies = [...vocabSpellingAccuracies];
 
   const dailyMap = new Map<string, DailyStudentActivity>();
   function getDay(date: string): DailyStudentActivity {
@@ -331,9 +336,10 @@ function computeStudentMetrics(
     if (item.glossaryCount > 0 && item.glossaryGeneratedAt) {
       getDay(toDateString(item.glossaryGeneratedAt)).glossary += 1;
     }
-    if (item.spellingGameBestScore && item.spellingGameBestScore > 0 && item.spellingGameCompletedAt) {
-      getDay(toDateString(item.spellingGameCompletedAt)).spellingGame += item.spellingGamesCompleted || 1;
-    }
+    // NOTE: spelling games are counted solely from vocabulary review sessions
+    // (the loop below) to avoid double-counting — every spelling completion
+    // (solo/multiplayer, reading/vocabulary page) creates a review-session row
+    // via the onComplete callback, which is the authoritative per-game record.
     if (item.vocabularyQuizScore && item.vocabularyQuizScore > 0 && item.vocabQuizCompletedAt) {
       getDay(toDateString(item.vocabQuizCompletedAt)).vocabQuiz += item.vocabQuizzesCompleted || 1;
     }
@@ -379,6 +385,7 @@ function computeStudentMetrics(
     quizScores,
     spellingScores,
     spellingAccuracies,
+    spellingAttempts,
     grammarQuizScores,
     grammarGameScores,
     grammarGameAccuracies,

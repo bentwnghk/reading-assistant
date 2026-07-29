@@ -341,6 +341,17 @@ export interface ReviewSessionRecord {
   completedAt: number;
 }
 
+export async function getSpellingReviewSessionCount(userId: string): Promise<number> {
+  const pool = getPool();
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS count
+     FROM vocabulary_review_sessions
+     WHERE user_id = $1 AND mode = 'spelling'`,
+    [userId]
+  );
+  return rows[0]?.count ?? 0;
+}
+
 export async function getReviewSessionsForUsers(
   userIds: string[]
 ): Promise<ReviewSessionRecord[]> {

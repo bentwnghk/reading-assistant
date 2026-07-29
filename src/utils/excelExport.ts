@@ -33,6 +33,7 @@ interface ExportOptions {
   filename?: string
   schoolName?: string
   className?: string
+  spellingAttemptsByUser?: Record<string, number>
 }
 
 interface SchoolBreakdownStats {
@@ -69,7 +70,10 @@ interface SummaryStats {
   schoolBreakdown: Map<string, SchoolBreakdownStats>
 }
 
-function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
+function calculateSummaryStats(
+  sessions: SessionWithSchool[],
+  spellingAttemptsByUser?: Record<string, number>
+): SummaryStats {
   const totalSessions = sessions.length
 
   if (totalSessions === 0) {
@@ -162,6 +166,19 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
   })
 
   const schoolBreakdownFinal = new Map<string, SchoolBreakdownStats>()
+  const schoolSpellingAttempts = new Map<string, number>()
+  if (spellingAttemptsByUser) {
+    const userSchoolMap = new Map<string, string>()
+    for (const s of sessions) {
+      if (!userSchoolMap.has(s.userId)) {
+        userSchoolMap.set(s.userId, s.schoolName || "Unknown")
+      }
+    }
+    for (const [userId, count] of Object.entries(spellingAttemptsByUser)) {
+      const school = userSchoolMap.get(userId) || "Unknown"
+      schoolSpellingAttempts.set(school, (schoolSpellingAttempts.get(school) || 0) + count)
+    }
+  }
   schoolBreakdown.forEach((value, key) => {
     schoolBreakdownFinal.set(key, {
       count: value.count,
@@ -169,7 +186,9 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
       avgVocabulary: value.vocabularyCompletedCount > 0 ? Math.round(value.totalVocabulary / value.vocabularyCompletedCount) : 0,
       vocabularyCompletedCount: value.vocabularyCompletedCount,
       avgSpellingScore: value.spellingCompletedCount > 0 ? Math.round(value.totalSpellingScore / value.spellingCompletedCount) : 0,
-      spellingCompletedCount: value.spellingCompletedCount,
+      spellingCompletedCount: spellingAttemptsByUser
+        ? (schoolSpellingAttempts.get(key) || 0)
+        : value.spellingCompletedCount,
       avgQuizScore: value.quizCompletedCount > 0 ? Math.round(value.totalQuizScore / value.quizCompletedCount) : 0,
       quizCompletedCount: value.quizCompletedCount,
       avgGrammarQuizScore: value.grammarQuizCompletedCount > 0 ? Math.round(value.totalGrammarQuizScore / value.grammarQuizCompletedCount) : 0,
@@ -189,7 +208,9 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
     avgVocabulary: vocabularySessions.length > 0 ? Math.round(totalVocabulary / vocabularySessions.length) : 0,
     vocabularyCompletedCount: vocabularySessions.length,
     avgSpellingScore: spellingCompletedSessions.length > 0 ? Math.round(totalSpellingScore / spellingCompletedSessions.length) : 0,
-    spellingCompletedCount: spellingCompletedSessions.length,
+    spellingCompletedCount: spellingAttemptsByUser
+      ? Object.values(spellingAttemptsByUser).reduce((sum, n) => sum + n, 0)
+      : spellingCompletedSessions.length,
     avgSpellingAccuracy: spellingAccuracySessions.length > 0 ? Math.round(totalSpellingAccuracy / spellingAccuracySessions.length) : 0,
     avgQuizScore: quizCompletedSessions.length > 0 ? Math.round(totalQuizScore / quizCompletedSessions.length) : 0,
     quizCompletedCount: quizCompletedSessions.length,
@@ -200,7 +221,7 @@ function calculateSummaryStats(sessions: SessionWithSchool[]): SummaryStats {
 }
 
 export async function exportStudentDataToExcel(options: ExportOptions): Promise<void> {
-  const { sessions, isAdmin, filename, schoolName, className } = options
+  const { sessions, isAdmin, filename, schoolName, className, spellingAttemptsByUser } = options
 
   const workbook = new ExcelJS.Workbook()
   workbook.creator = "Mr.🆖 ProReader"
@@ -418,7 +439,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   })
 
   const summarySheet = workbook.addWorksheet("Summary")
-  const stats = calculateSummaryStats(sessions)
+  const stats = calculateSummaryStats(sessions, spellingAttemptsByUser)
 
   summarySheet.columns = [
     { width: 40 },

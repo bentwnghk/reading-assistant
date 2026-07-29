@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getStudentSessions, canAccessClass } from "@/lib/users"
+import { getSpellingReviewSessionCount } from "@/lib/vocabulary"
 
 export async function GET(
   _request: Request,
@@ -24,8 +25,11 @@ export async function GET(
   }
 
   try {
-    const sessions = await getStudentSessions(studentId)
-    return NextResponse.json(sessions)
+    const [sessions, spellingReviewCount] = await Promise.all([
+      getStudentSessions(studentId),
+      getSpellingReviewSessionCount(studentId),
+    ])
+    return NextResponse.json({ sessions, spellingReviewCount })
   } catch (error) {
     console.error("Failed to get student sessions:", error)
     return NextResponse.json({ error: "Failed to get student sessions" }, { status: 500 })

@@ -294,8 +294,11 @@ export function computeDashboardMetrics(
   // Spelling score chart — reading-page only (points-based scale)
   const spellingScores: SessionScore[] = readingSpellingScores;
 
-  // Spelling accuracy chart — both sources (both are 0–100%)
-  const spellingAccuracyScores: SessionScore[] = [...readingSpellingScores, ...vocabSpellingAccuracies].sort(
+  // Spelling accuracy chart — review sessions only (per-game accuracy, covers
+  // both reading and vocabulary pages). readingSpellingScores is excluded to
+  // avoid duplicating reading-page games that also create a review-session row
+  // via the onComplete callback.
+  const spellingAccuracyScores: SessionScore[] = [...vocabSpellingAccuracies].sort(
     (a, b) => a.date - b.date,
   );
 
@@ -415,9 +418,10 @@ export function computeDashboardMetrics(
     if ((item.glossary || []).length > 0) {
       getDay(dailyMap, toDateString(item.glossaryGeneratedAt || item.createdAt)).glossary += 1;
     }
-    if ((item.spellingGameBestScore || 0) > 0) {
-      getDay(dailyMap, toDateString(item.spellingGameCompletedAt || item.createdAt)).spellingGame += item.spellingGamesCompleted || 1;
-    }
+    // NOTE: spelling games are counted solely from vocabulary review sessions
+    // (the loop below) to avoid double-counting — every spelling completion
+    // (solo/multiplayer, reading/vocabulary page) creates a review-session row
+    // via the onComplete callback, which is the authoritative per-game record.
     if ((item.vocabularyQuizScore || 0) > 0) {
       getDay(dailyMap, toDateString(item.vocabQuizCompletedAt || item.createdAt)).vocabQuiz += item.vocabQuizzesCompleted || 1;
     }

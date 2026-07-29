@@ -62,6 +62,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all")
   const [selectedClassId, setSelectedClassId] = useState<string>("")
   const [sessions, setSessions] = useState<SessionWithSchool[]>([])
+  const [spellingAttemptsByUser, setSpellingAttemptsByUser] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [loadingSessions, setLoadingSessions] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -113,29 +114,39 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         : classes.filter(c => c.id === selectedClassId)
 
       const allSessions: SessionWithSchool[] = []
+      const attemptsMap: Record<string, number> = {}
 
       for (const cls of classesToLoad) {
         const response = await fetch(`/api/classes/${cls.id}/members`)
         if (!response.ok) continue
 
         const members = await response.json()
-        const sessionPromises = members.map(async (member: { studentId: string }) => {
+        const studentDataPromises = members.map(async (member: { studentId: string }) => {
           const res = await fetch(`/api/classes/${cls.id}/students/${member.studentId}/sessions`)
           if (res.ok) {
-            const sessions = await res.json()
-            return sessions.map((s: StudentSessionData) => ({
-              ...s,
-              schoolName: cls.schoolName
-            }))
+            const data = await res.json()
+            const studentSessions: StudentSessionData[] = data.sessions ?? data
+            return {
+              sessions: studentSessions.map((s: StudentSessionData) => ({
+                ...s,
+                schoolName: cls.schoolName
+              })),
+              spellingReviewCount: data.spellingReviewCount ?? 0,
+              userId: member.studentId,
+            }
           }
-          return []
+          return { sessions: [] as SessionWithSchool[], spellingReviewCount: 0, userId: member.studentId }
         })
 
-        const sessionArrays = await Promise.all(sessionPromises)
-        allSessions.push(...sessionArrays.flat())
+        const studentResults = await Promise.all(studentDataPromises)
+        for (const r of studentResults) {
+          allSessions.push(...r.sessions)
+          attemptsMap[r.userId] = r.spellingReviewCount
+        }
       }
 
       setSessions(allSessions)
+      setSpellingAttemptsByUser(attemptsMap)
     } catch (error) {
       console.error("Failed to load sessions:", error)
       toast.error(t("userManagement.loadFailed"))
@@ -257,6 +268,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         isAdmin: isSuperAdmin || isAdmin,
         schoolName: selectedSchool,
         className: selectedClass,
+        spellingAttemptsByUser,
       })
     } catch (error) {
       console.error("Failed to export Excel:", error)
