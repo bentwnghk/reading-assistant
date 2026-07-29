@@ -1461,8 +1461,6 @@
         "typeMissing": "輸入缺少的字母...",
         "clear": "清除",
         "submit": "提交",
-        "audioBlocked": "瀏覽器已將音訊靜音",
-        "audioBlockedDesc": "點擊喇叭 🔊 以開啟遊戲音效。",
         "modes": {
           "listen-type": "聽音拼字",
           "scramble": "字母重組",

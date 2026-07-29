@@ -1430,8 +1430,6 @@
         "typeMissing": "Type the missing letters...",
         "clear": "Clear",
         "submit": "Submit",
-        "audioBlocked": "Audio is muted by your browser",
-        "audioBlockedDesc": "Tap the speaker 🔊 to enable sound for the game.",
         "modes": {
           "listen-type": "Listen & Type",
           "scramble": "Letter Scramble",
