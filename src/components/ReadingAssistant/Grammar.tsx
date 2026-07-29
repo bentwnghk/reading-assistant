@@ -43,6 +43,12 @@ import {
   AlignmentType,
   convertInchesToTwip,
   PageOrientation,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  BorderStyle,
+  ShadingType,
 } from "docx";
 import { saveAs } from "file-saver";
 import { useSession } from "next-auth/react";
@@ -271,6 +277,112 @@ const CEFR_COLORS: Record<string, string> = {
   C1: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
   C2: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
 };
+
+// ── docx export styling (mirrors the on-screen Topics/Lessons tab visuals) ──
+// Light-tint shading fills (hex, no "#") chosen to match the Tailwind light-mode
+// background classes used in the Topics/Lessons tabs (bg-*-50 / bg-muted).
+const SHADE = {
+  MUTED: "F3F4F6",
+  BLUE: "EFF6FF",
+  RED: "FEF2F2",
+  PURPLE: "FAF5FF",
+  CYAN: "ECFEFF",
+  GREEN: "F0FDF4",
+  AMBER: "FEF3C7",
+} as const;
+
+// Border line colors (mirror border-*-400 utility classes).
+const LINE = {
+  GRAY: "D1D5DB",
+  BLUE: "60A5FA",
+  PURPLE: "C084FC",
+  RED: "F87171",
+  GREEN: "4ADE80",
+} as const;
+
+// CEFR → badge shading fill + text color (mirrors CEFR_COLORS in the UI).
+const CEFR_DOCX: Record<string, { fill: string; color: string }> = {
+  A1: { fill: "DCFCE7", color: "166534" },
+  A2: { fill: "ECFCCB", color: "3F6212" },
+  B1: { fill: "FEF9C3", color: "854D0E" },
+  B2: { fill: "FFEDD5", color: "9A3412" },
+  C1: { fill: "FEE2E2", color: "991B1B" },
+  C2: { fill: "F3E8FF", color: "6B21A8" },
+};
+
+const thin = (color: string) => ({ style: BorderStyle.SINGLE, size: 4, color });
+const accent = (color: string) => ({ style: BorderStyle.SINGLE, size: 18, color });
+
+/** A soft-tinted paragraph with an optional colored left-accent border,
+ * mirroring the `bg-*-50 border-l-2 border-*-400` cards in the Lessons tab. */
+function tintedPara(
+  runs: TextRun[],
+  opts: { fill: string; left?: string; before?: number; after?: number }
+): Paragraph {
+  return new Paragraph({
+    children: runs,
+    shading: { type: ShadingType.CLEAR, fill: opts.fill, color: "auto" },
+    border: opts.left ? { left: accent(opts.left) } : undefined,
+    spacing: { before: opts.before ?? 60, after: opts.after ?? 60 },
+  });
+}
+
+/** A fully bordered paragraph (mirrors `border rounded` chips/boxes). */
+function borderedPara(
+  runs: TextRun[],
+  opts: { fill?: string; color?: string; before?: number; after?: number }
+): Paragraph {
+  const edge = opts.color ? thin(opts.color) : thin(LINE.GRAY);
+  return new Paragraph({
+    children: runs,
+    shading: opts.fill ? { type: ShadingType.CLEAR, fill: opts.fill, color: "auto" } : undefined,
+    border: { top: edge, bottom: edge, left: edge, right: edge },
+    spacing: { before: opts.before ?? 80, after: opts.after ?? 80 },
+  });
+}
+
+/** CEFR level rendered as a shaded inline run, mirroring the colored badge pills. */
+function cefrBadgeRun(level: string): TextRun {
+  const c = CEFR_DOCX[level] ?? { fill: SHADE.MUTED, color: "374151" };
+  return new TextRun({
+    text: ` ${level} `,
+    bold: true,
+    color: c.color,
+    shading: { type: ShadingType.CLEAR, fill: c.fill, color: "auto" },
+  });
+}
+
+/** A single-cell bordered table that wraps several paragraphs as one "card",
+ * mirroring the `border rounded-lg p-4` topic cards in the Topics tab. */
+function cardTable(paragraphs: Paragraph[], opts: { color?: string } = {}): Table {
+  const edge = opts.color ? thin(opts.color) : thin(LINE.GRAY);
+  return new Table({
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            borders: { top: edge, bottom: edge, left: edge, right: edge },
+            margins: { top: 120, bottom: 120, left: 160, right: 160 },
+            children: paragraphs,
+          }),
+        ],
+      }),
+    ],
+    width: { size: 100, type: WidthType.PERCENTAGE },
+  });
+}
+
+/** One bordered cell of the Affirmative/Negative/Question forms grid. */
+function formCell(label: string, value: string, color: string): TableCell {
+  return new TableCell({
+    borders: { top: thin(LINE.GRAY), bottom: thin(LINE.GRAY), left: thin(LINE.GRAY), right: thin(LINE.GRAY) },
+    margins: { top: 80, bottom: 80, left: 100, right: 100 },
+    children: [
+      new Paragraph({ children: [new TextRun({ text: label, bold: true, color, size: 18 })], spacing: { after: 40 } }),
+      new Paragraph({ children: [new TextRun({ text: value, font: "Courier New", size: 18 })] }),
+    ],
+  });
+}
 
 // Normalizes an answer string for client-side comparison: lowercase, trim, strip
 // punctuation and extra whitespace, strip a leading "A)/B)/..." option marker.
@@ -890,7 +1002,7 @@ function Grammar() {
 
     const title = docTitle || extractedText.split(/\n/).find((l) => l.trim()) || "Grammar";
     const generatedAt = formatDateTime(new Date());
-    const children: Paragraph[] = [];
+    const children: (Paragraph | Table)[] = [];
 
     children.push(
       new Paragraph({
@@ -924,56 +1036,44 @@ function Grammar() {
       );
 
       grammarTopics.forEach((topic, index) => {
-        children.push(
+        const card: Paragraph[] = [
           new Paragraph({
             children: [
-              new TextRun({ text: `${index + 1}. ${topic.name}`, bold: true }),
+              new TextRun({ text: `${index + 1}. ${topic.name}`, bold: true, size: 26 }),
               new TextRun({ text: `  (${topic.nameZh})`, color: "666666" }),
+              new TextRun({ text: "    " }),
+              cefrBadgeRun(topic.cefrLevel),
             ],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 300, after: 100 },
-          })
-        );
-
-        children.push(
+            spacing: { before: 0, after: 60 },
+          }),
           new Paragraph({
             children: [
-              new TextRun({ text: `[${topic.cefrLevel}] [${topic.category}]`, color: "666666", size: 20 }),
+              new TextRun({
+                text: `[${topic.category}]${topic.occurrences > 0 ? `   ·   ${topic.occurrences}x in text` : ""}`,
+                color: "666666",
+                size: 18,
+              }),
             ],
-            spacing: { after: 100 },
-          })
-        );
-
-        children.push(
+            spacing: { after: 80 },
+          }),
           new Paragraph({
             children: [
               new TextRun({ text: t("reading.grammar.whatIsIt") + ": ", bold: true }),
               new TextRun({ text: topic.explanation }),
             ],
             spacing: { after: 80 },
-          })
-        );
-
-        children.push(
-          new Paragraph({
-            children: [
+          }),
+          tintedPara(
+            [
               new TextRun({ text: t("reading.grammar.pattern") + ": ", bold: true }),
               new TextRun({ text: topic.pattern, font: "Courier New" }),
             ],
-            spacing: { after: 80 },
-          })
-        );
+            { fill: SHADE.MUTED, before: 40, after: 0 }
+          ),
+        ];
 
-        if (topic.occurrences > 0) {
-          children.push(
-            new Paragraph({
-              children: [
-                new TextRun({ text: `${topic.occurrences}x in text`, color: "666666", size: 20 }),
-              ],
-              spacing: { after: 200 },
-            })
-          );
-        }
+        children.push(cardTable(card));
+        children.push(new Paragraph({ children: [new TextRun({ text: "" })], spacing: { after: 120 } }));
       });
     }
 
@@ -987,248 +1087,201 @@ function Grammar() {
       );
 
       grammarTopics.forEach((topic, index) => {
+        // ── Topic header: name + zh + CEFR badge pill ──
         children.push(
           new Paragraph({
             children: [
               new TextRun({ text: `${index + 1}. ${topic.name}`, bold: true }),
               new TextRun({ text: `  (${topic.nameZh})`, color: "666666" }),
-              new TextRun({ text: `  [${topic.cefrLevel}]`, color: topic.cefrLevel.startsWith("A") ? "22C55E" : topic.cefrLevel.startsWith("B") ? "F59E0B" : "EF4444" }),
+              new TextRun({ text: "    " }),
+              cefrBadgeRun(topic.cefrLevel),
             ],
             heading: HeadingLevel.HEADING_2,
             spacing: { before: 300, after: 100 },
           })
         );
 
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: t("reading.grammar.whatIsIt"), bold: true }),
-            ],
-            spacing: { before: 100, after: 40 },
-          })
-        );
-        children.push(
-          new Paragraph({ children: [new TextRun({ text: topic.explanation })], spacing: { after: 40 } })
-        );
-        children.push(
-          new Paragraph({ children: [new TextRun({ text: topic.explanationZh, color: "666666" })], spacing: { after: 80 } })
-        );
+        // What is it
+        children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.whatIsIt"), bold: true })], spacing: { before: 100, after: 40 } }));
+        children.push(new Paragraph({ children: [new TextRun({ text: topic.explanation })], spacing: { after: 40 } }));
+        children.push(new Paragraph({ children: [new TextRun({ text: topic.explanationZh, color: "666666" })], spacing: { after: 80 } }));
 
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: t("reading.grammar.pattern"), bold: true }),
-            ],
-            spacing: { before: 100, after: 40 },
-          })
-        );
-        children.push(
-          new Paragraph({ children: [new TextRun({ text: topic.pattern, font: "Courier New" })], spacing: { after: 80 } })
-        );
+        // Pattern — mono text in a muted box (mirrors `font-mono bg-muted px-3 py-2 rounded`)
+        children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.pattern"), bold: true })], spacing: { before: 100, after: 40 } }));
+        children.push(tintedPara(
+          [new TextRun({ text: topic.pattern, font: "Courier New" })],
+          { fill: SHADE.MUTED, before: 0, after: 80 }
+        ));
 
+        // Examples — text sentences in a blue left-accent card, others in a muted card
         if (topic.textSentences.length > 0 || topic.examples.filter((ex) => ex.source !== "text").length > 0) {
-          children.push(
-            new Paragraph({
-              children: [
-                new TextRun({ text: t("reading.grammar.examples"), bold: true }),
-              ],
-              spacing: { before: 100, after: 40 },
-            })
-          );
+          children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.examples"), bold: true })], spacing: { before: 100, after: 40 } }));
 
           topic.textSentences.forEach((s) => {
-            children.push(
-              new Paragraph({
-                children: [
-                  new TextRun({ text: `\u201C${s}\u201D`, italics: true }),
-                  new TextRun({ text: ` (${t("reading.grammar.fromThisText")})`, color: "666666", size: 20 }),
-                ],
-                spacing: { after: 40 },
-              })
-            );
+            children.push(tintedPara(
+              [
+                new TextRun({ text: `\u201C${s}\u201D`, italics: true }),
+                new TextRun({ text: ` (${t("reading.grammar.fromThisText")})`, color: "666666", size: 20 }),
+              ],
+              { fill: SHADE.BLUE, left: LINE.BLUE, before: 0, after: 40 }
+            ));
           });
 
           topic.examples.filter((ex) => ex.source !== "text").forEach((ex) => {
-            children.push(
-              new Paragraph({
-                children: [
-                  new TextRun({ text: `\u201C${ex.sentence}\u201D`, italics: true }),
-                ],
-                spacing: { after: 40 },
-              })
-            );
+            children.push(tintedPara(
+              [new TextRun({ text: `\u201C${ex.sentence}\u201D`, italics: true })],
+              { fill: SHADE.MUTED, before: 0, after: 40 }
+            ));
           });
         }
 
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: t("reading.grammar.commonMistakes"), bold: true }),
-            ],
-            spacing: { before: 100, after: 40 },
-          })
-        );
-        children.push(
-          new Paragraph({ children: [new TextRun({ text: topic.commonMistakes })], spacing: { after: 40 } })
-        );
-        children.push(
-          new Paragraph({ children: [new TextRun({ text: topic.commonMistakesZh, color: "666666" })], spacing: { after: 80 } })
-        );
+        // Common mistakes — red tinted box (mirrors `bg-red-50 px-3 py-2 rounded`)
+        children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.commonMistakes"), bold: true })], spacing: { before: 100, after: 40 } }));
+        children.push(tintedPara(
+          [
+            new TextRun({ text: topic.commonMistakes }),
+            new TextRun({ text: topic.commonMistakesZh, color: "666666", break: 1 }),
+          ],
+          { fill: SHADE.RED, before: 0, after: 80 }
+        ));
 
         // ── Enriched lesson content (only when "Load Full Lesson" has run for this topic) ──
         if (topic.whenToUse) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: t("reading.grammar.lesson.whenToUse"), bold: true })],
-              spacing: { before: 120, after: 40 },
-            })
-          );
+          children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.lesson.whenToUse"), bold: true })], spacing: { before: 120, after: 40 } }));
           children.push(new Paragraph({ children: [new TextRun({ text: topic.whenToUse })], spacing: { after: 40 } }));
           children.push(new Paragraph({ children: [new TextRun({ text: topic.whenToUseZh, color: "666666" })], spacing: { after: 40 } }));
           if (topic.signalWords && topic.signalWords.length > 0) {
-            children.push(
-              new Paragraph({
-                children: [
-                  new TextRun({ text: `${t("reading.grammar.lesson.signalWords")}: `, bold: true }),
-                  new TextRun({ text: topic.signalWords.join(", ") }),
-                ],
-                spacing: { after: 80 },
-              })
-            );
+            const wordRuns: TextRun[] = [new TextRun({ text: `${t("reading.grammar.lesson.signalWords")}: `, bold: true })];
+            topic.signalWords.forEach((w) => {
+              wordRuns.push(new TextRun({
+                text: ` ${w} `,
+                color: "92400E",
+                shading: { type: ShadingType.CLEAR, fill: SHADE.AMBER, color: "auto" },
+              }));
+              wordRuns.push(new TextRun({ text: " " }));
+            });
+            children.push(new Paragraph({ children: wordRuns, spacing: { after: 80 } }));
           }
         }
 
+        // Forms — 3 bordered cells side by side (mirrors the affirmative/negative/question grid)
         if (topic.forms) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: t("reading.grammar.lesson.forms"), bold: true })],
-              spacing: { before: 120, after: 40 },
-            })
-          );
-          children.push(new Paragraph({
-            children: [
-              new TextRun({ text: `${t("reading.grammar.lesson.affirmative")}: `, bold: true }),
-              new TextRun({ text: topic.forms.affirmative }),
-            ],
-            spacing: { after: 40 },
+          children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.lesson.forms"), bold: true })], spacing: { before: 120, after: 40 } }));
+          children.push(new Table({
+            rows: [new TableRow({
+              children: [
+                formCell(t("reading.grammar.lesson.affirmative"), topic.forms.affirmative, "16A34A"),
+                formCell(t("reading.grammar.lesson.negative"), topic.forms.negative, "DC2626"),
+                formCell(t("reading.grammar.lesson.question"), topic.forms.question, "2563EB"),
+              ],
+            })],
+            width: { size: 100, type: WidthType.PERCENTAGE },
           }));
-          children.push(new Paragraph({
-            children: [
-              new TextRun({ text: `${t("reading.grammar.lesson.negative")}: `, bold: true }),
-              new TextRun({ text: topic.forms.negative }),
-            ],
-            spacing: { after: 40 },
-          }));
-          children.push(new Paragraph({
-            children: [
-              new TextRun({ text: `${t("reading.grammar.lesson.question")}: `, bold: true }),
-              new TextRun({ text: topic.forms.question }),
-            ],
-            spacing: { after: 80 },
-          }));
+          children.push(new Paragraph({ children: [new TextRun({ text: "" })], spacing: { after: 40 } }));
         }
 
+        // Compare with — purple left-accent card (mirrors `bg-purple-50 border-l-2 border-purple-400`)
         if (topic.compareWith) {
-          children.push(
-            new Paragraph({
-              children: [
-                new TextRun({ text: `${t("reading.grammar.lesson.compareWith")}: `, bold: true }),
-                new TextRun({ text: topic.compareWith.structure }),
-              ],
-              spacing: { before: 120, after: 40 },
-            })
-          );
-          children.push(new Paragraph({ children: [new TextRun({ text: topic.compareWith.difference })], spacing: { after: 40 } }));
+          children.push(new Paragraph({
+            children: [
+              new TextRun({ text: `${t("reading.grammar.lesson.compareWith")}: `, bold: true }),
+              new TextRun({ text: topic.compareWith.structure, color: "7E22CE" }),
+            ],
+            spacing: { before: 120, after: 40 },
+          }));
+          const cwRuns: TextRun[] = [new TextRun({ text: topic.compareWith.difference })];
           if (topic.compareWith.differenceZh) {
-            children.push(new Paragraph({ children: [new TextRun({ text: topic.compareWith.differenceZh, color: "666666" })], spacing: { after: 40 } }));
+            cwRuns.push(new TextRun({ text: topic.compareWith.differenceZh, color: "666666", break: 1 }));
           }
           if (topic.compareWith.example) {
-            children.push(new Paragraph({ children: [new TextRun({ text: `\u201C${topic.compareWith.example}\u201D`, italics: true })], spacing: { after: 80 } }));
+            cwRuns.push(new TextRun({ text: `\u201C${topic.compareWith.example}\u201D`, italics: true, break: 1 }));
           }
+          children.push(tintedPara(cwRuns, { fill: SHADE.PURPLE, left: LINE.PURPLE, before: 0, after: 80 }));
         }
 
+        // Pronunciation tips — cyan tinted box (mirrors `bg-cyan-50`)
         if (topic.pronunciationTips) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: t("reading.grammar.lesson.pronunciationTips"), bold: true })],
-              spacing: { before: 120, after: 40 },
-            })
-          );
-          children.push(new Paragraph({ children: [new TextRun({ text: topic.pronunciationTips })], spacing: { after: 80 } }));
+          children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.lesson.pronunciationTips"), bold: true })], spacing: { before: 120, after: 40 } }));
+          children.push(tintedPara(
+            [new TextRun({ text: topic.pronunciationTips })],
+            { fill: SHADE.CYAN, before: 0, after: 80 }
+          ));
         }
 
+        // Common mistake pairs — bordered box with a red (wrong) row + green (right) row
         if (topic.commonMistakePairs && topic.commonMistakePairs.length > 0) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: t("reading.grammar.lesson.mistakePairs"), bold: true })],
-              spacing: { before: 120, after: 40 },
-            })
-          );
+          children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.lesson.mistakePairs"), bold: true })], spacing: { before: 120, after: 40 } }));
+          const pairEdge = thin(LINE.GRAY);
           topic.commonMistakePairs.forEach((pair) => {
-            children.push(new Paragraph({
-              children: [
-                new TextRun({ text: `${t("reading.grammar.lesson.wrong")}: `, bold: true, color: "EF4444" }),
-                new TextRun({ text: pair.wrong, color: "EF4444" }),
+            children.push(new Table({
+              rows: [
+                new TableRow({ children: [new TableCell({
+                  shading: { type: ShadingType.CLEAR, fill: SHADE.RED, color: "auto" },
+                  borders: { top: pairEdge, bottom: pairEdge, left: pairEdge, right: pairEdge },
+                  margins: { top: 60, bottom: 60, left: 120, right: 120 },
+                  children: [new Paragraph({ children: [
+                    new TextRun({ text: `${t("reading.grammar.lesson.wrong")}: `, bold: true, color: "DC2626" }),
+                    new TextRun({ text: pair.wrong, color: "DC2626" }),
+                  ] })],
+                })] }),
+                new TableRow({ children: [new TableCell({
+                  shading: { type: ShadingType.CLEAR, fill: SHADE.GREEN, color: "auto" },
+                  borders: { top: pairEdge, bottom: pairEdge, left: pairEdge, right: pairEdge },
+                  margins: { top: 60, bottom: 60, left: 120, right: 120 },
+                  children: [new Paragraph({ children: [
+                    new TextRun({ text: `${t("reading.grammar.lesson.right")}: `, bold: true, color: "16A34A" }),
+                    new TextRun({ text: pair.right, color: "16A34A" }),
+                  ] })],
+                })] }),
               ],
-              spacing: { after: 20 },
+              width: { size: 100, type: WidthType.PERCENTAGE },
             }));
-            children.push(new Paragraph({
-              children: [
-                new TextRun({ text: `${t("reading.grammar.lesson.right")}: `, bold: true, color: "22C55E" }),
-                new TextRun({ text: pair.right, color: "22C55E" }),
-              ],
-              spacing: { after: 20 },
-            }));
-            children.push(new Paragraph({ children: [new TextRun({ text: pair.explanation, italics: true, size: 20 })], spacing: { after: 60 } }));
+            children.push(new Paragraph({ children: [new TextRun({ text: pair.explanation, italics: true, size: 20 })], spacing: { before: 40, after: 60 } }));
           });
         }
 
+        // CCQs — bordered chips (mirrors `border rounded px-3 py-2`)
         if (topic.ccqs && topic.ccqs.length > 0) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: t("reading.grammar.lesson.ccqTitle"), bold: true })],
-              spacing: { before: 120, after: 40 },
-            })
-          );
+          children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.lesson.ccqTitle"), bold: true })], spacing: { before: 120, after: 40 } }));
           topic.ccqs.forEach((ccq, ci) => {
-            children.push(new Paragraph({
-              children: [
-                new TextRun({ text: `${ci + 1}. ${ccq.question} `, }),
-                new TextRun({ text: ccq.answer, bold: true, color: "22C55E" }),
+            children.push(borderedPara(
+              [
+                new TextRun({ text: `${ci + 1}. ${ccq.question} ` }),
+                new TextRun({ text: ccq.answer, bold: true, color: "16A34A" }),
               ],
-              spacing: { after: 40 },
-            }));
+              { before: 0, after: 40 }
+            ));
           });
         }
 
+        // Quick practice — bordered cards (mirrors `border rounded p-3`)
         if (topic.guidedPractice && topic.guidedPractice.length > 0) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: t("reading.grammar.lesson.practiceTitle"), bold: true })],
-              spacing: { before: 120, after: 40 },
-            })
-          );
+          children.push(new Paragraph({ children: [new TextRun({ text: t("reading.grammar.lesson.practiceTitle"), bold: true })], spacing: { before: 120, after: 40 } }));
           topic.guidedPractice.forEach((item, pi) => {
-            children.push(new Paragraph({
-              children: [
-                new TextRun({ text: `${pi + 1}. ` }),
-                ...questionToTextRuns(item.prompt),
-              ],
-              spacing: { after: 40 },
-            }));
+            const practiceParas: Paragraph[] = [
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `${pi + 1}. ` }),
+                  ...questionToTextRuns(item.prompt),
+                ],
+                spacing: { after: 40 },
+              }),
+            ];
             if (item.options) {
               item.options.forEach((opt) => {
-                children.push(new Paragraph({ children: [new TextRun({ text: `   \u25EF ${opt}` })], spacing: { after: 20 } }));
+                practiceParas.push(new Paragraph({ children: [new TextRun({ text: `   \u25EF ${opt}` })], spacing: { after: 20 } }));
               });
             }
-            children.push(new Paragraph({
+            practiceParas.push(new Paragraph({
               children: [
                 new TextRun({ text: `${t("reading.grammar.quiz.correctAnswer")}: `, bold: true }),
-                new TextRun({ text: item.acceptableAnswers[0] || "", color: "22C55E" }),
+                new TextRun({ text: item.acceptableAnswers[0] || "", color: "16A34A" }),
               ],
               spacing: { after: 20 },
             }));
-            children.push(new Paragraph({ children: [new TextRun({ text: item.explanation, italics: true, size: 20 })], spacing: { after: 80 } }));
+            practiceParas.push(new Paragraph({ children: [new TextRun({ text: item.explanation, italics: true, size: 20 })], spacing: { after: 0 } }));
+            children.push(cardTable(practiceParas));
+            children.push(new Paragraph({ children: [new TextRun({ text: "" })], spacing: { after: 60 } }));
           });
         }
 
