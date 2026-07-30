@@ -318,45 +318,72 @@ function computeStudentMetrics(
 
   for (const item of sorted) {
     getDay(toDateString(item.createdAt)).readText += 1;
-    if (item.summary && item.summaryGeneratedAt) {
-      getDay(toDateString(item.summaryGeneratedAt)).summary += 1;
+    if (item.summary) {
+      getDay(toDateString(item.summaryGeneratedAt || item.createdAt)).summary += 1;
     }
-    if (item.mindMap && item.mindMapGeneratedAt) {
-      getDay(toDateString(item.mindMapGeneratedAt)).mindMap += 1;
+    if (item.mindMap) {
+      getDay(toDateString(item.mindMapGeneratedAt || item.createdAt)).mindMap += 1;
     }
-    if (item.visualization && item.visualizationGeneratedAt) {
-      getDay(toDateString(item.visualizationGeneratedAt)).visualization += 1;
+    if (item.visualization) {
+      getDay(toDateString(item.visualizationGeneratedAt || item.createdAt)).visualization += 1;
     }
-    if (item.adaptedText && item.adaptedTextGeneratedAt) {
-      getDay(toDateString(item.adaptedTextGeneratedAt)).adaptedText += 1;
+    if (item.adaptedText) {
+      getDay(toDateString(item.adaptedTextGeneratedAt || item.createdAt)).adaptedText += 1;
     }
-    if (item.simplifiedText && item.simplifiedTextGeneratedAt) {
-      getDay(toDateString(item.simplifiedTextGeneratedAt)).simplifiedText += 1;
+    if (item.simplifiedText) {
+      getDay(toDateString(item.simplifiedTextGeneratedAt || item.createdAt)).simplifiedText += 1;
     }
-    if (item.glossaryCount > 0 && item.glossaryGeneratedAt) {
-      getDay(toDateString(item.glossaryGeneratedAt)).glossary += 1;
+    if (item.glossaryCount > 0) {
+      getDay(toDateString(item.glossaryGeneratedAt || item.createdAt)).glossary += 1;
     }
     // NOTE: spelling games are counted solely from vocabulary review sessions
     // (the loop below) to avoid double-counting — every spelling completion
     // (solo/multiplayer, reading/vocabulary page) creates a review-session row
     // via the onComplete callback, which is the authoritative per-game record.
-    if (item.vocabularyQuizScore && item.vocabularyQuizScore > 0 && item.vocabQuizCompletedAt) {
-      getDay(toDateString(item.vocabQuizCompletedAt)).vocabQuiz += item.vocabQuizzesCompleted || 1;
+    if (item.vocabularyQuizScore && item.vocabularyQuizScore > 0) {
+      getDay(toDateString(item.vocabQuizCompletedAt || item.createdAt)).vocabQuiz += item.vocabQuizzesCompleted || 1;
     }
-    if (item.testCompleted && item.readingTestCompletedAt) {
-      getDay(toDateString(item.readingTestCompletedAt)).readingTest += item.testsCompleted || 1;
+    if (item.testCompleted) {
+      getDay(toDateString(item.readingTestCompletedAt || item.createdAt)).readingTest += item.testsCompleted || 1;
     }
-    if (item.grammarQuizCompleted && item.grammarQuizScore && item.grammarQuizScore > 0 && item.grammarQuizCompletedAt) {
-      getDay(toDateString(item.grammarQuizCompletedAt)).grammarQuiz += item.grammarQuizzesCompleted || 1;
+    if (item.grammarQuizCompleted && item.grammarQuizScore && item.grammarQuizScore > 0) {
+      getDay(toDateString(item.grammarQuizCompletedAt || item.createdAt)).grammarQuiz += item.grammarQuizzesCompleted || 1;
     }
     if (item.grammarGameBestScore != null && item.grammarGameBestScore > 0) {
-      getDay(toDateString(item.grammarGameCompletedAt || item.updatedAt)).grammarGame += item.grammarGamesCompleted || 1;
+      getDay(toDateString(item.grammarGameCompletedAt || item.updatedAt || item.createdAt)).grammarGame += item.grammarGamesCompleted || 1;
+    }
+    // sentenceAnalysis — each entry has its own createdAt (mirrors the student
+    // dashboard). Falls back to the session createdAt for legacy entries that
+    // predate the per-entry timestamp.
+    if (item.sentenceAnalysisTimestamps.length > 0) {
+      for (const ts of item.sentenceAnalysisTimestamps) {
+        getDay(toDateString(ts || item.createdAt)).sentenceAnalysis += 1;
+      }
+    } else if (item.sentenceAnalysisCount > 0) {
+      getDay(toDateString(item.createdAt)).sentenceAnalysis += item.sentenceAnalysisCount;
     }
     if (item.tutorQuestionCount > 0) {
-      getDay(toDateString(item.createdAt)).tutorQuestion += item.tutorQuestionCount;
+      // Date each tutor question by its own message timestamp (mirrors the
+      // student dashboard), falling back to createdAt for legacy messages
+      // with no timestamp. The session's createdAt must NOT be used for all
+      // questions, otherwise a question asked today on an old session is
+      // misattributed to the session's creation date.
+      if (item.tutorQuestionTimestamps.length > 0) {
+        for (const ts of item.tutorQuestionTimestamps) {
+          getDay(toDateString(ts || item.createdAt)).tutorQuestion += 1;
+        }
+      } else {
+        getDay(toDateString(item.createdAt)).tutorQuestion += item.tutorQuestionCount;
+      }
     }
     if (item.flashcardReviewCount > 0) {
-      getDay(toDateString(item.createdAt)).flashcardReview += item.flashcardReviewCount;
+      if (item.flashcardReviewTimestamps.length > 0) {
+        for (const ts of item.flashcardReviewTimestamps) {
+          getDay(toDateString(ts || item.createdAt)).flashcardReview += 1;
+        }
+      } else {
+        getDay(toDateString(item.createdAt)).flashcardReview += item.flashcardReviewCount;
+      }
     }
   }
 

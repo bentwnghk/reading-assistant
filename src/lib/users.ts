@@ -120,8 +120,14 @@ export interface TeacherSessionData {
   grammarGameCompletedAt: number
   glossaryCount: number
   sentenceAnalysisCount: number
+  /** Per-sentence-analysis timestamps — used for the daily activity chart (date-accurate). */
+  sentenceAnalysisTimestamps: number[]
   tutorQuestionCount: number
+  /** Per-user tutor-message timestamps — used for the daily activity chart (date-accurate). */
+  tutorQuestionTimestamps: number[]
   flashcardReviewCount: number
+  /** Per-flashcard-review timestamps — used for the daily activity chart (date-accurate). */
+  flashcardReviewTimestamps: number[]
   grammarAnalysisCount: number
   grammarGeneratedAt: number
   grammarQuizCompletedAt: number
@@ -207,10 +213,22 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
+      sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
+        ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
+            .map((e) => Number(e?.createdAt) || 0)
+        : [],
       tutorQuestionCount: Array.isArray(row.chat_history)
         ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
         : 0,
+      tutorQuestionTimestamps: Array.isArray(row.chat_history)
+        ? row.chat_history
+            .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
+            .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
+        : [],
       flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+      flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
+        ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
+        : [],
       grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
       grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
       grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
@@ -300,10 +318,22 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
+      sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
+        ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
+            .map((e) => Number(e?.createdAt) || 0)
+        : [],
       tutorQuestionCount: Array.isArray(row.chat_history)
         ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
         : 0,
+      tutorQuestionTimestamps: Array.isArray(row.chat_history)
+        ? row.chat_history
+            .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
+            .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
+        : [],
       flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+      flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
+        ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
+        : [],
       grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
       grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
       grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
@@ -392,10 +422,22 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
+      sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
+        ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
+            .map((e) => Number(e?.createdAt) || 0)
+        : [],
       tutorQuestionCount: Array.isArray(row.chat_history)
         ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
         : 0,
+      tutorQuestionTimestamps: Array.isArray(row.chat_history)
+        ? row.chat_history
+            .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
+            .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
+        : [],
       flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+      flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
+        ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
+        : [],
       grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
       grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
       grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
