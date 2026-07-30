@@ -2,9 +2,16 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
@@ -72,6 +79,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [dateRange, setDateRange] = useState<DateRange>("7")
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 20
+  const [viewingText, setViewingText] = useState<{ title: string; text: string; student?: string } | null>(null)
 
   const _isTeacher = !isSuperAdmin && !isAdmin
 
@@ -479,9 +487,19 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="truncate block max-w-48" title={session.docTitle}>
-                      {session.docTitle}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setViewingText({
+                        title: session.docTitle,
+                        text: session.extractedText,
+                        student: session.userName || undefined,
+                      })}
+                      className="flex items-center gap-1.5 text-left text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300 max-w-xs"
+                      title={t("userManagement.studentData.viewReadingText")}
+                    >
+                      <FileText className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate block">{session.docTitle}</span>
+                    </button>
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={session.progress === 100 ? "default" : "secondary"}>
@@ -597,6 +615,25 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           )}
         </>
       )}
+
+      <Dialog open={!!viewingText} onOpenChange={(open) => { if (!open) setViewingText(null) }}>
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <FileText className="h-5 w-5 shrink-0" />
+              <span className="truncate">{viewingText?.title}</span>
+            </DialogTitle>
+            {viewingText?.student && (
+              <DialogDescription>{viewingText.student}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto mt-2">
+            <pre className="whitespace-pre-wrap break-words text-sm leading-relaxed font-sans">
+              {viewingText?.text || t("userManagement.studentData.noReadingText")}
+            </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

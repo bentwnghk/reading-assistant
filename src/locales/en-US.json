@@ -2929,6 +2929,8 @@
       "school": "School",
       "student": "Student",
       "title": "Reading Text",
+      "viewReadingText": "View reading text",
+      "noReadingText": "No reading text available",
       "progress": "Learning Progress",
       "testScore": "Reading Test",
       "vocabulary": "Vocabulary Count",
