@@ -18,9 +18,10 @@ const Mermaid = dynamic(() => import("./Mermaid"));
 
 export type MarkdownProps = Options & {
   disableMath?: boolean;
+  hideMermaidDownload?: boolean;
 };
 
-function MarkdownBlock({ children: content, disableMath, ...rest }: MarkdownProps) {
+function MarkdownBlock({ children: content, disableMath, hideMermaidDownload, ...rest }: MarkdownProps) {
   const remarkPlugins = useMemo(
     () => rest.remarkPlugins ?? [],
     [rest.remarkPlugins]
@@ -89,7 +90,7 @@ function MarkdownBlock({ children: content, disableMath, ...rest }: MarkdownProp
           if (className?.includes("hljs")) {
             const lang = /language-(\w+)/.exec(className || "");
             if (lang && lang[1] === "mermaid") {
-              return <Mermaid>{children}</Mermaid>;
+              return <Mermaid hideDownload={hideMermaidDownload}>{children}</Mermaid>;
             }
             return (
               <Code lang={lang ? lang[1] : "plaintext"}>

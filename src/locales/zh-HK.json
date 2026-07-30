@@ -807,6 +807,7 @@
       "regenerate": "重新生成",
       "emptyTip": "點擊上方按鈕生成視覺化思維導圖",
       "chineseLabel": "中文",
+      "download": "下載",
       "help": {
         "title": "思維導圖指南",
         "intro": "以視覺化的地圖，呈現文本中主題與子主題之間的關係。",

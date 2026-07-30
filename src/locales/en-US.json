@@ -776,6 +776,7 @@
       "regenerate": "Regenerate",
       "emptyTip": "Click the button above to generate a visual mind map",
       "chineseLabel": "Chinese",
+      "download": "Download",
       "help": {
         "title": "Mind Map Guide",
         "intro": "See how the ideas in the text connect, in a visual map of main topics and their subtopics.",

@@ -23,6 +23,7 @@ import { downloadFile } from "@/utils/file";
 
 type Props = {
   children: ReactNode;
+  hideDownload?: boolean;
 };
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz", 8);
@@ -106,7 +107,7 @@ async function loadMermaid(element: HTMLElement, code: string) {
   }
 }
 
-function Mermaid({ children }: Props) {
+function Mermaid({ children, hideDownload }: Props) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const mermaidContainerRef = useRef<HTMLDivElement>(null);
@@ -236,15 +237,17 @@ function Mermaid({ children }: Props) {
                     <Copy className="h-full w-full" />
                   )}
                 </Button>
-                <Button
-                  className="w-6 h-6"
-                  size="icon"
-                  variant="ghost"
-                  title={t("editor.mermaid.downloadSvg")}
-                  onClick={() => downloadSvg()}
-                >
-                  <Download />
-                </Button>
+                {!hideDownload && (
+                  <Button
+                    className="w-6 h-6"
+                    size="icon"
+                    variant="ghost"
+                    title={t("editor.mermaid.downloadSvg")}
+                    onClick={() => downloadSvg()}
+                  >
+                    <Download />
+                  </Button>
+                )}
                 <Button
                   className="w-6 h-6"
                   size="icon"

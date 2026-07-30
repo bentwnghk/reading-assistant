@@ -1,29 +1,42 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Waypoints, LoaderCircle, Languages, Network } from "lucide-react";
+import { Waypoints, LoaderCircle, Languages, Network, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
+import { downloadFile } from "@/utils/file";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown/View"));
 
 function MindMap() {
   const { t } = useTranslation();
-  const { extractedText, mindMap } = useReadingStore();
+  const { extractedText, mindMap, docTitle } = useReadingStore();
   const { activeGenerations, generateMindMap } = useReadingAssistant();
   const isGenerating = !!activeGenerations["mindmap"];
   const [useChinese, setUseChinese] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   if (!extractedText) {
     return null;
   }
 
+  function handleDownload() {
+    const target = sectionRef.current?.querySelector(".mermaid");
+    if (!target) return;
+    const safeFileName = (docTitle || "Untitled")
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 80);
+    downloadFile(target.innerHTML, `${safeFileName} - Mind Map.svg`, "image/svg+xml");
+  }
+
   return (
-    <section className="p-4 border rounded-md mt-4">
+    <section className="p-4 border rounded-md mt-4" ref={sectionRef}>
       <div className="flex items-center justify-between border-b pb-4 mb-4">
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <Waypoints className="h-5 w-5 text-muted-foreground" />
@@ -47,6 +60,17 @@ function MindMap() {
           />
         </h3>
         <div className="flex items-center gap-3">
+          {mindMap && (
+            <Button
+              onClick={handleDownload}
+              size="sm"
+              variant="ghost"
+              disabled={isGenerating}
+            >
+              <Download className="h-4 w-4 mr-1" />
+              {t("reading.mindMap.download")}
+            </Button>
+          )}
           <div className="flex items-center gap-2">
             <Switch
               checked={useChinese}
@@ -85,7 +109,7 @@ function MindMap() {
 
       {mindMap ? (
         <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
-          <MagicDown>{mindMap}</MagicDown>
+          <MagicDown hideMermaidDownload>{mindMap}</MagicDown>
         </div>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
