@@ -80,6 +80,8 @@ export interface StudentSessionData {
   grammarGameAccuracy?: number
   glossaryCount: number
   glossary: GlossaryEntry[]
+  highlightedWords: string[]
+  analyzedSentences: Record<string, SentenceAnalysis>
   progress: number
   createdAt: number
   updatedAt: number
@@ -1143,6 +1145,8 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       grammarGameAccuracy: row.grammar_game_accuracy || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       glossary: Array.isArray(row.glossary) ? row.glossary : [],
+      highlightedWords: Array.isArray(row.highlighted_words) ? row.highlighted_words : [],
+      analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
@@ -1206,6 +1210,8 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       grammarGameAccuracy: row.grammar_game_accuracy || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       glossary: Array.isArray(row.glossary) ? row.glossary : [],
+      highlightedWords: Array.isArray(row.highlighted_words) ? row.highlighted_words : [],
+      analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),

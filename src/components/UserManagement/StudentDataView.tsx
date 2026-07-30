@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
+import { highlightTextAndSentences } from "@/utils/highlight"
 
 interface StudentDataViewProps {
   isSuperAdmin: boolean
@@ -79,7 +80,14 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [dateRange, setDateRange] = useState<DateRange>("7")
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 20
-  const [viewingText, setViewingText] = useState<{ title: string; text: string; student?: string } | null>(null)
+  const [viewingText, setViewingText] = useState<{
+    title: string
+    text: string
+    student?: string
+    highlightedWords: string[]
+    analyzedSentences: Record<string, SentenceAnalysis>
+    glossary: GlossaryEntry[]
+  } | null>(null)
   const [viewingGlossary, setViewingGlossary] = useState<{ title: string; glossary: GlossaryEntry[]; student?: string } | null>(null)
 
   const _isTeacher = !isSuperAdmin && !isAdmin
@@ -292,6 +300,26 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     return classes.filter(c => c.schoolId === selectedSchoolId)
   }, [classes, selectedSchoolId, isSuperAdmin])
 
+  const highlightedTextHtml = useMemo(() => {
+    if (!viewingText) return ""
+    const glossaryMap = new Map<string, GlossaryEntry>()
+    for (const entry of viewingText.glossary) {
+      glossaryMap.set(entry.word.toLowerCase(), entry)
+    }
+    const { html } = highlightTextAndSentences(
+      viewingText.text,
+      viewingText.highlightedWords,
+      viewingText.analyzedSentences,
+      glossaryMap
+    )
+    return html
+  }, [viewingText])
+
+  const hasHighlights = useMemo(() => {
+    if (!viewingText) return false
+    return viewingText.highlightedWords.length > 0 || Object.keys(viewingText.analyzedSentences).length > 0
+  }, [viewingText])
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -494,6 +522,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         title: session.docTitle,
                         text: session.extractedText,
                         student: session.userName || undefined,
+                        highlightedWords: session.highlightedWords,
+                        analyzedSentences: session.analyzedSentences,
+                        glossary: session.glossary,
                       })}
                       className="block truncate max-w-xs text-left text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                       title={`${t("userManagement.studentData.viewReadingText")}: ${session.docTitle}`}
@@ -515,7 +546,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         student: session.userName || undefined,
                       })}
                       className="inline-flex"
-                      title={`${t("userManagement.studentData.viewReadingText")}: ${session.docTitle}`}
+                      title={`${t("userManagement.studentData.viewGlossary")}: ${session.docTitle}`}
                       disabled={session.glossaryCount === 0}
                     >
                       <Badge variant="outline" className={session.glossaryCount > 0 ? "cursor-pointer hover:bg-accent text-blue-600 dark:text-blue-400" : ""}>
@@ -642,9 +673,22 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             )}
           </DialogHeader>
           <div className="flex-1 overflow-y-auto mt-2">
-            <pre className="whitespace-pre-wrap break-words text-sm leading-relaxed font-sans">
-              {viewingText?.text || t("userManagement.studentData.noReadingText")}
-            </pre>
+            {hasHighlights && (
+              <div className="flex flex-wrap items-center gap-4 mb-3 text-xs text-muted-foreground pb-2 border-b">
+                <span className="flex items-center gap-1">
+                  <mark className="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">&nbsp;</mark>
+                  {t("userManagement.studentData.legendVocabulary")}
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="border-b-2 border-blue-500 dark:border-blue-400">&nbsp;&nbsp;</span>
+                  {t("userManagement.studentData.legendAnalyzedSentence")}
+                </span>
+              </div>
+            )}
+            <div
+              className="whitespace-pre-wrap break-words text-sm leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: highlightedTextHtml || t("userManagement.studentData.noReadingText") }}
+            />
           </div>
         </DialogContent>
       </Dialog>
