@@ -3115,6 +3115,10 @@
           "excelExport": {
             "name": "Excel Export",
             "desc": "In the Student Data tab, export the currently filtered session data to an Excel file with formatted columns for offline analysis or reporting."
+          },
+          "studentDataDetails": {
+            "name": "Click-to-View Details",
+            "desc": "In the Student Data tab, click any value in the Reading Text, Vocabulary Count, Vocabulary Quiz, Grammar Quiz, or Reading Test columns to view full details in a popup dialog — including the original text with vocabulary highlights, glossary table, quiz questions with the student's answers (color-coded green/red), and adapted/simplified text tabs."
           }
         },
         "tip": {

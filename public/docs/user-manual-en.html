@@ -443,7 +443,7 @@ body.toc-noscroll{overflow:hidden}
   <div class="sub">User Manual</div>
   <div class="zh">A Complete Guide for Teachers &amp; Students</div>
   <div class="meta">
-    <div><strong>Version</strong> 2.944</div>
+    <div><strong>Version</strong> 2.965</div>
     <div><strong>Audience</strong> Students · Teachers · Administrators</div>
     <div><strong>Language</strong> English</div>
   </div>
@@ -2345,6 +2345,18 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Subscriptions</b></td><td>super-admin + admin</td><td>Manage Stripe subscriptions</td></tr>
       </table>
       <p>Header-level tools <span class="tag-super"></span>: full <b>Export</b> (.zip backup of schools/users/classes/sessions), <b>Import</b> (.zip/.json), and <b>Send Test Email</b> (9 template types).</p>
+
+      <h4>Student Data — click-to-view details</h4>
+      <p>Five columns in the Student Data table are interactive. Click any highlighted value to open a popup dialog with the student's full work:</p>
+      <table class="ref">
+        <tr><th>Column</th><th>What you see when you click</th></tr>
+        <tr><td><b>Reading Text</b></td><td>The full extracted text with <b>three tabs</b>: <em>Original</em> (vocabulary words highlighted in yellow, AI-analyzed sentences underlined in blue), <em>Adapted</em>, and <em>Simplified</em> (shown only if generated). A legend explains the colour coding.</td></tr>
+        <tr><td><b>Vocabulary Count</b></td><td>The complete glossary table — every word with its syllabification, part of speech, English/Chinese definitions, and example sentence.</td></tr>
+        <tr><td><b>Vocabulary Quiz</b></td><td>Every quiz question with all four options. The student's chosen answer and the correct answer are <span style="color:#16a34a;font-weight:bold">highlighted green</span> / <span style="color:#dc2626;font-weight:bold">red</span>. A score badge and per-question ✓/✗ indicators appear in the header and margin.</td></tr>
+        <tr><td><b>Grammar Quiz</b></td><td>Same colour-coded review as above, including AI-graded rewrite/fill-in questions (judged by earned points, not exact string match). Topic name shown per question.</td></tr>
+        <tr><td><b>Reading Test</b></td><td>Same colour-coded review, including AI-graded short-answer questions. Covers multiple-choice, true/false/not given, inference, vocabulary-in-context, and referencing types.</td></tr>
+      </table>
+      <div class="callout tip"><strong>Lazy-loaded</strong> Detail data is fetched on demand only when you click — the table itself loads fast even for large classes. A spinner appears briefly while fetching.</div>
 
       <h3>11.6 Account &amp; session security</h3>
       <p>Three layers protect your account — you don't configure these, but it helps to know they exist:</p>

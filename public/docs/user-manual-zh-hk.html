@@ -443,7 +443,7 @@ body.toc-noscroll{overflow:hidden}
   <div class="sub">用戶手冊</div>
   <div class="zh">教師與學生完整指南</div>
   <div class="meta">
-    <div><strong>版本</strong> 2.944</div>
+    <div><strong>版本</strong> 2.965</div>
     <div><strong>對象</strong> 學生 · 教師 · 管理員</div>
     <div><strong>語言</strong> 繁體中文</div>
   </div>
@@ -2345,6 +2345,18 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>訂閱</b></td><td>超級管理員＋管理員</td><td>管理 Stripe 訂閱</td></tr>
       </table>
       <p>頂層工具 <span class="tag-super"></span>：完整<b>匯出</b>（.zip 備份：學校／用戶／班別／工作階段）、<b>匯入</b>（.zip／.json）、<b>發送測試電郵</b>（9 種範本）。</p>
+
+      <h4>學生數據——點擊查看詳情</h4>
+      <p>學生數據表格中有五個欄位可互動。點擊任何有底線的數值即可開啟彈出對話框，查看學生的完整作答內容：</p>
+      <table class="ref">
+        <tr><th>欄位</th><th>點擊後顯示</th></tr>
+        <tr><td><b>閱讀文本</b></td><td>完整的原文，設有<b>三個分頁</b>：<em>原文</em>（詞彙以黃色高亮，AI 分析句子以藍色底線標示）、<em>改寫版本</em>、<em>簡化版本</em>（僅在已生成時顯示）。附有圖例說明顏色含義。</td></tr>
+        <tr><td><b>詞彙量</b></td><td>完整的詞彙表——每個單詞的音節、詞性、中英文釋義及例句。</td></tr>
+        <tr><td><b>詞彙測驗</b></td><td>每道測驗題目及全部四個選項。學生的作答與正確答案以<span style="color:#16a34a;font-weight:bold">綠色</span>／<span style="color:#dc2626;font-weight:bold">紅色</span>標示。標題列與頁邊顯示分數徽章及每題 ✓/✗ 標記。</td></tr>
+        <tr><td><b>語法測驗</b></td><td>同上彩色標示，包括 AI 評分的改寫／填空題（按得分判斷對錯，非字串比對）。每題顯示語法主題名稱。</td></tr>
+        <tr><td><b>閱讀測驗</b></td><td>同上彩色標示，包括 AI 評分的簡答題。涵蓋選擇題、是非／未提及、推論、詞彙語境及指代題型。</td></tr>
+      </table>
+      <div class="callout tip"><strong>按需載入</strong> 詳情數據僅在點擊時才從伺服器讀取——表格本身即使班別人數眾多也能快速載入。讀取時短暫顯示載入圖示。</div>
 
       <h3>11.6 帳戶與工作階段安全</h3>
       <p>三層保護你的帳戶——你毋須設定，但了解有益：</p>

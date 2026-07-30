@@ -9,6 +9,7 @@ import {
   Building2,
   CreditCard,
   Download,
+  Eye,
   Filter,
   GraduationCap,
   HelpCircle,
@@ -59,6 +60,7 @@ const FEATURE_ITEMS: { key: string; icon: React.ElementType; bgClass: string; ic
   { key: "exportImport", icon: Download, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
   { key: "testEmails", icon: Mail, bgClass: "bg-pink-500/10", iconClass: "text-pink-500" },
   { key: "excelExport", icon: Upload, bgClass: "bg-emerald-500/10", iconClass: "text-emerald-500" },
+  { key: "studentDataDetails", icon: Eye, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
 ];
 
 function IconCard({
