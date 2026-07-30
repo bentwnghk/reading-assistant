@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText } from "lucide-react"
+import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -80,6 +80,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 20
   const [viewingText, setViewingText] = useState<{ title: string; text: string; student?: string } | null>(null)
+  const [viewingGlossary, setViewingGlossary] = useState<{ title: string; glossary: GlossaryEntry[]; student?: string } | null>(null)
 
   const _isTeacher = !isSuperAdmin && !isAdmin
 
@@ -494,11 +495,10 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         text: session.extractedText,
                         student: session.userName || undefined,
                       })}
-                      className="flex items-center gap-1.5 text-left text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300 max-w-xs"
-                      title={t("userManagement.studentData.viewReadingText")}
+                      className="block truncate max-w-xs text-left text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+                      title={`${t("userManagement.studentData.viewReadingText")}: ${session.docTitle}`}
                     >
-                      <FileText className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate block">{session.docTitle}</span>
+                      {session.docTitle}
                     </button>
                   </TableCell>
                   <TableCell className="text-center">
@@ -507,7 +507,21 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="outline">{session.glossaryCount}</Badge>
+                    <button
+                      type="button"
+                      onClick={() => setViewingGlossary({
+                        title: session.docTitle,
+                        glossary: session.glossary,
+                        student: session.userName || undefined,
+                      })}
+                      className="inline-flex"
+                      title={`${t("userManagement.studentData.viewReadingText")}: ${session.docTitle}`}
+                      disabled={session.glossaryCount === 0}
+                    >
+                      <Badge variant="outline" className={session.glossaryCount > 0 ? "cursor-pointer hover:bg-accent text-blue-600 dark:text-blue-400" : ""}>
+                        {session.glossaryCount}
+                      </Badge>
+                    </button>
                   </TableCell>
                   <TableCell className="text-center">
                     {(session.spellingGameBestScore ?? 0) > 0 ? (
@@ -631,6 +645,54 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             <pre className="whitespace-pre-wrap break-words text-sm leading-relaxed font-sans">
               {viewingText?.text || t("userManagement.studentData.noReadingText")}
             </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingGlossary} onOpenChange={(open) => { if (!open) setViewingGlossary(null) }}>
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <BookMarked className="h-5 w-5 shrink-0" />
+              <span className="truncate">{viewingGlossary?.title}</span>
+            </DialogTitle>
+            {viewingGlossary?.student && (
+              <DialogDescription>
+                {viewingGlossary.student} — {viewingGlossary.glossary.length} {t("userManagement.studentData.vocabulary")}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-auto mt-2">
+            {viewingGlossary && viewingGlossary.glossary.length > 0 ? (
+              <Table>
+                <TableHeader className="sticky top-0 bg-background">
+                  <TableRow>
+                    <TableHead className="w-[120px]">{t("reading.glossary.word")}</TableHead>
+                    <TableHead className="w-[100px]">{t("reading.glossary.syllabification")}</TableHead>
+                    <TableHead className="w-[80px]">{t("reading.glossary.partOfSpeech")}</TableHead>
+                    <TableHead>{t("reading.glossary.englishDefinition")}</TableHead>
+                    <TableHead className="w-[200px]">{t("reading.glossary.chineseDefinition")}</TableHead>
+                    <TableHead>{t("reading.glossary.example")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {viewingGlossary.glossary.map((entry) => (
+                    <TableRow key={entry.word}>
+                      <TableCell className="font-medium">{entry.word}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{entry.syllabification || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground italic text-xs">{entry.partOfSpeech || "-"}</TableCell>
+                      <TableCell>{entry.englishDefinition}</TableCell>
+                      <TableCell className="font-noto-sans-tc">{entry.chineseDefinition}</TableCell>
+                      <TableCell className="text-muted-foreground italic">{entry.example || "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {t("userManagement.studentData.noGlossary")}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

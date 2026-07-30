@@ -2931,6 +2931,7 @@
       "title": "Reading Text",
       "viewReadingText": "View reading text",
       "noReadingText": "No reading text available",
+      "noGlossary": "No glossary available",
       "progress": "Learning Progress",
       "testScore": "Reading Test",
       "vocabulary": "Vocabulary Count",

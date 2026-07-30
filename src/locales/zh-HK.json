@@ -2958,6 +2958,7 @@
       "title": "閱讀文本",
       "viewReadingText": "查看閱讀文本",
       "noReadingText": "沒有可用的閱讀文本",
+      "noGlossary": "沒有可用的詞彙表",
       "progress": "學習進度",
       "testScore": "閱讀測驗",
       "vocabulary": "詞彙量",
