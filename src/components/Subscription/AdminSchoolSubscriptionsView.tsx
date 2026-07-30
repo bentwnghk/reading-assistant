@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { Fragment, useState, useEffect, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +28,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import SubscriptionHistoryTimeline, {
+  type HistoryEvent,
+} from "./SubscriptionHistoryTimeline"
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -110,6 +113,10 @@ export default function AdminSchoolSubscriptionsView() {
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
 
+  const [expandedSchoolId, setExpandedSchoolId] = useState<string | null>(null)
+  const [eventsBySchool, setEventsBySchool] = useState<Record<string, HistoryEvent[]>>({})
+  const [eventsLoadingSchool, setEventsLoadingSchool] = useState<string | null>(null)
+
   const [seatDialogOpen, setSeatDialogOpen] = useState(false)
   const [seatDialogSub, setSeatDialogSub] = useState<SchoolSubscriptionRow | null>(null)
   const [seatUsers, setSeatUsers] = useState<SeatUser[]>([])
@@ -165,6 +172,28 @@ export default function AdminSchoolSubscriptionsView() {
       console.error("Failed to fetch seat users:", error)
     } finally {
       setSeatUsersLoading(false)
+    }
+  }
+
+  async function toggleExpand(schoolId: string) {
+    if (expandedSchoolId === schoolId) {
+      setExpandedSchoolId(null)
+      return
+    }
+    setExpandedSchoolId(schoolId)
+    if (!eventsBySchool[schoolId]) {
+      setEventsLoadingSchool(schoolId)
+      try {
+        const res = await fetch(`/api/admin/school-subscriptions/events?schoolId=${encodeURIComponent(schoolId)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setEventsBySchool((prev) => ({ ...prev, [schoolId]: data.events || [] }))
+        }
+      } catch (error) {
+        console.error("Failed to fetch school subscription events:", error)
+      } finally {
+        setEventsLoadingSchool(null)
+      }
     }
   }
 
@@ -240,60 +269,95 @@ export default function AdminSchoolSubscriptionsView() {
                   </TableCell>
                 </TableRow>
               ) : (
-                subscriptions.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell>
-                      <div className="font-medium text-sm">{sub.school_name || "-"}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium text-sm">{sub.admin_name || "-"}</div>
-                        <div className="text-xs text-muted-foreground">{sub.admin_email || "-"}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {sub.plan ? (
-                        <Badge variant="secondary" className="text-xs">
-                          {t(`subscription.${sub.plan}`)}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
+                subscriptions.map((sub) => {
+                  const isOpen = expandedSchoolId === sub.school_id
+                  return (
+                    <Fragment key={sub.id}>
+                      <TableRow className={isOpen ? "bg-muted/40" : undefined}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              className="shrink-0"
+                              onClick={() => toggleExpand(sub.school_id)}
+                              aria-label={t("subscription.admin.historyToggle")}
+                            >
+                              {isOpen ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </button>
+                            <span className="font-medium text-sm">{sub.school_name || "-"}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-sm">{sub.admin_name || "-"}</div>
+                            <div className="text-xs text-muted-foreground">{sub.admin_email || "-"}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {sub.plan ? (
+                            <Badge variant="secondary" className="text-xs">
+                              {t(`subscription.${sub.plan}`)}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <button
+                            type="button"
+                            className="text-sm text-primary hover:underline cursor-pointer"
+                            onClick={() => openSeatUsers(sub)}
+                          >
+                            {sub.seats_used}/{sub.quantity}
+                          </button>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`text-xs ${STATUS_COLORS[sub.status] || ""}`}>
+                            {t(`subscription.status.${sub.status}`)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDate(sub.current_period_start, i18n.language)}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDate(sub.current_period_end, i18n.language)}
+                        </TableCell>
+                        <TableCell>
+                          {sub.cancel_at_period_end ? (
+                            <Badge variant="outline" className="text-xs text-orange-600">
+                              {t("subscription.admin.yes")}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">{t("subscription.admin.no")}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDate(sub.created_at, i18n.language)}
+                        </TableCell>
+                      </TableRow>
+                      {isOpen && (
+                        <TableRow className="bg-muted/30 hover:bg-muted/30">
+                          <TableCell colSpan={9} className="p-4">
+                            {eventsLoadingSchool === sub.school_id ? (
+                              <div className="flex items-center justify-center py-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                              </div>
+                            ) : (
+                              <SubscriptionHistoryTimeline
+                                events={eventsBySchool[sub.school_id] || []}
+                                showQuantity
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        type="button"
-                        className="text-sm text-primary hover:underline cursor-pointer"
-                        onClick={() => openSeatUsers(sub)}
-                      >
-                        {sub.seats_used}/{sub.quantity}
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`text-xs ${STATUS_COLORS[sub.status] || ""}`}>
-                        {t(`subscription.status.${sub.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(sub.current_period_start, i18n.language)}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(sub.current_period_end, i18n.language)}
-                    </TableCell>
-                    <TableCell>
-                      {sub.cancel_at_period_end ? (
-                        <Badge variant="outline" className="text-xs text-orange-600">
-                          {t("subscription.admin.yes")}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">{t("subscription.admin.no")}</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(sub.created_at, i18n.language)}
-                    </TableCell>
-                  </TableRow>
-                ))
+                    </Fragment>
+                  )
+                })
               )}
             </TableBody>
           </Table>

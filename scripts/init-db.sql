@@ -517,6 +517,31 @@ CREATE TRIGGER update_subscriptions_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- ─── Subscription events (history) table ──────────────────────────────────────
+
+CREATE TABLE subscription_events (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  stripe_subscription_id TEXT,
+  event_type TEXT NOT NULL,
+  status TEXT,
+  plan TEXT,
+  period_start TIMESTAMP WITH TIME ZONE,
+  period_end TIMESTAMP WITH TIME ZONE,
+  trial_end TIMESTAMP WITH TIME ZONE,
+  event_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_subscription_events_user_time
+  ON subscription_events(user_id, event_time DESC);
+
+CREATE INDEX idx_subscription_events_sub_time
+  ON subscription_events(stripe_subscription_id, event_time DESC);
+
+ALTER TABLE subscription_events
+  ADD CONSTRAINT subscription_events_dedup_key
+    UNIQUE (stripe_subscription_id, event_type, period_start) NULLS NOT DISTINCT;
+
 -- ─── Shared Sessions table ─────────────────────────────────────────────────────
 
 CREATE TABLE shared_sessions (

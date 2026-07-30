@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { ensureSubscriptionTable } from "@/lib/subscription"
 import { getClient } from "@/lib/db"
+import { getSchoolForUser } from "@/lib/users"
 import { NextResponse } from "next/server"
 
 export interface AdminSubscriptionRow {
@@ -50,12 +51,20 @@ export async function GET(request: Request) {
   const statusFilter = searchParams.get("status") || ""
   const search = searchParams.get("search") || ""
 
+  // School admins are scoped to their own school; super-admins see all.
+  const adminSchoolId =
+    role === "admin" ? await getSchoolForUser(session.user.id) : null
+
   const client = await getClient()
   try {
     const conditions: string[] = []
     const params: unknown[] = []
     let paramIdx = 1
 
+    if (role === "admin") {
+      conditions.push(`u.school_id = $${paramIdx++}`)
+      params.push(adminSchoolId)
+    }
     if (statusFilter) {
       conditions.push(`s.status = $${paramIdx++}`)
       params.push(statusFilter)
@@ -95,7 +104,9 @@ export async function GET(request: Request) {
          COUNT(*) FILTER (WHERE status = 'inactive') as inactive,
          COUNT(*) FILTER (WHERE plan = 'monthly') as monthly_count,
          COUNT(*) FILTER (WHERE plan = 'yearly') as yearly_count
-       FROM subscriptions`
+       FROM subscriptions
+       ${role === "admin" ? "WHERE user_id IN (SELECT id FROM users WHERE school_id = $1)" : ""}`,
+      role === "admin" ? [adminSchoolId] : []
     )
 
     return NextResponse.json({

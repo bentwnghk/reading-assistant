@@ -39,6 +39,27 @@ export interface SubscriptionStatusResponse {
   trialEligible: boolean;
 }
 
+export type SubscriptionEventType =
+  | "started"
+  | "renewed"
+  | "cancel_scheduled"
+  | "reactivated"
+  | "canceled"
+  | "past_due";
+
+export interface SubscriptionEvent {
+  id: string;
+  user_id: string;
+  stripe_subscription_id: string | null;
+  event_type: SubscriptionEventType;
+  status: SubscriptionStatus | null;
+  plan: SubscriptionPlan | null;
+  period_start: string | null;
+  period_end: string | null;
+  trial_end: string | null;
+  event_time: string;
+}
+
 let stripeInstance: Stripe | null = null;
 
 export function getStripe(): Stripe {
@@ -124,11 +145,132 @@ export async function ensureSubscriptionTable(): Promise<boolean> {
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)
     `);
+    await ensureSubscriptionEventsTable(client);
     tableEnsured = true;
     return true;
   } catch (error) {
     console.error("Failed to ensure subscription table:", error);
     return false;
+  } finally {
+    client.release();
+  }
+}
+
+let eventsTableEnsured = false;
+
+async function ensureSubscriptionEventsTable(
+  existingClient?: import("pg").PoolClient
+): Promise<void> {
+  if (eventsTableEnsured) return;
+  const run = async (client: import("pg").PoolClient) => {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS subscription_events (
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        stripe_subscription_id TEXT,
+        event_type TEXT NOT NULL,
+        status TEXT,
+        plan TEXT,
+        period_start TIMESTAMP WITH TIME ZONE,
+        period_end TIMESTAMP WITH TIME ZONE,
+        trial_end TIMESTAMP WITH TIME ZONE,
+        event_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_subscription_events_user_time
+        ON subscription_events(user_id, event_time DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_subscription_events_sub_time
+        ON subscription_events(stripe_subscription_id, event_time DESC)
+    `);
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'subscription_events_dedup_key'
+             AND conrelid = 'subscription_events'::regclass
+        ) THEN
+          ALTER TABLE subscription_events
+            ADD CONSTRAINT subscription_events_dedup_key
+              UNIQUE (stripe_subscription_id, event_type, period_start) NULLS NOT DISTINCT;
+        END IF;
+      END $$
+    `);
+  };
+
+  if (existingClient) {
+    await run(existingClient);
+  } else {
+    const client = await getClient();
+    try {
+      await run(client);
+    } finally {
+      client.release();
+    }
+  }
+  eventsTableEnsured = true;
+}
+
+// Append-only lifecycle event recording. Idempotent via the dedup unique
+// constraint (subscription + event_type + billing period). Failures are logged
+// but never throw so they cannot break the webhook flow — pass swallowError=true
+// when calling from webhook handlers.
+async function recordSubscriptionEvent(
+  userId: string,
+  data: {
+    stripeSubscriptionId?: string | null;
+    eventType: SubscriptionEventType;
+    status?: SubscriptionStatus | null;
+    plan?: SubscriptionPlan | null;
+    periodStart?: string | null;
+    periodEnd?: string | null;
+    trialEnd?: string | null;
+  }
+): Promise<void> {
+  const client = await getClient();
+  try {
+    await client.query(
+      `INSERT INTO subscription_events
+        (user_id, stripe_subscription_id, event_type, status, plan,
+         period_start, period_end, trial_end)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (stripe_subscription_id, event_type, period_start) DO NOTHING`,
+      [
+        userId,
+        data.stripeSubscriptionId ?? null,
+        data.eventType,
+        data.status ?? null,
+        data.plan ?? null,
+        data.periodStart ?? null,
+        data.periodEnd ?? null,
+        data.trialEnd ?? null,
+      ]
+    );
+  } catch (error) {
+    console.error("Failed to record subscription event:", error);
+  } finally {
+    client.release();
+  }
+}
+
+export async function getSubscriptionEvents(
+  userId: string
+): Promise<SubscriptionEvent[]> {
+  await ensureSubscriptionTable();
+  const client = await getClient();
+  try {
+    const result = await client.query(
+      `SELECT * FROM subscription_events
+       WHERE user_id = $1
+       ORDER BY event_time DESC`,
+      [userId]
+    );
+    return result.rows as SubscriptionEvent[];
+  } catch (error) {
+    console.error("Failed to get subscription events:", error);
+    return [];
   } finally {
     client.release();
   }
@@ -692,6 +834,16 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         plan: plan || null,
       });
 
+      await recordSubscriptionEvent(userId, {
+        stripeSubscriptionId: subscription.id,
+        eventType: "started",
+        status: subData.status,
+        plan: plan || null,
+        periodStart: subData.currentPeriodStart,
+        periodEnd: subData.currentPeriodEnd,
+        trialEnd: subData.trialEnd,
+      });
+
       try {
         const { notifySubscriptionEvent } = await import("./subscription-email");
         await notifySubscriptionEvent(userId, "subscription_activated", {
@@ -721,6 +873,27 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         ...subData,
         ...(detectedPlan ? { plan: detectedPlan } : {}),
       });
+
+      if (prevData?.cancel_at_period_end === false && subscription.cancel_at_period_end) {
+        await recordSubscriptionEvent(userId, {
+          stripeSubscriptionId: subscription.id,
+          eventType: "cancel_scheduled",
+          status: subData.status,
+          plan: detectedPlan ?? null,
+          periodStart: subData.currentPeriodStart,
+          periodEnd: subData.currentPeriodEnd,
+        });
+      }
+      if (prevData?.cancel_at_period_end === true && !subscription.cancel_at_period_end) {
+        await recordSubscriptionEvent(userId, {
+          stripeSubscriptionId: subscription.id,
+          eventType: "reactivated",
+          status: subData.status,
+          plan: detectedPlan ?? null,
+          periodStart: subData.currentPeriodStart,
+          periodEnd: subData.currentPeriodEnd,
+        });
+      }
 
       try {
         const { notifySubscriptionEvent } = await import("./subscription-email");
@@ -760,6 +933,14 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         status: "canceled",
         cancelAtPeriodEnd: false,
       });
+
+      await recordSubscriptionEvent(userId, {
+        stripeSubscriptionId: subscription.id,
+        eventType: "canceled",
+        status: "canceled",
+        periodStart: subData.currentPeriodStart,
+        periodEnd: subData.currentPeriodEnd,
+      });
       break;
     }
     case "invoice.paid": {
@@ -786,6 +967,14 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
       });
 
       if (invoice.billing_reason === "subscription_cycle") {
+        await recordSubscriptionEvent(userId, {
+          stripeSubscriptionId: subscription.id,
+          eventType: "renewed",
+          status: subData.status,
+          plan: getPlanFromSubscription(subscription),
+          periodStart: subData.currentPeriodStart,
+          periodEnd: subData.currentPeriodEnd,
+        });
         try {
           const { notifySubscriptionEvent, notifyPaymentReceipt } = await import("./subscription-email");
           const record = await getSubscriptionRecord(userId);
@@ -834,6 +1023,14 @@ export async function handleWebhookEvent(event: Stripe.Event): Promise<void> {
         stripeSubscriptionId: subscription.id,
         ...subData,
         status: "past_due",
+      });
+
+      await recordSubscriptionEvent(userId, {
+        stripeSubscriptionId: subscription.id,
+        eventType: "past_due",
+        status: "past_due",
+        periodStart: subData.currentPeriodStart,
+        periodEnd: subData.currentPeriodEnd,
       });
 
       try {

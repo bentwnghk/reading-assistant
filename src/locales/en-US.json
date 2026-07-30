@@ -2672,7 +2672,25 @@
       "userEmail": "Email",
       "userRole": "Role",
       "firstAccessed": "First Accessed",
-      "noSeatUsers": "No users have consumed seats in this period"
+      "noSeatUsers": "No users have consumed seats in this period",
+      "historyToggle": "Show subscription history",
+      "subscriberSince": "Subscriber since",
+      "totalTenure": "Total tenure",
+      "billingPeriods": "Billing periods",
+      "noHistory": "No subscription history recorded yet",
+      "seatsCount": "{{count}} seats",
+      "tenureYM": "{{years}} yr {{months}} mo",
+      "tenureY": "{{years}} yr(s)",
+      "tenureM": "{{months}} mo(s)",
+      "tenureD": "{{days}} day(s)",
+      "eventType": {
+        "started": "Subscription started",
+        "renewed": "Renewed",
+        "cancel_scheduled": "Cancellation scheduled",
+        "reactivated": "Reactivated",
+        "canceled": "Subscription canceled",
+        "past_due": "Payment failed"
+      }
     }
   },
   "schoolSubscription": {

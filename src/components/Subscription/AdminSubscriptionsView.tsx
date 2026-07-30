@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { Fragment, useState, useEffect, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ChevronLeft, ChevronRight, User, School } from "lucide-react"
+import { Loader2, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronRightIcon, User, School } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AdminSchoolSubscriptionsView from "./AdminSchoolSubscriptionsView"
+import SubscriptionHistoryTimeline, {
+  type HistoryEvent,
+} from "./SubscriptionHistoryTimeline"
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
@@ -79,6 +82,9 @@ function PersonalSubscriptionsView() {
   const [statusFilter, setStatusFilter] = useState("")
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null)
+  const [eventsByUser, setEventsByUser] = useState<Record<string, HistoryEvent[]>>({})
+  const [eventsLoadingUser, setEventsLoadingUser] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -113,6 +119,28 @@ function PersonalSubscriptionsView() {
   function handleStatusFilter(value: string) {
     setStatusFilter(value === "all" ? "" : value)
     setPage(1)
+  }
+
+  async function toggleExpand(userId: string) {
+    if (expandedUserId === userId) {
+      setExpandedUserId(null)
+      return
+    }
+    setExpandedUserId(userId)
+    if (!eventsByUser[userId]) {
+      setEventsLoadingUser(userId)
+      try {
+        const res = await fetch(`/api/admin/subscriptions/events?userId=${encodeURIComponent(userId)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setEventsByUser((prev) => ({ ...prev, [userId]: data.events || [] }))
+        }
+      } catch (error) {
+        console.error("Failed to fetch subscription events:", error)
+      } finally {
+        setEventsLoadingUser(null)
+      }
+    }
   }
 
   return (
@@ -183,48 +211,79 @@ function PersonalSubscriptionsView() {
                   </TableCell>
                 </TableRow>
               ) : (
-                subscriptions.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium text-sm">{sub.user_name || "-"}</div>
-                        <div className="text-xs text-muted-foreground">{sub.user_email || "-"}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {sub.plan ? (
-                        <Badge variant="secondary" className="text-xs">
-                          {t(`subscription.${sub.plan}`)}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
+                subscriptions.map((sub) => {
+                  const isOpen = expandedUserId === sub.user_id
+                  return (
+                    <Fragment key={sub.id}>
+                      <TableRow className={isOpen ? "bg-muted/40" : undefined}>
+                        <TableCell>
+                          <button
+                            type="button"
+                            className="flex w-full items-start gap-2 text-left"
+                            onClick={() => toggleExpand(sub.user_id)}
+                          >
+                            {isOpen ? (
+                              <ChevronDown className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                            ) : (
+                              <ChevronRightIcon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                            )}
+                            <span>
+                              <span className="block font-medium text-sm">{sub.user_name || "-"}</span>
+                              <span className="block text-xs text-muted-foreground">{sub.user_email || "-"}</span>
+                            </span>
+                          </button>
+                        </TableCell>
+                        <TableCell>
+                          {sub.plan ? (
+                            <Badge variant="secondary" className="text-xs">
+                              {t(`subscription.${sub.plan}`)}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`text-xs ${STATUS_COLORS[sub.status] || ""}`}>
+                            {t(`subscription.status.${sub.status}`)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDate(sub.current_period_start, i18n.language)}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDate(sub.current_period_end, i18n.language)}
+                        </TableCell>
+                        <TableCell>
+                          {sub.cancel_at_period_end ? (
+                            <Badge variant="outline" className="text-xs text-orange-600">
+                              {t("subscription.admin.yes")}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">{t("subscription.admin.no")}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDate(sub.created_at, i18n.language)}
+                        </TableCell>
+                      </TableRow>
+                      {isOpen && (
+                        <TableRow className="bg-muted/30 hover:bg-muted/30">
+                          <TableCell colSpan={7} className="p-4">
+                            {eventsLoadingUser === sub.user_id ? (
+                              <div className="flex items-center justify-center py-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                              </div>
+                            ) : (
+                              <SubscriptionHistoryTimeline
+                                events={eventsByUser[sub.user_id] || []}
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`text-xs ${STATUS_COLORS[sub.status] || ""}`}>
-                        {t(`subscription.status.${sub.status}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(sub.current_period_start, i18n.language)}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(sub.current_period_end, i18n.language)}
-                    </TableCell>
-                    <TableCell>
-                      {sub.cancel_at_period_end ? (
-                        <Badge variant="outline" className="text-xs text-orange-600">
-                          {t("subscription.admin.yes")}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">{t("subscription.admin.no")}</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDate(sub.created_at, i18n.language)}
-                    </TableCell>
-                  </TableRow>
-                ))
+                    </Fragment>
+                  )
+                })
               )}
             </TableBody>
           </Table>

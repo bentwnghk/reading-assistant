@@ -5,6 +5,7 @@ import {
   ensureSchoolStripePrices,
   type SubscriptionPlan,
   type SubscriptionStatus,
+  type SubscriptionEventType,
   getStripe,
   getAppUrl,
 } from "./subscription";
@@ -24,6 +25,20 @@ export interface SchoolSubscriptionRecord {
   trial_end: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface SchoolSubscriptionEvent {
+  id: string;
+  school_id: string;
+  stripe_subscription_id: string | null;
+  event_type: SubscriptionEventType;
+  status: SubscriptionStatus | null;
+  plan: SubscriptionPlan | null;
+  quantity: number | null;
+  period_start: string | null;
+  period_end: string | null;
+  trial_end: string | null;
+  event_time: string;
 }
 
 export interface SchoolSubscriptionStatusResponse {
@@ -112,11 +127,131 @@ export async function ensureSchoolSubscriptionTables(): Promise<boolean> {
       CREATE INDEX IF NOT EXISTS idx_school_subscription_usage_user ON school_subscription_usage(user_id)
     `);
 
+    await ensureSchoolSubscriptionEventsTable(client);
     schoolTableEnsured = true;
     return true;
   } catch (error) {
     console.error("Failed to ensure school subscription tables:", error);
     return false;
+  } finally {
+    client.release();
+  }
+}
+
+let schoolEventsTableEnsured = false;
+
+async function ensureSchoolSubscriptionEventsTable(
+  existingClient?: import("pg").PoolClient
+): Promise<void> {
+  if (schoolEventsTableEnsured) return;
+  const run = async (client: import("pg").PoolClient) => {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS school_subscription_events (
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+        school_id TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+        stripe_subscription_id TEXT,
+        event_type TEXT NOT NULL,
+        status TEXT,
+        plan TEXT,
+        quantity INTEGER,
+        period_start TIMESTAMP WITH TIME ZONE,
+        period_end TIMESTAMP WITH TIME ZONE,
+        trial_end TIMESTAMP WITH TIME ZONE,
+        event_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+      )
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_school_subscription_events_school_time
+        ON school_subscription_events(school_id, event_time DESC)
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_school_subscription_events_sub_time
+        ON school_subscription_events(stripe_subscription_id, event_time DESC)
+    `);
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'school_subscription_events_dedup_key'
+             AND conrelid = 'school_subscription_events'::regclass
+        ) THEN
+          ALTER TABLE school_subscription_events
+            ADD CONSTRAINT school_subscription_events_dedup_key
+              UNIQUE (stripe_subscription_id, event_type, period_start) NULLS NOT DISTINCT;
+        END IF;
+      END $$
+    `);
+  };
+
+  if (existingClient) {
+    await run(existingClient);
+  } else {
+    const client = await getClient();
+    try {
+      await run(client);
+    } finally {
+      client.release();
+    }
+  }
+  schoolEventsTableEnsured = true;
+}
+
+async function recordSchoolSubscriptionEvent(
+  schoolId: string,
+  data: {
+    stripeSubscriptionId?: string | null;
+    eventType: SubscriptionEventType;
+    status?: SubscriptionStatus | null;
+    plan?: SubscriptionPlan | null;
+    quantity?: number | null;
+    periodStart?: string | null;
+    periodEnd?: string | null;
+    trialEnd?: string | null;
+  }
+): Promise<void> {
+  const client = await getClient();
+  try {
+    await client.query(
+      `INSERT INTO school_subscription_events
+        (school_id, stripe_subscription_id, event_type, status, plan, quantity,
+         period_start, period_end, trial_end)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (stripe_subscription_id, event_type, period_start) DO NOTHING`,
+      [
+        schoolId,
+        data.stripeSubscriptionId ?? null,
+        data.eventType,
+        data.status ?? null,
+        data.plan ?? null,
+        data.quantity ?? null,
+        data.periodStart ?? null,
+        data.periodEnd ?? null,
+        data.trialEnd ?? null,
+      ]
+    );
+  } catch (error) {
+    console.error("Failed to record school subscription event:", error);
+  } finally {
+    client.release();
+  }
+}
+
+export async function getSchoolSubscriptionEvents(
+  schoolId: string
+): Promise<SchoolSubscriptionEvent[]> {
+  await ensureSchoolSubscriptionTables();
+  const client = await getClient();
+  try {
+    const result = await client.query(
+      `SELECT * FROM school_subscription_events
+       WHERE school_id = $1
+       ORDER BY event_time DESC`,
+      [schoolId]
+    );
+    return result.rows as SchoolSubscriptionEvent[];
+  } catch (error) {
+    console.error("Failed to get school subscription events:", error);
+    return [];
   } finally {
     client.release();
   }
@@ -691,6 +826,17 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
         quantity: subData.quantity,
       });
 
+      await recordSchoolSubscriptionEvent(schoolId, {
+        stripeSubscriptionId: subscription.id,
+        eventType: "started",
+        status: subData.status,
+        plan: plan || null,
+        quantity: subData.quantity,
+        periodStart: subData.currentPeriodStart,
+        periodEnd: subData.currentPeriodEnd,
+        trialEnd: subData.trialEnd,
+      });
+
       // The admin always consumes one seat — record their usage at activation time.
       await recordSeatUsage(adminUserId, schoolId).catch(() => {});
 
@@ -741,6 +887,29 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
         ...subData,
         ...(detectedPlan ? { plan: detectedPlan } : {}),
       });
+
+      if (prevData?.cancel_at_period_end === false && subscription.cancel_at_period_end) {
+        await recordSchoolSubscriptionEvent(schoolId, {
+          stripeSubscriptionId: subscription.id,
+          eventType: "cancel_scheduled",
+          status: subData.status,
+          plan: detectedPlan ?? null,
+          quantity: subData.quantity,
+          periodStart: subData.currentPeriodStart,
+          periodEnd: subData.currentPeriodEnd,
+        });
+      }
+      if (prevData?.cancel_at_period_end === true && !subscription.cancel_at_period_end) {
+        await recordSchoolSubscriptionEvent(schoolId, {
+          stripeSubscriptionId: subscription.id,
+          eventType: "reactivated",
+          status: subData.status,
+          plan: detectedPlan ?? null,
+          quantity: subData.quantity,
+          periodStart: subData.currentPeriodStart,
+          periodEnd: subData.currentPeriodEnd,
+        });
+      }
 
       try {
         const { notifySubscriptionEvent, getSchoolContext } = await import("./subscription-email");
@@ -799,6 +968,15 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
         status: "canceled",
         cancelAtPeriodEnd: false,
       });
+
+      await recordSchoolSubscriptionEvent(schoolId, {
+        stripeSubscriptionId: subscription.id,
+        eventType: "canceled",
+        status: "canceled",
+        quantity: subData.quantity,
+        periodStart: subData.currentPeriodStart,
+        periodEnd: subData.currentPeriodEnd,
+      });
       break;
     }
     case "invoice.paid": {
@@ -840,6 +1018,15 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
       });
 
       if (invoice.billing_reason === "subscription_cycle") {
+        await recordSchoolSubscriptionEvent(schoolId, {
+          stripeSubscriptionId: subscription.id,
+          eventType: "renewed",
+          status: subData.status,
+          plan: getPlanFromSubscription(subscription),
+          quantity: subData.quantity,
+          periodStart: subData.currentPeriodStart,
+          periodEnd: subData.currentPeriodEnd,
+        });
         try {
           const { notifySubscriptionEvent, notifyPaymentReceipt, getSchoolContext } = await import("./subscription-email");
           const record = await getSchoolSubscriptionRecord(schoolId);
@@ -907,6 +1094,15 @@ export async function handleSchoolWebhookEvent(event: Stripe.Event): Promise<voi
         stripeSubscriptionId: subscription.id,
         ...subData,
         status: "past_due",
+      });
+
+      await recordSchoolSubscriptionEvent(schoolId, {
+        stripeSubscriptionId: subscription.id,
+        eventType: "past_due",
+        status: "past_due",
+        quantity: subData.quantity,
+        periodStart: subData.currentPeriodStart,
+        periodEnd: subData.currentPeriodEnd,
       });
 
       try {

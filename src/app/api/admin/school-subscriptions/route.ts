@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { ensureSchoolSubscriptionTables } from "@/lib/school-subscription"
 import { getClient } from "@/lib/db"
+import { getSchoolForUser } from "@/lib/users"
 import { NextResponse } from "next/server"
 
 export interface AdminSchoolSubscriptionRow {
@@ -56,12 +57,20 @@ export async function GET(request: Request) {
   const statusFilter = searchParams.get("status") || ""
   const search = searchParams.get("search") || ""
 
+  // School admins are scoped to their own school; super-admins see all.
+  const adminSchoolId =
+    role === "admin" ? await getSchoolForUser(session.user.id) : null
+
   const client = await getClient()
   try {
     const conditions: string[] = []
     const params: unknown[] = []
     let paramIdx = 1
 
+    if (role === "admin") {
+      conditions.push(`ss.school_id = $${paramIdx++}`)
+      params.push(adminSchoolId)
+    }
     if (statusFilter) {
       conditions.push(`ss.status = $${paramIdx++}`)
       params.push(statusFilter)
@@ -117,7 +126,9 @@ export async function GET(request: Request) {
          COUNT(*) FILTER (WHERE plan = 'yearly') as yearly_count,
          COALESCE(SUM(quantity), 0) as total_seats,
          COALESCE(SUM(quantity) FILTER (WHERE status = 'active' OR status = 'trialing'), 0) as active_seats
-       FROM school_subscriptions`
+       FROM school_subscriptions
+       ${role === "admin" ? "WHERE school_id = $1" : ""}`,
+      role === "admin" ? [adminSchoolId] : []
     )
 
     return NextResponse.json({

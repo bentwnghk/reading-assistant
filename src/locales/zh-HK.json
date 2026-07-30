@@ -2699,7 +2699,25 @@
       "userEmail": "電郵",
       "userRole": "角色",
       "firstAccessed": "首次存取",
-      "noSeatUsers": "此期間沒有用戶消耗席位"
+      "noSeatUsers": "此期間沒有用戶消耗席位",
+      "historyToggle": "顯示訂閱歷史",
+      "subscriberSince": "訂閱起始",
+      "totalTenure": "訂閱時長",
+      "billingPeriods": "計費週期",
+      "noHistory": "尚無訂閱歷史記錄",
+      "seatsCount": "{{count}} 席位",
+      "tenureYM": "{{years}} 年 {{months}} 月",
+      "tenureY": "{{years}} 年",
+      "tenureM": "{{months}} 個月",
+      "tenureD": "{{days}} 天",
+      "eventType": {
+        "started": "訂閱開始",
+        "renewed": "已續訂",
+        "cancel_scheduled": "已排程取消",
+        "reactivated": "已重新啟用",
+        "canceled": "訂閱已取消",
+        "past_due": "付款失敗"
+      }
     }
   },
   "schoolSubscription": {
