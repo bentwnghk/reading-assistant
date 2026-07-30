@@ -180,7 +180,9 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
 
       if (newQueue.length === 0) {
         setIsReviewComplete(true);
-        incrementFlashcardReviewCount();
+        if (!disableSessionGlossary) {
+          incrementFlashcardReviewCount();
+        }
         if (onComplete) {
           const results = Array.from(flashcardResultsRef.current.entries()).map(
             ([word, data]) => ({ word, correct: data.correct, rating: data.rating, attempts: data.attempts })
@@ -190,7 +192,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         }
       }
     },
-    [currentEntry, reviewQueue, effectiveId, totalOriginal, incrementFlashcardReviewCount, onWordAction, onComplete, srsCounts]
+    [currentEntry, reviewQueue, effectiveId, totalOriginal, incrementFlashcardReviewCount, onWordAction, onComplete, srsCounts, disableSessionGlossary]
   );
 
   // ── TTS ──────────────────────────────────────────────────────────────────
