@@ -683,7 +683,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                       title={`${t("userManagement.studentData.viewGlossary")}: ${session.docTitle}`}
                       disabled={session.glossaryCount === 0}
                     >
-                      <Badge variant="outline" className={session.glossaryCount > 0 ? "cursor-pointer hover:bg-accent text-blue-600 dark:text-blue-400" : ""}>
+                      <Badge variant="outline" className={session.glossaryCount > 0 ? "cursor-pointer text-blue-600 dark:text-blue-400" : ""}>
                         {session.glossaryCount}
                       </Badge>
                     </button>
@@ -712,7 +712,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         className="inline-flex"
                         title={`${t("userManagement.studentData.viewVocabQuiz")}: ${session.docTitle}`}
                       >
-                        <Badge variant={session.vocabularyQuizScore! >= 70 ? "default" : "destructive"} className="cursor-pointer hover:bg-accent">
+                        <Badge variant={session.vocabularyQuizScore! >= 70 ? "default" : "destructive"} className="cursor-pointer">
                           {session.vocabularyQuizScore}%
                         </Badge>
                       </button>
@@ -728,7 +728,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         className="inline-flex"
                         title={`${t("userManagement.studentData.viewGrammarQuiz")}: ${session.docTitle}`}
                       >
-                        <Badge variant={(session.grammarQuizScore || 0) >= 70 ? "default" : "destructive"} className="cursor-pointer hover:bg-accent">
+                        <Badge variant={(session.grammarQuizScore || 0) >= 70 ? "default" : "destructive"} className="cursor-pointer">
                           {session.grammarQuizScore}%
                         </Badge>
                       </button>
@@ -762,7 +762,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         className="inline-flex"
                         title={`${t("userManagement.studentData.viewReadingTest")}: ${session.docTitle}`}
                       >
-                        <Badge variant={session.testScore >= 70 ? "default" : "destructive"} className="cursor-pointer hover:bg-accent">
+                        <Badge variant={session.testScore >= 70 ? "default" : "destructive"} className="cursor-pointer">
                           {session.testScore}%
                         </Badge>
                       </button>
