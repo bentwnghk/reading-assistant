@@ -447,6 +447,7 @@ interface ReadingSession {
   testScore?: number;
   testCompleted?: boolean;
   vocabularyQuizScore?: number;
+  vocabularyQuiz?: VocabularyQuizQuestion[];
   spellingGameBestScore?: number;
   flashcardReviewDates?: number[];
   summaryGeneratedAt?: number;

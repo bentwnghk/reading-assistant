@@ -46,8 +46,9 @@ export async function createReadingSession(
         grammar_error_challenges,
         grammar_scramble_challenges, grammar_workshop_challenges,
         grammar_game_questions,
-        created_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71)
+        created_at,
+        vocabulary_quiz
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72)
       ON CONFLICT (id) DO UPDATE SET
         doc_title = EXCLUDED.doc_title,
         source = EXCLUDED.source,
@@ -116,7 +117,8 @@ export async function createReadingSession(
         grammar_error_challenges = EXCLUDED.grammar_error_challenges,
         grammar_scramble_challenges = EXCLUDED.grammar_scramble_challenges,
         grammar_workshop_challenges = EXCLUDED.grammar_workshop_challenges,
-        grammar_game_questions = EXCLUDED.grammar_game_questions`,
+        grammar_game_questions = EXCLUDED.grammar_game_questions,
+        vocabulary_quiz = EXCLUDED.vocabulary_quiz`,
       [
         sessionData.id,
         userId,
@@ -189,6 +191,7 @@ export async function createReadingSession(
         JSON.stringify(sessionData.grammarWorkshopChallenges ?? []),
         JSON.stringify(sessionData.grammarGameQuestions ?? []),
         new Date(sessionData.createdAt || Date.now()),
+        JSON.stringify(sessionData.vocabularyQuiz ?? []),
       ]
     )
     
@@ -262,6 +265,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       testShowChinese: row.test_show_chinese,
       testMode: row.test_mode,
       vocabularyQuizScore: row.vocabulary_quiz_score,
+      vocabularyQuiz: row.vocabulary_quiz ?? [],
       spellingGameBestScore: row.spelling_game_best_score,
       spellingGameAccuracy: row.spelling_game_accuracy ?? 0,
       testsCompleted: row.tests_completed ?? 0,
@@ -396,6 +400,7 @@ export async function getReadingSession(
       testShowChinese: row.test_show_chinese,
       testMode: row.test_mode,
       vocabularyQuizScore: row.vocabulary_quiz_score,
+      vocabularyQuiz: row.vocabulary_quiz ?? [],
       spellingGameBestScore: row.spelling_game_best_score,
       spellingGameAccuracy: row.spelling_game_accuracy ?? 0,
       testsCompleted: row.tests_completed ?? 0,
@@ -501,6 +506,7 @@ export async function updateReadingSession(
       testShowChinese: "test_show_chinese",
       testMode: "test_mode",
       vocabularyQuizScore: "vocabulary_quiz_score",
+      vocabularyQuiz: "vocabulary_quiz",
       spellingGameBestScore: "spelling_game_best_score",
       spellingGameAccuracy: "spelling_game_accuracy",
       testsCompleted: "tests_completed",
@@ -566,8 +572,8 @@ export async function updateReadingSession(
              "glossaryRatings", "chatHistory", "originalDifficulty",
              "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates",
              "grammarTopics", "grammarQuiz", "grammarErrorChallenges",
-             "grammarScrambleChallenges", "grammarWorkshopChallenges",
-             "grammarGameQuestions", "generatedTextMeta"].includes(key)) {
+              "grammarScrambleChallenges", "grammarWorkshopChallenges",
+              "grammarGameQuestions", "generatedTextMeta", "vocabularyQuiz"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else if (key === "grammarGameCompletedAt") {
           values.push(value ? new Date(value as number) : null)

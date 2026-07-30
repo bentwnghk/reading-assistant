@@ -226,6 +226,7 @@ export interface ReadingStore {
   testMode: ReadingTestMode;
   testsCompleted: number;
   vocabularyQuizScore: number;
+  vocabularyQuiz: VocabularyQuizQuestion[];
   vocabQuizzesCompleted: number;
   spellingGameBestScore: number;
   spellingGameAccuracy: number;
@@ -305,6 +306,7 @@ interface ReadingActions {
   setTestShowChinese: (show: boolean) => void;
   setTestMode: (mode: ReadingTestMode) => void;
   setVocabularyQuizScore: (score: number) => void;
+  setVocabularyQuiz: (questions: VocabularyQuizQuestion[]) => void;
   setSpellingGameBestScore: (score: number, accuracy: number) => void;
   incrementFlashcardReviewCount: () => void; // appends Date.now() to flashcardReviewDates
   addChatMessage: (message: ChatMessage) => void;
@@ -391,6 +393,7 @@ const defaultValues: ReadingStore = {
   testMode: "all-at-once",
   testsCompleted: 0,
   vocabularyQuizScore: 0,
+  vocabularyQuiz: [],
   vocabQuizzesCompleted: 0,
     spellingGameBestScore: 0,
     spellingGameAccuracy: 0,
@@ -1088,6 +1091,17 @@ export const useReadingStore = create(
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setVocabularyQuiz: (questions) =>
+        set((state) => {
+          const newState = {
+            vocabularyQuiz: questions,
+            updatedAt: Date.now(),
+          };
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }

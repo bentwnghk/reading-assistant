@@ -84,6 +84,7 @@ export interface StudentSessionData {
   analyzedSentences?: Record<string, SentenceAnalysis>
   adaptedText?: string
   simplifiedText?: string
+  vocabularyQuiz?: VocabularyQuizQuestion[]
   progress: number
   createdAt: number
   updatedAt: number
@@ -1257,6 +1258,7 @@ export async function getStudentSessionDetail(sessionId: string): Promise<Studen
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.simplified_text,
+        rs.vocabulary_quiz,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
        FROM reading_sessions rs
@@ -1297,6 +1299,7 @@ export async function getStudentSessionDetail(sessionId: string): Promise<Studen
       analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
       adaptedText: row.adapted_text || undefined,
       simplifiedText: row.simplified_text || undefined,
+      vocabularyQuiz: Array.isArray(row.vocabulary_quiz) ? row.vocabulary_quiz : [],
       progress: 0,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),

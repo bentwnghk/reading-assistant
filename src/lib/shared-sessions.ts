@@ -58,6 +58,7 @@ function stripUserData(sessionData: ReadingStore): Record<string, unknown> {
     testEarnedPoints: 0,
     testsCompleted: 0,
     vocabularyQuizScore: 0,
+    vocabularyQuiz: [],
     vocabQuizzesCompleted: 0,
     spellingGameBestScore: 0,
     spellingGameAccuracy: 0,

@@ -279,7 +279,7 @@ function VocabQuizResultScreen({
 
 function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, disableSessionGlossary }: VocabularyQuizProps) {
   const { t } = useTranslation();
-  const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, glossaryRatings, backup } = useReadingStore();
+  const { id, docTitle, extractedText, vocabularyQuizScore, setVocabularyQuizScore, setVocabularyQuiz, glossaryRatings, backup } = useReadingStore();
   const effectiveId = disableSessionGlossary ? undefined : id;
   const { update, save } = useHistoryStore();
   const { data: session } = useSession();
@@ -340,6 +340,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
       ).length;
       const percentage = Math.round((correct / questions.length) * 100);
       setVocabularyQuizScore(percentage);
+      setVocabularyQuiz(questions.map((q) => ({ ...q, userAnswer: answers[q.id] })));
       setQuizState("completed");
       logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
 

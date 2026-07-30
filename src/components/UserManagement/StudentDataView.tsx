@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked } from "lucide-react"
+import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -97,6 +97,12 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     glossary?: GlossaryEntry[]
   } | null>(null)
   const [textTab, setTextTab] = useState<string>("original")
+  const [viewingQuiz, setViewingQuiz] = useState<{
+    title: string
+    student?: string
+    score?: number
+    questions?: VocabularyQuizQuestion[]
+  } | null>(null)
 
   const _isTeacher = !isSuperAdmin && !isAdmin
 
@@ -369,6 +375,25 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     }
   }, [t])
 
+  const handleViewQuiz = useCallback(async (session: SessionWithSchool) => {
+    if ((session.vocabularyQuizScore ?? 0) === 0) return
+    setViewingQuiz({ title: session.docTitle, student: session.userName || undefined, score: session.vocabularyQuizScore })
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/detail`)
+      if (res.ok) {
+        const detail: StudentSessionData = await res.json()
+        setViewingQuiz({
+          title: session.docTitle,
+          student: session.userName || undefined,
+          score: session.vocabularyQuizScore,
+          questions: detail.vocabularyQuiz || [],
+        })
+      }
+    } catch {
+      toast.error(t("userManagement.loadFailed"))
+    }
+  }, [t])
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -610,9 +635,16 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </TableCell>
                   <TableCell className="text-center">
                     {(session.vocabularyQuizScore ?? 0) > 0 ? (
-                      <Badge variant={session.vocabularyQuizScore! >= 70 ? "default" : "destructive"}>
-                        {session.vocabularyQuizScore}%
-                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleViewQuiz(session)}
+                        className="inline-flex"
+                        title={`${t("userManagement.studentData.viewVocabQuiz")}: ${session.docTitle}`}
+                      >
+                        <Badge variant={session.vocabularyQuizScore! >= 70 ? "default" : "destructive"} className="cursor-pointer hover:bg-accent text-blue-600 dark:text-blue-400">
+                          {session.vocabularyQuizScore}%
+                        </Badge>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -810,6 +842,82 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 {t("userManagement.studentData.noGlossary")}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingQuiz} onOpenChange={(open) => { if (!open) setViewingQuiz(null) }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <ClipboardList className="h-5 w-5 shrink-0" />
+              <span className="truncate">{viewingQuiz?.title}</span>
+              {viewingQuiz?.score !== undefined && (
+                <Badge variant={viewingQuiz.score >= 70 ? "default" : "destructive"} className="ml-auto">
+                  {viewingQuiz.score}%
+                </Badge>
+              )}
+            </DialogTitle>
+            {viewingQuiz?.student && (
+              <DialogDescription>{viewingQuiz.student}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
+            {viewingQuiz?.questions === undefined ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : viewingQuiz.questions.length > 0 ? (
+              viewingQuiz.questions.map((q, idx) => {
+                const isCorrect = q.userAnswer === q.correctAnswer
+                return (
+                  <div key={q.id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{q.question}</p>
+                        <div className="mt-2 space-y-1">
+                          {q.options.map((opt) => {
+                            const isUserAnswer = opt === q.userAnswer
+                            const isCorrectAnswer = opt === q.correctAnswer
+                            return (
+                              <div
+                                key={opt}
+                                className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${
+                                  isCorrectAnswer
+                                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium"
+                                    : isUserAnswer
+                                      ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                                      : "text-muted-foreground"
+                                }`}
+                              >
+                                {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
+                                {isUserAnswer && !isCorrectAnswer && <X className="h-3 w-3 shrink-0" />}
+                                <span>{opt}</span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                        {q.userAnswer === undefined && (
+                          <p className="text-xs text-muted-foreground italic mt-1">{t("userManagement.studentData.noAnswer")}</p>
+                        )}
+                      </div>
+                      <div className="shrink-0">
+                        {isCorrect ? (
+                          <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-500 dark:text-red-400" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {t("userManagement.studentData.noVocabQuiz")}
               </div>
             )}
           </div>
