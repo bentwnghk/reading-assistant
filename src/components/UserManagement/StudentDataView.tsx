@@ -34,6 +34,27 @@ import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
 import { highlightTextAndSentences } from "@/utils/highlight"
 
+function isGrammarAnswerCorrect(q: GrammarQuizQuestion): boolean {
+  if (q.type === "rewrite" || q.type === "fill-in") {
+    return (q.earnedPoints ?? 0) >= q.points
+  }
+  const ua = q.userAnswer?.toLowerCase().trim()
+  const ca = q.correctAnswer.toLowerCase().trim()
+  return ua === ca || ua === ca.charAt(0)
+}
+
+function isReadingTestAnswerCorrect(q: ReadingTestQuestion): boolean {
+  if (q.type === "short-answer") {
+    return (q.earnedPoints ?? 0) >= q.points
+  }
+  const ua = q.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-")
+  const ca = q.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-")
+  if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing") {
+    return ua === ca || ua === ca.charAt(0)
+  }
+  return ua === ca
+}
+
 interface StudentDataViewProps {
   isSuperAdmin: boolean
   isAdmin: boolean
@@ -1012,7 +1033,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             ) : viewingGrammarQuiz.questions.length > 0 ? (
               viewingGrammarQuiz.questions.map((q, idx) => {
                 const hasOptions = q.options && q.options.length > 0
-                const isCorrect = q.userAnswer === q.correctAnswer
+                const isCorrect = isGrammarAnswerCorrect(q)
                 return (
                   <div key={q.id} className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-start gap-2">
@@ -1085,7 +1106,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             ) : viewingReadingTest.questions.length > 0 ? (
               viewingReadingTest.questions.map((q, idx) => {
                 const hasOptions = q.options && q.options.length > 0
-                const isCorrect = q.userAnswer === q.correctAnswer
+                const isCorrect = isReadingTestAnswerCorrect(q)
                 return (
                   <div key={q.id} className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-start gap-2">
