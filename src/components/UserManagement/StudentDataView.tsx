@@ -83,15 +83,19 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const PAGE_SIZE = 20
   const [viewingText, setViewingText] = useState<{
     title: string
-    text: string
     student?: string
-    highlightedWords: string[]
-    analyzedSentences: Record<string, SentenceAnalysis>
-    glossary: GlossaryEntry[]
+    text?: string
+    highlightedWords?: string[]
+    analyzedSentences?: Record<string, SentenceAnalysis>
+    glossary?: GlossaryEntry[]
     adaptedText?: string
     simplifiedText?: string
   } | null>(null)
-  const [viewingGlossary, setViewingGlossary] = useState<{ title: string; glossary: GlossaryEntry[]; student?: string } | null>(null)
+  const [viewingGlossary, setViewingGlossary] = useState<{
+    title: string
+    student?: string
+    glossary?: GlossaryEntry[]
+  } | null>(null)
   const [textTab, setTextTab] = useState<string>("original")
 
   const _isTeacher = !isSuperAdmin && !isAdmin
@@ -305,15 +309,15 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   }, [classes, selectedSchoolId, isSuperAdmin])
 
   const highlightedTextHtml = useMemo(() => {
-    if (!viewingText) return ""
+    if (!viewingText?.text) return ""
     const glossaryMap = new Map<string, GlossaryEntry>()
-    for (const entry of viewingText.glossary) {
+    for (const entry of viewingText.glossary || []) {
       glossaryMap.set(entry.word.toLowerCase(), entry)
     }
     const { html } = highlightTextAndSentences(
       viewingText.text,
-      viewingText.highlightedWords,
-      viewingText.analyzedSentences,
+      viewingText.highlightedWords || [],
+      viewingText.analyzedSentences || {},
       glossaryMap
     )
     return html
@@ -321,8 +325,49 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
   const hasHighlights = useMemo(() => {
     if (!viewingText) return false
-    return viewingText.highlightedWords.length > 0 || Object.keys(viewingText.analyzedSentences).length > 0
+    return (viewingText.highlightedWords?.length ?? 0) > 0 || Object.keys(viewingText.analyzedSentences || {}).length > 0
   }, [viewingText])
+
+  const handleViewText = useCallback(async (session: SessionWithSchool) => {
+    setTextTab("original")
+    setViewingText({ title: session.docTitle, student: session.userName || undefined })
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/detail`)
+      if (res.ok) {
+        const detail: StudentSessionData = await res.json()
+        setViewingText({
+          title: session.docTitle,
+          student: session.userName || undefined,
+          text: detail.extractedText,
+          highlightedWords: detail.highlightedWords,
+          analyzedSentences: detail.analyzedSentences,
+          glossary: detail.glossary,
+          adaptedText: detail.adaptedText,
+          simplifiedText: detail.simplifiedText,
+        })
+      }
+    } catch {
+      toast.error(t("userManagement.loadFailed"))
+    }
+  }, [t])
+
+  const handleViewGlossary = useCallback(async (session: SessionWithSchool) => {
+    if (session.glossaryCount === 0) return
+    setViewingGlossary({ title: session.docTitle, student: session.userName || undefined })
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/detail`)
+      if (res.ok) {
+        const detail: StudentSessionData = await res.json()
+        setViewingGlossary({
+          title: session.docTitle,
+          student: session.userName || undefined,
+          glossary: detail.glossary || [],
+        })
+      }
+    } catch {
+      toast.error(t("userManagement.loadFailed"))
+    }
+  }, [t])
 
   if (loading) {
     return (
@@ -522,19 +567,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   <TableCell>
                     <button
                       type="button"
-                      onClick={() => {
-                        setTextTab("original")
-                        setViewingText({
-                          title: session.docTitle,
-                          text: session.extractedText,
-                          student: session.userName || undefined,
-                          highlightedWords: session.highlightedWords,
-                          analyzedSentences: session.analyzedSentences,
-                          glossary: session.glossary,
-                          adaptedText: session.adaptedText,
-                          simplifiedText: session.simplifiedText,
-                        })
-                      }}
+                      onClick={() => handleViewText(session)}
                       className="block truncate max-w-xs text-left text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                       title={`${t("userManagement.studentData.viewReadingText")}: ${session.docTitle}`}
                     >
@@ -549,11 +582,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   <TableCell className="text-center">
                     <button
                       type="button"
-                      onClick={() => setViewingGlossary({
-                        title: session.docTitle,
-                        glossary: session.glossary,
-                        student: session.userName || undefined,
-                      })}
+                      onClick={() => handleViewGlossary(session)}
                       className="inline-flex"
                       title={`${t("userManagement.studentData.viewGlossary")}: ${session.docTitle}`}
                       disabled={session.glossaryCount === 0}
@@ -682,46 +711,54 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             )}
           </DialogHeader>
           <Tabs value={textTab} onValueChange={setTextTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, !!viewingText?.adaptedText, !!viewingText?.simplifiedText].filter(Boolean).length}, minmax(0, 1fr))` }}>
-              <TabsTrigger value="original">{t("reading.adaptedText.originalTab")}</TabsTrigger>
-              {viewingText?.adaptedText && (
-                <TabsTrigger value="adapted">{t("reading.adaptedText.adaptedTab")}</TabsTrigger>
-              )}
-              {viewingText?.simplifiedText && (
-                <TabsTrigger value="simplified">{t("reading.adaptedText.simplifiedTab")}</TabsTrigger>
-              )}
-            </TabsList>
-            <TabsContent value="original" className="flex-1 overflow-y-auto mt-2">
-              {hasHighlights && (
-                <div className="flex flex-wrap items-center gap-4 mb-3 text-xs text-muted-foreground pb-2 border-b">
-                  <span className="flex items-center gap-1">
-                    <mark className="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">&nbsp;</mark>
-                    {t("userManagement.studentData.legendVocabulary")}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="border-b-2 border-blue-500 dark:border-blue-400">&nbsp;&nbsp;</span>
-                    {t("userManagement.studentData.legendAnalyzedSentence")}
-                  </span>
-                </div>
-              )}
-              <div
-                className="whitespace-pre-wrap break-words text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: highlightedTextHtml || t("userManagement.studentData.noReadingText") }}
-              />
-            </TabsContent>
-            {viewingText?.adaptedText && (
-              <TabsContent value="adapted" className="flex-1 overflow-y-auto mt-2">
-                <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                  {viewingText.adaptedText}
-                </div>
-              </TabsContent>
-            )}
-            {viewingText?.simplifiedText && (
-              <TabsContent value="simplified" className="flex-1 overflow-y-auto mt-2">
-                <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                  {viewingText.simplifiedText}
-                </div>
-              </TabsContent>
+            {viewingText?.text === undefined ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : (
+              <>
+                <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, !!viewingText?.adaptedText, !!viewingText?.simplifiedText].filter(Boolean).length}, minmax(0, 1fr))` }}>
+                  <TabsTrigger value="original">{t("reading.adaptedText.originalTab")}</TabsTrigger>
+                  {viewingText?.adaptedText && (
+                    <TabsTrigger value="adapted">{t("reading.adaptedText.adaptedTab")}</TabsTrigger>
+                  )}
+                  {viewingText?.simplifiedText && (
+                    <TabsTrigger value="simplified">{t("reading.adaptedText.simplifiedTab")}</TabsTrigger>
+                  )}
+                </TabsList>
+                <TabsContent value="original" className="flex-1 overflow-y-auto mt-2">
+                  {hasHighlights && (
+                    <div className="flex flex-wrap items-center gap-4 mb-3 text-xs text-muted-foreground pb-2 border-b">
+                      <span className="flex items-center gap-1">
+                        <mark className="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">&nbsp;</mark>
+                        {t("userManagement.studentData.legendVocabulary")}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="border-b-2 border-blue-500 dark:border-blue-400">&nbsp;&nbsp;</span>
+                        {t("userManagement.studentData.legendAnalyzedSentence")}
+                      </span>
+                    </div>
+                  )}
+                  <div
+                    className="whitespace-pre-wrap break-words text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: highlightedTextHtml || t("userManagement.studentData.noReadingText") }}
+                  />
+                </TabsContent>
+                {viewingText?.adaptedText && (
+                  <TabsContent value="adapted" className="flex-1 overflow-y-auto mt-2">
+                    <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                      {viewingText.adaptedText}
+                    </div>
+                  </TabsContent>
+                )}
+                {viewingText?.simplifiedText && (
+                  <TabsContent value="simplified" className="flex-1 overflow-y-auto mt-2">
+                    <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                      {viewingText.simplifiedText}
+                    </div>
+                  </TabsContent>
+                )}
+              </>
             )}
           </Tabs>
         </DialogContent>
@@ -734,14 +771,18 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
               <BookMarked className="h-5 w-5 shrink-0" />
               <span className="truncate">{viewingGlossary?.title}</span>
             </DialogTitle>
-            {viewingGlossary?.student && (
+            {viewingGlossary?.student && viewingGlossary?.glossary && (
               <DialogDescription>
                 {viewingGlossary.student} — {viewingGlossary.glossary.length} {t("userManagement.studentData.vocabulary")}
               </DialogDescription>
             )}
           </DialogHeader>
           <div className="flex-1 overflow-auto mt-2">
-            {viewingGlossary && viewingGlossary.glossary.length > 0 ? (
+            {viewingGlossary?.glossary === undefined ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : viewingGlossary.glossary.length > 0 ? (
               <Table>
                 <TableHeader className="sticky top-0 bg-background">
                   <TableRow>

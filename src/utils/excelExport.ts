@@ -9,7 +9,7 @@ interface SessionWithSchool {
   userEmail?: string
   docTitle: string
   studentAge: number
-  extractedText: string
+  extractedText?: string
   summary?: string
   testScore?: number
   testCompleted?: boolean

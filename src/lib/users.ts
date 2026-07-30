@@ -67,7 +67,7 @@ export interface StudentSessionData {
   userEmail?: string
   docTitle: string
   studentAge: number
-  extractedText: string
+  extractedText?: string
   summary?: string
   testScore?: number
   testCompleted?: boolean
@@ -79,9 +79,9 @@ export interface StudentSessionData {
   grammarGameBestScore?: number
   grammarGameAccuracy?: number
   glossaryCount: number
-  glossary: GlossaryEntry[]
-  highlightedWords: string[]
-  analyzedSentences: Record<string, SentenceAnalysis>
+  glossary?: GlossaryEntry[]
+  highlightedWords?: string[]
+  analyzedSentences?: Record<string, SentenceAnalysis>
   adaptedText?: string
   simplifiedText?: string
   progress: number
@@ -1108,7 +1108,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
-        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.simplified_text, rs.mind_map,
+        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -1127,7 +1127,6 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       userEmail: row.user_email,
       docTitle: row.doc_title || row.extracted_text?.slice(0, 50) || 'Untitled',
       studentAge: row.student_age,
-      extractedText: row.extracted_text,
       summary: row.summary,
       testScore: row.test_score,
       testCompleted: row.test_completed,
@@ -1146,11 +1145,6 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       ),
       grammarGameAccuracy: row.grammar_game_accuracy || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
-      glossary: Array.isArray(row.glossary) ? row.glossary : [],
-      highlightedWords: Array.isArray(row.highlighted_words) ? row.highlighted_words : [],
-      analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
-      adaptedText: row.adapted_text || undefined,
-      simplifiedText: row.simplified_text || undefined,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
@@ -1176,7 +1170,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
-        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.simplified_text, rs.mind_map,
+        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -1194,7 +1188,6 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       userEmail: row.user_email,
       docTitle: row.doc_title || row.extracted_text?.slice(0, 50) || 'Untitled',
       studentAge: row.student_age,
-      extractedText: row.extracted_text,
       summary: row.summary,
       testScore: row.test_score,
       testCompleted: row.test_completed,
@@ -1213,15 +1206,101 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       ),
       grammarGameAccuracy: row.grammar_game_accuracy || 0,
       glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
+      progress: calculateProgress(row),
+      createdAt: new Date(row.created_at).getTime(),
+      updatedAt: new Date(row.updated_at).getTime(),
+    }))
+  } finally {
+    client.release()
+  }
+}
+
+export async function canAccessStudent(userId: string, userRole: string, studentId: string): Promise<boolean> {
+  if (userRole === 'super-admin') return true
+
+  const client = await getClient()
+  try {
+    if (userRole === 'admin') {
+      const result = await client.query(
+        `SELECT 1 FROM users u1 JOIN users u2 ON u1.school_id = u2.school_id
+         WHERE u1.id = $1 AND u2.id = $2 AND u1.school_id IS NOT NULL`,
+        [userId, studentId]
+      )
+      return result.rows.length > 0
+    }
+    if (userRole === 'teacher') {
+      const result = await client.query(
+        `SELECT 1 FROM class_members cm
+         JOIN classes c ON cm.class_id = c.id
+         JOIN users u ON u.id = $1
+         WHERE cm.student_id = $2 AND c.school_id = u.school_id AND c.school_id IS NOT NULL`,
+        [userId, studentId]
+      )
+      return result.rows.length > 0
+    }
+    return false
+  } finally {
+    client.release()
+  }
+}
+
+export async function getStudentSessionDetail(sessionId: string): Promise<StudentSessionData | null> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT
+        rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
+        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        rs.spelling_game_accuracy,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
+        rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
+        rs.grammar_game_accuracy,
+        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.simplified_text,
+        rs.created_at, rs.updated_at,
+        u.name as user_name, u.email as user_email
+       FROM reading_sessions rs
+       JOIN users u ON rs.user_id = u.id
+       WHERE rs.id = $1`,
+      [sessionId]
+    )
+    if (result.rows.length === 0) return null
+
+    const row = result.rows[0]
+    return {
+      id: row.id,
+      userId: row.user_id,
+      userName: row.user_name,
+      userEmail: row.user_email,
+      docTitle: row.doc_title || row.extracted_text?.slice(0, 50) || 'Untitled',
+      studentAge: row.student_age,
+      extractedText: row.extracted_text,
+      summary: row.summary,
+      testScore: row.test_score,
+      testCompleted: row.test_completed,
+      vocabularyQuizScore: row.vocabulary_quiz_score,
+      spellingGameBestScore: row.spelling_game_best_score,
+      spellingGameAccuracy: row.spelling_game_accuracy || 0,
+      grammarQuizScore: row.grammar_quiz_score || 0,
+      grammarQuizCompleted: !!row.grammar_quiz_completed,
+      grammarGameBestScore: Math.max(
+        row.grammar_scramble_high_score || 0,
+        row.grammar_workshop_high_score || 0,
+        row.grammar_surgery_high_score || 0,
+        row.grammar_roulette_high_score || 0,
+        row.grammar_duel_high_score || 0,
+      ),
+      grammarGameAccuracy: row.grammar_game_accuracy || 0,
+      glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
       glossary: Array.isArray(row.glossary) ? row.glossary : [],
       highlightedWords: Array.isArray(row.highlighted_words) ? row.highlighted_words : [],
       analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
       adaptedText: row.adapted_text || undefined,
       simplifiedText: row.simplified_text || undefined,
-      progress: calculateProgress(row),
+      progress: 0,
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
-    }))
+    }
   } finally {
     client.release()
   }
