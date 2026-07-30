@@ -82,6 +82,8 @@ export interface StudentSessionData {
   glossary: GlossaryEntry[]
   highlightedWords: string[]
   analyzedSentences: Record<string, SentenceAnalysis>
+  adaptedText?: string
+  simplifiedText?: string
   progress: number
   createdAt: number
   updatedAt: number
@@ -1106,7 +1108,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
-        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
+        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.simplified_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -1147,6 +1149,8 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
       glossary: Array.isArray(row.glossary) ? row.glossary : [],
       highlightedWords: Array.isArray(row.highlighted_words) ? row.highlighted_words : [],
       analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
+      adaptedText: row.adapted_text || undefined,
+      simplifiedText: row.simplified_text || undefined,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
@@ -1172,7 +1176,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
-        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
+        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.simplified_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
         u.name as user_name, u.email as user_email
@@ -1212,6 +1216,8 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
       glossary: Array.isArray(row.glossary) ? row.glossary : [],
       highlightedWords: Array.isArray(row.highlighted_words) ? row.highlighted_words : [],
       analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
+      adaptedText: row.adapted_text || undefined,
+      simplifiedText: row.simplified_text || undefined,
       progress: calculateProgress(row),
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),

@@ -28,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
@@ -87,8 +88,11 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     highlightedWords: string[]
     analyzedSentences: Record<string, SentenceAnalysis>
     glossary: GlossaryEntry[]
+    adaptedText?: string
+    simplifiedText?: string
   } | null>(null)
   const [viewingGlossary, setViewingGlossary] = useState<{ title: string; glossary: GlossaryEntry[]; student?: string } | null>(null)
+  const [textTab, setTextTab] = useState<string>("original")
 
   const _isTeacher = !isSuperAdmin && !isAdmin
 
@@ -518,14 +522,19 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   <TableCell>
                     <button
                       type="button"
-                      onClick={() => setViewingText({
-                        title: session.docTitle,
-                        text: session.extractedText,
-                        student: session.userName || undefined,
-                        highlightedWords: session.highlightedWords,
-                        analyzedSentences: session.analyzedSentences,
-                        glossary: session.glossary,
-                      })}
+                      onClick={() => {
+                        setTextTab("original")
+                        setViewingText({
+                          title: session.docTitle,
+                          text: session.extractedText,
+                          student: session.userName || undefined,
+                          highlightedWords: session.highlightedWords,
+                          analyzedSentences: session.analyzedSentences,
+                          glossary: session.glossary,
+                          adaptedText: session.adaptedText,
+                          simplifiedText: session.simplifiedText,
+                        })
+                      }}
                       className="block truncate max-w-xs text-left text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
                       title={`${t("userManagement.studentData.viewReadingText")}: ${session.docTitle}`}
                     >
@@ -672,24 +681,49 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
               <DialogDescription>{viewingText.student}</DialogDescription>
             )}
           </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2">
-            {hasHighlights && (
-              <div className="flex flex-wrap items-center gap-4 mb-3 text-xs text-muted-foreground pb-2 border-b">
-                <span className="flex items-center gap-1">
-                  <mark className="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">&nbsp;</mark>
-                  {t("userManagement.studentData.legendVocabulary")}
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="border-b-2 border-blue-500 dark:border-blue-400">&nbsp;&nbsp;</span>
-                  {t("userManagement.studentData.legendAnalyzedSentence")}
-                </span>
-              </div>
+          <Tabs value={textTab} onValueChange={setTextTab} className="flex-1 flex flex-col overflow-hidden">
+            <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, !!viewingText?.adaptedText, !!viewingText?.simplifiedText].filter(Boolean).length}, minmax(0, 1fr))` }}>
+              <TabsTrigger value="original">{t("reading.adaptedText.originalTab")}</TabsTrigger>
+              {viewingText?.adaptedText && (
+                <TabsTrigger value="adapted">{t("reading.adaptedText.adaptedTab")}</TabsTrigger>
+              )}
+              {viewingText?.simplifiedText && (
+                <TabsTrigger value="simplified">{t("reading.adaptedText.simplifiedTab")}</TabsTrigger>
+              )}
+            </TabsList>
+            <TabsContent value="original" className="flex-1 overflow-y-auto mt-2">
+              {hasHighlights && (
+                <div className="flex flex-wrap items-center gap-4 mb-3 text-xs text-muted-foreground pb-2 border-b">
+                  <span className="flex items-center gap-1">
+                    <mark className="bg-yellow-200 dark:bg-yellow-400 px-0.5 rounded">&nbsp;</mark>
+                    {t("userManagement.studentData.legendVocabulary")}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="border-b-2 border-blue-500 dark:border-blue-400">&nbsp;&nbsp;</span>
+                    {t("userManagement.studentData.legendAnalyzedSentence")}
+                  </span>
+                </div>
+              )}
+              <div
+                className="whitespace-pre-wrap break-words text-sm leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: highlightedTextHtml || t("userManagement.studentData.noReadingText") }}
+              />
+            </TabsContent>
+            {viewingText?.adaptedText && (
+              <TabsContent value="adapted" className="flex-1 overflow-y-auto mt-2">
+                <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                  {viewingText.adaptedText}
+                </div>
+              </TabsContent>
             )}
-            <div
-              className="whitespace-pre-wrap break-words text-sm leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: highlightedTextHtml || t("userManagement.studentData.noReadingText") }}
-            />
-          </div>
+            {viewingText?.simplifiedText && (
+              <TabsContent value="simplified" className="flex-1 overflow-y-auto mt-2">
+                <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                  {viewingText.simplifiedText}
+                </div>
+              </TabsContent>
+            )}
+          </Tabs>
         </DialogContent>
       </Dialog>
 
