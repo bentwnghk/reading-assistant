@@ -1044,8 +1044,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         <div className="mt-2 space-y-1">
                           {hasOptions ? (
                             q.options!.map((opt) => {
-                              const isUserAnswer = opt === q.userAnswer
-                              const isCorrectAnswer = opt === q.correctAnswer
+                              const optLetter = opt.charAt(0).toUpperCase()
+                              const isUserAnswer = opt === q.userAnswer || optLetter === q.userAnswer?.toUpperCase().trim()
+                              const isCorrectAnswer = opt === q.correctAnswer || optLetter === q.correctAnswer.toUpperCase().trim()
                               return (
                                 <div key={opt} className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrectAnswer ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : isUserAnswer ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" : "text-muted-foreground"}`}>
                                   {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
@@ -1057,9 +1058,17 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                           ) : (
                             <div className="space-y-1">
                               {q.userAnswer !== undefined && (
-                                <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.yourAnswer")}:</span> <span className={isCorrect ? "text-green-600 dark:text-green-400 font-medium" : "text-red-600 dark:text-red-400"}>{q.userAnswer}</span></p>
+                                <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrect ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
+                                  {isCorrect ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
+                                  <span>{q.userAnswer}</span>
+                                </div>
                               )}
-                              <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.correctAnswer")}:</span> <span className="text-green-600 dark:text-green-400 font-medium">{q.correctAnswer}</span></p>
+                              {!isCorrect && (
+                                <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
+                                  <Check className="h-3 w-3 shrink-0" />
+                                  <span>{q.correctAnswer}</span>
+                                </div>
+                              )}
                               {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.studentData.noAnswer")}</p>}
                             </div>
                           )}
@@ -1116,8 +1125,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         <div className="mt-2 space-y-1">
                           {hasOptions ? (
                             q.options!.map((opt) => {
-                              const isUserAnswer = opt === q.userAnswer
-                              const isCorrectAnswer = opt === q.correctAnswer
+                              const optLetter = opt.charAt(0).toUpperCase()
+                              const isUserAnswer = opt === q.userAnswer || optLetter === q.userAnswer?.toUpperCase().trim()
+                              const isCorrectAnswer = opt === q.correctAnswer || optLetter === q.correctAnswer.toUpperCase().trim()
                               return (
                                 <div key={opt} className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrectAnswer ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : isUserAnswer ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" : "text-muted-foreground"}`}>
                                   {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
@@ -1129,9 +1139,17 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                           ) : (
                             <div className="space-y-1">
                               {q.userAnswer !== undefined && (
-                                <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.yourAnswer")}:</span> <span className={isCorrect ? "text-green-600 dark:text-green-400 font-medium" : "text-red-600 dark:text-red-400"}>{q.userAnswer}</span></p>
+                                <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrect ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
+                                  {isCorrect ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
+                                  <span>{q.userAnswer}</span>
+                                </div>
                               )}
-                              <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.correctAnswer")}:</span> <span className="text-green-600 dark:text-green-400 font-medium">{q.correctAnswer}</span></p>
+                              {!isCorrect && (
+                                <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
+                                  <Check className="h-3 w-3 shrink-0" />
+                                  <span>{q.correctAnswer}</span>
+                                </div>
+                              )}
                               {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.studentData.noAnswer")}</p>}
                             </div>
                           )}
