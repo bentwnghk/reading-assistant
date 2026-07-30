@@ -103,6 +103,18 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     score?: number
     questions?: VocabularyQuizQuestion[]
   } | null>(null)
+  const [viewingGrammarQuiz, setViewingGrammarQuiz] = useState<{
+    title: string
+    student?: string
+    score?: number
+    questions?: GrammarQuizQuestion[]
+  } | null>(null)
+  const [viewingReadingTest, setViewingReadingTest] = useState<{
+    title: string
+    student?: string
+    score?: number
+    questions?: ReadingTestQuestion[]
+  } | null>(null)
 
   const _isTeacher = !isSuperAdmin && !isAdmin
 
@@ -394,6 +406,44 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     }
   }, [t])
 
+  const handleViewGrammarQuiz = useCallback(async (session: SessionWithSchool) => {
+    if (!session.grammarQuizCompleted || (session.grammarQuizScore || 0) === 0) return
+    setViewingGrammarQuiz({ title: session.docTitle, student: session.userName || undefined, score: session.grammarQuizScore })
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/detail`)
+      if (res.ok) {
+        const detail: StudentSessionData = await res.json()
+        setViewingGrammarQuiz({
+          title: session.docTitle,
+          student: session.userName || undefined,
+          score: session.grammarQuizScore,
+          questions: detail.grammarQuiz || [],
+        })
+      }
+    } catch {
+      toast.error(t("userManagement.loadFailed"))
+    }
+  }, [t])
+
+  const handleViewReadingTest = useCallback(async (session: SessionWithSchool) => {
+    if (!session.testCompleted || session.testScore === undefined) return
+    setViewingReadingTest({ title: session.docTitle, student: session.userName || undefined, score: session.testScore })
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/detail`)
+      if (res.ok) {
+        const detail: StudentSessionData = await res.json()
+        setViewingReadingTest({
+          title: session.docTitle,
+          student: session.userName || undefined,
+          score: session.testScore,
+          questions: detail.readingTest || [],
+        })
+      }
+    } catch {
+      toast.error(t("userManagement.loadFailed"))
+    }
+  }, [t])
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -651,9 +701,16 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </TableCell>
                   <TableCell className="text-center">
                     {session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0 ? (
-                      <Badge variant={(session.grammarQuizScore || 0) >= 70 ? "default" : "destructive"}>
-                        {session.grammarQuizScore}%
-                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleViewGrammarQuiz(session)}
+                        className="inline-flex"
+                        title={`${t("userManagement.studentData.viewGrammarQuiz")}: ${session.docTitle}`}
+                      >
+                        <Badge variant={(session.grammarQuizScore || 0) >= 70 ? "default" : "destructive"} className="cursor-pointer hover:bg-accent">
+                          {session.grammarQuizScore}%
+                        </Badge>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -678,9 +735,16 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </TableCell>
                   <TableCell className="text-center">
                     {session.testCompleted && session.testScore !== undefined ? (
-                      <Badge variant={session.testScore >= 70 ? "default" : "destructive"}>
-                        {session.testScore}%
-                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleViewReadingTest(session)}
+                        className="inline-flex"
+                        title={`${t("userManagement.studentData.viewReadingTest")}: ${session.docTitle}`}
+                      >
+                        <Badge variant={session.testScore >= 70 ? "default" : "destructive"} className="cursor-pointer hover:bg-accent">
+                          {session.testScore}%
+                        </Badge>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -918,6 +982,151 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 {t("userManagement.studentData.noVocabQuiz")}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingGrammarQuiz} onOpenChange={(open) => { if (!open) setViewingGrammarQuiz(null) }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <ClipboardList className="h-5 w-5 shrink-0" />
+              <span className="truncate">{viewingGrammarQuiz?.title}</span>
+              {viewingGrammarQuiz?.score !== undefined && (
+                <Badge variant={viewingGrammarQuiz.score >= 70 ? "default" : "destructive"} className="ml-auto">
+                  {viewingGrammarQuiz.score}%
+                </Badge>
+              )}
+            </DialogTitle>
+            {viewingGrammarQuiz?.student && (
+              <DialogDescription>{viewingGrammarQuiz.student}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
+            {viewingGrammarQuiz?.questions === undefined ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : viewingGrammarQuiz.questions.length > 0 ? (
+              viewingGrammarQuiz.questions.map((q, idx) => {
+                const hasOptions = q.options && q.options.length > 0
+                const isCorrect = q.userAnswer === q.correctAnswer
+                return (
+                  <div key={q.id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        {q.topicName && <span className="text-xs text-muted-foreground">{q.topicName}</span>}
+                        <p className="text-sm font-medium">{q.question}</p>
+                        <div className="mt-2 space-y-1">
+                          {hasOptions ? (
+                            q.options!.map((opt) => {
+                              const isUserAnswer = opt === q.userAnswer
+                              const isCorrectAnswer = opt === q.correctAnswer
+                              return (
+                                <div key={opt} className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrectAnswer ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : isUserAnswer ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" : "text-muted-foreground"}`}>
+                                  {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
+                                  {isUserAnswer && !isCorrectAnswer && <X className="h-3 w-3 shrink-0" />}
+                                  <span>{opt}</span>
+                                </div>
+                              )
+                            })
+                          ) : (
+                            <div className="space-y-1">
+                              {q.userAnswer !== undefined && (
+                                <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.yourAnswer")}:</span> <span className={isCorrect ? "text-green-600 dark:text-green-400 font-medium" : "text-red-600 dark:text-red-400"}>{q.userAnswer}</span></p>
+                              )}
+                              <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.correctAnswer")}:</span> <span className="text-green-600 dark:text-green-400 font-medium">{q.correctAnswer}</span></p>
+                              {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.studentData.noAnswer")}</p>}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {isCorrect ? <Check className="h-4 w-4 text-green-600 dark:text-green-400" /> : <X className="h-4 w-4 text-red-500 dark:text-red-400" />}
+                        {q.earnedPoints !== undefined && <span className="text-xs text-muted-foreground block mt-1">{q.earnedPoints}/{q.points}</span>}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {t("userManagement.studentData.noGrammarQuiz")}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingReadingTest} onOpenChange={(open) => { if (!open) setViewingReadingTest(null) }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <FileText className="h-5 w-5 shrink-0" />
+              <span className="truncate">{viewingReadingTest?.title}</span>
+              {viewingReadingTest?.score !== undefined && (
+                <Badge variant={viewingReadingTest.score >= 70 ? "default" : "destructive"} className="ml-auto">
+                  {viewingReadingTest.score}%
+                </Badge>
+              )}
+            </DialogTitle>
+            {viewingReadingTest?.student && (
+              <DialogDescription>{viewingReadingTest.student}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
+            {viewingReadingTest?.questions === undefined ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : viewingReadingTest.questions.length > 0 ? (
+              viewingReadingTest.questions.map((q, idx) => {
+                const hasOptions = q.options && q.options.length > 0
+                const isCorrect = q.userAnswer === q.correctAnswer
+                return (
+                  <div key={q.id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{q.question}</p>
+                        <div className="mt-2 space-y-1">
+                          {hasOptions ? (
+                            q.options!.map((opt) => {
+                              const isUserAnswer = opt === q.userAnswer
+                              const isCorrectAnswer = opt === q.correctAnswer
+                              return (
+                                <div key={opt} className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrectAnswer ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : isUserAnswer ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" : "text-muted-foreground"}`}>
+                                  {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
+                                  {isUserAnswer && !isCorrectAnswer && <X className="h-3 w-3 shrink-0" />}
+                                  <span>{opt}</span>
+                                </div>
+                              )
+                            })
+                          ) : (
+                            <div className="space-y-1">
+                              {q.userAnswer !== undefined && (
+                                <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.yourAnswer")}:</span> <span className={isCorrect ? "text-green-600 dark:text-green-400 font-medium" : "text-red-600 dark:text-red-400"}>{q.userAnswer}</span></p>
+                              )}
+                              <p className="text-xs"><span className="text-muted-foreground">{t("userManagement.studentData.correctAnswer")}:</span> <span className="text-green-600 dark:text-green-400 font-medium">{q.correctAnswer}</span></p>
+                              {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.studentData.noAnswer")}</p>}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {isCorrect ? <Check className="h-4 w-4 text-green-600 dark:text-green-400" /> : <X className="h-4 w-4 text-red-500 dark:text-red-400" />}
+                        {q.earnedPoints !== undefined && <span className="text-xs text-muted-foreground block mt-1">{q.earnedPoints}/{q.points}</span>}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {t("userManagement.studentData.noReadingTest")}
               </div>
             )}
           </div>
