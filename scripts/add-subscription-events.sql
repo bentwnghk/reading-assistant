@@ -26,8 +26,9 @@ CREATE INDEX IF NOT EXISTS idx_subscription_events_sub_time
   ON subscription_events(stripe_subscription_id, event_time DESC);
 
 -- Dedup: a given (subscription, event_type, billing period) is recorded once.
--- NULLS NOT DISTINCT (PostgreSQL 15+) treats NULL period_start as equal so
--- events without a period (e.g. final cancel) still dedupe correctly.
+-- period_start is always populated by the webhook recorder (Stripe subscriptions
+-- always carry a period/start_date), so a plain UNIQUE constraint dedups
+-- correctly without needing NULLS NOT DISTINCT (PG 15+ only).
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -36,7 +37,7 @@ BEGIN
   ) THEN
     ALTER TABLE subscription_events
       ADD CONSTRAINT subscription_events_dedup_key
-        UNIQUE (stripe_subscription_id, event_type, period_start) NULLS NOT DISTINCT;
+        UNIQUE (stripe_subscription_id, event_type, period_start);
   END IF;
 END $$;
 
@@ -70,7 +71,7 @@ BEGIN
   ) THEN
     ALTER TABLE school_subscription_events
       ADD CONSTRAINT school_subscription_events_dedup_key
-        UNIQUE (stripe_subscription_id, event_type, period_start) NULLS NOT DISTINCT;
+        UNIQUE (stripe_subscription_id, event_type, period_start);
   END IF;
 END $$;
 

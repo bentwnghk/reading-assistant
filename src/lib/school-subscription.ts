@@ -177,7 +177,7 @@ async function ensureSchoolSubscriptionEventsTable(
         ) THEN
           ALTER TABLE school_subscription_events
             ADD CONSTRAINT school_subscription_events_dedup_key
-              UNIQUE (stripe_subscription_id, event_type, period_start) NULLS NOT DISTINCT;
+              UNIQUE (stripe_subscription_id, event_type, period_start);
         END IF;
       END $$
     `);

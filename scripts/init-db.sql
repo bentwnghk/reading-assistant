@@ -540,7 +540,7 @@ CREATE INDEX idx_subscription_events_sub_time
 
 ALTER TABLE subscription_events
   ADD CONSTRAINT subscription_events_dedup_key
-    UNIQUE (stripe_subscription_id, event_type, period_start) NULLS NOT DISTINCT;
+    UNIQUE (stripe_subscription_id, event_type, period_start);
 
 -- ─── Shared Sessions table ─────────────────────────────────────────────────────
 
