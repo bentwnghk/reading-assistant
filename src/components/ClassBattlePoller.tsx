@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Copy } from "lucide-react";
+import copy from "copy-to-clipboard";
 
 import { useBattleStore } from "@/store/battle";
 
@@ -102,11 +104,26 @@ export function ClassBattlePoller() {
           if (invite.roomCode === joinedRoom) continue;
           activeToastsRef.current.add(invite.roomCode);
           toast(
-            t(`${M}.classBattleToast`, {
-              hostName: invite.hostName ?? t(`${M}.aTeacher`),
-              wordCount: invite.actualWordCount,
-              roomCode: invite.roomCode,
-            }),
+            <div className="flex flex-col gap-2 pr-6">
+              <span>
+                {t(`${M}.classBattleToast`, {
+                  hostName: invite.hostName ?? t(`${M}.aTeacher`),
+                  wordCount: invite.actualWordCount,
+                })}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  copy(invite.roomCode);
+                  toast.success(t(`${M}.codeCopied`));
+                }}
+                title={t(`${M}.copyCode`)}
+                className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white/20 px-2.5 py-1 font-mono text-sm font-bold tracking-[0.2em] transition-colors hover:bg-white/30"
+              >
+                {invite.roomCode}
+                <Copy className="h-3 w-3" />
+              </button>
+            </div>,
             {
               id: invite.roomCode,
               duration: Infinity,
