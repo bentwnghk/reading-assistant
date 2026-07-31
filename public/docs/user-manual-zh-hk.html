@@ -443,7 +443,7 @@ body.toc-noscroll{overflow:hidden}
   <div class="sub">用戶手冊</div>
   <div class="zh">教師與學生完整指南</div>
   <div class="meta">
-    <div><strong>版本</strong> 2.965</div>
+    <div><strong>版本</strong> 2.972</div>
     <div><strong>對象</strong> 學生 · 教師 · 管理員</div>
     <div><strong>語言</strong> 繁體中文</div>
   </div>
@@ -2275,10 +2275,11 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>11.1 排行榜 <span style="font-weight:400;font-size:.8em">（<code>/leaderboard</code>）</span></h3>
-      <p>從頂欄獎盃圖示或學生資訊的「排行榜」按鈕開啟。三個分頁：<b>成就</b>、<b>我的統計</b>、<b>排行榜</b>。排名為<b>每週</b>（週一至週日）——用週選擇器瀏覽往週。範圍：<b>班別／學校／全球</b>（全球僅列學生）。</p>
+      <p>從頂欄獎盃圖示或學生資訊的「排行榜」按鈕開啟。三個分頁：<b>成就</b>、<b>我的統計</b>、<b>排行榜</b>。排行榜分頁上有 <b>本週／歷史總計</b> 切換，可在當週排名與終身累計排名之間切換。<b>本週</b>模式（週一至週日）可用週選擇器瀏覽往週；<b>歷史總計</b>模式因涵蓋所有時間，會隱藏週選擇器。範圍：<b>班別／學校／全球</b>（全球僅列學生）。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-trophy"/></svg> 成就與排行榜</div><span class="small">本週</span></div>
         <div class="mock-body">
+          <div class="seg" style="margin-bottom:8px"><span class="on">本週</span><span>歷史總計</span></div>
           <div class="seg" style="margin-bottom:10px"><span><svg class="ic sm"><use href="#i-users"/></svg> 我的班級</span><span class="on"><svg class="ic sm"><use href="#i-school"/></svg> 我的學校</span><span><svg class="ic sm"><use href="#i-globe"/></svg> 全球</span></div>
           <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde047">
             <span style="font-size:1.3rem">🥇</span><span class="av sm">J</span><div style="flex:1"><b>林同學</b> <span class="pill" style="background:#dbeafe;color:#1d4ed8;font-size:10px">你</span><br><span class="small">2B 班</span></div><b>342</b><span class="small" style="color:#16a34a">▲3</span>
@@ -2291,8 +2292,10 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <p>10 個可排序欄：週分、閱讀連續天數、各項平均分（測驗／詞彙測驗／拼字／語法測驗／語法遊戲）、總詞彙、生字卡複習、進步分。前三名有獎牌圖示；你的列會高亮並標「你」。趨勢箭頭顯示與上週的變化。</p>
+      <p><b>本週</b>模式：10 個可排序欄（週分、閱讀連續天數、各項平均分：測驗／詞彙測驗／拼字／語法測驗／語法遊戲、總詞彙、生字卡複習、進步分）。前三名有獎牌圖示；你的列會高亮並標「你」。趨勢箭頭顯示與上週的變化。</p>
       <div class="callout"><strong>週分公式</strong> 獎勵持續閱讀與詞彙增長：連續天數×10 + 平均測驗 + 平均詞彙測驗 + 平均拼字×0.5 + 平均語法測驗 + 平均語法遊戲×0.5 + 生字卡複習×5 + 總詞彙，另加最高 +20% 進步獎勵。</div>
+      <p><b>歷史總計</b>模式：10 個可排序欄，強調累計成果——歷史總分、<i>最長</i>連續天數、總閱讀次數、相同的各項平均分、總詞彙與生字卡複習。此模式沒有趨勢箭頭（無週與週之間的變化），詞彙數採計你「我的詞彙」詞庫中已去重的單字，而非各次閱讀的詞彙表項目。</p>
+      <div class="callout"><strong>歷史總分公式</strong> 權重與週分相同，但以<b>最長連續天數</b>取代當週連續天數，且<b>無進步獎勵</b>：最長連續天數×10 + 平均測驗 + 平均詞彙測驗 + 平均拼字×0.5 + 平均語法測驗 + 平均語法遊戲×0.5 + 終身生字卡複習×5 + 總詞彙。</div>
 
       <h3>11.2 我的統計</h3>
       <p>排名方塊（班／校／全球）、9 卡當週格（分數差、閱讀連續天數、各平均、生字卡、詞彙），及終身列（總工作階段、最長連續天數、終身平均）。</p>

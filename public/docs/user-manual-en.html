@@ -443,7 +443,7 @@ body.toc-noscroll{overflow:hidden}
   <div class="sub">User Manual</div>
   <div class="zh">A Complete Guide for Teachers &amp; Students</div>
   <div class="meta">
-    <div><strong>Version</strong> 2.965</div>
+    <div><strong>Version</strong> 2.972</div>
     <div><strong>Audience</strong> Students · Teachers · Administrators</div>
     <div><strong>Language</strong> English</div>
   </div>
@@ -2275,10 +2275,11 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>11.1 Leaderboard <span style="font-weight:400;font-size:.8em">(<code>/leaderboard</code>)</span></h3>
-      <p>Open from the header trophy icon or the Student Info "Leaderboard" button. Three tabs: <b>Achievements</b>, <b>My Stats</b>, <b>Leaderboard</b>. Rankings are <b>weekly</b> (Monday–Sunday) — use the week picker to browse past weeks. Scope: <b>Class / School / Global</b> (global lists students only).</p>
+      <p>Open from the header trophy icon or the Student Info "Leaderboard" button. Three tabs: <b>Achievements</b>, <b>My Stats</b>, <b>Leaderboard</b>. On the Leaderboard tab a <b>Weekly / All-Time</b> toggle switches between the current week's rankings and lifetime rankings. In <b>Weekly</b> mode (Monday–Sunday) the week picker browses past weeks; in <b>All-Time</b> mode the picker is hidden since totals span all time. Scope: <b>Class / School / Global</b> (global lists students only).</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-trophy"/></svg> Achievements &amp; Leaderboard</div><span class="small">This Week</span></div>
         <div class="mock-body">
+          <div class="seg" style="margin-bottom:8px"><span class="on">Weekly</span><span>All-Time</span></div>
           <div class="seg" style="margin-bottom:10px"><span><svg class="ic sm"><use href="#i-users"/></svg> My Class</span><span class="on"><svg class="ic sm"><use href="#i-school"/></svg> My School</span><span><svg class="ic sm"><use href="#i-globe"/></svg> Global</span></div>
           <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde047">
             <span style="font-size:1.3rem">🥇</span><span class="av sm">J</span><div style="flex:1"><b>Jamie L.</b> <span class="pill" style="background:#dbeafe;color:#1d4ed8;font-size:10px">You</span><br><span class="small">Class 2B</span></div><b>342</b><span class="small" style="color:#16a34a">▲3</span>
@@ -2291,8 +2292,10 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <p>10 sortable columns: weekly score, reading streak, avg test/quiz/spelling/grammar-quiz/grammar-game scores, total vocabulary, flashcard reviews, improvement. Top-3 get medal emojis; your row is highlighted with a "You" badge. Rank trend arrows show movement vs last week.</p>
+      <p><b>Weekly</b> mode: 10 sortable columns (weekly score, reading streak, avg test/quiz/spelling/grammar-quiz/grammar-game scores, total vocabulary, flashcard reviews, improvement). Top-3 get medal emojis; your row is highlighted with a "You" badge. Rank trend arrows show movement vs last week.</p>
       <div class="callout"><strong>Weekly score formula</strong> Rewards sustained reading &amp; vocabulary growth: streak×10 + avg test + avg quiz + avg spelling×0.5 + avg grammar quiz + avg grammar game×0.5 + flashcard reviews×5 + total vocab, plus up to +20% improvement bonus over the prior week.</div>
+      <p><b>All-Time</b> mode: 10 sortable columns emphasizing cumulative effort — all-time score, <i>longest</i> streak, total sessions, the same averages, total vocabulary, and flashcard reviews. There are no rank-trend arrows (no week-over-week movement), and vocabulary counts the deduplicated words in your <i>My Vocabulary</i> bank rather than per-session glossary entries.</p>
+      <div class="callout"><strong>All-time score formula</strong> Same weighting as weekly but with <b>longest streak</b> in place of the current-week streak and <b>no improvement bonus</b>: longest streak×10 + avg test + avg quiz + avg spelling×0.5 + avg grammar quiz + avg grammar game×0.5 + lifetime flashcard reviews×5 + total vocab.</div>
 
       <h3>11.2 My Stats</h3>
       <p>Rank chips (class/school/global), a 9-card current-week grid (score delta, reading streak, averages, flashcards, vocab), and an all-time row (total sessions, longest streak via gap-and-islands, lifetime averages).</p>
