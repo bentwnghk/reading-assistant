@@ -188,6 +188,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const [currentMode, setCurrentMode] = useState<SpellingGameMode>("listen-type");
 
   const [userInput, setUserInput] = useState("");
+  const [inputType, setInputType] = useState<"password" | "text">("password");
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
   const [usedIndices, setUsedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
@@ -276,6 +277,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     setTimeRemaining(config.timeLimits[initialMode]);
     setCorrectCount(0);
     setUserInput("");
+    setInputType("password");
     setSelectedLetters([]);
     setUsedIndices([]);
     setRevealedPositions([]);
@@ -301,6 +303,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                 const nextIndex = currentIndex + 1;
                 setCurrentIndex(nextIndex);
                 setUserInput("");
+                setInputType("password");
                 setSelectedLetters([]);
                 setUsedIndices([]);
                 setRevealedPositions([]);
@@ -340,6 +343,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
       setUserInput("");
+      setInputType("password");
       setSelectedLetters([]);
       setUsedIndices([]);
       setRevealedPositions([]);
@@ -934,9 +938,13 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
             <input
               ref={inputRef}
-              type="text"
+              type={inputType}
+              onFocus={() => setInputType("text")}
               value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
+              onChange={(e) => {
+                if (inputType === "password") setInputType("text");
+                setUserInput(e.target.value);
+              }}
               placeholder={t("reading.glossary.spelling.typeAnswer")}
               className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
               autoComplete="off"
@@ -1042,9 +1050,13 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
             <input
               ref={inputRef}
-              type="text"
+              type={inputType}
+              onFocus={() => setInputType("text")}
               value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
+              onChange={(e) => {
+                if (inputType === "password") setInputType("text");
+                setUserInput(e.target.value);
+              }}
               placeholder={t("reading.glossary.spelling.typeMissing")}
               className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
               autoComplete="off"
