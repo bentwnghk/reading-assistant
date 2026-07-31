@@ -232,12 +232,29 @@ export default function StudyPlanDialog({ onStartPlan }: StudyPlanDialogProps) {
                       <div className="flex items-start gap-3">
                         <Icon className={cn("w-5 h-5 mt-0.5 shrink-0", preset.text)} />
                         <div className="flex-1 space-y-1">
-                          <p className="font-semibold text-foreground">
-                            {t(preset.labelKey, { count: capped })}
-                          </p>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-semibold text-foreground">
+                              {t(preset.labelKey)}
+                            </p>
+                            <span
+                              className={cn(
+                                "shrink-0 rounded-full px-2 py-0.5 text-xs font-bold text-white tabular-nums",
+                                preset.color
+                              )}
+                            >
+                              {t("vocabulary.studyPlan.totalCount", { count })}
+                            </span>
+                          </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {t(preset.descKey)}
                           </p>
+                          {capped < count && (
+                            <p className={cn("text-xs font-medium", preset.text)}>
+                              {t("vocabulary.studyPlan.studyingCount", {
+                                count: capped,
+                              })}
+                            </p>
+                          )}
                         </div>
                         <ArrowRight className={cn("w-4 h-4 mt-1 shrink-0", preset.text)} />
                       </div>

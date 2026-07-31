@@ -1905,15 +1905,17 @@
       "gettingStartedDesc": "Start reading to collect words, then come back here to review them.",
       "gettingStartedCta": "Start reading",
       "presets": {
-        "due": "Review due words ({{count}})",
+        "due": "Review due words",
         "dueDesc": "Words scheduled for review by your spaced-repetition plan.",
-        "new": "Learn new words ({{count}})",
+        "new": "Learn new words",
         "newDesc": "Fresh words you haven't practiced yet.",
-        "hard": "Drill hard words ({{count}})",
+        "hard": "Drill hard words",
         "hardDesc": "Words you've marked as difficult.",
-        "random": "Random mixed practice ({{count}})",
+        "random": "Random mixed practice",
         "randomDesc": "A random mix from your entire vocabulary."
       },
+      "totalCount": "{{count}} words",
+      "studyingCount": "Studying {{count}}",
       "mode": {
         "flashcard": "Flashcards",
         "flashcardDesc": "Flip cards and rate your recall with SRS.",
