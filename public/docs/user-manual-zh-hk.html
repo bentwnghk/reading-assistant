@@ -890,8 +890,8 @@ body.toc-noscroll{overflow:hidden}
       <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。</p>
       <table class="ref">
         <tr><th>功能（標籤）</th><th>可用模型</th><th>預設</th></tr>
-        <tr><td>視覺（OCR）模型</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
-        <tr><td>摘要模型</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>視覺（OCR）模型</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
+        <tr><td>摘要模型</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
         <tr><td>心智圖模型</td><td rowspan="7">與摘要相同</td><td>deepseek-v4-flash</td></tr>
         <tr><td>改寫文本模型</td><td>deepseek-v4-flash</td></tr>
         <tr><td>簡化文本模型</td><td>deepseek-v4-flash</td></tr>
@@ -900,7 +900,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>句子分析模型</td><td>deepseek-v4-flash</td></tr>
         <tr><td>語法模型</td><td>deepseek-v4-flash</td></tr>
         <tr><td>閱讀文本生成模型</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>基本 AI 導師模型</td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>基本 AI 導師模型</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
         <tr><td>進階 AI 導師模型</td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>step-3.7-flash</code> 為推薦之選；切換至 <code>gpt-5.6-terra</code> 可得最強（亦最貴）的推理能力。</div>
@@ -2384,10 +2384,10 @@ body.toc-noscroll{overflow:hidden}
       <h3>A. AI 模型參考</h3>
       <table class="ref">
         <tr><th>模型清單</th><th>成員</th><th>預設</th></tr>
-        <tr><td><b>視覺</b>（OCR）</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
-        <tr><td><b>通用</b>（摘要、心智圖、改寫、簡化、測驗、詞彙、句子分析、語法）</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>視覺</b>（OCR）</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
+        <tr><td><b>通用</b>（摘要、心智圖、改寫、簡化、測驗、詞彙、句子分析、語法）</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>進階導師</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。</p>

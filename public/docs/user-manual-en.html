@@ -890,8 +890,8 @@ body.toc-noscroll{overflow:hidden}
       <p>Each AI-powered feature can use a different model. Lighter/faster models are cheaper; larger models are smarter. You can mix and match. If a stored model is ever removed from the app, it auto-resets to the default.</p>
       <table class="ref">
         <tr><th>Feature (label)</th><th>Available models</th><th>Default</th></tr>
-        <tr><td>Vision (OCR) Model</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
-        <tr><td>Summary Model</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Vision (OCR) Model</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
+        <tr><td>Summary Model</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Mind Map Model</td><td rowspan="7">same list as Summary</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Adapt Text Model</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Simplify Text Model</td><td>deepseek-v4-flash</td></tr>
@@ -900,7 +900,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Sentence Analysis Model</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Grammar Model</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Reading Text Generator Model</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>Basic AI Tutor Model</td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Basic AI Tutor Model</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Advanced AI Tutor Model</td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code> for the most capable (and costliest) reasoning.</div>
@@ -2384,10 +2384,10 @@ body.toc-noscroll{overflow:hidden}
       <h3>A. AI model reference</h3>
       <table class="ref">
         <tr><th>Model list</th><th>Members</th><th>Default</th></tr>
-        <tr><td><b>Vision</b> (OCR)</td><td>gpt-5-nano · gpt-5.4-nano</td><td>gpt-5-nano</td></tr>
-        <tr><td><b>Available</b> (summary, mind map, adapt, simplify, test, glossary, sentence-analysis, grammar)</td><td>gpt-5.4-mini · gpt-5.4-nano · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Vision</b> (OCR)</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
+        <tr><td><b>Available</b> (summary, mind map, adapt, simplify, test, glossary, sentence-analysis, grammar)</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>Reading Text</b> (AI text generator)</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td><b>Basic Tutor</b></td><td>deepseek-v4-flash · gpt-5.4-nano</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Basic Tutor</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>Advanced Tutor</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>.</p>

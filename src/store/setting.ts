@@ -3,14 +3,14 @@ import { persist, StorageValue } from "zustand/middleware";
 
 export const AVAILABLE_MODELS = [
   "gpt-5.4-mini",
-  "gpt-5.4-nano",
+  "gpt-5.6-luna",
   "deepseek-v4-flash",
   "gemini-3-flash-preview",
 ] as const;
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
 
-export const VISION_MODELS = ["gpt-5-nano", "gpt-5.4-nano"] as const;
+export const VISION_MODELS = ["gpt-5-nano", "gpt-5.6-luna"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
@@ -25,7 +25,7 @@ export type TutorModel = (typeof TUTOR_MODELS)[number];
 
 export const BASIC_TUTOR_MODELS = [
   "deepseek-v4-flash",
-  "gpt-5.4-nano",
+  "gpt-5.6-luna",
 ] as const;
 
 export type BasicTutorModel = (typeof BASIC_TUTOR_MODELS)[number];
