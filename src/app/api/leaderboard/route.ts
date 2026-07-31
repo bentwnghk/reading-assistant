@@ -4,6 +4,8 @@ import {
   getAllTimeLeaderboard,
   refreshWeeklyStatsForUser,
   refreshAllTimeStatsForUser,
+  allTimeStatsCount,
+  backfillAllTimeStats,
   type LeaderboardScope,
   type LeaderboardPeriod,
   type SortColumn,
@@ -44,10 +46,16 @@ export async function GET(request: Request) {
     const userId = session.user.id
     const userRole = session.user.role
 
-    // Always refresh the requesting user's own stats so their latest activity
-    // (quiz, test, spelling, flashcards) shows up immediately.
+    // Refresh stats so the requesting user's latest activity shows up immediately.
+    // All-time is a brand-new table: on first view it's empty, so backfill every
+    // user once (afterwards the lazy per-activity refresh keeps it warm).
     if (isAllTime) {
-      await refreshAllTimeStatsForUser(userId)
+      const statsCount = await allTimeStatsCount()
+      if (statsCount === 0) {
+        await backfillAllTimeStats()
+      } else {
+        await refreshAllTimeStatsForUser(userId)
+      }
     } else {
       await refreshWeeklyStatsForUser(userId, weekStart)
     }

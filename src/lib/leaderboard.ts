@@ -1,4 +1,4 @@
-import { getClient } from "./db"
+import { getClient, getPool } from "./db"
 import { getWeekStart, getReadingStreak } from "./activity"
 
 // ─── Public types ─────────────────────────────────────────────────────────────
@@ -798,6 +798,39 @@ export async function refreshAllTimeStatsForUser(
         allTimeScore,
       ]
     )
+  } finally {
+    client.release()
+  }
+}
+
+// ─── Cold-start backfill ──────────────────────────────────────────────────────
+// all_time_stats is a brand-new table, so unlike weekly_stats it starts empty.
+// The lazy per-activity refresh only ever populates the *acting* user, so the
+// board would appear empty until every user has individually logged activity.
+// These helpers detect that cold-start and populate every user once; afterwards
+// the normal lazy refresh keeps the table warm.
+
+export async function allTimeStatsCount(): Promise<number> {
+  const client = await getClient()
+  try {
+    const result = await client.query(`SELECT COUNT(*)::int AS cnt FROM all_time_stats`)
+    return parseInt(result.rows[0]?.cnt ?? "0") || 0
+  } finally {
+    client.release()
+  }
+}
+
+export async function backfillAllTimeStats(): Promise<void> {
+  const pool = getPool()
+  const client = await pool.connect()
+  try {
+    const { rows } = await client.query(`SELECT id FROM users`)
+    const batchSize = 10
+    for (let i = 0; i < rows.length; i += batchSize) {
+      await Promise.all(
+        rows.slice(i, i + batchSize).map(r => refreshAllTimeStatsForUser(r.id))
+      )
+    }
   } finally {
     client.release()
   }
