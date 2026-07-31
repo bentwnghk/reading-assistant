@@ -115,7 +115,16 @@ export function ClassBattlePoller() {
                 type="button"
                 onClick={() => {
                   copy(invite.roomCode);
-                  toast.success(t(`${M}.codeCopied`));
+                  const copiedId = `code-copied-${invite.roomCode}`;
+                  toast.success(t(`${M}.codeCopied`), {
+                    id: copiedId,
+                    duration: 2000,
+                  });
+                  // Fallback dismiss — sonner pauses its internal timer while
+                  // the pointer is "over" a toast, and iOS Safari doesn't fire
+                  // a reliable mouseleave to resume it, so this own-timer
+                  // guarantees dismissal regardless of that pause state.
+                  window.setTimeout(() => toast.dismiss(copiedId), 2500);
                 }}
                 title={t(`${M}.copyCode`)}
                 className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white/20 px-2.5 py-1 font-mono text-sm font-bold tracking-[0.2em] transition-colors hover:bg-white/30"
