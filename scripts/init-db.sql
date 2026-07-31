@@ -356,6 +356,44 @@ CREATE TRIGGER update_weekly_stats_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- All-time pre-computed stats (refreshed lazily, same pattern as weekly_stats).
+-- One row per user; aggregates across all time (no week_start_date).
+CREATE TABLE all_time_stats (
+  id                        TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id                   TEXT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  total_sessions            INTEGER      DEFAULT 0,
+  longest_streak_days       INTEGER      DEFAULT 0,
+  avg_test_score            NUMERIC(6,2)  DEFAULT 0,
+  total_flashcard_reviews   INTEGER       DEFAULT 0,
+  avg_quiz_score            NUMERIC(6,2)  DEFAULT 0,
+  avg_spelling_score        NUMERIC(10,2) DEFAULT 0,
+  avg_spelling_accuracy     NUMERIC(6,2)  DEFAULT 0,
+  avg_grammar_quiz_score    NUMERIC(6,2)  DEFAULT 0,
+  avg_grammar_game_score    NUMERIC(6,2)  DEFAULT 0,
+  avg_grammar_game_accuracy NUMERIC(6,2)  DEFAULT 0,
+  total_vocabulary_words    INTEGER       DEFAULT 0,
+  tests_completed           INTEGER       DEFAULT 0,
+  quizzes_completed         INTEGER       DEFAULT 0,
+  spelling_games_completed  INTEGER       DEFAULT 0,
+  grammar_quizzes_completed INTEGER       DEFAULT 0,
+  grammar_games_completed   INTEGER       DEFAULT 0,
+  all_time_score            NUMERIC(12,2) DEFAULT 0,
+  created_at                TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at                TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_all_time_stats_score
+  ON all_time_stats (all_time_score DESC);
+CREATE INDEX idx_all_time_stats_vocabulary
+  ON all_time_stats (total_vocabulary_words DESC);
+CREATE INDEX idx_all_time_stats_flashcards
+  ON all_time_stats (total_flashcard_reviews DESC);
+
+CREATE TRIGGER update_all_time_stats_updated_at
+  BEFORE UPDATE ON all_time_stats
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
 -- ─── Achievements tables ──────────────────────────────────────────────────────
 
 -- Stores each milestone a user has unlocked for each achievement type.

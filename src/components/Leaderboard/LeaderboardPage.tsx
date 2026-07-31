@@ -29,6 +29,8 @@ import {
   Users,
   School,
   Globe,
+  Infinity as InfinityIcon,
+  CalendarRange,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,10 +49,19 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/utils/style";
 import { LeaderboardTable } from "./LeaderboardTable";
+import { AllTimeLeaderboardTable } from "./AllTimeLeaderboardTable";
 import { PersonalStatsCard } from "./PersonalStatsCard";
 import { LeaderboardSkeleton, PersonalStatsSkeleton } from "./LeaderboardSkeleton";
 import { AchievementsTab } from "./AchievementsTab";
-import type { LeaderboardResponse, PersonalStats, LeaderboardScope, SortColumn } from "./types";
+import type {
+  LeaderboardResponse,
+  AllTimeLeaderboardResponse,
+  PersonalStats,
+  LeaderboardScope,
+  LeaderboardPeriod,
+  SortColumn,
+  AllTimeSortColumn,
+} from "./types";
 
 interface TeacherClass {
   id: string;
@@ -84,10 +95,12 @@ export function LeaderboardPage() {
 
   const [scope, setScope]     = useState<LeaderboardScope>("class");
   const [sortBy, setSortBy]   = useState<SortColumn>("weekly_score");
+  const [allTimeSortBy, setAllTimeSortBy] = useState<AllTimeSortColumn>("all_time_score");
+  const [period, setPeriod]   = useState<LeaderboardPeriod>("weekly");
   const [weekOffset, setWeekOffset] = useState(0);
   const [tab, setTab]         = useState<"achievements" | "board" | "me">("achievements");
 
-  const [boardData,   setBoardData]   = useState<LeaderboardResponse | null>(null);
+  const [boardData,   setBoardData]   = useState<LeaderboardResponse | AllTimeLeaderboardResponse | null>(null);
   const [personalData, setPersonalData] = useState<PersonalStats | null>(null);
   const [boardLoading,   setBoardLoading]   = useState(false);
   const [personalLoading, setPersonalLoading] = useState(false);
@@ -147,7 +160,13 @@ export function LeaderboardPage() {
     setBoardLoading(true);
     setBoardError(null);
     try {
-      const params = new URLSearchParams({ scope, sortBy, week: weekStart, limit: "50" });
+      const params = new URLSearchParams({ scope, period, limit: "50" });
+      if (period === "weekly") {
+        params.set("sortBy", sortBy);
+        params.set("week", weekStart);
+      } else {
+        params.set("sortBy", allTimeSortBy);
+      }
       if (scope === "class" && selectedClassId && selectedClassId !== "all") {
         params.set("classId", selectedClassId);
       }
@@ -156,14 +175,16 @@ export function LeaderboardPage() {
       }
       const res = await fetch(`/api/leaderboard?${params}`);
       if (!res.ok) throw new Error(await res.text());
-      const data = await res.json() as LeaderboardResponse;
+      const data = period === "weekly"
+        ? (await res.json() as LeaderboardResponse)
+        : (await res.json() as AllTimeLeaderboardResponse);
       setBoardData(data);
     } catch {
       setBoardError(t("leaderboard.empty.description"));
     } finally {
       setBoardLoading(false);
     }
-  }, [userId, scope, sortBy, weekStart, selectedClassId, selectedSchoolId, t]);
+  }, [userId, scope, period, sortBy, allTimeSortBy, weekStart, selectedClassId, selectedSchoolId, t]);
 
   // ── Fetch personal stats ──
   const fetchPersonal = useCallback(async () => {
@@ -220,8 +241,38 @@ export function LeaderboardPage() {
         </div>
       </div>
 
-      {/* ── Week picker (hidden on achievements tab) ── */}
-      {tab !== "achievements" && (
+      {/* ── Period toggle (board tab only) ── */}
+      {tab === "board" && (
+        <div className="flex gap-1 p-1 bg-muted rounded-lg">
+          <button
+            onClick={() => setPeriod("weekly")}
+            className={cn(
+              "flex-1 py-1 text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-1",
+              period === "weekly"
+                ? "bg-background shadow-sm text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <CalendarRange className="h-3.5 w-3.5" />
+            {t("leaderboard.period.weekly")}
+          </button>
+          <button
+            onClick={() => setPeriod("all-time")}
+            className={cn(
+              "flex-1 py-1 text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-1",
+              period === "all-time"
+                ? "bg-background shadow-sm text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <InfinityIcon className="h-3.5 w-3.5" />
+            {t("leaderboard.period.allTime")}
+          </button>
+        </div>
+      )}
+
+      {/* ── Week picker (hidden on achievements tab; hidden on board tab when all-time) ── */}
+      {tab !== "achievements" && !(tab === "board" && period === "all-time") && (
         <div className="flex items-center justify-between text-sm">
           <button
             onClick={() => setWeekOffset(w => w - 1)}
@@ -381,9 +432,15 @@ export function LeaderboardPage() {
               </div>
               <div className="text-right">
                 <div className="font-bold tabular-nums text-primary">
-                  {boardData.currentUserRank.weeklyScore}
+                  {boardData.period === "all-time"
+                    ? boardData.currentUserRank.allTimeScore
+                    : boardData.currentUserRank.weeklyScore}
                 </div>
-                <div className="text-xs text-muted-foreground">{t("leaderboard.columns.score")}</div>
+                <div className="text-xs text-muted-foreground">
+                  {boardData.period === "all-time"
+                    ? t("leaderboard.allTime.columns.score")
+                    : t("leaderboard.columns.score")}
+                </div>
               </div>
             </div>
           )}
@@ -407,13 +464,23 @@ export function LeaderboardPage() {
           )}
 
           {!boardLoading && !boardError && boardData && boardData.rankings.length > 0 && (
-            <LeaderboardTable
-              entries={boardData.rankings}
-              currentUserId={userId}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              scope={scope}
-            />
+            boardData.period === "all-time" ? (
+              <AllTimeLeaderboardTable
+                entries={boardData.rankings}
+                currentUserId={userId}
+                sortBy={allTimeSortBy}
+                onSortChange={setAllTimeSortBy}
+                scope={scope}
+              />
+            ) : (
+              <LeaderboardTable
+                entries={boardData.rankings}
+                currentUserId={userId}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                scope={scope}
+              />
+            )
           )}
         </div>
       )}
@@ -634,6 +701,16 @@ export function LeaderboardPage() {
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.weeklyScore.title")}</h4>
                   <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.weeklyScore.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <InfinityIcon className="h-5 w-5 text-amber-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.leaderboard.categories.allTimeScore.title")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.leaderboard.categories.allTimeScore.desc")}</p>
                 </div>
               </div>
 

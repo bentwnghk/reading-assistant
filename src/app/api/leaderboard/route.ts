@@ -1,15 +1,19 @@
 import { auth } from "@/auth"
 import {
   getLeaderboard,
+  getAllTimeLeaderboard,
   refreshWeeklyStatsForUser,
+  refreshAllTimeStatsForUser,
   type LeaderboardScope,
+  type LeaderboardPeriod,
   type SortColumn,
+  type AllTimeSortColumn,
 } from "@/lib/leaderboard"
 import { getWeekStart } from "@/lib/activity"
 import { getStudentClassId, getClassesForTeacher, getClassesForSchool, getSchoolForUser, getAllClasses } from "@/lib/users"
 import { NextResponse } from "next/server"
 
-// GET /api/leaderboard?scope=class|school|global&classId=...&schoolId=...&week=YYYY-MM-DD&sortBy=...&limit=50
+// GET /api/leaderboard?scope=class|school|global&period=weekly|all-time&classId=...&schoolId=...&week=YYYY-MM-DD&sortBy=...&limit=50
 export async function GET(request: Request) {
   try {
     const session = await auth()
@@ -19,20 +23,34 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url)
     const scopeParam  = (searchParams.get("scope") ?? "class") as LeaderboardScope
+    const periodParam = (searchParams.get("period") ?? "weekly") as LeaderboardPeriod
     const classId     = searchParams.get("classId") ?? undefined
     const schoolId    = searchParams.get("schoolId") ?? undefined
     const weekParam   = searchParams.get("week")
-    const sortByParam = (searchParams.get("sortBy") ?? "weekly_score") as SortColumn
     const limit       = Math.min(parseInt(searchParams.get("limit") ?? "50"), 200)
+
+    const isAllTime = periodParam === "all-time"
+    // Validate sort column against the active period's allowed set. The sortBy
+    // value is interpolated into ORDER BY, so it must match a known column.
+    const sortByParam = (() => {
+      if (isAllTime) {
+        return (searchParams.get("sortBy") ?? "all_time_score") as AllTimeSortColumn
+      }
+      return (searchParams.get("sortBy") ?? "weekly_score") as SortColumn
+    })()
 
     const weekStart = weekParam ? new Date(weekParam) : getWeekStart()
 
     const userId = session.user.id
     const userRole = session.user.role
 
-    // Always refresh the requesting user's own weekly stats so their latest
-    // activity (quiz, test, spelling, flashcards) shows up immediately.
-    await refreshWeeklyStatsForUser(userId, weekStart)
+    // Always refresh the requesting user's own stats so their latest activity
+    // (quiz, test, spelling, flashcards) shows up immediately.
+    if (isAllTime) {
+      await refreshAllTimeStatsForUser(userId)
+    } else {
+      await refreshWeeklyStatsForUser(userId, weekStart)
+    }
 
     let resolvedClassId  = classId
     let resolvedClassIds: string[] | undefined
@@ -78,15 +96,24 @@ export async function GET(request: Request) {
       }
     }
 
-    const data = await getLeaderboard(userId, {
-      scope:    resolvedScope,
-      classId:  resolvedClassId,
-      classIds: resolvedClassIds,
-      schoolId: resolvedSchoolId,
-      weekStart,
-      sortBy:   sortByParam,
-      limit,
-    })
+    const data = isAllTime
+      ? await getAllTimeLeaderboard(userId, {
+          scope:    resolvedScope,
+          classId:  resolvedClassId,
+          classIds: resolvedClassIds,
+          schoolId: resolvedSchoolId,
+          sortBy:   sortByParam as AllTimeSortColumn,
+          limit,
+        })
+      : await getLeaderboard(userId, {
+          scope:    resolvedScope,
+          classId:  resolvedClassId,
+          classIds: resolvedClassIds,
+          schoolId: resolvedSchoolId,
+          weekStart,
+          sortBy:   sortByParam as SortColumn,
+          limit,
+        })
 
     return NextResponse.json(data)
   } catch (error) {

@@ -3183,6 +3183,24 @@
     "thisWeek": "本週",
     "lastWeek": "上週",
     "nextWeek": "下週",
+    "period": {
+      "weekly": "本週",
+      "allTime": "歷史總計"
+    },
+    "allTime": {
+      "columns": {
+        "score": "歷史總分",
+        "longestStreak": "最長連續天數",
+        "sessions": "閱讀次數",
+        "test": "閱讀測驗",
+        "quiz": "詞彙測驗",
+        "spelling": "拼字遊戲",
+        "grammarQuiz": "語法測驗",
+        "grammarGame": "語法遊戲",
+        "vocab": "詞彙數量",
+        "flashcards": "單字卡"
+      }
+    },
     "scope": {
       "class": "我的班級",
       "school": "我的學校",
@@ -3287,6 +3305,10 @@
           "weeklyScore": {
             "title": "本週分數",
             "desc": "綜合所有學習活動的表現指標。每次閱讀、閱讀測驗、詞彙測驗、拼字遊戲、語法測驗和語法遊戲都會為你的每週總分增添積分。"
+          },
+          "allTimeScore": {
+            "title": "歷史總分",
+            "desc": "你一直以來的累計表現指標。切換至「歷史總計」即可查看所有人的長期排名——持之以恆、持續學習最為重要。"
           },
           "streak": {
             "title": "連續天數",

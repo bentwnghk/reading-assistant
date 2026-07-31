@@ -1,4 +1,5 @@
 export type LeaderboardScope = "class" | "school" | "global"
+export type LeaderboardPeriod = "weekly" | "all-time"
 export type SortColumn =
   | "weekly_score"
   | "reading_streak_days"
@@ -9,6 +10,18 @@ export type SortColumn =
   | "avg_grammar_game_score"
   | "total_vocabulary_words"
   | "improvement_score"
+  | "total_flashcard_reviews"
+
+export type AllTimeSortColumn =
+  | "all_time_score"
+  | "longest_streak_days"
+  | "total_sessions"
+  | "avg_test_score"
+  | "avg_quiz_score"
+  | "avg_spelling_score"
+  | "avg_grammar_quiz_score"
+  | "avg_grammar_game_score"
+  | "total_vocabulary_words"
   | "total_flashcard_reviews"
 
 export interface LeaderboardEntry {
@@ -42,6 +55,37 @@ export interface LeaderboardResponse {
   weekStartDate: string
   weekEndDate: string
   scope: LeaderboardScope
+  period: "weekly"
+}
+
+export interface AllTimeLeaderboardEntry {
+  rank: number
+  userId: string
+  userName: string
+  userImage?: string | null
+  classId?: string | null
+  className?: string | null
+  schoolId?: string | null
+  schoolName?: string | null
+  allTimeScore: number
+  longestStreak: number
+  avgTestScore: number
+  avgQuizScore: number
+  avgSpellingScore: number
+  avgGrammarQuizScore: number
+  avgGrammarGameScore: number
+  flashcardReviews: number
+  totalVocabWords: number
+  totalSessions: number
+  testsCompleted: number
+  quizzesCompleted: number
+}
+
+export interface AllTimeLeaderboardResponse {
+  rankings: AllTimeLeaderboardEntry[]
+  currentUserRank: AllTimeLeaderboardEntry | null
+  scope: LeaderboardScope
+  period: "all-time"
 }
 
 export interface WeeklyStatsRow {

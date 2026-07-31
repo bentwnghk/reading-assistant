@@ -1,6 +1,6 @@
 import { auth } from "@/auth"
 import { logActivity, type ActivityType, type ActivityDetails, getWeekStart } from "@/lib/activity"
-import { refreshWeeklyStatsForUser } from "@/lib/leaderboard"
+import { refreshWeeklyStatsForUser, refreshAllTimeStatsForUser } from "@/lib/leaderboard"
 import { checkAndUnlockAchievements } from "@/lib/achievements"
 import { NextResponse } from "next/server"
 import { z } from "zod"
@@ -68,10 +68,13 @@ export async function POST(request: Request) {
       details: details as ActivityDetails | undefined,
     })
 
-    // Trigger a non-blocking stats refresh for the current week
+    // Trigger a non-blocking stats refresh for the current week AND all-time
     // so leaderboard data stays fresh without needing a separate cron job.
-    refreshWeeklyStatsForUser(session.user.id, getWeekStart()).catch((err) =>
-      console.error("[activity] Failed to refresh weekly stats:", err)
+    Promise.all([
+      refreshWeeklyStatsForUser(session.user.id, getWeekStart()),
+      refreshAllTimeStatsForUser(session.user.id),
+    ]).catch((err) =>
+      console.error("[activity] Failed to refresh stats:", err)
     )
 
     // Check for newly unlocked achievements — non-blocking so any DB error

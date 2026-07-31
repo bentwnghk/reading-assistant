@@ -3156,6 +3156,24 @@
     "thisWeek": "This Week",
     "lastWeek": "Last Week",
     "nextWeek": "Next Week",
+    "period": {
+      "weekly": "Weekly",
+      "allTime": "All-Time"
+    },
+    "allTime": {
+      "columns": {
+        "score": "All-Time Score",
+        "longestStreak": "Longest Streak",
+        "sessions": "Sessions",
+        "test": "Reading Test",
+        "quiz": "Vocab Quiz",
+        "spelling": "Spelling",
+        "grammarQuiz": "Grammar Quiz",
+        "grammarGame": "Grammar Game",
+        "vocab": "Vocab Words",
+        "flashcards": "Flashcards"
+      }
+    },
     "scope": {
       "class": "My Class",
       "school": "My School",
@@ -3260,6 +3278,10 @@
           "weeklyScore": {
             "title": "Weekly Score",
             "desc": "Your all-around performance metric. Every reading session, reading test, vocab quiz, spelling game, grammar quiz, and grammar game contributes points to your weekly total."
+          },
+          "allTimeScore": {
+            "title": "All-Time Score",
+            "desc": "Your lifetime performance metric. Switch to the All-Time period to see how everyone stacks up across all weeks—consistency and dedication shine here."
           },
           "streak": {
             "title": "Reading Streak",

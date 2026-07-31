@@ -4,6 +4,7 @@ import { getWeekStart, getReadingStreak } from "./activity"
 // ─── Public types ─────────────────────────────────────────────────────────────
 
 export type LeaderboardScope = "class" | "school" | "global"
+export type LeaderboardPeriod = "weekly" | "all-time"
 export type SortColumn =
   | "weekly_score"
   | "reading_streak_days"
@@ -14,6 +15,22 @@ export type SortColumn =
   | "avg_grammar_game_score"
   | "total_vocabulary_words"
   | "improvement_score"
+  | "total_flashcard_reviews"
+
+// All-time sort columns: drops improvement_score (week-over-week only) and
+// weekly_score/reading_streak_days in favour of all_time_score/longest_streak_days,
+// adds total_sessions. The sortBy string is interpolated into ORDER BY, so this
+// union must stay closed and match the column names exactly.
+export type AllTimeSortColumn =
+  | "all_time_score"
+  | "longest_streak_days"
+  | "total_sessions"
+  | "avg_test_score"
+  | "avg_quiz_score"
+  | "avg_spelling_score"
+  | "avg_grammar_quiz_score"
+  | "avg_grammar_game_score"
+  | "total_vocabulary_words"
   | "total_flashcard_reviews"
 
 export interface LeaderboardEntry {
@@ -47,6 +64,37 @@ export interface LeaderboardResponse {
   weekStartDate: string
   weekEndDate: string
   scope: LeaderboardScope
+  period: "weekly"
+}
+
+export interface AllTimeLeaderboardEntry {
+  rank: number
+  userId: string
+  userName: string
+  userImage?: string | null
+  classId?: string | null
+  className?: string | null
+  schoolId?: string | null
+  schoolName?: string | null
+  allTimeScore: number
+  longestStreak: number
+  avgTestScore: number
+  avgQuizScore: number
+  avgSpellingScore: number
+  avgGrammarQuizScore: number
+  avgGrammarGameScore: number
+  flashcardReviews: number
+  totalVocabWords: number
+  totalSessions: number
+  testsCompleted: number
+  quizzesCompleted: number
+}
+
+export interface AllTimeLeaderboardResponse {
+  rankings: AllTimeLeaderboardEntry[]
+  currentUserRank: AllTimeLeaderboardEntry | null
+  scope: LeaderboardScope
+  period: "all-time"
 }
 
 export interface PersonalStats {
@@ -343,6 +391,7 @@ export async function getLeaderboard(
         weekStartDate: weekStart.toISOString().slice(0, 10),
         weekEndDate:   new Date(weekEnd.getTime() - 1).toISOString().slice(0, 10),
         scope: "class",
+        period: "weekly",
       }
     }
 
@@ -545,6 +594,396 @@ export async function getLeaderboard(
       weekStartDate: weekStart.toISOString().slice(0, 10),
       weekEndDate:   new Date(weekEnd.getTime() - 1).toISOString().slice(0, 10),
       scope: options.scope,
+      period: "weekly",
+    }
+  } finally {
+    client.release()
+  }
+}
+
+// ─── All-time composite score formula ─────────────────────────────────────────
+// Reuses the weekly weighting shape but substitutes longestStreak for the
+// current-week streak and drops the week-over-week improvement bonus (which has
+// no all-time meaning). Keeps scores comparable in spirit to the weekly score.
+//
+// All-Time Score =
+//   longestStreak × 10 +
+//   avgTestScore × 1.0 +
+//   avgQuizScore × 1.0 +
+//   avgSpellingScore × 0.5 +
+//   avgGrammarQuizScore × 1.0 +
+//   avgGrammarGameScore × 0.5 +
+//   flashcardReviews × 5 +
+//   totalVocabWords × 1
+//
+function calcAllTimeScore(
+  longestStreak: number,
+  avgTestScore: number,
+  avgQuizScore: number,
+  avgSpellingScore: number,
+  avgGrammarQuizScore: number,
+  avgGrammarGameScore: number,
+  flashcardReviews: number,
+  totalVocabWords: number
+): number {
+  const base =
+    longestStreak * 10 +
+    avgTestScore * 1.0 +
+    avgQuizScore * 1.0 +
+    avgSpellingScore * 0.5 +
+    avgGrammarQuizScore * 1.0 +
+    avgGrammarGameScore * 0.5 +
+    flashcardReviews * 5 +
+    totalVocabWords * 1
+
+  return Math.round(base)
+}
+
+// ─── Upsert all-time stats for one user ───────────────────────────────────────
+// Mirrors refreshWeeklyStatsForUser but aggregates across ALL time (no week
+// filter). The aggregation queries are the ones already proven correct in
+// getPersonalStats() below. Vocabulary is sourced from user_vocabulary (deduped
+// per-user count) to match the all-time personal stat, NOT the weekly
+// glossary-array-length sum.
+export async function refreshAllTimeStatsForUser(
+  userId: string
+): Promise<void> {
+  const client = await getClient()
+
+  try {
+    // Sessions / test / grammar-quiz averages from reading_sessions.
+    const sessionStatsResult = await client.query(
+      `SELECT
+         COUNT(id)::int                                              AS total_sessions,
+         COALESCE(AVG(NULLIF(test_score, 0)), 0)                    AS avg_test_score,
+         COUNT(CASE WHEN test_completed = true THEN 1 END)::int     AS tests_completed,
+         COALESCE(AVG(NULLIF(grammar_quiz_score, 0))
+           FILTER (WHERE grammar_quiz_completed = true), 0)         AS avg_grammar_quiz_score,
+         COUNT(CASE WHEN grammar_quiz_completed = true THEN 1 END)::int AS grammar_quizzes_completed
+       FROM reading_sessions
+       WHERE user_id = $1`,
+      [userId]
+    )
+
+    // Deduped vocabulary count from user_vocabulary (matches /vocabulary page).
+    const vocabResult = await client.query(
+      `SELECT COUNT(*)::int AS total_vocab
+       FROM user_vocabulary
+       WHERE user_id = $1`,
+      [userId]
+    )
+
+    // Quiz / spelling / grammar-game / flashcard aggregates from activity_logs.
+    const activityResult = await client.query(
+      `SELECT
+         COUNT(CASE WHEN activity_type = 'quiz_complete' THEN 1 END)::int    AS quizzes_completed,
+         COALESCE(AVG(CASE WHEN activity_type = 'quiz_complete' THEN score END), 0) AS avg_quiz_score,
+         COUNT(CASE WHEN activity_type = 'spelling_complete' THEN 1 END)::int AS spelling_games,
+         COALESCE(AVG(CASE WHEN activity_type = 'spelling_complete' THEN score END), 0) AS avg_spelling_score,
+         COALESCE(AVG(CASE WHEN activity_type = 'spelling_complete' THEN accuracy END), 0) AS avg_spelling_accuracy,
+         COALESCE(AVG(CASE WHEN activity_type IN ('grammar_scramble_complete','grammar_workshop_complete','grammar_surgery_complete','grammar_roulette_complete','grammar_duel_complete') THEN score END), 0) AS avg_grammar_game_score,
+         COALESCE(AVG(CASE WHEN activity_type IN ('grammar_scramble_complete','grammar_workshop_complete','grammar_surgery_complete','grammar_roulette_complete','grammar_duel_complete') THEN accuracy END), 0) AS avg_grammar_game_accuracy,
+         COUNT(CASE WHEN activity_type IN ('grammar_scramble_complete','grammar_workshop_complete','grammar_surgery_complete','grammar_roulette_complete','grammar_duel_complete') THEN 1 END)::int AS grammar_games,
+         COALESCE(SUM(CASE WHEN activity_type = 'flashcard_review'
+                          THEN (details->>'cardsReviewed')::int
+                          ELSE 0 END), 0)::int AS total_flashcard_reviews
+       FROM activity_logs
+       WHERE user_id = $1`,
+      [userId]
+    )
+
+    // Longest streak via gap-and-islands on distinct activity days.
+    const streakResult = await client.query(
+      `SELECT COALESCE(MAX(cnt), 0) AS longest_streak
+       FROM (
+         SELECT COUNT(*) AS cnt
+         FROM (
+           SELECT
+             activity_date,
+             activity_date - (RANK() OVER (ORDER BY activity_date))::int * INTERVAL '1 day' AS grp
+           FROM (
+             SELECT DISTINCT
+               date_trunc('day', created_at AT TIME ZONE 'UTC')::date AS activity_date
+             FROM activity_logs
+             WHERE user_id = $1
+           ) distinct_days
+         ) grouped
+         GROUP BY grp
+       ) streaks`,
+      [userId]
+    )
+
+    const sessionStats = sessionStatsResult.rows[0]
+    const activity     = activityResult.rows[0]
+
+    const totalSessions    = parseInt(sessionStats.total_sessions ?? "0") || 0
+    const avgTestScore     = parseFloat(sessionStats.avg_test_score ?? "0") || 0
+    const testsCompleted   = parseInt(sessionStats.tests_completed ?? "0") || 0
+    const avgGrammarQuizScore    = parseFloat(sessionStats.avg_grammar_quiz_score ?? "0") || 0
+    const grammarQuizzesCompleted = parseInt(sessionStats.grammar_quizzes_completed ?? "0") || 0
+
+    const totalVocabWords  = parseInt(vocabResult.rows[0]?.total_vocab ?? "0") || 0
+
+    const quizzesCompleted = parseInt(activity.quizzes_completed ?? "0") || 0
+    const avgQuizScore     = parseFloat(activity.avg_quiz_score ?? "0") || 0
+    const spellingGamesCompleted = parseInt(activity.spelling_games ?? "0") || 0
+    const avgSpellingScore = parseFloat(activity.avg_spelling_score ?? "0") || 0
+    const avgSpellingAccuracy = parseFloat(activity.avg_spelling_accuracy ?? "0") || 0
+    const grammarGamesCompleted = parseInt(activity.grammar_games ?? "0") || 0
+    const avgGrammarGameScore = parseFloat(activity.avg_grammar_game_score ?? "0") || 0
+    const avgGrammarGameAccuracy = parseFloat(activity.avg_grammar_game_accuracy ?? "0") || 0
+    const totalFlashcardReviews = parseInt(activity.total_flashcard_reviews ?? "0") || 0
+
+    const longestStreak = parseInt(streakResult.rows[0]?.longest_streak ?? "0") || 0
+
+    const allTimeScore = calcAllTimeScore(
+      longestStreak,
+      avgTestScore,
+      avgQuizScore,
+      avgSpellingScore,
+      avgGrammarQuizScore,
+      avgGrammarGameScore,
+      totalFlashcardReviews,
+      totalVocabWords
+    )
+
+    await client.query(
+      `INSERT INTO all_time_stats (
+         user_id,
+         total_sessions, longest_streak_days,
+         avg_test_score, total_flashcard_reviews,
+         avg_quiz_score, avg_spelling_score, avg_spelling_accuracy, avg_grammar_quiz_score, avg_grammar_game_score, avg_grammar_game_accuracy,
+         total_vocabulary_words,
+         tests_completed, quizzes_completed, spelling_games_completed, grammar_quizzes_completed, grammar_games_completed,
+         all_time_score
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+       ON CONFLICT (user_id)
+       DO UPDATE SET
+         total_sessions            = EXCLUDED.total_sessions,
+         longest_streak_days       = EXCLUDED.longest_streak_days,
+         avg_test_score            = EXCLUDED.avg_test_score,
+         total_flashcard_reviews   = EXCLUDED.total_flashcard_reviews,
+         avg_quiz_score            = EXCLUDED.avg_quiz_score,
+         avg_spelling_score        = EXCLUDED.avg_spelling_score,
+         avg_spelling_accuracy     = EXCLUDED.avg_spelling_accuracy,
+         avg_grammar_quiz_score    = EXCLUDED.avg_grammar_quiz_score,
+         avg_grammar_game_score    = EXCLUDED.avg_grammar_game_score,
+         avg_grammar_game_accuracy = EXCLUDED.avg_grammar_game_accuracy,
+         total_vocabulary_words    = EXCLUDED.total_vocabulary_words,
+         tests_completed           = EXCLUDED.tests_completed,
+         quizzes_completed         = EXCLUDED.quizzes_completed,
+         spelling_games_completed  = EXCLUDED.spelling_games_completed,
+         grammar_quizzes_completed = EXCLUDED.grammar_quizzes_completed,
+         grammar_games_completed   = EXCLUDED.grammar_games_completed,
+         all_time_score            = EXCLUDED.all_time_score,
+         updated_at                = NOW()`,
+      [
+        userId,
+        totalSessions,
+        longestStreak,
+        avgTestScore,
+        totalFlashcardReviews,
+        avgQuizScore,
+        avgSpellingScore,
+        avgSpellingAccuracy,
+        avgGrammarQuizScore,
+        avgGrammarGameScore,
+        avgGrammarGameAccuracy,
+        totalVocabWords,
+        testsCompleted,
+        quizzesCompleted,
+        spellingGamesCompleted,
+        grammarQuizzesCompleted,
+        grammarGamesCompleted,
+        allTimeScore,
+      ]
+    )
+  } finally {
+    client.release()
+  }
+}
+
+// ─── Get all-time leaderboard ─────────────────────────────────────────────────
+// Mirrors getLeaderboard() but queries all_time_stats (no week filter) and
+// omits the prior-week rank query (no week-over-week delta in all-time mode).
+export async function getAllTimeLeaderboard(
+  requestingUserId: string,
+  options: {
+    scope: LeaderboardScope
+    classId?: string
+    classIds?: string[]
+    schoolId?: string
+    sortBy?: AllTimeSortColumn
+    limit?: number
+  }
+): Promise<AllTimeLeaderboardResponse> {
+  const client = await getClient()
+
+  const sortBy = options.sortBy ?? "all_time_score"
+  const limit  = Math.min(options.limit ?? 50, 200)
+
+  const effectiveClassIds = options.classIds?.length ? options.classIds : (options.classId ? [options.classId] : [])
+
+  try {
+    if (options.scope === "class" && effectiveClassIds.length === 0) {
+      return {
+        rankings: [],
+        currentUserRank: null,
+        scope: "class",
+        period: "all-time",
+      }
+    }
+
+    let scopeJoin   = ""
+    let scopeWhere  = ""
+    const params: unknown[] = [limit]
+
+    if (options.scope === "class" && effectiveClassIds.length > 0) {
+      scopeJoin  = `JOIN class_members cm ON cm.student_id = ats.user_id`
+      if (effectiveClassIds.length === 1) {
+        scopeWhere = `AND cm.class_id = $2`
+        params.push(effectiveClassIds[0])
+      } else {
+        const placeholders = effectiveClassIds.map((_, i) => `$${i + 2}`).join(", ")
+        scopeWhere = `AND cm.class_id IN (${placeholders})`
+        params.push(...effectiveClassIds)
+      }
+    } else if (options.scope === "school" && options.schoolId) {
+      scopeJoin  = `JOIN users su ON su.id = ats.user_id
+                    JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
+      scopeWhere = `AND su.school_id = $2`
+      params.push(options.schoolId)
+    } else if (options.scope === "global") {
+      scopeJoin  = `JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
+      scopeWhere = ``
+    }
+
+    const sql = `
+      SELECT
+        ats.*,
+        u.name            AS user_name,
+        u.image           AS user_image,
+        cm2.class_id      AS class_id,
+        c.name            AS class_name,
+        u.school_id       AS school_id,
+        s.name            AS school_name,
+        RANK() OVER (ORDER BY ats.${sortBy} DESC NULLS LAST) AS rank
+      FROM all_time_stats ats
+      JOIN users u ON u.id = ats.user_id
+      LEFT JOIN class_members cm2 ON cm2.student_id = ats.user_id
+      LEFT JOIN classes c ON c.id = cm2.class_id
+      LEFT JOIN schools s ON s.id = u.school_id
+      ${scopeJoin}
+      WHERE 1=1
+        ${scopeWhere}
+      ORDER BY ats.${sortBy} DESC NULLS LAST
+      LIMIT $1`
+
+    const result = await client.query(sql, params)
+
+    const mapRow = (row: Record<string, unknown>, rank: number): AllTimeLeaderboardEntry => ({
+      rank,
+      userId:             row.user_id as string,
+      userName:           (row.user_name as string) ?? "Unknown",
+      userImage:          row.user_image as string | null,
+      classId:            row.class_id as string | null,
+      className:          row.class_name as string | null,
+      schoolId:           row.school_id as string | null,
+      schoolName:         row.school_name as string | null,
+      allTimeScore:       Math.round(parseFloat(row.all_time_score as string) || 0),
+      longestStreak:      parseInt(row.longest_streak_days as string) || 0,
+      avgTestScore:       Math.round(parseFloat(row.avg_test_score as string) || 0),
+      avgQuizScore:       Math.round(parseFloat(row.avg_quiz_score as string) || 0),
+      avgSpellingScore:   Math.round(parseFloat(row.avg_spelling_score as string) || 0),
+      avgGrammarQuizScore: Math.round(parseFloat(row.avg_grammar_quiz_score as string) || 0),
+      avgGrammarGameScore: Math.round(parseFloat(row.avg_grammar_game_score as string) || 0),
+      flashcardReviews:   parseInt(row.total_flashcard_reviews as string) || 0,
+      totalVocabWords:    parseInt(row.total_vocabulary_words as string) || 0,
+      totalSessions:      parseInt(row.total_sessions as string) || 0,
+      testsCompleted:     parseInt(row.tests_completed as string) || 0,
+      quizzesCompleted:   parseInt(row.quizzes_completed as string) || 0,
+    })
+
+    const rankings: AllTimeLeaderboardEntry[] = result.rows.map((row, i) =>
+      mapRow(row, i + 1)
+    )
+
+    // Find current user entry (may not be in top N)
+    let currentUserRank: AllTimeLeaderboardEntry | null =
+      rankings.find(r => r.userId === requestingUserId) ?? null
+
+    if (!currentUserRank) {
+      let userScopeJoin       = ""
+      let userScopeWhere      = ""
+      let userSubScopeJoin    = ""
+      let userSubScopeWhere   = ""
+      const userParams: unknown[] = [requestingUserId]
+
+      if (options.scope === "class" && effectiveClassIds.length > 0) {
+        userScopeJoin     = `JOIN class_members cm ON cm.student_id = ats.user_id`
+        userSubScopeJoin  = `JOIN class_members cm3 ON cm3.student_id = ats2.user_id`
+        if (effectiveClassIds.length === 1) {
+          userScopeWhere    = `AND cm.class_id = $2`
+          userSubScopeWhere = `AND cm3.class_id = $2`
+          userParams.push(effectiveClassIds[0])
+        } else {
+          const placeholders = effectiveClassIds.map((_, i) => `$${i + 2}`).join(", ")
+          userScopeWhere    = `AND cm.class_id IN (${placeholders})`
+          userSubScopeWhere = `AND cm3.class_id IN (${placeholders})`
+          userParams.push(...effectiveClassIds)
+        }
+      } else if (options.scope === "school" && options.schoolId) {
+        userScopeJoin     = `JOIN users su ON su.id = ats.user_id
+                             JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
+        userScopeWhere    = `AND su.school_id = $2`
+        userSubScopeJoin  = `JOIN users su2 ON su2.id = ats2.user_id
+                             JOIN user_roles ur2 ON ur2.user_id = ats2.user_id AND ur2.role = 'student'`
+        userSubScopeWhere = `AND su2.school_id = $2`
+        userParams.push(options.schoolId)
+      } else if (options.scope === "global") {
+        userScopeJoin     = `JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
+        userScopeWhere    = ``
+        userSubScopeJoin  = `JOIN user_roles ur2 ON ur2.user_id = ats2.user_id AND ur2.role = 'student'`
+        userSubScopeWhere = ``
+      }
+
+      const userSql = `
+        SELECT
+          ats.*,
+          u.name          AS user_name,
+          u.image         AS user_image,
+          cm2.class_id    AS class_id,
+          c.name          AS class_name,
+          u.school_id     AS school_id,
+          s.name          AS school_name,
+          (SELECT COUNT(*) + 1 FROM all_time_stats ats2
+           ${userSubScopeJoin}
+           WHERE ats2.${sortBy} > ats.${sortBy}
+             ${userSubScopeWhere}
+          ) AS rank
+        FROM all_time_stats ats
+        JOIN users u ON u.id = ats.user_id
+        LEFT JOIN class_members cm2 ON cm2.student_id = ats.user_id
+        LEFT JOIN classes c ON c.id = cm2.class_id
+        LEFT JOIN schools s ON s.id = u.school_id
+        ${userScopeJoin}
+        WHERE ats.user_id = $1
+          ${userScopeWhere}`
+
+      const userResult = await client.query(userSql, userParams)
+      if (userResult.rows.length > 0) {
+        currentUserRank = mapRow(
+          userResult.rows[0],
+          parseInt(userResult.rows[0].rank as string)
+        )
+      }
+    }
+
+    return {
+      rankings,
+      currentUserRank,
+      scope: options.scope,
+      period: "all-time",
     }
   } finally {
     client.release()
