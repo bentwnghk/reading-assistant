@@ -805,26 +805,24 @@ export async function refreshAllTimeStatsForUser(
 
 // ─── Cold-start backfill ──────────────────────────────────────────────────────
 // all_time_stats is a brand-new table, so unlike weekly_stats it starts empty.
-// The lazy per-activity refresh only ever populates the *acting* user, so the
-// board would appear empty until every user has individually logged activity.
-// These helpers detect that cold-start and populate every user once; afterwards
-// the normal lazy refresh keeps the table warm.
-
-export async function allTimeStatsCount(): Promise<number> {
-  const client = await getClient()
-  try {
-    const result = await client.query(`SELECT COUNT(*)::int AS cnt FROM all_time_stats`)
-    return parseInt(result.rows[0]?.cnt ?? "0") || 0
-  } finally {
-    client.release()
-  }
-}
-
-export async function backfillAllTimeStats(): Promise<void> {
+// The lazy per-activity refresh only ever populates the *acting* user, so without
+// a backfill the board would only show users who happened to log activity after
+// deployment. This finds every user still MISSING a row and refreshes them.
+//
+// It converges: once every user has a row, the LEFT JOIN finds nobody and this
+// becomes a cheap no-op, so it is safe (and cheap) to call on every all-time
+// leaderboard request. New users who sign up later are picked up automatically.
+export async function backfillMissingAllTimeStats(): Promise<void> {
   const pool = getPool()
   const client = await pool.connect()
   try {
-    const { rows } = await client.query(`SELECT id FROM users`)
+    const { rows } = await client.query(
+      `SELECT u.id
+       FROM users u
+       LEFT JOIN all_time_stats ats ON ats.user_id = u.id
+       WHERE ats.user_id IS NULL`
+    )
+    if (rows.length === 0) return
     const batchSize = 10
     for (let i = 0; i < rows.length; i += batchSize) {
       await Promise.all(

@@ -4,8 +4,7 @@ import {
   getAllTimeLeaderboard,
   refreshWeeklyStatsForUser,
   refreshAllTimeStatsForUser,
-  allTimeStatsCount,
-  backfillAllTimeStats,
+  backfillMissingAllTimeStats,
   type LeaderboardScope,
   type LeaderboardPeriod,
   type SortColumn,
@@ -47,15 +46,12 @@ export async function GET(request: Request) {
     const userRole = session.user.role
 
     // Refresh stats so the requesting user's latest activity shows up immediately.
-    // All-time is a brand-new table: on first view it's empty, so backfill every
-    // user once (afterwards the lazy per-activity refresh keeps it warm).
+    // All-time is a brand-new table: backfill any users still missing a row so
+    // the board shows everyone in scope (not just users active since deployment).
+    // This converges to a cheap no-op once every user has a row.
     if (isAllTime) {
-      const statsCount = await allTimeStatsCount()
-      if (statsCount === 0) {
-        await backfillAllTimeStats()
-      } else {
-        await refreshAllTimeStatsForUser(userId)
-      }
+      await refreshAllTimeStatsForUser(userId)
+      await backfillMissingAllTimeStats()
     } else {
       await refreshWeeklyStatsForUser(userId, weekStart)
     }
