@@ -102,6 +102,7 @@ function VocabularyContainer() {
   const [showHelp, setShowHelp] = useState(false);
   const [helpTab, setHelpTab] = useState<"overview" | "review" | "extras">("overview");
   const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
+  const currentEntryType = useRef<"word" | "phrase">("word");
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -149,6 +150,7 @@ function VocabularyContainer() {
   const handleStartReview = useCallback(() => {
     startReview();
     currentReviewMode.current = "flashcard";
+    currentEntryType.current = "word";
     setActiveTab("flashcard");
   }, [startReview]);
 
@@ -165,6 +167,7 @@ function VocabularyContainer() {
       autoSelectForReview(count, strategy);
       startReview();
       currentReviewMode.current = mode;
+      currentEntryType.current = "word";
       setActiveTab(mode);
     },
     [
@@ -212,6 +215,7 @@ function VocabularyContainer() {
     (results: { word: string; correct: boolean; rating?: SRSAction; attempts?: number }[], ratingCounts?: VocabularyRatingCounts) => {
       if (results.length === 0) return;
       const store = useVocabularyStore.getState();
+      const entryType = currentEntryType.current;
       const reviewResults: VocabularyReviewResult[] = results.map((r) => {
         const w = store.words.find(
           (vw) => vw.word.toLowerCase() === r.word.toLowerCase()
@@ -232,6 +236,36 @@ function VocabularyContainer() {
           mode: currentReviewMode.current,
           results: reviewResults,
           ratingCounts,
+          entryType,
+        }),
+      }).catch((err) => console.error("Failed to save review session:", err));
+    },
+    [],
+  );
+
+  // Records a phrase-unscramble session (the phrase equivalent of spelling).
+  const handlePhraseUnscrambleComplete = useCallback(
+    (results: { word: string; correct: boolean }[]) => {
+      if (results.length === 0) return;
+      const store = useVocabularyStore.getState();
+      const reviewResults: VocabularyReviewResult[] = results.map((r) => {
+        const w = store.words.find(
+          (vw) => vw.word.toLowerCase() === r.word.toLowerCase()
+        );
+        return {
+          word: r.word,
+          correct: r.correct,
+          masteryBefore: w?.masteryLevel ?? 0,
+          masteryAfter: w?.masteryLevel ?? 0,
+        };
+      });
+      fetch("/api/vocabulary/review-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "spelling",
+          results: reviewResults,
+          entryType: "phrase",
         }),
       }).catch((err) => console.error("Failed to save review session:", err));
     },
@@ -512,12 +546,15 @@ function VocabularyContainer() {
             <PhrasesTab
               onReviewFlashcard={() => {
                 currentReviewMode.current = "flashcard";
+                currentEntryType.current = "phrase";
                 setActiveTab("flashcard");
               }}
               onReviewQuiz={() => {
                 currentReviewMode.current = "quiz";
+                currentEntryType.current = "phrase";
                 setActiveTab("quiz");
               }}
+              onUnscrambleComplete={handlePhraseUnscrambleComplete}
             />
           )}
           {activeTab === "flashcard" && (

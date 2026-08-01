@@ -1886,7 +1886,8 @@
       "arrangeHint": "按正確順序點擊詞語",
       "allPlaced": "所有詞語已放置",
       "correct": "正確！",
-      "wrong": "不太對"
+      "wrong": "不太對",
+      "historyTitle": "詞組複習記錄"
     },
     "searchPlaceholder": "搜尋詞彙...",
     "allRatings": "全部評級",
@@ -2064,6 +2065,11 @@
       "flashcard": "字卡複習",
       "quiz": "詞彙測驗",
       "spelling": "拼寫練習",
+      "filter": {
+        "all": "全部",
+        "word": "單詞",
+        "phrase": "詞組"
+      },
       "words": "個詞",
       "correct": "正確",
       "incorrect": "錯誤",

@@ -26,6 +26,7 @@ const createSchema = z.object({
     good: z.number().int().min(0),
     easy: z.number().int().min(0),
   }).optional(),
+  entryType: z.enum(["word", "phrase"]).optional(),
 });
 
 export async function POST(request: Request) {
@@ -48,7 +49,8 @@ export async function POST(request: Request) {
       session.user.id,
       parsed.data.mode,
       parsed.data.results,
-      parsed.data.ratingCounts
+      parsed.data.ratingCounts,
+      parsed.data.entryType
     );
     return NextResponse.json({ id });
   } catch (error) {
@@ -73,6 +75,11 @@ export async function GET(request: Request) {
       Math.max(parseInt(searchParams.get("limit") || "20"), 1),
       100
     );
+    const entryTypeParam = searchParams.get("entryType");
+    const entryType =
+      entryTypeParam === "word" || entryTypeParam === "phrase"
+        ? entryTypeParam
+        : undefined;
 
     if (sessionId) {
       const detail = await getReviewSessionDetail(session.user.id, sessionId);
@@ -85,7 +92,7 @@ export async function GET(request: Request) {
       return NextResponse.json(detail);
     }
 
-    const sessions = await getReviewSessions(session.user.id, limit);
+    const sessions = await getReviewSessions(session.user.id, limit, entryType);
     return NextResponse.json(sessions);
   } catch (error) {
     console.error("Failed to fetch review sessions:", error);

@@ -2,19 +2,23 @@
 
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Brain, ClipboardList, Shuffle, Inbox } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Brain, ClipboardList, Shuffle, Inbox, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useVocabularyStore } from "@/store/vocabulary";
 import PhraseUnscramble from "./PhraseUnscramble";
+
+const ReviewHistory = dynamic(() => import("./ReviewHistory"));
 
 type PhraseMode = "list" | "flashcard" | "quiz" | "unscramble";
 
 interface PhrasesTabProps {
   onReviewFlashcard: () => void;
   onReviewQuiz: () => void;
+  onUnscrambleComplete?: (results: { word: string; correct: boolean }[]) => void;
 }
 
-export default function PhrasesTab({ onReviewFlashcard, onReviewQuiz }: PhrasesTabProps) {
+export default function PhrasesTab({ onReviewFlashcard, onReviewQuiz, onUnscrambleComplete }: PhrasesTabProps) {
   const { t } = useTranslation();
   const { words, setReviewQueue } = useVocabularyStore();
   const [mode, setMode] = useState<PhraseMode>("list");
@@ -52,7 +56,10 @@ export default function PhrasesTab({ onReviewFlashcard, onReviewQuiz }: PhrasesT
             englishDefinition: p.englishDefinition,
             chineseDefinition: p.chineseDefinition,
           }))}
-          onComplete={() => setMode("list")}
+          onComplete={(results) => {
+            onUnscrambleComplete?.(results);
+            setMode("list");
+          }}
         />
       </div>
     );
@@ -127,6 +134,15 @@ export default function PhrasesTab({ onReviewFlashcard, onReviewQuiz }: PhrasesT
           </table>
         </div>
       )}
+
+      {/* Phrase-scoped review history */}
+      <div className="mt-8">
+        <h3 className="text-sm font-semibold flex items-center gap-2 mb-3 text-muted-foreground">
+          <History className="h-4 w-4" />
+          {t("vocabulary.phrases.historyTitle")}
+        </h3>
+        <ReviewHistory fixedEntryType="phrase" />
+      </div>
     </div>
   );
 }

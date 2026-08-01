@@ -335,7 +335,8 @@ export async function createReviewSession(
   userId: string,
   mode: VocabularyReviewMode,
   results: VocabularyReviewResult[],
-  ratingCounts?: VocabularyRatingCounts
+  ratingCounts?: VocabularyRatingCounts,
+  entryType: "word" | "phrase" = "word"
 ): Promise<string> {
   const pool = getPool();
   const now = Date.now();
@@ -356,9 +357,9 @@ export async function createReviewSession(
       : null;
 
   await pool.query(
-    `INSERT INTO vocabulary_review_sessions (id, user_id, mode, total_words, correct_count, accuracy, rating_counts, started_at, completed_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-    [sessionId, userId, mode, totalWords, correctCount, accuracy, counts ? JSON.stringify(counts) : null, now - 60000, now]
+    `INSERT INTO vocabulary_review_sessions (id, user_id, mode, total_words, correct_count, accuracy, rating_counts, entry_type, started_at, completed_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [sessionId, userId, mode, totalWords, correctCount, accuracy, counts ? JSON.stringify(counts) : null, entryType, now - 60000, now]
   );
 
   if (results.length > 0) {
@@ -448,17 +449,22 @@ export async function getVocabularyCountsForUsers(
 
 export async function getReviewSessions(
   userId: string,
-  limit: number = 20
+  limit: number = 20,
+  entryType?: "word" | "phrase"
 ): Promise<VocabularyReviewSession[]> {
   const pool = getPool();
-  const { rows } = await pool.query(
-    `SELECT id, mode, total_words, correct_count, accuracy, rating_counts, started_at, completed_at
+  let query = `SELECT id, mode, total_words, correct_count, accuracy, rating_counts, entry_type, started_at, completed_at
      FROM vocabulary_review_sessions
-     WHERE user_id = $1
-     ORDER BY completed_at DESC
-     LIMIT $2`,
-    [userId, limit]
-  );
+     WHERE user_id = $1`;
+  const params: unknown[] = [userId];
+  if (entryType) {
+    query += ` AND entry_type = $${params.length + 1}`;
+    params.push(entryType);
+  }
+  query += ` ORDER BY completed_at DESC LIMIT $${params.length + 1}`;
+  params.push(limit);
+
+  const { rows } = await pool.query(query, params);
   return rows.map((r) => ({
     id: r.id,
     mode: r.mode,
@@ -466,6 +472,7 @@ export async function getReviewSessions(
     correctCount: Number(r.correct_count),
     accuracy: Number(r.accuracy),
     ratingCounts: r.rating_counts || undefined,
+    entryType: ((r.entry_type as string) || "word") as "word" | "phrase",
     startedAt: Number(r.started_at),
     completedAt: Number(r.completed_at),
   }));
@@ -478,7 +485,7 @@ export async function getReviewSessionDetail(
   const pool = getPool();
 
   const { rows: sessionRows } = await pool.query(
-    `SELECT id, mode, total_words, correct_count, accuracy, rating_counts, started_at, completed_at
+    `SELECT id, mode, total_words, correct_count, accuracy, rating_counts, entry_type, started_at, completed_at
      FROM vocabulary_review_sessions
      WHERE id = $1 AND user_id = $2`,
     [sessionId, userId]
@@ -503,6 +510,7 @@ export async function getReviewSessionDetail(
     correctCount: Number(s.correct_count),
     accuracy: Number(s.accuracy),
     ratingCounts: s.rating_counts || undefined,
+    entryType: ((s.entry_type as string) || "word") as "word" | "phrase",
     startedAt: Number(s.started_at),
     completedAt: Number(s.completed_at),
     results: resultRows.map((r) => ({

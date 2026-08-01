@@ -917,6 +917,8 @@ interface VocabularyReviewSession {
   ratingCounts?: VocabularyRatingCounts;
   startedAt: number;
   completedAt: number;
+  /** "word" (default) or "phrase" — scopes the review queue. */
+  entryType?: "word" | "phrase";
   results?: VocabularyReviewResult[];
 }
 

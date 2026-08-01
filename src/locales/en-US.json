@@ -1864,7 +1864,8 @@
       "arrangeHint": "Tap words in the correct order",
       "allPlaced": "All words placed",
       "correct": "Correct!",
-      "wrong": "Not quite"
+      "wrong": "Not quite",
+      "historyTitle": "Phrase Review History"
     },
     "searchPlaceholder": "Search words...",
     "allRatings": "All Ratings",
@@ -2042,6 +2043,11 @@
       "flashcard": "Flashcard Review",
       "quiz": "Vocabulary Quiz",
       "spelling": "Spelling Practice",
+      "filter": {
+        "all": "All",
+        "word": "Words",
+        "phrase": "Phrases"
+      },
       "words": "words",
       "correct": "correct",
       "incorrect": "incorrect",

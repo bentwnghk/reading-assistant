@@ -37,7 +37,12 @@ const RATING_COLORS: Record<string, string> = {
   easy: "text-green-500",
 };
 
-function ReviewHistory() {
+interface ReviewHistoryProps {
+  /** When set, locks the view to a single entry type (no filter toggle shown). */
+  fixedEntryType?: "word" | "phrase";
+}
+
+function ReviewHistory({ fixedEntryType }: ReviewHistoryProps) {
   const { t } = useTranslation();
   const [sessions, setSessions] = useState<VocabularyReviewSession[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -46,16 +51,22 @@ function ReviewHistory() {
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [entryFilter, setEntryFilter] = useState<"all" | "word" | "phrase">(
+    fixedEntryType ?? "all",
+  );
 
   useEffect(() => {
-    fetch("/api/vocabulary/review-sessions?limit=100")
+    setIsLoading(true);
+    const param = fixedEntryType ?? (entryFilter !== "all" ? entryFilter : undefined);
+    const qs = param ? `?limit=100&entryType=${param}` : "?limit=100";
+    fetch(`/api/vocabulary/review-sessions${qs}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         setSessions(Array.isArray(data) ? data : []);
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
-  }, []);
+  }, [entryFilter, fixedEntryType]);
 
   const toggleExpand = useCallback(
     async (sessionId: string) => {
@@ -168,6 +179,27 @@ function ReviewHistory() {
 
   return (
     <>
+    {!fixedEntryType && (
+      <div className="flex items-center gap-1 mb-3">
+        {(["all", "word", "phrase"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => {
+              setEntryFilter(f);
+              setCurrentPage(1);
+            }}
+            className={cn(
+              "px-3 py-1 rounded-md text-xs font-medium transition-colors",
+              entryFilter === f
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted hover:bg-accent text-muted-foreground",
+            )}
+          >
+            {t(`vocabulary.reviewHistory.filter.${f}`)}
+          </button>
+        ))}
+      </div>
+    )}
     <div className="space-y-2">
       {pagedSessions.map((session) => {
         const isExpanded = expandedId === session.id;
@@ -183,8 +215,13 @@ function ReviewHistory() {
               <span className="text-muted-foreground">
                 {getModeIcon(session.mode)}
               </span>
-              <span className="text-sm font-medium flex-1">
+              <span className="text-sm font-medium flex-1 flex items-center gap-2">
                 {getModeLabel(session.mode)}
+                {session.entryType === "phrase" && (
+                  <span className="text-[10px] uppercase tracking-wide rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 px-1.5 py-0.5">
+                    {t("vocabulary.tabPhrases")}
+                  </span>
+                )}
               </span>
               <span className="text-xs text-muted-foreground">
                 {session.totalWords} {t("vocabulary.reviewHistory.words")}
