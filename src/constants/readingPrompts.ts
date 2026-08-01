@@ -156,7 +156,99 @@ Make this text even simpler while preserving its core meaning.
 - Use simple sentence structures (subject-verb-object).
 - Keep the same meaning but make it extremely easy to read.
 
-**Respond with ONLY the simplified text, maintaining the paragraph structure.**`;
+  **Respond with ONLY the simplified text, maintaining the paragraph structure.**`;
+}
+
+export function generatePreReadingPrompt(age: number, text: string, title?: string): string {
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  const titleLine = title ? `\nThe text's title is: "${title}"` : "";
+  return `You are preparing a ${age}-year-old Hong Kong ${schoolLevel} student to read an English text. The student has NOT read the text yet. Generate pre-reading scaffolding that activates prior knowledge, sets a purpose for reading, pre-teaches the few words that would otherwise BLOCK comprehension, and supplies essential background — WITHOUT revealing the text's content, events, argument, or conclusions.
+
+<text>
+${text}
+</text>${titleLine}
+
+**YOUR TASK — produce this exact JSON shape (and NOTHING else):**
+{
+  "activationPrompts": ["...", "..."],
+  "activationPromptZh": ["...", "..."],
+  "predictionPrompt": "...",
+  "purpose": "...",
+  "preTeachWords": [
+    {"word":"...","syllabification":"...","partOfSpeech":"...","englishDefinition":"...","chineseDefinition":"..."}
+  ],
+  "backgroundNote": "..."
+}
+
+**FIELD RULES:**
+- "activationPrompts": 2-3 short questions (in English) that connect the TOPIC to the student's own life or existing knowledge. Do NOT ask about the text's specific content or outcome.
+- "activationPromptZh": optional Traditional Chinese (繁體中文) one-line hook per English prompt, to help weaker students engage. May be omitted entirely if the English is simple enough.
+- "predictionPrompt": ONE question that invites the student to GUESS what the text will be about, using only the title/topic — never reveal the answer.
+- "purpose": ONE sentence starting "Read to find out..." that gives the student a clear reason to read.
+- "preTeachWords": 5-8 words/phrases whose meaning is essential to understanding the text (the ~90-95% coverage principle). For each: a concise English definition a ${age}-year-old can grasp, the part of speech, and a Traditional Chinese (繁體中文) gloss in "chineseDefinition". Include syllabification (use · between syllables, uppercase the stressed syllable, e.g. "im·POR·tant"). Do NOT include trivial words the student already knows.
+- "backgroundNote": 1-2 sentences on cultural/contextual knowledge the text ASSUMES but a Hong Kong student may lack (e.g. a holiday, an institution, a historical event). If none is needed, return an empty string.
+
+**CRITICAL:** Do not state the text's main idea, summary, findings, plot, or conclusion anywhere. The student must discover those by reading. Respond with ONLY the JSON object, no markdown fences.`;
+}
+
+export function generatePreReadingImagePrompt(age: number, text: string): string {
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  return `You are generating a PREDICTION illustration for a ${age}-year-old Hong Kong ${schoolLevel} student who is about to read an English text but has NOT read it yet. The image must make the student CURIOUS and ready to predict — it must NOT reveal the text's content, events, outcome, or conclusion.
+
+<text>
+${text}
+</text>
+
+**Instructions:**
+1. Depict ONLY the topic, setting, mood, or genre of the text. For example: the place where events occur, key objects, the atmosphere, or the general subject area.
+2. **DO NOT** depict: specific events or actions from the text, characters' fates, results, conclusions, data/charts that give away findings, or any scene that would spoil what happens.
+3. Keep it evocative and intriguing but ambiguous — a viewer who has not read the text should be able to imagine several possible stories.
+4. The image must be:
+   - **Colorful and visually engaging** — vibrant colors appealing to students
+   - **Age-appropriate** — suitable for a ${age}-year-old
+   - **Minimal readable text** — avoid words/labels that hint at the content; no sentences or headlines
+   - **1K resolution (1280x720), 16:9 aspect ratio, PNG format**
+5. Use English for any unavoidable minimal text.
+
+Generate the image now.`;
+}
+
+export function generateCollocationsPrompt(age: number, text: string, glossaryWords: string[]): string {
+  const schoolLevel = age <= 11 ? "primary" : "secondary";
+  const knownList = glossaryWords.length > 0
+    ? `\nWords already covered in the glossary (do NOT repeat these as single words): ${glossaryWords.slice(0, 40).join(", ")}`
+    : "";
+  return `You are a language teacher analyzing an English text for ${age}-year-old Hong Kong ${schoolLevel} students. Hong Kong learners make many collocation errors due to L1 (Cantonese/Chinese) transfer — roughly half of their phrase-level mistakes come from translating word-for-word from Chinese. Extract the most useful multi-word chunks and collocations from the text.
+
+<text>
+${text}
+</text>${knownList}
+
+**YOUR TASK — produce a JSON array of objects with this exact shape (and NOTHING else):**
+[
+  {
+    "chunk": "take into account",
+    "pattern": "V + N (idiomatic)",
+    "meaning": "to consider something when judging a situation",
+    "meaningZh": "考慮；把……計算在內",
+    "contrastNote": "Cantonese speakers often say 「考慮」 directly; English requires the full chunk 'take into account', NOT 'consider into'.",
+    "example": "We must take the cost into account.",
+    "textOccurrences": 1
+  }
+]
+
+**EXTRACTION RULES:**
+- Extract 6-12 high-value chunks: phrasal verbs, delexicalized-verb collocations (take/make/have/do + noun), adjective+noun pairs, prepositional phrases, idioms, and fixed expressions that appear in (or are relevant to) the text.
+- "pattern": a short label (e.g. "Phrasal verb", "V+N", "Adj+N", "Prepositional phrase", "Idiom", "Fixed expression").
+- "meaning": concise English meaning a ${age}-year-old can grasp.
+- "meaningZh": Traditional Chinese (繁體中文) gloss.
+- "contrastNote": FOR CHUNKS WITH A KNOWN CANTONESE-L1 TRANSFER PITFALL, give a short note explaining how a Chinese-speaking learner typically gets it wrong (e.g. wrong preposition, word-for-word translation, missing article). This is the KEY value of this feature — include it whenever a transfer error is common. If the chunk has no notable transfer issue, omit "contrastNote".
+- "example": one example sentence (preferably from the text if present, otherwise generated and natural).
+- "textOccurrences": how many times the chunk (or its root form) appears in the text (0 if only related, not literal).
+
+**CRITICAL:**
+- Focus on chunks, NOT single words already in the glossary.
+- Respond with ONLY the JSON array, no markdown fences.`;
 }
 
 export function generateMindMapPrompt(age: number, text: string, useChinese: boolean = false) {

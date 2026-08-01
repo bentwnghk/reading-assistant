@@ -16,6 +16,7 @@ import {
   Pencil,
   Check,
   X,
+  Square,
   Wand2,
   ChevronDown,
   FileText,
@@ -78,6 +79,8 @@ import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 import { parseError } from "@/utils/error";
 import { sanitizeSentenceAnalysis } from "@/utils/text";
+import { splitSentences } from "@/utils/sentences";
+import { readAlong, stopReadAlong, stopSpeaking, unlockAudio } from "@/utils/tts";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
@@ -116,8 +119,23 @@ function highlightTextAndSentences(
   analyzedSentences: Record<string, SentenceAnalysis>,
   glossaryMap: Map<string, GlossaryEntry>
 ): { html: string; sentenceList: string[] } {
+  // First pass: split the full text into sentences and wrap each in a span
+  // with a stable data-ra-idx so read-along can highlight the active sentence.
+  const sentenceList = splitSentences(text);
   let result = text;
-  const sentenceList: string[] = [];
+  if (sentenceList.length > 0) {
+    // Replace longest sentences first to avoid partial-match collisions.
+    const sorted = [...sentenceList].sort((a, b) => b.length - a.length);
+    for (const sentence of sorted) {
+      const originalIdx = sentenceList.indexOf(sentence);
+      const escaped = escapeRegExp(sentence);
+      const pattern = new RegExp(`(${escaped})`, "g");
+      result = result.replace(
+        pattern,
+        `<span class="ra-sentence" data-ra-idx="${originalIdx}">$1</span>`
+      );
+    }
+  }
 
   const analyzedKeys = Object.keys(analyzedSentences);
   if (analyzedKeys.length > 0) {
@@ -127,13 +145,11 @@ function highlightTextAndSentences(
       .sort((a, b) => b.length - a.length);
 
     for (const sentence of sortedSentences) {
-      const sentenceIndex = sentenceList.length;
-      sentenceList.push(sentence);
       const escaped = escapeRegExp(sentence);
       const pattern = new RegExp(`(${escaped})`, "g");
       result = result.replace(
         pattern,
-        `<span class="analyzed-sentence border-b-2 border-blue-500 dark:border-blue-400 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950" data-idx="${sentenceIndex}">$1</span>`
+        `<span class="analyzed-sentence border-b-2 border-blue-500 dark:border-blue-400 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950" data-analyzed="1">$1</span>`
       );
     }
   }
@@ -375,6 +391,9 @@ function AdaptedText() {
     setIncludeSentenceAnalysis,
     setExtractedText,
     clearDerivedData,
+    readAlongIndex,
+    readAlongPlaying,
+    setReadAlong,
   } = useReadingStore();
 
   const { setTutorChatSelectedText } = useGlobalStore();
@@ -1039,6 +1058,73 @@ function AdaptedText() {
     return html;
   }, [extractedText, highlightedWords, analyzedSentences, glossaryMap]);
 
+  // ── Read-along (bimodal reading-while-listening) ──────────────────────────
+  const readAlongSentences = useMemo(
+    () => splitSentences(extractedText),
+    [extractedText],
+  );
+
+  const handleToggleReadAlong = useCallback(async () => {
+    if (readAlongPlaying) {
+      stopReadAlong();
+      setReadAlong(null, false);
+      return;
+    }
+    if (readAlongSentences.length === 0) return;
+    // The click is the user gesture that unlocks the AudioContext (Lesson 27).
+    await unlockAudio();
+    setReadAlong(0, true);
+    void readAlong({
+      sentences: readAlongSentences,
+      voice: ttsVoice,
+      speed: ttsPlaybackRate,
+      mode,
+      openaicompatibleApiKey,
+      openaicompatibleApiProxy,
+      accessPassword,
+      audioRef,
+      onSentenceStart: (i) => setReadAlong(i, true),
+      onSentenceEnd: (i) => {
+        // Brief pause between sentences is handled by sequential playback.
+        void i;
+      },
+      onComplete: () => setReadAlong(null, false),
+      onBlocked: () => {
+        setReadAlong(null, false);
+        toast.error(t("reading.readAlong.blocked"));
+      },
+    });
+  }, [readAlongPlaying, readAlongSentences, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword, setReadAlong, t]);
+
+  // Stop read-along when leaving the original tab.
+  useEffect(() => {
+    if (activeTab !== "original" && readAlongPlaying) {
+      stopReadAlong();
+      setReadAlong(null, false);
+    }
+  }, [activeTab, readAlongPlaying, setReadAlong]);
+
+  // Stop read-along on unmount.
+  useEffect(() => () => {
+    stopReadAlong();
+    stopSpeaking();
+  }, []);
+
+  // Highlight + scroll to the active sentence in the DOM.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.querySelectorAll(".ra-sentence.ra-active").forEach((el) => {
+      el.classList.remove("ra-active");
+    });
+    if (readAlongIndex === null || !readAlongPlaying) return;
+    const el = container.querySelector<HTMLElement>(`[data-ra-idx="${readAlongIndex}"]`);
+    if (el) {
+      el.classList.add("ra-active");
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [readAlongIndex, readAlongPlaying, highlightedText]);
+
   const analyzedSentencesKeys = useMemo(
     () => Object.keys(analyzedSentences),
     [analyzedSentences]
@@ -1083,13 +1169,9 @@ function AdaptedText() {
     if (analyzedSpan) {
       e.stopPropagation();
       e.preventDefault();
-      const idxAttr = analyzedSpan.getAttribute("data-idx");
-      if (idxAttr !== null) {
-        const idx = parseInt(idxAttr, 10);
-        const sentence = sentenceListRef.current[idx];
-        if (sentence) {
-          setActiveSentence(sentence);
-        }
+      const sentence = analyzedSpan.textContent || "";
+      if (sentence.trim()) {
+        setActiveSentence(sentence.trim());
       }
     }
   }, []);
@@ -1316,15 +1398,36 @@ function AdaptedText() {
           {/* Edit controls */}
           <div className="mb-4 flex justify-end gap-2">
             {!isEditing ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleStartEdit}
-                disabled={!extractedText}
-              >
-                <Pencil className="h-4 w-4 mr-1" />
-                {t("reading.adaptedText.edit")}
-              </Button>
+              <>
+                <Button
+                  variant={readAlongPlaying ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleToggleReadAlong}
+                  disabled={!extractedText || readAlongSentences.length === 0}
+                  className={readAlongPlaying ? "ra-pulse" : ""}
+                >
+                  {readAlongPlaying ? (
+                    <>
+                      <Square className="h-4 w-4 mr-1" />
+                      {t("reading.readAlong.stop")}
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 className="h-4 w-4 mr-1" />
+                      {t("reading.readAlong.play")}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleStartEdit}
+                  disabled={!extractedText}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  {t("reading.adaptedText.edit")}
+                </Button>
+              </>
             ) : (
               <>
                 <Button

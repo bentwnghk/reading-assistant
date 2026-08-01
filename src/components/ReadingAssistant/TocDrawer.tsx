@@ -11,6 +11,8 @@ import {
   BookMarked,
   Check,
   BookOpenCheck,
+  Sparkles,
+  Layers,
 } from "lucide-react";
 import {
   Dialog,
@@ -43,6 +45,15 @@ const sections = [
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.extractedText,
     isAccessible: () => true,
+  },
+  {
+    id: "section-pre-reading",
+    icon: Sparkles,
+    labelKey: "toc.preReading",
+    checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.preReading,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
   },
   {
     id: "section-summary",
@@ -86,6 +97,15 @@ const sections = [
     labelKey: "toc.glossary",
     checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
       store.glossary.length > 0,
+    isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
+      !!store.extractedText,
+  },
+  {
+    id: "section-collocations",
+    icon: Layers,
+    labelKey: "toc.collocations",
+    checkCompleted: (store: ReturnType<typeof useReadingStore.getState>) =>
+      store.collocations.length > 0,
     isAccessible: (store: ReturnType<typeof useReadingStore.getState>) =>
       !!store.extractedText,
   },

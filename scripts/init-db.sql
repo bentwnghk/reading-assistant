@@ -85,6 +85,15 @@ CREATE TABLE reading_sessions (
   mind_map TEXT DEFAULT '',
   visualization_image TEXT DEFAULT '',
   visualization_generated_at BIGINT DEFAULT 0,
+  pre_reading JSONB,
+  pre_reading_image TEXT DEFAULT '',
+  pre_reading_image_generated_at BIGINT DEFAULT 0,
+  pre_reading_generated_at BIGINT DEFAULT 0,
+  student_prediction TEXT DEFAULT '',
+  prediction_rating INTEGER,
+  skill_breakdown JSONB,
+  collocations JSONB DEFAULT '[]'::jsonb,
+  collocations_generated_at BIGINT DEFAULT 0,
   reading_test JSONB DEFAULT '[]'::jsonb,
   glossary JSONB DEFAULT '[]'::jsonb,
   glossary_ratings JSONB DEFAULT '{}'::jsonb,
@@ -295,6 +304,9 @@ CREATE TABLE activity_logs (
       'ai_tutor_question',
       'visualization_generate',
       'reading_text_generate',
+      'pre_reading_generate',
+      'pre_reading_image_generate',
+      'collocations_generate',
       'assignment_create',
       'assignment_start',
       'assignment_submit'
@@ -314,6 +326,15 @@ CREATE INDEX idx_activity_logs_session
   ON activity_logs (session_id);
 CREATE INDEX idx_activity_logs_week
   ON activity_logs (user_id, date_trunc('week', created_at));
+
+-- Cross-session per-skill rollup (Diagnostic Skill Profile).
+-- Incrementally upserted on each test completion.
+CREATE TABLE user_skill_profile (
+  user_id       TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  profile       JSONB NOT NULL DEFAULT '{}'::jsonb,
+  weakest_skill TEXT,
+  updated_at    BIGINT NOT NULL DEFAULT 0
+);
 
 -- Weekly pre-computed stats (refreshed by /api/leaderboard/refresh)
 -- week_start_date is always Monday (ISO week start)
@@ -625,6 +646,7 @@ CREATE TABLE user_vocabulary (
   source_session_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
   shared_by TEXT DEFAULT NULL REFERENCES users(id) ON DELETE SET NULL,
   srs_counts JSONB NOT NULL DEFAULT '{"hard":0,"medium":0}'::jsonb,
+  entry_type TEXT NOT NULL DEFAULT 'word' CHECK (entry_type IN ('word', 'phrase')),
   created_at BIGINT NOT NULL DEFAULT 0,
   updated_at BIGINT NOT NULL DEFAULT 0,
   UNIQUE (user_id, word)
@@ -645,6 +667,7 @@ CREATE TABLE vocabulary_review_sessions (
   correct_count INTEGER NOT NULL DEFAULT 0,
   accuracy INTEGER NOT NULL DEFAULT 0,
   rating_counts JSONB,
+  entry_type TEXT NOT NULL DEFAULT 'word',
   started_at BIGINT NOT NULL DEFAULT 0,
   completed_at BIGINT NOT NULL DEFAULT 0
 );

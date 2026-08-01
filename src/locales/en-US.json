@@ -10,12 +10,14 @@
     "description": "Jump to any section",
     "studentInfo": "User Info",
     "upload": "Select Text",
+    "preReading": "Before You Read",
     "summary": "Summary",
     "mindmap": "Mind Map",
     "visualization": "Text Visualization",
     "adapted": "Text Analysis & Adaptation",
     "test": "Reading Test",
     "glossary": "Vocabulary",
+    "collocations": "Collocations",
     "grammar": "Grammar"
   },
   "settingsBanner": {
@@ -136,7 +138,41 @@
           "title": "Sentence Analysis",
           "desc": "Click any sentence for a complete AI breakdown: meaning, vocabulary, grammar, language in use, and learning tips!"
         },
-        "glossary": {
+    "collocations": {
+      "title": "Word Chunks & Collocations",
+      "generate": "Extract Collocations",
+      "regenerate": "Regenerate",
+      "generating": "Extracting...",
+      "generatingWait": "Extracting collocations and L1 transfer notes...",
+      "emptyTip": "Click the button above to extract useful word chunks and collocations, with notes on common Cantonese-L1 mistakes.",
+      "inText": "In text: {{count}}",
+      "addToPhrases": "Add to Phrases",
+      "addedButton": "Added to Phrases",
+      "added": "Added \"{{chunk}}\" to your phrases.",
+      "addAll": "Add All to Phrases",
+      "addAllSuccess": "Added all chunks to your phrases.",
+      "addError": "Could not add phrase. Please try again.",
+      "parseError": "Could not parse collocations. Please try again.",
+      "help": {
+        "title": "Word Chunks & Collocations",
+        "intro": "Learn multi-word chunks and avoid common Cantonese-L1 transfer mistakes.",
+        "itemsBaseKey": "reading.collocations.help.items",
+        "items": {
+          "chunks": { "title": "Chunks", "description": "Phrasal verbs, collocations, and fixed expressions." },
+          "contrast": { "title": "Contrast", "description": "Notes on how Cantonese speakers typically get it wrong." },
+          "phrases": { "title": "Phrases", "description": "Add chunks to your Phrases review queue." }
+        },
+        "stepsTitle": "How it works",
+        "steps": {
+          "s1": "Click Extract Collocations.",
+          "s2": "Read the contrast notes to avoid L1 mistakes.",
+          "s3": "Add useful chunks to your Phrases tab for review."
+        },
+        "tipTitle": "Tip",
+        "tipContent": "About half of HK learners' collocation errors come from word-for-word translation — focus on the contrast notes."
+      }
+    },
+    "glossary": {
           "title": "Smart Glossary",
           "desc": "AI provides bilingual definitions (English + Chinese), syllable breakdowns, and example sentences for every word you mark."
         },
@@ -638,6 +674,53 @@
       "analysisTitle": "Sentence Analysis",
       "analysisDescription": "Detailed analysis of the selected sentence"
     },
+    "preReading": {
+      "title": "Before You Read",
+      "generate": "Prepare Pre-Reading",
+      "regenerate": "Regenerate",
+      "generating": "Preparing...",
+      "generatingWait": "Preparing pre-reading activities...",
+      "generateImage": "Show a picture to help me predict",
+      "imageGenerating": "Generating picture...",
+      "imageGeneratingWait": "Generating a prediction picture...",
+      "imageAlt": "Prediction illustration",
+      "imageTip": "Want a hint? Generate an illustrative picture to spark your prediction.",
+      "emptyTip": "Click the button above to activate your prior knowledge, pre-learn key words, and set a purpose before you read.",
+      "predictionPlaceholder": "Type what you think this text will be about...",
+      "titleHint": "Title: {{title}}",
+      "purposeLabel": "Purpose",
+      "activationLabel": "Activate Your Knowledge",
+      "preTeachLabel": "Key Words to Know First",
+      "backgroundLabel": "Background",
+      "listen": "Listen to {{word}}",
+      "parseError": "Could not parse pre-reading data. Please try again.",
+      "compareLabel": "Check Your Prediction",
+      "yourPrediction": "Your prediction",
+      "compareQuestion": "Now that you've read the summary — how close was your prediction?",
+      "rating": {
+        "notClose": "Not close",
+        "somewhat": "Somewhat",
+        "veryClose": "Very close"
+      },
+      "help": {
+        "title": "Before You Read",
+        "intro": "Get ready before you read so the text is easier to understand.",
+        "itemsBaseKey": "reading.preReading.help.items",
+        "items": {
+          "activate": { "title": "Activate", "description": "Connect the topic to what you already know." },
+          "predict": { "title": "Predict", "description": "Guess what the text is about, then check after reading." },
+          "preteach": { "title": "Pre-teach", "description": "Learn the key words you need before you start." }
+        },
+        "stepsTitle": "How it works",
+        "steps": {
+          "s1": "Click Prepare Pre-Reading.",
+          "s2": "Read the prompts and key words, then type your prediction.",
+          "s3": "After you read and get the summary, compare your prediction."
+        },
+        "tipTitle": "Tip",
+        "tipContent": "Predicting first helps you focus and remember more."
+      }
+    },
     "summary": {
       "title": "Summary",
       "generate": "Generate Summary",
@@ -679,6 +762,11 @@
         "tipTitle": "Good to know",
         "tipContent": "The tone and complexity match your age — simpler and more visual for primary students, more academic for DSE students."
       }
+    },
+    "readAlong": {
+      "play": "Read Along",
+      "stop": "Stop",
+      "blocked": "Tap the Read Along button again to enable sound."
     },
     "adaptedText": {
       "title": "Text Analysis & Adaptation",
@@ -1635,6 +1723,7 @@
       "title": "Learning Progress",
       "progress": "{{percent}}% complete",
       "upload": "Select Text",
+      "preReading": "Before You Read",
       "summary": "Summary",
       "adapt": "Adapt Text",
       "mindmap": "Mind Map",
@@ -1646,6 +1735,7 @@
       "analyze": "Analyze Sentence",
       "highlight": "Highlight Word",
       "glossary": "Vocabulary",
+      "collocations": "Collocations",
       "spelling": "Spelling Game",
       "vocabQuiz": "Vocab Quiz",
       "help": {
@@ -1746,6 +1836,7 @@
     "close": "Back to app",
     "tabTable": "Table",
     "tabFlashcard": "Flashcard",
+    "tabPhrases": "Phrases",
     "tabSpelling": "Spelling",
     "tabQuiz": "Quiz",
     "tabLists": "Review Lists",
@@ -1753,6 +1844,28 @@
     "emptyTitle": "No Vocabulary Yet",
     "emptyDesc": "Start reading to collect vocabulary words. They will appear here for review.",
     "startReading": "Start Reading",
+    "phrases": {
+      "count": "{{count}} phrases",
+      "empty": "No phrases yet.",
+      "emptyHint": "Extract collocations from a reading session and add them here.",
+      "startFlashcard": "Flashcard Review",
+      "startQuiz": "Quiz",
+      "startUnscramble": "Unscramble",
+      "backToList": "Back to list",
+      "colChunk": "Chunk",
+      "colPattern": "Pattern",
+      "colMeaning": "Meaning",
+      "colZh": "中文釋義",
+      "progress": "{{current}} / {{total}}",
+      "check": "Check",
+      "next": "Next",
+      "retry": "Retry",
+      "finish": "Finish",
+      "arrangeHint": "Tap words in the correct order",
+      "allPlaced": "All words placed",
+      "correct": "Correct!",
+      "wrong": "Not quite"
+    },
     "searchPlaceholder": "Search words...",
     "allRatings": "All Ratings",
     "hardOnly": "Hard",
@@ -2120,6 +2233,10 @@
       "vocabularyGrowth": "Vocabulary Growth",
       "cumulativeVocab": "Cumulative Vocabulary",
       "scoreDistribution": "Test Score Distribution",
+      "skillProfile": "Comprehension Skill Profile",
+      "skillProfileEmpty": "Complete a reading test to see your skill breakdown.",
+      "weakestSkill": "Focus area: {{skill}}",
+      "accuracy": "Accuracy",
       "noTestData": "No test scores yet",
       "noData": "No data yet"
     },

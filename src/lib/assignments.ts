@@ -35,6 +35,9 @@ export function stripSessionForAssignment(sessionData: ReadingStore): Record<str
     // SRS / ratings
     flashcardReviewDates: [],
     glossaryRatings: {},
+    // Pre-reading: content kept; user prediction zeroed
+    studentPrediction: "",
+    predictionRating: null,
     // Chat
     chatHistory: [],
     // Grammar quiz

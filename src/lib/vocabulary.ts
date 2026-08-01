@@ -24,6 +24,7 @@ function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
       ? (row.source_session_ids as string[])
       : [],
     source: row.shared_by ? "teacher" : "own",
+    entryType: ((row.entry_type as string) || "word") as "word" | "phrase",
     sharedBy: (row.shared_by as string) || null,
     createdAt: Number(row.created_at) || 0,
     updatedAt: Number(row.updated_at) || 0,
@@ -162,6 +163,59 @@ type WordData = {
   source: VocabularySource;
   sharedBy: string | null;
 };
+
+/**
+ * Adds (or updates) a collocation chunk in the user's vocabulary as a PHRASE
+ * (entry_type='phrase'). Phrases get their own review queue via the Phrases
+ * tab. The chunk text is lower-cased to match the user_vocabulary uniqueness
+ * constraint (user_id, word).
+ */
+export async function upsertPhrase(
+  userId: string,
+  chunk: {
+    chunk: string;
+    pattern?: string;
+    meaning: string;
+    meaningZh: string;
+    example?: string;
+  },
+  sessionId?: string,
+): Promise<void> {
+  const pool = getPool();
+  const now = Date.now();
+  const word = chunk.chunk.toLowerCase().trim();
+  if (!word) return;
+
+  await pool.query(
+    `INSERT INTO user_vocabulary (
+        user_id, word, part_of_speech,
+        english_definition, chinese_definition, example,
+        entry_type, source_session_ids, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, 'phrase', $7::jsonb, $8, $8)
+      ON CONFLICT (user_id, word) DO UPDATE SET
+        part_of_speech = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''), user_vocabulary.part_of_speech),
+        english_definition = COALESCE(NULLIF(EXCLUDED.english_definition, ''), user_vocabulary.english_definition),
+        chinese_definition = COALESCE(NULLIF(EXCLUDED.chinese_definition, ''), user_vocabulary.chinese_definition),
+        example = COALESCE(NULLIF(EXCLUDED.example, ''), user_vocabulary.example),
+        entry_type = 'phrase',
+        source_session_ids = (
+          SELECT jsonb_agg(DISTINCT elem) FROM jsonb_array_elements(
+            user_vocabulary.source_session_ids || EXCLUDED.source_session_ids
+          ) elem
+        ),
+        updated_at = $8`,
+    [
+      userId,
+      word,
+      chunk.pattern || "phrase",
+      chunk.meaning,
+      chunk.meaningZh,
+      chunk.example || "",
+      JSON.stringify(sessionId ? [sessionId] : []),
+      now,
+    ],
+  );
+}
 
 export async function recordSRSAction(
   userId: string,

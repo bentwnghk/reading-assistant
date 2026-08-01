@@ -14,6 +14,7 @@ import {
   getSystemPrompt,
   extractTextFromImagePrompt,
   generateSummaryPrompt,
+  generatePreReadingPrompt,
   adaptTextPrompt,
   simplifyTextPrompt,
   generateMindMapPrompt,
@@ -32,6 +33,7 @@ import {
   generateErrorSurgeryPrompt,
   generateGrammarQuestionsPrompt,
   generateReadingTextPrompt,
+  generateCollocationsPrompt,
   getAgeLevelMapping,
   shiftCefrLevel,
   READING_TEXT_TYPES,
@@ -40,6 +42,7 @@ import {
 import { parseError } from "@/utils/error";
 import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
+import { computeSkillBreakdown } from "@/utils/skillProfile";
 
 function smoothTextStream(type: "character" | "word" | "line") {
   return smoothStream({
@@ -404,6 +407,171 @@ function useReadingAssistant() {
       return "";
     } finally {
       removeAbortController("summary");
+    }
+  }
+
+  async function generatePreReading(): Promise<PreReadingData | null> {
+    if (useReadingStore.getState().activeGenerations["pre-reading"]) return null;
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("pre-reading");
+    const { studentAge, extractedText, docTitle, setPreReading, setError } = readingStore;
+
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return null;
+    }
+
+    setGenerating("pre-reading", true);
+    const toastId = toast.info(i18next.t("reading.preReading.generatingWait"), { duration: Infinity });
+
+    try {
+      const text = await glossaryGenerateText(
+        generatePreReadingPrompt(studentAge, extractedText, docTitle || undefined),
+        getSystemPrompt(),
+        summaryModel,
+        ac.signal,
+      );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("pre-reading", false);
+        return null;
+      }
+
+      const parsed = z
+        .object({
+          activationPrompts: z.array(z.string()),
+          activationPromptZh: z.array(z.string()).optional(),
+          predictionPrompt: z.string(),
+          purpose: z.string(),
+          preTeachWords: z.array(
+            z.object({
+              word: z.string(),
+              syllabification: z.string().optional(),
+              partOfSpeech: z.string(),
+              englishDefinition: z.string(),
+              chineseDefinition: z.string(),
+            }),
+          ),
+          backgroundNote: z.string(),
+        })
+        .safeParse(JSON.parse(text));
+
+      if (!parsed.success) {
+        throw new Error(i18next.t("reading.preReading.parseError"));
+      }
+
+      const data: PreReadingData = { ...parsed.data, generatedAt: Date.now() };
+      setPreReading(data);
+
+      logActivity("pre_reading_generate", { sessionId: readingStore.id || undefined });
+
+      toast.dismiss(toastId);
+      setGenerating("pre-reading", false);
+      return data;
+    } catch (error) {
+      toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("pre-reading", false);
+        return null;
+      }
+      const msg = handleError(error);
+      setError(msg);
+      setGenerating("pre-reading", false);
+      return null;
+    } finally {
+      removeAbortController("pre-reading");
+    }
+  }
+
+  async function generatePreReadingImage(): Promise<number | null> {
+    if (useReadingStore.getState().activeGenerations["pre-reading-image"]) return null;
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("pre-reading-image");
+    const { studentAge, extractedText, setPreReadingImage, setError } = readingStore;
+
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return null;
+    }
+
+    const { mode, accessPassword, provider, openAIApiKey, openaicompatibleApiKey } = useSettingStore.getState();
+
+    if (mode === "local") {
+      const hasKey =
+        (provider === "openai" && openAIApiKey.length > 0) ||
+        (provider === "openaicompatible" && openaicompatibleApiKey.length > 0);
+      if (!hasKey) {
+        toast.error("Please configure your API key in settings first.");
+        return null;
+      }
+    }
+
+    const toastId = toast.info(i18next.t("reading.preReading.imageGeneratingWait"), { duration: Infinity });
+
+    setGenerating("pre-reading-image", true);
+
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (mode === "proxy") {
+        headers["x-access-signature"] = generateSignature(accessPassword, Date.now());
+      }
+
+      const response = await fetch("/api/ai/pre-reading-image", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ text: extractedText, studentAge, mode }),
+        signal: ac.signal,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        const err = errorData.error;
+        const errorMsg =
+          typeof err === "string"
+            ? err
+            : err && typeof err === "object" && "status" in err && "message" in err
+              ? `[${err.status}]: ${err.message}`
+              : `Request failed (${response.status})`;
+        toast.dismiss(toastId);
+        toast.error(errorMsg);
+        setError(errorMsg);
+        setGenerating("pre-reading-image", false);
+        return null;
+      }
+
+      const data = await response.json();
+      if (!data.image) {
+        throw new Error("No image in response");
+      }
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        setGenerating("pre-reading-image", false);
+        return null;
+      }
+
+      setPreReadingImage(data.image);
+      logActivity("pre_reading_image_generate", { sessionId: readingStore.id || undefined });
+
+      toast.dismiss(toastId);
+      setGenerating("pre-reading-image", false);
+      return typeof data.remaining === "number" ? data.remaining : null;
+    } catch (error) {
+      toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("pre-reading-image", false);
+        return null;
+      }
+      const msg = handleError(error);
+      setError(msg);
+      setGenerating("pre-reading-image", false);
+      return null;
+    } finally {
+      removeAbortController("pre-reading-image");
     }
   }
 
@@ -906,9 +1074,89 @@ function useReadingAssistant() {
     }
   }
 
+  async function generateCollocations(): Promise<CollocationChunk[] | null> {
+    if (useReadingStore.getState().activeGenerations["collocations"]) return null;
+    const isSameSession = createSessionGuard();
+    const ac = getAbortController("collocations");
+    const { studentAge, extractedText, glossary, setCollocations, setError } = readingStore;
+
+    if (!extractedText) {
+      toast.error("Please extract text from an image first.");
+      return null;
+    }
+
+    setGenerating("collocations", true);
+    const toastId = toast.info(i18next.t("reading.collocations.generatingWait"), { duration: Infinity });
+
+    try {
+      const text = await glossaryGenerateText(
+        generateCollocationsPrompt(studentAge, extractedText, glossary.map((g) => g.word)),
+        getSystemPrompt(),
+        summaryModel,
+        ac.signal,
+      );
+
+      if (!isSameSession() || ac.signal.aborted) {
+        notifyGenerationCancelled();
+        toast.dismiss(toastId);
+        setGenerating("collocations", false);
+        return null;
+      }
+
+      const parsed = z
+        .array(
+          z.object({
+            chunk: z.string(),
+            pattern: z.string(),
+            meaning: z.string(),
+            meaningZh: z.string(),
+            contrastNote: z.string().optional(),
+            example: z.string(),
+            textOccurrences: z.number().default(0),
+          }),
+        )
+        .safeParse(JSON.parse(text));
+
+      if (!parsed.success) {
+        throw new Error(i18next.t("reading.collocations.parseError"));
+      }
+
+      const chunks: CollocationChunk[] = parsed.data.map((c, i) => ({
+        id: `chunk-${Date.now()}-${i}`,
+        chunk: c.chunk,
+        pattern: c.pattern,
+        meaning: c.meaning,
+        meaningZh: c.meaningZh,
+        contrastNote: c.contrastNote,
+        example: c.example,
+        textOccurrences: c.textOccurrences,
+      }));
+
+      setCollocations(chunks);
+      logActivity("collocations_generate", { sessionId: readingStore.id || undefined });
+
+      toast.dismiss(toastId);
+      setGenerating("collocations", false);
+      return chunks;
+    } catch (error) {
+      toast.dismiss(toastId);
+      if (!isSameSession() || isAbortError(error)) {
+        notifyGenerationCancelled();
+        setGenerating("collocations", false);
+        return null;
+      }
+      const msg = handleError(error);
+      setError(msg);
+      setGenerating("collocations", false);
+      return null;
+    } finally {
+      removeAbortController("collocations");
+    }
+  }
+
   function calculateTestScore() {
-    const { setTestScore, setTestCompleted, setTestPoints } = readingStore;
-    const { readingTest } = useReadingStore.getState();
+    const { setTestScore, setTestCompleted, setTestPoints, setSkillBreakdown } = readingStore;
+    const { readingTest, id } = useReadingStore.getState();
     
     let earnedPoints = 0;
     let totalPoints = 0;
@@ -944,6 +1192,19 @@ function useReadingAssistant() {
     setTestScore(score);
     setTestCompleted(true);
     setTestPoints(earnedPoints, totalPoints);
+
+    // Persist the per-skill breakdown (session field) and recompute the
+    // cross-session diagnostic profile. Non-blocking — must not hold up the UI.
+    const breakdown = computeSkillBreakdown(readingTest);
+    setSkillBreakdown(breakdown);
+    void fetch("/api/skill-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId: id || undefined, breakdown }),
+    }).catch(() => {
+      // Silent — profile recompute is best-effort; the session field is the
+      // source of truth and will be aggregated on the next completion.
+    });
     
     return score;
   }
@@ -1787,6 +2048,8 @@ Guidelines:
     extractTextFromImage,
     generateTitle,
     generateSummary,
+    generatePreReading,
+    generatePreReadingImage,
     adaptText,
     simplifyText,
     generateMindMap,
@@ -1795,6 +2058,7 @@ Guidelines:
     generateTargetedPractice,
     generateGlossary,
     suggestVocabulary,
+    generateCollocations,
     analyzeGrammarTopics,
     generateGrammarLesson,
     evaluateGrammarPracticeItem,

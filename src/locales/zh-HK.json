@@ -10,12 +10,14 @@
     "description": "跳轉到任何區域",
     "studentInfo": "用戶資料",
     "upload": "選擇文本",
+    "preReading": "閱讀前準備",
     "summary": "摘要",
     "mindmap": "思維導圖",
     "visualization": "文本視覺化",
     "adapted": "文本分析和改寫",
     "test": "閱讀測驗",
     "glossary": "詞彙",
+    "collocations": "搭配詞",
     "grammar": "語法"
   },
   "settingsBanner": {
@@ -136,7 +138,41 @@
           "title": "句子分析",
           "desc": "點擊任何句子，AI 即時拆解：含義、詞彙、語法、語用分析和學習貼士！"
         },
-        "glossary": {
+    "collocations": {
+      "title": "詞組與搭配詞",
+      "generate": "提取搭配詞",
+      "regenerate": "重新生成",
+      "generating": "提取中...",
+      "generatingWait": "正在提取搭配詞及母語轉移提示...",
+      "emptyTip": "點擊上方按鈕提取實用詞組與搭配詞，並附上常見粵語母語轉移錯誤提示。",
+      "inText": "文中出現：{{count}} 次",
+      "addToPhrases": "加入詞組",
+      "addedButton": "已加入詞組",
+      "added": "已將「{{chunk}}」加入你的詞組。",
+      "addAll": "全部加入詞組",
+      "addAllSuccess": "已將所有詞組加入你的詞組庫。",
+      "addError": "無法加入詞組，請重試。",
+      "parseError": "無法解析搭配詞，請重試。",
+      "help": {
+        "title": "詞組與搭配詞",
+        "intro": "學習多詞詞組，避免常見的粵語母語轉移錯誤。",
+        "itemsBaseKey": "reading.collocations.help.items",
+        "items": {
+          "chunks": { "title": "詞組", "description": "動詞短語、搭配詞和固定表達。" },
+          "contrast": { "title": "對比", "description": "說明粵語使用者常犯的錯誤。" },
+          "phrases": { "title": "詞組", "description": "將詞組加入你的詞組複習佇列。" }
+        },
+        "stepsTitle": "運作方式",
+        "steps": {
+          "s1": "點擊「提取搭配詞」。",
+          "s2": "閱讀對比提示以避免母語轉移錯誤。",
+          "s3": "將實用詞組加入「詞組」分頁進行複習。"
+        },
+        "tipTitle": "提示",
+        "tipContent": "約一半的香港學生搭配詞錯誤源自逐字翻譯——重點留意對比提示。"
+      }
+    },
+    "glossary": {
           "title": "智能詞彙表",
           "desc": "AI 為你標記的每個生字提供雙語定義（英文 + 中文）、音節劃分和真實例句。"
         },
@@ -668,6 +704,53 @@
       "analyzing": "分析中...",
       "analysisTitle": "句子分析",
       "analysisDescription": "所選句子的詳細分析"
+    },
+    "preReading": {
+      "title": "閱讀前準備",
+      "generate": "準備閱讀前活動",
+      "regenerate": "重新生成",
+      "generating": "準備中...",
+      "generatingWait": "正在準備閱讀前活動...",
+      "generateImage": "顯示圖片幫助我預測",
+      "imageGenerating": "正在生成圖片...",
+      "imageGeneratingWait": "正在生成預測圖片...",
+      "imageAlt": "預測插圖",
+      "imageTip": "想要提示？生成一張插圖來激發你的預測。",
+      "emptyTip": "點擊上方按鈕，在閱讀前激活已有知識、預習關鍵詞彙並設定閱讀目標。",
+      "predictionPlaceholder": "輸入你認為這篇文章會關於甚麼...",
+      "titleHint": "標題：{{title}}",
+      "purposeLabel": "閱讀目標",
+      "activationLabel": "激活你的知識",
+      "preTeachLabel": "先認識這些關鍵詞",
+      "backgroundLabel": "背景知識",
+      "listen": "聆聽 {{word}}",
+      "parseError": "無法解析閱讀前活動資料，請重試。",
+      "compareLabel": "檢視你的預測",
+      "yourPrediction": "你的預測",
+      "compareQuestion": "現在你已讀完摘要——你的預測有多準確？",
+      "rating": {
+        "notClose": "不太準",
+        "somewhat": "部分準確",
+        "veryClose": "非常準確"
+      },
+      "help": {
+        "title": "閱讀前準備",
+        "intro": "閱讀前先做好準備，讓文本更易理解。",
+        "itemsBaseKey": "reading.preReading.help.items",
+        "items": {
+          "activate": { "title": "激活", "description": "把主題與你已知的知識連繫起來。" },
+          "predict": { "title": "預測", "description": "先猜測文章內容，讀後再核對。" },
+          "preteach": { "title": "預習", "description": "先學會開始前所需的關鍵詞。" }
+        },
+        "stepsTitle": "運作方式",
+        "steps": {
+          "s1": "點擊「準備閱讀前活動」。",
+          "s2": "閱讀提示和關鍵詞，然後輸入你的預測。",
+          "s3": "讀完並取得摘要後，比較你的預測。"
+        },
+        "tipTitle": "提示",
+        "tipContent": "先作預測能幫助你更專注、記得更多。"
+      }
     },
     "summary": {
       "title": "摘要",
@@ -1662,6 +1745,7 @@
       "title": "學習進度",
       "progress": "已完成 {{percent}}%",
       "upload": "選擇文本",
+      "preReading": "閱讀前準備",
       "summary": "摘要",
       "adapt": "文本改寫",
       "mindmap": "思維導圖",
@@ -1673,6 +1757,7 @@
       "analyze": "分析句子",
       "highlight": "標記生字",
       "glossary": "詞彙",
+      "collocations": "搭配詞",
       "spelling": "拼字遊戲",
       "vocabQuiz": "詞彙測驗",
       "help": {
@@ -1773,6 +1858,7 @@
     "close": "返回應用程式",
     "tabTable": "表格",
     "tabFlashcard": "字卡",
+    "tabPhrases": "詞組",
     "tabSpelling": "拼寫",
     "tabQuiz": "測驗",
     "tabLists": "複習列表",
@@ -1780,6 +1866,28 @@
     "emptyTitle": "還沒有詞彙",
     "emptyDesc": "開始閱讀以收集詞彙。它們會出現在這裡供你複習。",
     "startReading": "開始閱讀",
+    "phrases": {
+      "count": "{{count}} 個詞組",
+      "empty": "還沒有詞組。",
+      "emptyHint": "從閱讀篇章提取搭配詞並加入這裡。",
+      "startFlashcard": "字卡複習",
+      "startQuiz": "測驗",
+      "startUnscramble": "重組句子",
+      "backToList": "返回列表",
+      "colChunk": "詞組",
+      "colPattern": "類型",
+      "colMeaning": "意思",
+      "colZh": "中文釋義",
+      "progress": "{{current}} / {{total}}",
+      "check": "檢查",
+      "next": "下一題",
+      "retry": "重試",
+      "finish": "完成",
+      "arrangeHint": "按正確順序點擊詞語",
+      "allPlaced": "所有詞語已放置",
+      "correct": "正確！",
+      "wrong": "不太對"
+    },
     "searchPlaceholder": "搜尋詞彙...",
     "allRatings": "全部評級",
     "hardOnly": "困難",
@@ -2147,6 +2255,10 @@
       "vocabularyGrowth": "詞彙增長",
       "cumulativeVocab": "累積詞彙量",
       "scoreDistribution": "測驗分數分佈",
+      "skillProfile": "理解能力分析",
+      "skillProfileEmpty": "完成閱讀測驗以查看你的能力分佈。",
+      "weakestSkill": "重點提升：{{skill}}",
+      "accuracy": "準確度",
       "noTestData": "尚無測驗分數",
       "noData": "尚無資料"
     },
@@ -3573,7 +3685,12 @@
         "title": "生成文章摘要",
         "description": "用 AI 生成的摘要快速了解你的閱讀材料。"
       },
-      "adaptedText": {
+    "readAlong": {
+      "play": "朗讀伴讀",
+      "stop": "停止",
+      "blocked": "再次點擊「朗讀伴讀」以開啟聲音。"
+    },
+    "adaptedText": {
         "title": "閱讀改編文本",
         "description": "閱讀根據你的程度改編的文本版本，內建詞彙支援。"
       },

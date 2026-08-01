@@ -48,6 +48,7 @@ interface VocabularyStoreActions {
     strategy: VocabularySelectionStrategy
   ) => void;
   startReview: () => void;
+  setReviewQueue: (queue: VocabularyWord[]) => void;
   clearReviewQueue: () => void;
   recordSRSAction: (
     word: string,
@@ -237,6 +238,8 @@ export const useVocabularyStore = create<
       );
       return { reviewQueue: queue };
     }),
+
+  setReviewQueue: (queue) => set({ reviewQueue: queue, selectedWordIds: new Set() }),
 
   clearReviewQueue: () => set({ reviewQueue: [] }),
 

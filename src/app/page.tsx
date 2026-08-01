@@ -20,6 +20,7 @@ const Header = dynamic(() => import("@/components/Internal/Header"));
 const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
 const StudentInfo = dynamic(() => import("@/components/ReadingAssistant/StudentInfo"));
 const ImageUpload = dynamic(() => import("@/components/ReadingAssistant/ImageUpload"));
+const PreReading = dynamic(() => import("@/components/ReadingAssistant/PreReading"));
 const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/WorkflowProgress"));
 const Summary = dynamic(() => import("@/components/ReadingAssistant/Summary"));
 const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedText"));
@@ -27,6 +28,7 @@ const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
 const Visualization = dynamic(() => import("@/components/ReadingAssistant/Visualization"));
 const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
+const Collocations = dynamic(() => import("@/components/ReadingAssistant/Collocations"));
 const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
 const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
@@ -141,6 +143,9 @@ function HomeContent() {
         <section id="section-upload">
           <ImageUpload />
         </section>
+        <section id="section-pre-reading">
+          <PreReading />
+        </section>
         <WorkflowProgress />
         <section id="section-summary">
           <Summary />
@@ -156,6 +161,9 @@ function HomeContent() {
         </section>
         <section id="section-glossary">
           <Glossary />
+        </section>
+        <section id="section-collocations">
+          <Collocations />
         </section>
         <section id="section-test">
           <ReadingTest />

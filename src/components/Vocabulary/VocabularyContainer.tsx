@@ -47,7 +47,7 @@ import ReviewListsTab from "./ReviewListsTab";
 import ReviewListShareDialog from "./ReviewListShareDialog";
 import StudyPlanDialog from "./StudyPlanDialog";
 
-type TabType = "table" | "flashcard" | "quiz" | "spelling" | "lists" | "history";
+type TabType = "table" | "flashcard" | "quiz" | "spelling" | "lists" | "history" | "phrases";
 
 const VocabularyFlashcard = dynamic(
   () => import("@/components/ReadingAssistant/VocabularyFlashcard")
@@ -59,6 +59,7 @@ const VocabularySpelling = dynamic(
   () => import("@/components/ReadingAssistant/VocabularySpelling")
 );
 const ReviewHistory = dynamic(() => import("./ReviewHistory"));
+const PhrasesTab = dynamic(() => import("./PhrasesTab"));
 
 const toEntry = (w: { word: string; syllabification?: string; partOfSpeech: string; englishDefinition: string; chineseDefinition: string; example?: string }): GlossaryEntry => ({
   word: w.word,
@@ -256,6 +257,7 @@ function VocabularyContainer() {
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
     { key: "table", label: t("vocabulary.tabTable"), icon: <Table className="h-4 w-4" /> },
+    { key: "phrases", label: t("vocabulary.tabPhrases"), icon: <Layers className="h-4 w-4" /> },
     { key: "flashcard", label: t("vocabulary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
     { key: "spelling", label: t("vocabulary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },
     { key: "quiz", label: t("vocabulary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },
@@ -480,6 +482,7 @@ function VocabularyContainer() {
                   tab.key !== "table" &&
                   tab.key !== "history" &&
                   tab.key !== "lists" &&
+                  tab.key !== "phrases" &&
                   selectedWordIds.size === 0 &&
                   reviewQueue.length === 0
                 }
@@ -492,6 +495,7 @@ function VocabularyContainer() {
                   tab.key !== "table" &&
                     tab.key !== "history" &&
                     tab.key !== "lists" &&
+                    tab.key !== "phrases" &&
                     selectedWordIds.size === 0 &&
                     reviewQueue.length === 0 &&
                     "opacity-40 cursor-not-allowed"
@@ -504,6 +508,18 @@ function VocabularyContainer() {
           </div>
 
           {activeTab === "table" && <VocabularyTable />}
+          {activeTab === "phrases" && (
+            <PhrasesTab
+              onReviewFlashcard={() => {
+                currentReviewMode.current = "flashcard";
+                setActiveTab("flashcard");
+              }}
+              onReviewQuiz={() => {
+                currentReviewMode.current = "quiz";
+                setActiveTab("quiz");
+              }}
+            />
+          )}
           {activeTab === "flashcard" && (
             <VocabularyFlashcard
               glossary={reviewGlossary}

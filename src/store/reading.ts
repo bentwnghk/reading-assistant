@@ -141,6 +141,8 @@ export type GenerationType =
   | "extracting"
   | "title"
   | "summary"
+  | "pre-reading"
+  | "pre-reading-image"
   | "adapted-text"
   | "simplified-text"
   | "mindmap"
@@ -158,7 +160,8 @@ export type GenerationType =
   | "grammar-lesson"
   | "sentence-analysis"
   | "tutor"
-  | "reading-text";
+  | "reading-text"
+  | "collocations";
 
 type ReadingTestMode = "all-at-once" | "question-by-question";
 type TextSource = "upload" | "repository" | "shared" | "assignment" | "ai-generated";
@@ -172,6 +175,15 @@ export interface ReadingStore {
   extractedText: string;
   generatedTextMeta: GeneratedTextMeta | null;
   summary: string;
+  preReading: PreReadingData | null;
+  preReadingImage: string;
+  preReadingImageGeneratedAt: number;
+  preReadingGeneratedAt: number;
+  studentPrediction: string;
+  predictionRating: number | null;
+  skillBreakdown: SkillBreakdown | null;
+  collocations: CollocationChunk[];
+  collocationsGeneratedAt: number;
   adaptedText: string;
   simplifiedText: string;
   highlightedWords: string[];
@@ -244,6 +256,8 @@ export interface ReadingStore {
   status: ReadingStatus;
   error: string | null;
   activeGenerations: Record<string, boolean>;
+  readAlongIndex: number | null;
+  readAlongPlaying: boolean;
   originalDifficulty: TextDifficultyResult | null;
   adaptedDifficulty: TextDifficultyResult | null;
   simplifiedDifficulty: TextDifficultyResult | null;
@@ -261,6 +275,12 @@ interface ReadingActions {
   removeOriginalImage: (index: number) => void;
   setExtractedText: (text: string) => void;
   setSummary: (summary: string) => void;
+  setPreReading: (data: PreReadingData | null) => void;
+  setPreReadingImage: (imageDataUrl: string) => void;
+  setStudentPrediction: (prediction: string) => void;
+  setPredictionRating: (rating: number | null) => void;
+  setSkillBreakdown: (breakdown: SkillBreakdown | null) => void;
+  setCollocations: (chunks: CollocationChunk[]) => void;
   setAdaptedText: (text: string) => void;
   setSimplifiedText: (text: string) => void;
   addHighlightedWord: (word: string) => void;
@@ -316,6 +336,7 @@ interface ReadingActions {
   setError: (error: string | null) => void;
   setGenerating: (type: string, active: boolean) => void;
   setStreaming: (value: boolean) => void;
+  setReadAlong: (index: number | null, playing: boolean) => void;
   setOriginalDifficulty: (result: TextDifficultyResult | null) => void;
   setAdaptedDifficulty: (result: TextDifficultyResult | null) => void;
   setSimplifiedDifficulty: (result: TextDifficultyResult | null) => void;
@@ -341,6 +362,15 @@ const defaultValues: ReadingStore = {
   extractedText: "",
   generatedTextMeta: null,
   summary: "",
+  preReading: null,
+  preReadingImage: "",
+  preReadingImageGeneratedAt: 0,
+  preReadingGeneratedAt: 0,
+  studentPrediction: "",
+  predictionRating: null,
+  skillBreakdown: null,
+  collocations: [],
+  collocationsGeneratedAt: 0,
   adaptedText: "",
   simplifiedText: "",
   highlightedWords: [],
@@ -411,6 +441,8 @@ const defaultValues: ReadingStore = {
   status: "idle",
   error: null,
   activeGenerations: {},
+  readAlongIndex: null,
+  readAlongPlaying: false,
   originalDifficulty: null,
   adaptedDifficulty: null,
   simplifiedDifficulty: null,
@@ -511,6 +543,81 @@ export const useReadingStore = create(
           const newState = {
             summary,
             summaryGeneratedAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setPreReading: (data) =>
+        set((state) => {
+          const newState = {
+            preReading: data,
+            preReadingGeneratedAt: data ? Date.now() : 0,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setPreReadingImage: (imageDataUrl) =>
+        set((state) => {
+          const newState = {
+            preReadingImage: imageDataUrl,
+            preReadingImageGeneratedAt: imageDataUrl ? Date.now() : 0,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setStudentPrediction: (prediction) =>
+        set((state) => {
+          const newState = {
+            studentPrediction: prediction,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setPredictionRating: (rating) =>
+        set((state) => {
+          const newState = {
+            predictionRating: rating,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setSkillBreakdown: (breakdown) =>
+        set((state) => {
+          const newState = {
+            skillBreakdown: breakdown,
+            updatedAt: Date.now(),
+          };
+          syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setCollocations: (chunks) =>
+        set((state) => {
+          const newState = {
+            collocations: chunks,
+            collocationsGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -1191,6 +1298,8 @@ export const useReadingStore = create(
       setStreaming: (value) => {
         setStreamingFlag(value);
       },
+      setReadAlong: (index, playing) =>
+        set({ readAlongIndex: index, readAlongPlaying: playing }),
       setOriginalDifficulty: (result) =>
         set((state) => {
           const newState = {
@@ -1410,7 +1519,13 @@ export const useReadingStore = create(
           return {} as ReadingStore & ReadingActions;
         }
         const keysToPersist = (Object.keys(defaultValues) as (keyof ReadingStore)[]).filter(
-          (key) => key !== "originalImages" && key !== "visualizationImage" && key !== "activeGenerations"
+          (key) =>
+            key !== "originalImages" &&
+            key !== "visualizationImage" &&
+            key !== "preReadingImage" &&
+            key !== "activeGenerations" &&
+            key !== "readAlongIndex" &&
+            key !== "readAlongPlaying"
         );
         return pick(state, keysToPersist) as ReadingStore & ReadingActions;
       },
@@ -1420,6 +1535,8 @@ export const useReadingStore = create(
           state.status = "idle";
         }
         state.activeGenerations = {};
+        state.readAlongIndex = null;
+        state.readAlongPlaying = false;
       },
       migrate: (persistedState) => persistedState as ReadingStore & ReadingActions,
     }

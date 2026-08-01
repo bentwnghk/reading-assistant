@@ -47,8 +47,11 @@ export async function createReadingSession(
         grammar_scramble_challenges, grammar_workshop_challenges,
         grammar_game_questions,
         created_at,
-        vocabulary_quiz
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72)
+        vocabulary_quiz,
+        pre_reading, pre_reading_image, pre_reading_image_generated_at,
+        pre_reading_generated_at, student_prediction, prediction_rating,
+        skill_breakdown, collocations, collocations_generated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81)
       ON CONFLICT (id) DO UPDATE SET
         doc_title = EXCLUDED.doc_title,
         source = EXCLUDED.source,
@@ -118,7 +121,16 @@ export async function createReadingSession(
         grammar_scramble_challenges = EXCLUDED.grammar_scramble_challenges,
         grammar_workshop_challenges = EXCLUDED.grammar_workshop_challenges,
         grammar_game_questions = EXCLUDED.grammar_game_questions,
-        vocabulary_quiz = EXCLUDED.vocabulary_quiz`,
+        vocabulary_quiz = EXCLUDED.vocabulary_quiz,
+        pre_reading = EXCLUDED.pre_reading,
+        pre_reading_image = EXCLUDED.pre_reading_image,
+        pre_reading_image_generated_at = EXCLUDED.pre_reading_image_generated_at,
+        pre_reading_generated_at = EXCLUDED.pre_reading_generated_at,
+        student_prediction = EXCLUDED.student_prediction,
+        prediction_rating = EXCLUDED.prediction_rating,
+        skill_breakdown = EXCLUDED.skill_breakdown,
+        collocations = EXCLUDED.collocations,
+        collocations_generated_at = EXCLUDED.collocations_generated_at`,
       [
         sessionData.id,
         userId,
@@ -192,6 +204,15 @@ export async function createReadingSession(
         JSON.stringify(sessionData.grammarGameQuestions ?? []),
         new Date(sessionData.createdAt || Date.now()),
         JSON.stringify(sessionData.vocabularyQuiz ?? []),
+        sessionData.preReading ? JSON.stringify(sessionData.preReading) : null,
+        sessionData.preReadingImage ?? "",
+        sessionData.preReadingImageGeneratedAt ?? 0,
+        sessionData.preReadingGeneratedAt ?? 0,
+        sessionData.studentPrediction ?? "",
+        sessionData.predictionRating ?? null,
+        sessionData.skillBreakdown ? JSON.stringify(sessionData.skillBreakdown) : null,
+        JSON.stringify(sessionData.collocations ?? []),
+        sessionData.collocationsGeneratedAt ?? 0,
       ]
     )
     
@@ -253,6 +274,17 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       highlightedWords: row.highlighted_words,
       analyzedSentences: row.analyzed_sentences,
       mindMap: row.mind_map,
+      preReading: row.pre_reading ?? null,
+      preReadingImage: "",
+      preReadingImageGeneratedAt: Number(row.pre_reading_image_generated_at ?? 0),
+      preReadingGeneratedAt: Number(row.pre_reading_generated_at ?? 0),
+      studentPrediction: row.student_prediction ?? "",
+      predictionRating: row.prediction_rating ?? null,
+      skillBreakdown: row.skill_breakdown ?? null,
+      collocations: row.collocations ?? [],
+      collocationsGeneratedAt: Number(row.collocations_generated_at ?? 0),
+      readAlongIndex: null,
+      readAlongPlaying: false,
       visualizationImage: "",
       visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
       readingTest: row.reading_test,
@@ -388,6 +420,17 @@ export async function getReadingSession(
       highlightedWords: row.highlighted_words,
       analyzedSentences: row.analyzed_sentences,
       mindMap: row.mind_map,
+      preReading: row.pre_reading ?? null,
+      preReadingImage: row.pre_reading_image ?? "",
+      preReadingImageGeneratedAt: Number(row.pre_reading_image_generated_at ?? 0),
+      preReadingGeneratedAt: Number(row.pre_reading_generated_at ?? 0),
+      studentPrediction: row.student_prediction ?? "",
+      predictionRating: row.prediction_rating ?? null,
+      skillBreakdown: row.skill_breakdown ?? null,
+      collocations: row.collocations ?? [],
+      collocationsGeneratedAt: Number(row.collocations_generated_at ?? 0),
+      readAlongIndex: null,
+      readAlongPlaying: false,
       visualizationImage: row.visualization_image ?? "",
       visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
       readingTest: row.reading_test,
@@ -561,6 +604,15 @@ export async function updateReadingSession(
       grammarScrambleChallenges: "grammar_scramble_challenges",
       grammarWorkshopChallenges: "grammar_workshop_challenges",
       grammarGameQuestions: "grammar_game_questions",
+      preReading: "pre_reading",
+      preReadingImage: "pre_reading_image",
+      preReadingImageGeneratedAt: "pre_reading_image_generated_at",
+      preReadingGeneratedAt: "pre_reading_generated_at",
+      studentPrediction: "student_prediction",
+      predictionRating: "prediction_rating",
+      skillBreakdown: "skill_breakdown",
+      collocations: "collocations",
+      collocationsGeneratedAt: "collocations_generated_at",
     }
     
     for (const [key, dbColumn] of Object.entries(fieldMappings)) {
@@ -573,7 +625,8 @@ export async function updateReadingSession(
              "adaptedDifficulty", "simplifiedDifficulty", "flashcardReviewDates",
              "grammarTopics", "grammarQuiz", "grammarErrorChallenges",
               "grammarScrambleChallenges", "grammarWorkshopChallenges",
-              "grammarGameQuestions", "generatedTextMeta", "vocabularyQuiz"].includes(key)) {
+              "grammarGameQuestions", "generatedTextMeta", "vocabularyQuiz",
+              "preReading", "skillBreakdown", "collocations"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else if (key === "grammarGameCompletedAt") {
           values.push(value ? new Date(value as number) : null)

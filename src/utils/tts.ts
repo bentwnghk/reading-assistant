@@ -245,3 +245,156 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
     opts.onEnd?.();
   }
 }
+
+// ── Bimodal reading-while-listening (sentence-queued playback) ──────────────
+
+export interface ReadAlongOptions {
+  sentences: string[];
+  voice: string;
+  speed: number;
+  mode: string;
+  openaicompatibleApiKey?: string;
+  openaicompatibleApiProxy?: string;
+  accessPassword?: string;
+  audioRef: { current: HTMLAudioElement | null };
+  onSentenceStart?: (index: number) => void;
+  onSentenceEnd?: (index: number) => void;
+  onComplete?: () => void;
+  onError?: (message: string) => void;
+  onBlocked?: () => void;
+}
+
+/**
+ * Plays an array of sentences sequentially via the Web Audio API, firing
+ * `onSentenceStart(i)` before each sentence plays (so the caller can highlight
+ * the active sentence) and `onSentenceEnd(i)` when it finishes. Reuses the
+ * single AudioContext + `currentSource` plumbing from `speakWord`.
+ *
+ * Cancellation: the caller controls playback by setting a module flag via
+ * `stopReadAlong()`, which is checked between sentences. This mirrors the
+ * iOS-unlock model (Lesson 27): one `unlockAudio()` in a gesture permits the
+ * whole sequence.
+ */
+let _readAlongStopped = false;
+
+export function stopReadAlong(): void {
+  _readAlongStopped = true;
+  stopSpeaking();
+}
+
+export async function readAlong(opts: ReadAlongOptions): Promise<void> {
+  const ctx = getAudioContext();
+  if (ctx && ctx.state !== "running") {
+    opts.onBlocked?.();
+    return;
+  }
+
+  _readAlongStopped = false;
+
+  for (let i = 0; i < opts.sentences.length; i++) {
+    if (_readAlongStopped) return;
+    const sentence = opts.sentences[i];
+    if (!sentence || !sentence.trim()) continue;
+
+    opts.onSentenceStart?.(i);
+
+    try {
+      const headers: HeadersInit = { "Content-Type": "application/json" };
+      let url: string;
+      if (opts.mode === "local") {
+        url = `${completePath(opts.openaicompatibleApiProxy ?? "", "/v1")}/audio/speech`;
+        if (opts.openaicompatibleApiKey) {
+          headers["Authorization"] = `Bearer ${opts.openaicompatibleApiKey}`;
+        }
+      } else if (opts.mode === "subscription") {
+        url = "/api/ai/subscription/v1/audio/speech";
+      } else {
+        url = "/api/ai/openaicompatible/v1/audio/speech";
+        if (opts.accessPassword) {
+          headers["Authorization"] = `Bearer ${generateSignature(opts.accessPassword, Date.now())}`;
+        }
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: "tts-1",
+          input: sentence,
+          voice: opts.voice,
+          response_format: "mp3",
+          speed: opts.speed,
+        }),
+      });
+
+      if (_readAlongStopped) return;
+
+      if (!response.ok) {
+        const errText = await response.text();
+        let errorMsg = `TTS request failed (${response.status})`;
+        try {
+          const parsed = JSON.parse(errText);
+          if (parsed.error?.status && parsed.error?.message) {
+            errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
+          }
+        } catch {
+          // keep default
+        }
+        opts.onError?.(errorMsg);
+        continue;
+      }
+
+      const audioData = await response.arrayBuffer();
+      if (_readAlongStopped) return;
+
+      if (ctx) {
+        const decoded = await decodeAudioDataP(ctx, audioData);
+        if (_readAlongStopped) return;
+        stopSpeaking();
+        const source = ctx.createBufferSource();
+        source.buffer = decoded;
+        source.connect(ctx.destination);
+        currentSource = source;
+        await new Promise<void>((resolve) => {
+          source.onended = () => {
+            if (currentSource === source) currentSource = null;
+            opts.onSentenceEnd?.(i);
+            resolve();
+          };
+          source.start();
+        });
+      } else {
+        // Fallback: HTMLAudioElement (lenient environments)
+        const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        await new Promise<void>((resolve) => {
+          const audio = new Audio();
+          opts.audioRef.current = audio;
+          audio.oncanplay = () => {
+            audio.play().then(resolve).catch(resolve);
+          };
+          audio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            opts.audioRef.current = null;
+            opts.onSentenceEnd?.(i);
+            resolve();
+          };
+          audio.onerror = () => {
+            URL.revokeObjectURL(audioUrl);
+            opts.audioRef.current = null;
+            resolve();
+          };
+          audio.src = audioUrl;
+          audio.load();
+        });
+      }
+    } catch {
+      // Skip to next sentence on error; don't abort the whole sequence.
+      opts.onSentenceEnd?.(i);
+    }
+  }
+
+  if (!_readAlongStopped) {
+    opts.onComplete?.();
+  }
+}

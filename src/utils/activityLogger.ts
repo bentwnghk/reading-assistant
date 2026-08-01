@@ -20,6 +20,9 @@ type ActivityType =
   | "ai_tutor_question"
   | "visualization_generate"
   | "reading_text_generate"
+  | "pre_reading_generate"
+  | "pre_reading_image_generate"
+  | "collocations_generate"
 
 interface ActivityDetails {
   cardsReviewed?: number

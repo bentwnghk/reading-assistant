@@ -1,5 +1,6 @@
 export { default as StudentInfo } from "./StudentInfo";
 export { default as ImageUpload } from "./ImageUpload";
+export { default as PreReading } from "./PreReading";
 export { default as AiTextGenerator } from "./AiTextGenerator";
 export { default as ExtractedText } from "./ExtractedText";
 export { default as Summary } from "./Summary";
@@ -8,6 +9,7 @@ export { default as MindMap } from "./MindMap";
 export { default as Visualization } from "./Visualization";
 export { default as ReadingTest } from "./ReadingTest";
 export { default as Glossary } from "./Glossary";
+export { default as Collocations } from "./Collocations";
 export { default as Grammar } from "./Grammar";
 export { default as WorkflowProgress } from "./WorkflowProgress";
 export { default as GrammarGames } from "./GrammarGames";

@@ -192,6 +192,20 @@ function ReadingTest() {
   const [evaluatingShortAnswer, setEvaluatingShortAnswer] = useState(false);
   const [retryMissedIds, setRetryMissedIds] = useState<Set<string>>(new Set());
   const [questionCounts, setQuestionCounts] = useState<ReadingTestQuestionCounts>(() => getReadingTestPreset(studentAge));
+  const [historicalWeakestSkill, setHistoricalWeakestSkill] = useState<ReadingTestSkill | null>(null);
+
+  // Fetch the learner's cross-session weakest skill so targeted practice can
+  // include the chronic weak area, not just the current test's misses.
+  useEffect(() => {
+    fetch("/api/skill-profile")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.weakestSkill) {
+          setHistoricalWeakestSkill(data.weakestSkill as ReadingTestSkill);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const isGenerating = !!activeGenerations["reading-test"] || !!activeGenerations["targeted-practice"];
 
@@ -361,13 +375,19 @@ function ReadingTest() {
   }, [skillStats]);
 
   const handleTargetedPractice = async () => {
-    if (missedSkills.length === 0) return;
+    // Merge the current test's missed skills with the learner's historical
+    // weakest skill (cross-session profile) so practice targets chronic gaps.
+    const skills: ReadingTestSkill[] = [...missedSkills];
+    if (historicalWeakestSkill && !skills.includes(historicalWeakestSkill)) {
+      skills.push(historicalWeakestSkill);
+    }
+    if (skills.length === 0) return;
     
     setRetryMissedIds(new Set());
     setCurrentQuestionIndex(0);
     setShowReview(false);
     
-    const questions = await generateTargetedPractice(missedSkills);
+    const questions = await generateTargetedPractice(skills);
     
     if (questions && questions.length > 0) {
       setQuizState("in-progress");

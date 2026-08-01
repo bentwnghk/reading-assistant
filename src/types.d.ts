@@ -15,6 +15,15 @@ type ReadingTestQuestionCounts = Record<ReadingTestQuestionType, number>;
 
 type ReadingTestSkill = "main-idea" | "detail" | "inference" | "vocabulary" | "purpose";
 
+interface SkillStat {
+  earned: number;
+  total: number;
+  correct: number;
+  count: number;
+}
+
+type SkillBreakdown = Record<ReadingTestSkill, SkillStat>;
+
 type DifficultyLevel = "foundation" | "intermediate" | "advanced";
 
 interface ReadingTestQuestion {
@@ -50,6 +59,35 @@ interface SentenceAnalysis {
   sentence: string;
   analysis: string;
   createdAt: number;
+}
+
+interface PreTeachWord {
+  word: string;
+  syllabification?: string;
+  partOfSpeech: string;
+  englishDefinition: string;
+  chineseDefinition: string;
+}
+
+interface PreReadingData {
+  activationPrompts: string[];
+  activationPromptZh?: string[];
+  predictionPrompt: string;
+  purpose: string;
+  preTeachWords: PreTeachWord[];
+  backgroundNote: string;
+  generatedAt: number;
+}
+
+interface CollocationChunk {
+  id: string;
+  chunk: string;
+  pattern: string;
+  meaning: string;
+  meaningZh: string;
+  contrastNote?: string;
+  example: string;
+  textOccurrences: number;
 }
 
 type GrammarTopicCategory =
@@ -435,6 +473,15 @@ interface ReadingSession {
   studentAge: number;
   originalImages?: string[];
   extractedText: string;
+  preReading?: PreReadingData | null;
+  preReadingImage?: string;
+  preReadingImageGeneratedAt?: number;
+  preReadingGeneratedAt?: number;
+  studentPrediction?: string;
+  predictionRating?: number | null;
+  skillBreakdown?: SkillBreakdown | null;
+  collocations?: CollocationChunk[];
+  collocationsGeneratedAt?: number;
   summary: string;
   adaptedText: string;
   simplifiedText: string;
@@ -691,7 +738,10 @@ type LeaderboardActivityType =
   | "simplified_text_generate"
   | "sentence_analyze"
   | "targeted_practice_complete"
-  | "glossary_add";
+  | "glossary_add"
+  | "pre_reading_generate"
+  | "pre_reading_image_generate"
+  | "collocations_generate";
 
 interface ActivityLogEntry {
   id: string;
@@ -819,6 +869,7 @@ interface VocabularyWord {
   nextReviewAt: number;
   sourceSessionIds: string[];
   source: VocabularySource;
+  entryType?: "word" | "phrase";
   sharedBy: string | null;
   createdAt: number;
   updatedAt: number;

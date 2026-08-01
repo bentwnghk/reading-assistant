@@ -32,6 +32,7 @@ import {
 } from "@/utils/dashboardMetrics";
 import { useHistoryStore } from "@/store/history";
 import { StatCard, HighlightedStatCard } from "./StatCard";
+import { SkillProfileCard } from "./SkillProfileCard";
 
 const TIME_RANGES = [
   { days: 7, labelKey: "dashboard.timeRanges.d7" },
@@ -669,6 +670,9 @@ export function OverviewTab() {
           </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
+
+      {/* Diagnostic Skill Profile (cross-session) */}
+      <SkillProfileCard />
     </div>
   );
 }
