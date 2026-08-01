@@ -329,6 +329,26 @@ function parseAnalysisMarkdown(markdown: string): Paragraph[] {
   return paragraphs;
 }
 
+/**
+ * The sentence-analysis AI prompt (see `analyzeSentencePrompt`) mandates the
+ * response begin with a bolded line `**<sentence>**`. When exporting to Word,
+ * that line would duplicate the numbered heading-3 sentence paragraph rendered
+ * just above it, so strip the leading bold-sentence line (and a single blank
+ * line immediately following it) before parsing the rest of the markdown.
+ * If the first non-blank line does not match, the markdown is returned as-is.
+ */
+function stripLeadingSentenceLine(markdown: string, sentence: string): string {
+  const lines = markdown.split(/\n/);
+  let i = 0;
+  while (i < lines.length && !lines[i].trim()) i++;
+  if (i >= lines.length) return markdown;
+  if (lines[i].trim() === `**${sentence.trim()}**`) {
+    lines.splice(i, 1);
+    if (i < lines.length && !lines[i].trim()) lines.splice(i, 1);
+  }
+  return lines.join("\n");
+}
+
 // ─── component ──────────────────────────────────────────────────────────────
 
 function AdaptedText() {
@@ -749,8 +769,10 @@ function AdaptedText() {
               },
             })
           );
-          // Rich markdown content
-          children.push(...parseAnalysisMarkdown(entry.analysis));
+          // Rich markdown content. Strip the leading bold-sentence line that
+          // duplicates the numbered heading above (the AI prompt mandates the
+          // analysis begin with "**<sentence>**").
+          children.push(...parseAnalysisMarkdown(stripLeadingSentenceLine(entry.analysis, entry.sentence)));
         });
       }
 
