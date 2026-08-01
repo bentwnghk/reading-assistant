@@ -49,7 +49,7 @@ export const TTS_VOICE_LABELS: Record<TTSVoice, string> = {
   echo: "Adam (US male)",
   fable: "Phoebe (US female)",
   onyx: "Ollie (UK male)",
-  shimmer: "Ava (US female)",
+  shimmer: "Ada (UK female)",
 };
 
 export const TTS_PLAYBACK_RATES = [0.25, 0.5, 0.75, 1.0] as const;
@@ -175,7 +175,7 @@ export const defaultValues: SettingStore = {
   readingTextModel: "deepseek-v4-flash",
   tutorModel: "step-3.7-flash",
   basicTutorModel: "deepseek-v4-flash",
-  ttsVoice: "alloy",
+  ttsVoice: "onyx",
   ttsPlaybackRate: 1.0 as TTSPlaybackRate,
   autoSpeakFlashcard: true,
   cheatMode: false,
