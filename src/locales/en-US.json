@@ -724,11 +724,9 @@
       "emptyTip": "Click the button above to generate a summary of the text",
       "oneSentence": "TL;DR",
       "mainPoints": "Main Points",
-      "keyWords": "Key Words",
-      "thinkAbout": "Something to Think About",
       "help": {
         "title": "Summary Guide",
-        "intro": "Get the gist of the text in seconds — a one-line TL;DR, the main points, key words, and a question to think about.",
+        "intro": "Get the gist of the text in seconds — a one-line TL;DR and the main points.",
         "items": {
           "tldr": {
             "name": "TL;DR",
@@ -737,22 +735,13 @@
           "mainPoints": {
             "name": "Main Points",
             "desc": "Bullet points with emojis covering the most important ideas."
-          },
-          "keyWords": {
-            "name": "Key Words",
-            "desc": "Important vocabulary with English and Chinese meanings."
-          },
-          "reflect": {
-            "name": "Something to Think About",
-            "desc": "A reflection question to help you think more deeply about the text."
           }
         },
         "stepsTitle": "How to use it",
         "steps": {
           "s1": "Click Generate Summary.",
           "s2": "Read the TL;DR for a quick overview.",
-          "s3": "Go through the main points and key words.",
-          "s4": "Think about the reflection question."
+          "s3": "Go through the main points."
         },
         "tipTitle": "Good to know",
         "tipContent": "The tone and complexity match your age — simpler and more visual for primary students, more academic for DSE students."

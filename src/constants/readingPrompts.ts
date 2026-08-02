@@ -89,24 +89,13 @@ ${text}
 • [emoji] [Fourth main point - if needed]
 • [emoji] [Fifth main point - if needed]
 
-## 🔑 Key Words
-[List 4-6 important or challenging vocabulary words from the text that students should learn]
-
-• **word** - simple English definition (中文解釋)
-• **word2** - simple English definition (中文解釋)
-...
-
-## 💡 Something to Think About
-[End with ONE engaging question that encourages students to think deeper about the text. Make it personal and relatable.]
-
 ${levelGuidance}
 
 **CRITICAL FORMATTING RULES:**
 - Use exactly the markdown headers (##) as shown above
 - Use bullet points (•) for all lists - NOT dashes or asterisks
-- Add relevant emojis: 📖🎯📝🔑💡⭐💭🌟📌🏠👥❤️🎓🌍🎭💪🏆🌈
-- **Bold** key vocabulary words inline using double asterisks
-- Include Traditional Chinese (繁體中文) translations for ALL key words
+- Add relevant emojis: 📖🎯📝⭐💭🌟📌🏠👥❤️🎓🌍🎭💪🏆🌈
+- **Bold** key terms inline using double asterisks
 - Keep the same language as the original text for the main content
 - Make sure TL;DR is truly the simplest possible summary
 

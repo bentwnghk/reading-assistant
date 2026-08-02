@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { FileText, LoaderCircle, ListChecks, BookMarked, Lightbulb } from "lucide-react";
+import { FileText, LoaderCircle, ListChecks, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
@@ -32,15 +32,12 @@ function Summary() {
             items={[
               { key: "tldr", icon: Lightbulb, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "mainPoints", icon: ListChecks, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
-              { key: "keyWords", icon: BookMarked, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
-              { key: "reflect", icon: FileText, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
             ]}
             stepsTitleKey="reading.summary.help.stepsTitle"
             stepsKeys={[
               "reading.summary.help.steps.s1",
               "reading.summary.help.steps.s2",
               "reading.summary.help.steps.s3",
-              "reading.summary.help.steps.s4",
             ]}
             tipTitleKey="reading.summary.help.tipTitle"
             tipContentKey="reading.summary.help.tipContent"
