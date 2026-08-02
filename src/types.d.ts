@@ -474,8 +474,6 @@ interface ReadingSession {
   originalImages?: string[];
   extractedText: string;
   preReading?: PreReadingData | null;
-  preReadingImage?: string;
-  preReadingImageGeneratedAt?: number;
   preReadingGeneratedAt?: number;
   studentPrediction?: string;
   predictionRating?: number | null;
@@ -740,7 +738,6 @@ type LeaderboardActivityType =
   | "targeted_practice_complete"
   | "glossary_add"
   | "pre_reading_generate"
-  | "pre_reading_image_generate"
   | "collocations_generate";
 
 interface ActivityLogEntry {

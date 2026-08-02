@@ -1,17 +1,25 @@
 -- Pre-Reading Phase feature (v2.x)
--- Adds pre-reading scaffolding + prediction illustration + student prediction capture.
--- Content fields (pre_reading, pre_reading_image, *_generated_at) are session content,
--- kept on share. student_prediction / prediction_rating are per-user and zeroed on share.
+-- Adds pre-reading scaffolding + student prediction capture.
+-- Content fields (pre_reading, *_generated_at) are session content, kept on
+-- share. student_prediction / prediction_rating are per-user, zeroed on share.
+
+-- Drop the prediction-image columns if a previous migration added them
+-- (the image-generation feature was removed). Idempotent.
+ALTER TABLE reading_sessions
+  DROP COLUMN IF EXISTS pre_reading_image,
+  DROP COLUMN IF EXISTS pre_reading_image_generated_at;
 
 ALTER TABLE reading_sessions
   ADD COLUMN IF NOT EXISTS pre_reading JSONB,
-  ADD COLUMN IF NOT EXISTS pre_reading_image TEXT DEFAULT '',
-  ADD COLUMN IF NOT EXISTS pre_reading_image_generated_at BIGINT DEFAULT 0,
   ADD COLUMN IF NOT EXISTS pre_reading_generated_at BIGINT DEFAULT 0,
   ADD COLUMN IF NOT EXISTS student_prediction TEXT DEFAULT '',
   ADD COLUMN IF NOT EXISTS prediction_rating INTEGER;
 
--- Extend activity_type CHECK constraint to include the new pre-reading activities.
+-- Extend activity_type CHECK constraint to include the new pre-reading activity.
+-- First remove orphaned rows from the removed image-generation feature, since
+-- the new CHECK no longer allows that value (otherwise re-adding fails).
+DELETE FROM activity_logs WHERE activity_type = 'pre_reading_image_generate';
+
 ALTER TABLE activity_logs
   DROP CONSTRAINT IF EXISTS activity_logs_activity_type_check;
 
@@ -39,7 +47,6 @@ ALTER TABLE activity_logs
     'visualization_generate',
     'reading_text_generate',
     'pre_reading_generate',
-    'pre_reading_image_generate',
     'collocations_generate',
     'assignment_create',
     'assignment_start',

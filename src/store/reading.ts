@@ -142,7 +142,6 @@ export type GenerationType =
   | "title"
   | "summary"
   | "pre-reading"
-  | "pre-reading-image"
   | "adapted-text"
   | "simplified-text"
   | "mindmap"
@@ -176,8 +175,6 @@ export interface ReadingStore {
   generatedTextMeta: GeneratedTextMeta | null;
   summary: string;
   preReading: PreReadingData | null;
-  preReadingImage: string;
-  preReadingImageGeneratedAt: number;
   preReadingGeneratedAt: number;
   studentPrediction: string;
   predictionRating: number | null;
@@ -276,7 +273,6 @@ interface ReadingActions {
   setExtractedText: (text: string) => void;
   setSummary: (summary: string) => void;
   setPreReading: (data: PreReadingData | null) => void;
-  setPreReadingImage: (imageDataUrl: string) => void;
   setStudentPrediction: (prediction: string) => void;
   setPredictionRating: (rating: number | null) => void;
   setSkillBreakdown: (breakdown: SkillBreakdown | null) => void;
@@ -363,8 +359,6 @@ const defaultValues: ReadingStore = {
   generatedTextMeta: null,
   summary: "",
   preReading: null,
-  preReadingImage: "",
-  preReadingImageGeneratedAt: 0,
   preReadingGeneratedAt: 0,
   studentPrediction: "",
   predictionRating: null,
@@ -556,19 +550,6 @@ export const useReadingStore = create(
           const newState = {
             preReading: data,
             preReadingGeneratedAt: data ? Date.now() : 0,
-            updatedAt: Date.now(),
-          };
-          syncToHistoryIfNeeded({ ...state, ...newState });
-          if (currentUserId && state.id) {
-            syncToAPI(state.id, newState);
-          }
-          return newState;
-        }),
-      setPreReadingImage: (imageDataUrl) =>
-        set((state) => {
-          const newState = {
-            preReadingImage: imageDataUrl,
-            preReadingImageGeneratedAt: imageDataUrl ? Date.now() : 0,
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
@@ -1522,7 +1503,6 @@ export const useReadingStore = create(
           (key) =>
             key !== "originalImages" &&
             key !== "visualizationImage" &&
-            key !== "preReadingImage" &&
             key !== "activeGenerations" &&
             key !== "readAlongIndex" &&
             key !== "readAlongPlaying"

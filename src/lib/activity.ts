@@ -23,7 +23,6 @@ export type ActivityType =
   | "visualization_generate"
   | "reading_text_generate"
   | "pre_reading_generate"
-  | "pre_reading_image_generate"
   | "collocations_generate"
   | "assignment_create"
   | "assignment_start"

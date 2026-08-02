@@ -486,95 +486,6 @@ function useReadingAssistant() {
     }
   }
 
-  async function generatePreReadingImage(): Promise<number | null> {
-    if (useReadingStore.getState().activeGenerations["pre-reading-image"]) return null;
-    const isSameSession = createSessionGuard();
-    const ac = getAbortController("pre-reading-image");
-    const { studentAge, extractedText, setPreReadingImage, setError } = readingStore;
-
-    if (!extractedText) {
-      toast.error("Please extract text from an image first.");
-      return null;
-    }
-
-    const { mode, accessPassword, provider, openAIApiKey, openaicompatibleApiKey } = useSettingStore.getState();
-
-    if (mode === "local") {
-      const hasKey =
-        (provider === "openai" && openAIApiKey.length > 0) ||
-        (provider === "openaicompatible" && openaicompatibleApiKey.length > 0);
-      if (!hasKey) {
-        toast.error("Please configure your API key in settings first.");
-        return null;
-      }
-    }
-
-    const toastId = toast.info(i18next.t("reading.preReading.imageGeneratingWait"), { duration: Infinity });
-
-    setGenerating("pre-reading-image", true);
-
-    try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (mode === "proxy") {
-        headers["x-access-signature"] = generateSignature(accessPassword, Date.now());
-      }
-
-      const response = await fetch("/api/ai/pre-reading-image", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ text: extractedText, studentAge, mode }),
-        signal: ac.signal,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        const err = errorData.error;
-        const errorMsg =
-          typeof err === "string"
-            ? err
-            : err && typeof err === "object" && "status" in err && "message" in err
-              ? `[${err.status}]: ${err.message}`
-              : `Request failed (${response.status})`;
-        toast.dismiss(toastId);
-        toast.error(errorMsg);
-        setError(errorMsg);
-        setGenerating("pre-reading-image", false);
-        return null;
-      }
-
-      const data = await response.json();
-      if (!data.image) {
-        throw new Error("No image in response");
-      }
-
-      if (!isSameSession() || ac.signal.aborted) {
-        notifyGenerationCancelled();
-        setGenerating("pre-reading-image", false);
-        return null;
-      }
-
-      setPreReadingImage(data.image);
-      logActivity("pre_reading_image_generate", { sessionId: readingStore.id || undefined });
-
-      toast.dismiss(toastId);
-      setGenerating("pre-reading-image", false);
-      return typeof data.remaining === "number" ? data.remaining : null;
-    } catch (error) {
-      toast.dismiss(toastId);
-      if (!isSameSession() || isAbortError(error)) {
-        notifyGenerationCancelled();
-        setGenerating("pre-reading-image", false);
-        return null;
-      }
-      const msg = handleError(error);
-      setError(msg);
-      setGenerating("pre-reading-image", false);
-      return null;
-    } finally {
-      removeAbortController("pre-reading-image");
-    }
-  }
-
   async function adaptText() {
     if (useReadingStore.getState().activeGenerations["adapted-text"]) return "";
     const isSameSession = createSessionGuard();
@@ -2049,7 +1960,6 @@ Guidelines:
     generateTitle,
     generateSummary,
     generatePreReading,
-    generatePreReadingImage,
     adaptText,
     simplifyText,
     generateMindMap,

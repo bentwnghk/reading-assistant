@@ -88,7 +88,7 @@ function stripUserData(sessionData: ReadingStore): Record<string, unknown> {
     flashcardReviewDates: [],
     glossaryRatings: {},
     chatHistory: [],
-    // Pre-reading: content (preReading/preReadingImage) is kept; user prediction is zeroed
+    // Pre-reading: content (preReading) is kept; user prediction is zeroed
     studentPrediction: "",
     predictionRating: null,
     status: "idle",

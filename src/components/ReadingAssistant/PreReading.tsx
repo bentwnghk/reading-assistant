@@ -5,11 +5,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   Sparkles,
-  ImageIcon,
   LoaderCircle,
   Volume2,
-  ZoomIn,
-  X,
   Target,
   Lightbulb,
   BookOpen,
@@ -29,16 +26,14 @@ function PreReading() {
     extractedText,
     docTitle,
     preReading,
-    preReadingImage,
     studentPrediction,
     predictionRating,
     summary,
     setStudentPrediction,
     setPredictionRating,
   } = useReadingStore();
-  const { activeGenerations, generatePreReading, generatePreReadingImage } = useReadingAssistant();
+  const { activeGenerations, generatePreReading } = useReadingAssistant();
   const isGenerating = !!activeGenerations["pre-reading"];
-  const isGeneratingImage = !!activeGenerations["pre-reading-image"];
 
   const {
     mode,
@@ -53,7 +48,6 @@ function PreReading() {
   // Local state for the prediction textarea; synced to the store on blur to
   // avoid firing a persistence write on every keystroke.
   const [predictionDraft, setPredictionDraft] = useState(studentPrediction || "");
-  const [zoomed, setZoomed] = useState(false);
 
   useEffect(() => {
     setPredictionDraft(studentPrediction || "");
@@ -122,7 +116,7 @@ function PreReading() {
         <div className="flex items-center gap-2 ml-auto">
           <Button
             onClick={() => generatePreReading()}
-            disabled={isGenerating || isGeneratingImage}
+            disabled={isGenerating}
             size="sm"
             variant={preReading ? "secondary" : "default"}
           >
@@ -153,54 +147,6 @@ function PreReading() {
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Prediction illustration (optional, on-demand) */}
-          <div>
-            {preReadingImage ? (
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setZoomed(true)}
-                  className="relative group cursor-pointer"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={preReadingImage}
-                    alt={t("reading.preReading.imageAlt")}
-                    className="max-w-full h-auto rounded-md border shadow-sm"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-md flex items-center justify-center">
-                    <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-80 transition-opacity" />
-                  </div>
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2 py-4 border border-dashed rounded-md">
-                <ImageIcon className="h-8 w-8 text-muted-foreground/60" />
-                <p className="text-sm text-muted-foreground text-center px-4">
-                  {t("reading.preReading.imageTip")}
-                </p>
-                <Button
-                  onClick={() => generatePreReadingImage()}
-                  disabled={isGeneratingImage}
-                  size="sm"
-                  variant="outline"
-                >
-                  {isGeneratingImage ? (
-                    <>
-                      <LoaderCircle className="h-4 w-4 mr-1 animate-spin" />
-                      {t("reading.preReading.imageGenerating")}
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="h-4 w-4 mr-1" />
-                      {t("reading.preReading.generateImage")}
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
-          </div>
-
           {/* Prediction prompt + capture */}
           <div className="rounded-md border p-3 bg-amber-500/5">
             <div className="flex items-center gap-2 mb-2">
@@ -333,28 +279,6 @@ function PreReading() {
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {zoomed && preReadingImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-          onClick={() => setZoomed(false)}
-        >
-          <button
-            type="button"
-            className="absolute top-4 right-4 text-white hover:text-gray-300"
-            onClick={() => setZoomed(false)}
-          >
-            <X className="h-8 w-8" />
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={preReadingImage}
-            alt={t("reading.preReading.imageAlt")}
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
         </div>
       )}
     </section>

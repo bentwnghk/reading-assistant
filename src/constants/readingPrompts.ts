@@ -191,28 +191,6 @@ ${text}
 **CRITICAL:** Do not state the text's main idea, summary, findings, plot, or conclusion anywhere. The student must discover those by reading. Respond with ONLY the JSON object, no markdown fences.`;
 }
 
-export function generatePreReadingImagePrompt(age: number, text: string): string {
-  const schoolLevel = age <= 11 ? "primary" : "secondary";
-  return `You are generating a PREDICTION illustration for a ${age}-year-old Hong Kong ${schoolLevel} student who is about to read an English text but has NOT read it yet. The image must make the student CURIOUS and ready to predict — it must NOT reveal the text's content, events, outcome, or conclusion.
-
-<text>
-${text}
-</text>
-
-**Instructions:**
-1. Depict ONLY the topic, setting, mood, or genre of the text. For example: the place where events occur, key objects, the atmosphere, or the general subject area.
-2. **DO NOT** depict: specific events or actions from the text, characters' fates, results, conclusions, data/charts that give away findings, or any scene that would spoil what happens.
-3. Keep it evocative and intriguing but ambiguous — a viewer who has not read the text should be able to imagine several possible stories.
-4. The image must be:
-   - **Colorful and visually engaging** — vibrant colors appealing to students
-   - **Age-appropriate** — suitable for a ${age}-year-old
-   - **Minimal readable text** — avoid words/labels that hint at the content; no sentences or headlines
-   - **1K resolution (1280x720), 16:9 aspect ratio, PNG format**
-5. Use English for any unavoidable minimal text.
-
-Generate the image now.`;
-}
-
 export function generateCollocationsPrompt(age: number, text: string, glossaryWords: string[]): string {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
   const knownList = glossaryWords.length > 0
