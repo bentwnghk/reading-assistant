@@ -4,17 +4,19 @@
 
 Mr.🆖 ProReader is built exactly for moments like that. Just upload your text (or snap a photo of it), and the AI goes to work in several ways:
 
-1. **Instant Summary & Mind Map** — Get a clear TL;DR, key points, and a visual mind map so you grasp the big picture before diving into the details.
+1. **Before You Read** — Prepare before you dive in: activate what you already know, learn the cultural background and key words, then skim the title, headings, and first/last paragraphs to predict what the text is about. After reading, check how close your prediction was.
 
-2. **Simplified & Adapted Text** — The app rewrites the passage at your level using simpler vocabulary and shorter sentences, while keeping the original meaning intact.
+2. **Instant Summary & Mind Map** — Get a clear TL;DR, key points, and a visual mind map so you grasp the big picture before diving into the details.
 
-3. **Vocabulary Glossary** — Every tricky word is highlighted and explained with bilingual definitions, syllable breakdowns, and example sentences. You can review them later with flashcards, spelling games, and quizzes powered by spaced repetition.
+3. **Simplified & Adapted Text** — The app rewrites the passage at your level using simpler vocabulary and shorter sentences, while keeping the original meaning intact.
 
-4. **Grammar Analysis** — Complex grammar structures are identified and explained with patterns and examples from the text itself, plus interactive grammar games to reinforce your understanding.
+4. **Vocabulary Glossary** — Every tricky word is highlighted and explained with bilingual definitions, syllable breakdowns, and example sentences. You can review them later with flashcards, spelling games, and quizzes powered by spaced repetition.
 
-5. **AI Tutor** — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.
+5. **Grammar Analysis** — Complex grammar structures are identified and explained with patterns and examples from the text itself, plus interactive grammar games to reinforce your understanding.
 
-6. **Reading Comprehension Test** — Once you feel ready, take a generated quiz covering main ideas, details, inferences, and more, with detailed explanations for every answer.
+6. **AI Tutor** — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.
+
+7. **Reading Comprehension Test** — Once you feel ready, take a generated quiz covering main ideas, details, inferences, and more, with detailed explanations for every answer.
 
 Think of Mr.🆖 ProReader as a patient, personalized tutor that turns any difficult text into a learnable experience.
 

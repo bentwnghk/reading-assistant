@@ -22,6 +22,7 @@ const stagger = {
 const FEATURES: { key: string; emoji: string }[] = [
   { key: "ocr", emoji: "📷" },
   { key: "aiTextGenerator", emoji: "✨" },
+  { key: "preReading", emoji: "🧭" },
   { key: "visual", emoji: "🧠" },
   { key: "visualization", emoji: "🖼️" },
   { key: "difficulty", emoji: "📊" },
