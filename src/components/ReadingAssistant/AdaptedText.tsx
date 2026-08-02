@@ -478,8 +478,8 @@ function AdaptedText() {
   } | null>(null);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
-  const [vocabListOpen, setVocabListOpen] = useState(true);
-  const [analyzedSentencesOpen, setAnalyzedSentencesOpen] = useState(true);
+  const [vocabListOpen, setVocabListOpen] = useState(false);
+  const [analyzedSentencesOpen, setAnalyzedSentencesOpen] = useState(false);
   const isTouchDeviceRef = useRef(false);
   const sentenceListRef = useRef<string[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
