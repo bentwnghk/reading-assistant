@@ -17,6 +17,7 @@ import {
   Pilcrow,
   ListTree,
   FileText,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GuideDialog from "@/components/Internal/GuideDialog";
@@ -240,14 +241,17 @@ function PreReading() {
             itemsBaseKey="reading.preReading.help.items"
             items={[
               { key: "activate", icon: Lightbulb, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
-              { key: "predict", icon: Sparkles, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "background", icon: Globe, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-600" },
+              { key: "purpose", icon: Target, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "preteach", icon: BookOpen, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+              { key: "predict", icon: Sparkles, bgClass: "bg-violet-500/10", iconClass: "text-violet-500" },
             ]}
             stepsTitleKey="reading.preReading.help.stepsTitle"
             stepsKeys={[
               "reading.preReading.help.steps.s1",
               "reading.preReading.help.steps.s2",
               "reading.preReading.help.steps.s3",
+              "reading.preReading.help.steps.s4",
             ]}
             tipTitleKey="reading.preReading.help.tipTitle"
             tipContentKey="reading.preReading.help.tipContent"

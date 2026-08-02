@@ -678,14 +678,17 @@
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
           "activate": { "name": "Activate", "desc": "Connect the topic to what you already know." },
-          "predict": { "name": "Predict", "desc": "Skim, then guess what the text is about and check after reading." },
-          "preteach": { "name": "Pre-teach", "desc": "Learn the key words you need before you start." }
+          "background": { "name": "Background", "desc": "Learn the cultural or contextual knowledge the text assumes you have." },
+          "purpose": { "name": "Purpose", "desc": "Get a clear reason to read — what to find out." },
+          "preteach": { "name": "Pre-teach", "desc": "Learn the key words you need before you start." },
+          "predict": { "name": "Predict", "desc": "Skim, then guess what the text is about and check after reading." }
         },
         "stepsTitle": "How it works",
         "steps": {
-          "s1": "Click Prepare Pre-Reading.",
-          "s2": "Skim the title, headings, and first/last paragraphs, then type your prediction.",
-          "s3": "After you read and get the summary, compare your prediction."
+          "s1": "Click Prepare Pre-Reading to generate your activities.",
+          "s2": "Work top to bottom: activate your knowledge, read the background, set your purpose, and learn the key words.",
+          "s3": "Skim the title, headings, and first/last paragraphs, then type your prediction.",
+          "s4": "After you read and get the summary, rate how close your prediction was."
         },
         "tipTitle": "Tip",
         "tipContent": "Skim first, then predict — it focuses your reading and helps you remember more."
