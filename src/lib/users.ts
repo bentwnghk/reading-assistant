@@ -145,6 +145,8 @@ export interface TeacherSessionData {
   readingTestCompletedAt: number
   visualization: boolean
   visualizationGeneratedAt: number
+  preReading: boolean
+  preReadingGeneratedAt: number
 }
 
 export async function getTeacherDashboardData(classId: string): Promise<TeacherSessionData[]> {
@@ -169,6 +171,8 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
         rs.grammar_game_completed_at,
         rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.pre_reading IS NOT NULL as has_pre_reading,
+        rs.pre_reading_generated_at,
         rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
         rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
@@ -249,6 +253,8 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
       visualization: !!row.visualization,
       visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
+      preReading: !!row.has_pre_reading,
+      preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
     }))
   } finally {
     client.release()
@@ -277,6 +283,8 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
         rs.grammar_game_completed_at,
         rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.pre_reading IS NOT NULL as has_pre_reading,
+        rs.pre_reading_generated_at,
         rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
         rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
@@ -357,6 +365,8 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
       visualization: !!row.visualization,
       visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
+      preReading: !!row.has_pre_reading,
+      preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
     }))
   } finally {
     client.release()
@@ -385,6 +395,8 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
         rs.grammar_game_completed_at,
         rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.pre_reading IS NOT NULL as has_pre_reading,
+        rs.pre_reading_generated_at,
         rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
         rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
@@ -464,6 +476,8 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
       visualization: !!row.visualization,
       visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
+      preReading: !!row.has_pre_reading,
+      preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
     }))
   } finally {
     client.release()
@@ -1171,6 +1185,8 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
         rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.pre_reading IS NOT NULL as has_pre_reading,
+        rs.pre_reading_generated_at,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
@@ -1234,6 +1250,8 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
         rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.pre_reading IS NOT NULL as has_pre_reading,
+        rs.pre_reading_generated_at,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,

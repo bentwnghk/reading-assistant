@@ -10,6 +10,7 @@ export interface StudentMetrics {
   vocabularyTimeline: Array<{ date: string; cumulative: number }>;
   avgProgress: number;
   aiUsage: {
+    preReading: number;
     summary: number;
     mindMap: number;
     visualization: number;
@@ -34,6 +35,7 @@ export interface StudentMetrics {
 export interface DailyStudentActivity {
   date: string;
   readText: number;
+  preReading: number;
   summary: number;
   mindMap: number;
   visualization: number;
@@ -71,6 +73,7 @@ export interface TeacherDashboardMetrics {
 
 export const DAILY_ACTIVITY_KEYS = [
   "readText",
+  "preReading",
   "summary",
   "mindMap",
   "visualization",
@@ -89,6 +92,7 @@ export const DAILY_ACTIVITY_KEYS = [
 
 export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   readText: "#3b82f6",
+  preReading: "#f43f5e",
   summary: "#6366f1",
   mindMap: "#8b5cf6",
   visualization: "#0ea5e9",
@@ -160,6 +164,7 @@ export function getQuartileColor(values: number[]): string[] {
 }
 
 export const AI_USAGE_KEYS = [
+  "preReading",
   "summary",
   "mindMap",
   "visualization",
@@ -172,6 +177,7 @@ export const AI_USAGE_KEYS = [
 ] as const;
 
 export const AI_USAGE_COLORS: Record<string, string> = {
+  preReading: "#f43f5e",
   summary: "#3b82f6",
   mindMap: "#8b5cf6",
   visualization: "#0ea5e9",
@@ -192,6 +198,7 @@ function emptyDailyActivity(date: string): DailyStudentActivity {
   return {
     date,
     readText: 0,
+    preReading: 0,
     summary: 0,
     mindMap: 0,
     visualization: 0,
@@ -223,7 +230,7 @@ function computeStudentMetrics(
       totalVocabulary: 0,
       vocabularyTimeline: [],
       avgProgress: 0,
-      aiUsage: { summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      aiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
       testScores: [],
       quizScores: [],
       spellingScores: [],
@@ -274,6 +281,7 @@ function computeStudentMetrics(
     : 0;
 
   const aiUsage = {
+    preReading: sorted.filter((s) => s.preReading).length,
     summary: sorted.filter((s) => s.summary).length,
     mindMap: sorted.filter((s) => s.mindMap).length,
     visualization: sorted.filter((s) => s.visualization).length,
@@ -318,6 +326,9 @@ function computeStudentMetrics(
 
   for (const item of sorted) {
     getDay(toDateString(item.createdAt)).readText += 1;
+    if (item.preReading) {
+      getDay(toDateString(item.preReadingGeneratedAt || item.createdAt)).preReading += 1;
+    }
     if (item.summary) {
       getDay(toDateString(item.summaryGeneratedAt || item.createdAt)).summary += 1;
     }
@@ -441,8 +452,8 @@ export function computeTeacherDashboardMetrics(
       classAvgGrammarQuizScore: 0,
       classAvgGrammarGameScore: 0,
       classAvgGrammarGameAccuracy: 0,
-      classTotalAiUsage: { summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
-      classAvgAiUsage: { summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      classTotalAiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      classAvgAiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
     };
   }
 
@@ -498,6 +509,7 @@ export function computeTeacherDashboardMetrics(
   const classAvgGrammarGameAccuracy = allGrammarGameAccuracies.length > 0 ? Math.round(allGrammarGameAccuracies.reduce((a, b) => a + b, 0) / allGrammarGameAccuracies.length) : 0;
 
   const classTotalAiUsage = {
+    preReading: students.reduce((sum, s) => sum + s.aiUsage.preReading, 0),
     summary: students.reduce((sum, s) => sum + s.aiUsage.summary, 0),
     mindMap: students.reduce((sum, s) => sum + s.aiUsage.mindMap, 0),
     visualization: students.reduce((sum, s) => sum + s.aiUsage.visualization, 0),
@@ -510,6 +522,7 @@ export function computeTeacherDashboardMetrics(
   };
 
   const classAvgAiUsage = {
+    preReading: Math.round(classTotalAiUsage.preReading / n),
     summary: Math.round(classTotalAiUsage.summary / n),
     mindMap: Math.round(classTotalAiUsage.mindMap / n),
     visualization: Math.round(classTotalAiUsage.visualization / n),
@@ -550,6 +563,7 @@ export function getDailyActivityForDate(
     return {
       userName: s.userName,
       readText: activity?.readText || 0,
+      preReading: activity?.preReading || 0,
       summary: activity?.summary || 0,
       mindMap: activity?.mindMap || 0,
       visualization: activity?.visualization || 0,

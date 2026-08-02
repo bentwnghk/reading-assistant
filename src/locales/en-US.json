@@ -2210,6 +2210,7 @@
       "avgProgress": "Avg Learning Progress"
     },
     "features": {
+      "preReading": "Before You Read",
       "summary": "Summary",
       "mindMap": "Mind Map",
       "mindMapEn": "Mind Map (EN)",
@@ -2253,6 +2254,7 @@
     },
     "activities": {
       "readText": "Read Text",
+      "preReading": "Before You Read",
       "summary": "Summary",
       "mindMap": "Mind Map",
       "visualization": "Text Visualization",

@@ -30,6 +30,7 @@ export interface ScoreBucket {
 export interface DailyActivity {
   date: string;
   readText: number;
+  preReading: number;
   summary: number;
   mindMap: number;
   visualization: number;
@@ -51,6 +52,7 @@ export interface DashboardMetrics {
   sessionsBySource: { upload: number; repository: number; shared: number };
   progressPerSession: { id: string; title: string; progress: number; date: number }[];
   averageProgress: number;
+  preReadingsGenerated: number;
   summariesGenerated: number;
   mindMapsGenerated: number;
   mindMapsChinese: number;
@@ -77,6 +79,7 @@ export interface DashboardMetrics {
 
 export const DAILY_ACTIVITY_KEYS = [
   "readText",
+  "preReading",
   "summary",
   "mindMap",
   "visualization",
@@ -95,6 +98,7 @@ export const DAILY_ACTIVITY_KEYS = [
 
 export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   readText: "#3b82f6",
+  preReading: "#f43f5e",
   summary: "#6366f1",
   mindMap: "#8b5cf6",
   visualization: "#0ea5e9",
@@ -136,6 +140,7 @@ function emptyDailyActivity(date: string): DailyActivity {
   return {
     date,
     readText: 0,
+    preReading: 0,
     summary: 0,
     mindMap: 0,
     visualization: 0,
@@ -164,6 +169,7 @@ export function computeDashboardMetrics(
       sessionsBySource: { upload: 0, repository: 0, shared: 0 },
       progressPerSession: [],
       averageProgress: 0,
+      preReadingsGenerated: 0,
       summariesGenerated: 0,
       mindMapsGenerated: 0,
       mindMapsChinese: 0,
@@ -206,6 +212,8 @@ export function computeDashboardMetrics(
   const averageProgress = Math.round(
     progressPerSession.reduce((sum, p) => sum + p.progress, 0) / progressPerSession.length
   );
+
+  const preReadingsGenerated = sorted.filter((h) => !!h.preReading).length;
 
   const summariesGenerated = sorted.filter((h) => !!h.summary).length;
 
@@ -363,6 +371,9 @@ export function computeDashboardMetrics(
     getDay(dailyMap, toDateString(item.createdAt)).readText += 1;
 
     // single-completion activities — use their own *At timestamp, fall back to createdAt
+    if (item.preReading) {
+      getDay(dailyMap, toDateString(item.preReadingGeneratedAt || item.createdAt)).preReading += 1;
+    }
     if (item.summary) {
       getDay(dailyMap, toDateString(item.summaryGeneratedAt || item.createdAt)).summary += 1;
     }
@@ -435,6 +446,7 @@ export function computeDashboardMetrics(
     sessionsBySource: { upload: uploadCount, repository: repositoryCount, shared: sharedCount },
     progressPerSession,
     averageProgress,
+    preReadingsGenerated,
     summariesGenerated,
     mindMapsGenerated,
     mindMapsChinese,

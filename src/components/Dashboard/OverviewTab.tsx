@@ -335,6 +335,7 @@ function formatDailyDate(dateStr: string, locale: string): string {
 interface DailyRow {
   date: string;
   readText: number;
+  preReading: number;
   summary: number;
   mindMap: number;
   adaptedText: number;
@@ -368,6 +369,7 @@ function fillDailyRange(activities: DailyRow[], days: number): DailyRow[] {
       filled.push({
         date: key,
         readText: 0,
+        preReading: 0,
         summary: 0,
         mindMap: 0,
         adaptedText: 0,
@@ -395,6 +397,7 @@ export function OverviewTab() {
 
   const aiFeaturesData = useMemo(
     () => [
+      { name: t("dashboard.features.preReading"), value: m.preReadingsGenerated, fill: "#f43f5e" },
       { name: t("dashboard.features.summary"), value: m.summariesGenerated, fill: "#3b82f6" },
       { name: t("dashboard.features.mindMap"), en: m.mindMapsEnglish, zh: m.mindMapsChinese, fill: "#8b5cf6", fill2: "#a78bfa" },
       { name: t("dashboard.features.visualization"), value: m.visualizationsGenerated, fill: "#0ea5e9" },

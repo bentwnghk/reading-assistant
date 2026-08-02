@@ -2237,6 +2237,7 @@
       "avgProgress": "平均學習進度"
     },
     "features": {
+      "preReading": "閱讀前準備",
       "summary": "摘要",
       "mindMap": "思維導圖",
       "mindMapEn": "思維導圖（英）",
@@ -2280,6 +2281,7 @@
     },
     "activities": {
       "readText": "閱讀文本",
+      "preReading": "閱讀前準備",
       "summary": "摘要",
       "mindMap": "思維導圖",
       "visualization": "文本視覺化",

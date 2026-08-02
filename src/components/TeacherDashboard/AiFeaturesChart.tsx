@@ -53,6 +53,7 @@ function CustomTooltip({
 }
 
 const AI_FEATURE_KEY_MAP: Record<string, string> = {
+  preReading: "dashboard.features.preReading",
   summary: "dashboard.features.summary",
   mindMap: "dashboard.features.mindMap",
   visualization: "dashboard.features.visualization",
