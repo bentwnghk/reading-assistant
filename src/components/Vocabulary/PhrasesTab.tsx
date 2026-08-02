@@ -8,6 +8,8 @@ import {
   Search,
   Filter,
   X,
+  Eye,
+  EyeOff,
   ChevronLeft,
   ChevronRight,
   UserCheck,
@@ -52,6 +54,9 @@ export default function PhrasesTab() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [pageSize, setPageSize] = useState<number>(50);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const hasEverSelected = selectedWordIds.size > 0;
+  const effectiveShowSelectedOnly = showSelectedOnly && hasEverSelected;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -92,6 +97,10 @@ export default function PhrasesTab() {
       result = result.filter((p) => p.source === filterSource);
     }
 
+    if (effectiveShowSelectedOnly) {
+      result = result.filter((p) => selectedWordIds.has(p.id));
+    }
+
     result = [...result].sort((a, b) => {
       let cmp = 0;
       switch (sortField) {
@@ -125,6 +134,8 @@ export default function PhrasesTab() {
     filterSource,
     sortField,
     sortOrder,
+    effectiveShowSelectedOnly,
+    selectedWordIds,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPhrases.length / pageSize));
@@ -307,6 +318,34 @@ export default function PhrasesTab() {
                 >
                   <X className="h-3.5 w-3.5 mr-1" />
                   {t("vocabulary.clearFilters")}
+                </Button>
+              )}
+              {hasEverSelected && !effectiveShowSelectedOnly && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowSelectedOnly(true);
+                    resetPage();
+                  }}
+                  className="h-9 animate-pulse ring-2 ring-sky-400 dark:ring-sky-300 ring-offset-1 ring-offset-background shadow-[0_0_8px_1px_rgba(56,189,248,0.5)] dark:shadow-[0_0_8px_1px_rgba(125,211,252,0.6)]"
+                >
+                  <Eye className="h-3.5 w-3.5 mr-1" />
+                  {t("vocabulary.showSelected")}
+                </Button>
+              )}
+              {hasEverSelected && effectiveShowSelectedOnly && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => {
+                    setShowSelectedOnly(false);
+                    resetPage();
+                  }}
+                  className="h-9"
+                >
+                  <EyeOff className="h-3.5 w-3.5 mr-1" />
+                  {t("vocabulary.showAll")}
                 </Button>
               )}
             </div>

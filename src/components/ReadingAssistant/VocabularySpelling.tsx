@@ -1110,7 +1110,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
           <Button
             onClick={checkAnswer}
             className="w-full mt-4"
-            disabled={selectedLetters.length !== currentChallenge.word.length}
+            disabled={selectedLetters.length !== scrambleUnits(currentChallenge).length}
           >
             {t("reading.glossary.spelling.submit")}
           </Button>
