@@ -28,12 +28,8 @@ import { speakWord, stopSpeaking, unlockAudio } from "@/utils/tts";
 import { extractSkimExcerpts } from "@/utils/text";
 import { cn } from "@/utils/style";
 
-const EXCERPT_MAX_CHARS = 300;
-
-function trimExcerpt(text: string): string {
-  const clean = text.replace(/\s+/g, " ").trim();
-  if (clean.length <= EXCERPT_MAX_CHARS) return clean;
-  return `${clean.slice(0, EXCERPT_MAX_CHARS).trimEnd()}…`;
+function normalizeExcerpt(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
 }
 
 interface SkimHelperProps {
@@ -87,7 +83,7 @@ function SkimHelper({ text, title }: SkimHelperProps) {
     items.push({
       icon: Pilcrow,
       label: t("reading.preReading.skim.firstParagraph"),
-      node: <p className="text-muted-foreground">{trimExcerpt(excerpts.firstParagraph)}</p>,
+      node: <p className="text-muted-foreground">{normalizeExcerpt(excerpts.firstParagraph)}</p>,
     });
   }
   if (subheadings.length > 0) {
@@ -120,7 +116,7 @@ function SkimHelper({ text, title }: SkimHelperProps) {
     items.push({
       icon: FileText,
       label: t("reading.preReading.skim.lastParagraph"),
-      node: <p className="text-muted-foreground">{trimExcerpt(excerpts.lastParagraph)}</p>,
+      node: <p className="text-muted-foreground">{normalizeExcerpt(excerpts.lastParagraph)}</p>,
     });
   }
 
