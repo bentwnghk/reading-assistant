@@ -138,40 +138,6 @@
           "title": "句子分析",
           "desc": "點擊任何句子，AI 即時拆解：含義、詞彙、語法、語用分析和學習貼士！"
         },
-    "collocations": {
-      "title": "詞組與搭配詞",
-      "generate": "提取搭配詞",
-      "regenerate": "重新生成",
-      "generating": "提取中...",
-      "generatingWait": "正在提取搭配詞及母語轉移提示...",
-      "emptyTip": "點擊上方按鈕提取實用詞組與搭配詞，並附上常見粵語母語轉移錯誤提示。",
-      "inText": "文中出現：{{count}} 次",
-      "addToPhrases": "加入詞組",
-      "addedButton": "已加入詞組",
-      "added": "已將「{{chunk}}」加入你的詞組。",
-      "addAll": "全部加入詞組",
-      "addAllSuccess": "已將所有詞組加入你的詞組庫。",
-      "addError": "無法加入詞組，請重試。",
-      "parseError": "無法解析搭配詞，請重試。",
-      "help": {
-        "title": "詞組與搭配詞",
-        "intro": "學習多詞詞組，避免常見的粵語母語轉移錯誤。",
-        "itemsBaseKey": "reading.collocations.help.items",
-        "items": {
-          "chunks": { "title": "詞組", "description": "動詞短語、搭配詞和固定表達。" },
-          "contrast": { "title": "對比", "description": "說明粵語使用者常犯的錯誤。" },
-          "phrases": { "title": "詞組", "description": "將詞組加入你的詞組複習佇列。" }
-        },
-        "stepsTitle": "運作方式",
-        "steps": {
-          "s1": "點擊「提取搭配詞」。",
-          "s2": "閱讀對比提示以避免母語轉移錯誤。",
-          "s3": "將實用詞組加入「詞組」分頁進行複習。"
-        },
-        "tipTitle": "提示",
-        "tipContent": "約一半的香港學生搭配詞錯誤源自逐字翻譯——重點留意對比提示。"
-      }
-    },
     "glossary": {
           "title": "智能詞彙表",
           "desc": "AI 為你標記的每個生字提供雙語定義（英文 + 中文）、音節劃分和真實例句。"
@@ -733,9 +699,9 @@
         "intro": "閱讀前先做好準備，讓文本更易理解。",
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
-          "activate": { "title": "激活", "description": "把主題與你已知的知識連繫起來。" },
-          "predict": { "title": "預測", "description": "先猜測文章內容，讀後再核對。" },
-          "preteach": { "title": "預習", "description": "先學會開始前所需的關鍵詞。" }
+          "activate": { "name": "激活", "desc": "把主題與你已知的知識連繫起來。" },
+          "predict": { "name": "預測", "desc": "先猜測文章內容，讀後再核對。" },
+          "preteach": { "name": "預習", "desc": "先學會開始前所需的關鍵詞。" }
         },
         "stepsTitle": "運作方式",
         "steps": {
@@ -745,6 +711,40 @@
         },
         "tipTitle": "提示",
         "tipContent": "先作預測能幫助你更專注、記得更多。"
+      }
+    },
+    "collocations": {
+      "title": "詞組與搭配詞",
+      "generate": "提取搭配詞",
+      "regenerate": "重新生成",
+      "generating": "提取中...",
+      "generatingWait": "正在提取搭配詞及母語轉移提示...",
+      "emptyTip": "點擊上方按鈕提取實用詞組與搭配詞，並附上常見粵語母語轉移錯誤提示。",
+      "inText": "文中出現：{{count}} 次",
+      "addToPhrases": "加入詞組",
+      "addedButton": "已加入詞組",
+      "added": "已將「{{chunk}}」加入你的詞組。",
+      "addAll": "全部加入詞組",
+      "addAllSuccess": "已將所有詞組加入你的詞組庫。",
+      "addError": "無法加入詞組，請重試。",
+      "parseError": "無法解析搭配詞，請重試。",
+      "help": {
+        "title": "詞組與搭配詞",
+        "intro": "學習多詞詞組，避免常見的粵語母語轉移錯誤。",
+        "itemsBaseKey": "reading.collocations.help.items",
+        "items": {
+          "chunks": { "name": "詞組", "desc": "動詞短語、搭配詞和固定表達。" },
+          "contrast": { "name": "對比", "desc": "說明粵語使用者常犯的錯誤。" },
+          "phrases": { "name": "詞組", "desc": "將詞組加入你的詞組複習佇列。" }
+        },
+        "stepsTitle": "運作方式",
+        "steps": {
+          "s1": "點擊「提取搭配詞」。",
+          "s2": "閱讀對比提示以避免母語轉移錯誤。",
+          "s3": "將實用詞組加入「詞組」分頁進行複習。"
+        },
+        "tipTitle": "提示",
+        "tipContent": "約一半的香港學生搭配詞錯誤源自逐字翻譯——重點留意對比提示。"
       }
     },
     "summary": {

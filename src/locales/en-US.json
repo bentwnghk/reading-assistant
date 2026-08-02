@@ -138,40 +138,6 @@
           "title": "Sentence Analysis",
           "desc": "Click any sentence for a complete AI breakdown: meaning, vocabulary, grammar, language in use, and learning tips!"
         },
-    "collocations": {
-      "title": "Word Chunks & Collocations",
-      "generate": "Extract Collocations",
-      "regenerate": "Regenerate",
-      "generating": "Extracting...",
-      "generatingWait": "Extracting collocations and L1 transfer notes...",
-      "emptyTip": "Click the button above to extract useful word chunks and collocations, with notes on common Cantonese-L1 mistakes.",
-      "inText": "In text: {{count}}",
-      "addToPhrases": "Add to Phrases",
-      "addedButton": "Added to Phrases",
-      "added": "Added \"{{chunk}}\" to your phrases.",
-      "addAll": "Add All to Phrases",
-      "addAllSuccess": "Added all chunks to your phrases.",
-      "addError": "Could not add phrase. Please try again.",
-      "parseError": "Could not parse collocations. Please try again.",
-      "help": {
-        "title": "Word Chunks & Collocations",
-        "intro": "Learn multi-word chunks and avoid common Cantonese-L1 transfer mistakes.",
-        "itemsBaseKey": "reading.collocations.help.items",
-        "items": {
-          "chunks": { "title": "Chunks", "description": "Phrasal verbs, collocations, and fixed expressions." },
-          "contrast": { "title": "Contrast", "description": "Notes on how Cantonese speakers typically get it wrong." },
-          "phrases": { "title": "Phrases", "description": "Add chunks to your Phrases review queue." }
-        },
-        "stepsTitle": "How it works",
-        "steps": {
-          "s1": "Click Extract Collocations.",
-          "s2": "Read the contrast notes to avoid L1 mistakes.",
-          "s3": "Add useful chunks to your Phrases tab for review."
-        },
-        "tipTitle": "Tip",
-        "tipContent": "About half of HK learners' collocation errors come from word-for-word translation — focus on the contrast notes."
-      }
-    },
     "glossary": {
           "title": "Smart Glossary",
           "desc": "AI provides bilingual definitions (English + Chinese), syllable breakdowns, and example sentences for every word you mark."
@@ -702,9 +668,9 @@
         "intro": "Get ready before you read so the text is easier to understand.",
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
-          "activate": { "title": "Activate", "description": "Connect the topic to what you already know." },
-          "predict": { "title": "Predict", "description": "Guess what the text is about, then check after reading." },
-          "preteach": { "title": "Pre-teach", "description": "Learn the key words you need before you start." }
+          "activate": { "name": "Activate", "desc": "Connect the topic to what you already know." },
+          "predict": { "name": "Predict", "desc": "Guess what the text is about, then check after reading." },
+          "preteach": { "name": "Pre-teach", "desc": "Learn the key words you need before you start." }
         },
         "stepsTitle": "How it works",
         "steps": {
@@ -714,6 +680,40 @@
         },
         "tipTitle": "Tip",
         "tipContent": "Predicting first helps you focus and remember more."
+      }
+    },
+    "collocations": {
+      "title": "Word Chunks & Collocations",
+      "generate": "Extract Collocations",
+      "regenerate": "Regenerate",
+      "generating": "Extracting...",
+      "generatingWait": "Extracting collocations and L1 transfer notes...",
+      "emptyTip": "Click the button above to extract useful word chunks and collocations, with notes on common Cantonese-L1 mistakes.",
+      "inText": "In text: {{count}}",
+      "addToPhrases": "Add to Phrases",
+      "addedButton": "Added to Phrases",
+      "added": "Added \"{{chunk}}\" to your phrases.",
+      "addAll": "Add All to Phrases",
+      "addAllSuccess": "Added all chunks to your phrases.",
+      "addError": "Could not add phrase. Please try again.",
+      "parseError": "Could not parse collocations. Please try again.",
+      "help": {
+        "title": "Word Chunks & Collocations",
+        "intro": "Learn multi-word chunks and avoid common Cantonese-L1 transfer mistakes.",
+        "itemsBaseKey": "reading.collocations.help.items",
+        "items": {
+          "chunks": { "name": "Chunks", "desc": "Phrasal verbs, collocations, and fixed expressions." },
+          "contrast": { "name": "Contrast", "desc": "Notes on how Cantonese speakers typically get it wrong." },
+          "phrases": { "name": "Phrases", "desc": "Add chunks to your Phrases review queue." }
+        },
+        "stepsTitle": "How it works",
+        "steps": {
+          "s1": "Click Extract Collocations.",
+          "s2": "Read the contrast notes to avoid L1 mistakes.",
+          "s3": "Add useful chunks to your Phrases tab for review."
+        },
+        "tipTitle": "Tip",
+        "tipContent": "About half of HK learners' collocation errors come from word-for-word translation — focus on the contrast notes."
       }
     },
     "summary": {
