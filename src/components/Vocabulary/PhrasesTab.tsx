@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   UserCheck,
+  ListChecks,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,8 @@ export default function PhrasesTab() {
     setFilterMastery,
     filterSource,
     setFilterSource,
+    activeReviewListWordIds,
+    exitReviewList,
   } = useVocabularyStore();
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
@@ -68,7 +71,9 @@ export default function PhrasesTab() {
   );
 
   const filteredPhrases = useMemo(() => {
-    let result = allPhrases;
+    let result = activeReviewListWordIds
+      ? allPhrases.filter((p) => activeReviewListWordIds.has(p.id))
+      : allPhrases;
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -136,6 +141,7 @@ export default function PhrasesTab() {
     sortOrder,
     effectiveShowSelectedOnly,
     selectedWordIds,
+    activeReviewListWordIds,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPhrases.length / pageSize));
@@ -218,6 +224,23 @@ export default function PhrasesTab() {
         </div>
       ) : (
         <>
+          {activeReviewListWordIds && (
+            <div className="flex items-center gap-2 mb-4 p-3 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+              <ListChecks className="h-4 w-4 text-indigo-500 shrink-0" />
+              <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                {t("vocabulary.reviewLists.viewingList", { count: activeReviewListWordIds.size })}
+              </span>
+              <div className="flex-1" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={exitReviewList}
+              >
+                {t("vocabulary.reviewLists.backToMyVocab")}
+              </Button>
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -353,10 +376,12 @@ export default function PhrasesTab() {
 
           <div className="text-xs text-muted-foreground mb-2 flex items-center justify-between">
             <span>
-              {t("vocabulary.phrases.showingPhrases", {
-                count: filteredPhrases.length,
-                total: allPhrases.length,
-              })}
+              {activeReviewListWordIds
+                ? t("vocabulary.reviewLists.listWords", { count: filteredPhrases.length })
+                : t("vocabulary.phrases.showingPhrases", {
+                    count: filteredPhrases.length,
+                    total: allPhrases.length,
+                  })}
             </span>
             <span>
               {t("vocabulary.pageInfo", { page: safePage, total: totalPages })}

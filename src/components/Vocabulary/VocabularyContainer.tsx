@@ -118,7 +118,11 @@ function VocabularyContainer() {
     const w = acceptedReviewListWords;
     setAcceptedReviewListWords(null);
     loadReviewListIntoQueue(w);
-    setActiveTab("table");
+    const first = w[0] as ReviewListWord;
+    const isPhrase =
+      (first.entryType ??
+        (first.word.trim().includes(" ") ? "phrase" : "word")) === "phrase";
+    setActiveTab(isPhrase ? "phrases" : "table");
   }, [acceptedReviewListWords, words, loadReviewListIntoQueue, setAcceptedReviewListWords]);
 
   useEffect(() => {
@@ -281,10 +285,14 @@ function VocabularyContainer() {
         const res = await fetch(`/api/review-lists/${listId}`);
         if (!res.ok) return;
         const data = await res.json();
-        if (data.words?.length > 0) {
-          loadReviewListIntoQueue(data.words);
-          setActiveTab("table");
-        }
+      if (data.words?.length > 0) {
+        loadReviewListIntoQueue(data.words);
+        const first = data.words[0] as ReviewListWord;
+        const isPhrase =
+          (first.entryType ??
+            (first.word.trim().includes(" ") ? "phrase" : "word")) === "phrase";
+        setActiveTab(isPhrase ? "phrases" : "table");
+      }
       } catch (err) {
         console.error("Failed to load review list:", err);
       }

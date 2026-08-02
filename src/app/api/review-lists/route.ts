@@ -19,6 +19,7 @@ const createSchema = z.object({
         englishDefinition: z.string().optional().default(""),
         chineseDefinition: z.string().optional().default(""),
         example: z.string().optional().default(""),
+        entryType: z.enum(["word", "phrase"]).optional(),
       })
     )
     .min(1),
@@ -92,6 +93,7 @@ export async function PATCH(request: Request) {
             englishDefinition: z.string().optional().default(""),
             chineseDefinition: z.string().optional().default(""),
             example: z.string().optional().default(""),
+            entryType: z.enum(["word", "phrase"]).optional(),
           })
         )
         .min(1),

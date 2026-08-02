@@ -390,6 +390,7 @@ export const useVocabularyStore = create<
       nextReviewAt: 0,
       sourceSessionIds: [],
       source: "own" as VocabularySource,
+      entryType: w.entryType ?? (w.word.trim().includes(" ") ? "phrase" : "word"),
       sharedBy: null,
       createdAt: now,
       updatedAt: now,

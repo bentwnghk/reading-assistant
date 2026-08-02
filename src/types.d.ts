@@ -928,6 +928,7 @@ interface ReviewListWord {
   englishDefinition: string;
   chineseDefinition: string;
   example: string;
+  entryType?: "word" | "phrase";
 }
 
 interface ReviewList {

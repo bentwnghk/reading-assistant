@@ -42,6 +42,7 @@ export default function AddToReviewListDialog({
         englishDefinition: w.englishDefinition,
         chineseDefinition: w.chineseDefinition,
         example: w.example,
+        entryType: w.entryType,
       }));
       const res = await fetch("/api/review-lists", {
         method: "POST",

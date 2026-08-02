@@ -245,19 +245,22 @@ export async function acceptReviewListShare(
   for (const w of words) {
     const word = (w.word || "").toLowerCase();
     if (!word) continue;
+    const entryType =
+      w.entryType ?? (word.trim().includes(" ") ? "phrase" : "word");
     await pool.query(
       `INSERT INTO user_vocabulary (
         user_id, word, syllabification, part_of_speech,
         english_definition, chinese_definition, example,
-        shared_by, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)
+        shared_by, entry_type, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
       ON CONFLICT (user_id, word) DO UPDATE SET
         syllabification = COALESCE(NULLIF(EXCLUDED.syllabification, ''), user_vocabulary.syllabification),
         part_of_speech = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''), user_vocabulary.part_of_speech),
         english_definition = COALESCE(NULLIF(EXCLUDED.english_definition, ''), user_vocabulary.english_definition),
         chinese_definition = COALESCE(NULLIF(EXCLUDED.chinese_definition, ''), user_vocabulary.chinese_definition),
         example = COALESCE(NULLIF(EXCLUDED.example, ''), user_vocabulary.example),
-        updated_at = $9`,
+        entry_type = EXCLUDED.entry_type,
+        updated_at = $10`,
       [
         recipientId,
         word,
@@ -267,6 +270,7 @@ export async function acceptReviewListShare(
         w.chineseDefinition || "",
         w.example || "",
         senderId,
+        entryType,
         now,
       ]
     );
