@@ -1868,7 +1868,7 @@
       "colChunk": "Chunk",
       "colPattern": "Pattern",
       "colMeaning": "Meaning",
-      "colZh": "中文釋義",
+      "colZh": "Chinese Translation",
       "progress": "{{current}} / {{total}}",
       "check": "Check",
       "arrangeHint": "Tap words in the correct order",

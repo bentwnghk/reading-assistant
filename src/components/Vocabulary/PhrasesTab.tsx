@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import dynamic from "next/dynamic";
-import { Brain, ClipboardList, Shuffle, Inbox, History, Clock } from "lucide-react";
+import { Layers, ClipboardList, Shuffle, Inbox, History, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { isDueForReview } from "@/utils/srs";
@@ -80,7 +80,7 @@ export default function PhrasesTab({ onReviewFlashcard, onReviewQuiz, onUnscramb
           size="sm"
           variant="outline"
         >
-          <Brain className="h-4 w-4 mr-1" />
+          <Layers className="h-4 w-4 mr-1" />
           {t("vocabulary.phrases.startFlashcard")}
         </Button>
         <Button

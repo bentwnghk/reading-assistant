@@ -6,6 +6,7 @@ import {
   BookMarked,
   Table,
   Layers,
+  Combine,
   ClipboardList,
   SpellCheck,
   LoaderCircle,
@@ -296,7 +297,7 @@ function VocabularyContainer() {
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
     { key: "table", label: t("vocabulary.tabWords"), icon: <Table className="h-4 w-4" /> },
-    { key: "phrases", label: t("vocabulary.tabPhrases"), icon: <Layers className="h-4 w-4" /> },
+    { key: "phrases", label: t("vocabulary.tabPhrases"), icon: <Combine className="h-4 w-4" /> },
     { key: "flashcard", label: t("vocabulary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
     { key: "spelling", label: t("vocabulary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },
     { key: "quiz", label: t("vocabulary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },

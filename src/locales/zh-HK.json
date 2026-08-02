@@ -1895,7 +1895,7 @@
       "colChunk": "詞組",
       "colPattern": "類型",
       "colMeaning": "意思",
-      "colZh": "中文釋義",
+      "colZh": "中文翻譯",
       "progress": "{{current}} / {{total}}",
       "check": "檢查",
       "arrangeHint": "按正確順序點擊詞語",
