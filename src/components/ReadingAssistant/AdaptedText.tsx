@@ -80,7 +80,7 @@ import { completePath } from "@/utils/url";
 import { parseError } from "@/utils/error";
 import { sanitizeSentenceAnalysis } from "@/utils/text";
 import { splitSentences } from "@/utils/sentences";
-import { readAlong, stopReadAlong, stopSpeaking, unlockAudio } from "@/utils/tts";
+import { readAlong, stopReadAlong, stopSpeaking, unlockAudio, isAudioUnlocked } from "@/utils/tts";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
@@ -1068,37 +1068,62 @@ function AdaptedText() {
     [extractedText],
   );
 
+  const startReadAlong = useCallback(
+    async (startIndex: number) => {
+      if (readAlongSentences.length === 0) return;
+      // The click is the user gesture that unlocks the AudioContext (Lesson 27).
+      await unlockAudio();
+      if (!isAudioUnlocked()) {
+        setReadAlong(null, false);
+        toast.error(t("reading.readAlong.blocked"));
+        return;
+      }
+      setReadAlong(startIndex, true);
+      void readAlong({
+        sentences: readAlongSentences,
+        startIndex,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        openaicompatibleApiProxy,
+        accessPassword,
+        audioRef,
+        onSentenceStart: (i) => setReadAlong(i, true),
+        onSentenceEnd: (i) => {
+          void i;
+        },
+        onComplete: () => setReadAlong(null, false),
+        onBlocked: () => {
+          setReadAlong(null, false);
+          toast.error(t("reading.readAlong.blocked"));
+        },
+      });
+    },
+    [readAlongSentences, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword, setReadAlong, t],
+  );
+
   const handleToggleReadAlong = useCallback(async () => {
     if (readAlongPlaying) {
       stopReadAlong();
       setReadAlong(null, false);
       return;
     }
-    if (readAlongSentences.length === 0) return;
-    // The click is the user gesture that unlocks the AudioContext (Lesson 27).
-    await unlockAudio();
-    setReadAlong(0, true);
-    void readAlong({
-      sentences: readAlongSentences,
-      voice: ttsVoice,
-      speed: ttsPlaybackRate,
-      mode,
-      openaicompatibleApiKey,
-      openaicompatibleApiProxy,
-      accessPassword,
-      audioRef,
-      onSentenceStart: (i) => setReadAlong(i, true),
-      onSentenceEnd: (i) => {
-        // Brief pause between sentences is handled by sequential playback.
-        void i;
-      },
-      onComplete: () => setReadAlong(null, false),
-      onBlocked: () => {
-        setReadAlong(null, false);
-        toast.error(t("reading.readAlong.blocked"));
-      },
-    });
-  }, [readAlongPlaying, readAlongSentences, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword, setReadAlong, t]);
+    void startReadAlong(0);
+  }, [readAlongPlaying, startReadAlong, setReadAlong]);
+
+  // Click-to-jump: restart read-along from the clicked sentence index.
+  // Works whether or not read-along is currently playing. The click event
+  // serves as the user gesture for AudioContext unlock.
+  const handleJumpReadAlong = useCallback(
+    (index: number) => {
+      if (readAlongSentences.length === 0) return;
+      if (index < 0 || index >= readAlongSentences.length) return;
+      stopReadAlong();
+      void startReadAlong(index);
+    },
+    [readAlongSentences, startReadAlong],
+  );
 
   // Stop read-along when leaving the original tab.
   useEffect(() => {
@@ -1177,8 +1202,23 @@ function AdaptedText() {
       if (sentence.trim()) {
         setActiveSentence(sentence.trim());
       }
+      return;
     }
-  }, []);
+
+    // Read-along jump: clicking a sentence starts/jumps read-along to it.
+    // Skip when the user is actively selecting text (drag-selection).
+    const raSpan = target.closest(".ra-sentence") as HTMLElement | null;
+    if (raSpan) {
+      const selection = window.getSelection();
+      if (selection && selection.toString().trim().length > 0) return;
+      const idxAttr = raSpan.getAttribute("data-ra-idx");
+      if (idxAttr !== null) {
+        e.stopPropagation();
+        e.preventDefault();
+        handleJumpReadAlong(Number(idxAttr));
+      }
+    }
+  }, [handleJumpReadAlong]);
 
   const handleGlossaryWordClick = useCallback((e: Event) => {
     const target = (e.target as HTMLElement).closest(
@@ -1400,9 +1440,14 @@ function AdaptedText() {
         {/* ── Original tab ─────────────────────────────────────────────── */}
         <TabsContent value="original" className="mt-4">
           {/* Edit controls */}
-          <div className="mb-4 flex justify-end gap-2">
+          <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
             {!isEditing ? (
               <>
+                {readAlongPlaying && (
+                  <span className="text-xs text-muted-foreground mr-auto hidden sm:inline">
+                    {t("reading.readAlong.jumpHint")}
+                  </span>
+                )}
                 <Button
                   variant={readAlongPlaying ? "default" : "outline"}
                   size="sm"

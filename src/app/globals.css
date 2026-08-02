@@ -375,18 +375,25 @@ html {
   content: "譯";
 }
 
-/* Read-along active sentence highlight */
+/* Read-along sentence highlight (fluorescent green) */
 .ra-sentence {
   border-radius: 0.25rem;
-  transition: background-color 0.2s ease;
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ra-sentence:hover {
+  background-color: rgba(57, 255, 20, 0.1);
 }
 .ra-sentence.ra-active {
-  background-color: rgba(59, 130, 246, 0.2);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+  background-color: rgba(57, 255, 20, 0.25);
+  box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.5);
+}
+:is(.dark .ra-sentence:hover) {
+  background-color: rgba(57, 255, 20, 0.08);
 }
 :is(.dark .ra-sentence.ra-active) {
-  background-color: rgba(96, 165, 250, 0.25);
-  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+  background-color: rgba(57, 255, 20, 0.18);
+  box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.4);
 }
 .ra-pulse {
   animation: ra-pulse 1.5s ease-in-out infinite;

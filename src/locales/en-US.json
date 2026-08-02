@@ -750,7 +750,8 @@
     "readAlong": {
       "play": "Read Along",
       "stop": "Stop",
-      "blocked": "Tap the Read Along button again to enable sound."
+      "blocked": "Tap the Read Along button again to enable sound.",
+      "jumpHint": "Click any sentence to jump to it"
     },
     "adaptedText": {
       "title": "Text Analysis & Adaptation",

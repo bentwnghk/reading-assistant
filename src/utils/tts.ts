@@ -250,6 +250,8 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
 
 export interface ReadAlongOptions {
   sentences: string[];
+  /** Index to begin playback from (default 0). Used for click-to-jump. */
+  startIndex?: number;
   voice: string;
   speed: number;
   mode: string;
@@ -270,15 +272,17 @@ export interface ReadAlongOptions {
  * the active sentence) and `onSentenceEnd(i)` when it finishes. Reuses the
  * single AudioContext + `currentSource` plumbing from `speakWord`.
  *
- * Cancellation: the caller controls playback by setting a module flag via
- * `stopReadAlong()`, which is checked between sentences. This mirrors the
- * iOS-unlock model (Lesson 27): one `unlockAudio()` in a gesture permits the
- * whole sequence.
+ * Cancellation uses a monotonically-incrementing token instead of a boolean
+ * flag. This correctly handles the click-to-jump scenario: when the user
+ * clicks a sentence mid-playback, `stopReadAlong()` invalidates the old loop,
+ * then a fresh `readAlong()` call with a new token takes over. A boolean flag
+ * would be reset to `false` by the new call before the old loop checks it,
+ * causing both loops to run concurrently and interleave audio.
  */
-let _readAlongStopped = false;
+let _readAlongToken = 0;
 
 export function stopReadAlong(): void {
-  _readAlongStopped = true;
+  _readAlongToken++;
   stopSpeaking();
 }
 
@@ -289,10 +293,10 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
     return;
   }
 
-  _readAlongStopped = false;
+  const myToken = ++_readAlongToken;
 
-  for (let i = 0; i < opts.sentences.length; i++) {
-    if (_readAlongStopped) return;
+  for (let i = opts.startIndex ?? 0; i < opts.sentences.length; i++) {
+    if (_readAlongToken !== myToken) return;
     const sentence = opts.sentences[i];
     if (!sentence || !sentence.trim()) continue;
 
@@ -327,7 +331,7 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
         }),
       });
 
-      if (_readAlongStopped) return;
+      if (_readAlongToken !== myToken) return;
 
       if (!response.ok) {
         const errText = await response.text();
@@ -345,11 +349,11 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
       }
 
       const audioData = await response.arrayBuffer();
-      if (_readAlongStopped) return;
+      if (_readAlongToken !== myToken) return;
 
       if (ctx) {
         const decoded = await decodeAudioDataP(ctx, audioData);
-        if (_readAlongStopped) return;
+        if (_readAlongToken !== myToken) return;
         stopSpeaking();
         const source = ctx.createBufferSource();
         source.buffer = decoded;
@@ -394,7 +398,7 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
     }
   }
 
-  if (!_readAlongStopped) {
+  if (_readAlongToken === myToken) {
     opts.onComplete?.();
   }
 }

@@ -3678,7 +3678,8 @@
     "readAlong": {
       "play": "朗讀伴讀",
       "stop": "停止",
-      "blocked": "再次點擊「朗讀伴讀」以開啟聲音。"
+      "blocked": "再次點擊「朗讀伴讀」以開啟聲音。",
+      "jumpHint": "點擊任意句子即可跳轉朗讀"
     },
     "adaptedText": {
         "title": "閱讀改編文本",
