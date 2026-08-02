@@ -2,13 +2,8 @@
 
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import dynamic from "next/dynamic";
 import {
-  Layers,
-  ClipboardList,
-  Shuffle,
   Inbox,
-  History,
   ArrowUpDown,
   Search,
   Filter,
@@ -27,35 +22,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { getMasteryColor, isDueForReview } from "@/utils/srs";
 import { formatDateLong } from "@/utils/formatDate";
 import { cn } from "@/utils/style";
-import PhraseUnscramble from "./PhraseUnscramble";
 
-const ReviewHistory = dynamic(() => import("./ReviewHistory"));
-
-type PhraseMode = "list" | "unscramble";
 type SortField = "word" | "rating" | "mastery" | "lastReviewed" | "createdAt";
 type SortOrder = "asc" | "desc";
 
 const RATING_SORT: Record<string, number> = { hard: 3, medium: 2, easy: 1 };
 
-interface PhrasesTabProps {
-  onReviewFlashcard: () => void;
-  onReviewQuiz: () => void;
-  onUnscrambleComplete?: (results: { word: string; correct: boolean }[]) => void;
-}
-
-export default function PhrasesTab({
-  onReviewFlashcard,
-  onReviewQuiz,
-  onUnscrambleComplete,
-}: PhrasesTabProps) {
+export default function PhrasesTab() {
   const { t, i18n } = useTranslation();
   const {
     words,
-    setReviewQueue,
+    selectedWordIds,
+    toggleWordSelection,
     searchQuery,
     setSearchQuery,
     filterRating,
@@ -65,7 +48,6 @@ export default function PhrasesTab({
     filterSource,
     setFilterSource,
   } = useVocabularyStore();
-  const [mode, setMode] = useState<PhraseMode>("list");
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [pageSize, setPageSize] = useState<number>(50);
@@ -166,16 +148,25 @@ export default function PhrasesTab({
     [sortField],
   );
 
-  const startMode = (m: "flashcard" | "quiz" | "unscramble") => {
-    if (filteredPhrases.length === 0) return;
-    if (m === "flashcard" || m === "quiz") {
-      setReviewQueue(filteredPhrases);
-      if (m === "flashcard") onReviewFlashcard();
-      else onReviewQuiz();
-      return;
+  const allSelected =
+    pagedPhrases.length > 0 &&
+    pagedPhrases.every((p) => selectedWordIds.has(p.id));
+
+  const handleSelectAll = useCallback(() => {
+    if (allSelected) {
+      const idsToRemove = new Set(pagedPhrases.map((p) => p.id));
+      const next = new Set(
+        [...selectedWordIds].filter((id) => !idsToRemove.has(id)),
+      );
+      useVocabularyStore.getState().setSelectedWordIds(next);
+    } else {
+      const next = new Set([
+        ...selectedWordIds,
+        ...pagedPhrases.map((p) => p.id),
+      ]);
+      useVocabularyStore.getState().setSelectedWordIds(next);
     }
-    setMode("unscramble");
-  };
+  }, [allSelected, pagedPhrases, selectedWordIds]);
 
   const getRatingLabel = (rating: GlossaryRating | null) => {
     if (!rating) return "-";
@@ -206,65 +197,8 @@ export default function PhrasesTab({
     filterSource !== "all" ||
     searchQuery !== "";
 
-  if (mode === "unscramble") {
-    if (filteredPhrases.length === 0) {
-      setMode("list");
-      return null;
-    }
-    return (
-      <div>
-        <div className="flex justify-end mb-3">
-          <Button onClick={() => setMode("list")} variant="ghost" size="sm">
-            {t("vocabulary.phrases.backToList")}
-          </Button>
-        </div>
-        <PhraseUnscramble
-          phrases={filteredPhrases.map((p) => ({
-            word: p.word,
-            englishDefinition: p.englishDefinition,
-            chineseDefinition: p.chineseDefinition,
-          }))}
-          onComplete={(results) => {
-            onUnscrambleComplete?.(results);
-            setMode("list");
-          }}
-        />
-      </div>
-    );
-  }
-
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <Button
-          onClick={() => startMode("flashcard")}
-          disabled={filteredPhrases.length === 0}
-          size="sm"
-          variant="outline"
-        >
-          <Layers className="h-4 w-4 mr-1" />
-          {t("vocabulary.phrases.startFlashcard")}
-        </Button>
-        <Button
-          onClick={() => startMode("quiz")}
-          disabled={filteredPhrases.length === 0}
-          size="sm"
-          variant="outline"
-        >
-          <ClipboardList className="h-4 w-4 mr-1" />
-          {t("vocabulary.phrases.startQuiz")}
-        </Button>
-        <Button
-          onClick={() => startMode("unscramble")}
-          disabled={filteredPhrases.length === 0}
-          size="sm"
-          variant="outline"
-        >
-          <Shuffle className="h-4 w-4 mr-1" />
-          {t("vocabulary.phrases.startUnscramble")}
-        </Button>
-      </div>
-
       {allPhrases.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Inbox className="h-12 w-12 mx-auto mb-3 opacity-40" />
@@ -394,6 +328,12 @@ export default function PhrasesTab({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[40px]">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead className="w-[160px]">
                     <Button
                       variant="ghost"
@@ -453,7 +393,19 @@ export default function PhrasesTab({
               </TableHeader>
               <TableBody>
                 {pagedPhrases.map((p) => (
-                  <TableRow key={p.id} className="hover:bg-muted/30">
+                  <TableRow
+                    key={p.id}
+                    className={cn(
+                      "hover:bg-muted/30",
+                      selectedWordIds.has(p.id) && "bg-primary/5",
+                    )}
+                  >
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedWordIds.has(p.id)}
+                        onCheckedChange={() => toggleWordSelection(p.id)}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{p.word}</TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <span className="text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
@@ -509,7 +461,7 @@ export default function PhrasesTab({
                 {pagedPhrases.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={9}
+                      colSpan={10}
                       className="text-center py-8 text-muted-foreground"
                     >
                       {t("vocabulary.phrases.noPhrasesMatch")}
@@ -607,15 +559,6 @@ export default function PhrasesTab({
           )}
         </>
       )}
-
-      {/* Phrase-scoped review history */}
-      <div className="mt-8">
-        <h3 className="text-sm font-semibold flex items-center gap-2 mb-3 text-muted-foreground">
-          <History className="h-4 w-4" />
-          {t("vocabulary.phrases.historyTitle")}
-        </h3>
-        <ReviewHistory fixedEntryType="phrase" />
-      </div>
     </div>
   );
 }

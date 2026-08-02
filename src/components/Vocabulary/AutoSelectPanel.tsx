@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Wand2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,17 +11,27 @@ import {
 } from "@/components/ui/popover";
 import { useVocabularyStore } from "@/store/vocabulary";
 
-function AutoSelectPanel() {
+function AutoSelectPanel({ entryType = "word" }: { entryType?: "word" | "phrase" }) {
   const { t } = useTranslation();
   const { autoSelectForReview, words } =
     useVocabularyStore();
+
+  const scopedWords = useMemo(
+    () =>
+      words.filter((w) =>
+        entryType === "phrase"
+          ? w.entryType === "phrase"
+          : w.entryType !== "phrase",
+      ),
+    [words, entryType],
+  );
 
   const [count, setCount] = useState(10);
   const [strategy, setStrategy] = useState<VocabularySelectionStrategy>("due");
 
   const handleAutoSelect = useCallback(() => {
-    autoSelectForReview(count, strategy);
-  }, [count, strategy, autoSelectForReview]);
+    autoSelectForReview(count, strategy, entryType);
+  }, [count, strategy, autoSelectForReview, entryType]);
 
   const strategies: { key: VocabularySelectionStrategy; label: string }[] = [
     { key: "due", label: t("vocabulary.strategy.due") },
@@ -45,19 +55,23 @@ function AutoSelectPanel() {
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium">
-                {t("vocabulary.wordCount")}
+                {t(
+                  entryType === "phrase"
+                    ? "vocabulary.phraseCount"
+                    : "vocabulary.wordCount"
+                )}
               </label>
               <Input
                 type="number"
                 min={1}
-                max={Math.min(words.length, 100)}
+                max={Math.min(scopedWords.length, 100)}
                 value={count}
                 onChange={(e) =>
                   setCount(
                     Math.max(
                       1,
                       Math.min(
-                        words.length,
+                        scopedWords.length,
                         parseInt(e.target.value) || 1
                       )
                     )
@@ -88,7 +102,12 @@ function AutoSelectPanel() {
               </div>
             </div>
             <Button size="sm" className="w-full" onClick={handleAutoSelect}>
-              {t("vocabulary.selectWords", { count })}
+              {t(
+                entryType === "phrase"
+                  ? "vocabulary.selectPhrases"
+                  : "vocabulary.selectWords",
+                { count },
+              )}
             </Button>
           </div>
         </PopoverContent>

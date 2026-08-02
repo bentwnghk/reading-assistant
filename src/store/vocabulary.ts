@@ -45,7 +45,8 @@ interface VocabularyStoreActions {
   clearSelection: () => void;
   autoSelectForReview: (
     count: number,
-    strategy: VocabularySelectionStrategy
+    strategy: VocabularySelectionStrategy,
+    entryType?: "word" | "phrase"
   ) => void;
   startReview: () => void;
   setReviewQueue: (queue: VocabularyWord[]) => void;
@@ -167,10 +168,13 @@ export const useVocabularyStore = create<
 
   clearSelection: () => set({ selectedWordIds: new Set(), reviewQueue: [] }),
 
-  autoSelectForReview: (count, strategy) => {
+  autoSelectForReview: (count, strategy, entryType = "word") => {
     const { words, filterRating, filterMastery, filterSource } = get();
     const now = Date.now();
-    let pool = words.filter((w) => w.entryType !== "phrase");
+    let pool =
+      entryType === "phrase"
+        ? words.filter((w) => w.entryType === "phrase")
+        : words.filter((w) => w.entryType !== "phrase");
 
     if (filterRating !== "all") {
       pool = pool.filter((w) => w.rating === filterRating);

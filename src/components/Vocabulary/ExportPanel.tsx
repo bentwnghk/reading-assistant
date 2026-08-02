@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Download,
@@ -17,13 +17,22 @@ import {
 } from "@/components/ui/popover";
 import { useVocabularyStore } from "@/store/vocabulary";
 
-function ExportPanel() {
+function ExportPanel({ entryType = "word" }: { entryType?: "word" | "phrase" }) {
   const { t } = useTranslation();
   const { selectedWordIds, words } = useVocabularyStore();
   const [exporting, setExporting] = useState<string | null>(null);
 
-  const selectedWords = words.filter((w) => selectedWordIds.has(w.id));
-  const targetWords = selectedWords.length > 0 ? selectedWords : words;
+  const scopedWords = useMemo(
+    () =>
+      words.filter((w) =>
+        entryType === "phrase"
+          ? w.entryType === "phrase"
+          : w.entryType !== "phrase",
+      ),
+    [words, entryType],
+  );
+  const selectedWords = scopedWords.filter((w) => selectedWordIds.has(w.id));
+  const targetWords = selectedWords.length > 0 ? selectedWords : scopedWords;
 
   const handleExport = useCallback(
     async (type: "glossary" | "flashcard" | "fillblank" | "matching") => {
@@ -108,10 +117,20 @@ function ExportPanel() {
         <div className="space-y-1">
           <p className="text-sm font-medium mb-2">
             {selectedWords.length > 0
-              ? t("vocabulary.export.selectedWords", {
-                  count: selectedWords.length,
-                })
-              : t("vocabulary.export.allWords", { count: words.length })}
+              ? t(
+                  entryType === "phrase"
+                    ? "vocabulary.export.selectedPhrases"
+                    : "vocabulary.export.selectedWords",
+                  {
+                    count: selectedWords.length,
+                  },
+                )
+              : t(
+                  entryType === "phrase"
+                    ? "vocabulary.export.allPhrases"
+                    : "vocabulary.export.allWords",
+                  { count: scopedWords.length },
+                )}
           </p>
           {exports.map((e) => (
             <button

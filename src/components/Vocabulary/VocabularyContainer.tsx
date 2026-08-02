@@ -163,14 +163,20 @@ function VocabularyContainer() {
     };
   }, [words]);
 
-  const displayStats = activeTab === "phrases" ? phraseStats : stats;
+  const isPhraseContext =
+    activeTab === "phrases" ||
+    (currentEntryType.current === "phrase" &&
+      (activeTab === "flashcard" ||
+        activeTab === "quiz" ||
+        activeTab === "spelling"));
+  const displayStats = isPhraseContext ? phraseStats : stats;
 
   const handleStartReview = useCallback(() => {
     startReview();
     currentReviewMode.current = "flashcard";
-    currentEntryType.current = "word";
+    currentEntryType.current = activeTab === "phrases" ? "phrase" : "word";
     setActiveTab("flashcard");
-  }, [startReview]);
+  }, [startReview, activeTab]);
 
   const handleStartPlan = useCallback(
     (
@@ -200,6 +206,14 @@ function VocabularyContainer() {
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
+      if (
+        (tab === "table" && activeTab === "phrases") ||
+        (tab === "phrases" && activeTab === "table")
+      ) {
+        useVocabularyStore.getState().setSelectedWordIds(new Set());
+      }
+      if (tab === "table") currentEntryType.current = "word";
+      if (tab === "phrases") currentEntryType.current = "phrase";
       if (tab === "history" || tab === "lists" || tab === "phrases") {
         setActiveTab(tab);
         return;
@@ -212,7 +226,7 @@ function VocabularyContainer() {
       }
       setActiveTab(tab);
     },
-    [selectedWordIds, reviewQueue]
+    [selectedWordIds, reviewQueue, activeTab]
   );
 
   const handleCardFilter = useCallback(
@@ -224,9 +238,9 @@ function VocabularyContainer() {
       setFilterRating("all");
       setFilterMastery(opts.mastery ?? "all");
       setFilterSource(opts.source ?? "all");
-      setActiveTab(activeTab === "phrases" ? "phrases" : "table");
+      setActiveTab(isPhraseContext ? "phrases" : "table");
     },
-    [setSearchQuery, setFilterRating, setFilterMastery, setFilterSource, activeTab]
+    [setSearchQuery, setFilterRating, setFilterMastery, setFilterSource, isPhraseContext]
   );
 
   const handleReviewComplete = useCallback(
@@ -255,40 +269,6 @@ function VocabularyContainer() {
           results: reviewResults,
           ratingCounts,
           entryType,
-        }),
-      }).catch((err) => console.error("Failed to save review session:", err));
-    },
-    [],
-  );
-
-  // Records a phrase-unscramble session (the phrase equivalent of spelling).
-  const handlePhraseUnscrambleComplete = useCallback(
-    (results: { word: string; correct: boolean }[]) => {
-      if (results.length === 0) return;
-      const store = useVocabularyStore.getState();
-      // Advance SRS for each phrase so Unscramble moves phrases out of "due",
-      // mirroring how quiz/spelling update word mastery via onWordResult.
-      for (const r of results) {
-        store.updateWordReview(r.word, r.correct);
-      }
-      const reviewResults: VocabularyReviewResult[] = results.map((r) => {
-        const w = store.words.find(
-          (vw) => vw.word.toLowerCase() === r.word.toLowerCase()
-        );
-        return {
-          word: r.word,
-          correct: r.correct,
-          masteryBefore: w?.masteryLevel ?? 0,
-          masteryAfter: w?.masteryLevel ?? 0,
-        };
-      });
-      fetch("/api/vocabulary/review-sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode: "spelling",
-          results: reviewResults,
-          entryType: "phrase",
         }),
       }).catch((err) => console.error("Failed to save review session:", err));
     },
@@ -476,21 +456,26 @@ function VocabularyContainer() {
             </button>
           </div>
 
-          {activeTab === "table" && (
+          {(activeTab === "table" || activeTab === "phrases") && (
             <>
               <div className="flex items-center gap-2 mb-4">
-                <AutoSelectPanel />
+                <AutoSelectPanel entryType={activeTab === "phrases" ? "phrase" : "word"} />
                 <div className="flex-1" />
                 <div className="flex items-center gap-2 flex-wrap justify-end">
-                <ExportPanel />
+                <ExportPanel entryType={activeTab === "phrases" ? "phrase" : "word"} />
                 </div>
               </div>
               {selectedWordIds.size > 0 && (
                 <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex-wrap">
                   <span className="text-sm font-medium">
-                    {t("vocabulary.selectedCount", {
-                      count: selectedWordIds.size,
-                    })}
+                    {t(
+                      activeTab === "phrases"
+                        ? "vocabulary.selectedPhrasesCount"
+                        : "vocabulary.selectedCount",
+                      {
+                        count: selectedWordIds.size,
+                      }
+                    )}
                   </span>
                   <div className="flex-1" />
                   <Button
@@ -565,21 +550,7 @@ function VocabularyContainer() {
           </div>
 
           {activeTab === "table" && <VocabularyTable />}
-          {activeTab === "phrases" && (
-            <PhrasesTab
-              onReviewFlashcard={() => {
-                currentReviewMode.current = "flashcard";
-                currentEntryType.current = "phrase";
-                setActiveTab("flashcard");
-              }}
-              onReviewQuiz={() => {
-                currentReviewMode.current = "quiz";
-                currentEntryType.current = "phrase";
-                setActiveTab("quiz");
-              }}
-              onUnscrambleComplete={handlePhraseUnscrambleComplete}
-            />
-          )}
+          {activeTab === "phrases" && <PhrasesTab />}
           {activeTab === "flashcard" && (
             <VocabularyFlashcard
               glossary={reviewGlossary}

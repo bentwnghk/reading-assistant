@@ -207,6 +207,14 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const currentChallenge = challenges[currentIndex];
   challengeRef.current = currentChallenge;
   const config = DIFFICULTY_CONFIG[difficulty];
+  // Scramble uses whole-word tiles for multi-word phrases (the entry's "word"
+  // contains spaces) instead of individual characters, so phrases stay solvable.
+  const scrambleByWord = !!currentChallenge && currentChallenge.word.trim().includes(" ");
+  const scrambleUnits = (challenge?: SpellingWordChallenge): string[] => {
+    if (!challenge) return [];
+    const w = challenge.word;
+    return w.trim().includes(" ") ? w.trim().split(/\s+/) : w.split("");
+  };
 
   const wordStats = useMemo(() => {
     return getWordStats(glossary, effectiveRatings);
@@ -225,8 +233,9 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
   const generateChallenge = useCallback((entry: GlossaryEntry, _mode: SpellingGameMode): SpellingWordChallenge => {
     const word = entry.word.toLowerCase();
+    const isPhrase = word.trim().includes(" ");
+    const scrambleTiles = isPhrase ? shuffleArray(word.trim().split(/\s+/)) : shuffleArray(word.split(""));
     const letters = word.split("");
-    const shuffledLetters = shuffleArray(letters);
 
     const blankCount = Math.max(1, Math.floor(word.length * config.blankRatio));
     const positions = shuffleArray([...Array(word.length).keys()]).slice(0, blankCount);
@@ -238,7 +247,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       word: entry.word,
       englishDefinition: entry.englishDefinition,
       chineseDefinition: entry.chineseDefinition,
-      shuffledLetters,
+      shuffledLetters: scrambleTiles,
       blankedWord,
       blankPositions: positions.sort((a, b) => a - b),
       revealedHints: [],
@@ -400,8 +409,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         .join("");
       correct = normalizedInput === missingLetters;
     } else {
-      const normalizedInput = userInput.toLowerCase().trim();
-      const normalizedAnswer = currentChallenge.word.toLowerCase();
+      // Normalize internal whitespace so multi-word phrases reconstructed from
+      // word-tile scramble (or typed in listen-type) match regardless of how
+      // many spaces separated the words in the stored entry.
+      const normalizedInput = userInput.toLowerCase().replace(/\s+/g, " ").trim();
+      const normalizedAnswer = currentChallenge.word.toLowerCase().replace(/\s+/g, " ").trim();
       correct = normalizedInput === normalizedAnswer;
     }
 
@@ -464,38 +476,51 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         setUserInput((prev) => prev + hintLetter);
       }
     } else if (currentMode === "scramble") {
-      const nextCorrectLetter = currentChallenge.word[selectedLetters.length];
-      if (nextCorrectLetter) {
+      const units = scrambleUnits(currentChallenge);
+      const nextCorrectUnit = units[selectedLetters.length];
+      if (nextCorrectUnit) {
         const letterIndex = currentChallenge.shuffledLetters.findIndex(
-          (letter, idx) => letter === nextCorrectLetter && !usedIndices.includes(idx)
+          (letter, idx) => letter === nextCorrectUnit && !usedIndices.includes(idx)
         );
         if (letterIndex !== -1) {
-          setSelectedLetters((prev) => [...prev, nextCorrectLetter]);
-          setUserInput((prev) => prev + nextCorrectLetter);
+          setSelectedLetters((prev) => [...prev, nextCorrectUnit]);
+          setUserInput((prev) =>
+            scrambleByWord
+              ? prev
+                ? `${prev} ${nextCorrectUnit}`
+                : nextCorrectUnit
+              : prev + nextCorrectUnit,
+          );
           setUsedIndices((prev) => [...prev, letterIndex]);
         }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hintsRemaining, currentChallenge, currentMode, selectedLetters, usedIndices, userInput]);
+  }, [hintsRemaining, currentChallenge, currentMode, selectedLetters, usedIndices, userInput, scrambleByWord]);
 
   const handleLetterClick = useCallback((letter: string, index: number) => {
     setSelectedLetters((prev) => [...prev, letter]);
-    setUserInput((prev) => prev + letter);
+    setUserInput((prev) =>
+      scrambleByWord ? (prev ? `${prev} ${letter}` : letter) : prev + letter,
+    );
     setUsedIndices((prev) => [...prev, index]);
-  }, []);
+  }, [scrambleByWord]);
 
   const handleScrambleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Backspace" && selectedLetters.length > 0) {
         setSelectedLetters((prev) => prev.slice(0, -1));
-        setUserInput((prev) => prev.slice(0, -1));
+        setUserInput((prev) =>
+          scrambleByWord
+            ? prev.split(" ").slice(0, -1).join(" ")
+            : prev.slice(0, -1),
+        );
         setUsedIndices((prev) => prev.slice(0, -1));
       } else if (e.key === "Enter") {
         checkAnswer();
       }
     },
-    [selectedLetters, checkAnswer]
+    [selectedLetters, checkAnswer, scrambleByWord]
   );
 
   const handleKeyDown = useCallback(
@@ -968,7 +993,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
             <div className="text-center font-mono text-2xl tracking-wider min-h-[2.5rem] p-2 border-b-2 border-dashed">
               {userInput || (
                 <span className="text-muted-foreground">
-                  {Array.from({ length: currentChallenge.word.length }).fill("_").join(" ")}
+                  {scrambleByWord
+                    ? Array.from({ length: currentChallenge.word.trim().split(/\s+/).length })
+                        .fill("___")
+                        .join("   ")
+                    : Array.from({ length: currentChallenge.word.length }).fill("_").join(" ")}
                 </span>
               )}
             </div>
@@ -986,13 +1015,14 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                     onClick={() => !isSelected && handleLetterClick(letter, idx)}
                     disabled={isSelected || showFeedback}
                     className={cn(
-                      "w-10 h-10 text-lg font-semibold rounded-lg border-2 transition-all",
+                      "text-lg font-semibold rounded-lg border-2 transition-all",
+                      scrambleByWord ? "h-10 px-3" : "w-10 h-10",
                       isSelected
                         ? "border-muted bg-muted text-muted-foreground cursor-not-allowed"
                         : "border-primary bg-primary/10 hover:bg-primary/20"
                     )}
                   >
-                    {letter.toUpperCase()}
+                    {scrambleByWord ? letter : letter.toUpperCase()}
                   </button>
                 );
               })}
