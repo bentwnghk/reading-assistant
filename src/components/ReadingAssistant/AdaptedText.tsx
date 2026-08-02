@@ -1198,6 +1198,18 @@ function AdaptedText() {
     if (analyzedSpan) {
       e.stopPropagation();
       e.preventDefault();
+      // When read-along is active, jump to this sentence instead of opening
+      // the analysis dialog (the dialog modal would cover the highlight).
+      if (readAlongPlaying) {
+        const raSpan = analyzedSpan.closest(".ra-sentence") as HTMLElement | null;
+        if (raSpan) {
+          const idxAttr = raSpan.getAttribute("data-ra-idx");
+          if (idxAttr !== null) {
+            handleJumpReadAlong(Number(idxAttr));
+          }
+        }
+        return;
+      }
       const sentence = analyzedSpan.textContent || "";
       if (sentence.trim()) {
         setActiveSentence(sentence.trim());
@@ -1218,7 +1230,7 @@ function AdaptedText() {
         handleJumpReadAlong(Number(idxAttr));
       }
     }
-  }, [handleJumpReadAlong]);
+  }, [handleJumpReadAlong, readAlongPlaying]);
 
   const handleGlossaryWordClick = useCallback((e: Event) => {
     const target = (e.target as HTMLElement).closest(

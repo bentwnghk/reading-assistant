@@ -389,7 +389,7 @@ html {
   box-shadow: 0 0 0 2px rgba(57, 255, 20, 0.5);
 }
 :is(.dark .ra-sentence:hover) {
-  background-color: rgba(57, 255, 20, 0.08);
+  background-color: rgba(57, 255, 20, 0.16);
 }
 :is(.dark .ra-sentence.ra-active) {
   background-color: rgba(57, 255, 20, 0.18);
