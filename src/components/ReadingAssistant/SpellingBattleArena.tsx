@@ -34,7 +34,11 @@ interface SpellingBattleArenaProps {
 }
 
 function normalize(s: string): string {
-  return s.trim().toLowerCase();
+  // Collapse internal whitespace so multi-word phrases reconstructed from
+  // word-tile scramble (or typed in listen-type) match regardless of how many
+  // spaces separated the words. Mirrors the server's normalizeWord and the
+  // solo game's checkAnswer.
+  return s.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 // Mirror of the authoritative hint policy in `realtime/src/game/scoring.ts`.
@@ -53,6 +57,8 @@ function nextHintCost(usedSoFar: number): number | null {
  * Optimistic local answer check — mirrors the server's `judgeAnswer` so client
  * feedback matches the authoritative server result.
  * - listen-type / scramble: whole-word equality (case- + whitespace-insensitive).
+ *   For scramble the caller joins tiles with "" for single words or " " for
+ *   phrases before passing `answer`; normalize() collapses any spacing diffs.
  * - fill-blanks: only the missing letters (NO trim — matches the solo game).
  */
 function checkAnswer(
@@ -103,6 +109,10 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   const word = battle.currentWord;
   const myUserId = session?.user?.id;
   const gameMode: SpellingGameMode = word?.gameMode ?? "listen-type";
+  // Scramble uses whole-word tiles for multi-word phrases (the entry's "word"
+  // contains spaces) instead of individual characters, so phrases stay solvable.
+  // Mirrors the solo game's scrambleByWord in VocabularySpelling.tsx.
+  const scrambleByWord = gameMode === "scramble" && !!word && word.word.trim().includes(" ");
 
   const doSpeak = useCallback(
     async (text: string) => {
@@ -177,7 +187,10 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
     // Build the answer string per mode.
     let answer: string;
     if (gameMode === "scramble") {
-      answer = selectedLetters.join("");
+      // For phrases, tiles are whole words and must be space-joined so the
+      // normalized comparison matches the canonical word. Single words join
+      // with "" (characters).
+      answer = scrambleByWord ? selectedLetters.join(" ") : selectedLetters.join("");
     } else if (gameMode === "fill-blanks") {
       answer = userInput; // missing letters only — NO trim
     } else {
@@ -193,7 +206,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
       submittedAt: Date.now(),
       hintsUsed,
     });
-  }, [word, hasSubmitted, gameMode, userInput, selectedLetters, hintsUsed, battle]);
+  }, [word, hasSubmitted, gameMode, scrambleByWord, userInput, selectedLetters, hintsUsed, battle]);
 
   const handleTileClick = useCallback((letter: string, index: number) => {
     setSelectedLetters((prev) => [...prev, letter]);
@@ -242,21 +255,24 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
       }
       setHintsUsed((n) => n + 1);
     } else if (gameMode === "scramble") {
-      // Auto-place the next correct tile.
+      // Auto-place the next correct tile. For phrases the units are whole
+      // words (split by whitespace); for single words they're characters.
+      // Mirrors the solo game's scramble hint in VocabularySpelling.tsx.
       const tiles = word.shuffledLetters ?? [];
-      const nextCorrectLetter = word.word[selectedLetters.length];
-      if (nextCorrectLetter) {
+      const units = scrambleByWord ? word.word.trim().split(/\s+/) : word.word.split("");
+      const nextCorrectUnit = units[selectedLetters.length];
+      if (nextCorrectUnit) {
         const tileIndex = tiles.findIndex(
-          (letter, idx) => letter === nextCorrectLetter.toLowerCase() && !usedTileIndices.includes(idx),
+          (letter, idx) => letter.toLowerCase() === nextCorrectUnit.toLowerCase() && !usedTileIndices.includes(idx),
         );
         if (tileIndex !== -1) {
-          setSelectedLetters((prev) => [...prev, nextCorrectLetter]);
+          setSelectedLetters((prev) => [...prev, tiles[tileIndex]]);
           setUsedTileIndices((prev) => [...prev, tileIndex]);
         }
       }
       setHintsUsed((n) => n + 1);
     }
-  }, [word, hasSubmitted, gameMode, showDefinition, revealedPositions, userInput, selectedLetters, usedTileIndices, hintsUsed]);
+  }, [word, hasSubmitted, gameMode, scrambleByWord, showDefinition, revealedPositions, userInput, selectedLetters, usedTileIndices, hintsUsed]);
 
   // Cleanup audio on unmount.
   useEffect(() => {
@@ -543,10 +559,14 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                   showCorrect === false && "border-destructive text-destructive",
                 )}>
                   {selectedLetters.length > 0 ? (
-                    selectedLetters.join("").toUpperCase()
+                    scrambleByWord ? selectedLetters.join(" ") : selectedLetters.join("").toUpperCase()
                   ) : (
                     <span className="text-muted-foreground">
-                      {Array.from({ length: word.word.length }).fill("_").join(" ")}
+                      {scrambleByWord
+                        ? Array.from({ length: word.word.trim().split(/\s+/).length })
+                            .fill("___")
+                            .join("   ")
+                        : Array.from({ length: word.word.length }).fill("_").join(" ")}
                     </span>
                   )}
                 </div>
@@ -566,13 +586,14 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                         onClick={() => !isSelected && handleTileClick(letter, idx)}
                         disabled={isSelected || locked}
                         className={cn(
-                          "w-10 h-10 text-lg font-semibold rounded-lg border-2 transition-all",
+                          "text-lg font-semibold rounded-lg border-2 transition-all",
+                          scrambleByWord ? "h-10 px-3" : "w-10 h-10",
                           isSelected
                             ? "border-muted bg-muted text-muted-foreground cursor-not-allowed"
                             : "border-primary bg-primary/10 hover:bg-primary/20",
                         )}
                       >
-                        {letter.toUpperCase()}
+                        {scrambleByWord ? letter : letter.toUpperCase()}
                       </button>
                     );
                   })}

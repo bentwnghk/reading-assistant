@@ -21,6 +21,13 @@ describe("normalizeWord", () => {
   it("is symmetric for case/whitespace variants", () => {
     expect(normalizeWord("Apple")).toBe(normalizeWord(" apple "));
   });
+
+  it("collapses internal whitespace so multi-word phrases match", () => {
+    expect(normalizeWord("take off")).toBe("take off");
+    expect(normalizeWord("take  off")).toBe("take off");
+    expect(normalizeWord(" take   off ")).toBe("take off");
+    expect(normalizeWord("Take Off")).toBe("take off");
+  });
 });
 
 describe("scoreAnswer", () => {
@@ -270,6 +277,24 @@ describe("judgeAnswer", () => {
     expect(judgeAnswer("scramble", "cat", "cat")).toBe(true);
     expect(judgeAnswer("scramble", "Cat", " cAt ")).toBe(true);
     expect(judgeAnswer("scramble", "cat", "cta")).toBe(false);
+  });
+
+  it("scramble: phrase tiles space-joined match the canonical phrase", () => {
+    // Phrase "take off" → word-tiles ["take", "off"] joined as "take off".
+    expect(judgeAnswer("scramble", "take off", "take off")).toBe(true);
+    // Extra/different internal spacing still matches (normalize collapses).
+    expect(judgeAnswer("scramble", "take off", "take  off")).toBe(true);
+    // Tiles in the wrong word order never match.
+    expect(judgeAnswer("scramble", "take off", "off take")).toBe(false);
+    // A concatenated (no-space) join would NOT match — this is why the client
+    // must space-join phrase tiles before submitting.
+    expect(judgeAnswer("scramble", "take off", "takeoff")).toBe(false);
+  });
+
+  it("listen-type: typed phrase matches regardless of internal spacing", () => {
+    expect(judgeAnswer("listen-type", "take off", "take off")).toBe(true);
+    expect(judgeAnswer("listen-type", "take off", "take  off")).toBe(true);
+    expect(judgeAnswer("listen-type", "Take Off", " take off ")).toBe(true);
   });
 
   it("fill-blanks: matches only the missing letters in blank-position order", () => {

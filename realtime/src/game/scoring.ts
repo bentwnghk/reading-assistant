@@ -90,16 +90,24 @@ export function nextHintCost(usedSoFar: number): number | null {
   return HINT_COSTS[Math.min(usedSoFar, HINT_COSTS.length - 1)];
 }
 
-/** Normalize a word/answer for case- and whitespace-insensitive comparison. */
+/**
+ * Normalize a word/answer for case- and whitespace-insensitive comparison.
+ *
+ * Internal whitespace is collapsed so multi-word phrases reconstructed from
+ * word-tile scramble (or typed in listen-type) match regardless of how many
+ * spaces separated the words in the stored entry. Mirrors the solo game's
+ * checkAnswer normalization in VocabularySpelling.tsx.
+ */
 export function normalizeWord(s: string): string {
-  return s.trim().toLowerCase();
+  return s.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 /**
  * Judge a submitted answer against the canonical word for a given mode.
  *
  * - listen-type / scramble: whole-word equality (case- + whitespace-insensitive).
- *   For scramble the client sends the tiles in selected order, concatenated.
+ *   For scramble the client sends the tiles in selected order — concatenated
+ *   for single words, space-joined for phrases.
  * - fill-blanks: the client sends only the missing letters (Nth char fills the
  *   Nth blank in `blankPositions` order). Compared case-insensitively WITHOUT
  *   trimming — a blanked space character must be preserved (mirrors the solo
