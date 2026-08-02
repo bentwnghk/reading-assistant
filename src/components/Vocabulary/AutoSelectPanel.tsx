@@ -35,10 +35,31 @@ function AutoSelectPanel({ entryType = "word" }: { entryType?: "word" | "phrase"
 
   const strategies: { key: VocabularySelectionStrategy; label: string }[] = [
     { key: "due", label: t("vocabulary.strategy.due") },
-    { key: "hardest", label: t("vocabulary.strategy.hardest") },
-    { key: "newest", label: t("vocabulary.strategy.newest") },
+    {
+      key: "hardest",
+      label: t(
+        entryType === "phrase"
+          ? "vocabulary.strategy.hardestPhrase"
+          : "vocabulary.strategy.hardest"
+      ),
+    },
+    {
+      key: "newest",
+      label: t(
+        entryType === "phrase"
+          ? "vocabulary.strategy.newestPhrase"
+          : "vocabulary.strategy.newest"
+      ),
+    },
     { key: "random", label: t("vocabulary.strategy.random") },
-    { key: "weakest", label: t("vocabulary.strategy.weakest") },
+    {
+      key: "weakest",
+      label: t(
+        entryType === "phrase"
+          ? "vocabulary.strategy.weakestPhrase"
+          : "vocabulary.strategy.weakest"
+      ),
+    },
   ];
 
   return (

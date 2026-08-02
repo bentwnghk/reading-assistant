@@ -1998,7 +1998,11 @@
       "new": "New Words",
       "clickToFilter": "Click to filter the table",
       "ownHint": "Show words from your own reading",
-      "teacherHint": "Show words shared by teachers"
+      "teacherHint": "Show words shared by teachers",
+      "totalPhrase": "Total Phrases",
+      "ownHintPhrase": "Show phrases from your own reading",
+      "teacherHintPhrase": "Show phrases shared by teachers",
+      "newPhrase": "New Phrases"
     },
     "export": {
       "title": "Export",
@@ -2020,7 +2024,10 @@
       "hardest": "Hardest Words",
       "newest": "Newest Words",
       "random": "Random Mix",
-      "weakest": "Weakest Words"
+      "weakest": "Weakest Words",
+      "hardestPhrase": "Hardest Phrases",
+      "newestPhrase": "Newest Phrases",
+      "weakestPhrase": "Weakest Phrases"
     },
     "studyPlan": {
       "title": "Ready to study?",

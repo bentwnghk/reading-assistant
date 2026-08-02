@@ -2025,7 +2025,11 @@
       "new": "新詞",
       "clickToFilter": "點擊以篩選表格",
       "ownHint": "顯示自己閱讀所得的詞彙",
-      "teacherHint": "顯示老師分享的詞彙"
+      "teacherHint": "顯示老師分享的詞彙",
+      "totalPhrase": "詞組總數",
+      "ownHintPhrase": "顯示自己閱讀所得的詞組",
+      "teacherHintPhrase": "顯示老師分享的詞組",
+      "newPhrase": "新詞組"
     },
     "export": {
       "title": "匯出",
@@ -2047,7 +2051,10 @@
       "hardest": "最難詞彙",
       "newest": "最新詞彙",
       "random": "隨機混合",
-      "weakest": "最弱詞彙"
+      "weakest": "最弱詞彙",
+      "hardestPhrase": "最難詞組",
+      "newestPhrase": "最新詞組",
+      "weakestPhrase": "最弱詞組"
     },
     "studyPlan": {
       "title": "準備好學習了嗎？",

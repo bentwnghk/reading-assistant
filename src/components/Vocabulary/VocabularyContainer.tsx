@@ -374,7 +374,11 @@ function VocabularyContainer() {
               >
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                   <BookMarked className="h-4 w-4" />
-                  {t("vocabulary.stats.total")}
+                  {t(
+                    isPhraseContext
+                      ? "vocabulary.stats.totalPhrase"
+                      : "vocabulary.stats.total"
+                  )}
                 </div>
                 <div className="text-2xl font-bold">{displayStats.totalWords}</div>
               </button>
@@ -382,7 +386,11 @@ function VocabularyContainer() {
                 <button
                   type="button"
                   onClick={() => handleCardFilter({ source: "own" })}
-                  title={t("vocabulary.stats.ownHint")}
+                  title={t(
+                    isPhraseContext
+                      ? "vocabulary.stats.ownHintPhrase"
+                      : "vocabulary.stats.ownHint"
+                  )}
                   className={cn(
                     "cursor-pointer hover:text-foreground transition-colors",
                     filterSource === "own" && "text-foreground font-medium underline underline-offset-2"
@@ -393,7 +401,11 @@ function VocabularyContainer() {
                 <button
                   type="button"
                   onClick={() => handleCardFilter({ source: "teacher" })}
-                  title={t("vocabulary.stats.teacherHint")}
+                  title={t(
+                    isPhraseContext
+                      ? "vocabulary.stats.teacherHintPhrase"
+                      : "vocabulary.stats.teacherHint"
+                  )}
                   className={cn(
                     "cursor-pointer hover:text-foreground transition-colors",
                     filterSource === "teacher" && "text-foreground font-medium underline underline-offset-2"
@@ -448,7 +460,11 @@ function VocabularyContainer() {
             >
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Brain className="h-4 w-4 text-blue-500" />
-                {t("vocabulary.stats.new")}
+                {t(
+                  isPhraseContext
+                    ? "vocabulary.stats.newPhrase"
+                    : "vocabulary.stats.new"
+                )}
               </div>
               <div className="text-2xl font-bold text-blue-500">
                 {displayStats.newWords}
