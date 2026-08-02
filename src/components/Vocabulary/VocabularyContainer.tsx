@@ -182,7 +182,7 @@ function VocabularyContainer() {
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
-      if (tab === "history" || tab === "lists") {
+      if (tab === "history" || tab === "lists" || tab === "phrases") {
         setActiveTab(tab);
         return;
       }
