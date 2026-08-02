@@ -167,6 +167,9 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
         COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
         rs.grammar_game_completed_at,
+        rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
+        rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -272,6 +275,9 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
         COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
         rs.grammar_game_completed_at,
+        rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
+        rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -377,6 +383,9 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
         COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
         rs.grammar_game_completed_at,
+        rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
+        rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
         rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
         rs.created_at, rs.updated_at,
@@ -1091,8 +1100,12 @@ export async function getStudentClassId(studentId: string): Promise<string | nul
   }
 }
 
+// Mirrors the 15 workflow steps in WorkflowProgress.tsx (and the copies in
+// SessionsTab.tsx / dashboardMetrics.ts). Keep all of them in sync.
 function calculateProgress(row: {
   extracted_text: string
+  pre_reading?: unknown
+  student_prediction?: string
   summary?: string
   mind_map?: string
   visualization_generated_at?: number | string
@@ -1101,6 +1114,7 @@ function calculateProgress(row: {
   analyzed_sentences?: Record<string, unknown>
   highlighted_words?: string[]
   glossary?: unknown[]
+  collocations?: unknown[]
   spelling_game_best_score?: number
   vocabulary_quiz_score?: number
   grammar_quiz_completed?: boolean
@@ -1114,16 +1128,18 @@ function calculateProgress(row: {
   const hasExtractedText = !!row.extracted_text
   const steps = [
     hasExtractedText,
+    !!row.pre_reading && (row.student_prediction || '').trim().length > 0,
     !!row.summary,
     !!row.mind_map,
     (Number(row.visualization_generated_at ?? 0)) > 0,
     !!row.adapted_text,
-    row.test_completed,
     Object.keys(row.analyzed_sentences || {}).length > 0,
     (row.highlighted_words || []).length > 0,
     (row.glossary || []).length > 0,
+    (row.collocations || []).length > 0,
     (row.spelling_game_best_score || 0) > 0,
     (row.vocabulary_quiz_score || 0) > 0,
+    !!row.test_completed,
     Math.max(
       row.grammar_scramble_high_score || 0,
       row.grammar_workshop_high_score || 0,
@@ -1131,7 +1147,7 @@ function calculateProgress(row: {
       row.grammar_roulette_high_score || 0,
       row.grammar_duel_high_score || 0,
     ) > 0,
-    row.grammar_quiz_completed && (row.grammar_quiz_score || 0) > 0,
+    !!row.grammar_quiz_completed && (row.grammar_quiz_score || 0) > 0,
   ]
   const completedCount = steps.filter(Boolean).length
   return Math.round((completedCount / steps.length) * 100)
@@ -1153,6 +1169,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
+        rs.pre_reading, rs.student_prediction, rs.collocations,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
@@ -1215,6 +1232,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.spelling_game_accuracy,
+        rs.pre_reading, rs.student_prediction, rs.collocations,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,

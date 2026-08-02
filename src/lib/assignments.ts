@@ -80,22 +80,25 @@ export function stripSessionForAssignment(sessionData: ReadingStore): Record<str
 
 /**
  * Compute the per-student progress percentage from a ReadingStore.
- * Mirrors the logic in dashboardMetrics.calculateProgress without the
- * cross-session dependency.
+ * Mirrors the 15 workflow steps in WorkflowProgress.tsx (and the copies in
+ * dashboardMetrics.calculateProgress / users.calculateProgress / SessionsTab).
+ * Keep all of them in sync.
  */
 export function calculateAssignmentProgress(session: ReadingStore): number {
   const steps = [
     !!session.extractedText,
+    !!session.preReading && (session.studentPrediction || '').trim().length > 0,
     !!session.summary,
     !!session.mindMap,
     !!session.visualizationImage,
     !!session.adaptedText,
-    !!session.testCompleted,
     Object.keys(session.analyzedSentences || {}).length > 0,
     (session.highlightedWords || []).length > 0,
     (session.glossary || []).length > 0,
+    (session.collocations || []).length > 0,
     (session.spellingGameBestScore || 0) > 0,
     (session.vocabularyQuizScore || 0) > 0,
+    !!session.testCompleted,
     Math.max(
       session.grammarScrambleHighScore || 0,
       session.grammarWorkshopHighScore || 0,

@@ -113,20 +113,24 @@ function getSessionTitle(item: ReadingHistory): string {
   return item.docTitle || item.extractedText?.slice(0, 50) || "Untitled";
 }
 
+// Mirrors the 15 workflow steps in WorkflowProgress.tsx (and the copies in
+// SessionsTab.tsx / users.ts). Keep all of them in sync.
 function calculateProgress(item: ReadingHistory): number {
   const hasExtractedText = !!item.extractedText;
   const steps = [
     hasExtractedText,
+    !!item.preReading && (item.studentPrediction || "").trim().length > 0,
     !!item.summary,
     !!item.mindMap,
     (item.visualizationGeneratedAt || 0) > 0,
     !!item.adaptedText,
-    item.testCompleted,
     Object.keys(item.analyzedSentences || {}).length > 0,
     (item.highlightedWords || []).length > 0,
     (item.glossary || []).length > 0,
+    (item.collocations || []).length > 0,
     (item.spellingGameBestScore || 0) > 0,
     (item.vocabularyQuizScore || 0) > 0,
+    !!item.testCompleted,
     Math.max(
       item.grammarScrambleHighScore || 0,
       item.grammarWorkshopHighScore || 0,
@@ -134,7 +138,7 @@ function calculateProgress(item: ReadingHistory): number {
       item.grammarRouletteHighScore || 0,
       item.grammarDuelHighScore || 0,
     ) > 0,
-    item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0,
+    !!item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0,
   ];
   const completedCount = steps.filter(Boolean).length;
   return Math.round((completedCount / steps.length) * 100);
