@@ -38,6 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useVocabularyStore } from "@/store/vocabulary";
+import { isDueForReview } from "@/utils/srs";
 import { cn } from "@/utils/style";
 import VocabularyTable from "./VocabularyTable";
 import AutoSelectPanel from "./AutoSelectPanel";
@@ -148,6 +149,22 @@ function VocabularyContainer() {
     return ratings;
   }, [reviewQueue, words, selectedWordIds]);
 
+  const phraseStats = useMemo(() => {
+    const phrases = words.filter((w) => w.entryType === "phrase");
+    return {
+      totalWords: phrases.length,
+      ownWords: phrases.filter((w) => w.source === "own").length,
+      teacherWords: phrases.filter((w) => w.source === "teacher").length,
+      dueForReview: phrases.filter(isDueForReview).length,
+      mastered: phrases.filter((w) => w.masteryLevel === 5).length,
+      newWords: phrases.filter(
+        (w) => w.masteryLevel === 0 && w.reviewCount === 0,
+      ).length,
+    };
+  }, [words]);
+
+  const displayStats = activeTab === "phrases" ? phraseStats : stats;
+
   const handleStartReview = useCallback(() => {
     startReview();
     currentReviewMode.current = "flashcard";
@@ -207,9 +224,9 @@ function VocabularyContainer() {
       setFilterRating("all");
       setFilterMastery(opts.mastery ?? "all");
       setFilterSource(opts.source ?? "all");
-      setActiveTab("table");
+      setActiveTab(activeTab === "phrases" ? "phrases" : "table");
     },
-    [setSearchQuery, setFilterRating, setFilterMastery, setFilterSource]
+    [setSearchQuery, setFilterRating, setFilterMastery, setFilterSource, activeTab]
   );
 
   const handleReviewComplete = useCallback(
@@ -379,7 +396,7 @@ function VocabularyContainer() {
                   <BookMarked className="h-4 w-4" />
                   {t("vocabulary.stats.total")}
                 </div>
-                <div className="text-2xl font-bold">{stats.totalWords}</div>
+                <div className="text-2xl font-bold">{displayStats.totalWords}</div>
               </button>
               <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
                 <button
@@ -391,7 +408,7 @@ function VocabularyContainer() {
                     filterSource === "own" && "text-foreground font-medium underline underline-offset-2"
                   )}
                 >
-                  {t("vocabulary.stats.own")}: {stats.ownWords}
+                  {t("vocabulary.stats.own")}: {displayStats.ownWords}
                 </button>
                 <button
                   type="button"
@@ -402,7 +419,7 @@ function VocabularyContainer() {
                     filterSource === "teacher" && "text-foreground font-medium underline underline-offset-2"
                   )}
                 >
-                  {t("vocabulary.stats.teacher")}: {stats.teacherWords}
+                  {t("vocabulary.stats.teacher")}: {displayStats.teacherWords}
                 </button>
               </div>
             </div>
@@ -420,7 +437,7 @@ function VocabularyContainer() {
                 {t("vocabulary.stats.due")}
               </div>
               <div className="text-2xl font-bold text-orange-500">
-                {stats.dueForReview}
+                {displayStats.dueForReview}
               </div>
             </button>
             <button
@@ -437,7 +454,7 @@ function VocabularyContainer() {
                 {t("vocabulary.stats.mastered")}
               </div>
               <div className="text-2xl font-bold text-green-500">
-                {stats.mastered}
+                {displayStats.mastered}
               </div>
             </button>
             <button
@@ -454,7 +471,7 @@ function VocabularyContainer() {
                 {t("vocabulary.stats.new")}
               </div>
               <div className="text-2xl font-bold text-blue-500">
-                {stats.newWords}
+                {displayStats.newWords}
               </div>
             </button>
           </div>

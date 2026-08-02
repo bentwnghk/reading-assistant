@@ -1857,8 +1857,6 @@
     "emptyDesc": "Start reading to collect vocabulary words. They will appear here for review.",
     "startReading": "Start Reading",
     "phrases": {
-      "count": "{{count}} phrases",
-      "dueCount": "{{count}} due for review",
       "empty": "No phrases yet.",
       "emptyHint": "Extract collocations from a reading session and add them here.",
       "startFlashcard": "Flashcard Review",
@@ -1869,6 +1867,9 @@
       "colPattern": "Pattern",
       "colMeaning": "Meaning",
       "colZh": "Chinese Translation",
+      "searchPlaceholder": "Search phrases...",
+      "showingPhrases": "Showing {{count}} of {{total}} phrases",
+      "noPhrasesMatch": "No phrases match your filters",
       "progress": "{{current}} / {{total}}",
       "check": "Check",
       "arrangeHint": "Tap words in the correct order",

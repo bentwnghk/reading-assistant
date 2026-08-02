@@ -1884,8 +1884,6 @@
     "emptyDesc": "開始閱讀以收集詞彙。它們會出現在這裡供你複習。",
     "startReading": "開始閱讀",
     "phrases": {
-      "count": "{{count}} 個詞組",
-      "dueCount": "{{count}} 個待溫習",
       "empty": "還沒有詞組。",
       "emptyHint": "從閱讀篇章提取搭配詞並加入這裡。",
       "startFlashcard": "字卡複習",
@@ -1896,6 +1894,9 @@
       "colPattern": "類型",
       "colMeaning": "意思",
       "colZh": "中文翻譯",
+      "searchPlaceholder": "搜尋詞組...",
+      "showingPhrases": "顯示 {{count}} / {{total}} 個詞組",
+      "noPhrasesMatch": "沒有符合篩選條件的詞組",
       "progress": "{{current}} / {{total}}",
       "check": "檢查",
       "arrangeHint": "按正確順序點擊詞語",
