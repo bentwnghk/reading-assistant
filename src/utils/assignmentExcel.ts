@@ -260,13 +260,17 @@ export async function exportAssignmentRoster(opts: ExportOptions): Promise<void>
   autoFitColumns(sheet)
 
   // ─── Write to file ────────────────────────────────────────────────────────
-  const safeTitle = assignment.title.replace(/[^a-z0-9-_]+/gi, "_").slice(0, 50) || "assignment"
+  const safeTitle = assignment.title
+    .replace(/[_\s]+/g, " ")
+    .replace(/[^a-z0-9-\s]+/gi, "")
+    .trim()
+    .slice(0, 50) || "assignment"
   const stamp = new Date().toISOString().slice(0, 10)
   const blob = await wb.xlsx.writeBuffer()
   saveAs(
     new Blob([blob], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     }),
-    filename || `assignment_${safeTitle}_${stamp}.xlsx`,
+    filename || `Assignment - ${safeTitle} - ${stamp}.xlsx`,
   )
 }

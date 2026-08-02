@@ -1726,7 +1726,7 @@
       "vocabQuiz": "Vocab Quiz",
       "help": {
         "title": "Learning Progress Guide",
-        "intro": "See how far you've come. The tracker shows your progress across 13 reading activities.",
+        "intro": "See how far you've come. The tracker shows your progress across 15 reading activities.",
         "items": {
           "steps": {
             "name": "Step Circles",
@@ -1748,7 +1748,7 @@
           "s3": "Tap a step to scroll to its section."
         },
         "tipTitle": "Good to know",
-        "tipContent": "Steps 2–13 unlock as soon as text is extracted. You can revisit any section at any time."
+        "tipContent": "Steps 2–15 unlock as soon as text is extracted. You can revisit any section at any time."
       }
     },
     "tutor": {

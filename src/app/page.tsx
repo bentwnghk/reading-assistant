@@ -143,10 +143,10 @@ function HomeContent() {
         <section id="section-upload">
           <ImageUpload />
         </section>
+        <WorkflowProgress />
         <section id="section-pre-reading">
           <PreReading />
         </section>
-        <WorkflowProgress />
         <section id="section-summary">
           <Summary />
         </section>
