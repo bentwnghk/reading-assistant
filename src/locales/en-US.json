@@ -2118,10 +2118,22 @@
         "table": {
           "title": "Word Table",
           "desc": "Browse, search, sort, and filter all your words. Select words manually or use Auto Select, then start a review."
+        },
+        "phrases": {
+          "name": "Phrases",
+          "desc": "A separate tab for multi-word expressions — collocations, idioms, and phrasal verbs collected from your reading. Browse, filter, and review phrases with the same flashcard, quiz, and spelling modes."
+        },
+        "studyPlan": {
+          "name": "Study Plan",
+          "desc": "A quick-start dialog that opens when you arrive. Pick a preset (due, new, hard, or random words), choose a review mode, and begin in two taps. Dismiss it to browse manually."
+        },
+        "clickableStats": {
+          "name": "Tap to Filter",
+          "desc": "Every stat card is a filter. Tap Total to split by Own vs Teacher, or tap Due / Mastered / New to jump straight to that group."
         }
       },
       "review": {
-        "intro": "Choose from three review modes. Select words first (or accept a shared review list), then pick a mode.",
+        "intro": "Choose from three review modes. Select words or phrases first (or accept a shared review list), then pick a mode.",
         "flashcard": {
           "name": "Flashcard",
           "desc": "Flip cards to reveal definitions, then rate your confidence with SRS buttons:"

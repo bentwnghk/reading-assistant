@@ -698,6 +698,33 @@ function VocabularyContainer() {
                       <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.table.desc")}</p>
                     </div>
                   </div>
+
+                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                      <Combine className="h-5 w-5 text-cyan-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.phrases.name")}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.phrases.desc")}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
+                      <BookOpen className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.studyPlan.name")}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.studyPlan.desc")}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">{t("vocabulary.help.overview.clickableStats.name")}</span>{" "}
+                      {t("vocabulary.help.overview.clickableStats.desc")}
+                    </p>
+                  </div>
                 </div>
               )}
 
