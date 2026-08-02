@@ -13,6 +13,7 @@ import useModelProvider from "@/hooks/useAiProvider";
 import {
   getSystemPrompt,
   extractTextFromImagePrompt,
+  extractTitleFromTextPrompt,
   generateSummaryPrompt,
   generatePreReadingPrompt,
   adaptTextPrompt,
@@ -305,7 +306,33 @@ function useReadingAssistant() {
     try {
       const titleModel = await createModelProvider(summaryModel);
       const titleText = extractedText.slice(0, 2000);
-      
+
+      // First, try to extract the ACTUAL title from the text (not a generated
+      // descriptive title). Exam labels like "Part A" / "Text 1" are explicitly
+      // excluded — see extractTitleFromTextPrompt.
+      try {
+        const { text: rawTitle } = await generateText({
+          model: titleModel,
+          prompt: extractTitleFromTextPrompt(titleText),
+          abortSignal: ac.signal,
+        });
+        if (!isSameSession() || ac.signal.aborted) {
+          notifyGenerationCancelled();
+          setGenerating("title", false);
+          return "";
+        }
+        const realTitle = rawTitle.trim().replace(/^["'“”‘’]|["'“”‘’]$/g, "");
+        if (realTitle) {
+          setDocTitle(realTitle);
+          setGenerating("title", false);
+          return realTitle;
+        }
+      } catch (titleError) {
+        if (ac.signal.aborted || isAbortError(titleError)) throw titleError;
+      }
+
+      // Fall back to generating a concise descriptive title only if no real
+      // title could be extracted from the text.
       const { text: llmTitle } = await generateText({
         model: titleModel,
         prompt: `You are a helpful assistant. Read the following text and reply with ONLY a concise, descriptive title for it (5–10 words, no punctuation at the end, no quotation marks).\n\n${titleText}`,

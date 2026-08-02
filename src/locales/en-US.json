@@ -657,7 +657,7 @@
       "parseError": "Could not parse pre-reading data. Please try again.",
       "compareLabel": "Check Your Prediction",
       "yourPrediction": "Your prediction",
-      "compareQuestion": "Now that you've read the summary — how close was your prediction?",
+      "compareQuestion": "Now read the summary below — how close was your prediction?",
       "rating": {
         "notClose": "Not close",
         "somewhat": "Somewhat",

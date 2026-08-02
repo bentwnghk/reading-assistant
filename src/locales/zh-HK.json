@@ -688,7 +688,7 @@
       "parseError": "無法解析閱讀前活動資料，請重試。",
       "compareLabel": "檢視你的預測",
       "yourPrediction": "你的預測",
-      "compareQuestion": "現在你已讀完摘要——你的預測有多準確？",
+      "compareQuestion": "現在往下閱讀摘要——你的預測有多準確？",
       "rating": {
         "notClose": "不太準",
         "somewhat": "部分準確",

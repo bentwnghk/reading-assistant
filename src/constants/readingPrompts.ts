@@ -148,6 +148,23 @@ Make this text even simpler while preserving its core meaning.
   **Respond with ONLY the simplified text, maintaining the paragraph structure.**`;
 }
 
+export function extractTitleFromTextPrompt(text: string): string {
+  return `Read the text below and identify its ACTUAL title — the real title the author or publisher gave the passage, exactly as it appears in the text itself.
+
+Return ONLY the title text and nothing else (no explanation, no quotation marks, no trailing period that is not part of the title). If there is no real title, return an empty string.
+
+Strict rules:
+- Labels and identifiers are NOT titles. NEVER return any of these as the title: "Part A", "Part B", "Part 1", "Text 1", "Text 2", "Reading Passage 1", "Passage A", "Section A", "Section 1", "Paper 1", "Question 1", or any similar Part/Text/Section/Passage/Paper/Question label — even if it appears at the very top of the text.
+- Do NOT return the author's name, a date, a page number, a rubric, or reading instructions.
+- Do NOT invent, paraphrase, summarize, or generate a title. Only return a title that literally appears in the text.
+- If the text begins with a real title as its heading (a short, title-like line at or near the top that is NOT one of the labels listed above), return that heading exactly as written.
+- If the text has NO real title (only labels like "Text 1", or it goes straight into body content with no heading), return an empty string.
+
+<text>
+${text}
+</text>`;
+}
+
 export function generatePreReadingPrompt(age: number, text: string, title?: string): string {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
   const titleLine = title ? `\nThe text's title is: "${title}"` : "";
