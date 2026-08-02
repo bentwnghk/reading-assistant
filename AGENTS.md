@@ -17,6 +17,7 @@ The project uses **npm** as the primary package manager (>= 9.8.0, Node >= 18.18
 - **Standalone Build**: `npm run build:standalone` (Sets `NEXT_PUBLIC_BUILD_MODE=standalone`)
 - **Start Production**: `npm run start`
 - **Linting**: `npm run lint`
+- **Type Checking**: `npm run typecheck` (runs `tsc --noEmit`)
 
 ### Testing
 
@@ -647,7 +648,7 @@ Next.js App Router pages in `src/app/`:
 - **Read First**: Always read the relevant file and its neighbors before proposing edits.
 - **Follow Patterns**: If adding a new component, look at existing components in the appropriate `src/components/` subdirectory for reference implementations.
 - **Keep it Focused**: Make small, cohesive changes. Avoid unrelated refactors.
-- **Validate**: Run `npm run lint` and `npm run build` to ensure your changes don't break the build.
+- **Validate**: Run `npm run lint` and `npm run typecheck` to ensure your changes don't introduce lint errors or type errors. Do not run `npm run build` as part of routine validation — it is slow and redundant with typecheck.
 - **Database Changes**: If modifying database schema, create a new SQL migration file in `scripts/` following the existing naming convention. Update the corresponding `src/lib/*.ts` data access module.
 - **API Routes**: New API routes should follow existing patterns — use `parseError` for error handling, Zod for input validation, and the `getPool()`/`getClient()` helpers from `src/lib/db.ts` for database access.
 - **Communication**: Summarize what changed, where, and why. Call out tradeoffs, assumptions, and known limitations. If validation could not be run, say so explicitly.

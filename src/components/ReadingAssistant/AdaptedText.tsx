@@ -128,8 +128,12 @@ function highlightTextAndSentences(
     const sorted = [...sentenceList].sort((a, b) => b.length - a.length);
     for (const sentence of sorted) {
       const originalIdx = sentenceList.indexOf(sentence);
-      const escaped = escapeRegExp(sentence);
-      const pattern = new RegExp(`(${escaped})`, "g");
+      // Make the pattern whitespace-flexible: splitSentences normalizes
+      // whitespace to single spaces, but the original text may contain
+      // newlines or multiple consecutive spaces. Replacing literal spaces
+      // with \s+ ensures the normalized sentence still matches the original.
+      const flexible = escapeRegExp(sentence).replace(/ +/g, "\\s+");
+      const pattern = new RegExp(`(${flexible})`, "g");
       result = result.replace(
         pattern,
         `<span class="ra-sentence" data-ra-idx="${originalIdx}">$1</span>`
@@ -145,8 +149,8 @@ function highlightTextAndSentences(
       .sort((a, b) => b.length - a.length);
 
     for (const sentence of sortedSentences) {
-      const escaped = escapeRegExp(sentence);
-      const pattern = new RegExp(`(${escaped})`, "g");
+      const flexible = escapeRegExp(sentence).replace(/ +/g, "\\s+");
+      const pattern = new RegExp(`(${flexible})`, "g");
       result = result.replace(
         pattern,
         `<span class="analyzed-sentence border-b-2 border-blue-500 dark:border-blue-400 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-950" data-analyzed="1">$1</span>`

@@ -1,20 +1,31 @@
 /**
  * Splits text into sentences for read-along (TTS) playback. Handles common
  * abbreviations conservatively (Mr., Mrs., Dr., etc.) so they aren't split.
- * Returns sentences with trailing whitespace/punctuation preserved.
+ *
+ * The text is split by newlines first, then each line is split on terminal
+ * punctuation (`.`, `!`, `?`). This ensures that lines without terminal
+ * punctuation (titles, headings, subheadings, labels) are isolated as their
+ * own sentence units rather than being merged into the following line — which
+ * previously caused them to never receive a read-along highlight span.
+ *
+ * Whitespace within each line is normalized to single spaces; punctuation is
+ * preserved.
  */
 const ABBREVIATIONS = new Set([
   "mr", "mrs", "ms", "dr", "prof", "sr", "jr", "st", "vs", "etc",
   "inc", "ltd", "co", "corp", "no", "vol", "fig", "e.g", "i.e", "u.s",
 ]);
 
-export function splitSentences(text: string): string[] {
-  if (!text || !text.trim()) return [];
-  // Work on a single-space-normalized copy for splitting, but return slices
-  // of the original so punctuation/spacing is preserved.
+/**
+ * Splits a single line into sentences based on terminal punctuation
+ * (`.`, `!`, `?`). Whitespace within the line is normalized to single spaces.
+ */
+function splitLineSentences(line: string): string[] {
+  const normalized = line.replace(/\s+/g, " ");
+  if (!normalized.trim()) return [];
+
   const sentences: string[] = [];
   let start = 0;
-  const normalized = text.replace(/\s+/g, " ");
 
   for (let i = 0; i < normalized.length; i++) {
     const char = normalized[i];
@@ -43,6 +54,24 @@ export function splitSentences(text: string): string[] {
 
   const tail = normalized.slice(start).trim();
   if (tail) sentences.push(tail);
+
+  return sentences;
+}
+
+export function splitSentences(text: string): string[] {
+  if (!text || !text.trim()) return [];
+
+  const sentences: string[] = [];
+
+  // Split by newlines first so that lines without terminal punctuation
+  // (titles, headings, subheadings) are isolated as their own sentence units
+  // rather than being merged into the following line after whitespace
+  // normalization.
+  for (const line of text.split(/\n/)) {
+    if (!line.trim()) continue;
+    const lineSentences = splitLineSentences(line);
+    for (const s of lineSentences) sentences.push(s);
+  }
 
   return sentences.filter((s) => s.length > 0);
 }
