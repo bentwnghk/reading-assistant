@@ -8,13 +8,13 @@ import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
   const { t } = useTranslation();
-  const { extractedText, summary, adaptedText, mindMap, visualizationImage, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarQuizCompleted, grammarQuizScore, grammarScrambleHighScore, grammarWorkshopHighScore, grammarSurgeryHighScore, grammarRouletteHighScore, grammarDuelHighScore, preReading, collocations } = useReadingStore();
+  const { extractedText, summary, adaptedText, mindMap, visualizationImage, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarQuizCompleted, grammarQuizScore, grammarScrambleHighScore, grammarWorkshopHighScore, grammarSurgeryHighScore, grammarRouletteHighScore, grammarDuelHighScore, preReading, studentPrediction, collocations } = useReadingStore();
 
   const hasExtractedText = !!extractedText;
 
   const steps = [
     { key: "upload", label: t("reading.workflow.upload"), completed: hasExtractedText, accessible: true, sectionId: "section-upload" },
-    { key: "preReading", label: t("reading.workflow.preReading"), completed: !!preReading, accessible: hasExtractedText, sectionId: "section-pre-reading" },
+    { key: "preReading", label: t("reading.workflow.preReading"), completed: !!preReading && studentPrediction.trim().length > 0, accessible: hasExtractedText, sectionId: "section-pre-reading" },
     { key: "summary", label: t("reading.workflow.summary"), completed: !!summary, accessible: hasExtractedText, sectionId: "section-summary" },
     { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap, accessible: hasExtractedText, sectionId: "section-mindmap" },
     { key: "visualization", label: t("reading.workflow.visualization"), completed: !!visualizationImage, accessible: hasExtractedText, sectionId: "section-visualization" },
