@@ -2,6 +2,8 @@ import { getClient } from "./db"
 import { logActivity } from "./activity"
 import { getSchoolForUser } from "./users"
 import type { ReadingStore } from "@/store/reading"
+import { calculateProgress } from "@/utils/progress"
+import { grammarGameBestScore } from "@/utils/sessionMetrics"
 
 /**
  * Strip a reading session down to its assignable form: keep all AI-generated
@@ -80,48 +82,11 @@ export function stripSessionForAssignment(sessionData: ReadingStore): Record<str
 
 /**
  * Compute the per-student progress percentage from a ReadingStore.
- * Mirrors the 15 workflow steps in WorkflowProgress.tsx (and the copies in
- * dashboardMetrics.calculateProgress / users.calculateProgress / SessionsTab).
- * Keep all of them in sync.
+ * Thin wrapper around the single shared `calculateProgress` in
+ * @/utils/progress — kept as a named export so existing callers are unaffected.
  */
 export function calculateAssignmentProgress(session: ReadingStore): number {
-  const steps = [
-    !!session.extractedText,
-    !!session.preReading && (session.studentPrediction || '').trim().length > 0,
-    !!session.summary,
-    !!session.mindMap,
-    !!session.visualizationImage,
-    !!session.adaptedText,
-    Object.keys(session.analyzedSentences || {}).length > 0,
-    (session.highlightedWords || []).length > 0,
-    (session.glossary || []).length > 0,
-    (session.collocations || []).length > 0,
-    (session.spellingGameBestScore || 0) > 0,
-    (session.vocabularyQuizScore || 0) > 0,
-    !!session.testCompleted,
-    Math.max(
-      session.grammarScrambleHighScore || 0,
-      session.grammarWorkshopHighScore || 0,
-      session.grammarSurgeryHighScore || 0,
-      session.grammarRouletteHighScore || 0,
-      session.grammarDuelHighScore || 0,
-    ) > 0,
-    !!session.grammarQuizCompleted && (session.grammarQuizScore || 0) > 0,
-  ]
-  return Math.round((steps.filter(Boolean).length / steps.length) * 100)
-}
-
-/**
- * Derive the grammar-game best score from a session (max of the 5 games).
- */
-function maxGrammarGameScore(session: ReadingStore): number {
-  return Math.max(
-    session.grammarScrambleHighScore || 0,
-    session.grammarWorkshopHighScore || 0,
-    session.grammarSurgeryHighScore || 0,
-    session.grammarRouletteHighScore || 0,
-    session.grammarDuelHighScore || 0,
-  )
+  return calculateProgress(session)
 }
 
 export interface CreateAssignmentInput {
@@ -669,7 +634,8 @@ export async function syncSubmissionMetrics(
     // scores below can distinguish "not started" (→ NULL, renders as "-" in the
     // roster) from a genuine 0 score (→ 0, renders as "0").
     const sessionRes = await client.query(
-      `SELECT extracted_text, summary, mind_map, visualization_image,
+      `SELECT extracted_text, pre_reading, student_prediction, collocations,
+              summary, mind_map, visualization_image, visualization_generated_at,
               adapted_text, test_completed, analyzed_sentences, highlighted_words,
               glossary, spelling_game_best_score, spelling_game_accuracy, vocabulary_quiz_score,
               grammar_quiz_completed, grammar_quiz_score,
@@ -687,9 +653,13 @@ export async function syncSubmissionMetrics(
     // Map DB row to the shape expected by calculateAssignmentProgress
     const session: Partial<ReadingStore> = {
       extractedText: row.extracted_text ?? "",
+      preReading: row.pre_reading ?? null,
+      studentPrediction: row.student_prediction ?? "",
+      collocations: row.collocations ?? [],
       summary: row.summary ?? "",
       mindMap: row.mind_map ?? "",
       visualizationImage: row.visualization_image ?? "",
+      visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
       adaptedText: row.adapted_text ?? "",
       testCompleted: row.test_completed ?? false,
       analyzedSentences: row.analyzed_sentences ?? {},
@@ -710,7 +680,7 @@ export async function syncSubmissionMetrics(
     }
 
     const progress = calculateAssignmentProgress(session as ReadingStore)
-    const grammarGameBest = maxGrammarGameScore(session as ReadingStore)
+    const grammarGameBest = grammarGameBestScore(session as ReadingStore)
 
     // Derive cached scores using each activity's completion flag as the
     // discriminator: not-yet-played → NULL (renders "-"), completed → the real

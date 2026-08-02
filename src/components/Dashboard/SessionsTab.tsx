@@ -27,6 +27,8 @@ import { useReadingStore, type ReadingStore } from "@/store/reading";
 import { useHistoryStore, type ReadingHistory } from "@/store/history";
 import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
+import { calculateProgress } from "@/utils/progress";
+import { grammarGameBestScore, formatScore } from "@/utils/sessionMetrics";
 import ShareSessionDialog from "@/components/Dashboard/ShareSessionDialog";
 import AssignRosterDialog from "@/components/Assignments/AssignRosterDialog";
 
@@ -117,39 +119,6 @@ function formatTime(timestamp: number, locale: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function calculateProgress(item: ReadingHistory): number {
-  // Mirrors the 15 workflow steps in WorkflowProgress.tsx. Uses the
-  // visualizationGeneratedAt timestamp proxy instead of visualizationImage
-  // because the lightweight history list strips the base64 image blob
-  // (see AGENTS.md Lesson 10).
-  const hasExtractedText = !!item.extractedText;
-  const steps = [
-    hasExtractedText,
-    !!item.preReading && (item.studentPrediction || "").trim().length > 0,
-    !!item.summary,
-    !!item.mindMap,
-    (item.visualizationGeneratedAt || 0) > 0,
-    !!item.adaptedText,
-    Object.keys(item.analyzedSentences || {}).length > 0,
-    (item.highlightedWords || []).length > 0,
-    (item.glossary || []).length > 0,
-    (item.collocations || []).length > 0,
-    (item.spellingGameBestScore || 0) > 0,
-    (item.vocabularyQuizScore || 0) > 0,
-    !!item.testCompleted,
-    Math.max(
-      item.grammarScrambleHighScore || 0,
-      item.grammarWorkshopHighScore || 0,
-      item.grammarSurgeryHighScore || 0,
-      item.grammarRouletteHighScore || 0,
-      item.grammarDuelHighScore || 0,
-    ) > 0,
-    !!item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0,
-  ];
-  const completedCount = steps.filter(Boolean).length;
-  return Math.round((completedCount / steps.length) * 100);
 }
 
 function SessionsTab({ onClose }: SessionsTabProps) {
@@ -351,31 +320,25 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                       {item.glossary?.length || 0}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {(item.spellingGameBestScore ?? 0) > 0 ? item.spellingGameBestScore : "-"}
+                      {formatScore(item.spellingGameBestScore)}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {item.spellingGameAccuracy ? `${item.spellingGameAccuracy}%` : "-"}
+                      {formatScore(item.spellingGameAccuracy, "%")}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {(item.vocabularyQuizScore ?? 0) > 0 ? `${item.vocabularyQuizScore}%` : "-"}
+                      {formatScore(item.vocabularyQuizScore, "%")}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {item.grammarQuizCompleted && item.grammarQuizScore > 0 ? `${item.grammarQuizScore}%` : "-"}
+                      {item.grammarQuizCompleted ? formatScore(item.grammarQuizScore, "%") : "-"}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {Math.max(
-                        item.grammarScrambleHighScore || 0,
-                        item.grammarWorkshopHighScore || 0,
-                        item.grammarSurgeryHighScore || 0,
-                        item.grammarRouletteHighScore || 0,
-                        item.grammarDuelHighScore || 0,
-                      ) || "-"}
+                      {formatScore(grammarGameBestScore(item))}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
-                      {item.grammarGameAccuracy ? `${item.grammarGameAccuracy}%` : "-"}
+                      {formatScore(item.grammarGameAccuracy, "%")}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       <div>{formatDate(item.updatedAt || item.createdAt, i18n.language)}</div>

@@ -1,4 +1,6 @@
 import type { ReadingHistory } from "@/store/history";
+import { calculateProgress } from "@/utils/progress";
+import { grammarGameBestScore } from "@/utils/sessionMetrics";
 
 export interface SessionScore {
   title: string;
@@ -111,37 +113,6 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
 
 function getSessionTitle(item: ReadingHistory): string {
   return item.docTitle || item.extractedText?.slice(0, 50) || "Untitled";
-}
-
-// Mirrors the 15 workflow steps in WorkflowProgress.tsx (and the copies in
-// SessionsTab.tsx / users.ts). Keep all of them in sync.
-function calculateProgress(item: ReadingHistory): number {
-  const hasExtractedText = !!item.extractedText;
-  const steps = [
-    hasExtractedText,
-    !!item.preReading && (item.studentPrediction || "").trim().length > 0,
-    !!item.summary,
-    !!item.mindMap,
-    (item.visualizationGeneratedAt || 0) > 0,
-    !!item.adaptedText,
-    Object.keys(item.analyzedSentences || {}).length > 0,
-    (item.highlightedWords || []).length > 0,
-    (item.glossary || []).length > 0,
-    (item.collocations || []).length > 0,
-    (item.spellingGameBestScore || 0) > 0,
-    (item.vocabularyQuizScore || 0) > 0,
-    !!item.testCompleted,
-    Math.max(
-      item.grammarScrambleHighScore || 0,
-      item.grammarWorkshopHighScore || 0,
-      item.grammarSurgeryHighScore || 0,
-      item.grammarRouletteHighScore || 0,
-      item.grammarDuelHighScore || 0,
-    ) > 0,
-    !!item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0,
-  ];
-  const completedCount = steps.filter(Boolean).length;
-  return Math.round((completedCount / steps.length) * 100);
 }
 
 function detectMindMapLanguage(mermaidCode: string): "zh" | "en" {
@@ -346,24 +317,12 @@ export function computeDashboardMetrics(
 
   const grammarGameScores: SessionScore[] = sorted
     .filter((h) => {
-      const best = Math.max(
-        h.grammarScrambleHighScore || 0,
-        h.grammarWorkshopHighScore || 0,
-        h.grammarSurgeryHighScore || 0,
-        h.grammarRouletteHighScore || 0,
-        h.grammarDuelHighScore || 0,
-      );
+      const best = grammarGameBestScore(h);
       return best > 0;
     })
     .map((h) => ({
       title: getSessionTitle(h),
-      score: Math.max(
-        h.grammarScrambleHighScore || 0,
-        h.grammarWorkshopHighScore || 0,
-        h.grammarSurgeryHighScore || 0,
-        h.grammarRouletteHighScore || 0,
-        h.grammarDuelHighScore || 0,
-      ),
+      score: grammarGameBestScore(h),
       accuracy: h.grammarGameAccuracy || 0,
       date: h.updatedAt || h.createdAt,
     }));
@@ -436,13 +395,7 @@ export function computeDashboardMetrics(
       getDay(dailyMap, toDateString(item.grammarQuizCompletedAt || item.createdAt)).grammarQuiz += item.grammarQuizzesCompleted || 1;
     }
 
-    const grammarGameBest = Math.max(
-      item.grammarScrambleHighScore || 0,
-      item.grammarWorkshopHighScore || 0,
-      item.grammarSurgeryHighScore || 0,
-      item.grammarRouletteHighScore || 0,
-      item.grammarDuelHighScore || 0,
-    );
+    const grammarGameBest = grammarGameBestScore(item);
     if (grammarGameBest > 0) {
       getDay(dailyMap, toDateString(item.grammarGameCompletedAt || item.updatedAt || item.createdAt)).grammarGame += item.grammarGamesCompleted || 1;
     }

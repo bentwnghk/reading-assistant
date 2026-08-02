@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Rocket, ListChecks, MousePointerClick } from "lucide-react";
 import { useReadingStore } from "@/store/reading";
+import { grammarGameBestScore } from "@/utils/sessionMetrics";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { cn } from "@/utils/style";
 
@@ -26,7 +27,7 @@ function WorkflowProgress() {
     { key: "spelling", label: t("reading.workflow.spelling"), completed: spellingGameBestScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "vocabQuiz", label: t("reading.workflow.vocabQuiz"), completed: vocabularyQuizScore > 0, accessible: hasExtractedText, sectionId: "section-glossary" },
     { key: "test", label: t("reading.workflow.test"), completed: testCompleted, accessible: hasExtractedText, sectionId: "section-test" },
-    { key: "grammarGame", label: t("reading.workflow.grammarGame"), completed: Math.max(grammarScrambleHighScore || 0, grammarWorkshopHighScore || 0, grammarSurgeryHighScore || 0, grammarRouletteHighScore || 0, grammarDuelHighScore || 0) > 0, accessible: hasExtractedText, sectionId: "section-grammar" },
+    { key: "grammarGame", label: t("reading.workflow.grammarGame"), completed: grammarGameBestScore({ grammarScrambleHighScore, grammarWorkshopHighScore, grammarSurgeryHighScore, grammarRouletteHighScore, grammarDuelHighScore }) > 0, accessible: hasExtractedText, sectionId: "section-grammar" },
     { key: "grammar", label: t("reading.workflow.grammarQuiz"), completed: grammarQuizCompleted && (grammarQuizScore || 0) > 0, accessible: hasExtractedText, sectionId: "section-grammar" },
   ];
 

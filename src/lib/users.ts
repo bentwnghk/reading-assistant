@@ -1,5 +1,6 @@
 import { getClient } from "./db"
 import { ensureSchoolSubscriptionTables } from "./school-subscription"
+import { calculateProgress as sharedCalculateProgress } from "@/utils/progress"
 
 export type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student'
 
@@ -1100,10 +1101,13 @@ export async function getStudentClassId(studentId: string): Promise<string | nul
   }
 }
 
-// Mirrors the 15 workflow steps in WorkflowProgress.tsx (and the copies in
-// SessionsTab.tsx / dashboardMetrics.ts). Keep all of them in sync.
+// Thin adapter: normalizes a snake_case DB row to the camelCase ProgressInput
+// expected by the shared calculateProgress in @/utils/progress. The algorithm
+// lives in ONE place (the util); this only renames fields. Used by all
+// reading-session queries in this module (3 teacher-dashboard queries +
+// getStudentSessionsForClass + getStudentSessions).
 function calculateProgress(row: {
-  extracted_text: string
+  extracted_text?: string | boolean
   pre_reading?: unknown
   student_prediction?: string
   summary?: string
@@ -1125,32 +1129,29 @@ function calculateProgress(row: {
   grammar_roulette_high_score?: number
   grammar_duel_high_score?: number
 }): number {
-  const hasExtractedText = !!row.extracted_text
-  const steps = [
-    hasExtractedText,
-    !!row.pre_reading && (row.student_prediction || '').trim().length > 0,
-    !!row.summary,
-    !!row.mind_map,
-    (Number(row.visualization_generated_at ?? 0)) > 0,
-    !!row.adapted_text,
-    Object.keys(row.analyzed_sentences || {}).length > 0,
-    (row.highlighted_words || []).length > 0,
-    (row.glossary || []).length > 0,
-    (row.collocations || []).length > 0,
-    (row.spelling_game_best_score || 0) > 0,
-    (row.vocabulary_quiz_score || 0) > 0,
-    !!row.test_completed,
-    Math.max(
-      row.grammar_scramble_high_score || 0,
-      row.grammar_workshop_high_score || 0,
-      row.grammar_surgery_high_score || 0,
-      row.grammar_roulette_high_score || 0,
-      row.grammar_duel_high_score || 0,
-    ) > 0,
-    !!row.grammar_quiz_completed && (row.grammar_quiz_score || 0) > 0,
-  ]
-  const completedCount = steps.filter(Boolean).length
-  return Math.round((completedCount / steps.length) * 100)
+  return sharedCalculateProgress({
+    extractedText: row.extracted_text,
+    preReading: row.pre_reading,
+    studentPrediction: row.student_prediction,
+    summary: row.summary,
+    mindMap: row.mind_map,
+    visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
+    adaptedText: row.adapted_text,
+    analyzedSentences: row.analyzed_sentences,
+    highlightedWords: row.highlighted_words,
+    glossary: row.glossary,
+    collocations: row.collocations,
+    spellingGameBestScore: row.spelling_game_best_score,
+    vocabularyQuizScore: row.vocabulary_quiz_score,
+    testCompleted: row.test_completed,
+    grammarScrambleHighScore: row.grammar_scramble_high_score,
+    grammarWorkshopHighScore: row.grammar_workshop_high_score,
+    grammarSurgeryHighScore: row.grammar_surgery_high_score,
+    grammarRouletteHighScore: row.grammar_roulette_high_score,
+    grammarDuelHighScore: row.grammar_duel_high_score,
+    grammarQuizCompleted: row.grammar_quiz_completed,
+    grammarQuizScore: row.grammar_quiz_score,
+  })
 }
 
 export async function getStudentSessionsForClass(classId: string): Promise<StudentSessionData[]> {

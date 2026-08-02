@@ -28,6 +28,8 @@ import { useReadingStore, type ReadingStore } from "@/store/reading";
 import { useHistoryStore, type ReadingHistory } from "@/store/history";
 import { markLastOpenedSession } from "@/store/setting";
 import { downloadFile } from "@/utils/file";
+import { calculateProgress } from "@/utils/progress";
+import { formatScore } from "@/utils/sessionMetrics";
 
 interface HistoryProps {
   open: boolean;
@@ -69,32 +71,6 @@ function formatTime(timestamp: number, locale: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function calculateProgress(item: ReadingHistory): number {
-  const hasExtractedText = !!item.extractedText;
-  const steps = [
-    hasExtractedText,
-    !!item.summary,
-    !!item.mindMap,
-    !!item.adaptedText,
-    item.testCompleted,
-    Object.keys(item.analyzedSentences || {}).length > 0,
-    (item.highlightedWords || []).length > 0,
-    (item.glossary || []).length > 0,
-    (item.spellingGameBestScore || 0) > 0,
-    (item.vocabularyQuizScore || 0) > 0,
-    Math.max(
-      item.grammarScrambleHighScore || 0,
-      item.grammarWorkshopHighScore || 0,
-      item.grammarSurgeryHighScore || 0,
-      item.grammarRouletteHighScore || 0,
-      item.grammarDuelHighScore || 0,
-    ) > 0,
-    item.grammarQuizCompleted && (item.grammarQuizScore || 0) > 0,
-  ];
-  const completedCount = steps.filter(Boolean).length;
-  return Math.round((completedCount / steps.length) * 100);
 }
 
 function History({ open, onClose }: HistoryProps) {
@@ -319,10 +295,10 @@ function History({ open, onClose }: HistoryProps) {
                           {item.glossary?.length || 0}
                         </TableCell>
                         <TableCell className="text-center whitespace-nowrap">
-                          {item.spellingGameBestScore || 0}
+                          {formatScore(item.spellingGameBestScore)}
                         </TableCell>
                         <TableCell className="text-center whitespace-nowrap">
-                          {item.vocabularyQuizScore !== undefined && item.vocabularyQuizScore !== null ? `${item.vocabularyQuizScore}%` : "0%"}
+                          {formatScore(item.vocabularyQuizScore, "%")}
                         </TableCell>
                         <TableCell className="text-center whitespace-nowrap">
                           {item.testCompleted && item.testScore !== undefined ? `${item.testScore}%` : "-"}
