@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -11,6 +11,12 @@ import {
   Lightbulb,
   BookOpen,
   Star,
+  Eye,
+  ChevronDown,
+  Heading,
+  Pilcrow,
+  ListTree,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GuideDialog from "@/components/Internal/GuideDialog";
@@ -18,7 +24,141 @@ import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { speakWord, stopSpeaking, unlockAudio } from "@/utils/tts";
+import { extractSkimExcerpts } from "@/utils/text";
 import { cn } from "@/utils/style";
+
+const EXCERPT_MAX_CHARS = 300;
+
+function trimExcerpt(text: string): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= EXCERPT_MAX_CHARS) return clean;
+  return `${clean.slice(0, EXCERPT_MAX_CHARS).trimEnd()}…`;
+}
+
+interface SkimHelperProps {
+  text: string;
+  title?: string;
+}
+
+function SkimHelper({ text, title }: SkimHelperProps) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(true);
+  const excerpts = useMemo(() => extractSkimExcerpts(text), [text]);
+
+  const subheadings = useMemo(
+    () =>
+      title
+        ? excerpts.subheadings.filter((h) => h.trim() !== title.trim())
+        : excerpts.subheadings,
+    [excerpts.subheadings, title],
+  );
+
+  // Drop topic sentences already shown verbatim inside the first/last paragraph
+  // excerpts to avoid repeating the same sentence twice in the panel.
+  const topicSentences = useMemo(() => {
+    let list = excerpts.topicSentences;
+    if (excerpts.firstParagraph && list.length > 0) {
+      list = list.slice(1);
+    }
+    if (excerpts.lastParagraph && list.length > 0) {
+      list = list.slice(0, -1);
+    }
+    return list;
+  }, [excerpts.topicSentences, excerpts.firstParagraph, excerpts.lastParagraph]);
+
+  const hasAny =
+    !!title ||
+    !!excerpts.firstParagraph ||
+    subheadings.length > 0 ||
+    topicSentences.length > 0 ||
+    !!excerpts.lastParagraph;
+  if (!hasAny) return null;
+
+  const items: { icon: typeof Eye; label: string; node: React.ReactNode }[] = [];
+  if (title) {
+    items.push({
+      icon: Heading,
+      label: t("reading.preReading.skim.title"),
+      node: <p className="font-medium">{title}</p>,
+    });
+  }
+  if (excerpts.firstParagraph) {
+    items.push({
+      icon: Pilcrow,
+      label: t("reading.preReading.skim.firstParagraph"),
+      node: <p className="text-muted-foreground">{trimExcerpt(excerpts.firstParagraph)}</p>,
+    });
+  }
+  if (subheadings.length > 0) {
+    items.push({
+      icon: ListTree,
+      label: t("reading.preReading.skim.headings"),
+      node: (
+        <ul className="list-disc pl-5 text-muted-foreground">
+          {subheadings.slice(0, 10).map((h, i) => (
+            <li key={`${h}-${i}`}>{h}</li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+  if (topicSentences.length > 0) {
+    items.push({
+      icon: ListTree,
+      label: t("reading.preReading.skim.topicSentences"),
+      node: (
+        <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+          {topicSentences.map((s, i) => (
+            <li key={`${s}-${i}`}>{s}</li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+  if (excerpts.lastParagraph) {
+    items.push({
+      icon: FileText,
+      label: t("reading.preReading.skim.lastParagraph"),
+      node: <p className="text-muted-foreground">{trimExcerpt(excerpts.lastParagraph)}</p>,
+    });
+  }
+
+  return (
+    <div className="mb-3 rounded-md border border-amber-500/30 bg-background/60">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left"
+        aria-expanded={open}
+      >
+        <Eye className="h-4 w-4 text-amber-500 shrink-0" />
+        <span className="text-xs font-medium">{t("reading.preReading.skimLabel")}</span>
+        <span className="text-xs text-muted-foreground hidden sm:inline">
+          {t("reading.preReading.skimHint")}
+        </span>
+        <ChevronDown
+          className={cn("h-4 w-4 ml-auto transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open && (
+        <div className="space-y-3 px-3 pb-3 text-sm">
+          <p className="text-xs text-muted-foreground">{t("reading.preReading.skimGuide")}</p>
+          {items.map(({ icon: Icon, label, node }, i) => (
+            <div key={i} className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <Icon className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {label}
+                </span>
+              </div>
+              {node}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PreReading() {
   const { t } = useTranslation();
@@ -153,6 +293,10 @@ function PreReading() {
               <Sparkles className="h-4 w-4 text-amber-500" />
               <h4 className="font-medium text-sm">{preReading.predictionPrompt}</h4>
             </div>
+
+            {/* Skim the text first — prediction is a skimming skill, not a title-only guess */}
+            <SkimHelper text={extractedText} title={docTitle || undefined} />
+
             <textarea
               className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder={t("reading.preReading.predictionPlaceholder")}
@@ -164,11 +308,6 @@ function PreReading() {
                 }
               }}
             />
-            {docTitle && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {t("reading.preReading.titleHint", { title: docTitle })}
-              </p>
-            )}
           </div>
 
           {/* Purpose */}

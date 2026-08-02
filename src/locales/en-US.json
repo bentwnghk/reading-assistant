@@ -647,8 +647,17 @@
       "generating": "Preparing...",
       "generatingWait": "Preparing pre-reading activities...",
       "emptyTip": "Click the button above to activate your prior knowledge, pre-learn key words, and set a purpose before you read.",
-      "predictionPlaceholder": "Type what you think this text will be about...",
-      "titleHint": "Title: {{title}}",
+      "predictionPlaceholder": "Skim the text above, then type what you think it will be about...",
+      "skimLabel": "Skim first",
+      "skimHint": "Good readers skim before predicting",
+      "skimGuide": "Skimming means quickly reading the title, headings, and the first & last paragraphs to get the gist — not every word. Skim these, then predict.",
+      "skim": {
+        "title": "Title",
+        "firstParagraph": "First paragraph",
+        "headings": "Headings",
+        "topicSentences": "Topic sentences",
+        "lastParagraph": "Last paragraph"
+      },
       "purposeLabel": "Purpose",
       "activationLabel": "Activate Your Knowledge",
       "preTeachLabel": "Key Words to Know First",
@@ -669,17 +678,17 @@
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
           "activate": { "name": "Activate", "desc": "Connect the topic to what you already know." },
-          "predict": { "name": "Predict", "desc": "Guess what the text is about, then check after reading." },
+          "predict": { "name": "Predict", "desc": "Skim, then guess what the text is about and check after reading." },
           "preteach": { "name": "Pre-teach", "desc": "Learn the key words you need before you start." }
         },
         "stepsTitle": "How it works",
         "steps": {
           "s1": "Click Prepare Pre-Reading.",
-          "s2": "Read the prompts and key words, then type your prediction.",
+          "s2": "Skim the title, headings, and first/last paragraphs, then type your prediction.",
           "s3": "After you read and get the summary, compare your prediction."
         },
         "tipTitle": "Tip",
-        "tipContent": "Predicting first helps you focus and remember more."
+        "tipContent": "Skim first, then predict — it focuses your reading and helps you remember more."
       }
     },
     "collocations": {

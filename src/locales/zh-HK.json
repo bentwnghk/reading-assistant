@@ -678,8 +678,17 @@
       "generating": "準備中...",
       "generatingWait": "正在準備閱讀前活動...",
       "emptyTip": "點擊上方按鈕，在閱讀前激活已有知識、預習關鍵詞彙並設定閱讀目標。",
-      "predictionPlaceholder": "輸入你認為這篇文章會關於甚麼...",
-      "titleHint": "標題：{{title}}",
+      "predictionPlaceholder": "先略讀上方文字，然後輸入你認為這篇文章會關於甚麼...",
+      "skimLabel": "先略讀",
+      "skimHint": "好的讀者先略讀再預測",
+      "skimGuide": "略讀是指快速看過標題、小標題，以及首尾兩段以掌握大意——而非逐字細讀。先略讀，再作預測。",
+      "skim": {
+        "title": "標題",
+        "firstParagraph": "首段",
+        "headings": "小標題",
+        "topicSentences": "主題句",
+        "lastParagraph": "尾段"
+      },
       "purposeLabel": "閱讀目標",
       "activationLabel": "激活你的知識",
       "preTeachLabel": "先認識這些關鍵詞",
@@ -700,17 +709,17 @@
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
           "activate": { "name": "激活", "desc": "把主題與你已知的知識連繫起來。" },
-          "predict": { "name": "預測", "desc": "先猜測文章內容，讀後再核對。" },
+          "predict": { "name": "預測", "desc": "先略讀，再猜測文章內容，讀後核對。" },
           "preteach": { "name": "預習", "desc": "先學會開始前所需的關鍵詞。" }
         },
         "stepsTitle": "運作方式",
         "steps": {
           "s1": "點擊「準備閱讀前活動」。",
-          "s2": "閱讀提示和關鍵詞，然後輸入你的預測。",
+          "s2": "略讀標題、小標題及首尾兩段，然後輸入你的預測。",
           "s3": "讀完並取得摘要後，比較你的預測。"
         },
         "tipTitle": "提示",
-        "tipContent": "先作預測能幫助你更專注、記得更多。"
+        "tipContent": "先略讀、再預測——能令你更專注、記得更多。"
       }
     },
     "collocations": {

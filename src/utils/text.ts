@@ -141,6 +141,81 @@ export class ThinkTagStreamProcessor {
   }
 }
 
+export interface SkimExcerpts {
+  firstParagraph?: string;
+  subheadings: string[];
+  topicSentences: string[];
+  lastParagraph?: string;
+}
+
+const SKIM_HEADING_RE = /^\s*#{1,6}\s+(.+?)\s*#*\s*$/;
+
+/**
+ * Extract the first sentence of a paragraph. Handles ASCII and CJK terminal
+ * punctuation. Falls back to the first line if no terminal punctuation exists.
+ */
+function firstSentence(paragraph: string): string {
+  const trimmed = paragraph.trim();
+  if (!trimmed) return "";
+  const match = trimmed.match(/^.+?[.!?。！？](?=\s|$)/);
+  if (match) return match[0].trim();
+  return trimmed.split(/\n/)[0].trim();
+}
+
+/**
+ * Derive the text features a reader should SKIM before predicting, per standard
+ * reading-strategy guidance (UNC Learning Center; Lumen Learning). The sequence
+ * a good reader samples is: title (passed separately as `docTitle`), first
+ * paragraph, subheadings, the first sentence of each body paragraph, and the
+ * last paragraph. This mirrors that set so the prediction step is grounded in
+ * actual skimming rather than the title alone.
+ */
+export function extractSkimExcerpts(text: string): SkimExcerpts {
+  const result: SkimExcerpts = { subheadings: [], topicSentences: [] };
+  if (!text || typeof text !== "string") return result;
+
+  const blocks = text
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  const bodyParagraphs: string[] = [];
+
+  for (const block of blocks) {
+    const headingMatch = block.match(SKIM_HEADING_RE);
+    if (headingMatch) {
+      result.subheadings.push(headingMatch[1].trim());
+      continue;
+    }
+    const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+    // A standalone short line with no terminal punctuation reads as a heading.
+    if (
+      lines.length === 1 &&
+      lines[0].length > 0 &&
+      lines[0].length <= 60 &&
+      !/[.!?。！？]$/.test(lines[0])
+    ) {
+      result.subheadings.push(lines[0]);
+      continue;
+    }
+    bodyParagraphs.push(block);
+  }
+
+  if (bodyParagraphs.length > 0) {
+    result.firstParagraph = bodyParagraphs[0];
+    if (bodyParagraphs.length > 1) {
+      result.lastParagraph = bodyParagraphs[bodyParagraphs.length - 1];
+    }
+    result.topicSentences = bodyParagraphs
+      .map(firstSentence)
+      .filter((s) => s.length > 0)
+      .slice(0, 8);
+  }
+
+  return result;
+}
+
 export function sanitizeSentenceAnalysis(
   analysis: string,
   sentence: string
