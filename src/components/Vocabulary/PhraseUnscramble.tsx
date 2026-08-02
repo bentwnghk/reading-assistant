@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, X, RotateCcw, Trophy } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/style";
 
@@ -57,6 +57,18 @@ export default function PhraseUnscramble({ phrases, onComplete }: PhraseUnscramb
     setupCurrent();
   }, [setupCurrent]);
 
+  useEffect(() => {
+    if (status === "idle") return;
+    const timer = setTimeout(() => {
+      if (index + 1 >= phrases.length) {
+        onComplete?.(results);
+        return;
+      }
+      setIndex((i) => i + 1);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [status, index, phrases.length, results, onComplete]);
+
   if (!current || correctWords.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -89,17 +101,6 @@ export default function PhraseUnscramble({ phrases, onComplete }: PhraseUnscramb
     setResults((prev) => [...prev, { word: current.word, correct: isCorrect }]);
   };
 
-  const next = () => {
-    if (index + 1 >= phrases.length) {
-      const finalResults = results;
-      onComplete?.(finalResults);
-      return;
-    }
-    setIndex((i) => i + 1);
-  };
-
-  const isFinished = index + 1 >= phrases.length && status !== "idle";
-
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
@@ -115,7 +116,6 @@ export default function PhraseUnscramble({ phrases, onComplete }: PhraseUnscramb
       </div>
 
       <div className="rounded-lg border p-6 mb-4 text-center">
-        <p className="text-lg font-medium mb-1">{current.word}</p>
         <p className="text-sm text-muted-foreground">{current.englishDefinition}</p>
         <p className="text-xs text-muted-foreground">{current.chineseDefinition}</p>
       </div>
@@ -172,27 +172,6 @@ export default function PhraseUnscramble({ phrases, onComplete }: PhraseUnscramb
                 {w.text}
               </button>
             ))
-          )}
-        </div>
-      )}
-
-      {status !== "idle" && (
-        <div className="flex justify-center gap-2 mt-4">
-          {!isFinished ? (
-            <Button onClick={next}>
-              {t("vocabulary.phrases.next")}
-            </Button>
-          ) : (
-            <Button onClick={() => onComplete?.(results)} variant="secondary">
-              <Trophy className="h-4 w-4 mr-1" />
-              {t("vocabulary.phrases.finish")}
-            </Button>
-          )}
-          {status === "wrong" && (
-            <Button onClick={setupCurrent} variant="outline">
-              <RotateCcw className="h-4 w-4 mr-1" />
-              {t("vocabulary.phrases.retry")}
-            </Button>
           )}
         </div>
       )}

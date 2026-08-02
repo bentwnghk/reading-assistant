@@ -666,10 +666,12 @@ export async function refreshAllTimeStatsForUser(
     )
 
     // Deduped vocabulary count from user_vocabulary (matches /vocabulary page).
+    // Scoped to entry_type = 'word' so it matches the word-only Table tab
+    // (phrases are tracked separately in the Phrases tab).
     const vocabResult = await client.query(
       `SELECT COUNT(*)::int AS total_vocab
        FROM user_vocabulary
-       WHERE user_id = $1`,
+       WHERE user_id = $1 AND entry_type = 'word'`,
       [userId]
     )
 
@@ -1056,11 +1058,12 @@ export async function getPersonalStats(
       [userId]
     )
 
-    // ── All-time: total vocabulary from user_vocabulary (matches /vocabulary page) ──
+    // ── All-time: total vocabulary from user_vocabulary (matches /vocabulary page).
+    // Scoped to entry_type = 'word' (phrases tracked separately in Phrases tab). ──
     const vocabResult = await client.query(
       `SELECT COUNT(*)::int AS total_vocab
        FROM user_vocabulary
-       WHERE user_id = $1`,
+       WHERE user_id = $1 AND entry_type = 'word'`,
       [userId]
     )
 

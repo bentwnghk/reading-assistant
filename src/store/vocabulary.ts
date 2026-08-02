@@ -160,7 +160,9 @@ export const useVocabularyStore = create<
 
   selectAll: () =>
     set((state) => ({
-      selectedWordIds: new Set(state.words.map((w) => w.id)),
+      selectedWordIds: new Set(
+        state.words.filter((w) => w.entryType !== "phrase").map((w) => w.id)
+      ),
     })),
 
   clearSelection: () => set({ selectedWordIds: new Set(), reviewQueue: [] }),
@@ -168,7 +170,7 @@ export const useVocabularyStore = create<
   autoSelectForReview: (count, strategy) => {
     const { words, filterRating, filterMastery, filterSource } = get();
     const now = Date.now();
-    let pool = [...words];
+    let pool = words.filter((w) => w.entryType !== "phrase");
 
     if (filterRating !== "all") {
       pool = pool.filter((w) => w.rating === filterRating);

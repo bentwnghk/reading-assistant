@@ -56,7 +56,7 @@ export async function getVocabularyDueForReview(
   const now = Date.now();
   const { rows } = await pool.query(
     `SELECT * FROM user_vocabulary
-     WHERE user_id = $1 AND next_review_at > 0 AND next_review_at <= $2
+     WHERE user_id = $1 AND entry_type = 'word' AND next_review_at > 0 AND next_review_at <= $2
      ORDER BY next_review_at ASC, mastery_level ASC
      LIMIT $3`,
     [userId, now, limit]
@@ -81,7 +81,7 @@ export async function getVocabularyStats(
         COUNT(*) FILTER (WHERE rating = 'medium') AS medium,
         COUNT(*) FILTER (WHERE rating = 'easy') AS easy,
         COUNT(*) FILTER (WHERE rating IS NULL) AS unrated
-      FROM user_vocabulary WHERE user_id = $1`,
+      FROM user_vocabulary WHERE user_id = $1 AND entry_type = 'word'`,
     [userId, now]
   );
   const r = rows[0];
@@ -99,6 +99,10 @@ export async function getVocabularyStats(
   };
 }
 
+function isMultiWordEntry(word: string): boolean {
+  return word.trim().split(/\s+/).length > 1;
+}
+
 export async function upsertVocabularyFromGlossary(
   userId: string,
   glossary: GlossaryEntry[],
@@ -111,13 +115,14 @@ export async function upsertVocabularyFromGlossary(
   for (const entry of glossary) {
     const word = entry.word.toLowerCase();
     const rating = ratings[entry.word] || null;
+    const entryType = isMultiWordEntry(word) ? "phrase" : "word";
 
     await pool.query(
       `INSERT INTO user_vocabulary (
         user_id, word, syllabification, part_of_speech,
         english_definition, chinese_definition, example,
-        rating, source_session_ids, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $10)
+        rating, source_session_ids, entry_type, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $11)
       ON CONFLICT (user_id, word) DO UPDATE SET
         syllabification = COALESCE(NULLIF(EXCLUDED.syllabification, ''), user_vocabulary.syllabification),
         part_of_speech = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''), user_vocabulary.part_of_speech),
@@ -132,12 +137,16 @@ export async function upsertVocabularyFromGlossary(
           WHEN user_vocabulary.rating IS NULL THEN EXCLUDED.rating
           ELSE user_vocabulary.rating
         END,
+        entry_type = CASE
+          WHEN user_vocabulary.entry_type = 'phrase' OR EXCLUDED.entry_type = 'phrase' THEN 'phrase'
+          ELSE user_vocabulary.entry_type
+        END,
         source_session_ids = (
           SELECT jsonb_agg(DISTINCT elem) FROM jsonb_array_elements(
             user_vocabulary.source_session_ids || EXCLUDED.source_session_ids
           ) elem
         ),
-        updated_at = $10`,
+        updated_at = $11`,
       [
         userId,
         word,
@@ -148,6 +157,7 @@ export async function upsertVocabularyFromGlossary(
         entry.example || "",
         rating,
         JSON.stringify([sessionId]),
+        entryType,
         now,
       ]
     );
@@ -243,8 +253,8 @@ export async function recordSRSAction(
       `INSERT INTO user_vocabulary (
         id, user_id, word, syllabification, part_of_speech,
         english_definition, chinese_definition, example,
-        srs_counts, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)`,
+        srs_counts, entry_type, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11)`,
       [
         id, userId, normalizedWord,
         wordData.syllabification || "",
@@ -253,6 +263,7 @@ export async function recordSRSAction(
         wordData.chineseDefinition || "",
         wordData.example || "",
         JSON.stringify({ hard: ratingKey === "hard" ? 1 : 0, medium: ratingKey === "medium" ? 1 : 0 }),
+        isMultiWordEntry(normalizedWord) ? "phrase" : "word",
         now,
       ]
     );
@@ -436,7 +447,7 @@ export async function getVocabularyCountsForUsers(
   const { rows } = await pool.query(
     `SELECT user_id, COUNT(*)::int AS word_count
      FROM user_vocabulary
-     WHERE user_id = ANY($1::text[])
+     WHERE user_id = ANY($1::text[]) AND entry_type = 'word'
      GROUP BY user_id`,
     [userIds]
   );

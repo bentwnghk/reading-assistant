@@ -72,7 +72,7 @@ function VocabularyTable() {
   const filteredWords = useMemo(() => {
     let result = activeReviewListWordIds
       ? words.filter((w) => activeReviewListWordIds.has(w.id))
-      : [...words];
+      : words.filter((w) => w.entryType !== "phrase");
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();

@@ -248,6 +248,11 @@ function VocabularyContainer() {
     (results: { word: string; correct: boolean }[]) => {
       if (results.length === 0) return;
       const store = useVocabularyStore.getState();
+      // Advance SRS for each phrase so Unscramble moves phrases out of "due",
+      // mirroring how quiz/spelling update word mastery via onWordResult.
+      for (const r of results) {
+        store.updateWordReview(r.word, r.correct);
+      }
       const reviewResults: VocabularyReviewResult[] = results.map((r) => {
         const w = store.words.find(
           (vw) => vw.word.toLowerCase() === r.word.toLowerCase()
@@ -290,7 +295,7 @@ function VocabularyContainer() {
   );
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
-    { key: "table", label: t("vocabulary.tabTable"), icon: <Table className="h-4 w-4" /> },
+    { key: "table", label: t("vocabulary.tabWords"), icon: <Table className="h-4 w-4" /> },
     { key: "phrases", label: t("vocabulary.tabPhrases"), icon: <Layers className="h-4 w-4" /> },
     { key: "flashcard", label: t("vocabulary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
     { key: "spelling", label: t("vocabulary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },

@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import dynamic from "next/dynamic";
-import { Brain, ClipboardList, Shuffle, Inbox, History } from "lucide-react";
+import { Brain, ClipboardList, Shuffle, Inbox, History, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useVocabularyStore } from "@/store/vocabulary";
+import { isDueForReview } from "@/utils/srs";
 import PhraseUnscramble from "./PhraseUnscramble";
 
 const ReviewHistory = dynamic(() => import("./ReviewHistory"));
@@ -26,6 +27,11 @@ export default function PhrasesTab({ onReviewFlashcard, onReviewQuiz, onUnscramb
   const phrases = useMemo(
     () => words.filter((w) => w.entryType === "phrase"),
     [words],
+  );
+
+  const dueCount = useMemo(
+    () => phrases.filter(isDueForReview).length,
+    [phrases],
   );
 
   const startMode = (m: PhraseMode) => {
@@ -95,7 +101,13 @@ export default function PhrasesTab({ onReviewFlashcard, onReviewQuiz, onUnscramb
           <Shuffle className="h-4 w-4 mr-1" />
           {t("vocabulary.phrases.startUnscramble")}
         </Button>
-        <span className="text-sm text-muted-foreground ml-auto">
+        <span className="text-sm text-muted-foreground ml-auto flex items-center gap-3">
+          {dueCount > 0 && (
+            <span className="flex items-center gap-1 text-orange-500">
+              <Clock className="h-3.5 w-3.5" />
+              {t("vocabulary.phrases.dueCount", { count: dueCount })}
+            </span>
+          )}
           {t("vocabulary.phrases.count", { count: phrases.length })}
         </span>
       </div>

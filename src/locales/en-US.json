@@ -1348,10 +1348,13 @@
       "example": "Example",
       "emptyTip": "Click the button above to generate definitions for {{count}} highlighted words (Please wait 1-2 minutes)",
       "noHighlightedWords": "Highlight some words in the Original text first. For best results, we recommend highlighting 10-30 words.",
-      "tabTable": "Table",
+      "tabWords": "Words",
+      "tabPhrases": "Phrases",
       "tabFlashcard": "Flashcard",
       "tabQuiz": "Quiz",
       "tabSpelling": "Spelling",
+      "wordsEmpty": "No single words in this glossary.",
+      "phrasesEmpty": "No multi-word phrases in this glossary.",
       "prioritizeHard": "Prioritize hard words",
       "prioritizeHardDesc": "Focus on words you rated as hard first",
       "wordStats": "{{hard}} hard, {{medium}} medium, {{easy}} easy",
@@ -1458,9 +1461,13 @@
         "title": "Vocabulary Guide",
         "intro": "Learn and master the new words from your text through four fun, interactive modes.",
         "items": {
-          "table": {
-            "name": "Glossary Table",
-            "desc": "Bilingual definitions (English + Chinese), syllable divisions and example sentences for every word."
+          "words": {
+            "name": "Words",
+            "desc": "Single-word entries with bilingual definitions (English + Chinese), syllable divisions and example sentences."
+          },
+          "phrases": {
+            "name": "Phrases",
+            "desc": "Multi-word entries (phrasal verbs, collocations, idioms) separated out for focused study. Review them anytime on the My Vocabulary page."
           },
           "flashcard": {
             "name": "Flashcards",
@@ -1839,7 +1846,7 @@
     "title": "My Vocabulary",
     "dueBadgeHint": "{{count}} words due for review",
     "close": "Back to app",
-    "tabTable": "Table",
+     "tabWords": "Words",
     "tabFlashcard": "Flashcard",
     "tabPhrases": "Phrases",
     "tabSpelling": "Spelling",
@@ -1851,11 +1858,12 @@
     "startReading": "Start Reading",
     "phrases": {
       "count": "{{count}} phrases",
+      "dueCount": "{{count}} due for review",
       "empty": "No phrases yet.",
       "emptyHint": "Extract collocations from a reading session and add them here.",
       "startFlashcard": "Flashcard Review",
       "startQuiz": "Quiz",
-      "startUnscramble": "Unscramble",
+      "startUnscramble": "Unscramble Game",
       "backToList": "Back to list",
       "colChunk": "Chunk",
       "colPattern": "Pattern",
@@ -1863,9 +1871,6 @@
       "colZh": "中文釋義",
       "progress": "{{current}} / {{total}}",
       "check": "Check",
-      "next": "Next",
-      "retry": "Retry",
-      "finish": "Finish",
       "arrangeHint": "Tap words in the correct order",
       "allPlaced": "All words placed",
       "correct": "Correct!",

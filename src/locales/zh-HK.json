@@ -1379,10 +1379,13 @@
       "example": "例句",
       "emptyTip": "點擊上方按鈕為 {{count}} 個已標記生字生成解釋 (請稍候 1-2 分鐘)",
       "noHighlightedWords": "請先在原文中標記生字。為獲得最佳效果，建議標記 10-30 個生字。",
-      "tabTable": "表格",
+      "tabWords": "單詞",
+      "tabPhrases": "詞組",
       "tabFlashcard": "字卡",
       "tabQuiz": "測驗",
       "tabSpelling": "拼字",
+      "wordsEmpty": "此詞彙表沒有單詞。",
+      "phrasesEmpty": "此詞彙表沒有多詞詞組。",
       "prioritizeHard": "優先複習難字",
       "prioritizeHardDesc": "先練習你標記為困難的詞彙",
       "wordStats": "{{hard}} 個難，{{medium}} 個中，{{easy}} 個易",
@@ -1489,9 +1492,13 @@
         "title": "詞彙指南",
         "intro": "透過四個有趣、互動的模式，學習並掌握文本中的生字。",
         "items": {
-          "table": {
-            "name": "詞彙表",
-            "desc": "為每個生字提供雙語解釋（英文＋中文）、音節劃分及例句。"
+          "words": {
+            "name": "單詞",
+            "desc": "單詞條目，提供雙語解釋（英文＋中文）、音節劃分及例句。"
+          },
+          "phrases": {
+            "name": "詞組",
+            "desc": "多詞條目（短語動詞、搭配詞、慣用語），獨立分類以便集中學習。可隨時在「我的詞彙」頁面複習。"
           },
           "flashcard": {
             "name": "字卡",
@@ -1866,7 +1873,7 @@
     "title": "我的詞彙",
     "dueBadgeHint": "{{count}} 個詞彙待複習",
     "close": "返回應用程式",
-    "tabTable": "表格",
+     "tabWords": "單詞",
     "tabFlashcard": "字卡",
     "tabPhrases": "詞組",
     "tabSpelling": "拼寫",
@@ -1878,11 +1885,12 @@
     "startReading": "開始閱讀",
     "phrases": {
       "count": "{{count}} 個詞組",
+      "dueCount": "{{count}} 個待溫習",
       "empty": "還沒有詞組。",
       "emptyHint": "從閱讀篇章提取搭配詞並加入這裡。",
       "startFlashcard": "字卡複習",
       "startQuiz": "測驗",
-      "startUnscramble": "重組句子",
+      "startUnscramble": "重組詞組遊戲",
       "backToList": "返回列表",
       "colChunk": "詞組",
       "colPattern": "類型",
@@ -1890,9 +1898,6 @@
       "colZh": "中文釋義",
       "progress": "{{current}} / {{total}}",
       "check": "檢查",
-      "next": "下一題",
-      "retry": "重試",
-      "finish": "完成",
       "arrangeHint": "按正確順序點擊詞語",
       "allPlaced": "所有詞語已放置",
       "correct": "正確！",

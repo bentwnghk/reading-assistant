@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine } from "lucide-react";
 import Link from "next/link";
 import {
   Document,
@@ -42,9 +42,13 @@ import VocabularyFlashcard from "./VocabularyFlashcard";
 import VocabularyQuiz from "./VocabularyQuiz";
 import VocabularySpelling from "./VocabularySpelling";
 
-type TabType = "table" | "flashcard" | "quiz" | "spelling";
+type TabType = "table" | "phrases" | "flashcard" | "quiz" | "spelling";
 type SortField = "word" | "partOfSpeech" | null;
 type SortOrder = "asc" | "desc";
+
+function isMultiWord(word: string): boolean {
+  return word.trim().split(/\s+/).length > 1;
+}
 
 function Glossary() {
   const { t } = useTranslation();
@@ -79,6 +83,15 @@ function Glossary() {
     });
     return sorted;
   }, [glossary, sortField, sortOrder]);
+
+  const wordEntries = useMemo(
+    () => sortedGlossary.filter((entry) => !isMultiWord(entry.word)),
+    [sortedGlossary],
+  );
+  const phraseEntries = useMemo(
+    () => sortedGlossary.filter((entry) => isMultiWord(entry.word)),
+    [sortedGlossary],
+  );
 
   const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
@@ -378,7 +391,8 @@ function Glossary() {
   }
 
   const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
-    { key: "table", label: t("reading.glossary.tabTable"), icon: <Table className="h-4 w-4" /> },
+    { key: "table", label: t("reading.glossary.tabWords"), icon: <Table className="h-4 w-4" /> },
+    { key: "phrases", label: t("reading.glossary.tabPhrases"), icon: <Combine className="h-4 w-4" /> },
     { key: "flashcard", label: t("reading.glossary.tabFlashcard"), icon: <Layers className="h-4 w-4" /> },
     { key: "spelling", label: t("reading.glossary.tabSpelling"), icon: <SpellCheck className="h-4 w-4" /> },
     { key: "quiz", label: t("reading.glossary.tabQuiz"), icon: <ClipboardList className="h-4 w-4" /> },
@@ -403,60 +417,74 @@ function Glossary() {
       );
     }
 
+    const renderGlossaryTable = (entries: GlossaryEntry[], emptyKey: string) => {
+      if (entries.length === 0) {
+        return (
+          <div className="text-center py-8 text-muted-foreground">
+            <BookMarked className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>{t(emptyKey)}</p>
+          </div>
+        );
+      }
+      return (
+        <div className="overflow-x-auto">
+          <DataTable>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[120px]">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("word")} className="-ml-3">
+                    {t("reading.glossary.word")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[100px]">{t("reading.glossary.syllabification")}</TableHead>
+                <TableHead className="w-[80px]">
+                  <Button variant="ghost" size="sm" onClick={() => handleSort("partOfSpeech")} className="-ml-3">
+                    {t("reading.glossary.partOfSpeech")}
+                    <ArrowUpDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </TableHead>
+                <TableHead>{t("reading.glossary.englishDefinition")}</TableHead>
+                <TableHead className="w-[200px]">{t("reading.glossary.chineseDefinition")}</TableHead>
+                <TableHead>{t("reading.glossary.example")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {entries.map((entry) => (
+                <TableRow key={entry.word}>
+                  <TableCell className="font-medium">{entry.word}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{entry.syllabification || "-"}</TableCell>
+                  <TableCell className="text-muted-foreground italic text-xs">{entry.partOfSpeech || "-"}</TableCell>
+                  <TableCell>{entry.englishDefinition}</TableCell>
+                  <TableCell className="font-noto-sans-tc">{entry.chineseDefinition}</TableCell>
+                  <TableCell className="text-muted-foreground italic">
+                    {entry.example || "-"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </DataTable>
+        </div>
+      );
+    };
+
     switch (activeTab) {
+      case "phrases":
+        return renderGlossaryTable(phraseEntries, "reading.glossary.phrasesEmpty");
       case "flashcard":
-        return <VocabularyFlashcard glossary={glossary} onWordAction={handleSRSAction} />;
+        return <VocabularyFlashcard glossary={wordEntries} onWordAction={handleSRSAction} />;
       case "quiz":
-        return <VocabularyQuiz glossary={glossary} />;
+        return <VocabularyQuiz glossary={wordEntries} />;
       case "spelling":
         return (
           <VocabularySpelling
-            glossary={glossary}
+            glossary={wordEntries}
             onWordResult={handleSpellingWordResult}
             onComplete={handleSpellingComplete}
           />
         );
       default:
-        return (
-          <div className="overflow-x-auto">
-            <DataTable>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[120px]">
-                    <Button variant="ghost" size="sm" onClick={() => handleSort("word")} className="-ml-3">
-                      {t("reading.glossary.word")}
-                      <ArrowUpDown className="ml-1 h-3 w-3" />
-                    </Button>
-                  </TableHead>
-                  <TableHead className="w-[100px]">{t("reading.glossary.syllabification")}</TableHead>
-                  <TableHead className="w-[80px]">
-                    <Button variant="ghost" size="sm" onClick={() => handleSort("partOfSpeech")} className="-ml-3">
-                      {t("reading.glossary.partOfSpeech")}
-                      <ArrowUpDown className="ml-1 h-3 w-3" />
-                    </Button>
-                  </TableHead>
-                  <TableHead>{t("reading.glossary.englishDefinition")}</TableHead>
-                  <TableHead className="w-[200px]">{t("reading.glossary.chineseDefinition")}</TableHead>
-                  <TableHead>{t("reading.glossary.example")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedGlossary.map((entry) => (
-                  <TableRow key={entry.word}>
-                    <TableCell className="font-medium">{entry.word}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{entry.syllabification || "-"}</TableCell>
-                    <TableCell className="text-muted-foreground italic text-xs">{entry.partOfSpeech || "-"}</TableCell>
-                    <TableCell>{entry.englishDefinition}</TableCell>
-                    <TableCell className="font-noto-sans-tc">{entry.chineseDefinition}</TableCell>
-                    <TableCell className="text-muted-foreground italic">
-                      {entry.example || "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </DataTable>
-          </div>
-        );
+        return renderGlossaryTable(wordEntries, "reading.glossary.wordsEmpty");
     }
   };
 
@@ -471,7 +499,8 @@ function Glossary() {
             introKey="reading.glossary.help.intro"
             itemsBaseKey="reading.glossary.help.items"
             items={[
-              { key: "table", icon: Table, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "words", icon: Table, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "phrases", icon: Combine, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
               { key: "flashcard", icon: Layers, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
               { key: "spelling", icon: SpellCheck, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
               { key: "quiz", icon: ClipboardList, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
