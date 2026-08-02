@@ -673,7 +673,7 @@
         "veryClose": "Very close"
       },
       "help": {
-        "title": "Before You Read",
+        "title": "Before You Read Guide",
         "intro": "Get ready before you read so the text is easier to understand.",
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {

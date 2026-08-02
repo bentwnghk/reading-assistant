@@ -287,38 +287,6 @@ function PreReading() {
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Prediction prompt + capture */}
-          <div className="rounded-md border p-3 bg-amber-500/5">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              <h4 className="font-medium text-sm">{preReading.predictionPrompt}</h4>
-            </div>
-
-            {/* Skim the text first — prediction is a skimming skill, not a title-only guess */}
-            <SkimHelper text={extractedText} title={docTitle || undefined} />
-
-            <textarea
-              className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder={t("reading.preReading.predictionPlaceholder")}
-              value={predictionDraft}
-              onChange={(e) => setPredictionDraft(e.target.value)}
-              onBlur={() => {
-                if (predictionDraft !== (studentPrediction || "")) {
-                  setStudentPrediction(predictionDraft);
-                }
-              }}
-            />
-          </div>
-
-          {/* Purpose */}
-          <div className="rounded-md border p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Target className="h-4 w-4 text-primary" />
-              <h4 className="font-medium text-sm">{t("reading.preReading.purposeLabel")}</h4>
-            </div>
-            <p className="text-sm text-muted-foreground">{preReading.purpose}</p>
-          </div>
-
           {/* Activation prompts */}
           {preReading.activationPrompts.length > 0 && (
             <div className="rounded-md border p-3">
@@ -340,6 +308,26 @@ function PreReading() {
               </ul>
             </div>
           )}
+
+          {/* Background note */}
+          {!!preReading.backgroundNote && (
+            <div className="rounded-md border p-3 bg-muted/30">
+              <div className="flex items-center gap-2 mb-1">
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <h4 className="font-medium text-sm">{t("reading.preReading.backgroundLabel")}</h4>
+              </div>
+              <p className="text-sm text-muted-foreground">{preReading.backgroundNote}</p>
+            </div>
+          )}
+
+          {/* Purpose */}
+          <div className="rounded-md border p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Target className="h-4 w-4 text-primary" />
+              <h4 className="font-medium text-sm">{t("reading.preReading.purposeLabel")}</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">{preReading.purpose}</p>
+          </div>
 
           {/* Pre-teach words */}
           {preReading.preTeachWords.length > 0 && (
@@ -376,16 +364,28 @@ function PreReading() {
             </div>
           )}
 
-          {/* Background note */}
-          {!!preReading.backgroundNote && (
-            <div className="rounded-md border p-3 bg-muted/30">
-              <div className="flex items-center gap-2 mb-1">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                <h4 className="font-medium text-sm">{t("reading.preReading.backgroundLabel")}</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">{preReading.backgroundNote}</p>
+          {/* Prediction prompt + capture (placed right before the comparison card) */}
+          <div className="rounded-md border p-3 bg-amber-500/5">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <h4 className="font-medium text-sm">{preReading.predictionPrompt}</h4>
             </div>
-          )}
+
+            {/* Skim the text first — prediction is a skimming skill, not a title-only guess */}
+            <SkimHelper text={extractedText} title={docTitle || undefined} />
+
+            <textarea
+              className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder={t("reading.preReading.predictionPlaceholder")}
+              value={predictionDraft}
+              onChange={(e) => setPredictionDraft(e.target.value)}
+              onBlur={() => {
+                if (predictionDraft !== (studentPrediction || "")) {
+                  setStudentPrediction(predictionDraft);
+                }
+              }}
+            />
+          </div>
 
           {/* Prediction comparison (only after the summary is generated) */}
           {showCompare && (

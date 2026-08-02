@@ -704,7 +704,7 @@
         "veryClose": "非常準確"
       },
       "help": {
-        "title": "閱讀前準備",
+        "title": "閱讀前準備指南",
         "intro": "閱讀前先做好準備，讓文本更易理解。",
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
