@@ -175,8 +175,8 @@
           "desc": "Compete with classmates and climb the ranks! Compare your reading stats, track streaks, and earn top spots across multiple categories."
         },
         "tts": {
-          "title": "Text-to-Speech",
-          "desc": "Perfect your pronunciation! Listen to any word, sentence, or paragraph read aloud in natural voice."
+          "title": "Text-to-Speech & Read Along",
+          "desc": "Perfect your pronunciation! Listen to any word, sentence, or paragraph read aloud — or use karaoke-style Read Along to hear the whole text sentence-by-sentence with each sentence highlighted. Click any sentence to jump to it."
         },
         "wordExport": {
           "title": "Word Export",
@@ -628,7 +628,7 @@
       "clickToRemove": "Click to remove word",
       "analyzedSentences": "Analyzed Sentences",
       "clickToRemoveAnalysis": "Click to remove sentence",
-      "highlightTip": "Select a word or phrase in the text below, then click [<2/> Add to vocabulary]; or select a sentence, then click [<0/> Analyze sentence]; or select any vocabulary, sentence, or paragraph, then click [<1/> Read aloud].",
+      "highlightTip": "Select a word or phrase in the text below, then click [<2/> Add to vocabulary]; or select a sentence, then click [<0/> Analyze sentence]; or select any word, then click [<1/> Read aloud].",
       "downloadWord": "Download Word",
       "includeGlossary": "Include Glossary",
       "includeSentenceAnalysis": "Include Sentence Analysis",
@@ -800,8 +800,8 @@
             "desc": "Select a sentence and click 'Analyze sentence' for a full breakdown — meaning, grammar, vocabulary and tips."
           },
           "tts": {
-            "name": "Read Aloud",
-            "desc": "Select any word, sentence or paragraph and click 'Read aloud' to hear natural pronunciation."
+            "name": "Read Aloud & Read Along",
+            "desc": "Select a word and click 'Read aloud' to hear natural pronunciation. Or click 'Read Along' to listen to the whole text sentence-by-sentence with each sentence highlighted in green — click any sentence to jump to it instantly."
           },
           "difficulty": {
             "name": "Difficulty Analysis",
@@ -813,7 +813,8 @@
           "s1": "Click Adapt to create a version of the text for your level.",
           "s2": "Highlight words you want to learn, or use Suggest to find them automatically.",
           "s3": "Select a sentence and click 'Analyze sentence' for a deep dive.",
-          "s4": "Use the O / A / S buttons to jump between matching paragraphs."
+          "s4": "Use the O / A / S buttons to jump between matching paragraphs.",
+          "s5": "Click 'Read Along' to listen sentence-by-sentence. Click any sentence to jump to it — great for re-hearing a tricky part."
         },
         "tipTitle": "Good to know",
         "tipContent": "If the extracted text has OCR mistakes, edit it in the Original tab. Saving will clear the adapted text, highlights and analyses so they can be regenerated to match."

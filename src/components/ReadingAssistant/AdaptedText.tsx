@@ -1378,6 +1378,7 @@ function AdaptedText() {
               "reading.adaptedText.help.steps.s2",
               "reading.adaptedText.help.steps.s3",
               "reading.adaptedText.help.steps.s4",
+              "reading.adaptedText.help.steps.s5",
             ]}
             tipTitleKey="reading.adaptedText.help.tipTitle"
             tipContentKey="reading.adaptedText.help.tipContent"
