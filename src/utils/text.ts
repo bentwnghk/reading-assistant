@@ -203,10 +203,37 @@ export function extractSkimExcerpts(text: string): SkimExcerpts {
   }
 
   if (bodyParagraphs.length > 0) {
-    result.firstParagraph = bodyParagraphs[0];
-    if (bodyParagraphs.length > 1) {
-      result.lastParagraph = bodyParagraphs[bodyParagraphs.length - 1];
+    // When the text uses [N]-style numbered paragraphs, anchor the first/last
+    // excerpts to those markers: first = the paragraph beginning with [1],
+    // last = the paragraph beginning with the largest [N]. Paragraphs without
+    // terminal punctuation are ignored as candidates so stray fragments or
+    // heading-like lines can't be selected.
+    const NUMBERED_RE = /^\s*\[(\d+)\]/;
+    const TERMINAL_PUNCT_RE = /[.!?。！？]$/;
+    const numberedCandidates: { num: number; text: string }[] = [];
+    for (const p of bodyParagraphs) {
+      const m = p.match(NUMBERED_RE);
+      if (m && TERMINAL_PUNCT_RE.test(p.trim())) {
+        const num = parseInt(m[1], 10);
+        if (Number.isFinite(num)) numberedCandidates.push({ num, text: p });
+      }
     }
+
+    if (numberedCandidates.length > 0) {
+      const first = numberedCandidates.find((c) => c.num === 1);
+      if (first) result.firstParagraph = first.text;
+      const last = numberedCandidates.reduce((acc, c) => (c.num > acc.num ? c : acc));
+      if (last && last.text !== result.firstParagraph) result.lastParagraph = last.text;
+    } else {
+      const punctuated = bodyParagraphs.filter((p) => TERMINAL_PUNCT_RE.test(p.trim()));
+      if (punctuated.length > 0) {
+        result.firstParagraph = punctuated[0];
+        if (punctuated.length > 1) {
+          result.lastParagraph = punctuated[punctuated.length - 1];
+        }
+      }
+    }
+
     result.topicSentences = bodyParagraphs
       .map(firstSentence)
       .filter((s) => s.length > 0)
