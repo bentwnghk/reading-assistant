@@ -1750,11 +1750,21 @@ body.toc-noscroll{overflow:hidden}
       <h3>6.4 測驗之後</h3>
       <ul>
         <li><b>檢視答案</b>——所有題目以綠／紅標示並附解釋（啟用則含中文）。</li>
-        <li><b>練習失分技能</b>——只為低於 50% 的技能生成新題。</li>
+        <li><b>針對這些技能練習</b>——生成 5–10 題全新題目，針對你這次測驗失分的技能，<em>再加上</em>你「能力分析」中长期需要加強的領域（以 <span style="display:inline-block;padding:1px 6px;border-radius:9999px;font-size:10px;text-transform:uppercase;background:#ccfbf1;color:#0f766e">歷史弱項</span> 徽章標示）。即使你這次全對，按鈕仍會出現，確保長期弱項持續被訓練。</li>
         <li><b>重試失分題</b>——只重做答錯的題。</li>
         <li><b>重試</b>（右上角）——清除結果並返回閒置畫面，於該處可<b>生成新測驗</b>從同一文章建立全新測驗。</li>
         <li><b>下載 Word</b>——匯出「下載空白卷」或「下載附答案」。<span class="tag-teacher"></span>「附答案」版本教師／管理員可見；學生須完成測驗後才可見。</li>
       </ul>
+
+      <div class="callout">
+        <strong>能力分析的回饋迴圈。</strong>
+        每次完成的測驗都會將該次的技能表現寫入你的<b>閱讀理解能力分析</b>（在「學習足跡」儀表板以雷達圖呈現）。當你點按 <b>針對這些技能練習</b> 時，系統會合併兩個訊號：
+        <ol style="margin:6px 0 2px">
+          <li><b>本次失分技能</b>——這次測驗正確率未達 100% 的技能。</li>
+          <li><b>歷史最弱技能</b>——跨越你<em>所有</em> session 統計、正確率最低的技能。</li>
+        </ol>
+        AI 會根據合併後的技能集平均產生題目，因此偶爾一次高分不會讓長期弱項被遺漏。完成該次練習（或任何未來的測驗）會更新能力分析、雷達圖，以及下一輪的目標技能——完成整個迴圈。
+      </div>
 
       </section>
     <!-- ============ CHAPTER 7: GRAMMAR SUITE & GAMES ============ -->

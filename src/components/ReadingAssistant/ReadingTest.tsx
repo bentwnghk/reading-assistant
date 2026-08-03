@@ -374,20 +374,33 @@ function ReadingTest() {
     return skills;
   }, [skillStats]);
 
-  const handleTargetedPractice = async () => {
-    // Merge the current test's missed skills with the learner's historical
-    // weakest skill (cross-session profile) so practice targets chronic gaps.
+  // The actual skill set targeted practice will drill: today's misses plus
+  // the learner's chronic weak area from the cross-session profile (appended
+  // if not already present). This is what the AI prompt receives.
+  const mergedSkills = useMemo(() => {
     const skills: ReadingTestSkill[] = [...missedSkills];
     if (historicalWeakestSkill && !skills.includes(historicalWeakestSkill)) {
       skills.push(historicalWeakestSkill);
     }
-    if (skills.length === 0) return;
+    return skills;
+  }, [missedSkills, historicalWeakestSkill]);
+
+  // The subset that came from the profile (not from today's test) — used to
+  // highlight them distinctly in the UI so learners know why a skill they
+  // aced today is still being practiced.
+  const historicalOnlySkills = useMemo(() => {
+    if (!historicalWeakestSkill) return [];
+    return missedSkills.includes(historicalWeakestSkill) ? [] : [historicalWeakestSkill];
+  }, [missedSkills, historicalWeakestSkill]);
+
+  const handleTargetedPractice = async () => {
+    if (mergedSkills.length === 0) return;
     
     setRetryMissedIds(new Set());
     setCurrentQuestionIndex(0);
     setShowReview(false);
     
-    const questions = await generateTargetedPractice(skills);
+    const questions = await generateTargetedPractice(mergedSkills);
     
     if (questions && questions.length > 0) {
       setQuizState("in-progress");
@@ -908,11 +921,38 @@ function ReadingTest() {
                       )}
                     </Button>
                   </div>
-                  {missedSkills.length > 0 && (
+                  {mergedSkills.length > 0 && (
                     <div className="flex flex-col items-center gap-2">
-                      <p className="text-muted-foreground">
-                        {t("reading.readingTest.practiceMissedSkillsDesc")}
+                      <p className="text-muted-foreground text-center">
+                        {historicalOnlySkills.length > 0
+                          ? t("reading.readingTest.practiceSkillsDescWithHistory", {
+                              skill: t(`reading.readingTest.skills.${SKILL_LABELS[historicalOnlySkills[0]]}`),
+                            })
+                          : t("reading.readingTest.practiceSkillsDesc")}
                       </p>
+                      <div className="flex flex-wrap gap-1.5 justify-center max-w-md">
+                        {mergedSkills.map((skill) => {
+                          const isHistorical = historicalOnlySkills.includes(skill);
+                          return (
+                            <span
+                              key={skill}
+                              className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs",
+                                isHistorical
+                                  ? "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300"
+                                  : "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              {t(`reading.readingTest.skills.${SKILL_LABELS[skill]}`)}
+                              {isHistorical && (
+                                <span className="text-[10px] uppercase tracking-wide opacity-75">
+                                  {t("reading.readingTest.fromHistory")}
+                                </span>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
                       <Button 
                         variant="secondary" 
                         onClick={handleTargetedPractice}
@@ -927,7 +967,7 @@ function ReadingTest() {
                         ) : (
                           <>
                             <Target className="h-5 w-5 mr-2" />
-                            {t("reading.readingTest.practiceMissedSkills", { count: missedSkills.length })}
+                            {t("reading.readingTest.practiceSkills", { count: mergedSkills.length })}
                           </>
                         )}
                       </Button>
@@ -1041,11 +1081,18 @@ function ReadingTest() {
               <Eye className="h-4 w-4 mr-2" />
               {showReview ? t("reading.readingTest.hideReview") : t("reading.readingTest.reviewAnswers")}
             </Button>
-            {missedSkills.length > 0 && (
+            {mergedSkills.length > 0 && (
               <Button 
                 variant="secondary" 
                 onClick={handleTargetedPractice}
                 disabled={isGenerating}
+                title={
+                  historicalOnlySkills.length > 0
+                    ? t("reading.readingTest.practiceSkillsDescWithHistory", {
+                        skill: t(`reading.readingTest.skills.${SKILL_LABELS[historicalOnlySkills[0]]}`),
+                      })
+                    : t("reading.readingTest.practiceSkillsDesc")
+                }
               >
                 {isGenerating ? (
                   <>
@@ -1055,7 +1102,7 @@ function ReadingTest() {
                 ) : (
                   <>
                     <Target className="h-4 w-4 mr-2" />
-                    {t("reading.readingTest.practiceMissedSkills", { count: missedSkills.length })}
+                    {t("reading.readingTest.practiceSkills", { count: mergedSkills.length })}
                   </>
                 )}
               </Button>

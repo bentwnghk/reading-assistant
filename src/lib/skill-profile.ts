@@ -133,15 +133,24 @@ export interface ClassSkillAverage {
   weakestSkill: string | null;
 }
 
-export async function getClassSkillAverages(classId: string): Promise<ClassSkillAverage[]> {
+/**
+ * Fetches each user's skill profile for an arbitrary set of user IDs.
+ * Used by the teacher dashboard which already resolves the user list
+ * (for a specific class, a whole school, or all schools). Returns one
+ * entry per user who has a profile row; users without a profile are
+ * omitted (the UI treats them as "no data").
+ */
+export async function getSkillAveragesForUsers(
+  userIds: string[],
+): Promise<ClassSkillAverage[]> {
+  if (userIds.length === 0) return [];
   const pool = getPool();
   const result = await pool.query(
     `SELECT p.user_id, u.name, p.profile, p.weakest_skill
      FROM user_skill_profile p
-     JOIN class_members cm ON cm.student_id = p.user_id
      LEFT JOIN users u ON u.id = p.user_id
-     WHERE cm.class_id = $1`,
-    [classId],
+     WHERE p.user_id = ANY($1::text[])`,
+    [userIds],
   );
   return result.rows.map((row) => ({
     userId: row.user_id,
@@ -149,4 +158,19 @@ export async function getClassSkillAverages(classId: string): Promise<ClassSkill
     profile: (row.profile ?? {}) as Profile,
     weakestSkill: (row.weakest_skill as string | null) ?? null,
   }));
+}
+
+/**
+ * Convenience wrapper around {@link getSkillAveragesForUsers} that resolves
+ * the user list from a class's membership. Prefer calling
+ * `getSkillAveragesForUsers` directly when the caller already has the user
+ * IDs (e.g. the teacher dashboard route) to avoid a second membership query.
+ */
+export async function getClassSkillAverages(classId: string): Promise<ClassSkillAverage[]> {
+  const pool = getPool();
+  const members = await pool.query(
+    "SELECT student_id FROM class_members WHERE class_id = $1",
+    [classId],
+  );
+  return getSkillAveragesForUsers(members.rows.map((r) => r.student_id));
 }

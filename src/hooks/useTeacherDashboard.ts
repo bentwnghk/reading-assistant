@@ -2,10 +2,12 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { TeacherSessionData } from "@/lib/users";
 import type { ReviewSessionRecord } from "@/lib/vocabulary";
+import type { ClassSkillAverage } from "@/lib/skill-profile";
 import { computeTeacherDashboardMetrics, type TeacherDashboardMetrics } from "@/utils/teacherDashboardMetrics";
 
 interface UseTeacherDashboardReturn {
   metrics: TeacherDashboardMetrics | null;
+  skillAverages: ClassSkillAverage[];
   loading: boolean;
   error: string | null;
   refetch: () => void;
@@ -15,6 +17,7 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
   const [rawSessions, setRawSessions] = useState<TeacherSessionData[]>([]);
   const [reviewSessions, setReviewSessions] = useState<ReviewSessionRecord[]>([]);
   const [vocabCounts, setVocabCounts] = useState<Record<string, number>>({});
+  const [skillAverages, setSkillAverages] = useState<ClassSkillAverage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,10 +39,12 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
         setRawSessions(data);
         setReviewSessions([]);
         setVocabCounts({});
+        setSkillAverages([]);
       } else {
         setRawSessions(data.sessions ?? []);
         setReviewSessions(data.reviewSessions ?? []);
         setVocabCounts(data.vocabCounts ?? {});
+        setSkillAverages(data.skillAverages ?? []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch");
@@ -56,5 +61,5 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
     return computeTeacherDashboardMetrics(rawSessions, reviewSessions, vocabCounts);
   }, [rawSessions, reviewSessions, vocabCounts]);
 
-  return { metrics, loading, error, refetch: fetchData };
+  return { metrics, skillAverages, loading, error, refetch: fetchData };
 }

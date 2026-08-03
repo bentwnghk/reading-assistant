@@ -1750,11 +1750,21 @@ body.toc-noscroll{overflow:hidden}
       <h3>6.4 After the test</h3>
       <ul>
         <li><b>Review Answers</b> — see all questions colored green/red with explanations (and Chinese if enabled).</li>
-        <li><b>Practice Missed Skills</b> — generates new questions only for skills below 50%.</li>
+        <li><b>Practice These Skills</b> — generates 5–10 fresh questions targeting the skills you missed on this test <em>plus</em> your long-term focus area from your skill profile (highlighted with a <span style="display:inline-block;padding:1px 6px;border-radius:9999px;font-size:10px;text-transform:uppercase;background:#ccfbf1;color:#0f766e">from history</span> badge). Even if you ace today's text, the button still appears so your chronic weak spot gets drilled.</li>
         <li><b>Retry Missed</b> — re-attempt just the questions you got wrong.</li>
         <li><b>Retry</b> (top-right) — clears results and returns to the idle screen, where <b>Generate New Test</b> makes a brand-new test from the same text.</li>
         <li><b>Download Word</b> — export "Download Blank Test" or "Download with Answers". <span class="tag-teacher"></span> "With Answers" is visible to teachers/admins, or to students only <em>after</em> completing the test.</li>
       </ul>
+
+      <div class="callout">
+        <strong>The skill-profile feedback loop.</strong>
+        Every finished test writes a per-skill snapshot to your <b>Comprehension Skill Profile</b> (visible on the Learning Journey dashboard as a radar chart). When you tap <b>Practice These Skills</b>, the app merges two signals:
+        <ol style="margin:6px 0 2px">
+          <li><b>Today's misses</b> — skills you scored below 100% on this text.</li>
+          <li><b>Your historical weakest skill</b> — the lowest-accuracy skill rolled up across <em>every</em> session you've ever done.</li>
+        </ol>
+        The AI then generates questions split evenly across the merged set, so a single fluke-good day can't let your long-term weak area slip. Finishing that practice (or any future test) updates the profile, the radar, and the next round of targeting — closing the loop.
+      </div>
 
       </section>
     <!-- ============ CHAPTER 7: GRAMMAR SUITE & GAMES ============ -->

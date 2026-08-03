@@ -164,7 +164,7 @@
         },
         "test": {
           "title": "Reading Test",
-          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and targeted practice for weak areas!"
+          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and adaptive targeted practice that remembers your weak spots across sessions and drills them until they improve!"
         },
         "achievements": {
           "title": "Achievements",
@@ -347,9 +347,10 @@
       "master": {
         "eyebrow": "Master",
         "title": "Watch yourself improve.",
-        "lede": "Take the reading test and see your skill scores climb. Compete on the leaderboard, earn achievements along the way, and build a vocabulary that travels with you.",
+        "lede": "Take the reading test and a skill profile learns your weak spots across every session — then adaptive targeted practice drills them until they're not. Compete on the leaderboard, earn achievements along the way, and build a vocabulary that travels with you.",
         "bullets": [
           "Reading test with skill breakdown",
+          "Adaptive targeted practice from your skill profile",
           "Leaderboards & achievements",
           "My Vocabulary hub with mastery tracking"
         ]
@@ -988,6 +989,10 @@
       "retryMissed": "Retry Missed ({{count}})",
       "practiceMissedSkills": "Practice Missed Skills ({{count}})",
       "practiceMissedSkillsDesc": "Generate new questions targeting skills you missed",
+      "practiceSkills": "Practice These Skills ({{count}})",
+      "practiceSkillsDesc": "Generate new questions targeting the skills listed below.",
+      "practiceSkillsDescWithHistory": "Generates questions for the skills you missed today, plus your long-term focus area ({{skill}}).",
+      "fromHistory": "from history",
       "practiceGeneratingWait": "Generating targeted practice... This usually takes 1-2 minutes. Please wait.",
       "downloadWord": "Download Word",
       "downloadBlank": "Download Blank Test",
@@ -2276,7 +2281,7 @@
       "vocabularyGrowth": "Vocabulary Growth",
       "cumulativeVocab": "Cumulative Vocabulary",
       "scoreDistribution": "Test Score Distribution",
-      "skillProfile": "Comprehension Skill Profile",
+      "skillProfile": "Reading Comprehension Skill Profile",
       "skillProfileEmpty": "Complete a reading test to see your skill breakdown.",
       "weakestSkill": "Focus area: {{skill}}",
       "accuracy": "Accuracy",
@@ -2467,6 +2472,7 @@
     "avg": "Avg",
     "avgScore": "Avg Score",
     "total": "Total",
+    "students": "Students",
     "empty": "No student data found for the selected class.",
     "charts": {
       "dailyActivity": "Daily Learning Activity",
@@ -2477,6 +2483,7 @@
       "spellingScore": "Spelling Score",
       "spellingAccuracy": "Spelling Accuracy",
       "vocabularyGrowth": "Vocabulary Growth",
+      "skillAverages": "Class Skill Profile",
       "pickDate": "Pick a date"
     },
     "quartiles": {
@@ -2508,7 +2515,7 @@
         "functions": "Features"
       },
       "charts": {
-        "intro": "The dashboard provides 12 visual charts to help you monitor student progress, identify learning gaps, and track engagement at a glance.",
+        "intro": "The dashboard provides 14 visual charts to help you monitor student progress, identify learning gaps, and track engagement at a glance.",
         "items": {
           "dailyActivity": {
             "name": "Daily Learning Activity",
@@ -2561,11 +2568,15 @@
           "vocabularyGrowth": {
             "name": "Vocabulary Growth",
             "desc": "A multi-line area chart tracking cumulative vocabulary growth over time for each student. Choose from 13 time ranges (1W to 3Y) and toggle individual students on/off."
+          },
+          "skillAverages": {
+            "name": "Class Reading Skill Profile",
+            "desc": "A radar chart showing the class's average accuracy across 5 reading comprehension skills (Main Idea, Detail, Inference, Vocabulary, Purpose). The caption highlights the class's weakest skill so you can target instruction."
           }
         },
         "tip": {
           "title": "Pro Tip:",
-          "content": "Use the Excel export to capture all 13 charts with detailed student data for offline analysis, parent meetings, or progress reports."
+          "content": "Use the Excel export to capture all 14 charts with detailed student data for offline analysis, parent meetings, or progress reports."
         }
       },
       "functions": {
@@ -2613,7 +2624,7 @@
           },
           "excelExport": {
             "name": "Export to Excel",
-            "desc": "Generate a comprehensive Excel report with all 12 charts as images plus 3 data sheets: Student Overview, AI Features breakdown, and Score Details with conditional formatting."
+            "desc": "Generate a comprehensive Excel report with all 14 charts as images plus 3 data sheets: Student Overview, AI Features breakdown, and Score Details with conditional formatting."
           }
         },
         "tip": {

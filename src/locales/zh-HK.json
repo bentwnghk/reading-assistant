@@ -164,7 +164,7 @@
         },
         "test": {
           "title": "閱讀測驗",
-          "desc": "6 種題型、5 項技能測試，附技能分析，你可以選擇重做錯題或針對性練習弱項！"
+          "desc": "6 種題型、5 項技能、技能分析、重做錯題，還有「針對性練習」會跨每次 session 記住你的弱項，反覆訓練直到進步！"
         },
         "achievements": {
           "title": "成就系統",
@@ -376,13 +376,14 @@
         ]
       },
       "master": {
-        "eyebrow": "精通",
-        "title": "看著自己不斷進步。",
-        "lede": "做完閱讀測驗，看著各項技能分數上升。在排行榜上競爭，沿途解鎖成就，並建立一套跟著你走的詞彙庫。",
+        "eyebrow": "Master",
+        "title": "看見自己的進步。",
+        "lede": "完成閱讀測驗後，能力分析會跨每次 session 記住你的弱項——接著「針對性練習」會自動生成題目，反覆訓練直到弱項變強項。同時挑戰排行榜、解鎖成就，並建立屬於你自己的詞彙庫。",
         "bullets": [
-          "附技能分析的閱讀測驗",
+          "閱讀測驗附技能分析",
+          "依能力分析自動生成針對性練習",
           "排行榜與成就",
-          "我的詞彙中樞與熟練度追蹤"
+          "我的詞彙中樞，含掌握度追蹤"
         ]
       }
     },
@@ -1019,6 +1020,10 @@
       "retryMissed": "重做錯題 ({{count}})",
       "practiceMissedSkills": "針對性練習 ({{count}} 項技能)",
       "practiceMissedSkillsDesc": "針對未掌握的技能生成新的練習題",
+      "practiceSkills": "針對這些技能練習 ({{count}} 項)",
+      "practiceSkillsDesc": "針對下方列出的技能生成新的練習題。",
+      "practiceSkillsDescWithHistory": "針對你今天答錯的技能，加上你長期需要加強的領域（{{skill}}）生成練習題。",
+      "fromHistory": "歷史弱項",
       "practiceGeneratingWait": "正在生成針對性練習...通常需要 1-2 分鐘，請稍候。",
       "downloadWord": "下載 Word",
       "downloadBlank": "下載空白試卷",
@@ -2303,7 +2308,7 @@
       "vocabularyGrowth": "詞彙增長",
       "cumulativeVocab": "累積詞彙量",
       "scoreDistribution": "測驗分數分佈",
-      "skillProfile": "理解能力分析",
+      "skillProfile": "閱讀理解能力分析",
       "skillProfileEmpty": "完成閱讀測驗以查看你的能力分佈。",
       "weakestSkill": "重點提升：{{skill}}",
       "accuracy": "準確度",
@@ -2494,6 +2499,7 @@
     "avg": "平均",
     "avgScore": "平均分",
     "total": "合計",
+    "students": "學生",
     "empty": "所選班級沒有學生資料。",
     "charts": {
       "dailyActivity": "每日學習活動",
@@ -2504,6 +2510,7 @@
       "spellingScore": "拼字分數",
       "spellingAccuracy": "拼字正確率",
       "vocabularyGrowth": "詞彙增長",
+      "skillAverages": "全班能力分析",
       "pickDate": "選擇日期"
     },
     "quartiles": {
@@ -2535,7 +2542,7 @@
         "functions": "功能"
       },
       "charts": {
-        "intro": "儀表板提供 12 個視覺化圖表，幫助你監察學生進度、找出學習差距，並一目了然地追蹤參與情況。",
+        "intro": "儀表板提供 14 個視覺化圖表，幫助你監察學生進度、找出學習差距，並一目了然地追蹤參與情況。",
         "items": {
           "dailyActivity": {
             "name": "每日學習活動",
@@ -2588,11 +2595,15 @@
           "vocabularyGrowth": {
             "name": "詞彙增長",
             "desc": "多線面積圖追蹤每位學生隨時間累積的詞彙增長。可選擇 13 個時間範圍（1週至3年），並切換顯示個別學生。"
+          },
+          "skillAverages": {
+            "name": "全班閱讀能力分析",
+            "desc": "雷達圖顯示全班在 5 個閱讀理解能力（主旨、細節、推論、詞彙、目的）的平均正確率。說明文字標示全班最弱的技能，方便針對性教學。"
           }
         },
         "tip": {
           "title": "小秘訣：",
-          "content": "使用 Excel 匯出功能擷取全部 13 個圖表及詳細學生資料，方便離線分析、家長會議或進度報告。"
+          "content": "使用 Excel 匯出功能擷取全部 14 個圖表及詳細學生資料，方便離線分析、家長會議或進度報告。"
         }
       },
       "functions": {
@@ -2640,7 +2651,7 @@
           },
           "excelExport": {
             "name": "匯出至 Excel",
-            "desc": "生成包含全部 12 個圖表（以圖片形式）及 3 個資料工作表的完整 Excel 報告：學生總覽、AI 功能使用明細，以及帶條件格式化的分數詳情。"
+            "desc": "生成包含全部 14 個圖表（以圖片形式）及 3 個資料工作表的完整 Excel 報告：學生總覽、AI 功能使用明細，以及帶條件格式化的分數詳情。"
           }
         },
         "tip": {

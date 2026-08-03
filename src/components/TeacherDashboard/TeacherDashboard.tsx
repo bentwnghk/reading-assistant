@@ -36,6 +36,7 @@ import SpellingScoreChart from "./SpellingScoreChart";
 import SpellingAccuracyChart from "./SpellingAccuracyChart";
 import GrammarGameChart from "./GrammarGameChart";
 import VocabularyGrowthChart from "./VocabularyGrowthChart";
+import SkillAveragesChart from "./SkillAveragesChart";
 import TeacherDashboardGuide from "./TeacherDashboardGuide";
 
 interface TeacherDashboardProps {
@@ -59,14 +60,14 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const [showHelp, setShowHelp] = useState(false);
 
   // Refs for each chart card — order matches the JSX render order below
-  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(13).fill(null));
+  const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(14).fill(null));
 
   const filteredClasses = useMemo(() => {
     if (!isSuperAdmin || selectedSchoolId === "all") return allClasses;
     return allClasses.filter((c) => c.schoolId === selectedSchoolId);
   }, [allClasses, selectedSchoolId, isSuperAdmin]);
 
-  const { metrics, loading, error } = useTeacherDashboard(
+  const { metrics, skillAverages, loading, error } = useTeacherDashboard(
     selectedClassId,
     isSuperAdmin ? selectedSchoolId : undefined
   );
@@ -137,6 +138,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
     t("teacherDashboard.charts.spellingScore"),
     t("teacherDashboard.charts.spellingAccuracy"),
     t("teacherDashboard.charts.vocabularyGrowth"),
+    t("teacherDashboard.charts.skillAverages"),
   ];
 
   async function captureChartAsBase64(el: HTMLDivElement): Promise<{ base64: string; width: number; height: number }> {
@@ -390,6 +392,10 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
 
             <div ref={(el) => { chartRefs.current[12] = el; }}>
               <VocabularyGrowthChart students={metrics.students} />
+            </div>
+
+            <div ref={(el) => { chartRefs.current[13] = el; }}>
+              <SkillAveragesChart students={skillAverages} />
             </div>
           </div>
         )}

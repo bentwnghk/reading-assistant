@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getTeacherDashboardData, getTeacherDashboardDataForSchool, getTeacherDashboardDataAllSchools, canAccessClass, getSchoolForUser } from "@/lib/users"
 import { getReviewSessionsForUsers, getVocabularyCountsForUsers } from "@/lib/vocabulary"
+import { getSkillAveragesForUsers } from "@/lib/skill-profile"
 
 export async function GET(
   request: Request,
@@ -47,12 +48,13 @@ export async function GET(
     }
 
     const userIds = [...new Set(sessions.map((s) => s.userId))]
-    const [reviewSessions, vocabCounts] = await Promise.all([
+    const [reviewSessions, vocabCounts, skillAverages] = await Promise.all([
       getReviewSessionsForUsers(userIds),
       getVocabularyCountsForUsers(userIds),
+      getSkillAveragesForUsers(userIds),
     ])
 
-    return NextResponse.json({ sessions, reviewSessions, vocabCounts: Object.fromEntries(vocabCounts) })
+    return NextResponse.json({ sessions, reviewSessions, vocabCounts: Object.fromEntries(vocabCounts), skillAverages })
   } catch (error) {
     console.error("Failed to get teacher dashboard data:", error)
     return NextResponse.json({ error: "Failed to get dashboard data" }, { status: 500 })
