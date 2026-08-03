@@ -38,6 +38,7 @@ export interface DailyActivity {
   simplifiedText: number;
   sentenceAnalysis: number;
   glossary: number;
+  collocations: number;
   spellingGame: number;
   vocabQuiz: number;
   readingTest: number;
@@ -62,6 +63,7 @@ export interface DashboardMetrics {
   simplifiedTextsGenerated: number;
   totalSentencesAnalyzed: number;
   glossariesGenerated: number;
+  collocationsGenerated: number;
   grammarAnalysisGenerated: number;
   totalVocabulary: number;
   totalTutorQuestions: number;
@@ -87,6 +89,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "simplifiedText",
   "sentenceAnalysis",
   "glossary",
+  "collocations",
   "flashcardReview",
   "spellingGame",
   "vocabQuiz",
@@ -106,6 +109,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
   glossary: "#eab308",
+  collocations: "#10b981",
   spellingGame: "#ec4899",
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
@@ -148,6 +152,7 @@ function emptyDailyActivity(date: string): DailyActivity {
     simplifiedText: 0,
     sentenceAnalysis: 0,
     glossary: 0,
+    collocations: 0,
     spellingGame: 0,
     vocabQuiz: 0,
     readingTest: 0,
@@ -179,6 +184,7 @@ export function computeDashboardMetrics(
       simplifiedTextsGenerated: 0,
       totalSentencesAnalyzed: 0,
       glossariesGenerated: 0,
+      collocationsGenerated: 0,
       grammarAnalysisGenerated: 0,
       totalVocabulary: 0,
       totalTutorQuestions: 0,
@@ -227,6 +233,8 @@ export function computeDashboardMetrics(
   const adaptedTextsGenerated = sorted.filter((h) => !!h.adaptedText).length;
   const simplifiedTextsGenerated = sorted.filter((h) => !!h.simplifiedText).length;
   const glossariesGenerated = sorted.filter((h) => (h.glossary || []).length > 0).length;
+
+  const collocationsGenerated = sorted.filter((h) => (h.collocations || []).length > 0).length;
 
   const grammarAnalysisGenerated = sorted.filter((h) => (h.grammarTopics || []).length > 0).length;
 
@@ -392,6 +400,9 @@ export function computeDashboardMetrics(
     if ((item.glossary || []).length > 0) {
       getDay(dailyMap, toDateString(item.glossaryGeneratedAt || item.createdAt)).glossary += 1;
     }
+    if ((item.collocations || []).length > 0) {
+      getDay(dailyMap, toDateString(item.collocationsGeneratedAt || item.createdAt)).collocations += 1;
+    }
     // NOTE: spelling games are counted solely from vocabulary review sessions
     // (the loop below) to avoid double-counting — every spelling completion
     // (solo/multiplayer, reading/vocabulary page) creates a review-session row
@@ -456,6 +467,7 @@ export function computeDashboardMetrics(
     simplifiedTextsGenerated,
     totalSentencesAnalyzed,
     glossariesGenerated,
+    collocationsGenerated,
     grammarAnalysisGenerated,
     totalVocabulary,
     totalTutorQuestions,

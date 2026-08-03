@@ -18,6 +18,7 @@ export interface StudentMetrics {
     simplifiedText: number;
     sentenceAnalysis: number;
     glossary: number;
+    collocations: number;
     grammar: number;
     tutorQuestion: number;
   };
@@ -43,6 +44,7 @@ export interface DailyStudentActivity {
   simplifiedText: number;
   sentenceAnalysis: number;
   glossary: number;
+  collocations: number;
   flashcardReview: number;
   spellingGame: number;
   vocabQuiz: number;
@@ -81,6 +83,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "simplifiedText",
   "sentenceAnalysis",
   "glossary",
+  "collocations",
   "flashcardReview",
   "spellingGame",
   "vocabQuiz",
@@ -100,6 +103,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
   glossary: "#eab308",
+  collocations: "#10b981",
   spellingGame: "#ec4899",
   vocabQuiz: "#06b6d4",
   readingTest: "#ef4444",
@@ -172,6 +176,7 @@ export const AI_USAGE_KEYS = [
   "simplifiedText",
   "sentenceAnalysis",
   "glossary",
+  "collocations",
   "grammar",
   "tutorQuestion",
 ] as const;
@@ -185,6 +190,7 @@ export const AI_USAGE_COLORS: Record<string, string> = {
   simplifiedText: "#14b8a6",
   sentenceAnalysis: "#f97316",
   glossary: "#eab308",
+  collocations: "#10b981",
   grammar: "#d946ef",
   tutorQuestion: "#a855f7",
 };
@@ -206,6 +212,7 @@ function emptyDailyActivity(date: string): DailyStudentActivity {
     simplifiedText: 0,
     sentenceAnalysis: 0,
     glossary: 0,
+    collocations: 0,
     flashcardReview: 0,
     spellingGame: 0,
     vocabQuiz: 0,
@@ -230,7 +237,7 @@ function computeStudentMetrics(
       totalVocabulary: 0,
       vocabularyTimeline: [],
       avgProgress: 0,
-      aiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      aiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, collocations: 0, grammar: 0, tutorQuestion: 0 },
       testScores: [],
       quizScores: [],
       spellingScores: [],
@@ -289,6 +296,7 @@ function computeStudentMetrics(
     simplifiedText: sorted.filter((s) => s.simplifiedText).length,
     sentenceAnalysis: sorted.reduce((sum, s) => sum + s.sentenceAnalysisCount, 0),
     glossary: sorted.filter((s) => s.glossaryCount > 0).length,
+    collocations: sorted.filter((s) => s.collocations).length,
     grammar: sorted.filter((s) => s.grammarAnalysisCount > 0).length,
     tutorQuestion: sorted.reduce((sum, s) => sum + s.tutorQuestionCount, 0),
   };
@@ -346,6 +354,9 @@ function computeStudentMetrics(
     }
     if (item.glossaryCount > 0) {
       getDay(toDateString(item.glossaryGeneratedAt || item.createdAt)).glossary += 1;
+    }
+    if (item.collocations) {
+      getDay(toDateString(item.collocationsGeneratedAt || item.createdAt)).collocations += 1;
     }
     // NOTE: spelling games are counted solely from vocabulary review sessions
     // (the loop below) to avoid double-counting — every spelling completion
@@ -452,8 +463,8 @@ export function computeTeacherDashboardMetrics(
       classAvgGrammarQuizScore: 0,
       classAvgGrammarGameScore: 0,
       classAvgGrammarGameAccuracy: 0,
-      classTotalAiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
-      classAvgAiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, grammar: 0, tutorQuestion: 0 },
+      classTotalAiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, collocations: 0, grammar: 0, tutorQuestion: 0 },
+      classAvgAiUsage: { preReading: 0, summary: 0, mindMap: 0, visualization: 0, adaptedText: 0, simplifiedText: 0, sentenceAnalysis: 0, glossary: 0, collocations: 0, grammar: 0, tutorQuestion: 0 },
     };
   }
 
@@ -517,6 +528,7 @@ export function computeTeacherDashboardMetrics(
     simplifiedText: students.reduce((sum, s) => sum + s.aiUsage.simplifiedText, 0),
     sentenceAnalysis: students.reduce((sum, s) => sum + s.aiUsage.sentenceAnalysis, 0),
     glossary: students.reduce((sum, s) => sum + s.aiUsage.glossary, 0),
+    collocations: students.reduce((sum, s) => sum + s.aiUsage.collocations, 0),
     grammar: students.reduce((sum, s) => sum + s.aiUsage.grammar, 0),
     tutorQuestion: students.reduce((sum, s) => sum + s.aiUsage.tutorQuestion, 0),
   };
@@ -530,6 +542,7 @@ export function computeTeacherDashboardMetrics(
     simplifiedText: Math.round(classTotalAiUsage.simplifiedText / n),
     sentenceAnalysis: Math.round(classTotalAiUsage.sentenceAnalysis / n),
     glossary: Math.round(classTotalAiUsage.glossary / n),
+    collocations: Math.round(classTotalAiUsage.collocations / n),
     grammar: Math.round(classTotalAiUsage.grammar / n),
     tutorQuestion: Math.round(classTotalAiUsage.tutorQuestion / n),
   };
@@ -571,6 +584,7 @@ export function getDailyActivityForDate(
       simplifiedText: activity?.simplifiedText || 0,
       sentenceAnalysis: activity?.sentenceAnalysis || 0,
       glossary: activity?.glossary || 0,
+      collocations: activity?.collocations || 0,
       flashcardReview: activity?.flashcardReview || 0,
       spellingGame: activity?.spellingGame || 0,
       vocabQuiz: activity?.vocabQuiz || 0,

@@ -147,6 +147,8 @@ export interface TeacherSessionData {
   visualizationGeneratedAt: number
   preReading: boolean
   preReadingGeneratedAt: number
+  collocations: boolean
+  collocationsGeneratedAt: number
 }
 
 export async function getTeacherDashboardData(classId: string): Promise<TeacherSessionData[]> {
@@ -173,6 +175,7 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
         rs.pre_reading, rs.student_prediction, rs.collocations,
         rs.pre_reading IS NOT NULL as has_pre_reading,
         rs.pre_reading_generated_at,
+        rs.collocations_generated_at,
         rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
         rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
@@ -255,6 +258,8 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
       visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
       preReading: !!row.has_pre_reading,
       preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
+      collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
+      collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
     }))
   } finally {
     client.release()
@@ -285,6 +290,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
         rs.pre_reading, rs.student_prediction, rs.collocations,
         rs.pre_reading IS NOT NULL as has_pre_reading,
         rs.pre_reading_generated_at,
+        rs.collocations_generated_at,
         rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
         rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
@@ -367,6 +373,8 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
       preReading: !!row.has_pre_reading,
       preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
+      collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
+      collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
     }))
   } finally {
     client.release()
@@ -397,6 +405,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
         rs.pre_reading, rs.student_prediction, rs.collocations,
         rs.pre_reading IS NOT NULL as has_pre_reading,
         rs.pre_reading_generated_at,
+        rs.collocations_generated_at,
         rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
         rs.highlighted_words,
         rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
@@ -478,6 +487,8 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
       visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
       preReading: !!row.has_pre_reading,
       preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
+      collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
+      collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
     }))
   } finally {
     client.release()
@@ -1187,6 +1198,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
         rs.pre_reading, rs.student_prediction, rs.collocations,
         rs.pre_reading IS NOT NULL as has_pre_reading,
         rs.pre_reading_generated_at,
+        rs.collocations_generated_at,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
@@ -1252,6 +1264,7 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
         rs.pre_reading, rs.student_prediction, rs.collocations,
         rs.pre_reading IS NOT NULL as has_pre_reading,
         rs.pre_reading_generated_at,
+        rs.collocations_generated_at,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
         rs.visualization_generated_at,
         rs.created_at, rs.updated_at,
