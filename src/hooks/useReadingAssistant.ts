@@ -1047,6 +1047,7 @@ function useReadingAssistant() {
         .array(
           z.object({
             chunk: z.string(),
+            syllabification: z.string().optional(),
             pattern: z.string(),
             meaning: z.string(),
             meaningZh: z.string(),
@@ -1063,6 +1064,7 @@ function useReadingAssistant() {
       const chunks: CollocationChunk[] = parsed.data.map((c, i) => ({
         id: `chunk-${Date.now()}-${i}`,
         chunk: c.chunk,
+        syllabification: c.syllabification,
         pattern: c.pattern,
         meaning: c.meaning,
         meaningZh: c.meaningZh,

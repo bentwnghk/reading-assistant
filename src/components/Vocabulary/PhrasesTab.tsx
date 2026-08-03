@@ -439,16 +439,19 @@ export default function PhrasesTab() {
                       onClick={() => handleSort("word")}
                       className="-ml-3"
                     >
-                      {t("vocabulary.phrases.colChunk")}
+                      {t("vocabulary.phrases.colPhrase")}
                       <ArrowUpDown className="ml-1 h-3 w-3" />
                     </Button>
                   </TableHead>
-                  <TableHead className="w-[90px]">
-                    {t("vocabulary.phrases.colPattern")}
+                  <TableHead className="w-[80px]">
+                    {t("vocabulary.syllabification")}
                   </TableHead>
-                  <TableHead>{t("vocabulary.phrases.colMeaning")}</TableHead>
+                  <TableHead className="w-[90px]">
+                    {t("vocabulary.partOfSpeech")}
+                  </TableHead>
+                  <TableHead>{t("vocabulary.englishDefinition")}</TableHead>
                   <TableHead className="w-[180px]">
-                    {t("vocabulary.phrases.colZh")}
+                    {t("vocabulary.chineseDefinition")}
                   </TableHead>
                   <TableHead>{t("vocabulary.example")}</TableHead>
                   <TableHead className="w-[80px]">
@@ -517,6 +520,9 @@ export default function PhrasesTab() {
                         <span>{p.word}</span>
                       </div>
                     </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {p.syllabification || "-"}
+                    </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <span className="text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
                         {p.partOfSpeech || "-"}
@@ -571,7 +577,7 @@ export default function PhrasesTab() {
                 {pagedPhrases.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={10}
+                      colSpan={11}
                       className="text-center py-8 text-muted-foreground"
                     >
                       {t("vocabulary.phrases.noPhrasesMatch")}

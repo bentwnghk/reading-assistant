@@ -82,6 +82,7 @@ function Collocations() {
               meaning: chunk.meaning,
               meaningZh: chunk.meaningZh,
               example: chunk.example,
+              syllabification: chunk.syllabification,
             },
           ],
         }),
@@ -116,6 +117,7 @@ function Collocations() {
             meaning: c.meaning,
             meaningZh: c.meaningZh,
             example: c.example,
+            syllabification: c.syllabification,
           })),
         }),
       });
@@ -212,6 +214,9 @@ function Collocations() {
                       <Volume2 className="h-4 w-4 text-muted-foreground" />
                     </button>
                     <span className="font-medium">{chunk.chunk}</span>
+                    {chunk.syllabification && chunk.syllabification !== chunk.chunk && (
+                      <span className="text-xs text-muted-foreground ml-1">{chunk.syllabification}</span>
+                    )}
                   </div>
                   <span className="shrink-0 text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
                     {chunk.pattern}

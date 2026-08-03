@@ -216,6 +216,7 @@ ${text}
 [
   {
     "chunk": "take into account",
+    "syllabification": "take in·to ac·COUNT",
     "pattern": "V + N (idiomatic)",
     "meaning": "to consider something when judging a situation",
     "meaningZh": "考慮；把……計算在內",
@@ -226,6 +227,7 @@ ${text}
 
 **EXTRACTION RULES:**
 - Extract 6-12 high-value chunks: phrasal verbs, delexicalized-verb collocations (take/make/have/do + noun), adjective+noun pairs, prepositional phrases, idioms, and fixed expressions that appear in (or are relevant to) the text.
+- "syllabification": the chunk with each word split into syllables using "·" between syllables and the stressed syllable uppercased. Separate words with spaces (e.g. "take into account" → "take in·to ac·COUNT", "make up your mind" → "make UP your MIND"). Monosyllabic words stay as-is. If the chunk has no single clearly stressed syllable, uppercase the primary-stressed syllable of the most prominent word.
 - "pattern": a short label (e.g. "Phrasal verb", "V+N", "Adj+N", "Prepositional phrase", "Idiom", "Fixed expression").
 - "meaning": concise English meaning a ${age}-year-old can grasp.
 - "meaningZh": Traditional Chinese (繁體中文) gloss.

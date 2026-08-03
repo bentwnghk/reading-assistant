@@ -188,6 +188,7 @@ export async function upsertPhrase(
     meaning: string;
     meaningZh: string;
     example?: string;
+    syllabification?: string;
   },
   sessionId?: string,
 ): Promise<void> {
@@ -198,11 +199,12 @@ export async function upsertPhrase(
 
   await pool.query(
     `INSERT INTO user_vocabulary (
-        user_id, word, part_of_speech,
+        user_id, word, syllabification, part_of_speech,
         english_definition, chinese_definition, example,
         entry_type, source_session_ids, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, 'phrase', $7::jsonb, $8, $8)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'phrase', $8::jsonb, $9, $9)
       ON CONFLICT (user_id, word) DO UPDATE SET
+        syllabification = COALESCE(NULLIF(EXCLUDED.syllabification, ''), user_vocabulary.syllabification),
         part_of_speech = COALESCE(NULLIF(EXCLUDED.part_of_speech, ''), user_vocabulary.part_of_speech),
         english_definition = COALESCE(NULLIF(EXCLUDED.english_definition, ''), user_vocabulary.english_definition),
         chinese_definition = COALESCE(NULLIF(EXCLUDED.chinese_definition, ''), user_vocabulary.chinese_definition),
@@ -213,10 +215,11 @@ export async function upsertPhrase(
             user_vocabulary.source_session_ids || EXCLUDED.source_session_ids
           ) elem
         ),
-        updated_at = $8`,
+        updated_at = $9`,
     [
       userId,
       word,
+      chunk.syllabification || "",
       chunk.pattern || "phrase",
       chunk.meaning,
       chunk.meaningZh,

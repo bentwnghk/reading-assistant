@@ -89,6 +89,7 @@ interface CollocationChunk {
   meaningZh: string;
   contrastNote?: string;
   example: string;
+  syllabification?: string;
 }
 
 type GrammarTopicCategory =

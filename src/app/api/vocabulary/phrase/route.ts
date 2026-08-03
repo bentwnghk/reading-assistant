@@ -8,6 +8,7 @@ interface PhraseInput {
   meaning: string;
   meaningZh: string;
   example?: string;
+  syllabification?: string;
 }
 
 export async function POST(request: Request) {
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
           meaning: phrase.meaning,
           meaningZh: phrase.meaningZh,
           example: phrase.example,
+          syllabification: phrase.syllabification,
         },
         sessionId,
       );
