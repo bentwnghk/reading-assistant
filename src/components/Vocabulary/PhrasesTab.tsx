@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import {
   Inbox,
   ArrowUpDown,
@@ -14,6 +15,7 @@ import {
   ChevronRight,
   UserCheck,
   ListChecks,
+  Volume2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,8 +29,10 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useVocabularyStore } from "@/store/vocabulary";
+import { useSettingStore } from "@/store/setting";
 import { getMasteryColor, isDueForReview } from "@/utils/srs";
 import { formatDateLong } from "@/utils/formatDate";
+import { speakWord, stopSpeaking, unlockAudio } from "@/utils/tts";
 import { cn } from "@/utils/style";
 
 type SortField = "word" | "rating" | "mastery" | "lastReviewed" | "createdAt";
@@ -53,6 +57,36 @@ export default function PhrasesTab() {
     activeReviewListWordIds,
     exitReviewList,
   } = useVocabularyStore();
+  const {
+    mode,
+    accessPassword,
+    ttsVoice,
+    ttsPlaybackRate,
+    openaicompatibleApiKey,
+    openaicompatibleApiProxy,
+  } = useSettingStore();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleSpeak = useCallback(
+    async (phrase: string) => {
+      if (!phrase) return;
+      await unlockAudio();
+      await speakWord({
+        word: phrase,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        openaicompatibleApiProxy,
+        accessPassword,
+        audioRef,
+        onError: (msg) => toast.error(msg),
+      });
+    },
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+  );
+
+  useEffect(() => () => stopSpeaking(), []);
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [pageSize, setPageSize] = useState<number>(50);
@@ -470,7 +504,19 @@ export default function PhrasesTab() {
                         onCheckedChange={() => toggleWordSelection(p.id)}
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{p.word}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleSpeak(p.word)}
+                          className="shrink-0 rounded-md p-1 hover:bg-accent"
+                          aria-label={t("vocabulary.phrases.listen", { phrase: p.word })}
+                        >
+                          <Volume2 className="h-4 w-4 text-muted-foreground" />
+                        </button>
+                        <span>{p.word}</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <span className="text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
                         {p.partOfSpeech || "-"}

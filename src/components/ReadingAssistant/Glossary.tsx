@@ -1,7 +1,8 @@
 "use client";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine } from "lucide-react";
+import { toast } from "sonner";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine, Volume2 } from "lucide-react";
 import Link from "next/link";
 import {
   Document,
@@ -33,9 +34,11 @@ import {
 } from "@/components/ui/table";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
+import { useSettingStore } from "@/store/setting";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { useBattleStore } from "@/store/battle";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
+import { speakWord, stopSpeaking, unlockAudio } from "@/utils/tts";
 
 import { cn } from "@/utils/style";
 import VocabularyFlashcard from "./VocabularyFlashcard";
@@ -54,9 +57,39 @@ function Glossary() {
   const { t } = useTranslation();
   const { extractedText, highlightedWords, glossary } = useReadingStore();
   const { activeGenerations, generateGlossary } = useReadingAssistant();
+  const {
+    mode,
+    accessPassword,
+    ttsVoice,
+    ttsPlaybackRate,
+    openaicompatibleApiKey,
+    openaicompatibleApiProxy,
+  } = useSettingStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleSpeak = useCallback(
+    async (word: string) => {
+      if (!word) return;
+      await unlockAudio();
+      await speakWord({
+        word,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        openaicompatibleApiProxy,
+        accessPassword,
+        audioRef,
+        onError: (msg) => toast.error(msg),
+      });
+    },
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+  );
+
+  useEffect(() => () => stopSpeaking(), []);
 
   const shouldOpenBattle = useBattleStore((s) => s.shouldOpenBattle);
 
@@ -452,7 +485,19 @@ function Glossary() {
             <TableBody>
               {entries.map((entry) => (
                 <TableRow key={entry.word}>
-                  <TableCell className="font-medium">{entry.word}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleSpeak(entry.word)}
+                        className="shrink-0 rounded-md p-1 hover:bg-accent"
+                        aria-label={t("reading.glossary.listen", { word: entry.word })}
+                      >
+                        <Volume2 className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                      <span>{entry.word}</span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-sm">{entry.syllabification || "-"}</TableCell>
                   <TableCell className="text-muted-foreground italic text-xs">{entry.partOfSpeech || "-"}</TableCell>
                   <TableCell>{entry.englishDefinition}</TableCell>

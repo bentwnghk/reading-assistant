@@ -1,6 +1,7 @@
 "use client";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import {
   ArrowUpDown,
   Search,
@@ -12,6 +13,7 @@ import {
   ChevronRight,
   UserCheck,
   ListChecks,
+  Volume2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,8 +27,10 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useVocabularyStore } from "@/store/vocabulary";
+import { useSettingStore } from "@/store/setting";
 import { getMasteryColor, isDueForReview } from "@/utils/srs";
 import { formatDateLong } from "@/utils/formatDate";
+import { speakWord, stopSpeaking, unlockAudio } from "@/utils/tts";
 import { cn } from "@/utils/style";
 
 type SortField =
@@ -56,6 +60,36 @@ function VocabularyTable() {
     activeReviewListWordIds,
     exitReviewList,
   } = useVocabularyStore();
+  const {
+    mode,
+    accessPassword,
+    ttsVoice,
+    ttsPlaybackRate,
+    openaicompatibleApiKey,
+    openaicompatibleApiProxy,
+  } = useSettingStore();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleSpeak = useCallback(
+    async (word: string) => {
+      if (!word) return;
+      await unlockAudio();
+      await speakWord({
+        word,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        openaicompatibleApiProxy,
+        accessPassword,
+        audioRef,
+        onError: (msg) => toast.error(msg),
+      });
+    },
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+  );
+
+  useEffect(() => () => stopSpeaking(), []);
 
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
@@ -424,7 +458,19 @@ function VocabularyTable() {
                     onCheckedChange={() => toggleWordSelection(w.id)}
                   />
                 </TableCell>
-                <TableCell className="font-medium">{w.word}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleSpeak(w.word)}
+                      className="shrink-0 rounded-md p-1 hover:bg-accent"
+                      aria-label={t("vocabulary.listen", { word: w.word })}
+                    >
+                      <Volume2 className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                    <span>{w.word}</span>
+                  </div>
+                </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {w.syllabification || "-"}
                 </TableCell>

@@ -734,6 +734,7 @@
     },
     "collocations": {
       "title": "詞組與搭配詞",
+      "listen": "聆聽 {{chunk}}",
       "generate": "提取搭配詞",
       "regenerate": "重新生成",
       "generating": "提取中...",
@@ -1378,6 +1379,7 @@
       "example": "例句",
       "emptyTip": "點擊上方按鈕為 {{count}} 個已標記生字生成解釋 (請稍候 1-2 分鐘)",
       "noHighlightedWords": "請先在原文中標記生字。為獲得最佳效果，建議標記 10-30 個生字。",
+      "listen": "聆聽 {{word}}",
       "tabWords": "單詞",
       "tabPhrases": "詞組",
       "tabFlashcard": "字卡",
@@ -1884,6 +1886,7 @@
     "startReading": "開始閱讀",
     "phrases": {
       "empty": "還沒有詞組。",
+      "listen": "聆聽 {{phrase}}",
       "emptyHint": "從閱讀篇章提取搭配詞並加入這裡。",
       "startFlashcard": "字卡複習",
       "startQuiz": "測驗",
@@ -1905,6 +1908,7 @@
       "historyTitle": "詞組複習記錄"
     },
     "searchPlaceholder": "搜尋詞彙...",
+    "listen": "聆聽 {{word}}",
     "allRatings": "全部評級",
     "hardOnly": "困難",
     "mediumOnly": "中等",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -10,6 +10,7 @@ import {
   Check,
   Languages,
   AlertCircle,
+  Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GuideDialog from "@/components/Internal/GuideDialog";
@@ -17,15 +18,45 @@ import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { generateSignature } from "@/utils/signature";
+import { speakWord, stopSpeaking, unlockAudio } from "@/utils/tts";
 
 function Collocations() {
   const { t } = useTranslation();
   const { extractedText, collocations, id } = useReadingStore();
   const { activeGenerations, generateCollocations } = useReadingAssistant();
   const isGenerating = !!activeGenerations["collocations"];
-  const { mode, accessPassword } = useSettingStore();
+  const {
+    mode,
+    accessPassword,
+    ttsVoice,
+    ttsPlaybackRate,
+    openaicompatibleApiKey,
+    openaicompatibleApiProxy,
+  } = useSettingStore();
   const [addedChunks, setAddedChunks] = useState<Set<string>>(new Set());
   const [addingAll, setAddingAll] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleSpeak = useCallback(
+    async (chunk: string) => {
+      if (!chunk) return;
+      await unlockAudio();
+      await speakWord({
+        word: chunk,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        openaicompatibleApiProxy,
+        accessPassword,
+        audioRef,
+        onError: (msg) => toast.error(msg),
+      });
+    },
+    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+  );
+
+  useEffect(() => () => stopSpeaking(), []);
 
   if (!extractedText) {
     return null;
@@ -171,7 +202,15 @@ function Collocations() {
             return (
               <div key={chunk.id} className="rounded-md border p-3 flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
-                  <div>
+                  <div className="flex items-start gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleSpeak(chunk.chunk)}
+                      className="shrink-0 mt-0.5 rounded-md p-1 hover:bg-accent"
+                      aria-label={t("reading.collocations.listen", { chunk: chunk.chunk })}
+                    >
+                      <Volume2 className="h-4 w-4 text-muted-foreground" />
+                    </button>
                     <span className="font-medium">{chunk.chunk}</span>
                   </div>
                   <span className="shrink-0 text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
