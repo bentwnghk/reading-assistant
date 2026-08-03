@@ -466,7 +466,7 @@ function Glossary() {
               <TableRow>
                 <TableHead className="w-[120px]">
                   <Button variant="ghost" size="sm" onClick={() => handleSort("word")} className="-ml-3">
-                    {t("reading.glossary.word")}
+                    {activeTab === "phrases" ? t("reading.glossary.phrase") : t("reading.glossary.word")}
                     <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
