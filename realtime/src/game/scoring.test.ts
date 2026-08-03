@@ -291,6 +291,16 @@ describe("judgeAnswer", () => {
     expect(judgeAnswer("scramble", "take off", "takeoff")).toBe(false);
   });
 
+  it("scramble: hyphenated-compound word-tiles space-joined match the canonical", () => {
+    // "mother-in-law" → word-tiles ["mother","in","law"] joined with spaces.
+    // normalize treats hyphens and spaces as equivalent so the match succeeds.
+    expect(judgeAnswer("scramble", "mother-in-law", "mother in law")).toBe(true);
+    // Mixed-separator entry: "once-in-a-lifetime experience" → 5 word-tiles.
+    expect(judgeAnswer("scramble", "once-in-a-lifetime experience", "once in a lifetime experience")).toBe(true);
+    // Wrong tile order never matches.
+    expect(judgeAnswer("scramble", "mother-in-law", "law in mother")).toBe(false);
+  });
+
   it("listen-type: typed phrase matches regardless of internal spacing", () => {
     expect(judgeAnswer("listen-type", "take off", "take off")).toBe(true);
     expect(judgeAnswer("listen-type", "take off", "take  off")).toBe(true);

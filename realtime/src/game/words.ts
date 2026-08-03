@@ -148,13 +148,16 @@ function computeBlankPositions(word: string, blankRatio: number): number[] {
 }
 
 function computeShuffledLetters(word: string): string[] {
-  // Phrases (multi-word entries) scramble by whole-word tiles so they stay
-  // solvable; single words scramble by character. Mirrors the solo game's
-  // generateChallenge in VocabularySpelling.tsx.
+  // Multi-unit entries (containing spaces OR hyphens) scramble by whole-word
+  // tiles so they stay solvable; single words scramble by character. Hyphens
+  // are treated as separators alongside whitespace, so "mother-in-law" yields
+  // 3 word-tiles ["mother","in","law"] rather than 12 character tiles.
+  // Mirrors the solo game's generateChallenge in VocabularySpelling.tsx.
   const lower = word.toLowerCase();
-  return lower.trim().includes(" ")
-    ? shuffle(lower.trim().split(/\s+/))
-    : shuffle(lower.split(""));
+  const trimmed = lower.trim();
+  return /[\s-]/.test(trimmed)
+    ? shuffle(trimmed.split(/[\s-]+/))
+    : shuffle(trimmed.split(""));
 }
 
 /**

@@ -708,7 +708,6 @@
       "generating": "Extracting...",
       "generatingWait": "Extracting collocations and L1 transfer notes...",
       "emptyTip": "Click the button above to extract useful word chunks and collocations, with notes on common Cantonese-L1 mistakes.",
-      "inText": "In text: {{count}}",
       "addToPhrases": "Add to Phrases",
       "addedButton": "Added to Phrases",
       "added": "Added \"{{chunk}}\" to your phrases.",

@@ -173,11 +173,6 @@ function Collocations() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <span className="font-medium">{chunk.chunk}</span>
-                    {chunk.textOccurrences > 0 && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {t("reading.collocations.inText", { count: chunk.textOccurrences })}
-                      </span>
-                    )}
                   </div>
                   <span className="shrink-0 text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
                     {chunk.pattern}

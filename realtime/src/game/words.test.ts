@@ -22,6 +22,24 @@ describe("enrichWords", () => {
     expect([...tiles].sort()).toEqual(["off", "take"]);
   });
 
+  it("splits hyphenated compounds into whole-word tiles for scramble", () => {
+    const words: BattleWord[] = [{ word: "mother-in-law" }];
+    const enriched = enrichWords(words, "scramble", "medium");
+    const tiles = enriched[0]?.shuffledLetters ?? [];
+    // Three word-tiles (mother, in, law), not 12 character tiles.
+    expect(tiles).toHaveLength(3);
+    expect([...tiles].sort()).toEqual(["in", "law", "mother"]);
+  });
+
+  it("splits mixed-separator entries (hyphens AND spaces) into whole-word tiles", () => {
+    const words: BattleWord[] = [{ word: "once-in-a-lifetime experience" }];
+    const enriched = enrichWords(words, "scramble", "medium");
+    const tiles = enriched[0]?.shuffledLetters ?? [];
+    // Five word-tiles (once, in, a, lifetime, experience).
+    expect(tiles).toHaveLength(5);
+    expect([...tiles].sort()).toEqual(["a", "experience", "in", "lifetime", "once"]);
+  });
+
   it("lowercases phrase word-tiles", () => {
     const words: BattleWord[] = [{ word: "New York" }];
     const enriched = enrichWords(words, "scramble", "medium");

@@ -739,7 +739,6 @@
       "generating": "提取中...",
       "generatingWait": "正在提取搭配詞及母語轉移提示...",
       "emptyTip": "點擊上方按鈕提取實用詞組與搭配詞，並附上常見粵語母語轉移錯誤提示。",
-      "inText": "文中出現：{{count}} 次",
       "addToPhrases": "加入詞組",
       "addedButton": "已加入詞組",
       "added": "已將「{{chunk}}」加入你的詞組。",

@@ -207,13 +207,15 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const currentChallenge = challenges[currentIndex];
   challengeRef.current = currentChallenge;
   const config = DIFFICULTY_CONFIG[difficulty];
-  // Scramble uses whole-word tiles for multi-word phrases (the entry's "word"
-  // contains spaces) instead of individual characters, so phrases stay solvable.
-  const scrambleByWord = !!currentChallenge && currentChallenge.word.trim().includes(" ");
+  // Scramble uses whole-word tiles for multi-unit entries (the entry's "word"
+  // contains spaces OR hyphens) instead of individual characters, so phrases
+  // and hyphenated compounds stay solvable. Mirrors the realtime server's
+  // computeShuffledLetters in realtime/src/game/words.ts.
+  const scrambleByWord = !!currentChallenge && /[\s-]/.test(currentChallenge.word.trim());
   const scrambleUnits = (challenge?: SpellingWordChallenge): string[] => {
     if (!challenge) return [];
     const w = challenge.word;
-    return w.trim().includes(" ") ? w.trim().split(/\s+/) : w.split("");
+    return /[\s-]/.test(w.trim()) ? w.trim().split(/[\s-]+/) : w.split("");
   };
 
   const wordStats = useMemo(() => {
@@ -233,8 +235,8 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
   const generateChallenge = useCallback((entry: GlossaryEntry, _mode: SpellingGameMode): SpellingWordChallenge => {
     const word = entry.word.toLowerCase();
-    const isPhrase = word.trim().includes(" ");
-    const scrambleTiles = isPhrase ? shuffleArray(word.trim().split(/\s+/)) : shuffleArray(word.split(""));
+    const isPhrase = /[\s-]/.test(word.trim());
+    const scrambleTiles = isPhrase ? shuffleArray(word.trim().split(/[\s-]+/)) : shuffleArray(word.split(""));
     const letters = word.split("");
 
     const blankCount = Math.max(1, Math.floor(word.length * config.blankRatio));
@@ -409,11 +411,12 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         .join("");
       correct = normalizedInput === missingLetters;
     } else {
-      // Normalize internal whitespace so multi-word phrases reconstructed from
-      // word-tile scramble (or typed in listen-type) match regardless of how
-      // many spaces separated the words in the stored entry.
-      const normalizedInput = userInput.toLowerCase().replace(/\s+/g, " ").trim();
-      const normalizedAnswer = currentChallenge.word.toLowerCase().replace(/\s+/g, " ").trim();
+      // Normalize internal whitespace AND hyphens to single spaces so
+      // multi-unit entries reconstructed from word-tile scramble (or typed in
+      // listen-type) match regardless of which separator the canonical entry
+      // uses. Mirrors the server's normalizeWord in realtime/src/game/scoring.ts.
+      const normalizedInput = userInput.toLowerCase().replace(/[\s-]+/g, " ").trim();
+      const normalizedAnswer = currentChallenge.word.toLowerCase().replace(/[\s-]+/g, " ").trim();
       correct = normalizedInput === normalizedAnswer;
     }
 
@@ -994,9 +997,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
               {userInput || (
                 <span className="text-muted-foreground">
                   {scrambleByWord
-                    ? Array.from({ length: currentChallenge.word.trim().split(/\s+/).length })
-                        .fill("___")
-                        .join("   ")
+                    ? currentChallenge.word.replace(/[^\s-]+/g, "___")
                     : Array.from({ length: currentChallenge.word.length }).fill("_").join(" ")}
                 </span>
               )}

@@ -91,15 +91,20 @@ export function nextHintCost(usedSoFar: number): number | null {
 }
 
 /**
- * Normalize a word/answer for case- and whitespace-insensitive comparison.
+ * Normalize a word/answer for case-, whitespace-, and hyphen-insensitive
+ * comparison.
  *
- * Internal whitespace is collapsed so multi-word phrases reconstructed from
- * word-tile scramble (or typed in listen-type) match regardless of how many
- * spaces separated the words in the stored entry. Mirrors the solo game's
- * checkAnswer normalization in VocabularySpelling.tsx.
+ * Internal whitespace AND hyphens are collapsed to single spaces so that:
+ *   - multi-word phrases reconstructed from word-tile scramble (or typed in
+ *     listen-type) match regardless of how many spaces separated the words;
+ *   - hyphenated compounds split into word-tiles (e.g. "mother-in-law" →
+ *     ["mother","in","law"]) and rejoined with spaces still match the
+ *     canonical hyphenated entry.
+ * Mirrors the solo game's checkAnswer normalization in VocabularySpelling.tsx
+ * and the battle arena's normalize() in SpellingBattleArena.tsx.
  */
 export function normalizeWord(s: string): string {
-  return s.replace(/\s+/g, " ").trim().toLowerCase();
+  return s.replace(/[\s-]+/g, " ").trim().toLowerCase();
 }
 
 /**

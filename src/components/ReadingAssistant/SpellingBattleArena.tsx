@@ -34,11 +34,12 @@ interface SpellingBattleArenaProps {
 }
 
 function normalize(s: string): string {
-  // Collapse internal whitespace so multi-word phrases reconstructed from
-  // word-tile scramble (or typed in listen-type) match regardless of how many
-  // spaces separated the words. Mirrors the server's normalizeWord and the
-  // solo game's checkAnswer.
-  return s.replace(/\s+/g, " ").trim().toLowerCase();
+  // Collapse internal whitespace AND hyphens to single spaces so multi-unit
+  // entries reconstructed from word-tile scramble (or typed in listen-type)
+  // match regardless of which separator the canonical entry uses. Mirrors the
+  // server's normalizeWord in realtime/src/game/scoring.ts and the solo game's
+  // checkAnswer in VocabularySpelling.tsx.
+  return s.replace(/[\s-]+/g, " ").trim().toLowerCase();
 }
 
 // Mirror of the authoritative hint policy in `realtime/src/game/scoring.ts`.
@@ -109,10 +110,12 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
   const word = battle.currentWord;
   const myUserId = session?.user?.id;
   const gameMode: SpellingGameMode = word?.gameMode ?? "listen-type";
-  // Scramble uses whole-word tiles for multi-word phrases (the entry's "word"
-  // contains spaces) instead of individual characters, so phrases stay solvable.
-  // Mirrors the solo game's scrambleByWord in VocabularySpelling.tsx.
-  const scrambleByWord = gameMode === "scramble" && !!word && word.word.trim().includes(" ");
+  // Scramble uses whole-word tiles for multi-unit entries (the entry's "word"
+  // contains spaces OR hyphens) instead of individual characters, so phrases
+  // and hyphenated compounds stay solvable. Mirrors the solo game's
+  // scrambleByWord in VocabularySpelling.tsx and the server's
+  // computeShuffledLetters in realtime/src/game/words.ts.
+  const scrambleByWord = gameMode === "scramble" && !!word && /[\s-]/.test(word.word.trim());
 
   const doSpeak = useCallback(
     async (text: string) => {
@@ -255,11 +258,12 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
       }
       setHintsUsed((n) => n + 1);
     } else if (gameMode === "scramble") {
-      // Auto-place the next correct tile. For phrases the units are whole
-      // words (split by whitespace); for single words they're characters.
-      // Mirrors the solo game's scramble hint in VocabularySpelling.tsx.
+      // Auto-place the next correct tile. For multi-unit entries the units
+      // are whole words (split by whitespace or hyphens); for single words
+      // they're characters. Mirrors the solo game's scramble hint in
+      // VocabularySpelling.tsx.
       const tiles = word.shuffledLetters ?? [];
-      const units = scrambleByWord ? word.word.trim().split(/\s+/) : word.word.split("");
+      const units = scrambleByWord ? word.word.trim().split(/[\s-]+/) : word.word.split("");
       const nextCorrectUnit = units[selectedLetters.length];
       if (nextCorrectUnit) {
         const tileIndex = tiles.findIndex(
@@ -563,9 +567,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
                   ) : (
                     <span className="text-muted-foreground">
                       {scrambleByWord
-                        ? Array.from({ length: word.word.trim().split(/\s+/).length })
-                            .fill("___")
-                            .join("   ")
+                        ? word.word.replace(/[^\s-]+/g, "___")
                         : Array.from({ length: word.word.length }).fill("_").join(" ")}
                     </span>
                   )}

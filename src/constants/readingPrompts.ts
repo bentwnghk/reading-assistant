@@ -216,8 +216,7 @@ ${text}
     "meaning": "to consider something when judging a situation",
     "meaningZh": "考慮；把……計算在內",
     "contrastNote": "Cantonese speakers often say 「考慮」 directly; English requires the full chunk 'take into account', NOT 'consider into'.",
-    "example": "We must take the cost into account.",
-    "textOccurrences": 1
+    "example": "We must take the cost into account."
   }
 ]
 
@@ -228,7 +227,6 @@ ${text}
 - "meaningZh": Traditional Chinese (繁體中文) gloss.
 - "contrastNote": FOR CHUNKS WITH A KNOWN CANTONESE-L1 TRANSFER PITFALL, give a short note explaining how a Chinese-speaking learner typically gets it wrong (e.g. wrong preposition, word-for-word translation, missing article). This is the KEY value of this feature — include it whenever a transfer error is common. If the chunk has no notable transfer issue, omit "contrastNote".
 - "example": one example sentence (preferably from the text if present, otherwise generated and natural).
-- "textOccurrences": how many times the chunk (or its root form) appears in the text (0 if only related, not literal).
 
 **CRITICAL:**
 - Focus on chunks, NOT single words already in the glossary.
@@ -572,24 +570,21 @@ export function suggestVocabularyPrompt(age: number, text: string, count: number
   const levelGuidance = age <= 11 ? `
 **For a ${age}-year-old primary student (ages 8-11):**
 - The student knows only very common everyday words (A1-A2 level).
-- Select challenging words, useful phrases, collocations, and idioms that appear in the text.
-- Include multi-word phrases (e.g. "look forward to", "in spite of") when they are worth learning.
+- Select challenging SINGLE words that appear in the text and that the student is unlikely to know.
 - Do NOT include extremely basic words the student certainly knows (e.g. "the", "go", "big").
 ` : age <= 15 ? `
 **For a ${age}-year-old junior secondary student (ages 12-15):**
 - The student knows common everyday and early academic words (up to B1 level).
-- Focus on B2+ vocabulary, abstract concepts, figurative language, and useful phrases/idioms.
-- Include multi-word expressions when they are worth learning.
+- Focus on challenging SINGLE words: B2+ vocabulary, abstract concepts, and figurative-language words.
 - Do NOT include words a typical 12-15 year old already knows.
 ` : `
 **For a ${age}-year-old senior secondary/DSE student (ages 16-18):**
 - The student has solid command of everyday and academic English (up to B2 level).
-- Focus on advanced (C1-C2) vocabulary, low-frequency academic words, nuanced expressions, and idioms.
-- Include multi-word expressions when they are worth learning.
+- Focus on challenging SINGLE words: advanced (C1-C2) vocabulary, low-frequency academic words, and nuanced single-word terms.
 - Do NOT include words a typical senior secondary student already knows.
 `;
 
-  return `You are an expert English reading teacher for Hong Kong students. Identify exactly **${count}** words and/or phrases from the text below that a ${age}-year-old ${schoolLevel} student is unlikely to already know, and that are therefore worth learning.
+  return `You are an expert English reading teacher for Hong Kong students. Identify exactly **${count}** single words from the text below that a ${age}-year-old ${schoolLevel} student is unlikely to already know, and that are therefore worth learning.
 
 <text>
 ${text}
@@ -599,7 +594,7 @@ ${levelGuidance}
 - Return AT MOST ${count} items. If the text contains fewer than ${count} genuinely challenging items, return fewer — never pad the list with easy words.
 - Prefer items in order of their first appearance in the text.
 - Each item MUST be copied **verbatim** from the text (same words, same form). Do not lemmatize, inflect, or rephrase.
-- Single words and multi-word phrases are both allowed.
+- **SINGLE WORDS ONLY.** Do NOT include multi-word phrases, collocations, idioms, phrasal verbs, or fixed expressions. If a multi-word expression is worth learning, suggest its single most challenging component word instead, and only if that word itself is worth learning on its own.
 - Each item should be distinct and independently worth learning.
 
 **Output format:**
