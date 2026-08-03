@@ -164,7 +164,7 @@
         },
         "test": {
           "title": "Reading Test",
-          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and adaptive targeted practice that remembers your weak spots across sessions and drills them until they improve!"
+          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and adaptive targeted practice that remembers your weak spots across reading sessions and drills them until they improve!"
         },
         "achievements": {
           "title": "Achievements",
@@ -347,7 +347,7 @@
       "master": {
         "eyebrow": "Master",
         "title": "Watch yourself improve.",
-        "lede": "Take the reading test and a skill profile learns your weak spots across every session — then adaptive targeted practice drills them until they're not. Compete on the leaderboard, earn achievements along the way, and build a vocabulary that travels with you.",
+        "lede": "Take the reading test and a skill profile learns your weak spots across every reading session — then adaptive targeted practice drills them until they're not. Compete on the leaderboard, earn achievements along the way, and build a vocabulary that travels with you.",
         "bullets": [
           "Reading test with skill breakdown",
           "Adaptive targeted practice from your skill profile",
