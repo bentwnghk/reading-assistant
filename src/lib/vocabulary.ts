@@ -1,4 +1,5 @@
 import { getPool } from "./db";
+import type { PoolClient } from "pg";
 
 function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
   const rawCounts = row.srs_counts as { hard?: number; medium?: number } | null;
@@ -317,18 +318,20 @@ export async function updateVocabularyReview(
 
 export async function deleteVocabularyBySession(
   userId: string,
-  sessionId: string
+  sessionId: string,
+  client?: PoolClient
 ): Promise<void> {
-  const pool = getPool();
-  await pool.query(
+  const exec = client ?? getPool();
+  await exec.query(
     `DELETE FROM user_vocabulary
      WHERE user_id = $1
        AND source_session_ids @> $2::jsonb
-       AND jsonb_array_length(source_session_ids) = 1`,
+       AND jsonb_array_length(source_session_ids) = 1
+       AND shared_by IS NULL`,
     [userId, JSON.stringify([sessionId])]
   );
 
-  await pool.query(
+  await exec.query(
     `UPDATE user_vocabulary
      SET source_session_ids = (
        SELECT jsonb_agg(elem) FROM jsonb_array_elements(source_session_ids) elem WHERE elem != $2::jsonb

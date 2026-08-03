@@ -260,6 +260,7 @@ export async function acceptReviewListShare(
         chinese_definition = COALESCE(NULLIF(EXCLUDED.chinese_definition, ''), user_vocabulary.chinese_definition),
         example = COALESCE(NULLIF(EXCLUDED.example, ''), user_vocabulary.example),
         entry_type = EXCLUDED.entry_type,
+        shared_by = COALESCE(user_vocabulary.shared_by, EXCLUDED.shared_by),
         updated_at = $10`,
       [
         recipientId,

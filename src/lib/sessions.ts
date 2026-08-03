@@ -1,6 +1,7 @@
 import { getClient, base64ToBuffer, bufferToBase64 } from "./db"
 import { logActivity } from "./activity"
 import { syncSubmissionMetrics } from "./assignments"
+import { deleteVocabularyBySession } from "./vocabulary"
 import type { ReadingStore } from "@/store/reading"
 
 export interface SessionWithImages extends ReadingStore {
@@ -682,13 +683,27 @@ export async function deleteReadingSession(
   sessionId: string
 ): Promise<boolean> {
   const client = await getClient()
-  
+
   try {
+    await client.query("BEGIN")
+
     const result = await client.query(
       "DELETE FROM reading_sessions WHERE id = $1 AND user_id = $2",
       [sessionId, userId]
     )
-    return (result.rowCount ?? 0) > 0
+
+    if ((result.rowCount ?? 0) === 0) {
+      await client.query("ROLLBACK")
+      return false
+    }
+
+    await deleteVocabularyBySession(userId, sessionId, client)
+
+    await client.query("COMMIT")
+    return true
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
   } finally {
     client.release()
   }
