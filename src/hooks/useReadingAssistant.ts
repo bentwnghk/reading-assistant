@@ -472,6 +472,7 @@ function useReadingAssistant() {
           activationPromptZh: z.array(z.string()).optional(),
           predictionPrompt: z.string(),
           purpose: z.string(),
+          purposeZh: z.string().optional(),
           preTeachWords: z.array(
             z.object({
               word: z.string(),
@@ -482,6 +483,7 @@ function useReadingAssistant() {
             }),
           ),
           backgroundNote: z.string(),
+          backgroundNoteZh: z.string().optional(),
         })
         .safeParse(JSON.parse(text));
 

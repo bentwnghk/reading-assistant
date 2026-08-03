@@ -74,8 +74,10 @@ interface PreReadingData {
   activationPromptZh?: string[];
   predictionPrompt: string;
   purpose: string;
+  purposeZh?: string;
   preTeachWords: PreTeachWord[];
   backgroundNote: string;
+  backgroundNoteZh?: string;
   generatedAt: number;
 }
 

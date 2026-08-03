@@ -317,6 +317,9 @@ function PreReading() {
                 <h4 className="font-medium text-sm">{t("reading.preReading.backgroundLabel")}</h4>
               </div>
               <p className="text-sm text-muted-foreground">{preReading.backgroundNote}</p>
+              {preReading.backgroundNoteZh && (
+                <p className="text-xs text-muted-foreground mt-0.5">{preReading.backgroundNoteZh}</p>
+              )}
             </div>
           )}
 
@@ -327,6 +330,9 @@ function PreReading() {
               <h4 className="font-medium text-sm">{t("reading.preReading.purposeLabel")}</h4>
             </div>
             <p className="text-sm text-muted-foreground">{preReading.purpose}</p>
+            {preReading.purposeZh && (
+              <p className="text-xs text-muted-foreground mt-0.5">{preReading.purposeZh}</p>
+            )}
           </div>
 
           {/* Pre-teach words */}

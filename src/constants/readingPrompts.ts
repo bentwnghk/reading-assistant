@@ -180,10 +180,12 @@ ${text}
   "activationPromptZh": ["...", "..."],
   "predictionPrompt": "...",
   "purpose": "...",
+  "purposeZh": "...",
   "preTeachWords": [
     {"word":"...","syllabification":"...","partOfSpeech":"...","englishDefinition":"...","chineseDefinition":"..."}
   ],
-  "backgroundNote": "..."
+  "backgroundNote": "...",
+  "backgroundNoteZh": "..."
 }
 
 **FIELD RULES:**
@@ -191,8 +193,10 @@ ${text}
 - "activationPromptZh": optional Traditional Chinese (繁體中文) one-line hook per English prompt, to help weaker students engage. May be omitted entirely if the English is simple enough.
 - "predictionPrompt": ONE question that invites the student to GUESS what the text will be about, based on what they can SKIM (the title, any headings, and the first/last paragraphs) — never reveal the answer. Prediction is a skimming skill, so the prompt must NOT ask the student to guess from the title alone.
 - "purpose": ONE sentence starting "Read to find out..." that gives the student a clear reason to read.
+- "purposeZh": optional Traditional Chinese (繁體中文) translation of "purpose", to help weaker students engage. May be omitted entirely if the English is simple enough.
 - "preTeachWords": 5-8 words/phrases whose meaning is essential to understanding the text (the ~90-95% coverage principle). For each: a concise English definition a ${age}-year-old can grasp, the part of speech, and a Traditional Chinese (繁體中文) gloss in "chineseDefinition". Include syllabification (use · between syllables, uppercase the stressed syllable, e.g. "im·POR·tant"). Do NOT include trivial words the student already knows.
 - "backgroundNote": 1-2 sentences on cultural/contextual knowledge the text ASSUMES but a Hong Kong student may lack (e.g. a holiday, an institution, a historical event). If none is needed, return an empty string.
+- "backgroundNoteZh": optional Traditional Chinese (繁體中文) translation of "backgroundNote". If "backgroundNote" is empty, omit this field.
 
 **CRITICAL:** Do not state the text's main idea, summary, findings, plot, or conclusion anywhere. The student must discover those by reading. Respond with ONLY the JSON object, no markdown fences.`;
 }
