@@ -62,6 +62,7 @@ const formSchema = z.object({
   provider: z.string(),
   mode: z.enum(["local", "proxy", "subscription"]).optional(),
   visionModel: z.enum(VISION_MODELS),
+  prereadingModel: z.enum(AVAILABLE_MODELS),
   summaryModel: z.enum(AVAILABLE_MODELS),
   mindMapModel: z.enum(AVAILABLE_MODELS),
   adaptedTextModel: z.enum(AVAILABLE_MODELS),
@@ -69,6 +70,7 @@ const formSchema = z.object({
   readingTestModel: z.enum(AVAILABLE_MODELS),
   glossaryModel: z.enum(AVAILABLE_MODELS),
   sentenceAnalysisModel: z.enum(AVAILABLE_MODELS),
+  collocationModel: z.enum(AVAILABLE_MODELS),
   grammarModel: z.enum(AVAILABLE_MODELS),
   readingTextModel: z.enum(READING_TEXT_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
@@ -682,6 +684,37 @@ function Setting({ open, onClose }: SettingProps) {
                 />
                 <FormField
                   control={form.control}
+                  name="prereadingModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.prereadingModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("prereadingModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AVAILABLE_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="summaryModel"
                   render={({ field }) => (
                     <FormItem className="from-item">
@@ -849,6 +882,37 @@ function Setting({ open, onClose }: SettingProps) {
                           onValueChange={(value) => {
                             field.onChange(value);
                             updateSetting("glossaryModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AVAILABLE_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="collocationModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.collocationModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("collocationModel", value);
                           }}
                         >
                           <SelectTrigger className="form-field">

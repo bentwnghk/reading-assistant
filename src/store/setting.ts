@@ -64,6 +64,7 @@ export interface SettingStore {
   provider: string;
   mode: ApiMode;
   visionModel: VisionModel;
+  prereadingModel: AvailableModel;
   summaryModel: AvailableModel;
   mindMapModel: AvailableModel;
   adaptedTextModel: AvailableModel;
@@ -71,6 +72,7 @@ export interface SettingStore {
   readingTestModel: AvailableModel;
   glossaryModel: AvailableModel;
   sentenceAnalysisModel: AvailableModel;
+  collocationModel: AvailableModel;
   grammarModel: AvailableModel;
   readingTextModel: ReadingTextModel;
   tutorModel: TutorModel;
@@ -164,6 +166,7 @@ export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
   visionModel: "gpt-5-nano",
+  prereadingModel: "deepseek-v4-flash",
   summaryModel: "deepseek-v4-flash",
   mindMapModel: "deepseek-v4-flash",
   adaptedTextModel: "deepseek-v4-flash",
@@ -171,6 +174,7 @@ export const defaultValues: SettingStore = {
   readingTestModel: "deepseek-v4-flash",
   glossaryModel: "deepseek-v4-flash",
   sentenceAnalysisModel: "deepseek-v4-flash",
+  collocationModel: "deepseek-v4-flash",
   grammarModel: "deepseek-v4-flash",
   readingTextModel: "deepseek-v4-flash",
   tutorModel: "step-3.7-flash",
@@ -238,9 +242,9 @@ export const useSettingStore = create(
           const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
           const state = parsed.state as unknown as Record<string, unknown>;
           const modelFields: (keyof SettingStore)[] = [
-            "summaryModel", "mindMapModel", "adaptedTextModel",
+            "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
             "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
-            "grammarModel",
+            "collocationModel", "grammarModel",
           ];
           for (const field of modelFields) {
             if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {

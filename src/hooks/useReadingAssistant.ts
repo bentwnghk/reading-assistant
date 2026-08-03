@@ -110,11 +110,13 @@ function useReadingAssistant() {
   const { 
     smoothTextStreamType, 
     visionModel: visionModelName,
+    prereadingModel,
     summaryModel,
     mindMapModel,
     adaptedTextModel,
     simplifyModel,
     glossaryModel,
+    collocationModel,
   } = useSettingStore();
   const readingStore = useReadingStore();
   const { createModelProvider } = useModelProvider();
@@ -455,7 +457,7 @@ function useReadingAssistant() {
       const text = await glossaryGenerateText(
         generatePreReadingPrompt(studentAge, extractedText, docTitle || undefined),
         getSystemPrompt(),
-        summaryModel,
+        prereadingModel,
         ac.signal,
       );
 
@@ -1032,7 +1034,7 @@ function useReadingAssistant() {
       const text = await glossaryGenerateText(
         generateCollocationsPrompt(studentAge, extractedText, glossary.map((g) => g.word)),
         getSystemPrompt(),
-        summaryModel,
+        collocationModel,
         ac.signal,
       );
 
