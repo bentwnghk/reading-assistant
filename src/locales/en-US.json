@@ -702,34 +702,34 @@
       }
     },
     "collocations": {
-      "title": "Word Chunks & Collocations",
+      "title": "Phrases & Collocations",
       "listen": "Listen to {{chunk}}",
       "generate": "Extract Collocations",
       "regenerate": "Regenerate",
       "generating": "Extracting...",
       "generatingWait": "Extracting collocations and L1 transfer notes...",
-      "emptyTip": "Click the button above to extract useful word chunks and collocations, with notes on common Cantonese-L1 mistakes.",
+      "emptyTip": "Click the button above to extract useful phrases and collocations, with notes on common Cantonese-L1 mistakes.",
       "addToPhrases": "Add to Phrases",
       "addedButton": "Added to Phrases",
       "added": "Added \"{{chunk}}\" to your phrases.",
       "addAll": "Add All to Phrases",
-      "addAllSuccess": "Added all chunks to your phrases.",
+      "addAllSuccess": "Added all phrases to your phrases.",
       "addError": "Could not add phrase. Please try again.",
       "parseError": "Could not parse collocations. Please try again.",
       "help": {
-        "title": "Word Chunks & Collocations Guide",
+        "title": "Phrases & Collocations Guide",
         "intro": "Master the multi-word expressions in your text and learn to dodge the mistakes Cantonese speakers most often make.",
         "itemsBaseKey": "reading.collocations.help.items",
         "items": {
-          "chunks": { "name": "Word Chunks", "desc": "Multi-word expressions pulled from your text — phrasal verbs, collocations, and fixed phrases — each shown with its meaning and an example." },
+          "chunks": { "name": "Phrases", "desc": "Multi-word expressions pulled from your text — phrasal verbs, collocations, and fixed phrases — each shown with its meaning and an example." },
           "contrast": { "name": "Contrast Notes", "desc": "Flags the errors Cantonese speakers typically make, so you can spot and avoid them." },
-          "phrases": { "name": "Save to Phrases", "desc": "Send any chunk to the Phrases tab on My Vocabulary for spaced-repetition review." }
+          "phrases": { "name": "Save to Phrases", "desc": "Send any phrase to the Phrases tab on My Vocabulary for spaced-repetition review." }
         },
         "stepsTitle": "How it works",
         "steps": {
           "s1": "Click Extract Collocations to scan the text for useful multi-word expressions.",
-          "s2": "Read each chunk's contrast note to see what to avoid saying.",
-          "s3": "Tap Add to Phrases on the chunks you want to review later."
+          "s2": "Read each phrase's contrast note to see what to avoid saying.",
+          "s3": "Tap Add to Phrases on the phrases you want to review later."
         },
         "tipTitle": "Tip",
         "tipContent": "Roughly half of the collocation errors Hong Kong learners make come from word-for-word translation — the contrast notes are where you'll catch them."
@@ -2705,6 +2705,7 @@
     "simplifyModel": "Simplify Text Model",
     "readingTestModel": "Reading Test Model",
     "glossaryModel": "Glossary Model",
+    "suggestVocabModel": "Suggest Vocabulary Model",
     "collocationModel": "Collocations Model",
     "sentenceAnalysisModel": "Sentence Analysis Model",
     "grammarModel": "Grammar Model",

@@ -116,6 +116,7 @@ function useReadingAssistant() {
     adaptedTextModel,
     simplifyModel,
     glossaryModel,
+    suggestVocabModel,
     collocationModel,
   } = useSettingStore();
   const readingStore = useReadingStore();
@@ -958,7 +959,7 @@ function useReadingAssistant() {
       const text = await glossaryGenerateText(
         suggestVocabularyPrompt(studentAge, extractedText, count),
         getSystemPrompt(),
-        glossaryModel,
+        suggestVocabModel,
         ac.signal,
       );
 

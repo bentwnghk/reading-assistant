@@ -71,6 +71,7 @@ export interface SettingStore {
   simplifyModel: AvailableModel;
   readingTestModel: AvailableModel;
   glossaryModel: AvailableModel;
+  suggestVocabModel: AvailableModel;
   sentenceAnalysisModel: AvailableModel;
   collocationModel: AvailableModel;
   grammarModel: AvailableModel;
@@ -166,15 +167,16 @@ export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
   visionModel: "gpt-5-nano",
-  prereadingModel: "deepseek-v4-flash",
+  prereadingModel: "gpt-5.6-luna",
   summaryModel: "deepseek-v4-flash",
   mindMapModel: "deepseek-v4-flash",
   adaptedTextModel: "deepseek-v4-flash",
   simplifyModel: "deepseek-v4-flash",
   readingTestModel: "deepseek-v4-flash",
   glossaryModel: "deepseek-v4-flash",
+  suggestVocabModel: "gpt-5.6-luna",
   sentenceAnalysisModel: "deepseek-v4-flash",
-  collocationModel: "deepseek-v4-flash",
+  collocationModel: "gpt-5.6-luna",
   grammarModel: "deepseek-v4-flash",
   readingTextModel: "deepseek-v4-flash",
   tutorModel: "step-3.7-flash",
@@ -243,7 +245,7 @@ export const useSettingStore = create(
           const state = parsed.state as unknown as Record<string, unknown>;
           const modelFields: (keyof SettingStore)[] = [
             "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
-            "simplifyModel", "readingTestModel", "glossaryModel", "sentenceAnalysisModel",
+            "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
             "collocationModel", "grammarModel",
           ];
           for (const field of modelFields) {

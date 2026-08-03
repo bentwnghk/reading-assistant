@@ -69,6 +69,7 @@ const formSchema = z.object({
   simplifyModel: z.enum(AVAILABLE_MODELS),
   readingTestModel: z.enum(AVAILABLE_MODELS),
   glossaryModel: z.enum(AVAILABLE_MODELS),
+  suggestVocabModel: z.enum(AVAILABLE_MODELS),
   sentenceAnalysisModel: z.enum(AVAILABLE_MODELS),
   collocationModel: z.enum(AVAILABLE_MODELS),
   grammarModel: z.enum(AVAILABLE_MODELS),
@@ -882,6 +883,37 @@ function Setting({ open, onClose }: SettingProps) {
                           onValueChange={(value) => {
                             field.onChange(value);
                             updateSetting("glossaryModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {AVAILABLE_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="suggestVocabModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.suggestVocabModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("suggestVocabModel", value);
                           }}
                         >
                           <SelectTrigger className="form-field">
