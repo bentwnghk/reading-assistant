@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
-  Layers,
+  Combine,
   LoaderCircle,
   Plus,
   Check,
@@ -136,14 +136,14 @@ function Collocations() {
     <section className="p-4 border rounded-md mt-4">
       <div className="flex flex-wrap md:flex-nowrap items-center justify-between border-b pb-4 mb-4 gap-2">
         <h3 className="font-semibold text-lg flex items-center gap-2">
-          <Layers className="h-5 w-5 text-muted-foreground" />
+          <Combine className="h-5 w-5 text-muted-foreground" />
           {t("reading.collocations.title")}
           <GuideDialog
             titleKey="reading.collocations.help.title"
             introKey="reading.collocations.help.intro"
             itemsBaseKey="reading.collocations.help.items"
             items={[
-              { key: "chunks", icon: Layers, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "chunks", icon: Combine, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "contrast", icon: AlertCircle, bgClass: "bg-rose-500/10", iconClass: "text-rose-500" },
               { key: "phrases", icon: Languages, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
             ]}
@@ -177,12 +177,12 @@ function Collocations() {
               </>
             ) : collocations.length > 0 ? (
               <>
-                <Layers className="h-4 w-4 mr-1" />
+                <Combine className="h-4 w-4 mr-1" />
                 {t("reading.collocations.regenerate")}
               </>
             ) : (
               <>
-                <Layers className="h-4 w-4 mr-1" />
+                <Combine className="h-4 w-4 mr-1" />
                 {t("reading.collocations.generate")}
               </>
             )}
@@ -192,7 +192,7 @@ function Collocations() {
 
       {collocations.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <Combine className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p>{t("reading.collocations.emptyTip")}</p>
         </div>
       ) : (
