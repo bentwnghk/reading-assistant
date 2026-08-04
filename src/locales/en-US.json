@@ -2576,8 +2576,8 @@
             "desc": "A multi-line area chart tracking cumulative vocabulary growth over time for each student. Choose from 13 time ranges (1W to 3Y) and toggle individual students on/off."
           },
           "skillAverages": {
-            "name": "Class Reading Skill Profile",
-            "desc": "A radar chart showing the class's average accuracy across 5 reading comprehension skills (Main Idea, Detail, Inference, Vocabulary, Purpose). The caption highlights the class's weakest skill so you can target instruction."
+            "name": "Class Reading Comprehension Skill Profile",
+            "desc": "A radar chart showing the class's average accuracy across 5 reading comprehension skills (Main Idea, Detail, Inference, Vocabulary, Purpose), aggregated from every completed reading test. The caption highlights the class's weakest skill so you can target instruction."
           }
         },
         "tip": {

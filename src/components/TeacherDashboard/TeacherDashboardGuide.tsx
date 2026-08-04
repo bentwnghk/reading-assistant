@@ -55,6 +55,7 @@ const CHART_ITEMS: { key: string; icon: React.ElementType; bgClass: string; icon
   { key: "spellingScore", icon: PenTool, bgClass: "bg-pink-500/10", iconClass: "text-pink-500" },
   { key: "spellingAccuracy", icon: Target, bgClass: "bg-rose-500/10", iconClass: "text-rose-500" },
   { key: "vocabularyGrowth", icon: LineChart, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
+  { key: "skillAverages", icon: Target, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
 ];
 
 const FUNCTION_ITEMS: { key: string; icon: React.ElementType; bgClass: string; iconClass: string }[] = [
