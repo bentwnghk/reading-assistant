@@ -152,9 +152,13 @@ function extractFromOpenAIResponse(data: any): string | null {
 
   if (typeof message.content === "string") {
     const b64Match = message.content.match(
-      /data:image\/[a-zA-Z+]+;base64,([A-Za-z0-9+/=]+)/
+      /data:(image\/[a-zA-Z+]+);base64,([A-Za-z0-9+/=\s]+)/
     );
-    if (b64Match) return `data:image/png;base64,${b64Match[1]}`;
+    if (b64Match) {
+      const mime = b64Match[1];
+      const b64 = b64Match[2].replace(/\s/g, "");
+      return `data:${mime};base64,${b64}`;
+    }
   }
 
   if (Array.isArray(message.content)) {
@@ -165,6 +169,17 @@ function extractFromOpenAIResponse(data: any): string | null {
       if (part.type === "image" && part.source?.data) {
         const mime = part.source.media_type || "image/png";
         return `data:${mime};base64,${part.source.data}`;
+      }
+      if (part.type === "image" && part.image_url?.url) {
+        return part.image_url.url;
+      }
+      if (part.inline_data?.data) {
+        const mime = part.inline_data.mime_type || "image/png";
+        return `data:${mime};base64,${part.inline_data.data}`;
+      }
+      if (part.inlineData?.data) {
+        const mime = part.inlineData.mimeType || "image/png";
+        return `data:${mime};base64,${part.inlineData.data}`;
       }
     }
   }
@@ -349,7 +364,13 @@ export async function POST(request: NextRequest) {
         const response = await callOpenAICompatibleApi(prompt, IMAGE_MODEL, body.mode === "subscription");
         if (response.ok) {
           const data = await response.json();
-          imageDataUrl = extractFromOpenAIResponse(data);
+          imageDataUrl =
+            extractFromOpenAIResponse(data) ?? extractBase64FromGeminiResponse(data);
+          if (!imageDataUrl) {
+            errors.push(
+              `OpenAI-compatible (200): response did not contain a recognizable image. keys=${Object.keys(data ?? {}).join(",")}`
+            );
+          }
         } else {
           const errorText = await response.text();
           errors.push(`OpenAI-compatible (${response.status}): ${errorText.substring(0, 200)}`);
