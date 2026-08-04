@@ -433,6 +433,7 @@ function AdaptedText() {
   const adaptedContainerRef = useRef<HTMLDivElement | null>(null);
   const simplifiedContainerRef = useRef<HTMLDivElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const paragraphCounts = useMemo(
     () => ({
@@ -470,6 +471,13 @@ function AdaptedText() {
     },
     []
   );
+
+  const scrollToTabTop = useCallback(() => {
+    requestAnimationFrame(() => {
+      tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
+
   const [selection, setSelection] = useState<{
     text: string;
     x: number;
@@ -1420,7 +1428,7 @@ function AdaptedText() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs ref={tabsRef} value={activeTab} onValueChange={setActiveTab} className="scroll-mt-20">
         <TabsList className="w-full">
           <TabsTrigger value="original" className="flex-1 gap-1">
             <FileText className="h-3.5 w-3.5" />
@@ -1682,6 +1690,7 @@ function AdaptedText() {
                 onClick={() => {
                   setActiveTab("adapted");
                   adaptText();
+                  scrollToTabTop();
                 }}
                 disabled={isAdapting}
                 size="sm"
@@ -1756,6 +1765,7 @@ function AdaptedText() {
                       onClick={() => {
                         setActiveTab("simplified");
                         simplifyText();
+                        scrollToTabTop();
                       }}
                       disabled={isSimplifying}
                       variant="secondary"
