@@ -51,6 +51,7 @@ const OVERVIEW_ITEMS: { key: string; icon: React.ElementType; bgClass: string; i
   { key: "grammarGameTrend", icon: Gamepad2, bgClass: "bg-lime-500/10", iconClass: "text-lime-500" },
   { key: "grammarGameAccuracy", icon: Target, bgClass: "bg-emerald-500/10", iconClass: "text-emerald-500" },
   { key: "vocabularyGrowth", icon: BookMarked, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
+  { key: "skillProfile", icon: Target, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
 ];
 
 const SESSION_ITEMS: { key: string; icon: React.ElementType; bgClass: string; iconClass: string }[] = [

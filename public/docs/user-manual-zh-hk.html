@@ -443,7 +443,7 @@ body.toc-noscroll{overflow:hidden}
   <div class="sub">用戶手冊</div>
   <div class="zh">教師與學生完整指南</div>
   <div class="meta">
-    <div><strong>版本</strong> 2.1020</div>
+    <div><strong>版本</strong> 3.1</div>
     <div><strong>對象</strong> 學生 · 教師 · 管理員</div>
     <div><strong>語言</strong> 繁體中文</div>
   </div>
@@ -877,12 +877,12 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>計費模式</strong></td><td>訂閱 · 計量 · 免費</td><td>見第 2 章。</td></tr>
         <tr><td><strong>AI 供應商</strong></td><td>Mr.🆖 AI Hub</td><td>介面中唯一選項。</td></tr>
         <tr><td><strong>API 金鑰</strong>／<strong>API 基礎網址</strong></td><td>文字（密碼欄）</td><td>僅於 計量 模式顯示。API 基礎網址 唯讀（<code>https://api.mr5ai.com</code>）。</td></tr>
-        <tr><td><strong>存取密碼</strong></td><td>文字（密碼欄）</td><td>僅於 免費 模式顯示。</td></tr>
+        <tr><td><strong>訪問密碼</strong></td><td>文字（密碼欄）</td><td>僅於 免費 模式顯示。</td></tr>
         <tr><td><strong>訂閱面板</strong></td><td>定價／狀態卡</td><td>訂閱 模式且已登入時顯示。學校訂閱會停用個人訂閱。</td></tr>
-        <tr><td><strong>介面語言</strong></td><td>跟隨系統 · English · 繁體中文</td><td>更改全部介面文字。</td></tr>
-        <tr><td><strong>介面主題</strong></td><td>跟隨系統 · 淺色 · 深色</td><td>預設跟隨作業系統。</td></tr>
+        <tr><td><strong>界面語言</strong></td><td>跟隨系統 · English · 繁體中文</td><td>更改全部介面文字。</td></tr>
+        <tr><td><strong>界面主題</strong></td><td>跟隨系統 · 淺色 · 深色</td><td>預設跟隨作業系統。</td></tr>
         <tr><td><strong>越獄模式</strong></td><td>開／關</td><td>解鎖 AI 導師的「進階答案協助」（見第 8 章）。</td></tr>
-        <tr><td><strong>顯示「給出答案」</strong></td><td>開／關</td><td>需先開啟越獄模式。關閉越獄模式亦會關閉此項。</td></tr>
+        <tr><td><strong>顯示「直接解答」</strong></td><td>開／關</td><td>需先開啟越獄模式。關閉越獄模式亦會關閉此項。</td></tr>
         <tr><td><strong>刪除帳戶</strong> <span class="tag-super" style="border:none"></span></td><td>危險區域按鈕</td><td>超級管理員不顯示。需重新輸入電郵確認。無法復原。</td></tr>
       </table>
 
@@ -892,25 +892,28 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>功能（標籤）</th><th>可用模型</th><th>預設</th></tr>
         <tr><td>視覺（OCR）模型</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
         <tr><td>摘要模型</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>心智圖模型</td><td rowspan="7">與摘要相同</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>改寫文本模型</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>簡化文本模型</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>閱讀測驗模型</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>詞彙模型</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>讀前模型</td><td rowspan="10">與摘要相同</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>思維導圖模型</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>文本改寫模型</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>文本簡化模型</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>閱讀測驗模型</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>詞彙表模型</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>推薦生字模型</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>搭配模型</td><td>gpt-5.6-luna</td></tr>
         <tr><td>句子分析模型</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>語法模型</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>語法模型</td><td>gpt-5.6-luna</td></tr>
         <tr><td>閱讀文本生成模型</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>基本 AI 導師模型</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>進階 AI 導師模型</td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
+        <tr><td>基礎 AI 導師模型</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>高級 AI 導師模型</td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>step-3.7-flash</code> 為推薦之選；切換至 <code>gpt-5.6-terra</code> 可得最強（亦最貴）的推理能力。</div>
 
       <h3>3.3 語音分頁</h3>
       <table class="ref">
         <tr><th>設定</th><th>選項</th><th>備註</th></tr>
-        <tr><td><strong>語音選擇</strong></td><td>Alloy（美式男）· Nova（美式女）· Adam（美式男）· Phoebe（美式女）· Ollie（英式男）· Ava（美式女）</td><td>用於詞彙朗讀按鈕、生字卡、拼字遊戲。</td></tr>
+        <tr><td><strong>語音選擇</strong></td><td>Alloy（美式男）· Nova（美式女）· Adam（美式男）· Phoebe（美式女）· Ollie（英式男）· Ada（英式女）</td><td>用於詞彙朗讀按鈕、生字卡、拼字遊戲。</td></tr>
         <tr><td><strong>播放速度</strong></td><td>0.25× · 0.5× · 0.75× · 1.0×</td><td>較慢速度有助語言學習者。</td></tr>
-        <tr><td><strong>自動朗讀生字卡</strong></td><td>開／關</td><td>生字卡載入時自動朗讀每個生字。預設開啟。</td></tr>
+        <tr><td><strong>自動朗讀字卡</strong></td><td>開／關</td><td>生字卡載入時自動朗讀每個生字。預設開啟。</td></tr>
       </table>
 
       <h3>3.4 通知分頁</h3>
@@ -918,13 +921,13 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>設定</th><th>選項</th></tr>
         <tr><td><strong>電郵提醒</strong></td><td>開／關</td></tr>
-        <tr><td><strong>提醒頻率</strong></td><td>每 1 · 2 · 3 · 5 · 7 · 14 天（預設 3）</td></tr>
+        <tr><td><strong>每隔</strong></td><td>每 1 · 2 · 3 · 5 · 7 · 14 天（預設 3）</td></tr>
       </table>
 
       <h3>3.5 底部按鈕</h3>
       <ul>
         <li><b>儲存</b>——套用變更並同步至伺服器。</li>
-        <li><b>重設全部</b>——還原所有選項至出廠預設值。</li>
+        <li><b>重設所有設定</b>——還原所有選項至出廠預設值。</li>
       </ul>
 
       </section>
@@ -2128,12 +2131,12 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <p><b>概覽</b>含：3 張統計卡（文本、詞彙、平均進度）；堆疊長條<b>每日活動</b>圖（15 種活動、可選時段）；每週<b>閱讀活動</b>面積圖；<b>AI 功能</b>用量長條圖；2×2<b>成績格</b>（測驗／詞彙測驗／拼字／語法的分佈與趨勢）；<b>詞彙增長</b>面積圖（1 週至 3 年）。</p>
+      <p><b>概覽</b>含：3 張統計卡（文本、詞彙、平均進度）；堆疊長條<b>每日活動</b>圖（17 種活動、可選時段）；每週<b>閱讀活動</b>面積圖；<b>AI 功能</b>用量長條圖（11 項功能）；2×2<b>成績格</b>（測驗／詞彙測驗／拼字／語法的分佈與趨勢）；<b>詞彙增長</b>面積圖（1 週至 3 年）；<b>閱讀理解能力分析</b>雷達圖（依完成的閱讀測驗顯示 5 個能力——主旨、細節、推論、詞彙、目的——的正確率，並標示最弱能力）。</p>
       <p><b>工作階段</b>為每個已存工作階段的表格，含模糊搜尋、<b>匯入</b>（.json），及每列操作：<b>建立功課</b><span class="tag-teacher"></span>（見 §10.4）、<b>分享</b>、<b>載入</b>（還原至工作區）、<b>下載</b>（.json）、<b>刪除</b>。欄含所有分數＋進度％。若 AI 生成進行中嘗試載入，會有確認對話框保護串流。</p>
 
       <h3>10.2 教師儀表板 <span class="tag-teacher"></span></h3>
-      <p>班級層面數據。篩選列按角色調整：<b>教師</b>只見自己的班；<b>管理員</b>見校內所有班；<b>超級管理員</b>另有學校選擇器<em>及</em>班別選擇器。<b>匯出 Excel</b> 按鈕把全部 13 張圖表截圖及指標表整合為一份 <code>.xlsx</code> 報告。</p>
-      <div class="callout teacher"><strong><span class="tag-teacher"></span>13 張圖表卡</strong> 每日活動、閱讀文本（每學生）、總詞彙、平均進度（四分位著色）、AI 功能、閱讀測驗／詞彙測驗／語法測驗分數分佈、語法遊戲分數及準確度、拼字分數及準確度、詞彙增長。各含班級總計與平均。</div>
+      <p>班級層面數據。篩選列按角色調整：<b>教師</b>只見自己的班；<b>管理員</b>見校內所有班；<b>超級管理員</b>另有學校選擇器<em>及</em>班別選擇器。<b>匯出 Excel</b> 按鈕把全部 14 張圖表截圖及指標表整合為一份 <code>.xlsx</code> 報告。</p>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>14 張圖表卡</strong> 每日活動、閱讀文本（每學生）、總詞彙、平均進度（四分位著色）、AI 功能、閱讀測驗／詞彙測驗／語法測驗分數分佈、語法遊戲分數及準確度、拼字分數及準確度、詞彙增長、全班閱讀理解能力分析。各含班級總計與平均。</div>
 
       <h3>10.3 工作階段分享</h3>
       <p>分享一個已完成的閱讀工作階段，讓接收者得到<b>乾淨副本</b>（你的答案、分數及聊天記錄已被剔除）。從工作階段分頁中該工作階段的<b>分享</b>按鈕開啟。</p>
@@ -2396,9 +2399,10 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>模型清單</th><th>成員</th><th>預設</th></tr>
         <tr><td><b>視覺</b>（OCR）</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
-        <tr><td><b>通用</b>（摘要、心智圖、改寫、簡化、測驗、詞彙、句子分析、語法）</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>通用</b>——預設 <code>deepseek-v4-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>通用</b>——預設 <code>gpt-5.6-luna</code>（讀前、閱讀測驗、推薦生字、搭配、語法）</td><td>同上</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>進階導師</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。</p>
@@ -2451,11 +2455,11 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <hr style="margin:40px 0 10px;border:none;border-top:1px solid var(--border)">
-      <p class="small" style="text-align:center;color:var(--muted)">Mr.🆖 ProReader 用戶手冊 · 版本 2.1020 · 繁體中文版<br>為產品文件而生成。螢幕重現僅供示意；實際介面或隨版本演進。</p>
+      <p class="small" style="text-align:center;color:var(--muted)">Mr.🆖 ProReader 用戶手冊 · 版本 3.1 · 繁體中文版<br>為產品文件而生成。螢幕重現僅供示意；實際介面或隨版本演進。</p>
       </section>
    </main>
 </div>
-<div class="print-footer"><span>Mr.🆖 ProReader — 用戶手冊</span><span>版本 2.1020</span></div>
+<div class="print-footer"><span>Mr.🆖 ProReader — 用戶手冊</span><span>版本 3.1</span></div>
 
 <!-- ============ MOBILE TOC (floating button + slide-in drawer) ============ -->
 <button class="back-app no-print" id="backApp" aria-label="返回應用"><svg class="ic pri"><use href="#i-arrow-left"/></svg>返回應用</button>

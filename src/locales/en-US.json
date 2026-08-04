@@ -2349,7 +2349,7 @@
           },
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing your daily learning activities across 15 types including reading, summaries, mind maps, text visualizations, tests, quizzes, spelling games, and more. Use the time range buttons to adjust the window."
+            "desc": "A stacked bar chart showing your daily learning activities across 17 types including reading, pre-reading summaries, mind maps, text visualizations, glossary, collocations, flashcard reviews, tests, quizzes, spelling and grammar games, and AI Tutor questions. Use the time range buttons to adjust the window."
           },
           "readingActivity": {
             "name": "Reading Activity",
@@ -2357,7 +2357,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A horizontal bar chart breaking down your usage of 9 AI-powered features: summaries, mind maps (English and Chinese separately), text visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI Tutor questions."
+            "desc": "A horizontal bar chart breaking down your usage of 11 AI-powered features: pre-reading summaries, mind maps (English and Chinese shown as stacked segments), text visualizations, adapted texts, simplified texts, sentence analysis, glossary, phrases & collocations, grammar analysis, and AI Tutor questions."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",
@@ -2390,6 +2390,10 @@
           "vocabularyGrowth": {
             "name": "Vocabulary Growth",
             "desc": "An area chart tracking your cumulative vocabulary growth over time. Choose from 13 time ranges (1W to 3Y) to view your vocabulary accumulation over different periods."
+          },
+          "skillProfile": {
+            "name": "Reading Comprehension Skill Profile",
+            "desc": "A radar chart showing your accuracy across 5 reading comprehension skills (Main Idea, Detail, Inference, Vocabulary, Purpose), aggregated from every completed reading test. The caption highlights your weakest skill so you can focus your practice."
           }
         },
         "tip": {
@@ -2485,7 +2489,7 @@
       "spellingScore": "Spelling Score",
       "spellingAccuracy": "Spelling Accuracy",
       "vocabularyGrowth": "Vocabulary Growth",
-      "skillAverages": "Class Skill Profile",
+      "skillAverages": "Class Reading Comprehension Skill Profile",
       "pickDate": "Pick a date"
     },
     "quartiles": {
@@ -2521,7 +2525,7 @@
         "items": {
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 15 activity types."
+            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 17 activity types."
           },
           "readingTexts": {
             "name": "Reading Texts",
@@ -2537,7 +2541,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A stacked bar chart breaking down how each student uses 9 AI-powered features: summaries, mind maps, visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar, and AI Tutor."
+            "desc": "A stacked bar chart breaking down how each student uses 11 AI-powered features: pre-reading summaries, mind maps, visualizations, adapted texts, simplified texts, sentence analysis, glossary, phrases & collocations, grammar, and AI Tutor."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",

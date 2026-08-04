@@ -443,7 +443,7 @@ body.toc-noscroll{overflow:hidden}
   <div class="sub">User Manual</div>
   <div class="zh">A Complete Guide for Teachers &amp; Students</div>
   <div class="meta">
-    <div><strong>Version</strong> 2.1020</div>
+    <div><strong>Version</strong> 3.1</div>
     <div><strong>Audience</strong> Students · Teachers · Administrators</div>
     <div><strong>Language</strong> English</div>
   </div>
@@ -892,15 +892,18 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>Feature (label)</th><th>Available models</th><th>Default</th></tr>
         <tr><td>Vision (OCR) Model</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
         <tr><td>Summary Model</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>Mind Map Model</td><td rowspan="7">same list as Summary</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Pre-reading Model</td><td rowspan="10">same list as Summary</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>Mind Map Model</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Adapt Text Model</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Simplify Text Model</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>Reading Test Model</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Reading Test Model</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Glossary Model</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Suggest Vocabulary Model</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>Collocations Model</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Sentence Analysis Model</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>Grammar Model</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Grammar Model</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Reading Text Generator Model</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>Basic AI Tutor Model</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Basic AI Tutor Model</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Advanced AI Tutor Model</td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code> for the most capable (and costliest) reasoning.</div>
@@ -908,7 +911,7 @@ body.toc-noscroll{overflow:hidden}
       <h3>3.3 TTS tab — text-to-speech</h3>
       <table class="ref">
         <tr><th>Setting</th><th>Options</th><th>Notes</th></tr>
-        <tr><td><strong>TTS Voice</strong></td><td>Alloy (US male) · Nova (US female) · Adam (US male) · Phoebe (US female) · Ollie (UK male) · Ava (US female)</td><td>Used by glossary speak buttons, flashcards, spelling game.</td></tr>
+        <tr><td><strong>TTS Voice</strong></td><td>Alloy (US male) · Nova (US female) · Adam (US male) · Phoebe (US female) · Ollie (UK male) · Ada (UK female)</td><td>Used by glossary speak buttons, flashcards, spelling game.</td></tr>
         <tr><td><strong>Playback Speed</strong></td><td>0.25× · 0.5× · 0.75× · 1.0×</td><td>Slower speeds help language learners.</td></tr>
         <tr><td><strong>Auto-speak Flashcard</strong></td><td>on / off</td><td>Reads each word aloud automatically when a flashcard loads. On by default.</td></tr>
       </table>
@@ -2128,12 +2131,12 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <p><b>Overview</b> shows: 3 summary stat cards (texts, vocabulary, avg progress); a stacked-bar <b>Daily Activity</b> chart (15 activity types, selectable time range); a weekly <b>Reading Activity</b> area chart; an <b>AI Features</b> usage bar chart; a 2×2 <b>score grid</b> (test/quiz/spelling/grammar distributions &amp; trends); and a <b>Vocabulary Growth</b> area chart (1 week → 3 years).</p>
+      <p><b>Overview</b> shows: 3 summary stat cards (texts, vocabulary, avg progress); a stacked-bar <b>Daily Activity</b> chart (17 activity types, selectable time range); a weekly <b>Reading Activity</b> area chart; an <b>AI Features</b> usage bar chart (11 features); a 2×2 <b>score grid</b> (test/quiz/spelling/grammar distributions &amp; trends); a <b>Vocabulary Growth</b> area chart (1 week → 3 years); and a <b>Reading Comprehension Skill Profile</b> radar (your accuracy across 5 skills — Main Idea, Detail, Inference, Vocabulary, Purpose — aggregated from completed reading tests, with your weakest skill flagged).</p>
       <p><b>Sessions</b> is a table of every saved session with a search box (fuzzy), <b>Import</b> (.json), and per-row actions: <b>Create Assignment</b> <span class="tag-teacher"></span> (see §10.4), <b>Share</b>, <b>Load</b> (restore into workspace), <b>Download</b> (.json), <b>Delete</b>. Columns include all scores + progress %. If you try to load while an AI generation is active, a confirm dialog protects against corrupting a stream.</p>
 
       <h3>10.2 Teacher Dashboard <span class="tag-teacher"></span></h3>
-      <p>Class-wide analytics. The filter bar adapts to your role: <b>teachers</b> see only their classes; <b>admins</b> see all classes in their school; <b>super-admins</b> get a School selector <em>and</em> a Class selector. An <b>Export to Excel</b> button captures all 13 charts as images plus metric tables into one <code>.xlsx</code> report.</p>
-      <div class="callout teacher"><strong><span class="tag-teacher"></span>13 chart cards</strong> Daily Activity · Reading Texts (per-student) · Total Vocabulary · Average Progress (quartile-colored) · AI Features · Reading Test / Vocab Quiz / Grammar Quiz score distributions · Grammar Game score &amp; accuracy · Spelling score &amp; accuracy · Vocabulary Growth. Each includes class totals &amp; averages.</div>
+      <p>Class-wide analytics. The filter bar adapts to your role: <b>teachers</b> see only their classes; <b>admins</b> see all classes in their school; <b>super-admins</b> get a School selector <em>and</em> a Class selector. An <b>Export to Excel</b> button captures all 14 charts as images plus metric tables into one <code>.xlsx</code> report.</p>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>14 chart cards</strong> Daily Activity · Reading Texts (per-student) · Total Vocabulary · Average Progress (quartile-colored) · AI Features · Reading Test / Vocab Quiz / Grammar Quiz score distributions · Grammar Game score &amp; accuracy · Spelling score &amp; accuracy · Vocabulary Growth · Class Reading Comprehension Skill Profile. Each includes class totals &amp; averages.</div>
 
       <h3>10.3 Session sharing</h3>
       <p>Share a completed reading session so a recipient gets a <b>clean copy</b> (your answers, scores, and chat history are stripped). Open it from a session's <b>Share</b> button in the Sessions tab.</p>
@@ -2396,9 +2399,10 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>Model list</th><th>Members</th><th>Default</th></tr>
         <tr><td><b>Vision</b> (OCR)</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
-        <tr><td><b>Available</b> (summary, mind map, adapt, simplify, test, glossary, sentence-analysis, grammar)</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Available</b> — default <code>deepseek-v4-flash</code> (summary, mind map, adapt, simplify, glossary, sentence-analysis)</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Available</b> — default <code>gpt-5.6-luna</code> (pre-reading, reading test, suggest vocabulary, collocations, grammar)</td><td>same list as above</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>Reading Text</b> (AI text generator)</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
-        <tr><td><b>Basic Tutor</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>Basic Tutor</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>Advanced Tutor</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
       </table>
       <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>.</p>
@@ -2451,11 +2455,11 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <hr style="margin:40px 0 10px;border:none;border-top:1px solid var(--border)">
-      <p class="small" style="text-align:center;color:var(--muted)">Mr.🆖 ProReader User Manual · Version 2.1020 · English Edition<br>Generated for product documentation. Screen recreations are illustrative; the live interface may evolve between releases.</p>
+      <p class="small" style="text-align:center;color:var(--muted)">Mr.🆖 ProReader User Manual · Version 3.1 · English Edition<br>Generated for product documentation. Screen recreations are illustrative; the live interface may evolve between releases.</p>
       </section>
    </main>
 </div>
-<div class="print-footer"><span>Mr.🆖 ProReader — User Manual</span><span>Version 2.1020</span></div>
+<div class="print-footer"><span>Mr.🆖 ProReader — User Manual</span><span>Version 3.1</span></div>
 
 <!-- ============ MOBILE TOC (floating button + slide-in drawer) ============ -->
 <button class="back-app no-print" id="backApp" aria-label="Back to app"><svg class="ic pri"><use href="#i-arrow-left"/></svg>Back to App</button>
