@@ -146,6 +146,53 @@ async function callOpenAICompatibleApi(
   );
 }
 
+function truncateBase64ForLog(str: string): string {
+  return str.replace(/[A-Za-z0-9+/]{80,}={0,2}/g, "<base64>");
+}
+
+function detectRawBase64Image(str: string): string | null {
+  const trimmed = str.replace(/\s/g, "");
+  if (trimmed.length < 200 || !/^[A-Za-z0-9+/]+={0,2}$/.test(trimmed)) {
+    return null;
+  }
+  const mime =
+    trimmed.startsWith("/9j/") ? "image/jpeg"
+    : trimmed.startsWith("iVBOR") ? "image/png"
+    : trimmed.startsWith("UklGR") ? "image/webp"
+    : trimmed.startsWith("R0lGOD") ? "image/gif"
+    : null;
+  return mime ? `data:${mime};base64,${trimmed}` : null;
+}
+
+function findDataUrlDeep(obj: unknown, depth = 0): string | null {
+  if (depth > 12 || obj == null) return null;
+
+  if (typeof obj === "string") {
+    if (obj.startsWith("data:image/")) {
+      return obj.replace(/\s/g, "");
+    }
+    const match = obj.match(/data:(image\/[a-zA-Z+]+);base64,([A-Za-z0-9+/=\s]+)/);
+    if (match) {
+      return `data:${match[1]};base64,${match[2].replace(/\s/g, "")}`;
+    }
+    const raw = detectRawBase64Image(obj);
+    if (raw) return raw;
+    return null;
+  }
+
+  const children = Array.isArray(obj)
+    ? obj
+    : typeof obj === "object"
+      ? Object.values(obj as Record<string, unknown>)
+      : [];
+
+  for (const child of children) {
+    const found = findDataUrlDeep(child, depth + 1);
+    if (found) return found;
+  }
+  return null;
+}
+
 function extractFromOpenAIResponse(data: any): string | null {
   const message = data?.choices?.[0]?.message;
   if (!message) return null;
@@ -163,15 +210,19 @@ function extractFromOpenAIResponse(data: any): string | null {
 
   if (Array.isArray(message.content)) {
     for (const part of message.content) {
-      if (part.type === "image_url" && part.image_url?.url) {
-        return part.image_url.url;
+      if (part.type === "image_url") {
+        const url =
+          typeof part.image_url === "string"
+            ? part.image_url
+            : part.image_url?.url;
+        if (url) return url.replace(/\s/g, "");
       }
       if (part.type === "image" && part.source?.data) {
         const mime = part.source.media_type || "image/png";
         return `data:${mime};base64,${part.source.data}`;
       }
       if (part.type === "image" && part.image_url?.url) {
-        return part.image_url.url;
+        return part.image_url.url.replace(/\s/g, "");
       }
       if (part.inline_data?.data) {
         const mime = part.inline_data.mime_type || "image/png";
@@ -184,7 +235,7 @@ function extractFromOpenAIResponse(data: any): string | null {
     }
   }
 
-  return null;
+  return findDataUrlDeep(data);
 }
 
 const ADMIN_ROLES = new Set(["admin", "super-admin"]);
@@ -367,8 +418,12 @@ export async function POST(request: NextRequest) {
           imageDataUrl =
             extractFromOpenAIResponse(data) ?? extractBase64FromGeminiResponse(data);
           if (!imageDataUrl) {
+            const msg = data?.choices?.[0]?.message;
+            const debugInfo = msg
+              ? truncateBase64ForLog(JSON.stringify(msg)).substring(0, 600)
+              : truncateBase64ForLog(JSON.stringify(data)).substring(0, 600);
             errors.push(
-              `OpenAI-compatible (200): response did not contain a recognizable image. keys=${Object.keys(data ?? {}).join(",")}`
+              `OpenAI-compatible (200): could not extract image. message=${debugInfo}`
             );
           }
         } else {
