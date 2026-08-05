@@ -357,7 +357,8 @@
         "carousel": {
           "label": "Mastery features",
           "slideCount": "{{count}} slides",
-          "skills": "Skills & achievements",
+          "readingTest": "Reading test & targeted practice",
+          "achievements": "Achievements & leaderboard",
           "vocabulary": "My Vocabulary hub",
           "prev": "Previous slide",
           "next": "Next slide",

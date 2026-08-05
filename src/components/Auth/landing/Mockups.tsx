@@ -7,7 +7,6 @@ import {
   Brain,
   Image as ImageIcon,
   Volume2,
-  Trophy,
   BarChart3,
   FileDown,
   Sparkles,
@@ -26,6 +25,8 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Lock,
   CheckCircle2,
   Calendar,
@@ -36,6 +37,7 @@ import {
   TriangleAlert,
   BookOpenCheck,
   ClipboardList,
+  ClipboardCheck,
   Combine,
   Shuffle,
   SpellCheck,
@@ -56,7 +58,10 @@ import {
   Globe,
   Building2,
   RotateCcw,
-  ChevronDown,
+  Crown,
+  Eye,
+  Languages,
+  Medal,
   ChevronsUpDown,
 } from "lucide-react";
 
@@ -1071,350 +1076,470 @@ export function PracticeMockup() {
   );
 }
 
-/* ── 5. MASTER — test scorecard + leaderboard + achievements ── */
-export function MasterMockup() {
+/* ── 5a. MASTER — reading test results ↔ targeted practice (faithful) ── */
+// Cycles between the completed-test results screen and the question-by-question
+// targeted-practice quiz view. Both faithfully mirror ReadingTest.tsx:
+//   - results: TestResultScreen tier card + skill breakdown + action buttons
+//   - practice: progress bar + renderQuestion() MCQ card + prev/next nav
+export function ReadingTestMockup() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref);
-  const [practiceMode, setPracticeMode] = useState(false);
-  // Auto-toggle the "Targeted practice" view every 2s. Re-runs on every
-  // `practiceMode` change (including manual clicks), so each view holds 2s.
+  const [view, setView] = useState<"results" | "practice">("results");
+
+  // Auto-cycle every 3.2s. Re-runs on every `view` change so each holds 3.2s.
   // Paused when the mockup is scrolled out of view.
   useEffect(() => {
     if (!inView) return;
-    const id = setTimeout(() => setPracticeMode((p) => !p), 2000);
+    const id = setTimeout(() => setView((v) => (v === "results" ? "practice" : "results")), 3200);
     return () => clearTimeout(id);
-  }, [practiceMode, inView]);
+  }, [view, inView]);
+
+  const score = 85;
+  const earnedPoints = 17;
+  const totalPoints = 20;
+  const scoreColor = (s: number) =>
+    s >= 80 ? "text-green-600 dark:text-green-400" : s >= 60 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400";
+
+  // Faithful copy of TEST_TIER_CONFIG.master (ReadingTest.tsx)
+  const tier = {
+    emoji: "👑",
+    Icon: Crown,
+    color: "text-amber-600 dark:text-amber-400",
+    badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+    gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)",
+  };
+  const TierIcon = tier.Icon;
+
   const skills = [
-    { l: "Main idea", v: 90 },
-    { l: "Inference", v: 45 },
-    { l: "Vocabulary", v: 85 },
+    { l: "Main Idea", correct: 10, count: 10 },
+    { l: "Vocabulary in Context", correct: 8, count: 10 },
+    { l: "Inference", correct: 3, count: 5 },
+    { l: "Referencing", correct: 4, count: 5 },
   ];
-  const achievements = [
-    {
-      name: "Avid Reader",
-      icon: BookOpen,
-      colorBg: "bg-blue-500",
-      colorText: "text-blue-600 dark:text-blue-400",
-      colorRing: "#3b82f6",
-      colorDot: "bg-blue-500",
-      desc: "Read 10 texts",
-      progress: 60,
-      current: "8",
-      target: "10",
-      unlocked: true,
-      dotsEarned: 1,
-    },
-    {
-      name: "Word Collector",
-      icon: BookText,
-      colorBg: "bg-green-500",
-      colorText: "text-green-600 dark:text-green-400",
-      colorRing: "#22c55e",
-      colorDot: "bg-green-500",
-      desc: "Collect 100 vocabulary items",
-      progress: 44,
-      current: "72",
-      target: "100",
-      unlocked: true,
-      dotsEarned: 1,
-    },
-    {
-      name: "Grammar Gamer",
-      icon: Gamepad2,
-      colorBg: "bg-amber-500",
-      colorText: "text-amber-600 dark:text-amber-400",
-      colorRing: "#f59e0b",
-      colorDot: "bg-amber-500",
-      desc: "Play 5 grammar games",
-      progress: 60,
-      current: "3",
-      target: "5",
-      unlocked: false,
-      dotsEarned: 0,
-    },
-    {
-      name: "Curious Learner",
-      icon: Sparkles,
-      colorBg: "bg-cyan-500",
-      colorText: "text-cyan-600 dark:text-cyan-400",
-      colorRing: "#06b6d4",
-      colorDot: "bg-cyan-500",
-      desc: "Ask AI Tutor 20 questions",
-      progress: 47,
-      current: "12",
-      target: "20",
-      unlocked: true,
-      dotsEarned: 1,
-    },
+
+  const options = [
+    { letter: "A", text: "They have proof that costs will soon decrease." },
+    { letter: "B", text: "They trust that time and experience will help.", selected: true },
+    { letter: "C", text: "They plan to redesign the whole process themselves." },
+    { letter: "D", text: "They believe the critics exaggerated the costs." },
   ];
+
   return (
-    <MockupFrame label="DASHBOARD · Mr.🆖 ProReader" frameRef={ref}>
-      <div className="grid items-start gap-4 sm:grid-cols-2">
-        {/* Column 1 — your stats: scorecard + leaderboard */}
-        <div className="flex flex-col gap-4">
-          {practiceMode ? (
-            /* ── targeted practice — question-by-question quiz view ── */
-            <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
-              {/* header */}
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPracticeMode(false)}
-                    className="text-[var(--lp-ink-soft)] transition-colors hover:text-[var(--lp-ink)]"
-                    aria-label="Back to results"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                  </button>
-                  <span className="text-xs font-semibold text-[var(--lp-ink)]">Reading Test</span>
-                </div>
-                <span className="rounded-md bg-[var(--lp-accent)] px-2.5 py-1 text-[10px] font-semibold text-white">
-                  Submit Answers
+    <MockupFrame label="READING TEST · Mr.🆖 ProReader" frameRef={ref}>
+      {/* Section — mirrors ReadingTest.tsx completed / in-progress section */}
+      <div className="rounded-md border p-4">
+        {/* Header row */}
+        <div className="mb-4 flex items-center justify-between border-b pb-4">
+          <h3 className="flex items-center gap-2 text-lg font-semibold">
+            <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
+            Reading Test
+          </h3>
+          {view === "results" ? (
+            <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
+              <RotateCcw className="h-4 w-4" />
+              <span>Retry</span>
+            </span>
+          ) : (
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground">
+              <Languages className="h-4 w-4" />
+            </span>
+          )}
+        </div>
+
+        {view === "results" ? (
+          <div className="space-y-6">
+            {/* TestResultScreen card — faithful */}
+            <div
+              className="relative overflow-hidden rounded-2xl border-2 p-6 text-center shadow-2xl ring-4 ring-amber-400/60"
+              style={{ background: tier.gradient }}
+            >
+              <div className="text-5xl">{tier.emoji}</div>
+              <div className="mt-1">
+                <div className="text-5xl font-black text-amber-600 dark:text-amber-400">{score}%</div>
+                <p className="mt-1 text-sm text-muted-foreground">Excellent!</p>
+                <p className="text-sm text-muted-foreground">{earnedPoints} / {totalPoints} points</p>
+              </div>
+              <div className="mt-3">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tier.badgeBg}`}>
+                  <TierIcon className="h-3.5 w-3.5" />
+                  Master
                 </span>
               </div>
+            </div>
 
-              {/* progress */}
-              <div className="mb-1 flex items-center justify-between text-[10px] text-[var(--lp-ink-soft)]">
+            {/* Skill breakdown — faithful */}
+            <div className="rounded-lg bg-muted p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                <h4 className="font-medium">Skill Breakdown</h4>
+              </div>
+              <div className="space-y-3">
+                {skills.map((s) => {
+                  const pct = Math.round((s.correct / s.count) * 100);
+                  return (
+                    <div key={s.l}>
+                      <div className="mb-1 flex justify-between text-sm">
+                        <span>{s.l}</span>
+                        <span className={`font-medium ${scoreColor(pct)}`}>
+                          {s.correct}/{s.count} ({pct}%)
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-muted-foreground/20">
+                        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Action buttons — faithful */}
+            <div className="flex flex-wrap justify-center gap-2">
+              <span className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium">
+                <Eye className="mr-1.5 h-4 w-4" /> Review Answers
+              </span>
+              <span className="inline-flex items-center rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
+                <Target className="mr-1.5 h-4 w-4" /> Practice Skills (3)
+              </span>
+              <span className="inline-flex items-center rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
+                <RotateCcw className="mr-1.5 h-4 w-4" /> Retry Missed (2)
+              </span>
+            </div>
+          </div>
+        ) : (
+          /* Targeted practice — question-by-question in-progress (faithful) */
+          <div className="space-y-4 py-4">
+            {/* Progress */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Question 1 of 6</span>
                 <span>Press →/←</span>
               </div>
-              <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
-                <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: "17%" }} />
-              </div>
-
-              {/* question card */}
-              <div className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
-                <div className="mb-2 flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-[var(--lp-accent)]">1.</span>
-                  <span className="rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
-                    Inference
-                  </span>
-                  <span className="rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
-                    Inference
-                  </span>
-                </div>
-                <p className="mb-3 text-sm font-medium text-[var(--lp-ink)]">
-                  What can we infer about why the defenders believe recycling will improve?
-                </p>
-                <div className="space-y-1.5">
-                  {[
-                    { letter: "A", text: "They have proof that costs will decrease", selected: false },
-                    { letter: "B", text: "They trust that time and experience will help", selected: true },
-                    { letter: "C", text: "They plan to redesign the process themselves", selected: false },
-                    { letter: "D", text: "They think the critics lied about the costs", selected: false },
-                  ].map((opt) => (
-                    <div
-                      key={opt.letter}
-                      className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs ${
-                        opt.selected
-                          ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/5 text-[var(--lp-ink)]"
-                          : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
-                      }`}
-                    >
-                      <span
-                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border ${
-                          opt.selected
-                            ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]"
-                            : "border-[var(--lp-rule)]"
-                        }`}
-                      >
-                        {opt.selected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
-                      </span>
-                      <span className="font-mono text-[10px]">{opt.letter})</span>
-                      <span>{opt.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* navigation */}
-              <div className="mt-3 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] px-2.5 py-1.5 text-[10px] text-[var(--lp-ink-soft)] opacity-50">
-                  <ArrowLeft className="h-3 w-3" /> Previous
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-lg bg-[var(--lp-accent)] px-2.5 py-1.5 text-[10px] font-semibold text-white">
-                  Next <ChevronRight className="h-3 w-3" />
-                </span>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted-foreground/20">
+                <div className="h-full rounded-full bg-primary" style={{ width: "17%" }} />
               </div>
             </div>
-          ) : (
-            /* ── scorecard (default) ── */
-            <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-4">
-              <div className="flex items-center gap-3">
-                <div className="relative flex h-14 w-14 items-center justify-center">
-                  <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
-                    <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--lp-rule)" strokeWidth="4" />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="15.5"
-                      fill="none"
-                      stroke="var(--lp-accent)"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      strokeDasharray="78 100"
-                    />
-                  </svg>
-                  <span className="absolute font-display text-base font-bold text-[var(--lp-ink)]">8/10</span>
-                </div>
-                <div>
-                  <p className="font-display text-sm font-semibold text-[var(--lp-ink)]">Reading test</p>
-                  <p className="text-xs text-[var(--lp-ink-soft)]">+2 from last time</p>
+
+            {/* Question card — mirrors renderQuestion() */}
+            <div className="rounded-lg border p-4">
+              <div className="mb-3 flex items-start gap-3">
+                <span className="font-bold text-primary">1.</span>
+                <div className="flex-1">
+                  <div className="mb-1 flex flex-wrap gap-2">
+                    <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">Multiple Choice</span>
+                    <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">Inference</span>
+                  </div>
+                  <p className="font-medium">
+                    What can we infer about why the defenders believe recycling will improve?
+                  </p>
                 </div>
               </div>
-              <div className="mt-3 space-y-1.5">
-                {skills.map((s) => (
-                  <div key={s.l}>
-                    <div className="flex justify-between text-[10px] text-[var(--lp-ink-soft)]">
-                      <span>{s.l}</span>
-                      <span className="font-mono">{s.v}%</span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-[var(--lp-rule)]">
-                      <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: `${s.v}%` }} />
-                    </div>
+              <div className="space-y-2 pl-6">
+                {options.map((opt) => (
+                  <div key={opt.letter} className="flex items-center gap-2">
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                        opt.selected ? "border-primary" : "border-input"
+                      }`}
+                    >
+                      {opt.selected && <span className="h-2 w-2 rounded-full bg-primary" />}
+                    </span>
+                    <span className="text-sm">{opt.letter}) {opt.text}</span>
                   </div>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => setPracticeMode(true)}
-                className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--lp-accent)]/40 bg-[var(--lp-accent)]/5 px-3 py-2 text-xs font-semibold text-[var(--lp-accent)] transition-colors hover:bg-[var(--lp-accent)]/10"
-              >
-                <Target className="h-3.5 w-3.5" />
-                Targeted practice
-              </button>
             </div>
-          )}
 
-          {/* leaderboard */}
-          <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-3">
-            <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
-              <Trophy className="h-3.5 w-3.5" />
-              <span className="font-mono text-[10px] uppercase tracking-wider">Leaderboard</span>
-            </div>
-            {[
-              { r: 1, n: "Chloe L.", pts: "1,240", you: false },
-              { r: 2, n: "You", pts: "1,180", you: true },
-              { r: 3, n: "Marcus T.", pts: "1,090", you: false },
-              { r: 4, n: "Priya K.", pts: "1,050", you: false },
-            ].map((row) => (
-              <div
-                key={row.r}
-                className={`flex items-center gap-2 rounded-md px-2 py-1 text-sm ${
-                  row.you
-                    ? "bg-[var(--lp-accent)]/10 font-semibold text-[var(--lp-accent)]"
-                    : "text-[var(--lp-ink)]"
-                }`}
-              >
-                <span className="w-4 font-mono text-xs text-[var(--lp-ink-soft)]">{row.r}</span>
-                <span className="flex-1">{row.n}</span>
-                <span className="font-mono text-xs text-[var(--lp-ink-soft)]">{row.pts}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Column 2 — rewards: achievements */}
-        <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-[var(--lp-rule)] p-3">
-            <div className="mb-2 flex items-center gap-1.5">
-              <Trophy className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
-                Achievements
+            {/* Navigation */}
+            <div className="flex items-center justify-between">
+              <span className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs opacity-50">
+                <ArrowLeft className="mr-1.5 h-4 w-4" /> Previous
+              </span>
+              <span className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
+                Next <ChevronRight className="ml-1.5 h-4 w-4" />
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-2.5">
-              {achievements.map((a) => (
+          </div>
+        )}
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 5b. MASTER — achievements + leaderboard ranking (faithful, side by side) ── */
+// Left column mirrors AchievementsTab + AchievementMedal (overall banner + medal
+// grid with progress rings, milestone dots). Right column mirrors LeaderboardTable
+// (sort bar + ranked rows with medals, avatars, "You" highlight, rank trend).
+export function AchievementsLeaderboardMockup() {
+  // Color maps — mirror AchievementMedal.tsx
+  const colorBg: Record<string, string> = {
+    blue: "bg-blue-500", green: "bg-green-500", indigo: "bg-indigo-500", cyan: "bg-cyan-500",
+    purple: "bg-purple-500", amber: "bg-amber-500", teal: "bg-teal-500", pink: "bg-pink-500",
+  };
+  const colorRing: Record<string, string> = {
+    blue: "stroke-blue-500", green: "stroke-green-500", indigo: "stroke-indigo-500", cyan: "stroke-cyan-500",
+    purple: "stroke-purple-500", amber: "stroke-amber-500", teal: "stroke-teal-500", pink: "stroke-pink-500",
+  };
+  const colorText: Record<string, string> = {
+    blue: "text-blue-600 dark:text-blue-400", green: "text-green-600 dark:text-green-400",
+    indigo: "text-indigo-600 dark:text-indigo-400", cyan: "text-cyan-600 dark:text-cyan-400",
+    purple: "text-purple-600 dark:text-purple-400", amber: "text-amber-600 dark:text-amber-400",
+    teal: "text-teal-600 dark:text-teal-400", pink: "text-pink-600 dark:text-pink-400",
+  };
+  const colorGlow: Record<string, string> = {
+    blue: "shadow-blue-400/50", green: "shadow-green-400/50", indigo: "shadow-indigo-400/50", cyan: "shadow-cyan-400/50",
+    purple: "shadow-purple-400/50", amber: "shadow-amber-400/50", teal: "shadow-teal-400/50", pink: "shadow-pink-400/50",
+  };
+
+  // Real achievement types from ACHIEVEMENT_CONFIG (achievements.ts)
+  const medals = [
+    { type: "Avid Reader", icon: BookOpen, color: "blue", unlocked: true, progress: 100, current: 12, nextTarget: 0, label: "Read 10 texts", dotsUnlocked: 2 },
+    { type: "Word Collector", icon: BookText, color: "green", unlocked: true, progress: 100, current: 72, nextTarget: 0, label: "Collect 50 words", dotsUnlocked: 1 },
+    { type: "Flashcard Reviews", icon: Layers, color: "indigo", unlocked: false, progress: 64, current: 32, nextTarget: 50, label: "Review 50 cards", dotsUnlocked: 0 },
+    { type: "Curious Learner", icon: Sparkles, color: "cyan", unlocked: false, progress: 47, current: 14, nextTarget: 30, label: "Ask 30 questions", dotsUnlocked: 0 },
+  ];
+
+  const totalUnlocked = 3;
+  const totalMilestones = 105;
+  const pct = Math.round((totalUnlocked / totalMilestones) * 100);
+
+  // Leaderboard rows — mirror LeaderboardTable.tsx structure
+  const rows = [
+    { rank: 1, name: "Chloe L.", score: 1240, you: false, prior: 2, medal: true, medalColor: "text-yellow-400", rowBg: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800" },
+    { rank: 2, name: "You", score: 1180, you: true, prior: 4, medal: true, medalColor: "", rowBg: "" },
+    { rank: 3, name: "Marcus T.", score: 1090, you: false, prior: 3, medal: true, medalColor: "text-amber-600", rowBg: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800" },
+    { rank: 4, name: "Priya K.", score: 1050, you: false, prior: 6, medal: false, medalColor: "", rowBg: "" },
+    { rank: 5, name: "Ethan R.", score: 980, you: false, prior: 5, medal: false, medalColor: "", rowBg: "" },
+  ];
+  const medalEmoji = (r: number) => (r === 1 ? "🥇" : r === 2 ? "🥈" : "🥉");
+
+  const sortCols = [
+    { key: "weekly_score", label: "Score", active: true },
+    { key: "reading_streak_days", label: "Streak", active: false },
+    { key: "avg_test_score", label: "Test", active: false },
+    { key: "total_vocabulary_words", label: "Vocab", active: false },
+    { key: "total_flashcard_reviews", label: "Flashcards", active: false },
+  ];
+
+  return (
+    <MockupFrame label="LEADERBOARD · Mr.🆖 ProReader">
+      <div className="grid items-start gap-4 sm:grid-cols-2">
+        {/* ── Column 1: Achievements (faithful to AchievementsTab + AchievementMedal) ── */}
+        <div className="space-y-4">
+          {/* Overall progress banner */}
+          <div className="rounded-xl border bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-orange-500/10 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-500/20">
+                  <Medal className="h-5 w-5 text-yellow-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Achievements</p>
+                  <p className="text-xs text-muted-foreground">Milestones you&apos;ve unlocked</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold tabular-nums text-yellow-600 dark:text-yellow-400">
+                  {totalUnlocked}
+                  <span className="text-sm font-normal text-muted-foreground">/{totalMilestones}</span>
+                </p>
+                <p className="text-xs text-muted-foreground">{pct}%</p>
+              </div>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-amber-500"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {totalUnlocked} of {totalMilestones} milestones unlocked
+            </p>
+          </div>
+
+          {/* Medal grid — faithful to AchievementMedal */}
+          <div className="grid grid-cols-2 gap-3">
+            {medals.map((m) => {
+              const cBg = colorBg[m.color];
+              const cRing = colorRing[m.color];
+              const cText = colorText[m.color];
+              const cGlow = colorGlow[m.color];
+              const circ = 2 * Math.PI * 44;
+              const offset = circ - (m.progress / 100) * circ;
+              const Icon = m.icon;
+              return (
                 <div
-                  key={a.name}
-                  className={`flex flex-col items-center rounded-2xl border-2 p-2.5 ${
-                    a.unlocked
-                      ? "border-transparent bg-[var(--lp-surface)] shadow-sm"
-                      : "border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40"
+                  key={m.type}
+                  className={`relative flex flex-col items-center rounded-2xl border-2 p-3 ${
+                    m.unlocked
+                      ? "border-transparent bg-gradient-to-b from-card to-card/80 shadow-lg"
+                      : "border-border/50 bg-card/60"
                   }`}
                 >
-                  {/* medal circle with progress ring */}
-                  <div className="relative mb-2 h-12 w-12">
+                  {m.unlocked && (
+                    <div className={`absolute inset-0 rounded-2xl opacity-10 blur-xl ${cBg}`} />
+                  )}
+                  {/* Medal circle with progress ring */}
+                  <div className="relative mb-2 h-16 w-16">
                     <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full -rotate-90">
-                      <circle cx="50" cy="50" r="44" fill="none" stroke="var(--lp-rule)" strokeWidth="5" />
-                      {a.unlocked ? (
-                        <circle cx="50" cy="50" r="44" fill="none" stroke={a.colorRing} strokeWidth="5" />
+                      <circle cx="50" cy="50" r="44" fill="none" strokeWidth="5" className="stroke-muted-foreground/20" />
+                      {m.unlocked ? (
+                        <circle cx="50" cy="50" r="44" fill="none" strokeWidth="5" className={cRing} />
                       ) : (
                         <circle
-                          cx="50"
-                          cy="50"
-                          r="44"
-                          fill="none"
-                          stroke={a.colorRing}
-                          strokeWidth="5"
-                          strokeLinecap="round"
-                          strokeDasharray="276"
-                          strokeDashoffset={276 - Math.round((a.progress / 100) * 276)}
+                          cx="50" cy="50" r="44" fill="none" strokeWidth="5"
+                          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+                          className={cRing}
                         />
                       )}
                     </svg>
-                    {/* inner circle */}
                     <div
-                      className={`absolute inset-[10px] flex items-center justify-center rounded-full ${
-                        a.unlocked ? `${a.colorBg} shadow-sm` : "bg-[var(--lp-paper-2)]"
+                      className={`absolute inset-2 flex items-center justify-center rounded-full ${
+                        m.unlocked ? `${cBg} shadow-lg ${cGlow}` : "bg-muted"
                       }`}
                     >
-                      {a.unlocked ? (
-                        <a.icon className="h-4 w-4 text-white" />
+                      {m.unlocked ? (
+                        <Icon className="h-7 w-7 text-white" />
                       ) : (
-                        <Lock className="h-3.5 w-3.5 text-[var(--lp-ink-soft)] opacity-50" />
+                        <Lock className="h-6 w-6 text-muted-foreground/50" />
                       )}
                     </div>
-                    {/* check badge */}
-                    {a.unlocked && (
-                      <span className="absolute -bottom-0.5 -right-0.5 rounded-full bg-[var(--lp-surface)] p-0.5">
-                        <CheckCircle2 className={`h-3 w-3 ${a.colorText}`} />
-                      </span>
+                    {m.unlocked && (
+                      <div className="absolute -bottom-1 -right-1 rounded-full bg-background p-0.5">
+                        <CheckCircle2 className={`h-5 w-5 ${cText}`} />
+                      </div>
                     )}
                   </div>
-                  {/* title */}
-                  <span
-                    className={`text-center text-[10px] font-bold leading-tight ${
-                      a.unlocked ? "text-[var(--lp-ink)]" : "text-[var(--lp-ink-soft)]"
+                  <p
+                    className={`text-center text-sm font-bold leading-tight ${
+                      m.unlocked ? "text-foreground" : "text-muted-foreground"
                     }`}
                   >
-                    {a.name}
-                  </span>
-                  {/* milestone label */}
-                  <span
-                    className={`mt-0.5 text-center text-[8px] leading-tight ${
-                      a.unlocked ? a.colorText : "text-[var(--lp-ink-soft)] opacity-70"
+                    {m.type}
+                  </p>
+                  <p
+                    className={`text-center text-xs leading-tight ${
+                      m.unlocked ? cText : "text-muted-foreground/70"
                     }`}
                   >
-                    {a.desc}
-                  </span>
-                  {/* progress bar */}
-                  <div className="mt-1.5 w-full">
-                    <div className="h-0.5 w-full overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                    {m.label}
+                  </p>
+                  {/* Progress bar + count */}
+                  <div className="mt-2 w-full">
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
                       <div
-                        className={`h-full rounded-full ${a.unlocked ? a.colorBg : "bg-[var(--lp-ink-soft)] opacity-40"}`}
-                        style={{ width: `${a.progress}%` }}
+                        className={`h-full rounded-full ${m.unlocked ? cBg : "bg-muted-foreground/40"}`}
+                        style={{ width: `${m.progress}%` }}
                       />
                     </div>
-                    <span className="mt-0.5 block text-center text-[7px] text-[var(--lp-ink-soft)]">
-                      {a.current} / {a.target}
-                    </span>
+                    <p className="mt-1 text-center text-[10px] text-muted-foreground">
+                      {m.unlocked ? `${m.dotsUnlocked} unlocked` : `${m.current} / ${m.nextTarget}`}
+                    </p>
                   </div>
-                  {/* milestone dots */}
-                  <div className="mt-1 flex justify-center gap-0.5">
+                  {/* Milestone dots */}
+                  <div className="mt-2 flex justify-center gap-1">
                     {Array.from({ length: 7 }).map((_, i) => (
-                      <span
+                      <div
                         key={i}
-                        className={`h-1 w-1 rounded-full ${
-                          i < a.dotsEarned ? a.colorDot : "bg-[var(--lp-ink-soft)] opacity-30"
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          i < m.dotsUnlocked ? cBg : "bg-muted-foreground/30"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
+
+        {/* ── Column 2: Leaderboard ranking (faithful to LeaderboardTable) ── */}
+        <div className="space-y-2">
+          {/* Sort bar */}
+          <div className="flex items-center gap-3 overflow-x-auto border-b px-2 pb-1">
+            <span className="shrink-0 text-xs text-muted-foreground">Rank:</span>
+            {sortCols.map((c) => (
+              <span
+                key={c.key}
+                className={`flex shrink-0 items-center gap-0.5 whitespace-nowrap text-xs ${
+                  c.active ? "font-semibold text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {c.label}
+                {c.active && <ChevronDown className="h-3 w-3" />}
+              </span>
+            ))}
+          </div>
+          {/* Entries */}
+          {rows.map((r) => {
+            const isYou = r.you;
+            const isMedal = r.medal;
+            const delta = r.prior - r.rank;
+            return (
+              <div
+                key={r.rank}
+                className={`flex items-center gap-3 rounded-xl border p-3 ${
+                  isYou
+                    ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
+                    : isMedal
+                    ? r.rowBg
+                    : "bg-card"
+                }`}
+              >
+                {/* Rank */}
+                <div className="w-8 shrink-0 text-center">
+                  {isMedal ? (
+                    <span className="text-xl font-black">{medalEmoji(r.rank)}</span>
+                  ) : (
+                    <span className="text-sm font-bold tabular-nums text-muted-foreground">#{r.rank}</span>
+                  )}
+                </div>
+                {/* Avatar */}
+                <div className="shrink-0">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
+                    {r.name.charAt(0)}
+                  </div>
+                </div>
+                {/* Name + rank trend */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={`truncate text-sm font-semibold ${isYou ? "text-primary" : ""}`}>
+                      {r.name}
+                    </span>
+                    {isYou && (
+                      <span className="shrink-0 rounded-full bg-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
+                        You
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-0.5">
+                    {delta > 0 ? (
+                      <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
+                        <ChevronUp className="h-3 w-3" /> Up {delta}
+                      </span>
+                    ) : delta < 0 ? (
+                      <span className="flex items-center gap-0.5 text-xs text-red-500">
+                        <ChevronDown className="h-3 w-3" /> Down {Math.abs(delta)}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Same</span>
+                    )}
+                  </div>
+                </div>
+                {/* Primary stat */}
+                <div className="shrink-0 text-right">
+                  <div
+                    className={`text-base font-black tabular-nums ${
+                      isYou ? "text-primary" : isMedal ? r.medalColor : ""
+                    }`}
+                  >
+                    {r.score.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Score</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </MockupFrame>

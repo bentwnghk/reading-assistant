@@ -23,7 +23,8 @@ import {
   UnderstandMockup,
   AITutorMockup,
   PracticeMockup,
-  MasterMockup,
+  ReadingTestMockup,
+  AchievementsLeaderboardMockup,
   DashboardMockup,
   AssignmentsMockup,
   VocabularyMockup,
@@ -136,7 +137,8 @@ const CAROUSEL_AUTOPLAY_MS = 7000;
 function MasterCarousel() {
   const { t } = useTranslation();
   const slides = [
-    { key: "skills", label: t("landing.chapters.master.carousel.skills"), node: <MasterMockup /> },
+    { key: "readingTest", label: t("landing.chapters.master.carousel.readingTest"), node: <ReadingTestMockup /> },
+    { key: "achievements", label: t("landing.chapters.master.carousel.achievements"), node: <AchievementsLeaderboardMockup /> },
     { key: "vocabulary", label: t("landing.chapters.master.carousel.vocabulary"), node: <VocabularyMockup /> },
   ];
   const count = slides.length;
