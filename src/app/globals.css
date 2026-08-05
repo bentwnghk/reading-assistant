@@ -366,6 +366,20 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * Keep sonner toasts clickable even when a Radix modal dialog is open.
+ * Radix sets `body.style.pointerEvents = "none"` (via DismissableLayer's
+ * disableOutsidePointerEvents) to block interaction with the page behind the
+ * dialog. Because pointer-events is an inherited CSS property, the sonner
+ * toaster — a child of <body> — inherits `none`, making toast buttons
+ * (e.g. class-battle invite "Join Battle" / copy-code) unclickable. Setting
+ * `auto` on the toaster element itself overrides the inherited value so the
+ * toaster and its children regain pointer interaction.
+ */
+[data-sonner-toaster] {
+  pointer-events: auto;
+}
+
 .glossary-indicator {
   pointer-events: none;
   -webkit-user-select: none;

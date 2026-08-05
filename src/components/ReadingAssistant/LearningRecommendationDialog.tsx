@@ -30,7 +30,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useReadingStore, isRestoreComplete, isWelcomeDialogChecked, setWelcomeDialogChecked, setWelcomeDialogOpen } from "@/store/reading";
+import { useReadingStore, isRestoreComplete, isWelcomeDialogChecked, setWelcomeDialogChecked } from "@/store/reading";
 import { useSharingStore } from "@/store/sharing";
 import { cn } from "@/utils/style";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -194,14 +194,6 @@ export default function LearningRecommendationDialog() {
     }, 100);
     return () => clearInterval(interval);
   }, [status]);
-
-  // Mirror the dialog's open state to a module-level flag so other components
-  // (e.g. ClassBattlePoller) can defer UI that would be blocked by the modal's
-  // body-level pointer-events: none.
-  useEffect(() => {
-    setWelcomeDialogOpen(open);
-    return () => setWelcomeDialogOpen(false);
-  }, [open]);
 
   useEffect(() => {
     if (isWelcomeDialogChecked()) {
