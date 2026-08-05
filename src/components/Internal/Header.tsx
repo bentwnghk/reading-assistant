@@ -306,7 +306,7 @@ function Header() {
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
             </span>
           </Link>
-          <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap">
+          <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap max-sm:gap-0.5 max-sm:[&_button]:px-2">
             <Button
               className="h-8 gap-1.5 relative"
               variant="ghost"
