@@ -40,8 +40,14 @@ export interface BattleWord {
 
 export type WordSourceType = "glossary" | "vocabulary" | "review-list" | "selected";
 
-/** Filter applied when the word source is the host's vocabulary bank. */
-export type VocabularyFilter = "all" | "due-for-review" | "hard-words";
+/**
+ * Filter applied when the word source is the host's vocabulary bank.
+ * Mirrors the strategies in the main app's `VocabularySelectionStrategy`
+ * (plus "all"), so the spelling-battle lobby offers the same selection options
+ * as the My Vocabulary "Auto Select" panel. Mirrored from src/types.d.ts —
+ * keep in sync.
+ */
+export type VocabularyFilter = "all" | "due" | "hardest" | "newest" | "random" | "weakest";
 
 export interface WordSource {
   type: WordSourceType;

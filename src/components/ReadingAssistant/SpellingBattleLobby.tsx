@@ -94,7 +94,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
   const [sourceType, setSourceType] = useState<WordSourceType>(
     defaultGlossarySessionId ? "glossary" : selectedWords && selectedWords.length > 0 ? "selected" : "vocabulary",
   );
-  const [vocabFilter, setVocabFilter] = useState<VocabularyFilter>("all");
+  const [vocabFilter, setVocabFilter] = useState<VocabularyFilter>("random");
   const [reviewListId, setReviewListId] = useState<string>("");
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
@@ -416,9 +416,11 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t(`${M}.filterAll`)}</SelectItem>
-                  <SelectItem value="due-for-review">{t(`${M}.filterDue`)}</SelectItem>
-                  <SelectItem value="hard-words">{t(`${M}.filterHard`)}</SelectItem>
+                  <SelectItem value="due">{t("vocabulary.strategy.due")}</SelectItem>
+                  <SelectItem value="hardest">{t("vocabulary.strategy.hardest")}</SelectItem>
+                  <SelectItem value="newest">{t("vocabulary.strategy.newest")}</SelectItem>
+                  <SelectItem value="random">{t("vocabulary.strategy.random")}</SelectItem>
+                  <SelectItem value="weakest">{t("vocabulary.strategy.weakest")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

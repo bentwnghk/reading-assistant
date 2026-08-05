@@ -273,8 +273,13 @@ interface BattleWord {
 
 type WordSourceType = "glossary" | "vocabulary" | "review-list" | "selected";
 
-/** Filter applied when the word source is the host's vocabulary bank. */
-type VocabularyFilter = "all" | "due-for-review" | "hard-words";
+/**
+ * Filter applied when the word source is the host's vocabulary bank.
+ * Mirrors the strategies in `VocabularySelectionStrategy` (plus "all"), so the
+ * spelling-battle lobby offers the same selection options as the My Vocabulary
+ * "Auto Select" panel. Mirrored in realtime/src/game/types.ts — keep in sync.
+ */
+type VocabularyFilter = "all" | "due" | "hardest" | "newest" | "random" | "weakest";
 
 interface WordSource {
   type: WordSourceType;

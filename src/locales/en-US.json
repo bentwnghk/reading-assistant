@@ -1661,8 +1661,6 @@
           "noInvites": "No pending invitations.",
           "filter": "Filter",
           "filterAll": "All words",
-          "filterDue": "Due for review",
-          "filterHard": "Hard words",
           "selectList": "Select a list…",
           "speedBonus": "Speed Bonus",
           "speedBonusDesc": "Award up to +50 points per correct answer based on how fast you answer. The per-word timer is always on.",

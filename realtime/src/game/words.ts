@@ -50,18 +50,59 @@ interface VocabularyRow {
   example: string | null;
 }
 
-async function fetchVocabulary(hostUserId: string, filter: VocabularyFilter): Promise<BattleWord[]> {
+async function fetchVocabulary(hostUserId: string, filter: VocabularyFilter, requestedCount: number): Promise<BattleWord[]> {
   const pool = getPool();
+  const now = Date.now();
   let query = `SELECT word, syllabification, part_of_speech, english_definition, chinese_definition, example
                FROM user_vocabulary WHERE user_id = $1`;
   const params: unknown[] = [hostUserId];
-  if (filter === "due-for-review") {
+
+  // Strategy filters — mirror the My Vocabulary "Auto Select" strategies
+  // (src/store/vocabulary.ts `autoSelectForReview`).
+  if (filter === "due") {
     query += ` AND (next_review_at = 0 OR next_review_at <= $2)`;
-    params.push(Date.now());
-  } else if (filter === "hard-words") {
+    params.push(now);
+  } else if (filter === "hardest") {
     query += ` AND rating = 'hard'`;
+  } else if (filter === "newest") {
+    query += ` AND mastery_level = 0 AND review_count = 0`;
+  } else if (filter === "weakest") {
+    query += ` AND review_count > 0`;
   }
-  query += ` ORDER BY word`;
+  // "all" and "random" → no extra filter.
+
+  // Order so the "most <strategy>" words surface first. For the priority
+  // strategies we then cap the candidate pool to requestedCount*3 (matching the
+  // store's algorithm) so the strategy actually biases the final selection —
+  // resolveWordList shuffles this pool and picks the final requestedCount.
+  // "all" and "random" return the full bank (resolveWordList shuffles it).
+  switch (filter) {
+    case "due":
+      query += ` ORDER BY next_review_at ASC`;
+      break;
+    case "hardest":
+      query += ` ORDER BY mastery_level ASC`;
+      break;
+    case "newest":
+      query += ` ORDER BY created_at DESC`;
+      break;
+    case "weakest":
+      // Lowest accuracy first (correct_count / review_count asc). Words with no
+      // reviews are excluded by the filter above, so NULLIF isn't needed here.
+      query += ` ORDER BY (correct_count::float / review_count) ASC`;
+      break;
+    default:
+      query += ` ORDER BY word`;
+  }
+
+  const isPriorityStrategy =
+    filter === "due" || filter === "hardest" || filter === "newest" || filter === "weakest";
+  if (isPriorityStrategy) {
+    const candidateCap = Math.max(1, requestedCount * 3);
+    params.push(candidateCap);
+    query += ` LIMIT $${params.length}`;
+  }
+
   const result = await pool.query<VocabularyRow>(query, params);
   return result.rows.map((r) => ({
     word: r.word,
@@ -201,7 +242,7 @@ export async function resolveWordList(
       raw = await fetchGlossary(hostUserId, source.sourceId);
       break;
     case "vocabulary":
-      raw = await fetchVocabulary(hostUserId, source.filter ?? "all");
+      raw = await fetchVocabulary(hostUserId, source.filter ?? "all", requestedCount);
       break;
     case "review-list":
       raw = await fetchReviewList(hostUserId, source.sourceId);
