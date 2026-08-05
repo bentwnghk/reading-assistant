@@ -2413,8 +2413,8 @@ export function FlashcardFrontMockup() {
     <MockupFrame label="FLASHCARDS · Mr.🆖 ProReader">
       <FlashcardChrome />
       {/* card — front */}
-      <div className="relative aspect-[3/4] max-h-72 w-full overflow-hidden rounded-xl border-2 border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-surface)] via-[var(--lp-surface)] to-[var(--lp-accent)]/5 shadow-lg">
-        <div className="flex h-full flex-col items-center justify-center px-4 text-center">
+      <div className="flex h-64 w-full flex-col overflow-hidden rounded-xl border-2 border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-surface)] via-[var(--lp-surface)] to-[var(--lp-accent)]/5 shadow-lg">
+        <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
           <div className="flex items-center gap-2">
             <span className="font-display text-4xl font-extrabold text-[var(--lp-ink)]">flourish</span>
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--lp-accent)]/10">
@@ -2425,10 +2425,10 @@ export function FlashcardFrontMockup() {
           <span className="mt-2 rounded-full bg-[var(--lp-accent)]/10 px-3 py-1 text-sm font-medium text-[var(--lp-accent)]">
             verb
           </span>
-          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-[var(--lp-ink-soft)]">
-            Click to flip
-          </span>
         </div>
+        <span className="pb-4 text-center text-[10px] text-[var(--lp-ink-soft)]">
+          Click to flip
+        </span>
       </div>
     </MockupFrame>
   );
