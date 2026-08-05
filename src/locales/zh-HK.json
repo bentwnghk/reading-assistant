@@ -373,7 +373,25 @@
           "4 款拼字與詞彙遊戲",
           "5 款語法遊戲",
           "與同學進行即時拼字對戰 🆕"
-        ]
+        ],
+        "carousel": {
+          "label": "練習功能",
+          "slideCount": "共 {{count}} 張",
+          "flashcardFront": "字卡 · 正面",
+          "flashcardBack": "字卡 · 背面",
+          "spellingListen": "拼字 · 聽音拼字",
+          "spellingFill": "拼字 · 填空",
+          "spellingScramble": "拼字 · 字母重組",
+          "grammarTopics": "語法主題",
+          "grammarRoulette": "語法輪盤",
+          "grammarSurgery": "錯字手術",
+          "grammarWorkshop": "語法工坊",
+          "battleLobby": "拼字對戰大廳",
+          "prev": "上一張",
+          "next": "下一張",
+          "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",
+          "indicator": "第 {{n}} / {{count}} 張：{{label}}"
+        }
       },
       "master": {
         "eyebrow": "Master",

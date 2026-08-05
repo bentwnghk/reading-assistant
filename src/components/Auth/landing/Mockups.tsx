@@ -63,6 +63,14 @@ import {
   Languages,
   Medal,
   ChevronsUpDown,
+  Flame,
+  Coins,
+  Stethoscope,
+  Copy,
+  ScrollText,
+  Zap,
+  XCircle,
+  Highlighter,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -2345,6 +2353,711 @@ export function SpellingSetupMockup() {
           <Play className="h-3.5 w-3.5" />
           Start Game
         </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PRACTICE carousel slides (Chapter 04) — 10 faithful mockups.
+   Each slide is a standalone view of a real in-app screen.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Shared chrome for the flashcard slides: toolbar + progress row */
+function FlashcardChrome() {
+  return (
+    <>
+      {/* toolbar — Prioritize hard words · Shuffle · Regenerate */}
+      <div className="mb-2 flex flex-wrap items-center justify-center gap-1.5">
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+          <Target className="h-3 w-3 text-[var(--lp-ink-soft)]" /> Prioritize hard
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+          <Shuffle className="h-3 w-3 text-[var(--lp-ink-soft)]" /> Shuffle
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <RotateCcw className="h-3 w-3" /> Regenerate
+        </span>
+      </div>
+      {/* progress row — remaining counter + SRS stats + bar */}
+      <div className="mb-2 flex items-center justify-between font-mono text-[10px] text-[var(--lp-ink-soft)]">
+        <span>3 / 12 remaining</span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-rose-500">Again: 1</span>
+          <span className="text-[var(--lp-rule)]">|</span>
+          <span className="text-orange-500">Hard: 0</span>
+          <span className="text-[var(--lp-rule)]">|</span>
+          <span className="text-blue-500">Good: 2</span>
+          <span className="text-[var(--lp-rule)]">|</span>
+          <span className="text-green-500">Easy: 9</span>
+        </span>
+      </div>
+      <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--lp-rule)]">
+        <div className="h-full rounded-full bg-gradient-to-r from-[var(--lp-accent)] to-[var(--lp-accent)]/60" style={{ width: "75%" }} />
+      </div>
+    </>
+  );
+}
+
+/* ── Slide 1. Flashcard — FRONT ── */
+export function FlashcardFrontMockup() {
+  return (
+    <MockupFrame label="FLASHCARDS · Mr.🆖 ProReader">
+      <FlashcardChrome />
+      {/* card — front */}
+      <div className="relative aspect-[3/4] max-h-72 w-full overflow-hidden rounded-xl border-2 border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-surface)] via-[var(--lp-surface)] to-[var(--lp-accent)]/5 shadow-lg">
+        <div className="flex h-full flex-col items-center justify-center px-4 text-center">
+          <div className="flex items-center gap-2">
+            <span className="font-display text-4xl font-extrabold text-[var(--lp-ink)]">flourish</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--lp-accent)]/10">
+              <Volume2 className="h-4 w-4 text-[var(--lp-ink-soft)]" />
+            </span>
+          </div>
+          <span className="mt-2 font-mono text-base text-[var(--lp-ink-soft)]">flour·ish</span>
+          <span className="mt-2 rounded-full bg-[var(--lp-accent)]/10 px-3 py-1 text-sm font-medium text-[var(--lp-accent)]">
+            verb
+          </span>
+          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-[var(--lp-ink-soft)]">
+            Click to flip
+          </span>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 2. Flashcard — BACK ── */
+export function FlashcardBackMockup() {
+  return (
+    <MockupFrame label="FLASHCARDS · Mr.🆖 ProReader">
+      <FlashcardChrome />
+      {/* card — back */}
+      <div className="relative max-h-72 w-full overflow-hidden rounded-xl border-2 border-emerald-300 bg-gradient-to-br from-[var(--lp-surface)] via-[var(--lp-surface)] to-emerald-100 p-3 shadow-lg dark:border-emerald-800 dark:to-emerald-950/50">
+        <div className="flex items-center gap-2">
+          <span className="font-display text-xl font-extrabold text-[var(--lp-ink)]">flourish</span>
+          <Volume2 className="h-4 w-4 text-[var(--lp-ink-soft)]" />
+          <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">flour·ish</span>
+          <span className="ml-auto rounded-full bg-[var(--lp-accent)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--lp-accent)]">
+            verb
+          </span>
+        </div>
+        <div className="mt-2 space-y-1.5">
+          <div className="rounded-lg bg-[var(--lp-paper-2)] p-2">
+            <p className="text-[9px] font-semibold uppercase tracking-wide text-[var(--lp-ink-soft)]">English Definition</p>
+            <p className="text-[11px] leading-snug text-[var(--lp-ink)]">to grow or develop successfully; to thrive</p>
+          </div>
+          <div className="rounded-lg bg-[var(--lp-paper-2)] p-2">
+            <p className="text-[9px] font-semibold uppercase tracking-wide text-[var(--lp-ink-soft)]">中文解釋</p>
+            <p className="text-[11px] leading-snug text-[var(--lp-ink)]">茁壯成長；繁榮</p>
+          </div>
+          <div className="rounded-lg bg-[var(--lp-paper-2)] p-2">
+            <p className="text-[9px] font-semibold uppercase tracking-wide text-[var(--lp-ink-soft)]">Example 例句</p>
+            <p className="text-[11px] leading-snug italic text-[var(--lp-ink)]">
+              “They predicted recycling would{" "}
+              <span className="not-italic font-semibold text-[var(--lp-accent)]">flourish</span> as the industry matured.”
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* SRS rating buttons */}
+      <div className="mt-3">
+        <p className="mb-1.5 text-center text-[10px] text-[var(--lp-ink-soft)]">How well did you know this?</p>
+        <div className="grid grid-cols-4 gap-1.5">
+          <span className="rounded-lg border border-rose-300 px-2 py-1.5 text-center text-[11px] font-semibold text-rose-600">Again</span>
+          <span className="rounded-lg border border-orange-300 px-2 py-1.5 text-center text-[11px] font-semibold text-orange-600">Hard</span>
+          <span className="rounded-lg border border-blue-300 px-2 py-1.5 text-center text-[11px] font-semibold text-blue-600">Good</span>
+          <span className="rounded-lg border border-green-300 px-2 py-1.5 text-center text-[11px] font-semibold text-green-600">Easy</span>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* Shared header for the spelling slides — counter · streak · hint · timer + bar */
+function SpellingHeader({ mode }: { mode: string }) {
+  return (
+    <>
+      <div className="mb-1.5 flex items-center justify-between text-[11px]">
+        <div className="flex items-center gap-2 text-[var(--lp-ink-soft)]">
+          <span>3 / 10</span>
+          <span className="inline-flex items-center gap-0.5 font-semibold text-orange-500">
+            <Flame className="h-3.5 w-3.5 animate-pulse" />4
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-[var(--lp-ink-soft)]">
+          <span className="inline-flex items-center gap-0.5">
+            <Lightbulb className="h-3.5 w-3.5" />3
+          </span>
+          <span className="inline-flex items-center gap-0.5">
+            <Timer className="h-3.5 w-3.5" />18s
+          </span>
+        </div>
+      </div>
+      <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--lp-rule)]">
+        <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: "30%" }} />
+      </div>
+      <div className="mb-2 text-center">
+        <span className="rounded-full bg-[var(--lp-rule)]/60 px-2 py-0.5 text-[10px] text-[var(--lp-ink-soft)]">{mode}</span>
+      </div>
+    </>
+  );
+}
+
+/* Shared bottom score row for the spelling slides */
+function SpellingScoreRow() {
+  return (
+    <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-[var(--lp-ink-soft)]">
+      <span>Score:</span>
+      <span className="font-semibold text-[var(--lp-ink)]">340</span>
+      <span className="text-[var(--lp-rule)]">|</span>
+      <Flame className="h-3.5 w-3.5 text-orange-500" />
+      <span className="font-semibold text-[var(--lp-ink)]">4</span>
+    </div>
+  );
+}
+
+/* ── Slide 3. Spelling — Listen & Type ── */
+export function SpellingListenTypeMockup() {
+  return (
+    <MockupFrame label="SPELLING · Mr.🆖 ProReader">
+      <SpellingHeader mode="Listen & Type" />
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-4">
+        <div className="flex flex-col items-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--lp-accent)]/10">
+            <Volume2 className="h-7 w-7 text-[var(--lp-accent)]" />
+          </span>
+          <p className="mt-2 text-[11px] text-[var(--lp-ink-soft)]">Click to hear the word</p>
+          {/* hint-revealed letters */}
+          <p className="mt-2 font-mono text-base tracking-[0.3em] text-[var(--lp-ink)]">_ h _ _ _ _</p>
+          <div className="mt-3 w-full rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-3 py-2.5 text-center text-sm text-[var(--lp-ink-soft)]">
+            Type the word you hear...
+          </div>
+        </div>
+      </div>
+      <SpellingScoreRow />
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 4. Spelling — Fill Blanks ── */
+export function SpellingFillBlanksMockup() {
+  return (
+    <MockupFrame label="SPELLING · Mr.🆖 ProReader">
+      <SpellingHeader mode="Fill Blanks" />
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-4">
+        <p className="mb-2 flex items-center justify-center gap-1 text-center text-[11px] text-[var(--lp-ink-soft)]">
+          <Eye className="h-3 w-3" /> the process by which plants use sunlight · 光合作用
+        </p>
+        {/* word display — letters with blanks */}
+        <div className="flex justify-center gap-0.5 font-mono text-lg tracking-wider">
+          {["p", "h", "o", "t", "_", "_", "_", "_", "t", "h", "_", "s", "_", "s"].map((ch, i) => (
+            <span
+              key={i}
+              className={`inline-flex h-7 w-4 items-center justify-center ${
+                ch === "_" ? "border-b-2 border-[var(--lp-accent)]" : "text-[var(--lp-ink)]"
+              }`}
+            >
+              {ch === "_" ? "" : ch}
+            </span>
+          ))}
+        </div>
+        <div className="mt-3 w-full rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-3 py-2.5 text-center text-sm text-[var(--lp-ink-soft)]">
+          Type the missing letters...
+        </div>
+      </div>
+      <SpellingScoreRow />
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 5. Spelling — Letter Scramble ── */
+export function SpellingScrambleMockup() {
+  return (
+    <MockupFrame label="SPELLING · Mr.🆖 ProReader">
+      <SpellingHeader mode="Letter Scramble" />
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-4">
+        <p className="mb-2 flex items-center justify-center gap-1 text-center text-[11px] text-[var(--lp-ink-soft)]">
+          <Eye className="h-3 w-3" /> to grow or develop successfully; to thrive · 茁壯成長
+        </p>
+        {/* assembly area */}
+        <div className="flex min-h-[2.25rem] items-center justify-center border-b-2 border-dashed border-[var(--lp-rule)] p-1.5 font-mono text-lg tracking-widest text-[var(--lp-ink)]">
+          F L O U
+        </div>
+        {/* scrambled letter tiles */}
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {["R", "I", "S", "H"].map((ch, i) => (
+            <span
+              key={i}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 font-display text-sm font-semibold text-[var(--lp-accent)]"
+            >
+              {ch}
+            </span>
+          ))}
+          {["F", "L", "O", "U"].map((ch, i) => (
+            <span
+              key={`u-${i}`}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] text-sm font-semibold text-[var(--lp-ink-soft)] opacity-40"
+            >
+              {ch}
+            </span>
+          ))}
+        </div>
+        <div className="mt-3 flex justify-center">
+          <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1 text-[10px] text-[var(--lp-ink-soft)]">
+            <RotateCcw className="h-3 w-3" /> Clear
+          </span>
+        </div>
+      </div>
+      <SpellingScoreRow />
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 6. Grammar — Topics table/card grid ── */
+export function GrammarTopicsMockup() {
+  const tabs = [
+    { key: "topics", label: "Topics", icon: BookOpen, active: true },
+    { key: "lessons", label: "Lessons", icon: GraduationCap },
+    { key: "games", label: "Games", icon: Gamepad2 },
+    { key: "quiz", label: "Quiz", icon: CheckCircle2 },
+  ];
+  const topics = [
+    { name: "Present Perfect", zh: "現在完成式", cefr: "B2", cefrCls: "bg-orange-100 text-orange-800", count: "3x", catCls: "bg-blue-100 text-blue-800", desc: "have/has + past participle — past actions connected to the present." },
+    { name: "Conditionals", zh: "條件句", cefr: "B1", cefrCls: "bg-yellow-100 text-yellow-800", count: "2x", catCls: "bg-purple-100 text-purple-800", desc: "If-clause + main clause; real & hypothetical conditions." },
+    { name: "Passive Voice", zh: "被動語態", cefr: "B1", cefrCls: "bg-yellow-100 text-yellow-800", count: "2x", catCls: "bg-green-100 text-green-800", desc: "be + past participle — focus on the receiver of the action." },
+    { name: "Modal Verbs", zh: "情態動詞", cefr: "A2", cefrCls: "bg-lime-100 text-lime-800", count: "1x", catCls: "bg-cyan-100 text-cyan-800", desc: "can · could · may · might — ability, possibility & permission." },
+  ];
+  return (
+    <MockupFrame label="GRAMMAR · Mr.🆖 ProReader">
+      {/* tab bar */}
+      <div className="mb-3 flex gap-1 border-b border-[var(--lp-rule)]">
+        {tabs.map((tb) => (
+          <span
+            key={tb.key}
+            className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium -mb-px border-b-2 ${
+              tb.active
+                ? "border-[var(--lp-accent)] text-[var(--lp-accent)]"
+                : "border-transparent text-[var(--lp-ink-soft)]"
+            }`}
+          >
+            <tb.icon className="h-3 w-3" />
+            {tb.label}
+          </span>
+        ))}
+      </div>
+      {/* topic card grid */}
+      <div className="grid gap-2 sm:grid-cols-2">
+        {topics.map((tp) => (
+          <div key={tp.name} className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2.5">
+            <div className="flex items-start justify-between gap-1.5">
+              <div className="min-w-0">
+                <p className="truncate text-[11px] font-medium text-[var(--lp-ink)]">{tp.name}</p>
+                <p className="text-[9px] text-[var(--lp-ink-soft)]">{tp.zh}</p>
+              </div>
+              <div className="flex shrink-0 gap-1">
+                <span className={`rounded px-1.5 py-0.5 text-[8px] font-medium ${tp.cefrCls}`}>{tp.cefr}</span>
+                <span className={`rounded px-1.5 py-0.5 text-[8px] font-medium ${tp.catCls}`}>{tp.count}</span>
+              </div>
+            </div>
+            <p className="mt-1.5 line-clamp-2 text-[9px] leading-snug text-[var(--lp-ink-soft)]">{tp.desc}</p>
+            <div className="mt-1.5 flex gap-1">
+              <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--lp-accent)] px-1.5 py-0.5 text-[8px] font-semibold text-white">
+                <GraduationCap className="h-2.5 w-2.5" /> Lesson
+              </span>
+              <span className="inline-flex items-center gap-0.5 rounded-md border border-[var(--lp-rule)] px-1.5 py-0.5 text-[8px] text-[var(--lp-ink-soft)]">
+                <Highlighter className="h-2.5 w-2.5" /> Highlight
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 7. Grammar Game — Roulette ── */
+const WHEEL_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
+const WHEEL_TOPICS = ["Pres. Perfect", "Conditionals", "Passive", "Modals", "Articles", "Prepositions", "Comparatives", "Conjunctions"];
+
+function wheelSlicePath(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+  const toRad = (a: number) => ((a - 90) * Math.PI) / 180;
+  const x1 = cx + r * Math.cos(toRad(startAngle));
+  const y1 = cy + r * Math.sin(toRad(startAngle));
+  const x2 = cx + r * Math.cos(toRad(endAngle));
+  const y2 = cy + r * Math.sin(toRad(endAngle));
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+}
+
+export function GrammarRouletteMockup() {
+  const options = [
+    { label: "They has eaten dinner.", correct: false },
+    { label: "They have eaten dinner.", correct: true },
+    { label: "They have eat dinner.", correct: false },
+    { label: "They having eaten dinner.", correct: false },
+  ];
+  return (
+    <MockupFrame label="GRAMMAR ROULETTE · Mr.🆖 ProReader">
+      {/* header — back | streak | coins */}
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="inline-flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <ArrowLeft className="h-3 w-3" /> Back to Games
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-orange-500 px-1.5 py-0.5 text-[9px] font-bold text-white">
+            <Flame className="h-2.5 w-2.5" /> ×3
+          </span>
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
+            <Coins className="h-3.5 w-3.5" /> 350
+          </span>
+        </div>
+      </div>
+      <div className="mb-2 flex items-center justify-between font-mono text-[9px] text-[var(--lp-ink-soft)]">
+        <span>10 rounds · 1/10</span>
+        <span className="inline-flex items-center gap-0.5"><Timer className="h-3 w-3" />28s</span>
+      </div>
+
+      {/* wheel */}
+      <div className="relative mx-auto mb-2 h-36 w-36">
+        {/* pointer */}
+        <div
+          className="absolute left-1/2 top-0 z-10 -translate-x-1/2"
+          style={{ width: 0, height: 0, borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderTop: "12px solid var(--lp-accent)" }}
+        />
+        <svg viewBox="0 0 120 120" className="h-full w-full" role="img" aria-label="Grammar roulette wheel">
+          {WHEEL_COLORS.map((color, i) => {
+            const start = i * 45;
+            const end = start + 45;
+            const mid = start + 22.5;
+            const toRad = (a: number) => ((a - 90) * Math.PI) / 180;
+            const lx = 60 + 38 * Math.cos(toRad(mid));
+            const ly = 60 + 38 * Math.sin(toRad(mid));
+            return (
+              <g key={i}>
+                <path d={wheelSlicePath(60, 60, 56, start, end)} fill={color} stroke="#fff" strokeWidth="1" />
+                <text
+                  x={lx}
+                  y={ly}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize="4"
+                  fill="white"
+                  style={{ fontFamily: "var(--font-sans), sans-serif" }}
+                >
+                  {WHEEL_TOPICS[i]}
+                </text>
+              </g>
+            );
+          })}
+          <circle cx="60" cy="60" r="12" fill="white" stroke="var(--lp-rule)" strokeWidth="1" />
+          <circle cx="60" cy="60" r="3" fill="var(--lp-accent)" />
+        </svg>
+      </div>
+
+      {/* landed topic pill */}
+      <div className="mb-2 flex justify-center">
+        <span className="rounded-full bg-[#3b82f6] px-3 py-1 text-[10px] font-semibold text-white">Present Perfect 🔥 Hot Topic!</span>
+      </div>
+
+      {/* question box */}
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2.5">
+        <p className="mb-2 text-[11px] font-medium text-[var(--lp-ink)]">Which sentence is correct?</p>
+        <div className="space-y-1.5">
+          {options.map((o, i) => (
+            <div
+              key={i}
+              className={`rounded-lg border px-2.5 py-1.5 text-left text-[10px] ${
+                o.correct
+                  ? "border-green-500 bg-green-50 font-medium text-green-800"
+                  : "border-[var(--lp-rule)] opacity-60 text-[var(--lp-ink-soft)]"
+              }`}
+            >
+              {String.fromCharCode(65 + i)}. {o.label}
+            </div>
+          ))}
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 8. Grammar Game — Error Surgery ── */
+export function GrammarErrorSurgeryMockup() {
+  const sentence = [
+    { w: "She", sel: false },
+    { w: "have", sel: true },
+    { w: "went", sel: false },
+    { w: "to", sel: false },
+    { w: "the", sel: false },
+    { w: "store", sel: false },
+  ];
+  return (
+    <MockupFrame label="ERROR SURGERY · Mr.🆖 ProReader">
+      {/* header */}
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="inline-flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <ArrowLeft className="h-3 w-3" /> Back to Games
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-orange-500">
+            <Flame className="h-3 w-3" /> ×3
+          </span>
+          <span className="text-[10px] font-semibold text-[var(--lp-ink-soft)]">240 pts</span>
+        </div>
+      </div>
+      {/* progress + round counter + timer */}
+      <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--lp-rule)]">
+        <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: "30%" }} />
+      </div>
+      <div className="mb-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+        <span className="inline-flex items-center gap-0.5"><Timer className="h-3 w-3" />18s</span>
+        <span className="rounded-md border border-[var(--lp-rule)] px-1.5 py-0.5 text-[8px]">Present Perfect</span>
+        <span>3 / 10</span>
+      </div>
+
+      {/* instruction strip */}
+      <div className="mb-2 flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-400">
+        <Stethoscope className="h-3.5 w-3.5 shrink-0" />
+        <span className="text-[10px] font-medium">Tap the error word in the sentence</span>
+      </div>
+
+      {/* sentence box — clickable word buttons */}
+      <div className="mb-2 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+        <div className="flex flex-wrap gap-x-1 gap-y-1.5 text-[11px]">
+          {sentence.map((s, i) => (
+            <span
+              key={i}
+              className={`rounded border px-1.5 py-0.5 ${
+                s.sel
+                  ? "border-2 border-amber-500 bg-amber-100 font-semibold text-amber-800"
+                  : "border-transparent text-[var(--lp-ink)]"
+              }`}
+            >
+              {s.w}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* correction panel */}
+      <div className="rounded-xl border-2 border-amber-400 bg-amber-50 p-3 dark:bg-amber-900/10">
+        <p className="mb-2 text-[9px] font-medium text-amber-800">
+          Replace: <span className="font-mono">have</span> →
+        </p>
+        <div className="grid grid-cols-2 gap-1.5">
+          {[
+            { w: "has", correct: true },
+            { w: "had", correct: false },
+            { w: "having", correct: false },
+            { w: "is", correct: false },
+          ].map((c) => (
+            <span
+              key={c.w}
+              className={`rounded-lg border px-2 py-1.5 text-center text-[10px] font-medium ${
+                c.correct
+                  ? "border-green-500 bg-green-100 text-green-800"
+                  : "border-[var(--lp-rule)] bg-[var(--lp-surface)] text-[var(--lp-ink)]"
+              }`}
+            >
+              {c.w}
+            </span>
+          ))}
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 9. Grammar Game — Workshop ── */
+export function GrammarWorkshopMockup() {
+  return (
+    <MockupFrame label="GRAMMAR WORKSHOP · Mr.🆖 ProReader">
+      {/* header */}
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="inline-flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <ArrowLeft className="h-3 w-3" /> Back to Games
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-orange-500">
+            <Flame className="h-3 w-3" /> ×3
+          </span>
+          <span className="text-[10px] font-semibold text-[var(--lp-ink-soft)]">180 pts</span>
+        </div>
+      </div>
+      {/* progress + counter + timer */}
+      <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--lp-rule)]">
+        <div className="h-full rounded-full bg-[var(--lp-accent)]" style={{ width: "25%" }} />
+      </div>
+      <div className="mb-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+        <span className="inline-flex items-center gap-0.5"><Timer className="h-3 w-3" />22s</span>
+        <span className="rounded-md border border-[var(--lp-rule)] px-1.5 py-0.5 text-[8px]">Conditionals</span>
+        <span>2 / 8</span>
+      </div>
+
+      {/* sentence box with slots */}
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/30 p-3">
+        <p className="text-[11px] leading-relaxed text-[var(--lp-ink)]">
+          If it rains,{" "}
+          <span className="mx-0.5 inline-block rounded-md border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--lp-accent)]">
+            we
+          </span>{" "}
+          <span className="mx-0.5 inline-block rounded-md border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--lp-accent)]">
+            will
+          </span>{" "}
+          stay home.
+        </p>
+      </div>
+
+      {/* pattern hint */}
+      <p className="mt-2 font-mono text-[9px] text-[var(--lp-ink-soft)]">Pattern: [subject] + [auxiliary] + [verb]</p>
+
+      {/* word bank */}
+      <div className="mt-2">
+        <p className="mb-1.5 text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">Word Bank</p>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { w: "we", used: true },
+            { w: "will", used: true },
+            { w: "stay", used: false },
+            { w: "go", used: false },
+            { w: "home", used: false },
+            { w: "it", used: false },
+            { w: "would", used: false },
+          ].map((c) => (
+            <span
+              key={c.w}
+              className={`rounded-lg border px-2.5 py-1 text-[10px] font-medium ${
+                c.used
+                  ? "border-[var(--lp-rule)] bg-[var(--lp-paper-2)] text-[var(--lp-ink-soft)] opacity-40"
+                  : "border-[var(--lp-rule)] bg-[var(--lp-surface)] text-[var(--lp-ink)]"
+              }`}
+            >
+              {c.w}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* check answer button */}
+      <div className="mt-3 flex items-center justify-center gap-1.5 rounded-lg bg-[var(--lp-accent)] px-3 py-2 text-[11px] font-semibold text-white">
+        <CheckCircle2 className="h-3.5 w-3.5" /> Check Answer
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 10. Multiplayer Spelling Battle — Lobby ── */
+export function SpellingBattleLobbyMockup() {
+  const players = [
+    { name: "Alice", you: true, host: true, away: false, initials: "AL" },
+    { name: "Bob", you: false, host: false, away: false, initials: "BO" },
+    { name: "Carol", you: false, host: false, away: false, initials: "CA" },
+    { name: "Dave", you: false, host: false, away: true, initials: "DA" },
+  ];
+  return (
+    <MockupFrame label="SPELLING BATTLE · Mr.🆖 ProReader">
+      {/* card title + status */}
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <Swords className="h-4 w-4 text-fuchsia-500" />
+          <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Battle Room</span>
+        </div>
+        <span className="rounded-full bg-[var(--lp-rule)]/60 px-2 py-0.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">
+          Waiting
+        </span>
+      </div>
+
+      {/* room code block */}
+      <div className="flex items-center justify-center gap-2 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 py-3">
+        <span className="font-mono text-2xl font-bold tracking-[0.3em] text-[var(--lp-ink)]">ABC123</span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--lp-rule)] text-[var(--lp-ink-soft)]">
+          <Copy className="h-3.5 w-3.5" />
+        </span>
+      </div>
+      <p className="mt-1 text-center text-[9px] text-[var(--lp-ink-soft)]">Share this code with your opponents</p>
+
+      <div className="my-3 border-t border-[var(--lp-rule)]" />
+
+      {/* players list */}
+      <div className="mb-1.5 flex items-center gap-1.5 text-[var(--lp-ink)]">
+        <Users className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+        <span className="text-[11px] font-medium">Players (4)</span>
+      </div>
+      <div className="space-y-1.5">
+        {players.map((p) => (
+          <div
+            key={p.name}
+            className={`flex items-center gap-2 rounded-lg border p-1.5 ${
+              p.you ? "border-[var(--lp-accent)]/40 bg-[var(--lp-accent)]/5" : "border-[var(--lp-rule)] bg-[var(--lp-surface)]"
+            }`}
+          >
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--lp-accent)]/15 text-[8px] font-bold uppercase text-[var(--lp-accent)]">
+              {p.initials}
+            </span>
+            <span className="text-[10px] font-medium text-[var(--lp-ink)]">{p.name}</span>
+            {p.you && (
+              <span className="rounded bg-[var(--lp-rule)]/60 px-1.5 py-0.5 text-[8px] text-[var(--lp-ink-soft)]">You</span>
+            )}
+            {p.away && (
+              <span className="rounded border border-[var(--lp-rule)] px-1.5 py-0.5 text-[8px] text-[var(--lp-ink-soft)]">away</span>
+            )}
+            {p.host && <Crown className="ml-auto h-3.5 w-3.5 text-amber-500" />}
+          </div>
+        ))}
+      </div>
+
+      <div className="my-3 border-t border-[var(--lp-rule)]" />
+
+      {/* words row */}
+      <div className="mb-3 flex items-center justify-between text-[10px] text-[var(--lp-ink-soft)]">
+        <span>Words in this battle</span>
+        <span className="rounded-md border border-[var(--lp-rule)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink)]">10 words</span>
+      </div>
+
+      {/* game rules */}
+      <div className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/30 p-2.5">
+        <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink)]">
+          <ScrollText className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+          <span className="text-[10px] font-medium">Game Rules</span>
+        </div>
+        <div className="mb-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[9px]">
+          <div><span className="text-[var(--lp-ink-soft)]">Mode: </span><span className="font-medium text-[var(--lp-ink)]">Listen &amp; Type</span></div>
+          <div><span className="text-[var(--lp-ink-soft)]">Difficulty: </span><span className="font-medium text-[var(--lp-ink)]">Medium</span></div>
+          <div><span className="text-[var(--lp-ink-soft)]">Time/word: </span><span className="font-medium text-[var(--lp-ink)]">20s</span></div>
+          <div><span className="text-[var(--lp-ink-soft)]">Timed: </span><span className="font-medium text-[var(--lp-ink)]">On</span></div>
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-start gap-1.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-1.5">
+            <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-500" />
+            <div><span className="text-[9px] font-medium text-[var(--lp-ink)]">Correct</span> <span className="text-[8px] text-[var(--lp-ink-soft)]">· 100 base pts</span></div>
+          </div>
+          <div className="flex items-start gap-1.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-1.5">
+            <Zap className="h-3 w-3 shrink-0 text-amber-500" />
+            <div><span className="text-[9px] font-medium text-[var(--lp-ink)]">Speed</span> <span className="text-[8px] text-[var(--lp-ink-soft)]">· up to +50</span></div>
+          </div>
+          <div className="flex items-start gap-1.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-1.5">
+            <Flame className="h-3 w-3 shrink-0 text-orange-500" />
+            <div><span className="text-[9px] font-medium text-[var(--lp-ink)]">Streak</span> <span className="text-[8px] text-[var(--lp-ink-soft)]">· +10% up to +50%</span></div>
+          </div>
+          <div className="flex items-start gap-1.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-1.5">
+            <Lightbulb className="h-3 w-3 shrink-0 text-yellow-500" />
+            <div><span className="text-[9px] font-medium text-[var(--lp-ink)]">Hints</span> <span className="text-[8px] text-[var(--lp-ink-soft)]">· max 3 · 10/20/30</span></div>
+          </div>
+          <div className="flex items-start gap-1.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-1.5">
+            <XCircle className="h-3 w-3 shrink-0 text-rose-500" />
+            <div><span className="text-[9px] font-medium text-[var(--lp-ink)]">Wrong</span> <span className="text-[8px] text-[var(--lp-ink-soft)]">· 0 pts — streak resets</span></div>
+          </div>
+        </div>
+      </div>
+
+      {/* action buttons */}
+      <div className="mt-3 flex gap-2">
+        <span className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-fuchsia-500 px-3 py-2 text-[11px] font-semibold text-white">
+          <Play className="h-3.5 w-3.5" /> Start Battle
+        </span>
+        <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-3 py-2 text-[11px] text-[var(--lp-ink-soft)]">
+          Leave
+        </span>
       </div>
     </MockupFrame>
   );
