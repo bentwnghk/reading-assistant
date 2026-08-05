@@ -101,12 +101,23 @@ export default {
             backgroundPosition: "200% 0",
           },
         },
+        "glow-pulse": {
+          "0%, 100%": {
+            boxShadow:
+              "0 0 0 1px hsl(var(--primary) / 0.4), 0 0 18px -4px hsl(var(--primary) / 0.4)",
+          },
+          "50%": {
+            boxShadow:
+              "0 0 0 2px hsl(var(--primary) / 0.65), 0 0 28px 2px hsl(var(--primary) / 0.55)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "float-up": "float-up 3s ease-out infinite",
         shimmer: "shimmer 3s linear infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
       },
     },
   },
