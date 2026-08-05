@@ -1005,8 +1005,52 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <div class="callout tip"><strong>提示</strong> 提取文字後可<b>編輯</b>（原文分頁的鉛筆圖示）——便於修正 OCR 錯誤。編輯會在確認後清除 AI 衍生內容（改寫文本、詞彙等）。</div>
 
-      <h3>4.3 摘要</h3>
-      <p>點擊 <b>生成</b> 取得串流 AI 摘要：要點速覽、主要論點、關鍵詞及反思問題，以 Markdown 呈現。</p>
+      <h3>4.3 閱讀前準備</h3>
+      <p>正式閱讀前，點擊 <b>準備閱讀前活動</b>，AI 會生成一連串熱身活動，為大腦做好閱讀準備。AI 會分析文本並產生五個部分，建議由上而下依次完成：</p>
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-sparkles"/></svg> 閱讀前準備</div><span class="btn sm"><svg class="ic sm"><use href="#i-sparkles"/></svg> 重新生成</span></div>
+        <div class="mock-body">
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg class="ic sm" style="color:#f59e0b"><use href="#i-lightbulb"/></svg><span style="font-weight:600;font-size:13px">激活你的知識</span></div>
+            <ul class="small" style="margin:0"><li>你有沒有參觀過珊瑚礁，或在電視上見過？你還記得甚麼？</li></ul>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--subtle);margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg class="ic sm" style="color:#0891b2"><use href="#i-globe"/></svg><span style="font-weight:600;font-size:13px">背景知識</span></div>
+            <p class="small" style="margin:0">珊瑚礁是由微小動物「珊瑚蟲」建造的水下生態系統，常被稱為「海洋熱帶雨林」……</p>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg class="ic sm pri"><use href="#i-target"/></svg><span style="font-weight:600;font-size:13px">閱讀目標</span></div>
+            <p class="small" style="margin:0">找出珊瑚礁為何陷入危機，以及有甚麼方法可以拯救。</p>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg class="ic sm" style="color:#2563eb"><use href="#i-book-open"/></svg><span style="font-weight:600;font-size:13px">先認識這些關鍵詞</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px"><span class="btn sm outline" style="padding:2px 6px;flex-shrink:0"><svg class="ic sm"><use href="#i-volume-2"/></svg></span><div><span style="font-weight:600;font-size:13px">ecosystem</span> <span class="small" style="color:var(--muted)">e·co·sys·tem <em>(n.)</em></span><p class="small" style="margin:0">由生物群落及其物理環境組成的系統。</p></div></div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;background:rgba(245,158,11,.05)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg class="ic sm" style="color:#f59e0b"><use href="#i-sparkles"/></svg><span style="font-weight:600;font-size:13px">你認為這篇文章會關於甚麼？</span></div>
+            <div style="border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:8px;margin-bottom:8px;background:var(--card)">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg class="ic sm" style="color:#f59e0b"><use href="#i-eye"/></svg><span class="small" style="font-weight:600">先略讀</span><svg class="ic sm" style="margin-left:auto"><use href="#i-chevron-down"/></svg></div>
+              <p class="small" style="margin:0 0 3px"><b>標題：</b>危機中的珊瑚礁</p>
+              <p class="small" style="margin:0 0 3px;color:var(--muted)"><b>首段：</b>珊瑚礁是地球上最多樣化的生態系統之一……</p>
+              <p class="small" style="margin:0;color:var(--muted)"><b>尾段：</b>若不採取行動，我們這一代可能就會失去牠們。</p>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--muted);font-size:12px">先略讀上方文字，然後輸入你認為這篇文章會關於甚麼……</div>
+          </div>
+        </div>
+      </div>
+      <table class="ref">
+        <tr><th>部分</th><th>作用</th></tr>
+        <tr><td><b>激活你的知識</b></td><td>把主題與你已知的知識連繫起來的問題（中英雙語）。</td></tr>
+        <tr><td><b>背景知識</b></td><td>文章假設你已具備的文化或背景知識。</td></tr>
+        <tr><td><b>閱讀目標</b></td><td>設定清晰的閱讀目標——找出要留意的事。</td></tr>
+        <tr><td><b>先認識這些關鍵詞</b></td><td>預習必要詞彙：釋義、音節劃分、詞性，以及 🔊 聆聽按鈕（語音合成）。</td></tr>
+        <tr><td><b>預測</b></td><td>先略讀再預測——見下文。</td></tr>
+      </table>
+      <p><b>預測</b>卡片包含一個可收展的 <b>先略讀</b>助手，會顯示標題、小標題、主題句以及首尾兩段——快速略讀這些內容，然後在輸入框寫下你的預測。<strong>生成摘要</strong>（§4.4）後，這裏會出現一張 <b>檢視你的預測</b>卡片：將你的猜測與摘要對照，並評分 😕 不太準／🙂 部分準確／🎯 非常準確。閱讀前先作預測，能有效提升專注力與記憶。</p>
+      <div class="callout tip"><strong>提示</strong> 先略讀、再預測——能令你更專注、記得更多。點擊關鍵詞的 🔊 按鈕可在開始閱讀前先聆聽發音。</div>
+
+      <h3>4.4 摘要</h3>
+      <p>點擊 <b>生成</b> 取得串流 AI 摘要（以 Markdown 呈現）：一行 <b>TL;DR</b>——文章最簡單的解釋——以及 3 至 5 條以表情符號標示的 <b>主要論點</b>。語調與複雜度會配合學生年齡。生成摘要同時會解鎖上方「閱讀前準備」（§4.3）的 <b>檢視你的預測</b>卡片，讓你評估自己的猜測有多準確。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-file-text"/></svg> 摘要</div><span class="btn primary sm"><svg class="ic sm"><use href="#i-file-text"/></svg> 生成摘要</span></div>
         <div class="mock-body">
@@ -1017,7 +1061,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.4 心智圖</h3>
+      <h3>4.5 心智圖</h3>
       <p>切換鈕讓你選擇<b>中文或英文</b>，然後生成 Markdown 心智圖（可捲動）。可隨時重新生成。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-waypoints"/></svg> 思維導圖</div><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> 中文</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-waypoints"/></svg> 生成思維導圖</span></div>
@@ -1072,7 +1116,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.5 視覺化</h3>
+      <h3>4.6 視覺化</h3>
       <p>AI 根據文字內容生成插圖（可切換中／英文提示）。生成後可<b>下載（PNG）</b>或點擊圖片全螢幕縮放。<strong>設有額度</strong>：免費 每天 1 張、訂閱 每天 2 張、計量 無限。「剩餘：N」計數器顯示配額；為 0 時出現鎖定畫面。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-image"/></svg> 文本視覺化</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-download"/></svg> 下載</span><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> 中文</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-image"/></svg> 重新生成</span><span class="small">今日剩餘 1 次</span></div>
@@ -1315,7 +1359,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.6 改寫文本 — 互動閱讀中樞</h3>
+      <h3>4.7 改寫文本 — 互動閱讀中樞</h3>
       <p>最大的區塊。三個分頁讓你並排閱讀<b>原文</b>、<b>改寫</b>（按年齡簡化）及<b>簡化</b>（更簡單）版本，並可在段落間導航。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-book-open"/></svg> 文本分析和改寫</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-file-down"/></svg> 下載 Word <svg class="ic sm"><use href="#i-chevron-down"/></svg></span></div>
@@ -1344,7 +1388,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>下載 Word</b></td><td>匯出格式化 .docx，可勾選包含詞彙表及／或句子分析，另含改寫／簡化段落。</td></tr>
       </table>
 
-      <h3>4.7 文本難度與 CEFR 高亮</h3>
+      <h3>4.8 文本難度與 CEFR 高亮</h3>
       <p>在改寫文本下方，切換 <b>顯示卡片</b> 比較原文／改寫／簡化的可讀性指標，切換 <b>CEFR 高亮</b> 按難度為每個生字著色。</p>
       <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:200px">
@@ -1380,10 +1424,10 @@ body.toc-noscroll{overflow:hidden}
       <div class="chapter-head">
         <span class="chapter-num">第 5 章</span>
         <h2 class="section-title">5. 詞彙工具與間隔重複</h2>
-        <p class="small">工作階段內的詞彙表中樞：表格、生字卡、拼字遊戲及測驗——全部由 Leitner SRS 演算法驅動。</p>
+        <p class="small">工作階段內的詞彙表中樞：表格、生字卡、拼字遊戲、測驗及詞組與搭配詞——全部由 Leitner SRS 演算法驅動。</p>
       </div>
 
-      <p>當你有<b>高亮詞彙</b>後（來自 AI 詞彙建議或選取文字），<strong>詞彙表</strong> 可生成定義，並成為含四個子分頁的中樞：<b>表格</b>、<b>生字卡</b>、<b>拼字</b>、<b>測驗</b>。你練習的每個生字都由間隔重複系統（SRS）追蹤，使你在適當時間複習適當的詞。</p>
+      <p>當你有<b>高亮詞彙</b>後（來自 AI 詞彙建議或選取文字），<strong>詞彙表</strong> 可生成定義，並成為含四個子分頁的中樞：<b>表格</b>、<b>生字卡</b>、<b>拼字</b>、<b>測驗</b>。詞彙表正下方，<b>詞組與搭配詞</b>區段會提取多詞表達（動詞短語、搭配詞、慣用語），並附上粵語母語轉移對比提示。你練習的每個生字與詞組都由間隔重複系統（SRS）追蹤，使你在適當時間複習適當的項目。</p>
 
       <h3>5.1 詞彙表中樞</h3>
       <div class="mock">
@@ -1402,9 +1446,53 @@ body.toc-noscroll{overflow:hidden}
         <li><b>表格分頁</b>——可按生字或詞性排序。欄含生字、音節、詞性、英／中解釋、例句。</li>
         <li><b>匯出</b>——「下載 Word」（格式化詞彙表 .docx）或「下載 Excel」（.xlsx，含篩選、凍結標題列、中文字體）。</li>
         <li><b>「我的詞彙」連結</b>——跳至完整的我的詞彙頁面（第 9 章）。</li>
+        <li><b>詞組與搭配詞</b>——詞彙表正下方的區段，會從文本中提取多詞詞塊（見 §5.2）。</li>
       </ul>
 
-      <h3>5.2 生字卡（SRS 驅動）</h3>
+      <h3>5.2 詞組與搭配詞</h3>
+      <p>詞彙表正下方，此區段會掃描文本，找出 6 至 12 個高價值的<b>多詞詞塊</b>——動詞短語、虛義動詞搭配詞（<i>take / make / have / do</i> + 名詞）、形容詞+名詞配對、介詞短語及慣用語——這些都是單字詞彙表無法涵蓋的。點擊 <b>提取搭配詞</b>（提取需時 1 至 2 分鐘）。它會刻意跳過已在詞彙表中出現的單字。</p>
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-languages"/></svg> 詞組與搭配詞</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-plus"/></svg> 全部加入詞組</span><span class="btn sm"><svg class="ic sm"><use href="#i-languages"/></svg> 重新生成</span></div>
+        <div class="mock-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                <div style="display:flex;align-items:flex-start;gap:4px"><span class="btn sm outline" style="padding:2px 6px;flex-shrink:0"><svg class="ic sm"><use href="#i-volume-2"/></svg></span><div><span style="font-weight:600;font-size:13px">take into account</span><br><span class="small" style="color:var(--muted)">take in·to ac·COUNT</span></div></div>
+                <span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">V + N（慣用）</span>
+              </div>
+              <p class="small" style="margin:0">to consider something when judging a situation</p>
+              <p class="small" style="margin:0;color:var(--muted)">考慮；把……計算在內</p>
+              <div style="display:flex;align-items:flex-start;gap:4px;border-radius:6px;background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);padding:6px 8px"><svg class="ic sm" style="color:#f43f5e;flex-shrink:0;margin-top:1px"><use href="#i-alert-triangle"/></svg><p class="small" style="margin:0">粵語使用者常直接說「考慮」；英文須用完整詞塊，而非 "consider into"。</p></div>
+              <p class="small" style="margin:0;font-style:italic;color:var(--muted)">"We must take the cost into account."</p>
+              <span class="btn sm outline" style="justify-content:center;margin-top:auto"><svg class="ic sm"><use href="#i-check"/></svg> 已加入詞組庫</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                <div style="display:flex;align-items:flex-start;gap:4px"><span class="btn sm outline" style="padding:2px 6px;flex-shrink:0"><svg class="ic sm"><use href="#i-volume-2"/></svg></span><div><span style="font-weight:600;font-size:13px">in danger of</span><br><span class="small" style="color:var(--muted)">in DAN·ger of</span></div></div>
+                <span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">介+名+介</span>
+              </div>
+              <p class="small" style="margin:0">close to experiencing something bad</p>
+              <p class="small" style="margin:0;color:var(--muted)">瀕臨；有……的危險</p>
+              <div style="display:flex;align-items:flex-start;gap:4px;border-radius:6px;background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);padding:6px 8px"><svg class="ic sm" style="color:#f43f5e;flex-shrink:0;margin-top:1px"><use href="#i-alert-triangle"/></svg><p class="small" style="margin:0">不要漏掉第二個 "of"——應說 "in danger of disappearing"，而非 "in danger disappearing"。</p></div>
+              <p class="small" style="margin:0;font-style:italic;color:var(--muted)">"The reefs are in danger of vanishing."</p>
+              <span class="btn sm secondary" style="justify-content:center;margin-top:auto"><svg class="ic sm"><use href="#i-plus"/></svg> 加入詞組</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <table class="ref">
+        <tr><th>卡片元素</th><th>顯示內容</th></tr>
+        <tr><td><b>🔊 聆聽</b></td><td>朗讀整個詞塊（語音合成）。</td></tr>
+        <tr><td><b>音節標示</b></td><td>將詞塊拆分為音節，重讀音節以大寫標示（如 <code>take in·to ac·COUNT</code>）。</td></tr>
+        <tr><td><b>句型</b></td><td>簡短的語法標籤——<i>動詞短語</i>、<i>動+名</i>、<i>形+名</i>、<i>介詞短語</i>、<i>慣用語</i>等。</td></tr>
+        <tr><td><b>釋義</b></td><td>英文 + 繁體中文解釋，配合年齡調整。</td></tr>
+        <tr><td><b>⚠️ 對比提示</b></td><td>此功能的核心價值：標示粵語母語使用者最常犯的錯誤（錯用介詞、逐字翻譯、漏用冠詞）。僅在存在常見轉移陷阱時顯示。</td></tr>
+        <tr><td><b>例句</b></td><td>使用該詞塊的句子（盡量取自原文）。</td></tr>
+        <tr><td><b>加入詞組</b></td><td>將詞塊儲存至「我的詞彙」頁面的<b>詞組</b>分頁（第 9 章），進行間隔複習。標題列的 <b>全部加入詞組</b> 可一次過儲存所有詞塊。</td></tr>
+      </table>
+      <div class="callout tip"><strong>對比提示為何重要</strong> 香港學生約一半的搭配詞錯誤源自中文逐字翻譯。「對比提示」正是揪出這類錯誤的地方——儲存詞組前請先閱讀每條提示。</div>
+
+      <h3>5.3 生字卡（SRS 驅動）</h3>
       <p>翻轉卡片溫習。正面：生字＋音節＋詞性＋朗讀按鈕。背面：解釋＋例句。為每張卡評級以排程下次複習。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-layers"/></svg> 生字卡</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-target"/></svg> 優先複習難字</span><span class="btn sm outline"><svg class="ic sm"><use href="#i-shuffle"/></svg> 隨機排序</span></div>
@@ -1435,7 +1523,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.3 拼字遊戲</h3>
+      <h3>5.4 拼字遊戲</h3>
       <p>在四種模式下憑記憶拼出生字。需 ≥3 個生字。</p>
       <table class="ref">
         <tr><th>模式</th><th>你要做甚麼</th></tr>
@@ -1488,7 +1576,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.4 多人拼字對戰 ⚔️</h3>
+      <h3>5.5 多人拼字對戰 ⚔️</h3>
       <p>與同學進行<b>即時拼字對決</b>。選擇遊戲模式（聽音拼字、字母重組、填空或混合），多位玩家同時挑戰相同的單詞，每題結束後即時更新排名。</p>
       <div class="callout"><strong>玩法說明</strong>
         <ol style="margin:6px 0 0;padding-left:20px">
@@ -1637,7 +1725,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="mock-cap">拼字對戰競技場 — 即時對戰畫面（聽音拼字模式）。左側面板顯示當前單詞挑戰（喇叭、提示、輸入及回饋）；右側面板在每題結束後即時更新排名。</div>
 
-      <h3>5.5 詞彙測驗</h3>
+      <h3>5.6 詞彙測驗</h3>
       <p>選擇題測驗（需 ≥4 生字）。題型隨機為三之一：<b>生字→定義</b>、<b>定義→生字</b>或<b>填空</b>（取自例句）。可選<b>計時挑戰</b>（易 20 秒／中 15 秒／難 10 秒）。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-list"/></svg> 詞彙測驗</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 9s</span></div>
@@ -1654,7 +1742,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.6 SRS 演算法詳解</h3>
+      <h3>5.7 SRS 演算法詳解</h3>
       <p>Mr.🆖 ProReader 採用 <strong>Leitner 五格</strong>系統。每個生字位於一個「格」（熟練度 0–5）。答對升一格（下次複習間隔更長）；答錯降一格。目標：困難的生字常複習、容易的生字少複習，直至掌握。</p>
       <table class="ref">
         <tr><th>格／級別</th><th>標籤</th><th>複習間隔</th><th>顏色</th></tr>
@@ -1994,10 +2082,10 @@ body.toc-noscroll{overflow:hidden}
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#22c55e"><use href="#i-check-circle-2"/></svg> 已掌握</div><b style="font-size:1.2rem;color:#22c55e">95</b></div>
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#3b82f6"><use href="#i-brain"/></svg> 新詞</div><b style="font-size:1.2rem;color:#3b82f6">31</b></div>
           </div>
-          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-table"/></svg> 表格</span><span><svg class="ic sm"><use href="#i-layers"/></svg> 生字卡</span><span><svg class="ic sm"><use href="#i-spell-check"/></svg> 拼字</span><span><svg class="ic sm"><use href="#i-clipboard-list"/></svg> 測驗</span><span><svg class="ic sm"><use href="#i-list-plus"/></svg> 複習列表</span><span><svg class="ic sm"><use href="#i-history"/></svg> 歷史</span></div>
+          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-table"/></svg> 詞彙</span><span><svg class="ic sm"><use href="#i-languages"/></svg> 詞組</span><span><svg class="ic sm"><use href="#i-layers"/></svg> 生字卡</span><span><svg class="ic sm"><use href="#i-spell-check"/></svg> 拼字</span><span><svg class="ic sm"><use href="#i-clipboard-list"/></svg> 測驗</span><span><svg class="ic sm"><use href="#i-list-plus"/></svg> 複習列表</span><span><svg class="ic sm"><use href="#i-history"/></svg> 歷史</span></div>
         </div>
       </div>
-      <p>四張統計卡同時兼作篩選器——點擊即篩選表格。六個分頁：<b>表格</b>、<b>生字卡</b>、<b>拼字</b>、<b>測驗</b>、<b>清單</b>、<b>歷史</b>。複習分頁（生字卡／拼字／測驗）須先選生字（或載入清單）。</p>
+      <p>四張統計卡同時兼作篩選器——點擊即篩選表格。統計卡與表格具備<b>情境感知</b>：在<b>詞彙</b>分頁統計並列出單字；在<b>詞組</b>分頁則切換為統計並列出多詞詞塊。七個分頁：<b>詞彙</b>、<b>詞組</b>、<b>生字卡</b>、<b>拼字</b>、<b>測驗</b>、<b>複習列表</b>、<b>歷史</b>。複習分頁（生字卡／拼字／測驗）須先選詞彙或詞組（或載入清單）。</p>
 
       <h3>9.2 學習計劃對話框 <span style="font-weight:400;font-size:.8em">（進入時）</span></h3>
       <p>開啟我的詞彙頁面時，會彈出一次性的<b>學習計劃</b>視窗，助你即時開始練習——無須手動選字。它在詞彙載入後出現，每次載入頁面僅顯示一次，重新整理或重新登入前不會再彈。選一個預設、或自訂計劃，再選複習模式，兩步即可開始複習。</p>
@@ -2041,7 +2129,7 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <p>選擇<b>生字卡</b>、<b>拼寫</b>或<b>測驗</b>，所選詞彙即直接進入該複習分頁——完全跳過詞彙表格、篩選器及「開始複習」按鈕。<b>自訂計劃</b>展開器讓你從五種自動選取策略（§9.4）中任選，並設定詞數（1–100），再進入同一個模式選擇器。</p>
+      <p>選擇<b>生字卡</b>、<b>拼寫</b>或<b>測驗</b>，所選詞彙即直接進入該複習分頁——完全跳過詞彙表格、篩選器及「開始複習」按鈕。<b>自訂計劃</b>展開器讓你從五種自動選取策略（§9.5）中任選，並設定詞數（1–100），再進入同一個模式選擇器。</p>
 
       <h3>9.3 詞彙表格</h3>
       <p>可排序、篩選、分頁（每頁 25/50/75/100）。欄含<b>來源</b>徽章（自有／教師分享）、彩色<b>評級</b>（困難紅／中等黃／容易綠）及<b>熟練度</b>（L0–L5）徽章。</p>
@@ -2050,10 +2138,20 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>☐</td><td><b>ecosystem</b></td><td>n.</td><td>community of organisms</td><td><span class="badge b-slate">自有</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>容易</span></td><td><span class="badge b-green">已掌握</span></td><td class="small">2 天前</td></tr>
         <tr><td>☐</td><td><b>symbiosis</b></td><td>n.</td><td>close long-term interaction</td><td><span class="badge b-violet">教師</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>困難</span></td><td><span class="badge" style="background:#fee2e2;color:#dc2626">L1</span></td><td class="small">從未</td></tr>
       </table>
-      <p>篩選：<b>評級</b>（全部／困難／中等／容易）、<b>熟練度</b>（全部／到期／新詞／已掌握）、<b>來源</b>（全部／自有／教師），另含文字<b>搜尋</b>。以標題列核取方塊批量選取；選取後出現「開始複習」浮動條。</p>
+      <p>篩選：<b>評級</b>（全部／困難／中等／容易）、<b>熟練度</b>（全部／到期／新詞／已掌握）、<b>來源</b>（全部／自有／教師），另含文字<b>搜尋</b>。以標題列核取方塊批量選取；選取後出現「開始複習」浮動條。詞彙分頁僅顯示單字——多詞詞塊位於<b>詞組</b>分頁（§9.4）。</p>
 
-      <h3>9.4 自動選取策略</h3>
-      <p>自動選取面板用五種策略之一為你挑生字（受現用篩選影響）：</p>
+      <h3>9.4 詞組分頁</h3>
+      <p>你從主閱讀頁面的<b>詞組與搭配詞</b>區段（§5.2）儲存的多詞詞塊會出現在這裏——動詞短語、搭配詞、慣用語及固定表達。表格具備與詞彙表格相同的欄位、排序、篩選（評級／熟練度／來源／搜尋）、分頁（25/50/75/100）及批量選取，但<b>生字</b>欄變為<b>詞組</b>，<b>詞性</b>欄顯示詞塊的<b>句型</b>（如 <i>動+名</i>、<i>動詞短語</i>、<i>慣用語</i>）。</p>
+      <table class="ref">
+        <tr><th style="width:28px">☐</th><th>詞組 <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>音節</th><th>句型</th><th>英文釋義</th><th>中文</th><th>例句</th><th>來源</th><th>評級</th><th>等級</th></tr>
+        <tr><td>☐</td><td><b>take into account</b></td><td class="small">take in·to ac·COUNT</td><td><span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">動+名</span></td><td class="small">to consider when judging</td><td class="small">考慮</td><td class="small"><i>"We must take the cost into account."</i></td><td><span class="badge b-slate">自有</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>中等</span></td><td><span class="badge" style="background:#fef3c7;color:#b45309">L2</span></td></tr>
+        <tr><td>☐</td><td><b>in danger of</b></td><td class="small">in DAN·ger of</td><td><span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">介+名+介</span></td><td class="small">close to something bad</td><td class="small">瀕臨</td><td class="small"><i>"Reefs are in danger of vanishing."</i></td><td><span class="badge b-slate">自有</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>困難</span></td><td><span class="badge" style="background:#fee2e2;color:#dc2626">L1</span></td></tr>
+      </table>
+      <p>每個詞組均有 🔊 <b>聆聽</b>按鈕（語音合成朗讀整個詞塊）。表格上方同樣有<b>自動選取</b>面板（§9.5）及<b>匯出</b>面板（§9.7），範圍限於詞組。已選詞組可透過<b>生字卡</b>、<b>拼字</b>或<b>測驗</b>複習——SRS 系統將它們與單字同等對待。詞組庫為空時，分頁會提示你從閱讀工作階段提取搭配詞。</p>
+      <div class="callout tip"><strong>詞組從何而來？</strong> 詞組透過主閱讀頁面的「詞組與搭配詞」區段（§5.2）中的<b>加入詞組</b>收集。每個儲存的詞塊會將其句型、雙語釋義及例句帶入此表格。</div>
+
+      <h3>9.5 自動選取策略</h3>
+      <p>自動選取面板用五種策略之一為你挑生字（受現用篩選影響）。此面板同時出現在詞彙及詞組分頁——在詞組分頁上，它會從你的多詞詞塊中選取：</p>
       <table class="ref">
         <tr><th>策略</th><th>選取</th></tr>
         <tr><td><b>到期複習</b></td><td>現已到期的生字（從未複習或間隔已過），最快到期者優先。</td></tr>
@@ -2063,11 +2161,11 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>最弱詞彙</b></td><td>複習過但正確率最低的生字。</td></tr>
       </table>
 
-      <h3>9.5 複習清單 <span style="font-weight:400;font-size:.8em">（命名詞集）</span></h3>
+      <h3>9.6 複習清單 <span style="font-weight:400;font-size:.8em">（命名詞集）</span></h3>
       <p>從已選生字建立複習清單（「加入複習清單」），再於<b>清單分頁</b>管理：<b>播放</b>（載入複習佇列）、<b>編輯</b>（改名／移除生字）、<b>分享</b><span class="tag-teacher"></span>、<b>刪除</b>。分頁每頁 10/20/30/50。</p>
 
-      <h3>9.6 匯出 <span style="font-weight:400;font-size:.8em">（4 種格式）</span></h3>
-      <p>匯出面板可匯出已選生字或全部：</p>
+      <h3>9.7 匯出 <span style="font-weight:400;font-size:.8em">（4 種格式）</span></h3>
+      <p>匯出面板可匯出已選詞彙／詞組或全部（範圍限於現用的詞彙或詞組分頁）：</p>
       <table class="ref">
         <tr><th>格式</th><th>檔案</th><th>內容</th></tr>
         <tr><td>詞彙表</td><td>.docx</td><td>含定義的詞彙表。</td></tr>
@@ -2076,10 +2174,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>配對練習</td><td>.docx</td><td>生字↔定義配對。</td></tr>
       </table>
 
-      <h3>9.7 複習歷史</h3>
-      <p>過往複習工作階段（生字卡／測驗／拼字）的分頁記錄。每列顯示模式、詞數、準確度％（彩色）、時間。展開可看每評級次數（生字卡）或逐詞結果（測驗／拼字），連同熟練度徽章。</p>
+      <h3>9.8 複習歷史</h3>
+      <p>過往複習工作階段（生字卡／測驗／拼字）的分頁記錄。每列顯示模式、詞數、準確度％（彩色）、時間，並以項目類型徽章區分<b>單字</b>與<b>詞組</b>工作階段。展開可看每評級次數（生字卡）或逐詞結果（測驗／拼字），連同熟練度徽章。</p>
 
-      <h3>9.8 分享 <span class="tag-teacher"></span></h3>
+      <h3>9.9 分享 <span class="tag-teacher"></span></h3>
       <div class="callout teacher"><strong>僅限教師／管理員／超級管理員</strong> 兩種分享，學生介面皆隱藏：
       <ul style="margin:6px 0 0">
         <li><b>分享個別生字</b>——發送給同校用戶（超級管理員可發任何用戶）。已有該生字者會跳過。</li>

@@ -1005,8 +1005,52 @@ body.toc-noscroll{overflow:hidden}
       </table>
       <div class="callout tip"><strong>Tip</strong> Once text is extracted you can <b>edit it</b> (pencil icon in the Original tab) — handy for fixing OCR errors. Editing clears AI-derived content (adapted text, glossary, etc.) after a confirmation prompt.</div>
 
-      <h3>4.3 Summary</h3>
-      <p>Click <b>Generate</b> to get a streaming AI summary: a TL;DR, main points, key words, and a reflection question, rendered as Markdown.</p>
+      <h3>4.3 Before You Read (Pre-Reading)</h3>
+      <p>Before diving into the full text, click <b>Prepare Pre-Reading</b> to generate a set of warm-up activities that prime your brain for reading. The AI analyses the text and produces five components, designed to be worked through top-to-bottom:</p>
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-sparkles"/></svg> Before You Read</div><span class="btn sm"><svg class="ic sm"><use href="#i-sparkles"/></svg> Regenerate</span></div>
+        <div class="mock-body">
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg class="ic sm" style="color:#f59e0b"><use href="#i-lightbulb"/></svg><span style="font-weight:600;font-size:13px">Activate Your Knowledge</span></div>
+            <ul class="small" style="margin:0"><li>Have you ever visited a coral reef or seen one on TV? What do you remember about it?</li></ul>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--subtle);margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg class="ic sm" style="color:#0891b2"><use href="#i-globe"/></svg><span style="font-weight:600;font-size:13px">Background</span></div>
+            <p class="small" style="margin:0">Coral reefs are underwater ecosystems built by tiny animals called polyps. They are often called "the rainforests of the sea"…</p>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg class="ic sm pri"><use href="#i-target"/></svg><span style="font-weight:600;font-size:13px">Purpose</span></div>
+            <p class="small" style="margin:0">Read to find out why coral reefs are in danger and what might save them.</p>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg class="ic sm" style="color:#2563eb"><use href="#i-book-open"/></svg><span style="font-weight:600;font-size:13px">Key Words to Know First</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px"><span class="btn sm outline" style="padding:2px 6px;flex-shrink:0"><svg class="ic sm"><use href="#i-volume-2"/></svg></span><div><span style="font-weight:600;font-size:13px">ecosystem</span> <span class="small" style="color:var(--muted)">e·co·sys·tem <em>(n.)</em></span><p class="small" style="margin:0">A community of living organisms and their physical environment.</p></div></div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;padding:10px;background:rgba(245,158,11,.05)">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><svg class="ic sm" style="color:#f59e0b"><use href="#i-sparkles"/></svg><span style="font-weight:600;font-size:13px">What do you think this text will be about?</span></div>
+            <div style="border:1px solid rgba(245,158,11,.3);border-radius:6px;padding:8px;margin-bottom:8px;background:var(--card)">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg class="ic sm" style="color:#f59e0b"><use href="#i-eye"/></svg><span class="small" style="font-weight:600">Skim first</span><svg class="ic sm" style="margin-left:auto"><use href="#i-chevron-down"/></svg></div>
+              <p class="small" style="margin:0 0 3px"><b>Title:</b> Coral Reefs in Danger</p>
+              <p class="small" style="margin:0 0 3px;color:var(--muted)"><b>First paragraph:</b> Coral reefs are among the most diverse ecosystems on Earth…</p>
+              <p class="small" style="margin:0;color:var(--muted)"><b>Last paragraph:</b> Without action, we may lose them within our lifetime.</p>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--muted);font-size:12px">Skim the text above, then type what you think it will be about…</div>
+          </div>
+        </div>
+      </div>
+      <table class="ref">
+        <tr><th>Part</th><th>What it does</th></tr>
+        <tr><td><b>Activate Your Knowledge</b></td><td>Questions that connect the topic to what you already know (bilingual: English + Chinese).</td></tr>
+        <tr><td><b>Background</b></td><td>Cultural or contextual knowledge the text assumes you have.</td></tr>
+        <tr><td><b>Purpose</b></td><td>A clear reason to read — what to find out.</td></tr>
+        <tr><td><b>Key Words to Know First</b></td><td>Pre-teaches essential vocabulary: definition, syllabification, part of speech, and a 🔊 listen button (TTS).</td></tr>
+        <tr><td><b>Predict</b></td><td>A skim-then-predict task — see below.</td></tr>
+      </table>
+      <p>The <b>Predict</b> card includes a collapsible <b>Skim first</b> helper that surfaces the title, sub-headings, topic sentences, and the first &amp; last paragraphs — skim these quickly, then type your prediction in the box. <strong>After you generate the Summary</strong> (§4.4), a <b>Check Your Prediction</b> card appears here: re-read your guess against the summary and rate it 😕 Not close / 🙂 Somewhat / 🎯 Very close. Predicting before reading is a proven way to sharpen focus and boost retention.</p>
+      <div class="callout tip"><strong>Tip</strong> Skim first, then predict — it focuses your reading and helps you remember more. Tap a key word's 🔊 button to hear it pronounced before you start reading.</div>
+
+      <h3>4.4 Summary</h3>
+      <p>Click <b>Generate</b> for a streaming AI summary rendered as Markdown: a one-line <b>TL;DR</b> — the simplest possible explanation of the text — and 3–5 <b>Main Points</b> as emoji bullets. The tone and complexity adapt to the student's age. Generating the summary also unlocks the <b>Check Your Prediction</b> card back in Before You Read (§4.3), so you can rate how close your guess was.</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-file-text"/></svg> Summary</div><span class="btn primary sm"><svg class="ic sm"><use href="#i-file-text"/></svg> Generate Summary</span></div>
         <div class="mock-body">
@@ -1017,7 +1061,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.4 Mind Map</h3>
+      <h3>4.5 Mind Map</h3>
       <p>A toggle lets you choose <b>Chinese or English</b>, then Generate produces a Markdown mind map (scrollable). Regenerate any time.</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-waypoints"/></svg> Mind Map</div><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> Chinese</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-waypoints"/></svg> Generate Mind Map</span></div>
@@ -1072,7 +1116,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.5 Visualization</h3>
+      <h3>4.6 Visualization</h3>
       <p>AI generates an illustration of the text's content (toggle Chinese/English for the prompt). After generation you can <b>Download (PNG)</b> or click the image for a fullscreen zoom. <strong>Rate-limited</strong>: Free = 1/day, Subscription = 2/day, Meter = unlimited. A "remaining: N" counter shows your quota; when 0 a lock screen appears.</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-image"/></svg> Text Visualization</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-download"/></svg> Download</span><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> Chinese</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-image"/></svg> Regenerate</span><span class="small">1 left today</span></div>
@@ -1315,7 +1359,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.6 Adapted Text — the interactive reading hub</h3>
+      <h3>4.7 Adapted Text — the interactive reading hub</h3>
       <p>The largest section. Three tabs let you read the <b>Original</b>, an <b>Adapted</b> (age-simplified) version, and a <b>Simplified</b> (even simpler) version side by side, with paragraph navigation between them.</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-book-open"/></svg> Text Analysis &amp; Adaptation</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-file-down"/></svg> Download Word <svg class="ic sm"><use href="#i-chevron-down"/></svg></span></div>
@@ -1344,7 +1388,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Download Word</b></td><td>Export a styled .docx with checkboxes to include Glossary and/or Sentence Analysis, plus adapted/simplified sections.</td></tr>
       </table>
 
-      <h3>4.7 Text Difficulty &amp; CEFR Highlighting</h3>
+      <h3>4.8 Text Difficulty &amp; CEFR Highlighting</h3>
       <p>Below the Adapted Text, toggle <b>Show Cards</b> to compare readability metrics across Original/Adapted/Simplified, and toggle <b>CEFR Highlight</b> to color-code every word by its difficulty level.</p>
       <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:200px">
@@ -1380,10 +1424,10 @@ body.toc-noscroll{overflow:hidden}
       <div class="chapter-head">
         <span class="chapter-num">CHAPTER 5</span>
         <h2 class="section-title">5. Vocabulary Tools &amp; Spaced Repetition</h2>
-        <p class="small">The in-session Glossary hub: table, flashcards, spelling game, and quiz — all powered by the Leitner SRS algorithm.</p>
+        <p class="small">The in-session Glossary hub: table, flashcards, spelling game, quiz, and phrases &amp; collocations — all powered by the Leitner SRS algorithm.</p>
       </div>
 
-      <p>Once you have <b>highlighted words</b> (from AI Vocabulary Suggest or by selecting text), the <strong>Glossary</strong> section can generate definitions. It then becomes a hub with four sub-tabs: <b>Table</b>, <b>Flashcard</b>, <b>Spelling</b>, and <b>Quiz</b>. Every word you practice is tracked by a spaced-repetition system (SRS) so you review the right words at the right time.</p>
+      <p>Once you have <b>highlighted words</b> (from AI Vocabulary Suggest or by selecting text), the <strong>Glossary</strong> section can generate definitions. It then becomes a hub with four sub-tabs: <b>Table</b>, <b>Flashcard</b>, <b>Spelling</b>, and <b>Quiz</b>. Directly below the Glossary, the <b>Phrases &amp; Collocations</b> section extracts multi-word expressions (phrasal verbs, collocations, idioms) with Cantonese-L1 contrast notes. Every word and phrase you practice is tracked by a spaced-repetition system (SRS) so you review the right items at the right time.</p>
 
       <h3>5.1 The Glossary hub</h3>
       <div class="mock">
@@ -1402,9 +1446,53 @@ body.toc-noscroll{overflow:hidden}
         <li><b>Table tab</b> — sortable by Word or Part of Speech. Columns: word, syllabification, POS, English/Chinese definition, example.</li>
         <li><b>Export</b> — "Download Word" (styled glossary .docx) or "Download Excel" (.xlsx with filter, frozen header, Chinese font).</li>
         <li><b>"My Vocabulary" link</b> — jumps to the full My Vocabulary page (Chapter 9).</li>
+        <li><b>Phrases &amp; Collocations</b> — the section directly below the Glossary extracts multi-word chunks from the text (see §5.2).</li>
       </ul>
 
-      <h3>5.2 Flashcards (SRS-powered)</h3>
+      <h3>5.2 Phrases &amp; Collocations</h3>
+      <p>Directly below the Glossary, this section scans the text for 6–12 high-value <b>multi-word chunks</b> — phrasal verbs, delexicalized-verb collocations (<i>take / make / have / do</i> + noun), adjective+noun pairs, prepositional phrases, and idioms — that a single-word glossary misses. Click <b>Extract Collocations</b> (extraction takes 1–2 minutes). It deliberately skips words already covered in your glossary.</p>
+      <div class="mock">
+        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-languages"/></svg> Phrases &amp; Collocations</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-plus"/></svg> Add All to Phrases</span><span class="btn sm"><svg class="ic sm"><use href="#i-languages"/></svg> Regenerate</span></div>
+        <div class="mock-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                <div style="display:flex;align-items:flex-start;gap:4px"><span class="btn sm outline" style="padding:2px 6px;flex-shrink:0"><svg class="ic sm"><use href="#i-volume-2"/></svg></span><div><span style="font-weight:600;font-size:13px">take into account</span><br><span class="small" style="color:var(--muted)">take in·to ac·COUNT</span></div></div>
+                <span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">V + N (idiomatic)</span>
+              </div>
+              <p class="small" style="margin:0">to consider something when judging a situation</p>
+              <p class="small" style="margin:0;color:var(--muted)">考慮；把……計算在內</p>
+              <div style="display:flex;align-items:flex-start;gap:4px;border-radius:6px;background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);padding:6px 8px"><svg class="ic sm" style="color:#f43f5e;flex-shrink:0;margin-top:1px"><use href="#i-alert-triangle"/></svg><p class="small" style="margin:0">Cantonese speakers often say「考慮」directly; English requires the full chunk, NOT "consider into".</p></div>
+              <p class="small" style="margin:0;font-style:italic;color:var(--muted)">"We must take the cost into account."</p>
+              <span class="btn sm outline" style="justify-content:center;margin-top:auto"><svg class="ic sm"><use href="#i-check"/></svg> Added to Phrases</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+                <div style="display:flex;align-items:flex-start;gap:4px"><span class="btn sm outline" style="padding:2px 6px;flex-shrink:0"><svg class="ic sm"><use href="#i-volume-2"/></svg></span><div><span style="font-weight:600;font-size:13px">in danger of</span><br><span class="small" style="color:var(--muted)">in DAN·ger of</span></div></div>
+                <span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">Prep + N + Prep</span>
+              </div>
+              <p class="small" style="margin:0">close to experiencing something bad</p>
+              <p class="small" style="margin:0;color:var(--muted)">瀕臨；有……的危險</p>
+              <div style="display:flex;align-items:flex-start;gap:4px;border-radius:6px;background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.2);padding:6px 8px"><svg class="ic sm" style="color:#f43f5e;flex-shrink:0;margin-top:1px"><use href="#i-alert-triangle"/></svg><p class="small" style="margin:0">Don't drop the second "of" — say "in danger of disappearing", NOT "in danger disappearing".</p></div>
+              <p class="small" style="margin:0;font-style:italic;color:var(--muted)">"The reefs are in danger of vanishing."</p>
+              <span class="btn sm secondary" style="justify-content:center;margin-top:auto"><svg class="ic sm"><use href="#i-plus"/></svg> Add to Phrases</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <table class="ref">
+        <tr><th>Card element</th><th>What it shows</th></tr>
+        <tr><td><b>🔊 Listen</b></td><td>Pronounces the whole chunk (TTS).</td></tr>
+        <tr><td><b>Syllabification</b></td><td>The chunk split into syllables with the stressed syllable in CAPS (e.g. <code>take in·to ac·COUNT</code>).</td></tr>
+        <tr><td><b>Pattern</b></td><td>A short grammar label — <i>Phrasal verb</i>, <i>V+N</i>, <i>Adj+N</i>, <i>Prepositional phrase</i>, <i>Idiom</i>, etc.</td></tr>
+        <tr><td><b>Meaning</b></td><td>English + Traditional Chinese (繁體中文) gloss, age-appropriate.</td></tr>
+        <tr><td><b>⚠️ Contrast note</b></td><td>The key value of this feature: flags the specific error Cantonese-L1 speakers typically make (wrong preposition, word-for-word translation, missing article). Shown only when a common transfer pitfall exists.</td></tr>
+        <tr><td><b>Example</b></td><td>A sentence using the chunk (preferably from the text).</td></tr>
+        <tr><td><b>Add to Phrases</b></td><td>Saves the chunk to the <b>Phrases</b> tab on the My Vocabulary page (Chapter 9) for spaced-repetition review. <b>Add All to Phrases</b> (header) saves every chunk at once.</td></tr>
+      </table>
+      <div class="callout tip"><strong>Why contrast notes matter</strong> Roughly half of the collocation errors Hong Kong learners make come from word-for-word translation from Chinese. The contrast notes are where you'll catch them — read each one before saving a phrase.</div>
+
+      <h3>5.3 Flashcards (SRS-powered)</h3>
       <p>Flip cards to study. Front: word + syllabification + POS + speak button. Back: definitions + example. Rate each card to schedule its next review.</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-layers"/></svg> Flashcard</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-target"/></svg> Prioritize hard words</span><span class="btn sm outline"><svg class="ic sm"><use href="#i-shuffle"/></svg> Shuffle</span></div>
@@ -1435,7 +1523,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.3 Spelling game</h3>
+      <h3>5.4 Spelling game</h3>
       <p>Type words from memory across four modes. Requires ≥3 words.</p>
       <table class="ref">
         <tr><th>Mode</th><th>What you do</th></tr>
@@ -1488,7 +1576,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.4 Multiplayer Spelling Battle ⚔️</h3>
+      <h3>5.5 Multiplayer Spelling Battle ⚔️</h3>
       <p>Challenge your classmates to a <b>live, real-time spelling duel</b>. Pick a game mode — Listen &amp; Type, Letter Scramble, Fill Blanks, or Mixed — and race to master words simultaneously while a live ranking updates after every word.</p>
       <div class="callout"><strong>How it works</strong>
         <ol style="margin:6px 0 0;padding-left:20px">
@@ -1637,7 +1725,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="mock-cap">Spelling Battle Arena — live gameplay with listen-type mode. The left panel shows the word challenge (speaker, hints, input, feedback); the right panel updates ranking in real time after every word.</div>
 
-      <h3>5.5 Vocabulary Quiz</h3>
+      <h3>5.6 Vocabulary Quiz</h3>
       <p>Multiple-choice quiz (requires ≥4 words). Questions are randomly one of three types: <b>Word→Definition</b>, <b>Definition→Word</b>, or <b>Fill-blank</b> (cloze from the example). Optional <b>Time Challenge</b> (Easy 20s / Medium 15s / Hard 10s per question).</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-clipboard-list"/></svg> Vocabulary Quiz</div><span class="small"><svg class="ic sm"><use href="#i-timer"/></svg> 9s</span></div>
@@ -1654,7 +1742,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>5.6 The SRS algorithm explained</h3>
+      <h3>5.7 The SRS algorithm explained</h3>
       <p>Mr.🆖 ProReader uses the <strong>Leitner 5-box</strong> system. Each word sits in a "box" (mastery level 0–5). Answering correctly moves it up a box (longer interval until next review); answering incorrectly moves it down. The goal: review hard words often, easy words rarely, until mastered.</p>
       <table class="ref">
         <tr><th>Box / Level</th><th>Label</th><th>Review interval</th><th>Color</th></tr>
@@ -1994,10 +2082,10 @@ body.toc-noscroll{overflow:hidden}
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#22c55e"><use href="#i-check-circle-2"/></svg> Mastered</div><b style="font-size:1.2rem;color:#22c55e">95</b></div>
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#3b82f6"><use href="#i-brain"/></svg> New Words</div><b style="font-size:1.2rem;color:#3b82f6">31</b></div>
           </div>
-          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-table"/></svg> Table</span><span><svg class="ic sm"><use href="#i-layers"/></svg> Flashcard</span><span><svg class="ic sm"><use href="#i-spell-check"/></svg> Spelling</span><span><svg class="ic sm"><use href="#i-clipboard-list"/></svg> Quiz</span><span><svg class="ic sm"><use href="#i-list-plus"/></svg> Review Lists</span><span><svg class="ic sm"><use href="#i-history"/></svg> History</span></div>
+          <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-table"/></svg> Words</span><span><svg class="ic sm"><use href="#i-languages"/></svg> Phrases</span><span><svg class="ic sm"><use href="#i-layers"/></svg> Flashcard</span><span><svg class="ic sm"><use href="#i-spell-check"/></svg> Spelling</span><span><svg class="ic sm"><use href="#i-clipboard-list"/></svg> Quiz</span><span><svg class="ic sm"><use href="#i-list-plus"/></svg> Review Lists</span><span><svg class="ic sm"><use href="#i-history"/></svg> History</span></div>
         </div>
       </div>
-      <p>Four stat cards double as filters — click one to filter the table. The six tabs are: <b>Table</b>, <b>Flashcard</b>, <b>Spelling</b>, <b>Quiz</b>, <b>Lists</b>, <b>History</b>. The review tabs (Flashcard/Spelling/Quiz) require you to select words first (or load a review list).</p>
+      <p>Four stat cards double as filters — click one to filter the table. The cards and table are <b>context-aware</b>: on the <b>Words</b> tab they count and list single words; on the <b>Phrases</b> tab they switch to counting and listing multi-word chunks. The seven tabs are: <b>Words</b>, <b>Phrases</b>, <b>Flashcard</b>, <b>Spelling</b>, <b>Quiz</b>, <b>Review Lists</b>, and <b>History</b>. The review tabs (Flashcard/Spelling/Quiz) require you to select words or phrases first (or load a review list).</p>
 
       <h3>9.2 Study Plan dialog <span style="font-weight:400;font-size:.8em">(on entry)</span></h3>
       <p>When you open the My Vocabulary page, a one-time <b>Study Plan</b> popup helps you jump straight into practice — no need to select words manually. It appears once per page load (after your vocabulary has loaded) and won't reappear until you reload or sign back in. Pick a preset, optionally build a custom plan, choose a review mode, and you're reviewing in two taps.</p>
@@ -2041,7 +2129,7 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <p>Choose <b>Flashcards</b>, <b>Spelling</b>, or <b>Quiz</b> and the selected words launch straight into that review tab — the word table, filters, and "Start Review" button are skipped entirely. The <b>Custom plan</b> expander lets you pick any of the five Auto-Select strategies (§9.4) plus a word count (1–100) before reaching the same mode picker.</p>
+      <p>Choose <b>Flashcards</b>, <b>Spelling</b>, or <b>Quiz</b> and the selected words launch straight into that review tab — the word table, filters, and "Start Review" button are skipped entirely. The <b>Custom plan</b> expander lets you pick any of the five Auto-Select strategies (§9.5) plus a word count (1–100) before reaching the same mode picker.</p>
 
       <h3>9.3 The word table</h3>
       <p>Sortable, filterable, paginated (25/50/75/100 per page). Columns include a <b>Source</b> badge (Own / Teacher-shared) and color-coded <b>Rating</b> (hard=red / medium=yellow / easy=green) and <b>Mastery</b> (L0–L5) badges.</p>
@@ -2050,10 +2138,20 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>☐</td><td><b>ecosystem</b></td><td>n.</td><td>community of organisms</td><td><span class="badge b-slate">Own</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>Easy</span></td><td><span class="badge b-green">Mastered</span></td><td class="small">2 days ago</td></tr>
         <tr><td>☐</td><td><b>symbiosis</b></td><td>n.</td><td>close long-term interaction</td><td><span class="badge b-violet">Teacher</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>Hard</span></td><td><span class="badge" style="background:#fee2e2;color:#dc2626">L1</span></td><td class="small">Never</td></tr>
       </table>
-      <p>Filters: <b>Rating</b> (all/hard/medium/easy), <b>Mastery</b> (all/due/new/mastered), <b>Source</b> (all/own/teacher), plus free-text <b>search</b>. Bulk-select with the header checkbox; a glowing "Start Review" bar appears when words are selected.</p>
+      <p>Filters: <b>Rating</b> (all/hard/medium/easy), <b>Mastery</b> (all/due/new/mastered), <b>Source</b> (all/own/teacher), plus free-text <b>search</b>. Bulk-select with the header checkbox; a glowing "Start Review" bar appears when words are selected. The Words tab only shows single words — multi-word chunks live in the <b>Phrases</b> tab (§9.4).</p>
 
-      <h3>9.4 Auto-Select strategies</h3>
-      <p>The Auto-Select panel picks words for you using one of five strategies (respects active filters):</p>
+      <h3>9.4 The Phrases tab</h3>
+      <p>Multi-word chunks you saved from the <b>Phrases &amp; Collocations</b> section (§5.2) appear here — phrasal verbs, collocations, idioms, and fixed expressions. The table has the same columns, sorting, filtering (Rating / Mastery / Source / search), pagination (25/50/75/100), and bulk-select as the word table, but the <b>Word</b> column becomes <b>Phrase</b> and the <b>PoS</b> column shows the chunk's <b>pattern</b> (e.g. <i>V+N</i>, <i>Phrasal verb</i>, <i>Idiom</i>).</p>
+      <table class="ref">
+        <tr><th style="width:28px">☐</th><th>Phrase <svg class="ic sm muted"><use href="#i-arrow-down"/></svg></th><th>Syllabification</th><th>Pattern</th><th>English Definition</th><th>Chinese</th><th>Example</th><th>Source</th><th>Rating</th><th>Level</th></tr>
+        <tr><td>☐</td><td><b>take into account</b></td><td class="small">take in·to ac·COUNT</td><td><span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">V+N</span></td><td class="small">to consider when judging</td><td class="small">考慮</td><td class="small"><i>"We must take the cost into account."</i></td><td><span class="badge b-slate">Own</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>Medium</span></td><td><span class="badge" style="background:#fef3c7;color:#b45309">L2</span></td></tr>
+        <tr><td>☐</td><td><b>in danger of</b></td><td class="small">in DAN·ger of</td><td><span class="pill" style="font-size:10px;background:var(--primary-soft);color:var(--primary)">Prep+N+Prep</span></td><td class="small">close to something bad</td><td class="small">瀕臨</td><td class="small"><i>"Reefs are in danger of vanishing."</i></td><td><span class="badge b-slate">Own</span></td><td><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>Hard</span></td><td><span class="badge" style="background:#fee2e2;color:#dc2626">L1</span></td></tr>
+      </table>
+      <p>Each phrase has a 🔊 <b>listen</b> button (TTS pronounces the whole chunk). The same <b>Auto-Select</b> panel (§9.5) and <b>Export</b> panel (§9.7) appear above the table, scoped to phrases. Selected phrases can be reviewed via <b>Flashcards</b>, <b>Spelling</b>, or <b>Quiz</b> — the SRS system treats them identically to words. When the phrases bank is empty, the tab shows a prompt to extract collocations from a reading session.</p>
+      <div class="callout tip"><strong>Where do phrases come from?</strong> Phrases are collected via <b>Add to Phrases</b> in the Phrases &amp; Collocations section (§5.2) of the main reading page. Each saved chunk carries its pattern, bilingual meaning, and example sentence into this table.</div>
+
+      <h3>9.5 Auto-Select strategies</h3>
+      <p>The Auto-Select panel picks words for you using one of five strategies (respects active filters). The same panel appears on both the Words and Phrases tabs — on Phrases, it selects from your multi-word chunks instead:</p>
       <table class="ref">
         <tr><th>Strategy</th><th>Selects</th></tr>
         <tr><td><b>Due for Review</b></td><td>Words due now (never reviewed or interval elapsed), soonest first.</td></tr>
@@ -2063,11 +2161,11 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Weakest Words</b></td><td>Reviewed words with the lowest correct/total ratio.</td></tr>
       </table>
 
-      <h3>9.5 Review Lists <span style="font-weight:400;font-size:.8em">(named word sets)</span></h3>
+      <h3>9.6 Review Lists <span style="font-weight:400;font-size:.8em">(named word sets)</span></h3>
       <p>Create named lists from selected words (via "Add to Review List"), then manage them in the <b>Lists tab</b>: <b>Play</b> (load into the review queue), <b>Edit</b> (rename / remove words), <b>Share</b> <span class="tag-teacher"></span>, <b>Delete</b>. Paginated 10/20/30/50 per page.</p>
 
-      <h3>9.6 Export <span style="font-weight:400;font-size:.8em">(4 formats)</span></h3>
-      <p>The Export panel exports either your selected words or all of them:</p>
+      <h3>9.7 Export <span style="font-weight:400;font-size:.8em">(4 formats)</span></h3>
+      <p>The Export panel exports either your selected words/phrases or all of them (scoped to the active Words or Phrases tab):</p>
       <table class="ref">
         <tr><th>Format</th><th>File</th><th>Content</th></tr>
         <tr><td>Glossary</td><td>.docx</td><td>Word list with definitions in a table.</td></tr>
@@ -2076,10 +2174,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Matching Exercise</td><td>.docx</td><td>Match words with definitions.</td></tr>
       </table>
 
-      <h3>9.7 Review History</h3>
-      <p>A paginated log of past review sessions (flashcard/quiz/spelling). Each row shows mode, word count, accuracy % (color-coded), and timestamp. Expand a row to see per-rating counts (flashcard) or per-word results (quiz/spelling), with resulting mastery badges.</p>
+      <h3>9.8 Review History</h3>
+      <p>A paginated log of past review sessions (flashcard/quiz/spelling). Each row shows mode, word count, accuracy % (color-coded), and timestamp, with an entry-type badge distinguishing <b>word</b> vs <b>phrase</b> sessions. Expand a row to see per-rating counts (flashcard) or per-word results (quiz/spelling), with resulting mastery badges.</p>
 
-      <h3>9.8 Sharing <span class="tag-teacher"></span></h3>
+      <h3>9.9 Sharing <span class="tag-teacher"></span></h3>
       <div class="callout teacher"><strong>Teacher / admin / super-admin only</strong> Two kinds of sharing exist, both hidden from students:
       <ul style="margin:6px 0 0">
         <li><b>Share individual words</b> — send selected words to same-school users (super-admins: any user). Recipients who already have a word are skipped.</li>
