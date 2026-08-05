@@ -622,7 +622,6 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         defaultGlossarySessionId={disableSessionGlossary ? undefined : (id ?? undefined)}
         selectedWords={glossary.map((g) => g.word)}
         onWordResult={onWordResult}
-        onComplete={onComplete}
         onExitToSolo={() => setPlayMode("solo")}
       />
     );

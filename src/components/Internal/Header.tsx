@@ -132,6 +132,18 @@ function Header() {
   const battleActive = battleStatus === "countdown" || battleStatus === "playing" || !!battleCurrentWord;
   const showBattleLobbyDialog = useBattleStore((s) => s.showBattleLobbyDialog);
   const setShowBattleLobbyDialog = useBattleStore((s) => s.setShowBattleLobbyDialog);
+  // Per-word SRS for battles started from the Header dialog. Uses the same
+  // `correct`-only PATCH as the solo spelling game (Glossary.tsx). That path
+  // runs a pure UPDATE on user_vocabulary, so words the user doesn't already
+  // have are skipped (0 rows) — battle words are NOT auto-inserted into the
+  // joiner's My Vocabulary; only existing words' mastery is updated.
+  const handleBattleWordResult = useCallback((word: string, correct: boolean) => {
+    fetch("/api/vocabulary/word", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ word, correct }),
+    }).catch(() => {});
+  }, []);
   const totalPending = pendingCount + pendingReviewListShareCount + pendingClassBattleCount;
   const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
   const {
@@ -1030,7 +1042,7 @@ function Header() {
             </DialogTitle>
             <DialogDescription>{t("reading.glossary.spelling.multiplayer.dialogDesc")}</DialogDescription>
           </DialogHeader>
-          <SpellingBattleFlow onExitToSolo={() => setShowBattleLobbyDialog(false)} />
+          <SpellingBattleFlow onWordResult={handleBattleWordResult} onExitToSolo={() => setShowBattleLobbyDialog(false)} />
         </DialogContent>
       </Dialog>
       <input

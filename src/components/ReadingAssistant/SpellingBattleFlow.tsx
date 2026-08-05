@@ -17,10 +17,8 @@ interface SpellingBattleFlowProps {
   defaultGlossarySessionId?: string;
   /** Inline word texts from the host's current selection (vocabulary-page context); enables the "selected" source. */
   selectedWords?: string[];
-  /** Per-word SRS callback (fired on the /vocabulary page; undefined on the reading page). */
+  /** Optional per-word SRS callback (e.g. PATCH /api/vocabulary/word). Page-supplied. */
   onWordResult?: (word: string, correct: boolean) => void;
-  /** Review-session callback (fired on the /vocabulary page; undefined on the reading page). */
-  onComplete?: (results: { word: string; correct: boolean }[]) => void;
   /** Return to the solo spelling setup. */
   onExitToSolo: () => void;
 }
@@ -33,15 +31,21 @@ interface SpellingBattleFlowProps {
  * On game_end, persists the result via the SAME paths the solo game uses:
  *   - `setSpellingGameBestScore` (reading store — best score + running accuracy)
  *   - `logActivity("spelling_complete", { multiplayer: true, ... })` (leaderboard)
- *   - `onWordResult` / `onComplete` (SRS + review session — /vocabulary page only)
+ *   - `onWordResult` (optional, page-supplied SRS per-word PATCH) + an
+ *     UNCONDITIONAL `vocabulary_review_sessions` POST
  *   - history `backup/update/save` (reading session persistence)
- * This keeps single-player and multiplayer stats unified.
+ *
+ * The review-session POST is intrinsic (not a page callback) because that row
+ * is the authoritative per-game record the student/teacher dashboards count
+ * spelling games, accuracy, and attempts from. Making it unconditional ensures
+ * battles started from ANY entry point (Header dialog, reading page,
+ * vocabulary page) are tracked — previously a page-supplied `onComplete`
+ * silently dropped battles from entry points that didn't wire it.
  */
 export function SpellingBattleFlow({
   defaultGlossarySessionId,
   selectedWords,
   onWordResult,
-  onComplete,
   onExitToSolo,
 }: SpellingBattleFlowProps) {
   const battle = useSpellingBattle();
@@ -88,7 +92,11 @@ export function SpellingBattleFlow({
       },
     });
 
-    // 3. /vocabulary page: SRS per-word + review-session POST.
+    // 3. SRS per-word (optional, page-supplied) + UNCONDITIONAL review-session
+    //    POST. The vocabulary_review_sessions row is the authoritative
+    //    per-game record the dashboards count from, so it must be created for
+    //    every battle regardless of entry point. Matches the solo game's
+    //    review-session payload (mode "spelling", masteryBefore/After = 0).
     const wordResults = battle.myWordResults;
     if (wordResults.length > 0) {
       if (onWordResult) {
@@ -96,9 +104,19 @@ export function SpellingBattleFlow({
           onWordResult(wr.word, wr.correct);
         }
       }
-      if (onComplete) {
-        onComplete(wordResults);
-      }
+      const reviewResults = wordResults.map((wr) => ({
+        word: wr.word,
+        correct: wr.correct,
+        masteryBefore: 0,
+        masteryAfter: 0,
+      }));
+      fetch("/api/vocabulary/review-sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "spelling", results: reviewResults }),
+      }).catch(() => {
+        // Silent — battle result tracking must never break the UX.
+      });
     }
 
     // 4. History persistence (reading session with updated spelling best score).
