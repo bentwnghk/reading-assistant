@@ -28,6 +28,19 @@ export function isWelcomeDialogChecked() {
   return _welcomeDialogChecked;
 }
 
+// Tracks whether the LearningRecommendationDialog ("Welcome Back!") is currently
+// open. Radix modal dialogs set `body.style.pointerEvents = "none"` (via
+// DismissableLayer disableOutsidePointerEvents), which makes sonner toasts —
+// children of <body> — unclickable. The ClassBattlePoller reads this to defer
+// class-battle invite toasts until the dialog closes.
+let _welcomeDialogOpen = false;
+export function setWelcomeDialogOpen(value: boolean) {
+  _welcomeDialogOpen = value;
+}
+export function isWelcomeDialogOpen() {
+  return _welcomeDialogOpen;
+}
+
 let currentUserId: string | null = null;
 export function setUserId(id: string | null) {
   currentUserId = id;
