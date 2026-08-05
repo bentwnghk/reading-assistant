@@ -31,6 +31,11 @@ import { Progress } from "@/components/ui/progress";
 
 interface SpellingBattleArenaProps {
   onExit: () => void;
+  /**
+   * Tighten the live-ranking height cap (Header dialog context). See the
+   * matching note on `SpellingBattleFlowProps.compact`.
+   */
+  compact?: boolean;
 }
 
 function normalize(s: string): string {
@@ -76,7 +81,7 @@ function checkAnswer(
   return normalize(answer) === normalize(wordStr);
 }
 
-export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
+export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const battle = useSpellingBattle();
@@ -675,7 +680,7 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
         </Card>
 
         {/* Live ranking strip */}
-        <RankingStrip ranking={battle.liveRanking} myUserId={myUserId} />
+        <RankingStrip ranking={battle.liveRanking} myUserId={myUserId} compact={compact} />
       </div>
     </div>
   );
@@ -684,9 +689,11 @@ export function SpellingBattleArena({ onExit }: SpellingBattleArenaProps) {
 function RankingStrip({
   ranking,
   myUserId,
+  compact,
 }: {
   ranking: BattleRankingEntry[];
   myUserId?: string;
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   return (
@@ -696,7 +703,20 @@ function RankingStrip({
           <Crown className="h-4 w-4 text-amber-500" />
           {t(`${M}.liveRank`)}
         </div>
-        <div className="space-y-1.5">
+        {/*
+          In-container scroll with a hidden scrollbar (matches GuideDialog's
+          `scrollbar-hide`). Caps are viewport-relative so the play area (the
+          grid's main column) stays fully visible alongside/above the ranking
+          without scrolling the page/dialog. `compact` lowers the caps for the
+          shorter Header battle dialog; the inline spelling-tab mount uses the
+          more generous defaults.
+        */}
+        <div
+          className={cn(
+            "space-y-1.5 overflow-y-auto scrollbar-hide",
+            compact ? "max-h-[26vh] md:max-h-[60vh]" : "max-h-[38vh] md:max-h-[72vh]",
+          )}
+        >
           {ranking.length === 0 && (
             <p className="text-xs text-muted-foreground">{t(`${M}.awaitingFirst`)}</p>
           )}

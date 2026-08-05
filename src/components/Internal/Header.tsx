@@ -1042,7 +1042,7 @@ function Header() {
             </DialogTitle>
             <DialogDescription>{t("reading.glossary.spelling.multiplayer.dialogDesc")}</DialogDescription>
           </DialogHeader>
-          <SpellingBattleFlow onWordResult={handleBattleWordResult} onExitToSolo={() => setShowBattleLobbyDialog(false)} />
+          <SpellingBattleFlow compact onWordResult={handleBattleWordResult} onExitToSolo={() => setShowBattleLobbyDialog(false)} />
         </DialogContent>
       </Dialog>
       <input

@@ -21,6 +21,15 @@ interface SpellingBattleFlowProps {
   onWordResult?: (word: string, correct: boolean) => void;
   /** Return to the solo spelling setup. */
   onExitToSolo: () => void;
+  /**
+   * Tighten the ranking-list height caps for a shorter container (the Header
+   * battle dialog, which renders inside a `max-h-[90vh]` DialogContent). When
+   * true, the live + final ranking lists cap at smaller viewport-relative
+   * heights so the question/answer area (mid-battle) and the result headline +
+   * actions (end of battle) remain fully visible without scrolling the dialog.
+   * The inline spelling-tab mount leaves this false (more generous caps).
+   */
+  compact?: boolean;
 }
 
 /**
@@ -47,6 +56,7 @@ export function SpellingBattleFlow({
   selectedWords,
   onWordResult,
   onExitToSolo,
+  compact,
 }: SpellingBattleFlowProps) {
   const battle = useSpellingBattle();
   const { data: session } = useSession();
@@ -136,12 +146,12 @@ export function SpellingBattleFlow({
 
   // ── Rendering ────────────────────────────────────────────────────────────
   if (battle.status === "finished" && battle.finalRanking.length > 0) {
-    return <SpellingBattleResults onExit={handleExit} />;
+    return <SpellingBattleResults onExit={handleExit} compact={compact} />;
   }
 
   // In-progress (countdown / playing) → arena.
   if (battle.status === "playing" || battle.status === "countdown" || battle.currentWord !== null) {
-    return <SpellingBattleArena onExit={handleExit} />;
+    return <SpellingBattleArena onExit={handleExit} compact={compact} />;
   }
 
   // Otherwise → lobby (create / join / waiting room).

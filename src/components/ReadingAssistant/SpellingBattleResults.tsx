@@ -14,6 +14,11 @@ import { cn } from "@/utils/style";
 
 interface SpellingBattleResultsProps {
   onExit: () => void;
+  /**
+   * Tighten the final-ranking height cap (Header dialog context). See the
+   * matching note on `SpellingBattleFlowProps.compact`.
+   */
+  compact?: boolean;
 }
 
 const M = "reading.glossary.spelling.multiplayer";
@@ -66,7 +71,7 @@ function FloatingParticles({ color, count }: { color: string; count: number }) {
   );
 }
 
-export function SpellingBattleResults({ onExit }: SpellingBattleResultsProps) {
+export function SpellingBattleResults({ onExit, compact }: SpellingBattleResultsProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const battle = useSpellingBattle();
@@ -194,7 +199,18 @@ export function SpellingBattleResults({ onExit }: SpellingBattleResultsProps) {
             <Crown className="h-4 w-4 text-amber-500" />
             {t(`${M}.finalRanking`)}
           </div>
-          <div className="space-y-2">
+          <div
+            className={cn(
+              // In-container scroll with a hidden scrollbar (matches
+              // GuideDialog's `scrollbar-hide`). Caps are viewport-relative so
+              // the result headline card above and the action buttons below
+              // stay fully visible without scrolling the page/dialog. `compact`
+              // lowers the caps for the shorter Header battle dialog; the
+              // inline spelling-tab mount uses the more generous defaults.
+              "space-y-2 overflow-y-auto scrollbar-hide",
+              compact ? "max-h-[34vh] md:max-h-[50vh]" : "max-h-[46vh] md:max-h-[65vh]",
+            )}
+          >
             {ranking.map((entry, idx) => {
               const isMe = entry.userId === myUserId;
               const acc = totalWords > 0 ? Math.round((entry.correctCount / totalWords) * 100) : 0;
