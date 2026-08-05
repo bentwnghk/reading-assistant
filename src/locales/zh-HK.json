@@ -384,7 +384,17 @@
           "依能力分析自動生成針對性練習",
           "排行榜與成就",
           "我的詞彙中樞，含掌握度追蹤"
-        ]
+        ],
+        "carousel": {
+          "label": "精通功能",
+          "slideCount": "共 {{count}} 張",
+          "skills": "技能與成就",
+          "vocabulary": "我的詞彙中樞",
+          "prev": "上一張",
+          "next": "下一張",
+          "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",
+          "indicator": "第 {{n}} / {{count}} 張：{{label}}"
+        }
       }
     },
     "classrooms": {

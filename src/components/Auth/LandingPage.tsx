@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
 import locales from "@/constants/locales";
 import { resolveLanguagePreference } from "@/utils/i18n";
-import { motion, useInView } from "motion/react";
-import { ArrowRight, ArrowDown, Globe, Check, Plus, Minus, BookOpen } from "lucide-react";
+import { motion, AnimatePresence, useInView } from "motion/react";
+import { ArrowRight, ArrowDown, Globe, Check, Plus, Minus, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/utils/style";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -130,6 +131,136 @@ function Chapter({ num, eyebrow, title, lede, bullets, mockup, flip }: ChapterPr
   );
 }
 
+const CAROUSEL_AUTOPLAY_MS = 7000;
+
+function MasterCarousel() {
+  const { t } = useTranslation();
+  const slides = [
+    { key: "skills", label: t("landing.chapters.master.carousel.skills"), node: <MasterMockup /> },
+    { key: "vocabulary", label: t("landing.chapters.master.carousel.vocabulary"), node: <VocabularyMockup /> },
+  ];
+  const count = slides.length;
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const goTo = useCallback(
+    (i: number) => {
+      const normalized = ((i % count) + count) % count;
+      setIndex(normalized);
+    },
+    [count],
+  );
+  const next = useCallback(() => goTo(index + 1), [goTo, index]);
+  const prev = useCallback(() => goTo(index - 1), [goTo, index]);
+
+  // Autoplay — resets whenever the index changes or pause toggles.
+  useEffect(() => {
+    if (paused || count <= 1) return;
+    const id = setTimeout(() => setIndex((i) => (i + 1) % count), CAROUSEL_AUTOPLAY_MS);
+    return () => clearTimeout(id);
+  }, [index, paused, count]);
+
+  // Keyboard arrow navigation when the carousel region is focused.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      prev();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      next();
+    }
+  };
+
+  const currentLabel = slides[index].label;
+
+  return (
+    <div
+      className="relative"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={t("landing.chapters.master.carousel.label")}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      {/* Slide stage */}
+      <div className="relative" aria-live="polite">
+        <AnimatePresence initial={false} mode="wait">
+          <motion.div
+            key={slides[index].key}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: easeOut }}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={t("landing.chapters.master.carousel.indicator", {
+              n: index + 1,
+              count,
+              label: currentLabel,
+            })}
+          >
+            {slides[index].node}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Controls */}
+      <div className="mt-5 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={prev}
+          aria-label={t("landing.chapters.master.carousel.prev")}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] text-[var(--lp-ink-soft)] transition-colors hover:border-[var(--lp-accent)] hover:text-[var(--lp-accent)]"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+
+        <div className="flex items-center gap-2">
+          {slides.map((s, i) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={t("landing.chapters.master.carousel.goTo", { n: i + 1, count, label: s.label })}
+              aria-current={i === index ? "true" : undefined}
+              className={cn(
+                "h-2 rounded-full transition-all duration-300",
+                i === index
+                  ? "w-7 bg-[var(--lp-accent)]"
+                  : "w-2 bg-[var(--lp-rule)] hover:bg-[var(--lp-ink-soft)]",
+              )}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={next}
+          aria-label={t("landing.chapters.master.carousel.next")}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] text-[var(--lp-ink-soft)] transition-colors hover:border-[var(--lp-accent)] hover:text-[var(--lp-accent)]"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Current-slide label + position counter */}
+      <p className="mt-2.5 text-center text-xs font-medium text-[var(--lp-ink-soft)]">
+        <span className="text-[var(--lp-ink)]">{currentLabel}</span>
+        <span className="mx-2 text-[var(--lp-rule)]" aria-hidden="true">·</span>
+        <span className="font-mono tabular-nums">
+          {index + 1}
+          <span className="mx-0.5 text-[var(--lp-rule)]">/</span>
+          {count}
+        </span>
+      </p>
+    </div>
+  );
+}
+
 type FeatureBlockProps = {
   eyebrow: string;
   title: string;
@@ -212,12 +343,7 @@ export function LandingPage() {
     {
       key: "master",
       num: "05",
-      mockup: (
-        <div className="flex flex-col gap-4">
-          <MasterMockup />
-          <VocabularyMockup />
-        </div>
-      ),
+      mockup: <MasterCarousel />,
     },
   ];
 
