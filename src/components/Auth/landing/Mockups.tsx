@@ -3134,12 +3134,75 @@ function TextAnalysisTabs({ active }: { active: "original" | "adapted" | "simpli
   );
 }
 
-/* ── Slide 1. Mind map — more complex, 6 branches with sub-leaves ── */
+/* ── Slide 1. Mind map — left-to-right, 4 branches with sub-leaves ──
+   Based on the Mermaid mindmap:
+     root((The Myth of Recycling))
+       Costly and Inefficient          (3 leaves)
+       Overstated Environmental Benefits (4 leaves)
+       Political and Social Pressure    (4 leaves)
+       What Actually Works              (4 leaves) */
 export function UnderstandMindMapMockup() {
-  // Branch palette: teal, blue, purple, amber, pink, emerald
+  // Branch palette: red, amber, violet, emerald
+  const BRANCHES = [
+    {
+      label: "Costly & Inefficient",
+      color: "#EF4444",
+      leafFill: "#FEE2E2",
+      centerY: 45,
+      leaves: [
+        { text: "More expensive than landfills", y: 29 },
+        { text: "Material prices have plummeted", y: 45 },
+        { text: "Companies shutting down plants", y: 61 },
+      ],
+    },
+    {
+      label: "Overstated Benefits",
+      color: "#F59E0B",
+      leafFill: "#FEF3C7",
+      centerY: 135,
+      leaves: [
+        { text: "Plastic recycling: little impact", y: 111 },
+        { text: "40,000 bottles offset one flight", y: 127 },
+        { text: "Rinsing bottles adds emissions", y: 143 },
+        { text: "90% benefits from few materials", y: 159 },
+      ],
+    },
+    {
+      label: "Political Pressure",
+      color: "#8B5CF6",
+      leafFill: "#EDE9FE",
+      centerY: 225,
+      leaves: [
+        { text: "Recycling seen as morality", y: 201 },
+        { text: "Zero-waste goals unrealistic", y: 217 },
+        { text: "National rate has stagnated", y: 233 },
+        { text: "Rich vs low-income areas", y: 249 },
+      ],
+    },
+    {
+      label: "What Actually Works",
+      color: "#10B981",
+      leafFill: "#D1FAE5",
+      centerY: 315,
+      leaves: [
+        { text: "Paper, cardboard, aluminum", y: 291 },
+        { text: "Landfills capture methane", y: 307 },
+        { text: "Modern incinerators are clean", y: 323 },
+        { text: "Most else not worth it", y: 339 },
+      ],
+    },
+  ];
+
+  // SVG layout constants
+  const ROOT_CX = 48, ROOT_CY = 180, ROOT_R = 26;
+  const BRANCH_X = 142, BRANCH_W = 106, BRANCH_H = 16;
+  const LEAF_X = 298, LEAF_W = 138, LEAF_H = 12;
+  const ROOT_RIGHT = ROOT_CX + ROOT_R;
+  const BRANCH_RIGHT = BRANCH_X + BRANCH_W;
+
   return (
     <MockupFrame label="MIND MAP · Mr.🆖 ProReader">
-      {/* toolbar row — Read Along off · Chinese toggle · Download · Regenerate */}
+      {/* toolbar row — EN toggle · Download · Regenerate */}
       <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-[var(--lp-rule)] pb-3">
         <Brain className="h-4 w-4 text-[var(--lp-accent)]" />
         <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Mind Map</span>
@@ -3152,113 +3215,96 @@ export function UnderstandMindMapMockup() {
       </div>
 
       <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 p-3">
-        <svg viewBox="0 0 280 220" className="w-full" role="img" aria-label="Mind map: Recycling debate">
-          {/* ── connectors: root → 6 branches (radial) ── */}
-          {/* top-left: Criticism (teal) */}
-          <path d="M 130,104 Q 100,80 78,58" stroke="#26A69A" strokeWidth="1.1" fill="none" />
-          {/* top: Process (blue) */}
-          <path d="M 140,98 Q 140,72 140,46" stroke="#42A5F5" strokeWidth="1.1" fill="none" />
-          {/* top-right: Defense (purple) */}
-          <path d="M 150,104 Q 180,80 202,58" stroke="#AB47BC" strokeWidth="1.1" fill="none" />
-          {/* bottom-left: Cost (amber) */}
-          <path d="M 130,116 Q 100,140 78,162" stroke="#FFA726" strokeWidth="1.1" fill="none" />
-          {/* bottom: Growth (pink) */}
-          <path d="M 140,122 Q 140,148 140,176" stroke="#EC407A" strokeWidth="1.1" fill="none" />
-          {/* bottom-right: Future (emerald) */}
-          <path d="M 150,116 Q 180,140 202,162" stroke="#26A69A" strokeWidth="1.1" fill="none" />
+        <svg viewBox="0 0 440 360" className="w-full" role="img" aria-label="Mind map: The Myth of Recycling">
+          {/* ── connectors: root → branches (curved, colored per branch) ── */}
+          {BRANCHES.map((b) => (
+            <path
+              key={`rc-${b.label}`}
+              d={`M ${ROOT_RIGHT} ${ROOT_CY} Q ${(ROOT_RIGHT + BRANCH_X) / 2} ${b.centerY} ${BRANCH_X} ${b.centerY}`}
+              stroke={b.color}
+              strokeWidth="1.2"
+              fill="none"
+            />
+          ))}
 
-          {/* ── branch → leaves connectors (per branch, 3 each) ── */}
-          {/* Criticism leaves (top-left, teal) */}
-          <path d="M 50,48 Q 38,42 26,40" stroke="#26A69A" strokeWidth="0.7" fill="none" />
-          <path d="M 50,58 Q 38,58 26,58" stroke="#26A69A" strokeWidth="0.7" fill="none" />
-          <path d="M 50,68 Q 38,76 26,78" stroke="#26A69A" strokeWidth="0.7" fill="none" />
-          {/* Process leaves (top, blue) */}
-          <path d="M 116,30 Q 100,24 88,22" stroke="#42A5F5" strokeWidth="0.7" fill="none" />
-          <path d="M 140,28 Q 140,18 140,12" stroke="#42A5F5" strokeWidth="0.7" fill="none" />
-          <path d="M 164,30 Q 180,24 192,22" stroke="#42A5F5" strokeWidth="0.7" fill="none" />
-          {/* Defense leaves (top-right, purple) */}
-          <path d="M 230,48 Q 242,42 254,40" stroke="#AB47BC" strokeWidth="0.7" fill="none" />
-          <path d="M 230,58 Q 242,58 254,58" stroke="#AB47BC" strokeWidth="0.7" fill="none" />
-          <path d="M 230,68 Q 242,76 254,78" stroke="#AB47BC" strokeWidth="0.7" fill="none" />
-          {/* Cost leaves (bottom-left, amber) */}
-          <path d="M 50,152 Q 38,148 26,148" stroke="#FFA726" strokeWidth="0.7" fill="none" />
-          <path d="M 50,162 Q 38,162 26,162" stroke="#FFA726" strokeWidth="0.7" fill="none" />
-          <path d="M 50,172 Q 38,178 26,180" stroke="#FFA726" strokeWidth="0.7" fill="none" />
-          {/* Growth leaves (bottom, pink) */}
-          <path d="M 116,190 Q 100,196 88,198" stroke="#EC407A" strokeWidth="0.7" fill="none" />
-          <path d="M 140,192 Q 140,202 140,208" stroke="#EC407A" strokeWidth="0.7" fill="none" />
-          <path d="M 164,190 Q 180,196 192,198" stroke="#EC407A" strokeWidth="0.7" fill="none" />
-          {/* Future leaves (bottom-right, emerald) */}
-          <path d="M 230,152 Q 242,148 254,148" stroke="#10B981" strokeWidth="0.7" fill="none" />
-          <path d="M 230,162 Q 242,162 254,162" stroke="#10B981" strokeWidth="0.7" fill="none" />
-          <path d="M 230,172 Q 242,178 254,180" stroke="#10B981" strokeWidth="0.7" fill="none" />
+          {/* ── connectors: branches → leaves (curved, colored per branch) ── */}
+          {BRANCHES.map((b) =>
+            b.leaves.map((leaf, li) => (
+              <path
+                key={`bc-${b.label}-${li}`}
+                d={`M ${BRANCH_RIGHT} ${b.centerY} Q ${(BRANCH_RIGHT + LEAF_X) / 2} ${leaf.y} ${LEAF_X} ${leaf.y}`}
+                stroke={b.color}
+                strokeWidth="0.8"
+                fill="none"
+              />
+            )),
+          )}
 
           {/* ── leaves (lighter tints, dark text) ── */}
-          {/* Criticism leaves — teal tint */}
-          <rect x="2" y="35" width="24" height="10" rx="2" fill="#B2DFDB" />
-          <text x="14" y="41" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Costly</text>
-          <rect x="2" y="53" width="24" height="10" rx="2" fill="#B2DFDB" />
-          <text x="14" y="59" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Wasteful</text>
-          <rect x="2" y="73" width="24" height="10" rx="2" fill="#B2DFDB" />
-          <text x="14" y="79" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Rush judge</text>
-
-          {/* Process leaves — blue tint */}
-          <rect x="64" y="17" width="24" height="10" rx="2" fill="#BBDEFB" />
-          <text x="76" y="23" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Collect</text>
-          <rect x="128" y="2" width="24" height="10" rx="2" fill="#BBDEFB" />
-          <text x="140" y="8" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Sort</text>
-          <rect x="192" y="17" width="24" height="10" rx="2" fill="#BBDEFB" />
-          <text x="204" y="23" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Reprocess</text>
-
-          {/* Defense leaves — purple tint */}
-          <rect x="254" y="35" width="24" height="10" rx="2" fill="#E1BEE7" />
-          <text x="266" y="41" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Too soon</text>
-          <rect x="254" y="53" width="24" height="10" rx="2" fill="#E1BEE7" />
-          <text x="266" y="59" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Promising</text>
-          <rect x="254" y="73" width="24" height="10" rx="2" fill="#E1BEE7" />
-          <text x="266" y="79" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Just begun</text>
-
-          {/* Cost leaves — amber tint */}
-          <rect x="2" y="143" width="24" height="10" rx="2" fill="#FFE0B2" />
-          <text x="14" y="149" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Energy</text>
-          <rect x="2" y="157" width="24" height="10" rx="2" fill="#FFE0B2" />
-          <text x="14" y="163" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Local gov</text>
-          <rect x="2" y="175" width="24" height="10" rx="2" fill="#FFE0B2" />
-          <text x="14" y="181" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Budgets</text>
-
-          {/* Growth leaves — pink tint */}
-          <rect x="64" y="193" width="24" height="10" rx="2" fill="#F8BBD0" />
-          <text x="76" y="199" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Matures</text>
-          <rect x="128" y="203" width="24" height="10" rx="2" fill="#F8BBD0" />
-          <text x="140" y="209" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Learns</text>
-          <rect x="192" y="193" width="24" height="10" rx="2" fill="#F8BBD0" />
-          <text x="204" y="199" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Improves</text>
-
-          {/* Future leaves — emerald tint */}
-          <rect x="254" y="143" width="24" height="10" rx="2" fill="#B2DFDB" />
-          <text x="266" y="149" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Flourish</text>
-          <rect x="254" y="157" width="24" height="10" rx="2" fill="#B2DFDB" />
-          <text x="266" y="163" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Thrive</text>
-          <rect x="254" y="175" width="24" height="10" rx="2" fill="#B2DFDB" />
-          <text x="266" y="181" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Sustain</text>
+          {BRANCHES.map((b) =>
+            b.leaves.map((leaf, li) => (
+              <g key={`l-${b.label}-${li}`}>
+                <rect x={LEAF_X} y={leaf.y - LEAF_H / 2} width={LEAF_W} height={LEAF_H} rx="2" fill={b.leafFill} />
+                <text
+                  x={LEAF_X + LEAF_W / 2}
+                  y={leaf.y}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize="5.5"
+                  fill="#37474F"
+                  style={{ fontFamily: "var(--font-sans), sans-serif" }}
+                >
+                  {leaf.text}
+                </text>
+              </g>
+            )),
+          )}
 
           {/* ── branches (medium fills, white text) ── */}
-          <rect x="48" y="48" width="44" height="14" rx="3" fill="#26A69A" />
-          <text x="70" y="55" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Criticism</text>
-          <rect x="118" y="32" width="44" height="14" rx="3" fill="#42A5F5" />
-          <text x="140" y="39" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Process</text>
-          <rect x="188" y="48" width="44" height="14" rx="3" fill="#AB47BC" />
-          <text x="210" y="55" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Defense</text>
-          <rect x="48" y="155" width="44" height="14" rx="3" fill="#FFA726" />
-          <text x="70" y="162" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Cost</text>
-          <rect x="118" y="178" width="44" height="14" rx="3" fill="#EC407A" />
-          <text x="140" y="185" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Growth</text>
-          <rect x="188" y="155" width="44" height="14" rx="3" fill="#10B981" />
-          <text x="210" y="162" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Future</text>
+          {BRANCHES.map((b) => (
+            <g key={`b-${b.label}`}>
+              <rect x={BRANCH_X} y={b.centerY - BRANCH_H / 2} width={BRANCH_W} height={BRANCH_H} rx="3" fill={b.color} />
+              <text
+                x={BRANCH_X + BRANCH_W / 2}
+                y={b.centerY}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="7"
+                fontWeight="600"
+                fill="white"
+                style={{ fontFamily: "var(--font-sans), sans-serif" }}
+              >
+                {b.label}
+              </text>
+            </g>
+          ))}
 
           {/* ── root (circle, indigo) ── */}
-          <circle cx="140" cy="110" r="16" fill="#5C6BC0" />
-          <text x="140" y="111" textAnchor="middle" dominantBaseline="central" fontSize="6.5" fontWeight="700" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Recycling</text>
+          <circle cx={ROOT_CX} cy={ROOT_CY} r={ROOT_R} fill="#5C6BC0" />
+          <text
+            x={ROOT_CX}
+            y={ROOT_CY - 5}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="7"
+            fontWeight="700"
+            fill="white"
+            style={{ fontFamily: "var(--font-sans), sans-serif" }}
+          >
+            The Myth of
+          </text>
+          <text
+            x={ROOT_CX}
+            y={ROOT_CY + 6}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize="7"
+            fontWeight="700"
+            fill="white"
+            style={{ fontFamily: "var(--font-sans), sans-serif" }}
+          >
+            Recycling
+          </text>
         </svg>
       </div>
     </MockupFrame>
