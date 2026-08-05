@@ -446,11 +446,11 @@ export default function PhrasesTab() {
                   <TableHead className="w-[80px]">
                     {t("vocabulary.syllabification")}
                   </TableHead>
-                  <TableHead className="w-[90px]">
+                  <TableHead className="w-[90px] hidden sm:table-cell">
                     {t("vocabulary.partOfSpeech")}
                   </TableHead>
                   <TableHead>{t("vocabulary.englishDefinition")}</TableHead>
-                  <TableHead className="w-[180px]">
+                  <TableHead className="w-[180px] hidden md:table-cell">
                     {t("vocabulary.chineseDefinition")}
                   </TableHead>
                   <TableHead>{t("vocabulary.example")}</TableHead>
