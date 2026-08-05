@@ -1076,24 +1076,10 @@ export function PracticeMockup() {
   );
 }
 
-/* ── 5a. MASTER — reading test results ↔ targeted practice (faithful) ── */
-// Cycles between the completed-test results screen and the question-by-question
-// targeted-practice quiz view. Both faithfully mirror ReadingTest.tsx:
-//   - results: TestResultScreen tier card + skill breakdown + action buttons
-//   - practice: progress bar + renderQuestion() MCQ card + prev/next nav
-export function ReadingTestMockup() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref);
-  const [view, setView] = useState<"results" | "practice">("results");
-
-  // Auto-cycle every 3.2s. Re-runs on every `view` change so each holds 3.2s.
-  // Paused when the mockup is scrolled out of view.
-  useEffect(() => {
-    if (!inView) return;
-    const id = setTimeout(() => setView((v) => (v === "results" ? "practice" : "results")), 3200);
-    return () => clearTimeout(id);
-  }, [view, inView]);
-
+/* ── 5a. MASTER — reading test results screen (faithful, static) ── */
+// Mirrors the completed-test view in ReadingTest.tsx: the TestResultScreen
+// tier card + skill breakdown + action-button row.
+export function ReadingTestResultsMockup() {
   const score = 85;
   const earnedPoints = 17;
   const totalPoints = 20;
@@ -1104,7 +1090,6 @@ export function ReadingTestMockup() {
   const tier = {
     emoji: "👑",
     Icon: Crown,
-    color: "text-amber-600 dark:text-amber-400",
     badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
     gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)",
   };
@@ -1117,6 +1102,89 @@ export function ReadingTestMockup() {
     { l: "Referencing", correct: 4, count: 5 },
   ];
 
+  return (
+    <MockupFrame label="READING TEST · Mr.🆖 ProReader">
+      <div className="rounded-md border p-4">
+        {/* Header row */}
+        <div className="mb-4 flex items-center justify-between border-b pb-4">
+          <h3 className="flex items-center gap-2 text-lg font-semibold">
+            <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
+            Reading Test
+          </h3>
+          <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
+            <RotateCcw className="h-4 w-4" />
+            <span>Retry</span>
+          </span>
+        </div>
+
+        <div className="space-y-6">
+          {/* TestResultScreen card — faithful */}
+          <div
+            className="relative overflow-hidden rounded-2xl border-2 p-6 text-center shadow-2xl ring-4 ring-amber-400/60"
+            style={{ background: tier.gradient }}
+          >
+            <div className="text-5xl">{tier.emoji}</div>
+            <div className="mt-1">
+              <div className="text-5xl font-black text-amber-600 dark:text-amber-400">{score}%</div>
+              <p className="mt-1 text-sm text-muted-foreground">Excellent!</p>
+              <p className="text-sm text-muted-foreground">{earnedPoints} / {totalPoints} points</p>
+            </div>
+            <div className="mt-3">
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tier.badgeBg}`}>
+                <TierIcon className="h-3.5 w-3.5" />
+                Master
+              </span>
+            </div>
+          </div>
+
+          {/* Skill breakdown — faithful */}
+          <div className="rounded-lg bg-muted p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <h4 className="font-medium">Skill Breakdown</h4>
+            </div>
+            <div className="space-y-3">
+              {skills.map((s) => {
+                const pct = Math.round((s.correct / s.count) * 100);
+                return (
+                  <div key={s.l}>
+                    <div className="mb-1 flex justify-between text-sm">
+                      <span>{s.l}</span>
+                      <span className={`font-medium ${scoreColor(pct)}`}>
+                        {s.correct}/{s.count} ({pct}%)
+                      </span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted-foreground/20">
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Action buttons — faithful */}
+          <div className="flex flex-wrap justify-center gap-2">
+            <span className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium">
+              <Eye className="mr-1.5 h-4 w-4" /> Review Answers
+            </span>
+            <span className="inline-flex items-center rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
+              <Target className="mr-1.5 h-4 w-4" /> Practice Skills (3)
+            </span>
+            <span className="inline-flex items-center rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
+              <RotateCcw className="mr-1.5 h-4 w-4" /> Retry Missed (2)
+            </span>
+          </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 5b. MASTER — targeted practice screen (faithful, static) ── */
+// Mirrors the question-by-question in-progress quiz view in ReadingTest.tsx:
+// progress bar + renderQuestion() MCQ card + prev/next nav.
+export function TargetedPracticeMockup() {
   const options = [
     { letter: "A", text: "They have proof that costs will soon decrease." },
     { letter: "B", text: "They trust that time and experience will help.", selected: true },
@@ -1125,8 +1193,8 @@ export function ReadingTestMockup() {
   ];
 
   return (
-    <MockupFrame label="READING TEST · Mr.🆖 ProReader" frameRef={ref}>
-      {/* Section — mirrors ReadingTest.tsx completed / in-progress section */}
+    <MockupFrame label="READING TEST · Mr.🆖 ProReader">
+      {/* Section — mirrors ReadingTest.tsx in-progress section */}
       <div className="rounded-md border p-4">
         {/* Header row */}
         <div className="mb-4 flex items-center justify-between border-b pb-4">
@@ -1134,143 +1202,72 @@ export function ReadingTestMockup() {
             <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
             Reading Test
           </h3>
-          {view === "results" ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
-              <RotateCcw className="h-4 w-4" />
-              <span>Retry</span>
-            </span>
-          ) : (
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground">
-              <Languages className="h-4 w-4" />
-            </span>
-          )}
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground">
+            <Languages className="h-4 w-4" />
+          </span>
         </div>
 
-        {view === "results" ? (
-          <div className="space-y-6">
-            {/* TestResultScreen card — faithful */}
-            <div
-              className="relative overflow-hidden rounded-2xl border-2 p-6 text-center shadow-2xl ring-4 ring-amber-400/60"
-              style={{ background: tier.gradient }}
-            >
-              <div className="text-5xl">{tier.emoji}</div>
-              <div className="mt-1">
-                <div className="text-5xl font-black text-amber-600 dark:text-amber-400">{score}%</div>
-                <p className="mt-1 text-sm text-muted-foreground">Excellent!</p>
-                <p className="text-sm text-muted-foreground">{earnedPoints} / {totalPoints} points</p>
-              </div>
-              <div className="mt-3">
-                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${tier.badgeBg}`}>
-                  <TierIcon className="h-3.5 w-3.5" />
-                  Master
-                </span>
-              </div>
+        <div className="space-y-4 py-4">
+          {/* Progress */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Question 1 of 6</span>
+              <span>Press →/←</span>
             </div>
-
-            {/* Skill breakdown — faithful */}
-            <div className="rounded-lg bg-muted p-4">
-              <div className="mb-3 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                <h4 className="font-medium">Skill Breakdown</h4>
-              </div>
-              <div className="space-y-3">
-                {skills.map((s) => {
-                  const pct = Math.round((s.correct / s.count) * 100);
-                  return (
-                    <div key={s.l}>
-                      <div className="mb-1 flex justify-between text-sm">
-                        <span>{s.l}</span>
-                        <span className={`font-medium ${scoreColor(pct)}`}>
-                          {s.correct}/{s.count} ({pct}%)
-                        </span>
-                      </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-muted-foreground/20">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Action buttons — faithful */}
-            <div className="flex flex-wrap justify-center gap-2">
-              <span className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-medium">
-                <Eye className="mr-1.5 h-4 w-4" /> Review Answers
-              </span>
-              <span className="inline-flex items-center rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
-                <Target className="mr-1.5 h-4 w-4" /> Practice Skills (3)
-              </span>
-              <span className="inline-flex items-center rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
-                <RotateCcw className="mr-1.5 h-4 w-4" /> Retry Missed (2)
-              </span>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted-foreground/20">
+              <div className="h-full rounded-full bg-primary" style={{ width: "17%" }} />
             </div>
           </div>
-        ) : (
-          /* Targeted practice — question-by-question in-progress (faithful) */
-          <div className="space-y-4 py-4">
-            {/* Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Question 1 of 6</span>
-                <span>Press →/←</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted-foreground/20">
-                <div className="h-full rounded-full bg-primary" style={{ width: "17%" }} />
-              </div>
-            </div>
 
-            {/* Question card — mirrors renderQuestion() */}
-            <div className="rounded-lg border p-4">
-              <div className="mb-3 flex items-start gap-3">
-                <span className="font-bold text-primary">1.</span>
-                <div className="flex-1">
-                  <div className="mb-1 flex flex-wrap gap-2">
-                    <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">Multiple Choice</span>
-                    <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">Inference</span>
-                  </div>
-                  <p className="font-medium">
-                    What can we infer about why the defenders believe recycling will improve?
-                  </p>
+          {/* Question card — mirrors renderQuestion() */}
+          <div className="rounded-lg border p-4">
+            <div className="mb-3 flex items-start gap-3">
+              <span className="font-bold text-primary">1.</span>
+              <div className="flex-1">
+                <div className="mb-1 flex flex-wrap gap-2">
+                  <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">Multiple Choice</span>
+                  <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">Inference</span>
                 </div>
-              </div>
-              <div className="space-y-2 pl-6">
-                {options.map((opt) => (
-                  <div key={opt.letter} className="flex items-center gap-2">
-                    <span
-                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
-                        opt.selected ? "border-primary" : "border-input"
-                      }`}
-                    >
-                      {opt.selected && <span className="h-2 w-2 rounded-full bg-primary" />}
-                    </span>
-                    <span className="text-sm">{opt.letter}) {opt.text}</span>
-                  </div>
-                ))}
+                <p className="font-medium">
+                  What can we infer about why the defenders believe recycling will improve?
+                </p>
               </div>
             </div>
-
-            {/* Navigation */}
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs opacity-50">
-                <ArrowLeft className="mr-1.5 h-4 w-4" /> Previous
-              </span>
-              <span className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
-                Next <ChevronRight className="ml-1.5 h-4 w-4" />
-              </span>
+            <div className="space-y-2 pl-6">
+              {options.map((opt) => (
+                <div key={opt.letter} className="flex items-center gap-2">
+                  <span
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                      opt.selected ? "border-primary" : "border-input"
+                    }`}
+                  >
+                    {opt.selected && <span className="h-2 w-2 rounded-full bg-primary" />}
+                  </span>
+                  <span className="text-sm">{opt.letter}) {opt.text}</span>
+                </div>
+              ))}
             </div>
           </div>
-        )}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between">
+            <span className="inline-flex items-center rounded-md border px-3 py-1.5 text-xs opacity-50">
+              <ArrowLeft className="mr-1.5 h-4 w-4" /> Previous
+            </span>
+            <span className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
+              Next <ChevronRight className="ml-1.5 h-4 w-4" />
+            </span>
+          </div>
+        </div>
       </div>
     </MockupFrame>
   );
 }
 
-/* ── 5b. MASTER — achievements + leaderboard ranking (faithful, side by side) ── */
-// Left column mirrors AchievementsTab + AchievementMedal (overall banner + medal
-// grid with progress rings, milestone dots). Right column mirrors LeaderboardTable
-// (sort bar + ranked rows with medals, avatars, "You" highlight, rank trend).
-export function AchievementsLeaderboardMockup() {
+/* ── 5c. MASTER — achievements screen (faithful, static) ── */
+// Mirrors AchievementsTab + AchievementMedal: overall progress banner + medal
+// grid with progress rings, milestone dots. Uses real ACHIEVEMENT_CONFIG types.
+export function AchievementsMockup() {
   // Color maps — mirror AchievementMedal.tsx
   const colorBg: Record<string, string> = {
     blue: "bg-blue-500", green: "bg-green-500", indigo: "bg-indigo-500", cyan: "bg-cyan-500",
@@ -1303,6 +1300,143 @@ export function AchievementsLeaderboardMockup() {
   const totalMilestones = 105;
   const pct = Math.round((totalUnlocked / totalMilestones) * 100);
 
+  return (
+    <MockupFrame label="ACHIEVEMENTS · Mr.🆖 ProReader">
+      <div className="space-y-4">
+        {/* Overall progress banner */}
+        <div className="rounded-xl border bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-orange-500/10 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-500/20">
+                <Medal className="h-5 w-5 text-yellow-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">Achievements</p>
+                <p className="text-xs text-muted-foreground">Milestones you&apos;ve unlocked</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold tabular-nums text-yellow-600 dark:text-yellow-400">
+                {totalUnlocked}
+                <span className="text-sm font-normal text-muted-foreground">/{totalMilestones}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">{pct}%</p>
+            </div>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-amber-500"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {totalUnlocked} of {totalMilestones} milestones unlocked
+          </p>
+        </div>
+
+        {/* Medal grid — faithful to AchievementMedal */}
+        <div className="grid grid-cols-2 gap-3">
+          {medals.map((m) => {
+            const cBg = colorBg[m.color];
+            const cRing = colorRing[m.color];
+            const cText = colorText[m.color];
+            const cGlow = colorGlow[m.color];
+            const circ = 2 * Math.PI * 44;
+            const offset = circ - (m.progress / 100) * circ;
+            const Icon = m.icon;
+            return (
+              <div
+                key={m.type}
+                className={`relative flex flex-col items-center rounded-2xl border-2 p-3 ${
+                  m.unlocked
+                    ? "border-transparent bg-gradient-to-b from-card to-card/80 shadow-lg"
+                    : "border-border/50 bg-card/60"
+                }`}
+              >
+                {m.unlocked && (
+                  <div className={`absolute inset-0 rounded-2xl opacity-10 blur-xl ${cBg}`} />
+                )}
+                {/* Medal circle with progress ring */}
+                <div className="relative mb-2 h-16 w-16">
+                  <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full -rotate-90">
+                    <circle cx="50" cy="50" r="44" fill="none" strokeWidth="5" className="stroke-muted-foreground/20" />
+                    {m.unlocked ? (
+                      <circle cx="50" cy="50" r="44" fill="none" strokeWidth="5" className={cRing} />
+                    ) : (
+                      <circle
+                        cx="50" cy="50" r="44" fill="none" strokeWidth="5"
+                        strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+                        className={cRing}
+                      />
+                    )}
+                  </svg>
+                  <div
+                    className={`absolute inset-2 flex items-center justify-center rounded-full ${
+                      m.unlocked ? `${cBg} shadow-lg ${cGlow}` : "bg-muted"
+                    }`}
+                  >
+                    {m.unlocked ? (
+                      <Icon className="h-7 w-7 text-white" />
+                    ) : (
+                      <Lock className="h-6 w-6 text-muted-foreground/50" />
+                    )}
+                  </div>
+                  {m.unlocked && (
+                    <div className="absolute -bottom-1 -right-1 rounded-full bg-background p-0.5">
+                      <CheckCircle2 className={`h-5 w-5 ${cText}`} />
+                    </div>
+                  )}
+                </div>
+                <p
+                  className={`text-center text-sm font-bold leading-tight ${
+                    m.unlocked ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {m.type}
+                </p>
+                <p
+                  className={`text-center text-xs leading-tight ${
+                    m.unlocked ? cText : "text-muted-foreground/70"
+                  }`}
+                >
+                  {m.label}
+                </p>
+                {/* Progress bar + count */}
+                <div className="mt-2 w-full">
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={`h-full rounded-full ${m.unlocked ? cBg : "bg-muted-foreground/40"}`}
+                      style={{ width: `${m.progress}%` }}
+                    />
+                  </div>
+                  <p className="mt-1 text-center text-[10px] text-muted-foreground">
+                    {m.unlocked ? `${m.dotsUnlocked} unlocked` : `${m.current} / ${m.nextTarget}`}
+                  </p>
+                </div>
+                {/* Milestone dots */}
+                <div className="mt-2 flex justify-center gap-1">
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        i < m.dotsUnlocked ? cBg : "bg-muted-foreground/30"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 5d. MASTER — leaderboard ranking screen (faithful, static) ── */
+// Mirrors LeaderboardTable: sort bar + ranked rows with medals, avatars,
+// "You" highlight, and rank-trend arrows.
+export function LeaderboardMockup() {
   // Leaderboard rows — mirror LeaderboardTable.tsx structure
   const rows = [
     { rank: 1, name: "Chloe L.", score: 1240, you: false, prior: 2, medal: true, medalColor: "text-yellow-400", rowBg: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800" },
@@ -1310,6 +1444,7 @@ export function AchievementsLeaderboardMockup() {
     { rank: 3, name: "Marcus T.", score: 1090, you: false, prior: 3, medal: true, medalColor: "text-amber-600", rowBg: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800" },
     { rank: 4, name: "Priya K.", score: 1050, you: false, prior: 6, medal: false, medalColor: "", rowBg: "" },
     { rank: 5, name: "Ethan R.", score: 980, you: false, prior: 5, medal: false, medalColor: "", rowBg: "" },
+    { rank: 6, name: "Sofia M.", score: 910, you: false, prior: 6, medal: false, medalColor: "", rowBg: "" },
   ];
   const medalEmoji = (r: number) => (r === 1 ? "🥇" : r === 2 ? "🥈" : "🥉");
 
@@ -1319,228 +1454,97 @@ export function AchievementsLeaderboardMockup() {
     { key: "avg_test_score", label: "Test", active: false },
     { key: "total_vocabulary_words", label: "Vocab", active: false },
     { key: "total_flashcard_reviews", label: "Flashcards", active: false },
+    { key: "improvement_score", label: "Improvement", active: false },
   ];
 
   return (
     <MockupFrame label="LEADERBOARD · Mr.🆖 ProReader">
-      <div className="grid items-start gap-4 sm:grid-cols-2">
-        {/* ── Column 1: Achievements (faithful to AchievementsTab + AchievementMedal) ── */}
-        <div className="space-y-4">
-          {/* Overall progress banner */}
-          <div className="rounded-xl border bg-gradient-to-r from-yellow-500/10 via-amber-500/5 to-orange-500/10 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-500/20">
-                  <Medal className="h-5 w-5 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Achievements</p>
-                  <p className="text-xs text-muted-foreground">Milestones you&apos;ve unlocked</p>
+      <div className="space-y-2">
+        {/* Sort bar */}
+        <div className="flex items-center gap-3 overflow-x-auto border-b px-2 pb-1">
+          <span className="shrink-0 text-xs text-muted-foreground">Rank:</span>
+          {sortCols.map((c) => (
+            <span
+              key={c.key}
+              className={`flex shrink-0 items-center gap-0.5 whitespace-nowrap text-xs ${
+                c.active ? "font-semibold text-primary" : "text-muted-foreground"
+              }`}
+            >
+              {c.label}
+              {c.active && <ChevronDown className="h-3 w-3" />}
+            </span>
+          ))}
+        </div>
+        {/* Entries */}
+        {rows.map((r) => {
+          const isYou = r.you;
+          const isMedal = r.medal;
+          const delta = r.prior - r.rank;
+          return (
+            <div
+              key={r.rank}
+              className={`flex items-center gap-3 rounded-xl border p-3 ${
+                isYou
+                  ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
+                  : isMedal
+                  ? r.rowBg
+                  : "bg-card"
+              }`}
+            >
+              {/* Rank */}
+              <div className="w-8 shrink-0 text-center">
+                {isMedal ? (
+                  <span className="text-xl font-black">{medalEmoji(r.rank)}</span>
+                ) : (
+                  <span className="text-sm font-bold tabular-nums text-muted-foreground">#{r.rank}</span>
+                )}
+              </div>
+              {/* Avatar */}
+              <div className="shrink-0">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
+                  {r.name.charAt(0)}
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-lg font-bold tabular-nums text-yellow-600 dark:text-yellow-400">
-                  {totalUnlocked}
-                  <span className="text-sm font-normal text-muted-foreground">/{totalMilestones}</span>
-                </p>
-                <p className="text-xs text-muted-foreground">{pct}%</p>
+              {/* Name + rank trend */}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className={`truncate text-sm font-semibold ${isYou ? "text-primary" : ""}`}>
+                    {r.name}
+                  </span>
+                  {isYou && (
+                    <span className="shrink-0 rounded-full bg-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
+                      You
+                    </span>
+                  )}
+                </div>
+                <div className="mt-0.5">
+                  {delta > 0 ? (
+                    <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
+                      <ChevronUp className="h-3 w-3" /> Up {delta}
+                    </span>
+                  ) : delta < 0 ? (
+                    <span className="flex items-center gap-0.5 text-xs text-red-500">
+                      <ChevronDown className="h-3 w-3" /> Down {Math.abs(delta)}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Same</span>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-yellow-400 to-amber-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              {totalUnlocked} of {totalMilestones} milestones unlocked
-            </p>
-          </div>
-
-          {/* Medal grid — faithful to AchievementMedal */}
-          <div className="grid grid-cols-2 gap-3">
-            {medals.map((m) => {
-              const cBg = colorBg[m.color];
-              const cRing = colorRing[m.color];
-              const cText = colorText[m.color];
-              const cGlow = colorGlow[m.color];
-              const circ = 2 * Math.PI * 44;
-              const offset = circ - (m.progress / 100) * circ;
-              const Icon = m.icon;
-              return (
+              {/* Primary stat */}
+              <div className="shrink-0 text-right">
                 <div
-                  key={m.type}
-                  className={`relative flex flex-col items-center rounded-2xl border-2 p-3 ${
-                    m.unlocked
-                      ? "border-transparent bg-gradient-to-b from-card to-card/80 shadow-lg"
-                      : "border-border/50 bg-card/60"
+                  className={`text-base font-black tabular-nums ${
+                    isYou ? "text-primary" : isMedal ? r.medalColor : ""
                   }`}
                 >
-                  {m.unlocked && (
-                    <div className={`absolute inset-0 rounded-2xl opacity-10 blur-xl ${cBg}`} />
-                  )}
-                  {/* Medal circle with progress ring */}
-                  <div className="relative mb-2 h-16 w-16">
-                    <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full -rotate-90">
-                      <circle cx="50" cy="50" r="44" fill="none" strokeWidth="5" className="stroke-muted-foreground/20" />
-                      {m.unlocked ? (
-                        <circle cx="50" cy="50" r="44" fill="none" strokeWidth="5" className={cRing} />
-                      ) : (
-                        <circle
-                          cx="50" cy="50" r="44" fill="none" strokeWidth="5"
-                          strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
-                          className={cRing}
-                        />
-                      )}
-                    </svg>
-                    <div
-                      className={`absolute inset-2 flex items-center justify-center rounded-full ${
-                        m.unlocked ? `${cBg} shadow-lg ${cGlow}` : "bg-muted"
-                      }`}
-                    >
-                      {m.unlocked ? (
-                        <Icon className="h-7 w-7 text-white" />
-                      ) : (
-                        <Lock className="h-6 w-6 text-muted-foreground/50" />
-                      )}
-                    </div>
-                    {m.unlocked && (
-                      <div className="absolute -bottom-1 -right-1 rounded-full bg-background p-0.5">
-                        <CheckCircle2 className={`h-5 w-5 ${cText}`} />
-                      </div>
-                    )}
-                  </div>
-                  <p
-                    className={`text-center text-sm font-bold leading-tight ${
-                      m.unlocked ? "text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    {m.type}
-                  </p>
-                  <p
-                    className={`text-center text-xs leading-tight ${
-                      m.unlocked ? cText : "text-muted-foreground/70"
-                    }`}
-                  >
-                    {m.label}
-                  </p>
-                  {/* Progress bar + count */}
-                  <div className="mt-2 w-full">
-                    <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={`h-full rounded-full ${m.unlocked ? cBg : "bg-muted-foreground/40"}`}
-                        style={{ width: `${m.progress}%` }}
-                      />
-                    </div>
-                    <p className="mt-1 text-center text-[10px] text-muted-foreground">
-                      {m.unlocked ? `${m.dotsUnlocked} unlocked` : `${m.current} / ${m.nextTarget}`}
-                    </p>
-                  </div>
-                  {/* Milestone dots */}
-                  <div className="mt-2 flex justify-center gap-1">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          i < m.dotsUnlocked ? cBg : "bg-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
+                  {r.score.toLocaleString()}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── Column 2: Leaderboard ranking (faithful to LeaderboardTable) ── */}
-        <div className="space-y-2">
-          {/* Sort bar */}
-          <div className="flex items-center gap-3 overflow-x-auto border-b px-2 pb-1">
-            <span className="shrink-0 text-xs text-muted-foreground">Rank:</span>
-            {sortCols.map((c) => (
-              <span
-                key={c.key}
-                className={`flex shrink-0 items-center gap-0.5 whitespace-nowrap text-xs ${
-                  c.active ? "font-semibold text-primary" : "text-muted-foreground"
-                }`}
-              >
-                {c.label}
-                {c.active && <ChevronDown className="h-3 w-3" />}
-              </span>
-            ))}
-          </div>
-          {/* Entries */}
-          {rows.map((r) => {
-            const isYou = r.you;
-            const isMedal = r.medal;
-            const delta = r.prior - r.rank;
-            return (
-              <div
-                key={r.rank}
-                className={`flex items-center gap-3 rounded-xl border p-3 ${
-                  isYou
-                    ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
-                    : isMedal
-                    ? r.rowBg
-                    : "bg-card"
-                }`}
-              >
-                {/* Rank */}
-                <div className="w-8 shrink-0 text-center">
-                  {isMedal ? (
-                    <span className="text-xl font-black">{medalEmoji(r.rank)}</span>
-                  ) : (
-                    <span className="text-sm font-bold tabular-nums text-muted-foreground">#{r.rank}</span>
-                  )}
-                </div>
-                {/* Avatar */}
-                <div className="shrink-0">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-primary">
-                    {r.name.charAt(0)}
-                  </div>
-                </div>
-                {/* Name + rank trend */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className={`truncate text-sm font-semibold ${isYou ? "text-primary" : ""}`}>
-                      {r.name}
-                    </span>
-                    {isYou && (
-                      <span className="shrink-0 rounded-full bg-primary/20 px-1.5 py-0.5 text-xs font-medium text-primary">
-                        You
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-0.5">
-                    {delta > 0 ? (
-                      <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
-                        <ChevronUp className="h-3 w-3" /> Up {delta}
-                      </span>
-                    ) : delta < 0 ? (
-                      <span className="flex items-center gap-0.5 text-xs text-red-500">
-                        <ChevronDown className="h-3 w-3" /> Down {Math.abs(delta)}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Same</span>
-                    )}
-                  </div>
-                </div>
-                {/* Primary stat */}
-                <div className="shrink-0 text-right">
-                  <div
-                    className={`text-base font-black tabular-nums ${
-                      isYou ? "text-primary" : isMedal ? r.medalColor : ""
-                    }`}
-                  >
-                    {r.score.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Score</div>
-                </div>
+                <div className="text-xs text-muted-foreground">Score</div>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </MockupFrame>
   );
@@ -1980,50 +1984,27 @@ export function AssignmentsMockup() {
   );
 }
 
-/* ── 8. VOCABULARY — faithful mockup of the My Vocabulary page ── */
-export function VocabularyMockup() {
-  const frameRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(frameRef);
-  // Auto-cycle the three demo'd tabs (Words → Phrases → Spelling) every 2.5s.
-  // Re-runs on every tab change (incl. manual clicks) so each gets a full window.
-  // Paused when the mockup is scrolled out of view (same pattern as UnderstandMockup).
-  const [activeTab, setActiveTab] = useState<"table" | "phrases" | "spelling">("table");
-  useEffect(() => {
-    if (!inView) return;
-    const order: ("table" | "phrases" | "spelling")[] = ["table", "phrases", "spelling"];
-    const id = setTimeout(() => {
-      setActiveTab((cur) => order[(order.indexOf(cur) + 1) % order.length]);
-    }, 2500);
-    return () => clearTimeout(id);
-  }, [activeTab, inView]);
-
-  const isPhrase = activeTab === "phrases";
-
-  // Overview stat cards switch with the tab (phraseStats vs wordStats on the real page).
+/* ── 8a. VOCABULARY — Words table screen (faithful, static) ── */
+// Mirrors the My Vocabulary page with the Words tab active: page header (title +
+// stat cards) + 7-tab strip + toolbar + sortable word table + pagination.
+export function WordsTableMockup() {
+  // Overview stat cards (word stats — the page header on the Words tab).
   const wordStats = [
     { label: "Total Words", value: "128", icon: BookMarked, color: "text-[var(--lp-ink)]", sub: "Own: 96 · Teacher: 32" },
     { label: "Due for Review", value: "14", icon: Clock, color: "text-orange-500", sub: null },
     { label: "Mastered", value: "47", icon: CheckCircle2, color: "text-green-500", sub: null },
     { label: "New Words", value: "21", icon: Brain, color: "text-blue-500", sub: null },
   ];
-  const phraseStats = [
-    { label: "Total Phrases", value: "36", icon: Combine, color: "text-[var(--lp-ink)]", sub: "Own: 24 · Teacher: 12" },
-    { label: "Due for Review", value: "6", icon: Clock, color: "text-orange-500", sub: null },
-    { label: "Mastered", value: "11", icon: CheckCircle2, color: "text-green-500", sub: null },
-    { label: "New Phrases", value: "9", icon: Brain, color: "text-blue-500", sub: null },
-  ];
-  const stats = isPhrase ? phraseStats : wordStats;
 
-  // Full 7-tab strip matches the real page. Only the three demo'd tabs are
-  // clickable (the rest are present for faithfulness but don't break the cycle).
+  // Full 7-tab strip matches the real page; static (Words active).
   const tabs = [
-    { key: "table", label: "Words", icon: TableIcon, cycle: true },
-    { key: "phrases", label: "Phrases", icon: Combine, cycle: true },
-    { key: "flashcard", label: "Flashcard", icon: Layers, cycle: false },
-    { key: "spelling", label: "Spelling", icon: SpellCheck, cycle: true },
-    { key: "quiz", label: "Quiz", icon: ClipboardList, cycle: false },
-    { key: "lists", label: "Review Lists", icon: ListPlus, cycle: false },
-    { key: "history", label: "History", icon: History, cycle: false },
+    { key: "table", label: "Words", icon: TableIcon },
+    { key: "phrases", label: "Phrases", icon: Combine },
+    { key: "flashcard", label: "Flashcard", icon: Layers },
+    { key: "spelling", label: "Spelling", icon: SpellCheck },
+    { key: "quiz", label: "Quiz", icon: ClipboardList },
+    { key: "lists", label: "Review Lists", icon: ListPlus },
+    { key: "history", label: "History", icon: History },
   ];
 
   // Mastery level badges: 0 New → 5 Mastered (gray→red→orange→yellow→blue→green ramp).
@@ -2038,13 +2019,8 @@ export function VocabularyMockup() {
   const masteryLabel: Record<string, string> = {
     "5": "Mastered", "4": "L4", "3": "L3", "2": "L2", "1": "L1", "0": "New",
   };
-
-  // Rating dots: hard red / medium yellow / easy green / unrated gray.
   const ratingDot: Record<string, string> = {
-    easy: "bg-green-500",
-    medium: "bg-yellow-500",
-    hard: "bg-red-500",
-    none: "bg-gray-300 dark:bg-gray-600",
+    easy: "bg-green-500", medium: "bg-yellow-500", hard: "bg-red-500", none: "bg-gray-300 dark:bg-gray-600",
   };
   const ratingLabel: Record<string, string> = { easy: "Easy", medium: "Medium", hard: "Hard", none: "—" };
 
@@ -2052,7 +2028,6 @@ export function VocabularyMockup() {
   type Rating = "easy" | "medium" | "hard" | "none";
   type Source = "own" | "teacher";
 
-  // Words tab rows (single-word glossary entries).
   const wordRows: { word: string; pos: string; def: string; zh: string; source: Source; rating: Rating; level: Level }[] = [
     { word: "flourish", pos: "verb", def: "to grow or develop successfully", zh: "茁壯成長", source: "own", rating: "easy", level: "5" },
     { word: "luminous", pos: "adj.", def: "full of light; brightly glowing", zh: "發光的", source: "own", rating: "medium", level: "4" },
@@ -2061,26 +2036,8 @@ export function VocabularyMockup() {
     { word: "verdict", pos: "noun", def: "a formal decision or judgment", zh: "裁決", source: "own", rating: "none", level: "0" },
   ];
 
-  // Phrases tab rows — each a CollocationChunk added via the reading-session
-  // "Add to Phrases" flow. `pattern` is the chunk-type badge.
-  const phraseRows: { phrase: string; pattern: string; meaning: string; zh: string; source: Source; rating: Rating; level: Level }[] = [
-    { phrase: "take into account", pattern: "V + Prep + N", meaning: "to consider when judging", zh: "把…考慮在內", source: "own", rating: "medium", level: "3" },
-    { phrase: "make a decision", pattern: "V + N", meaning: "to decide something", zh: "作決定", source: "teacher", rating: "hard", level: "1" },
-    { phrase: "heavy rain", pattern: "Adj + N", meaning: "very strong rainfall", zh: "大雨", source: "own", rating: "easy", level: "5" },
-    { phrase: "look forward to", pattern: "Phrasal verb", meaning: "to expect with pleasure", zh: "期待", source: "own", rating: "none", level: "0" },
-    { phrase: "in spite of", pattern: "Prep phrase", meaning: "despite; not prevented by", zh: "儘管", source: "teacher", rating: "hard", level: "2" },
-  ];
-
-  // Spelling setup screen config (frozen at the initial state — Solo, Listen & Type, Medium, timed).
-  const spellModes = [
-    { key: "listen-type", label: "Listen & Type", icon: Volume2, active: true },
-    { key: "scramble", label: "Letter Scramble", icon: Shuffle, active: false },
-    { key: "fill-blanks", label: "Fill Blanks", icon: Keyboard, active: false },
-    { key: "mixed", label: "Mixed Mode", icon: HelpCircle, active: false },
-  ];
-
   return (
-    <MockupFrame label="MY VOCABULARY · Mr.🆖 ProReader" frameRef={frameRef}>
+    <MockupFrame label="MY VOCABULARY · Mr.🆖 ProReader">
       {/* title row */}
       <div className="flex items-center gap-2">
         <BookMarked className="h-4 w-4 text-indigo-500" />
@@ -2088,13 +2045,10 @@ export function VocabularyMockup() {
         <HelpCircle className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
       </div>
 
-      {/* 4 stat cards — always visible (page header), switch word/phrase stats with the tab */}
+      {/* 4 stat cards */}
       <div className="mt-3 grid grid-cols-4 gap-2">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2"
-          >
+        {wordStats.map((s) => (
+          <div key={s.label} className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2">
             <div className="flex items-center gap-1 text-[var(--lp-ink-soft)]">
               <s.icon className={`h-3 w-3 ${s.color}`} />
               <span className="truncate text-[8px] uppercase tracking-wide">{s.label}</span>
@@ -2105,257 +2059,293 @@ export function VocabularyMockup() {
         ))}
       </div>
 
-      {/* tab strip — 7 tabs match the real page; the 3 demo'd tabs are clickable */}
+      {/* tab strip — 7 tabs match the real page; Words active */}
       <div className="mt-3 flex flex-wrap gap-1 border-b border-[var(--lp-rule)]">
         {tabs.map((tb) => {
-          const active = activeTab === tb.key;
-          const cls = `flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium -mb-px border-b-2 transition-colors ${
-            active
-              ? "border-[var(--lp-accent)] text-[var(--lp-accent)]"
-              : "border-transparent text-[var(--lp-ink-soft)]"
-          }`;
-          const inner = (
-            <>
+          const active = tb.key === "table";
+          return (
+            <span
+              key={tb.key}
+              className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium -mb-px border-b-2 transition-colors ${
+                active
+                  ? "border-[var(--lp-accent)] text-[var(--lp-accent)]"
+                  : "border-transparent text-[var(--lp-ink-soft)]"
+              }`}
+            >
               <tb.icon className="h-3 w-3" />
               {tb.label}
-            </>
-          );
-          return tb.cycle ? (
-            <button
-              key={tb.key}
-              type="button"
-              onClick={() => setActiveTab(tb.key as "table" | "phrases" | "spelling")}
-              className={cls}
-            >
-              {inner}
-            </button>
-          ) : (
-            <span key={tb.key} className={cls}>
-              {inner}
             </span>
           );
         })}
       </div>
 
-      {/* ── WORDS + PHRASES content (table views) ── */}
-      {(activeTab === "table" || activeTab === "phrases") && (
-        <>
-          {/* toolbar: Auto Select | spacer | Export */}
-          <div className="mt-2.5 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
-              <Wand2 className="h-3 w-3 text-[var(--lp-accent)]" /> Auto Select
+      {/* toolbar: Auto Select | spacer | Export */}
+      <div className="mt-2.5 flex items-center gap-2">
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Wand2 className="h-3 w-3 text-[var(--lp-accent)]" /> Auto Select
+        </span>
+        <span className="flex-1" />
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Download className="h-3 w-3" /> Export
+        </span>
+      </div>
+
+      {/* meta row */}
+      <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+        <span>Showing 5 of 128 words</span>
+        <span>Page 1 of 3</span>
+      </div>
+
+      {/* table */}
+      <div className="mt-1.5 overflow-hidden rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[8px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
+              <th className="px-2 py-1.5 text-left font-semibold">Word</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">PoS</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">Definition</th>
+              <th className="px-1.5 py-1.5 text-left font-semibold">中文</th>
+              <th className="px-1.5 py-1.5 text-center font-semibold">Source</th>
+              <th className="px-1.5 py-1.5 text-center font-semibold">Rating</th>
+              <th className="px-2 py-1.5 text-center font-semibold">Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            {wordRows.map((r, i) => (
+              <tr
+                key={r.word}
+                className={`text-[10px] text-[var(--lp-ink)] ${i !== wordRows.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}
+              >
+                <td className="px-2 py-1.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    <Volume2 className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+                    {r.word}
+                  </span>
+                </td>
+                <td className="px-1.5 py-1.5">
+                  <span className="italic text-[var(--lp-ink-soft)]">{r.pos}</span>
+                </td>
+                <td className="max-w-[110px] truncate px-1.5 py-1.5">{r.def}</td>
+                <td className="px-1.5 py-1.5 text-[var(--lp-ink-soft)]">{r.zh}</td>
+                <td className="px-1.5 py-1.5 text-center">
+                  <span
+                    className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${
+                      r.source === "teacher"
+                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                    }`}
+                  >
+                    {r.source === "teacher" ? "Teacher" : "Own"}
+                  </span>
+                </td>
+                <td className="px-1.5 py-1.5 text-center">
+                  <span className="inline-flex items-center gap-1 text-[9px] text-[var(--lp-ink-soft)]">
+                    <span className={`h-1.5 w-1.5 rounded-full ${ratingDot[r.rating]}`} />
+                    {ratingLabel[r.rating]}
+                  </span>
+                </td>
+                <td className="px-2 py-1.5 text-center">
+                  <span className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${masteryStyle[r.level]}`}>
+                    {masteryLabel[r.level]}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* pagination */}
+      <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+        <span className="inline-flex items-center gap-1">
+          Per page:
+          {[25, 50, 75, 100].map((n, idx) => (
+            <span
+              key={n}
+              className={`rounded px-1 py-0.5 ${idx === 1 ? "bg-[var(--lp-accent)] font-medium text-white" : ""}`}
+            >
+              {n}
             </span>
-            <span className="flex-1" />
-            <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
-              <Download className="h-3 w-3" /> Export
-            </span>
-          </div>
+          ))}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <ChevronRight className="h-3 w-3 rotate-180" />
+          <span className="rounded bg-[var(--lp-accent)] px-1.5 py-0.5 font-medium text-white">1</span>
+          <span>2</span>
+          <span>3</span>
+          <ChevronRight className="h-3 w-3" />
+        </span>
+      </div>
+    </MockupFrame>
+  );
+}
 
-          {/* meta row */}
-          <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
-            <span>{isPhrase ? "Showing 5 of 36 phrases" : "Showing 5 of 128 words"}</span>
-            <span>{isPhrase ? "Page 1 of 1" : "Page 1 of 3"}</span>
-          </div>
+/* ── 8b. VOCABULARY — Spelling game setup screen (faithful, static) ── */
+// Mirrors the My Vocabulary page with the Spelling tab active: page header +
+// 7-tab strip (Spelling active) + the frozen initial spelling setup (Solo,
+// Listen & Type, Medium difficulty, Time Challenge on, Start Game).
+export function SpellingSetupMockup() {
+  const wordStats = [
+    { label: "Total Words", value: "128", icon: BookMarked, color: "text-[var(--lp-ink)]", sub: "Own: 96 · Teacher: 32" },
+    { label: "Due for Review", value: "14", icon: Clock, color: "text-orange-500", sub: null },
+    { label: "Mastered", value: "47", icon: CheckCircle2, color: "text-green-500", sub: null },
+    { label: "New Words", value: "21", icon: Brain, color: "text-blue-500", sub: null },
+  ];
 
-          {/* table */}
-          <div className="mt-1.5 overflow-hidden rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[8px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
-                  <th className="px-2 py-1.5 text-left font-semibold">{isPhrase ? "Phrase" : "Word"}</th>
-                  <th className="px-1.5 py-1.5 text-left font-semibold">{isPhrase ? "Pattern" : "PoS"}</th>
-                  <th className="px-1.5 py-1.5 text-left font-semibold">{isPhrase ? "Meaning" : "Definition"}</th>
-                  <th className="px-1.5 py-1.5 text-left font-semibold">中文</th>
-                  <th className="px-1.5 py-1.5 text-center font-semibold">Source</th>
-                  <th className="px-1.5 py-1.5 text-center font-semibold">Rating</th>
-                  <th className="px-2 py-1.5 text-center font-semibold">Level</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(isPhrase ? phraseRows : wordRows).map((r, i) => {
-                  const rows = isPhrase ? phraseRows : wordRows;
-                  const entry = isPhrase ? (r as typeof phraseRows[number]).phrase : (r as typeof wordRows[number]).word;
-                  const secondary = isPhrase ? (r as typeof phraseRows[number]).pattern : (r as typeof wordRows[number]).pos;
-                  const meaning = isPhrase ? (r as typeof phraseRows[number]).meaning : (r as typeof wordRows[number]).def;
-                  return (
-                    <tr
-                      key={entry}
-                      className={`text-[10px] text-[var(--lp-ink)] ${i !== rows.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}
-                    >
-                      <td className="px-2 py-1.5 font-medium">
-                        <span className="inline-flex items-center gap-1">
-                          <Volume2 className="h-3 w-3 text-[var(--lp-ink-soft)]" />
-                          {entry}
-                        </span>
-                      </td>
-                      <td className="px-1.5 py-1.5">
-                        {isPhrase ? (
-                          <span className="inline-flex rounded-full bg-[var(--lp-accent)]/10 px-1.5 py-0.5 text-[8px] font-medium text-[var(--lp-accent)]">
-                            {secondary}
-                          </span>
-                        ) : (
-                          <span className="italic text-[var(--lp-ink-soft)]">{secondary}</span>
-                        )}
-                      </td>
-                      <td className="max-w-[110px] truncate px-1.5 py-1.5">{meaning}</td>
-                      <td className="px-1.5 py-1.5 text-[var(--lp-ink-soft)]">{r.zh}</td>
-                      <td className="px-1.5 py-1.5 text-center">
-                        <span
-                          className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${
-                            r.source === "teacher"
-                              ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                          }`}
-                        >
-                          {r.source === "teacher" ? "Teacher" : "Own"}
-                        </span>
-                      </td>
-                      <td className="px-1.5 py-1.5 text-center">
-                        <span className="inline-flex items-center gap-1 text-[9px] text-[var(--lp-ink-soft)]">
-                          <span className={`h-1.5 w-1.5 rounded-full ${ratingDot[r.rating]}`} />
-                          {ratingLabel[r.rating]}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center">
-                        <span className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${masteryStyle[r.level]}`}>
-                          {masteryLabel[r.level]}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+  const tabs = [
+    { key: "table", label: "Words", icon: TableIcon },
+    { key: "phrases", label: "Phrases", icon: Combine },
+    { key: "flashcard", label: "Flashcard", icon: Layers },
+    { key: "spelling", label: "Spelling", icon: SpellCheck },
+    { key: "quiz", label: "Quiz", icon: ClipboardList },
+    { key: "lists", label: "Review Lists", icon: ListPlus },
+    { key: "history", label: "History", icon: History },
+  ];
 
-          {/* pagination */}
-          <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
-            <span className="inline-flex items-center gap-1">
-              Per page:
-              {[25, 50, 75, 100].map((n, idx) => (
-                <span
-                  key={n}
-                  className={`rounded px-1 py-0.5 ${idx === 1 ? "bg-[var(--lp-accent)] font-medium text-white" : ""}`}
-                >
-                  {n}
-                </span>
-              ))}
-            </span>
-            {isPhrase ? (
-              <span className="inline-flex items-center gap-1">
-                <ChevronRight className="h-3 w-3 rotate-180 opacity-40" />
-                <span className="rounded bg-[var(--lp-accent)] px-1.5 py-0.5 font-medium text-white">1</span>
-                <ChevronRight className="h-3 w-3 opacity-40" />
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1">
-                <ChevronRight className="h-3 w-3 rotate-180" />
-                <span className="rounded bg-[var(--lp-accent)] px-1.5 py-0.5 font-medium text-white">1</span>
-                <span>2</span>
-                <span>3</span>
-                <ChevronRight className="h-3 w-3" />
-              </span>
-            )}
-          </div>
-        </>
-      )}
+  const spellModes = [
+    { key: "listen-type", label: "Listen & Type", icon: Volume2, active: true },
+    { key: "scramble", label: "Letter Scramble", icon: Shuffle, active: false },
+    { key: "fill-blanks", label: "Fill Blanks", icon: Keyboard, active: false },
+    { key: "mixed", label: "Mixed Mode", icon: HelpCircle, active: false },
+  ];
 
-      {/* ── SPELLING tab: initial setup screen only ── */}
-      {activeTab === "spelling" && (
-        <div className="mt-3 flex flex-col gap-3">
-          {/* title */}
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-1.5">
-              <SpellCheck className="h-4 w-4 text-[var(--lp-accent)]" />
-              <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Spelling Challenge</span>
-              <HelpCircle className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+  return (
+    <MockupFrame label="MY VOCABULARY · Mr.🆖 ProReader">
+      {/* title row */}
+      <div className="flex items-center gap-2">
+        <BookMarked className="h-4 w-4 text-indigo-500" />
+        <span className="font-display text-base font-semibold text-[var(--lp-ink)]">My Vocabulary</span>
+        <HelpCircle className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+      </div>
+
+      {/* 4 stat cards */}
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        {wordStats.map((s) => (
+          <div key={s.label} className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2">
+            <div className="flex items-center gap-1 text-[var(--lp-ink-soft)]">
+              <s.icon className={`h-3 w-3 ${s.color}`} />
+              <span className="truncate text-[8px] uppercase tracking-wide">{s.label}</span>
             </div>
-            <p className="text-[9px] text-[var(--lp-ink-soft)]">Practice spelling 128 words</p>
+            <div className={`mt-0.5 font-display text-lg font-bold ${s.color}`}>{s.value}</div>
+            {s.sub && <div className="text-[7px] leading-tight text-[var(--lp-ink-soft)]">{s.sub}</div>}
           </div>
+        ))}
+      </div>
 
-          {/* play mode: Solo (selected) | Multiplayer Battle */}
-          <div>
-            <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Choose Your Challenge</div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="relative rounded-lg border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 p-2">
-                <CheckCircle2 className="absolute right-1 top-1 h-3 w-3 text-[var(--lp-accent)]" />
-                <div className="mb-1 flex h-6 w-6 items-center justify-center rounded bg-[var(--lp-accent)]/15">
-                  <User className="h-3.5 w-3.5 text-[var(--lp-accent)]" />
-                </div>
-                <div className="text-[10px] font-semibold text-[var(--lp-accent)]">Solo Practice</div>
-                <div className="text-[8px] text-[var(--lp-ink-soft)]">At your own pace</div>
+      {/* tab strip — 7 tabs match the real page; Spelling active */}
+      <div className="mt-3 flex flex-wrap gap-1 border-b border-[var(--lp-rule)]">
+        {tabs.map((tb) => {
+          const active = tb.key === "spelling";
+          return (
+            <span
+              key={tb.key}
+              className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium -mb-px border-b-2 transition-colors ${
+                active
+                  ? "border-[var(--lp-accent)] text-[var(--lp-accent)]"
+                  : "border-transparent text-[var(--lp-ink-soft)]"
+              }`}
+            >
+              <tb.icon className="h-3 w-3" />
+              {tb.label}
+            </span>
+          );
+        })}
+      </div>
+
+      {/* ── SPELLING setup ── */}
+      <div className="mt-3 flex flex-col gap-3">
+        {/* title */}
+        <div className="flex flex-col items-center gap-1">
+          <div className="flex items-center gap-1.5">
+            <SpellCheck className="h-4 w-4 text-[var(--lp-accent)]" />
+            <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Spelling Challenge</span>
+            <HelpCircle className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+          </div>
+          <p className="text-[9px] text-[var(--lp-ink-soft)]">Practice spelling 128 words</p>
+        </div>
+
+        {/* play mode: Solo (selected) | Multiplayer Battle */}
+        <div>
+          <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Choose Your Challenge</div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="relative rounded-lg border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 p-2">
+              <CheckCircle2 className="absolute right-1 top-1 h-3 w-3 text-[var(--lp-accent)]" />
+              <div className="mb-1 flex h-6 w-6 items-center justify-center rounded bg-[var(--lp-accent)]/15">
+                <User className="h-3.5 w-3.5 text-[var(--lp-accent)]" />
               </div>
-              <div className="relative rounded-lg border-2 border-fuchsia-400/40 bg-gradient-to-br from-fuchsia-500/10 to-transparent p-2">
-                <span className="absolute right-1 top-1 inline-flex items-center gap-0.5 rounded-full bg-fuchsia-500 px-1 py-0.5 text-[7px] font-bold text-white">
-                  <span className="h-1 w-1 rounded-full bg-white animate-pulse" />
-                  LIVE
-                </span>
-                <div className="mb-1 flex h-6 w-6 items-center justify-center rounded bg-fuchsia-500/15">
-                  <Swords className="h-3.5 w-3.5 text-fuchsia-500" />
-                </div>
-                <div className="text-[10px] font-semibold text-fuchsia-600 dark:text-fuchsia-400">Multiplayer Battle</div>
-                <div className="text-[8px] text-[var(--lp-ink-soft)]">Real-time arena</div>
+              <div className="text-[10px] font-semibold text-[var(--lp-accent)]">Solo Practice</div>
+              <div className="text-[8px] text-[var(--lp-ink-soft)]">At your own pace</div>
+            </div>
+            <div className="relative rounded-lg border-2 border-fuchsia-400/40 bg-gradient-to-br from-fuchsia-500/10 to-transparent p-2">
+              <span className="absolute right-1 top-1 inline-flex items-center gap-0.5 rounded-full bg-fuchsia-500 px-1 py-0.5 text-[7px] font-bold text-white">
+                <span className="h-1 w-1 rounded-full bg-white animate-pulse" />
+                LIVE
+              </span>
+              <div className="mb-1 flex h-6 w-6 items-center justify-center rounded bg-fuchsia-500/15">
+                <Swords className="h-3.5 w-3.5 text-fuchsia-500" />
               </div>
+              <div className="text-[10px] font-semibold text-fuchsia-600 dark:text-fuchsia-400">Multiplayer Battle</div>
+              <div className="text-[8px] text-[var(--lp-ink-soft)]">Real-time arena</div>
             </div>
-          </div>
-
-          {/* game mode grid */}
-          <div>
-            <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Select Game Mode</div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {spellModes.map((m) => (
-                <div
-                  key={m.key}
-                  className={`flex items-center gap-1.5 rounded-md border-2 px-2 py-1.5 ${
-                    m.active
-                      ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]"
-                      : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
-                  }`}
-                >
-                  <m.icon className="h-3 w-3" />
-                  <span className="text-[9px]">{m.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* difficulty */}
-          <div>
-            <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Select Difficulty</div>
-            <div className="grid grid-cols-3 gap-1.5">
-              {["Easy", "Medium", "Hard"].map((d) => (
-                <div
-                  key={d}
-                  className={`rounded-md border-2 px-2 py-1.5 text-center text-[10px] font-medium ${
-                    d === "Medium"
-                      ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]"
-                      : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
-                  }`}
-                >
-                  {d}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* time challenge toggle */}
-          <div className="flex items-center justify-between rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5">
-            <div className="flex items-center gap-1.5">
-              <Timer className="h-3 w-3 text-[var(--lp-ink-soft)]" />
-              <span className="text-[10px] text-[var(--lp-ink)]">Time Challenge</span>
-            </div>
-            <span className="relative h-3.5 w-6 rounded-full bg-[var(--lp-accent)]">
-              <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-white" />
-            </span>
-          </div>
-
-          {/* start button */}
-          <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[var(--lp-accent)] px-3 py-2 text-[11px] font-semibold text-white shadow">
-            <Play className="h-3.5 w-3.5" />
-            Start Game
           </div>
         </div>
-      )}
+
+        {/* game mode grid */}
+        <div>
+          <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Select Game Mode</div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {spellModes.map((m) => (
+              <div
+                key={m.key}
+                className={`flex items-center gap-1.5 rounded-md border-2 px-2 py-1.5 ${
+                  m.active
+                    ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]"
+                    : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
+                }`}
+              >
+                <m.icon className="h-3 w-3" />
+                <span className="text-[9px]">{m.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* difficulty */}
+        <div>
+          <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Select Difficulty</div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {["Easy", "Medium", "Hard"].map((d) => (
+              <div
+                key={d}
+                className={`rounded-md border-2 px-2 py-1.5 text-center text-[10px] font-medium ${
+                  d === "Medium"
+                    ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]"
+                    : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
+                }`}
+              >
+                {d}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* time challenge toggle */}
+        <div className="flex items-center justify-between rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5">
+          <div className="flex items-center gap-1.5">
+            <Timer className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+            <span className="text-[10px] text-[var(--lp-ink)]">Time Challenge</span>
+          </div>
+          <span className="relative h-3.5 w-6 rounded-full bg-[var(--lp-accent)]">
+            <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-white" />
+          </span>
+        </div>
+
+        {/* start button */}
+        <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[var(--lp-accent)] px-3 py-2 text-[11px] font-semibold text-white shadow">
+          <Play className="h-3.5 w-3.5" />
+          Start Game
+        </div>
+      </div>
     </MockupFrame>
   );
 }

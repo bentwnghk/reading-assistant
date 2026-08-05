@@ -23,11 +23,14 @@ import {
   UnderstandMockup,
   AITutorMockup,
   PracticeMockup,
-  ReadingTestMockup,
-  AchievementsLeaderboardMockup,
+  ReadingTestResultsMockup,
+  TargetedPracticeMockup,
+  AchievementsMockup,
+  LeaderboardMockup,
+  WordsTableMockup,
+  SpellingSetupMockup,
   DashboardMockup,
   AssignmentsMockup,
-  VocabularyMockup,
 } from "@/components/Auth/landing/Mockups";
 import { FeaturesShowcase } from "@/components/Auth/landing/FeaturesShowcase";
 import { Footer } from "@/components/Internal/Footer";
@@ -137,9 +140,12 @@ const CAROUSEL_AUTOPLAY_MS = 7000;
 function MasterCarousel() {
   const { t } = useTranslation();
   const slides = [
-    { key: "readingTest", label: t("landing.chapters.master.carousel.readingTest"), node: <ReadingTestMockup /> },
-    { key: "achievements", label: t("landing.chapters.master.carousel.achievements"), node: <AchievementsLeaderboardMockup /> },
-    { key: "vocabulary", label: t("landing.chapters.master.carousel.vocabulary"), node: <VocabularyMockup /> },
+    { key: "results", label: t("landing.chapters.master.carousel.results"), node: <ReadingTestResultsMockup /> },
+    { key: "practice", label: t("landing.chapters.master.carousel.practice"), node: <TargetedPracticeMockup /> },
+    { key: "achievements", label: t("landing.chapters.master.carousel.achievements"), node: <AchievementsMockup /> },
+    { key: "leaderboard", label: t("landing.chapters.master.carousel.leaderboard"), node: <LeaderboardMockup /> },
+    { key: "words", label: t("landing.chapters.master.carousel.words"), node: <WordsTableMockup /> },
+    { key: "spelling", label: t("landing.chapters.master.carousel.spelling"), node: <SpellingSetupMockup /> },
   ];
   const count = slides.length;
   const [index, setIndex] = useState(0);
