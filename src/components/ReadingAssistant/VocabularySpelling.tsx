@@ -611,14 +611,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     }
   }, [gameStatus, score, setSpellingGameBestScore, effectiveId, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete, correctCount, challenges]);
 
-  if (glossary.length < 3) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        <p>{t("reading.glossary.spelling.notEnoughWords")}</p>
-      </div>
-    );
-  }
-
+  // Battle mode must be reachable even with an empty glossary: joining a room
+  // (by code or via a class-battle invite) needs no word source — the host
+  // supplies the words. The glossary-count guard below only applies to solo
+  // play. Without this ordering, a user with no reading session/vocabulary who
+  // accepts a class-battle invite can never reach the lobby.
   if (playMode === "battle") {
     return (
       <SpellingBattleFlow
@@ -628,6 +625,14 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         onComplete={onComplete}
         onExitToSolo={() => setPlayMode("solo")}
       />
+    );
+  }
+
+  if (glossary.length < 3) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <p>{t("reading.glossary.spelling.notEnoughWords")}</p>
+      </div>
     );
   }
 

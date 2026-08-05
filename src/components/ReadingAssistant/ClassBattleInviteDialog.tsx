@@ -28,6 +28,7 @@ export function ClassBattleInviteDialog() {
   const invites = useBattleStore((s) => s.pendingClassBattleInvites);
   const setShow = useBattleStore((s) => s.setShowClassBattleInviteDialog);
   const setShouldOpenBattle = useBattleStore((s) => s.setShouldOpenBattle);
+  const setClassInvite = useBattleStore((s) => s.setClassInvite);
   const dismiss = useBattleStore((s) => s.dismissClassBattleInvite);
 
   const handleCopy = useCallback((code: string) => {
@@ -42,11 +43,17 @@ export function ClassBattleInviteDialog() {
   }, [dismiss, setShow]);
 
   const handleJoinBattle = useCallback((code: string) => {
+    // Carry the chosen invite into the lobby so the ClassInviteBanner renders
+    // a one-click "Join" (→ joinRoom(code)). Without this the user lands in the
+    // lobby with the code they already saw but no way to use it short of
+    // retyping it — and a session-less user has no glossary to fall back on.
+    const invite = invites.find((i) => i.roomCode === code);
+    if (invite) setClassInvite(invite);
     setShouldOpenBattle(true);
     dismiss(code);
     setShow(false);
     router.push("/");
-  }, [setShouldOpenBattle, dismiss, setShow, router]);
+  }, [invites, setClassInvite, setShouldOpenBattle, dismiss, setShow, router]);
 
   return (
     <Dialog open={show} onOpenChange={setShow}>

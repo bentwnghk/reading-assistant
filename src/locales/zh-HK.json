@@ -1615,6 +1615,8 @@
         "multiplayer": {
           "title": "多人拼字對戰",
           "subtitle": "與其他玩家進行即時拼字對決",
+          "navTitle": "拼字對戰",
+          "dialogDesc": "建立房間擔任主持人，或輸入房間代碼加入現有對戰。",
           "connecting": "正在連線到對戰伺服器…",
           "retry": "重試",
           "unavailable": "此伺服器未啟用多人對戰。",

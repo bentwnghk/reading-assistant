@@ -35,6 +35,7 @@ import {
   CircleHelp,
   ImageIcon,
   Compass,
+  Swords,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -79,6 +80,7 @@ const History = dynamic(() => import("@/components/Dashboard/Dashboard"));
 const TeacherDashboard = dynamic(() => import("@/components/TeacherDashboard/TeacherDashboard"));
 const SharedSessionDialog = dynamic(() => import("@/components/Dashboard/SharedSessionDialog"));
 const ClassBattleInviteDialog = dynamic(() => import("@/components/ReadingAssistant/ClassBattleInviteDialog").then(m => m.ClassBattleInviteDialog));
+const SpellingBattleFlow = dynamic(() => import("@/components/ReadingAssistant/SpellingBattleFlow").then(m => m.SpellingBattleFlow));
 const ReviewListShareDialog = dynamic(() => import("@/components/Vocabulary/ReviewListShareDialog"));
 
 function getSafeFilename(value: string): string {
@@ -111,6 +113,7 @@ function Header() {
   const [openAbout, setOpenAbout] = useState<boolean>(false);
   const [openNoPending, setOpenNoPending] = useState<boolean>(false);
   const [openUserManagement, setOpenUserManagement] = useState<boolean>(false);
+  const [openBattleLobby, setOpenBattleLobby] = useState<boolean>(false);
   const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
@@ -122,6 +125,12 @@ function Header() {
   const { overdueCount, fetchOverdueAssignmentCount } = useAssignmentsStore();
   const pendingClassBattleCount = useBattleStore((s) => s.pendingClassBattleInvites.length);
   const setShowClassBattleInviteDialog = useBattleStore((s) => s.setShowClassBattleInviteDialog);
+  // Prevent accidental dialog dismissal while a live game is in progress —
+  // closing mid-battle unmounts the arena (the connection itself survives at
+  // module scope, but the timed-input UI would be lost until reopened).
+  const battleStatus = useBattleStore((s) => s.status);
+  const battleCurrentWord = useBattleStore((s) => s.currentWord);
+  const battleActive = battleStatus === "countdown" || battleStatus === "playing" || !!battleCurrentWord;
   const totalPending = pendingCount + pendingReviewListShareCount + pendingClassBattleCount;
   const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
   const {
@@ -402,6 +411,18 @@ function Header() {
                   <span className="text-sm">{t("vocabulary.title")}</span>
                 </Button>
               </Link>
+            )}
+            {session?.user && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1.5"
+                title={t("reading.glossary.spelling.multiplayer.navTitle")}
+                onClick={() => setOpenBattleLobby(true)}
+              >
+                <Swords className="h-4 w-4" />
+                <span className="text-sm">{t("reading.glossary.spelling.multiplayer.navTitle")}</span>
+              </Button>
             )}
             {session?.user ? (
               <DropdownMenu>
@@ -985,6 +1006,32 @@ function Header() {
       <SharedSessionDialog />
       <ReviewListShareDialog />
       <ClassBattleInviteDialog />
+      {/*
+        Unified, always-reachable entry to the multiplayer spelling battle
+        lobby. Mounts the SAME SpellingBattleFlow used inside the spelling tab,
+        so joining (by code or invite) works for users with no reading session
+        or vocabulary — the lobby needs no word source to join, and hosting
+        defaults to the user's vocabulary DB. The underlying Socket.io
+        connection + Zustand store live at module scope, so this dialog is just
+        a second mount point over the same singleton state (safe alongside the
+        in-context spelling-tab entry). onExitToSolo = close dialog.
+      */}
+      <Dialog open={openBattleLobby} onOpenChange={setOpenBattleLobby}>
+        <DialogContent
+          className="max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide"
+          onInteractOutside={(e) => { if (battleActive) e.preventDefault(); }}
+          onEscapeKeyDown={(e) => { if (battleActive) e.preventDefault(); }}
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Swords className="h-5 w-5" />
+              {t("reading.glossary.spelling.multiplayer.title")}
+            </DialogTitle>
+            <DialogDescription>{t("reading.glossary.spelling.multiplayer.dialogDesc")}</DialogDescription>
+          </DialogHeader>
+          <SpellingBattleFlow onExitToSolo={() => setOpenBattleLobby(false)} />
+        </DialogContent>
+      </Dialog>
       <input
         ref={fileInputRef}
         type="file"

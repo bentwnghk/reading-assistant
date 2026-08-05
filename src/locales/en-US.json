@@ -1584,6 +1584,8 @@
         "multiplayer": {
           "title": "Multiplayer Spelling Battle",
           "subtitle": "Challenge other players to a live spelling duel",
+          "navTitle": "Spelling Battle",
+          "dialogDesc": "Create a room to host, or join an existing battle with a room code.",
           "connecting": "Connecting to battle server…",
           "retry": "Retry",
           "unavailable": "Multiplayer battles are not available on this server.",

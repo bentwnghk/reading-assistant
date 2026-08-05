@@ -141,6 +141,9 @@ export function ClassBattlePoller() {
                 label: t(`${M}.classBattleToastAction`),
                 onClick: () => {
                   useBattleStore.getState().setShouldOpenBattle(true);
+                  // Carry the invite into the lobby so the ClassInviteBanner
+                  // offers a one-click join (see ClassBattleInviteDialog).
+                  useBattleStore.getState().setClassInvite(invite);
                   useBattleStore.getState().dismissClassBattleInvite(invite.roomCode);
                   router.push("/");
                   toast.dismiss(invite.roomCode);
