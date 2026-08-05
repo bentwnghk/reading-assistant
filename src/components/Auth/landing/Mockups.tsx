@@ -3407,7 +3407,7 @@ export function UnderstandOriginalMockup() {
       {/* highlighted words chips (mirrors highlightedWords map) */}
       <div className="mb-3 flex flex-wrap items-center gap-1.5 rounded-md bg-[var(--lp-paper-2)]/60 p-2">
         <span className="text-[9px] text-[var(--lp-ink-soft)]">Added words:</span>
-        {["flourish", "inefficient", "predicted", "matured", "defenders"].map((w) => (
+        {["flourish", "inefficient", "predicted", "matured", "defenders", "local"].map((w) => (
           <span
             key={w}
             className="rounded bg-yellow-100 px-1.5 py-0.5 text-[9px] font-medium text-yellow-800 dark:bg-yellow-900/60 dark:text-yellow-200"
@@ -3420,19 +3420,6 @@ export function UnderstandOriginalMockup() {
       {/* text body — 2 paragraphs with highlighted words (yellow chips),
           one with the small amber dot that signals a glossary entry */}
       <div className="relative space-y-3">
-        {/* floating selection toolbar — mirrors the .selection-popup in AdaptedText.tsx */}
-        <div className="absolute -top-1 left-12 z-10 flex items-center gap-0.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-0.5 shadow-md">
-          <span className="inline-flex items-center gap-0.5 border-r border-[var(--lp-rule)] px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
-            <Plus className="h-3 w-3" /> Add Word
-          </span>
-          <span className="inline-flex items-center gap-0.5 border-r border-[var(--lp-rule)] px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
-            <Brain className="h-3 w-3 text-[var(--lp-accent)]" /> Analyze
-          </span>
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
-            <Volume2 className="h-3 w-3 text-green-500" /> Speak
-          </span>
-        </div>
-
         <p className="pl-0 text-[11px] leading-relaxed text-[var(--lp-ink)]">
           I presented plenty of evidence that recycling was{" "}
           <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
@@ -3441,7 +3428,6 @@ export function UnderstandOriginalMockup() {
           and{" "}
           <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
             inefficient
-            <sup className="ml-0.5 inline-flex h-[10px] min-w-[10px] items-center justify-center rounded-full bg-amber-500/80 align-super text-[7px] font-bold text-white" />
           </mark>
           , but its{" "}
           <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
@@ -3469,33 +3455,48 @@ export function UnderstandOriginalMockup() {
           Critics, however, were not convinced. They pointed to studies showing that collecting,
           sorting, and reprocessing waste often consumed more energy than it saved, and that the
           costs fell heavily on{" "}
-          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
-            local governments
-          </mark>{" "}
-          already struggling to balance their budgets.
+          <span className="relative inline-block">
+            {/* floating selection toolbar — mirrors the .selection-popup in AdaptedText.tsx */}
+            <div className="absolute -top-7 left-0 z-10 flex items-center gap-0.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-0.5 shadow-md">
+              <span className="inline-flex items-center gap-0.5 border-r border-[var(--lp-rule)] px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+                <Plus className="h-3 w-3" /> Add Word
+              </span>
+              <span className="inline-flex items-center gap-0.5 border-r border-[var(--lp-rule)] px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+                <Brain className="h-3 w-3 text-[var(--lp-accent)]" /> Analyze
+              </span>
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+                <Volume2 className="h-3 w-3 text-green-500" /> Speak
+              </span>
+            </div>
+            <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+              local
+              <sup className="ml-0.5 inline-flex h-[10px] min-w-[10px] items-center justify-center rounded-full bg-amber-500/80 align-super text-[7px] font-bold text-white" />
+            </mark>
+          </span>{" "}
+          governments already struggling to balance their budgets.
         </p>
 
-        {/* glossary popover underneath the "inefficient" chip —
+        {/* glossary popover underneath the "local" chip —
             mirrors the .glossary-popover in AdaptedText.tsx */}
         <div className="relative mx-auto mt-2 w-[calc(100%-1rem)] max-w-[300px] rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3 shadow-lg">
           {/* popover arrow pointing up */}
-          <div className="absolute -top-1.5 left-12 h-3 w-3 rotate-45 border-l border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]" />
+          <div className="absolute -top-1.5 left-10 h-3 w-3 rotate-45 border-l border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]" />
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <span className="text-sm font-bold text-[var(--lp-ink)]">inefficient</span>
-              <span className="ml-1.5 text-[10px] text-[var(--lp-ink-soft)]">in·ef·fi·cient</span>
+              <span className="text-sm font-bold text-[var(--lp-ink)]">local</span>
+              <span className="ml-1.5 text-[10px] text-[var(--lp-ink-soft)]">lo·cal</span>
               <Volume2 className="ml-1 inline h-3 w-3 text-[var(--lp-ink-soft)]" />
             </div>
             <span className="shrink-0 rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
               adjective
             </span>
           </div>
-          <div className="mt-1 text-sm font-semibold text-[var(--lp-accent)]">效率低的</div>
+          <div className="mt-1 text-sm font-semibold text-[var(--lp-accent)]">本地的；地方的</div>
           <div className="text-[11px] text-[var(--lp-ink-soft)]">
-            not using time or energy well; wasteful
+            relating to a particular area, city, or community
           </div>
           <div className="mt-2 border-t border-[var(--lp-rule)] pt-2 text-[10px] italic text-[var(--lp-ink-soft)]">
-            “They pointed out that the existing process was inefficient and costly.”
+            “The costs fell heavily on local governments already struggling to balance their budgets.”
           </div>
         </div>
       </div>
