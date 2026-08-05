@@ -12,6 +12,7 @@ import {
   FileDown,
   Sparkles,
   Target,
+  Timer,
   BookOpen,
   BookText,
   Gamepad2,
@@ -35,16 +36,21 @@ import {
   TriangleAlert,
   BookOpenCheck,
   ClipboardList,
+  Combine,
+  Shuffle,
   SpellCheck,
+  Swords,
   GraduationCap,
   BookMarked,
   Clock,
   HelpCircle,
+  Keyboard,
   Table as TableIcon,
   ListPlus,
   History,
   Wand2,
   Layers,
+  Play,
   Library,
   Search,
   Globe,
@@ -1851,22 +1857,48 @@ export function AssignmentsMockup() {
 
 /* ── 8. VOCABULARY — faithful mockup of the My Vocabulary page ── */
 export function VocabularyMockup() {
-  // 4 overview stat cards (Total / Due / Mastered / New). Colors match the real page.
-  const stats = [
+  const frameRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(frameRef);
+  // Auto-cycle the three demo'd tabs (Words → Phrases → Spelling) every 2.5s.
+  // Re-runs on every tab change (incl. manual clicks) so each gets a full window.
+  // Paused when the mockup is scrolled out of view (same pattern as UnderstandMockup).
+  const [activeTab, setActiveTab] = useState<"table" | "phrases" | "spelling">("table");
+  useEffect(() => {
+    if (!inView) return;
+    const order: ("table" | "phrases" | "spelling")[] = ["table", "phrases", "spelling"];
+    const id = setTimeout(() => {
+      setActiveTab((cur) => order[(order.indexOf(cur) + 1) % order.length]);
+    }, 2500);
+    return () => clearTimeout(id);
+  }, [activeTab, inView]);
+
+  const isPhrase = activeTab === "phrases";
+
+  // Overview stat cards switch with the tab (phraseStats vs wordStats on the real page).
+  const wordStats = [
     { label: "Total Words", value: "128", icon: BookMarked, color: "text-[var(--lp-ink)]", sub: "Own: 96 · Teacher: 32" },
     { label: "Due for Review", value: "14", icon: Clock, color: "text-orange-500", sub: null },
     { label: "Mastered", value: "47", icon: CheckCircle2, color: "text-green-500", sub: null },
     { label: "New Words", value: "21", icon: Brain, color: "text-blue-500", sub: null },
   ];
+  const phraseStats = [
+    { label: "Total Phrases", value: "36", icon: Combine, color: "text-[var(--lp-ink)]", sub: "Own: 24 · Teacher: 12" },
+    { label: "Due for Review", value: "6", icon: Clock, color: "text-orange-500", sub: null },
+    { label: "Mastered", value: "11", icon: CheckCircle2, color: "text-green-500", sub: null },
+    { label: "New Phrases", value: "9", icon: Brain, color: "text-blue-500", sub: null },
+  ];
+  const stats = isPhrase ? phraseStats : wordStats;
 
-  // Tab strip — note Spelling precedes Quiz, matching the real page.
+  // Full 7-tab strip matches the real page. Only the three demo'd tabs are
+  // clickable (the rest are present for faithfulness but don't break the cycle).
   const tabs = [
-    { key: "table", label: "Table", icon: TableIcon, active: true },
-    { key: "flashcard", label: "Flashcard", icon: Layers, active: false },
-    { key: "spelling", label: "Spelling", icon: SpellCheck, active: false },
-    { key: "quiz", label: "Quiz", icon: ClipboardList, active: false },
-    { key: "lists", label: "Review Lists", icon: ListPlus, active: false },
-    { key: "history", label: "History", icon: History, active: false },
+    { key: "table", label: "Words", icon: TableIcon, cycle: true },
+    { key: "phrases", label: "Phrases", icon: Combine, cycle: true },
+    { key: "flashcard", label: "Flashcard", icon: Layers, cycle: false },
+    { key: "spelling", label: "Spelling", icon: SpellCheck, cycle: true },
+    { key: "quiz", label: "Quiz", icon: ClipboardList, cycle: false },
+    { key: "lists", label: "Review Lists", icon: ListPlus, cycle: false },
+    { key: "history", label: "History", icon: History, cycle: false },
   ];
 
   // Mastery level badges: 0 New → 5 Mastered (gray→red→orange→yellow→blue→green ramp).
@@ -1893,16 +1925,10 @@ export function VocabularyMockup() {
 
   type Level = "0" | "1" | "2" | "3" | "4" | "5";
   type Rating = "easy" | "medium" | "hard" | "none";
-  type Row = {
-    word: string;
-    pos: string;
-    def: string;
-    zh: string;
-    source: "own" | "teacher";
-    rating: Rating;
-    level: Level;
-  };
-  const rows: Row[] = [
+  type Source = "own" | "teacher";
+
+  // Words tab rows (single-word glossary entries).
+  const wordRows: { word: string; pos: string; def: string; zh: string; source: Source; rating: Rating; level: Level }[] = [
     { word: "flourish", pos: "verb", def: "to grow or develop successfully", zh: "茁壯成長", source: "own", rating: "easy", level: "5" },
     { word: "luminous", pos: "adj.", def: "full of light; brightly glowing", zh: "發光的", source: "own", rating: "medium", level: "4" },
     { word: "inefficient", pos: "adj.", def: "not using time or energy well", zh: "效率低的", source: "teacher", rating: "hard", level: "2" },
@@ -1910,8 +1936,26 @@ export function VocabularyMockup() {
     { word: "verdict", pos: "noun", def: "a formal decision or judgment", zh: "裁決", source: "own", rating: "none", level: "0" },
   ];
 
+  // Phrases tab rows — each a CollocationChunk added via the reading-session
+  // "Add to Phrases" flow. `pattern` is the chunk-type badge.
+  const phraseRows: { phrase: string; pattern: string; meaning: string; zh: string; source: Source; rating: Rating; level: Level }[] = [
+    { phrase: "take into account", pattern: "V + Prep + N", meaning: "to consider when judging", zh: "把…考慮在內", source: "own", rating: "medium", level: "3" },
+    { phrase: "make a decision", pattern: "V + N", meaning: "to decide something", zh: "作決定", source: "teacher", rating: "hard", level: "1" },
+    { phrase: "heavy rain", pattern: "Adj + N", meaning: "very strong rainfall", zh: "大雨", source: "own", rating: "easy", level: "5" },
+    { phrase: "look forward to", pattern: "Phrasal verb", meaning: "to expect with pleasure", zh: "期待", source: "own", rating: "none", level: "0" },
+    { phrase: "in spite of", pattern: "Prep phrase", meaning: "despite; not prevented by", zh: "儘管", source: "teacher", rating: "hard", level: "2" },
+  ];
+
+  // Spelling setup screen config (frozen at the initial state — Solo, Listen & Type, Medium, timed).
+  const spellModes = [
+    { key: "listen-type", label: "Listen & Type", icon: Volume2, active: true },
+    { key: "scramble", label: "Letter Scramble", icon: Shuffle, active: false },
+    { key: "fill-blanks", label: "Fill Blanks", icon: Keyboard, active: false },
+    { key: "mixed", label: "Mixed Mode", icon: HelpCircle, active: false },
+  ];
+
   return (
-    <MockupFrame label="MY VOCABULARY · Mr.🆖 ProReader">
+    <MockupFrame label="MY VOCABULARY · Mr.🆖 ProReader" frameRef={frameRef}>
       {/* title row */}
       <div className="flex items-center gap-2">
         <BookMarked className="h-4 w-4 text-indigo-500" />
@@ -1919,7 +1963,7 @@ export function VocabularyMockup() {
         <HelpCircle className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
       </div>
 
-      {/* 4 stat cards */}
+      {/* 4 stat cards — always visible (page header), switch word/phrase stats with the tab */}
       <div className="mt-3 grid grid-cols-4 gap-2">
         {stats.map((s) => (
           <div
@@ -1936,113 +1980,257 @@ export function VocabularyMockup() {
         ))}
       </div>
 
-      {/* tabs */}
+      {/* tab strip — 7 tabs match the real page; the 3 demo'd tabs are clickable */}
       <div className="mt-3 flex flex-wrap gap-1 border-b border-[var(--lp-rule)]">
-        {tabs.map((tb) => (
-          <span
-            key={tb.key}
-            className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium -mb-px border-b-2 ${
-              tb.active
-                ? "border-[var(--lp-accent)] text-[var(--lp-accent)]"
-                : "border-transparent text-[var(--lp-ink-soft)]"
-            }`}
-          >
-            <tb.icon className="h-3 w-3" />
-            {tb.label}
-          </span>
-        ))}
-      </div>
-
-      {/* toolbar: Auto Select | spacer | Export */}
-      <div className="mt-2.5 flex items-center gap-2">
-        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
-          <Wand2 className="h-3 w-3 text-[var(--lp-accent)]" /> Auto Select
-        </span>
-        <span className="flex-1" />
-        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
-          <Download className="h-3 w-3" /> Export
-        </span>
-      </div>
-
-      {/* meta row */}
-      <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
-        <span>Showing 5 of 128 words</span>
-        <span>Page 1 of 3</span>
-      </div>
-
-      {/* word table */}
-      <div className="mt-1.5 overflow-hidden rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[8px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
-              <th className="px-2 py-1.5 text-left font-semibold">Word</th>
-              <th className="px-1.5 py-1.5 text-left font-semibold">PoS</th>
-              <th className="px-1.5 py-1.5 text-left font-semibold">Definition</th>
-              <th className="px-1.5 py-1.5 text-left font-semibold">中文</th>
-              <th className="px-1.5 py-1.5 text-center font-semibold">Source</th>
-              <th className="px-1.5 py-1.5 text-center font-semibold">Rating</th>
-              <th className="px-2 py-1.5 text-center font-semibold">Level</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr
-                key={r.word}
-                className={`text-[10px] text-[var(--lp-ink)] ${i !== rows.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}
-              >
-                <td className="px-2 py-1.5 font-medium">{r.word}</td>
-                <td className="px-1.5 py-1.5 italic text-[var(--lp-ink-soft)]">{r.pos}</td>
-                <td className="max-w-[110px] truncate px-1.5 py-1.5">{r.def}</td>
-                <td className="px-1.5 py-1.5 text-[var(--lp-ink-soft)]">{r.zh}</td>
-                <td className="px-1.5 py-1.5 text-center">
-                  <span
-                    className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${
-                      r.source === "teacher"
-                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                    }`}
-                  >
-                    {r.source === "teacher" ? "Teacher" : "Own"}
-                  </span>
-                </td>
-                <td className="px-1.5 py-1.5 text-center">
-                  <span className="inline-flex items-center gap-1 text-[9px] text-[var(--lp-ink-soft)]">
-                    <span className={`h-1.5 w-1.5 rounded-full ${ratingDot[r.rating]}`} />
-                    {ratingLabel[r.rating]}
-                  </span>
-                </td>
-                <td className="px-2 py-1.5 text-center">
-                  <span className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${masteryStyle[r.level]}`}>
-                    {masteryLabel[r.level]}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* pagination: Per page 25/50/75/100 (50 default) + page nav */}
-      <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
-        <span className="inline-flex items-center gap-1">
-          Per page:
-          {[25, 50, 75, 100].map((n, idx) => (
-            <span
-              key={n}
-              className={`rounded px-1 py-0.5 ${idx === 1 ? "bg-[var(--lp-accent)] font-medium text-white" : ""}`}
+        {tabs.map((tb) => {
+          const active = activeTab === tb.key;
+          const cls = `flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium -mb-px border-b-2 transition-colors ${
+            active
+              ? "border-[var(--lp-accent)] text-[var(--lp-accent)]"
+              : "border-transparent text-[var(--lp-ink-soft)]"
+          }`;
+          const inner = (
+            <>
+              <tb.icon className="h-3 w-3" />
+              {tb.label}
+            </>
+          );
+          return tb.cycle ? (
+            <button
+              key={tb.key}
+              type="button"
+              onClick={() => setActiveTab(tb.key as "table" | "phrases" | "spelling")}
+              className={cls}
             >
-              {n}
+              {inner}
+            </button>
+          ) : (
+            <span key={tb.key} className={cls}>
+              {inner}
             </span>
-          ))}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <ChevronRight className="h-3 w-3 rotate-180" />
-          <span className="rounded bg-[var(--lp-accent)] px-1.5 py-0.5 font-medium text-white">1</span>
-          <span>2</span>
-          <span>3</span>
-          <ChevronRight className="h-3 w-3" />
-        </span>
+          );
+        })}
       </div>
+
+      {/* ── WORDS + PHRASES content (table views) ── */}
+      {(activeTab === "table" || activeTab === "phrases") && (
+        <>
+          {/* toolbar: Auto Select | spacer | Export */}
+          <div className="mt-2.5 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+              <Wand2 className="h-3 w-3 text-[var(--lp-accent)]" /> Auto Select
+            </span>
+            <span className="flex-1" />
+            <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+              <Download className="h-3 w-3" /> Export
+            </span>
+          </div>
+
+          {/* meta row */}
+          <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+            <span>{isPhrase ? "Showing 5 of 36 phrases" : "Showing 5 of 128 words"}</span>
+            <span>{isPhrase ? "Page 1 of 1" : "Page 1 of 3"}</span>
+          </div>
+
+          {/* table */}
+          <div className="mt-1.5 overflow-hidden rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[8px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
+                  <th className="px-2 py-1.5 text-left font-semibold">{isPhrase ? "Phrase" : "Word"}</th>
+                  <th className="px-1.5 py-1.5 text-left font-semibold">{isPhrase ? "Pattern" : "PoS"}</th>
+                  <th className="px-1.5 py-1.5 text-left font-semibold">{isPhrase ? "Meaning" : "Definition"}</th>
+                  <th className="px-1.5 py-1.5 text-left font-semibold">中文</th>
+                  <th className="px-1.5 py-1.5 text-center font-semibold">Source</th>
+                  <th className="px-1.5 py-1.5 text-center font-semibold">Rating</th>
+                  <th className="px-2 py-1.5 text-center font-semibold">Level</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(isPhrase ? phraseRows : wordRows).map((r, i) => {
+                  const rows = isPhrase ? phraseRows : wordRows;
+                  const entry = isPhrase ? (r as typeof phraseRows[number]).phrase : (r as typeof wordRows[number]).word;
+                  const secondary = isPhrase ? (r as typeof phraseRows[number]).pattern : (r as typeof wordRows[number]).pos;
+                  const meaning = isPhrase ? (r as typeof phraseRows[number]).meaning : (r as typeof wordRows[number]).def;
+                  return (
+                    <tr
+                      key={entry}
+                      className={`text-[10px] text-[var(--lp-ink)] ${i !== rows.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}
+                    >
+                      <td className="px-2 py-1.5 font-medium">
+                        <span className="inline-flex items-center gap-1">
+                          <Volume2 className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+                          {entry}
+                        </span>
+                      </td>
+                      <td className="px-1.5 py-1.5">
+                        {isPhrase ? (
+                          <span className="inline-flex rounded-full bg-[var(--lp-accent)]/10 px-1.5 py-0.5 text-[8px] font-medium text-[var(--lp-accent)]">
+                            {secondary}
+                          </span>
+                        ) : (
+                          <span className="italic text-[var(--lp-ink-soft)]">{secondary}</span>
+                        )}
+                      </td>
+                      <td className="max-w-[110px] truncate px-1.5 py-1.5">{meaning}</td>
+                      <td className="px-1.5 py-1.5 text-[var(--lp-ink-soft)]">{r.zh}</td>
+                      <td className="px-1.5 py-1.5 text-center">
+                        <span
+                          className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${
+                            r.source === "teacher"
+                              ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                          }`}
+                        >
+                          {r.source === "teacher" ? "Teacher" : "Own"}
+                        </span>
+                      </td>
+                      <td className="px-1.5 py-1.5 text-center">
+                        <span className="inline-flex items-center gap-1 text-[9px] text-[var(--lp-ink-soft)]">
+                          <span className={`h-1.5 w-1.5 rounded-full ${ratingDot[r.rating]}`} />
+                          {ratingLabel[r.rating]}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1.5 text-center">
+                        <span className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${masteryStyle[r.level]}`}>
+                          {masteryLabel[r.level]}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* pagination */}
+          <div className="mt-2 flex items-center justify-between text-[9px] text-[var(--lp-ink-soft)]">
+            <span className="inline-flex items-center gap-1">
+              Per page:
+              {[25, 50, 75, 100].map((n, idx) => (
+                <span
+                  key={n}
+                  className={`rounded px-1 py-0.5 ${idx === 1 ? "bg-[var(--lp-accent)] font-medium text-white" : ""}`}
+                >
+                  {n}
+                </span>
+              ))}
+            </span>
+            {isPhrase ? (
+              <span className="inline-flex items-center gap-1">
+                <ChevronRight className="h-3 w-3 rotate-180 opacity-40" />
+                <span className="rounded bg-[var(--lp-accent)] px-1.5 py-0.5 font-medium text-white">1</span>
+                <ChevronRight className="h-3 w-3 opacity-40" />
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1">
+                <ChevronRight className="h-3 w-3 rotate-180" />
+                <span className="rounded bg-[var(--lp-accent)] px-1.5 py-0.5 font-medium text-white">1</span>
+                <span>2</span>
+                <span>3</span>
+                <ChevronRight className="h-3 w-3" />
+              </span>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── SPELLING tab: initial setup screen only ── */}
+      {activeTab === "spelling" && (
+        <div className="mt-3 flex flex-col gap-3">
+          {/* title */}
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-1.5">
+              <SpellCheck className="h-4 w-4 text-[var(--lp-accent)]" />
+              <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Spelling Challenge</span>
+              <HelpCircle className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+            </div>
+            <p className="text-[9px] text-[var(--lp-ink-soft)]">Practice spelling 128 words</p>
+          </div>
+
+          {/* play mode: Solo (selected) | Multiplayer Battle */}
+          <div>
+            <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Choose Your Challenge</div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative rounded-lg border-2 border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 p-2">
+                <CheckCircle2 className="absolute right-1 top-1 h-3 w-3 text-[var(--lp-accent)]" />
+                <div className="mb-1 flex h-6 w-6 items-center justify-center rounded bg-[var(--lp-accent)]/15">
+                  <User className="h-3.5 w-3.5 text-[var(--lp-accent)]" />
+                </div>
+                <div className="text-[10px] font-semibold text-[var(--lp-accent)]">Solo Practice</div>
+                <div className="text-[8px] text-[var(--lp-ink-soft)]">At your own pace</div>
+              </div>
+              <div className="relative rounded-lg border-2 border-fuchsia-400/40 bg-gradient-to-br from-fuchsia-500/10 to-transparent p-2">
+                <span className="absolute right-1 top-1 inline-flex items-center gap-0.5 rounded-full bg-fuchsia-500 px-1 py-0.5 text-[7px] font-bold text-white">
+                  <span className="h-1 w-1 rounded-full bg-white animate-pulse" />
+                  LIVE
+                </span>
+                <div className="mb-1 flex h-6 w-6 items-center justify-center rounded bg-fuchsia-500/15">
+                  <Swords className="h-3.5 w-3.5 text-fuchsia-500" />
+                </div>
+                <div className="text-[10px] font-semibold text-fuchsia-600 dark:text-fuchsia-400">Multiplayer Battle</div>
+                <div className="text-[8px] text-[var(--lp-ink-soft)]">Real-time arena</div>
+              </div>
+            </div>
+          </div>
+
+          {/* game mode grid */}
+          <div>
+            <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Select Game Mode</div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {spellModes.map((m) => (
+                <div
+                  key={m.key}
+                  className={`flex items-center gap-1.5 rounded-md border-2 px-2 py-1.5 ${
+                    m.active
+                      ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]"
+                      : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
+                  }`}
+                >
+                  <m.icon className="h-3 w-3" />
+                  <span className="text-[9px]">{m.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* difficulty */}
+          <div>
+            <div className="mb-1.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">Select Difficulty</div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {["Easy", "Medium", "Hard"].map((d) => (
+                <div
+                  key={d}
+                  className={`rounded-md border-2 px-2 py-1.5 text-center text-[10px] font-medium ${
+                    d === "Medium"
+                      ? "border-[var(--lp-accent)] bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]"
+                      : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
+                  }`}
+                >
+                  {d}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* time challenge toggle */}
+          <div className="flex items-center justify-between rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2 py-1.5">
+            <div className="flex items-center gap-1.5">
+              <Timer className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+              <span className="text-[10px] text-[var(--lp-ink)]">Time Challenge</span>
+            </div>
+            <span className="relative h-3.5 w-6 rounded-full bg-[var(--lp-accent)]">
+              <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-white" />
+            </span>
+          </div>
+
+          {/* start button */}
+          <div className="flex items-center justify-center gap-1.5 rounded-lg bg-[var(--lp-accent)] px-3 py-2 text-[11px] font-semibold text-white shadow">
+            <Play className="h-3.5 w-3.5" />
+            Start Game
+          </div>
+        </div>
+      )}
     </MockupFrame>
   );
 }
