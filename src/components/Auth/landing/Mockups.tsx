@@ -3457,7 +3457,7 @@ export function UnderstandOriginalMockup() {
           costs fell heavily on{" "}
           <span className="relative inline-block">
             {/* floating selection toolbar — mirrors the .selection-popup in AdaptedText.tsx */}
-            <div className="absolute -top-7 left-0 z-10 flex items-center gap-0.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-0.5 shadow-md">
+            <div className="absolute -top-9 left-0 z-10 flex w-max items-center gap-0.5 whitespace-nowrap rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-0.5 shadow-md">
               <span className="inline-flex items-center gap-0.5 border-r border-[var(--lp-rule)] px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
                 <Plus className="h-3 w-3" /> Add Word
               </span>
