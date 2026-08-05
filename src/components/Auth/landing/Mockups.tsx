@@ -71,6 +71,14 @@ import {
   Zap,
   XCircle,
   Highlighter,
+  Pencil,
+  Plus,
+  X,
+  Gauge,
+  FileText,
+  FileEdit,
+  FileMinus,
+  EyeOff,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -2786,7 +2794,7 @@ export function GrammarErrorSurgeryMockup() {
   const sentence = [
     { w: "She", sel: false },
     { w: "have", sel: true },
-    { w: "went", sel: false },
+    { w: "gone", sel: false },
     { w: "to", sel: false },
     { w: "the", sel: false },
     { w: "store", sel: false },
@@ -3058,6 +3066,659 @@ export function SpellingBattleLobbyMockup() {
         <span className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-3 py-2 text-[11px] text-[var(--lp-ink-soft)]">
           Leave
         </span>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UNDERSTAND carousel slides (Chapter 02) — 6 faithful mockups.
+   Each slide is a standalone view of a real in-app screen.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Shared two-paragraph passage (Original) — same recycling text, split
+   into two paragraphs so the mockups look like real reading passages. */
+const UNDERSTAND_PARAGRAPHS = {
+  original: [
+    "I presented plenty of evidence that recycling was costly and inefficient, but its defenders said that it was unfair to rush to judgment. Noting that the modern recycling movement had really just begun a few years earlier, they predicted it would flourish as the industry matured and the public learned how to recycle properly.",
+    "Critics, however, were not convinced. They pointed to studies showing that collecting, sorting, and reprocessing waste often consumed more energy than it saved, and that the costs fell heavily on local governments already struggling to balance their budgets.",
+  ],
+  adapted: [
+    "I gave a lot of proof that recycling cost too much and was not efficient. But people who supported recycling said it was unfair to judge too quickly. They said the modern recycling movement had just started a few years earlier. They predicted it would get better as the industry grew and people learned how to recycle.",
+    "However, critics did not agree. They showed studies proving that collecting and sorting waste often used more energy than it saved. They also noted that the high costs hurt local governments that were already struggling with money.",
+  ],
+  simplified: [
+    "I showed it cost too much. It was not efficient (not working well). Supporters said it was unfair to judge. They said recycling was new. It would get better.",
+    "But critics did not agree. They showed proof. Collecting and sorting waste used too much energy. It also cost too much money for towns.",
+  ],
+} as const;
+
+/* Shared text-analysis header: title + download dropdown, mirrors
+   AdaptedText.tsx (BookOpen + "Text Analysis & Adaptation" + FileDown). */
+function TextAnalysisHeader() {
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-[var(--lp-rule)] pb-3">
+      <BookOpen className="h-4 w-4 text-[var(--lp-ink-soft)]" />
+      <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Text Analysis &amp; Adaptation</span>
+      <span className="ml-auto inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink-soft)]">
+        <FileDown className="h-3 w-3" /> Word
+        <ChevronDown className="h-2.5 w-2.5" />
+      </span>
+    </div>
+  );
+}
+
+/* Shared text-analysis tab strip — Original · Adapted · Simplified. */
+function TextAnalysisTabs({ active }: { active: "original" | "adapted" | "simplified" }) {
+  const tabs: { key: typeof active; label: string; icon: React.ReactNode }[] = [
+    { key: "original", label: "Original", icon: <FileText className="h-3 w-3" /> },
+    { key: "adapted", label: "Adapted", icon: <FileEdit className="h-3 w-3" /> },
+    { key: "simplified", label: "Simplified", icon: <FileMinus className="h-3 w-3" /> },
+  ];
+  return (
+    <div className="mb-3 flex gap-1 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 p-0.5">
+      {tabs.map((tb) => (
+        <span
+          key={tb.key}
+          className={`flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[10px] font-medium transition-colors ${
+            active === tb.key
+              ? "bg-[var(--lp-accent)] text-white"
+              : "text-[var(--lp-ink-soft)]"
+          }`}
+        >
+          {tb.icon}
+          {tb.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ── Slide 1. Mind map — more complex, 6 branches with sub-leaves ── */
+export function UnderstandMindMapMockup() {
+  // Branch palette: teal, blue, purple, amber, pink, emerald
+  return (
+    <MockupFrame label="MIND MAP · Mr.🆖 ProReader">
+      {/* toolbar row — Read Along off · Chinese toggle · Download · Regenerate */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-[var(--lp-rule)] pb-3">
+        <Brain className="h-4 w-4 text-[var(--lp-accent)]" />
+        <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Mind Map</span>
+        <span className="ml-auto inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <Languages className="h-3 w-3" /> EN
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <RotateCcw className="h-3 w-3" /> Regenerate
+        </span>
+      </div>
+
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 p-3">
+        <svg viewBox="0 0 280 220" className="w-full" role="img" aria-label="Mind map: Recycling debate">
+          {/* ── connectors: root → 6 branches (radial) ── */}
+          {/* top-left: Criticism (teal) */}
+          <path d="M 130,104 Q 100,80 78,58" stroke="#26A69A" strokeWidth="1.1" fill="none" />
+          {/* top: Process (blue) */}
+          <path d="M 140,98 Q 140,72 140,46" stroke="#42A5F5" strokeWidth="1.1" fill="none" />
+          {/* top-right: Defense (purple) */}
+          <path d="M 150,104 Q 180,80 202,58" stroke="#AB47BC" strokeWidth="1.1" fill="none" />
+          {/* bottom-left: Cost (amber) */}
+          <path d="M 130,116 Q 100,140 78,162" stroke="#FFA726" strokeWidth="1.1" fill="none" />
+          {/* bottom: Growth (pink) */}
+          <path d="M 140,122 Q 140,148 140,176" stroke="#EC407A" strokeWidth="1.1" fill="none" />
+          {/* bottom-right: Future (emerald) */}
+          <path d="M 150,116 Q 180,140 202,162" stroke="#26A69A" strokeWidth="1.1" fill="none" />
+
+          {/* ── branch → leaves connectors (per branch, 3 each) ── */}
+          {/* Criticism leaves (top-left, teal) */}
+          <path d="M 50,48 Q 38,42 26,40" stroke="#26A69A" strokeWidth="0.7" fill="none" />
+          <path d="M 50,58 Q 38,58 26,58" stroke="#26A69A" strokeWidth="0.7" fill="none" />
+          <path d="M 50,68 Q 38,76 26,78" stroke="#26A69A" strokeWidth="0.7" fill="none" />
+          {/* Process leaves (top, blue) */}
+          <path d="M 116,30 Q 100,24 88,22" stroke="#42A5F5" strokeWidth="0.7" fill="none" />
+          <path d="M 140,28 Q 140,18 140,12" stroke="#42A5F5" strokeWidth="0.7" fill="none" />
+          <path d="M 164,30 Q 180,24 192,22" stroke="#42A5F5" strokeWidth="0.7" fill="none" />
+          {/* Defense leaves (top-right, purple) */}
+          <path d="M 230,48 Q 242,42 254,40" stroke="#AB47BC" strokeWidth="0.7" fill="none" />
+          <path d="M 230,58 Q 242,58 254,58" stroke="#AB47BC" strokeWidth="0.7" fill="none" />
+          <path d="M 230,68 Q 242,76 254,78" stroke="#AB47BC" strokeWidth="0.7" fill="none" />
+          {/* Cost leaves (bottom-left, amber) */}
+          <path d="M 50,152 Q 38,148 26,148" stroke="#FFA726" strokeWidth="0.7" fill="none" />
+          <path d="M 50,162 Q 38,162 26,162" stroke="#FFA726" strokeWidth="0.7" fill="none" />
+          <path d="M 50,172 Q 38,178 26,180" stroke="#FFA726" strokeWidth="0.7" fill="none" />
+          {/* Growth leaves (bottom, pink) */}
+          <path d="M 116,190 Q 100,196 88,198" stroke="#EC407A" strokeWidth="0.7" fill="none" />
+          <path d="M 140,192 Q 140,202 140,208" stroke="#EC407A" strokeWidth="0.7" fill="none" />
+          <path d="M 164,190 Q 180,196 192,198" stroke="#EC407A" strokeWidth="0.7" fill="none" />
+          {/* Future leaves (bottom-right, emerald) */}
+          <path d="M 230,152 Q 242,148 254,148" stroke="#10B981" strokeWidth="0.7" fill="none" />
+          <path d="M 230,162 Q 242,162 254,162" stroke="#10B981" strokeWidth="0.7" fill="none" />
+          <path d="M 230,172 Q 242,178 254,180" stroke="#10B981" strokeWidth="0.7" fill="none" />
+
+          {/* ── leaves (lighter tints, dark text) ── */}
+          {/* Criticism leaves — teal tint */}
+          <rect x="2" y="35" width="24" height="10" rx="2" fill="#B2DFDB" />
+          <text x="14" y="41" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Costly</text>
+          <rect x="2" y="53" width="24" height="10" rx="2" fill="#B2DFDB" />
+          <text x="14" y="59" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Wasteful</text>
+          <rect x="2" y="73" width="24" height="10" rx="2" fill="#B2DFDB" />
+          <text x="14" y="79" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Rush judge</text>
+
+          {/* Process leaves — blue tint */}
+          <rect x="64" y="17" width="24" height="10" rx="2" fill="#BBDEFB" />
+          <text x="76" y="23" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Collect</text>
+          <rect x="128" y="2" width="24" height="10" rx="2" fill="#BBDEFB" />
+          <text x="140" y="8" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Sort</text>
+          <rect x="192" y="17" width="24" height="10" rx="2" fill="#BBDEFB" />
+          <text x="204" y="23" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Reprocess</text>
+
+          {/* Defense leaves — purple tint */}
+          <rect x="254" y="35" width="24" height="10" rx="2" fill="#E1BEE7" />
+          <text x="266" y="41" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Too soon</text>
+          <rect x="254" y="53" width="24" height="10" rx="2" fill="#E1BEE7" />
+          <text x="266" y="59" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Promising</text>
+          <rect x="254" y="73" width="24" height="10" rx="2" fill="#E1BEE7" />
+          <text x="266" y="79" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Just begun</text>
+
+          {/* Cost leaves — amber tint */}
+          <rect x="2" y="143" width="24" height="10" rx="2" fill="#FFE0B2" />
+          <text x="14" y="149" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Energy</text>
+          <rect x="2" y="157" width="24" height="10" rx="2" fill="#FFE0B2" />
+          <text x="14" y="163" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Local gov</text>
+          <rect x="2" y="175" width="24" height="10" rx="2" fill="#FFE0B2" />
+          <text x="14" y="181" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Budgets</text>
+
+          {/* Growth leaves — pink tint */}
+          <rect x="64" y="193" width="24" height="10" rx="2" fill="#F8BBD0" />
+          <text x="76" y="199" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Matures</text>
+          <rect x="128" y="203" width="24" height="10" rx="2" fill="#F8BBD0" />
+          <text x="140" y="209" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Learns</text>
+          <rect x="192" y="193" width="24" height="10" rx="2" fill="#F8BBD0" />
+          <text x="204" y="199" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Improves</text>
+
+          {/* Future leaves — emerald tint */}
+          <rect x="254" y="143" width="24" height="10" rx="2" fill="#B2DFDB" />
+          <text x="266" y="149" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Flourish</text>
+          <rect x="254" y="157" width="24" height="10" rx="2" fill="#B2DFDB" />
+          <text x="266" y="163" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Thrive</text>
+          <rect x="254" y="175" width="24" height="10" rx="2" fill="#B2DFDB" />
+          <text x="266" y="181" textAnchor="middle" dominantBaseline="central" fontSize="4.2" fill="#37474F" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Sustain</text>
+
+          {/* ── branches (medium fills, white text) ── */}
+          <rect x="48" y="48" width="44" height="14" rx="3" fill="#26A69A" />
+          <text x="70" y="55" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Criticism</text>
+          <rect x="118" y="32" width="44" height="14" rx="3" fill="#42A5F5" />
+          <text x="140" y="39" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Process</text>
+          <rect x="188" y="48" width="44" height="14" rx="3" fill="#AB47BC" />
+          <text x="210" y="55" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Defense</text>
+          <rect x="48" y="155" width="44" height="14" rx="3" fill="#FFA726" />
+          <text x="70" y="162" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Cost</text>
+          <rect x="118" y="178" width="44" height="14" rx="3" fill="#EC407A" />
+          <text x="140" y="185" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Growth</text>
+          <rect x="188" y="155" width="44" height="14" rx="3" fill="#10B981" />
+          <text x="210" y="162" textAnchor="middle" dominantBaseline="central" fontSize="5.5" fontWeight="600" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Future</text>
+
+          {/* ── root (circle, indigo) ── */}
+          <circle cx="140" cy="110" r="16" fill="#5C6BC0" />
+          <text x="140" y="111" textAnchor="middle" dominantBaseline="central" fontSize="6.5" fontWeight="700" fill="white" style={{ fontFamily: "var(--font-sans), sans-serif" }}>Recycling</text>
+        </svg>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 2. AI Visualization — recycling infographic (User Manual §4.6) ── */
+export function UnderstandVisualizationMockup() {
+  return (
+    <MockupFrame label="AI VISUALIZATION · Mr.🆖 ProReader">
+      {/* toolbar — Download · Chinese toggle · Regenerate · remaining quota */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-[var(--lp-rule)] pb-3">
+        <ImageIcon className="h-4 w-4 text-[var(--lp-accent)]" />
+        <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Text Visualization</span>
+        <span className="ml-auto inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <Download className="h-3 w-3" /> PNG
+        </span>
+        <span className="inline-flex items-center gap-1 text-[10px] text-[var(--lp-ink-soft)]">
+          <span className="relative h-3 w-5 rounded-full bg-[var(--lp-accent)]">
+            <span className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-white" />
+          </span>
+          中文
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md bg-[var(--lp-accent)] px-2 py-1 text-[10px] font-semibold text-white">
+          <ImageIcon className="h-3 w-3" /> Regenerate
+        </span>
+        <span className="text-[9px] text-[var(--lp-ink-soft)]">1 left today</span>
+      </div>
+
+      {/* the infographic poster — same SVG as User Manual §4.6 */}
+      <div className="rounded-xl border border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-accent)]/10 via-[var(--lp-highlight)]/15 to-transparent p-3">
+        <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
+          <ImageIcon className="h-3 w-3" />
+          <span className="font-mono text-[9px] uppercase tracking-wider">AI Visualization</span>
+        </div>
+        <div className="flex items-center justify-center">
+          <svg
+            viewBox="0 0 240 200"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-full w-full max-h-72"
+            role="img"
+            aria-label="Infographic poster: The recycling movement is ready to flourish"
+          >
+            <defs>
+              <clipPath id="lpPosterClip2">
+                <rect width="240" height="200" rx="4" />
+              </clipPath>
+            </defs>
+            <g clipPath="url(#lpPosterClip2)">
+              {/* poster paper */}
+              <rect width="240" height="200" fill="#FBF8F1" />
+              {/* top accent bars */}
+              <rect x="0" y="0" width="240" height="5" fill="#1E3A8A" />
+              <rect x="0" y="5" width="240" height="1.5" fill="#F5C842" />
+              {/* title */}
+              <text x="120" y="22" textAnchor="middle" fontSize="16" fontWeight="900" fill="#17161A" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>RECYCLING</text>
+              <text x="120" y="31" textAnchor="middle" fontSize="5.5" fontWeight="600" letterSpacing="1.5" fill="#5C5751" style={{ fontFamily: "var(--font-mono), monospace" }}>A MOVEMENT IN PROGRESS</text>
+              <line x1="85" y1="36" x2="155" y2="36" stroke="#DCD5C6" strokeWidth="0.8" />
+              <circle cx="120" cy="36" r="2" fill="#F5C842" />
+              {/* critics panel (left) */}
+              <rect x="14" y="42" width="100" height="46" rx="4" fill="#FEF2F2" stroke="#FCA5A5" strokeWidth="0.5" />
+              <text x="64" y="51" textAnchor="middle" fontSize="5.5" fontWeight="700" letterSpacing="1" fill="#B91C1C" style={{ fontFamily: "var(--font-mono), monospace" }}>CRITICS SAY</text>
+              <g transform="translate(56, 54)" stroke="#DC2626" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M -5,0 L -5,5 M -7,3 L -5,5 L -3,3" />
+                <path d="M 1,0 L 1,7 M -1,5 L 1,7 L 3,5" />
+                <path d="M 7,0 L 7,6 M 5,4 L 7,6 L 9,4" />
+              </g>
+              <text x="64" y="76" textAnchor="middle" fontSize="7" fontWeight="700" fill="#17161A" style={{ fontFamily: "var(--font-sans), sans-serif" }}>&ldquo;Costly&rdquo;</text>
+              <text x="64" y="84" textAnchor="middle" fontSize="5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>inefficient &middot; rush to judge</text>
+              {/* VS badge */}
+              <circle cx="120" cy="65" r="9" fill="#17161A" />
+              <text x="120" y="68" textAnchor="middle" fontSize="7" fontWeight="900" fill="#F5C842" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>VS</text>
+              {/* defenders panel (right) */}
+              <rect x="126" y="42" width="100" height="46" rx="4" fill="#EFF6FF" stroke="#93C5FD" strokeWidth="0.5" />
+              <text x="176" y="51" textAnchor="middle" fontSize="5.5" fontWeight="700" letterSpacing="1" fill="#1E40AF" style={{ fontFamily: "var(--font-mono), monospace" }}>DEFENDERS SAY</text>
+              <g transform="translate(168, 54)" stroke="#2563EB" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M -5,8 L -5,3 M -7,5 L -5,3 L -3,5" />
+                <path d="M 1,8 L 1,1 M -1,3 L 1,1 L 3,3" />
+                <path d="M 7,8 L 7,2 M 5,4 L 7,2 L 9,4" />
+              </g>
+              <text x="176" y="76" textAnchor="middle" fontSize="7" fontWeight="700" fill="#17161A" style={{ fontFamily: "var(--font-sans), sans-serif" }}>&ldquo;Too soon&rdquo;</text>
+              <text x="176" y="84" textAnchor="middle" fontSize="5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>just begun &middot; will flourish</text>
+              {/* growth chart */}
+              <text x="14" y="100" fontSize="5.5" fontWeight="700" letterSpacing="0.8" fill="#5C5751" style={{ fontFamily: "var(--font-mono), monospace" }}>PROJECTED GROWTH</text>
+              <line x1="14" y1="115" x2="226" y2="115" stroke="#DCD5C6" strokeWidth="0.4" strokeDasharray="2 2" />
+              <line x1="14" y1="127" x2="226" y2="127" stroke="#DCD5C6" strokeWidth="0.4" strokeDasharray="2 2" />
+              <line x1="14" y1="132" x2="226" y2="132" stroke="#DCD5C6" strokeWidth="0.8" />
+              <rect x="24" y="125" width="28" height="7" rx="1" fill="#1E3A8A" opacity="0.25" />
+              <rect x="62" y="120" width="28" height="12" rx="1" fill="#1E3A8A" opacity="0.4" />
+              <rect x="100" y="115" width="28" height="17" rx="1" fill="#1E3A8A" opacity="0.58" />
+              <rect x="138" y="109" width="28" height="23" rx="1" fill="#1E3A8A" opacity="0.78" />
+              <rect x="176" y="102" width="28" height="30" rx="1" fill="#F5C842" />
+              <rect x="176" y="102" width="28" height="30" rx="1" fill="none" stroke="#1E3A8A" strokeWidth="0.5" />
+              <path d="M 38,125 L 76,120 L 114,115 L 152,109 L 190,102" stroke="#17161A" strokeWidth="0.8" fill="none" strokeDasharray="1.5 1.5" opacity="0.4" />
+              <text x="38" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>now</text>
+              <text x="76" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>early</text>
+              <text x="114" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>growing</text>
+              <text x="152" y="140" textAnchor="middle" fontSize="4.5" fill="#5C5751" style={{ fontFamily: "var(--font-sans), sans-serif" }}>maturing</text>
+              <text x="190" y="140" textAnchor="middle" fontSize="4.5" fontWeight="700" fill="#1E3A8A" style={{ fontFamily: "var(--font-sans), sans-serif" }}>flourish!</text>
+              {/* key takeaway box */}
+              <rect x="14" y="148" width="212" height="44" rx="4" fill="#17161A" />
+              <text x="120" y="162" textAnchor="middle" fontSize="6" fontStyle="italic" fill="#9CA3AF" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>the verdict?</text>
+              <rect x="62" y="167" width="104" height="16" fill="#F5C842" opacity="0.9" rx="1" />
+              <text x="114" y="179" textAnchor="middle" fontSize="14" fontWeight="900" fill="#17161A" style={{ fontFamily: "var(--font-display), Georgia, serif" }}>FLOURISH</text>
+              <g transform="translate(182, 158)">
+                <line x1="5" y1="20" x2="5" y2="10" stroke="#15803D" strokeWidth="0.9" />
+                <path d="M 5,12 Q 0,11 0.5,6 Q 5,7 5,12 Z" fill="#22C55E" />
+                <path d="M 5,10 Q 10,9 9.5,4 Q 5,5 5,10 Z" fill="#16A34A" />
+              </g>
+            </g>
+            <rect x="0.5" y="0.5" width="239" height="199" fill="none" stroke="#DCD5C6" rx="4" />
+          </svg>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 3. Text Analysis — Original tab ──
+   2 paragraphs, highlighted yellow chips, glossary popover underneath,
+   floating selection toolbar above the text body. */
+export function UnderstandOriginalMockup() {
+  return (
+    <MockupFrame label="TEXT ANALYSIS · Mr.🆖 ProReader">
+      <TextAnalysisHeader />
+      <TextAnalysisTabs active="original" />
+
+      {/* control row — Read Along · Edit (mirrors AdaptedText.tsx) */}
+      <div className="mb-3 flex items-center justify-end gap-1.5">
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Volume2 className="h-3 w-3" /> Read Along
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Pencil className="h-3 w-3" /> Edit
+        </span>
+      </div>
+
+      {/* green tip banner — mirrors AdaptedText.tsx highlightTip */}
+      <div className="mb-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
+        💡 <Brain className="inline h-3 w-3 align-text-bottom" /> Tap the{" "}
+        <span className="font-medium">yellow words</span> for definitions,{" "}
+        <Volume2 className="inline h-3 w-3 align-text-bottom" /> to listen, and{" "}
+        <Plus className="inline h-3 w-3 align-text-bottom" /> to add new words.
+      </div>
+
+      {/* highlighted words chips (mirrors highlightedWords map) */}
+      <div className="mb-3 flex flex-wrap items-center gap-1.5 rounded-md bg-[var(--lp-paper-2)]/60 p-2">
+        <span className="text-[9px] text-[var(--lp-ink-soft)]">Added words:</span>
+        {["flourish", "inefficient", "predicted", "matured", "defenders"].map((w) => (
+          <span
+            key={w}
+            className="rounded bg-yellow-100 px-1.5 py-0.5 text-[9px] font-medium text-yellow-800 dark:bg-yellow-900/60 dark:text-yellow-200"
+          >
+            {w}
+          </span>
+        ))}
+      </div>
+
+      {/* text body — 2 paragraphs with highlighted words (yellow chips),
+          one with the small amber dot that signals a glossary entry */}
+      <div className="relative space-y-3">
+        {/* floating selection toolbar — mirrors the .selection-popup in AdaptedText.tsx */}
+        <div className="absolute -top-1 left-12 z-10 flex items-center gap-0.5 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-0.5 shadow-md">
+          <span className="inline-flex items-center gap-0.5 border-r border-[var(--lp-rule)] px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+            <Plus className="h-3 w-3" /> Add Word
+          </span>
+          <span className="inline-flex items-center gap-0.5 border-r border-[var(--lp-rule)] px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+            <Brain className="h-3 w-3 text-[var(--lp-accent)]" /> Analyze
+          </span>
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+            <Volume2 className="h-3 w-3 text-green-500" /> Speak
+          </span>
+        </div>
+
+        <p className="pl-0 text-[11px] leading-relaxed text-[var(--lp-ink)]">
+          I presented plenty of evidence that recycling was{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            costly
+          </mark>{" "}
+          and{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            inefficient
+            <sup className="ml-0.5 inline-flex h-[10px] min-w-[10px] items-center justify-center rounded-full bg-amber-500/80 align-super text-[7px] font-bold text-white" />
+          </mark>
+          , but its{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            defenders
+          </mark>{" "}
+          said that it was unfair to{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            rush to judgment
+          </mark>
+          . Noting that the modern recycling movement had really just begun a few years earlier, they{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            predicted
+          </mark>{" "}
+          it would{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            flourish
+          </mark>{" "}
+          as the industry{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            matured
+          </mark>{" "}
+          and the public learned how to recycle properly.
+        </p>
+        <p className="text-[11px] leading-relaxed text-[var(--lp-ink)]">
+          Critics, however, were not convinced. They pointed to studies showing that collecting,
+          sorting, and reprocessing waste often consumed more energy than it saved, and that the
+          costs fell heavily on{" "}
+          <mark className="rounded bg-yellow-200 px-0.5 text-[var(--lp-ink)] dark:bg-yellow-400/80">
+            local governments
+          </mark>{" "}
+          already struggling to balance their budgets.
+        </p>
+
+        {/* glossary popover underneath the "inefficient" chip —
+            mirrors the .glossary-popover in AdaptedText.tsx */}
+        <div className="relative mx-auto mt-2 w-[calc(100%-1rem)] max-w-[300px] rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3 shadow-lg">
+          {/* popover arrow pointing up */}
+          <div className="absolute -top-1.5 left-12 h-3 w-3 rotate-45 border-l border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]" />
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <span className="text-sm font-bold text-[var(--lp-ink)]">inefficient</span>
+              <span className="ml-1.5 text-[10px] text-[var(--lp-ink-soft)]">in·ef·fi·cient</span>
+              <Volume2 className="ml-1 inline h-3 w-3 text-[var(--lp-ink-soft)]" />
+            </div>
+            <span className="shrink-0 rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
+              adjective
+            </span>
+          </div>
+          <div className="mt-1 text-sm font-semibold text-[var(--lp-accent)]">效率低的</div>
+          <div className="text-[11px] text-[var(--lp-ink-soft)]">
+            not using time or energy well; wasteful
+          </div>
+          <div className="mt-2 border-t border-[var(--lp-rule)] pt-2 text-[10px] italic text-[var(--lp-ink-soft)]">
+            “They pointed out that the existing process was inefficient and costly.”
+          </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 4. Text Analysis — Adapted tab ── */
+export function UnderstandAdaptedMockup() {
+  return (
+    <MockupFrame label="TEXT ANALYSIS · Mr.🆖 ProReader">
+      <TextAnalysisHeader />
+      <TextAnalysisTabs active="adapted" />
+
+      {/* control row — Regenerate (student age) */}
+      <div className="mb-3 flex items-center justify-end gap-1.5">
+        <span className="inline-flex items-center gap-1 rounded-md bg-[var(--lp-paper-2)] px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+          <BookOpen className="h-3 w-3" /> Regenerate (14 yo)
+        </span>
+      </div>
+
+      {/* adapted text body — 2 paragraphs, plain (no highlights by default) */}
+      <div className="space-y-3">
+        <p className="text-[11px] leading-relaxed text-[var(--lp-ink)]">
+          {UNDERSTAND_PARAGRAPHS.adapted[0]}
+        </p>
+        <p className="text-[11px] leading-relaxed text-[var(--lp-ink)]">
+          {UNDERSTAND_PARAGRAPHS.adapted[1]}
+        </p>
+      </div>
+
+      {/* Simplify further button — mirrors AdaptedText.tsx */}
+      <div className="mt-4 border-t border-[var(--lp-rule)] pt-3">
+        <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--lp-paper-2)] px-3 py-2 text-[10px] font-medium text-[var(--lp-ink)]">
+          <ArrowDown className="h-3 w-3" /> Simplify Further
+        </span>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 5. Text Analysis — Simplified tab ── */
+export function UnderstandSimplifiedMockup() {
+  return (
+    <MockupFrame label="TEXT ANALYSIS · Mr.🆖 ProReader">
+      <TextAnalysisHeader />
+      <TextAnalysisTabs active="simplified" />
+
+      {/* simplified text body — 2 short paragraphs */}
+      <div className="space-y-3">
+        <p className="text-[11px] leading-relaxed text-[var(--lp-ink)]">
+          {UNDERSTAND_PARAGRAPHS.simplified[0]}
+        </p>
+        <p className="text-[11px] leading-relaxed text-[var(--lp-ink)]">
+          {UNDERSTAND_PARAGRAPHS.simplified[1]}
+        </p>
+      </div>
+
+      {/* Simplify further button — mirrors AdaptedText.tsx */}
+      <div className="mt-4 border-t border-[var(--lp-rule)] pt-3">
+        <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--lp-paper-2)] px-3 py-2 text-[10px] font-medium text-[var(--lp-ink)]">
+          <ArrowDown className="h-3 w-3" /> Simplify Further
+        </span>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Slide 6. Text Difficulty Analysis + CEFR Word Highlight ── */
+export function UnderstandDifficultyMockup() {
+  // 3 DifficultyCards (Original / Adapted / Simplified) — mirrors
+  // DifficultyCard in TextDifficultyAnalyzer.tsx
+  const cards = [
+    {
+      title: "Original",
+      cefr: "B2",
+      cefrCls: "bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100",
+      words: 96, sentences: 4, avgLen: 24.0, flesch: 49.5, grade: "S5",
+    },
+    {
+      title: "Adapted",
+      cefr: "B1",
+      cefrCls: "bg-amber-200 text-amber-900 dark:bg-amber-800 dark:text-amber-100",
+      words: 88, sentences: 6, avgLen: 14.7, flesch: 71.3, grade: "S2",
+    },
+    {
+      title: "Simplified",
+      cefr: "A2",
+      cefrCls: "bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100",
+      words: 52, sentences: 8, avgLen: 6.5, flesch: 88.4, grade: "P6",
+    },
+  ];
+
+  // CEFR legend counts (only highlight B1+ in the mockup)
+  const cefrLegend = [
+    { level: "A1", count: 14, dot: "bg-cyan-500" },
+    { level: "A2", count: 22, dot: "bg-green-500" },
+    { level: "B1", count: 31, dot: "bg-amber-500" },
+    { level: "B2", count: 18, dot: "bg-orange-500" },
+    { level: "C1", count: 8, dot: "bg-red-500" },
+    { level: "C2", count: 3, dot: "bg-purple-500" },
+  ];
+
+  return (
+    <MockupFrame label="DIFFICULTY · Mr.🆖 ProReader">
+      {/* header — title + analyze + hide/show cards toggle */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-[var(--lp-rule)] pb-3">
+        <BarChart3 className="h-4 w-4 text-[var(--lp-ink-soft)]" />
+        <span className="font-display text-sm font-semibold text-[var(--lp-ink)]">Text Difficulty Analysis</span>
+        <span className="ml-auto inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Gauge className="h-3 w-3" /> Analyze
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md bg-[var(--lp-accent)] px-2 py-1 text-[10px] font-medium text-white">
+          <EyeOff className="h-3 w-3" /> Hide
+        </span>
+      </div>
+
+      {/* 3 DifficultyCards in a row */}
+      <div className="mb-4 grid grid-cols-3 gap-2">
+        {cards.map((c) => (
+          <div
+            key={c.title}
+            className="rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2.5"
+          >
+            <p className="mb-2 border-b border-[var(--lp-rule)] pb-1.5 text-center text-[10px] font-medium text-[var(--lp-ink)]">
+              {c.title}
+            </p>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[var(--lp-ink-soft)]">CEFR</span>
+                <span className={`rounded px-1.5 py-0.5 text-[9px] font-medium ${c.cefrCls}`}>{c.cefr}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[var(--lp-ink-soft)]">Words</span>
+                <span className="text-[10px] text-[var(--lp-ink)]">{c.words}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[var(--lp-ink-soft)]">Sentences</span>
+                <span className="text-[10px] text-[var(--lp-ink)]">{c.sentences}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[var(--lp-ink-soft)]">Avg len</span>
+                <span className="text-[10px] text-[var(--lp-ink)]">{c.avgLen}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[var(--lp-ink-soft)]">Flesch</span>
+                <span className="text-[10px] text-[var(--lp-ink)]">{c.flesch}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] text-[var(--lp-ink-soft)]">Grade</span>
+                <span className="text-[10px] text-[var(--lp-ink)]">{c.grade}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CEFR Word Highlight panel — mirrors CefrTextHighlighter */}
+      <div className="rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Highlighter className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+            <span className="text-[11px] font-medium text-[var(--lp-ink)]">CEFR Word Highlight</span>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-md bg-[var(--lp-accent)] px-2 py-1 text-[10px] font-medium text-white">
+            <X className="h-3 w-3" /> Hide
+          </span>
+        </div>
+
+        {/* legend — clickable CEFR level chips */}
+        <div className="mb-3 flex flex-wrap gap-1.5 border-b border-[var(--lp-rule)] pb-2">
+          {cefrLegend.map((c) => (
+            <span
+              key={c.level}
+              className="inline-flex items-center gap-1 text-[9px] text-[var(--lp-ink)]"
+            >
+              <span className={`h-2.5 w-2.5 rounded ${c.dot}`} />
+              <span className="font-medium">{c.level}</span>
+              <span className="text-[var(--lp-ink-soft)]">({c.count})</span>
+            </span>
+          ))}
+        </div>
+
+        {/* highlighted text body — 2 paragraphs with CEFR-colored words */}
+        <div className="max-h-48 space-y-2 overflow-hidden text-[10px] leading-relaxed text-[var(--lp-ink)]">
+          <p>
+            I{" "}
+            <span className="rounded bg-orange-200 px-0.5 text-[var(--lp-ink)] dark:bg-orange-800 dark:text-orange-100">presented</span>{" "}
+            plenty of{" "}
+            <span className="rounded bg-amber-200 px-0.5 text-[var(--lp-ink)] dark:bg-amber-800 dark:text-amber-100">evidence</span>{" "}
+            that{" "}
+            <span className="rounded bg-amber-200 px-0.5 text-[var(--lp-ink)] dark:bg-amber-800 dark:text-amber-100">recycling</span>{" "}
+            was{" "}
+            <span className="rounded bg-orange-200 px-0.5 text-[var(--lp-ink)] dark:bg-orange-800 dark:text-orange-100">costly</span>{" "}
+            and{" "}
+            <span className="rounded bg-red-200 px-0.5 text-[var(--lp-ink)] dark:bg-red-800 dark:text-red-100">inefficient</span>
+            , but its{" "}
+            <span className="rounded bg-red-200 px-0.5 text-[var(--lp-ink)] dark:bg-red-800 dark:text-red-100">defenders</span>{" "}
+            said that it was{" "}
+            <span className="rounded bg-amber-200 px-0.5 text-[var(--lp-ink)] dark:bg-amber-800 dark:text-amber-100">unfair</span>{" "}
+            to rush to{" "}
+            <span className="rounded bg-orange-200 px-0.5 text-[var(--lp-ink)] dark:bg-orange-800 dark:text-orange-100">judgment</span>
+            . They{" "}
+            <span className="rounded bg-orange-200 px-0.5 text-[var(--lp-ink)] dark:bg-orange-800 dark:text-orange-100">predicted</span>{" "}
+            it would{" "}
+            <span className="rounded bg-red-200 px-0.5 text-[var(--lp-ink)] dark:bg-red-800 dark:text-red-100">flourish</span>{" "}
+            as the industry{" "}
+            <span className="rounded bg-red-200 px-0.5 text-[var(--lp-ink)] dark:bg-red-800 dark:text-red-100">matured</span>
+            .
+          </p>
+          <p>
+            <span className="rounded bg-red-200 px-0.5 text-[var(--lp-ink)] dark:bg-red-800 dark:text-red-100">Critics</span>
+            , however, were not{" "}
+            <span className="rounded bg-amber-200 px-0.5 text-[var(--lp-ink)] dark:bg-amber-800 dark:text-amber-100">convinced</span>
+            . They pointed to{" "}
+            <span className="rounded bg-amber-200 px-0.5 text-[var(--lp-ink)] dark:bg-amber-800 dark:text-amber-100">studies</span>{" "}
+            showing that collecting and{" "}
+            <span className="rounded bg-orange-200 px-0.5 text-[var(--lp-ink)] dark:bg-orange-800 dark:text-orange-100">reprocessing</span>{" "}
+            waste often consumed more{" "}
+            <span className="rounded bg-amber-200 px-0.5 text-[var(--lp-ink)] dark:bg-amber-800 dark:text-amber-100">energy</span>{" "}
+            than it saved.
+          </p>
+        </div>
       </div>
     </MockupFrame>
   );

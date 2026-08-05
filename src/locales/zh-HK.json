@@ -352,7 +352,21 @@
           "原文 · 改寫 · 簡化",
           "心智圖與 AI 視覺化圖像",
           "CEFR 程度與可讀性分數"
-        ]
+        ],
+        "carousel": {
+          "label": "理解功能",
+          "slideCount": "共 {{count}} 張",
+          "mindmap": "心智圖",
+          "visualization": "AI 圖像化呈現",
+          "original": "文本分析 · 原文",
+          "adapted": "文本分析 · 改寫版",
+          "simplified": "文本分析 · 簡化版",
+          "difficulty": "難度與 CEFR 標記",
+          "prev": "上一張",
+          "next": "下一張",
+          "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",
+          "indicator": "第 {{n}} / {{count}} 張：{{label}}"
+        }
       },
       "tutor": {
         "eyebrow": "AI 導師",
