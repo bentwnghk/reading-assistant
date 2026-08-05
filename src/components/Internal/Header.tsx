@@ -113,7 +113,6 @@ function Header() {
   const [openAbout, setOpenAbout] = useState<boolean>(false);
   const [openNoPending, setOpenNoPending] = useState<boolean>(false);
   const [openUserManagement, setOpenUserManagement] = useState<boolean>(false);
-  const [openBattleLobby, setOpenBattleLobby] = useState<boolean>(false);
   const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
@@ -131,6 +130,8 @@ function Header() {
   const battleStatus = useBattleStore((s) => s.status);
   const battleCurrentWord = useBattleStore((s) => s.currentWord);
   const battleActive = battleStatus === "countdown" || battleStatus === "playing" || !!battleCurrentWord;
+  const showBattleLobbyDialog = useBattleStore((s) => s.showBattleLobbyDialog);
+  const setShowBattleLobbyDialog = useBattleStore((s) => s.setShowBattleLobbyDialog);
   const totalPending = pendingCount + pendingReviewListShareCount + pendingClassBattleCount;
   const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
   const {
@@ -418,7 +419,7 @@ function Header() {
                 size="sm"
                 className="h-8 gap-1.5"
                 title={t("reading.glossary.spelling.multiplayer.navTitle")}
-                onClick={() => setOpenBattleLobby(true)}
+                onClick={() => setShowBattleLobbyDialog(true)}
               >
                 <Swords className="h-4 w-4" />
                 <span className="text-sm">{t("reading.glossary.spelling.multiplayer.navTitle")}</span>
@@ -1016,7 +1017,7 @@ function Header() {
         a second mount point over the same singleton state (safe alongside the
         in-context spelling-tab entry). onExitToSolo = close dialog.
       */}
-      <Dialog open={openBattleLobby} onOpenChange={setOpenBattleLobby}>
+      <Dialog open={showBattleLobbyDialog} onOpenChange={setShowBattleLobbyDialog}>
         <DialogContent
           className="max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide"
           onInteractOutside={(e) => { if (battleActive) e.preventDefault(); }}
@@ -1029,7 +1030,7 @@ function Header() {
             </DialogTitle>
             <DialogDescription>{t("reading.glossary.spelling.multiplayer.dialogDesc")}</DialogDescription>
           </DialogHeader>
-          <SpellingBattleFlow onExitToSolo={() => setOpenBattleLobby(false)} />
+          <SpellingBattleFlow onExitToSolo={() => setShowBattleLobbyDialog(false)} />
         </DialogContent>
       </Dialog>
       <input

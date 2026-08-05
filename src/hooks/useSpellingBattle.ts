@@ -100,10 +100,15 @@ function wireEventsOnce(socket: NonNullable<ReturnType<typeof getRealtimeSocket>
     useBattleStore.getState().setGameEnd(payload.finalRanking, payload.totalWords)
   })
 
-  // On every (re)connect, re-join the current room to restore the seat.
+  // On every (re)connect, re-join the current room to restore the seat, and
+  // drain any join that was queued before the connection completed (e.g. an
+  // invite banner clicked during the handshake — see joinRoom below).
   socket.on("connect", () => {
-    const { roomCode } = useBattleStore.getState()
-    if (roomCode) {
+    const { roomCode, pendingJoinCode } = useBattleStore.getState()
+    if (pendingJoinCode) {
+      socket.emit("room:join", { code: pendingJoinCode } satisfies BattleJoinRoomPayload)
+      useBattleStore.getState().setPendingJoinCode(null)
+    } else if (roomCode) {
       socket.emit("room:join", { code: roomCode } satisfies BattleJoinRoomPayload)
     }
   })
@@ -231,17 +236,25 @@ export function useSpellingBattle(): UseSpellingBattle {
   }, [])
 
   const joinRoom = useCallback((code: string): void => {
+    const normalized = code.trim().toUpperCase()
     const socket = getRealtimeSocket()
     if (!socket?.connected) {
-      useBattleStore.getState().setError("not_connected")
+      // The socket handshake is still in flight (e.g. the user clicked the
+      // invite banner's Join immediately after the lobby mounted). Queue the
+      // join and ensure connect() is running; the `connect` handler drains it
+      // once live. Without this, the join silently fails with "not_connected".
+      useBattleStore.getState().setPendingJoinCode(normalized)
+      void connect()
       return
     }
-    socket.emit("room:join", { code: code.trim().toUpperCase() } satisfies BattleJoinRoomPayload)
-  }, [])
+    socket.emit("room:join", { code: normalized } satisfies BattleJoinRoomPayload)
+  }, [connect])
 
   const leaveRoom = useCallback((): void => {
     const socket = getRealtimeSocket()
     if (socket?.connected) socket.emit("room:leave")
+    // Cancel any join queued before the socket connected.
+    useBattleStore.getState().setPendingJoinCode(null)
     useBattleStore.getState().setRoomState(emptyRoomState())
   }, [])
 

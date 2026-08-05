@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Copy } from "lucide-react";
 import copy from "copy-to-clipboard";
@@ -52,7 +51,6 @@ async function fetchTicket(): Promise<string | null> {
 export function ClassBattlePoller() {
   const { data: session } = useSession();
   const { t } = useTranslation();
-  const router = useRouter();
   /** roomCodes that currently have an active persistent toast. */
   const activeToastsRef = useRef<Set<string>>(new Set());
 
@@ -140,12 +138,13 @@ export function ClassBattlePoller() {
               action: {
                 label: t(`${M}.classBattleToastAction`),
                 onClick: () => {
-                  useBattleStore.getState().setShouldOpenBattle(true);
-                  // Carry the invite into the lobby so the ClassInviteBanner
-                  // offers a one-click join (see ClassBattleInviteDialog).
+                  // Open the unified battle-lobby dialog with the invite
+                  // preloaded, so the lobby's ClassInviteBanner can join with
+                  // one click (queued until the socket connects). See
+                  // ClassBattleInviteDialog.handleJoinBattle for the same path.
                   useBattleStore.getState().setClassInvite(invite);
+                  useBattleStore.getState().setShowBattleLobbyDialog(true);
                   useBattleStore.getState().dismissClassBattleInvite(invite.roomCode);
-                  router.push("/");
                   toast.dismiss(invite.roomCode);
                 },
               },
@@ -160,7 +159,7 @@ export function ClassBattlePoller() {
     poll();
     const interval = setInterval(poll, 60_000);
     return () => clearInterval(interval);
-  }, [session?.user?.role, t, router]);
+  }, [session?.user?.role, t]);
 
   // Dismiss the toast immediately when the student joins a room (don't wait
   // for the next 60s poll).

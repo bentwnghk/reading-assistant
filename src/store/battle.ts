@@ -39,6 +39,18 @@ interface BattleStore {
   showClassBattleInviteDialog: boolean
   /** Flag set by ClassBattleInviteDialog to auto-navigate into battle mode. */
   shouldOpenBattle: boolean
+  /**
+   * Controls the unified battle-lobby dialog in the Header (Swords entry).
+   * Driven by the Header button and by invite acceptance, so the lobby is
+   * reachable on every page without navigating to `/`.
+   */
+  showBattleLobbyDialog: boolean
+  /**
+   * A join requested before the socket connected (e.g. clicking the invite
+   * banner's Join during the handshake). Drained by the `connect` handler once
+   * the socket is live, so join is robust to connection timing.
+   */
+  pendingJoinCode: string | null
 
   // ── Game loop (populated from countdown/word_start/word_end/etc.) ────────
   countdownN: number | null
@@ -66,6 +78,8 @@ interface BattleStore {
   dismissClassBattleInvite: (roomCode: string) => void
   setShowClassBattleInviteDialog: (open: boolean) => void
   setShouldOpenBattle: (open: boolean) => void
+  setShowBattleLobbyDialog: (open: boolean) => void
+  setPendingJoinCode: (code: string | null) => void
   setCountdown: (n: number | null) => void
   setCurrentWord: (word: BattleWordStartPayload | null) => void
   setWordEnded: (info: { index: number; correctWord: string } | null) => void
@@ -91,6 +105,8 @@ const initialRoomState = {
   pendingClassBattleInvites: [],
   showClassBattleInviteDialog: false,
   shouldOpenBattle: false,
+  showBattleLobbyDialog: false,
+  pendingJoinCode: null,
   countdownN: null,
   currentWord: null,
   wordEnded: null,
@@ -141,6 +157,8 @@ export const useBattleStore = create<BattleStore>((set) => ({
     })),
   setShowClassBattleInviteDialog: (showClassBattleInviteDialog) => set({ showClassBattleInviteDialog }),
   setShouldOpenBattle: (shouldOpenBattle: boolean) => set({ shouldOpenBattle }),
+  setShowBattleLobbyDialog: (showBattleLobbyDialog: boolean) => set({ showBattleLobbyDialog }),
+  setPendingJoinCode: (pendingJoinCode: string | null) => set({ pendingJoinCode }),
 
   setCountdown: (countdownN) => set({ countdownN }),
   setCurrentWord: (currentWord) => set({ currentWord, wordEnded: null }),
