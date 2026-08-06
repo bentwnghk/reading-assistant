@@ -255,15 +255,10 @@ function CaptureBeat() {
           </p>
         </div>
 
-        {/* OCR scan line — one sweep per capture beat */}
-        <motion.div
-          className="pointer-events-none absolute left-4 right-4 h-[2px] rounded-full bg-[var(--lp-accent)] shadow-[0_0_10px_2px_var(--lp-accent)]"
-          initial={{ top: "12%", opacity: 0 }}
-          animate={{ top: ["12%", "88%"], opacity: [0, 1, 1, 0] }}
-          transition={{
-            top: { duration: 2, ease: "easeInOut" },
-            opacity: { duration: 2, times: [0, 0.12, 0.85, 1], ease: "easeOut" },
-          }}
+        {/* OCR scan line — one sweep per capture beat. CSS (not motion) so it
+            runs on the very first mount despite AnimatePresence initial={false}. */}
+        <div
+          className="lp-scan-line pointer-events-none absolute left-4 right-4 h-[2px] rounded-full bg-[var(--lp-accent)] shadow-[0_0_10px_2px_var(--lp-accent)]"
           aria-hidden
         />
       </div>

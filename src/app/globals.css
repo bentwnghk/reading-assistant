@@ -192,6 +192,25 @@
   }
 }
 
+/* OCR scan line for the hero capture mockup — sweeps once on mount. */
+.lp-scan-line {
+  top: 12%;
+  opacity: 0;
+  animation: lp-scan 2s ease-in-out forwards;
+}
+@keyframes lp-scan {
+  0%   { top: 12%; opacity: 0; }
+  12%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: 88%; opacity: 0; }
+}
+/* Reduced motion: hide the scan line (purely a motion effect). */
+@media (prefers-reduced-motion: reduce) {
+  .lp-scan-line {
+    animation: none;
+  }
+}
+
 .dialog-safe-width {
   max-width: min(28rem, calc(100dvw - 2rem));
   width: calc(100dvw - 2rem);
