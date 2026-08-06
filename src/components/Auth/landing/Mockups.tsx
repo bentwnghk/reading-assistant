@@ -148,44 +148,6 @@ function RepoVisBadge({
   );
 }
 
-/* ── 1. HERO — the signature: passage + highlighted word + glossary popover ── */
-export function HeroReadingMockup() {
-  return (
-    <MockupFrame label="READING · Mr.🆖 ProReader">
-      <p className="font-display text-lg sm:text-xl leading-relaxed text-[var(--lp-ink)]">
-        Deep beneath the surface, currents stir the cold darkness. Here,{" "}
-        <span className="lp-marker lp-marker--draw relative whitespace-nowrap font-semibold">
-          luminous
-          <span className="absolute -top-1 -right-3 h-2 w-2 rounded-full bg-[var(--lp-highlight)] ring-2 ring-[var(--lp-surface)]" />
-        </span>{" "}
-        creatures drift past one another — their soft glow the only light for
-        miles around.
-      </p>
-
-      {/* Glossary popover card */}
-      <div className="mt-5 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] p-4">
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="font-display text-2xl font-semibold text-[var(--lp-ink)]">luminous</span>
-          <span className="font-mono text-xs text-[var(--lp-ink-soft)]">lu·mi·nous</span>
-          <span className="font-mono text-xs italic text-[var(--lp-ink-soft)]">adjective</span>
-          <button
-            className="ml-auto inline-flex items-center gap-1 text-xs text-[var(--lp-accent)]"
-            aria-hidden
-          >
-            <Volume2 className="h-3.5 w-3.5" /> Listen
-          </button>
-        </div>
-        <p className="mt-2 text-sm text-[var(--lp-ink)]">
-          Full of light; brightly glowing. <span className="text-[var(--lp-ink-soft)]">發光的；明亮的</span>
-        </p>
-        <p className="mt-1.5 text-sm italic text-[var(--lp-ink-soft)]">
-          “The luminous jellyfish pulsed gently in the dark water.”
-        </p>
-      </div>
-    </MockupFrame>
-  );
-}
-
 /* ── 1b. HERO — capture any text: photograph a paper → live tappable passage ── */
 export function CaptureComprehendMockup() {
   const ref = useRef<HTMLDivElement>(null);
@@ -319,6 +281,20 @@ function CaptureBeat() {
 /* Result beat — the captured passage now live in-app, with one word
    highlighted and a glossary popover. */
 function ResultBeat() {
+  const [showPopover, setShowPopover] = useState(false);
+
+  // Reveal the popover once the `lp-marker--draw` highlighter finishes drawing
+  // on "luminous" (0.5s delay + 0.9s duration, defined in globals.css). Under
+  // reduced motion the draw is instant, so show the popover right away.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setShowPopover(true);
+      return;
+    }
+    const id = setTimeout(() => setShowPopover(true), 1400);
+    return () => clearTimeout(id);
+  }, []);
+
   return (
     <div className="w-full">
       {/* provenance row — ties the result back to the captured photo */}
@@ -341,8 +317,14 @@ function ResultBeat() {
         miles around.
       </p>
 
-      {/* glossary popover — mirrors the Chapter 02 Text Analysis (Original) popover */}
-      <div className="relative mx-auto mt-5 w-[calc(100%-1rem)] max-w-[300px] rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3 shadow-lg">
+      {/* glossary popover — mirrors the Chapter 02 Text Analysis (Original) popover.
+          Always rendered to reserve its space; revealed once the highlight finishes. */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: showPopover ? 1 : 0, y: showPopover ? 0 : 8 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="relative mx-auto mt-5 w-[calc(100%-1rem)] max-w-[300px] rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3 shadow-lg"
+      >
         {/* popover arrow pointing up */}
         <div className="absolute -top-1.5 left-10 h-3 w-3 rotate-45 border-l border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]" />
         <div className="flex items-start justify-between gap-2">
@@ -362,7 +344,7 @@ function ResultBeat() {
         <div className="mt-2 border-t border-[var(--lp-rule)] pt-2 text-[10px] italic text-[var(--lp-ink-soft)]">
           “The luminous jellyfish pulsed gently in the dark water.”
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
