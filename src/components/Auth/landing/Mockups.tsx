@@ -341,23 +341,27 @@ function ResultBeat() {
         miles around.
       </p>
 
-      {/* glossary popover card */}
-      <div className="mt-5 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] p-4">
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="font-display text-2xl font-semibold text-[var(--lp-ink)]">luminous</span>
-          <span className="font-mono text-xs text-[var(--lp-ink-soft)]">lu·mi·nous</span>
-          <span className="font-mono text-xs italic text-[var(--lp-ink-soft)]">adjective</span>
-          <span className="ml-auto inline-flex items-center gap-1 text-xs text-[var(--lp-accent)]">
-            <Volume2 className="h-3.5 w-3.5" /> Listen
+      {/* glossary popover — mirrors the Chapter 02 Text Analysis (Original) popover */}
+      <div className="relative mx-auto mt-5 w-[calc(100%-1rem)] max-w-[300px] rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3 shadow-lg">
+        {/* popover arrow pointing up */}
+        <div className="absolute -top-1.5 left-10 h-3 w-3 rotate-45 border-l border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]" />
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <span className="text-sm font-bold text-[var(--lp-ink)]">luminous</span>
+            <span className="ml-1.5 text-[10px] text-[var(--lp-ink-soft)]">lu·mi·nous</span>
+            <Volume2 className="ml-1 inline h-3 w-3 text-[var(--lp-ink-soft)]" />
+          </div>
+          <span className="shrink-0 rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
+            adjective
           </span>
         </div>
-        <p className="mt-2 text-sm text-[var(--lp-ink)]">
-          Full of light; brightly glowing.{" "}
-          <span className="text-[var(--lp-ink-soft)]">發光的；明亮的</span>
-        </p>
-        <p className="mt-1.5 text-sm italic text-[var(--lp-ink-soft)]">
+        <div className="mt-1 text-sm font-semibold text-[var(--lp-accent)]">發光的；明亮的</div>
+        <div className="text-[11px] text-[var(--lp-ink-soft)]">
+          full of light; brightly glowing
+        </div>
+        <div className="mt-2 border-t border-[var(--lp-rule)] pt-2 text-[10px] italic text-[var(--lp-ink-soft)]">
           “The luminous jellyfish pulsed gently in the dark water.”
-        </p>
+        </div>
       </div>
     </div>
   );
