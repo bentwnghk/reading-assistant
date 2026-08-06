@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
-  HeroReadingMockup,
+  CaptureComprehendMockup,
   UploadMockup,
   UnderstandMindMapMockup,
   UnderstandVisualizationMockup,
@@ -735,7 +735,7 @@ export function LandingPage() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, ease: easeOut, delay: 0.3 }}
         >
-          <HeroReadingMockup />
+          <CaptureComprehendMockup />
         </motion.div>
       </section>
 

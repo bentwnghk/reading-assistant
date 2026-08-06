@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useInView } from "motion/react";
+import { motion, AnimatePresence, useInView } from "motion/react";
 import {
   Upload,
   Brain,
@@ -28,6 +28,8 @@ import {
   ChevronUp,
   ChevronDown,
   Lock,
+  Camera,
+  Check,
   CheckCircle2,
   Calendar,
   Users,
@@ -181,6 +183,183 @@ export function HeroReadingMockup() {
         </p>
       </div>
     </MockupFrame>
+  );
+}
+
+/* ── 1b. HERO — capture any text: photograph a paper → live tappable passage ── */
+export function CaptureComprehendMockup() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref);
+  const [phase, setPhase] = useState<"capture" | "result">("capture");
+  const [flashKey, setFlashKey] = useState(0);
+
+  // Auto-cycle: capture → shutter flash → result → capture …
+  // Paused when the mockup is scrolled out of view.
+  useEffect(() => {
+    if (!inView) return;
+    if (phase === "capture") {
+      const id = setTimeout(() => {
+        setFlashKey((k) => k + 1);
+        setPhase("result");
+      }, 2600);
+      return () => clearTimeout(id);
+    }
+    const id = setTimeout(() => setPhase("capture"), 4400);
+    return () => clearTimeout(id);
+  }, [phase, inView]);
+
+  return (
+    <MockupFrame label="CAPTURE · Mr.🆖 ProReader" frameRef={ref}>
+      <div className="relative min-h-[22rem] sm:min-h-[24rem]">
+        {/* shutter flash — replays on each capture → result transition */}
+        {flashKey > 0 && (
+          <motion.div
+            key={flashKey}
+            className="pointer-events-none absolute inset-0 z-30 rounded-xl bg-white"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.9, 0] }}
+            transition={{ duration: 0.5, times: [0, 0.35, 1], ease: "easeOut" }}
+            aria-hidden
+          />
+        )}
+
+        <AnimatePresence initial={false}>
+          {phase === "capture" ? (
+            <motion.div
+              key="capture"
+              className="absolute inset-0 flex flex-col justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <CaptureBeat />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="result"
+              className="absolute inset-0 flex flex-col justify-center"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <ResultBeat />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* Camera viewfinder beat — a printed exam paper framed by focus brackets
+   while an OCR scan line sweeps across it. */
+function CaptureBeat() {
+  return (
+    <div className="w-full">
+      <div className="mb-2.5 flex items-center justify-between">
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-[var(--lp-ink-soft)]">
+          <Camera className="h-3.5 w-3.5" /> Scanner
+        </span>
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-[var(--lp-accent)]">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--lp-accent)] opacity-60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[var(--lp-accent)]" />
+          </span>
+          Scanning…
+        </span>
+      </div>
+
+      {/* camera viewport */}
+      <div className="relative overflow-hidden rounded-xl border border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-paper-2)] to-[var(--lp-paper)] p-4">
+        {/* focus corner brackets */}
+        <span className="pointer-events-none absolute left-3 top-3 h-5 w-5 rounded-tl border-l-2 border-t-2 border-[var(--lp-accent)]" />
+        <span className="pointer-events-none absolute right-3 top-3 h-5 w-5 rounded-tr border-r-2 border-t-2 border-[var(--lp-accent)]" />
+        <span className="pointer-events-none absolute bottom-3 left-3 h-5 w-5 rounded-bl border-b-2 border-l-2 border-[var(--lp-accent)]" />
+        <span className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 rounded-br border-b-2 border-r-2 border-[var(--lp-accent)]" />
+
+        {/* the printed exam paper */}
+        <div
+          className="relative mx-auto max-w-[260px] rounded-[3px] bg-[var(--lp-surface)] px-4 py-3 shadow-[0_8px_24px_-12px_rgba(23,22,26,0.25)]"
+          style={{ transform: "rotate(-1.5deg)" }}
+        >
+          <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]">
+            HKDSE · English Language · Paper 1
+          </p>
+          <div className="my-1.5 h-px bg-[var(--lp-rule)]" />
+          <p className="font-display text-[12px] leading-snug text-[var(--lp-ink-soft)]">
+            Deep beneath the surface, currents stir the cold darkness. Here, luminous creatures drift past one another — their soft glow the only light for miles around.
+          </p>
+        </div>
+
+        {/* OCR scan line — one sweep per capture beat */}
+        <motion.div
+          className="pointer-events-none absolute left-4 right-4 h-[2px] rounded-full bg-[var(--lp-accent)] shadow-[0_0_10px_2px_var(--lp-accent)]"
+          initial={{ top: "12%", opacity: 0 }}
+          animate={{ top: ["12%", "88%"], opacity: [0, 1, 1, 0] }}
+          transition={{
+            top: { duration: 2, ease: "easeInOut" },
+            opacity: { duration: 2, times: [0, 0.12, 0.85, 1], ease: "easeOut" },
+          }}
+          aria-hidden
+        />
+      </div>
+
+      {/* shutter */}
+      <div className="mt-4 flex items-center justify-center" aria-hidden>
+        <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-[var(--lp-accent)]">
+          <span className="h-7 w-7 rounded-full bg-[var(--lp-accent)]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Result beat — the captured passage now live in-app, with one word
+   highlighted and a glossary popover. */
+function ResultBeat() {
+  return (
+    <div className="w-full">
+      {/* provenance row — ties the result back to the captured photo */}
+      <div className="mb-3 flex items-center gap-1.5 text-[10px] text-[var(--lp-ink-soft)]">
+        <span className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-2 py-0.5 font-medium text-[var(--lp-ink)]">
+          <Check className="h-3 w-3 text-[var(--lp-accent)]" /> Extracted from photo
+        </span>
+        <span className="ml-auto inline-flex items-center gap-1 font-mono">
+          <Highlighter className="h-3 w-3" /> tap any word
+        </span>
+      </div>
+
+      <p className="font-display text-lg leading-relaxed text-[var(--lp-ink)] sm:text-xl">
+        Deep beneath the surface, currents stir the cold darkness. Here,{" "}
+        <span className="lp-marker lp-marker--draw relative whitespace-nowrap font-semibold">
+          luminous
+          <span className="absolute -top-1 -right-3 h-2 w-2 rounded-full bg-[var(--lp-highlight)] ring-2 ring-[var(--lp-surface)]" />
+        </span>{" "}
+        creatures drift past one another — their soft glow the only light for
+        miles around.
+      </p>
+
+      {/* glossary popover card */}
+      <div className="mt-5 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] p-4">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="font-display text-2xl font-semibold text-[var(--lp-ink)]">luminous</span>
+          <span className="font-mono text-xs text-[var(--lp-ink-soft)]">lu·mi·nous</span>
+          <span className="font-mono text-xs italic text-[var(--lp-ink-soft)]">adjective</span>
+          <span className="ml-auto inline-flex items-center gap-1 text-xs text-[var(--lp-accent)]">
+            <Volume2 className="h-3.5 w-3.5" /> Listen
+          </span>
+        </div>
+        <p className="mt-2 text-sm text-[var(--lp-ink)]">
+          Full of light; brightly glowing.{" "}
+          <span className="text-[var(--lp-ink-soft)]">發光的；明亮的</span>
+        </p>
+        <p className="mt-1.5 text-sm italic text-[var(--lp-ink-soft)]">
+          “The luminous jellyfish pulsed gently in the dark water.”
+        </p>
+      </div>
+    </div>
   );
 }
 
