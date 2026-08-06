@@ -162,6 +162,8 @@ function MasterCarousel() {
     { key: "spelling", label: t("landing.chapters.master.carousel.spelling"), node: <SpellingSetupMockup /> },
   ];
   const count = slides.length;
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(carouselRef);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -176,11 +178,12 @@ function MasterCarousel() {
   const prev = useCallback(() => goTo(index - 1), [goTo, index]);
 
   // Autoplay — resets whenever the index changes or pause toggles.
+  // Also pauses when the carousel is scrolled out of view.
   useEffect(() => {
-    if (paused || count <= 1) return;
+    if (!inView || paused || count <= 1) return;
     const id = setTimeout(() => setIndex((i) => (i + 1) % count), CAROUSEL_AUTOPLAY_MS);
     return () => clearTimeout(id);
-  }, [index, paused, count]);
+  }, [index, inView, paused, count]);
 
   // Keyboard arrow navigation when the carousel region is focused.
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -197,6 +200,7 @@ function MasterCarousel() {
 
   return (
     <div
+      ref={carouselRef}
       className="relative"
       role="region"
       aria-roledescription="carousel"
@@ -299,6 +303,8 @@ function PracticeCarousel() {
     { key: "battleLobby", label: t("landing.chapters.practice.carousel.battleLobby"), node: <SpellingBattleLobbyMockup /> },
   ];
   const count = slides.length;
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(carouselRef);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -313,11 +319,12 @@ function PracticeCarousel() {
   const prev = useCallback(() => goTo(index - 1), [goTo, index]);
 
   // Autoplay — resets whenever the index changes or pause toggles.
+  // Also pauses when the carousel is scrolled out of view.
   useEffect(() => {
-    if (paused || count <= 1) return;
+    if (!inView || paused || count <= 1) return;
     const id = setTimeout(() => setIndex((i) => (i + 1) % count), CAROUSEL_AUTOPLAY_MS);
     return () => clearTimeout(id);
-  }, [index, paused, count]);
+  }, [index, inView, paused, count]);
 
   // Keyboard arrow navigation when the carousel region is focused.
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -334,6 +341,7 @@ function PracticeCarousel() {
 
   return (
     <div
+      ref={carouselRef}
       className="relative"
       role="region"
       aria-roledescription="carousel"
@@ -432,6 +440,8 @@ function UnderstandCarousel() {
     { key: "difficulty", label: t("landing.chapters.understand.carousel.difficulty"), node: <UnderstandDifficultyMockup /> },
   ];
   const count = slides.length;
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(carouselRef);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -446,11 +456,12 @@ function UnderstandCarousel() {
   const prev = useCallback(() => goTo(index - 1), [goTo, index]);
 
   // Autoplay — resets whenever the index changes or pause toggles.
+  // Also pauses when the carousel is scrolled out of view.
   useEffect(() => {
-    if (paused || count <= 1) return;
+    if (!inView || paused || count <= 1) return;
     const id = setTimeout(() => setIndex((i) => (i + 1) % count), CAROUSEL_AUTOPLAY_MS);
     return () => clearTimeout(id);
-  }, [index, paused, count]);
+  }, [index, inView, paused, count]);
 
   // Keyboard arrow navigation when the carousel region is focused.
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -467,6 +478,7 @@ function UnderstandCarousel() {
 
   return (
     <div
+      ref={carouselRef}
       className="relative"
       role="region"
       aria-roledescription="carousel"
