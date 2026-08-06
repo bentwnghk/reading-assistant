@@ -840,6 +840,27 @@ export function AITutorMockup() {
             <em className="not-italic font-semibold text-[var(--lp-accent)]">matures</em>?
           </div>
         </div>
+        {/* user (right) */}
+        <div className="flex flex-row-reverse gap-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white dark:bg-blue-600">
+            <User className="h-4 w-4" />
+          </span>
+          <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-blue-500 px-3 py-2 text-sm text-white dark:bg-blue-600">
+            Maybe recycling rates will go up as factories get better at it?
+          </div>
+        </div>
+        {/* assistant (left) */}
+        <div className="flex gap-2">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] text-[var(--lp-ink-soft)]">
+            <Bot className="h-4 w-4" />
+          </span>
+          <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-3 py-2 text-sm leading-relaxed text-[var(--lp-ink)]">
+            Exactly! ✅ As technology improves and{" "}
+            <em className="not-italic font-semibold text-[var(--lp-accent)]">economies of scale</em>{" "}
+            kick in, costs drop and recycling becomes more viable. Can you find the sentence in
+            paragraph 3 that hints at this?
+          </div>
+        </div>
       </div>
 
       {/* quick questions + answer help */}
