@@ -4,7 +4,8 @@ import { Suspense, useState, useLayoutEffect, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { useSearchParams, useRouter } from "next/navigation";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { useSettingStore } from "@/store/setting";
 import { useHistoryStore } from "@/store/history";
@@ -34,6 +35,16 @@ const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
 const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
 
+// iOS Safari can leave the auth/session network fetch pending indefinitely after
+// the browser killed and restored a tab, keeping the page stuck on the loading
+// spinner. Recover automatically: after the watchdog window, attempt one silent
+// reload (tracked in sessionStorage so it cannot loop); if still stuck, surface a
+// tappable reload button — the user gesture is what unblocks iOS' suspended
+// network on the restored tab. 12s is past the service worker's own 10s
+// NetworkOnly timeout on /api/auth/*, so it only fires on a genuinely stuck fetch.
+const LOAD_WATCHDOG_KEY = "__next_load_reloaded";
+const LOAD_WATCHDOG_MS = 12_000;
+
 function HomeContent() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
@@ -48,6 +59,8 @@ function HomeContent() {
   useVocabularySync();
 
   const [restoreReady, setRestoreReady] = useState(false);
+  const [stuckLoading, setStuckLoading] = useState(false);
+  const isLoading = status === "loading" || (status === "authenticated" && !restoreReady);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -63,6 +76,31 @@ function HomeContent() {
     }, 100);
     return () => clearInterval(interval);
   }, [status]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setStuckLoading(false);
+      try {
+        sessionStorage.removeItem(LOAD_WATCHDOG_KEY);
+      } catch {}
+      return;
+    }
+    const timer = setTimeout(() => {
+      let alreadyTried = false;
+      try {
+        alreadyTried = sessionStorage.getItem(LOAD_WATCHDOG_KEY) === "1";
+      } catch {}
+      if (!alreadyTried) {
+        try {
+          sessionStorage.setItem(LOAD_WATCHDOG_KEY, "1");
+        } catch {}
+        window.location.reload();
+        return;
+      }
+      setStuckLoading(true);
+    }, LOAD_WATCHDOG_MS);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   useLayoutEffect(() => {
     setHistorySyncFn((readingStore) => {
@@ -118,11 +156,28 @@ function HomeContent() {
   // Show a full-screen loading overlay while the session is being resolved
   // or while the user's data is being restored after sign-in. This prevents
   // a flash of the app UI before the "Welcome back!" dialog appears.
-  if (status === "loading" || (status === "authenticated" && !restoreReady)) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <LoaderCircle className="h-8 w-8 animate-spin text-blue-500" />
         <p className="text-lg text-muted-foreground">{t("header.auth.loading")}</p>
+        {stuckLoading ? (
+          <div className="mt-2 flex flex-col items-center gap-3">
+            <p className="text-sm text-muted-foreground">{t("header.auth.stuck")}</p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                try {
+                  sessionStorage.removeItem(LOAD_WATCHDOG_KEY);
+                } catch {}
+                window.location.reload();
+              }}
+            >
+              <RotateCcw className="h-4 w-4" />
+              {t("header.auth.reload")}
+            </Button>
+          </div>
+        ) : null}
       </div>
     );
   }

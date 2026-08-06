@@ -35,7 +35,9 @@
     "auth": {
       "signIn": "使用 Google 登入",
       "signOut": "登出",
-      "loading": "載入中..."
+      "loading": "載入中...",
+      "stuck": "載入時間比平常長。",
+      "reload": "重新載入"
     },
     "shortcuts": {
       "title": "鍵盤快捷鍵",

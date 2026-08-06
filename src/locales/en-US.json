@@ -35,7 +35,9 @@
     "auth": {
       "signIn": "Sign in with Google",
       "signOut": "Sign Out",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "stuck": "This is taking longer than usual.",
+      "reload": "Reload"
     },
     "shortcuts": {
       "title": "Keyboard Shortcuts",
