@@ -61,15 +61,24 @@ export function useIdleTimer() {
 
     lastActivityRef.current = Date.now()
 
-    const channel = new BroadcastChannel("idle-timer")
+    let channel: BroadcastChannel | null = null
+    try {
+      channel = new BroadcastChannel("idle-timer")
+    } catch {
+      // BroadcastChannel can be unavailable/throw in unusual browser states
+      // (e.g. a restored tab). Multi-tab sync is best-effort; degrade gracefully.
+      channel = null
+    }
     channelRef.current = channel
 
-    channel.onmessage = (e: MessageEvent) => {
-      if (e.data?.type === "activity") {
-        lastActivityRef.current = Date.now()
-        resetWarning()
-      } else if (e.data?.type === "signout") {
-        signOut({ callbackUrl: "/" })
+    if (channel) {
+      channel.onmessage = (e: MessageEvent) => {
+        if (e.data?.type === "activity") {
+          lastActivityRef.current = Date.now()
+          resetWarning()
+        } else if (e.data?.type === "signout") {
+          signOut({ callbackUrl: "/" })
+        }
       }
     }
 
@@ -100,7 +109,7 @@ export function useIdleTimer() {
       }
 
       if (idleDuration >= idleTimeoutMs) {
-        channel.postMessage({ type: "signout" })
+        channel?.postMessage({ type: "signout" })
         signOut({ callbackUrl: "/" })
       }
     }, CHECK_INTERVAL_MS)
@@ -110,7 +119,7 @@ export function useIdleTimer() {
         window.removeEventListener(event, throttledHandler)
       })
       clearInterval(interval)
-      channel.close()
+      channel?.close()
       channelRef.current = null
       toast.dismiss("idle-warning")
     }

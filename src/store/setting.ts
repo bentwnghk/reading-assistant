@@ -239,39 +239,55 @@ export const useSettingStore = create(
       name: "setting",
       storage: {
         getItem: (name) => {
-          const value = localStorage.getItem(name);
-          if (!value) return null;
-          const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
-          const state = parsed.state as unknown as Record<string, unknown>;
-          const modelFields: (keyof SettingStore)[] = [
-            "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
-            "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
-            "collocationModel", "grammarModel",
-          ];
-          for (const field of modelFields) {
-            if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {
-              state[field] = defaultValues[field];
+          try {
+            const value = localStorage.getItem(name);
+            if (!value) return null;
+            const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
+            const state = parsed.state as unknown as Record<string, unknown>;
+            const modelFields: (keyof SettingStore)[] = [
+              "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
+              "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
+              "collocationModel", "grammarModel",
+            ];
+            for (const field of modelFields) {
+              if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {
+                state[field] = defaultValues[field];
+              }
             }
+            if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
+              state.visionModel = defaultValues.visionModel;
+            }
+            if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
+              state.tutorModel = defaultValues.tutorModel;
+            }
+            if (!BASIC_TUTOR_MODELS.includes(state.basicTutorModel as BasicTutorModel)) {
+              state.basicTutorModel = defaultValues.basicTutorModel;
+            }
+            if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
+              state.readingTextModel = defaultValues.readingTextModel;
+            }
+            return parsed;
+          } catch {
+            // iOS Safari can leave truncated/corrupt localStorage after tab
+            // restore, or transiently reject storage access while the origin
+            // re-initializes. Fall back to defaults instead of crashing.
+            try {
+              localStorage.removeItem(name);
+            } catch {}
+            return null;
           }
-          if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
-            state.visionModel = defaultValues.visionModel;
-          }
-          if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
-            state.tutorModel = defaultValues.tutorModel;
-          }
-          if (!BASIC_TUTOR_MODELS.includes(state.basicTutorModel as BasicTutorModel)) {
-            state.basicTutorModel = defaultValues.basicTutorModel;
-          }
-          if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
-            state.readingTextModel = defaultValues.readingTextModel;
-          }
-          return parsed;
         },
         setItem: (name, value) => {
-          if (currentUserId) return;
-          localStorage.setItem(name, JSON.stringify(value));
+          try {
+            if (currentUserId) return;
+            localStorage.setItem(name, JSON.stringify(value));
+          } catch {}
         },
-        removeItem: (name) => localStorage.removeItem(name),
+        removeItem: (name) => {
+          try {
+            localStorage.removeItem(name);
+          } catch {}
+        },
       },
     }
   )

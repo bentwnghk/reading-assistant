@@ -1485,15 +1485,32 @@ export const useReadingStore = create(
       version: 9,
       storage: {
         getItem: (name) => {
-          const value = localStorage.getItem(name);
-          return value ? (JSON.parse(value) as StorageValue<ReadingStore & ReadingActions>) : null;
+          try {
+            const value = localStorage.getItem(name);
+            return value ? (JSON.parse(value) as StorageValue<ReadingStore & ReadingActions>) : null;
+          } catch {
+            // iOS Safari can leave truncated/corrupt localStorage entries after the
+            // tab is killed and restored, or transiently reject localStorage access
+            // while the security origin re-initializes. Returning null lets the store
+            // fall back to its defaults instead of crashing the whole page.
+            try {
+              localStorage.removeItem(name);
+            } catch {}
+            return null;
+          }
         },
         setItem: (name, value) => {
-          if (_isStreaming) return;
-          if (currentUserId) return; // Don't persist to localStorage for authenticated users
-          localStorage.setItem(name, JSON.stringify(value));
+          try {
+            if (_isStreaming) return;
+            if (currentUserId) return; // Don't persist to localStorage for authenticated users
+            localStorage.setItem(name, JSON.stringify(value));
+          } catch {}
         },
-        removeItem: (name) => localStorage.removeItem(name),
+        removeItem: (name) => {
+          try {
+            localStorage.removeItem(name);
+          } catch {}
+        },
       },
       partialize: (state) => {
         if (currentUserId) {

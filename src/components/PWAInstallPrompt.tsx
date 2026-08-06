@@ -37,7 +37,11 @@ export default function PWAInstallPrompt() {
 
   useEffect(() => {
     if (isStandalone()) return;
-    if (sessionStorage.getItem(DISMISSED_KEY)) return;
+    let dismissed = false;
+    try {
+      dismissed = !!sessionStorage.getItem(DISMISSED_KEY);
+    } catch {}
+    if (dismissed) return;
 
     if (canInstall) {
       setShow(true);
@@ -52,7 +56,9 @@ export default function PWAInstallPrompt() {
   };
 
   const handleDismiss = () => {
-    sessionStorage.setItem(DISMISSED_KEY, "1");
+    try {
+      sessionStorage.setItem(DISMISSED_KEY, "1");
+    } catch {}
     setShow(false);
     setShowIOS(false);
   };
