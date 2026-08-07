@@ -57,7 +57,29 @@ function MindMap() {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 80);
-    const source = new XMLSerializer().serializeToString(svg);
+    // Clone and give it an intrinsic pixel size + namespaces so the file
+    // renders when opened standalone (a bare width="100%" collapses to 0).
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    let w = parseFloat(clone.getAttribute("width") ?? "");
+    let h = parseFloat(clone.getAttribute("height") ?? "");
+    if (!w || !h) {
+      const vb = (clone.getAttribute("viewBox") ?? "")
+        .split(/[\s,]+/)
+        .map(Number);
+      if (vb.length === 4 && vb[2] && vb[3]) {
+        w = vb[2];
+        h = vb[3];
+      }
+    }
+    if (w && h) {
+      clone.setAttribute("width", String(w));
+      clone.setAttribute("height", String(h));
+    }
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    const source =
+      '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' +
+      new XMLSerializer().serializeToString(clone);
     downloadFile(source, `${safeFileName} - Mind Map.svg`, "image/svg+xml");
   }
 
@@ -138,7 +160,7 @@ function MindMap() {
           const parsed = tryParseMindMapData(mindMap);
           if (parsed) {
             return (
-              <div className="max-w-full overflow-x-auto rounded-md bg-muted/30 p-2 dark:bg-muted/20">
+              <div className="overflow-hidden rounded-md border">
                 <MindMapView data={parsed} />
               </div>
             );
