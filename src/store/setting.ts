@@ -60,6 +60,8 @@ export type ApiMode = "local" | "proxy" | "subscription" | "";
 
 export type TutorLanguage = "en" | "zh";
 
+export type MindMapRenderer = "tree" | "mermaid";
+
 export interface SettingStore {
   provider: string;
   mode: ApiMode;
@@ -93,6 +95,7 @@ export interface SettingStore {
   debug: "enable" | "disable";
   smoothTextStreamType: "character" | "word" | "line";
   tutorLanguage: TutorLanguage;
+  mindMapRenderer: MindMapRenderer;
   lastOpenedSessionId: string;
 }
 
@@ -196,6 +199,7 @@ export const defaultValues: SettingStore = {
   debug: "disable",
   smoothTextStreamType: "word",
   tutorLanguage: "en",
+  mindMapRenderer: "tree",
   lastOpenedSessionId: "",
 };
 

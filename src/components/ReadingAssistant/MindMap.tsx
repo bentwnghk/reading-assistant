@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
+import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import MindMapView from "./MindMapView";
 
@@ -38,13 +39,33 @@ function tryParseMindMapData(raw: string): MindMapData | null {
   return null;
 }
 
+/** Render structured mind-map data as a radial Mermaid `mindmap` diagram, so
+ *  users who prefer the classic look can view the same data without a second
+ *  AI call. Labels are JSON-quoted to tolerate special characters. */
+function mindMapDataToMermaid(data: MindMapData): string {
+  const clean = (s: string) => s.replace(/"/g, "'").replace(/\s+/g, " ").trim();
+  const lines: string[] = ["mindmap", `  root((${clean(data.root)}))`];
+  data.branches.forEach((b, bi) => {
+    lines.push(`    b${bi}[${JSON.stringify(clean(b.label))}]`);
+    b.leaves.forEach((leaf, li) => {
+      lines.push(`      l${bi}_${li}[${JSON.stringify(clean(leaf))}]`);
+    });
+  });
+  return "```mermaid\n" + lines.join("\n") + "\n```";
+}
+
 function MindMap() {
   const { t } = useTranslation();
   const { extractedText, mindMap, docTitle } = useReadingStore();
+  const { mindMapRenderer, update } = useSettingStore();
   const { activeGenerations, generateMindMap } = useReadingAssistant();
   const isGenerating = !!activeGenerations["mindmap"];
   const [useChinese, setUseChinese] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  // New mind maps are JSON; legacy sessions stored Mermaid markdown. `parsed`
+  // is non-null only for the new structured format, which is what the tree
+  // renderer (and the renderer toggle) requires.
+  const parsed = mindMap ? tryParseMindMapData(mindMap) : null;
 
   if (!extractedText) {
     return null;
@@ -148,6 +169,46 @@ function MindMap() {
               {t("reading.mindMap.download")}
             </Button>
           )}
+          {mindMap && (
+            <div
+              className="flex items-center rounded-md border bg-background/60 p-0.5"
+              role="group"
+              aria-label={t("reading.mindMap.renderer")}
+            >
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => update({ mindMapRenderer: "tree" })}
+                className={`h-7 gap-1 px-2 ${
+                  mindMapRenderer === "tree"
+                    ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+                title={t("reading.mindMap.rendererTree")}
+                aria-pressed={mindMapRenderer === "tree"}
+              >
+                <Network className="h-4 w-4" />
+                <span>{t("reading.mindMap.rendererTree")}</span>
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => update({ mindMapRenderer: "mermaid" })}
+                className={`h-7 gap-1 px-2 ${
+                  mindMapRenderer === "mermaid"
+                    ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+                title={t("reading.mindMap.rendererMap")}
+                aria-pressed={mindMapRenderer === "mermaid"}
+              >
+                <Waypoints className="h-4 w-4" />
+                <span>{t("reading.mindMap.rendererMap")}</span>
+              </Button>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Switch
               checked={useChinese}
@@ -185,24 +246,43 @@ function MindMap() {
       </div>
 
       {mindMap ? (
-        (() => {
-          const parsed = tryParseMindMapData(mindMap);
-          if (parsed) {
-            return (
-              <div className="overflow-hidden rounded-md border">
-                <MindMapView data={parsed} />
-              </div>
-            );
-          }
-          // Legacy: stored as Mermaid markdown.
-          return (
-            <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
-              <Suspense fallback={null}>
-                <MagicDown hideMermaidDownload>{mindMap}</MagicDown>
-              </Suspense>
+        mindMapRenderer === "tree" ? (
+          parsed ? (
+            <div className="overflow-hidden rounded-md border">
+              <MindMapView data={parsed} />
             </div>
-          );
-        })()
+          ) : (
+            // Legacy Mermaid data can't render as an interactive tree — offer
+            // a one-click regeneration, which produces structured JSON.
+            <div className="flex flex-col items-center justify-center gap-3 rounded-md border border-dashed py-10 text-center text-muted-foreground">
+              <Network className="h-10 w-10 opacity-50" />
+              <p className="max-w-md px-4 text-sm">{t("reading.mindMap.legacyTreeHint")}</p>
+              <Button
+                onClick={() => generateMindMap(useChinese)}
+                disabled={isGenerating}
+                size="sm"
+                variant="secondary"
+              >
+                {isGenerating ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Waypoints className="h-4 w-4" />
+                )}
+                {t("reading.mindMap.regenerate")}
+              </Button>
+            </div>
+          )
+        ) : (
+          // Radial (Mermaid) view: convert structured data, or render legacy
+          // markdown as-is.
+          <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
+            <Suspense fallback={null}>
+              <MagicDown hideMermaidDownload>
+                {parsed ? mindMapDataToMermaid(parsed) : mindMap}
+              </MagicDown>
+            </Suspense>
+          </div>
+        )
       ) : (
         <div className="text-center py-8 text-muted-foreground">
           <Waypoints className="h-12 w-12 mx-auto mb-4 opacity-50" />
