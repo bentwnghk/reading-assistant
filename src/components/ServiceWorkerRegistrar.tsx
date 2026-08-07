@@ -16,6 +16,21 @@ let timerRetries = 0;
 let lastCheckAt = 0;
 let interactionListenersArmed = false;
 
+function canReloadNow(): boolean {
+  try {
+    const last = parseInt(sessionStorage.getItem(RELOAD_THROTTLE_KEY) || "0", 10);
+    return Date.now() - last >= RELOAD_THROTTLE_MS;
+  } catch {
+    return true;
+  }
+}
+
+function markReload() {
+  try {
+    sessionStorage.setItem(RELOAD_THROTTLE_KEY, String(Date.now()));
+  } catch {}
+}
+
 // Returns "reload" if the served build is stale, "match" if it is current,
 // or "unavailable" if the network could not be reached. The Promise.race
 // guarantees this resolves even when iOS Safari's suspended network keeps the
@@ -46,37 +61,57 @@ async function checkStaleBuild(): Promise<"reload" | "match" | "unavailable"> {
   return Promise.race([attempt, fallback]);
 }
 
+// iOS Safari restores a relaunched tab from a page archive that bypasses the
+// network, the service worker, and HTTP Cache-Control — and it only lifts the
+// restored tab's network suspension after a user gesture. A tap is that
+// gesture, and the reload right after it is a real navigation that fetches the
+// latest build. This listener is armed only while the served build could not be
+// verified, so it never fires for a normal (network-available) page load.
+function onInteraction() {
+  disarmInteractionListeners();
+  if (!canReloadNow()) return;
+  markReload();
+  window.location.reload();
+}
+
+function armInteractionListeners() {
+  if (interactionListenersArmed) return;
+  interactionListenersArmed = true;
+  window.addEventListener("pointerdown", onInteraction);
+  window.addEventListener("keydown", onInteraction);
+}
+
+function disarmInteractionListeners() {
+  if (!interactionListenersArmed) return;
+  interactionListenersArmed = false;
+  window.removeEventListener("pointerdown", onInteraction);
+  window.removeEventListener("keydown", onInteraction);
+}
+
 async function reloadIfStale() {
   // Throttle auto-reloads so a reload that comes back stale (network still
   // suspended) can try again instead of being stuck for the whole session.
-  try {
-    const last = parseInt(sessionStorage.getItem(RELOAD_THROTTLE_KEY) || "0", 10);
-    if (Date.now() - last < RELOAD_THROTTLE_MS) return;
-  } catch {}
+  if (!canReloadNow()) return;
 
   // No point checking while the tab is hidden; the visibilitychange listener
   // re-runs this when the user returns to the tab.
   if (document.visibilityState === "hidden") return;
 
-  // Dedupe the events that fire together on load (mount + pageshow + visible)
-  // and the interaction-triggered re-checks below.
+  // Dedupe the events that fire together on load (mount + pageshow + visible).
   const now = Date.now();
   if (now - lastCheckAt < 3000) return;
   lastCheckAt = now;
 
   const result = await checkStaleBuild();
   if (result === "reload") {
-    try {
-      sessionStorage.setItem(RELOAD_THROTTLE_KEY, String(Date.now()));
-    } catch {}
+    markReload();
     window.location.reload();
     return;
   }
   if (result === "unavailable") {
-    // iOS Safari keeps a restored tab's network suspended until the user
-    // interacts with the page (or iOS resumes it). Keep polling, and also arm
-    // interaction listeners so the reload fires right after the first tap —
-    // the gesture is what unblocks the network.
+    // The build could not be verified. Keep polling in case the network comes
+    // back on its own, and arm the interaction listener so the first user tap
+    // (the gesture that unblocks iOS's network) reloads to the latest build.
     if (timerRetries < MAX_TIMER_RETRIES) {
       timerRetries += 1;
       setTimeout(() => void reloadIfStale(), RETRY_MS);
@@ -87,20 +122,6 @@ async function reloadIfStale() {
   // match — the served build is current
   timerRetries = 0;
   disarmInteractionListeners();
-}
-
-function armInteractionListeners() {
-  if (interactionListenersArmed) return;
-  interactionListenersArmed = true;
-  window.addEventListener("pointerdown", reloadIfStale);
-  window.addEventListener("keydown", reloadIfStale);
-}
-
-function disarmInteractionListeners() {
-  if (!interactionListenersArmed) return;
-  interactionListenersArmed = false;
-  window.removeEventListener("pointerdown", reloadIfStale);
-  window.removeEventListener("keydown", reloadIfStale);
 }
 
 export default function ServiceWorkerRegistrar() {
@@ -126,12 +147,9 @@ export default function ServiceWorkerRegistrar() {
       }
     }
 
-    // Detect a stale page and reload. This matters most on iOS Safari, which
-    // restores open tabs on browser relaunch from a page snapshot that bypasses
-    // the network, the service worker, and HTTP Cache-Control — a deployed
-    // update (e.g. an edited mockup) stays invisible until reloaded. The
-    // mounted check runs on every load; the listeners re-check on bfcache
-    // restores and when the tab becomes visible again.
+    // Detect a stale page and recover. The mounted check runs on every load;
+    // the listeners re-check on bfcache restores and when the tab becomes
+    // visible again. See reloadIfStale/onInteraction for the iOS-specific path.
     void reloadIfStale();
 
     const onPageShow = () => void reloadIfStale();
