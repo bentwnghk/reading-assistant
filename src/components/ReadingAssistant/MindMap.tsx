@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState, useRef } from "react";
+import { useState, useRef, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Waypoints, LoaderCircle, Languages, Network, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,33 @@ import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { downloadFile } from "@/utils/file";
+import MindMapView from "./MindMapView";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown/View"));
+
+/** New mind maps are stored as JSON (`MindMapData`); legacy sessions stored a
+ *  Mermaid markdown string. Detect which one this is so legacy data still
+ *  renders via Mermaid while new generations render as the left-to-right tree. */
+function tryParseMindMapData(raw: string): MindMapData | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  // Legacy Mermaid markdown starts with a code fence or a diagram keyword.
+  if (!trimmed.startsWith("{")) return null;
+  try {
+    const obj = JSON.parse(trimmed);
+    if (
+      obj &&
+      typeof obj.root === "string" &&
+      Array.isArray(obj.branches) &&
+      obj.branches.length > 0
+    ) {
+      return obj as MindMapData;
+    }
+  } catch {
+    // Not valid JSON — fall through to Mermaid rendering.
+  }
+  return null;
+}
 
 function MindMap() {
   const { t } = useTranslation();
@@ -25,14 +50,15 @@ function MindMap() {
   }
 
   function handleDownload() {
-    const target = sectionRef.current?.querySelector(".mermaid");
-    if (!target) return;
+    const svg = sectionRef.current?.querySelector("svg");
+    if (!svg) return;
     const safeFileName = (docTitle || "Untitled")
       .replace(/[\\/:*?"<>|]/g, "")
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 80);
-    downloadFile(target.innerHTML, `${safeFileName} - Mind Map.svg`, "image/svg+xml");
+    const source = new XMLSerializer().serializeToString(svg);
+    downloadFile(source, `${safeFileName} - Mind Map.svg`, "image/svg+xml");
   }
 
   return (
@@ -108,9 +134,24 @@ function MindMap() {
       </div>
 
       {mindMap ? (
-        <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
-          <MagicDown hideMermaidDownload>{mindMap}</MagicDown>
-        </div>
+        (() => {
+          const parsed = tryParseMindMapData(mindMap);
+          if (parsed) {
+            return (
+              <div className="max-w-full overflow-x-auto rounded-md bg-muted/30 p-2 dark:bg-muted/20">
+                <MindMapView data={parsed} />
+              </div>
+            );
+          }
+          // Legacy: stored as Mermaid markdown.
+          return (
+            <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
+              <Suspense fallback={null}>
+                <MagicDown hideMermaidDownload>{mindMap}</MagicDown>
+              </Suspense>
+            </div>
+          );
+        })()
       ) : (
         <div className="text-center py-8 text-muted-foreground">
           <Waypoints className="h-12 w-12 mx-auto mb-4 opacity-50" />

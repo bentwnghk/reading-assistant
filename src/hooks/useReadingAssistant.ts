@@ -71,6 +71,18 @@ function stripMarkdownFences(text: string): string {
   return text.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
 }
 
+const mindMapDataSchema = z.object({
+  root: z.string().min(1),
+  branches: z
+    .array(
+      z.object({
+        label: z.string().min(1),
+        leaves: z.array(z.string().min(1)),
+      })
+    )
+    .min(1),
+});
+
 let _fallbackModelPromise: Promise<string> | null = null;
 
 function getFallbackModel(): Promise<string> {
@@ -183,6 +195,27 @@ function useReadingAssistant() {
         return stripMarkdownFences(result.text);
       } catch (fallbackError) {
         console.error("Glossary fallback also failed:", fallbackError);
+        throw primaryError;
+      }
+    }
+  }
+
+  async function mindMapGenerateText(prompt: string, system: string, model: string, signal?: AbortSignal): Promise<string> {
+    const FALLBACK_MODEL = await getFallbackModel();
+    try {
+      const aiModel = await createModelProvider(model);
+      const result = await generateText({ model: aiModel, system, prompt, abortSignal: signal });
+      return stripMarkdownFences(result.text);
+    } catch (primaryError) {
+      if (signal?.aborted || isAbortError(primaryError)) throw primaryError;
+      if (model === FALLBACK_MODEL) throw primaryError;
+      console.warn("Mind map model failed, retrying with fallback:", FALLBACK_MODEL, primaryError);
+      try {
+        const fbModel = await createModelProvider(FALLBACK_MODEL);
+        const result = await generateText({ model: fbModel, system, prompt, abortSignal: signal });
+        return stripMarkdownFences(result.text);
+      } catch (fallbackError) {
+        console.error("Mind map fallback also failed:", fallbackError);
         throw primaryError;
       }
     }
@@ -669,59 +702,41 @@ function useReadingAssistant() {
     const isSameSession = createSessionGuard();
     const ac = getAbortController("mindmap");
     const { studentAge, extractedText, setMindMap, setError } = readingStore;
-    
+
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return "";
     }
 
     setGenerating("mindmap", true);
+    const toastId = toast.info(i18next.t("reading.mindMap.generating"), { duration: Infinity });
 
     try {
-      const thinkingModel = await createModelProvider(mindMapModel);
-      
-      const result = streamText({
-        model: thinkingModel,
-        system: getSystemPrompt(),
-        prompt: generateMindMapPrompt(studentAge, extractedText, useChinese),
-        experimental_transform: smoothTextStream(smoothTextStreamType),
-        abortSignal: ac.signal,
-        onError: (error) => {
-          if (!isSameSession() || ac.signal.aborted) return;
-          const msg = handleError(error);
-          setError(msg);
-          setGenerating("mindmap", false);
-        },
-      });
-
-      let text = "";
-      setStreamingFlag(true);
-      try {
-        for await (const textPart of result.textStream) {
-          if (!isSameSession() || ac.signal.aborted) break;
-          text += textPart;
-          setMindMap(text);
-        }
-      } finally {
-        setStreamingFlag(false);
-      }
+      const text = await mindMapGenerateText(
+        generateMindMapPrompt(studentAge, extractedText, useChinese),
+        getSystemPrompt(),
+        mindMapModel,
+        ac.signal,
+      );
 
       if (!isSameSession() || ac.signal.aborted) {
         notifyGenerationCancelled();
+        toast.dismiss(toastId);
         setGenerating("mindmap", false);
         return "";
       }
 
-      setMindMap(text);
+      const data = mindMapDataSchema.parse(JSON.parse(text));
+      const json = JSON.stringify(data);
+      setMindMap(json);
 
-      if (text.trim()) {
-        logActivity("mindmap_generate", { sessionId: readingStore.id || undefined });
-      }
+      logActivity("mindmap_generate", { sessionId: readingStore.id || undefined });
 
+      toast.dismiss(toastId);
       setGenerating("mindmap", false);
-      return text;
+      return json;
     } catch (error) {
-      setStreamingFlag(false);
+      toast.dismiss(toastId);
       if (!isSameSession() || isAbortError(error)) {
         notifyGenerationCancelled();
         setGenerating("mindmap", false);

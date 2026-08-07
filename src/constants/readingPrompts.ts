@@ -250,28 +250,29 @@ export function generateMindMapPrompt(age: number, text: string, useChinese: boo
 ${text}
 </text>
 
-Generate a Mermaid mindmap diagram using the following format:
+Return ONLY a JSON object (no markdown fences, no commentary) with this exact shape:
 
-\`\`\`mermaid
-mindmap
-  root((Main Topic))
-    Branch1
-      Sub-topic1
-      Sub-topic2
-    Branch2
-      Sub-topic1
-      Sub-topic2
-\`\`\`
+{
+  "root": "The central topic of the text",
+  "branches": [
+    {
+      "label": "First key theme or section",
+      "leaves": ["supporting point 1", "supporting point 2", "supporting point 3"]
+    },
+    {
+      "label": "Second key theme or section",
+      "leaves": ["supporting point 1", "supporting point 2"]
+    }
+  ]
+}
 
 **Requirements:**
-1. Use the \`mindmap\` diagram type.
-2. Start with the main topic as the root (in a circle).
-3. Include 3-5 main branches for key themes or sections.
-4. Each branch should have 2-4 sub-topics.
-5. Keep text concise (max 5-6 words per node).
-6. ${languageInstruction}
-
-**Respond with ONLY the Mermaid code block, no additional text.**`;
+1. \`root\` is one concise phrase naming the central topic (max 6 words).
+2. Include 3-5 entries in \`branches\`, one per key theme or section of the text.
+3. Each branch's \`leaves\` array holds 2-4 short supporting points (max 6 words each).
+4. Keep every node concise and specific to THIS text.
+5. ${languageInstruction}
+6. Output ONLY the JSON object. Do not wrap it in markdown fences or add any text.`;
 }
 
 export function getReadingTestPreset(age: number): ReadingTestQuestionCounts {

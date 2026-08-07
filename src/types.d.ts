@@ -474,6 +474,20 @@ interface VocabularyQuizQuestion {
   wordRef: string;
 }
 
+/** Structured mind-map data rendered as a left-to-right tree (mirrors the
+ *  Chapter 02 landing mockup / NotebookLM style: indigo root, colored
+ *  branches, tinted leaves). Persisted as JSON in the `mindMap` string field
+ *  of the reading store (and the `mind_map` DB column). Legacy sessions store
+ *  Mermaid markdown in the same field; the component detects the format. */
+interface MindMapData {
+  root: string;
+  branches: MindMapBranch[];
+}
+interface MindMapBranch {
+  label: string;
+  leaves: string[];
+}
+
 interface ReadingSession {
   id: string;
   title: string;
