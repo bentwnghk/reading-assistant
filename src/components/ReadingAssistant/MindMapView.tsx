@@ -145,7 +145,18 @@ type Transform = { tx: number; ty: number; s: number };
 export default function MindMapView({ data }: { data: MindMapData }) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef({ active: false, startX: 0, startY: 0, startTx: 0, startTy: 0, moved: false });
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const panRef = useRef({
+    active: false,
+    pointerId: -1,
+    startX: 0,
+    startY: 0,
+    startTx: 0,
+    startTy: 0,
+    moved: false,
+    captured: false,
+  });
+  const pinchRef = useRef<{ p1: { x: number; y: number }; p2: { x: number; y: number }; t: Transform } | null>(null);
   const suppressClickRef = useRef(false);
   const minScaleRef = useRef(0);
 
@@ -233,28 +244,84 @@ export default function MindMapView({ data }: { data: MindMapData }) {
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
+  function releasePanCapture() {
+    const d = panRef.current;
+    if (d.captured) {
+      try {
+        containerRef.current?.releasePointerCapture(d.pointerId);
+      } catch {
+        /* noop */
+      }
+    }
+    d.captured = false;
+    d.active = false;
+  }
+
   function onPointerDown(e: React.PointerEvent) {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     suppressClickRef.current = false;
-    containerRef.current?.setPointerCapture(e.pointerId);
-    dragRef.current = {
-      active: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      startTx: transform.tx,
-      startTy: transform.ty,
-      moved: false,
-    };
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointersRef.current.size === 1) {
+      // Begin tracking a potential pan. We do NOT capture yet — capturing in
+      // pointerdown retargets pointer events to the container and prevents
+      // the click that node onClick handlers rely on. Capture only starts
+      // once movement proves this is a drag (see onPointerMove).
+      panRef.current = {
+        active: true,
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        startTx: transform.tx,
+        startTy: transform.ty,
+        moved: false,
+        captured: false,
+      };
+    } else if (pointersRef.current.size === 2) {
+      // Second finger lands → switch from pan to pinch.
+      releasePanCapture();
+      setIsPanning(false);
+      const pts = [...pointersRef.current.values()];
+      pinchRef.current = { p1: pts[0], p2: pts[1], t: transform };
+    }
   }
 
   function onPointerMove(e: React.PointerEvent) {
-    const d = dragRef.current;
-    if (!d.active) return;
+    if (!pointersRef.current.has(e.pointerId)) return;
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // Two-finger pinch: scale around the gesture midpoint and translate so
+    // the midpoint's content point tracks the fingers (natural touch feel).
+    if (pointersRef.current.size >= 2 && pinchRef.current) {
+      const pts = [...pointersRef.current.values()];
+      const p1 = pts[0];
+      const p2 = pts[1];
+      const start = pinchRef.current;
+      const startDist = Math.hypot(start.p2.x - start.p1.x, start.p2.y - start.p1.y) || 1;
+      const curDist = Math.hypot(p2.x - p1.x, p2.y - p1.y) || 1;
+      const ns = clampScale(start.t.s * (curDist / startDist));
+      const startMidX = (start.p1.x + start.p2.x) / 2;
+      const startMidY = (start.p1.y + start.p2.y) / 2;
+      const curMidX = (p1.x + p2.x) / 2;
+      const curMidY = (p1.y + p2.y) / 2;
+      const cx = (startMidX - start.t.tx) / start.t.s;
+      const cy = (startMidY - start.t.ty) / start.t.s;
+      setTransform({ tx: curMidX - cx * ns, ty: curMidY - cy * ns, s: ns });
+      return;
+    }
+
+    const d = panRef.current;
+    if (!d.active || d.pointerId !== e.pointerId) return;
     const dx = e.clientX - d.startX;
     const dy = e.clientY - d.startY;
     if (!d.moved && Math.abs(dx) + Math.abs(dy) > 4) {
       d.moved = true;
       setIsPanning(true);
+      try {
+        containerRef.current?.setPointerCapture(d.pointerId);
+        d.captured = true;
+      } catch {
+        /* noop */
+      }
     }
     if (d.moved) {
       setTransform((t) => ({ ...t, tx: d.startTx + dx, ty: d.startTy + dy }));
@@ -262,15 +329,43 @@ export default function MindMapView({ data }: { data: MindMapData }) {
   }
 
   function onPointerUp(e: React.PointerEvent) {
-    const d = dragRef.current;
-    if (d.active && d.moved) suppressClickRef.current = true;
-    d.active = false;
-    setIsPanning(false);
-    try {
-      containerRef.current?.releasePointerCapture(e.pointerId);
-    } catch {
-      /* noop */
+    const wasTracked = pointersRef.current.has(e.pointerId);
+    pointersRef.current.delete(e.pointerId);
+
+    const d = panRef.current;
+    if (d.active && d.pointerId === e.pointerId) {
+      if (d.moved) suppressClickRef.current = true;
+      releasePanCapture();
+      setIsPanning(false);
     }
+
+    if (wasTracked && pointersRef.current.size < 2) {
+      const wasPinching = pinchRef.current !== null;
+      pinchRef.current = null;
+      if (wasPinching) suppressClickRef.current = true;
+      // One finger remains after a pinch → let it continue as a fresh pan.
+      if (pointersRef.current.size === 1) {
+        const [pid] = [...pointersRef.current.keys()];
+        const [pt] = [...pointersRef.current.values()];
+        panRef.current = {
+          active: true,
+          pointerId: pid,
+          startX: pt.x,
+          startY: pt.y,
+          startTx: transform.tx,
+          startTy: transform.ty,
+          moved: false,
+          captured: false,
+        };
+      }
+    }
+  }
+
+  function onPointerCancel() {
+    pointersRef.current.clear();
+    pinchRef.current = null;
+    releasePanCapture();
+    setIsPanning(false);
   }
 
   function consumeClick(): boolean {
@@ -322,6 +417,7 @@ export default function MindMapView({ data }: { data: MindMapData }) {
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}
+      onPointerCancel={onPointerCancel}
     >
       <div
         style={{
@@ -334,6 +430,7 @@ export default function MindMapView({ data }: { data: MindMapData }) {
           width={contentW}
           height={contentH}
           viewBox={`0 0 ${contentW} ${contentH}`}
+          style={{ fontFamily: "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" }}
           role="img"
           aria-label={`Mind map: ${data.root}`}
         >

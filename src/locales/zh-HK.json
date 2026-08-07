@@ -950,6 +950,7 @@
       "emptyTip": "點擊上方按鈕生成視覺化思維導圖",
       "chineseLabel": "中文",
       "download": "下載",
+      "downloadError": "無法匯出思維導圖，請再試一次。",
       "hint": "拖曳平移 · 滾輪縮放 · 點擊分支摺疊",
       "zoomIn": "放大",
       "zoomOut": "縮小",

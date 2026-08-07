@@ -3,12 +3,13 @@ import dynamic from "next/dynamic";
 import { useState, useRef, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Waypoints, LoaderCircle, Languages, Network, Download } from "lucide-react";
+import { toast } from "sonner";
+import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
-import { downloadFile } from "@/utils/file";
 import MindMapView from "./MindMapView";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown/View"));
@@ -57,8 +58,8 @@ function MindMap() {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 80);
-    // Clone and give it an intrinsic pixel size + namespaces so the file
-    // renders when opened standalone (a bare width="100%" collapses to 0).
+    // Rasterize the SVG to a PNG via a canvas. The SVG is cloned with an
+    // explicit pixel size + namespaces so the Image loads it standalone.
     const clone = svg.cloneNode(true) as SVGSVGElement;
     let w = parseFloat(clone.getAttribute("width") ?? "");
     let h = parseFloat(clone.getAttribute("height") ?? "");
@@ -71,16 +72,44 @@ function MindMap() {
         h = vb[3];
       }
     }
-    if (w && h) {
-      clone.setAttribute("width", String(w));
-      clone.setAttribute("height", String(h));
+    if (!w || !h) {
+      toast.error(t("reading.mindMap.downloadError"));
+      return;
     }
+    const SCALE = 2;
+    clone.setAttribute("width", String(w));
+    clone.setAttribute("height", String(h));
     clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-    const source =
-      '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' +
-      new XMLSerializer().serializeToString(clone);
-    downloadFile(source, `${safeFileName} - Mind Map.svg`, "image/svg+xml");
+    const xml = new XMLSerializer().serializeToString(clone);
+    const url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(w * SCALE);
+      canvas.height = Math.round(h * SCALE);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        toast.error(t("reading.mindMap.downloadError"));
+        return;
+      }
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          toast.error(t("reading.mindMap.downloadError"));
+          return;
+        }
+        saveAs(blob, `${safeFileName} - Mind Map.png`);
+      }, "image/png");
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast.error(t("reading.mindMap.downloadError"));
+    };
+    img.src = url;
   }
 
   return (

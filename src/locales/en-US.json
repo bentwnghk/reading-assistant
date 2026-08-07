@@ -919,6 +919,7 @@
       "emptyTip": "Click the button above to generate a visual mind map",
       "chineseLabel": "Chinese",
       "download": "Download",
+      "downloadError": "Could not export the mind map. Please try again.",
       "hint": "Drag to pan · Scroll to zoom · Click a branch to collapse",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
