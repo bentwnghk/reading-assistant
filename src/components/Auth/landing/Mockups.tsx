@@ -25,8 +25,13 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronRight,
+  ChevronLeft,
   ChevronUp,
   ChevronDown,
+  Trophy,
+  CalendarRange,
+  Infinity as InfinityIcon,
+  School,
   Lock,
   Camera,
   Check,
@@ -1068,14 +1073,18 @@ export function AchievementsMockup() {
 // Mirrors LeaderboardTable: sort bar + ranked rows with medals, avatars,
 // "You" highlight, and rank-trend arrows.
 export function LeaderboardMockup() {
-  // Leaderboard rows — mirror LeaderboardTable.tsx structure
+  // Leaderboard rows — mirror LeaderboardTable.tsx structure.
+  // School-wide ranking: a larger pool, "You" mid-pack at #7.
+  // `className` is shown under each name when the school scope is active.
   const rows = [
-    { rank: 1, name: "Chloe L.", score: 1240, you: false, prior: 2, medal: true, medalColor: "text-yellow-400", rowBg: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800" },
-    { rank: 2, name: "You", score: 1180, you: true, prior: 4, medal: true, medalColor: "", rowBg: "" },
-    { rank: 3, name: "Marcus T.", score: 1090, you: false, prior: 3, medal: true, medalColor: "text-amber-600", rowBg: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800" },
-    { rank: 4, name: "Priya K.", score: 1050, you: false, prior: 6, medal: false, medalColor: "", rowBg: "" },
-    { rank: 5, name: "Ethan R.", score: 980, you: false, prior: 5, medal: false, medalColor: "", rowBg: "" },
-    { rank: 6, name: "Sofia M.", score: 910, you: false, prior: 6, medal: false, medalColor: "", rowBg: "" },
+    { rank: 1, name: "Aisha N.", className: "S5 Gp1", score: 1420, you: false, prior: 1, medal: true, medalColor: "text-yellow-400", rowBg: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800" },
+    { rank: 2, name: "Diego S.", className: "S6 Gp2", score: 1340, you: false, prior: 4, medal: true, medalColor: "text-yellow-400", rowBg: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800" },
+    { rank: 3, name: "You", className: "S4 Gp1", score: 1290, you: true, prior: 5, medal: true, medalColor: "", rowBg: "" },
+    { rank: 4, name: "Hana W.", className: "S4 Gp1", score: 1200, you: false, prior: 4, medal: false, medalColor: "", rowBg: "" },
+    { rank: 5, name: "Lucas P.", className: "S5 Gp2", score: 1140, you: false, prior: 8, medal: false, medalColor: "", rowBg: "" },
+    { rank: 6, name: "Mei L.", className: "S4 Gp2", score: 1070, you: false, prior: 6, medal: false, medalColor: "", rowBg: "" },
+    { rank: 7, name: "Omar F.", className: "S6 Gp3", score: 975, you: false, prior: 7, medal: false, medalColor: "", rowBg: "" },
+    { rank: 8, name: "Sara K.", className: "S5 Gp1", score: 940, you: false, prior: 3, medal: false, medalColor: "", rowBg: "" },
   ];
   const medalEmoji = (r: number) => (r === 1 ? "🥇" : r === 2 ? "🥈" : "🥉");
 
@@ -1090,7 +1099,57 @@ export function LeaderboardMockup() {
 
   return (
     <MockupFrame label="LEADERBOARD · Mr.🆖 ProReader">
-      <div className="space-y-2">
+      <div className="space-y-3">
+        {/* Header — mirrors LeaderboardPage header */}
+        <div className="flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          <div>
+            <h2 className="text-base font-bold leading-tight">Leaderboard</h2>
+            <p className="text-[10px] text-muted-foreground">See where you rank across your whole school</p>
+          </div>
+        </div>
+
+        {/* Period toggle — Weekly (active) / All-Time */}
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          <span className="flex flex-1 items-center justify-center gap-1 rounded-md bg-background py-1 text-xs font-medium text-foreground shadow-sm">
+            <CalendarRange className="h-3.5 w-3.5" />
+            Weekly
+          </span>
+          <span className="flex flex-1 items-center justify-center gap-1 rounded-md py-1 text-xs font-medium text-muted-foreground">
+            <InfinityIcon className="h-3.5 w-3.5" />
+            All-Time
+          </span>
+        </div>
+
+        {/* Week selector — Last Week / This Week / Next Week */}
+        <div className="flex items-center justify-between text-sm">
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <ChevronLeft className="h-4 w-4" />
+            Last Week
+          </span>
+          <span className="font-medium tabular-nums">This Week</span>
+          <span className="flex cursor-not-allowed items-center gap-1 text-muted-foreground/40">
+            Next Week
+            <ChevronLeft className="h-4 w-4 rotate-180" />
+          </span>
+        </div>
+
+        {/* Scope tabs — My Class / My School (active) / Global */}
+        <div className="flex gap-2">
+          <span className="flex flex-1 items-center justify-center gap-1 rounded-lg border-2 border-border py-1.5 text-xs font-medium text-muted-foreground">
+            <Users className="h-3 w-3 shrink-0" />
+            My Class
+          </span>
+          <span className="flex flex-1 items-center justify-center gap-1 rounded-lg border-2 border-primary bg-primary/10 py-1.5 text-xs font-medium text-primary">
+            <School className="h-3 w-3 shrink-0" />
+            My School
+          </span>
+          <span className="flex flex-1 items-center justify-center gap-1 rounded-lg border-2 border-border py-1.5 text-xs font-medium text-muted-foreground">
+            <Globe className="h-3 w-3 shrink-0" />
+            Global
+          </span>
+        </div>
+
         {/* Sort bar */}
         <div className="flex items-center gap-3 overflow-x-auto border-b px-2 pb-1">
           <span className="shrink-0 text-xs text-muted-foreground">Rank:</span>
@@ -1136,7 +1195,7 @@ export function LeaderboardMockup() {
                   {r.name.charAt(0)}
                 </div>
               </div>
-              {/* Name + rank trend */}
+              {/* Name + class + rank trend */}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className={`truncate text-sm font-semibold ${isYou ? "text-primary" : ""}`}>
@@ -1148,6 +1207,8 @@ export function LeaderboardMockup() {
                     </span>
                   )}
                 </div>
+                {/* Class name — shown under each student in the school scope */}
+                <div className="truncate text-xs text-muted-foreground">{r.className}</div>
                 <div className="mt-0.5">
                   {delta > 0 ? (
                     <span className="flex items-center gap-0.5 text-xs text-green-600 dark:text-green-400">
@@ -1171,7 +1232,7 @@ export function LeaderboardMockup() {
                 >
                   {r.score.toLocaleString()}
                 </div>
-                <div className="text-xs text-muted-foreground">Score</div>
+                <div className="text-xs text-muted-foreground">Weekly Score</div>
               </div>
             </div>
           );
