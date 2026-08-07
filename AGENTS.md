@@ -21,8 +21,9 @@ The project uses **npm** as the primary package manager (>= 9.8.0, Node >= 18.18
 
 ### Testing
 
-- **Status**: Currently, there are no automated tests in the codebase.
-- **Guideline**: If adding tests, use **Vitest** or **Jest** following standard Next.js patterns. Place test files next to the code they test (e.g., `ComponentName.test.tsx`) or in a `__tests__` directory.
+- **App**: No automated tests in the main Next.js app currently.
+- **Realtime package**: The `realtime/` package has **Vitest** unit tests (`scoring.test.ts`, `words.test.ts`). Run from `realtime/` with `npm test`.
+- **Guideline**: If adding tests to the app, use **Vitest** or **Jest** following standard Next.js patterns. Place test files next to the code they test (e.g., `ComponentName.test.tsx`) or in a `__tests__` directory.
 
 ### Docker
 
@@ -53,13 +54,13 @@ src/
 ├── components/
 │   ├── ui/                     # Shadcn UI primitives (do not modify directly)
 │   ├── Internal/               # Custom shared components
-│   ├── ReadingAssistant/       # Core reading assistance feature components (41 files — see Reading Assistant Features section)
-│   ├── Vocabulary/             # My Vocabulary page components (table, flashcards, quiz, spelling, review lists, export, sharing)
+│   ├── ReadingAssistant/       # Core reading assistance feature components (43 files — see Reading Assistant Features section)
+│   ├── Vocabulary/             # My Vocabulary page components (table, phrases, flashcards, quiz, spelling, review lists, export, sharing)
 │   ├── MagicDown/              # Markdown rendering and editing components
 │   ├── Auth/                   # Authentication UI components
-│   ├── Dashboard/              # Student dashboard components (includes session sharing dialogs)
+│   ├── Dashboard/              # Student dashboard components (session sharing dialogs, SkillProfileCard)
 │   ├── TeacherDashboard/       # Teacher dashboard components (includes GrammarGameChart)
-│   ├── Leaderboard/            # Leaderboard components
+│   ├── Leaderboard/            # Leaderboard components (weekly + all-time tables, LeaderboardPage)
 │   ├── Subscription/           # Subscription/billing UI components
 │   ├── UserManagement/         # User management components
 │   ├── Provider/               # Context providers (Theme, I18n)
@@ -88,6 +89,9 @@ src/
 │   ├── school-subscription.ts  # School subscription logic
 │   ├── settings.ts             # App settings queries
 │   ├── shared-sessions.ts      # Session sharing CRUD + share target resolution
+│   ├── assignments.ts          # Assignment CRUD + stripSessionForAssignment (teacher→student)
+│   ├── assignment-presets.ts   # Reusable school-wide student-group presets
+│   ├── skill-profile.ts        # Comprehension skill-profile snapshot + cross-session rollup
 │   ├── subscription.ts         # Subscription data access
 │   └── subscription-email.ts   # Subscription email templates
 ├── templates/                  # Email template files
@@ -107,9 +111,11 @@ realtime/                       # Standalone Socket.io server for multiplayer sp
 │   ├── rooms.ts                # Room CRUD, player management, host transfer
 │   └── game/
 │       ├── engine.ts           # Game loop (countdown→playing→finished)
-│       ├── scoring.ts          # Authoritative scoring + timing constants
+│       ├── scoring.ts          # Authoritative scoring + timing constants (per-mode, phrase-aware)
+│       ├── scoring.test.ts     # Vitest unit tests for scoring/judging
 │       ├── types.ts            # Battle types (mirrored from src/types.d.ts)
-│       └── words.ts            # Word list resolution (glossary/vocab/review-list) + per-mode challenge precompute (enrichWords)
+│       ├── words.ts            # Word/phrase list resolution + per-mode challenge precompute (enrichWords)
+│       └── words.test.ts       # Vitest unit tests for word resolution/enrichment
 ```
 
 ---
@@ -139,7 +145,8 @@ realtime/                       # Standalone Socket.io server for multiplayer sp
   - `useSubscription` — Stripe subscription state management
   - `useSchoolSubscription` — School subscription state management
   - `useVocabularySync` — Auto-syncs glossary changes to vocabulary DB on change
-  - `useAutoSave` — Auto-saves reading session to localforage history (skips during streaming; excludes `originalImages`/`visualizationImage` from its dependency array because they are lazy-loaded asynchronously — see [Lesson 10](#10-lazy-loaded-large-fields-originalimages--visualizationimage))
+  - `useSpellingBattle` — Multiplayer spelling battle state via the non-persisted `battle` store + singleton Socket.io event wiring
+  - `useAutoSave` — Auto-saves reading session to localforage history (skips during streaming; excludes `originalImages`/`visualizationImage` from its dependency array because they are lazy-loaded asynchronously — see Architectural Rules §C below)
   - `useMobile` — Responsive breakpoint detection
   - `useAccurateTimer` — High-precision countdown timer for games
   - `useSubmitShortcut` — Keyboard shortcut (Ctrl+Enter) for form submission
@@ -156,10 +163,10 @@ realtime/                       # Standalone Socket.io server for multiplayer sp
 ### 4. State Management
 
 - **Zustand**: Used for global client-side state and persistence.
-- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts`, `sharing.ts` — all in `src/store/`.
-- **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`.
+- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts`, `sharing.ts`, `assignments.ts`, `battle.ts` — all in `src/store/`.
+- **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`. Exceptions: `battle.ts` is **non-persisted** (ephemeral connection state, lives at module scope — see Architectural Rules §A).
 - **Radash**: Use **radash** utilities for common operations like `pick`, `isString`, `isObject`, etc.
-- **History store lightweight/full split**: The `src/store/history.ts` store tracks sessions in two states. `loadFromAPI` populates the array with **lightweight** entries (no `originalImages`/`visualizationImage` — these large base64 payloads are stripped by `getUserSessions()`). The async `loadFull(id)` method fetches the complete session (including media) on demand via `/api/sessions/[id]`, deduplicates concurrent fetches, and merges via `hydrate(id, data)`. A module-level `hydratedSessionIds` Set records which entries already contain full media. Use `loadFull` (not `load`) whenever media fields are needed (restore, download, assignment snapshots); use `load` only for synchronous reads of already-present text fields. See [Lesson 10](#10-lazy-loaded-large-fields-originalimages--visualizationimage).
+- **History store lightweight/full split**: The `src/store/history.ts` store tracks sessions in two states. `loadFromAPI` populates the array with **lightweight** entries (no `originalImages`/`visualizationImage` — these large base64 payloads are stripped by `getUserSessions()`). The async `loadFull(id)` method fetches the complete session (including media) on demand via `/api/sessions/[id]`, deduplicates concurrent fetches, and merges via `hydrate(id, data)`. A module-level `hydratedSessionIds` Set records which entries already contain full media. Use `loadFull` (not `load`) whenever media fields are needed (restore, download, assignment snapshots); use `load` only for synchronous reads of already-present text fields. See Architectural Rules §C below.
 - **AI Generation Tracking**: All AI generation loading state lives in the reading store's `activeGenerations: Record<string, boolean>` field (keyed by `GenerationType`). Components read `!!activeGenerations["type"]` for spinners/disabled state. This **must** be store-level (not component-local `useState`) so loading indicators and button-disable survive SPA navigation — the user can navigate to `/leaderboard` mid-generation, come back, and still see the spinner. See [AI Generation Tracking](#ai-generation-tracking-activegenerations) below.
 
 ### 5. Imports
@@ -244,6 +251,9 @@ API routes are in `src/app/api/`. Key route groups:
 - **`cron/*`**: Scheduled tasks (email reminders).
 - **`config/*`**: Public config endpoints (e.g., fallback model).
 - **`shares/*`**: Reading session sharing (create, list pending, accept/reject, get targets).
+- **`assignments/*`**: Teacher assignments CRUD, student submissions, view, overdue count, and reusable student-group presets (`/presets`).
+- **`skill-profile/*`**: Comprehension skill-profile snapshot (per-session + cross-session rollup).
+- **`realtime/*`**: HMAC ticket issuance for the standalone Socket.io server (`/realtime/ticket`).
 
 ### 3. Provider Proxying
 
@@ -292,8 +302,8 @@ A dedicated auth-gated page for systematic vocabulary review across all reading 
 
 ### Database Tables
 
-- **`user_vocabulary`**: Per-user word bank. Columns: `user_id`, `word` (unique per user), `syllabification`, `part_of_speech`, `english_definition`, `chinese_definition`, `example`, `source_session_ids` (JSONB), `shared_by` (FK to `users.id`, NULL = "own"), `srs_counts` (JSONB `{"hard":N,"medium":N}`), `rating` (derived: easy/hard/medium), `mastery_level` (0-5), `review_count`, `correct_count`, `last_reviewed_at`, `next_review_at`.
-- **`vocabulary_review_sessions`**: Review session history. Columns: `id`, `user_id`, `mode` (flashcard/quiz/spelling), `word_count`, `correct_count`, `rating_counts` (JSONB `{"again":N,"hard":N,"good":N,"easy":N}`), `results` (JSONB array), `created_at`.
+- **`user_vocabulary`**: Per-user word bank. Columns: `user_id`, `word` (unique per user), `entry_type` (`'word'` | `'phrase'`, default `'word'` — drives the Words vs. Phrases tab split), `syllabification`, `part_of_speech`, `english_definition`, `chinese_definition`, `example`, `source_session_ids` (JSONB), `shared_by` (FK to `users.id`, NULL = "own"), `srs_counts` (JSONB `{"hard":N,"medium":N}`), `rating` (derived: easy/hard/medium), `mastery_level` (0-5), `review_count`, `correct_count`, `last_reviewed_at`, `next_review_at`.
+- **`vocabulary_review_sessions`**: Review session history. Columns: `id`, `user_id`, `mode` (flashcard/quiz/spelling), `entry_type` (`'word'` | `'phrase'` — review sessions are type-scoped so phrases get their own queue), `word_count`, `correct_count`, `rating_counts` (JSONB `{"again":N,"hard":N,"good":N,"easy":N}`), `results` (JSONB array), `created_at`.
 - **`review_lists`**: Named word lists. Columns: `id`, `name`, `words` (JSONB array of `ReviewListWord`), `word_count`, `created_by`, `created_at`, `updated_at`.
 - **`shared_review_lists`**: Pending/accepted/rejected review list shares. Columns: `id`, `sender_id`, `recipient_id`, `review_list_id`, `review_list_name`, `word_count`, `status`, `created_at`, `updated_at`.
 
@@ -305,7 +315,9 @@ A dedicated auth-gated page for systematic vocabulary review across all reading 
 4. `scripts/add-review-lists.sql` — creates `review_lists` and `shared_review_lists` tables
 5. `scripts/add-review-session-rating-counts.sql` — adds `rating_counts` JSONB + `rating` TEXT
 6. `scripts/add-srs-counts.sql` — adds `srs_counts` JSONB to `user_vocabulary`
-7. `scripts/backfill-user-vocabulary.sql` — backfills words from existing sessions
+7. `scripts/add-phrases.sql` — adds `entry_type` to `user_vocabulary`/`vocabulary_review_sessions` + `collocations` columns on `reading_sessions`
+8. `scripts/migrate-multi-word-to-phrases.sql` — reclassifies legacy multi-word entries (containing a space) from `'word'` to `'phrase'`; hyphenated compounds stay `'word'`
+9. `scripts/backfill-user-vocabulary.sql` — backfills words from existing sessions
 
 `scripts/init-db.sql` includes all tables for fresh installs.
 
@@ -322,8 +334,9 @@ A dedicated auth-gated page for systematic vocabulary review across all reading 
 
 | Component | Purpose |
 |-----------|---------|
-| `VocabularyContainer.tsx` | Main container — tabs (Table, Flashcards, Quiz, Spelling, Review Lists, History), stats cards, word selection |
+| `VocabularyContainer.tsx` | Main container — tabs (Table, Phrases, Flashcards, Quiz, Spelling, Review Lists, History), stats cards, word/phrase selection |
 | `VocabularyTable.tsx` | Sortable/filterable word table with source column, bulk selection, review list filtering |
+| `PhrasesTab.tsx` | Phrase table (filters `user_vocabulary` by `entry_type='phrase'`), pronunciation playback, syllable display |
 | `AutoSelectPanel.tsx` | 5 auto-select strategies (due for review, hard words, random, new, oldest reviewed) |
 | `ExportPanel.tsx` | Export to PDF, Word, CSV, text-as-image |
 | `ReviewListsTab.tsx` | CRUD for named review lists, pagination, share button (teachers/admins only) |
@@ -361,6 +374,7 @@ A dedicated auth-gated page for systematic vocabulary review across all reading 
 - Accepted shared review list words are persisted to `user_vocabulary` on accept (not deferred to first review), so source attribution is correct immediately.
 - The `acceptedReviewListWords` store field bridges the main page to the vocabulary page for review list workflows.
 - Pagination: Table tab uses 25/50/75/100 per page; Review Lists & History tabs use 10/20/30/50.
+- **Phrases**: `entry_type` is set automatically on sync — multi-word entries (lowercased word contains whitespace) become `'phrase'`; hyphenated compounds (e.g. `well-known`) stay `'word'`. On upsert, `'phrase'` is sticky: once a row is a phrase (or the new row is a phrase) it stays a phrase. Flashcard/spelling/quiz are unified across words and phrases; review sessions and queues are **type-scoped** so phrases never mix into the word queue.
 
 ---
 
@@ -376,12 +390,14 @@ The main reading page (`src/app/page.tsx`) is a multi-step workflow driven by `u
 | Image Upload | `ImageUpload.tsx` | Upload images, PDFs, or paste URLs; OCR extraction |
 | Text Difficulty | `TextDifficultyAnalyzer.tsx` | Multi-metric readability (Flesch, Flesch-Kincaid, ARI, Coleman-Liau, SMOG, CEFR) with interactive highlighting |
 | CEFR Highlighting | `CefrTextHighlighter.tsx` | Color-coded word difficulty overlay per CEFR level |
+| Pre-Reading | `PreReading.tsx` | AI-generated scaffolding (activation prompts, prediction, purpose, pre-teach words, background note); captures the student's prediction |
 | Summary | `Summary.tsx` | AI-generated text summary |
-| Adapted Text | `AdaptedText.tsx` | AI-simplified version of the text |
+| Adapted Text | `AdaptedText.tsx` | AI-simplified version of the text; includes sentence-by-sentence **read-along** (TTS + highlight) and Sentence Analysis |
 | Mind Map | `MindMap.tsx` | AI-generated Markdown mind map (rendered via `MagicDown`) |
 | Visualization | `Visualization.tsx` | AI-generated image visualization of the text |
-| Reading Test | `ReadingTest.tsx` | Multi-type comprehension questions (MC, T/F/NG, short answer, inference, vocab-context, referencing) |
+| Reading Test | `ReadingTest.tsx` | Multi-type comprehension questions (MC, T/F/NG, short answer, inference, vocab-context, referencing); each question is tagged with a `skillTested` (skill-profile) and `difficultyLevel` |
 | Glossary | `Glossary.tsx` | Extracted vocabulary with definitions, syllabification, examples, and SRS rating |
+| Collocations | `Collocations.tsx` | AI-extracted chunk-level collocations (pattern, meaning, contrast note, example) stored per-session |
 | Grammar | `Grammar.tsx` | AI grammar topic extraction, interactive quiz, Word export, grammar-specific text highlighting |
 | Grammar Games | `GrammarGames.tsx` | Hub for 5 gamified grammar exercises (see Grammar Games below) |
 | Vocabulary Flashcard | `VocabularyFlashcard.tsx` | In-session flashcard review with SRS integration |
@@ -464,6 +480,17 @@ Both features use AI image generation from the extracted text:
 - **Libraries**: `flesch`, `flesch-kincaid`, `automated-readability`, `coleman-liau`, `smog-formula`, `syllable`, `cefr-analyzer`
 - Types: `TextDifficultyResult`, `CEFRLevel`
 
+### Pre-Reading & Collocations (DB columns on `reading_sessions`)
+
+- `pre_reading` (JSONB `PreReadingData`: activation prompts, prediction prompt, purpose, pre-teach words, background note), `pre_reading_generated_at` (BIGINT) — AI scaffolding shown before reading.
+- `student_prediction` (TEXT — the student's free-text prediction; **per-user, zeroed on share**), `prediction_rating` (INTEGER — teacher/self rating of the prediction).
+- `collocations` (JSONB array of `CollocationChunk`: id, chunk, pattern, meaning, meaningZh, contrastNote, example), `collocations_generated_at` (BIGINT).
+- Migrations: `scripts/add-pre-reading.sql`, `scripts/add-skill-profile.sql`, `scripts/add-phrases.sql` (collocations columns).
+
+### Comprehension Skill Profile
+
+Each `ReadingTestQuestion` carries `skillTested: ReadingTestSkill` (`"main-idea" | "detail" | "inference" | "vocabulary" | "purpose"`) and a `difficultyLevel`. When a test completes, a per-session `skill_breakdown` JSONB snapshot is written to `reading_sessions`, and a cross-session rollup is upserted into the `user_skill_profile` table (`{skill: {earned,total,correct,count,sessions}}`, plus `weakest_skill`). The dashboard `SkillProfileCard.tsx` reads the rollup. Data access lives in `src/lib/skill-profile.ts`; API at `/api/skill-profile`.
+
 ---
 
 ## AI Generation Tracking (`activeGenerations`)
@@ -477,20 +504,24 @@ All AI generation loading state is tracked in the reading store via `activeGener
 | `"extracting"` | `extractTextFromImage` | Hook |
 | `"title"` | `generateTitle` | Hook |
 | `"summary"` | `generateSummary` | Hook |
+| `"pre-reading"` | `generatePreReading` | Hook |
 | `"adapted-text"` | `adaptText` | Hook |
 | `"simplified-text"` | `simplifyText` | Hook |
+| `"reading-text"` | `generateReadingText` | Hook |
 | `"mindmap"` | `generateMindMap` | Hook |
 | `"visualization"` | `generateVisualization` | Hook |
 | `"reading-test"` | `generateReadingTest` | Hook |
 | `"targeted-practice"` | `generateTargetedPractice` | Hook |
 | `"glossary"` | `generateGlossary` | Hook |
 | `"vocabulary-suggest"` | `suggestVocabulary` | Hook |
+| `"collocations"` | `generateCollocations` | Hook |
 | `"grammar-topics"` | `analyzeGrammarTopics` | Hook |
 | `"grammar-quiz"` | `generateGrammarQuiz` | Hook |
 | `"grammar-scramble"` | `generateGrammarScrambleContent` | Hook |
 | `"grammar-workshop"` | `generateGrammarWorkshopContent` | Hook |
 | `"grammar-surgery"` | `generateErrorSurgeryContent` | Hook |
 | `"grammar-questions"` | `generateGrammarQuestions` | Hook (shared by Roulette + Duel) |
+| `"grammar-lesson"` | `generateGrammarLesson` | Hook |
 | `"sentence-analysis"` | `handleAnalyzeSentence` | `AdaptedText.tsx` (direct `generateText`) |
 | `"tutor"` | `askTutor` | Hook |
 
@@ -580,6 +611,48 @@ Teachers and admins can share completed reading sessions with students. Shared s
 
 When sharing, `stripUserData` removes: `userAnswer`, `earnedPoints` from test questions; resets `testScore`, `testCompleted`, `vocabularyQuizScore`, `spellingGameBestScore`, `flashcardReviewDates`, `glossaryRatings`, `chatHistory`, `status`, `error`; strips `id`, `createdAt`, `updatedAt`. On accept, a new `id` and timestamps are assigned.
 
+> **Every score/progress field added to the reading store must also be zeroed here** (or it leaks to students — see Architectural Rules §C). This now includes all grammar-game scores/accuracies/completion counts and `grammarQuiz` per-item `userAnswer`/`earnedPoints`.
+
+---
+
+## Assignments (Teacher → Student)
+
+Teachers can create assignments from a reading session (their own or from the text repository) and assign them to students. Each student receives a **stripped copy** (`stripSessionForAssignment`) with all AI content preserved and every per-student attempt field reset. Students work the assignment; their scores are cached on `assignment_submissions` and surfaced in the teacher dashboard.
+
+### Database Tables
+
+- **`assignments`**: Teacher-created assignments. Columns: `id`, `teacher_id`, `title`, `description`, `subject`, `source_session_id`, `source_doc_title`, `due_date`, `status` (`'active'`|`'archived'`), `student_ids` (JSONB array), `created_at`, `updated_at`.
+- **`assignment_submissions`**: Per-student working state. Columns: `id`, `assignment_id` (FK cascade), `student_id`, `student_session_id`, `progress`, cached score columns (`test_score`, `vocabulary_quiz_score`, `spelling_game_best_score`, `grammar_quiz_score`, `grammar_game_best_score`, etc.), `test_completed`, `last_viewed_at`, `submitted_at`, `created_at`.
+- **`assignment_presets`**: Reusable, **school-wide** student-group presets. Columns: `id`, `teacher_id`, `school_id`, `name`, `description`, `student_ids` (JSONB array), `student_count`, `created_at`, `updated_at`. Shared across the school; only the creator (or admin/super-admin) can edit/delete.
+
+### Key Modules
+
+| Module | Purpose |
+|--------|---------|
+| `src/lib/assignments.ts` | Assignment CRUD, submission scoring, **`stripSessionForAssignment`** |
+| `src/lib/assignment-presets.ts` | Preset CRUD |
+| `src/store/assignments.ts` | Client state (active/overdue counts, current assignment) |
+| `src/utils/progress.ts` | `calculateProgress` — shared completion proxy used here + dashboards |
+
+### `stripSessionForAssignment` vs `stripUserData`
+
+`stripSessionForAssignment` (in `assignments.ts`) is **forked from** `stripUserData` (`shared-sessions.ts`) but resets **more** state — all grammar-game scores/completion, spelling accuracy, and `studentPrediction`/`predictionRating`. Session sharing leaves grammar/spelling state untouched; assignments reset everything per-student. Keep both stripping functions in sync when adding new score/progress fields (same rule as Architectural Rules §C).
+
+### API Routes
+
+| Route | Methods | Purpose |
+|-------|---------|---------|
+| `/api/assignments` | GET, POST | List/create assignments |
+| `/api/assignments/[id]` | GET, PATCH, DELETE | Assignment CRUD |
+| `/api/assignments/[id]/submissions` | GET | List student submissions |
+| `/api/assignments/[id]/view` | GET | Student fetches their stripped working copy |
+| `/api/assignments/overdue/count` | GET | Student overdue count (badge) |
+| `/api/assignments/targets` | GET | Assignable students (teacher's classes) |
+| `/api/assignments/presets` | GET, POST | Preset CRUD |
+| `/api/assignments/presets/[id]` | GET, PATCH, DELETE | Single preset |
+
+Activity types added: `assignment_create`, `assignment_start`, `assignment_submit`.
+
 ---
 
 ## App Routes
@@ -613,6 +686,11 @@ Next.js App Router pages in `src/app/`:
 | `activityLogger.ts` | Log user activities to API |
 | `chatQuestionLogger.ts` | Log tutor chat questions to API (silent, non-blocking) |
 | `artifact.ts` | AI artifact modification prompt templates |
+| `progress.ts` | `calculateProgress` — shared completion proxy (assignments + dashboards) |
+| `sessionMetrics.ts` | Aggregate session metric helpers (e.g. `grammarGameBestScore`) |
+| `sentences.ts` | Sentence splitting for read-along / Sentence Analysis |
+| `skillProfile.ts` | Comprehension skill-profile helpers (mirrors `src/lib/skill-profile.ts` rollup logic) |
+| `tts.ts` | Single Web Audio `AudioContext` TTS engine: `speakWord`, `readAlong`, `unlockAudio` (see Architectural Rules §K) |
 | `error.ts` | `parseError` utility for standardized error messages |
 | `style.ts` | `cn()` Tailwind class merge utility |
 | `file.ts` | File download and size formatting |
@@ -657,915 +735,120 @@ Next.js App Router pages in `src/app/`:
 
 ---
 
-## Lessons Learned: Adding Major Features
+## Architectural Rules & Lessons Learned
 
-The Grammar feature (v2.462–v2.485) introduced several issues that required multiple reverts and fixes. The insights below apply to any major feature addition.
+Hard-won constraints. Violating each caused real production bugs; the **rule** is what matters, not the history. Apply these when adding features or touching the listed subsystems.
 
-### 1. Multi-System Integration Checklist
+### A. State that spans SPA navigation must live at module/store scope
 
-A major feature touches **many subsystems**. Missing any one causes runtime errors or data inconsistencies. Before marking a feature complete, verify integration across **all** of the following:
+The reading store is a module-level singleton that survives client-side route changes. Any state whose lifecycle spans component unmount/remount must live there too — **not** in `useState`/`useRef`, which reset when the component unmounts (e.g. on navigating to `/leaderboard` mid-generation):
 
-| System | Files to Update | What to Check |
-|--------|----------------|---------------|
-| **Types** | `src/types.d.ts` | Define all new interfaces/types first |
-| **Store** | `src/store/reading.ts` | Add state fields, setters, and persistence |
-| **Hooks** | `src/hooks/useReadingAssistant.ts` | Add business logic methods |
-| **Prompts** | `src/constants/readingPrompts.ts` | Add AI prompt functions |
-| **Components** | `src/components/ReadingAssistant/` | Main UI component + any helper components |
-| **Barrel Export** | `src/components/ReadingAssistant/index.ts` | Re-export new component |
-| **Main Page** | `src/app/page.tsx` | Render the new component section |
-| **Workflow** | `WorkflowProgress.tsx`, `TocDrawer.tsx` | Add to step list and table of contents |
-| **Session Persistence** | `src/lib/sessions.ts` | Save/load new fields to/from DB |
-| **DB Migration** | `scripts/*.sql` | Add columns; update `init-db.sql` for fresh installs |
-| **Achievements** | `src/lib/achievements.ts` | Add achievement types + colors in `AchievementMedal.tsx` |
-| **Activity Logging** | `src/lib/activity.ts`, `src/utils/activityLogger.ts` | Add activity types |
-| **Leaderboard** | `src/lib/leaderboard.ts`, `LeaderboardTable.tsx`, `PersonalStatsCard.tsx`, `types.ts` | Add new stat columns |
-| **Dashboard** | `src/utils/dashboardMetrics.ts`, `OverviewTab.tsx`, `SessionsTab.tsx` | Add to student metrics |
-| **Teacher Dashboard** | `src/utils/teacherDashboardMetrics.ts`, `TeacherDashboard.tsx`, charts | Add to class metrics and charts |
-| **Excel Export** | `src/utils/excelExport.ts`, `src/utils/teacherDashboardExcel.ts` | Add columns to exports |
-| **User Data** | `src/lib/users.ts`, `StudentDataView.tsx` | Include in student detail views |
-| **Settings** | `src/store/setting.ts`, `src/components/Setting.tsx` | Add any model-specific settings |
-| **I18n** | `src/locales/en-US.json`, `src/locales/zh-HK.json` | Add all UI strings in both languages |
-| **Landing Page** | `src/components/Auth/LandingPage.tsx` | Add to feature cards, workflow, skills |
-| **About Dialog** | `src/components/Internal/Header.tsx` | Add to feature cards, workflow, skills |
+| Concern | Wrong | Right |
+|---|---|---|
+| AI generation loading | `useState<ReadingStatus>` in the hook | `activeGenerations` in the reading store (see that section) |
+| One-shot side-effect guards ("persist battle results once") | `useRef<boolean>` | Store flag reset on phase change (`resultPersisted` on `battle` store) |
+| Realtime socket connection | Created in a hook/component | Singleton in `src/lib/realtime-client.ts`; `battle` store is non-persisted |
+| `AudioContext` for TTS | Per-component | Module singleton in `src/utils/tts.ts` |
 
-### 2. Database Migration Best Practices
+Component-local state is fine **only** for ephemeral UI (popups, selection, streaming preview) that has no meaning after unmount.
 
-- **Separate migration files**: Each new feature must have its own incremental migration file (e.g., `add-grammar-columns.sql`, `add-grammar-achievements.sql`). Do **not** modify existing migration files that have already been applied.
-- **Update `init-db.sql`**: Also update `scripts/init-db.sql` so fresh installs include all features without running incremental migrations.
-- **CHECK constraints**: When adding new values to `CHECK` constraints (e.g., `achievement_type`, `activity_type`), the migration must `DROP CONSTRAINT IF EXISTS` then re-create it with the full list of values.
-- **Test both paths**: Verify that both (1) running the incremental migration on an existing DB and (2) running `init-db.sql` on a fresh DB produce the correct schema.
+**Converse footgun — cross-page bleed**: because the store survives navigation, `useReadingStore().id` stays set even on `/vocabulary`. Components reused across pages that read a page-specific store field must accept an explicit override prop (e.g. `disableSessionGlossary`) or receive data via props — don't trust the store value on a page it doesn't belong to.
 
-### 3. Model List Reuse in Settings
+**Lightweight alternative**: for a one-shot UI flag that must reset on full reload but survive navigation and needs no persistence, a module-level boolean + getter/setter (e.g. `isStudyPlanDialogChecked()` in `vocabulary.ts`) is simpler than a store field. Do **not** use this for any user data (scores, progress, settings).
 
-- When adding a new AI model setting (e.g., `grammarModel`), **reuse existing model lists** (`AVAILABLE_MODELS`, `VISION_MODELS`, `TUTOR_MODELS`) unless there's a strong reason to create a separate list.
-- Creating a dedicated model list (e.g., `GRAMMAR_MODELS`) adds maintenance burden and caused Zod enum validation issues that required two reverts (v2.480, v2.481) to fix.
-- The settings form uses `z.enum()` from Zod, so the model list must match exactly between the store definition and the form schema.
+### B. `next/dynamic()` components need a local `<Suspense>` boundary
 
-### 4. Color and Data Conflicts
+`next/dynamic(() => import(...))` without a `loading` option suspends on **first** render (the chunk loads). With no local `<Suspense>`, the suspension bubbles to the root `<Suspense fallback={null}>` in `page.tsx` and the **entire page blanks** for ~100–400ms. Symptom signature: "scroll jumps to top / page flashes blank" that happens **only once per page load** (the import promise is cached afterwards).
 
-- Before choosing colors (Tailwind classes, hex codes) for a new feature, audit all existing color usages across the codebase to avoid conflicts:
-  - Chart colors in `dashboardMetrics.ts` and `teacherDashboardMetrics.ts`
-  - Badge/label colors in `AchievementMedal.tsx`
-  - Category colors in feature components
-  - Landing page and About dialog feature card colors
-- Each feature's chart color must be unique within its chart. The grammar feature initially used `#d946ef` (fuchsia) which conflicted, and was changed to `#14b8a6` (teal) in a hotfix.
-
-### 5. Incremental Commits
-
-- Avoid massive single commits. The initial grammar commit (1,530 lines across 15 files) made it difficult to isolate and revert bugs.
-- Recommended commit structure for a major feature:
-  1. Types + store + hooks (data layer)
-  2. Prompts + AI logic (AI layer)
-  3. Component UI (UI layer)
-  4. DB migrations + session persistence (persistence layer)
-  5. Dashboard/leaderboard/achievements integration (metrics layer)
-  6. I18n + landing page updates (presentation layer)
-- Each commit should be independently buildable and not break existing functionality.
-
-### 6. SQL INSERT Synchronization
-
-When modifying a `INSERT INTO ... VALUES ($1, $2, ...)` statement, **all three parts must be updated together**:
-
-1. **Column list** — the column names after `INSERT INTO table (`
-2. **Parameter placeholders** — the `$N` tokens in `VALUES (...)`
-3. **Values array** — the JS array passed as the query's second argument
-
-A mismatch between column count and placeholder count causes a PostgreSQL `INSERT has more target columns than expressions` error at runtime. This is easy to miss during code review because the three parts are often far apart in the same function.
-
-**Prevention checklist** when adding a column to `createReadingSession` (or any hand-written INSERT):
-
-| Step | What to update | Where in `sessions.ts` |
-|------|---------------|----------------------|
-| Add column name | Column list after `INSERT INTO reading_sessions (` | ~line 19 |
-| Add `$N` placeholder | VALUES clause — increment the max `$N` by 1 | ~line 48 |
-| Add value expression | JS array — insert at the correct positional index | ~line 116 |
-| Add ON CONFLICT update | `column = EXCLUDED.column` in the upsert clause | ~line 49 |
-
-Also verify that `updateReadingSession`'s `fieldMappings` already includes the new field (it maps JS camelCase → DB snake_case).
-
-### 7. Full Persistence Layer Check for New Store Fields
-
-When a new field is added to the Zustand store (`src/store/reading.ts`), it is not automatically persisted to the database. The persistence layer must be updated explicitly. Before considering a new store field "complete", verify:
-
-| Layer | File | What to check |
-|-------|------|---------------|
-| **DB schema** | `scripts/init-db.sql` + new migration | Column exists with correct type and constraints |
-| **Create** | `src/lib/sessions.ts` `createReadingSession()` | Column in INSERT, placeholder in VALUES, value in array, ON CONFLICT update |
-| **Update** | `src/lib/sessions.ts` `updateReadingSession()` | Field in `fieldMappings` + correct serialization (JSON vs raw) |
-| **Read** | `src/lib/sessions.ts` `getUserReadingSessions()` + `getReadingSession()` | Field mapped from `row.column_name` with correct fallback default |
-
-A field that exists in the store and `fieldMappings` but is missing from the DB schema and INSERT will silently fail: the column doesn't exist in the table, so reads return `undefined`, and fallback logic determines the displayed value. This was the root cause of the `source` field bug where all sessions appeared as "from repository" — the `source` column had never been added to the database.
-
-### 8. Generation Loading State Must Be Store-Level (Not Component-Local)
-
-AI generation loading indicators (`isGenerating`, `isLoading`, etc.) **must** live in the Zustand store (`activeGenerations`), not in component-local `useState`. This was learned the hard way:
-
-- **The bug**: Loading state was tracked via `useState<ReadingStatus>` inside `useReadingAssistant` (component-local). When the user navigated to `/leaderboard` mid-generation, the component unmounted, the local state reset to `"idle"`, and the spinner disappeared. On return, the user saw no indication that generation was still running, could click "Generate" again, and two concurrent streams would interleave tokens into the same store field — corrupting the output.
-- **The fix**: All generation flags now live in `activeGenerations: Record<string, boolean>` in the reading store. The store is a module-level singleton that survives SPA navigation. Components read from the store, so spinners persist and buttons stay disabled across page transitions. Each generation function also has an early-return guard (`if (activeGenerations["type"]) return;`) as a belt-and-suspenders check.
-- **Key principle**: Any state that tracks an async operation whose lifecycle spans component unmount/remount (which includes ALL AI generations, since the user can navigate freely) must be in the store, not in `useState`. Component-local state is fine for ephemeral UI concerns (popups, selected items, streaming preview text) that have no meaning after unmount.
-
-### 9. `next/dynamic()` Components Need a Local `<Suspense>` Boundary
-
-Components loaded via `next/dynamic(() => import(...))` **without a `loading` option and without a local `<Suspense>` wrapper** will, on their very first render in a page session, suspend while their chunk loads. React bubbles that suspension up to the **nearest ancestor `<Suspense>`** — and in this app that is the root-level `<Suspense fallback={null}>` wrapping all of `<HomeContent />` in `src/app/page.tsx`. The result: the **entire page** is replaced by `null` (a blank document) until the chunk resolves (~100–400ms in dev, faster but still nonzero in production). Once the chunk loads, React restores the full tree and the browser recovers the prior scroll position.
-
-**Why this is deceptive**: The symptom usually reported is "the page scrolls to the top", but the actual cause is a **document height collapse**, not a scroll operation. No `scrollTo`/`focus`/`scrollTop` assignment is involved — it's invisible to JS-level instrumentation. `document.body.scrollHeight` reads `0` (with `documentElement.scrollHeight` reading exactly the viewport height) during the blank window.
-
-**The "only the first time" signature**: This class of bug **only reproduces once per page load** because the lazy chunk's import promise is cached in memory for the remainder of the session. If a user reports a symptom that happens on the first interaction after reload and never again, suspect a `next/dynamic()` / `React.lazy()` first-load suspension.
-
-**The fix**: Always wrap `<MagicDown>` (and any other `next/dynamic()` component) in a local `<Suspense fallback={...}>` at each call site so the loading state is scoped to that subtree instead of blanking the whole app:
-
+Always wrap dynamic components (especially `MagicDown`) in a local `<Suspense>`:
 ```tsx
-import { Suspense } from "react";
-
 <Suspense fallback={<LoadingSpinner />}>
   <MagicDown value={...} onChange={...} hideTools />
 </Suspense>
 ```
+Note: Radix `onOpenAutoFocus={(e) => e.preventDefault()}` does **not** fix this — that guards a different (focus-driven) scroll issue. Known call sites: `AdaptedText.tsx` (Sentence Analysis dialog — fixed), `Summary.tsx`, `MindMap.tsx`.
 
-**Diagnostic checklist** when investigating a "scroll jumps to top" / "page flashes blank" symptom:
+### C. Persistence layer — full write AND read path for store fields
 
-| Step | What to check | How |
-|------|---------------|-----|
-| 1. Is it a real scroll, or a document collapse? | Log `document.body.scrollHeight` in a `requestAnimationFrame` loop around the trigger | If it reads `0` during the symptom, the page content is gone, not scrolled |
-| 2. Is a lazy component mounting for the first time? | Look for `next/dynamic()` / `React.lazy()` in the subtree that just rendered | These suspend on first render only |
-| 3. Is there a local `<Suspense>` around it? | Check the JSX context of the lazy component usage | If not, the suspension bubbles to the root |
-| 4. Does the symptom only happen once per page load? | Reload and try the same action twice | "Only first time" = cached chunk promise afterwards |
+A store field is not persisted automatically. When adding one, update **all** of:
 
-**Known call sites of `MagicDown` (all loaded via `next/dynamic()` without local Suspense — potential blank-page sites)**: `AdaptedText.tsx` (Sentence Analysis dialog — fixed), `Summary.tsx`, `MindMap.tsx`. If a similar symptom appears in those sections after a fresh page load, apply the same local `<Suspense>` wrap.
+| Layer | File | Check |
+|---|---|---|
+| DB schema | `scripts/init-db.sql` + new migration | Column exists with correct type/constraints |
+| Create | `src/lib/sessions.ts` `createReadingSession()` | Column in INSERT list **and** `$N` placeholder in VALUES **and** value in the JS array **and** ON CONFLICT update |
+| Update | `src/lib/sessions.ts` `updateReadingSession()` | Field in `fieldMappings` with correct (JSON vs raw) serialization |
+| Read | `src/lib/sessions.ts` `getUserReadingSessions()` / `getReadingSession()` | Mapped from `row.column` with a fallback default |
 
-**Why `onOpenAutoFocus={(e) => e.preventDefault()}` on the Radix `DialogContent` does NOT fix this**: That guards against focus-driven scroll (a real but different Radix behavior). It was the first attempted fix for the Sentence Analysis scroll-to-top bug and had zero effect, because the cause was the lazy import's Suspense suspension, not focus management. Don't conflate the two.
+**SQL INSERT sync**: when editing a hand-written INSERT, the column list, the `$N` placeholders, and the JS values array must change together — a count mismatch throws `INSERT has more target columns than expressions` at runtime, and the three parts are far apart in the file.
 
-### 10. Lazy-Loaded Large Fields (`originalImages` / `visualizationImage`)
+**Read-path mirror — lazy-loaded fields**: `originalImages` and `visualizationImage` are stripped from the list query (`getUserSessions()`) for performance and fetched on demand via `loadFull(id)`. Before stopping eager-load of any column, audit every consumer:
+- Anything using `!!row.visualization_image` as a completion proxy must switch to the lightweight proxy that **is** returned — `visualization_generated_at > 0`. Update **every** `calculateProgress` copy: `dashboardMetrics.ts`, `Dashboard/SessionsTab.tsx`, `users.ts` (`getStudentSessions*` must also `SELECT` the timestamp).
+- `useAutoSave` must **not** have lazy-loaded media in its dependency array (they arrive async and trigger a clobbering write).
+- `AuthProvider`'s background merge is guarded against account switching (`syncedUserIdRef`) and session switching (`store.id !== id`).
 
-`originalImages` (base64 image arrays) and `visualizationImage` (base64 data URL) are the two largest payloads on a reading session. Loading them for every row in the session list (on sign-in, dashboard, history) is expensive and unnecessary for list/metric views. As of v2.859 these fields are **stripped from the list query** (`getUserSessions()` in `src/lib/sessions.ts` no longer joins `reading_images` and returns `originalImages: []` / `visualizationImage: ""`). Full media is fetched **on demand** via `getReadingSession` / the history store's `loadFull(id)`, with concurrent-fetch deduplication and a `hydratedSessionIds` Set tracking which entries already contain media.
+Rule of thumb: "If I stop returning this column from the list query, what else reads it?" Answer *before* merging the query change.
 
-This lightweight/full split is correct, but it silently broke two classes of consumers and required follow-up fixes (v2.860, v2.861). **Any time you stop eager-loading a field, audit every consumer**:
+**`stripUserData` / `stripSessionForAssignment` for sharing & assignments**: every score/progress/completion field added to the reading store must be zeroed in `stripUserData` (`src/lib/shared-sessions.ts`) **and** `stripSessionForAssignment` (`src/lib/assignments.ts`), or it leaks to students/recipients. JSONB arrays of questions (`grammarQuiz`, `readingTest`) need per-item `userAnswer`/`earnedPoints` stripping, not just a scalar zero. Keep both stripping functions in sync.
 
-| Failure mode | What happens | Fix pattern |
-|--------------|--------------|-------------|
-| **Presence-as-completion proxy** | Code used `!!row.visualization_image` to mean "visualization was generated". With the field stripped, this is always `false`, so progress bars / dashboard counts / activity tallies report 0%. | Switch to a **lightweight proxy** that *is* returned by the list query — here `visualization_generated_at > 0` (a BIGINT timestamp). Update *every* `calculateProgress` copy: `src/utils/dashboardMetrics.ts`, `src/components/Dashboard/SessionsTab.tsx`, and `src/lib/users.ts` (`getStudentSessions`/`getStudentSessionsForClass` must also `SELECT` the timestamp column). |
-| **Autosave dependency array** | `useAutoSave` had `originalImages`/`visualizationImage` in its `useEffect` deps. After lazy-loading, these arrive **asynchronously** (background merge in `AuthProvider`), transitioning the store field from `[]`/`""` (lightweight) to populated (hydrated). That transition fires the autosave effect, which persists the *current* store state — potentially clobbering the just-fetched media, or triggering a redundant write before hydration lands. | Remove lazy-loaded media fields from the autosave dependency array. They are not user-editable text and are persisted by their own generation/save paths. |
+### D. Database migration best practices
 
-**The background-merge race (AuthProvider)**: On sign-in, `AuthProvider` restores the **lightweight** session immediately (so the "Welcome back!" UI isn't blocked), then fetches the full session and merges **only** `originalImages`/`visualizationImage` into the store. The merge is guarded by two checks to avoid clobbering user edits made in the window between restore and fetch:
-1. `syncedUserIdRef.current !== expectedUserId` — user hasn't signed out / switched accounts.
-2. `useReadingStore.getState().id !== sessionToRestore.id` — user hasn't switched to a different session.
+- Each feature gets its **own** incremental migration (`scripts/add-*.sql`); never edit an already-applied migration. Also update `scripts/init-db.sql` so fresh installs match.
+- Adding a value to a `CHECK` constraint (`achievement_type`, `activity_type`): `DROP CONSTRAINT IF EXISTS` then recreate with the **full** list of values.
+- Test both paths: incremental migration on an existing DB, and `init-db.sql` on a fresh DB.
 
-**Rule of thumb**: "If I stop returning this column from the list query, what else reads it?" Answer that question *before* merging the query change, not after users report zeroed-out dashboards.
+### E. Zustand `persist` hydration is async
 
-**Lesson 7 interaction**: This is the read-path mirror of [Lesson 7](#7-full-persistence-layer-check-for-new-store-fields). Lesson 7 says "a field missing from the DB/INSERT silently fails on write"; this lesson says "a field missing from the SELECT silently fails on read." Both produce `undefined`/fallback values with no error, so they are invisible to tests that don't assert the specific field.
+On first render the store returns defaults, then hydrates from localStorage via `setTimeout`. Any value that drives initial render output (language, theme) must be read from `localStorage.getItem(...)` directly in the first `useLayoutEffect`, not from the store. And when the user changes such a value, write to localStorage explicitly (persist's `setItem` is also async; the next `getItem` won't reflect it until flushed).
 
-### 11. Changing an AI Model Default — What to Update, and Why No Client-Side Migration Is Needed
+### F. Env vars: runtime vs build-time
 
-Changing the default value of an AI model setting (e.g., making `step-3.7-flash` the default Advanced AI Tutor Model instead of `gpt-5.4-mini`) touches **two code locations** and, if you want existing users to adopt the new default, **one SQL migration**. The Settings dialog label itself lives in `src/locales/*.json` (`setting.<fieldName>`).
+`NEXT_PUBLIC_*` is inlined at **build time** (changing it needs a rebuild). For per-deployment values (timeouts, limits, toggles, `REALTIME_URL`, `SESSION_IDLE_TIMEOUT_MINUTES`), use server-side env vars (no prefix) exposed via `/api/config`. The Docker image is built once and reused across environments.
 
-#### Code changes (in `src/store/setting.ts`)
+### G. AI model settings — reuse lists; changing a default needs only SQL
 
-| What | Where | Notes |
-|------|-------|-------|
-| **Model list** | `const` array (e.g., `TUTOR_MODELS`, `READING_TEXT_MODELS`, `VISION_MODELS`, `AVAILABLE_MODELS`, `BASIC_TUTOR_MODELS`) | Add/remove/rename entries. The Zod schema in `Setting.tsx` uses `z.enum(<ARRAY>)`, so it picks up the change automatically — **do not** hand-maintain a parallel literal in the schema. |
-| **Default value** | `defaultValues` object (e.g., `tutorModel: "step-3.7-flash"`) | New users and `reset()` calls get this. |
+- **Reuse** existing model lists (`AVAILABLE_MODELS`, `TUTOR_MODELS`, `VISION_MODELS`) for any new model setting. The Settings form schema uses `z.enum(<ARRAY>)`, so it picks up list changes automatically — do **not** hand-maintain a parallel literal. Per-feature lists cause Zod enum mismatch bugs.
+- **Changing a default**: update the list + `defaultValues` in `src/store/setting.ts`. Authenticated users load settings from the DB (`user_settings.settings` JSONB) via `loadFromServer` on each sign-in — localStorage is never read for them. So forcing existing users to a new default needs **only** a SQL migration (`jsonb_set` on `user_settings`); a client-side localStorage migration is dead code.
 
-The `getItem` validation in the persist config only resets a stored value to the default when it is **not in the model list** (i.e., invalid). It does **not** force a *valid* old selection to the new default — so a user who previously chose `gpt-5.4-mini` keeps it unless you migrate them.
+### H. Multi-system integration checklists
 
-#### Force-applying the new default to existing users
+A major feature touches many subsystems; missing any one causes runtime errors or silent data inconsistency.
 
-Because the app is auth-gated and `setItem` short-circuits when `currentUserId` is set (`if (currentUserId) return;` in the persist storage), **authenticated users never read or write the model fields to localStorage**. Their settings are loaded from the server via `loadFromServer` on each sign-in (`{ ...defaultValues, ...serverSettings }`). The DB (`user_settings.settings` JSONB) is therefore the **single source of truth** — a **SQL migration alone** is sufficient, and a client-side localStorage migration is dead code that should not be added.
+#### H.1 Major reading-assistant feature
+Touch all of: types (`types.d.ts`) → store (`reading.ts`) → hook (`useReadingAssistant`) → prompts (`readingPrompts.ts`) → components (`ReadingAssistant/`) + barrel export → `page.tsx` render → workflow (`WorkflowProgress`, `TocDrawer`) → session persistence (`sessions.ts`) → DB migration (`scripts/` + `init-db.sql`) → achievements (`achievements.ts` + `AchievementMedal`) → activity logging (`activity.ts`, `activityLogger.ts`) → leaderboard (`leaderboard.ts`, `LeaderboardTable`, `PersonalStatsCard`) → dashboards (`dashboardMetrics.ts`, `OverviewTab`, `SessionsTab`, `teacherDashboardMetrics.ts`, `TeacherDashboard`) → Excel exports (`excelExport.ts`, `teacherDashboardExcel.ts`) → user data (`users.ts`, `StudentDataView`) → settings (`setting.ts`, `Setting.tsx`) → **strip functions** (`stripUserData` + `stripSessionForAssignment` — §C) → **skill-profile** (`skill-profile.ts`, if questions are tagged) → i18n (both locales) → landing page + About dialog.
 
-Create a migration in `scripts/` (see `migrate-tutor-model-step-3.7-flash.sql` for the template):
+#### H.2 Realtime feature (additions to H.1)
+Types mirrored in `realtime/src/game/types.ts` (sync comment both sides) → non-persisted store (`battle.ts`) → hook with singleton event-wiring guard (`useSpellingBattle`) → socket client (`realtime-client.ts`) → ticket API (`/api/realtime/ticket`) → realtime package build/Dockerfile → `docker-compose.yml` service → env vars (`REALTIME_*`) → CI parallel job (`ghcr.yml`) → `ClassBattlePoller` in root layout → Header bell badge + About dialog → landing page → i18n → user manuals → README/FAQs.
 
-```sql
-UPDATE user_settings
-SET settings =
-    jsonb_set(
-      settings,
-      '{tutorModel}', '"step-3.7-flash"'::jsonb
-    ),
-    updated_at = NOW();
-```
+#### H.3 Extending a multiplayer game's modes
+Types (both sides) → word resolution (`words.ts` `enrichWords`) → scoring (`scoring.ts` per-mode durations + `judgeAnswer`) → engine (`engine.ts` `actualMode`, `submitAnswer`, `startWord` payload) → room creation (`rooms.ts`, `server.ts`) → lobby UI (mode picker) → arena UI (per-mode rendering + optimistic `checkAnswer`) → poller (`ClassBattlePoller`) → invite dialog → i18n.
 
-- **No `WHERE` clause** → applies to all users unconditionally (true "force").
-- Add a `WHERE settings->>'tutorModel' = '<old-value>'` clause if you only want to migrate users on a specific previous model.
-- Update `scripts/init-db.sql` if the default seed data embeds the old model name.
+### I. Realtime service patterns (`realtime/`)
 
-#### Anti-pattern: client-side localStorage migration
+- **Standalone package**: own `package.json`/`tsconfig`/build/Dockerfile/CI. Main app `tsconfig.json` must `exclude: ["realtime"]`. No imports from `src/` — types are mirrored manually with a sync comment on both sides. Also mirror any **gameplay constants** the client needs for UI (e.g. `MAX_HINTS_PER_WORD`, `HINT_COSTS`).
+- **HMAC-ticket auth** (not shared sessions): `/api/realtime/ticket` signs `{userId,name,image,role,schoolId,classId,exp}` with `AUTH_SECRET`; the client fetches a fresh ticket on every connection/reconnect (30s TTL is enough); the server verifies HMAC + exp. Stateless — no DB lookup per connection.
+- **Module-scope socket**: singleton in `realtime-client.ts`; `socket.io-client` is dynamically imported inside `connectRealtime()` to keep it out of the SSR bundle. Event wiring uses a module-level `eventsWired` guard (register listeners once).
+- **Two-channel notifications**: socket event (real-time, connected users) + HTTP poll (`ClassBattlePoller` in root layout, 60s, all users). Raw HTTP routes need explicit `setCorsHeaders()` — a separate CORS handshake from Engine.IO.
+- **Grace-based reconnection**: new joiners only in lobby; reconnecting members re-bind their seat in any phase. On disconnect, mark `disconnected` + 15s grace; a game dropping below 2 present players cancels back to lobby.
+- **Authoritative server scoring + input clamping**: the server clock is authoritative; clients send answer + hint count only. **Every client-reported scoring input must be server-clamped** to its valid range (`clampHintsUsed`) before scoring — the client UI is a suggestion, the server is the law.
+- **CI/CD**: two parallel jobs publish `ghcr.io/owner/repo` and `.../-realtime`.
 
-Do **not** add a one-time override in the persist `getItem` (e.g., a `localStorage.getItem("...-migrated-...")` flag that force-sets the field). For authenticated users, `loadFromServer` overwrites whatever `getItem` produced, so the override has no lasting effect; for unauthenticated users, there is no meaningful persisted setting to migrate. It is unreachable code that adds maintenance burden.
+### J. Multiplayer game-mechanic rules
 
-#### Related: [Lesson 3](#3-model-list-reuse-in-settings) (Model List Reuse)
+- **Per-mode time constants**: when a game supports multiple input mechanics (listen-type vs scramble vs fill-blanks), word durations must be per-mode (`Record<GameMode, Record<Difficulty, number>>`), not global. Scramble needs longer than transcription.
+- **Server-precomputed randomness**: in "mixed" mode each word's mode + `blankPositions`/`shuffledLetters` is assigned server-side in `enrichWords()` and stored on `room.canonicalWords`. Never compute randomized per-challenge data on the client.
+- **Mode-aware judging (mirrored)**: `judgeAnswer()` on the server must mirror the client's optimistic `checkAnswer()`. fill-blanks compares only the missing letters (no trim); listen-type/scramble compare whole words (normalized).
+- **Tie ranking**: equal scores get the same rank (track `prevScore`/`prevCorrect`, increment rank only on change).
+- **Scoring balance**: audit the min/max of **every** input (hint count, time, streak). Flat penalties break at the edges and compound mechanics amplify it. The hint policy: `MAX_HINTS_PER_WORD = 3`, escalating `HINT_COSTS = [10, 20, 30]`, and hint-aided correct answers do not advance the streak. Net result: clean correct (100) > hint-aided (40) > wrong (0).
 
-Lesson 3 says to **reuse existing model lists** rather than creating per-feature lists. This lesson covers the *operational* side of those same lists — how to change a default and roll it out. Reuse + this lesson together prevent both the Zod enum mismatch bugs (Lesson 3) and the "stale default in the DB" gap (this lesson).
+### K. Spelling-game specifics
 
-### 12. Adding a Standalone Realtime Service (Multiplayer Spelling Battle Lessons)
+- **SRS integration is mandatory**: any game/quiz generating word-results needs `onWordResult(word, correct)` → `PATCH /api/vocabulary/word` and `onComplete(results)` → `POST /api/vocabulary/review-sessions`. Without it, play doesn't feed spaced repetition.
+- **Phrase-aware**: solo + multiplayer spelling are unified across words and phrases. Phrase answers use multi-word judging (whole-phrase normalized comparison); the realtime `scoring.ts`/`words.ts` resolve phrase challenges server-side. Word sources include glossary, vocabulary (incl. phrases), and review lists.
+- **Suppress keyboard suggestions** on recall-testing inputs: `autoComplete="off"`, `autoCorrect="off"`, `autoCapitalize="off"`, `spellCheck={false}`, plus `writingsuggestions="false"` (spread via cast — not in React types). Omit any one and the browser spoils the answer.
+- **iOS Safari audio**: `HTMLAudioElement` gesture-blessing is per-element and non-transferable, and `setTimeout`/`await` breaks the gesture chain. Use a single Web Audio `AudioContext` (`src/utils/tts.ts`): `ctx.resume()` once inside a gesture unlocks it for the page lifetime; schedule buffers via `source.start()` afterwards, no further gestures needed. `speakWord()` short-circuits before fetch if not unlocked (don't waste TTS calls). UX: one **persistent pulsing speaker button** (never an ephemeral toast) as the unlock + replay affordance. **Server-paced** features (multiplayer) hit this deterministically; user-paced ones may slip through but are still fragile. Keep exactly one TTS implementation — import from `@/utils/tts`, never fork per feature.
+- **Toast action buttons**: persistent toasts (`duration: Infinity`) must carry a navigation action. Use a store flag (`shouldOpenBattle`) to bridge the poller/dialog (runs anywhere) to the flow component (renders only on `/`).
 
-The multiplayer spelling battle (v2.902–v2.907) introduced a **standalone Socket.io server** (`realtime/`) alongside the Next.js app. This is the first realtime feature in the project and established several architectural patterns.
+### L. Color & commit hygiene
 
-#### 12.1 Standalone Package Isolation
-
-The `realtime/` directory is a completely independent Node.js+TypeScript package:
-
-| Concern | How realtime/ handles it |
-|---------|--------------------------|
-| **Code deps** | Its own `package.json`, `tsconfig.json`, `vitest.config.ts`. No import from `src/` — types are **manually mirrored** in `realtime/src/game/types.ts` with a comment at the top of `src/types.d.ts` (`// Mirrored in realtime/src/game/types.ts — keep both sides in sync`). |
-| **Build** | `npm run build` in `realtime/` compiles `src/` → `dist/` (CommonJS, ES2022 target). |
-| **Docker** | Own multi-stage `realtime/Dockerfile` (3-stage: deps → builder → prod-deps → runner). Published as a separate `-realtime` image via `.github/workflows/ghcr.yml`. |
-| **Runtime** | Runs as a separate container in `docker-compose.yml` on port 3001. Shares `AUTH_SECRET` and `DATABASE_URL` env vars with the main app. |
-
-**Key decisions**:
-- The main app's `tsconfig.json` `exclude` list **must** include `"realtime"` (v2.904) to avoid TypeScript picking up the standalone package in the Next.js build.
-- The realtime server has its own `config.ts` with env-driven runtime configuration (`REALTIME_PORT`, `REALTIME_CORS_ORIGIN`, `AUTH_SECRET`, `DATABASE_URL`, timeout/max-room constants).
-- The realtime URL is a **server-side runtime env var** (`REALTIME_URL`, not `NEXT_PUBLIC_*`), exposed to the client via `/api/config`, so the same Docker image works across deployments.
-
-#### 12.2 HMAC-Ticket Auth for External Services
-
-Instead of sharing session state or using a DB lookup on every Socket.io connection, auth uses **short-lived HMAC-signed tickets**:
-
-1. **Issuance**: The Next.js app's `/api/realtime/ticket` endpoint creates a JSON payload (`userId`, `name`, `image`, `role`, `schoolId`, `classId`, `exp`) and signs it with `AUTH_SECRET` via HMAC-SHA256.
-2. **Delivery**: The client fetches the ticket via HTTP **before** connecting and passes it as Socket.io's `auth.token`.
-3. **Verification**: The realtime server's `auth.ts` verifies the HMAC signature + expiry on each connection.
-4. **Refresh**: The client's `auth` callback (in Socket.io config) fetches a fresh ticket on **every** connection attempt (initial + each reconnect), so tickets need only a 30s TTL.
-
-```
-Next.js API                    Client                       Realtime Server
-  /api/realtime/ticket
-       │                         │                               │
-       │─── HMAC ticket ────────>│                               │
-       │                         │─── connect({ auth.token }) ──>│
-       │                         │                               │── verify HMAC + exp
-       │                         │<────── connected ────────────│
-```
-
-**Why this pattern**:
-- **No shared session DB** — the realtime server never queries the NextAuth session table.
-- **Lightweight verification** — HMAC is stateless (no DB call per connection).
-- **Graceful degradation** — if the ticket endpoint is down, the client's reconnection loop retries and re-fetches.
-- **Class-battle routing** — the ticket embeds `classId` (resolved server-side during issuance) so the realtime server knows which class notifications to route without extra DB queries. Fallback DB resolution is included for older clients during rollout.
-
-#### 12.3 Module-Scope Socket Connection (Lesson 8 Extension)
-
-The Socket.io connection lives at **module scope** (`src/lib/realtime-client.ts` singleton), per Lesson 8's principle that state tracking an async operation whose lifecycle spans component unmount/remount must be at module level, not component-local:
-
-- `connectRealtime()` creates the singleton socket; subsequent calls are no-ops.
-- `disconnectRealtime()` tears it down (explicit lifecycle managed by UI, not React mount/unmount).
-- `getRealtimeSocket()` provides access for event wiring.
-- The battle Zustand store (`battle.ts`) is **non-persisted** — battle state is ephemeral and tied to the live connection, but lives at module scope so it survives SPA navigation.
-
-The `useSpellingBattle` hook's event wiring uses the **singleton pattern** with a module-level `eventsWired` guard:
-```ts
-let eventsWired = false
-function wireEventsOnce(socket) {
-  if (eventsWired) return
-  eventsWired = true
-  // ... register all server→store event handlers ...
-}
-```
-This ensures event listeners are registered exactly once, not re-attached on every hook mount. On Socket.io reconnect, the `connect` event handler re-joins the current room to restore the seat.
-
-**Socket.io client import**: Dynamically imported inside `connectRealtime()` (`const { io } = await import("socket.io-client")`) so it stays out of the SSR bundle and is code-split (only loaded when a user actually starts a battle).
-
-#### 12.4 Two-Channel Notification Pattern
-
-Class-battle invites reach students via **two independent channels**, covering both connected and non-connected users:
-
-| Channel | Mechanism | Latency | Coverage |
-|---------|-----------|---------|----------|
-| **Socket event** | `class_battle_available` emitted to connected classmates in the same class | Real-time (<100ms) | Students currently on the web app with an active WebSocket |
-| **HTTP poll** | `ClassBattlePoller` component (mounted in root layout) fetches `/api/battle/pending-class-invites` from the realtime server every 60s via `fetch()` | 60s max | **All** students (no WebSocket needed), works on any page |
-
-**Design notes**:
-- The poll endpoint is a **raw HTTP route** on the realtime server (not Socket.io), authenticated by the same HMAC ticket passed as a query parameter.
-- The `ClassBattlePoller` is mounted in `RootLayout` (outside the page router) so it lives across all SPA navigations.
-- The poll updates `pendingClassBattleInvites` in the battle store, which drives the **bell badge count** in `Header.tsx` (alongside pending shares and review list shares).
-- Clicking the bell when class-battle invites exist opens `ClassBattleInviteDialog` with room code, copy-button, and instructions.
-- The poller is **student-only** (early return for non-students).
-
-#### 12.5 Persistent Toast Lifecycle
-
-Class-battle invite toasts use `duration: Infinity` and are managed programmatically:
-
-- **Show**: On first discovery via poll, `toast(invite.roomCode, { id: invite.roomCode, duration: Infinity })`.
-- **Dismiss**: When the student joins the room (`useBattleStore.subscribe` watches `roomCode`) or the room is destroyed/starts (the invite disappears from the poll response).
-- **Idempotency**: A `useRef<Set<string>>` tracks which room codes currently have active toasts, preventing duplicates.
-- **Poll-driven cleanup**: On each poll cycle, invites that vanished from the response are dismissed.
-
-This is different from typical auto-dismiss toasts and requires explicit lifecycle management.
-
-#### 12.6 Grace-Based Reconnection for Realtime
-
-The realtime server distinguishes **new joiners** from **reconnecting members**:
-
-| Type | When allowed | Behavior |
-|------|-------------|----------|
-| **New joiner** | Lobby only | Must enter via room code; subject to class-membership check; triggers `player_joined` event |
-| **Reconnecting member** | Any game phase (lobby/countdown/playing/finished) | Re-binds the player's existing seat; skips membership check; no `player_joined` event — just fresh `room:state` |
-
-Implementation in `server.ts`:
-```ts
-const existingMember = room.players.get(user.userId);
-if (!existingMember && room.status !== "lobby") {
-  return emitRoomError(socket, "room_not_in_lobby", "That battle has already started");
-}
-```
-
-**Disconnect handling**:
-- On socket `disconnect`, the player is marked `status: "disconnected"` and a 15-second grace timer starts (`config.reconnectGraceMs`).
-- If the player reconnects within grace (Socket.io's reconnection loop fires a new `room:join`), the seat is restored.
-- If grace expires and the player is still disconnected, they are removed from the room.
-- If an in-progress game drops below 2 present players, the game is cancelled back to lobby.
-
-#### 12.7 Authoritative Server Scoring
-
-The game engine is **server-authoritative** for all scoring. Clients only report their typed answer + hint usage count; the server judges correctness and computes points:
-
-```ts
-// Server clock is authoritative — ignore the client's submittedAt for scoring
-const result = scoreAnswer({
-  correct,
-  timed: room.config.timed,
-  durationMs,
-  timeTakenMs: Date.now() - room.wordStartedAt,  // server clock
-  hintsUsed: payload.hintsUsed,
-  oldStreak: player.streak,
-});
-```
-
-Scoring formula (from `realtime/src/game/scoring.ts`, ported verbatim from the solo spelling game so scores are comparable):
-- Base 100 points for a correct answer
-- Speed bonus: `floor(remainingTimeFraction * 50)` if timed (0–50)
-- Streak bonus: +10% per streak level beyond 2, capped at +50% (streaks of 3–7)
-- Hint penalty: -10 per hint used
-- Floor: minimum 10 points per correct answer
-
-The per-word time limit and between-word pause are defined as constants at module scope and are not overridable per-room:
-
-| Difficulty | Word duration | Grace | Between-word pause |
-|-----------|--------------|-------|-------------------|
-| Easy | 30s | 500ms | 1.5s |
-| Medium | 20s | 500ms | 1.5s |
-| Hard | 12s | 500ms | 1.5s |
-
-#### 12.8 CORS for Mixed-Protocol Servers
-
-The realtime server serves two protocol layers on the same HTTP server:
-- **Socket.io (Engine.IO)**: CORS configured via `io.cors` — applies to WebSocket upgrade and long-polling transport.
-- **Raw HTTP routes** (`/health`, `/api/battle/pending-class-invites`): Need **explicit CORS headers** via `setCorsHeaders()` because browser `fetch()` calls use a separate CORS handshake from the Socket.io connection.
-
-```ts
-function setCorsHeaders(req: IncomingMessage, res: ServerResponse): void {
-  const origin = req.headers.origin;
-  if (origin && config.corsOrigin.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    res.setHeader("Vary", "Origin");
-  }
-}
-```
-
-This was missed in v2.902 and hotfixed in v2.906 — without it, browser `fetch()` calls to the raw HTTP endpoints fail with CORS errors in production.
-
-#### 12.9 CI/CD for Multi-Image Releases
-
-The GitHub Actions workflow (`ghcr.yml`) builds and publishes **two separate Docker images** in parallel jobs:
-
-| Image | Context | Tags | Purpose |
-|-------|---------|------|---------|
-| `ghcr.io/owner/repo` | `.` (app root) | `main`, `dev`, `v*` | Next.js app |
-| `ghcr.io/owner/repo-realtime` | `./realtime` | `main`, `dev`, `v*` | Socket.io server |
-
-Both images are pushed to the same container registry with a `-realtime` suffix for the second. Each has its own metadata step, build step, and artifact attestation step. Jobs are fully independent (no `needs` dependency).
-
-#### 12.10 Multi-System Integration Checklist for Realtime Features
-
-Building the multiplayer spelling battle confirmed that the checklist from [Lesson 1](#1-multi-system-integration-checklist) applies to realtime features too. The additional systems touched by a realtime feature:
-
-| System | Files | What to check |
-|--------|-------|---------------|
-| **Types (mirrored)** | `src/types.d.ts` + `realtime/src/game/types.ts` | Manually mirror all shared types; add sync comment |
-| **Store (non-persisted)** | `src/store/battle.ts` | Zustand store at module scope, NOT persisted (ephemeral connection state) |
-| **Hook** | `src/hooks/useSpellingBattle.ts` | Singleton event-wiring guard (`eventsWired`), connection lifecycle |
-| **Socket client** | `src/lib/realtime-client.ts` | Singleton module-level connection, dynamic `socket.io-client` import, auth ticket fetch |
-| **Ticket API** | `src/app/api/realtime/ticket/route.ts` | Short-lived HMAC ticket issuance (embeds userId + role + schoolId + classId) |
-| **Realtime package** | `realtime/` | Standalone package with own build, Dockerfile, CI pipeline |
-| **Docker compose** | `docker-compose.yml` | Add the realtime service alongside postgres and app |
-| **Env vars** | `env.tpl`, `realtime/src/config.ts` | `REALTIME_PORT`, `REALTIME_CORS_ORIGIN`, `REALTIME_URL` |
-| **CI/CD** | `.github/workflows/ghcr.yml` | Parallel job for `-realtime` image |
-| **Root layout** | `src/app/layout.tsx` | Mount `ClassBattlePoller` for cross-page notification polling |
-| **Header integration** | `src/components/Internal/Header.tsx` | Bell badge count includes `pendingClassBattleInvites`; about dialog feature cards |
-| **Landing page** | `src/components/Auth/landing/FeaturesShowcase.tsx` | Add multiplayer feature entry |
-| **I18n** | `src/locales/en-US.json`, `zh-HK.json` | All battle UI strings, error codes, toast messages, about dialog |
-| **User manuals** | `public/docs/user-manual-*.html` | Multiplayer spelling battle how-to + class battle section |
-| **README/FAQs** | `README.md`, `FAQs.md` | Feature description and Q&A |
-
-#### 12.11 Type Mirroring Pattern
-
-Types between the main app and the realtime package are **manually mirrored** rather than shared via a common package. This avoids adding a monorepo build step or package publishing requirement. The convention:
-
-1. Define all battle types in `src/types.d.ts` (the main app's canonical home).
-2. Copy them to `realtime/src/game/types.ts`, adding a comment at the top: `// Mirrored from src/types.d.ts — keep both sides in sync`.
-3. Add a comment at the source definition: `// Mirrored in realtime/src/game/types.ts`.
-
-This is manual and error-prone, but keeps each package independently buildable and deployable. If a type mismatch causes a runtime error, the fix is to update both files in the same commit.
-
-### 13. Zustand Persist Rehydration Is Async — i18n Must Read Persisted Values Before Hydration
-
-The `persist` middleware in Zustand is **asynchronous**. When a page loads, the store returns `defaultValues` on first render, then hydrates from localStorage asynchronously (via `setTimeout`). If i18n initialization reads `useSettingStore.getState().language` on first render, it gets the **default** language, not the persisted one — the UI briefly flashes the wrong language before switching.
-
-**The fix** (v2.914): In the `I18n.tsx` provider's first `useLayoutEffect`, bypass the Zustand store and read `localStorage.getItem("language")` directly:
-
-```ts
-const isHydrated = useRef(false);
-useLayoutEffect(() => {
-  let effectiveLanguage: string;
-  if (!isHydrated.current) {
-    isHydrated.current = true;
-    const storedLanguage = localStorage.getItem("language");
-    effectiveLanguage = storedLanguage ?? language;
-  } else {
-    effectiveLanguage = language;
-  }
-  const resolvedLanguage = resolveLanguagePreference(effectiveLanguage);
-  i18n.changeLanguage(resolvedLanguage);
-}, [language]);
-```
-
-Additionally, **write to localStorage explicitly** in `Setting.tsx` when the user changes language, because the Zustand persist middleware's `setItem` is also async and the next `getItem` call won't reflect the new value until the middleware flushes:
-
-```ts
-if (key === "language" && typeof value === "string") {
-  localStorage.setItem("language", value);
-}
-```
-
-**Key principle**: Any value that determines initial render output (language, theme, etc.) and is persisted via Zustand must be read from localStorage directly on first mount, because the store hasn't been rehydrated yet.
-
-### 14. Session Sharing: `stripUserData` Must Zero Every Score/Progress Field
-
-When `stripUserData` in `src/lib/shared-sessions.ts` was originally written, it only stripped reading test answers and a few score fields. But many grammar game fields were missed (v2.924):
-
-- `grammarQuiz` (JSONB array — `userAnswer`/`earnedPoints` in each item)
-- `grammarQuizScore`, `grammarQuizCompleted`, `grammarQuizzesCompleted`, `grammarQuizEarnedPoints`, `grammarQuizTotalPoints`
-- Per-game high scores (5 games): `grammarScrambleHighScore`, `grammarWorkshopHighScore`, `grammarSurgeryHighScore`, `grammarRouletteHighScore`, `grammarDuelHighScore`
-- Per-game accuracies (5 games): `grammarScrambleAccuracy`, `grammarWorkshopAccuracy`, etc.
-- Per-game completion counts (5 games): `grammarScrambleCompleted`, `grammarWorkshopCompleted`, etc.
-- Aggregates: `grammarGameAccuracy`, `grammarGamesCompleted`
-- Non-grammar fields: `testsCompleted`, `vocabQuizzesCompleted`, `spellingGamesCompleted`, `spellingGameAccuracy`
-
-A shared session without these zeroed leaked the teacher's game scores and progress to students.
-
-**Prevention rule**: **Every time a new score, progress, or completion field is added to the reading store (`src/store/reading.ts`)**, update `stripUserData` in `src/lib/shared-sessions.ts`. If it represents user-specific data (answers, scores, progress), it must be zeroed. Use the same checklist discipline as [Lesson 7](#7-full-persistence-layer-check-for-new-store-fields): when adding a field, audit all downwind consumers — `stripUserData` is one of them.
-
-Also: `grammarQuiz` is a JSONB array of question objects, so it needs the same `userAnswer`/`earnedPoints` strip treatment as `readingTest`, not just a scalar zero.
-
-### 15. Store-Level Flag for One-Shot Side Effects That Survive Navigation
-
-In `SpellingBattleFlow.tsx`, a `useRef<boolean>` (`persistedRef`) was used as a guard to ensure result persistence (activity log, history store) ran exactly once per battle. This worked — until the user navigated away from the page and came back (v2.920). React unmounts the component on navigation and recreates it on return, so the `useRef` was a fresh `false`.
-
-**The fix**: Replace the local `useRef` with a **store-level flag** (`resultPersisted: boolean` on `useBattleStore`). The store is a module-level singleton that survives SPA navigation. The flag is set to `true` after persistence completes and reset to `false` on `countdown`/`lobby` state transitions:
-
-```ts
-// In the component's persistence effect:
-if (battle.resultPersisted) return;
-// ... persist results ...
-useBattleStore.getState().setResultPersisted(true);
-
-// In the store's setRoomState:
-if (state.status === "lobby" || state.status === "countdown") {
-  // reset for fresh game
-  resultPersisted: false
-}
-```
-
-**Key principle**: This is an extension of [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local). Any flag whose meaning spans component unmount/remount (one-shot side effects, completion flags, phase guards) must be in the store, not in `useRef`/`useState`.
-
-### 16. Multi-Mode Game: Word Duration Must Be Per-Mode
-
-When adding multiple game modes (scramble, fill-blanks) to spelling, word durations must differ per mode (v2.917, v2.919). Scramble needs more time (45s/30s/20s for easy/medium/hard) than listen-type (30s/20s/12s) because tile reordering takes longer than transcription.
-
-The `WORD_DURATION_MS` constant changed from `Record<SpellingDifficulty, number>` to `Record<BattleGameMode, Record<SpellingDifficulty, number>>`:
-
-```ts
-export const WORD_DURATION_MS: Record<BattleGameMode, Record<SpellingDifficulty, number>> = {
-  "listen-type": { easy: 30_000, medium: 20_000, hard: 12_000 },
-  scramble: { easy: 45_000, medium: 30_000, hard: 20_000 },
-  "fill-blanks": { easy: 30_000, medium: 20_000, hard: 12_000 },
-  mixed: { easy: 30_000, medium: 20_000, hard: 12_000 },
-};
-```
-
-**Key principle**: When a game/feature supports multiple modes with different input mechanics, time constants must be per-mode, not global. The engine resolves the mode per-word via `actualMode()`:
-
-```ts
-function actualMode(room: BattleRoom, index: number): BattleGameMode {
-  const word = room.canonicalWords[index];
-  return room.config.gameMode === "mixed" ? word.perWordMode : room.config.gameMode;
-}
-```
-
-### 17. Authoritative Per-Word Mode Precomputation
-
-For "mixed" mode (v2.919), each canonical word gets a random base mode assigned at resolve time via `enrichWords()` in `realtime/src/game/words.ts`. This is **server-authoritative** so every player sees the same mode for the same word:
-
-```ts
-export function enrichWords(words: BattleWord[], gameMode: BattleGameMode, difficulty: SpellingDifficulty): BattleWord[] {
-  return words.map((w) => {
-    const perWordMode = gameMode === "mixed" ? BASE_MODES[Math.floor(Math.random() * BASE_MODES.length)] : gameMode;
-    const enriched: BattleWord = { ...w, perWordMode };
-    if (perWordMode === "fill-blanks") enriched.blankPositions = computeBlankPositions(w.word, blankRatio);
-    else if (perWordMode === "scramble") enriched.shuffledLetters = computeShuffledLetters(w.word);
-    return enriched;
-  });
-}
-```
-
-The per-word data (`blankPositions`, `shuffledLetters`, `perWordMode`) is stored on `room.canonicalWords` and emitted in each `word_start` payload. The client receives `gameMode`, `blankPositions`, and `shuffledLetters` per word.
-
-**Key principle**: Any randomized per-challenge data in a multiplayer game must be precomputed on the server (in the word resolution step, before the game starts), not on the client. This ensures identical experience for all players and authoritative judging.
-
-### 18. Mode-Specific Judging: Different Correctness Logic per Mode
-
-Different game modes require different answer judging (v2.919):
-
-- **listen-type / scramble**: Whole-word case-insensitive equality (`normalizeWord(answer) === normalizeWord(word)`)
-- **fill-blanks**: Only the missing letters are compared (case-insensitive, NO trim — a blanked space must be preserved)
-- **mixed**: Resolved to a base mode by the caller
-
-The server's `judgeAnswer()` function in `realtime/src/game/scoring.ts` must mirror the client's optimistic `checkAnswer()` in `SpellingBattleArena.tsx` so client feedback matches the authoritative result:
-
-```ts
-export function judgeAnswer(mode: BattleGameMode, word: string, answer: string, blankPositions?: number[]): boolean {
-  if (mode === "fill-blanks") {
-    if (!blankPositions || blankPositions.length === 0) return false;
-    const missingLetters = blankPositions.map((p) => word[p].toLowerCase()).join("");
-    return answer.toLowerCase() === missingLetters;
-  }
-  return normalizeWord(answer) === normalizeWord(word);
-}
-```
-
-**Key principle**: When answer format differs per mode, the judging function must be mode-aware on both server (authoritative) and client (optimistic feedback). Both implementations must be kept in sync.
-
-### 19. Tie Ranking: Shared Rank for Equal Scores
-
-Standard competition ranking gives players with the same score the **same rank** (v2.917). The naive `sorted.map((p, i) => ({ rank: i + 1 }))` assigns sequential ranks regardless of ties, which is incorrect:
-
-```ts
-let rank = 0;
-let prevScore = -1;
-let prevCorrect = -1;
-return sorted.map((p) => {
-  if (p.score !== prevScore || p.correctCount !== prevCorrect) {
-    rank += 1;
-    prevScore = p.score;
-    prevCorrect = p.correctCount;
-  }
-  return { rank, ... };
-});
-```
-
-### 20. Extending a Feature's Game Modes — Full Touch Checklist
-
-When adding new game modes to an existing multiplayer realtime feature (v2.919), every layer needs updating:
-
-| Layer | File(s) | What changed |
-|-------|---------|-------------|
-| **Types (mirrored)** | `src/types.d.ts` + `realtime/src/game/types.ts` | New `BattleGameMode`, `blankPositions`/`shuffledLetters`/`perWordMode` fields on `BattleWord`, `BattleWordStartPayload`, `BattleRoomConfig`, `BattleClassBattleAvailablePayload` |
-| **Word resolution** | `realtime/src/game/words.ts` | `enrichWords()` precomputes mode-specific data; removed `curated` source type |
-| **Scoring** | `realtime/src/game/scoring.ts` | `WORD_DURATION_MS` becomes per-mode; `judgeAnswer()` added for mode-specific judging |
-| **Engine** | `realtime/src/game/engine.ts` | `actualMode()` resolves per-word mode; `submitAnswer` uses `judgeAnswer`; `startWord` emits mode-specific payload fields |
-| **Room creation** | `realtime/src/rooms.ts`, `realtime/src/server.ts` | Accept `gameMode` from client; pass to `enrichWords` |
-| **Lobby UI** | `SpellingBattleLobby.tsx` | Mode picker UI (4 options); removed curated source |
-| **Arena UI** | `SpellingBattleArena.tsx` | Per-mode rendering (listener input, scramble tiles, fill-blank input); mode-specific hints; optimistic `checkAnswer` |
-| **Poller** | `ClassBattlePoller.tsx` | Map `gameMode` from poll response; pass to toast + invite dialog |
-| **Invite dialog** | `ClassBattleInviteDialog.tsx` | Show game mode in invite card |
-| **I18n** | Both locale files | Mode name strings |
-
-This is the same multi-system integration principle from [Lesson 1](#1-multi-system-integration-checklist) and [Lesson 12.10](#1210-multi-system-integration-checklist-for-realtime-features), but specifically for **game mode extension** which touches the scoring/judging layer on both sides of the realtime boundary.
-
-### 21. Spelling Game SRS Integration: Hook Up the Callbacks
-
-The in-glossary spelling game (solo) originally had no connection to the SRS system — word results were not persisted to `user_vocabulary` or `vocabulary_review_sessions` (v2.923). The fix connects `VocabularySpelling` to the vocabulary API via two callback props:
-
-1. **`onWordResult(word, correct)`**: Called per-word. Fires a `PATCH /api/vocabulary/word` with just `{ word, correct }`. The API route auto-loads the current mastery level via `getVocabularyWordMastery()`, computes the new SRS interval via `calculateNextReview()`, and updates the DB.
-
-2. **`onComplete(results[])`**: Called at game end. Fires a `POST /api/vocabulary/review-sessions` with `{ mode: "spelling", results }` to record the full session in `vocabulary_review_sessions`.
-
-Both callbacks are passed from `Glossary.tsx`:
-
-```tsx
-<VocabularySpelling
-  glossary={glossary}
-  onWordResult={handleSpellingWordResult}
-  onComplete={handleSpellingComplete}
-/>
-```
-
-The API route was also extended (v2.923) to handle the case where only `correct` (not `masteryLevel`/`nextReviewAt`) is sent — it auto-fetches the current mastery, computes the SRS transition, and applies it:
-
-```ts
-if (typeof correct === "boolean") {
-  const existing = await getVocabularyWordMastery(session.user.id, word);
-  const currentLevel = existing?.masteryLevel ?? 0;
-  const { newMastery, nextReviewAt: calculatedNext } = calculateNextReview(currentLevel, correct);
-  await updateVocabularyReview(session.user.id, word, correct, newMastery, calculatedNext);
-}
-```
-
-**Key principle**: Any interactive game/quiz component that generates word-results must have callback hooks into the vocabulary/SRS system. Without them, gameplay doesn't contribute to spaced repetition — the user plays but learns nothing from the SRS perspective.
-
-### 22. Keyboard Suggestion Suppression in Spelling Inputs
-
-Mobile and desktop browser autocomplete/autocorrect features interfere with spelling game inputs by suggesting words the player is supposed to spell (v2.910). The fix applies to both solo (`VocabularySpelling.tsx`) and multiplayer (`SpellingBattleArena.tsx`):
-
-```tsx
-<input
-  autoComplete="off"
-  autoCorrect="off"
-  autoCapitalize="off"
-  spellCheck={false}
-  {...({ writingsuggestions: "false" } as React.InputHTMLAttributes<HTMLInputElement>)}
-/>
-```
-
-- `autoComplete="off"`: Prevents browser from suggesting previously typed words
-- `autoCorrect="off"` / `autoCapitalize="off"`: iOS Safari-specific
-- `spellCheck={false}`: Prevents red underline on "misspelled" words
-- `writingsuggestions="false"`: A non-standard attribute some browsers respect; spread via `{...(obj as ...)}` cast because it's not in React's `InputHTMLAttributes` types
-
-**Key principle**: Any text input whose purpose is to test user recall (spelling, typing, fill-in-the-blank) must suppress all keyboard suggestion features. Omitting any one of these attributes leaves a path for the browser to spoil the answer.
-
-### 23. Toast Action Buttons for Direct Navigation
-
-Persistent toast notifications (`duration: Infinity`) should provide an **action button** that navigates the user directly to the relevant UI (v2.909, v2.918). For class-battle invite toasts, the action chain is:
-
-```ts
-toast(message, {
-  id: invite.roomCode,
-  duration: Infinity,
-  action: {
-    label: t("reading.glossary.spelling.multiplayer.classBattleToastAction"),
-    onClick: () => {
-      useBattleStore.getState().setShouldOpenBattle(true);  // 1. flag for auto-entry
-      useBattleStore.getState().dismissClassBattleInvite(invite.roomCode);  // 2. clean up
-      router.push("/");                                       // 3. navigate to main
-      toast.dismiss(invite.roomCode);                        // 4. dismiss toast
-    },
-  },
-});
-```
-
-The `shouldOpenBattle` store flag is consumed by `SpellingBattleFlow` on the main page to auto-enter battle mode (skip the solo vs. battle choice screen). The `ClassBattleInviteDialog` also uses the same flag for its "Join Battle" button.
-
-**Key principle**: A notification visible outside the target UI must carry navigation state. A store flag (`shouldOpenBattle`) bridges the gap between the poller/dialog (which runs anywhere) and the flow component (which only renders on the main page). Without it, the user clicks the toast, lands on the main page, and sees nothing — they must manually navigate to the battle lobby.
-
-### 24. Game Balance: Audit the Min-Max Bounds of Every Scoring Input
-
-The multiplayer spelling battle originally used a **flat `-10 points per hint` with no cap** on how many hints a player could use per word (`realtime/src/game/scoring.ts`). On paper this looked balanced: each hint costs 10 points, so 3 hints = −30. In practice it created an exploit:
-
-- A **wrong answer scores 0** and resets the streak to 0.
-- A **correct answer is always floored at 10 points** minimum, regardless of hints.
-- Therefore a player who spammed hints to *guarantee* correctness almost always outscored a player who guessed wrong — even with 9 hints (`100 − 90 = 10 > 0`).
-- Worse, the **streak bonus compounded the exploit**: a hint-using player who stayed correct racked up streaks of 3–7 for +10%…+50%, widening the gap further. The "soft" -10 penalty was dwarfed by the +50% streak multiplier it helped sustain.
-
-The lesson: a flat per-unit penalty looks harmless in the typical case but breaks at the **edges of the input range** (0 hints vs. many hints), and **compound mechanics** (streak × hints × speed bonus) amplify the breakage. When designing or rebalancing a scoring formula, enumerate the min and max value of *every* input and check the resulting score range — not just the "reasonable middle."
-
-#### The three-part rebalance
-
-The fix combined three orthogonal knobs (any one alone would have been insufficient):
-
-| Knob | Change | Why |
-|------|--------|-----|
-| **Hard cap** | `MAX_HINTS_PER_WORD = 3` — server clamps any higher client-reported value | Prevents the "burn 9 hints to guarantee correctness" extreme. Matches the solo game's `config.hintsAllowed` default of 3. |
-| **Escalating penalty** | `HINT_COSTS = [10, 20, 30]` — the Nth hint costs more than the (N−1)th | Makes the *third* hint feel costly enough that players won't reflexively burn all three. Total max penalty = −60 (was −30 for 3 hints under the flat model). |
-| **Streak skip** | Hint-aided correct answers do not advance the streak counter and earn no streak bonus (streak is preserved, not reset) | Decouples the hint mechanic from the streak multiplier, killing the compounding exploit. The player can resume streak growth on the next clean (hint-free) answer. |
-
-Worked example (medium word, untimed, no incoming streak):
-- Wrong, 0 hints → **0 pts**, streak reset
-- Right, 0 hints → **100 pts**, streak +1
-- Right, 3 hints → `100 − 60 = 40 pts`, streak unchanged (was 70 pts + streak advancement under the old model)
-
-The hint-using correct answer still beats a wrong answer (40 > 0), preserving the hint-as-lifeline role, but no longer dominates a clean correct answer (40 ≪ 100) and no longer feeds the streak multiplier.
-
-#### Server-side clamping is mandatory (Lesson 12.7 extension)
-
-[Lesson 12.7](#127-authoritative-server-scoring) establishes that the server is authoritative for scoring. This change extends it: **every client-reported scoring input must be server-clamped to its valid range**, not just trusted. The client UI disables the hint button at the cap, but a buggy or malicious client could still submit `hintsUsed: 0` after actually using 3 hints (or `hintsUsed: 99` for some other exploit). The server clamps in `engine.ts` before passing to `scoreAnswer`:
-
-```ts
-// engine.ts — clamp client input before scoring
-hintsUsed: clampHintsUsed(payload.hintsUsed),
-```
-
-```ts
-// scoring.ts — the clamp helper
-export function clampHintsUsed(reported: number): number {
-  if (!Number.isFinite(reported) || reported < 0) return 0;
-  return Math.min(Math.floor(reported), MAX_HINTS_PER_WORD);
-}
-```
-
-**Rule of thumb**: any number the client sends that affects the score (hint count, time taken, answer text) must pass through a server-side bounds check. The client UI is a suggestion; the server is the law.
-
-#### Gameplay constants are mirrored like types (Lesson 12.11 extension)
-
-[Lesson 12.11](#1211-type-mirroring-pattern) establishes that types are manually mirrored between `src/` and `realtime/`. The same applies to **gameplay constants** that the client needs for UI rendering. The client `SpellingBattleArena.tsx` needs `MAX_HINTS_PER_WORD` (to disable the button at the cap) and `HINT_COSTS` (to label the button with the upcoming penalty). These are mirrored as local consts with a sync comment:
-
-```ts
-// Mirror of the authoritative hint policy in `realtime/src/game/scoring.ts`.
-// The server clamps any client-reported hint count to MAX_HINTS_PER_WORD and
-// applies the escalating HINT_COSTS penalty, so the client UI must match to
-// avoid showing the player a misleading "next hint" cost or remaining count.
-// Keep both sides in sync.
-const MAX_HINTS_PER_WORD = 3;
-const HINT_COSTS: readonly number[] = [10, 20, 30];
-```
-
-If the server's `HINT_COSTS` changes but the client mirror doesn't, the UI will show the player one penalty while the server applies another — a subtle and confusing desync. Always update both files in the same commit, and prefer exporting a single `nextHintCost(usedSoFar)` helper from both sides rather than re-deriving the cost at each call site (fewer places to drift).
-
-#### Rebalance checklist
-
-When tuning any scoring input (hint cost, time bonus, streak threshold, etc.):
-
-| Step | What to check | How |
-|------|---------------|-----|
-| 1. Enumerate the input range | What are the min and max realistic values the player can produce? | Write them down before touching the formula |
-| 2. Compute score at both edges | What does the formula yield at min-input vs. max-input? | Unit tests for both bounds (not just the middle) |
-| 3. Audit compound mechanics | Does this input interact with streaks, multipliers, or other bonuses? | Trace every formula branch that reads the input |
-| 4. Server-clamp the input | Does the server bound the client-reported value before scoring? | Add a `clampX()` helper; call it at the engine boundary |
-| 5. Mirror UI constants | Does the client need the cap/cost array to render accurate UI? | Mirror with a sync comment (per Lesson 12.11) |
-| 6. Test the exploit shape | Does the rebalanced formula still let the intended strategy win? | Add a regression test: "clean correct > hint-aided correct > wrong" |
-
-**Related**: [Lesson 12.7](#127-authoritative-server-scoring) (authoritative scoring), [Lesson 12.11](#1211-type-mirroring-pattern) (type mirroring), [Lesson 18](#18-mode-specific-judging-different-correctness-logic-per-mode) (client/server judging mirror).
-
-### 25. Cross-Page Store State Bleed — Guard Against Stale Page-Specific Fields
-
-The reading store is a module-level singleton that survives SPA navigation (by design, per [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local)). This means `useReadingStore().id` retains its value even after the user navigates to `/vocabulary`. Components on the vocabulary page that read the reading store's `id` will get a **stale session ID** from the previous reading session, causing incorrect behavior (v2.940).
-
-**Example symptom**: The multiplayer spelling battle lobby on the `/vocabulary` page defaulted to "current session glossary" as the word source — even though the user was on the vocabulary page and had no active reading session. The stale `id` from a previous reading session made `defaultGlossarySessionId` non-null, overriding the intended "selected words" source.
-
-**The fix**: Add an explicit opt-out prop that the parent sets when the component renders outside its home page:
-
-```tsx
-// VocabularySpelling.tsx (reused on both / and /vocabulary)
-interface VocabularySpellingProps {
-  disableSessionGlossary?: boolean;
-  selectedWords?: string[];
-  // ...
-}
-
-// When rendering from /vocabulary — suppress stale reading store id
-defaultGlossarySessionId={disableSessionGlossary ? undefined : (id ?? undefined)}
-// Pass word data explicitly instead of relying on the store
-selectedWords={glossary.map((g) => g.word)}
-```
-
-```tsx
-// VocabularyContainer.tsx (on the /vocabulary page)
-<VocabularySpelling
-  glossary={glossary}
-  disableSessionGlossary // ← overrides the stale useReadingStore().id
-  selectedWords={glossary.map((g) => g.word)}
-  onWordResult={handleWordResult}
-  onComplete={handleReviewComplete}
-/>
-```
-
-**Key principle**: A store designed to survive SPA navigation (for resilience) becomes a source of stale cross-page data. Any component reused across pages that reads a page-specific store field must either:
-1. Accept an explicit override prop (`disableSessionGlossary`) that suppress the stale value, or
-2. Receive data explicitly via props (`selectedWords`) instead of reading the store directly.
-
-This is the **converse** of [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local): Lesson 8 says "put it in the store so it survives navigation"; this lesson says "that same survival creates a footgun for components on other pages." The fix is not to undo the store pattern, but to add explicit page-context props at component boundaries.
-
-### 26. Module-Level Boolean for One-Shot UI State That Survives Navigation
-
-For transient UI state that must (a) reset on full page reload, (b) survive SPA navigation, and (c) not require persistence to localStorage or the server, a **module-level boolean variable** is simpler than a Zustand store field (v2.942):
-
-```ts
-// src/store/vocabulary.ts — module scope, no persist middleware needed
-let _studyPlanDialogChecked = false;
-export function setStudyPlanDialogChecked(value: boolean) {
-  _studyPlanDialogChecked = value;
-}
-export function isStudyPlanDialogChecked() {
-  return _studyPlanDialogChecked;
-}
-```
-
-This pattern was used for the Study Plan Dialog's "show once per session" gate. It avoids:
-- Zustand persist middleware's async hydration lag (see [Lesson 13](#13-zustand-persist-rehydration-is-async--i18n-must-read-persisted-values-before-hydration))
-- localStorage writes for ephemeral state
-- Complex store boilerplate for a single boolean
-
-**When to use**: One-shot dialog flags, "first visit" nudges, or any UI state that resets on reload but must survive client-side navigation.
-
-**When NOT to use**: Any state that affects a user's data (scores, progress, settings) — those must go through the store + DB for consistency.
-
-**Related**: [Lesson 15](#15-store-level-flag-for-one-shot-side-effects-that-survive-navigation) — this is the lightweight alternative when a full Zustand store field is overkill.
-
-### 27. Programmatic Audio on iOS Safari — Use a Web Audio `AudioContext`, Not `<audio>` Elements
-
-The spelling games (solo + multiplayer) auto-play a TTS pronunciation when each word appears. On iOS Safari this silently failed with `NotAllowedError` ("The request is not allowed by the user agent or the platform in the current context…"). The root cause and fix span two layers — the **browser policy** and the **game's transition trigger source** — and both must be understood to fix it correctly.
-
-#### 27.1 The policy: `HTMLAudioElement` gesture-blessing is per-element and non-transferable
-
-iOS Safari (and mobile Chrome) reject `audio.play()` unless it runs inside a user gesture. Two subtleties make this hard to work around with plain `<audio>` elements:
-
-1. **The blessing does NOT transfer across elements.** Playing one `<audio>` inside a gesture does **not** unlock subsequently-created `<audio>` elements. Each `new Audio()` needs its own gesture-bound `play()`. So the naive "primer" fix — create a separate silent `<audio>`, play+pause it on first gesture to "unlock the session" — has **no effect** on the per-word `new Audio()` elements the game creates later. This was the first attempted fix and it failed for exactly this reason.
-
-2. **A `setTimeout`/`fetch`/await chain breaks the gesture call stack.** Even within a gesture handler, if `play()` happens after an `await` or a `setTimeout`, iOS no longer considers it user-initiated.
-
-#### 27.2 The deterministic fix: Web Audio `AudioContext`
-
-The `AudioContext` API has different semantics: it only needs **`ctx.resume()` once, inside a gesture**. After that the context stays in the `"running"` state for the **page's lifetime**, and any number of decoded audio buffers can be scheduled via `source.start()` **without further gestures**. This is the only deterministic way to auto-play audio driven by a timer or a network event on iOS.
-
-The shared implementation lives in `src/utils/tts.ts`:
-
-```ts
-let audioCtx: AudioContext | null = null;           // single, app-lifetime context
-let currentSource: AudioBufferSourceNode | null = null; // currently-scheduled source
-
-export function isAudioUnlocked(): boolean {
-  const ctx = getAudioContext();
-  return !!ctx && ctx.state === "running";
-}
-
-// Call from inside a user gesture (click/touch/pointerdown).
-export async function unlockAudio(): Promise<boolean> {
-  const ctx = getAudioContext();
-  if (!ctx || ctx.state === "running") return !!ctx;
-  try { await ctx.resume(); } catch { /* not in a gesture — retry on next tap */ }
-  return ctx.state === "running";
-}
-```
-
-Playback fetches the MP3, decodes it, and schedules it through the running context (with an `HTMLAudioElement` fallback only when `AudioContext` is unavailable):
-
-```ts
-const decoded = await decodeAudioDataP(ctx, audioData);
-stopSpeaking();                       // cut off any still-playing previous word
-const source = ctx.createBufferSource();
-source.buffer = decoded;
-source.connect(ctx.destination);
-source.onended = () => { /* onEnd */ };
-source.start();
-```
-
-**Key API rules** the implementation enforces:
-- `speakWord()` short-circuits **before** the fetch when `ctx.state !== "running"` (via `onBlocked`) — so no billed TTS request is wasted on audio that can't be heard.
-- `stopSpeaking()` stops + disconnects `currentSource` on unmount and before each new word, mirroring the old `audioRef.current.pause()` so words never overlap.
-- `decodeAudioData` is wrapped to tolerate the legacy callback-only signature (older Safari) and the modern Promise form.
-
-#### 27.3 Why solo worked but multiplayer didn't — the transition trigger source
-
-Both games used the **same fragile pattern** (`setTimeout(() => speak(...), N)` on each new word). The difference was entirely in **what advances to the next word**:
-
-| Game | Word transition trigger | Recent user gesture when auto-play fires? | iOS result |
-|------|-------------------------|-------------------------------------------|------------|
-| **Solo** | Player taps Submit / presses Enter (`moveToNext`) | Yes — the gesture is ~300ms stale, still inside the transient-activation window | **Plays** (slips through) |
-| **Solo (timed-out)** | Countdown hits 0, 1500ms timer auto-advances | No — user idle, activation expired | **Blocked** (latent bug, rarely hit) |
-| **Multiplayer** | Server pushes `word_start` over Socket.io | No — server paces the game, player may be idle | **Blocked** (reported bug) |
-
-**Insight**: a game whose pacing is **user-driven** (each step is a player action) keeps the gesture "warm" and hides the latent autoplay bug. A game whose pacing is **server-driven** (a realtime event advances steps independent of input) lets the gesture go cold and exposes it. This is inherent to the architecture, not a coding mistake — and it means **any** server-paced audio feature (live multiplayer anything, push-notification-triggered sound, countdown beeps) needs the AudioContext approach, while the same code in a user-paced equivalent may appear to "just work."
-
-#### 27.4 Unlock UX — persistent affordance, not an ephemeral toast
-
-The first fix surfaced the block as an auto-dismissing toast with a "hear word" action button. This was wrong on three counts (all reported by users):
-
-1. **Ephemeral recovery**: if the user doesn't tap the toast before it disappears, there's no path to unlock.
-2. **Per-question repetition**: even when tapped, tapping a *different* element (the toast button) didn't bless the per-word elements, so the toast reappeared next word (see 27.1).
-3. **Lost replay**: relying on the toast meant the in-question speaker icon wasn't an obvious/available replay control.
-
-The correct UX:
-- **One persistent, always-available control** (the speaker button) is the unlock + replay affordance. It never disappears.
-- Before unlock, it **pulses** (`animate-pulse` + ring) with a "Tap to enable sound" label, drawing the eye. After one tap (gesture) it resumes the context and the label reverts to "Click to hear the word".
-- The control is **never disabled** by loading state (only briefly shows a spinner), so it's always tappable to (re)unlock after e.g. tab backgrounding.
-
-#### 27.5 Where to call `unlockAudio()`
-
-| Call site | Why |
-|-----------|-----|
-| **Game-start button** (`startGame`) | Guaranteed user gesture before the first word; ideal primary unlock for user-paced games |
-| **Speaker / play button** | Replay + re-unlock if the context was suspended (backgrounded tab) |
-| **Global `pointerdown`/`touchend` listener** (multiplayer arena) | Catches the *first* tap anywhere (hint, tile, submit) so the context unlocks even if the user never taps the speaker first |
-| **Mount effect (best-effort)** | On desktop, sticky activation often lets `resume()` succeed with no fresh gesture, so sound works from word 1 |
-
-`unlockAudio()` is idempotent (no-op when `"running"`), so calling it on every gesture is cheap and safe.
-
-#### 27.6 Consolidate TTS into one shared utility
-
-The solo game originally kept an **inline copy** of `speakWord` (~90 lines) while the multiplayer arena used the shared `@/utils/tts`. When applying this fix to solo, the inline copy was deleted in favor of a thin wrapper around the shared utility — net **−90 / +39 lines** and a single source of truth for the AudioContext logic. Any future TTS consumer should import from `@/utils/tts` rather than re-implementing.
-
-**Rule of thumb**: audio playback code is high-churn across browser policy changes. Keep exactly one implementation; do not fork it per feature.
-
-#### 27.7 Diagnostic checklist
-
-When audio auto-play is silent / throws `NotAllowedError` on mobile:
-
-| Step | What to check | How |
-|------|---------------|-----|
-| 1. Is the `play()` in a gesture, or after `setTimeout`/`await`? | Trace the call stack from the trigger event to `play()` | If an `await`/timer sits between the gesture and `play()`, the gesture is "cold" |
-| 2. What advances to the next sound — a user action or a server/timer event? | Find the state update that triggers the auto-play effect | Server/timer-driven → needs AudioContext; user-driven may slip through but is still fragile |
-| 3. Are you creating a `new Audio()` per play? | Search for `new Audio(` | Per-element creation can't be "pre-unlocked"; switch to a single `AudioContext` |
-| 4. Did you try priming a *separate* element? | Check if the primer and the real playback share an element | They don't transfer (27.1) — use `AudioContext.resume()` instead |
-| 5. Is the recovery affordance persistent? | Is the unlock prompt an auto-dismissing toast? | Replace with an always-visible control (speaker button) that pulses until tapped |
-
-**Related**: [Lesson 8](#8-generation-loading-state-must-be-store-level-not-component-local) (the `AudioContext` is a module-level singleton that must survive SPA navigation, same principle), [Lesson 12.7](#127-authoritative-server-scoring) (the server-paced multiplayer transition that exposes the bug), [Lesson 22](#22-keyboard-suggestion-suppression-in-spelling-inputs) (same spelling components' mobile-specific quirks).
+- **Colors**: audit existing chart/badge/category colors before choosing one for a new feature (`dashboardMetrics.ts`, `teacherDashboardMetrics.ts`, `AchievementMedal.tsx`, landing/About cards). Each feature's chart color must be unique within its chart.
+- **Commits**: split major features into independently-buildable commits (data → AI → UI → persistence → metrics → i18n/presentation). A single 1,500-line commit makes bugs hard to isolate and revert.
