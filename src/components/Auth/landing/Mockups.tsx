@@ -3012,10 +3012,6 @@ export function UnderstandVisualizationMockup() {
 
       {/* the infographic poster — same SVG as User Manual §4.6 */}
       <div className="rounded-xl border border-[var(--lp-rule)] bg-gradient-to-br from-[var(--lp-accent)]/10 via-[var(--lp-highlight)]/15 to-transparent p-3">
-        <div className="mb-2 flex items-center gap-1.5 text-[var(--lp-ink-soft)]">
-          <ImageIcon className="h-3 w-3" />
-          <span className="font-mono text-[9px] uppercase tracking-wider">AI Visualization</span>
-        </div>
         <div className="flex items-center justify-center">
           <svg
             viewBox="0 0 240 200"
