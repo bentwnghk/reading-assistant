@@ -20,10 +20,6 @@ const serwist = new Serwist({
       matcher: ({ request }) => request.mode === "navigate",
       handler: new NetworkFirst({
         cacheName: "serwist-navigation",
-        // Never let a navigation be satisfied from the browser HTTP cache —
-        // iOS Safari can otherwise resurrect a stale archived HTML document on
-        // tab restore. The SW always asks the server for the current page.
-        fetchOptions: { cache: "no-store" },
         plugins: [],
       }),
     },
