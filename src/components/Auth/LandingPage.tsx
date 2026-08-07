@@ -149,7 +149,7 @@ function Chapter({ num, eyebrow, title, lede, bullets, mockup, flip }: ChapterPr
   );
 }
 
-const CAROUSEL_AUTOPLAY_MS = 7000;
+const CAROUSEL_AUTOPLAY_MS = 5000;
 
 function MasterCarousel() {
   const { t } = useTranslation();
