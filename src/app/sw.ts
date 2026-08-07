@@ -1,6 +1,6 @@
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist, NetworkFirst } from "serwist";
+import { Serwist, NetworkFirst, NetworkOnly } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -22,6 +22,17 @@ const serwist = new Serwist({
         cacheName: "serwist-navigation",
         plugins: [],
       }),
+    },
+    // /api/config must always hit the network (never the SW cache): it carries
+    // the current build ID that ServiceWorkerRegistrar uses to detect stale
+    // cached pages. defaultCache otherwise caches every /api/* GET in its
+    // "apis" cache, and when the network is unavailable (e.g. iOS Safari's
+    // suspended network on tab restore) NetworkFirst serves the cached OLD
+    // build ID — hiding deployed updates until a manual reload. This route is
+    // registered first so it takes precedence over the defaultCache /api/* rule.
+    {
+      matcher: ({ url }) => url.pathname === "/api/config",
+      handler: new NetworkOnly(),
     },
     ...defaultCache,
   ],
