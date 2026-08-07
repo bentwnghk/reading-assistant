@@ -1076,15 +1076,15 @@ export function LeaderboardMockup() {
   // Leaderboard rows — mirror LeaderboardTable.tsx structure.
   // School-wide ranking: a larger pool, "You" mid-pack at #7.
   // `className` is shown under each name when the school scope is active.
+  // Leaderboard rows — mirror LeaderboardTable.tsx structure.
+  // School-wide ranking, top-5 view with "You" on the podium at #3.
+  // `className` is shown under each name when the school scope is active.
   const rows = [
     { rank: 1, name: "Aisha N.", className: "S5 Gp1", score: 1420, you: false, prior: 1, medal: true, medalColor: "text-yellow-400", rowBg: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800" },
     { rank: 2, name: "Diego S.", className: "S6 Gp2", score: 1340, you: false, prior: 4, medal: true, medalColor: "text-yellow-400", rowBg: "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800" },
-    { rank: 3, name: "You", className: "S4 Gp1", score: 1290, you: true, prior: 5, medal: true, medalColor: "", rowBg: "" },
+    { rank: 3, name: "Jamie C.", className: "S4 Gp1", score: 1290, you: true, prior: 5, medal: true, medalColor: "", rowBg: "" },
     { rank: 4, name: "Hana W.", className: "S4 Gp1", score: 1200, you: false, prior: 4, medal: false, medalColor: "", rowBg: "" },
     { rank: 5, name: "Lucas P.", className: "S5 Gp2", score: 1140, you: false, prior: 8, medal: false, medalColor: "", rowBg: "" },
-    { rank: 6, name: "Mei L.", className: "S4 Gp2", score: 1070, you: false, prior: 6, medal: false, medalColor: "", rowBg: "" },
-    { rank: 7, name: "Omar F.", className: "S6 Gp3", score: 975, you: false, prior: 7, medal: false, medalColor: "", rowBg: "" },
-    { rank: 8, name: "Sara K.", className: "S5 Gp1", score: 940, you: false, prior: 3, medal: false, medalColor: "", rowBg: "" },
   ];
   const medalEmoji = (r: number) => (r === 1 ? "🥇" : r === 2 ? "🥈" : "🥉");
 
@@ -1099,7 +1099,7 @@ export function LeaderboardMockup() {
 
   return (
     <MockupFrame label="LEADERBOARD · Mr.🆖 ProReader">
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {/* Header — mirrors LeaderboardPage header */}
         <div className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-yellow-500" />
@@ -1173,7 +1173,7 @@ export function LeaderboardMockup() {
           return (
             <div
               key={r.rank}
-              className={`flex items-center gap-3 rounded-xl border p-3 ${
+              className={`flex items-center gap-3 rounded-xl border p-2.5 ${
                 isYou
                   ? "border-primary/40 bg-primary/5 dark:bg-primary/10"
                   : isMedal
