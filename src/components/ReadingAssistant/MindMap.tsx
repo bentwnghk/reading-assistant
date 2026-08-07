@@ -73,7 +73,71 @@ function pickMindMapSvg(container: HTMLElement | null): SVGSVGElement | null {
     const rect = svg.getBoundingClientRect();
     return rect.width * rect.height;
   };
-  return svgs.reduce((best, svg) => (area(svg) > area(best) ? svg : best), svgs[0]);
+    return svgs.reduce((best, svg) => (area(svg) > area(best) ? svg : best), svgs[0]);
+}
+
+/** Make an SVG safe to rasterize via <img> + canvas. Per the HTML spec, an SVG
+ *  containing <foreignObject> (Mermaid's HTML labels) or external resource
+ *  references taints the canvas, making toBlob() throw a SecurityError. This
+ *  converts <foreignObject> labels to native <text> and strips external refs
+ *  / scripts so the export is clean — without losing the visible content. */
+function sanitizeForRaster(svg: SVGSVGElement): void {
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const XLINKNS = "http://www.w3.org/1999/xlink";
+
+  svg.querySelectorAll("script").forEach((el) => el.remove());
+
+  // Strip external url() / @import from <style> blocks (keep theme CSS).
+  svg.querySelectorAll("style").forEach((st) => {
+    const css = st.textContent ?? "";
+    if (/url\(\s*['"]?https?:/i.test(css) || /@import/i.test(css)) {
+      st.textContent = css
+        .replace(/url\(\s*['"]?https?:[^)]+\)/gi, "none")
+        .replace(/@import[^;]+;?/gi, "");
+    }
+  });
+
+  // Strip external url() from inline style attributes.
+  svg.querySelectorAll<SVGElement>("[style]").forEach((el) => {
+    const style = el.getAttribute("style");
+    if (style && /url\(\s*['"]?https?:/i.test(style)) {
+      el.setAttribute("style", style.replace(/url\(\s*['"]?https?:[^)]+\)/gi, "none"));
+    }
+  });
+
+  // Drop external hrefs (keep data: and internal #refs).
+  svg.querySelectorAll<SVGElement>("[href],[xlink\\:href]").forEach((el) => {
+    const h = el.getAttribute("href");
+    if (h && /^https?:/i.test(h)) el.removeAttribute("href");
+    const xh = el.getAttributeNS(XLINKNS, "href");
+    if (xh && /^https?:/i.test(xh)) el.removeAttributeNS(XLINKNS, "href");
+  });
+
+  // Convert <foreignObject> HTML labels to a centered native <text>.
+  svg.querySelectorAll<SVGForeignObjectElement>("foreignObject").forEach((fo) => {
+    const text = (fo.textContent ?? "").replace(/\s+/g, " ").trim();
+    if (!text) {
+      fo.remove();
+      return;
+    }
+    const x = parseFloat(fo.getAttribute("x") ?? "0");
+    const y = parseFloat(fo.getAttribute("y") ?? "0");
+    const width = parseFloat(fo.getAttribute("width") ?? "0");
+    const height = parseFloat(fo.getAttribute("height") ?? "0");
+    const replacement = document.createElementNS(SVGNS, "text");
+    replacement.setAttribute("x", String(x + width / 2));
+    replacement.setAttribute("y", String(y + height / 2));
+    replacement.setAttribute("text-anchor", "middle");
+    replacement.setAttribute("dominant-baseline", "central");
+    replacement.setAttribute("font-size", "14");
+    // Inherit the label color Mermaid's contrast pass applied inline.
+    let fill = "#333333";
+    const colored = Array.from(fo.querySelectorAll<HTMLElement>("*")).find((e) => e.style.color);
+    if (colored?.style.color) fill = colored.style.color;
+    replacement.setAttribute("fill", fill);
+    replacement.textContent = text;
+    fo.replaceWith(replacement);
+  });
 }
 
 function MindMap() {
@@ -106,6 +170,9 @@ function MindMap() {
     // Rasterize the SVG to a PNG via a canvas. The SVG is cloned with an
     // explicit pixel size + namespaces so the Image loads it standalone.
     const clone = svg.cloneNode(true) as SVGSVGElement;
+    // Strip <foreignObject>/external refs so the canvas isn't tainted (Mermaid
+    // uses HTML labels that would otherwise throw on toBlob).
+    sanitizeForRaster(clone);
     // Resolve an intrinsic pixel size. Prefer the viewBox — Mermaid sets
     // width="100%" (not a real size), and the tree SVG carries matching
     // width/height/viewBox anyway.
@@ -196,46 +263,44 @@ function MindMap() {
               {t("reading.mindMap.download")}
             </Button>
           )}
-          {mindMap && (
-            <div
-              className="flex items-center rounded-md border bg-background/60 p-0.5"
-              role="group"
-              aria-label={t("reading.mindMap.renderer")}
+          <div
+            className="flex items-center rounded-md border bg-background/60 p-0.5"
+            role="group"
+            aria-label={t("reading.mindMap.renderer")}
+          >
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => update({ mindMapRenderer: "tree" })}
+              className={`h-7 gap-1 px-2 ${
+                mindMapRenderer === "tree"
+                  ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                  : "text-muted-foreground"
+              }`}
+              title={t("reading.mindMap.rendererTree")}
+              aria-pressed={mindMapRenderer === "tree"}
             >
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => update({ mindMapRenderer: "tree" })}
-                className={`h-7 gap-1 px-2 ${
-                  mindMapRenderer === "tree"
-                    ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                    : "text-muted-foreground"
-                }`}
-                title={t("reading.mindMap.rendererTree")}
-                aria-pressed={mindMapRenderer === "tree"}
-              >
-                <Network className="h-4 w-4" />
-                <span>{t("reading.mindMap.rendererTree")}</span>
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => update({ mindMapRenderer: "mermaid" })}
-                className={`h-7 gap-1 px-2 ${
-                  mindMapRenderer === "mermaid"
-                    ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                    : "text-muted-foreground"
-                }`}
-                title={t("reading.mindMap.rendererMap")}
-                aria-pressed={mindMapRenderer === "mermaid"}
-              >
-                <Waypoints className="h-4 w-4" />
-                <span>{t("reading.mindMap.rendererMap")}</span>
-              </Button>
-            </div>
-          )}
+              <Network className="h-4 w-4" />
+              <span>{t("reading.mindMap.rendererTree")}</span>
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => update({ mindMapRenderer: "mermaid" })}
+              className={`h-7 gap-1 px-2 ${
+                mindMapRenderer === "mermaid"
+                  ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                  : "text-muted-foreground"
+              }`}
+              title={t("reading.mindMap.rendererMap")}
+              aria-pressed={mindMapRenderer === "mermaid"}
+            >
+              <Waypoints className="h-4 w-4" />
+              <span>{t("reading.mindMap.rendererMap")}</span>
+            </Button>
+          </div>
           <div className="flex items-center gap-2">
             <Switch
               checked={useChinese}
