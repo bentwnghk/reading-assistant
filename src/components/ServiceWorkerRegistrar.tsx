@@ -8,13 +8,16 @@ import { useEffect } from "react";
 const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_ID || "";
 const RELOAD_THROTTLE_KEY = "__proreader_build_reloaded_at";
 const RELOAD_THROTTLE_MS = 20000;
-const FETCH_TIMEOUT_MS = 6000;
+const FETCH_TIMEOUT_MS = 5000;
 const RETRY_MS = 10000;
 const MAX_TIMER_RETRIES = 18; // ~3 minutes of timer-driven retries per visibility period
 
 let timerRetries = 0;
 let lastCheckAt = 0;
-let interactionListenersArmed = false;
+// Assume the served build is fresh until a check proves otherwise, so a click on
+// a normal (network-available) page never triggers a reload. Set to false when
+// the build could not be verified (the iOS restored-tab / offline state).
+let verifiedFresh = true;
 
 function canReloadNow(): boolean {
   try {
@@ -62,30 +65,17 @@ async function checkStaleBuild(): Promise<"reload" | "match" | "unavailable"> {
 }
 
 // iOS Safari restores a relaunched tab from a page archive that bypasses the
-// network, the service worker, and HTTP Cache-Control — and it only lifts the
-// restored tab's network suspension after a user gesture. A tap is that
-// gesture, and the reload right after it is a real navigation that fetches the
-// latest build. This listener is armed only while the served build could not be
-// verified, so it never fires for a normal (network-available) page load.
-function onInteraction() {
-  disarmInteractionListeners();
+// network, the service worker, and HTTP Cache-Control, and it only lifts that
+// restored tab's network suspension after a real user ACTIVATION — `click`,
+// not `pointerdown` (the same reason the LOAD_WATCHDOG uses an onClick button
+// in page.tsx). If the served build could not be verified as current, the next
+// click reloads: the click unblocks the network and the reload is a real
+// navigation that fetches the latest build.
+function onUserClick() {
+  if (verifiedFresh) return;
   if (!canReloadNow()) return;
   markReload();
   window.location.reload();
-}
-
-function armInteractionListeners() {
-  if (interactionListenersArmed) return;
-  interactionListenersArmed = true;
-  window.addEventListener("pointerdown", onInteraction);
-  window.addEventListener("keydown", onInteraction);
-}
-
-function disarmInteractionListeners() {
-  if (!interactionListenersArmed) return;
-  interactionListenersArmed = false;
-  window.removeEventListener("pointerdown", onInteraction);
-  window.removeEventListener("keydown", onInteraction);
 }
 
 async function reloadIfStale() {
@@ -109,19 +99,20 @@ async function reloadIfStale() {
     return;
   }
   if (result === "unavailable") {
-    // The build could not be verified. Keep polling in case the network comes
-    // back on its own, and arm the interaction listener so the first user tap
-    // (the gesture that unblocks iOS's network) reloads to the latest build.
+    // The build could not be verified (iOS restored-tab network suspension, or
+    // offline). Keep polling in case the network comes back on its own, and arm
+    // the click recovery so the first real user activation reloads to the
+    // latest build.
+    verifiedFresh = false;
     if (timerRetries < MAX_TIMER_RETRIES) {
       timerRetries += 1;
       setTimeout(() => void reloadIfStale(), RETRY_MS);
     }
-    armInteractionListeners();
     return;
   }
   // match — the served build is current
+  verifiedFresh = true;
   timerRetries = 0;
-  disarmInteractionListeners();
 }
 
 export default function ServiceWorkerRegistrar() {
@@ -149,7 +140,7 @@ export default function ServiceWorkerRegistrar() {
 
     // Detect a stale page and recover. The mounted check runs on every load;
     // the listeners re-check on bfcache restores and when the tab becomes
-    // visible again. See reloadIfStale/onInteraction for the iOS-specific path.
+    // visible again. See reloadIfStale/onUserClick for the iOS-specific path.
     void reloadIfStale();
 
     const onPageShow = () => void reloadIfStale();
@@ -161,10 +152,11 @@ export default function ServiceWorkerRegistrar() {
     };
     window.addEventListener("pageshow", onPageShow);
     document.addEventListener("visibilitychange", onVisible);
+    document.addEventListener("click", onUserClick);
     return () => {
       window.removeEventListener("pageshow", onPageShow);
       document.removeEventListener("visibilitychange", onVisible);
-      disarmInteractionListeners();
+      document.removeEventListener("click", onUserClick);
     };
   }, []);
 
