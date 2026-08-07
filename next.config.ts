@@ -3,6 +3,13 @@ import withSerwistInit from "@serwist/next";
 import { PHASE_PRODUCTION_BUILD } from "next/constants.js";
 import pkg from "./package.json";
 
+// Unique per-build marker, inlined into client and server bundles. The client
+// (ServiceWorkerRegistrar) compares its own marker against the one the server
+// returns via /api/config and reloads when they differ — this detects stale
+// cached page loads (e.g. iOS Safari restoring an old tab snapshot) that
+// bypass HTTP Cache-Control entirely.
+const BUILD_ID = Date.now().toString(36);
+
 const BUILD_MODE = process.env.NEXT_PUBLIC_BUILD_MODE;
 // AI provider API base url
 const API_PROXY_BASE_URL = process.env.API_PROXY_BASE_URL || "";
@@ -50,6 +57,7 @@ export default async function Config(phase: string) {
     },
     env: {
       NEXT_PUBLIC_VERSION: pkg.version,
+      NEXT_PUBLIC_BUILD_ID: BUILD_ID,
     },
     transpilePackages: ["pdfjs-dist", "mermaid"],
     images: {
