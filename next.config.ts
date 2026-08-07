@@ -66,6 +66,26 @@ export default async function Config(phase: string) {
         },
       ],
     },
+    // HTML documents must never be served stale by the browser HTTP cache.
+    // iOS Safari otherwise resurrects a stale cached document on cold relaunch
+    // (tab restore): it serves the old HTML, which references old JS chunk
+    // hashes still held in the service worker's immutable /_next/static cache,
+    // so the whole old UI renders until a manual reload. The service worker's
+    // own NetworkFirst navigation cache (separate from the HTTP cache) still
+    // provides offline support. Excludes API routes, hashed static assets,
+    // optimized images, and any dotted file (favicon, sw.js, manifest, icons).
+    headers: async () => [
+      {
+        source:
+          "/((?!api|_next/static|_next/image|.*\\..*).*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate",
+          },
+        ],
+      },
+    ],
   };
 
   if (BUILD_MODE === "export") {
