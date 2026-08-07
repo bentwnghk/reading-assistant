@@ -177,7 +177,7 @@ export function CaptureComprehendMockup() {
 
   return (
     <MockupFrame label="CAPTURE · Mr.🆖 ProReader" frameRef={ref}>
-      <div className="relative min-h-[22rem] sm:min-h-[24rem]">
+      <div className="relative min-h-[18rem] sm:min-h-[20rem]">
         {/* shutter flash — replays on each capture → result transition */}
         {flashKey > 0 && (
           <motion.div
