@@ -76,6 +76,19 @@ export default async function Config(phase: string) {
     // optimized images, and any dotted file (favicon, sw.js, manifest, icons).
     headers: async () => [
       {
+        // The service worker script must always be revalidated so the browser
+        // detects a newly deployed build promptly (reg.update() / the automatic
+        // update check fetch this file). A cached sw.js would delay activation
+        // of the new SW — and thus the controllerchange reload — by up to 24h.
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, must-revalidate",
+          },
+        ],
+      },
+      {
         source:
           "/((?!api|_next/static|_next/image|.*\\..*).*)",
         headers: [
