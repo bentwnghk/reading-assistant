@@ -40,12 +40,34 @@ const TOGGLE_R = 7; // collapse/expand button radius on a branch
 const MAX_SCALE = 4;
 const EMPTY_SET: Set<number> = new Set();
 
-/* Approximate average glyph width as a fraction of font size. */
-const GLYPH_RATIO = 0.56;
+/* Approximate glyph width as a fraction of font size. CJK glyphs are roughly
+   full-width (~1em) while Latin glyphs are ~0.56em; treating them the same
+   made Chinese labels overflow their pill/box (e.g. 9+ root characters). */
+const LATIN_RATIO = 0.56;
+const CJK_RATIO = 1.0;
+
+function isCJK(ch: string): boolean {
+  const code = ch.codePointAt(0) ?? 0;
+  return (
+    (code >= 0x3040 && code <= 0x30ff) || // Hiragana / Katakana
+    (code >= 0x3400 && code <= 0x9fff) || // CJK Unified Ideographs (+ Ext A)
+    (code >= 0xf900 && code <= 0xfaff) || // CJK Compatibility Ideographs
+    (code >= 0xac00 && code <= 0xd7af) || // Hangul Syllables
+    (code >= 0xff00 && code <= 0xffef) // Fullwidth Forms
+  );
+}
+
+function measureText(text: string, font: number): number {
+  let w = 0;
+  for (const ch of text) {
+    w += (isCJK(ch) ? CJK_RATIO : LATIN_RATIO) * font;
+  }
+  return w;
+}
 
 function fitFont(text: string, maxWidth: number, maxFont: number, minFont: number): number {
   for (let f = maxFont; f >= minFont; f -= 0.5) {
-    if (text.length * f * GLYPH_RATIO <= maxWidth) return f;
+    if (measureText(text, f) <= maxWidth) return f;
   }
   return minFont;
 }
@@ -126,7 +148,7 @@ type Geometry = {
 
 function computeGeometry(root: string): Geometry {
   const rootFont = fitFont(root, 220, ROOT_FONT_MAX, ROOT_FONT_MIN);
-  const textW = root.length * rootFont * GLYPH_RATIO;
+  const textW = measureText(root, rootFont);
   const pillWidth = Math.max(textW + ROOT_HPAD * 2, ROOT_MIN_W);
   const rootRight = ROOT_LEFT + pillWidth;
   const branchX = rootRight + ROOT_GAP;

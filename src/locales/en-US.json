@@ -930,25 +930,34 @@
       "resetView": "Reset view",
       "help": {
         "title": "Mind Map Guide",
-        "intro": "See how the ideas in the text connect, in a visual map of main topics and their subtopics.",
+        "intro": "Visualise how the ideas in the text connect. Choose an interactive Tree you can pan, zoom and collapse, or a classic Radial mind map — and switch any time.",
         "items": {
-          "structure": {
-            "name": "Visual Structure",
-            "desc": "Main topics branch into subtopics, so the structure of the text is easy to follow at a glance."
+          "views": {
+            "name": "Two views",
+            "desc": "Pick the interactive Tree or the classic Radial layout. Your choice is remembered and you can switch any time."
+          },
+          "interact": {
+            "name": "Explore the Tree",
+            "desc": "Drag to pan, scroll or pinch to zoom, click a branch to collapse it, and click a node to zoom to it."
           },
           "bilingual": {
-            "name": "Bilingual Support",
+            "name": "Bilingual support",
             "desc": "Toggle Chinese to generate the mind map in Traditional Chinese."
+          },
+          "export": {
+            "name": "Save as PNG",
+            "desc": "Download exports the current view (Tree or Radial) as a PNG image."
           }
         },
         "stepsTitle": "How to use it",
         "steps": {
           "s1": "Click Generate Mind Map.",
-          "s2": "Explore the branches to see how the ideas link together.",
-          "s3": "Toggle Chinese for a Traditional Chinese version."
+          "s2": "Use the Tree / Radial toggle to choose a layout.",
+          "s3": "In Tree view, drag to pan, scroll or pinch to zoom, and click a branch to collapse it.",
+          "s4": "Toggle Chinese for a Traditional Chinese version, and Download to save the view as a PNG."
         },
         "tipTitle": "Good to know",
-        "tipContent": "A mind map is a great way to revise the structure of a text quickly before a test."
+        "tipContent": "Use the Tree view to focus on one branch at a time, or Radial to see the whole picture at once."
       }
     },
     "visualization": {

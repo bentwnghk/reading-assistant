@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { useState, useRef, Suspense } from "react";
 import { useTranslation } from "react-i18next";
-import { Waypoints, LoaderCircle, Languages, Network, Download } from "lucide-react";
+import { Waypoints, LoaderCircle, Languages, Network, Download, Move } from "lucide-react";
 import { toast } from "sonner";
 import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
@@ -238,14 +238,17 @@ function MindMap() {
             introKey="reading.mindMap.help.intro"
             itemsBaseKey="reading.mindMap.help.items"
             items={[
-              { key: "structure", icon: Network, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "views", icon: Network, bgClass: "bg-primary/10", iconClass: "text-primary" },
+              { key: "interact", icon: Move, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
               { key: "bilingual", icon: Languages, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+              { key: "export", icon: Download, bgClass: "bg-emerald-500/10", iconClass: "text-emerald-500" },
             ]}
             stepsTitleKey="reading.mindMap.help.stepsTitle"
             stepsKeys={[
               "reading.mindMap.help.steps.s1",
               "reading.mindMap.help.steps.s2",
               "reading.mindMap.help.steps.s3",
+              "reading.mindMap.help.steps.s4",
             ]}
             tipTitleKey="reading.mindMap.help.tipTitle"
             tipContentKey="reading.mindMap.help.tipContent"
