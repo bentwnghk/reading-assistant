@@ -54,6 +54,28 @@ function mindMapDataToMermaid(data: MindMapData): string {
   return "```mermaid\n" + lines.join("\n") + "\n```";
 }
 
+/** Find the actual mind-map <svg> inside the content container. We can't just
+ *  querySelector("svg") on the whole section because the toolbar/header icons
+ *  (lucide) are <svg> too and appear first in the DOM. Picking the SVG with
+ *  the largest area reliably returns the diagram for both renderers (and
+ *  ignores stray icon SVGs Mermaid's wrapper may inject). */
+function pickMindMapSvg(container: HTMLElement | null): SVGSVGElement | null {
+  if (!container) return null;
+  const svgs = Array.from(container.querySelectorAll("svg"));
+  if (svgs.length === 0) return null;
+  if (svgs.length === 1) return svgs[0];
+  const area = (svg: SVGSVGElement): number => {
+    const vb = (svg.getAttribute("viewBox") ?? "").split(/[\s,]+/).map(Number);
+    if (vb.length === 4 && vb[2] && vb[3]) return vb[2] * vb[3];
+    const w = parseFloat(svg.getAttribute("width") ?? "");
+    const h = parseFloat(svg.getAttribute("height") ?? "");
+    if (w && h) return w * h;
+    const rect = svg.getBoundingClientRect();
+    return rect.width * rect.height;
+  };
+  return svgs.reduce((best, svg) => (area(svg) > area(best) ? svg : best), svgs[0]);
+}
+
 function MindMap() {
   const { t } = useTranslation();
   const { extractedText, mindMap, docTitle } = useReadingStore();
@@ -61,18 +83,20 @@ function MindMap() {
   const { activeGenerations, generateMindMap } = useReadingAssistant();
   const isGenerating = !!activeGenerations["mindmap"];
   const [useChinese, setUseChinese] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   // New mind maps are JSON; legacy sessions stored Mermaid markdown. `parsed`
   // is non-null only for the new structured format, which is what the tree
   // renderer (and the renderer toggle) requires.
   const parsed = mindMap ? tryParseMindMapData(mindMap) : null;
+  // There is nothing to export in the legacy+tree CTA state (no rendered map).
+  const canDownload = !!mindMap && (mindMapRenderer === "mermaid" || !!parsed);
 
   if (!extractedText) {
     return null;
   }
 
   function handleDownload() {
-    const svg = sectionRef.current?.querySelector("svg");
+    const svg = pickMindMapSvg(contentRef.current);
     if (!svg) return;
     const safeFileName = (docTitle || "Untitled")
       .replace(/[\\/:*?"<>|]/g, "")
@@ -82,16 +106,19 @@ function MindMap() {
     // Rasterize the SVG to a PNG via a canvas. The SVG is cloned with an
     // explicit pixel size + namespaces so the Image loads it standalone.
     const clone = svg.cloneNode(true) as SVGSVGElement;
-    let w = parseFloat(clone.getAttribute("width") ?? "");
-    let h = parseFloat(clone.getAttribute("height") ?? "");
+    // Resolve an intrinsic pixel size. Prefer the viewBox — Mermaid sets
+    // width="100%" (not a real size), and the tree SVG carries matching
+    // width/height/viewBox anyway.
+    let w = 0;
+    let h = 0;
+    const vb = (clone.getAttribute("viewBox") ?? "").split(/[\s,]+/).map(Number);
+    if (vb.length === 4 && vb[2] && vb[3]) {
+      w = vb[2];
+      h = vb[3];
+    }
     if (!w || !h) {
-      const vb = (clone.getAttribute("viewBox") ?? "")
-        .split(/[\s,]+/)
-        .map(Number);
-      if (vb.length === 4 && vb[2] && vb[3]) {
-        w = vb[2];
-        h = vb[3];
-      }
+      w = parseFloat(clone.getAttribute("width") ?? "");
+      h = parseFloat(clone.getAttribute("height") ?? "");
     }
     if (!w || !h) {
       toast.error(t("reading.mindMap.downloadError"));
@@ -134,7 +161,7 @@ function MindMap() {
   }
 
   return (
-    <section className="p-4 border rounded-md mt-4" ref={sectionRef}>
+    <section className="p-4 border rounded-md mt-4">
       <div className="flex flex-wrap md:flex-nowrap items-center justify-between border-b pb-4 mb-4 gap-2">
         <h3 className="font-semibold text-lg flex items-center gap-2">
           <Waypoints className="h-5 w-5 text-muted-foreground" />
@@ -158,7 +185,7 @@ function MindMap() {
           />
         </h3>
         <div className="flex items-center gap-2 ml-auto">
-          {mindMap && (
+          {canDownload && (
             <Button
               onClick={handleDownload}
               size="sm"
@@ -248,7 +275,7 @@ function MindMap() {
       {mindMap ? (
         mindMapRenderer === "tree" ? (
           parsed ? (
-            <div className="overflow-hidden rounded-md border">
+            <div ref={contentRef} className="overflow-hidden rounded-md border">
               <MindMapView data={parsed} />
             </div>
           ) : (
@@ -275,7 +302,7 @@ function MindMap() {
         ) : (
           // Radial (Mermaid) view: convert structured data, or render legacy
           // markdown as-is.
-          <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
+          <div ref={contentRef} className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
             <Suspense fallback={null}>
               <MagicDown hideMermaidDownload>
                 {parsed ? mindMapDataToMermaid(parsed) : mindMap}
