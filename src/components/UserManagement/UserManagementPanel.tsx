@@ -31,7 +31,6 @@ import StudentDataView from "./StudentDataView"
 import SchoolList from "./SchoolList"
 import AiQuestionsView from "./AiQuestionsView"
 import AdminSubscriptionsView from "@/components/Subscription/AdminSubscriptionsView"
-import BackfillTitlesTab from "./BackfillTitlesTab"
 import UserManagementGuide from "./UserManagementGuide"
 
 interface UserManagementPanelProps {
@@ -354,9 +353,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isSuperAdmin || isAdmin) && (
               <TabsTrigger value="subscriptions">{t("userManagement.tabs.subscriptions")}</TabsTrigger>
             )}
-            {isSuperAdmin && (
-              <TabsTrigger value="backfill">{t("userManagement.tabs.backfill")}</TabsTrigger>
-            )}
           </TabsList>
           <div className="flex-1 overflow-auto mt-4">
             {isSuperAdmin && (
@@ -390,11 +386,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isSuperAdmin || isAdmin) && (
               <TabsContent value="subscriptions" className="mt-0">
                 <AdminSubscriptionsView />
-              </TabsContent>
-            )}
-            {isSuperAdmin && (
-              <TabsContent value="backfill" className="mt-0">
-                <BackfillTitlesTab />
               </TabsContent>
             )}
           </div>
