@@ -35,9 +35,7 @@
     "auth": {
       "signIn": "Sign in with Google",
       "signOut": "Sign Out",
-      "loading": "Loading...",
-      "stuck": "This is taking longer than usual.",
-      "reload": "Reload"
+      "loading": "Loading..."
     },
     "shortcuts": {
       "title": "Keyboard Shortcuts",
@@ -166,7 +164,7 @@
         },
         "test": {
           "title": "Reading Test",
-          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and adaptive targeted practice that remembers your weak spots across reading sessions and drills them until they improve!"
+          "desc": "6 question types, 5 skills tested, skill breakdown, retry missed questions, and targeted practice for weak areas!"
         },
         "achievements": {
           "title": "Achievements",
@@ -203,16 +201,11 @@
         "aiTextGenerator": {
           "title": "AI Text Generator",
           "desc": "No text on hand? Type a topic, pick a text type and length, and AI writes an age-appropriate reading passage at the right CEFR level — complete with a difficulty check and one-tap regenerate easier/harder."
-        },
-        "preReading": {
-          "title": "Before You Read",
-          "desc": "Get ready before you read! Activate prior knowledge, learn the cultural background, set a purpose, and pre-learn key words. Then skim the title, headings, and first/last paragraphs to predict what the text is about — and check your prediction after reading."
         }
       },
       "workflow": {
         "title": "Your Learning Journey",
         "upload": "Select text via image/PDF upload, Text Repository, or AI Text Generator",
-        "preReading": "Activate knowledge, learn key words, skim, and predict before you read",
         "summary": "Get a quick summary of the content",
         "mindmap": "Explore with an interactive mind map",
         "visualization": "Visualize main ideas with a colorful AI-generated image",
@@ -237,9 +230,7 @@
         "inference": "🧩 Inference",
         "vocabulary": "📚 Vocabulary",
         "purpose": "✍️ Author's Purpose",
-        "grammar": "📐 Grammar",
-        "skimming": "👁️ Skimming & Scanning",
-        "prediction": "🔮 Prediction"
+        "grammar": "📐 Grammar"
       },
       "builtWith": "Built with ❤️ by Mr.🆖 for students learning English",
       "builtWithPoweredByPrefix": " · Powered by ",
@@ -248,7 +239,7 @@
         "title": "Frequently Asked Questions",
         "q1": {
           "q": "I'm reading a text that I find really difficult to understand. How can Mr.🆖 ProReader help me?",
-          "a": "<p>Mr.🆖 ProReader is built exactly for moments like that. Just upload your text (or snap a photo of it), and the AI goes to work in several ways:</p><ol><li><strong>Before You Read</strong> — Prepare before you dive in: activate what you already know, learn the cultural background and key words, then skim the title, headings, and first/last paragraphs to predict what the text is about. After reading, check how close your prediction was.</li><li><strong>Instant Summary &amp; Mind Map</strong> — Get a clear TL;DR, key points, and a visual mind map so you grasp the big picture before diving into the details.</li><li><strong>AI Text Visualization</strong> — The AI generates a vivid, colorful image that brings the main ideas to life! It automatically picks the best style — infographic, comic strip, cartoon, or painting — based on the text's genre. Available in English and Chinese.</li><li><strong>Simplified &amp; Adapted Text</strong> — The app rewrites the passage at your level using simpler vocabulary and shorter sentences, while keeping the original meaning intact.</li><li><strong>Vocabulary Glossary</strong> — Every tricky word is highlighted and explained with bilingual definitions, syllable breakdowns, and example sentences. You can review them later with flashcards, spelling games, and quizzes powered by spaced repetition.</li><li><strong>Grammar Analysis</strong> — Complex grammar structures are identified and explained with patterns and examples from the text itself, plus interactive grammar games to reinforce your understanding.</li><li><strong>AI Tutor</strong> — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.</li><li><strong>Reading Comprehension Test</strong> — Once you feel ready, take a generated quiz covering main ideas, details, inferences, and more, with detailed explanations for every answer.</li></ol><p>Think of Mr.🆖 ProReader as a patient, personalized tutor that turns any difficult text into a learnable experience.</p>"
+          "a": "<p>Mr.🆖 ProReader is built exactly for moments like that. Just upload your text (or snap a photo of it), and the AI goes to work in several ways:</p><ol><li><strong>Instant Summary &amp; Mind Map</strong> — Get a clear TL;DR, key points, and a visual mind map so you grasp the big picture before diving into the details.</li><li><strong>AI Text Visualization</strong> — The AI generates a vivid, colorful image that brings the main ideas to life! It automatically picks the best style — infographic, comic strip, cartoon, or painting — based on the text's genre. Available in English and Chinese.</li><li><strong>Simplified &amp; Adapted Text</strong> — The app rewrites the passage at your level using simpler vocabulary and shorter sentences, while keeping the original meaning intact.</li><li><strong>Vocabulary Glossary</strong> — Every tricky word is highlighted and explained with bilingual definitions, syllable breakdowns, and example sentences. You can review them later with flashcards, spelling games, and quizzes powered by spaced repetition.</li><li><strong>Grammar Analysis</strong> — Complex grammar structures are identified and explained with patterns and examples from the text itself, plus interactive grammar games to reinforce your understanding.</li><li><strong>AI Tutor</strong> — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.</li><li><strong>Reading Comprehension Test</strong> — Once you feel ready, take a generated quiz covering main ideas, details, inferences, and more, with detailed explanations for every answer.</li></ol><p>Think of Mr.🆖 ProReader as a patient, personalized tutor that turns any difficult text into a learnable experience.</p>"
         },
         "q2": {
           "q": "If there's a word or phrase I don't understand in the text, what can I do?",
@@ -323,21 +314,7 @@
           "Original · Adapted · Simplified",
           "Mind map & AI visualization",
           "CEFR levels & readability scores"
-        ],
-        "carousel": {
-          "label": "Understand features",
-          "slideCount": "{{count}} slides",
-          "mindmap": "Mind map",
-          "visualization": "AI visualization",
-          "original": "Text analysis · Original",
-          "adapted": "Text analysis · Adapted",
-          "simplified": "Text analysis · Simplified",
-          "difficulty": "Difficulty & CEFR highlight",
-          "prev": "Previous slide",
-          "next": "Next slide",
-          "goTo": "Go to slide {{n}} of {{count}}: {{label}}",
-          "indicator": "Slide {{n}} of {{count}}: {{label}}"
-        }
+        ]
       },
       "tutor": {
         "eyebrow": "AI Tutor",
@@ -358,50 +335,17 @@
           "4 spelling & vocabulary games",
           "5 grammar games",
           "Multiplayer spelling battles against classmates 🆕"
-        ],
-        "carousel": {
-          "label": "Practice features",
-          "slideCount": "{{count}} slides",
-          "flashcardFront": "Flashcard · front",
-          "flashcardBack": "Flashcard · back",
-          "spellingListen": "Spelling · listen & type",
-          "spellingFill": "Spelling · fill blanks",
-          "spellingScramble": "Spelling · letter scramble",
-          "grammarTopics": "Grammar topics",
-          "grammarRoulette": "Grammar roulette",
-          "grammarSurgery": "Error surgery",
-          "grammarWorkshop": "Grammar workshop",
-          "battleLobby": "Spelling battle lobby",
-          "prev": "Previous slide",
-          "next": "Next slide",
-          "goTo": "Go to slide {{n}} of {{count}}: {{label}}",
-          "indicator": "Slide {{n}} of {{count}}: {{label}}"
-        }
+        ]
       },
       "master": {
         "eyebrow": "Master",
         "title": "Watch yourself improve.",
-        "lede": "Take the reading test and a skill profile learns your weak spots across every reading session — then adaptive targeted practice drills them until they're not. Compete on the leaderboard, earn achievements along the way, and build a vocabulary that travels with you.",
+        "lede": "Take the reading test and see your skill scores climb. Compete on the leaderboard, earn achievements along the way, and build a vocabulary that travels with you.",
         "bullets": [
           "Reading test with skill breakdown",
-          "Adaptive targeted practice from your skill profile",
           "Leaderboards & achievements",
           "My Vocabulary hub with mastery tracking"
-        ],
-        "carousel": {
-          "label": "Mastery features",
-          "slideCount": "{{count}} slides",
-          "results": "Reading test results",
-          "practice": "Targeted practice",
-          "achievements": "Achievements",
-          "leaderboard": "Leaderboard ranking",
-          "words": "My Vocabulary: Words",
-          "spelling": "Spelling game setup",
-          "prev": "Previous slide",
-          "next": "Next slide",
-          "goTo": "Go to slide {{n}} of {{count}}: {{label}}",
-          "indicator": "Slide {{n}} of {{count}}: {{label}}"
-        }
+        ]
       }
     },
     "classrooms": {
@@ -516,7 +460,6 @@
       "orClick": "or click to select",
       "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP, PDF",
       "extracting": "Extracting text...",
-      "extractingWait": "Extracting text from image... This may take 1-2 minutes. Please wait.",
       "extractingProgress": "Extracting text ({{current}}/{{total}})...",
       "processingPdf": "Processing PDF...",
       "uploadNew": "Click the [+ New Text] button above to start over",
@@ -573,7 +516,7 @@
       "reset": "Auto",
       "generateButton": "Generate Reading Text",
       "generating": "Generating...",
-      "generatingWait": "Generating your reading text... This may take 1-2 minutes. Please wait.",
+      "generatingWait": "Generating your reading text — this may take a moment...",
       "regenerateEasier": "Easier",
       "regenerateHarder": "Harder",
       "qcTitle": "Generated Text Details",
@@ -702,19 +645,10 @@
       "generate": "Prepare Pre-Reading",
       "regenerate": "Regenerate",
       "generating": "Preparing...",
-      "generatingWait": "Preparing pre-reading activities... This may take up to 1 minute. Please wait.",
+      "generatingWait": "Preparing pre-reading activities...",
       "emptyTip": "Click the button above to activate your prior knowledge, pre-learn key words, and set a purpose before you read.",
-      "predictionPlaceholder": "Skim the text above, then type what you think it will be about...",
-      "skimLabel": "Skim first",
-      "skimHint": "Good readers skim before predicting",
-      "skimGuide": "Skimming means quickly reading the title, headings, and the first & last paragraphs to get the gist — not every word. Skim these, then predict.",
-      "skim": {
-        "title": "Title",
-        "firstParagraph": "First paragraph",
-        "headings": "Headings",
-        "topicSentences": "Topic sentences",
-        "lastParagraph": "Last paragraph"
-      },
+      "predictionPlaceholder": "Type what you think this text will be about...",
+      "titleHint": "Title: {{title}}",
       "purposeLabel": "Purpose",
       "activationLabel": "Activate Your Knowledge",
       "preTeachLabel": "Key Words to Know First",
@@ -730,66 +664,62 @@
         "veryClose": "Very close"
       },
       "help": {
-        "title": "Before You Read Guide",
+        "title": "Before You Read",
         "intro": "Get ready before you read so the text is easier to understand.",
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
           "activate": { "name": "Activate", "desc": "Connect the topic to what you already know." },
-          "background": { "name": "Background", "desc": "Learn the cultural or contextual knowledge the text assumes you have." },
-          "purpose": { "name": "Purpose", "desc": "Get a clear reason to read — what to find out." },
-          "preteach": { "name": "Pre-teach", "desc": "Learn the key words you need before you start." },
-          "predict": { "name": "Predict", "desc": "Skim, then guess what the text is about and check after reading." }
+          "predict": { "name": "Predict", "desc": "Guess what the text is about, then check after reading." },
+          "preteach": { "name": "Pre-teach", "desc": "Learn the key words you need before you start." }
         },
         "stepsTitle": "How it works",
         "steps": {
-          "s1": "Click Prepare Pre-Reading to generate your activities.",
-          "s2": "Work top to bottom: activate your knowledge, read the background, set your purpose, and learn the key words.",
-          "s3": "Skim the title, headings, and first/last paragraphs, then type your prediction.",
-          "s4": "After you read and get the summary, rate how close your prediction was."
+          "s1": "Click Prepare Pre-Reading.",
+          "s2": "Read the prompts and key words, then type your prediction.",
+          "s3": "After you read and get the summary, compare your prediction."
         },
         "tipTitle": "Tip",
-        "tipContent": "Skim first, then predict — it focuses your reading and helps you remember more."
+        "tipContent": "Predicting first helps you focus and remember more."
       }
     },
     "collocations": {
-      "title": "Phrases & Collocations",
-      "listen": "Listen to {{chunk}}",
+      "title": "Word Chunks & Collocations",
       "generate": "Extract Collocations",
       "regenerate": "Regenerate",
       "generating": "Extracting...",
-      "generatingWait": "Extracting collocations and L1 transfer notes... This may take 1-2 minutes. Please wait.",
-      "emptyTip": "Click the button above to extract useful phrases and collocations, with notes on common Cantonese-L1 mistakes.",
+      "generatingWait": "Extracting collocations and L1 transfer notes...",
+      "emptyTip": "Click the button above to extract useful word chunks and collocations, with notes on common Cantonese-L1 mistakes.",
+      "inText": "In text: {{count}}",
       "addToPhrases": "Add to Phrases",
       "addedButton": "Added to Phrases",
       "added": "Added \"{{chunk}}\" to your phrases.",
       "addAll": "Add All to Phrases",
-      "addAllSuccess": "Added all phrases to your phrases.",
+      "addAllSuccess": "Added all chunks to your phrases.",
       "addError": "Could not add phrase. Please try again.",
       "parseError": "Could not parse collocations. Please try again.",
       "help": {
-        "title": "Phrases & Collocations Guide",
-        "intro": "Master the multi-word expressions in your text and learn to dodge the mistakes Cantonese speakers most often make.",
+        "title": "Word Chunks & Collocations",
+        "intro": "Learn multi-word chunks and avoid common Cantonese-L1 transfer mistakes.",
         "itemsBaseKey": "reading.collocations.help.items",
         "items": {
-          "chunks": { "name": "Phrases", "desc": "Multi-word expressions pulled from your text — phrasal verbs, collocations, and fixed phrases — each shown with its meaning and an example." },
-          "contrast": { "name": "Contrast Notes", "desc": "Flags the errors Cantonese speakers typically make, so you can spot and avoid them." },
-          "phrases": { "name": "Save to Phrases", "desc": "Send any phrase to the Phrases tab on My Vocabulary for spaced-repetition review." }
+          "chunks": { "name": "Chunks", "desc": "Phrasal verbs, collocations, and fixed expressions." },
+          "contrast": { "name": "Contrast", "desc": "Notes on how Cantonese speakers typically get it wrong." },
+          "phrases": { "name": "Phrases", "desc": "Add chunks to your Phrases review queue." }
         },
         "stepsTitle": "How it works",
         "steps": {
-          "s1": "Click Extract Collocations to scan the text for useful multi-word expressions.",
-          "s2": "Read each phrase's contrast note to see what to avoid saying.",
-          "s3": "Tap Add to Phrases on the phrases you want to review later."
+          "s1": "Click Extract Collocations.",
+          "s2": "Read the contrast notes to avoid L1 mistakes.",
+          "s3": "Add useful chunks to your Phrases tab for review."
         },
         "tipTitle": "Tip",
-        "tipContent": "Roughly half of the collocation errors Hong Kong learners make come from word-for-word translation — the contrast notes are where you'll catch them."
+        "tipContent": "About half of HK learners' collocation errors come from word-for-word translation — focus on the contrast notes."
       }
     },
     "summary": {
       "title": "Summary",
       "generate": "Generate Summary",
       "generating": "Generating...",
-      "generatingWait": "Generating summary... This may take up to 30 seconds. Please wait.",
       "regenerate": "Regenerate",
       "emptyTip": "Click the button above to generate a summary of the text",
       "oneSentence": "TL;DR",
@@ -827,14 +757,12 @@
       "title": "Text Analysis & Adaptation",
       "adapt": "Adapt",
       "adapting": "Adapting...",
-      "adaptingWait": "Generating adapted text... This may take 1-2 minutes. Please wait.",
       "originalTab": "Original",
       "adaptedTab": "Adapted",
       "simplifiedTab": "Simplified",
       "emptyTip": "Click the button above to adapt the text to your level",
       "simplifyFurther": "Simplify Further",
       "simplifying": "Simplifying...",
-      "simplifyingWait": "Generating simplified text... This may take 1-2 minutes. Please wait.",
       "simplifiedEmptyTip": "Click the button below to create an even simpler version",
       "generateSimplified": "Generate Simplified Version",
       "goToOriginal": "Go to Original",
@@ -852,7 +780,7 @@
       "regenerating": "Regenerating...",
       "suggestLabel": "Auto-highlight words worth learning:",
       "suggestButton": "Suggest",
-      "suggesting": "Suggesting... This may take up to 1 minute. Please wait.",
+      "suggesting": "Suggesting...",
       "suggestSuccess": "Added {{added}} new word(s) ({{total}} total highlighted)",
       "suggestParseError": "Could not parse the AI response. Please try again.",
       "help": {
@@ -919,57 +847,38 @@
       "title": "Mind Map",
       "generate": "Generate Mind Map",
       "generating": "Generating...",
-      "generatingWait": "Generating mind map... This may take up to 30 seconds. Please wait.",
       "regenerate": "Regenerate",
       "emptyTip": "Click the button above to generate a visual mind map",
       "chineseLabel": "Chinese",
       "download": "Download",
-      "downloadError": "Could not export the mind map. Please try again.",
-      "hint": "Drag to pan · Scroll to zoom · Click a branch to collapse",
-      "renderer": "Mind map style",
-      "rendererTree": "Tree",
-      "rendererMap": "Radial",
-      "legacyTreeHint": "This mind map uses the older format. Regenerate to view it as an interactive tree.",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out",
-      "resetView": "Reset view",
       "help": {
         "title": "Mind Map Guide",
-        "intro": "Visualise how the ideas in the text connect. Choose an interactive Tree you can pan, zoom and collapse, or a classic Radial mind map — and switch any time.",
+        "intro": "See how the ideas in the text connect, in a visual map of main topics and their subtopics.",
         "items": {
-          "views": {
-            "name": "Two views",
-            "desc": "Pick the interactive Tree or the classic Radial layout. Your choice is remembered and you can switch any time."
-          },
-          "interact": {
-            "name": "Explore the Tree",
-            "desc": "Drag to pan, scroll or pinch to zoom, click a branch to collapse it, and click a node to zoom to it."
+          "structure": {
+            "name": "Visual Structure",
+            "desc": "Main topics branch into subtopics, so the structure of the text is easy to follow at a glance."
           },
           "bilingual": {
-            "name": "Bilingual support",
+            "name": "Bilingual Support",
             "desc": "Toggle Chinese to generate the mind map in Traditional Chinese."
-          },
-          "export": {
-            "name": "Save as PNG",
-            "desc": "Download exports the current view (Tree or Radial) as a PNG image."
           }
         },
         "stepsTitle": "How to use it",
         "steps": {
           "s1": "Click Generate Mind Map.",
-          "s2": "Use the Tree / Radial toggle to choose a layout.",
-          "s3": "In Tree view, drag to pan, scroll or pinch to zoom, and click a branch to collapse it.",
-          "s4": "Toggle Chinese for a Traditional Chinese version, and Download to save the view as a PNG."
+          "s2": "Explore the branches to see how the ideas link together.",
+          "s3": "Toggle Chinese for a Traditional Chinese version."
         },
         "tipTitle": "Good to know",
-        "tipContent": "Use the Tree view to focus on one branch at a time, or Radial to see the whole picture at once."
+        "tipContent": "A mind map is a great way to revise the structure of a text quickly before a test."
       }
     },
     "visualization": {
       "title": "Text Visualization",
       "generate": "Generate Visualization",
       "generating": "Generating...",
-      "generatingWait": "Generating visualization... This may take up to 30 seconds. Please wait.",
+      "generatingWait": "Generating visualization... This usually takes 1-2 minutes. Please wait.",
       "regenerate": "Regenerate",
       "download": "Download",
       "chineseLabel": "Chinese",
@@ -1008,7 +917,7 @@
       "title": "Reading Test",
       "generate": "Generate Test",
       "generating": "Generating...",
-      "generatingWait": "Generating reading test... This may take 1-2 minutes. Please wait.",
+      "generatingWait": "Generating reading test... This usually takes 1-2 minutes. Please wait.",
       "submit": "Submit Answers",
       "retry": "Retry",
       "emptyTip": "Click the button above to generate a reading comprehension test (Please wait 1-2 minutes)",
@@ -1060,11 +969,7 @@
       "retryMissed": "Retry Missed ({{count}})",
       "practiceMissedSkills": "Practice Missed Skills ({{count}})",
       "practiceMissedSkillsDesc": "Generate new questions targeting skills you missed",
-      "practiceSkills": "Practice These Skills ({{count}})",
-      "practiceSkillsDesc": "Generate new questions targeting the skills listed below.",
-      "practiceSkillsDescWithHistory": "Generates questions for the skills you missed today, plus your long-term focus area ({{skill}}).",
-      "fromHistory": "from history",
-      "practiceGeneratingWait": "Generating targeted practice... This may take 1-2 minutes. Please wait.",
+      "practiceGeneratingWait": "Generating targeted practice... This usually takes 1-2 minutes. Please wait.",
       "downloadWord": "Download Word",
       "downloadBlank": "Download Blank Test",
       "downloadWithAnswers": "Download with Answers",
@@ -1115,7 +1020,7 @@
       "title": "Grammar",
       "analyze": "Analyze Grammar",
       "analyzing": "Analyzing...",
-      "analyzingWait": "Analyzing grammar topics... This may take 1-2 minutes. Please wait.",
+      "analyzingWait": "Analyzing grammar topics... This usually takes 1-2 minutes. Please wait.",
       "regenerate": "Re-analyze",
       "downloadWord": "Download Word",
       "exportDownload": "Download",
@@ -1140,7 +1045,7 @@
       "lesson": {
         "loadFullLesson": "Load Full Lesson",
         "reloadLesson": "Reload Lesson",
-        "generatingWait": "Building your full grammar lesson... This may take up to 1 minute. Please wait.",
+        "generatingWait": "Building your full grammar lesson... This usually takes 30-60 seconds.",
         "loadedHint": "Full lesson loaded",
         "whenToUse": "When to Use It",
         "signalWords": "Signal Words",
@@ -1212,7 +1117,7 @@
         "generate": "Generate Quiz",
         "regenerate": "New Quiz",
         "generateFirst": "Generate a quiz to practice grammar from this text",
-        "generatingWait": "Generating grammar quiz... This may take 1-2 minutes. Please wait.",
+        "generatingWait": "Generating grammar quiz... This usually takes 1-2 minutes. Please wait.",
         "start": "Start Quiz",
         "lastScore": "Last Score:",
         "submit": "Submit Answers",
@@ -1296,7 +1201,7 @@
         "backToGames": "Back to Games",
         "generateChallenges": "New Challenges",
         "generating": "Generating...",
-        "generatingWait": "Generating new challenges… This may take 1-2 minutes. Please wait.",
+        "generatingWait": "Generating new challenges… Please wait.",
         "score": "Score",
         "accuracy": "Accuracy",
         "streak": "Best Streak",
@@ -1412,12 +1317,11 @@
       "title": "Vocabulary",
       "generate": "Generate Glossary",
       "generating": "Generating...",
-      "generatingWait": "Generating glossary... This may take 1-2 minutes. Please wait.",
+      "generatingWait": "Generating glossary... This usually takes 1-2 minutes. Please wait.",
       "regenerate": "Regenerate",
       "downloadWord": "Download Word",
       "downloadExcel": "Download Excel",
       "word": "Word",
-      "phrase": "Phrase",
       "syllabification": "Syllables",
       "partOfSpeech": "PoS",
       "englishDefinition": "English Definition",
@@ -1425,14 +1329,10 @@
       "example": "Example",
       "emptyTip": "Click the button above to generate definitions for {{count}} highlighted words (Please wait 1-2 minutes)",
       "noHighlightedWords": "Highlight some words in the Original text first. For best results, we recommend highlighting 10-30 words.",
-      "listen": "Listen to {{word}}",
-      "tabWords": "Words",
-      "tabPhrases": "Phrases",
+      "tabTable": "Table",
       "tabFlashcard": "Flashcard",
       "tabQuiz": "Quiz",
       "tabSpelling": "Spelling",
-      "wordsEmpty": "No single words in this glossary.",
-      "phrasesEmpty": "No multi-word phrases in this glossary.",
       "prioritizeHard": "Prioritize hard words",
       "prioritizeHardDesc": "Focus on words you rated as hard first",
       "wordStats": "{{hard}} hard, {{medium}} medium, {{easy}} easy",
@@ -1539,13 +1439,9 @@
         "title": "Vocabulary Guide",
         "intro": "Learn and master the new words from your text through four fun, interactive modes.",
         "items": {
-          "words": {
-            "name": "Words",
-            "desc": "Single-word entries with bilingual definitions (English + Chinese), syllable divisions and example sentences."
-          },
-          "phrases": {
-            "name": "Phrases",
-            "desc": "Multi-word entries (phrasal verbs, collocations, idioms) separated out for focused study. Review them anytime on the My Vocabulary page."
+          "table": {
+            "name": "Glossary Table",
+            "desc": "Bilingual definitions (English + Chinese), syllable divisions and example sentences for every word."
           },
           "flashcard": {
             "name": "Flashcards",
@@ -1655,8 +1551,6 @@
         "multiplayer": {
           "title": "Multiplayer Spelling Battle",
           "subtitle": "Challenge other players to a live spelling duel",
-          "navTitle": "Spelling Battle",
-          "dialogDesc": "Create a room to host, or join an existing battle with a room code.",
           "connecting": "Connecting to battle server…",
           "retry": "Retry",
           "unavailable": "Multiplayer battles are not available on this server.",
@@ -1732,6 +1626,8 @@
           "noInvites": "No pending invitations.",
           "filter": "Filter",
           "filterAll": "All words",
+          "filterDue": "Due for review",
+          "filterHard": "Hard words",
           "selectList": "Select a list…",
           "speedBonus": "Speed Bonus",
           "speedBonusDesc": "Award up to +50 points per correct answer based on how fast you answer. The per-word timer is always on.",
@@ -1830,7 +1726,7 @@
       "vocabQuiz": "Vocab Quiz",
       "help": {
         "title": "Learning Progress Guide",
-        "intro": "See how far you've come. The tracker shows your progress across 15 reading activities.",
+        "intro": "See how far you've come. The tracker shows your progress across 13 reading activities.",
         "items": {
           "steps": {
             "name": "Step Circles",
@@ -1852,7 +1748,7 @@
           "s3": "Tap a step to scroll to its section."
         },
         "tipTitle": "Good to know",
-        "tipContent": "Steps 2–15 unlock as soon as text is extracted. You can revisit any section at any time."
+        "tipContent": "Steps 2–13 unlock as soon as text is extracted. You can revisit any section at any time."
       }
     },
     "tutor": {
@@ -1924,7 +1820,7 @@
     "title": "My Vocabulary",
     "dueBadgeHint": "{{count}} words due for review",
     "close": "Back to app",
-     "tabWords": "Words",
+    "tabTable": "Table",
     "tabFlashcard": "Flashcard",
     "tabPhrases": "Phrases",
     "tabSpelling": "Spelling",
@@ -1935,19 +1831,22 @@
     "emptyDesc": "Start reading to collect vocabulary words. They will appear here for review.",
     "startReading": "Start Reading",
     "phrases": {
+      "count": "{{count}} phrases",
       "empty": "No phrases yet.",
-      "listen": "Listen to {{phrase}}",
       "emptyHint": "Extract collocations from a reading session and add them here.",
       "startFlashcard": "Flashcard Review",
       "startQuiz": "Quiz",
-      "startUnscramble": "Unscramble Game",
+      "startUnscramble": "Unscramble",
       "backToList": "Back to list",
-      "colPhrase": "Phrase",
-      "searchPlaceholder": "Search phrases...",
-      "showingPhrases": "Showing {{count}} of {{total}} phrases",
-      "noPhrasesMatch": "No phrases match your filters",
+      "colChunk": "Chunk",
+      "colPattern": "Pattern",
+      "colMeaning": "Meaning",
+      "colZh": "中文釋義",
       "progress": "{{current}} / {{total}}",
       "check": "Check",
+      "next": "Next",
+      "retry": "Retry",
+      "finish": "Finish",
       "arrangeHint": "Tap words in the correct order",
       "allPlaced": "All words placed",
       "correct": "Correct!",
@@ -1955,7 +1854,6 @@
       "historyTitle": "Phrase Review History"
     },
     "searchPlaceholder": "Search words...",
-    "listen": "Listen to {{word}}",
     "allRatings": "All Ratings",
     "hardOnly": "Hard",
     "mediumOnly": "Medium",
@@ -1972,7 +1870,6 @@
     "rowsPerPage": "Per page",
     "noWordsMatch": "No words match your filters",
     "selectedCount": "{{count}} words selected",
-    "selectedPhrasesCount": "{{count}} phrases selected",
     "clearSelection": "Clear",
     "startReview": "Start Review",
     "source": "Source",
@@ -2039,10 +1936,8 @@
     },
     "autoSelect": "Auto Select",
     "wordCount": "Number of words",
-    "phraseCount": "Number of phrases",
     "selectStrategy": "Selection strategy",
     "selectWords": "Select {{count}} words",
-    "selectPhrases": "Select {{count}} phrases",
     "word": "Word",
     "syllabification": "Syllables",
     "partOfSpeech": "PoS",
@@ -2075,18 +1970,12 @@
       "new": "New Words",
       "clickToFilter": "Click to filter the table",
       "ownHint": "Show words from your own reading",
-      "teacherHint": "Show words shared by teachers",
-      "totalPhrase": "Total Phrases",
-      "ownHintPhrase": "Show phrases from your own reading",
-      "teacherHintPhrase": "Show phrases shared by teachers",
-      "newPhrase": "New Phrases"
+      "teacherHint": "Show words shared by teachers"
     },
     "export": {
       "title": "Export",
       "selectedWords": "Export {{count}} selected words",
-      "selectedPhrases": "Export {{count}} selected phrases",
       "allWords": "Export all {{count}} words",
-      "allPhrases": "Export all {{count}} phrases",
       "glossary": "Glossary",
       "glossaryDesc": "Word list with definitions in a table",
       "flashcard": "Flashcard Sheets",
@@ -2101,10 +1990,7 @@
       "hardest": "Hardest Words",
       "newest": "Newest Words",
       "random": "Random Mix",
-      "weakest": "Weakest Words",
-      "hardestPhrase": "Hardest Phrases",
-      "newestPhrase": "Newest Phrases",
-      "weakestPhrase": "Weakest Phrases"
+      "weakest": "Weakest Words"
     },
     "studyPlan": {
       "title": "Ready to study?",
@@ -2195,22 +2081,10 @@
         "table": {
           "title": "Word Table",
           "desc": "Browse, search, sort, and filter all your words. Select words manually or use Auto Select, then start a review."
-        },
-        "phrases": {
-          "name": "Phrases",
-          "desc": "A separate tab for multi-word expressions — collocations, idioms, and phrasal verbs collected from your reading. Browse, filter, and review phrases with the same flashcard, quiz, and spelling modes."
-        },
-        "studyPlan": {
-          "name": "Study Plan",
-          "desc": "A quick-start dialog that opens when you arrive. Pick a preset (due, new, hard, or random words), choose a review mode, and begin in two taps. Dismiss it to browse manually."
-        },
-        "clickableStats": {
-          "name": "Tap to Filter",
-          "desc": "Every stat card is a filter. Tap Total to split by Own vs Teacher, or tap Due / Mastered / New to jump straight to that group."
         }
       },
       "review": {
-        "intro": "Choose from three review modes. Select words or phrases first (or accept a shared review list), then pick a mode.",
+        "intro": "Choose from three review modes. Select words first (or accept a shared review list), then pick a mode.",
         "flashcard": {
           "name": "Flashcard",
           "desc": "Flip cards to reveal definitions, then rate your confidence with SRS buttons:"
@@ -2317,7 +2191,6 @@
       "avgProgress": "Avg Learning Progress"
     },
     "features": {
-      "preReading": "Before You Read",
       "summary": "Summary",
       "mindMap": "Mind Map",
       "mindMapEn": "Mind Map (EN)",
@@ -2329,7 +2202,6 @@
       "simplifiedText": "Simplified Text",
       "sentenceAnalysis": "Sentence Analysis",
       "glossary": "Generate Glossary",
-      "collocations": "Phrases & Collocations",
       "grammar": "Grammar Analysis",
       "tutorQuestion": "AI Tutor",
       "flashcardReview": "Flashcard Review",
@@ -2353,7 +2225,7 @@
       "vocabularyGrowth": "Vocabulary Growth",
       "cumulativeVocab": "Cumulative Vocabulary",
       "scoreDistribution": "Test Score Distribution",
-      "skillProfile": "Reading Comprehension Skill Profile",
+      "skillProfile": "Comprehension Skill Profile",
       "skillProfileEmpty": "Complete a reading test to see your skill breakdown.",
       "weakestSkill": "Focus area: {{skill}}",
       "accuracy": "Accuracy",
@@ -2362,7 +2234,6 @@
     },
     "activities": {
       "readText": "Read Text",
-      "preReading": "Before You Read",
       "summary": "Summary",
       "mindMap": "Mind Map",
       "visualization": "Text Visualization",
@@ -2370,7 +2241,6 @@
       "simplifiedText": "Simplified Text",
       "sentenceAnalysis": "Sentence Analysis",
       "glossary": "Glossary",
-      "collocations": "Phrases & Collocations",
       "spellingGame": "Spelling Game",
       "vocabQuiz": "Vocab Quiz",
       "readingTest": "Reading Test",
@@ -2420,7 +2290,7 @@
           },
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing your daily learning activities across 17 types including reading, pre-reading summaries, mind maps, text visualizations, glossary, collocations, flashcard reviews, tests, quizzes, spelling and grammar games, and AI Tutor questions. Use the time range buttons to adjust the window."
+            "desc": "A stacked bar chart showing your daily learning activities across 15 types including reading, summaries, mind maps, text visualizations, tests, quizzes, spelling games, and more. Use the time range buttons to adjust the window."
           },
           "readingActivity": {
             "name": "Reading Activity",
@@ -2428,7 +2298,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A horizontal bar chart breaking down your usage of 11 AI-powered features: pre-reading summaries, mind maps (English and Chinese shown as stacked segments), text visualizations, adapted texts, simplified texts, sentence analysis, glossary, phrases & collocations, grammar analysis, and AI Tutor questions."
+            "desc": "A horizontal bar chart breaking down your usage of 9 AI-powered features: summaries, mind maps (English and Chinese separately), text visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar analysis, and AI Tutor questions."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",
@@ -2461,10 +2331,6 @@
           "vocabularyGrowth": {
             "name": "Vocabulary Growth",
             "desc": "An area chart tracking your cumulative vocabulary growth over time. Choose from 13 time ranges (1W to 3Y) to view your vocabulary accumulation over different periods."
-          },
-          "skillProfile": {
-            "name": "Reading Comprehension Skill Profile",
-            "desc": "A radar chart showing your accuracy across 5 reading comprehension skills (Main Idea, Detail, Inference, Vocabulary, Purpose), aggregated from every completed reading test. The caption highlights your weakest skill so you can focus your practice."
           }
         },
         "tip": {
@@ -2549,7 +2415,6 @@
     "avg": "Avg",
     "avgScore": "Avg Score",
     "total": "Total",
-    "students": "Students",
     "empty": "No student data found for the selected class.",
     "charts": {
       "dailyActivity": "Daily Learning Activity",
@@ -2560,7 +2425,6 @@
       "spellingScore": "Spelling Score",
       "spellingAccuracy": "Spelling Accuracy",
       "vocabularyGrowth": "Vocabulary Growth",
-      "skillAverages": "Class Reading Comprehension Skill Profile",
       "pickDate": "Pick a date"
     },
     "quartiles": {
@@ -2592,11 +2456,11 @@
         "functions": "Features"
       },
       "charts": {
-        "intro": "The dashboard provides 14 visual charts to help you monitor student progress, identify learning gaps, and track engagement at a glance.",
+        "intro": "The dashboard provides 12 visual charts to help you monitor student progress, identify learning gaps, and track engagement at a glance.",
         "items": {
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 17 activity types."
+            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 15 activity types."
           },
           "readingTexts": {
             "name": "Reading Texts",
@@ -2612,7 +2476,7 @@
           },
           "aiFeatures": {
             "name": "AI Features Usage",
-            "desc": "A stacked bar chart breaking down how each student uses 11 AI-powered features: pre-reading summaries, mind maps, visualizations, adapted texts, simplified texts, sentence analysis, glossary, phrases & collocations, grammar, and AI Tutor."
+            "desc": "A stacked bar chart breaking down how each student uses 9 AI-powered features: summaries, mind maps, visualizations, adapted texts, simplified texts, sentence analysis, glossary, grammar, and AI Tutor."
           },
           "readingTestDist": {
             "name": "Reading Test Score Distribution",
@@ -2645,15 +2509,11 @@
           "vocabularyGrowth": {
             "name": "Vocabulary Growth",
             "desc": "A multi-line area chart tracking cumulative vocabulary growth over time for each student. Choose from 13 time ranges (1W to 3Y) and toggle individual students on/off."
-          },
-          "skillAverages": {
-            "name": "Class Reading Comprehension Skill Profile",
-            "desc": "A radar chart showing the class's average accuracy across 5 reading comprehension skills (Main Idea, Detail, Inference, Vocabulary, Purpose), aggregated from every completed reading test. The caption highlights the class's weakest skill so you can target instruction."
           }
         },
         "tip": {
           "title": "Pro Tip:",
-          "content": "Use the Excel export to capture all 14 charts with detailed student data for offline analysis, parent meetings, or progress reports."
+          "content": "Use the Excel export to capture all 13 charts with detailed student data for offline analysis, parent meetings, or progress reports."
         }
       },
       "functions": {
@@ -2701,7 +2561,7 @@
           },
           "excelExport": {
             "name": "Export to Excel",
-            "desc": "Generate a comprehensive Excel report with all 14 charts as images plus 3 data sheets: Student Overview, AI Features breakdown, and Score Details with conditional formatting."
+            "desc": "Generate a comprehensive Excel report with all 12 charts as images plus 3 data sheets: Student Overview, AI Features breakdown, and Score Details with conditional formatting."
           }
         },
         "tip": {
@@ -2786,15 +2646,12 @@
     "tabTTS": "TTS",
     "model": "Model",
     "visionModel": "Vision Model",
-    "prereadingModel": "Pre-reading Model",
     "summaryModel": "Summary Model",
     "mindMapModel": "Mind Map Model",
     "adaptedTextModel": "Adapt Text Model",
     "simplifyModel": "Simplify Text Model",
     "readingTestModel": "Reading Test Model",
     "glossaryModel": "Glossary Model",
-    "suggestVocabModel": "Suggest Vocabulary Model",
-    "collocationModel": "Collocations Model",
     "sentenceAnalysisModel": "Sentence Analysis Model",
     "grammarModel": "Grammar Model",
     "readingTextModel": "Reading Text Generator Model",
@@ -3078,8 +2935,7 @@
       "studentData": "Student Data",
       "schools": "Schools",
       "aiQuestions": "AI Questions",
-      "subscriptions": "Subscriptions",
-      "backfill": "Title Backfill"
+      "subscriptions": "Subscriptions"
     },
     "roles": {
       "superAdmin": "Super Admin",
@@ -3087,39 +2943,6 @@
       "admin": "Admin",
       "teacher": "Teacher",
       "student": "Student"
-    },
-    "backfill": {
-      "description": "Re-extracts the real title from each text via AI, replacing the AI-generated descriptive titles stored in doc_title. Run a dry run first to preview, then propagate the refreshed titles to shared sessions, assignments, and chat questions.",
-      "configTitle": "Configuration",
-      "provider": "AI Provider",
-      "model": "Model",
-      "concurrency": "Concurrency",
-      "maxChars": "Max chars/call",
-      "limit": "Row limit (0 = all)",
-      "dryRun": "Dry run (preview, no writes)",
-      "onlyEmpty": "Only blank titles",
-      "includeRepository": "Include text repository",
-      "refreshCount": "Refresh count",
-      "rowsToProcess": "Rows to process: {{count}}",
-      "counting": "Counting rows…",
-      "nothingToDo": "Nothing to do",
-      "preview": "Preview (dry run)",
-      "start": "Start backfill",
-      "stop": "Stop",
-      "running": "Running…",
-      "complete": "Complete",
-      "changed": "Changed",
-      "skipped": "Skipped",
-      "failed": "Failed",
-      "dryRunBadge": "DRY RUN",
-      "summary": "Changed {{changed}}, skipped {{skipped}}, failed {{failed}}.",
-      "statsError": "Failed to load row counts",
-      "propagateTitle": "Propagate Titles",
-      "propagateDesc": "After backfilling reading_sessions, copy the refreshed titles into shared_sessions, assignments, and chat_questions. Idempotent — only updates rows whose title differs.",
-      "propagate": "Propagate to denormalized tables",
-      "propagateDone": "Propagation complete",
-      "propagateError": "Propagation failed",
-      "propagateResult": "Updated — shared sessions: {{sharedSessions}}, assignments: {{assignments}}, chat questions: {{chatQuestions}}."
     },
     "users": {
       "descriptionSuperAdmin": "Manage all users across all schools. Super-admins can assign any role including admin.",

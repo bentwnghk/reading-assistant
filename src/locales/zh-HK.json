@@ -35,9 +35,7 @@
     "auth": {
       "signIn": "使用 Google 登入",
       "signOut": "登出",
-      "loading": "載入中...",
-      "stuck": "載入時間比平常長。",
-      "reload": "重新載入"
+      "loading": "載入中..."
     },
     "shortcuts": {
       "title": "鍵盤快捷鍵",
@@ -166,7 +164,7 @@
         },
         "test": {
           "title": "閱讀測驗",
-          "desc": "6 種題型、5 項技能、技能分析、重做錯題，還有「針對性練習」會跨每次閱讀工作階段記住你的弱項，反覆訓練直到進步！"
+          "desc": "6 種題型、5 項技能測試，附技能分析，你可以選擇重做錯題或針對性練習弱項！"
         },
         "achievements": {
           "title": "成就系統",
@@ -203,16 +201,11 @@
         "aiTextGenerator": {
           "title": "AI 文本生成器",
           "desc": "手頭沒有文本？輸入主題、選擇文體與長度，AI 便會按你的年齡與 CEFR 等級撰寫一篇適齡的閱讀文章——附帶難度檢查，並可一鍵重新生成較易或較難的版本。"
-        },
-        "preReading": {
-          "title": "閱讀前準備",
-          "desc": "閱讀前先做好準備！激活已有知識、認識文化背景、設定閱讀目標，並預習關鍵詞。然後略讀標題、小標題及首尾兩段，預測文章內容——讀後再核對你的預測。"
         }
       },
       "workflow": {
         "title": "你的學習旅程",
         "upload": "透過上傳圖片/PDF、文本庫或 AI 文本生成器選擇文本",
-        "preReading": "閱讀前激活知識、學習關鍵詞、略讀並作出預測",
         "summary": "獲取內容的快速摘要",
         "mindmap": "用互動思維導圖探索",
         "visualization": "用 AI 生成的彩色圖像將主要意念視覺化",
@@ -237,9 +230,7 @@
         "inference": "🧩 推論",
         "vocabulary": "📚 詞彙",
         "purpose": "✍️ 作者目的",
-        "grammar": "📐 語法",
-        "skimming": "👁️ 略讀與掃讀",
-        "prediction": "🔮 預測"
+        "grammar": "📐 語法"
       },
       "builtWith": "Mr.🆖 為學習英語的學生用 ❤️ 打造",
       "builtWithPoweredByPrefix": " · 由 ",
@@ -248,7 +239,7 @@
         "title": "常見問題",
         "q1": {
           "q": "我正在閱讀一篇很難理解的文章，Mr.🆖 ProReader 可以怎樣幫助我？",
-          "a": "<p>Mr.🆖 ProReader 正是為這種情況而設計的。只需上傳你的文章（或拍一張照片），AI 就會從多方面為你提供幫助：</p><ol><li><strong>閱讀前準備</strong> — 在開始前先做好準備：激活你已知的知識、認識文化背景與關鍵詞，然後略讀標題、小標題及首尾兩段，預測文章內容。讀後再核對你的預測有多準確。</li><li><strong>即時摘要及思維導圖</strong> — 獲取清晰的摘要、重點和視覺化思維導圖，讓你在深入細節之前先掌握大意。</li><li><strong>AI 文本可視化圖像</strong> — AI 生成一張生動的彩色圖像，將主要意念呈現眼前！根據文本體裁自動選擇最合適的風格——資訊圖表、漫畫、卡通或繪畫。支援英文和中文。</li><li><strong>簡化及改寫文本</strong> — 應用程式會以你的程度，使用較簡單的詞彙和較短的句子改寫文章，同時保留原文意思。</li><li><strong>詞彙表</strong> — 每一個生詞都會被標記並附有雙語釋義、音節劃分和例句。你之後可以透過間隔重複的字卡、拼字遊戲和測驗來複習。</li><li><strong>語法分析</strong> — 識別並解釋複雜的語法結構，附有從文章中提取的句式和例子，以及互動語法遊戲來鞏固你的理解。</li><li><strong>AI 導師</strong> — 一位對話式 AI 導師隨時待命。你可以問它任何關於文章的問題——標記一個令人困惑的句子，它會逐步為你拆解。</li><li><strong>閱讀理解測試</strong> — 當你覺得準備好了，可以參加自動生成的測驗，涵蓋主旨、細節、推論等，每道題都有詳細解釋。</li></ol><p>把 Mr.🆖 ProReader 想像成一位耐心的個人導師，將任何困難的文本轉化為可學習的體驗。</p>"
+          "a": "<p>Mr.🆖 ProReader 正是為這種情況而設計的。只需上傳你的文章（或拍一張照片），AI 就會從多方面為你提供幫助：</p><ol><li><strong>即時摘要及思維導圖</strong> — 獲取清晰的摘要、重點和視覺化思維導圖，讓你在深入細節之前先掌握大意。</li><li><strong>AI 文本可視化圖像</strong> — AI 生成一張生動的彩色圖像，將主要意念呈現眼前！根據文本體裁自動選擇最合適的風格——資訊圖表、漫畫、卡通或繪畫。支援英文和中文。</li><li><strong>簡化及改寫文本</strong> — 應用程式會以你的程度，使用較簡單的詞彙和較短的句子改寫文章，同時保留原文意思。</li><li><strong>詞彙表</strong> — 每一個生詞都會被標記並附有雙語釋義、音節劃分和例句。你之後可以透過間隔重複的字卡、拼字遊戲和測驗來複習。</li><li><strong>語法分析</strong> — 識別並解釋複雜的語法結構，附有從文章中提取的句式和例子，以及互動語法遊戲來鞏固你的理解。</li><li><strong>AI 導師</strong> — 一位對話式 AI 導師隨時待命。你可以問它任何關於文章的問題——標記一個令人困惑的句子，它會逐步為你拆解。</li><li><strong>閱讀理解測試</strong> — 當你覺得準備好了，可以參加自動生成的測驗，涵蓋主旨、細節、推論等，每道題都有詳細解釋。</li></ol><p>把 Mr.🆖 ProReader 想像成一位耐心的個人導師，將任何困難的文本轉化為可學習的體驗。</p>"
         },
         "q2": {
           "q": "如果文章中有我不懂的生字或短語，我可以怎麼做？",
@@ -354,21 +345,7 @@
           "原文 · 改寫 · 簡化",
           "心智圖與 AI 視覺化圖像",
           "CEFR 程度與可讀性分數"
-        ],
-        "carousel": {
-          "label": "理解功能",
-          "slideCount": "共 {{count}} 張",
-          "mindmap": "心智圖",
-          "visualization": "AI 圖像化呈現",
-          "original": "文本分析 · 原文",
-          "adapted": "文本分析 · 改寫版",
-          "simplified": "文本分析 · 簡化版",
-          "difficulty": "難度與 CEFR 標記",
-          "prev": "上一張",
-          "next": "下一張",
-          "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",
-          "indicator": "第 {{n}} / {{count}} 張：{{label}}"
-        }
+        ]
       },
       "tutor": {
         "eyebrow": "AI 導師",
@@ -389,50 +366,17 @@
           "4 款拼字與詞彙遊戲",
           "5 款語法遊戲",
           "與同學進行即時拼字對戰 🆕"
-        ],
-        "carousel": {
-          "label": "練習功能",
-          "slideCount": "共 {{count}} 張",
-          "flashcardFront": "字卡 · 正面",
-          "flashcardBack": "字卡 · 背面",
-          "spellingListen": "拼字 · 聽音拼字",
-          "spellingFill": "拼字 · 填空",
-          "spellingScramble": "拼字 · 字母重組",
-          "grammarTopics": "語法主題",
-          "grammarRoulette": "語法輪盤",
-          "grammarSurgery": "錯字手術",
-          "grammarWorkshop": "語法工坊",
-          "battleLobby": "拼字對戰大廳",
-          "prev": "上一張",
-          "next": "下一張",
-          "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",
-          "indicator": "第 {{n}} / {{count}} 張：{{label}}"
-        }
+        ]
       },
       "master": {
-        "eyebrow": "Master",
-        "title": "看見自己的進步。",
-        "lede": "完成閱讀測驗後，能力分析會跨每次閱讀工作階段記住你的弱項——接著「針對性練習」會自動生成題目，反覆訓練直到弱項變強項。同時挑戰排行榜、解鎖成就，並建立屬於你自己的詞彙庫。",
+        "eyebrow": "精通",
+        "title": "看著自己不斷進步。",
+        "lede": "做完閱讀測驗，看著各項技能分數上升。在排行榜上競爭，沿途解鎖成就，並建立一套跟著你走的詞彙庫。",
         "bullets": [
-          "閱讀測驗附技能分析",
-          "依能力分析自動生成針對性練習",
+          "附技能分析的閱讀測驗",
           "排行榜與成就",
-          "我的詞彙中樞，含掌握度追蹤"
-        ],
-        "carousel": {
-          "label": "精通功能",
-          "slideCount": "共 {{count}} 張",
-          "results": "閱讀測驗結果",
-          "practice": "針對性練習",
-          "achievements": "成就",
-          "leaderboard": "排行榜",
-          "words": "我的詞彙：單字",
-          "spelling": "拼字遊戲設定",
-          "prev": "上一張",
-          "next": "下一張",
-          "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",
-          "indicator": "第 {{n}} / {{count}} 張：{{label}}"
-        }
+          "我的詞彙中樞與熟練度追蹤"
+        ]
       }
     },
     "classrooms": {
@@ -547,7 +491,6 @@
       "orClick": "或點擊選擇",
       "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP、PDF",
       "extracting": "正在提取文字...",
-      "extractingWait": "正在從圖片提取文字... 這可能需要 1-2 分鐘，請稍候。",
       "extractingProgress": "正在提取文字（{{current}}/{{total}}）...",
       "processingPdf": "正在處理 PDF...",
       "uploadNew": "點擊上方 [+ 新文本] 按鈕以重新開始",
@@ -604,7 +547,7 @@
       "reset": "自動",
       "generateButton": "生成閱讀文本",
       "generating": "生成中...",
-      "generatingWait": "正在生成你的閱讀文本... 這可能需要 1-2 分鐘，請稍候。",
+      "generatingWait": "正在生成你的閱讀文本，請稍候...",
       "regenerateEasier": "較易",
       "regenerateHarder": "較難",
       "qcTitle": "生成文本資料",
@@ -733,19 +676,10 @@
       "generate": "準備閱讀前活動",
       "regenerate": "重新生成",
       "generating": "準備中...",
-      "generatingWait": "正在準備閱讀前活動... 這可能需要最多 1 分鐘，請稍候。",
+      "generatingWait": "正在準備閱讀前活動...",
       "emptyTip": "點擊上方按鈕，在閱讀前激活已有知識、預習關鍵詞彙並設定閱讀目標。",
-      "predictionPlaceholder": "先略讀上方文字，然後輸入你認為這篇文章會關於甚麼...",
-      "skimLabel": "先略讀",
-      "skimHint": "好的讀者先略讀再預測",
-      "skimGuide": "略讀是指快速看過標題、小標題，以及首尾兩段以掌握大意——而非逐字細讀。先略讀，再作預測。",
-      "skim": {
-        "title": "標題",
-        "firstParagraph": "首段",
-        "headings": "小標題",
-        "topicSentences": "主題句",
-        "lastParagraph": "尾段"
-      },
+      "predictionPlaceholder": "輸入你認為這篇文章會關於甚麼...",
+      "titleHint": "標題：{{title}}",
       "purposeLabel": "閱讀目標",
       "activationLabel": "激活你的知識",
       "preTeachLabel": "先認識這些關鍵詞",
@@ -761,66 +695,62 @@
         "veryClose": "非常準確"
       },
       "help": {
-        "title": "閱讀前準備指南",
+        "title": "閱讀前準備",
         "intro": "閱讀前先做好準備，讓文本更易理解。",
         "itemsBaseKey": "reading.preReading.help.items",
         "items": {
           "activate": { "name": "激活", "desc": "把主題與你已知的知識連繫起來。" },
-          "background": { "name": "背景", "desc": "認識文章假設你已具備的文化或背景知識。" },
-          "purpose": { "name": "目標", "desc": "設定清晰的閱讀目標——找出要留意的事。" },
-          "preteach": { "name": "預習", "desc": "先學會開始前所需的關鍵詞。" },
-          "predict": { "name": "預測", "desc": "先略讀，再猜測文章內容，讀後核對。" }
+          "predict": { "name": "預測", "desc": "先猜測文章內容，讀後再核對。" },
+          "preteach": { "name": "預習", "desc": "先學會開始前所需的關鍵詞。" }
         },
         "stepsTitle": "運作方式",
         "steps": {
-          "s1": "點擊「準備閱讀前活動」以生成活動。",
-          "s2": "由上而下：激活知識、閱讀背景、設定目標，並學習關鍵詞。",
-          "s3": "略讀標題、小標題及首尾兩段，然後輸入你的預測。",
-          "s4": "讀完並取得摘要後，評估你的預測有多準確。"
+          "s1": "點擊「準備閱讀前活動」。",
+          "s2": "閱讀提示和關鍵詞，然後輸入你的預測。",
+          "s3": "讀完並取得摘要後，比較你的預測。"
         },
         "tipTitle": "提示",
-        "tipContent": "先略讀、再預測——能令你更專注、記得更多。"
+        "tipContent": "先作預測能幫助你更專注、記得更多。"
       }
     },
     "collocations": {
       "title": "詞組與搭配詞",
-      "listen": "聆聽 {{chunk}}",
       "generate": "提取搭配詞",
       "regenerate": "重新生成",
       "generating": "提取中...",
-      "generatingWait": "正在提取搭配詞及母語轉移提示... 這可能需要 1-2 分鐘，請稍候。",
+      "generatingWait": "正在提取搭配詞及母語轉移提示...",
       "emptyTip": "點擊上方按鈕提取實用詞組與搭配詞，並附上常見粵語母語轉移錯誤提示。",
+      "inText": "文中出現：{{count}} 次",
       "addToPhrases": "加入詞組",
-      "addedButton": "已加入詞組庫",
-      "added": "已將「{{chunk}}」加入你的詞組庫。",
+      "addedButton": "已加入詞組",
+      "added": "已將「{{chunk}}」加入你的詞組。",
       "addAll": "全部加入詞組",
       "addAllSuccess": "已將所有詞組加入你的詞組庫。",
       "addError": "無法加入詞組，請重試。",
       "parseError": "無法解析搭配詞，請重試。",
       "help": {
-        "title": "詞組與搭配詞指南",
-        "intro": "掌握文本中的多詞表達，並學會避開粵語使用者最常犯的錯誤。",
+        "title": "詞組與搭配詞",
+        "intro": "學習多詞詞組，避免常見的粵語母語轉移錯誤。",
         "itemsBaseKey": "reading.collocations.help.items",
         "items": {
-          "chunks": { "name": "詞塊", "desc": "從文本中抽取的多詞表達——動詞短語、搭配詞及固定表達——每個都附有釋義與例句。" },
-          "contrast": { "name": "對比提示", "desc": "標示粵語使用者最常犯的錯誤，幫助你察覺並避免。" },
-          "phrases": { "name": "加入詞組庫", "desc": "將任何詞塊送到「我的詞彙」的「詞組」分頁，進行間隔複習。" }
+          "chunks": { "name": "詞組", "desc": "動詞短語、搭配詞和固定表達。" },
+          "contrast": { "name": "對比", "desc": "說明粵語使用者常犯的錯誤。" },
+          "phrases": { "name": "詞組", "desc": "將詞組加入你的詞組複習佇列。" }
         },
         "stepsTitle": "運作方式",
         "steps": {
-          "s1": "點擊「提取搭配詞」，系統會掃描文本找出實用的多詞表達。",
-          "s2": "閱讀每個詞塊的對比提示，了解應避免怎樣的表達。",
-          "s3": "在想日後複習的詞塊上點擊「加入詞組」。"
+          "s1": "點擊「提取搭配詞」。",
+          "s2": "閱讀對比提示以避免母語轉移錯誤。",
+          "s3": "將實用詞組加入「詞組」分頁進行複習。"
         },
         "tipTitle": "提示",
-        "tipContent": "約一半的香港學生搭配詞錯誤源自逐字翻譯——「對比提示」正是揪出這類錯誤的地方。"
+        "tipContent": "約一半的香港學生搭配詞錯誤源自逐字翻譯——重點留意對比提示。"
       }
     },
     "summary": {
       "title": "摘要",
       "generate": "生成摘要",
       "generating": "正在生成...",
-      "generatingWait": "正在生成摘要... 這可能需要最多 30 秒，請稍候。",
       "regenerate": "重新生成",
       "emptyTip": "點擊上方按鈕生成文本摘要",
       "oneSentence": "一句話總結",
@@ -858,14 +788,12 @@
       "title": "文本分析和改寫",
       "adapt": "改寫",
       "adapting": "正在改寫...",
-      "adaptingWait": "正在生成改寫文本... 這可能需要 1-2 分鐘，請稍候。",
       "originalTab": "原文",
       "adaptedTab": "改寫版本",
       "simplifiedTab": "簡化版本",
       "emptyTip": "點擊上方按鈕將文本改寫至你的程度",
       "simplifyFurther": "進一步簡化",
       "simplifying": "正在簡化...",
-      "simplifyingWait": "正在生成簡化文本... 這可能需要 1-2 分鐘，請稍候。",
       "simplifiedEmptyTip": "點擊下方按鈕創建更簡單的版本",
       "generateSimplified": "生成簡化版本",
       "goToOriginal": "跳轉到原文",
@@ -883,7 +811,7 @@
       "regenerating": "正在重新改寫...",
       "suggestLabel": "自動標示值得學習的生字：",
       "suggestButton": "建議",
-      "suggesting": "正在建議... 這可能需要最多 1 分鐘，請稍候。",
+      "suggesting": "正在建議...",
       "suggestSuccess": "已新增 {{added}} 個生字（共標示 {{total}} 個）",
       "suggestParseError": "無法解析AI回應，請再試一次。",
       "help": {
@@ -950,57 +878,38 @@
       "title": "思維導圖",
       "generate": "生成思維導圖",
       "generating": "正在生成...",
-      "generatingWait": "正在生成思維導圖... 這可能需要最多 30 秒，請稍候。",
       "regenerate": "重新生成",
       "emptyTip": "點擊上方按鈕生成視覺化思維導圖",
       "chineseLabel": "中文",
       "download": "下載",
-      "downloadError": "無法匯出思維導圖，請再試一次。",
-      "hint": "拖曳平移 · 滾輪縮放 · 點擊分支摺疊",
-      "renderer": "思維導圖樣式",
-      "rendererTree": "樹狀",
-      "rendererMap": "放射狀",
-      "legacyTreeHint": "此思維導圖使用舊格式，重新生成即可顯示為互動樹狀圖。",
-      "zoomIn": "放大",
-      "zoomOut": "縮小",
-      "resetView": "重置檢視",
       "help": {
         "title": "思維導圖指南",
-        "intro": "以視覺化方式呈現文本中概念的連繫。可選擇可平移、縮放、摺疊的互動「樹狀」圖，或經典的「放射狀」思維導圖，並隨時切換。",
+        "intro": "以視覺化的地圖，呈現文本中主題與子主題之間的關係。",
         "items": {
-          "views": {
-            "name": "兩種檢視",
-            "desc": "選擇互動「樹狀」或經典「放射狀」版面。你的選擇會被記住，並可隨時切換。"
-          },
-          "interact": {
-            "name": "探索樹狀圖",
-            "desc": "拖曳平移、滾輪或雙指縮放、點擊分支摺疊，點擊節點即可放大至該處。"
+          "structure": {
+            "name": "視覺結構",
+            "desc": "主題會分支成子主題，讓你一眼看清文章的結構。"
           },
           "bilingual": {
             "name": "雙語支援",
             "desc": "切換「中文」即可生成繁體中文版本的思維導圖。"
-          },
-          "export": {
-            "name": "儲存為 PNG",
-            "desc": "點擊「下載」可將目前檢視（樹狀或放射狀）匯出為 PNG 圖片。"
           }
         },
         "stepsTitle": "如何使用",
         "steps": {
           "s1": "點擊「生成思維導圖」。",
-          "s2": "使用「樹狀／放射狀」切換選擇版面。",
-          "s3": "在樹狀圖中，拖曳平移、滾輪或雙指縮放，並點擊分支摺疊。",
-          "s4": "切換「中文」取得繁體中文版本，並點擊「下載」將圖片儲存為 PNG。"
+          "s2": "瀏覽各個分支，了解概念如何連繫。",
+          "s3": "切換「中文」以取得繁體中文版本。"
         },
         "tipTitle": "小貼士",
-        "tipContent": "用「樹狀」檢視專注於單一分支，或用「放射狀」一次看清全貌。"
+        "tipContent": "思維導圖非常適合在測驗前快速溫習文章結構。"
       }
     },
     "visualization": {
       "title": "文本視覺化",
       "generate": "生成視覺化圖像",
       "generating": "正在生成...",
-      "generatingWait": "正在生成視覺化圖像... 這可能需要最多 30 秒，請稍候。",
+      "generatingWait": "正在生成視覺化圖像...通常需要 1-2 分鐘，請稍候。",
       "regenerate": "重新生成",
       "download": "下載",
       "chineseLabel": "中文",
@@ -1039,7 +948,7 @@
       "title": "閱讀測驗",
       "generate": "生成測驗",
       "generating": "正在生成...",
-      "generatingWait": "正在生成閱讀測驗... 這可能需要 1-2 分鐘，請稍候。",
+      "generatingWait": "正在生成閱讀測驗...通常需要 1-2 分鐘，請稍候。",
       "submit": "提交答案",
       "retry": "重新作答",
       "emptyTip": "點擊上方按鈕生成閱讀理解測驗 (請稍候 1-2 分鐘)",
@@ -1091,11 +1000,7 @@
       "retryMissed": "重做錯題 ({{count}})",
       "practiceMissedSkills": "針對性練習 ({{count}} 項技能)",
       "practiceMissedSkillsDesc": "針對未掌握的技能生成新的練習題",
-      "practiceSkills": "針對這些技能練習 ({{count}} 項)",
-      "practiceSkillsDesc": "針對下方列出的技能生成新的練習題。",
-      "practiceSkillsDescWithHistory": "針對你今天答錯的技能，加上你長期需要加強的領域（{{skill}}）生成練習題。",
-      "fromHistory": "歷史弱項",
-      "practiceGeneratingWait": "正在生成針對性練習... 這可能需要 1-2 分鐘，請稍候。",
+      "practiceGeneratingWait": "正在生成針對性練習...通常需要 1-2 分鐘，請稍候。",
       "downloadWord": "下載 Word",
       "downloadBlank": "下載空白試卷",
       "downloadWithAnswers": "下載含答案",
@@ -1146,7 +1051,7 @@
       "title": "語法",
       "analyze": "分析語法",
       "analyzing": "正在分析...",
-      "analyzingWait": "正在分析語法主題... 這可能需要 1-2 分鐘，請稍候。",
+      "analyzingWait": "正在分析語法主題...通常需要 1-2 分鐘，請稍候。",
       "regenerate": "重新分析",
       "downloadWord": "下載 Word",
       "exportDownload": "下載",
@@ -1171,7 +1076,7 @@
       "lesson": {
         "loadFullLesson": "載入完整課程",
         "reloadLesson": "重新載入課程",
-        "generatingWait": "正在建立完整的語法課程… 這可能需要最多 1 分鐘，請稍候。",
+        "generatingWait": "正在建立完整的語法課程… 通常需要 30-60 秒。",
         "loadedHint": "完整課程已載入",
         "whenToUse": "何時使用",
         "signalWords": "標誌詞",
@@ -1243,7 +1148,7 @@
         "generate": "生成測驗",
         "regenerate": "新測驗",
         "generateFirst": "生成測驗以練習此文本的語法",
-        "generatingWait": "正在生成語法測驗... 這可能需要 1-2 分鐘，請稍候。",
+        "generatingWait": "正在生成語法測驗...通常需要 1-2 分鐘，請稍候。",
         "start": "開始測驗",
         "lastScore": "上次得分：",
         "submit": "提交答案",
@@ -1327,7 +1232,7 @@
         "backToGames": "返回遊戲",
         "generateChallenges": "新挑戰",
         "generating": "正在生成...",
-        "generatingWait": "正在生成新挑戰... 這可能需要 1-2 分鐘，請稍候。",
+        "generatingWait": "正在生成新挑戰，請稍候...",
         "score": "得分",
         "accuracy": "準確率",
         "streak": "最高連勝",
@@ -1443,12 +1348,11 @@
       "title": "詞彙",
       "generate": "生成詞彙表",
       "generating": "正在生成...",
-      "generatingWait": "正在生成詞彙表... 這可能需要 1-2 分鐘，請稍候。",
+      "generatingWait": "正在生成詞彙表...通常需要 1-2 分鐘，請稍候。",
       "regenerate": "重新生成",
       "downloadWord": "下載 Word",
       "downloadExcel": "下載 Excel",
       "word": "生字",
-      "phrase": "詞組",
       "syllabification": "音節",
       "partOfSpeech": "詞性",
       "englishDefinition": "英文解釋",
@@ -1456,14 +1360,10 @@
       "example": "例句",
       "emptyTip": "點擊上方按鈕為 {{count}} 個已標記生字生成解釋 (請稍候 1-2 分鐘)",
       "noHighlightedWords": "請先在原文中標記生字。為獲得最佳效果，建議標記 10-30 個生字。",
-      "listen": "聆聽 {{word}}",
-      "tabWords": "單詞",
-      "tabPhrases": "詞組",
+      "tabTable": "表格",
       "tabFlashcard": "字卡",
       "tabQuiz": "測驗",
       "tabSpelling": "拼字",
-      "wordsEmpty": "此詞彙表沒有單詞。",
-      "phrasesEmpty": "此詞彙表沒有多詞詞組。",
       "prioritizeHard": "優先複習難字",
       "prioritizeHardDesc": "先練習你標記為困難的詞彙",
       "wordStats": "{{hard}} 個難，{{medium}} 個中，{{easy}} 個易",
@@ -1570,13 +1470,9 @@
         "title": "詞彙指南",
         "intro": "透過四個有趣、互動的模式，學習並掌握文本中的生字。",
         "items": {
-          "words": {
-            "name": "單詞",
-            "desc": "單詞條目，提供雙語解釋（英文＋中文）、音節劃分及例句。"
-          },
-          "phrases": {
-            "name": "詞組",
-            "desc": "多詞條目（短語動詞、搭配詞、慣用語），獨立分類以便集中學習。可隨時在「我的詞彙」頁面複習。"
+          "table": {
+            "name": "詞彙表",
+            "desc": "為每個生字提供雙語解釋（英文＋中文）、音節劃分及例句。"
           },
           "flashcard": {
             "name": "字卡",
@@ -1686,8 +1582,6 @@
         "multiplayer": {
           "title": "多人拼字對戰",
           "subtitle": "與其他玩家進行即時拼字對決",
-          "navTitle": "拼字對戰",
-          "dialogDesc": "建立房間擔任主持人，或輸入房間代碼加入現有對戰。",
           "connecting": "正在連線到對戰伺服器…",
           "retry": "重試",
           "unavailable": "此伺服器未啟用多人對戰。",
@@ -1763,6 +1657,8 @@
           "noInvites": "沒有待處理的邀請。",
           "filter": "篩選",
           "filterAll": "全部詞彙",
+          "filterDue": "待複習",
+          "filterHard": "困難詞彙",
           "selectList": "選擇清單…",
           "speedBonus": "速度加成",
           "speedBonusDesc": "依答題速度，每題正確可得最高 +50 分加成。每題的計時不會關閉。",
@@ -1857,7 +1753,7 @@
       "vocabQuiz": "詞彙測驗",
       "help": {
         "title": "學習進度指南",
-        "intro": "看看你完成了多少。進度追蹤器會顯示你在 15 個閱讀活動中的進度。",
+        "intro": "看看你完成了多少。進度追蹤器會顯示你在 13 個閱讀活動中的進度。",
         "items": {
           "steps": {
             "name": "步驟圓圈",
@@ -1879,7 +1775,7 @@
           "s3": "點擊步驟即可捲動到該部分。"
         },
         "tipTitle": "小貼士",
-        "tipContent": "提取文本後，第 2 至第 15 步即會解鎖。你隨時可以重訪任何部分。"
+        "tipContent": "提取文本後，第 2 至第 13 步即會解鎖。你隨時可以重訪任何部分。"
       }
     },
     "tutor": {
@@ -1951,7 +1847,7 @@
     "title": "我的詞彙",
     "dueBadgeHint": "{{count}} 個詞彙待複習",
     "close": "返回應用程式",
-     "tabWords": "單詞",
+    "tabTable": "表格",
     "tabFlashcard": "字卡",
     "tabPhrases": "詞組",
     "tabSpelling": "拼寫",
@@ -1962,19 +1858,22 @@
     "emptyDesc": "開始閱讀以收集詞彙。它們會出現在這裡供你複習。",
     "startReading": "開始閱讀",
     "phrases": {
+      "count": "{{count}} 個詞組",
       "empty": "還沒有詞組。",
-      "listen": "聆聽 {{phrase}}",
       "emptyHint": "從閱讀篇章提取搭配詞並加入這裡。",
       "startFlashcard": "字卡複習",
       "startQuiz": "測驗",
-      "startUnscramble": "重組詞組遊戲",
+      "startUnscramble": "重組句子",
       "backToList": "返回列表",
-      "colPhrase": "詞組",
-      "searchPlaceholder": "搜尋詞組...",
-      "showingPhrases": "顯示 {{count}} / {{total}} 個詞組",
-      "noPhrasesMatch": "沒有符合篩選條件的詞組",
+      "colChunk": "詞組",
+      "colPattern": "類型",
+      "colMeaning": "意思",
+      "colZh": "中文釋義",
       "progress": "{{current}} / {{total}}",
       "check": "檢查",
+      "next": "下一題",
+      "retry": "重試",
+      "finish": "完成",
       "arrangeHint": "按正確順序點擊詞語",
       "allPlaced": "所有詞語已放置",
       "correct": "正確！",
@@ -1982,7 +1881,6 @@
       "historyTitle": "詞組複習記錄"
     },
     "searchPlaceholder": "搜尋詞彙...",
-    "listen": "聆聽 {{word}}",
     "allRatings": "全部評級",
     "hardOnly": "困難",
     "mediumOnly": "中等",
@@ -1999,7 +1897,6 @@
     "rowsPerPage": "每頁",
     "noWordsMatch": "沒有符合篩選條件的詞彙",
     "selectedCount": "已選擇 {{count}} 個詞彙",
-    "selectedPhrasesCount": "已選擇 {{count}} 個詞組",
     "clearSelection": "清除",
     "startReview": "開始複習",
     "source": "來源",
@@ -2066,10 +1963,8 @@
     },
     "autoSelect": "自動選擇",
     "wordCount": "詞彙數量",
-    "phraseCount": "詞組數量",
     "selectStrategy": "選擇策略",
     "selectWords": "選擇 {{count}} 個詞彙",
-    "selectPhrases": "選擇 {{count}} 個詞組",
     "word": "單詞",
     "syllabification": "音節",
     "partOfSpeech": "詞性",
@@ -2102,18 +1997,12 @@
       "new": "新詞",
       "clickToFilter": "點擊以篩選表格",
       "ownHint": "顯示自己閱讀所得的詞彙",
-      "teacherHint": "顯示老師分享的詞彙",
-      "totalPhrase": "詞組總數",
-      "ownHintPhrase": "顯示自己閱讀所得的詞組",
-      "teacherHintPhrase": "顯示老師分享的詞組",
-      "newPhrase": "新詞組"
+      "teacherHint": "顯示老師分享的詞彙"
     },
     "export": {
       "title": "匯出",
       "selectedWords": "匯出 {{count}} 個已選詞彙",
-      "selectedPhrases": "匯出 {{count}} 個已選詞組",
       "allWords": "匯出全部 {{count}} 個詞彙",
-      "allPhrases": "匯出全部 {{count}} 個詞組",
       "glossary": "詞彙表",
       "glossaryDesc": "含釋義的詞彙表格",
       "flashcard": "字卡",
@@ -2128,10 +2017,7 @@
       "hardest": "最難詞彙",
       "newest": "最新詞彙",
       "random": "隨機混合",
-      "weakest": "最弱詞彙",
-      "hardestPhrase": "最難詞組",
-      "newestPhrase": "最新詞組",
-      "weakestPhrase": "最弱詞組"
+      "weakest": "最弱詞彙"
     },
     "studyPlan": {
       "title": "準備好學習了嗎？",
@@ -2222,22 +2108,10 @@
         "table": {
           "title": "詞彙表格",
           "desc": "瀏覽、搜尋、排序和篩選所有詞彙。手動選取詞彙或使用自動選取功能，然後開始複習。"
-        },
-        "phrases": {
-          "name": "詞組",
-          "desc": "獨立的分頁，用於管理從閱讀中收集的多詞表達——搭配詞、慣用語和動詞短語。可瀏覽、篩選，並使用相同的字卡、測驗和拼寫模式複習詞組。"
-        },
-        "studyPlan": {
-          "name": "學習計劃",
-          "desc": "抵達時自動開啟的快速開始對話框。選擇一個預設（待複習、新詞、困難或隨機詞彙），再選複習模式，兩步即可開始。關閉後可自行瀏覽。"
-        },
-        "clickableStats": {
-          "name": "點擊篩選",
-          "desc": "每張統計卡都是篩選器。點擊「總詞數」可按「自己／老師」來源細分，或點擊「待複習／已掌握／新詞」直接跳到該分組。"
         }
       },
       "review": {
-        "intro": "提供三種複習模式。先選取詞彙或詞組（或接受老師分享的複習清單），再選擇複習方式。",
+        "intro": "提供三種複習模式。先選取詞彙（或接受老師分享的複習清單），再選擇複習方式。",
         "flashcard": {
           "name": "字卡複習",
           "desc": "翻開字卡查看釋義，然後使用 SRS 按鈕評估你的信心程度："
@@ -2344,7 +2218,6 @@
       "avgProgress": "平均學習進度"
     },
     "features": {
-      "preReading": "閱讀前準備",
       "summary": "摘要",
       "mindMap": "思維導圖",
       "mindMapEn": "思維導圖（英）",
@@ -2356,7 +2229,6 @@
       "simplifiedText": "簡化文本",
       "sentenceAnalysis": "句子分析",
       "glossary": "生成詞彙表",
-      "collocations": "詞組與搭配詞",
       "grammar": "語法分析",
       "tutorQuestion": "AI 導師",
       "flashcardReview": "字卡複習",
@@ -2380,7 +2252,7 @@
       "vocabularyGrowth": "詞彙增長",
       "cumulativeVocab": "累積詞彙量",
       "scoreDistribution": "測驗分數分佈",
-      "skillProfile": "閱讀理解能力分析",
+      "skillProfile": "理解能力分析",
       "skillProfileEmpty": "完成閱讀測驗以查看你的能力分佈。",
       "weakestSkill": "重點提升：{{skill}}",
       "accuracy": "準確度",
@@ -2389,7 +2261,6 @@
     },
     "activities": {
       "readText": "閱讀文本",
-      "preReading": "閱讀前準備",
       "summary": "摘要",
       "mindMap": "思維導圖",
       "visualization": "文本視覺化",
@@ -2397,7 +2268,6 @@
       "simplifiedText": "簡化文本",
       "sentenceAnalysis": "句子分析",
       "glossary": "詞彙表",
-      "collocations": "詞組與搭配詞",
       "spellingGame": "拼字遊戲",
       "vocabQuiz": "詞彙測驗",
       "readingTest": "閱讀測驗",
@@ -2447,7 +2317,7 @@
           },
           "dailyActivity": {
             "name": "每日學習活動",
-            "desc": "堆疊長條圖顯示你的每日學習活動，涵蓋 17 種類型，包括閱讀、閱讀前、摘要、思維導圖、文本視覺化、詞彙表、搭配詞、生字卡複習、測驗、問答、拼字及語法遊戲和 AI 導師提問。使用時間範圍按鈕調整顯示區間。"
+            "desc": "堆疊長條圖顯示你的每日學習活動，涵蓋 15 種類型，包括閱讀、摘要、思維導圖、文本視覺化、測驗、問答、拼字遊戲等。使用時間範圍按鈕調整顯示區間。"
           },
           "readingActivity": {
             "name": "閱讀活動",
@@ -2455,7 +2325,7 @@
           },
           "aiFeatures": {
             "name": "AI 功能使用",
-            "desc": "橫向長條圖細分你使用的 11 項 AI 功能：閱讀前、摘要、思維導圖（英文和中文以堆疊區段顯示）、文本視覺化、改寫文本、簡化文本、句子分析、詞彙表、搭配詞、語法分析及 AI 導師提問。"
+            "desc": "橫向長條圖細分你使用的 9 項 AI 功能：摘要、思維導圖（英文和中文分開計算）、文本視覺化、改寫文本、簡化文本、句子分析、詞彙表、語法分析及 AI 導師提問。"
           },
           "readingTestDist": {
             "name": "閱讀測驗分數分佈",
@@ -2488,10 +2358,6 @@
           "vocabularyGrowth": {
             "name": "詞彙增長",
             "desc": "面積圖追蹤你隨時間累積的詞彙增長。可從 13 個時間範圍（1週至3年）中選擇，查看不同時期的詞彙累積情況。"
-          },
-          "skillProfile": {
-            "name": "閱讀理解能力分析",
-            "desc": "雷達圖顯示你在 5 個閱讀理解能力（主旨、細節、推論、詞彙、目的）的正確率，數據來自每次完成的閱讀測驗。說明文字標示你最弱的能力，方便針對性練習。"
           }
         },
         "tip": {
@@ -2576,7 +2442,6 @@
     "avg": "平均",
     "avgScore": "平均分",
     "total": "合計",
-    "students": "學生",
     "empty": "所選班級沒有學生資料。",
     "charts": {
       "dailyActivity": "每日學習活動",
@@ -2587,7 +2452,6 @@
       "spellingScore": "拼字分數",
       "spellingAccuracy": "拼字正確率",
       "vocabularyGrowth": "詞彙增長",
-      "skillAverages": "全班閱讀理解能力分析",
       "pickDate": "選擇日期"
     },
     "quartiles": {
@@ -2619,11 +2483,11 @@
         "functions": "功能"
       },
       "charts": {
-        "intro": "儀表板提供 14 個視覺化圖表，幫助你監察學生進度、找出學習差距，並一目了然地追蹤參與情況。",
+        "intro": "儀表板提供 12 個視覺化圖表，幫助你監察學生進度、找出學習差距，並一目了然地追蹤參與情況。",
         "items": {
           "dailyActivity": {
             "name": "每日學習活動",
-            "desc": "堆疊長條圖顯示每位學生在特定日期的學習活動。可在日期之間切換，查看 17 種活動類型的每日明細。"
+            "desc": "堆疊長條圖顯示每位學生在特定日期的學習活動。可在日期之間切換，查看 15 種活動類型的每日明細。"
           },
           "readingTexts": {
             "name": "閱讀文本",
@@ -2639,7 +2503,7 @@
           },
           "aiFeatures": {
             "name": "AI 功能使用",
-            "desc": "堆疊長條圖細分每位學生如何使用 11 項 AI 功能：閱讀前、摘要、思維導圖、視覺化、改寫文本、簡化文本、句子分析、詞彙表、搭配詞、語法及 AI 導師。"
+            "desc": "堆疊長條圖細分每位學生如何使用 9 項 AI 功能：摘要、思維導圖、視覺化、改寫文本、簡化文本、句子分析、詞彙表、語法及 AI 導師。"
           },
           "readingTestDist": {
             "name": "閱讀測驗分數分佈",
@@ -2672,15 +2536,11 @@
           "vocabularyGrowth": {
             "name": "詞彙增長",
             "desc": "多線面積圖追蹤每位學生隨時間累積的詞彙增長。可選擇 13 個時間範圍（1週至3年），並切換顯示個別學生。"
-          },
-          "skillAverages": {
-            "name": "全班閱讀理解能力分析",
-            "desc": "雷達圖顯示全班在 5 個閱讀理解能力（主旨、細節、推論、詞彙、目的）的平均正確率，數據來自每次完成的閱讀測驗。說明文字標示全班最弱的技能，方便針對性教學。"
           }
         },
         "tip": {
           "title": "小秘訣：",
-          "content": "使用 Excel 匯出功能擷取全部 14 個圖表及詳細學生資料，方便離線分析、家長會議或進度報告。"
+          "content": "使用 Excel 匯出功能擷取全部 13 個圖表及詳細學生資料，方便離線分析、家長會議或進度報告。"
         }
       },
       "functions": {
@@ -2728,7 +2588,7 @@
           },
           "excelExport": {
             "name": "匯出至 Excel",
-            "desc": "生成包含全部 14 個圖表（以圖片形式）及 3 個資料工作表的完整 Excel 報告：學生總覽、AI 功能使用明細，以及帶條件格式化的分數詳情。"
+            "desc": "生成包含全部 12 個圖表（以圖片形式）及 3 個資料工作表的完整 Excel 報告：學生總覽、AI 功能使用明細，以及帶條件格式化的分數詳情。"
           }
         },
         "tip": {
@@ -2813,15 +2673,12 @@
     "tabTTS": "語音",
     "model": "模型",
     "visionModel": "視覺模型",
-    "prereadingModel": "讀前模型",
     "summaryModel": "摘要模型",
     "mindMapModel": "思維導圖模型",
     "adaptedTextModel": "文本改寫模型",
     "simplifyModel": "文本簡化模型",
     "readingTestModel": "閱讀測驗模型",
     "glossaryModel": "詞彙表模型",
-    "suggestVocabModel": "推薦生字模型",
-    "collocationModel": "搭配模型",
     "sentenceAnalysisModel": "句子分析模型",
     "grammarModel": "語法模型",
     "readingTextModel": "閱讀文本生成模型",
@@ -3105,8 +2962,7 @@
       "studentData": "學生數據",
       "schools": "學校",
       "aiQuestions": "AI 提問",
-      "subscriptions": "訂閱",
-      "backfill": "標題回填"
+      "subscriptions": "訂閱"
     },
     "roles": {
       "superAdmin": "超級管理員",
@@ -3114,39 +2970,6 @@
       "admin": "管理員",
       "teacher": "老師",
       "student": "學生"
-    },
-    "backfill": {
-      "description": "透過 AI 從每篇文章重新擷取真實標題，取代儲存在 doc_title 中由 AI 生成的描述性標題。請先執行預覽（模擬運行）檢視結果，再將更新的標題傳播至共享閱讀紀錄、作業及 AI 提問。",
-      "configTitle": "設定",
-      "provider": "AI 供應商",
-      "model": "模型",
-      "concurrency": "並行數",
-      "maxChars": "每次最大字元數",
-      "limit": "行數上限（0 = 全部）",
-      "dryRun": "模擬運行（預覽，不寫入）",
-      "onlyEmpty": "僅空白標題",
-      "includeRepository": "包含文章庫",
-      "refreshCount": "重新計算",
-      "rowsToProcess": "待處理行數：{{count}}",
-      "counting": "正在統計行數……",
-      "nothingToDo": "沒有需要處理的項目",
-      "preview": "預覽（模擬運行）",
-      "start": "開始回填",
-      "stop": "停止",
-      "running": "執行中……",
-      "complete": "完成",
-      "changed": "已更改",
-      "skipped": "已跳過",
-      "failed": "失敗",
-      "dryRunBadge": "模擬運行",
-      "summary": "已更改 {{changed}}，已跳過 {{skipped}}，失敗 {{failed}}。",
-      "statsError": "載入行數失敗",
-      "propagateTitle": "傳播標題",
-      "propagateDesc": "回填 reading_sessions 後，將更新的標題複製至 shared_sessions、assignments 及 chat_questions。可重複執行——只會更新標題不同的行。",
-      "propagate": "傳播至非正規化資料表",
-      "propagateDone": "傳播完成",
-      "propagateError": "傳播失敗",
-      "propagateResult": "已更新——共享閱讀紀錄：{{sharedSessions}}，作業：{{assignments}}，AI 提問：{{chatQuestions}}。"
     },
     "users": {
       "descriptionSuperAdmin": "管理所有學校的用戶。超級管理員可以指派任何角色，包括管理員。",
