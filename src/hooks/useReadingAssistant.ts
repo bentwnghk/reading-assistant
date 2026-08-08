@@ -250,6 +250,7 @@ function useReadingAssistant() {
     const { setExtractedText, setError, addOriginalImage } = readingStore;
     setGenerating("extracting", true);
     addOriginalImage(imageData);
+    const toastId = toast.info(i18next.t("reading.imageUpload.extractingWait"), { duration: Infinity });
 
     try {
       const visionModel = await createModelProvider(visionModelName);
@@ -326,6 +327,7 @@ function useReadingAssistant() {
       return "";
     } finally {
       removeAbortController("extracting");
+      toast.dismiss(toastId);
     }
   }
 
@@ -417,6 +419,7 @@ function useReadingAssistant() {
     }
 
     setGenerating("summary", true);
+    const toastId = toast.info(i18next.t("reading.summary.generatingWait"), { duration: Infinity });
 
     try {
       const thinkingModel = await createModelProvider(summaryModel);
@@ -470,6 +473,7 @@ function useReadingAssistant() {
       return "";
     } finally {
       removeAbortController("summary");
+      toast.dismiss(toastId);
     }
   }
 
@@ -563,6 +567,7 @@ function useReadingAssistant() {
     }
 
     setGenerating("adapted-text", true);
+    const toastId = toast.info(i18next.t("reading.adaptedText.adaptingWait"), { duration: Infinity });
 
     try {
       const thinkingModel = await createModelProvider(adaptedTextModel);
@@ -620,6 +625,7 @@ function useReadingAssistant() {
       return "";
     } finally {
       removeAbortController("adapted-text");
+      toast.dismiss(toastId);
     }
   }
 
@@ -637,6 +643,7 @@ function useReadingAssistant() {
     }
 
     setGenerating("simplified-text", true);
+    const toastId = toast.info(i18next.t("reading.adaptedText.simplifyingWait"), { duration: Infinity });
 
     try {
       const thinkingModel = await createModelProvider(simplifyModel);
@@ -694,6 +701,7 @@ function useReadingAssistant() {
       return "";
     } finally {
       removeAbortController("simplified-text");
+      toast.dismiss(toastId);
     }
   }
 
@@ -709,7 +717,7 @@ function useReadingAssistant() {
     }
 
     setGenerating("mindmap", true);
-    const toastId = toast.info(i18next.t("reading.mindMap.generating"), { duration: Infinity });
+    const toastId = toast.info(i18next.t("reading.mindMap.generatingWait"), { duration: Infinity });
 
     try {
       const text = await mindMapGenerateText(
