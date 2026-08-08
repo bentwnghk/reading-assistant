@@ -100,10 +100,26 @@ function getFallbackModel(): Promise<string> {
  * long as the reading store still holds that same session.  Used to guard
  * writes inside async generation functions so a stale generation (whose
  * session was replaced via restore/reset) never clobbers the new session.
+ *
+ * When the guard is created with no active session (empty id) — which happens
+ * when extraction runs on a freshly-reset store (e.g. via the Welcome dialog's
+ * "Upload Image/PDF" card or the "New Text" button) — the guard binds to the
+ * first non-empty id it observes. That id is the one lazily created by
+ * `setExtractedText` for *this* extraction and must not be mistaken for a
+ * session switch. Genuine session switches (restore/reset/loadFromRepository)
+ * all call `abortAllGenerations()`, which remains the authoritative cancel
+ * signal; the guard is only a complementary check.
  */
 function createSessionGuard(): () => boolean {
-  const sessionId = useReadingStore.getState().id;
-  return () => useReadingStore.getState().id === sessionId;
+  let sessionId = useReadingStore.getState().id;
+  return () => {
+    const currentId = useReadingStore.getState().id;
+    if (!sessionId) {
+      if (currentId) sessionId = currentId;
+      return true;
+    }
+    return currentId === sessionId;
+  };
 }
 
 /** True when the error is (or wraps) an AbortError. */
