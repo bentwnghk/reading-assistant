@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { FileText, LoaderCircle, ListChecks, Lightbulb } from "lucide-react";
@@ -77,12 +78,29 @@ function Summary() {
           prose-strong:text-foreground prose-strong:font-semibold
           prose-hr:my-4
           text-[15px]">
-          <MagicDown
-            value={summary}
-            onChange={() => {}}
-            hideTools
-            disableMath
-          />
+          {/* MagicDown is lazy-loaded via next/dynamic with no Suspense
+              boundary of its own. Without a local <Suspense> here, the very
+              first time it renders (when summary generation completes) the
+              pending import bubbles up to the app's root Suspense boundary
+              (page.tsx), which blanks the *entire* page until the chunk loads
+              — collapsing document height to 0 and forcing window.scrollY to
+              0, which looks like the page "scrolling to the top". Scoping the
+              fallback here keeps that loading state local to this section. */}
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-8">
+                <LoaderCircle className="h-5 w-5 animate-spin mr-2" />
+                <span>{t("reading.summary.generating")}</span>
+              </div>
+            }
+          >
+            <MagicDown
+              value={summary}
+              onChange={() => {}}
+              hideTools
+              disableMath
+            />
+          </Suspense>
         </div>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
