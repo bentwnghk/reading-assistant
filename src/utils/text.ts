@@ -189,12 +189,17 @@ export function extractSkimExcerpts(text: string): SkimExcerpts {
       continue;
     }
     const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
-    // A standalone short line with no terminal punctuation reads as a heading.
+    // A standalone short line reads as a heading. Only "." / "。" are treated
+    // as paragraph-terminating — "?" / "!" (and their CJK forms) are common in
+    // titles and section headings ("Where Do Penguins Live?", "Watch Out!"),
+    // so a short line ending with them should still be classified as a heading
+    // rather than falling through into bodyParagraphs and getting selected as
+    // the first/last paragraph for skimming.
     if (
       lines.length === 1 &&
       lines[0].length > 0 &&
       lines[0].length <= 60 &&
-      !/[.!?。！？]$/.test(lines[0])
+      !/[.。]$/.test(lines[0])
     ) {
       result.subheadings.push(lines[0]);
       continue;
