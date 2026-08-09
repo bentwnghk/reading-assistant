@@ -444,6 +444,7 @@ export function OverviewTab() {
           sub={t("dashboard.stats.sourceBreakdown", {
             upload: m.sessionsBySource.upload,
             repository: m.sessionsBySource.repository,
+            aiGenerated: m.sessionsBySource.aiGenerated,
             shared: m.sessionsBySource.shared,
           })}
         />

@@ -50,7 +50,7 @@ export interface DailyActivity {
 
 export interface DashboardMetrics {
   totalSessions: number;
-  sessionsBySource: { upload: number; repository: number; shared: number };
+  sessionsBySource: { upload: number; repository: number; shared: number; aiGenerated: number };
   progressPerSession: { id: string; title: string; progress: number; date: number }[];
   averageProgress: number;
   preReadingsGenerated: number;
@@ -171,7 +171,7 @@ export function computeDashboardMetrics(
   if (history.length === 0 && reviewSessions.length === 0) {
     return {
       totalSessions: 0,
-      sessionsBySource: { upload: 0, repository: 0, shared: 0 },
+      sessionsBySource: { upload: 0, repository: 0, shared: 0, aiGenerated: 0 },
       progressPerSession: [],
       averageProgress: 0,
       preReadingsGenerated: 0,
@@ -207,6 +207,7 @@ export function computeDashboardMetrics(
   const uploadCount = sorted.filter((h) => h.source === "upload").length;
   const repositoryCount = sorted.filter((h) => h.source === "repository").length;
   const sharedCount = sorted.filter((h) => h.source === "shared").length;
+  const aiGeneratedCount = sorted.filter((h) => h.source === "ai-generated").length;
 
   const progressPerSession = sorted.map((item) => ({
     id: item.id,
@@ -454,7 +455,7 @@ export function computeDashboardMetrics(
 
   return {
     totalSessions: sorted.length,
-    sessionsBySource: { upload: uploadCount, repository: repositoryCount, shared: sharedCount },
+    sessionsBySource: { upload: uploadCount, repository: repositoryCount, shared: sharedCount, aiGenerated: aiGeneratedCount },
     progressPerSession,
     averageProgress,
     preReadingsGenerated,

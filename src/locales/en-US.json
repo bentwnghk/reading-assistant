@@ -2305,7 +2305,7 @@
     "empty": "No reading sessions yet. Start reading to see your Learning Journey!",
     "stats": {
       "totalTexts": "Reading Texts",
-      "sourceBreakdown": "{{upload}} from uploaded · {{repository}} from repository · {{shared}} from shared",
+      "sourceBreakdown": "{{upload}} from uploaded · {{repository}} from repository · {{aiGenerated}} from AI · {{shared}} from shared",
       "summaries": "Summaries",
       "mindMaps": "Mind Maps",
       "mindMapBreakdown": "{{en}} English · {{zh}} Chinese",
