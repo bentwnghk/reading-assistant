@@ -907,7 +907,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
                     onSort={handleSort}
                   />
                 </TableHead>
-                <TableHead className="w-[1%] text-right">
+                <TableHead className="w-[1%]">
                   {t("reading.repository.colActions")}
                 </TableHead>
                 <TableHead className="w-[130px]">
