@@ -696,6 +696,12 @@ export default function LearningRecommendationDialog() {
                             }
                           />
                           <DifficultyStatChip
+                            label={t("reading.difficulty.gradeLevel")}
+                            value={usGradeToHKGrade(
+                              Math.round(previewDifficulty.fleschKincaidGrade)
+                            )}
+                          />
+                          <DifficultyStatChip
                             label={t("reading.difficulty.wordCount")}
                             value={previewDifficulty.wordCount}
                           />
@@ -712,12 +718,6 @@ export default function LearningRecommendationDialog() {
                             value={previewDifficulty.fleschReadingEase}
                             title={getFleschDescription(
                               previewDifficulty.fleschReadingEase
-                            )}
-                          />
-                          <DifficultyStatChip
-                            label={t("reading.difficulty.gradeLevel")}
-                            value={usGradeToHKGrade(
-                              Math.round(previewDifficulty.fleschKincaidGrade)
                             )}
                           />
                         </>
