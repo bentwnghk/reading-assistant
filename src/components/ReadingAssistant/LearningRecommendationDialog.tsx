@@ -645,7 +645,7 @@ export default function LearningRecommendationDialog() {
                     </p>
                   )}
                   {recommendedText.difficulty && (
-                    <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5 pt-2">
                       <DifficultyStatChip
                         label="CEFR"
                         value={
