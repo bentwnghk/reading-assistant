@@ -428,7 +428,12 @@ export default function LearningRecommendationDialog() {
         if (!v) handleDismiss();
       }}
     >
-      <DialogContent className="max-w-sm max-h-[80vh] text-center overflow-x-hidden overflow-y-auto scrollbar-hide">
+      <DialogContent
+        className={cn(
+          "max-h-[80vh] text-center overflow-x-hidden overflow-y-auto scrollbar-hide",
+          step === "repository-preview" ? "max-w-md" : "max-w-sm"
+        )}
+      >
         {step === "choices" && (
           <>
             <div
