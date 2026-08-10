@@ -52,6 +52,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { useReadingStore } from "@/store/reading";
 import { downloadFile } from "@/utils/file";
+import { cn } from "@/utils/style";
+import { getCefrBadgeColor, usGradeToHKGrade } from "@/utils/textDifficulty";
 import dynamic from "next/dynamic";
 
 const RepositoryUploadDialog = dynamic(
@@ -149,6 +151,53 @@ function VisibilityIcon({ visibility }: { visibility: TextVisibility }) {
     return <Building2 className="h-4 w-4 text-muted-foreground" />;
   }
   return <Users className="h-4 w-4 text-muted-foreground" />;
+}
+
+function StatChip({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[11px] leading-tight">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">{value}</span>
+    </span>
+  );
+}
+
+function RepositoryDifficultyBadges({ item }: { item: RepositoryTextListItem }) {
+  const { t } = useTranslation();
+  const difficulty = item.difficulty;
+  if (!difficulty) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 mt-1">
+      <StatChip
+        label="CEFR"
+        value={
+          <span
+            className={cn(
+              "rounded px-1 py-px text-[10px] font-semibold",
+              getCefrBadgeColor(difficulty.cefrLevel)
+            )}
+          >
+            {difficulty.cefrLevel}
+          </span>
+        }
+      />
+      <StatChip
+        label={t("reading.difficulty.gradeLevel")}
+        value={usGradeToHKGrade(Math.round(difficulty.fleschKincaidGrade))}
+      />
+      <StatChip
+        label={t("reading.difficulty.wordCount")}
+        value={difficulty.wordCount}
+      />
+    </div>
+  );
 }
 
 interface EditTextDialogProps {
@@ -908,6 +957,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
                           {item.title}
                         </p>
                       )}
+                      <RepositoryDifficultyBadges item={item} />
                     </TableCell>
 
                     <TableCell className="text-right">

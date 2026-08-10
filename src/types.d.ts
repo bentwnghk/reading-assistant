@@ -853,6 +853,8 @@ interface RepositoryText {
   title: string;
   extractedText: string;
   originalImages: string[];
+  /** Cached difficulty analysis of extractedText (computed on upload/edit), if available. */
+  difficulty: TextDifficultyResult | null;
   schoolId: string | null;
   classId?: string | null;
   visibility: TextVisibility;
@@ -979,6 +981,8 @@ interface RepositoryTextListItem {
   name: string;
   title: string;
   previewText: string;
+  /** Cached difficulty analysis (computed on upload/edit), if available. */
+  difficulty: TextDifficultyResult | null;
   imageCount: number;
   schoolId: string | null;
   schoolName?: string | null;

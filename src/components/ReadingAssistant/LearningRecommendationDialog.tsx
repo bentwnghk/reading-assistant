@@ -34,7 +34,6 @@ import { useReadingStore, isRestoreComplete, isWelcomeDialogChecked, setWelcomeD
 import { useSharingStore } from "@/store/sharing";
 import { cn } from "@/utils/style";
 import {
-  analyzeTextDifficulty,
   getCefrBadgeColor,
   getFleschDescription,
   usGradeToHKGrade,
@@ -187,10 +186,6 @@ export default function LearningRecommendationDialog() {
   const [hasIncompleteActivities, setHasIncompleteActivities] = useState(false);
   const [recommendedText, setRecommendedText] =
     useState<RepositoryTextListItem | null>(null);
-  const [fullPreviewText, setFullPreviewText] = useState<RepositoryText | null>(null);
-  const [previewDifficulty, setPreviewDifficulty] =
-    useState<TextDifficultyResult | null>(null);
-  const [analyzingDifficulty, setAnalyzingDifficulty] = useState(false);
   const [loadingStart, setLoadingStart] = useState(false);
   const [restoreReady, setRestoreReady] = useState(false);
   const dismissedSessionRef = useRef<string | null>(null);
@@ -274,25 +269,6 @@ export default function LearningRecommendationDialog() {
     });
   }, [activity]);
 
-  const loadPreviewText = useCallback(async (item: RepositoryTextListItem) => {
-    setAnalyzingDifficulty(true);
-    setPreviewDifficulty(null);
-    setFullPreviewText(null);
-    try {
-      const res = await fetch(`/api/repository/${item.id}`);
-      if (!res.ok) throw new Error("Failed to load");
-      const fullText: RepositoryText = await res.json();
-      setFullPreviewText(fullText);
-      if (fullText.extractedText) {
-        setPreviewDifficulty(analyzeTextDifficulty(fullText.extractedText));
-      }
-    } catch {
-      setPreviewDifficulty(null);
-    } finally {
-      setAnalyzingDifficulty(false);
-    }
-  }, []);
-
   const handleChooseRepository = useCallback(async () => {
     setStep("repository-loading");
     try {
@@ -312,12 +288,11 @@ export default function LearningRecommendationDialog() {
       const randomText = texts[Math.floor(Math.random() * texts.length)];
       setRecommendedText(randomText);
       setStep("repository-preview");
-      loadPreviewText(randomText);
     } catch {
       toast.error(t("reading.repository.fetchError"));
       setStep("choices");
     }
-  }, [t, loadPreviewText]);
+  }, [t]);
 
   const handlePickAnother = useCallback(() => {
     const texts = allTextsRef.current;
@@ -327,21 +302,15 @@ export default function LearningRecommendationDialog() {
       candidate = texts[Math.floor(Math.random() * texts.length)];
     } while (candidate.id === recommendedText?.id);
     setRecommendedText(candidate);
-    loadPreviewText(candidate);
-  }, [recommendedText, loadPreviewText]);
+  }, [recommendedText]);
 
   const handleStartReading = useCallback(async () => {
     if (!recommendedText) return;
     setLoadingStart(true);
     try {
-      let fullText: RepositoryText;
-      if (fullPreviewText && fullPreviewText.id === recommendedText.id) {
-        fullText = fullPreviewText;
-      } else {
-        const res = await fetch(`/api/repository/${recommendedText.id}`);
-        if (!res.ok) throw new Error("Failed to load");
-        fullText = (await res.json()) as RepositoryText;
-      }
+      const res = await fetch(`/api/repository/${recommendedText.id}`);
+      if (!res.ok) throw new Error("Failed to load");
+      const fullText: RepositoryText = await res.json();
       useReadingStore.getState().loadFromRepository(fullText);
       setOpen(false);
     } catch {
@@ -349,15 +318,12 @@ export default function LearningRecommendationDialog() {
     } finally {
       setLoadingStart(false);
     }
-  }, [recommendedText, fullPreviewText, t]);
+  }, [recommendedText, t]);
 
   const handleDismiss = useCallback(() => {
     setOpen(false);
     setStep("choices");
     setRecommendedText(null);
-    setFullPreviewText(null);
-    setPreviewDifficulty(null);
-    setAnalyzingDifficulty(false);
     if (id) {
       dismissedSessionRef.current = id;
     }
@@ -678,55 +644,50 @@ export default function LearningRecommendationDialog() {
                       {recommendedText.previewText}
                     </p>
                   )}
-                  {(analyzingDifficulty || previewDifficulty) && (
+                  {recommendedText.difficulty && (
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {analyzingDifficulty ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <LoaderCircle className="w-3 h-3 animate-spin" />
-                          {t("reading.difficulty.analyzing")}
-                        </span>
-                      ) : previewDifficulty ? (
-                        <>
-                          <DifficultyStatChip
-                            label="CEFR"
-                            value={
-                              <span
-                                className={cn(
-                                  "rounded px-1 py-px text-[10px] font-semibold",
-                                  getCefrBadgeColor(previewDifficulty.cefrLevel)
-                                )}
-                              >
-                                {previewDifficulty.cefrLevel}
-                              </span>
-                            }
-                          />
-                          <DifficultyStatChip
-                            label={t("reading.difficulty.gradeLevel")}
-                            value={usGradeToHKGrade(
-                              Math.round(previewDifficulty.fleschKincaidGrade)
+                      <DifficultyStatChip
+                        label="CEFR"
+                        value={
+                          <span
+                            className={cn(
+                              "rounded px-1 py-px text-[10px] font-semibold",
+                              getCefrBadgeColor(
+                                recommendedText.difficulty.cefrLevel
+                              )
                             )}
-                          />
-                          <DifficultyStatChip
-                            label={t("reading.difficulty.wordCount")}
-                            value={previewDifficulty.wordCount}
-                          />
-                          <DifficultyStatChip
-                            label={t("reading.difficulty.sentenceCount")}
-                            value={previewDifficulty.sentenceCount}
-                          />
-                          <DifficultyStatChip
-                            label={t("reading.difficulty.avgSentenceLength")}
-                            value={previewDifficulty.avgSentenceLength}
-                          />
-                          <DifficultyStatChip
-                            label={t("reading.difficulty.fleschReadingEase")}
-                            value={previewDifficulty.fleschReadingEase}
-                            title={getFleschDescription(
-                              previewDifficulty.fleschReadingEase
-                            )}
-                          />
-                        </>
-                      ) : null}
+                          >
+                            {recommendedText.difficulty.cefrLevel}
+                          </span>
+                        }
+                      />
+                      <DifficultyStatChip
+                        label={t("reading.difficulty.gradeLevel")}
+                        value={usGradeToHKGrade(
+                          Math.round(
+                            recommendedText.difficulty.fleschKincaidGrade
+                          )
+                        )}
+                      />
+                      <DifficultyStatChip
+                        label={t("reading.difficulty.wordCount")}
+                        value={recommendedText.difficulty.wordCount}
+                      />
+                      <DifficultyStatChip
+                        label={t("reading.difficulty.sentenceCount")}
+                        value={recommendedText.difficulty.sentenceCount}
+                      />
+                      <DifficultyStatChip
+                        label={t("reading.difficulty.avgSentenceLength")}
+                        value={recommendedText.difficulty.avgSentenceLength}
+                      />
+                      <DifficultyStatChip
+                        label={t("reading.difficulty.fleschReadingEase")}
+                        value={recommendedText.difficulty.fleschReadingEase}
+                        title={getFleschDescription(
+                          recommendedText.difficulty.fleschReadingEase
+                        )}
+                      />
                     </div>
                   )}
                   <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">

@@ -1393,6 +1393,9 @@ export const useReadingStore = create(
           docTitle: text.title || text.name,
           extractedText: text.extractedText,
           originalImages: text.originalImages,
+          // Seed the cached analysis so the Text Difficulty Analysis "Original"
+          // card is populated without requiring a click on "Analyze".
+          originalDifficulty: text.difficulty ?? null,
           source: "repository",
           createdAt: now,
           updatedAt: now,

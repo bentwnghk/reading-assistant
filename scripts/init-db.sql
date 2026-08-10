@@ -484,6 +484,7 @@ CREATE TABLE text_repository (
   is_public      BOOLEAN NOT NULL DEFAULT FALSE,          -- TRUE = visible to users of all schools
   visibility     TEXT NOT NULL DEFAULT 'school' CHECK (visibility IN ('class', 'school', 'public')),
   class_id       TEXT REFERENCES classes(id) ON DELETE SET NULL,
+  difficulty     JSONB,                                   -- Cached TextDifficultyResult (CEFR + readability), computed by the app
   created_by     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW()

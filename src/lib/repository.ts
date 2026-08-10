@@ -1,6 +1,38 @@
 import { getClient, base64ToBuffer, bufferToBase64 } from "./db"
+import { analyzeTextDifficulty } from "@/utils/textDifficulty"
 
 type TextVisibility = 'class' | 'school' | 'public'
+
+/**
+ * Maximum legacy rows to backfill (analyze + persist) per list request. Bounds
+ * latency on the first loads after the migration; the rest self-heal on
+ * subsequent requests.
+ */
+const DIFFICULTY_BACKFILL_BATCH = 20
+
+/**
+ * Validates a raw JSONB value (already JSON-parsed by pg) into a usable
+ * TextDifficultyResult. Returns null for missing/malformed values and for the
+ * `{"unanalyzable":true}` sentinel stored when analysis yielded no result
+ * (e.g. text with no English words), so consumers simply hide the chips.
+ */
+function normalizeDifficulty(raw: unknown): TextDifficultyResult | null {
+  if (!raw || typeof raw !== "object") return null
+  const d = raw as Record<string, unknown>
+  if (typeof d.cefrLevel !== "string" || typeof d.wordCount !== "number") {
+    return null
+  }
+  return raw as TextDifficultyResult
+}
+
+/**
+ * Serializes a difficulty result for JSONB storage. Unanalyzable texts are
+ * stored as `{"unanalyzable":true}` (NOT SQL NULL) so they are not retried on
+ * every read.
+ */
+function serializeDifficulty(result: TextDifficultyResult | null): string {
+  return JSON.stringify(result ?? { unanalyzable: true })
+}
 
 function rowToListItem(row: Record<string, unknown>): RepositoryTextListItem {
   return {
@@ -8,6 +40,7 @@ function rowToListItem(row: Record<string, unknown>): RepositoryTextListItem {
     name: row.name as string,
     title: (row.title as string) || "",
     previewText: ((row.extracted_text as string) || "").slice(0, 200),
+    difficulty: normalizeDifficulty(row.difficulty),
     imageCount: Number(row.image_count ?? 0),
     schoolId: (row.school_id as string) || null,
     schoolName: (row.school_name as string) || null,
@@ -34,6 +67,7 @@ function rowToFull(
     originalImages: images
       .sort((a, b) => a.image_order - b.image_order)
       .map((img) => bufferToBase64(img.image_data as Buffer, img.content_type)),
+    difficulty: normalizeDifficulty(row.difficulty),
     schoolId: (row.school_id as string) || null,
     classId: (row.class_id as string) || null,
     visibility: (row.visibility as TextVisibility) || "school",
@@ -42,6 +76,29 @@ function rowToFull(
     createdAt: new Date(row.created_at as string).getTime(),
     updatedAt: new Date(row.updated_at as string).getTime(),
   }
+}
+
+/**
+ * Computes difficulty for a text and persists it to the given row id.
+ * Best-effort: swallows errors so a read request never fails because of a
+ * backfill write. Returns the computed result (or null when unanalyzable) so
+ * the caller can use it in-memory for the current response.
+ */
+async function computeAndCacheDifficulty(
+  client: { query: (text: string, params?: unknown[]) => Promise<{ rowCount: number | null }> },
+  id: string,
+  text: string
+): Promise<TextDifficultyResult | null> {
+  const result = analyzeTextDifficulty(text)
+  try {
+    await client.query(
+      `UPDATE text_repository SET difficulty = $1::jsonb WHERE id = $2`,
+      [serializeDifficulty(result), id]
+    )
+  } catch {
+    // ignore — will retry on a later read
+  }
+  return result
 }
 
 async function getTeacherClassIds(teacherId: string): Promise<string[]> {
@@ -156,6 +213,7 @@ export async function getRepositoryTexts(
          tr.name,
          tr.title,
          tr.extracted_text,
+         tr.difficulty,
          tr.school_id,
          tr.visibility,
          tr.class_id,
@@ -178,7 +236,22 @@ export async function getRepositoryTexts(
        ORDER BY tr.updated_at DESC`,
       values
     )
-    return result.rows.map(rowToListItem)
+    const rows = result.rows as Array<Record<string, unknown>>
+
+    // Bounded lazy backfill: analyze + persist up to DIFFICULTY_BACKFILL_BATCH
+    // legacy rows (difficulty IS NULL) per request. Yields to the event loop
+    // between heavy synchronous analyses so other requests aren't blocked.
+    const legacy = rows.filter((r) => r.difficulty == null).slice(0, DIFFICULTY_BACKFILL_BATCH)
+    for (const r of legacy) {
+      r.difficulty = await computeAndCacheDifficulty(
+        client,
+        r.id as string,
+        (r.extracted_text as string) || ""
+      )
+      await new Promise((resolve) => setImmediate(resolve))
+    }
+
+    return rows.map(rowToListItem)
   } finally {
     client.release()
   }
@@ -207,6 +280,17 @@ export async function getRepositoryText(
     )
     if (result.rows.length === 0) return null
 
+    const row = result.rows[0] as Record<string, unknown>
+
+    // Lazy backfill for legacy rows without cached difficulty.
+    if (row.difficulty == null) {
+      row.difficulty = await computeAndCacheDifficulty(
+        client,
+        id,
+        (row.extracted_text as string) || ""
+      )
+    }
+
     const imgResult = await client.query(
       `SELECT image_data, image_order, content_type
        FROM text_repository_images
@@ -214,7 +298,7 @@ export async function getRepositoryText(
        ORDER BY image_order`,
       [id]
     )
-    return rowToFull(result.rows[0] as Record<string, unknown>, imgResult.rows as Array<{ image_data: unknown; image_order: number; content_type: string }>)
+    return rowToFull(row, imgResult.rows as Array<{ image_data: unknown; image_order: number; content_type: string }>)
   } finally {
     client.release()
   }
@@ -237,10 +321,19 @@ export async function createRepositoryText(
     await client.query("BEGIN")
 
     const result = await client.query(
-      `INSERT INTO text_repository (name, title, extracted_text, school_id, visibility, class_id, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO text_repository (name, title, extracted_text, school_id, visibility, class_id, created_by, difficulty)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
        RETURNING id`,
-      [data.name, data.title, data.extractedText, schoolId, data.visibility, data.classId || null, createdBy]
+      [
+        data.name,
+        data.title,
+        data.extractedText,
+        schoolId,
+        data.visibility,
+        data.classId || null,
+        createdBy,
+        serializeDifficulty(analyzeTextDifficulty(data.extractedText)),
+      ]
     )
     const textId: string = result.rows[0].id
 
@@ -353,6 +446,9 @@ export async function updateRepositoryText(
       }
       fields.push(`extracted_text = $${p++}`)
       values.push(data.extractedText)
+      // Text changed → recompute the cached difficulty.
+      fields.push(`difficulty = $${p++}::jsonb`)
+      values.push(serializeDifficulty(analyzeTextDifficulty(data.extractedText)))
     }
 
     if (fields.length === 0) return { success: true }

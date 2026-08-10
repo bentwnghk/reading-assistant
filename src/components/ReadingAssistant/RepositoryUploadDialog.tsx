@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/utils/style";
+import { analyzeTextDifficulty } from "@/utils/textDifficulty";
 import { useSettingStore } from "@/store/setting";
 import { extractTextFromImagePrompt, getSystemPrompt } from "@/constants/readingPrompts";
 import useModelProvider from "@/hooks/useAiProvider";
@@ -282,6 +283,7 @@ function RepositoryUploadDialog({
         name: name.trim(),
         title: generatedTitle,
         previewText: extractedText.slice(0, 200),
+        difficulty: analyzeTextDifficulty(extractedText),
         imageCount: images.length,
         schoolId: null,
         schoolName: null,
