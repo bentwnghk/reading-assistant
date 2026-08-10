@@ -898,7 +898,7 @@ function TextRepository({ onTextLoaded }: TextRepositoryProps) {
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-background">
               <TableRow>
-                <TableHead className="min-w-[190px]">
+                <TableHead className="min-w-[320px]">
                   <SortButton
                     field="name"
                     current={sortField}

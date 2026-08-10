@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI English Reading Assistants for EFL — Competitive Analysis</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --text: #1a1f2e;
+    --muted: #5b6478;
+    --border: #e3e7ee;
+    --accent: #2b6cb0;
+    --accent-soft: #eaf2fb;
+    --hl: #fdf6e3;          /* ProReader column highlight */
+    --hl-border: #f0c36d;
+    --y: #1a7f37; --y-bg: #e7f5ec;
+    --p: #b26a00; --p-bg: #fdf1dc;
+    --n: #c93a3a; --n-bg: #fdecec;
+    --na: #8a93a5; --na-bg: #eef0f4;
+    --code-bg: #eef0f4;
+    --shadow: 0 1px 3px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.04);
+  }
+  html.dark {
+    --bg: #0f131c;
+    --surface: #161c28;
+    --text: #e6e9f0;
+    --muted: #9aa4b8;
+    --border: #262e3d;
+    --accent: #6cb0ff;
+    --accent-soft: #1b2738;
+    --hl: #241f12;
+    --hl-border: #7a5a18;
+    --y: #4cc38a; --y-bg: #15301f;
+    --p: #e0a93a; --p-bg: #2f2512;
+    --n: #ef6b6b; --n-bg: #341a1c;
+    --na: #7d8699; --na-bg: #1e232f;
+    --code-bg: #1e232f;
+    --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Layout */
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+  header.top {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .top-inner {
+    display: flex; align-items: center; gap: 16px;
+    max-width: 1200px; margin: 0 auto; padding: 12px 20px;
+  }
+  .brand { font-weight: 700; font-size: 15px; white-space: nowrap; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 4px 14px; overflow-x: auto; }
+  nav.toc a {
+    font-size: 13px; color: var(--muted); white-space: nowrap; padding: 2px 0;
+  }
+  nav.toc a:hover { color: var(--accent); text-decoration: none; }
+  .spacer { flex: 1; }
+  button.theme {
+    background: var(--accent-soft); color: var(--accent);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 12px; font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  button.theme:hover { filter: brightness(.97); }
+
+  /* Hero */
+  .hero { padding: 40px 0 8px; }
+  .hero h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -.01em; }
+  .hero p { color: var(--muted); margin: 0; max-width: 80ch; }
+
+  /* Sections */
+  section { padding: 28px 0; border-top: 1px solid var(--border); }
+  section.first { border-top: none; }
+  h2 { font-size: 20px; margin: 0 0 14px; }
+  h3 { font-size: 16px; margin: 22px 0 8px; }
+  p, ul { max-width: 88ch; }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin: 14px 0 0; font-size: 13px; color: var(--muted);
+  }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-weight: 600; }
+  .badge .sym { font-size: 14px; }
+  .b-y { background: var(--y-bg); color: var(--y); }
+  .b-p { background: var(--p-bg); color: var(--p); }
+  .b-n { background: var(--n-bg); color: var(--n); }
+  .b-na { background: var(--na-bg); color: var(--na); }
+
+  /* Tables */
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 100%; }
+  th, td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+  th:last-child, td:last-child { border-right: none; }
+  thead th {
+    position: sticky; top: 0; z-index: 3;
+    background: var(--surface);
+    font-size: 12px; text-transform: uppercase; letter-spacing: .03em;
+    color: var(--muted); font-weight: 600;
+  }
+  thead th.feature-h { left: 0; z-index: 4; }
+  tbody th {                       /* sticky first column (feature names) */
+    position: sticky; left: 0; z-index: 2;
+    background: var(--surface);
+    text-align: left; font-weight: 500; color: var(--text);
+    min-width: 230px;
+  }
+  /* ProReader highlight column = first data column after the sticky feature col */
+  tbody td.col-pr {
+    position: sticky; left: 230px; z-index: 2;
+    background: var(--hl);
+    font-weight: 600;
+    box-shadow: inset 1px 0 0 var(--hl-border);
+  }
+  thead th.col-pr {
+    position: sticky; left: 230px; z-index: 5;
+    background: var(--hl);
+    color: var(--text);
+    box-shadow: inset 1px 0 0 var(--hl-border);
+  }
+  tbody tr:nth-child(even) th { background: var(--bg); }
+  tbody tr:nth-child(even) td.col-pr { background: var(--hl); }
+  tbody tr:hover td, tbody tr:hover th { background: var(--accent-soft) !important; }
+
+  /* Status cell coloring (applied via JS) */
+  td.s, th.s { text-align: center; font-weight: 700; }
+  td.s-y { color: var(--y); background: var(--y-bg); }
+  td.s-p { color: var(--p); background: var(--p-bg); }
+  td.s-n { color: var(--n); background: var(--n-bg); }
+  td.s-na { color: var(--na); background: var(--na-bg); }
+
+  /* Overview table: allow wrapping for link cells */
+  table.overview th, table.overview td { white-space: normal; }
+  table.overview td.col-pr { left: 0; min-width: 0; box-shadow: none; }
+  table.overview thead th.col-pr { left: 0; box-shadow: none; }
+  table.overview tbody th { position: static; min-width: 0; }
+  table.overview tbody td.col-pr { position: static; }
+  .note { font-size: 12px; color: var(--muted); }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+  .lead-in { font-weight: 600; }
+  .footer { padding: 30px 0 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); }
+  @media (max-width: 720px) {
+    .hero h1 { font-size: 22px; }
+    nav.toc { display: none; }
+  }
+  @media print {
+    header.top { position: static; box-shadow: none; }
+    .table-scroll { overflow: visible; box-shadow: none; }
+    thead th, tbody th, tbody td.col-pr { position: static !important; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">📖 EFL Reading Tools — Competitive Analysis</div>
+    <nav class="toc">
+      <a href="#overview">Overview</a>
+      <a href="#content">Content &amp; Input</a>
+      <a href="#vocab">Vocabulary &amp; SRS</a>
+      <a href="#comprehension">Comprehension &amp; Grammar</a>
+      <a href="#audio">Audio &amp; TTS</a>
+      <a href="#ai">AI &amp; Engagement</a>
+      <a href="#teacher">Teacher &amp; Analytics</a>
+      <a href="#platform">Platform &amp; Tech</a>
+      <a href="#analysis">Analysis</a>
+      <a href="#pedagogy">Pedagogy</a>
+    </nav>
+    <div class="spacer"></div>
+    <button class="theme" id="themeBtn">🌙 Dark</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>AI English Reading Assistants for EFL Learners</h1>
+    <p>Head-to-head comparison of <strong>Mr.🆖 ProReader</strong> (this repository) against the leading AI-powered reading &amp; literacy platforms serving EFL / striving readers. Compiled from public product pages, vendor documentation, and the IES What Works Clearinghouse.</p>
+    <div class="legend">
+      <span class="badge b-y"><span class="sym">✅</span> Yes / full</span>
+      <span class="badge b-p"><span class="sym">◐</span> Partial / limited</span>
+      <span class="badge b-n"><span class="sym">❌</span> No</span>
+      <span class="badge b-na"><span class="sym">—</span> Unknown / n/a</span>
+    </div>
+  </div>
+
+  <!-- 1. OVERVIEW -->
+  <section id="overview" class="first">
+    <h2>1 · Product Overview</h2>
+    <div class="table-scroll">
+      <table class="overview">
+        <thead>
+          <tr>
+            <th class="col-pr">Platform</th>
+            <th>Category</th>
+            <th>Primary Audience</th>
+            <th>Pricing</th>
+            <th>Website</th>
+            <th>iOS</th>
+            <th>Android</th>
+            <th>Access Model</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-pr">Mr.🆖 ProReader</td>
+            <td>AI reading assistant + vocab/grammar suite</td>
+            <td>EFL learners (students + teachers)</td>
+            <td>Freemium (Stripe); self-hostable</td>
+            <td><a href="https://github.com/bentwnghk/reading-assistant" target="_blank" rel="noopener">github.com/…/reading-assistant</a></td>
+            <td>PWA (browser install)</td>
+            <td>PWA (browser install)</td>
+            <td>Open-source · self-host via Docker (<code>docker compose up</code>) · Google sign-in</td>
+          </tr>
+          <tr>
+            <td class="col-pr">LingQ</td>
+            <td>Extensive reading + vocab tracker</td>
+            <td>Language learners (EFL/MFL)</td>
+            <td>Subscription (free tier)</td>
+            <td><a href="https://www.lingq.com" target="_blank" rel="noopener">lingq.com</a></td>
+            <td><a href="https://apps.apple.com/app/lingq-learn-languages/id379385811" target="_blank" rel="noopener">App Store</a></td>
+            <td><a href="https://play.google.com/store/apps/details?id=com.linguistsoftware.lingq" target="_blank" rel="noopener">Play Store</a></td>
+            <td>Consumer subscription</td>
+          </tr>
+          <tr>
+            <td class="col-pr">Beelinguapp</td>
+            <td>Bilingual parallel reading</td>
+            <td>EFL / casual learners</td>
+            <td>Freemium</td>
+            <td><a href="https://www.beelinguapp.com" target="_blank" rel="noopener">beelinguapp.com</a></td>
+            <td><a href="https://apps.apple.com/app/beelinguapp/id1210574997" target="_blank" rel="noopener">App Store</a></td>
+            <td><a href="https://play.google.com/store/apps/details?id=com.beelinguapp" target="_blank" rel="noopener">Play Store</a></td>
+            <td>Consumer freemium</td>
+          </tr>
+          <tr>
+            <td class="col-pr">Achieve3000 Literacy</td>
+            <td>Adaptive leveled ELL program</td>
+            <td>K-12 ELL / striving readers</td>
+            <td>School licensing</td>
+            <td><a href="https://www.mheducation.com/prek-12/program/microsites/achieve-3000-literacy.html" target="_blank" rel="noopener">mheducation.com › Achieve3000</a></td>
+            <td>— (web/SSO)</td>
+            <td>— (web/SSO)</td>
+            <td>School license · SSO/Clever · login <a href="https://portal.achieve3000.com" target="_blank" rel="noopener">portal.achieve3000.com</a></td>
+          </tr>
+          <tr>
+            <td class="col-pr">Newsela</td>
+            <td>Cross-curricular leveled content</td>
+            <td>K-12 ELA/SS/Science</td>
+            <td>School licensing</td>
+            <td><a href="https://newsela.com" target="_blank" rel="noopener">newsela.com</a></td>
+            <td>— (web/SSO)</td>
+            <td>— (web/SSO)</td>
+            <td>School license · Google Classroom/Clever</td>
+          </tr>
+          <tr>
+            <td class="col-pr">ReadTheory</td>
+            <td>Adaptive comprehension practice</td>
+            <td>K-12 (native + ELL)</td>
+            <td>Free + premium</td>
+            <td><a href="https://readtheory.org" target="_blank" rel="noopener">readtheory.org</a></td>
+            <td>— (web)</td>
+            <td>— (web)</td>
+            <td>Free + premium</td>
+          </tr>
+          <tr>
+            <td class="col-pr">CommonLit</td>
+            <td>Free ELA curriculum library</td>
+            <td>Secondary ELA</td>
+            <td>Free (paid add-ons)</td>
+            <td><a href="https://www.commonlit.org" target="_blank" rel="noopener">commonlit.org</a></td>
+            <td>— (web)</td>
+            <td>— (web)</td>
+            <td>Free · Google Classroom</td>
+          </tr>
+          <tr>
+            <td class="col-pr">Raz-Kids / Reading A-Z</td>
+            <td>Leveled eBook library</td>
+            <td>Elementary</td>
+            <td>Subscription</td>
+            <td><a href="https://www.raz-kids.com" target="_blank" rel="noopener">raz-kids.com</a> · <a href="https://www.readinga-z.com" target="_blank" rel="noopener">readinga-z.com</a></td>
+            <td><a href="https://apps.apple.com/app/kids-a-z/id536128826" target="_blank" rel="noopener">Kids A-Z</a></td>
+            <td><a href="https://play.google.com/store/apps/details?id=com.learninga_z.onyourown" target="_blank" rel="noopener">Kids A-Z</a></td>
+            <td>Subscription</td>
+          </tr>
+          <tr>
+            <td class="col-pr">Epic</td>
+            <td>Kids' digital library</td>
+            <td>Elementary</td>
+            <td>Subscription (Basic free)</td>
+            <td><a href="https://www.getepic.com" target="_blank" rel="noopener">getepic.com</a></td>
+            <td><a href="https://apps.apple.com/app/epic/id719219382" target="_blank" rel="noopener">App Store</a></td>
+            <td><a href="https://play.google.com/store/apps/details?id=com.getepic.epic" target="_blank" rel="noopener">Play Store</a></td>
+            <td>Consumer subscription</td>
+          </tr>
+          <tr>
+            <td class="col-pr">Khanmigo</td>
+            <td>General AI tutor</td>
+            <td>K-12 all subjects</td>
+            <td>Subscription</td>
+            <td><a href="https://www.khanmigo.ai" target="_blank" rel="noopener">khanmigo.ai</a> · <a href="https://www.khanacademy.org" target="_blank" rel="noopener">khanacademy.org</a></td>
+            <td>via Khan Academy app</td>
+            <td>via Khan Academy app</td>
+            <td>Consumer subscription</td>
+          </tr>
+          <tr>
+            <td class="col-pr">Diffit</td>
+            <td>AI resource differentiation</td>
+            <td>Teachers</td>
+            <td>Freemium</td>
+            <td><a href="https://web.diffit.me" target="_blank" rel="noopener">web.diffit.me</a> · <a href="https://diffit.me" target="_blank" rel="noopener">diffit.me</a></td>
+            <td>— (web)</td>
+            <td>— (web)</td>
+            <td>Freemium (teacher/district tiers)</td>
+          </tr>
+          <tr>
+            <td class="col-pr">EPS Reading Assistant</td>
+            <td>ASR oral-reading coach</td>
+            <td>Intervention / ELL</td>
+            <td>Licensing</td>
+            <td><a href="https://www.epslearning.com/products/eps-reading-assistant" target="_blank" rel="noopener">epslearning.com › Reading Assistant</a></td>
+            <td>— (web/SSO)</td>
+            <td>— (web/SSO)</td>
+            <td>School license · rostered</td>
+          </tr>
+          <tr>
+            <td class="col-pr">MagicSchool</td>
+            <td>Teacher AI productivity</td>
+            <td>Teachers</td>
+            <td>Freemium</td>
+            <td><a href="https://www.magicschool.ai" target="_blank" rel="noopener">magicschool.ai</a></td>
+            <td>— (web)</td>
+            <td>— (web)</td>
+            <td>Free for teachers + school tiers</td>
+          </tr>
+          <tr>
+            <td class="col-pr">Brisk Teaching</td>
+            <td>Teacher AI productivity (extension)</td>
+            <td>Teachers</td>
+            <td>Freemium</td>
+            <td><a href="https://www.briskteaching.com" target="_blank" rel="noopener">briskteaching.com</a></td>
+            <td>— (extension)</td>
+            <td>— (extension)</td>
+            <td>Freemium · lives inside Google/MS tools</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Platforms marked “— (web/SSO)” are web-only (no native app); students access via district SSO/Clever/ClassLink. The official website’s “Get the app” button is the authoritative source if any store link has moved. <strong>Mr.🆖 ProReader</strong> is the only self-hostable/open-source entry; all others are closed SaaS.</p>
+  </section>
+
+  <!-- 2. CONTENT -->
+  <section id="content">
+    <h2>2 · Content &amp; Input</h2>
+    <div class="table-scroll">
+      <table data-feature="">
+        <thead>
+          <tr>
+            <th class="feature-h">Feature</th>
+            <th class="col-pr">Mr.🆖 ProReader</th>
+            <th>LingQ</th><th>Beelinguapp</th><th>Achieve3000</th><th>Newsela</th><th>ReadTheory</th><th>CommonLit</th><th>Raz-Kids</th><th>Epic</th><th>Khanmigo</th><th>Diffit</th><th>EPS R.A.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>Multi-level / adapted text</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅ (5 levels)</td><td>✅ (Lexile)</td><td>◐</td><td>✅ (aa–Z)</td><td>❌</td><td>❌</td><td>✅ (by grade)</td><td>❌</td></tr>
+          <tr><th>AI text simplification on demand</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td></tr>
+          <tr><th>OCR / image input</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>◐</td><td>❌</td></tr>
+          <tr><th>PDF / file upload</th><td class="col-pr">✅</td><td>◐ (import)</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅ (URL/PDF)</td><td>❌</td></tr>
+          <tr><th>URL / web-page ingestion</th><td class="col-pr">✅</td><td>✅</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td></tr>
+          <tr><th>User-uploaded shared text repository</th><td class="col-pr">✅</td><td>◐ (import only)</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>CEFR / multi-metric readability analysis</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>◐ (Lexile)</td><td>◐ (Lexile)</td><td>✅ (Lexile)</td><td>❌</td><td>◐</td><td>❌</td><td>❌</td><td>◐</td><td>❌</td></tr>
+          <tr><th>CEFR word-level highlighting</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. VOCAB -->
+  <section id="vocab">
+    <h2>3 · Vocabulary &amp; Spaced Repetition</h2>
+    <div class="table-scroll">
+      <table data-feature="">
+        <thead>
+          <tr>
+            <th class="feature-h">Feature</th>
+            <th class="col-pr">Mr.🆖 ProReader</th>
+            <th>LingQ</th><th>Beelinguapp</th><th>Achieve3000</th><th>Newsela</th><th>ReadTheory</th><th>CommonLit</th><th>Raz-Kids</th><th>Epic</th><th>Khanmigo</th><th>Diffit</th><th>EPS R.A.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>Auto glossary extraction</th><td class="col-pr">✅</td><td>◐ (mark words)</td><td>◐ (click-add)</td><td>❌</td><td>◐ (in-text)</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td></tr>
+          <tr><th>Personal word bank (per user)</th><td class="col-pr">✅</td><td>✅</td><td>◐</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Bilingual definitions (zh/en)</th><td class="col-pr">✅</td><td>◐</td><td>✅</td><td>❌</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Flashcards</th><td class="col-pr">✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>◐</td><td>❌</td><td>❌</td><td>◐</td><td>❌</td></tr>
+          <tr><th>Spaced repetition (algorithmic SRS)</th><td class="col-pr">✅ (Leitner 5-box)</td><td>◐</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Named review lists + sharing</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Export (PDF/Word/CSV/image)</th><td class="col-pr">✅</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>◐</td><td>❌</td></tr>
+          <tr><th>Review session history + stats</th><td class="col-pr">✅</td><td>◐</td><td>❌</td><td>◐</td><td>❌</td><td>✅ (auto-grade)</td><td>◐</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>◐</td></tr>
+          <tr><th>Collocations (chunk learning)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. COMPREHENSION -->
+  <section id="comprehension">
+    <h2>4 · Comprehension, Grammar &amp; Assessment</h2>
+    <div class="table-scroll">
+      <table data-feature="">
+        <thead>
+          <tr>
+            <th class="feature-h">Feature</th>
+            <th class="col-pr">Mr.🆖 ProReader</th>
+            <th>LingQ</th><th>Beelinguapp</th><th>Achieve3000</th><th>Newsela</th><th>ReadTheory</th><th>CommonLit</th><th>Raz-Kids</th><th>Epic</th><th>Khanmigo</th><th>Diffit</th><th>EPS R.A.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>Comprehension quizzes (MC/TF/short-answer/inference/vocab-context/referencing)</th><td class="col-pr">✅ (6 types)</td><td>◐ (cloze)</td><td>❌</td><td>✅</td><td>✅</td><td>✅ (MC)</td><td>✅</td><td>✅</td><td>❌</td><td>◐</td><td>✅</td><td>❌</td></tr>
+          <tr><th>Skill profiling (main-idea/detail/inference/vocab/purpose)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>AI grammar-topic extraction</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Grammar quizzes + lessons</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>◐</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Grammar games (multiple)</th><td class="col-pr">✅ (5 games)</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Adaptive difficulty on performance</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><th>Pre-reading scaffolding (activate/predict/pre-teach)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>✅ (polls)</td><td>◐</td><td>❌</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. AUDIO -->
+  <section id="audio">
+    <h2>5 · Audio, Pronunciation &amp; TTS</h2>
+    <div class="table-scroll">
+      <table data-feature="">
+        <thead>
+          <tr>
+            <th class="feature-h">Feature</th>
+            <th class="col-pr">Mr.🆖 ProReader</th>
+            <th>LingQ</th><th>Beelinguapp</th><th>Achieve3000</th><th>Newsela</th><th>ReadTheory</th><th>CommonLit</th><th>Raz-Kids</th><th>Epic</th><th>Khanmigo</th><th>Diffit</th><th>EPS R.A.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>Read-along (synced TTS + highlight)</th><td class="col-pr">✅</td><td>◐</td><td>✅ (karaoke)</td><td>◐</td><td>◐</td><td>◐</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Word-level TTS playback</th><td class="col-pr">✅</td><td>✅</td><td>✅</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+          <tr><th>ASR oral-reading / pronunciation feedback</th><td class="col-pr">❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>◐ (running record)</td><td>❌</td><td>✅ (speech)</td><td>❌</td><td>✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6. AI -->
+  <section id="ai">
+    <h2>6 · AI Scaffolding, Tutoring &amp; Engagement</h2>
+    <div class="table-scroll">
+      <table data-feature="">
+        <thead>
+          <tr>
+            <th class="feature-h">Feature</th>
+            <th class="col-pr">Mr.🆖 ProReader</th>
+            <th>LingQ</th><th>Beelinguapp</th><th>Achieve3000</th><th>Newsela</th><th>ReadTheory</th><th>CommonLit</th><th>Raz-Kids</th><th>Epic</th><th>Khanmigo</th><th>Diffit</th><th>EPS R.A.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>AI-generated summary</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>◐</td><td>✅</td><td>❌</td></tr>
+          <tr><th>AI mind map</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>AI image visualization of text</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Conversational AI reading tutor</th><td class="col-pr">✅</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Gamification (points/badges/achievements)</th><td class="col-pr">✅</td><td>◐ (streaks)</td><td>◐</td><td>◐</td><td>◐</td><td>✅</td><td>❌</td><td>✅</td><td>◐</td><td>◐</td><td>❌</td><td>◐</td></tr>
+          <tr><th>Leaderboard (weekly/all-time)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Real-time multiplayer game (spelling battle)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7. TEACHER -->
+  <section id="teacher">
+    <h2>7 · Teacher, Classroom &amp; Analytics</h2>
+    <div class="table-scroll">
+      <table data-feature="">
+        <thead>
+          <tr>
+            <th class="feature-h">Feature</th>
+            <th class="col-pr">Mr.🆖 ProReader</th>
+            <th>LingQ</th><th>Beelinguapp</th><th>Achieve3000</th><th>Newsela</th><th>ReadTheory</th><th>CommonLit</th><th>Raz-Kids</th><th>Epic</th><th>Khanmigo</th><th>Diffit</th><th>EPS R.A.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>Teacher → student assignments</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td></tr>
+          <tr><th>Session sharing (teacher↔student)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Student dashboard + analytics</th><td class="col-pr">✅</td><td>◐</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><th>Teacher dashboard + Excel export</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>◐</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><th>Role-based access (admin/teacher/student)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>◐</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>✅</td></tr>
+          <tr><th>LMS / Google Classroom integration</th><td class="col-pr">❌</td><td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>◐</td><td>✅</td><td>✅</td><td>◐</td><td>◐</td><td>✅</td><td>◐</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8. PLATFORM -->
+  <section id="platform">
+    <h2>8 · Platform, Deployment &amp; Tech</h2>
+    <div class="table-scroll">
+      <table data-feature="">
+        <thead>
+          <tr>
+            <th class="feature-h">Feature</th>
+            <th class="col-pr">Mr.🆖 ProReader</th>
+            <th>LingQ</th><th>Beelinguapp</th><th>Achieve3000</th><th>Newsela</th><th>ReadTheory</th><th>CommonLit</th><th>Raz-Kids</th><th>Epic</th><th>Khanmigo</th><th>Diffit</th><th>EPS R.A.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th>PWA / installable</th><td class="col-pr">✅</td><td>✅ (apps)</td><td>✅ (apps)</td><td>◐</td><td>◐</td><td>◐</td><td>◐</td><td>✅ (apps)</td><td>✅ (apps)</td><td>✅</td><td>◐</td><td>◐</td></tr>
+          <tr><th>Self-host / open-source (Docker)</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Bring-your-own-key multi-AI-provider</th><td class="col-pr">✅ (10+ providers)</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>i18n (multi-language UI)</th><td class="col-pr">✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><th>Email reminders / subscriptions</th><td class="col-pr">✅</td><td>❌</td><td>❌</td><td>◐</td><td>◐</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ANALYSIS -->
+  <section id="analysis">
+    <h2>Analysis</h2>
+
+    <h3>Where Mr.🆖 ProReader stands out (unique / differentiated)</h3>
+    <ul>
+      <li><span class="lead-in">BYO-key multi-provider AI</span> (Google/OpenAI/Anthropic/DeepSeek/xAI/Mistral/Azure/Ollama, etc.) — none of the commercial competitors let you plug in your own model keys or self-host.</li>
+      <li><span class="lead-in">Self-hostable open deployment</span> (Docker) — only ProReader offers on-prem / private data control.</li>
+      <li><span class="lead-in">Collocations</span> (chunk-level learning) — absent from all others.</li>
+      <li><span class="lead-in">AI mind map + AI image visualization</span> — no competitor offers both.</li>
+      <li><span class="lead-in">5 dedicated grammar games</span> (Roulette, Error Surgery, Workshop, Duel, Word Scramble) — unmatched; competitors do at most static grammar drills.</li>
+      <li><span class="lead-in">Real-time multiplayer spelling battle</span> (Socket.io arena) — unique gamified multiplayer.</li>
+      <li><span class="lead-in">Algorithmic Leitner SRS</span> with per-word review history + exportable named review lists — deeper than LingQ/Beelinguapp's informal flashcards.</li>
+      <li><span class="lead-in">Comprehension skill profiling</span> (5 skills, cross-session rollup) — no competitor tracks skill breakdowns this way.</li>
+      <li><span class="lead-in">CEFR word-level highlighting + 6-formula readability</span> — most offer only Lexile.</li>
+      <li><span class="lead-in">Multi-type reading test</span> (6 question types incl. T/F/NG, referencing) — richer than typical MC-only tools.</li>
+      <li><span class="lead-in">Arbitrary input (OCR/PDF/URL + shared text repository)</span> — Diffit matches on input but not on the learner-facing app.</li>
+    </ul>
+
+    <h3>Where competitors lead</h3>
+    <ul>
+      <li><span class="lead-in">ASR oral-reading / pronunciation feedback</span> — EPS Reading Assistant and Raz-Kids (running records) do this; ProReader is TTS-only (no speech recognition).</li>
+      <li><span class="lead-in">Curated, standards-aligned content libraries at scale</span> — Newsela, CommonLit, Raz-Kids, Achieve3000 ship vast pre-leveled corpora; ProReader relies on user-supplied text.</li>
+      <li><span class="lead-in">LMS / Google Classroom / roster integration</span> — Newsela, CommonLit, Diffit, Brisk have deep LMS hooks; ProReader has none.</li>
+      <li><span class="lead-in">Efficacy evidence / research backing</span> — Achieve3000 and ReadTheory have WWC/efficacy studies; ProReader is newer with less published validation.</li>
+      <li><span class="lead-in">Native mobile apps</span> — LingQ, Beelinguapp, Epic, Raz-Kids have polished native apps; ProReader is PWA-only.</li>
+    </ul>
+
+    <h3>Strategic gaps worth considering</h3>
+    <ol>
+      <li><span class="lead-in">Speech recognition / pronunciation scoring</span> (biggest functional gap vs. EPS R.A.).</li>
+      <li><span class="lead-in">Built-in leveled content library</span> (reduces friction for teachers who lack source texts).</li>
+      <li><span class="lead-in">LMS/SIS roster sync</span> (Google Classroom, Clever, ClassLink) — critical for school adoption.</li>
+      <li><span class="lead-in">Published efficacy research</span> to match institutional procurement requirements.</li>
+    </ol>
+  </section>
+
+  <!-- PEDAGOGY -->
+  <section id="pedagogy">
+    <h2>Pedagogical Foundations</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Theory</th><th>Feature mapping</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Comprehensible input / i+1 (Krashen)</td><td>Leveled texts, TTS, AI simplification</td></tr>
+          <tr><td>Scaffolding / ZPD (Vygotsky)</td><td>Guided questions, chunking, multi-step routines</td></tr>
+          <tr><td>Spaced repetition / retrieval practice</td><td>Vocabulary flashcards, tracked review (Leitner)</td></tr>
+          <tr><td>Schema theory</td><td>Pre-reading organizers, background activation</td></tr>
+          <tr><td>Formative assessment</td><td>Auto-grading quizzes, dashboards</td></tr>
+          <tr><td>Extensive reading</td><td>Large leveled libraries (competitors) / importable texts (ProReader, LingQ)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    <p><strong>Sources:</strong> IES What Works Clearinghouse — Achieve3000 intervention report · Newsela Educator Success Guide · Vendor product pages (ReadTheory, CommonLit, ReadWorks, LingQ, Beelinguapp, Raz-Kids, Reading A-Z, Epic, Curipod, Khanmigo, MagicSchool, Diffit, Brisk Teaching, EPS Learning, McGraw Hill / Achieve3000 Literacy).</p>
+    <p class="note">Feature assessments reflect publicly documented capabilities as of Aug 2026 and may change as vendors ship updates; verify against the linked product pages before procurement decisions.</p>
+  </div>
+
+</div>
+
+<script>
+  // Color-code status cells in feature tables
+  const map = { '✅': 's-y', '◐': 's-p', '❌': 's-n', '—': 's-na' };
+  document.querySelectorAll('table[data-feature] td').forEach(td => {
+    const txt = td.textContent.trim();
+    // match pure symbol, or symbol + parenthetical (e.g. "✅ (5 levels)")
+    const m = txt.match(/^([✅◐❌—])(.*)$/);
+    if (m) {
+      td.classList.add('s', map[m[1]]);
+    }
+  });
+
+  // Dark mode toggle (persisted)
+  const root = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  const stored = localStorage.getItem('ra-theme');
+  if (stored === 'dark') { root.classList.add('dark'); btn.textContent = '☀️ Light'; }
+  btn.addEventListener('click', () => {
+    const dark = root.classList.toggle('dark');
+    btn.textContent = dark ? '☀️ Light' : '🌙 Dark';
+    localStorage.setItem('ra-theme', dark ? 'dark' : 'light');
+  });
+
+  // Keep sticky left offset in sync with actual first-column width
+  function syncSticky() {
+    document.querySelectorAll('table[data-feature]').forEach(t => {
+      const firstW = t.querySelector('tbody th')?.getBoundingClientRect().width || 230;
+      t.querySelectorAll('thead th.col-pr, tbody td.col-pr').forEach(c => {
+        c.style.left = firstW + 'px';
+      });
+    });
+  }
+  window.addEventListener('load', syncSticky);
+  window.addEventListener('resize', syncSticky);
+</script>
+</body>
+</html>
