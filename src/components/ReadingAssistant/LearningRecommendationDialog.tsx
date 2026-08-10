@@ -33,6 +33,12 @@ import { Button } from "@/components/ui/button";
 import { useReadingStore, isRestoreComplete, isWelcomeDialogChecked, setWelcomeDialogChecked } from "@/store/reading";
 import { useSharingStore } from "@/store/sharing";
 import { cn } from "@/utils/style";
+import {
+  analyzeTextDifficulty,
+  getCefrBadgeColor,
+  getFleschDescription,
+  usGradeToHKGrade,
+} from "@/utils/textDifficulty";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { processPdfFile } from "@/utils/parser/pdfParser";
 import {
@@ -152,6 +158,26 @@ function ActivityIcon({ activity }: { activity: LearningActivity }) {
   );
 }
 
+function DifficultyStatChip({
+  label,
+  value,
+  title,
+}: {
+  label: string;
+  value: React.ReactNode;
+  title?: string;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[11px] leading-tight"
+      title={title}
+    >
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground">{value}</span>
+    </span>
+  );
+}
+
 export default function LearningRecommendationDialog() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -161,6 +187,10 @@ export default function LearningRecommendationDialog() {
   const [hasIncompleteActivities, setHasIncompleteActivities] = useState(false);
   const [recommendedText, setRecommendedText] =
     useState<RepositoryTextListItem | null>(null);
+  const [fullPreviewText, setFullPreviewText] = useState<RepositoryText | null>(null);
+  const [previewDifficulty, setPreviewDifficulty] =
+    useState<TextDifficultyResult | null>(null);
+  const [analyzingDifficulty, setAnalyzingDifficulty] = useState(false);
   const [loadingStart, setLoadingStart] = useState(false);
   const [restoreReady, setRestoreReady] = useState(false);
   const dismissedSessionRef = useRef<string | null>(null);
@@ -244,6 +274,25 @@ export default function LearningRecommendationDialog() {
     });
   }, [activity]);
 
+  const loadPreviewText = useCallback(async (item: RepositoryTextListItem) => {
+    setAnalyzingDifficulty(true);
+    setPreviewDifficulty(null);
+    setFullPreviewText(null);
+    try {
+      const res = await fetch(`/api/repository/${item.id}`);
+      if (!res.ok) throw new Error("Failed to load");
+      const fullText: RepositoryText = await res.json();
+      setFullPreviewText(fullText);
+      if (fullText.extractedText) {
+        setPreviewDifficulty(analyzeTextDifficulty(fullText.extractedText));
+      }
+    } catch {
+      setPreviewDifficulty(null);
+    } finally {
+      setAnalyzingDifficulty(false);
+    }
+  }, []);
+
   const handleChooseRepository = useCallback(async () => {
     setStep("repository-loading");
     try {
@@ -263,11 +312,12 @@ export default function LearningRecommendationDialog() {
       const randomText = texts[Math.floor(Math.random() * texts.length)];
       setRecommendedText(randomText);
       setStep("repository-preview");
+      loadPreviewText(randomText);
     } catch {
       toast.error(t("reading.repository.fetchError"));
       setStep("choices");
     }
-  }, [t]);
+  }, [t, loadPreviewText]);
 
   const handlePickAnother = useCallback(() => {
     const texts = allTextsRef.current;
@@ -277,15 +327,21 @@ export default function LearningRecommendationDialog() {
       candidate = texts[Math.floor(Math.random() * texts.length)];
     } while (candidate.id === recommendedText?.id);
     setRecommendedText(candidate);
-  }, [recommendedText]);
+    loadPreviewText(candidate);
+  }, [recommendedText, loadPreviewText]);
 
   const handleStartReading = useCallback(async () => {
     if (!recommendedText) return;
     setLoadingStart(true);
     try {
-      const res = await fetch(`/api/repository/${recommendedText.id}`);
-      if (!res.ok) throw new Error("Failed to load");
-      const fullText: RepositoryText = await res.json();
+      let fullText: RepositoryText;
+      if (fullPreviewText && fullPreviewText.id === recommendedText.id) {
+        fullText = fullPreviewText;
+      } else {
+        const res = await fetch(`/api/repository/${recommendedText.id}`);
+        if (!res.ok) throw new Error("Failed to load");
+        fullText = (await res.json()) as RepositoryText;
+      }
       useReadingStore.getState().loadFromRepository(fullText);
       setOpen(false);
     } catch {
@@ -293,12 +349,15 @@ export default function LearningRecommendationDialog() {
     } finally {
       setLoadingStart(false);
     }
-  }, [recommendedText, t]);
+  }, [recommendedText, fullPreviewText, t]);
 
   const handleDismiss = useCallback(() => {
     setOpen(false);
     setStep("choices");
     setRecommendedText(null);
+    setFullPreviewText(null);
+    setPreviewDifficulty(null);
+    setAnalyzingDifficulty(false);
     if (id) {
       dismissedSessionRef.current = id;
     }
@@ -613,6 +672,57 @@ export default function LearningRecommendationDialog() {
                     <p className="text-sm text-muted-foreground line-clamp-3">
                       {recommendedText.previewText}
                     </p>
+                  )}
+                  {(analyzingDifficulty || previewDifficulty) && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {analyzingDifficulty ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <LoaderCircle className="w-3 h-3 animate-spin" />
+                          {t("reading.difficulty.analyzing")}
+                        </span>
+                      ) : previewDifficulty ? (
+                        <>
+                          <DifficultyStatChip
+                            label="CEFR"
+                            value={
+                              <span
+                                className={cn(
+                                  "rounded px-1 py-px text-[10px] font-semibold",
+                                  getCefrBadgeColor(previewDifficulty.cefrLevel)
+                                )}
+                              >
+                                {previewDifficulty.cefrLevel}
+                              </span>
+                            }
+                          />
+                          <DifficultyStatChip
+                            label={t("reading.difficulty.wordCount")}
+                            value={previewDifficulty.wordCount}
+                          />
+                          <DifficultyStatChip
+                            label={t("reading.difficulty.sentenceCount")}
+                            value={previewDifficulty.sentenceCount}
+                          />
+                          <DifficultyStatChip
+                            label={t("reading.difficulty.avgSentenceLength")}
+                            value={previewDifficulty.avgSentenceLength}
+                          />
+                          <DifficultyStatChip
+                            label={t("reading.difficulty.fleschReadingEase")}
+                            value={previewDifficulty.fleschReadingEase}
+                            title={getFleschDescription(
+                              previewDifficulty.fleschReadingEase
+                            )}
+                          />
+                          <DifficultyStatChip
+                            label={t("reading.difficulty.gradeLevel")}
+                            value={usGradeToHKGrade(
+                              Math.round(previewDifficulty.fleschKincaidGrade)
+                            )}
+                          />
+                        </>
+                      ) : null}
+                    </div>
                   )}
                   <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
                     {recommendedText.createdByName && (
