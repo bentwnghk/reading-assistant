@@ -6,7 +6,7 @@
 #   builder  — compiles TypeScript -> JavaScript
 #   prod-deps — production deps only (slim final image, no test/build tooling)
 #   runner   — compiled dist + prod node_modules
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Full dependencies (devDeps included — needed to build).
 FROM base AS deps

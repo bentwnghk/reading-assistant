@@ -27,8 +27,8 @@ The project uses **npm** as the primary package manager (>= 9.8.0, Node >= 18.18
 
 ### Docker
 
-- **Main app Dockerfile**: Multi-stage build on `node:18-alpine`, runs `build:standalone`, exposes port 3000.
-- **Realtime Dockerfile**: Multi-stage build on `node:18-alpine` at `realtime/Dockerfile`, builds TypeScript → JS, exposes port 3001. Uses a 3-stage layout (deps → builder → prod-deps → runner) for a slim final image.
+- **Main app Dockerfile**: Multi-stage build on `node:20-alpine`, runs `build:standalone`, exposes port 3000.
+- **Realtime Dockerfile**: Multi-stage build on `node:20-alpine` at `realtime/Dockerfile`, builds TypeScript → JS, exposes port 3001. Uses a 3-stage layout (deps → builder → prod-deps → runner) for a slim final image.
 - **docker-compose.yml**: Three services — `postgres` (PostgreSQL 16 Alpine, port 5432), `reading-assistant` (port 3000, depends on healthy postgres), and `realtime` (port 3001, Socket.io server, depends on healthy postgres, shares `AUTH_SECRET` and `DATABASE_URL`).
 - **Build & Run**: `docker compose up --build`
 
