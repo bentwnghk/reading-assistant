@@ -6,10 +6,11 @@ import { ZoomIn, ZoomOut, Maximize } from "lucide-react";
 
 /* ── Palette (mirrors the Chapter 02 landing mockup & NotebookLM) ──
    Each branch gets a saturated stroke + a matching light tint for its leaves.
-   The palette cycles if a text yields more than 4 branches. */
-const ROOT_COLOR = "#5C6BC0"; // indigo
-const LEAF_TEXT = "#37474F"; // dark slate — readable on light tints in light & dark mode
-const PALETTE: { stroke: string; fill: string }[] = [
+   The palette cycles if a text yields more than 4 branches.
+   Shared with MindMap.tsx so the Mermaid renderer can mimic the same two-tone scheme. */
+export const ROOT_COLOR = "#5C6BC0"; // indigo
+export const LEAF_TEXT = "#37474F"; // dark slate — readable on light tints in light & dark mode
+export const PALETTE: { stroke: string; fill: string }[] = [
   { stroke: "#EF4444", fill: "#FEE2E2" }, // red
   { stroke: "#F59E0B", fill: "#FEF3C7" }, // amber
   { stroke: "#8B5CF6", fill: "#EDE9FE" }, // violet

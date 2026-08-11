@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Waypoints, LoaderCircle, Languages, Network, Download, Move } from "lucide-react";
 import { toast } from "sonner";
@@ -11,7 +11,7 @@ import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
-import MindMapView from "./MindMapView";
+import MindMapView, { PALETTE, ROOT_COLOR, LEAF_TEXT } from "./MindMapView";
 
 const MagicDown = dynamic(() => import("@/components/MagicDown/View"));
 
@@ -74,6 +74,73 @@ function pickMindMapSvg(container: HTMLElement | null): SVGSVGElement | null {
     return rect.width * rect.height;
   };
     return svgs.reduce((best, svg) => (area(svg) > area(best) ? svg : best), svgs[0]);
+}
+
+/** Extract the visible label text from a Mermaid mindmap node `<g>`. */
+function getNodeText(g: Element): string {
+  const fo = g.querySelector("foreignObject");
+  if (fo) return fo.textContent || "";
+  const text = g.querySelector("text");
+  return text?.textContent || "";
+}
+
+/** Apply fill + text colors to a mindmap node using inline styles so they
+ *  override Mermaid's generated `<style>` block (inline > stylesheet > attribute
+ *  in the SVG cascade). `applyContrastTextColors` in Mermaid.tsx runs before
+ *  this (it also uses inline styles), so we must match its approach to win. */
+function colorizeNode(g: Element, fill: string, textColor: string): void {
+  g.querySelectorAll<SVGElement>("rect, circle, ellipse, polygon, path").forEach((shape) => {
+    shape.style.fill = fill;
+    shape.style.stroke = "none";
+  });
+  g.querySelectorAll<SVGElement>("text, tspan").forEach((t) => {
+    t.style.fill = textColor;
+  });
+  g.querySelectorAll<HTMLElement>("foreignObject *").forEach((t) => {
+    t.style.color = textColor;
+  });
+}
+
+/** Override Mermaid's default mindmap colors with the Tree view's two-tone palette.
+ *  Mermaid assigns the SAME `section-N` class (and thus the same color) to a branch
+ *  and all of its leaves. We walk the rendered SVG and differentiate them:
+ *  root → indigo, branches → saturated palette stroke, leaves → matching light tint.
+ *  Branch vs. leaf is determined by matching the node's text against `data.branches`. */
+function colorizeMindMapSvg(svg: SVGSVGElement, data: MindMapData): void {
+  const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+  const branchLabels = new Set(data.branches.map((b) => norm(b.label)));
+
+  // Root nodes (class includes `section-root` or `section--1`)
+  svg.querySelectorAll("g.section-root, g.section--1").forEach((g) => {
+    colorizeNode(g, ROOT_COLOR, "#ffffff");
+  });
+
+  // Branch vs leaf nodes — identified by text matching + section class
+  svg.querySelectorAll<SVGGElement>("g.mindmap-node").forEach((g) => {
+    const cls = g.getAttribute("class") || "";
+    if (cls.includes("section-root") || cls.includes("section--1")) return;
+
+    const text = norm(getNodeText(g));
+    const sectionMatch = cls.match(/section-(\d+)/);
+    const section = sectionMatch ? parseInt(sectionMatch[1], 10) : 0;
+    const color = PALETTE[section % PALETTE.length];
+
+    if (branchLabels.has(text)) {
+      colorizeNode(g, color.stroke, "#ffffff");
+    } else {
+      colorizeNode(g, color.fill, LEAF_TEXT);
+    }
+  });
+
+  // Recolor connecting edges to match branch palette
+  const branchSections = new Set<number>();
+  data.branches.forEach((_, bi) => branchSections.add(bi % 11));
+  branchSections.forEach((section) => {
+    const color = PALETTE[section % PALETTE.length];
+    svg.querySelectorAll<SVGElement>(`.section-edge-${section}`).forEach((el) => {
+      el.style.stroke = color.stroke;
+    });
+  });
 }
 
 /** Make an SVG safe to rasterize via <img> + canvas. Per the HTML spec, an SVG
@@ -277,6 +344,32 @@ function MindMap() {
   const parsed = mindMap ? tryParseMindMapData(mindMap) : null;
   // There is nothing to export in the legacy+tree CTA state (no rendered map).
   const canDownload = !!mindMap && (mindMapRenderer === "mermaid" || !!parsed);
+
+  // Colorize the Mermaid mindmap SVG after Mermaid finishes rendering. Mermaid
+  // assigns the same section color to a branch and all its leaves — we override
+  // this with the two-tone palette (saturated branch, light-tint leaf) to match
+  // the Tree renderer. Uses a MutationObserver because Mermaid renders
+  // asynchronously (dynamic import + async render). Our inline-style writes are
+  // attribute changes, not childList changes, so the observer does NOT loop.
+  useEffect(() => {
+    if (!parsed || mindMapRenderer !== "mermaid") return;
+    const container = contentRef.current;
+    if (!container) return;
+
+    const tryColorize = () => {
+      const svg = pickMindMapSvg(container);
+      if (svg && svg.querySelector("g.mindmap-node")) {
+        colorizeMindMapSvg(svg, parsed);
+      }
+    };
+
+    // Try immediately in case the SVG is already in the DOM.
+    tryColorize();
+
+    const observer = new MutationObserver(tryColorize);
+    observer.observe(container, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [parsed, mindMapRenderer]);
 
   if (!extractedText) {
     return null;
