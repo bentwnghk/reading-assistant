@@ -234,7 +234,9 @@ function sanitizeForRaster(svg: SVGSVGElement): void {
     const lineHeight = fontSize * 1.2;
     const firstLineY = centerY - ((lines.length - 1) * lineHeight) / 2;
 
-    // Inherit the label color Mermaid's contrast pass applied inline.
+    // Inherit the label color from the on-screen rendering. Both
+    // applyContrastTextColors (Mermaid.tsx) and colorizeMindMapSvg set
+    // `style.color` on foreignObject descendants; read the first one found.
     let fill = "#333333";
     const colored = Array.from(fo.querySelectorAll<HTMLElement>("*")).find((e) => e.style.color);
     if (colored?.style.color) fill = colored.style.color;
@@ -246,7 +248,12 @@ function sanitizeForRaster(svg: SVGSVGElement): void {
     replacement.setAttribute("dominant-baseline", "central");
     replacement.setAttribute("font-size", String(fontSize));
     replacement.setAttribute("font-family", fontFamily);
-    replacement.setAttribute("fill", fill);
+    // Use inline style (not setAttribute) so the color survives Mermaid's
+    // generated <style> rules (e.g. `.section-0 text { fill: … }`) which
+    // override presentation attributes but not inline styles. Without this,
+    // the exported PNG shows Mermaid's default label colors instead of the
+    // two-tone palette applied on screen.
+    replacement.style.fill = fill;
     lines.forEach((line, i) => {
       const tspan = document.createElementNS(SVGNS, "tspan");
       tspan.setAttribute("x", String(centerX));
