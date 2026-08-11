@@ -113,31 +113,154 @@ function sanitizeForRaster(svg: SVGSVGElement): void {
     if (xh && /^https?:/i.test(xh)) el.removeAttributeNS(XLINKNS, "href");
   });
 
-  // Convert <foreignObject> HTML labels to a centered native <text>.
+  // Reusable canvas for word-wrap measurement — see convertForeignObject().
+  const measureCtx = document.createElement("canvas").getContext("2d");
+
+  // Convert <foreignObject> HTML labels to native <text>, preserving the line
+  // breaks Mermaid/HTML produced on screen. `textContent` flattens <br> and
+  // block elements into a single string with no separator, and native SVG
+  // <text> does not auto-wrap, so we must (a) walk the DOM to recover the
+  // paragraph structure and (b) re-wrap each paragraph to the foreignObject
+  // width using canvas measurement — otherwise long labels collapse to one
+  // clipped line in the exported PNG.
   svg.querySelectorAll<SVGForeignObjectElement>("foreignObject").forEach((fo) => {
-    const text = (fo.textContent ?? "").replace(/\s+/g, " ").trim();
-    if (!text) {
+    // Read the font Mermaid applied so the wrapping matches what the browser
+    // rendered (mindmap nodes use a non-default size/family).
+    let fontSize = 14;
+    let fontFamily = "sans-serif";
+    const firstEl = fo.firstElementChild as HTMLElement | null;
+    if (firstEl) {
+      const cs = window.getComputedStyle(firstEl);
+      const px = parseFloat(cs.fontSize);
+      if (!isNaN(px) && px > 0) fontSize = px;
+      if (cs.fontFamily) fontFamily = cs.fontFamily;
+    }
+    const font = `${fontSize}px ${fontFamily}`;
+
+    const paragraphs = extractHtmlLines(fo)
+      .map((l) => l.replace(/\s+/g, " ").trim());
+    // Drop trailing empties from the block-walk so they don't add blank lines.
+    while (paragraphs.length > 0 && paragraphs[paragraphs.length - 1] === "") {
+      paragraphs.pop();
+    }
+    if (paragraphs.length === 0 || paragraphs.every((p) => !p)) {
       fo.remove();
       return;
     }
+
     const x = parseFloat(fo.getAttribute("x") ?? "0");
     const y = parseFloat(fo.getAttribute("y") ?? "0");
     const width = parseFloat(fo.getAttribute("width") ?? "0");
     const height = parseFloat(fo.getAttribute("height") ?? "0");
-    const replacement = document.createElementNS(SVGNS, "text");
-    replacement.setAttribute("x", String(x + width / 2));
-    replacement.setAttribute("y", String(y + height / 2));
-    replacement.setAttribute("text-anchor", "middle");
-    replacement.setAttribute("dominant-baseline", "central");
-    replacement.setAttribute("font-size", "14");
+    const centerX = x + width / 2;
+    const centerY = y + height / 2;
+
+    const lines: string[] = [];
+    for (const p of paragraphs) {
+      if (!p) {
+        lines.push("");
+        continue;
+      }
+      lines.push(...wrapTextLine(measureCtx, p, width, font));
+    }
+
+    const lineHeight = fontSize * 1.2;
+    const firstLineY = centerY - ((lines.length - 1) * lineHeight) / 2;
+
     // Inherit the label color Mermaid's contrast pass applied inline.
     let fill = "#333333";
     const colored = Array.from(fo.querySelectorAll<HTMLElement>("*")).find((e) => e.style.color);
     if (colored?.style.color) fill = colored.style.color;
+
+    const replacement = document.createElementNS(SVGNS, "text");
+    replacement.setAttribute("x", String(centerX));
+    replacement.setAttribute("y", String(firstLineY));
+    replacement.setAttribute("text-anchor", "middle");
+    replacement.setAttribute("dominant-baseline", "central");
+    replacement.setAttribute("font-size", String(fontSize));
+    replacement.setAttribute("font-family", fontFamily);
     replacement.setAttribute("fill", fill);
-    replacement.textContent = text;
+    lines.forEach((line, i) => {
+      const tspan = document.createElementNS(SVGNS, "tspan");
+      tspan.setAttribute("x", String(centerX));
+      tspan.setAttribute("y", String(firstLineY + i * lineHeight));
+      tspan.textContent = line;
+      replacement.appendChild(tspan);
+    });
     fo.replaceWith(replacement);
   });
+}
+
+/** HTML block-level tags that should start a new line when flattening
+ *  foreignObject content to text. Inline tags (span, b, i, em, strong, ...)
+ *  are walked recursively without breaking the line. */
+const BLOCK_TAGS = new Set([
+  "div", "p", "ul", "ol", "li", "section", "article",
+  "blockquote", "h1", "h2", "h3", "h4", "h5", "h6", "tr",
+]);
+
+/** Walk an HTML subtree inside a Mermaid <foreignObject> and return its text
+ *  split into paragraphs at <br> and block-element boundaries, mirroring the
+ *  line structure the browser rendered. Inline elements concatenate onto the
+ *  current line. */
+function extractHtmlLines(node: Node): string[] {
+  const lines: string[] = [""];
+  const walk = (n: Node) => {
+    n.childNodes.forEach((child) => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        lines[lines.length - 1] += child.textContent ?? "";
+        return;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) return;
+      const tag = (child as Element).tagName.toLowerCase();
+      if (tag === "br") {
+        lines.push("");
+        return;
+      }
+      if (BLOCK_TAGS.has(tag)) {
+        if (lines[lines.length - 1] !== "") lines.push("");
+        walk(child);
+        lines.push("");
+        return;
+      }
+      walk(child);
+    });
+  };
+  walk(node);
+  return lines;
+}
+
+/** Word-wrap a single paragraph to fit maxWidth using canvas measurement so
+ *  the rasterized line breaks match what HTML word-wrap produced on screen.
+ *  Falls back to the unwrapped input if no 2D context is available. */
+function wrapTextLine(
+  ctx: CanvasRenderingContext2D | null,
+  text: string,
+  maxWidth: number,
+  font: string,
+): string[] {
+  if (!text) return [];
+  if (!ctx || maxWidth <= 0) return [text];
+  ctx.font = font;
+  if (ctx.measureText(text).width <= maxWidth) return [text];
+  const words = text.split(" ");
+  const out: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (ctx.measureText(candidate).width <= maxWidth) {
+      current = candidate;
+    } else if (current) {
+      out.push(current);
+      current = word;
+    } else {
+      // Single word wider than maxWidth — keep it intact on its own line.
+      out.push(word);
+      current = "";
+    }
+  }
+  if (current) out.push(current);
+  return out;
 }
 
 function MindMap() {
