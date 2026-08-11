@@ -275,22 +275,6 @@ function MindMap() {
               type="button"
               size="sm"
               variant="ghost"
-              onClick={() => update({ mindMapRenderer: "tree" })}
-              className={`h-7 gap-1 px-2 ${
-                mindMapRenderer === "tree"
-                  ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                  : "text-muted-foreground"
-              }`}
-              title={t("reading.mindMap.rendererTree")}
-              aria-pressed={mindMapRenderer === "tree"}
-            >
-              <Network className="h-4 w-4" />
-              <span>{t("reading.mindMap.rendererTree")}</span>
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
               onClick={() => update({ mindMapRenderer: "mermaid" })}
               className={`h-7 gap-1 px-2 ${
                 mindMapRenderer === "mermaid"
@@ -302,6 +286,22 @@ function MindMap() {
             >
               <Waypoints className="h-4 w-4" />
               <span>{t("reading.mindMap.rendererMap")}</span>
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => update({ mindMapRenderer: "tree" })}
+              className={`h-7 gap-1 px-2 ${
+                mindMapRenderer === "tree"
+                  ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                  : "text-muted-foreground"
+              }`}
+              title={t("reading.mindMap.rendererTree")}
+              aria-pressed={mindMapRenderer === "tree"}
+            >
+              <Network className="h-4 w-4" />
+              <span>{t("reading.mindMap.rendererTree")}</span>
             </Button>
           </div>
           <div className="flex items-center gap-2">

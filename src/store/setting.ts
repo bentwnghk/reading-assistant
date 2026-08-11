@@ -199,7 +199,7 @@ export const defaultValues: SettingStore = {
   debug: "disable",
   smoothTextStreamType: "word",
   tutorLanguage: "en",
-  mindMapRenderer: "tree",
+  mindMapRenderer: "mermaid",
   lastOpenedSessionId: "",
 };
 
