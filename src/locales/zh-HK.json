@@ -2754,7 +2754,7 @@
     "delete": "刪除",
     "loadMore": "載入更多記錄",
     "noHistory": "沒有記錄",
-    "restored": "已恢復工作階段：{{title}}",
+    "restored": "已恢復閱讀工作階段：{{title}}",
     "progress": "學習進度",
     "testScore": "閱讀測驗得分",
     "glossaryWords": "詞彙量",
@@ -2766,13 +2766,13 @@
     "grammarGameAccuracy": "語法遊戲正確率",
     "totalVocabulary": "總詞彙量",
     "confirmSwitchTitle": "AI 生成進行中",
-    "confirmSwitchDesc": "目前有 AI 生成正在進行。切換到另一個工作階段將會取消它。您想繼續嗎？",
-    "confirmSwitch": "切換工作階段",
+    "confirmSwitchDesc": "目前有 AI 生成正在進行。切換到另一個閱讀工作階段將會取消它。您想繼續嗎？",
+    "confirmSwitch": "切換閱讀工作階段",
     "help": {
       "title": "閱讀記錄指南",
       "purpose": "閱讀記錄會保留你所有過去的閱讀工作階段，包括學習進度、收集的詞彙及測驗得分。",
-      "features": "你可以載入先前的的工作階段以繼續閱讀、匯出工作階段進行備份，或刪除不再需要的工作階段。",
-      "usage": "點擊「載入」以恢復工作階段，或使用匯入/匯出按鈕來管理你的閱讀資料。"
+      "features": "你可以載入先前的的閱讀工作階段以繼續閱讀、匯出工作階段進行備份，或刪除不再需要的工作階段。",
+      "usage": "點擊「載入」以恢復閱讀工作階段，或使用匯入/匯出按鈕來管理你的閱讀資料。"
     },
     "share": "分享"
   },

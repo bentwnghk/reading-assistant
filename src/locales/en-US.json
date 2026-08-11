@@ -2727,7 +2727,7 @@
     "delete": "Delete",
     "loadMore": "Load More History",
     "noHistory": "No history records",
-    "restored": "Restored session: {{title}}",
+    "restored": "Restored reading session: {{title}}",
     "progress": "Learning Progress",
     "testScore": "Reading Test Score",
     "glossaryWords": "Vocabulary Count",
@@ -2739,13 +2739,13 @@
     "grammarGameAccuracy": "Grammar Game Accuracy",
     "totalVocabulary": "Total Vocabulary",
     "confirmSwitchTitle": "AI Generation in Progress",
-    "confirmSwitchDesc": "An AI generation is currently in progress. Switching to another session will cancel it. Do you want to continue?",
-    "confirmSwitch": "Switch Session",
+    "confirmSwitchDesc": "An AI generation is currently in progress. Switching to another reading session will cancel it. Do you want to continue?",
+    "confirmSwitch": "Switch Reading Session",
     "help": {
       "title": "Reading History Guide",
       "purpose": "The Reading History keeps a record of all your past reading sessions, including learning progress, vocabulary collected, and test scores.",
-      "features": "You can load a previous session to continue reading, export sessions for backup, or delete sessions you no longer need.",
-      "usage": "Click \"Load\" to resume a session, or use the import/export buttons to manage your reading data."
+      "features": "You can load a previous reading session to continue reading, export sessions for backup, or delete sessions you no longer need.",
+      "usage": "Click \"Load\" to resume a reading session, or use the import/export buttons to manage your reading data."
     },
     "share": "Share"
   },
