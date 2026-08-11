@@ -241,6 +241,46 @@ export function LeaderboardPage() {
         </div>
       </div>
 
+      {/* ── Tabs: Achievements / My Stats / Leaderboard ── */}
+      <div className="flex gap-1 p-1 bg-muted rounded-lg">
+        <button
+          onClick={() => setTab("achievements")}
+          className={cn(
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
+            tab === "achievements"
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Medal className="h-3.5 w-3.5" />
+          {t("achievements.tabLabel")}
+        </button>
+        <button
+          onClick={() => setTab("me")}
+          className={cn(
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
+            tab === "me"
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <BarChart3 className="h-3.5 w-3.5" />
+          {t("leaderboard.myStats")}
+        </button>
+        <button
+          onClick={() => setTab("board")}
+          className={cn(
+            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
+            tab === "board"
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Trophy className="h-3.5 w-3.5" />
+          {t("leaderboard.tabLabel")}
+        </button>
+      </div>
+
       {/* ── Period toggle (board tab only) ── */}
       {tab === "board" && (
         <div className="flex gap-1 p-1 bg-muted rounded-lg">
@@ -299,46 +339,6 @@ export function LeaderboardPage() {
           </button>
         </div>
       )}
-
-      {/* ── Tabs: Achievements / My Stats / Leaderboard ── */}
-      <div className="flex gap-1 p-1 bg-muted rounded-lg">
-        <button
-          onClick={() => setTab("achievements")}
-          className={cn(
-            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
-            tab === "achievements"
-              ? "bg-background shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Medal className="h-3.5 w-3.5" />
-          {t("achievements.tabLabel")}
-        </button>
-        <button
-          onClick={() => setTab("me")}
-          className={cn(
-            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
-            tab === "me"
-              ? "bg-background shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <BarChart3 className="h-3.5 w-3.5" />
-          {t("leaderboard.myStats")}
-        </button>
-        <button
-          onClick={() => setTab("board")}
-          className={cn(
-            "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1",
-            tab === "board"
-              ? "bg-background shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Trophy className="h-3.5 w-3.5" />
-          {t("leaderboard.tabLabel")}
-        </button>
-      </div>
 
       {/* ── Achievements tab ── */}
       {tab === "achievements" && (

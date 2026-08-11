@@ -55,6 +55,12 @@ i18next
   .init({
     supportedLngs: keys(locales),
     fallbackLng: "en-US",
+    interpolation: {
+      // React already escapes text content, so i18next's HTML escaping is
+      // redundant and causes double-escaping (e.g. apostrophes in translated
+      // values like "Author's Purpose" render as literal "Author&#39;s Purpose").
+      escapeValue: false,
+    },
   });
 
 export default i18next;
