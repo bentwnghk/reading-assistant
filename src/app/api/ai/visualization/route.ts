@@ -129,18 +129,13 @@ async function callOpenAICompatibleApi(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
+        "Accept-Encoding": "identity",
       },
       body: JSON.stringify({
         model,
         messages: [{ role: "user", content: prompt }],
         max_tokens: 4096,
         responseModalities: ["TEXT", "IMAGE"],
-        responseFormat: {
-          image: {
-            aspectRatio: "16:9",
-            imageSize: "1K",
-          },
-        },
       }),
     }
   );
