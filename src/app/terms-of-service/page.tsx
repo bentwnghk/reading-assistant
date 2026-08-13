@@ -113,7 +113,7 @@ const en = {
       body: (
         <>
           <p>To the maximum extent permitted by applicable law, in no event shall Mr.🆖 ProReader, its affiliates, directors, employees, agents, or licensors be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, data, use, or goodwill, arising out of or related to your use of the Service.</p>
-          <p>Our total liability to you for any claims arising out of or relating to the Service shall not exceed the amount you have paid to us in the twelve (12) months preceding the event giving rise to the claim, or one hundred US dollars ($100), whichever is greater.</p>
+          <p>Our total liability to you for any claims arising out of or relating to the Service shall not exceed the amount you have paid to us in the twelve (12) months preceding the event giving rise to the claim, or one hundred US dollars ($100), whichever is less.</p>
         </>
       ),
     },
@@ -271,7 +271,7 @@ const zhHK = {
       body: (
         <>
           <p>在適用法律允許的最大範圍內，Mr.🆖 ProReader 及其關聯公司、董事、僱員、代理人或授權方概不對因您使用本服務而產生的任何間接、附帶、特殊、後果性或懲罰性損害承擔責任，包括但不限於利潤、資料、使用或商譽的損失。</p>
-          <p>我們對因本服務引起或與之相關的任何索賠的總責任，不超過您在引發索賠的事件發生前十二（12）個月內向我們支付的款項，或一百美元（$100），以較高者為準。</p>
+          <p>我們對因本服務引起或與之相關的任何索賠的總責任，不超過您在引發索賠的事件發生前十二（12）個月內向我們支付的款項，或一百美元（$100），以較低者為準。</p>
         </>
       ),
     },
