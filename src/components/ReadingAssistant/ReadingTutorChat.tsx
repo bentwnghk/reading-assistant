@@ -235,10 +235,20 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     setPendingImages([]);
   };
 
+  // Answer Help buttons never open the file picker themselves. If an image is
+  // already waiting (added via the "Add image" button or pasted), the request
+  // is sent to the LLM immediately. Otherwise the question is armed and sends
+  // automatically as soon as an image is added or pasted (see handleImageUpload
+  // and the paste listener).
   const handleQuickQuestionSelect = (question: string, action?: "text" | "upload-image", displayLabel?: string) => {
     if (action === "upload-image") {
-      setPendingQuestionForImage({ question, displayLabel });
-      fileInputRef.current?.click();
+      if (pendingImages.length > 0) {
+        const images = pendingImages;
+        setPendingImages([]);
+        handleSendWithImages(question, images, displayLabel);
+      } else {
+        setPendingQuestionForImage({ question, displayLabel });
+      }
     } else {
       handleSend(question, undefined, undefined, displayLabel);
     }
@@ -418,6 +428,24 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
               onTouchEnd={(e) => { e.preventDefault(); setTutorChatSelectedText(""); }}
               className="flex-shrink-0 hover:bg-primary/20 rounded p-0.5 transition-colors"
               title={t("reading.tutor.removeSelection")}
+            >
+              <XIcon className="h-3 w-3" />
+            </button>
+          </div>
+        )}
+        {pendingQuestionForImage && (
+          <div className="mb-2 text-xs text-orange-600 dark:text-orange-400 bg-orange-500/10 border border-orange-500/20 rounded px-2 py-1.5 font-medium flex items-center gap-1">
+            <span className="truncate">
+              {t("reading.tutor.imageQuestionArmed", {
+                label: pendingQuestionForImage.displayLabel || pendingQuestionForImage.question,
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPendingQuestionForImage(null)}
+              onTouchEnd={(e) => { e.preventDefault(); setPendingQuestionForImage(null); }}
+              className="flex-shrink-0 hover:bg-orange-500/20 rounded p-0.5 transition-colors"
+              title={t("reading.tutor.cancelImageQuestion")}
             >
               <XIcon className="h-3 w-3" />
             </button>

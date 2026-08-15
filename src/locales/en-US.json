@@ -1868,6 +1868,8 @@
       "removeSelection": "Remove selected text from context",
       "addImage": "Add image",
       "imageOnly": "[Image]",
+      "imageQuestionArmed": "\"{{label}}\" is ready — add or paste an image to send it",
+      "cancelImageQuestion": "Cancel",
       "languageToggleLabel": "Response language",
       "languageEnglish": "EN",
       "languageChinese": "中文",
@@ -1885,7 +1887,7 @@
           },
           "image": {
             "name": "Answer Help",
-            "desc": "Upload or paste a photo of a reading question for hints, step-by-step guidance or direct answer."
+            "desc": "Add or paste a photo of a reading question, then tap 'Hint me', 'Step-by-step' or 'Give answer'. If an image is already there it sends right away; otherwise it waits for one."
           },
           "quick": {
             "name": "Quick Questions",
@@ -1897,7 +1899,7 @@
           "s1": "Tap the chat icon to open the tutor.",
           "s2": "Type a question or tap a quick-question button.",
           "s3": "Select text first to ask about something specific.",
-          "s4": "Upload or paste an image for guided help on a worksheet question."
+          "s4": "Add or paste an image of a worksheet question, then tap an Answer Help button — it sends as soon as the image is ready."
         },
         "tipTitle": "Good to know",
         "tipContent": "Use the EN / 中文 switch to choose the tutor's reply language. It remembers your conversation for follow-up questions."
