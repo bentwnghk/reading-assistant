@@ -405,7 +405,10 @@ function PreReading() {
                   document
                     .getElementById("section-summary")
                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  generateSummary();
+                  // Only generate when absent — never regenerate an existing summary.
+                  if (!summary) {
+                    generateSummary();
+                  }
                 }}
                 disabled={isSummaryGenerating || !predictionDraft.trim()}
                 size="sm"
