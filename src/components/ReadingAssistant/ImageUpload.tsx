@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
+import { useGlobalStore } from "@/store/global";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { cn } from "@/utils/style";
 import { processPdfFile } from "@/utils/parser/pdfParser";
@@ -41,6 +42,7 @@ function ImageUpload() {
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "repository" | "ai-generate">("upload");
   const { originalImages, extractedText, activeGenerations, docTitle, source } = useReadingStore();
+  const { openTutorChat } = useGlobalStore();
   const { extractTextFromImage, generateTitle } = useReadingAssistant();
   const isExtracting = !!activeGenerations["extracting"];
   const isBusy = isExtracting || isProcessingPdf;
@@ -179,13 +181,14 @@ function ImageUpload() {
   };
 
   // Accept pasted images/PDFs (screenshots, browser "Copy image", or files
-  // copied from the OS file manager) while the Upload tab is active. Only
-  // armed before any text has been extracted — once text exists the paste
-  // ownership moves to the AI Tutor dialog (which requires extracted text),
-  // so a paste intended for the tutor never triggers OCR here. Text pastes
-  // and non-supported clipboard files are left to their default behavior.
+  // copied from the OS file manager) while the Upload tab is active. Stays
+  // armed after extraction too, so a multi-screenshot reading text can be
+  // pasted one screenshot at a time (each paste appends via handleFiles →
+  // extractTextFromImage). Only disarmed while the AI Tutor dialog is open —
+  // pastes then belong to the tutor chat. Text pastes and non-supported
+  // clipboard files are left to their default behavior.
   useEffect(() => {
-    if (activeTab !== "upload" || extractedText) return;
+    if (activeTab !== "upload" || openTutorChat) return;
     const handlePaste = (e: ClipboardEvent) => {
       if (isBusy) return;
       const files = Array.from(e.clipboardData?.files ?? []);
@@ -201,7 +204,7 @@ function ImageUpload() {
     };
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);
-  }, [activeTab, extractedText, isBusy, handleFiles]);
+  }, [activeTab, openTutorChat, isBusy, handleFiles]);
 
   const clearImage = (index: number) => {
     useReadingStore.getState().removeOriginalImage(index);
@@ -348,6 +351,9 @@ function ImageUpload() {
                 <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
                 <p className="text-sm text-muted-foreground mt-1">
                   {t("reading.imageUpload.addMore")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("reading.imageUpload.pasteHint")}
                 </p>
               </div>
             </div>
