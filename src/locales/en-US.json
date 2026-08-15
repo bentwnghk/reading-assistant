@@ -705,6 +705,7 @@
       "generatingWait": "Preparing pre-reading activities... This may take up to 1 minute. Please wait.",
       "emptyTip": "Click the button above to activate your prior knowledge, pre-learn key words, and set a purpose before you read.",
       "predictionPlaceholder": "Skim the text above, then type what you think it will be about...",
+      "submitPrediction": "Submit",
       "skimLabel": "Skim first",
       "skimHint": "Good readers skim before predicting",
       "skimGuide": "Skimming means quickly reading the title, headings, and the first & last paragraphs to get the gist — not every word. Skim these, then predict.",

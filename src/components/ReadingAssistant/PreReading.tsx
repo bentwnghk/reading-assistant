@@ -13,6 +13,7 @@ import {
   Star,
   Eye,
   ChevronDown,
+  Send,
   Heading,
   Pilcrow,
   ListTree,
@@ -169,8 +170,9 @@ function PreReading() {
     setStudentPrediction,
     setPredictionRating,
   } = useReadingStore();
-  const { activeGenerations, generatePreReading } = useReadingAssistant();
+  const { activeGenerations, generatePreReading, generateSummary } = useReadingAssistant();
   const isGenerating = !!activeGenerations["pre-reading"];
+  const isSummaryGenerating = !!activeGenerations["summary"];
 
   const {
     mode,
@@ -391,6 +393,36 @@ function PreReading() {
                 }
               }}
             />
+
+            <div className="mt-2 flex justify-end">
+              <Button
+                onClick={() => {
+                  // Persist the prediction immediately so the summary
+                  // comparison card has it when generation finishes.
+                  if (predictionDraft !== (studentPrediction || "")) {
+                    setStudentPrediction(predictionDraft);
+                  }
+                  document
+                    .getElementById("section-summary")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  generateSummary();
+                }}
+                disabled={isSummaryGenerating || !predictionDraft.trim()}
+                size="sm"
+              >
+                {isSummaryGenerating ? (
+                  <>
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                    <span>{t("reading.summary.generating")}</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    <span>{t("reading.preReading.submitPrediction")}</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Prediction comparison (only after the summary is generated) */}
