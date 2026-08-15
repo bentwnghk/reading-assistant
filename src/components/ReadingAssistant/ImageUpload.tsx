@@ -178,6 +178,29 @@ function ImageUpload() {
     fileInputRef.current?.click();
   };
 
+  // Accept pasted images/PDFs (screenshots, browser "Copy image", or files
+  // copied from the OS file manager) while the Upload tab is active. Text
+  // pastes and non-supported clipboard files are left to their default
+  // behavior.
+  useEffect(() => {
+    if (activeTab !== "upload") return;
+    const handlePaste = (e: ClipboardEvent) => {
+      if (isBusy) return;
+      const files = Array.from(e.clipboardData?.files ?? []);
+      const supported = files.filter(
+        (file) =>
+          file.type.startsWith("image/") ||
+          file.type === "application/pdf" ||
+          file.name.toLowerCase().endsWith(".pdf")
+      );
+      if (supported.length === 0) return;
+      e.preventDefault();
+      handleFiles(supported);
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [activeTab, isBusy, handleFiles]);
+
   const clearImage = (index: number) => {
     useReadingStore.getState().removeOriginalImage(index);
   };
@@ -407,9 +430,12 @@ function ImageUpload() {
                       {t("reading.imageUpload.orClick")}
                     </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {t("reading.imageUpload.supportedFormats")}
-                  </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {t("reading.imageUpload.supportedFormats")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("reading.imageUpload.pasteHint")}
+              </p>
                 </div>
               )}
             </div>

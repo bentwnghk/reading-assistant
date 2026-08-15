@@ -546,6 +546,7 @@
       "dropHere": "拖放圖片或 PDF 到這裡",
       "orClick": "或點擊選擇",
       "supportedFormats": "支援格式：PNG、JPG、JPEG、WEBP、PDF",
+      "pasteHint": "亦可按 Ctrl+V 貼上已複製的圖片",
       "extracting": "正在提取文字...",
       "extractingWait": "正在從圖片提取文字... 這可能需要 1-2 分鐘，請稍候。",
       "extractingProgress": "正在提取文字（{{current}}/{{total}}）...",

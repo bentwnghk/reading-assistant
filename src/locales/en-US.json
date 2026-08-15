@@ -515,6 +515,7 @@
       "dropHere": "Drop image or PDF here",
       "orClick": "or click to select",
       "supportedFormats": "Supported: PNG, JPG, JPEG, WEBP, PDF",
+      "pasteHint": "You can also paste a copied image with Ctrl+V",
       "extracting": "Extracting text...",
       "extractingWait": "Extracting text from image... This may take 1-2 minutes. Please wait.",
       "extractingProgress": "Extracting text ({{current}}/{{total}})...",
