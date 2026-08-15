@@ -179,11 +179,13 @@ function ImageUpload() {
   };
 
   // Accept pasted images/PDFs (screenshots, browser "Copy image", or files
-  // copied from the OS file manager) while the Upload tab is active. Text
-  // pastes and non-supported clipboard files are left to their default
-  // behavior.
+  // copied from the OS file manager) while the Upload tab is active. Only
+  // armed before any text has been extracted — once text exists the paste
+  // ownership moves to the AI Tutor dialog (which requires extracted text),
+  // so a paste intended for the tutor never triggers OCR here. Text pastes
+  // and non-supported clipboard files are left to their default behavior.
   useEffect(() => {
-    if (activeTab !== "upload") return;
+    if (activeTab !== "upload" || extractedText) return;
     const handlePaste = (e: ClipboardEvent) => {
       if (isBusy) return;
       const files = Array.from(e.clipboardData?.files ?? []);
@@ -199,7 +201,7 @@ function ImageUpload() {
     };
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);
-  }, [activeTab, isBusy, handleFiles]);
+  }, [activeTab, extractedText, isBusy, handleFiles]);
 
   const clearImage = (index: number) => {
     useReadingStore.getState().removeOriginalImage(index);

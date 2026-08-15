@@ -22,6 +22,21 @@ interface ReadingTutorChatProps {
   onClose?: () => void;
 }
 
+function readImageFiles(files: File[]): Promise<string[]> {
+  const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+  return Promise.all(
+    imageFiles.map(
+      (file) =>
+        new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (event) => resolve((event.target?.result as string) || "");
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(file);
+        })
+    )
+  ).then((results) => results.filter(Boolean));
+}
+
 function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -65,7 +80,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
     }
   }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
@@ -74,38 +89,15 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       setPendingQuestionForImage(null);
     }
 
-    const newImages: string[] = [];
-    let loadedCount = 0;
-    const totalFiles = Array.from(files).filter((f) => f.type.startsWith("image/")).length;
+    const newImages = await readImageFiles(Array.from(files));
+    e.target.value = "";
 
-    if (totalFiles === 0) {
-      e.target.value = "";
-      return;
-    }
+    if (newImages.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const base64 = event.target?.result as string;
-          newImages.push(base64);
-          loadedCount++;
-
-            if (loadedCount === totalFiles) {
-              e.target.value = "";
-              if (questionForImage && !isLoading) {
-                handleSendWithImages(questionForImage.question, newImages, questionForImage.displayLabel);
-              } else {
-              setPendingImages((prev) => [...prev, ...newImages]);
-            }
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    if (totalFiles === 0) {
-      e.target.value = "";
+    if (questionForImage && !isLoading) {
+      handleSendWithImages(questionForImage.question, newImages, questionForImage.displayLabel);
+    } else {
+      setPendingImages((prev) => [...prev, ...newImages]);
     }
   };
 
@@ -159,6 +151,13 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
 
     setStreamingContent("");
   };
+
+  // Keep a ref to the latest handleSendWithImages so the paste listener below
+  // does not need its (per-render) identity in its dependency array.
+  const sendWithImagesRef = useRef(handleSendWithImages);
+  useEffect(() => {
+    sendWithImagesRef.current = handleSendWithImages;
+  });
 
   const removePendingImage = (index: number) => {
     setPendingImages((prev) => prev.filter((_, i) => i !== index));
@@ -244,6 +243,34 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
       handleSend(question, undefined, undefined, displayLabel);
     }
   };
+
+  // Accept pasted images (screenshots, browser-copied images) while the tutor
+  // chat is open. If one of the Answer Help buttons armed a pending question,
+  // the pasted image is sent with that question (mirroring handleImageUpload);
+  // otherwise it joins the pending image strip above the input. Text pastes
+  // keep their default behavior.
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (isLoading || e.defaultPrevented) return;
+      const imageFiles = Array.from(e.clipboardData?.files ?? []).filter((f) =>
+        f.type.startsWith("image/")
+      );
+      if (imageFiles.length === 0) return;
+      e.preventDefault();
+      readImageFiles(imageFiles).then((newImages) => {
+        if (newImages.length === 0) return;
+        const questionForImage = pendingQuestionForImage;
+        if (questionForImage) {
+          setPendingQuestionForImage(null);
+          sendWithImagesRef.current(questionForImage.question, newImages, questionForImage.displayLabel);
+        } else {
+          setPendingImages((prev) => [...prev, ...newImages]);
+        }
+      });
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [isLoading, pendingQuestionForImage]);
 
   if (!extractedText) {
     return null;

@@ -1885,7 +1885,7 @@
           },
           "image": {
             "name": "Answer Help",
-            "desc": "Upload a photo of a reading question for hints, step-by-step guidance or direct answer."
+            "desc": "Upload or paste a photo of a reading question for hints, step-by-step guidance or direct answer."
           },
           "quick": {
             "name": "Quick Questions",
@@ -1897,7 +1897,7 @@
           "s1": "Tap the chat icon to open the tutor.",
           "s2": "Type a question or tap a quick-question button.",
           "s3": "Select text first to ask about something specific.",
-          "s4": "Upload an image for guided help on a worksheet question."
+          "s4": "Upload or paste an image for guided help on a worksheet question."
         },
         "tipTitle": "Good to know",
         "tipContent": "Use the EN / 中文 switch to choose the tutor's reply language. It remembers your conversation for follow-up questions."
