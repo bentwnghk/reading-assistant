@@ -76,9 +76,13 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
 
   // Initialize queue only when the glossary list itself changes, not on every rating update.
   // isShuffled/isPrioritized are intentionally omitted — toolbar handlers manage those resets.
+  // Key on the word sequence, not the array reference: parents (e.g. the /vocabulary page
+  // reviewing the current selection) pass a freshly-derived array on every store `words`
+  // update, so referencing the array would reset the session after each rating press.
+  const glossaryKey = glossary.map((g) => g.word).join("\u0000");
   useEffect(() => {
     resetSession(buildQueue(glossary, effectiveRatingsRef.current, isShuffled, isPrioritized));
-  }, [glossary]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [glossaryKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentEntry = reviewQueue[0];
 
