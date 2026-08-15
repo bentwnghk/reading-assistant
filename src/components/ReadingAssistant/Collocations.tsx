@@ -213,10 +213,12 @@ function Collocations() {
                     >
                       <Volume2 className="h-4 w-4 text-muted-foreground" />
                     </button>
-                    <span className="font-medium">{chunk.chunk}</span>
-                    {chunk.syllabification && chunk.syllabification !== chunk.chunk && (
-                      <span className="text-xs text-muted-foreground ml-1">{chunk.syllabification}</span>
-                    )}
+                    <div className="min-w-0">
+                      <span className="font-medium">{chunk.chunk}</span>
+                      {chunk.syllabification && chunk.syllabification !== chunk.chunk && (
+                        <p className="text-xs text-muted-foreground">{chunk.syllabification}</p>
+                      )}
+                    </div>
                   </div>
                   <span className="shrink-0 text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
                     {chunk.pattern}
