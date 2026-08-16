@@ -17,6 +17,31 @@ type SortField =
   | "createdAt";
 type SortOrder = "asc" | "desc";
 
+/**
+ * Client-side mirror of getVocabularyStats (src/lib/vocabulary.ts) for
+ * entry_type = 'word'. Keeping stats derived from `words` means the stats
+ * cards update live after reviews (flashcard/quiz/spelling) without a
+ * refetch, matching the phrase stats which are derived in the container.
+ */
+function computeWordStats(words: VocabularyWord[]): VocabularyStats {
+  const now = Date.now();
+  const pool = words.filter((w) => w.entryType !== "phrase");
+  return {
+    totalWords: pool.length,
+    ownWords: pool.filter((w) => w.source === "own").length,
+    teacherWords: pool.filter((w) => w.source === "teacher").length,
+    dueForReview: pool.filter((w) => w.nextReviewAt === 0 || w.nextReviewAt <= now)
+      .length,
+    mastered: pool.filter((w) => w.masteryLevel === 5).length,
+    newWords: pool.filter((w) => w.masteryLevel === 0 && w.reviewCount === 0)
+      .length,
+    hard: pool.filter((w) => w.rating === "hard").length,
+    medium: pool.filter((w) => w.rating === "medium").length,
+    easy: pool.filter((w) => w.rating === "easy").length,
+    unrated: pool.filter((w) => w.rating === null).length,
+  };
+}
+
 interface VocabularyStoreState {
   words: VocabularyWord[];
   stats: VocabularyStats;
@@ -429,3 +454,13 @@ export const useVocabularyStore = create<
       selectedWordIds: new Set(),
     }),
 }));
+
+// Keep stats derived from words so any mutation (recordSRSAction,
+// updateWordReview, loadReviewListIntoQueue, fetchVocabulary, ...) updates
+// the stats cards live. Setting stats here does not touch words, so the
+// listener re-entry is a no-op (words reference is unchanged).
+useVocabularyStore.subscribe((state, prev) => {
+  if (state.words !== prev.words) {
+    useVocabularyStore.setState({ stats: computeWordStats(state.words) });
+  }
+});
