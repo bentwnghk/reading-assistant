@@ -210,11 +210,18 @@ function VocabularyContainer() {
 
   const handleTabChange = useCallback(
     (tab: TabType) => {
-      if (
-        (tab === "table" && activeTab === "phrases") ||
-        (tab === "phrases" && activeTab === "table")
-      ) {
-        useVocabularyStore.getState().setSelectedWordIds(new Set());
+      if (tab === "table" || tab === "phrases") {
+        const targetEntryType: "word" | "phrase" =
+          tab === "phrases" ? "phrase" : "word";
+        const store = useVocabularyStore.getState();
+        const hasOtherTypeSelected = store.words.some(
+          (w) =>
+            store.selectedWordIds.has(w.id) &&
+            (w.entryType ?? "word") !== targetEntryType
+        );
+        if (hasOtherTypeSelected) {
+          store.setSelectedWordIds(new Set());
+        }
       }
       if (tab === "table") currentEntryType.current = "word";
       if (tab === "phrases") currentEntryType.current = "phrase";
@@ -230,7 +237,7 @@ function VocabularyContainer() {
       }
       setActiveTab(tab);
     },
-    [selectedWordIds, reviewQueue, activeTab]
+    [selectedWordIds, reviewQueue]
   );
 
   const handleCardFilter = useCallback(
