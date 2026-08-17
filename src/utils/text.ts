@@ -1,5 +1,21 @@
 const MAX_TEXT_CHUNK_LENGTH = 2000; // 你可以根据需要调整这个值
 
+/**
+ * Rebuild a scramble answer from whole-word tiles, restoring the entry's
+ * original separators (e.g. "well-known" keeps its hyphen instead of being
+ * space-joined). Separators are derived deterministically from the canonical
+ * word, so no state needs to be carried on the challenge. Shared by the solo
+ * spelling game (VocabularySpelling.tsx) and the multiplayer arena
+ * (SpellingBattleArena.tsx).
+ */
+export function joinScrambleUnits(units: string[], word: string): string {
+  const separators = word.trim().match(/[\s-]+/g) ?? [];
+  return units.reduce(
+    (acc, unit, i) => (i === 0 ? unit : `${acc}${separators[i - 1] ?? " "}${unit}`),
+    "",
+  );
+}
+
 export function splitText(
   text: string = "",
   maxLength: number = MAX_TEXT_CHUNK_LENGTH

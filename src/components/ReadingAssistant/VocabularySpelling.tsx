@@ -34,6 +34,7 @@ import { logActivity } from "@/utils/activityLogger";
 import { cn } from "@/utils/style";
 import { speakWord as speakWordShared, stopSpeaking, unlockAudio } from "@/utils/tts";
 import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
+import { joinScrambleUnits } from "@/utils/text";
 import { SpellingBattleFlow } from "./SpellingBattleFlow";
 import GuideDialog from "@/components/Internal/GuideDialog";
 
@@ -489,9 +490,10 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
           setSelectedLetters((prev) => [...prev, nextCorrectUnit]);
           setUserInput((prev) =>
             scrambleByWord
-              ? prev
-                ? `${prev} ${nextCorrectUnit}`
-                : nextCorrectUnit
+              ? joinScrambleUnits(
+                  [...(prev ? prev.split(/[\s-]+/) : []), nextCorrectUnit],
+                  currentChallenge.word,
+                )
               : prev + nextCorrectUnit,
           );
           setUsedIndices((prev) => [...prev, letterIndex]);
@@ -504,10 +506,12 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const handleLetterClick = useCallback((letter: string, index: number) => {
     setSelectedLetters((prev) => [...prev, letter]);
     setUserInput((prev) =>
-      scrambleByWord ? (prev ? `${prev} ${letter}` : letter) : prev + letter,
+      scrambleByWord
+        ? joinScrambleUnits([...(prev ? prev.split(/[\s-]+/) : []), letter], currentChallenge?.word ?? "")
+        : prev + letter,
     );
     setUsedIndices((prev) => [...prev, index]);
-  }, [scrambleByWord]);
+  }, [scrambleByWord, currentChallenge]);
 
   const handleScrambleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -515,7 +519,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         setSelectedLetters((prev) => prev.slice(0, -1));
         setUserInput((prev) =>
           scrambleByWord
-            ? prev.split(" ").slice(0, -1).join(" ")
+            ? joinScrambleUnits(prev.split(/[\s-]+/).slice(0, -1), currentChallenge?.word ?? "")
             : prev.slice(0, -1),
         );
         setUsedIndices((prev) => prev.slice(0, -1));
@@ -523,7 +527,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         checkAnswer();
       }
     },
-    [selectedLetters, checkAnswer, scrambleByWord]
+    [selectedLetters, checkAnswer, scrambleByWord, currentChallenge]
   );
 
   const handleKeyDown = useCallback(

@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useSettingStore } from "@/store/setting";
 import { speakWord, stopSpeaking, unlockAudio, isAudioUnlocked } from "@/utils/tts";
+import { joinScrambleUnits } from "@/utils/text";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -195,10 +196,11 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     // Build the answer string per mode.
     let answer: string;
     if (gameMode === "scramble") {
-      // For phrases, tiles are whole words and must be space-joined so the
-      // normalized comparison matches the canonical word. Single words join
-      // with "" (characters).
-      answer = scrambleByWord ? selectedLetters.join(" ") : selectedLetters.join("");
+      // For phrases, tiles are whole words joined with the entry's original
+      // separators (hyphens stay hyphens); normalize() on both sides makes
+      // separator style irrelevant to correctness. Single words join with ""
+      // (characters).
+      answer = scrambleByWord ? joinScrambleUnits(selectedLetters, word.word) : selectedLetters.join("");
     } else if (gameMode === "fill-blanks") {
       answer = userInput; // missing letters only — NO trim
     } else {
@@ -568,7 +570,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
                   showCorrect === false && "border-destructive text-destructive",
                 )}>
                   {selectedLetters.length > 0 ? (
-                    scrambleByWord ? selectedLetters.join(" ") : selectedLetters.join("").toUpperCase()
+                    scrambleByWord ? joinScrambleUnits(selectedLetters, word.word) : selectedLetters.join("").toUpperCase()
                   ) : (
                     <span className="text-muted-foreground">
                       {scrambleByWord
