@@ -1632,7 +1632,7 @@
             },
             "scramble": {
               "name": "Letter Scramble",
-              "desc": "Rearrange jumbled letters to form the correct word. A visual puzzle approach!"
+              "desc": "Rearrange jumbled letters to form the correct word. Phrases and hyphenated compounds shuffle whole-word tiles instead. A visual puzzle approach!"
             },
             "fill-blanks": {
               "name": "Fill Blanks",
@@ -1647,7 +1647,7 @@
         },
         "modeDesc": {
           "listen-type": "Listen to the word pronunciation and type what you hear. Great for auditory learning!",
-          "scramble": "Rearrange jumbled letters to form the correct word. A visual puzzle approach!",
+          "scramble": "Rearrange jumbled letters to form the correct word. Phrases and hyphenated compounds shuffle whole-word tiles instead. A visual puzzle approach!",
           "fill-blanks": "Type the missing letters shown as underscores. Focus on specific letter patterns!",
           "mixed": "Randomly switches between all modes for variety and comprehensive practice!"
         },
