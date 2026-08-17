@@ -517,13 +517,13 @@ function Glossary() {
       case "phrases":
         return renderGlossaryTable(phraseEntries, "reading.glossary.phrasesEmpty");
       case "flashcard":
-        return <VocabularyFlashcard glossary={wordEntries} onWordAction={handleSRSAction} />;
+        return <VocabularyFlashcard glossary={sortedGlossary} onWordAction={handleSRSAction} />;
       case "quiz":
-        return <VocabularyQuiz glossary={wordEntries} />;
+        return <VocabularyQuiz glossary={sortedGlossary} />;
       case "spelling":
         return (
           <VocabularySpelling
-            glossary={wordEntries}
+            glossary={sortedGlossary}
             onWordResult={handleSpellingWordResult}
             onComplete={handleSpellingComplete}
           />
