@@ -678,7 +678,37 @@
       "importSuccess": "Imported {{count}} of {{total}} texts",
       "importError": "Failed to import texts",
       "importInvalid": "Invalid import file format",
-      "importNoTexts": "No texts found in import file"
+      "importNoTexts": "No texts found in import file",
+      "help": {
+        "title": "Upload Text to Repository Guide",
+        "intro": "Turn photos or PDFs of worksheets and pages into shared repository texts — AI reads out the words, drafts a title, and you decide who can see the result.",
+        "items": {
+          "upload": {
+            "name": "Upload Image / PDF",
+            "desc": "Drag & drop, paste from the clipboard, or tap to add photos or PDFs of worksheets, textbook pages or articles."
+          },
+          "extract": {
+            "name": "Smart Text Extraction",
+            "desc": "AI uses OCR to read the words out of your images automatically, then drafts a descriptive title for the text."
+          },
+          "review": {
+            "name": "Review & Name",
+            "desc": "Check the extracted text (fix any OCR slips) and enter a display name students will recognize."
+          },
+          "visibility": {
+            "name": "Choose Visibility",
+            "desc": "My Classes: only students in your classes. School: everyone in your school. Public: all schools (super-admin only)."
+          }
+        },
+        "stepsTitle": "How to upload",
+        "steps": {
+          "s1": "Add your images or PDFs and wait for the text and title to be generated.",
+          "s2": "Review the extracted text and enter a display name.",
+          "s3": "Choose who can see the text and, optionally, a target class, then tap Save to Repository."
+        },
+        "tipTitle": "Good to know",
+        "tipContent": "You can queue several images or PDFs at once (one image per page). Supported formats: PNG, JPG, JPEG, WEBP and PDF."
+      }
     },
     "extractedText": {
       "title": "Extracted Text",

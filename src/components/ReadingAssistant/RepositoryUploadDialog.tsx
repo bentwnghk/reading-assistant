@@ -4,8 +4,9 @@ import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { streamText, generateText } from "ai";
-import { Upload, Image as ImageIcon, X, LoaderCircle, Globe, Building2, Users } from "lucide-react";
+import { Upload, Image as ImageIcon, X, LoaderCircle, Globe, Building2, Users, ScanText, FileText, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import GuideDialog from "@/components/Internal/GuideDialog";
 import {
   Dialog,
   DialogContent,
@@ -336,7 +337,28 @@ function RepositoryUploadDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t("reading.repository.uploadTitle")}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {t("reading.repository.uploadTitle")}
+            <GuideDialog
+              titleKey="reading.repository.help.title"
+              introKey="reading.repository.help.intro"
+              itemsBaseKey="reading.repository.help.items"
+              items={[
+                { key: "upload", icon: Upload, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
+                { key: "extract", icon: ScanText, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                { key: "review", icon: FileText, bgClass: "bg-emerald-500/10", iconClass: "text-emerald-500" },
+                { key: "visibility", icon: Eye, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+              ]}
+              stepsTitleKey="reading.repository.help.stepsTitle"
+              stepsKeys={[
+                "reading.repository.help.steps.s1",
+                "reading.repository.help.steps.s2",
+                "reading.repository.help.steps.s3",
+              ]}
+              tipTitleKey="reading.repository.help.tipTitle"
+              tipContentKey="reading.repository.help.tipContent"
+            />
+          </DialogTitle>
           <DialogDescription>{t("reading.repository.uploadDesc")}</DialogDescription>
         </DialogHeader>
 
