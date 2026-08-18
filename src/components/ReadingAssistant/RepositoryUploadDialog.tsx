@@ -243,6 +243,30 @@ function RepositoryUploadDialog({
     [handleFiles]
   );
 
+  // Accept pasted images/PDFs (screenshots, browser "Copy image", or files
+  // copied from the OS file manager) while the dialog is open. Text pastes
+  // into the name/extracted-text fields are left to their default behavior.
+  // Because this is a modal dialog, pastes that originate inside it must not
+  // reach the page-level paste handlers (ImageUpload / tutor chat) — those
+  // guard against targets inside [role=dialog].
+  useEffect(() => {
+    if (!open || isProcessing) return;
+    const handlePaste = (e: ClipboardEvent) => {
+      const files = Array.from(e.clipboardData?.files ?? []);
+      const supported = files.filter(
+        (f) =>
+          f.type.startsWith("image/") ||
+          f.type === "application/pdf" ||
+          f.name.toLowerCase().endsWith(".pdf")
+      );
+      if (supported.length === 0) return;
+      e.preventDefault();
+      handleFiles(supported);
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [open, isProcessing, handleFiles]);
+
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
@@ -389,6 +413,9 @@ function RepositoryUploadDialog({
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {t("reading.imageUpload.supportedFormats")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("reading.imageUpload.pasteHint")}
                   </p>
                 </div>
               )}

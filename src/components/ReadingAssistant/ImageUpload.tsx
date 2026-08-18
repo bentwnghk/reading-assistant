@@ -191,6 +191,9 @@ function ImageUpload() {
     if (activeTab !== "upload" || openTutorChat) return;
     const handlePaste = (e: ClipboardEvent) => {
       if (isBusy) return;
+      // Pastes inside an open dialog (e.g. Upload Text to Repository) belong
+      // to that dialog's own paste handler.
+      if (e.target instanceof Element && e.target.closest("[role=dialog]")) return;
       const files = Array.from(e.clipboardData?.files ?? []);
       const supported = files.filter(
         (file) =>

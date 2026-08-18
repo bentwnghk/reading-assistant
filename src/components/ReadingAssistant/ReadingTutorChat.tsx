@@ -262,6 +262,9 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       if (isLoading || e.defaultPrevented) return;
+      // Pastes inside an open dialog (e.g. Upload Text to Repository) belong
+      // to that dialog's own paste handler.
+      if (e.target instanceof Element && e.target.closest("[role=dialog]")) return;
       const imageFiles = Array.from(e.clipboardData?.files ?? []).filter((f) =>
         f.type.startsWith("image/")
       );
