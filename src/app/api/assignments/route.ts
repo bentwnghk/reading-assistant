@@ -5,6 +5,8 @@ import {
   createAssignment,
   getAssignmentsForTeacher,
   getAssignmentsForStudent,
+  getSchoolAssignments,
+  getAllAssignments,
 } from "@/lib/assignments"
 import { getReadingSession } from "@/lib/sessions"
 import { getSchoolForUser, getUsersInSchool, getAllUsers } from "@/lib/users"
@@ -18,7 +20,7 @@ const createSchema = z.object({
   studentIds: z.array(z.string().min(1)).min(1),
 })
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth()
     if (!session?.user?.id) {
@@ -26,6 +28,23 @@ export async function GET() {
     }
 
     const role = session.user.role
+
+    // School-wide oversight view: every assignment by any teacher in the
+    // admin's school (all schools for super-admin).
+    const scope = new URL(request.url).searchParams.get("scope")
+    if (scope === "school") {
+      if (role === "super-admin") {
+        return NextResponse.json(await getAllAssignments())
+      }
+      if (role === "admin") {
+        const schoolId = await getSchoolForUser(session.user.id)
+        return NextResponse.json(
+          schoolId ? await getSchoolAssignments(schoolId) : [],
+        )
+      }
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
     if (role === "teacher" || role === "admin" || role === "super-admin") {
       const assignments = await getAssignmentsForTeacher(session.user.id)
       return NextResponse.json(assignments)

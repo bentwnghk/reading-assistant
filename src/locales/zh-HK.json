@@ -3883,6 +3883,28 @@
       "notStarted": "尚未開始",
       "never": "從未"
     },
+    "schoolView": {
+      "tabMine": "我的功課",
+      "tabSchool": "全體教師",
+      "colTitle": "標題",
+      "colTeacher": "教師",
+      "colSchool": "學校",
+      "colRoster": "名單",
+      "colSubject": "科目",
+      "colProgress": "平均進度",
+      "colDueDate": "截止日期",
+      "colCreated": "建立日期",
+      "colStatus": "狀態",
+      "customRoster": "自訂",
+      "allTeachers": "所有教師",
+      "allSchools": "所有學校",
+      "allSubjects": "所有科目",
+      "allRosters": "所有名單",
+      "allStatuses": "全部",
+      "empty": "學校內尚未有教師建立任何功課。",
+      "emptyFiltered": "沒有符合目前篩選條件的功課。",
+      "rosterNote": "名單名稱會與已儲存名單自動比對；以手動挑選學生建立的功課會顯示為「自訂」。"
+    },
     "stats": {
       "sectionTitle": "班級分析",
       "sectionSubtitle": "所有指派學生的整體表現分析。",

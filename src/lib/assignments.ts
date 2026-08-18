@@ -1,4 +1,5 @@
 import { getClient } from "./db"
+import type { PoolClient } from "pg"
 import { logActivity } from "./activity"
 import { getSchoolForUser } from "./users"
 import type { ReadingStore } from "@/store/reading"
@@ -360,6 +361,127 @@ export async function getAssignmentsForTeacher(teacherId: string): Promise<Assig
   } finally {
     client.release()
   }
+}
+
+/**
+ * School-wide assignment list for admins: every assignment created by any
+ * teacher in the school (including the admin's own, and archived ones).
+ * Each row also carries a derived rosterName matched against the school's
+ * saved presets (assignment_presets).
+ */
+export async function getSchoolAssignments(schoolId: string): Promise<Assignment[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT a.*,
+              u.name AS teacher_name,
+              COALESCE(COUNT(s.id), 0)::int AS student_count,
+              COALESCE(AVG(s.progress), 0)::float AS avg_progress,
+              ARRAY_REMOVE(ARRAY_AGG(s.student_id), NULL) AS roster_ids
+       FROM assignments a
+       JOIN users u ON u.id = a.teacher_id
+       LEFT JOIN assignment_submissions s ON s.assignment_id = a.id
+       WHERE u.school_id = $1
+       GROUP BY a.id, u.name
+       ORDER BY a.created_at DESC`,
+      [schoolId],
+    )
+    const presets = await getRosterPresets(client, schoolId)
+    return result.rows.map((row) => ({
+      ...mapAssignmentRow(row),
+      rosterName: resolveRosterName(row.roster_ids ?? [], presets),
+    }))
+  } finally {
+    client.release()
+  }
+}
+
+/** Every assignment across all schools (super-admin oversight view). */
+export async function getAllAssignments(): Promise<Assignment[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT a.*,
+              u.name AS teacher_name,
+              sc.name AS school_name,
+              COALESCE(COUNT(s.id), 0)::int AS student_count,
+              COALESCE(AVG(s.progress), 0)::float AS avg_progress,
+              ARRAY_REMOVE(ARRAY_AGG(s.student_id), NULL) AS roster_ids
+       FROM assignments a
+       JOIN users u ON u.id = a.teacher_id
+       LEFT JOIN schools sc ON sc.id = u.school_id
+       LEFT JOIN assignment_submissions s ON s.assignment_id = a.id
+       GROUP BY a.id, u.name, sc.name
+       ORDER BY a.created_at DESC`,
+    )
+    // Student ids belong to exactly one school, so cross-school set
+    // matching is safe: only the student's own school presets can match.
+    const presets = await getRosterPresets(client)
+    return result.rows.map((row) => ({
+      ...mapAssignmentRow(row),
+      rosterName: resolveRosterName(row.roster_ids ?? [], presets),
+      schoolName: (row.school_name as string) || undefined,
+    }))
+  } finally {
+    client.release()
+  }
+}
+
+interface RosterPresetRef {
+  name: string
+  studentIds: Set<string>
+}
+
+function rowToPresetRef(row: Record<string, unknown>): RosterPresetRef {
+  const ids = Array.isArray(row.student_ids) ? (row.student_ids as string[]) : []
+  return { name: row.name as string, studentIds: new Set(ids) }
+}
+
+/** Load saved roster presets for roster-name matching (all schools when schoolId is omitted). */
+async function getRosterPresets(
+  client: PoolClient,
+  schoolId?: string,
+): Promise<RosterPresetRef[]> {
+  const { rows } = await client.query(
+    schoolId
+      ? `SELECT name, student_ids FROM assignment_presets
+         WHERE school_id = $1 ORDER BY name ASC`
+      : `SELECT name, student_ids FROM assignment_presets ORDER BY name ASC`,
+    schoolId ? [schoolId] : [],
+  )
+  return rows.map(rowToPresetRef)
+}
+
+/**
+ * Resolve an assignment's roster name by matching its student-id set against
+ * the school's saved presets:
+ *   1. exact set equality → that preset's name
+ *   2. else the smallest preset whose set contains the roster (tolerates stale
+ *      ids from students who have since left the preset)
+ *   3. else undefined → rendered as "Custom"
+ * Presets must be pre-sorted by name for deterministic exact-match results.
+ */
+function resolveRosterName(
+  rosterIds: string[],
+  presets: RosterPresetRef[],
+): string | undefined {
+  if (rosterIds.length === 0 || presets.length === 0) return undefined
+  for (const p of presets) {
+    if (
+      p.studentIds.size === rosterIds.length &&
+      rosterIds.every((id) => p.studentIds.has(id))
+    ) {
+      return p.name
+    }
+  }
+  let best: RosterPresetRef | undefined
+  for (const p of presets) {
+    if (p.studentIds.size < rosterIds.length) continue
+    if (rosterIds.every((id) => p.studentIds.has(id))) {
+      if (!best || p.studentIds.size < best.studentIds.size) best = p
+    }
+  }
+  return best?.name
 }
 
 export async function getAssignmentsForStudent(studentId: string): Promise<Assignment[]> {

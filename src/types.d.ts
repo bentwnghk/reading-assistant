@@ -649,6 +649,14 @@ interface Assignment {
   status: AssignmentStatus;
   studentCount?: number;
   avgProgress?: number;
+  /**
+   * Derived (never persisted): the saved roster/preset name (e.g. "S3A")
+   * matched from the school's assignment_presets against the roster's
+   * student-id set. Undefined when no preset matches ("Custom").
+   */
+  rosterName?: string;
+  /** Only populated for cross-school (super-admin) list queries. */
+  schoolName?: string;
   /** Only populated for student-side queries (their own working session id). */
   studentSessionId?: string;
   /** Only populated for student-side queries (their cached scores). */

@@ -48,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useGlobalStore } from "@/store/global"
 import { cn } from "@/utils/style"
 import PresetsSection from "./PresetsSection"
+import SchoolAssignmentsTable from "./SchoolAssignmentsTable"
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -74,6 +75,9 @@ export default function AssignmentsList() {
 
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
+  const [schoolAssignments, setSchoolAssignments] = useState<Assignment[]>([])
+  const [schoolLoading, setSchoolLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<"mine" | "school">("mine")
   const [editing, setEditing] = useState<Assignment | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null)
   const [showHelp, setShowHelp] = useState(false)
@@ -83,20 +87,32 @@ export default function AssignmentsList() {
 
   const role = session?.user?.role
   const isTeacher = role === "teacher" || role === "admin" || role === "super-admin"
+  // Admins/super-admins get a second, school-wide oversight tab
+  const hasSchoolTab = role === "admin" || role === "super-admin"
 
   const load = useCallback(async () => {
     setLoading(true)
+    if (hasSchoolTab) setSchoolLoading(true)
     try {
-      const res = await fetch("/api/assignments")
-      if (!res.ok) throw new Error("Failed")
-      const data: Assignment[] = await res.json()
-      setAssignments(data)
+      const responses = await Promise.all([
+        fetch("/api/assignments"),
+        hasSchoolTab ? fetch("/api/assignments?scope=school") : null,
+      ])
+      const mineRes = responses[0]
+      const schoolRes = responses[1]
+      if (!mineRes || !mineRes.ok) throw new Error("Failed")
+      setAssignments(await mineRes.json())
+      if (schoolRes) {
+        if (!schoolRes.ok) throw new Error("Failed")
+        setSchoolAssignments(await schoolRes.json())
+      }
     } catch {
       toast.error(t("assignments.error.loadFailed"))
     } finally {
       setLoading(false)
+      setSchoolLoading(false)
     }
-  }, [t])
+  }, [t, hasSchoolTab])
 
   useEffect(() => {
     load()
@@ -104,7 +120,13 @@ export default function AssignmentsList() {
 
   async function handleArchive(assignment: Assignment, archive: boolean) {
     const original = assignments
+    const originalSchool = schoolAssignments
     setAssignments((prev) =>
+      prev.map((a) =>
+        a.id === assignment.id ? { ...a, status: archive ? "archived" : "active" } : a,
+      ),
+    )
+    setSchoolAssignments((prev) =>
       prev.map((a) =>
         a.id === assignment.id ? { ...a, status: archive ? "archived" : "active" } : a,
       ),
@@ -121,13 +143,16 @@ export default function AssignmentsList() {
       )
     } catch {
       setAssignments(original)
+      setSchoolAssignments(originalSchool)
       toast.error(t("assignments.error.loadFailed"))
     }
   }
 
   async function handleDelete(assignment: Assignment) {
     const original = assignments
+    const originalSchool = schoolAssignments
     setAssignments((prev) => prev.filter((a) => a.id !== assignment.id))
+    setSchoolAssignments((prev) => prev.filter((a) => a.id !== assignment.id))
     setDeleteTarget(null)
     try {
       const res = await fetch(`/api/assignments/${assignment.id}`, { method: "DELETE" })
@@ -135,6 +160,7 @@ export default function AssignmentsList() {
       toast.success(t("assignments.teacherView.deleted"))
     } catch {
       setAssignments(original)
+      setSchoolAssignments(originalSchool)
       toast.error(t("assignments.error.loadFailed"))
     }
   }
@@ -176,6 +202,45 @@ export default function AssignmentsList() {
         )}
       </div>
 
+      {hasSchoolTab && (
+        <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
+          <button
+            onClick={() => setActiveTab("mine")}
+            className={cn(
+              "px-4 py-1.5 text-sm font-medium rounded-md transition-colors",
+              activeTab === "mine"
+                ? "bg-background shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t("assignments.schoolView.tabMine")}
+          </button>
+          <button
+            onClick={() => setActiveTab("school")}
+            className={cn(
+              "px-4 py-1.5 text-sm font-medium rounded-md transition-colors",
+              activeTab === "school"
+                ? "bg-background shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t("assignments.schoolView.tabSchool")}
+          </button>
+        </div>
+      )}
+
+      {activeTab === "school" && hasSchoolTab ? (
+        <SchoolAssignmentsTable
+          assignments={schoolAssignments}
+          loading={schoolLoading}
+          currentUserId={session?.user?.id || ""}
+          isSuperAdmin={role === "super-admin"}
+          onEdit={(a) => setEditing(a)}
+          onArchive={handleArchive}
+          onDelete={(a) => setDeleteTarget(a)}
+        />
+      ) : (
+        <>
       {isTeacher && <PresetsSection />}
 
       {assignments.length === 0 ? (
@@ -327,6 +392,8 @@ export default function AssignmentsList() {
             )
           })}
         </div>
+      )}
+        </>
       )}
 
       <EditDialog

@@ -3856,6 +3856,28 @@
       "notStarted": "Not started",
       "never": "Never"
     },
+    "schoolView": {
+      "tabMine": "My Assignments",
+      "tabSchool": "All Teachers",
+      "colTitle": "Title",
+      "colTeacher": "Teacher",
+      "colSchool": "School",
+      "colRoster": "Roster",
+      "colSubject": "Subject",
+      "colProgress": "Avg. progress",
+      "colDueDate": "Due date",
+      "colCreated": "Created",
+      "colStatus": "Status",
+      "customRoster": "Custom",
+      "allTeachers": "All teachers",
+      "allSchools": "All schools",
+      "allSubjects": "All subjects",
+      "allRosters": "All rosters",
+      "allStatuses": "All",
+      "empty": "No assignments from teachers in your school yet.",
+      "emptyFiltered": "No assignments match the current filters.",
+      "rosterNote": "Roster names are matched against saved rosters; assignments with a hand-picked roster are shown as \"Custom\"."
+    },
     "stats": {
       "sectionTitle": "Class insights",
       "sectionSubtitle": "Aggregated performance across all assigned students.",
