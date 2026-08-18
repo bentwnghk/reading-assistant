@@ -227,7 +227,7 @@ function EditTextDialog({ item, userRole, userId, onUpdated }: EditTextDialogPro
     ));
 
   const canSetPublic = userRole === "super-admin";
-  const canSetSchool = userRole === "super-admin" || userRole === "admin";
+  const canSetSchool = userRole === "super-admin" || userRole === "admin" || userRole === "teacher";
 
   useEffect(() => {
     if (!open) return;

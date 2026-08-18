@@ -89,9 +89,9 @@ function RepositoryUploadDialog({
   const isSuperAdmin = userRole === "super-admin";
   const hasTeacherClasses = teacherClasses.length > 0;
 
-  const canSetSchool = isAdmin || isSuperAdmin;
+  const canSetSchool = isTeacher || isAdmin || isSuperAdmin;
   const canSetPublic = isSuperAdmin;
-  const canSetClass = isTeacher || (isAdmin && hasTeacherClasses);
+  const canSetClass = (isTeacher || isAdmin) && hasTeacherClasses;
 
   const defaultVisibility = isSuperAdmin ? "public" : canSetClass ? "class" : "school";
 

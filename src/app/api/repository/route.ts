@@ -86,12 +86,19 @@ export async function POST(request: Request) {
         }
       }
     } else if (role === "teacher") {
-      finalVisibility = "class"
-      if (classId) {
-        const validClass = userClasses.find(c => c.id === classId)
-        if (validClass) {
-          finalClassId = classId
+      if (hasClasses && visibility === "class") {
+        finalVisibility = "class"
+        if (classId) {
+          const validClass = userClasses.find(c => c.id === classId)
+          if (validClass) {
+            finalClassId = classId
+          }
         }
+      } else {
+        // Teachers without classes get school-wide visibility ("class" would be
+        // creator-only, i.e. invisible to every student). "public" stays
+        // super-admin-only and is clamped to "school".
+        finalVisibility = "school"
       }
     } else {
       finalVisibility = "school"
