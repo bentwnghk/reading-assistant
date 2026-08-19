@@ -40,9 +40,11 @@ const RATING_COLORS: Record<string, string> = {
 interface ReviewHistoryProps {
   /** When set, locks the view to a single entry type (no filter toggle shown). */
   fixedEntryType?: "word" | "phrase";
+  /** When set, view another (permitted) user's sessions read-only — hides delete. */
+  userId?: string | null;
 }
 
-function ReviewHistory({ fixedEntryType }: ReviewHistoryProps) {
+function ReviewHistory({ fixedEntryType, userId }: ReviewHistoryProps) {
   const { t } = useTranslation();
   const [sessions, setSessions] = useState<VocabularyReviewSession[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -58,15 +60,17 @@ function ReviewHistory({ fixedEntryType }: ReviewHistoryProps) {
   useEffect(() => {
     setIsLoading(true);
     const param = fixedEntryType ?? (entryFilter !== "all" ? entryFilter : undefined);
-    const qs = param ? `?limit=100&entryType=${param}` : "?limit=100";
-    fetch(`/api/vocabulary/review-sessions${qs}`)
+    const qsParts = ["limit=100"];
+    if (param) qsParts.push(`entryType=${param}`);
+    if (userId) qsParts.push(`userId=${encodeURIComponent(userId)}`);
+    fetch(`/api/vocabulary/review-sessions?${qsParts.join("&")}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         setSessions(Array.isArray(data) ? data : []);
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
-  }, [entryFilter, fixedEntryType]);
+  }, [entryFilter, fixedEntryType, userId]);
 
   const toggleExpand = useCallback(
     async (sessionId: string) => {
@@ -77,9 +81,10 @@ function ReviewHistory({ fixedEntryType }: ReviewHistoryProps) {
       }
       setExpandedId(sessionId);
       try {
-        const res = await fetch(
-          `/api/vocabulary/review-sessions?id=${sessionId}`
-        );
+        const qs = userId
+          ? `id=${sessionId}&userId=${encodeURIComponent(userId)}`
+          : `id=${sessionId}`;
+        const res = await fetch(`/api/vocabulary/review-sessions?${qs}`);
         if (res.ok) {
           const data = await res.json();
           setDetail(data);
@@ -88,7 +93,7 @@ function ReviewHistory({ fixedEntryType }: ReviewHistoryProps) {
         setDetail(null);
       }
     },
-    [expandedId]
+    [expandedId, userId]
   );
 
   const handleDelete = useCallback(async () => {
@@ -243,17 +248,19 @@ function ReviewHistory({ fixedEntryType }: ReviewHistoryProps) {
               ) : (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteId(session.id);
-                }}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              {!userId && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteId(session.id);
+                  }}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              )}
             </button>
 
             {isExpanded && detail && (
@@ -409,24 +416,26 @@ function ReviewHistory({ fixedEntryType }: ReviewHistoryProps) {
       </div>
     )}
 
-    <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{t("vocabulary.reviewHistory.confirmDelete")}</DialogTitle>
-          <DialogDescription>
-            {t("vocabulary.reviewHistory.confirmDeleteDesc")}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setDeleteId(null)}>
-            {t("share.close")}
-          </Button>
-          <Button variant="destructive" onClick={handleDelete}>
-            {t("vocabulary.reviewHistory.delete")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    {!userId && (
+      <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("vocabulary.reviewHistory.confirmDelete")}</DialogTitle>
+            <DialogDescription>
+              {t("vocabulary.reviewHistory.confirmDeleteDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>
+              {t("share.close")}
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              {t("vocabulary.reviewHistory.delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )}
     </>
   );
 }

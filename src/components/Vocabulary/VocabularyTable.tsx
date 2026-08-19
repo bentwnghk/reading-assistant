@@ -59,7 +59,9 @@ function VocabularyTable() {
     setFilterSource,
     activeReviewListWordIds,
     exitReviewList,
+    viewingUserId,
   } = useVocabularyStore();
+  const readOnly = !!viewingUserId;
   const {
     mode,
     accessPassword,
@@ -337,7 +339,7 @@ function VocabularyTable() {
               {t("vocabulary.clearFilters")}
             </Button>
           )}
-          {hasEverSelected && !effectiveShowSelectedOnly && (
+          {!readOnly && hasEverSelected && !effectiveShowSelectedOnly && (
             <Button
               variant="outline"
               size="sm"
@@ -348,7 +350,7 @@ function VocabularyTable() {
               {t("vocabulary.showSelected")}
             </Button>
           )}
-          {hasEverSelected && effectiveShowSelectedOnly && (
+          {!readOnly && hasEverSelected && effectiveShowSelectedOnly && (
             <Button
               variant="default"
               size="sm"
@@ -378,12 +380,14 @@ function VocabularyTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[40px]">
-                <Checkbox
-                  checked={allSelected}
-                  onCheckedChange={handleSelectAll}
-                />
-              </TableHead>
+              {!readOnly && (
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={handleSelectAll}
+                  />
+                </TableHead>
+              )}
               <TableHead className="w-[120px]">
                 <Button
                   variant="ghost"
@@ -452,12 +456,14 @@ function VocabularyTable() {
                   selectedWordIds.has(w.id) && "bg-primary/5"
                 )}
               >
-                <TableCell>
-                  <Checkbox
-                    checked={selectedWordIds.has(w.id)}
-                    onCheckedChange={() => toggleWordSelection(w.id)}
-                  />
-                </TableCell>
+                {!readOnly && (
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedWordIds.has(w.id)}
+                      onCheckedChange={() => toggleWordSelection(w.id)}
+                    />
+                  </TableCell>
+                )}
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-1.5">
                     <button
@@ -521,7 +527,7 @@ function VocabularyTable() {
             ))}
             {pagedWords.length === 0 && (
               <TableRow>
-                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={readOnly ? 10 : 11} className="text-center py-8 text-muted-foreground">
                   {t("vocabulary.noWordsMatch")}
                 </TableCell>
               </TableRow>

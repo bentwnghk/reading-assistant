@@ -1968,6 +1968,21 @@
     "emptyTitle": "No Vocabulary Yet",
     "emptyDesc": "Start reading to collect vocabulary words. They will appear here for review.",
     "startReading": "Start Reading",
+    "studentView": {
+      "title": "Student data",
+      "myVocabulary": "My vocabulary",
+      "allSchools": "All schools",
+      "allClasses": "All classes",
+      "noClass": "No class",
+      "allTeachers": "All teachers",
+      "noSchool": "No school",
+      "noStudents": "No students found",
+      "loading": "Loading students...",
+      "banner": "Viewing {{name}} — read-only",
+      "backToMine": "Back to my vocabulary",
+      "emptyTitle": "No Vocabulary Yet",
+      "emptyDesc": "This student has no vocabulary words yet. They will appear here once the student completes reading sessions."
+    },
     "phrases": {
       "empty": "No phrases yet.",
       "listen": "Listen to {{phrase}}",

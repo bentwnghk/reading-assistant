@@ -60,10 +60,13 @@ interface VocabularyStoreState {
   showReviewListShareDialog: boolean;
   acceptedReviewListWords: ReviewListWord[] | null;
   activeReviewListWordIds: Set<string> | null;
+  /** Non-null when a teacher/admin/super-admin is viewing a student's data (read-only). */
+  viewingUserId: string | null;
+  viewingUserName: string | null;
 }
 
 interface VocabularyStoreActions {
-  fetchVocabulary: () => Promise<void>;
+  fetchVocabulary: (userId?: string | null, userName?: string | null) => Promise<void>;
   setSelectedWordIds: (ids: Set<string>) => void;
   toggleWordSelection: (wordId: string) => void;
   selectAll: () => void;
@@ -131,14 +134,19 @@ export const useVocabularyStore = create<
   showReviewListShareDialog: false,
   acceptedReviewListWords: null,
   activeReviewListWordIds: null,
+  viewingUserId: null,
+  viewingUserName: null,
 
-  fetchVocabulary: async () => {
+  fetchVocabulary: async (userId, userName) => {
     set({ isLoading: true });
     try {
-      const res = await fetch("/api/vocabulary");
+      const qs = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+      const res = await fetch(`/api/vocabulary${qs}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       set({
+        viewingUserId: userId ?? null,
+        viewingUserName: userId ? userName ?? null : null,
         words: data.words || [],
         stats: data.stats || {
           totalWords: 0,
@@ -152,6 +160,9 @@ export const useVocabularyStore = create<
           easy: 0,
           unrated: 0,
         },
+        selectedWordIds: new Set(),
+        reviewQueue: [],
+        activeReviewListWordIds: null,
         isLoading: false,
       });
     } catch (error) {
@@ -175,6 +186,7 @@ export const useVocabularyStore = create<
 
   toggleWordSelection: (wordId) =>
     set((state) => {
+      if (state.viewingUserId) return {};
       const next = new Set(state.selectedWordIds);
       if (next.has(wordId)) {
         next.delete(wordId);
@@ -185,11 +197,14 @@ export const useVocabularyStore = create<
     }),
 
   selectAll: () =>
-    set((state) => ({
-      selectedWordIds: new Set(
-        state.words.filter((w) => w.entryType !== "phrase").map((w) => w.id)
-      ),
-    })),
+    set((state) => {
+      if (state.viewingUserId) return {};
+      return {
+        selectedWordIds: new Set(
+          state.words.filter((w) => w.entryType !== "phrase").map((w) => w.id)
+        ),
+      };
+    }),
 
   clearSelection: () => set({ selectedWordIds: new Set(), reviewQueue: [] }),
 
@@ -276,6 +291,7 @@ export const useVocabularyStore = create<
 
   recordSRSAction: async (word, action) => {
     const state = get();
+    if (state.viewingUserId) return;
     const existingWord = state.words.find(
       (w) => w.word.toLowerCase() === word.toLowerCase()
     );
@@ -318,6 +334,7 @@ export const useVocabularyStore = create<
 
   updateWordReview: async (word, correct) => {
     const state = get();
+    if (state.viewingUserId) return;
     const existingWord = state.words.find(
       (w) => w.word.toLowerCase() === word.toLowerCase()
     );

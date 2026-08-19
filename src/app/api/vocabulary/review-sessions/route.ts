@@ -6,6 +6,7 @@ import {
   getReviewSessionDetail,
   deleteReviewSession,
 } from "@/lib/vocabulary";
+import { canViewStudentVocabulary } from "@/lib/users";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -81,8 +82,24 @@ export async function GET(request: Request) {
         ? entryTypeParam
         : undefined;
 
+    // Teacher/admin/super-admin may read another (permitted) student's
+    // sessions (read-only: POST/DELETE below stay self-scoped)
+    const userIdParam = searchParams.get("userId");
+    let targetUserId = session.user.id;
+    if (userIdParam && userIdParam !== session.user.id) {
+      const role = session.user.role;
+      if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      const allowed = await canViewStudentVocabulary(session.user.id, role, userIdParam);
+      if (!allowed) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      targetUserId = userIdParam;
+    }
+
     if (sessionId) {
-      const detail = await getReviewSessionDetail(session.user.id, sessionId);
+      const detail = await getReviewSessionDetail(targetUserId, sessionId);
       if (!detail) {
         return NextResponse.json(
           { error: "Session not found" },
@@ -92,7 +109,7 @@ export async function GET(request: Request) {
       return NextResponse.json(detail);
     }
 
-    const sessions = await getReviewSessions(session.user.id, limit, entryType);
+    const sessions = await getReviewSessions(targetUserId, limit, entryType);
     return NextResponse.json(sessions);
   } catch (error) {
     console.error("Failed to fetch review sessions:", error);

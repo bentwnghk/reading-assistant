@@ -1648,3 +1648,107 @@ export async function deleteUser(userId: string): Promise<boolean> {
     client.release()
   }
 }
+
+export interface ScopedStudent {
+  id: string
+  name: string | null
+  email: string | null
+  classId: string | null
+  className: string | null
+  teacherId: string | null
+  teacherName: string | null
+  schoolId: string | null
+  schoolName: string | null
+}
+
+/**
+ * Stricter than canAccessStudent for the vocabulary student view:
+ * teachers may only view students in classes they teach (not the whole school).
+ */
+export async function canViewStudentVocabulary(actorId: string, actorRole: string, studentId: string): Promise<boolean> {
+  if (actorRole === 'super-admin') return true
+
+  const client = await getClient()
+  try {
+    if (actorRole === 'admin') {
+      const result = await client.query(
+        `SELECT 1 FROM users u1 JOIN users u2 ON u1.school_id = u2.school_id
+         WHERE u1.id = $1 AND u2.id = $2 AND u1.school_id IS NOT NULL`,
+        [actorId, studentId]
+      )
+      return result.rows.length > 0
+    }
+    if (actorRole === 'teacher') {
+      const result = await client.query(
+        `SELECT 1 FROM class_members cm
+         JOIN classes c ON cm.class_id = c.id
+         WHERE cm.student_id = $2 AND c.teacher_id = $1`,
+        [actorId, studentId]
+      )
+      return result.rows.length > 0
+    }
+    return false
+  } finally {
+    client.release()
+  }
+}
+
+/**
+ * Students whose vocabulary the actor may view:
+ * - teacher: students in classes they teach
+ * - admin: all students in their school (class info included, may be null)
+ * - super-admin: all students, optionally narrowed to one school
+ */
+export async function getScopedStudents(actorId: string, actorRole: string, schoolId?: string): Promise<ScopedStudent[]> {
+  const client = await getClient()
+  try {
+    const params: unknown[] = [actorId]
+    let scopeCondition = ''
+    if (actorRole === 'teacher') {
+      scopeCondition = 'AND c.teacher_id = $1'
+    } else if (actorRole === 'admin') {
+      scopeCondition = 'AND u.school_id IS NOT NULL AND u.school_id = (SELECT school_id FROM users WHERE id = $1)'
+    } else if (actorRole === 'super-admin') {
+      if (schoolId) {
+        params.push(schoolId)
+        scopeCondition = 'AND u.school_id = $2'
+      }
+    } else {
+      return []
+    }
+
+    const result = await client.query(
+      `SELECT u.id, u.name, u.email,
+              c.id AS class_id, c.name AS class_name,
+              t.id AS teacher_id, t.name AS teacher_name,
+              sch.id AS school_id, sch.name AS school_name
+       FROM users u
+       LEFT JOIN user_roles ur ON ur.user_id = u.id
+       LEFT JOIN class_members cm ON cm.student_id = u.id
+       LEFT JOIN classes c ON c.id = cm.class_id
+       LEFT JOIN users t ON t.id = c.teacher_id
+       LEFT JOIN schools sch ON sch.id = u.school_id
+       WHERE COALESCE(ur.role, 'student') = 'student'
+         AND u.id <> $1
+         ${scopeCondition}
+       ORDER BY u.name ASC`,
+      params
+    )
+    return result.rows.map((row: Record<string, string | null>) => ({
+      id: row.id ?? '',
+      name: row.name ?? null,
+      email: row.email ?? null,
+      classId: row.class_id ?? null,
+      className: row.class_name ?? null,
+      teacherId: row.teacher_id ?? null,
+      teacherName: row.teacher_name ?? null,
+      schoolId: row.school_id ?? null,
+      schoolName: row.school_name ?? null,
+    }))
+  } catch (error) {
+    console.error('Failed to get scoped students:', error)
+    return []
+  } finally {
+    client.release()
+  }
+}

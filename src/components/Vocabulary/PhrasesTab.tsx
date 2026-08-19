@@ -56,7 +56,9 @@ export default function PhrasesTab() {
     setFilterSource,
     activeReviewListWordIds,
     exitReviewList,
+    viewingUserId,
   } = useVocabularyStore();
+  const readOnly = !!viewingUserId;
   const {
     mode,
     accessPassword,
@@ -377,7 +379,7 @@ export default function PhrasesTab() {
                   {t("vocabulary.clearFilters")}
                 </Button>
               )}
-              {hasEverSelected && !effectiveShowSelectedOnly && (
+              {!readOnly && hasEverSelected && !effectiveShowSelectedOnly && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -391,7 +393,7 @@ export default function PhrasesTab() {
                   {t("vocabulary.showSelected")}
                 </Button>
               )}
-              {hasEverSelected && effectiveShowSelectedOnly && (
+              {!readOnly && hasEverSelected && effectiveShowSelectedOnly && (
                 <Button
                   variant="default"
                   size="sm"
@@ -426,12 +428,14 @@ export default function PhrasesTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40px]">
-                    <Checkbox
-                      checked={allSelected}
-                      onCheckedChange={handleSelectAll}
-                    />
-                  </TableHead>
+                  {!readOnly && (
+                    <TableHead className="w-[40px]">
+                      <Checkbox
+                        checked={allSelected}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead className="w-[160px]">
                     <Button
                       variant="ghost"
@@ -501,12 +505,14 @@ export default function PhrasesTab() {
                       selectedWordIds.has(p.id) && "bg-primary/5",
                     )}
                   >
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedWordIds.has(p.id)}
-                        onCheckedChange={() => toggleWordSelection(p.id)}
-                      />
-                    </TableCell>
+                    {!readOnly && (
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedWordIds.has(p.id)}
+                          onCheckedChange={() => toggleWordSelection(p.id)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-1.5">
                         <button
@@ -577,7 +583,7 @@ export default function PhrasesTab() {
                 {pagedPhrases.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={11}
+                      colSpan={readOnly ? 10 : 11}
                       className="text-center py-8 text-muted-foreground"
                     >
                       {t("vocabulary.phrases.noPhrasesMatch")}

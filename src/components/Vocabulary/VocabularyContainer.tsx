@@ -26,6 +26,7 @@ import {
   Sparkles,
   Shuffle,
   TrendingDown,
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -48,6 +49,7 @@ import AddToReviewListDialog from "./AddToReviewListDialog";
 import ReviewListsTab from "./ReviewListsTab";
 import ReviewListShareDialog from "./ReviewListShareDialog";
 import StudyPlanDialog from "./StudyPlanDialog";
+import StudentViewFilters from "./StudentViewFilters";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling" | "lists" | "history" | "phrases";
 
@@ -84,6 +86,8 @@ function VocabularyContainer() {
     stats,
     reviewQueue,
     selectedWordIds,
+    viewingUserId,
+    viewingUserName,
     fetchVocabulary,
     startReview,
     autoSelectForReview,
@@ -105,18 +109,42 @@ function VocabularyContainer() {
   const [helpTab, setHelpTab] = useState<"overview" | "review" | "extras">("overview");
   const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
   const currentEntryType = useRef<"word" | "phrase">("word");
+  const prevViewingUserIdRef = useRef<string | null>(viewingUserId);
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const isStudentView = !!viewingUserId;
+  const viewKey = viewingUserId ?? "self";
+
   useEffect(() => {
-    fetchVocabulary();
+    // Remount fetch: restore whichever view (self or student) was active,
+    // so the student view survives SPA navigation (store-level state).
+    const { viewingUserId: currentId, viewingUserName: currentName } =
+      useVocabularyStore.getState();
+    fetchVocabulary(currentId ?? null, currentName ?? undefined);
   }, [fetchVocabulary]);
+
+  useEffect(() => {
+    // Reset UI state only when entering/leaving student view (change
+    // detection, so plain SPA remounts don't clear self-view filters).
+    if (prevViewingUserIdRef.current !== viewingUserId) {
+      prevViewingUserIdRef.current = viewingUserId;
+      const store = useVocabularyStore.getState();
+      store.setSearchQuery("");
+      store.setFilterRating("all");
+      store.setFilterMastery("all");
+      store.setFilterSource("all");
+      setActiveTab("table");
+    }
+  }, [viewingUserId]);
 
   useEffect(() => {
     if (!acceptedReviewListWords || acceptedReviewListWords.length === 0) return;
     if (useVocabularyStore.getState().isLoading) return;
     const w = acceptedReviewListWords;
     setAcceptedReviewListWords(null);
+    // Never merge a just-accepted review list into a student's read-only view
+    if (useVocabularyStore.getState().viewingUserId) return;
     loadReviewListIntoQueue(w);
     const first = w[0] as ReviewListWord;
     const isPhrase =
@@ -317,6 +345,13 @@ function VocabularyContainer() {
     { key: "history", label: t("vocabulary.tabHistory"), icon: <History className="h-4 w-4" /> },
   ];
 
+  const visibleTabs = isStudentView
+    ? tabs.filter(
+        (tab) =>
+          tab.key === "table" || tab.key === "phrases" || tab.key === "history"
+      )
+    : tabs;
+
   const isLoading = useVocabularyStore((s) => s.isLoading);
 
   const handleWordAction = useCallback(
@@ -357,11 +392,51 @@ function VocabularyContainer() {
         </div>
       </div>
 
+      {isTeacherOrAbove && (
+        <StudentViewFilters
+          role={
+            (session?.user?.role as "teacher" | "admin" | "super-admin") ??
+            "teacher"
+          }
+        />
+      )}
+
+      {isStudentView && (
+        <div className="flex items-center gap-2 mb-4 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <Eye className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <span className="text-sm font-medium text-amber-700 dark:text-amber-300 truncate">
+            {t("vocabulary.studentView.banner", {
+              name: viewingUserName || viewingUserId,
+            })}
+          </span>
+          <div className="flex-1" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs shrink-0"
+            onClick={() => fetchVocabulary(null)}
+          >
+            {t("vocabulary.studentView.backToMine")}
+          </Button>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <LoaderCircle className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : words.length === 0 ? (
+        isStudentView ? (
+          <div className="text-center py-20">
+            <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+            <h2 className="text-lg font-medium mb-2">
+              {t("vocabulary.studentView.emptyTitle")}
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              {t("vocabulary.studentView.emptyDesc")}
+            </p>
+          </div>
+        ) : (
         <div className="text-center py-20">
           <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
           <h2 className="text-lg font-medium mb-2">
@@ -374,6 +449,7 @@ function VocabularyContainer() {
             <Button>{t("vocabulary.startReading")}</Button>
           </Link>
         </div>
+        )
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
@@ -490,13 +566,15 @@ function VocabularyContainer() {
           {(activeTab === "table" || activeTab === "phrases") && (
             <>
               <div className="flex items-center gap-2 mb-4">
-                <AutoSelectPanel entryType={activeTab === "phrases" ? "phrase" : "word"} />
+                {!isStudentView && (
+                  <AutoSelectPanel entryType={activeTab === "phrases" ? "phrase" : "word"} />
+                )}
                 <div className="flex-1" />
                 <div className="flex items-center gap-2 flex-wrap justify-end">
                 <ExportPanel entryType={activeTab === "phrases" ? "phrase" : "word"} />
                 </div>
               </div>
-              {selectedWordIds.size > 0 && (
+              {!isStudentView && selectedWordIds.size > 0 && (
                 <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg flex-wrap">
                   <span className="text-sm font-medium">
                     {t(
@@ -547,7 +625,7 @@ function VocabularyContainer() {
           )}
 
           <div className="flex flex-wrap gap-1 mb-4 border-b">
-            {tabs.map((tab) => (
+            {visibleTabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
@@ -580,8 +658,8 @@ function VocabularyContainer() {
             ))}
           </div>
 
-          {activeTab === "table" && <VocabularyTable />}
-          {activeTab === "phrases" && <PhrasesTab />}
+          {activeTab === "table" && <VocabularyTable key={viewKey} />}
+          {activeTab === "phrases" && <PhrasesTab key={viewKey} />}
           {activeTab === "flashcard" && (
             <VocabularyFlashcard
               glossary={reviewGlossary}
@@ -609,7 +687,9 @@ function VocabularyContainer() {
               disableSessionGlossary
             />
           )}
-          {activeTab === "history" && <ReviewHistory />}
+          {activeTab === "history" && (
+            <ReviewHistory key={viewKey} userId={viewingUserId} />
+          )}
           {activeTab === "lists" && <ReviewListsTab onReviewList={handleReviewList} />}
           <ShareVocabularyDialog
             open={shareOpen}
@@ -622,7 +702,7 @@ function VocabularyContainer() {
             onOpenChange={setAddToListOpen}
           />
           <ReviewListShareDialog />
-          <StudyPlanDialog onStartPlan={handleStartPlan} />
+          {!isStudentView && <StudyPlanDialog onStartPlan={handleStartPlan} />}
 
           <Dialog open={showHelp} onOpenChange={setShowHelp}>
             <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">

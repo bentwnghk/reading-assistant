@@ -1995,6 +1995,21 @@
     "emptyTitle": "還沒有詞彙",
     "emptyDesc": "開始閱讀以收集詞彙。它們會出現在這裡供你複習。",
     "startReading": "開始閱讀",
+    "studentView": {
+      "title": "學生資料",
+      "myVocabulary": "我的詞彙",
+      "allSchools": "所有學校",
+      "allClasses": "所有班別",
+      "noClass": "未編班",
+      "allTeachers": "所有老師",
+      "noSchool": "未分派學校",
+      "noStudents": "沒有可查看的學生",
+      "loading": "載入學生中…",
+      "banner": "正在查看 {{name}} — 唯讀模式",
+      "backToMine": "返回我的詞彙",
+      "emptyTitle": "尚無詞彙",
+      "emptyDesc": "此學生尚未建立詞彙。學生完成閱讀後，詞彙會自動出現在這裡。"
+    },
     "phrases": {
       "empty": "還沒有詞組。",
       "listen": "聆聽 {{phrase}}",
