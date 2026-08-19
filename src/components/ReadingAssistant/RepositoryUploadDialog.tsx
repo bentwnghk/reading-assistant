@@ -104,7 +104,8 @@ function RepositoryUploadDialog({
         fetch("/api/classes")
           .then((r) => r.json())
           .then((data) => {
-            const classes = data || [];
+            const classes = (data || []) as ClassInfo[];
+            classes.sort((a, b) => a.name.localeCompare(b.name));
             setTeacherClasses(classes);
           })
           .catch(() => {

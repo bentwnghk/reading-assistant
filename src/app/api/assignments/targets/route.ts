@@ -88,7 +88,11 @@ function groupByClass(
     }
   }
   const result: ShareTargetGroup[] = []
-  for (const [classId, users] of Object.entries(groups)) {
+  for (const [classId, users] of Object.entries(groups).sort((a, b) => {
+    const aName = a[1][0]?.className ?? a[0]
+    const bName = b[1][0]?.className ?? b[0]
+    return aName.localeCompare(bName)
+  })) {
     result.push({
       classId,
       className: users[0].className,

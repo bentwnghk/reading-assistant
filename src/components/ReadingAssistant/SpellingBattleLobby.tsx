@@ -130,7 +130,10 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
     if (!canHostClassBattle) return;
     fetch("/api/classes")
       .then((r) => (r.ok ? r.json() : []))
-      .then((c: ClassInfo[]) => setClasses(c))
+      .then((c: ClassInfo[]) => {
+        const sorted = [...c].sort((a, b) => a.name.localeCompare(b.name));
+        setClasses(sorted);
+      })
       .catch(() => {});
   }, [canHostClassBattle]);
 

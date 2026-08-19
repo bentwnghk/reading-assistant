@@ -269,7 +269,11 @@ export async function getShareTargets(
         }
       }
 
-      for (const [classId, clsUsers] of Object.entries(groupedByClass)) {
+      for (const [classId, clsUsers] of Object.entries(groupedByClass).sort((a, b) => {
+        const aName = a[1][0]?.className ?? a[0]
+        const bName = b[1][0]?.className ?? b[0]
+        return aName.localeCompare(bName)
+      })) {
         result.push({
           classId,
           className: clsUsers[0].className,
@@ -322,7 +326,11 @@ export async function getShareTargets(
     }
 
     const result: ShareTargetGroup[] = []
-    for (const [classId, users] of Object.entries(groups)) {
+    for (const [classId, users] of Object.entries(groups).sort((a, b) => {
+      const aName = a[1][0]?.className ?? a[0]
+      const bName = b[1][0]?.className ?? b[0]
+      return aName.localeCompare(bName)
+    })) {
       result.push({
         classId,
         className: users[0].className,
@@ -338,9 +346,10 @@ export async function getShareTargets(
 
   if (role === "teacher") {
     const classes = await getClassesForTeacher(userId)
+    const sortedClasses = [...classes].sort((a, b) => a.name.localeCompare(b.name))
     const result: ShareTargetGroup[] = []
 
-    for (const cls of classes) {
+    for (const cls of sortedClasses) {
       const members: ClassMember[] = await getClassMembers(cls.id)
       const targets: ShareTarget[] = members.map((m) => ({
         id: m.studentId,
