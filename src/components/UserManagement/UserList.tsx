@@ -623,6 +623,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                         </SelectItem>
                         {classes
                           .filter(c => c.schoolId === user.schoolId || c.id === user.classId)
+                          .sort((a, b) => a.name.localeCompare(b.name))
                           .map((cls) => (
                             <SelectItem key={cls.id} value={cls.id}>
                               {cls.name}

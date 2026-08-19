@@ -63,8 +63,10 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
   const chartRefs = useRef<(HTMLDivElement | null)[]>(Array(14).fill(null));
 
   const filteredClasses = useMemo(() => {
-    if (!isSuperAdmin || selectedSchoolId === "all") return allClasses;
-    return allClasses.filter((c) => c.schoolId === selectedSchoolId);
+    const scoped = !isSuperAdmin || selectedSchoolId === "all"
+      ? allClasses
+      : allClasses.filter((c) => c.schoolId === selectedSchoolId);
+    return [...scoped].sort((a, b) => a.name.localeCompare(b.name));
   }, [allClasses, selectedSchoolId, isSuperAdmin]);
 
   const { metrics, skillAverages, loading, error } = useTeacherDashboard(

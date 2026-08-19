@@ -125,6 +125,9 @@ export function LeaderboardPage() {
         const res = await fetch("/api/classes");
         if (res.ok) {
           const classes = await res.json() as TeacherClass[];
+          classes.sort((a, b) =>
+            a.name.localeCompare(b.name) || (a.schoolName ?? "").localeCompare(b.schoolName ?? "")
+          );
           setTeacherClasses(classes);
         }
       } catch {

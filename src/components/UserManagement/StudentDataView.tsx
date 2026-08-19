@@ -343,8 +343,10 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   }
 
   const filteredClasses = useMemo(() => {
-    if (!isSuperAdmin || selectedSchoolId === "all") return classes
-    return classes.filter(c => c.schoolId === selectedSchoolId)
+    const scoped = !isSuperAdmin || selectedSchoolId === "all"
+      ? classes
+      : classes.filter(c => c.schoolId === selectedSchoolId)
+    return [...scoped].sort((a, b) => a.name.localeCompare(b.name))
   }, [classes, selectedSchoolId, isSuperAdmin])
 
   const highlightedTextHtml = useMemo(() => {
