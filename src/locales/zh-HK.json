@@ -884,7 +884,10 @@
       "play": "朗讀伴讀",
       "stop": "停止",
       "blocked": "再次點擊「朗讀伴讀」以開啟聲音。",
-      "jumpHint": "點擊任意句子即可跳轉朗讀"
+      "jumpHint": "點擊任意句子即可跳轉朗讀",
+      "nowPlaying": "正在朗讀 {{current}} / {{total}}",
+      "nowPlayingShort": "正在朗讀...",
+      "escHint": "按 Esc 停止"
     },
     "adaptedText": {
       "title": "文本分析和改寫",

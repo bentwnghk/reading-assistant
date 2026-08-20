@@ -1204,6 +1204,21 @@ function AdaptedText() {
     stopSpeaking();
   }, [clearPendingClickAction]);
 
+  // Esc stops read-along (desktop). Skipped while any Radix dialog is open —
+  // Esc's primary job there is closing the dialog (handled by Radix itself),
+  // and stopping playback simultaneously would be surprising.
+  useEffect(() => {
+    if (!readAlongPlaying) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+      stopReadAlong();
+      setReadAlong(null, false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [readAlongPlaying, setReadAlong]);
+
   // Highlight + scroll to the active sentence in the DOM.
   useEffect(() => {
     const container = containerRef.current;

@@ -853,7 +853,10 @@
       "play": "Read Along",
       "stop": "Stop",
       "blocked": "Tap the Read Along button again to enable sound.",
-      "jumpHint": "Click any sentence to jump to it"
+      "jumpHint": "Click any sentence to jump to it",
+      "nowPlaying": "Reading {{current}} / {{total}}",
+      "nowPlayingShort": "Reading aloud...",
+      "escHint": "Esc to stop"
     },
     "adaptedText": {
       "title": "Text Analysis & Adaptation",

@@ -33,6 +33,7 @@ const Collocations = dynamic(() => import("@/components/ReadingAssistant/Colloca
 const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
 const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
+const ReadAlongIndicator = dynamic(() => import("@/components/ReadingAssistant/ReadAlongIndicator"));
 const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
 
 // iOS Safari can leave the auth/session network fetch pending indefinitely after
@@ -229,6 +230,7 @@ function HomeContent() {
       </main>
       <TocFab />
       <TutorChatFab />
+      <ReadAlongIndicator />
       <LearningRecommendationDialog />
       <Footer />
     </div>
