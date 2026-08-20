@@ -2340,6 +2340,10 @@
           "name": "Review History",
           "desc": "See past review sessions with per-word results. Flashcard sessions show Again/Hard/Good/Easy counts; Quiz and Spelling sessions show accuracy."
         },
+        "studentView": {
+          "name": "Student Data (Teachers)",
+          "desc": "Teachers and admins can browse a student's vocabulary in read-only mode. Filter by school, class, or teacher, then pick a student to see their words, phrases, stats, and review history. Export stays available; nothing can be modified."
+        },
         "tip": {
           "title": "Tip",
           "content": "Use Auto Select with \"Due for Review\" to quickly catch up on overdue words, or \"Random Mix\" for a balanced study session."
