@@ -95,6 +95,12 @@ function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// How long a single-click action (read-along jump / sentence-analysis dialog)
+// is deferred on desktop so a double-click can cancel it and let the browser
+// finish selecting the word natively. Keep below the typical OS double-click
+// threshold (~500ms); 300ms covers most inter-click intervals.
+const CLICK_ACTION_DELAY_MS = 300;
+
 function getContextAround(
   text: string,
   target: string,
@@ -492,6 +498,7 @@ function AdaptedText() {
   const sentenceListRef = useRef<string[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
   const glossaryPopoverRef = useRef<HTMLDivElement>(null);
+  const clickActionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [glossaryPopover, setGlossaryPopover] = useState<{
     entry: GlossaryEntry;
@@ -1031,7 +1038,41 @@ function AdaptedText() {
     ]
   );
 
+  // ── Deferred single-click actions (desktop double-click selection) ──────
+  // A single click on the original text either jumps read-along to that
+  // sentence or opens the sentence-analysis dialog. Both steal focus and
+  // scroll the viewport, which would break the native double-click word
+  // selection. On desktop the action is therefore deferred briefly; the
+  // second click of a double-click (event.detail >= 2) cancels it. Touch
+  // devices keep the immediate behavior.
+  const clearPendingClickAction = useCallback(() => {
+    if (clickActionTimerRef.current) {
+      clearTimeout(clickActionTimerRef.current);
+      clickActionTimerRef.current = null;
+    }
+  }, []);
+
+  const runClickAction = useCallback(
+    (action: () => void) => {
+      if (isTouchDeviceRef.current) {
+        action();
+        return;
+      }
+      clearPendingClickAction();
+      clickActionTimerRef.current = setTimeout(() => {
+        clickActionTimerRef.current = null;
+        action();
+      }, CLICK_ACTION_DELAY_MS);
+    },
+    [clearPendingClickAction]
+  );
+
   const handleMouseDown = useCallback((e: MouseEvent | TouchEvent) => {
+    // Cancel on mousedown of the second click — earlier than the click
+    // event itself, so slower double-clicks still cancel in time.
+    if (!isTouchDeviceRef.current && (e as MouseEvent).detail >= 2) {
+      clearPendingClickAction();
+    }
     const target = e.target as HTMLElement;
     if (
       !target.closest(".selection-popup") &&
@@ -1042,7 +1083,7 @@ function AdaptedText() {
       setSelection(null);
       setGlossaryPopover(null);
     }
-  }, []);
+  }, [clearPendingClickAction]);
 
   // ── effects ──
 
@@ -1133,19 +1174,35 @@ function AdaptedText() {
     [readAlongSentences, startReadAlong],
   );
 
-  // Stop read-along when leaving the original tab.
+  // Read-along jumps go through the deferred click action, but the Web Audio
+  // unlock must START inside the gesture handler (Safari rejects resume()
+  // from a timer), so unlock here and defer only the rest.
+  const scheduleJump = useCallback(
+    (index: number) => {
+      void unlockAudio();
+      runClickAction(() => handleJumpReadAlong(index));
+    },
+    [runClickAction, handleJumpReadAlong]
+  );
+
+  // Stop read-along when leaving the original tab. Also drop any pending
+  // deferred click action — it must not fire read-along on a hidden tab.
   useEffect(() => {
-    if (activeTab !== "original" && readAlongPlaying) {
-      stopReadAlong();
-      setReadAlong(null, false);
+    if (activeTab !== "original") {
+      clearPendingClickAction();
+      if (readAlongPlaying) {
+        stopReadAlong();
+        setReadAlong(null, false);
+      }
     }
-  }, [activeTab, readAlongPlaying, setReadAlong]);
+  }, [activeTab, readAlongPlaying, setReadAlong, clearPendingClickAction]);
 
   // Stop read-along on unmount.
   useEffect(() => () => {
+    clearPendingClickAction();
     stopReadAlong();
     stopSpeaking();
-  }, []);
+  }, [clearPendingClickAction]);
 
   // Highlight + scroll to the active sentence in the DOM.
   useEffect(() => {
@@ -1197,6 +1254,13 @@ function AdaptedText() {
     const mouseEvent = e as MouseEvent;
     const target = mouseEvent.target as HTMLElement;
 
+    // Desktop: the second click of a double-click cancels the pending
+    // single-click action so the native word selection completes.
+    if (!isTouchDeviceRef.current && mouseEvent.detail >= 2) {
+      clearPendingClickAction();
+      return;
+    }
+
     if (target.closest("[data-glossary-word]")) return;
 
     const analyzedSpan = target.closest(
@@ -1213,14 +1277,15 @@ function AdaptedText() {
         if (raSpan) {
           const idxAttr = raSpan.getAttribute("data-ra-idx");
           if (idxAttr !== null) {
-            handleJumpReadAlong(Number(idxAttr));
+            scheduleJump(Number(idxAttr));
           }
         }
         return;
       }
       const sentence = analyzedSpan.textContent || "";
       if (sentence.trim()) {
-        setActiveSentence(sentence.trim());
+        const trimmed = sentence.trim();
+        runClickAction(() => setActiveSentence(trimmed));
       }
       return;
     }
@@ -1235,10 +1300,10 @@ function AdaptedText() {
       if (idxAttr !== null) {
         e.stopPropagation();
         e.preventDefault();
-        handleJumpReadAlong(Number(idxAttr));
+        scheduleJump(Number(idxAttr));
       }
     }
-  }, [handleJumpReadAlong, readAlongPlaying]);
+  }, [scheduleJump, runClickAction, clearPendingClickAction, readAlongPlaying]);
 
   const handleGlossaryWordClick = useCallback((e: Event) => {
     const target = (e.target as HTMLElement).closest(
