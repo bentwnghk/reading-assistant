@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, LoaderCircle } from "lucide-react";
+import { Eye, LoaderCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -166,7 +166,7 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-card border rounded-lg">
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
-        <GraduationCap className="h-4 w-4" />
+        <Eye className="h-4 w-4 text-amber-500" />
         <span className="hidden sm:inline">
           {t("vocabulary.studentView.title")}
         </span>
