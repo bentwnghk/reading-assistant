@@ -140,6 +140,7 @@ function RepositoryUploadDialog({
 
       setPhase("extracting");
       setGeneratedTitle("");
+      const toastId = toast.info(t("reading.imageUpload.extractingWait"), { duration: Infinity });
       const dataURLs: string[] = [];
       let combinedText = extractedTextRef.current;
 
@@ -195,6 +196,8 @@ function RepositoryUploadDialog({
         toast.error(t("reading.repository.uploadError"));
         setPhase("idle");
         setProgress(null);
+      } finally {
+        toast.dismiss(toastId);
       }
     },
     [createModelProvider, visionModelName, summaryModel, t]
