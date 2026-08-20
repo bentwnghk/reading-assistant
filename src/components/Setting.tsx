@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -133,6 +133,20 @@ function Setting({ open, onClose }: SettingProps) {
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Restricted preview models are only visible to super-admins and
+  // meter-billing (local mode) users; hidden from everyone else's dropdowns.
+  const showRestrictedModels =
+    sessionData?.user?.role === "super-admin" || mode === "local";
+  const availableModelOptions = showRestrictedModels
+    ? AVAILABLE_MODELS
+    : AVAILABLE_MODELS.filter((m) => !RESTRICTED_MODELS.includes(m));
+  const readingTextModelOptions = showRestrictedModels
+    ? READING_TEXT_MODELS
+    : READING_TEXT_MODELS.filter((m) => !RESTRICTED_MODELS.includes(m));
+  const tutorModelOptions = showRestrictedModels
+    ? TUTOR_MODELS
+    : TUTOR_MODELS.filter((m) => !RESTRICTED_TUTOR_MODELS.includes(m));
+
   useEffect(() => {
     fetch("/api/subscription/pricing")
       .then((r) => r.json())
@@ -177,6 +191,7 @@ function Setting({ open, onClose }: SettingProps) {
   // always reflected, regardless of when they arrived relative to mount.
   useEffect(() => {
     if (open) {
+      enforceRestrictedModels(sessionData?.user?.role);
       form.reset(getFormValues());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -194,6 +209,15 @@ function Setting({ open, onClose }: SettingProps) {
 
   function handleModeChange(mode: string) {
     update({ mode: mode as import("@/store/setting").ApiMode });
+    // Leaving meter billing revokes restricted models for non-super-admins;
+    // reset any such selections in both the store and the open form.
+    const resets = enforceRestrictedModels(sessionData?.user?.role);
+    for (const field of RESTRICTED_MODEL_FIELD_NAMES) {
+      const value = resets[field];
+      if (value !== undefined) {
+        form.setValue(field, value);
+      }
+    }
   }
 
   async function handleProviderChange(provider: string) {
@@ -703,7 +727,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -734,7 +758,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -765,7 +789,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -796,7 +820,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -827,7 +851,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -858,7 +882,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -889,7 +913,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -920,7 +944,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -951,7 +975,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -982,7 +1006,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -1013,7 +1037,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {AVAILABLE_MODELS.map((m) => (
+                            {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -1044,7 +1068,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {READING_TEXT_MODELS.map((m) => (
+                            {readingTextModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>
@@ -1106,7 +1130,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {TUTOR_MODELS.map((m) => (
+                            {tutorModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {m}
                               </SelectItem>

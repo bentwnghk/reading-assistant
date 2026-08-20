@@ -39,6 +39,36 @@ export const READING_TEXT_MODELS = [
 
 export type ReadingTextModel = (typeof READING_TEXT_MODELS)[number];
 
+// Preview models hidden from the Settings dropdowns for regular users.
+// Super-admins and meter-billing (mode "local") users always see them.
+export const RESTRICTED_MODELS: string[] = [
+  "gpt-5.4-mini",
+  "gemini-3-flash-preview",
+];
+
+export const RESTRICTED_TUTOR_MODELS: string[] = [
+  "gemini-3-flash-preview",
+  "gpt-5.6-terra",
+];
+
+export const RESTRICTED_MODEL_FIELD_NAMES = [
+  "prereadingModel",
+  "summaryModel",
+  "mindMapModel",
+  "adaptedTextModel",
+  "simplifyModel",
+  "readingTestModel",
+  "glossaryModel",
+  "suggestVocabModel",
+  "sentenceAnalysisModel",
+  "collocationModel",
+  "grammarModel",
+  "readingTextModel",
+  "tutorModel",
+] as const;
+
+export type RestrictedModelField = (typeof RESTRICTED_MODEL_FIELD_NAMES)[number];
+
 export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] as const;
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
@@ -304,4 +334,33 @@ export function markLastOpenedSession(sessionId: string) {
   if (lastOpenedSessionId === sessionId) return;
 
   update({ lastOpenedSessionId: sessionId });
+}
+
+export function getRestrictedModelResets(
+  state: SettingStore,
+  isPrivileged: boolean
+): Partial<Pick<SettingStore, RestrictedModelField>> {
+  if (isPrivileged) return {};
+  const updates: Partial<Record<RestrictedModelField, string>> = {};
+  for (const field of RESTRICTED_MODEL_FIELD_NAMES) {
+    const restricted =
+      field === "tutorModel" ? RESTRICTED_TUTOR_MODELS : RESTRICTED_MODELS;
+    if (restricted.includes(state[field])) {
+      updates[field] = defaultValues[field];
+    }
+  }
+  return updates as Partial<Pick<SettingStore, RestrictedModelField>>;
+}
+
+// Reset any restricted model selection back to its default for users who are
+// neither super-admin nor on meter billing (mode "local"). Persists the
+// correction via update() (debounced server sync for authenticated users).
+export function enforceRestrictedModels(role?: string | null) {
+  const state = useSettingStore.getState();
+  const isPrivileged = role === "super-admin" || state.mode === "local";
+  const updates = getRestrictedModelResets(state, isPrivileged);
+  if (Object.keys(updates).length > 0) {
+    state.update(updates);
+  }
+  return updates;
 }

@@ -12,6 +12,7 @@ import {
   markLastOpenedSession,
   useSettingStore,
   defaultValues,
+  enforceRestrictedModels,
 } from "@/store/setting"
 
 import { useHistoryStore } from "@/store/history"
@@ -70,6 +71,11 @@ function AuthStateManager() {
         } else {
           useSettingStore.getState().update({ language: preSignInLanguage })
         }
+
+        // Reset restricted model selections (persisted server-side or in
+        // hydrated localStorage) back to defaults for non-privileged users.
+        // The corrected values sync back to the server via debounced update().
+        enforceRestrictedModels(session?.user?.role)
 
         const currentReading = useReadingStore.getState()
         const hasActiveSession = Boolean(currentReading.id && currentReading.extractedText)
@@ -132,7 +138,7 @@ function AuthStateManager() {
           setShareCheckComplete(true)
         })
       })
-  }, [session?.user?.id, status, t])
+  }, [session?.user?.id, session?.user?.role, status, t])
   
   return null
 }
