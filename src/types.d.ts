@@ -336,6 +336,8 @@ interface BattleCreateRoomPayload {
   config: BattleRoomConfig;
   /** For class battles: the target class id (teacher must own it). */
   targetClassId?: string;
+  /** For roster battles: the target assignment-preset id (must be in the requester's school). */
+  targetPresetId?: string;
 }
 
 interface BattleJoinRoomPayload {

@@ -87,6 +87,8 @@ export interface CreateRoomInput {
   socketId: string;
   resolved: { words: BattleWord[]; actualCount: number };
   classId: string | null;
+  /** Roster (assignment preset) target for roster battles; null otherwise. */
+  preset: { id: string; name: string; studentIds: string[] } | null;
 }
 
 export function createRoom(input: CreateRoomInput): BattleRoom {
@@ -102,6 +104,9 @@ export function createRoom(input: CreateRoomInput): BattleRoom {
     lastActivityAt: now,
     classBattle: input.config.classBattle,
     classId: input.classId,
+    presetId: input.preset?.id ?? null,
+    presetName: input.preset?.name ?? null,
+    targetUserIds: input.preset ? new Set(input.preset.studentIds) : null,
     canonicalWords: input.resolved.words,
     actualWordCount: input.resolved.actualCount,
     currentIndex: -1,
@@ -211,17 +216,50 @@ export function pruneIdleRooms(now: number = Date.now()): string[] {
   return destroyed;
 }
 
+/** Public invite summary returned by the pending-invites endpoint. */
+export interface BattleInviteSummary {
+  roomCode: string;
+  hostName: string | null;
+  /** Class name — or the roster (preset) name for roster battles. */
+  className: string | null;
+  actualWordCount: number;
+  difficulty: SpellingDifficulty;
+  gameMode: BattleGameMode;
+}
+
 /** Return simplified invite objects for class-battle rooms targeting the given class. */
-export function findClassBattleInvites(
-  classId: string,
-): { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty; gameMode: BattleGameMode }[] {
-  const invites: { roomCode: string; hostName: string | null; actualWordCount: number; difficulty: SpellingDifficulty; gameMode: BattleGameMode }[] = [];
+export function findClassBattleInvites(classId: string): BattleInviteSummary[] {
+  const invites: BattleInviteSummary[] = [];
   for (const room of rooms.values()) {
     if (room.classBattle && room.classId === classId && room.status === "lobby") {
       const hostPlayer = room.players.get(room.hostId);
       invites.push({
         roomCode: room.code,
         hostName: hostPlayer?.name ?? null,
+        className: null,
+        actualWordCount: room.actualWordCount,
+        difficulty: room.config.difficulty,
+        gameMode: room.config.gameMode,
+      });
+    }
+  }
+  return invites;
+}
+
+/**
+ * Return invite objects for roster-battle rooms whose roster (assignment
+ * preset) contains the given user. Roster invites reach students who may have
+ * no class at all, so lookup is by userId, not classId.
+ */
+export function findRosterBattleInvites(userId: string): BattleInviteSummary[] {
+  const invites: BattleInviteSummary[] = [];
+  for (const room of rooms.values()) {
+    if (room.classBattle && room.targetUserIds?.has(userId) && room.status === "lobby") {
+      const hostPlayer = room.players.get(room.hostId);
+      invites.push({
+        roomCode: room.code,
+        hostName: hostPlayer?.name ?? null,
+        className: room.presetName,
         actualWordCount: room.actualWordCount,
         difficulty: room.config.difficulty,
         gameMode: room.config.gameMode,

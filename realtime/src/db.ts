@@ -107,3 +107,42 @@ export async function getClassInfo(
     return { className: null, ownerName: null };
   }
 }
+
+export interface PresetTarget {
+  presetName: string;
+  studentIds: string[];
+}
+
+/**
+ * Resolve an assignment preset (saved roster) as a battle target, with RBAC
+ * mirroring the app's `getPresetsForUser` visibility: presets are shared
+ * school-wide, so teachers/admins may target presets in their own school and
+ * super-admins any preset. Returns null if not found, not allowed, or the DB
+ * is unreachable — roster battles degrade gracefully.
+ */
+export async function getPresetTarget(
+  role: string,
+  schoolId: string | null,
+  presetId: string,
+): Promise<PresetTarget | null> {
+  try {
+    const p = getPool();
+    const result = await p.query<{ name: string; student_ids: unknown; school_id: string }>(
+      `SELECT name, student_ids, school_id FROM assignment_presets WHERE id = $1`,
+      [presetId],
+    );
+    if (result.rows.length === 0) return null;
+    const row = result.rows[0];
+    if (role === "super-admin") {
+      // any preset
+    } else if (role === "teacher" || role === "admin") {
+      if (!schoolId || row.school_id !== schoolId) return null;
+    } else {
+      return null;
+    }
+    const studentIds = Array.isArray(row.student_ids) ? (row.student_ids as string[]) : [];
+    return { presetName: row.name, studentIds };
+  } catch {
+    return null;
+  }
+}

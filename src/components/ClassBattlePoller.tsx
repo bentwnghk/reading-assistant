@@ -70,7 +70,7 @@ export function ClassBattlePoller() {
         );
         if (!res.ok) return;
         const body = (await res.json()) as {
-          invites: { roomCode: string; hostName: string | null; className: string | null; actualWordCount: number; difficulty: string; gameMode?: string }[];
+          invites: { roomCode: string; hostName: string | null; className?: string | null; actualWordCount: number; difficulty: string; gameMode?: string }[];
         };
 
         // Map to the store payload shape.

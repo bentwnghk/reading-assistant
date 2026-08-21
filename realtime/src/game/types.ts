@@ -101,8 +101,14 @@ export interface BattleRoom {
   createdAt: number;
   lastActivityAt: number;
   classBattle: boolean;
-  /** Target class for class battles (null for normal rooms). */
+  /** Target class for class battles (null for normal + roster battles). */
   classId: string | null;
+  /** Target roster (assignment preset) for roster battles (null otherwise). */
+  presetId: string | null;
+  /** Roster display name — flows into invite payloads as `className`. */
+  presetName: string | null;
+  /** Roster member userIds resolved at creation (invite + join-RBAC scope). */
+  targetUserIds: Set<string> | null;
   /** Resolved (shuffled + capped) canonical word list — hidden from clients. */
   canonicalWords: BattleWord[];
   /** Resolved word count (may be < config.wordCount). */
@@ -149,6 +155,8 @@ export interface CreateRoomPayload {
   config: BattleRoomConfig;
   /** For class battles: the target class id (teacher must own it). */
   targetClassId?: string;
+  /** For roster battles: the target assignment-preset id (must be in the requester's school). */
+  targetPresetId?: string;
 }
 
 export interface JoinRoomPayload {

@@ -6,6 +6,7 @@ import {
   createRoom,
   destroyRoom,
   findRoomByPlayer,
+  findRosterBattleInvites,
   generateRoomCode,
   getRoom,
   normalizeCode,
@@ -35,6 +36,18 @@ function makeRoom(hostId: string): BattleRoom {
     socketId: "sock-" + hostId,
     resolved: { words: [{ word: "test" }], actualCount: 1 },
     classId: null,
+    preset: null,
+  });
+}
+
+function makeRosterRoom(hostId: string, presetId: string, studentIds: string[]): BattleRoom {
+  return createRoom({
+    host: fakeUser(hostId),
+    config: { ...baseConfig, classBattle: true },
+    socketId: "sock-" + hostId,
+    resolved: { words: [{ word: "test" }], actualCount: 1 },
+    classId: null,
+    preset: { id: presetId, name: "Battle Roster", studentIds },
   });
 }
 
@@ -150,5 +163,34 @@ describe("toRoomStatePayload", () => {
     expect(JSON.stringify(payload)).not.toContain("canonicalWords");
     expect(payload.actualWordCount).toBe(1);
     expect(payload.currentIndex).toBe(-1);
+  });
+});
+
+describe("roster battles", () => {
+  it("createRoom stores the preset target on the room", () => {
+    const room = makeRosterRoom("roster-host-1", "preset-1", ["s1", "s2"]);
+    expect(room.classBattle).toBe(true);
+    expect(room.presetId).toBe("preset-1");
+    expect(room.presetName).toBe("Battle Roster");
+    expect(room.targetUserIds).toEqual(new Set(["s1", "s2"]));
+    expect(room.classId).toBeNull();
+  });
+
+  it("findRosterBattleInvites returns lobby invites for roster members only", () => {
+    const room = makeRosterRoom("roster-host-2", "preset-2", ["roster-a", "roster-b"]);
+    const invites = findRosterBattleInvites("roster-a");
+    expect(invites).toHaveLength(1);
+    expect(invites[0].roomCode).toBe(room.code);
+    expect(invites[0].className).toBe("Battle Roster");
+    expect(invites[0].hostName).toBe("roster-host-2");
+    // Non-members (including the host) get no invite.
+    expect(findRosterBattleInvites("roster-c")).toHaveLength(0);
+    expect(findRosterBattleInvites("roster-host-2")).toHaveLength(0);
+  });
+
+  it("findRosterBattleInvites excludes rooms that already started", () => {
+    const room = makeRosterRoom("roster-host-3", "preset-3", ["roster-x"]);
+    room.status = "playing";
+    expect(findRosterBattleInvites("roster-x")).toHaveLength(0);
   });
 });

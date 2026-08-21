@@ -44,7 +44,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -102,10 +104,12 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
   const [timed, setTimed] = useState(true);
   const [classBattle, setClassBattle] = useState(false);
   const [targetClassId, setTargetClassId] = useState<string>("");
+  const [targetPresetId, setTargetPresetId] = useState<string>("");
 
   // ── Fetched data ─────────────────────────────────────────────────────────
   const [reviewLists, setReviewLists] = useState<{ id: string; name: string; wordCount: number }[]>([]);
   const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [rosters, setRosters] = useState<AssignmentPreset[]>([]);
 
   // ── Join form ────────────────────────────────────────────────────────────
   const [joinCode, setJoinCode] = useState("");
@@ -125,7 +129,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       .catch(() => {});
   }, []);
 
-  // Fetch classes (teachers/admins only — for class battles).
+  // Fetch classes + saved rosters (teachers/admins only — for class battles).
   useEffect(() => {
     if (!canHostClassBattle) return;
     fetch("/api/classes")
@@ -134,6 +138,12 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
         const sorted = [...c].sort((a, b) => a.name.localeCompare(b.name));
         setClasses(sorted);
       })
+      .catch(() => {});
+    // Saved rosters = assignment presets (reusable student groups shared
+    // school-wide). Used to target a battle at an ad-hoc student group.
+    fetch("/api/assignments/presets")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((p: AssignmentPreset[]) => setRosters(p))
       .catch(() => {});
   }, [canHostClassBattle]);
 
@@ -164,16 +174,17 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       toast.error(t(`${M}.errors.needSelected`));
       return;
     }
-    if (classBattle && !targetClassId) {
+    if (classBattle && !targetClassId && !targetPresetId) {
       toast.error(t(`${M}.errors.needClass`));
       return;
     }
     battle.clearError();
     battle.createRoom({
       config: { source, difficulty, gameMode, wordCount, timed, classBattle },
-      targetClassId: classBattle ? targetClassId : undefined,
+      targetClassId: classBattle && targetClassId ? targetClassId : undefined,
+      targetPresetId: classBattle && targetPresetId ? targetPresetId : undefined,
     });
-  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, difficulty, gameMode, wordCount, timed, battle, t]);
+  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, targetPresetId, difficulty, gameMode, wordCount, timed, battle, t]);
 
   const handleJoin = useCallback(() => {
     if (joinCode.trim().length < 4) {
@@ -504,16 +515,41 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
               {classBattle && (
                 <div className="space-y-2">
                   <Label className="text-xs uppercase text-muted-foreground">{t(`${M}.targetClass`)}</Label>
-                  <Select value={targetClassId} onValueChange={setTargetClassId}>
+                  <Select
+                    value={targetClassId ? `class:${targetClassId}` : targetPresetId ? `preset:${targetPresetId}` : ""}
+                    onValueChange={(v) => {
+                      const [kind, id] = v.split(":");
+                      setTargetClassId(kind === "class" ? id : "");
+                      setTargetPresetId(kind === "preset" ? id : "");
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder={t(`${M}.selectClass`)} />
                     </SelectTrigger>
                     <SelectContent>
-                      {classes.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
+                      {classes.length > 0 && (
+                        <SelectGroup>
+                          <SelectLabel className="text-xs uppercase text-muted-foreground">{t(`${M}.groupClasses`)}</SelectLabel>
+                          {classes.map((c) => (
+                            <SelectItem key={c.id} value={`class:${c.id}`}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      )}
+                      {rosters.length > 0 && (
+                        <SelectGroup>
+                          <SelectLabel className="text-xs uppercase text-muted-foreground">{t(`${M}.groupRosters`)}</SelectLabel>
+                          {rosters.map((r) => (
+                            <SelectItem key={r.id} value={`preset:${r.id}`}>
+                              {r.name} · {t(`${M}.rosterStudentsCount`, { count: r.studentCount })}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      )}
+                      {classes.length === 0 && rosters.length === 0 && (
+                        <div className="px-3 py-2 text-xs text-muted-foreground">{t(`${M}.noTargets`)}</div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

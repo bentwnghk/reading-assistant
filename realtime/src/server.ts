@@ -11,11 +11,12 @@ import { Server as SocketIOServer, type Socket } from "socket.io";
 
 import { config } from "./config";
 import { verifyTicket, type AuthenticatedUser } from "./auth";
-import { getPool, resolveClassId, canTargetClass, isClassMember, getClassInfo, closePool } from "./db";
+import { getPool, resolveClassId, canTargetClass, isClassMember, getClassInfo, getPresetTarget, closePool } from "./db";
 import {
   registerPresence,
   unregisterPresenceBySocket,
   getConnectedSocketIdsInClass,
+  getConnectedSocketIdsForUsers,
 } from "./presence";
 import {
   addPlayer,
@@ -23,6 +24,7 @@ import {
   createRoom,
   destroyRoom,
   findClassBattleInvites,
+  findRosterBattleInvites,
   findRoomByPlayer,
   getRoom,
   markDisconnected,
@@ -76,14 +78,18 @@ function handlePendingClassInvites(req: IncomingMessage, res: ServerResponse): v
     const parsedUrl = new URL(req.url ?? "", `http://${req.headers.host ?? "localhost"}`);
     const ticket = parsedUrl.searchParams.get("ticket") ?? undefined;
     const user = verifyTicket(ticket);
-    if (!user || !user.classId) {
+    if (!user) {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ invites: [] }));
       return;
     }
-    const invites = findClassBattleInvites(user.classId);
+    // Class-targeted rooms (by classId) + roster-targeted rooms (by userId —
+    // roster members may have no class at all). Dedupe by roomCode for safety.
+    const invites = [...(user.classId ? findClassBattleInvites(user.classId) : []), ...findRosterBattleInvites(user.userId)];
+    const seen = new Set<string>();
+    const unique = invites.filter((i) => (seen.has(i.roomCode) ? false : seen.add(i.roomCode)));
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ invites }));
+    res.end(JSON.stringify({ invites: unique }));
   } catch {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ invites: [] }));
@@ -249,17 +255,30 @@ io.on("connection", (socket: Socket) => {
       // Leave any room the user is currently in.
       leaveCurrentRoom(user.userId);
 
-      // Class-battle RBAC: teacher must own the target class.
+      // Class-battle RBAC: teacher must own the target class. Roster battles
+      // instead target an assignment preset (saved roster) visible in the
+      // requester's school — exactly one of classId / preset may be set.
       let classId: string | null = null;
+      let preset: { id: string; name: string; studentIds: string[] } | null = null;
       if (payload.config.classBattle) {
-        if (!payload.targetClassId) {
+        if (payload.targetClassId) {
+          const allowed = await canTargetClass(user.userId, user.role, user.schoolId, payload.targetClassId);
+          if (!allowed) {
+            return emitRoomError(socket, "class_not_allowed", "You may not target this class");
+          }
+          classId = payload.targetClassId;
+        } else if (payload.targetPresetId) {
+          const target = await getPresetTarget(user.role, user.schoolId, payload.targetPresetId);
+          if (!target) {
+            return emitRoomError(socket, "class_not_allowed", "You may not target this roster");
+          }
+          if (target.studentIds.length === 0) {
+            return emitRoomError(socket, "class_not_allowed", "This roster has no students");
+          }
+          preset = { id: payload.targetPresetId, name: target.presetName, studentIds: target.studentIds };
+        } else {
           return emitRoomError(socket, "class_not_allowed", "Class battle requires a target class");
         }
-        const allowed = await canTargetClass(user.userId, user.role, user.schoolId, payload.targetClassId);
-        if (!allowed) {
-          return emitRoomError(socket, "class_not_allowed", "You may not target this class");
-        }
-        classId = payload.targetClassId;
       }
 
       // Resolve the word list (fetch + shuffle + cap).
@@ -282,6 +301,7 @@ io.on("connection", (socket: Socket) => {
         socketId: socket.id,
         resolved,
         classId,
+        preset,
       });
       socket.join(room.code);
       // The host's player socketId is set at creation; ensure it matches.
@@ -291,7 +311,7 @@ io.on("connection", (socket: Socket) => {
       console.log(`[realtime] room:create code=${room.code} host=${user.userId} words=${resolved.actualCount}`);
       broadcastRoomState(room);
 
-      // Class-battle broadcast to connected classmates.
+      // Class-battle broadcast to connected classmates / roster members.
       if (room.classBattle && classId) {
         const info = await getClassInfo(classId);
         const classmateSocketIds = getConnectedSocketIdsInClass(classId);
@@ -304,6 +324,19 @@ io.on("connection", (socket: Socket) => {
           gameMode: payload.config.gameMode,
         };
         for (const sid of classmateSocketIds) {
+          if (sid !== socket.id) io.to(sid).emit("class_battle_available", notif);
+        }
+      } else if (room.classBattle && preset) {
+        const memberSocketIds = getConnectedSocketIdsForUsers(room.targetUserIds ?? new Set<string>());
+        const notif: ClassBattleAvailablePayload = {
+          roomCode: room.code,
+          hostName: user.name,
+          className: room.presetName,
+          actualWordCount: room.actualWordCount,
+          difficulty: payload.config.difficulty,
+          gameMode: payload.config.gameMode,
+        };
+        for (const sid of memberSocketIds) {
           if (sid !== socket.id) io.to(sid).emit("class_battle_available", notif);
         }
       }
@@ -347,6 +380,19 @@ io.on("connection", (socket: Socket) => {
           : false;
         if (!isClassMember_ && !canTarget) {
           return emitRoomError(socket, "class_not_allowed", "You are not a member of the target class");
+        }
+      }
+      // Roster-battle membership: a new joiner must be in the roster (the
+      // preset's student ids) or be staff who may target that preset.
+      if (!isReconnect && room.classBattle && room.presetId) {
+        const inRoster = room.targetUserIds?.has(user.userId) ?? false;
+        const canTarget = user.role === "teacher" || user.role === "admin" || user.role === "super-admin"
+          ? await getPresetTarget(user.role, user.schoolId, room.presetId)
+              .then((t) => t !== null)
+              .catch(() => false)
+          : false;
+        if (!inRoster && !canTarget) {
+          return emitRoomError(socket, "class_not_allowed", "You are not a member of the target roster");
         }
       }
       const player = addPlayer(room, user, socket.id);

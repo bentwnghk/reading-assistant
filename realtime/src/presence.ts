@@ -64,6 +64,16 @@ export function getConnectedSocketIdsInClass(classId: string): string[] {
   return socketIds;
 }
 
+/** Connected socket ids for the given user ids (for roster-battle broadcasts). */
+export function getConnectedSocketIdsForUsers(userIds: Set<string>): string[] {
+  const socketIds: string[] = [];
+  for (const userId of userIds) {
+    const entry = presence.get(userId);
+    if (entry) socketIds.push(entry.socketId);
+  }
+  return socketIds;
+}
+
 export function presenceSize(): number {
   return presence.size;
 }
