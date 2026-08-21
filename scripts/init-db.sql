@@ -301,6 +301,7 @@ CREATE TABLE activity_logs (
       'grammar_surgery_complete',
       'grammar_roulette_complete',
       'grammar_duel_complete',
+      'grammar_hot_streak',
       'ai_tutor_question',
       'visualization_generate',
       'reading_text_generate',
@@ -442,7 +443,8 @@ CREATE TABLE user_achievements (
       'ai_tutor_questions',
       'grammar_analysis',
       'grammar_quizzes',
-      'grammar_games'
+      'grammar_games',
+      'grammar_hot_streak'
     )),
   milestone        INTEGER     NOT NULL,   -- the target that was reached (e.g. 5, 10, 20 …)
   unlocked_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

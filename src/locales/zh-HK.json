@@ -1370,6 +1370,17 @@
         "roundsLabel": "回合",
         "questionsAvailable": "條題目",
         "newBest": "新紀錄！",
+        "fx": {
+          "streakTier": {
+            "heatingUp": "漸入佳境",
+            "onFire": "火熱連勝",
+            "blazing": "烈焰狂飆",
+            "unstoppable": "勢不可擋"
+          },
+          "milestone": "連續答對 {{count}} 題！",
+          "newBest": "刷新個人紀錄！",
+          "perfect": "完美！"
+        },
         "result": {
           "master": "出色表現！",
           "great": "做得很好！",
@@ -3755,6 +3766,10 @@
             "name": "語法遊戲達人",
             "desc": "玩語法遊戲如輪盤、手術室、工作坊、對決和重組句子，透過趣味挑戰掌握語法！"
           },
+          "grammar_hot_streak": {
+            "name": "語法火焰",
+            "desc": "在一場語法遊戲（輪盤、手術室、工作坊、對決或重組句子）中連續答對 5 題。保持連勝即可解鎖更高里程碑！"
+          },
           "ai_tutor_questions": {
             "name": "好奇學習者",
             "desc": "有地方不明白？問 AI 導師吧！你問的每個問題都算數——這裡沒有笨問題！"
@@ -3863,6 +3878,11 @@
         "name": "語法遊戲達人",
         "description": "玩 {{count}} 次語法遊戲",
         "hint": "玩語法遊戲如輪盤、手術室、工作坊、對決和重組句子"
+      },
+      "grammar_hot_streak": {
+        "name": "語法火焰",
+        "description": "在語法遊戲中達成 5 連勝以上 {{count}} 次",
+        "hint": "在一場語法遊戲中連續答對 5 題"
       },
       "ai_tutor_questions": {
         "name": "好奇學習者",

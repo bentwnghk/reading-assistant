@@ -11,7 +11,18 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { GameBackButton, GameModeSelector, AnswerFeedback } from "./GrammarGames";
+import {
+  PointPopup,
+  AnimatedScore,
+  StreakFlame,
+  MilestoneBanner,
+  burstConfetti,
+  STREAK_MILESTONES,
+  GRAMMAR_FX,
+  type PointBreakdown,
+} from "./GameFx";
 import { logActivity } from "@/utils/activityLogger";
+import { playSfx } from "@/utils/sfx";
 import GameResultScreen from "./GameResultScreen";
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -43,6 +54,34 @@ interface RoundState {
 
 interface Props { onBack: () => void }
 
+/**
+ * Scramble scoring, extracted verbatim from the old inline math in
+ * `checkAnswer` so the breakdown (base / time / streak / hint) can be
+ * surfaced to the UI (PointPopup). Do NOT change the formula.
+ */
+function computeScramblePoints(opts: {
+  arcade: boolean;
+  timeLeft: number;
+  /** Streak AFTER this correct answer (streak + 1). */
+  newStreak: number;
+  hintsUsed: number;
+}): PointBreakdown {
+  let pts = 100;
+  let timeBonus = 0;
+  if (opts.arcade) {
+    timeBonus = Math.round((opts.timeLeft / 30) * 50);
+    pts += timeBonus;
+  }
+  let streakBonus = 0;
+  if (opts.newStreak >= 3) {
+    streakBonus = Math.floor(pts * 0.1 * Math.min(opts.newStreak - 2, 5));
+    pts += streakBonus;
+  }
+  const hintPenalty = opts.hintsUsed * 15;
+  pts -= hintPenalty;
+  return { base: 100, timeBonus, streakBonus, hintPenalty, total: Math.max(pts, 10) };
+}
+
 export default function GrammarWordScramble({ onBack }: Props) {
   const { t } = useTranslation();
   const {
@@ -73,6 +112,19 @@ export default function GrammarWordScramble({ onBack }: Props) {
   const isGenerating = !!activeGenerations["grammar-scramble"];
   const isAutoGenerating = isGenerating && challenges.length === 0;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
+  // banner components remount (replaying their one-shot animations) per answer.
+  const [lastBreakdown, setLastBreakdown] = useState<(PointBreakdown & { seq: number }) | null>(null);
+  const [milestone, setMilestone] = useState<{ streak: number; seq: number } | null>(null);
+  // `bestBefore` snapshots the store best at game start (the store only keeps
+  // a max); the ref makes the in-game banner a one-shot per game, and the
+  // snapshot freezes `isNewHigh` for the result screen (recomputing it from
+  // the store would self-cancel once the completion effect raises the best).
+  const [bestBefore, setBestBefore] = useState(0);
+  const [newBestSeq, setNewBestSeq] = useState(0);
+  const newBestFiredRef = useRef(false);
+  const fxSeqRef = useRef(0);
 
   // ── Sync store cache → local challenges ──────────────────────────────────
   useEffect(() => {
@@ -127,6 +179,13 @@ export default function GrammarWordScramble({ onBack }: Props) {
     setHintsUsed(0);
     setShowHint(false);
     setTimeLeft(30);
+    setLastBreakdown(null);
+    setMilestone(null);
+    // Snapshot via getState() — startGame's closure would otherwise capture a
+    // stale best across consecutive games.
+    setBestBefore(useReadingStore.getState().grammarScrambleHighScore);
+    setNewBestSeq(0);
+    newBestFiredRef.current = false;
     setGameStatus("playing");
   }, [challenges, grammarTopics, buildRound]);
 
@@ -189,26 +248,66 @@ export default function GrammarWordScramble({ onBack }: Props) {
     const playerSentence = round.answer.map((c) => c.word).join(" ");
     const correct = playerSentence.trim() === round.challenge.sentence.trim();
 
-    let pts = 0;
     if (correct) {
-      pts = 100;
-      if (mode === "arcade") pts += Math.round((timeLeft / 30) * 50);
       const newStreak = streak + 1;
-      if (newStreak >= 3) pts += Math.floor(pts * 0.1 * Math.min(newStreak - 2, 5));
-      pts -= hintsUsed * 15;
-      pts = Math.max(pts, 10);
-      setScore((s) => s + pts);
+      const breakdown = computeScramblePoints({ arcade: mode === "arcade", timeLeft, newStreak, hintsUsed });
+      fxSeqRef.current += 1;
+      setLastBreakdown({
+        ...breakdown,
+        perfect: mode === "arcade" && hintsUsed === 0 && breakdown.timeBonus >= 25,
+        seq: fxSeqRef.current,
+      });
+      setScore((s) => s + breakdown.total);
       setStreak(newStreak);
       setMaxStreak((ms) => Math.max(ms, newStreak));
       setCorrectCount((c) => c + 1);
+
+      playSfx("correct");
+      if (STREAK_MILESTONES.includes(newStreak)) {
+        playSfx("streak");
+        setMilestone({ streak: newStreak, seq: fxSeqRef.current });
+        burstConfetti({ count: 24, spread: 55 });
+      }
+      // First time this game's running total passes the previous best score.
+      if (bestBefore > 0 && score + breakdown.total > bestBefore && !newBestFiredRef.current) {
+        newBestFiredRef.current = true;
+        setNewBestSeq(fxSeqRef.current);
+        playSfx("newBest");
+        burstConfetti({ count: 40, spread: 70 });
+      }
     } else {
       setStreak(0);
+      setLastBreakdown(null);
+      // Wrong-answer SFX fires from the result effect below (it also covers
+      // the timeout path).
     }
 
     setRound((prev) => prev ? { ...prev, result: correct ? "correct" : "incorrect" } : prev);
     setTimeout(() => advanceRound(), 3000);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [round, mode, timeLeft, streak, hintsUsed]);
+  }, [round, mode, timeLeft, streak, score, bestBefore, hintsUsed]);
+
+  // Wrong-answer SFX lives in an effect (not the timeout callback) because the
+  // timeout path sets result from inside a state updater, which StrictMode
+  // double-invokes — an effect fires exactly once per round.
+  useEffect(() => {
+    if (gameStatus === "playing" && round?.result === "incorrect") {
+      playSfx("wrong");
+    }
+  }, [gameStatus, round?.result]);
+
+  // Countdown tick for the final 3 seconds (arcade / mastery only).
+  useEffect(() => {
+    if (
+      gameStatus === "playing" &&
+      mode !== "practice" &&
+      round?.result === "pending" &&
+      timeLeft > 0 &&
+      timeLeft <= 3
+    ) {
+      playSfx("tick");
+    }
+  }, [timeLeft, gameStatus, mode, round?.result]);
 
   // ── Save on completion ────────────────────────────────────────────────────
   useEffect(() => {
@@ -217,6 +316,16 @@ export default function GrammarWordScramble({ onBack }: Props) {
       setGrammarScrambleHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
       logActivity("grammar_scramble_complete", { sessionId: id || undefined, score, accuracy });
+      // Achievement-granular event (On Fire): 5+ streak in one game. Separate
+      // activity type — doesn't disturb the scramble completion counter.
+      if (maxStreak >= 5) {
+        logActivity("grammar_hot_streak", {
+          sessionId: id || undefined,
+          score,
+          accuracy,
+          details: { mode, game: "scramble", streak: maxStreak },
+        });
+      }
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);
@@ -287,7 +396,9 @@ export default function GrammarWordScramble({ onBack }: Props) {
   // ── Render: Completed ─────────────────────────────────────────────────────
   if (gameStatus === "completed") {
     const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
-    const isNewHigh = score > grammarScrambleHighScore;
+    // Frozen against the start-of-game snapshot — the completion effect has
+    // already raised the store best by the time this renders.
+    const isNewHigh = score > bestBefore;
 
     return (
       <GameResultScreen
@@ -313,7 +424,20 @@ export default function GrammarWordScramble({ onBack }: Props) {
   const originalWords = round.challenge.sentence.split(/\s+/).filter(Boolean);
 
   return (
-    <div className="space-y-4">
+    <div className="relative space-y-4">
+      {milestone && (
+        <MilestoneBanner
+          key={`mb-${milestone.seq}`}
+          message={t("reading.grammar.games.fx.milestone", { count: milestone.streak })}
+        />
+      )}
+      {newBestSeq > 0 && (
+        <MilestoneBanner
+          key={`nb-${newBestSeq}`}
+          message={t("reading.grammar.games.fx.newBest")}
+          className="top-12"
+        />
+      )}
       <div className="flex items-center justify-between">
         <GameBackButton onBack={onBack} />
         {mode !== "practice" && (
@@ -321,7 +445,11 @@ export default function GrammarWordScramble({ onBack }: Props) {
             <div
               className={cn(
                 "text-lg font-bold tabular-nums",
-                timeLeft <= 10 ? "text-red-500 animate-pulse" : "text-muted-foreground"
+                timeLeft <= 3
+                  ? "text-red-500 animate-urgent-pulse"
+                  : timeLeft <= 10
+                  ? "text-red-500 animate-pulse"
+                  : "text-muted-foreground"
               )}
             >
               {timeLeft}s
@@ -335,8 +463,8 @@ export default function GrammarWordScramble({ onBack }: Props) {
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{roundIndex + 1} / {challenges.length}</span>
         <div className="flex items-center gap-3">
-          {streak >= 2 && <span className="text-orange-500 font-bold">🔥 ×{streak}</span>}
-          <span className="font-semibold">{score} pts</span>
+          <StreakFlame streak={streak} fxPrefix={GRAMMAR_FX} />
+          <span className="font-semibold"><AnimatedScore value={score} /> pts</span>
         </div>
       </div>
 
@@ -362,7 +490,10 @@ export default function GrammarWordScramble({ onBack }: Props) {
       </div>
 
       {/* Answer zone */}
-      <div className="min-h-[56px] rounded-xl border-2 border-dashed border-border bg-muted/30 p-3 flex flex-wrap gap-2 items-center">
+      <div className="relative min-h-[56px] rounded-xl border-2 border-dashed border-border bg-muted/30 p-3 flex flex-wrap gap-2 items-center">
+        {round.result !== "pending" && lastBreakdown && (
+          <PointPopup key={`pp-${lastBreakdown.seq}`} breakdown={lastBreakdown} fxPrefix={GRAMMAR_FX} />
+        )}
         {round.answer.length === 0 ? (
           <span className="text-xs text-muted-foreground italic w-full text-center">
             {t("reading.grammar.games.scramble.tapToSelect")}

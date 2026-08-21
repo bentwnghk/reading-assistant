@@ -263,7 +263,7 @@ export function AnswerFeedback({
         "w-full rounded-xl border-2 p-4 space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200",
         isCorrect
           ? "border-green-500 bg-green-50 dark:bg-green-900/20"
-          : "border-red-400 bg-red-50 dark:bg-red-900/20"
+          : "border-red-400 bg-red-50 dark:bg-red-900/20 animate-shake-x"
       )}
     >
       <div className="flex items-center justify-between">

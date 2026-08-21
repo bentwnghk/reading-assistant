@@ -10,7 +10,18 @@ import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GameBackButton, GameModeSelector, AnswerFeedback } from "./GrammarGames";
+import {
+  PointPopup,
+  AnimatedScore,
+  StreakFlame,
+  MilestoneBanner,
+  burstConfetti,
+  STREAK_MILESTONES,
+  GRAMMAR_FX,
+  type PointBreakdown,
+} from "./GameFx";
 import { logActivity } from "@/utils/activityLogger";
+import { playSfx } from "@/utils/sfx";
 import GameResultScreen from "./GameResultScreen";
 
 // ── Wheel colours per topic slot ─────────────────────────────────────────────
@@ -29,6 +40,28 @@ interface RouletteRound {
 }
 
 interface Props { onBack: () => void }
+
+/**
+ * Roulette scoring, extracted verbatim from the old inline math in
+ * `handleAnswer` so the breakdown (base / hot-topic multiplier / time) can be
+ * surfaced to the UI (PointPopup). Do NOT change the formula.
+ */
+function computeRoulettePoints(opts: {
+  arcade: boolean;
+  timeLeft: number;
+  multiplier: number;
+}): PointBreakdown {
+  const base = 100;
+  // The Hot Topic multiplier extra is a same-topic streak bonus in disguise.
+  const streakBonus = base * opts.multiplier - base;
+  let award = base + streakBonus;
+  let timeBonus = 0;
+  if (opts.arcade) {
+    timeBonus = Math.round((opts.timeLeft / 30) * 50);
+    award += timeBonus;
+  }
+  return { base, timeBonus, streakBonus, hintPenalty: 0, total: award };
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -70,6 +103,20 @@ export default function GrammarRoulette({ onBack }: Props) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const usedQuestionIds = useRef<Set<string>>(new Set());
   const [timeLeft, setTimeLeft] = useState(30);
+
+  // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
+  // banner components remount (replaying their one-shot animations) per answer.
+  const [lastBreakdown, setLastBreakdown] = useState<(PointBreakdown & { seq: number }) | null>(null);
+  const [milestone, setMilestone] = useState<{ streak: number; seq: number } | null>(null);
+  // New-personal-best celebration: `bestBefore` snapshots the store best at
+  // game start (the store only keeps a max, so the delta can't be derived
+  // later); the ref makes the banner a one-shot per game. `bestBefore` also
+  // freezes `isNewHigh` for the result screen — recomputing it from the store
+  // would self-cancel once the completion effect raises the best.
+  const [bestBefore, setBestBefore] = useState(0);
+  const [newBestSeq, setNewBestSeq] = useState(0);
+  const newBestFiredRef = useRef(false);
+  const fxSeqRef = useRef(0);
 
   // ── Sync store cache → local questions + byTopic map ─────────────────────
   useEffect(() => {
@@ -195,16 +242,38 @@ export default function GrammarRoulette({ onBack }: Props) {
       setHotTopicId(topic.id);
       setHotTopicStreak(newHotStreak);
       const multiplier = newHotStreak >= 3 ? 3 : newHotStreak >= 2 ? 2 : 1;
-      let award = Math.round(100 * multiplier);
-      if (mode === "arcade") award += Math.round((timeLeft / 30) * 50);
-      setCoins((c) => c + award);
+      const breakdown = computeRoulettePoints({ arcade: mode === "arcade", timeLeft, multiplier });
+      fxSeqRef.current += 1;
+      setLastBreakdown({
+        ...breakdown,
+        perfect: mode === "arcade" && breakdown.timeBonus >= 25,
+        seq: fxSeqRef.current,
+      });
+      setCoins((c) => c + breakdown.total);
       setStreak(newStreak);
       setMaxStreak((ms) => Math.max(ms, newStreak));
       setCorrectCount((c) => c + 1);
+
+      playSfx("correct");
+      if (STREAK_MILESTONES.includes(newStreak)) {
+        playSfx("streak");
+        setMilestone({ streak: newStreak, seq: fxSeqRef.current });
+        burstConfetti({ count: 24, spread: 55 });
+      }
+      // First time this game's running total passes the previous best score.
+      if (bestBefore > 0 && coins + breakdown.total > bestBefore && !newBestFiredRef.current) {
+        newBestFiredRef.current = true;
+        setNewBestSeq(fxSeqRef.current);
+        playSfx("newBest");
+        burstConfetti({ count: 40, spread: 70 });
+      }
     } else {
       setStreak(0);
       setHotTopicId(null);
       setHotTopicStreak(0);
+      setLastBreakdown(null);
+      // Wrong-answer SFX fires from the answered effect below (it also covers
+      // the timeout path).
     }
 
     setCurrentRound((r) => r ? { ...r, answered: true, correct: isCorrect } : r);
@@ -219,7 +288,7 @@ export default function GrammarRoulette({ onBack }: Props) {
         setSelectedOption(null);
       }
     }, 3000);
-  }, [currentRound, streak, hotTopicId, hotTopicStreak, grammarTopics, roundIndex, totalRounds, mode, timeLeft]);
+  }, [currentRound, streak, coins, bestBefore, hotTopicId, hotTopicStreak, grammarTopics, roundIndex, totalRounds, mode, timeLeft]);
 
   const startGame = useCallback(() => {
     setRoundIndex(0);
@@ -234,9 +303,40 @@ export default function GrammarRoulette({ onBack }: Props) {
     setWheelRotation(0);
     setLandedTopicIndex(null);
     setTimeLeft(30);
+    setLastBreakdown(null);
+    setMilestone(null);
+    // Snapshot via getState() — startGame's closure would otherwise capture a
+    // stale best across consecutive games.
+    setBestBefore(useReadingStore.getState().grammarRouletteHighScore);
+    setNewBestSeq(0);
+    newBestFiredRef.current = false;
     usedQuestionIds.current = new Set();
     setGameStatus("playing");
   }, []);
+
+  // Wrong-answer SFX lives in an effect (not the timeout callback) because the
+  // timeout path sets answered/correct from inside a state updater, which
+  // StrictMode double-invokes — an effect fires exactly once per round.
+  useEffect(() => {
+    if (currentRound?.answered && !currentRound.correct) {
+      playSfx("wrong");
+    }
+  }, [currentRound?.answered, currentRound?.correct]);
+
+  // Countdown tick for the final 3 seconds (arcade / mastery only).
+  useEffect(() => {
+    if (
+      gameStatus === "playing" &&
+      mode !== "practice" &&
+      !isSpinning &&
+      currentRound &&
+      !currentRound.answered &&
+      timeLeft > 0 &&
+      timeLeft <= 3
+    ) {
+      playSfx("tick");
+    }
+  }, [timeLeft, gameStatus, mode, isSpinning, currentRound]);
 
   useEffect(() => {
     if (gameStatus === "completed" && totalRounds > 0) {
@@ -244,6 +344,16 @@ export default function GrammarRoulette({ onBack }: Props) {
       setGrammarRouletteHighScore(coins, accuracy);
       setGrammarGameAccuracy(accuracy);
       logActivity("grammar_roulette_complete", { sessionId: id || undefined, score: coins, accuracy });
+      // Achievement-granular event (On Fire): 5+ streak in one game. Separate
+      // activity type — doesn't disturb the roulette completion counter.
+      if (maxStreak >= 5) {
+        logActivity("grammar_hot_streak", {
+          sessionId: id || undefined,
+          score: coins,
+          accuracy,
+          details: { mode, game: "roulette", streak: maxStreak },
+        });
+      }
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);
@@ -378,7 +488,9 @@ export default function GrammarRoulette({ onBack }: Props) {
 
   if (gameStatus === "completed") {
     const accuracy = totalRounds > 0 ? Math.round((correctCount / totalRounds) * 100) : 0;
-    const isNewHigh = coins > grammarRouletteHighScore;
+    // Frozen against the start-of-game snapshot — the completion effect has
+    // already raised the store best by the time this renders.
+    const isNewHigh = coins > bestBefore;
     return (
       <GameResultScreen
         onBack={onBack}
@@ -405,10 +517,24 @@ export default function GrammarRoulette({ onBack }: Props) {
   const hotMultiplier = hotTopicStreak >= 3 ? 3 : hotTopicStreak >= 2 ? 2 : 1;
 
   return (
-    <div className="space-y-4">
+    <div className="relative space-y-4">
+      {milestone && (
+        <MilestoneBanner
+          key={`mb-${milestone.seq}`}
+          message={t("reading.grammar.games.fx.milestone", { count: milestone.streak })}
+        />
+      )}
+      {newBestSeq > 0 && (
+        <MilestoneBanner
+          key={`nb-${newBestSeq}`}
+          message={t("reading.grammar.games.fx.newBest")}
+          className="top-12"
+        />
+      )}
       <div className="flex items-center justify-between">
         <GameBackButton onBack={onBack} />
         <div className="flex items-center gap-3">
+          <StreakFlame streak={streak} fxPrefix={GRAMMAR_FX} />
           {hotTopicStreak >= 2 && (
             <Badge className="bg-orange-500 text-white text-xs">
               🔥 {t("reading.grammar.games.roulette.streakBonus", { multiplier: hotMultiplier })}
@@ -416,7 +542,7 @@ export default function GrammarRoulette({ onBack }: Props) {
           )}
           <div className="flex items-center gap-1 text-sm font-bold text-amber-600 dark:text-amber-400">
             <Coins className="h-4 w-4" />
-            {coins}
+            <AnimatedScore value={coins} />
           </div>
         </div>
       </div>
@@ -426,7 +552,11 @@ export default function GrammarRoulette({ onBack }: Props) {
         {mode !== "practice" && currentRound && !isSpinning && (
           <span className={cn(
             "font-bold tabular-nums",
-            timeLeft <= 10 ? "text-red-500 animate-pulse" : "text-muted-foreground"
+            timeLeft <= 3
+              ? "text-red-500 animate-urgent-pulse"
+              : timeLeft <= 10
+              ? "text-red-500 animate-pulse"
+              : "text-muted-foreground"
           )}>
             {timeLeft}s
           </span>
@@ -463,7 +593,10 @@ export default function GrammarRoulette({ onBack }: Props) {
             </div>
           )}
 
-          <div className="border rounded-xl p-4">
+          <div className="relative border rounded-xl p-4">
+            {currentRound.answered && lastBreakdown && (
+              <PointPopup key={`pp-${lastBreakdown.seq}`} breakdown={lastBreakdown} fxPrefix={GRAMMAR_FX} />
+            )}
             <p className="text-sm font-medium mb-3">{currentRound.question.question}</p>
             <div className="space-y-2">
               {currentRound.question.options.map((opt, i) => {

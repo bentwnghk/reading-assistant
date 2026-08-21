@@ -22,6 +22,15 @@ import { cn } from "@/utils/style";
 
 const FX = "reading.glossary.spelling.fx";
 
+/**
+ * Default i18n namespace for the translated FX strings ("Perfect!", streak
+ * tier labels). The wording is fully generic, but games that carry their own
+ * fx subtree (grammar: `reading.grammar.games.fx`) can pass `fxPrefix` to
+ * PointPopup / StreakFlame — omitting it keeps the spelling namespace and
+ * is a no-op for existing spelling callers.
+ */
+export const GRAMMAR_FX = "reading.grammar.games.fx";
+
 /** Streak counts that trigger a milestone banner + streak SFX + confetti
  *  (matches StreakFlame's tier thresholds below). Shared by solo + battle. */
 export const STREAK_MILESTONES = [3, 5, 8, 10];
@@ -75,7 +84,16 @@ export interface PointBreakdown {
  * it dismisses itself after the float-fade animation (~1.4s). Position it in
  * an absolutely-positionable parent via `className` (defaults to top-right).
  */
-export function PointPopup({ breakdown, className }: { breakdown: PointBreakdown; className?: string }) {
+export function PointPopup({
+  breakdown,
+  className,
+  fxPrefix = FX,
+}: {
+  breakdown: PointBreakdown;
+  className?: string;
+  /** i18n prefix for the "Perfect!" badge (defaults to the spelling fx tree). */
+  fxPrefix?: string;
+}) {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(true);
 
@@ -141,7 +159,7 @@ export function PointPopup({ breakdown, className }: { breakdown: PointBreakdown
           className="animate-pop-in rounded-full bg-amber-400 px-2.5 py-0.5 text-xs font-bold text-amber-950 shadow-md"
           style={{ animationDelay: "180ms" }}
         >
-          {t(`${FX}.perfect`)}
+          {t(`${fxPrefix}.perfect`)}
         </span>
       )}
       {items.map((item, i) => (
@@ -218,7 +236,16 @@ const STREAK_TIERS = [
  * previous plain-flame display); from 3 the flame grows, gains a pulsing
  * animation (5+) and an escalating label (3/5/8/10).
  */
-export function StreakFlame({ streak, className }: { streak: number; className?: string }) {
+export function StreakFlame({
+  streak,
+  className,
+  fxPrefix = FX,
+}: {
+  streak: number;
+  className?: string;
+  /** i18n prefix for the tier labels (defaults to the spelling fx tree). */
+  fxPrefix?: string;
+}) {
   const { t } = useTranslation();
   if (streak < 2) return null;
 
@@ -231,7 +258,7 @@ export function StreakFlame({ streak, className }: { streak: number; className?:
       <span className="text-sm font-semibold text-orange-500 tabular-nums">{streak}</span>
       {tier && (
         <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">
-          {t(`${FX}.streakTier.${tier.labelKey}`)}
+          {t(`${fxPrefix}.streakTier.${tier.labelKey}`)}
         </span>
       )}
     </div>

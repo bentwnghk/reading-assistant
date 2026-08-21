@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/style";
+import { playSfx } from "@/utils/sfx";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LoaderCircle, RefreshCw, Star, Zap, Trophy, Flame, Heart, Crown } from "lucide-react";
 import { GameBackButton, GameStatRow } from "./GrammarGames";
+import { AnimatedScore, burstConfetti } from "./GameFx";
 
 type PerformanceTier = "master" | "great" | "good" | "keepGoing";
 
@@ -138,6 +140,29 @@ export default function GameResultScreen({
     return () => clearTimeout(t);
   }, []);
 
+  // Confetti for top tiers (mirrors the spelling result screens). The ref
+  // guard survives StrictMode's double-invoked effects in dev. New personal
+  // best gets a fanfare even on lower tiers.
+  const celebratedRef = useRef(false);
+  useEffect(() => {
+    if (celebratedRef.current) return;
+    celebratedRef.current = true;
+    if (isNewHigh) {
+      playSfx("newBest");
+      if (tier !== "master" && tier !== "great") {
+        burstConfetti({ count: 40, spread: 70 });
+      }
+    }
+    if (tier === "master" || tier === "great") {
+      burstConfetti({ count: tier === "master" ? 100 : 50, spread: 75 });
+      if (tier === "master") {
+        setTimeout(() => {
+          burstConfetti({ count: 70, spread: 100, colors: ["#a855f7", "#6366f1", "#22d3ee", "#10b981"] });
+        }, 280);
+      }
+    }
+  }, [tier, isNewHigh]);
+
   return (
     <div className="space-y-5">
       <GameBackButton onBack={onBack} />
@@ -182,7 +207,7 @@ export default function GameResultScreen({
           {!scorePrefix && (
             <div className={cn("text-5xl font-black flex items-center justify-center gap-2", config.scoreColor)}>
               {scoreIcon}
-              {score}
+              <AnimatedScore value={score} />
             </div>
           )}
           <div className="text-sm text-muted-foreground mt-1">

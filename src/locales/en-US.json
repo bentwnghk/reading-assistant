@@ -1339,6 +1339,17 @@
         "roundsLabel": "rounds",
         "questionsAvailable": "questions available",
         "newBest": "New Best!",
+        "fx": {
+          "streakTier": {
+            "heatingUp": "Heating Up",
+            "onFire": "On Fire",
+            "blazing": "Blazing",
+            "unstoppable": "Unstoppable"
+          },
+          "milestone": "{{count}} in a row!",
+          "newBest": "New personal best!",
+          "perfect": "Perfect!"
+        },
         "result": {
           "master": "Outstanding Mastery!",
           "great": "Excellent Work!",
@@ -3729,6 +3740,10 @@
             "name": "Grammar Gamer",
             "desc": "Play grammar games like Roulette, Surgery, Workshop, Duel, and Scramble to master grammar through fun challenges!"
           },
+          "grammar_hot_streak": {
+            "name": "Grammar on Fire",
+            "desc": "Get 5 correct answers in a row within a single grammar game — Roulette, Surgery, Workshop, Duel, or Scramble. Keep the streak alive to unlock higher milestones!"
+          },
           "ai_tutor_questions": {
             "name": "Curious Learner",
             "desc": "Stuck on something? Ask the AI Tutor! Every question you ask counts—there are no silly questions here!"
@@ -3837,6 +3852,11 @@
         "name": "Grammar Gamer",
         "description": "Play {{count}} grammar games",
         "hint": "Play grammar games like Roulette, Surgery, Workshop, Duel, and Scramble"
+      },
+      "grammar_hot_streak": {
+        "name": "Grammar on Fire",
+        "description": "Achieve a 5+ answer streak in grammar games {{count}} times",
+        "hint": "Get 5 correct answers in a row in a single grammar game"
       },
       "ai_tutor_questions": {
         "name": "Curious Learner",

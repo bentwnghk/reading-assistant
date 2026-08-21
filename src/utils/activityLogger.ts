@@ -19,6 +19,7 @@ type ActivityType =
   | "grammar_surgery_complete"
   | "grammar_roulette_complete"
   | "grammar_duel_complete"
+  | "grammar_hot_streak"
   | "ai_tutor_question"
   | "visualization_generate"
   | "reading_text_generate"
@@ -35,6 +36,8 @@ interface ActivityDetails {
   multiplayer?: boolean
   opponentCount?: number
   rank?: number
+  /** Grammar-game enrichment: which game emitted the event. */
+  game?: string
 }
 
 interface LogActivityOptions {

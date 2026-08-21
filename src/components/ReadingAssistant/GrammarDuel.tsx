@@ -12,7 +12,18 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { GameBackButton, AnswerFeedback } from "./GrammarGames";
+import {
+  PointPopup,
+  AnimatedScore,
+  StreakFlame,
+  MilestoneBanner,
+  burstConfetti,
+  STREAK_MILESTONES,
+  GRAMMAR_FX,
+  type PointBreakdown,
+} from "./GameFx";
 import { logActivity } from "@/utils/activityLogger";
+import { playSfx } from "@/utils/sfx";
 import GameResultScreen from "./GameResultScreen";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -56,6 +67,7 @@ export default function GrammarDuel({ onBack }: Props) {
   const [playerHp, setPlayerHp] = useState(MAX_HP);
   const [aiHp, setAiHp] = useState(MAX_HP);
   const [playerStreak, setPlayerStreak] = useState(0);
+  const [maxPlayerStreak, setMaxPlayerStreak] = useState(0);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
@@ -71,6 +83,19 @@ export default function GrammarDuel({ onBack }: Props) {
 
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const usedQIndices = useRef<Set<number>>(new Set());
+
+  // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
+  // banner components remount (replaying their one-shot animations) per answer.
+  const [lastBreakdown, setLastBreakdown] = useState<(PointBreakdown & { seq: number }) | null>(null);
+  const [milestone, setMilestone] = useState<{ streak: number; seq: number } | null>(null);
+  // `bestBefore` snapshots the store best at game start (the store only keeps
+  // a max); the ref makes the in-game banner a one-shot per game, and the
+  // snapshot freezes `isNewHigh` for the result screen (recomputing it from
+  // the store would self-cancel once the completion effect raises the best).
+  const [bestBefore, setBestBefore] = useState(0);
+  const [newBestSeq, setNewBestSeq] = useState(0);
+  const newBestFiredRef = useRef(false);
+  const fxSeqRef = useRef(0);
 
   // ── Sync store cache → local questions ───────────────────────────────────
   useEffect(() => {
@@ -125,6 +150,7 @@ export default function GrammarDuel({ onBack }: Props) {
     if (isCorrect) {
       const newStreak = playerStreak + 1;
       setPlayerStreak(newStreak);
+      setMaxPlayerStreak((ms) => Math.max(ms, newStreak));
       setCorrectCount((c) => c + 1);
 
       const isPower = newStreak >= POWER_MOVE_THRESHOLD && newStreak % POWER_MOVE_THRESHOLD === 0;
@@ -132,8 +158,37 @@ export default function GrammarDuel({ onBack }: Props) {
       if (isPower) setIsPowerMove(true);
 
       applyDamage("ai", dmg);
-      setScore((s) => s + (isPower ? 200 : 100));
+      // Power Move extra rides in the streakBonus slot (base 100 → 200).
+      const awarded = isPower ? 200 : 100;
+      const breakdown: PointBreakdown = {
+        base: 100,
+        timeBonus: 0,
+        streakBonus: isPower ? 100 : 0,
+        hintPenalty: 0,
+        total: awarded,
+      };
+      fxSeqRef.current += 1;
+      setLastBreakdown({ ...breakdown, seq: fxSeqRef.current });
+      setScore((s) => s + awarded);
       setRoundResult("player-wins");
+
+      playSfx("correct");
+      // Milestone fanfare takes precedence when streak 3 is BOTH a milestone
+      // and a Power Move — one fanfare per answer.
+      if (STREAK_MILESTONES.includes(newStreak)) {
+        playSfx("streak");
+        setMilestone({ streak: newStreak, seq: fxSeqRef.current });
+        burstConfetti({ count: 24, spread: 55 });
+      } else if (isPower) {
+        playSfx("streak");
+      }
+      // First time this game's running total passes the previous best score.
+      if (bestBefore > 0 && score + awarded > bestBefore && !newBestFiredRef.current) {
+        newBestFiredRef.current = true;
+        setNewBestSeq(fxSeqRef.current);
+        playSfx("newBest");
+        burstConfetti({ count: 40, spread: 70 });
+      }
 
       setTimeout(() => {
         const newAiHp = Math.max(0, (aiHp - dmg));
@@ -142,6 +197,8 @@ export default function GrammarDuel({ onBack }: Props) {
       }, isPower ? 3500 : 3000);
     } else {
       setPlayerStreak(0);
+      setLastBreakdown(null);
+      // Wrong/overtaken SFX fires from the round-result effect below.
       applyDamage("player", BASE_DAMAGE);
       setRoundResult("ai-wins");
       setTimeout(() => {
@@ -151,7 +208,7 @@ export default function GrammarDuel({ onBack }: Props) {
       }, 3000);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAnswered, currentQuestion, playerStreak, aiHp, playerHp, applyDamage]);
+  }, [isAnswered, currentQuestion, playerStreak, score, bestBefore, aiHp, playerHp, applyDamage]);
 
   const advanceRound = useCallback(() => {
     setSelectedOption(null);
@@ -202,6 +259,7 @@ export default function GrammarDuel({ onBack }: Props) {
     setPlayerHp(MAX_HP);
     setAiHp(MAX_HP);
     setPlayerStreak(0);
+    setMaxPlayerStreak(0);
     setScore(0);
     setCorrectCount(0);
     setTotalAnswered(0);
@@ -210,8 +268,25 @@ export default function GrammarDuel({ onBack }: Props) {
     setRoundResult(null);
     setIsPowerMove(false);
     setHitAnimation(null);
+    setLastBreakdown(null);
+    setMilestone(null);
+    // Snapshot via getState() — startGame's closure would otherwise capture a
+    // stale best across consecutive games.
+    setBestBefore(useReadingStore.getState().grammarDuelHighScore);
+    setNewBestSeq(0);
+    newBestFiredRef.current = false;
     setGameStatus("playing");
   }, [questions]);
+
+  // Round-result SFX lives in an effect (not the AI-timer callback) because
+  // the timer path sets the result from inside a state updater, which
+  // StrictMode double-invokes — an effect fires exactly once per round. A
+  // wrong PLAYER answer thuds; the AI answering first correctly whooshes
+  // ("overtaken") — the player never got to answer.
+  useEffect(() => {
+    if (gameStatus !== "playing" || !isAnswered || roundResult !== "ai-wins") return;
+    playSfx(selectedOption !== null ? "wrong" : "overtaken");
+  }, [gameStatus, isAnswered, roundResult, selectedOption]);
 
   useEffect(() => {
     if (gameStatus === "completed") {
@@ -219,6 +294,16 @@ export default function GrammarDuel({ onBack }: Props) {
       setGrammarDuelHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
       logActivity("grammar_duel_complete", { sessionId: id || undefined, score, accuracy });
+      // Achievement-granular event (On Fire): 5+ streak in one game. Separate
+      // activity type — doesn't disturb the duel completion counter.
+      if (maxPlayerStreak >= 5) {
+        logActivity("grammar_hot_streak", {
+          sessionId: id || undefined,
+          score,
+          accuracy,
+          details: { mode: difficulty, game: "duel", streak: maxPlayerStreak },
+        });
+      }
       const session = backup();
       const updated = update(id, session);
       if (!updated) save(session);
@@ -306,7 +391,9 @@ export default function GrammarDuel({ onBack }: Props) {
   if (gameStatus === "completed") {
     const playerWon = aiHp <= 0 || (playerHp > aiHp);
     const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
-    const isNewHigh = score > grammarDuelHighScore;
+    // Frozen against the start-of-game snapshot — the completion effect has
+    // already raised the store best by the time this renders.
+    const isNewHigh = score > bestBefore;
     return (
       <GameResultScreen
         onBack={onBack}
@@ -339,7 +426,20 @@ export default function GrammarDuel({ onBack }: Props) {
   if (!currentQuestion) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="relative space-y-4">
+      {milestone && (
+        <MilestoneBanner
+          key={`mb-${milestone.seq}`}
+          message={t("reading.grammar.games.fx.milestone", { count: milestone.streak })}
+        />
+      )}
+      {newBestSeq > 0 && (
+        <MilestoneBanner
+          key={`nb-${newBestSeq}`}
+          message={t("reading.grammar.games.fx.newBest")}
+          className="top-12"
+        />
+      )}
       <GameBackButton onBack={onBack} />
 
       {/* Power Move overlay */}
@@ -365,7 +465,11 @@ export default function GrammarDuel({ onBack }: Props) {
           <div className="flex items-center gap-1.5">
             <Shield className="h-4 w-4 text-blue-500" />
             <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{t("reading.grammar.games.duel.you")}</span>
-            {playerStreak >= 2 && <span className="text-xs text-orange-500 font-bold ml-auto">🔥×{playerStreak}</span>}
+            {playerStreak >= 2 && (
+              <span className="ml-auto">
+                <StreakFlame streak={playerStreak} fxPrefix={GRAMMAR_FX} />
+              </span>
+            )}
           </div>
           <Progress value={(playerHp / MAX_HP) * 100}
             className="h-3"
@@ -400,12 +504,15 @@ export default function GrammarDuel({ onBack }: Props) {
 
       {/* Score */}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>{t("reading.grammar.games.score")}: <strong className="text-foreground">{score}</strong></span>
+        <span>{t("reading.grammar.games.score")}: <strong className="text-foreground"><AnimatedScore value={score} /></strong></span>
         {currentTopic && <Badge variant="outline" className="text-xs">{currentTopic.name}</Badge>}
       </div>
 
       {/* Question */}
-      <div className="border rounded-xl p-4 space-y-3">
+      <div className="relative border rounded-xl p-4 space-y-3">
+        {isAnswered && roundResult === "player-wins" && lastBreakdown && (
+          <PointPopup key={`pp-${lastBreakdown.seq}`} breakdown={lastBreakdown} fxPrefix={GRAMMAR_FX} />
+        )}
         <p className="text-sm font-semibold">{currentQuestion.question}</p>
         <div className="space-y-2">
           {currentQuestion.options.map((opt, i) => {
