@@ -852,3 +852,12 @@ Types (both sides) → word resolution (`words.ts` `enrichWords`) → scoring (`
 
 - **Colors**: audit existing chart/badge/category colors before choosing one for a new feature (`dashboardMetrics.ts`, `teacherDashboardMetrics.ts`, `AchievementMedal.tsx`, landing/About cards). Each feature's chart color must be unique within its chart.
 - **Commits**: split major features into independently-buildable commits (data → AI → UI → persistence → metrics → i18n/presentation). A single 1,500-line commit makes bugs hard to isolate and revert.
+
+### M. Derive validation enums from the canonical list — never parallel literals
+
+`/api/activity` once validated `activityType` against a hand-maintained Zod enum that had drifted behind `ActivityType` in `src/lib/activity.ts`. New activity types were POSTed by the client but silently 400-rejected — `logActivity` swallows errors by design (fire-and-forget) — so rows were never inserted, `checkAndUnlockAchievements` never ran, and achievements quietly never unlocked. The same drift had been silently dropping other activity types for a long time. Symptom signature: "feature logs data / unlocks achievements… sometimes nothing happens, no errors anywhere."
+
+- The canonical list is `ACTIVITY_TYPES` in `src/lib/activity.ts`; the route schema uses `z.enum(ACTIVITY_TYPES)`. Adding an activity type = extend that array (+ the SQL CHECK-constraint migration, §D) — nothing else.
+- Same rule as §G's model lists, generalized: any `z.enum([...])` over a domain that HAS a canonical array (models, activity types, game modes) must be **derived** (`z.enum(ARRAY)`), never retyped as a literal. Hand-maintained copies drift silently because the failure is a quiet 400 in a fire-and-forget path.
+- **Finding every list to update**: when adding a value to a domain enum, grep for an existing sibling value (e.g. `grammar_duel_complete`) — every match is a list/CHECK that enumerates the domain: API Zod schema, TS unions (`lib/activity.ts` + the client mirror in `utils/activityLogger.ts`), SQL CHECK constraints (§D), realtime mirrored types (§I).
+- **Nested-schema drift**: Zod **strips** unknown object keys by default — a `details` sub-schema missing fields (`multiplayer`, `opponentCount`, `rank`) doesn't reject the request, it silently deletes the data. When enriching a payload, extend the nested schema too, not just the enum.

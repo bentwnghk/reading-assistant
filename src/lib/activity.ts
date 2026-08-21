@@ -1,34 +1,43 @@
 import { getClient } from "./db"
 
-export type ActivityType =
-  | "session_create"
-  | "test_complete"
-  | "quiz_complete"
-  | "spelling_complete"
-  | "spelling_battle_win"
-  | "spelling_hot_streak"
-  | "flashcard_review"
-  | "mindmap_generate"
-  | "adapted_text_generate"
-  | "simplified_text_generate"
-  | "sentence_analyze"
-  | "targeted_practice_complete"
-  | "glossary_add"
-  | "grammar_analyze"
-  | "grammar_quiz_complete"
-  | "grammar_scramble_complete"
-  | "grammar_workshop_complete"
-  | "grammar_surgery_complete"
-  | "grammar_roulette_complete"
-  | "grammar_duel_complete"
-  | "ai_tutor_question"
-  | "visualization_generate"
-  | "reading_text_generate"
-  | "pre_reading_generate"
-  | "collocations_generate"
-  | "assignment_create"
-  | "assignment_start"
-  | "assignment_submit"
+/**
+ * Single source of truth for valid activity types. The API route derives its
+ * Zod enum from this list — never hand-maintain a parallel literal there (a
+ * drifted list silently rejects new activities with a 400, which once blocked
+ * the Battle Champion achievement from ever unlocking).
+ */
+export const ACTIVITY_TYPES = [
+  "session_create",
+  "test_complete",
+  "quiz_complete",
+  "spelling_complete",
+  "spelling_battle_win",
+  "spelling_hot_streak",
+  "flashcard_review",
+  "mindmap_generate",
+  "adapted_text_generate",
+  "simplified_text_generate",
+  "sentence_analyze",
+  "targeted_practice_complete",
+  "glossary_add",
+  "grammar_analyze",
+  "grammar_quiz_complete",
+  "grammar_scramble_complete",
+  "grammar_workshop_complete",
+  "grammar_surgery_complete",
+  "grammar_roulette_complete",
+  "grammar_duel_complete",
+  "ai_tutor_question",
+  "visualization_generate",
+  "reading_text_generate",
+  "pre_reading_generate",
+  "collocations_generate",
+  "assignment_create",
+  "assignment_start",
+  "assignment_submit",
+] as const
+
+export type ActivityType = (typeof ACTIVITY_TYPES)[number]
 
 export interface ActivityDetails {
   cardsReviewed?: number
@@ -39,6 +48,10 @@ export interface ActivityDetails {
   assignmentId?: string
   title?: string
   studentCount?: number
+  /** Multiplayer spelling battle enrichment (omitted for solo). */
+  multiplayer?: boolean
+  opponentCount?: number
+  rank?: number
 }
 
 export interface ActivityLog {

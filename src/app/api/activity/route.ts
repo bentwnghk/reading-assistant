@@ -1,43 +1,26 @@
 import { auth } from "@/auth"
-import { logActivity, type ActivityType, type ActivityDetails, getWeekStart } from "@/lib/activity"
+import { ACTIVITY_TYPES, logActivity, type ActivityType, type ActivityDetails, getWeekStart } from "@/lib/activity"
 import { refreshWeeklyStatsForUser, refreshAllTimeStatsForUser } from "@/lib/leaderboard"
 import { checkAndUnlockAchievements } from "@/lib/achievements"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
 const ActivitySchema = z.object({
-  activityType: z.enum([
-    "session_create",
-    "test_complete",
-    "quiz_complete",
-    "spelling_complete",
-    "flashcard_review",
-    "mindmap_generate",
-    "adapted_text_generate",
-    "simplified_text_generate",
-    "sentence_analyze",
-    "targeted_practice_complete",
-    "glossary_add",
-    "grammar_analyze",
-    "grammar_quiz_complete",
-    "grammar_scramble_complete",
-    "grammar_workshop_complete",
-    "grammar_surgery_complete",
-    "grammar_roulette_complete",
-    "grammar_duel_complete",
-    "ai_tutor_question",
-    "visualization_generate",
-    "reading_text_generate",
-  ]),
+  // Derived from the canonical list in lib/activity — adding an activity type
+  // there is the ONLY change needed for it to be accepted here.
+  activityType: z.enum(ACTIVITY_TYPES),
   sessionId: z.string().optional(),
   score:     z.number().min(0).max(10000).optional(),
   accuracy:  z.number().min(0).max(100).optional(),
-  details:   z.object({
+  details: z.object({
     cardsReviewed: z.number().int().min(0).optional(),
     wordCount:     z.number().int().min(0).optional(),
     mode:          z.string().optional(),
     difficulty:    z.string().optional(),
     streak:        z.number().int().min(0).optional(),
+    multiplayer:   z.boolean().optional(),
+    opponentCount: z.number().int().min(0).optional(),
+    rank:          z.number().int().min(0).optional(),
   }).optional(),
 })
 
