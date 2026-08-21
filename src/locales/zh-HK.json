@@ -1391,7 +1391,9 @@
           "name": "文字排列",
           "nameZh": "Word Order Scramble",
           "description": "點擊文字碎片，將它們排列成正確的語法順序",
-          "tapToSelect": "點擊下方文字以組成句子"
+          "tapToSelect": "點擊下方文字以組成句子",
+          "tapToRemove": "點擊已放置的文字可將其移除",
+          "undo": "撤銷上一個文字"
         },
         "workshop": {
           "name": "語法工作坊",
@@ -1674,6 +1676,7 @@
         "typeAnswer": "輸入你聽到的生字...",
         "typeMissing": "輸入缺少的字母...",
         "clear": "清除",
+        "undo": "撤銷上一個字母",
         "submit": "提交",
         "modes": {
           "listen-type": "聽音拼字",

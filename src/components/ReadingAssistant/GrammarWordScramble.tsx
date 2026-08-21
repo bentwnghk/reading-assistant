@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshCw, Lightbulb, CheckCircle2, LoaderCircle } from "lucide-react";
+import { RefreshCw, Lightbulb, CheckCircle2, LoaderCircle, Delete } from "lucide-react";
 import { toast } from "sonner";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -167,6 +167,17 @@ export default function GrammarWordScramble({ onBack }: Props) {
       if (!prev) return prev;
       const newAnswer = prev.answer.filter((_, i) => i !== indexInAnswer);
       const newChips = prev.chips.map((c) => c.id === chip.id ? { ...c, placed: false } : c);
+      return { ...prev, chips: newChips, answer: newAnswer };
+    });
+  }, [round]);
+
+  const undoLast = useCallback(() => {
+    if (!round || round.result !== "pending" || round.answer.length === 0) return;
+    setRound((prev) => {
+      if (!prev || prev.answer.length === 0) return prev;
+      const last = prev.answer[prev.answer.length - 1];
+      const newAnswer = prev.answer.slice(0, -1);
+      const newChips = prev.chips.map((c) => c.id === last.id ? { ...c, placed: false } : c);
       return { ...prev, chips: newChips, answer: newAnswer };
     });
   }, [round]);
@@ -375,6 +386,19 @@ export default function GrammarWordScramble({ onBack }: Props) {
           ))
         )}
       </div>
+
+      {/* Undo + tap-to-remove hint */}
+      {round.result === "pending" && round.answer.length > 0 && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            {t("reading.grammar.games.scramble.tapToRemove")}
+          </span>
+          <Button variant="outline" size="sm" onClick={undoLast}>
+            <Delete className="h-4 w-4 mr-1" />
+            {t("reading.grammar.games.scramble.undo")}
+          </Button>
+        </div>
+      )}
 
       {/* Word bank */}
       <div className="flex flex-wrap gap-2">

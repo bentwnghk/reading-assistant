@@ -23,6 +23,7 @@ import {
   Heart,
   Swords,
   User,
+  Delete,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -645,21 +646,26 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     setUsedIndices((prev) => [...prev, index]);
   }, [scrambleByWord, currentChallenge]);
 
+  const handleUndoLast = useCallback(() => {
+    if (selectedLetters.length === 0) return;
+    setSelectedLetters((prev) => prev.slice(0, -1));
+    setUserInput((prev) =>
+      scrambleByWord
+        ? joinScrambleUnits(prev.split(/[\s-]+/).slice(0, -1), currentChallenge?.word ?? "")
+        : prev.slice(0, -1),
+    );
+    setUsedIndices((prev) => prev.slice(0, -1));
+  }, [selectedLetters.length, scrambleByWord, currentChallenge]);
+
   const handleScrambleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Backspace" && selectedLetters.length > 0) {
-        setSelectedLetters((prev) => prev.slice(0, -1));
-        setUserInput((prev) =>
-          scrambleByWord
-            ? joinScrambleUnits(prev.split(/[\s-]+/).slice(0, -1), currentChallenge?.word ?? "")
-            : prev.slice(0, -1),
-        );
-        setUsedIndices((prev) => prev.slice(0, -1));
+      if (e.key === "Backspace") {
+        handleUndoLast();
       } else if (e.key === "Enter") {
         checkAnswer();
       }
     },
-    [selectedLetters, checkAnswer, scrambleByWord, currentChallenge]
+    [handleUndoLast, checkAnswer]
   );
 
   const handleKeyDown = useCallback(
@@ -1220,6 +1226,15 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
             </div>
 
             <div className="flex gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUndoLast}
+                disabled={selectedLetters.length === 0 || showFeedback}
+              >
+                <Delete className="h-4 w-4 mr-1" />
+                {t("reading.glossary.spelling.undo")}
+              </Button>
               <Button
                 variant="outline"
                 size="sm"

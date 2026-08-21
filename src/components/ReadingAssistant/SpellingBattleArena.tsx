@@ -14,6 +14,7 @@ import {
   Trophy,
   LogOut,
   Clock,
+  Delete,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -243,16 +244,21 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     setUsedTileIndices((prev) => [...prev, index]);
   }, []);
 
+  const handleUndoLast = useCallback(() => {
+    if (selectedLetters.length === 0) return;
+    setSelectedLetters((prev) => prev.slice(0, -1));
+    setUsedTileIndices((prev) => prev.slice(0, -1));
+  }, [selectedLetters.length]);
+
   const handleScrambleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Backspace" && selectedLetters.length > 0) {
-        setSelectedLetters((prev) => prev.slice(0, -1));
-        setUsedTileIndices((prev) => prev.slice(0, -1));
+      if (e.key === "Backspace") {
+        handleUndoLast();
       } else if (e.key === "Enter") {
         handleSubmit();
       }
     },
-    [selectedLetters.length, handleSubmit],
+    [handleUndoLast, handleSubmit],
   );
 
   const handleHint = useCallback(() => {
@@ -694,8 +700,17 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
                   })}
                 </div>
 
-                {/* Clear + submit */}
+                {/* Undo + clear + submit */}
                 <div className="flex gap-2 justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleUndoLast}
+                    disabled={selectedLetters.length === 0 || locked}
+                  >
+                    <Delete className="h-4 w-4 mr-1" />
+                    {t("reading.glossary.spelling.undo")}
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

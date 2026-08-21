@@ -1360,7 +1360,9 @@
           "name": "Word Order Scramble",
           "nameZh": "文字排列",
           "description": "Tap word chips to arrange them into the correct grammatical order",
-          "tapToSelect": "Tap words below to build the sentence"
+          "tapToSelect": "Tap words below to build the sentence",
+          "tapToRemove": "Tap a placed word to remove it",
+          "undo": "Undo"
         },
         "workshop": {
           "name": "Grammar Workshop",
@@ -1643,6 +1645,7 @@
         "typeAnswer": "Type the word you hear...",
         "typeMissing": "Type the missing letters...",
         "clear": "Clear",
+        "undo": "Undo",
         "submit": "Submit",
         "modes": {
           "listen-type": "Listen & Type",
