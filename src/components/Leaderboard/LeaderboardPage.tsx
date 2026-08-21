@@ -24,6 +24,7 @@ import {
   BookOpenCheck,
   GraduationCap,
   Gamepad2,
+  Swords,
   Dices,
   BarChart3,
   Users,
@@ -628,6 +629,26 @@ export function LeaderboardPage() {
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.spelling_challenges.name")}</h4>
                   <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.achievements.types.spelling_challenges.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center">
+                  <Swords className="h-5 w-5 text-violet-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.spelling_battle_win.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.achievements.types.spelling_battle_win.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
+                  <Flame className="h-5 w-5 text-rose-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.spelling_hot_streak.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("leaderboard.help.achievements.types.spelling_hot_streak.desc")}</p>
                 </div>
               </div>
 

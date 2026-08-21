@@ -281,7 +281,7 @@ Tap the **bar chart icon** in the header to open **"Learning Journey"**. It has 
 
 ### 2. Achievements — unlock badges as you learn
 
-As you read and learn, you'll automatically earn **achievement badges** across 12 different types — from completing reading sessions to acing vocabulary quizzes. Each badge tracks your milestones and motivates you to keep going.
+As you read and learn, you'll automatically earn **achievement badges** across 17 different types — from completing reading sessions to acing vocabulary quizzes, winning multiplayer spelling battles, and hitting 5-answer streaks. Each badge tracks your milestones and motivates you to keep going.
 
 ### 3. Leaderboard — see how you stack up
 

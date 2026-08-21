@@ -574,7 +574,7 @@ Compete with classmates and track your learning journey!
 | 📖 **Vocabulary Words** | Words in your collection |
 
 #### Achievement System
-Unlock medals across **15 achievement types**. Each type generates 7 milestones that **double** from a base target (e.g., 5 → 10 → 20 → 40 → 80 → 160 → 320):
+Unlock medals across **17 achievement types**. Each type generates 7 milestones that **double** from a base target (e.g., 5 → 10 → 20 → 40 → 80 → 160 → 320):
 
 | Achievement Type | What It Tracks |
 |-----------------|----------------|
@@ -588,6 +588,8 @@ Unlock medals across **15 achievement types**. Each type generates 7 milestones 
 | 📝 **Tests Completed** | Comprehension tests taken |
 | 🎯 **Targeted Practices** | Targeted practice questions generated |
 | 🎮 **Spelling Challenges** | Spelling games played |
+| ⚔️ **Battle Champion** | Multiplayer spelling battles won |
+| 🔥 **On Fire** | Games with a 5+ answer streak |
 | 📋 **Vocabulary Quizzes** | Vocabulary quizzes completed |
 | 📐 **Grammar Analysis** | Grammar topics identified across sessions |
 | 🎓 **Grammar Quizzes** | Grammar quizzes completed |
