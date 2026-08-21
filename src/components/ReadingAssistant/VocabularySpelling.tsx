@@ -129,6 +129,19 @@ function computeSoloPoints(opts: {
   return { base: 100, timeBonus, streakBonus, hintPenalty, total: Math.max(points, 10) };
 }
 
+// Mobile (especially landscape): focusing the answer textbox opens the
+// on-screen keyboard and the browser auto-scrolls the page to keep the input
+// above it, so the game screen drifts off-screen word after word. This resets
+// to a known-good state by centering the game area — touch devices only, so
+// desktop scroll positions are never hijacked.
+function centerGameArea(area: { current: HTMLDivElement | null }, delayMs = 0) {
+  if (typeof window === "undefined") return;
+  if (!window.matchMedia("(pointer: coarse)").matches) return;
+  window.setTimeout(() => {
+    area.current?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+  }, delayMs);
+}
+
 const TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: string; ring: string; glow: string; badgeBg: string; particleColor: string; gradient: string }> = {
   master:    { emoji: "👑", icon: Crown, color: "text-amber-600 dark:text-amber-400", ring: "ring-4 ring-amber-400/60", glow: "shadow-amber-400/50", badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", particleColor: "#fbbf24", gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)" },
   great:      { emoji: "🌟", icon: Star, color: "text-emerald-600 dark:text-emerald-400", ring: "ring-4 ring-emerald-400/50", glow: "shadow-emerald-400/40", badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", particleColor: "#34d399", gradient: "linear-gradient(135deg, rgba(167,243,208,0.15) 0%, rgba(52,211,153,0.08) 50%, rgba(167,243,208,0.15) 100%)" },
@@ -290,6 +303,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const [srsOutcomes, setSrsOutcomes] = useState<VocabularySrsOutcome[]>([]);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const challengeRef = useRef<SpellingWordChallenge | null>(null);
@@ -438,7 +452,9 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                   setTimeRemaining(config.timeLimits[gameMode]);
                 }
 
-                setTimeout(() => inputRef.current?.focus(), 100);
+                setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 100);
+                // Re-center after the browser settles the newly focused input.
+                centerGameArea(gameAreaRef, 450);
               }
             }, 1500);
             return config.timeLimits[currentMode];
@@ -495,7 +511,9 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         setTimeRemaining(config.timeLimits[gameMode]);
       }
 
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 100);
+      // Re-center after the browser settles the newly focused input.
+      centerGameArea(gameAreaRef, 450);
     }
   }, [currentIndex, challenges.length, gameMode, config.timeLimits]);
 
@@ -548,6 +566,10 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
     setIsCorrect(correct);
     setShowFeedback(true);
+    // Dismiss the on-screen keyboard and reset the scroll the browser did to
+    // keep the focused input above it (mobile landscape). See centerGameArea.
+    inputRef.current?.blur();
+    centerGameArea(gameAreaRef, 100);
 
     if (correct) {
       const newStreak = streak + 1;
@@ -1085,7 +1107,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     : null;
 
   return (
-    <div className="relative flex flex-col items-center gap-4 py-4">
+    <div ref={gameAreaRef} className="relative flex flex-col items-center gap-4 py-4">
       {milestone && (
         <MilestoneBanner
           key={`mb-${milestone.seq}`}

@@ -84,6 +84,20 @@ function checkAnswer(
   return normalize(answer) === normalize(wordStr);
 }
 
+// Mobile (especially landscape): focusing the answer textbox opens the
+// on-screen keyboard and the browser auto-scrolls the page to keep the input
+// above it, so the game screen drifts off-screen word after word. This resets
+// to a known-good state by centering the game area — touch devices only, so
+// desktop scroll positions are never hijacked. Mirrors the solo game's
+// centerGameArea in VocabularySpelling.tsx.
+function centerGameArea(area: { current: HTMLDivElement | null }, delayMs = 0) {
+  if (typeof window === "undefined") return;
+  if (!window.matchMedia("(pointer: coarse)").matches) return;
+  window.setTimeout(() => {
+    area.current?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+  }, delayMs);
+}
+
 export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -119,6 +133,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const gameAreaRef = useRef<HTMLDivElement | null>(null);
   const tickerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const submitElapsedRef = useRef(0);
   const submitHintsRef = useRef(0);
@@ -183,7 +198,10 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
             void doSpeak(word.word);
           }, 250)
         : null;
-    const focusTimer = setTimeout(() => inputRef.current?.focus(), 300);
+    const focusTimer = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 300);
+    // Re-center after the browser settles the newly focused input (mobile
+    // landscape keyboard scroll). See centerGameArea.
+    centerGameArea(gameAreaRef, 650);
     return () => {
       if (speakTimer) clearTimeout(speakTimer);
       clearTimeout(focusTimer);
@@ -231,6 +249,10 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     // Optimistic local feedback (server judges identically).
     setOptimisticCorrect(checkAnswer(gameMode, word.word, answer, word.blankPositions));
     setHasSubmitted(true);
+    // Dismiss the on-screen keyboard and reset the scroll the browser did to
+    // keep the focused input above it (mobile landscape). See centerGameArea.
+    inputRef.current?.blur();
+    centerGameArea(gameAreaRef, 100);
     battle.submitAnswer({
       index: word.index,
       answer,
@@ -449,7 +471,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
   const timePct = Math.min(100, (timeRemainingMs / durationMs) * 100);
 
   return (
-    <div className="relative mx-auto max-w-3xl space-y-4">
+    <div ref={gameAreaRef} className="relative mx-auto max-w-3xl space-y-4">
       {milestone && (
         <MilestoneBanner
           key={`mb-${milestone.seq}`}
