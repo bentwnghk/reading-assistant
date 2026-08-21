@@ -271,6 +271,14 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const [bestBefore, setBestBefore] = useState(0);
   const [newBestSeq, setNewBestSeq] = useState(0);
   const newBestFiredRef = useRef(false);
+  // Completion side effects (logActivity / best-score update / SRS / session
+  // save) must fire exactly once per game. The completion effect's deps
+  // include unstable function props (onComplete/onWordResult), so without this
+  // guard it re-runs on every parent re-render — re-POSTing activities
+  // (duplicate achievement milestones) and looping setState (React error
+  // #185). The ref survives StrictMode's double-invoked effects; it resets
+  // when gameStatus leaves "completed" (play again / new game).
+  const completionFiredRef = useRef(false);
   // SRS outcomes collected from the parent's onWordResult promises — powers
   // the result screen's "spaced repetition updated" card.
   const [srsOutcomes, setSrsOutcomes] = useState<VocabularySrsOutcome[]>([]);
@@ -704,65 +712,70 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   }, [currentIndex, gameStatus, currentMode, currentChallenge, speakWord]);
 
   useEffect(() => {
-    if (gameStatus === "completed" && score > 0) {
-      const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
-      setSpellingGameBestScore(score, accuracy);
-      logActivity("spelling_complete", {
+    if (gameStatus !== "completed") {
+      completionFiredRef.current = false;
+      return;
+    }
+    if (score <= 0 || completionFiredRef.current) return;
+    completionFiredRef.current = true;
+
+    const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
+    setSpellingGameBestScore(score, accuracy);
+    logActivity("spelling_complete", {
+      sessionId: effectiveId || undefined,
+      score,
+      accuracy,
+      details: { mode: gameMode, difficulty, streak: maxStreak },
+    });
+
+    // Achievement-granular event (On Fire): 5+ streak in one game. Separate
+    // activity type — doesn't disturb the spelling_challenges counter.
+    if (maxStreak >= 5) {
+      logActivity("spelling_hot_streak", {
         sessionId: effectiveId || undefined,
         score,
         accuracy,
         details: { mode: gameMode, difficulty, streak: maxStreak },
       });
+    }
 
-      // Achievement-granular event (On Fire): 5+ streak in one game. Separate
-      // activity type — doesn't disturb the spelling_challenges counter.
-      if (maxStreak >= 5) {
-        logActivity("spelling_hot_streak", {
-          sessionId: effectiveId || undefined,
-          score,
-          accuracy,
-          details: { mode: gameMode, difficulty, streak: maxStreak },
-        });
-      }
-
-      if (onWordResult && correctWordsRef.current.size > 0) {
-        // Collect SRS outcomes from callers that return them (the card is
-        // omitted for fire-and-forget callers). Failures are swallowed — the
-        // card is decorative, never load-bearing.
-        const outcomes: VocabularySrsOutcome[] = [];
-        const settled: Promise<void>[] = [];
-        for (const [word, correct] of correctWordsRef.current) {
-          const maybe = onWordResult(word, correct);
-          if (maybe && typeof maybe.then === "function") {
-            settled.push(
-              maybe
-                .then((o) => {
-                  if (o) outcomes.push(o);
-                })
-                .catch(() => {}),
-            );
-          }
-        }
-        if (settled.length > 0) {
-          void Promise.all(settled).then(() => setSrsOutcomes(outcomes));
+    if (onWordResult && correctWordsRef.current.size > 0) {
+      // Collect SRS outcomes from callers that return them (the card is
+      // omitted for fire-and-forget callers). Failures are swallowed — the
+      // card is decorative, never load-bearing.
+      const outcomes: VocabularySrsOutcome[] = [];
+      const settled: Promise<void>[] = [];
+      for (const [word, correct] of correctWordsRef.current) {
+        const maybe = onWordResult(word, correct);
+        if (maybe && typeof maybe.then === "function") {
+          settled.push(
+            maybe
+              .then((o) => {
+                if (o) outcomes.push(o);
+              })
+              .catch(() => {}),
+          );
         }
       }
-
-      if (onComplete && correctWordsRef.current.size > 0) {
-        const results = Array.from(correctWordsRef.current.entries()).map(
-          ([word, correct]) => ({ word, correct })
-        );
-        onComplete(results);
+      if (settled.length > 0) {
+        void Promise.all(settled).then(() => setSrsOutcomes(outcomes));
       }
+    }
 
-      correctWordsRef.current.clear();
-      
-      if (id) {
-        const session = backup();
-        const updated = update(id, session);
-        if (!updated) {
-          save(session);
-        }
+    if (onComplete && correctWordsRef.current.size > 0) {
+      const results = Array.from(correctWordsRef.current.entries()).map(
+        ([word, correct]) => ({ word, correct })
+      );
+      onComplete(results);
+    }
+
+    correctWordsRef.current.clear();
+
+    if (id) {
+      const session = backup();
+      const updated = update(id, session);
+      if (!updated) {
+        save(session);
       }
     }
   }, [gameStatus, score, setSpellingGameBestScore, effectiveId, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete, correctCount, challenges]);
