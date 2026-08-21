@@ -140,7 +140,10 @@ function Glossary() {
     store.recordSRSAction(word, action);
   }, []);
 
-  const handleSpellingWordResult = useCallback(
+  // Shared by the spelling game and the vocabulary quiz — returns the word's
+  // SRS outcome so the games' result screens can surface the "leveled up /
+  // next review" card.
+  const handleWordResult = useCallback(
     async (word: string, correct: boolean): Promise<VocabularySrsOutcome | null> => {
       try {
         const res = await fetch("/api/vocabulary/word", {
@@ -161,21 +164,22 @@ function Glossary() {
     []
   );
 
-  const handleSpellingComplete = useCallback(
-    (results: { word: string; correct: boolean }[]) => {
-      if (results.length === 0) return;
-      const reviewResults: VocabularyReviewResult[] = results.map((r) => ({
-        word: r.word,
-        correct: r.correct,
-        masteryBefore: 0,
-        masteryAfter: 0,
-      }));
-      fetch("/api/vocabulary/review-sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "spelling", results: reviewResults }),
-      }).catch((_err) => {});
-    },
+  const handleGameComplete = useCallback(
+    (mode: VocabularyReviewMode) =>
+      (results: { word: string; correct: boolean }[]) => {
+        if (results.length === 0) return;
+        const reviewResults: VocabularyReviewResult[] = results.map((r) => ({
+          word: r.word,
+          correct: r.correct,
+          masteryBefore: 0,
+          masteryAfter: 0,
+        }));
+        fetch("/api/vocabulary/review-sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode, results: reviewResults }),
+        }).catch((_err) => {});
+      },
     [],
   );
 
@@ -532,13 +536,19 @@ function Glossary() {
       case "flashcard":
         return <VocabularyFlashcard glossary={sortedGlossary} onWordAction={handleSRSAction} />;
       case "quiz":
-        return <VocabularyQuiz glossary={sortedGlossary} />;
+        return (
+          <VocabularyQuiz
+            glossary={sortedGlossary}
+            onWordResult={handleWordResult}
+            onComplete={handleGameComplete("quiz")}
+          />
+        );
       case "spelling":
         return (
           <VocabularySpelling
             glossary={sortedGlossary}
-            onWordResult={handleSpellingWordResult}
-            onComplete={handleSpellingComplete}
+            onWordResult={handleWordResult}
+            onComplete={handleGameComplete("spelling")}
           />
         );
       default:

@@ -32,11 +32,18 @@ import { nanoid } from "nanoid";
 import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { HelpCircle, PenLine } from "lucide-react";
+import { SrsUpdateCard } from "./GameFx";
 
 interface VocabularyQuizProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
-  onWordResult?: (word: string, correct: boolean) => void;
+  /**
+   * Per-word SRS callback (PATCH /api/vocabulary/word). May return a promise
+   * resolving to the word's SRS outcome — used to render the "spaced
+   * repetition updated" card on the result screen. Fire-and-forget callers
+   * (void) are fine; the card is simply omitted.
+   */
+  onWordResult?: (word: string, correct: boolean) => void | Promise<VocabularySrsOutcome | null>;
   onComplete?: (results: { word: string; correct: boolean }[]) => void;
   /**
    * True when rendered outside the reading-session context (e.g. the
@@ -196,6 +203,7 @@ function VocabQuizResultScreen({
   correct,
   total,
   scoreMessage,
+  srsOutcomes,
   onReview,
   onRetry,
   onRetryMissed,
@@ -207,6 +215,7 @@ function VocabQuizResultScreen({
   correct: number;
   total: number;
   scoreMessage: string;
+  srsOutcomes?: VocabularySrsOutcome[];
   onReview: () => void;
   onRetry: () => void;
   onRetryMissed: () => void;
@@ -256,6 +265,8 @@ function VocabQuizResultScreen({
         )}
       </div>
 
+      {srsOutcomes && srsOutcomes.length > 0 && <SrsUpdateCard outcomes={srsOutcomes} />}
+
       <div className={cn("flex gap-2 justify-center flex-wrap transition-all duration-500 [transition-delay:400ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
         {downloadContent}
         <Button variant="outline" size="sm" onClick={onReview}>
@@ -296,6 +307,9 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
   const [timeRemaining, setTimeRemaining] = useState(20);
   const [difficulty, setDifficulty] = useState<QuizDifficulty>("medium");
   const [questionCountLimit, setQuestionCountLimit] = useState<number | "all">("all");
+  // SRS outcomes collected from the parent's onWordResult promises — powers
+  // the result screen's "spaced repetition updated" card.
+  const [srsOutcomes, setSrsOutcomes] = useState<VocabularySrsOutcome[]>([]);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -320,6 +334,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
     setQuizState("in-progress");
     setShowReview(false);
     setTimeRemaining(config.timeLimit);
+    setSrsOutcomes([]);
   }, [glossary, effectiveRatings, prioritizeHardWords, config.timeLimit, questionCountLimit]);
 
   const handleAnswer = (answer: string) => {
@@ -330,43 +345,75 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
     }));
   };
 
+  // Shared by both completion paths (submit on last question + timer expiry).
+  // Collect SRS outcomes from callers that return them (the result-screen card
+  // is omitted for fire-and-forget callers). Failures are swallowed — the card
+  // is decorative, never load-bearing.
+  const collectSrsOutcomes = useCallback(
+    (qs: VocabularyQuizQuestion[], ans: Record<string, string>) => {
+      if (!onWordResult) return;
+      const outcomes: VocabularySrsOutcome[] = [];
+      const settled: Promise<void>[] = [];
+      for (const q of qs) {
+        const maybe = onWordResult(q.wordRef, ans[q.id] === q.correctAnswer);
+        if (maybe && typeof maybe.then === "function") {
+          settled.push(
+            maybe
+              .then((o) => {
+                if (o) outcomes.push(o);
+              })
+              .catch(() => {}),
+          );
+        }
+      }
+      if (settled.length > 0) {
+        void Promise.all(settled).then(() => setSrsOutcomes(outcomes));
+      }
+    },
+    [onWordResult],
+  );
+
+  // Quiz completion, shared by both paths (submit on last question + timer
+  // expiry). Runs exactly once per quiz — callers are an event handler and the
+  // timer-expiry effect below, never a state updater (React may double-invoke
+  // updaters in StrictMode, which would double-fire the PATCH/POST calls).
+  const completeQuiz = useCallback(() => {
+    const correct = questions.filter(
+      (q) => answers[q.id] === q.correctAnswer
+    ).length;
+    const percentage = Math.round((correct / questions.length) * 100);
+    if (!disableSessionGlossary) {
+      setVocabularyQuizScore(percentage);
+    }
+    setVocabularyQuiz(questions.map((q) => ({ ...q, userAnswer: answers[q.id] })));
+    setQuizState("completed");
+    logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
+
+    collectSrsOutcomes(questions, answers);
+
+    if (onComplete) {
+      const results = questions.map((q) => ({
+        word: q.wordRef,
+        correct: answers[q.id] === q.correctAnswer,
+      }));
+      onComplete(results);
+    }
+
+    if (!disableSessionGlossary && id) {
+      const session = backup();
+      const updated = update(id, session);
+      if (!updated) {
+        save(session);
+      }
+    }
+  }, [questions, answers, disableSessionGlossary, setVocabularyQuizScore, setVocabularyQuiz, effectiveId, collectSrsOutcomes, onComplete, id, backup, update, save]);
+
   const goToNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setTimeRemaining(config.timeLimit);
     } else {
-      const correct = questions.filter(
-        (q) => answers[q.id] === q.correctAnswer
-      ).length;
-      const percentage = Math.round((correct / questions.length) * 100);
-      if (!disableSessionGlossary) {
-        setVocabularyQuizScore(percentage);
-      }
-      setVocabularyQuiz(questions.map((q) => ({ ...q, userAnswer: answers[q.id] })));
-      setQuizState("completed");
-      logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
-
-      if (onWordResult) {
-        for (const q of questions) {
-          onWordResult(q.wordRef, answers[q.id] === q.correctAnswer);
-        }
-      }
-
-      if (onComplete) {
-        const results = questions.map((q) => ({
-          word: q.wordRef,
-          correct: answers[q.id] === q.correctAnswer,
-        }));
-        onComplete(results);
-      }
-      
-      if (!disableSessionGlossary && id) {
-        const session = backup();
-        const updated = update(id, session);
-        if (!updated) {
-          save(session);
-        }
-      }
+      completeQuiz();
     }
   };
 
@@ -386,51 +433,13 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
     return { correct, total: questions.length };
   }, [questions, answers]);
 
+  // Pure countdown tick only — state updaters must stay pure because React may
+  // double-invoke them (StrictMode). Reaching 0 signals expiry; the effect
+  // below decides what to do about it exactly once per commit.
   useEffect(() => {
     if (quizState === "in-progress" && isTimed) {
       timerRef.current = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            if (currentQuestionIndex < questions.length - 1) {
-              setCurrentQuestionIndex((idx) => idx + 1);
-              return config.timeLimit;
-            } else {
-              const correct = questions.filter(
-                (q) => answers[q.id] === q.correctAnswer
-              ).length;
-              const percentage = Math.round((correct / questions.length) * 100);
-              if (!disableSessionGlossary) {
-                setVocabularyQuizScore(percentage);
-              }
-              setQuizState("completed");
-              logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
-
-              if (onWordResult) {
-                for (const q of questions) {
-                  onWordResult(q.wordRef, answers[q.id] === q.correctAnswer);
-                }
-              }
-
-              if (onComplete) {
-                const results = questions.map((q) => ({
-                  word: q.wordRef,
-                  correct: answers[q.id] === q.correctAnswer,
-                }));
-                onComplete(results);
-              }
-              
-              if (!disableSessionGlossary && id) {
-                const session = backup();
-                const updated = update(id, session);
-                if (!updated) {
-                  save(session);
-                }
-              }
-            }
-            return config.timeLimit;
-          }
-          return prev - 1;
-        });
+        setTimeRemaining((prev) => (prev > 1 ? prev - 1 : 0));
       }, 1000);
     }
 
@@ -439,7 +448,21 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
         clearInterval(timerRef.current);
       }
     };
-  }, [quizState, isTimed, currentQuestionIndex, questions, config.timeLimit, answers, effectiveId, id, backup, update, save, setVocabularyQuizScore, onWordResult, onComplete, disableSessionGlossary]);
+  }, [quizState, isTimed]);
+
+  // Timer expiry: advance to the next question (resetting the clock) or, on
+  // the last question, complete the quiz. Living in an effect (not inside the
+  // setTimeRemaining updater) keeps the network calls in completeQuiz /
+  // collectSrsOutcomes firing exactly once, even under StrictMode.
+  useEffect(() => {
+    if (timeRemaining > 0 || quizState !== "in-progress" || !isTimed) return;
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((idx) => idx + 1);
+      setTimeRemaining(config.timeLimit);
+    } else {
+      completeQuiz();
+    }
+  }, [timeRemaining, quizState, isTimed, currentQuestionIndex, questions.length, config.timeLimit, completeQuiz]);
 
   const missedQuestions = useMemo(() => {
     return questions.filter((q) => answers[q.id] !== q.correctAnswer);
@@ -458,6 +481,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
     setCurrentQuestionIndex(0);
     setQuizState("in-progress");
     setShowReview(false);
+    setSrsOutcomes([]);
   };
 
   const downloadWord = useCallback(async (includeAnswers: boolean = false) => {
@@ -782,6 +806,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
           correct={getScore.correct}
           total={getScore.total}
           scoreMessage={scoreMessage}
+          srsOutcomes={srsOutcomes}
           showReview={showReview}
           onReview={() => setShowReview(!showReview)}
           onRetry={startQuiz}
