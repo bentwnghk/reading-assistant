@@ -1687,6 +1687,25 @@
         "tipStreak": "Build streaks for bonus points (+10% per 3 consecutive)",
         "tipHint": "Use hints wisely - they reveal letters but reduce your score",
         "tipTime": "Time bonus rewards faster responses",
+        "fx": {
+          "streakTier": {
+            "heatingUp": "Heating Up",
+            "onFire": "On Fire",
+            "blazing": "Blazing",
+            "unstoppable": "Unstoppable"
+          },
+          "milestone": "{{count}} in a row!",
+          "newBest": "New personal best!",
+          "perfect": "Perfect!",
+          "srs": {
+            "title": "Spaced repetition updated",
+            "leveledUp_one": "{{count}} word leveled up",
+            "leveledUp_other": "{{count}} words leveled up",
+            "today": "today",
+            "inDays_one": "in {{count}} day",
+            "inDays_other": "in {{count}} days"
+          }
+        },
         "multiplayer": {
           "title": "Multiplayer Spelling Battle",
           "subtitle": "Challenge other players to a live spelling duel",
@@ -1750,6 +1769,7 @@
           "rulesWrongDesc": "0 points — streak resets to 0",
           "liveRank": "Live Rank",
           "awaitingFirst": "Awaiting first word…",
+          "overtaken": "You've been overtaken!",
           "points": "pts",
           "youWon": "You won! 🎉",
           "youFinished": "You finished #{{rank}}",
@@ -2864,6 +2884,8 @@
     "ttsPlaybackRate": "Playback Speed",
     "autoSpeakFlashcard": "Auto-speak Flashcard",
     "autoSpeakFlashcardTip": "Automatically read the word aloud when a flashcard loads",
+    "gameSoundEffects": "Game Sound Effects",
+    "gameSoundEffectsTip": "Play short sound effects in spelling and grammar games (correct answers, streaks, countdowns)",
     "cheatMode": "Jailbreak Mode",
     "cheatModeTip": "Show advanced Answer Help",
     "showGiveAnswer": "Show 'Give Answer'",
@@ -3770,11 +3792,21 @@
         "description": "Complete {{count}} targeted reading practices",
         "hint": "Practice the skills you missed in reading tests"
       },
-      "spelling_challenges": {
-        "name": "Spelling Bee",
-        "description": "Complete {{count}} spelling challenges",
-        "hint": "Play spelling games with your vocabulary words"
-      },
+    "spelling_challenges": {
+      "name": "Spelling Bee",
+      "description": "Complete {{count}} spelling challenges",
+      "hint": "Play spelling games with your vocabulary words"
+    },
+    "spelling_battle_win": {
+      "name": "Battle Champion",
+      "description": "Win {{count}} multiplayer spelling battles",
+      "hint": "Finish #1 in a live spelling battle against other players"
+    },
+    "spelling_hot_streak": {
+      "name": "On Fire",
+      "description": "Achieve a 5+ answer streak {{count}} times",
+      "hint": "Get 5 correct answers in a row in a single spelling game"
+    },
       "vocabulary_quizzes": {
         "name": "Quiz Wizard",
         "description": "Complete {{count}} vocabulary quizzes",

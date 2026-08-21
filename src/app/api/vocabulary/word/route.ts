@@ -50,7 +50,9 @@ export async function PATCH(request: Request) {
         correct
       );
       await updateVocabularyReview(session.user.id, word, correct, newMastery, calculatedNext);
-      return NextResponse.json({ success: true });
+      // Surface the SRS outcome so callers (spelling games' result screens)
+      // can show the "leveled up / next review" reward framing.
+      return NextResponse.json({ success: true, newMastery, nextReviewAt: calculatedNext });
     }
 
     return NextResponse.json({ success: true });

@@ -17,8 +17,12 @@ interface SpellingBattleFlowProps {
   defaultGlossarySessionId?: string;
   /** Inline word texts from the host's current selection (vocabulary-page context); enables the "selected" source. */
   selectedWords?: string[];
-  /** Optional per-word SRS callback (e.g. PATCH /api/vocabulary/word). Page-supplied. */
-  onWordResult?: (word: string, correct: boolean) => void;
+  /**
+   * Optional per-word SRS callback (e.g. PATCH /api/vocabulary/word).
+   * Page-supplied; may return a promise resolving to the word's SRS outcome
+   * for the results screen's "spaced repetition updated" card.
+   */
+  onWordResult?: (word: string, correct: boolean) => void | Promise<VocabularySrsOutcome | null>;
   /** Return to the solo spelling setup. */
   onExitToSolo: () => void;
   /**
@@ -84,6 +88,11 @@ export function SpellingBattleFlow({
     const gameMode = battle.config?.gameMode ?? "listen-type";
 
     // 1. Reading store: best score + running accuracy (both call sites).
+    //    Read the PREVIOUS best BEFORE the max-update so the results screen
+    //    can celebrate a new personal best (the store only keeps a max).
+    const previousBest = useReadingStore.getState().spellingGameBestScore;
+    const isNewBest = previousBest > 0 && me.total > previousBest;
+    useBattleStore.getState().setNewBestAchieved(isNewBest);
     setSpellingGameBestScore(me.total, accuracy);
 
     // 2. Activity log → leaderboard (both call sites). The `multiplayer` flag
@@ -102,6 +111,31 @@ export function SpellingBattleFlow({
       },
     });
 
+    // 2b. Achievement-granular events: each drives its own achievement track
+    //     (Battle Champion / On Fire). Separate activity types keep the
+    //     spelling_challenges counter (spelling_complete) undisturbed.
+    if (me.rank === 1 && battle.finalRanking.length > 1) {
+      logActivity("spelling_battle_win", {
+        sessionId: id || undefined,
+        score: me.total,
+        accuracy,
+        details: {
+          mode: gameMode,
+          difficulty,
+          opponentCount: battle.finalRanking.length - 1,
+          rank: 1,
+        },
+      });
+    }
+    if ((me.maxStreak ?? 0) >= 5) {
+      logActivity("spelling_hot_streak", {
+        sessionId: id || undefined,
+        score: me.total,
+        accuracy,
+        details: { mode: gameMode, difficulty, streak: me.maxStreak },
+      });
+    }
+
     // 3. SRS per-word (optional, page-supplied) + UNCONDITIONAL review-session
     //    POST. The vocabulary_review_sessions row is the authoritative
     //    per-game record the dashboards count from, so it must be created for
@@ -109,9 +143,22 @@ export function SpellingBattleFlow({
     //    review-session payload (mode "spelling", masteryBefore/After = 0).
     const wordResults = battle.myWordResults;
     if (wordResults.length > 0) {
+      // Collect SRS outcomes from callers that return them (the results-screen
+      // card is omitted for fire-and-forget callers). Failures are swallowed.
+      const outcomes: VocabularySrsOutcome[] = [];
+      const settled: Promise<void>[] = [];
       if (onWordResult) {
         for (const wr of wordResults) {
-          onWordResult(wr.word, wr.correct);
+          const maybe = onWordResult(wr.word, wr.correct);
+          if (maybe && typeof maybe.then === "function") {
+            settled.push(
+              maybe
+                .then((o) => {
+                  if (o) outcomes.push(o);
+                })
+                .catch(() => {}),
+            );
+          }
         }
       }
       const reviewResults = wordResults.map((wr) => ({
@@ -127,6 +174,12 @@ export function SpellingBattleFlow({
       }).catch(() => {
         // Silent — battle result tracking must never break the UX.
       });
+
+      if (settled.length > 0) {
+        void Promise.all(settled).then(() => {
+          useBattleStore.getState().setSrsOutcomes(outcomes);
+        });
+      }
     }
 
     // 4. History persistence (reading session with updated spelling best score).

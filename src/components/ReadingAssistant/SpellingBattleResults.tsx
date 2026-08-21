@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { Crown, RotateCcw, LogOut, Trophy, Flame } from "lucide-react";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
+import { playSfx } from "@/utils/sfx";
+import { burstConfetti, SrsUpdateCard } from "./GameFx";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -83,6 +85,7 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
   const myAccuracy = me && totalWords > 0 ? Math.round((me.correctCount / totalWords) * 100) : 0;
   const myTier = getTier(myAccuracy);
   const iWon = me?.rank === 1;
+  const isNewBest = battle.newBestAchieved;
 
   const [animateIn, setAnimateIn] = useState(false);
   const confettiFiredRef = useRef(false);
@@ -97,6 +100,12 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
   useEffect(() => {
     if (!me || confettiFiredRef.current) return;
     confettiFiredRef.current = true;
+    if (isNewBest) {
+      playSfx("newBest");
+      // Top-3 finishers already get confetti below; a new-personal-best player
+      // outside the top 3 still earns a celebratory burst of their own.
+      if (me.rank > 3) burstConfetti({ count: 60, spread: 80 });
+    }
     if (me.rank > 3) return; // only celebrate top-3
     import("canvas-confetti")
       .then((mod) => {
@@ -125,7 +134,7 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
         }
       })
       .catch(() => {});
-  }, [me]);
+  }, [me, isNewBest]);
 
   if (!me) {
     return (
@@ -165,6 +174,12 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
             <span>{tierCfg.emoji}</span>
             {t(`${TIER}.${myTier}`)}
           </Badge>
+          {isNewBest && (
+            <Badge className="gap-1 bg-amber-500 text-white">
+              <Trophy className="h-3.5 w-3.5" />
+              {t("reading.glossary.spelling.fx.newBest")}
+            </Badge>
+          )}
           <div className="mt-1 flex items-center gap-5 text-sm">
             <span className="flex items-center gap-1">
               <Trophy className="h-4 w-4 text-yellow-500" />
@@ -185,6 +200,10 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
           </div>
         </CardContent>
       </Card>
+
+      {/* Spaced-repetition reward framing (only when the entry point returned
+          SRS outcomes for its words). */}
+      {battle.srsOutcomes.length > 0 && <SrsUpdateCard outcomes={battle.srsOutcomes} />}
 
       {/* Final ranking */}
       <Card

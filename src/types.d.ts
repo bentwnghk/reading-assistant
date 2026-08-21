@@ -922,6 +922,21 @@ type VocabularyReviewMode = "flashcard" | "quiz" | "spelling";
 
 type SRSAction = "again" | "hard" | "good" | "easy";
 
+/**
+ * Result of a single word's SRS update after a spelling/quiz/review answer,
+ * as surfaced by `onWordResult` callbacks and shown on the result screens
+ * ("N words leveled up · next reviews …"). Fields are optional because some
+ * callers fire-and-forget without parsing the PATCH response.
+ */
+interface VocabularySrsOutcome {
+  word: string;
+  correct: boolean;
+  /** New Leitner box level (0-5) after this review, when known. */
+  newMastery?: number;
+  /** Epoch ms of the next scheduled review, when known. */
+  nextReviewAt?: number;
+}
+
 interface VocabularyReviewResult {
   word: string;
   correct: boolean;

@@ -11,6 +11,8 @@ export type AchievementType =
   | "tests_completed"
   | "targeted_practices"
   | "spelling_challenges"
+  | "spelling_battle_win"
+  | "spelling_hot_streak"
   | "vocabulary_quizzes"
   | "grammar_analysis"
   | "grammar_quizzes"
@@ -112,6 +114,18 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
     color: "pink",
     activityTypes: ["spelling_complete"],
     initialMilestone: 5,
+  },
+  spelling_battle_win: {
+    icon: "Swords",
+    color: "violet",
+    activityTypes: ["spelling_battle_win"],
+    initialMilestone: 1,
+  },
+  spelling_hot_streak: {
+    icon: "Flame",
+    color: "rose",
+    activityTypes: ["spelling_hot_streak"],
+    initialMilestone: 1,
   },
   vocabulary_quizzes: {
     icon: "Brain",

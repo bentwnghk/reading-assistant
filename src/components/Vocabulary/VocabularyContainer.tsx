@@ -369,7 +369,9 @@ function VocabularyContainer() {
 
   const handleWordResult = useCallback((word: string, correct: boolean) => {
     const store = useVocabularyStore.getState();
-    store.updateWordReview(word, correct);
+    // Return the promise (SRS outcome) so the spelling games' result screens
+    // can surface the "leveled up / next review" card.
+    return store.updateWordReview(word, correct);
   }, []);
 
   return (

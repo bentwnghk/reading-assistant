@@ -12,7 +12,6 @@ import {
   XCircle,
   Crown,
   Trophy,
-  Flame,
   LogOut,
   Clock,
 } from "lucide-react";
@@ -21,6 +20,7 @@ import { toast } from "sonner";
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useSettingStore } from "@/store/setting";
 import { speakWord, stopSpeaking, unlockAudio, isAudioUnlocked } from "@/utils/tts";
+import { playSfx } from "@/utils/sfx";
 import { joinScrambleUnits } from "@/utils/text";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { PointPopup, AnimatedScore, StreakFlame, MilestoneBanner, burstConfetti, STREAK_MILESTONES, type PointBreakdown } from "./GameFx";
 
 interface SpellingBattleArenaProps {
   onExit: () => void;
@@ -109,9 +110,18 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
   // auto-plays without another gesture.
   const [soundEnabled, setSoundEnabled] = useState(false);
 
+  // Game-juice state (see GameFx.tsx). The PointPopup breakdown is derived
+  // client-side from mirrored scoring inputs captured at submit time; the
+  // authoritative total shown on the trophy badge comes from the server.
+  const [popup, setPopup] = useState<(PointBreakdown & { seq: number }) | null>(null);
+  const [milestone, setMilestone] = useState<{ streak: number; seq: number } | null>(null);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const tickerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const submitElapsedRef = useRef(0);
+  const submitHintsRef = useRef(0);
+  const fxSeqRef = useRef(0);
 
   const word = battle.currentWord;
   const myUserId = session?.user?.id;
@@ -160,6 +170,8 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     setSelectedLetters([]);
     setUsedTileIndices([]);
     setRevealedPositions([]);
+    setPopup(null);
+    setMilestone(null);
     // Only listen-type reveals the word via audio; the other modes show a visual clue.
     // Auto-play only when the audio session is already unlocked — otherwise iOS
     // Safari blocks it. The speaker button (always visible) lets the user unlock
@@ -207,6 +219,14 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
       answer = userInput.trim();
     }
     if (!answer) return;
+    // Capture the mirrored scoring inputs at submit time so the PointPopup
+    // breakdown effect can reconstruct base/time/streak/hint components later
+    // (when the server result arrives) without worrying about later state
+    // changes (hints are frozen once submitted). Computed from the word's
+    // startedAt (same base the ticker uses) so this callback doesn't need the
+    // 100ms-churning elapsedMs state in its deps.
+    submitElapsedRef.current = Math.max(0, Date.now() - word.startedAt);
+    submitHintsRef.current = hintsUsed;
     // Optimistic local feedback (server judges identically).
     setOptimisticCorrect(checkAnswer(gameMode, word.word, answer, word.blankPositions));
     setHasSubmitted(true);
@@ -323,6 +343,80 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     };
   }, []);
 
+  // ── Derived game state (used by the juice effects below AND the render) ──
+  const durationMs = word?.durationMs ?? 0;
+  const timeRemainingMs = word ? Math.max(0, durationMs - elapsedMs) : 0;
+  const timedOut = !!word && timeRemainingMs === 0 && !hasSubmitted;
+  const myResult = battle.myLastResult;
+  const showCorrect = hasSubmitted ? (myResult?.correct ?? optimisticCorrect ?? false) : null;
+  // The current word is over for this player if they submitted, their local
+  // timer expired, or the server resolved the word (covers the case where all
+  // OTHER players submitted early). In any of these cases, reveal the answer.
+  const wordEndedForThisWord = !!battle.wordEnded && !!word && battle.wordEnded.index === word.index;
+  const locked = hasSubmitted || timedOut || wordEndedForThisWord;
+  const secondsLeft = word ? Math.ceil(timeRemainingMs / 1000) : 0;
+
+  // ── Juice: reveal SFX (fire once per word — the derived booleans transition
+  // false→true exactly once: on submit, timeout, or server reveal). A locked
+  // word without a correct reveal (wrong submit, timeout, or the server
+  // resolving the word before this player answered) counts as wrong. ────────
+  const correctRevealed = locked && showCorrect === true;
+  const wrongRevealed = locked && !correctRevealed;
+  useEffect(() => {
+    if (correctRevealed) playSfx("correct");
+  }, [correctRevealed]);
+  useEffect(() => {
+    if (wrongRevealed) playSfx("wrong");
+  }, [wrongRevealed]);
+
+  // ── Juice: server result → point-breakdown popup + streak milestone. The
+  // breakdown is reconstructed from mirrored scoring inputs captured at
+  // submit; the displayed total is the authoritative server value. ─────────
+  useEffect(() => {
+    const r = battle.myLastResult;
+    if (!r || !word || r.index !== word.index || !r.correct) return;
+    const remainingFraction = Math.max(
+      0,
+      Math.min(1, (word.durationMs - submitElapsedRef.current) / word.durationMs),
+    );
+    const timeBonus = Math.floor(remainingFraction * 50);
+    const hints = Math.min(submitHintsRef.current, MAX_HINTS_PER_WORD);
+    let streakBonus = 0;
+    if (hints === 0 && r.streak >= 3) {
+      streakBonus = Math.floor((100 + timeBonus) * 0.1 * Math.min(r.streak - 2, 5));
+    }
+    let hintPenalty = 0;
+    for (let i = 0; i < hints; i++) {
+      hintPenalty += HINT_COSTS[Math.min(i, HINT_COSTS.length - 1)];
+    }
+    fxSeqRef.current += 1;
+    setPopup({
+      base: 100,
+      timeBonus,
+      streakBonus,
+      hintPenalty,
+      total: r.pointsAwarded,
+      perfect: hints === 0 && remainingFraction >= 0.5,
+      seq: fxSeqRef.current,
+    });
+    if (STREAK_MILESTONES.includes(r.streak)) {
+      playSfx("streak");
+      setMilestone({ streak: r.streak, seq: fxSeqRef.current });
+      burstConfetti({ count: 24, spread: 55 });
+    }
+  }, [battle.myLastResult, word]);
+
+  // ── Juice: final-seconds tick (muted while TTS speaks — see playSfx) ─────
+  useEffect(() => {
+    if (!word || locked || secondsLeft < 1 || secondsLeft > 3) return;
+    playSfx("tick");
+  }, [secondsLeft, word, locked]);
+
+  // ── Juice: pre-game countdown blips ───────────────────────────────────────
+  useEffect(() => {
+    if (battle.countdownN !== null && battle.countdownN > 0) playSfx("countdown");
+  }, [battle.countdownN]);
+
   // ── Countdown overlay ────────────────────────────────────────────────────
   if (!word && battle.countdownN !== null) {
     return (
@@ -346,20 +440,16 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     );
   }
 
-  const durationMs = word.durationMs;
-  const timeRemainingMs = Math.max(0, durationMs - elapsedMs);
   const timePct = Math.min(100, (timeRemainingMs / durationMs) * 100);
-  const timedOut = timeRemainingMs === 0 && !hasSubmitted;
-  const myResult = battle.myLastResult;
-  const showCorrect = hasSubmitted ? (myResult?.correct ?? optimisticCorrect ?? false) : null;
-  // The current word is over for this player if they submitted, their local
-  // timer expired, or the server resolved the word (covers the case where all
-  // OTHER players submitted early). In any of these cases, reveal the answer.
-  const wordEndedForThisWord = !!battle.wordEnded && battle.wordEnded.index === word.index;
-  const locked = hasSubmitted || timedOut || wordEndedForThisWord;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="relative mx-auto max-w-3xl space-y-4">
+      {milestone && (
+        <MilestoneBanner
+          key={`mb-${milestone.seq}`}
+          message={t("reading.glossary.spelling.fx.milestone", { count: milestone.streak })}
+        />
+      )}
       {/* Top bar: progress + exit */}
       <div className="flex items-center justify-between gap-3">
         <Badge variant="secondary">
@@ -368,14 +458,9 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="gap-1">
             <Trophy className="h-3 w-3 text-yellow-500" />
-            {myResult?.total ?? 0}
+            <AnimatedScore value={myResult?.total ?? 0} />
           </Badge>
-          {(myResult?.streak ?? 0) >= 2 && (
-            <Badge variant="outline" className="gap-1">
-              <Flame className="h-3 w-3 text-orange-500" />
-              {myResult?.streak}
-            </Badge>
-          )}
+          <StreakFlame streak={myResult?.streak ?? 0} />
         </div>
         <Button variant="ghost" size="sm" onClick={onExit}>
           <LogOut className="h-4 w-4 mr-1" />
@@ -387,7 +472,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
       <div className="space-y-1">
         <Progress value={timePct} className="h-1.5" />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
+          <span className={cn("flex items-center gap-1", secondsLeft <= 3 && !locked && "font-semibold text-destructive animate-urgent-pulse")}>
             <Clock className="h-3 w-3" />
             {(timeRemainingMs / 1000).toFixed(1)}s
           </span>
@@ -398,8 +483,9 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
 
       <div className="grid gap-4 md:grid-cols-[1fr_220px]">
         {/* Main play area */}
-        <Card>
+        <Card className="relative">
           <CardContent className="space-y-4 py-6">
+            {locked && popup && <PointPopup key={`pp-${popup.seq}`} breakdown={popup} />}
             {/* Mode badge */}
             <div className="text-center">
               <Badge variant="secondary" className="text-xs">
@@ -628,7 +714,12 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
 
             {/* Feedback (shared) */}
             {locked && (
-              <div className="flex items-center justify-center gap-2 text-sm">
+              <div
+                className={cn(
+                  "flex items-center justify-center gap-2 text-sm",
+                  showCorrect === false && "animate-shake-x",
+                )}
+              >
                 {showCorrect ? (
                   <>
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -698,6 +789,56 @@ function RankingStrip({
   compact?: boolean;
 }) {
   const { t } = useTranslation();
+  // Live-juice: per-player point deltas since the previous ranking event,
+  // a pop animation when the leader changes, and an "overtaken" alert when MY
+  // rank worsens. live_ranking arrives at most once per word, so the alert is
+  // naturally throttled to that cadence.
+  const [deltas, setDeltas] = useState<Record<string, number>>({});
+  const [leaderPulse, setLeaderPulse] = useState(0);
+  const prevRef = useRef<{
+    totals: Map<string, number>;
+    ranks: Map<string, number>;
+    leader: string | null;
+  }>({ totals: new Map(), ranks: new Map(), leader: null });
+
+  useEffect(() => {
+    const prev = prevRef.current;
+    const nextTotals = new Map<string, number>();
+    const nextRanks = new Map<string, number>();
+    const nextDeltas: Record<string, number> = {};
+    let nextLeader: string | null = null;
+    for (const entry of ranking) {
+      if (entry.rank === 1) nextLeader = entry.userId;
+      const prevTotal = prev.totals.get(entry.userId);
+      if (prevTotal !== undefined && entry.total > prevTotal) {
+        nextDeltas[entry.userId] = entry.total - prevTotal;
+      }
+      nextTotals.set(entry.userId, entry.total);
+      nextRanks.set(entry.userId, entry.rank);
+    }
+    prevRef.current = { totals: nextTotals, ranks: nextRanks, leader: nextLeader };
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    if (Object.keys(nextDeltas).length > 0) {
+      setDeltas(nextDeltas);
+      timers.push(setTimeout(() => setDeltas({}), 1800));
+    }
+    // Leader takeover → replay the 🥇 pop animation (skips the first ranking).
+    if (prev.leader !== null && nextLeader !== null && nextLeader !== prev.leader) {
+      setLeaderPulse((n) => n + 1);
+    }
+    // My rank worsened → pressure alert (skips the first ranking).
+    if (myUserId && prev.ranks.has(myUserId)) {
+      const before = prev.ranks.get(myUserId)!;
+      const now = nextRanks.get(myUserId);
+      if (now !== undefined && now > before) {
+        playSfx("overtaken");
+        toast(t(`${M}.overtaken`), { icon: "⚡" });
+      }
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [ranking, myUserId, t]);
+
   return (
     <Card className="h-fit">
       <CardContent className="py-4">
@@ -724,6 +865,7 @@ function RankingStrip({
           )}
           {ranking.map((entry) => {
             const isMe = entry.userId === myUserId;
+            const delta = deltas[entry.userId];
             return (
               <div
                 key={entry.userId}
@@ -733,7 +875,17 @@ function RankingStrip({
                 )}
               >
                 <span className="w-5 text-center text-sm font-bold">
-                  {entry.rank === 1 ? "🥇" : entry.rank === 2 ? "🥈" : entry.rank === 3 ? "🥉" : entry.rank}
+                  {entry.rank === 1 ? (
+                    <span key={`gold-${leaderPulse}`} className="inline-block animate-pop-in">
+                      🥇
+                    </span>
+                  ) : entry.rank === 2 ? (
+                    "🥈"
+                  ) : entry.rank === 3 ? (
+                    "🥉"
+                  ) : (
+                    entry.rank
+                  )}
                 </span>
                 <Avatar className="h-6 w-6">
                   {entry.image && <AvatarImage src={entry.image} alt={entry.name ?? ""} />}
@@ -745,7 +897,15 @@ function RankingStrip({
                   {entry.name ?? t(`${M}.anonymous`)}
                   {isMe && <span className="ml-1 text-primary">({t(`${M}.you`)})</span>}
                 </div>
-                <span className="text-xs font-bold">{entry.total}</span>
+                {delta && (
+                  <span
+                    key={`d-${entry.total}`}
+                    className="animate-float-fade text-[10px] font-bold text-emerald-500"
+                  >
+                    +{delta}
+                  </span>
+                )}
+                <span className="text-xs font-bold tabular-nums">{entry.total}</span>
               </div>
             );
           })}

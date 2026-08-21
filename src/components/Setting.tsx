@@ -79,6 +79,7 @@ const formSchema = z.object({
   ttsVoice: z.enum(TTS_VOICES),
   ttsPlaybackRate: z.union([z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1.0)]),
   autoSpeakFlashcard: z.boolean().optional(),
+  gameSoundEffects: z.boolean().optional(),
   cheatMode: z.boolean().optional(),
   showGiveAnswer: z.boolean().optional(),
   openAIApiKey: z.string().optional(),
@@ -1225,6 +1226,41 @@ function Setting({ open, onClose }: SettingProps) {
                             const newValue = !field.value;
                             field.onChange(newValue);
                             updateSetting("autoSpeakFlashcard", newValue);
+                          }}
+                          className={cn(
+                            "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                            field.value ? "bg-primary" : "bg-input"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow ring-0 transition duration-200 ease-in-out",
+                              field.value ? "translate-x-5" : "translate-x-0"
+                            )}
+                          />
+                        </button>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="gameSoundEffects"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label flex items-center gap-1">
+                        {t("setting.gameSoundEffects")}
+                        <InfoTooltip content={t("setting.gameSoundEffectsTip")} />
+                      </FormLabel>
+                      <FormControl>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={field.value}
+                          onClick={() => {
+                            const newValue = !field.value;
+                            field.onChange(newValue);
+                            updateSetting("gameSoundEffects", newValue);
                           }}
                           className={cn(
                             "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

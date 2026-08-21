@@ -377,6 +377,20 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Game-juice animations (Tailwind animate-pop-in / shake-x / float-fade /
+   flame-pulse / urgent-pulse). Under reduced motion, decorative movement is
+   disabled — content stays visible at its final state (popups keep their
+   info and auto-dismiss via the same JS timers). */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in,
+  .animate-shake-x,
+  .animate-float-fade,
+  .animate-flame-pulse,
+  .animate-urgent-pulse {
+    animation: none;
+  }
+}
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

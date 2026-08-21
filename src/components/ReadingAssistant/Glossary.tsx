@@ -140,13 +140,26 @@ function Glossary() {
     store.recordSRSAction(word, action);
   }, []);
 
-  const handleSpellingWordResult = useCallback((word: string, correct: boolean) => {
-    fetch("/api/vocabulary/word", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ word, correct }),
-    }).catch((_err) => {});
-  }, []);
+  const handleSpellingWordResult = useCallback(
+    async (word: string, correct: boolean): Promise<VocabularySrsOutcome | null> => {
+      try {
+        const res = await fetch("/api/vocabulary/word", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ word, correct }),
+        });
+        if (!res.ok) return null;
+        const data = (await res.json()) as { newMastery?: number; nextReviewAt?: number };
+        if (typeof data.newMastery !== "number" || typeof data.nextReviewAt !== "number") {
+          return null;
+        }
+        return { word, correct, newMastery: data.newMastery, nextReviewAt: data.nextReviewAt };
+      } catch {
+        return null;
+      }
+    },
+    []
+  );
 
   const handleSpellingComplete = useCallback(
     (results: { word: string; correct: boolean }[]) => {

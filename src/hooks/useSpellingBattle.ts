@@ -160,6 +160,10 @@ export interface UseSpellingBattle {
   totalWords: number
   config: BattleRoomConfig | null
   resultPersisted: boolean
+  /** True when this battle's score beat the player's previous spelling best. */
+  newBestAchieved: boolean
+  /** Per-word SRS outcomes (when the entry point returned them) — result card. */
+  srsOutcomes: VocabularySrsOutcome[]
   // imperative API
   connect: () => Promise<void>
   disconnect: () => void
@@ -303,6 +307,8 @@ export function useSpellingBattle(): UseSpellingBattle {
   const totalWords = useBattleStore((s) => s.totalWords)
   const config = useBattleStore((s) => s.config)
   const resultPersisted = useBattleStore((s) => s.resultPersisted)
+  const newBestAchieved = useBattleStore((s) => s.newBestAchieved)
+  const srsOutcomes = useBattleStore((s) => s.srsOutcomes)
 
   return {
     connectionStatus,
@@ -327,6 +333,8 @@ export function useSpellingBattle(): UseSpellingBattle {
     totalWords,
     config,
     resultPersisted,
+    newBestAchieved,
+    srsOutcomes,
     connect,
     disconnect,
     clearError,

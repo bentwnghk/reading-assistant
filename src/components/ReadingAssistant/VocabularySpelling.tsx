@@ -33,15 +33,23 @@ import { useBattleStore } from "@/store/battle";
 import { logActivity } from "@/utils/activityLogger";
 import { cn } from "@/utils/style";
 import { speakWord as speakWordShared, stopSpeaking, unlockAudio } from "@/utils/tts";
+import { playSfx } from "@/utils/sfx";
 import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
 import { joinScrambleUnits } from "@/utils/text";
 import { SpellingBattleFlow } from "./SpellingBattleFlow";
+import { PointPopup, AnimatedScore, StreakFlame, MilestoneBanner, burstConfetti, SrsUpdateCard, STREAK_MILESTONES, type PointBreakdown } from "./GameFx";
 import GuideDialog from "@/components/Internal/GuideDialog";
 
 interface VocabularySpellingProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
-  onWordResult?: (word: string, correct: boolean) => void;
+  /**
+   * Per-word SRS callback (PATCH /api/vocabulary/word). May return a promise
+   * resolving to the word's SRS outcome — used to render the "spaced
+   * repetition updated" card on the result screen. Fire-and-forget callers
+   * (void) are fine; the card is simply omitted.
+   */
+  onWordResult?: (word: string, correct: boolean) => void | Promise<VocabularySrsOutcome | null>;
   onComplete?: (results: { word: string; correct: boolean }[]) => void;
   /**
    * True when rendered outside the reading-session context (e.g. the
@@ -88,6 +96,38 @@ function getResultTier(score: number) {
   return "keepGoing";
 }
 
+/**
+ * Solo scoring, extracted verbatim from the old inline math in `checkAnswer`
+ * so the breakdown (base / time / streak / hint) can be surfaced to the UI
+ * (PointPopup). Do NOT change the formula — solo and battle scores are meant
+ * to stay comparable (the realtime server mirrors it in
+ * realtime/src/game/scoring.ts).
+ */
+function computeSoloPoints(opts: {
+  isTimed: boolean;
+  timeRemaining: number;
+  timeLimit: number;
+  /** Streak AFTER this correct answer (streak + 1). */
+  newStreak: number;
+  hintsUsed: number;
+}): PointBreakdown {
+  let points = 100;
+  let timeBonus = 0;
+  if (opts.isTimed) {
+    timeBonus = Math.floor((opts.timeRemaining / opts.timeLimit) * 50);
+    points += timeBonus;
+  }
+  let streakBonus = 0;
+  if (opts.newStreak >= 3) {
+    // Computed on base+time BEFORE the hint penalty — mirrors the original.
+    streakBonus = Math.floor(points * 0.1 * Math.min(opts.newStreak - 2, 5));
+    points += streakBonus;
+  }
+  const hintPenalty = opts.hintsUsed * 10;
+  points -= hintPenalty;
+  return { base: 100, timeBonus, streakBonus, hintPenalty, total: Math.max(points, 10) };
+}
+
 const TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: string; ring: string; glow: string; badgeBg: string; particleColor: string; gradient: string }> = {
   master:    { emoji: "👑", icon: Crown, color: "text-amber-600 dark:text-amber-400", ring: "ring-4 ring-amber-400/60", glow: "shadow-amber-400/50", badgeBg: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", particleColor: "#fbbf24", gradient: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.08) 50%, rgba(255,237,160,0.15) 100%)" },
   great:      { emoji: "🌟", icon: Star, color: "text-emerald-600 dark:text-emerald-400", ring: "ring-4 ring-emerald-400/50", glow: "shadow-emerald-400/40", badgeBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", particleColor: "#34d399", gradient: "linear-gradient(135deg, rgba(167,243,208,0.15) 0%, rgba(52,211,153,0.08) 50%, rgba(167,243,208,0.15) 100%)" },
@@ -96,9 +136,9 @@ const TIER_CONFIG: Record<string, { emoji: string; icon: typeof Crown; color: st
 };
 
 function SpellingResultScreen({
-  score, accuracy, correctCount, totalCount, maxStreak, onPlayAgain,
+  score, accuracy, correctCount, totalCount, maxStreak, isNewBest, srsOutcomes, onPlayAgain,
 }: {
-  score: number; accuracy: number; correctCount: number; totalCount: number; maxStreak: number; onPlayAgain: () => void;
+  score: number; accuracy: number; correctCount: number; totalCount: number; maxStreak: number; isNewBest?: boolean; srsOutcomes?: VocabularySrsOutcome[]; onPlayAgain: () => void;
 }) {
   const { t } = useTranslation();
   const tier = getResultTier(accuracy);
@@ -106,6 +146,22 @@ function SpellingResultScreen({
   const TierIcon = config.icon;
   const [animateIn, setAnimateIn] = useState(false);
   useEffect(() => { const timer = setTimeout(() => setAnimateIn(true), 100); return () => clearTimeout(timer); }, []);
+
+  // Confetti for top tiers (mirrors the battle results screen). The ref guard
+  // survives StrictMode's double-invoked effects in dev.
+  const confettiFiredRef = useRef(false);
+  useEffect(() => {
+    if (confettiFiredRef.current) return;
+    confettiFiredRef.current = true;
+    if (tier === "master" || tier === "great") {
+      burstConfetti({ count: tier === "master" ? 100 : 50, spread: 75 });
+      if (tier === "master") {
+        setTimeout(() => {
+          burstConfetti({ count: 70, spread: 100, colors: ["#a855f7", "#6366f1", "#22d3ee", "#10b981"] });
+        }, 280);
+      }
+    }
+  }, [tier]);
 
   return (
     <div className="space-y-5">
@@ -119,6 +175,12 @@ function SpellingResultScreen({
         </div>
         <div className={cn("transition-all duration-500 [transition-delay:600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
           <span className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold", config.badgeBg)}><TierIcon className="h-3.5 w-3.5" />{t(`reading.glossary.spelling.resultTier.${tier}`)}</span>
+          {isNewBest && (
+            <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white">
+              <Trophy className="h-3.5 w-3.5" />
+              {t("reading.glossary.spelling.fx.newBest")}
+            </span>
+          )}
         </div>
         {tier === "master" && <div className="absolute inset-0 pointer-events-none transition-opacity duration-700" style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.15) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }} />}
       </div>
@@ -139,6 +201,7 @@ function SpellingResultScreen({
           <span className="font-semibold">{maxStreak}</span>
         </div>
       </div>
+      {srsOutcomes && srsOutcomes.length > 0 && <SrsUpdateCard outcomes={srsOutcomes} />}
       <div className={cn("text-center transition-all duration-500 [transition-delay:600ms]", animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
         <Button onClick={onPlayAgain} variant="outline" size="lg">
           <RotateCcw className="h-4 w-4 mr-2" />
@@ -198,12 +261,27 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const [isCorrect, setIsCorrect] = useState(false);
   const [isTTSLoading, setIsTTSLoading] = useState(false);
 
+  // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
+  // banner components remount (replaying their one-shot animations) per word.
+  const [lastBreakdown, setLastBreakdown] = useState<(PointBreakdown & { seq: number }) | null>(null);
+  const [milestone, setMilestone] = useState<{ streak: number; seq: number } | null>(null);
+  // New-personal-best celebration: `bestBefore` snapshots the store best at
+  // game start (the store only keeps a max, so the delta can't be derived
+  // later); the ref makes the banner a one-shot per game.
+  const [bestBefore, setBestBefore] = useState(0);
+  const [newBestSeq, setNewBestSeq] = useState(0);
+  const newBestFiredRef = useRef(false);
+  // SRS outcomes collected from the parent's onWordResult promises — powers
+  // the result screen's "spaced repetition updated" card.
+  const [srsOutcomes, setSrsOutcomes] = useState<VocabularySrsOutcome[]>([]);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const challengeRef = useRef<SpellingWordChallenge | null>(null);
   const revealedPositionsRef = useRef<number[]>([]);
   const correctWordsRef = useRef<Map<string, boolean>>(new Map());
+  const fxSeqRef = useRef(0);
 
   const currentChallenge = challenges[currentIndex];
   challengeRef.current = currentChallenge;
@@ -296,9 +374,15 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     revealedPositionsRef.current = [];
     setDefinitionsRevealed(false);
     setShowFeedback(false);
+    setLastBreakdown(null);
+    setMilestone(null);
+    setBestBefore(spellingGameBestScore);
+    setNewBestSeq(0);
+    newBestFiredRef.current = false;
+    setSrsOutcomes([]);
     setGameStatus("playing");
     setCurrentMode(initialMode);
-  }, [glossary, effectiveRatings, prioritizeHardWords, gameMode, config, generateChallenge, wordCountLimit]);
+  }, [glossary, effectiveRatings, prioritizeHardWords, gameMode, config, generateChallenge, wordCountLimit, spellingGameBestScore]);
 
   useEffect(() => {
     if (gameStatus === "playing" && isTimed && !showFeedback) {
@@ -347,6 +431,23 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       }
     };
   }, [gameStatus, isTimed, showFeedback, currentIndex, challenges.length, gameMode, config.timeLimits, currentMode]);
+
+  // Wrong-answer SFX lives in an effect (not the timeout callback) because the
+  // timeout path sets isCorrect/showFeedback from inside a state updater,
+  // which StrictMode double-invokes — an effect fires exactly once per word.
+  useEffect(() => {
+    if (showFeedback && !isCorrect) {
+      playSfx("wrong");
+    }
+  }, [showFeedback, isCorrect]);
+
+  // Countdown tick for the final 3 seconds (skips while TTS is speaking —
+  // see playSfx).
+  useEffect(() => {
+    if (gameStatus === "playing" && isTimed && !showFeedback && timeRemaining > 0 && timeRemaining <= 3) {
+      playSfx("tick");
+    }
+  }, [timeRemaining, gameStatus, isTimed, showFeedback]);
 
   const moveToNext = useCallback(() => {
     if (currentIndex >= challenges.length - 1) {
@@ -430,17 +531,40 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       setMaxStreak((prev) => Math.max(prev, newStreak));
       setCorrectCount((prev) => prev + 1);
 
-      let points = 100;
-      if (isTimed) {
-        points += Math.floor((timeRemaining / config.timeLimits[currentMode]) * 50);
+      const breakdown = computeSoloPoints({
+        isTimed,
+        timeRemaining,
+        timeLimit: config.timeLimits[currentMode],
+        newStreak,
+        hintsUsed,
+      });
+      fxSeqRef.current += 1;
+      setLastBreakdown({
+        ...breakdown,
+        // "Perfect" = fast (top-half time bonus) AND hint-free, timed mode only.
+        perfect: isTimed && hintsUsed === 0 && breakdown.timeBonus >= 25,
+        seq: fxSeqRef.current,
+      });
+      setScore((prev) => prev + breakdown.total);
+
+      playSfx("correct");
+      if (STREAK_MILESTONES.includes(newStreak)) {
+        playSfx("streak");
+        setMilestone({ streak: newStreak, seq: fxSeqRef.current });
+        burstConfetti({ count: 24, spread: 55 });
       }
-      if (newStreak >= 3) {
-        points += Math.floor(points * 0.1 * Math.min(newStreak - 2, 5));
+      // First time this game's running total passes the previous best score.
+      if (bestBefore > 0 && score + breakdown.total > bestBefore && !newBestFiredRef.current) {
+        newBestFiredRef.current = true;
+        setNewBestSeq(fxSeqRef.current);
+        playSfx("newBest");
+        burstConfetti({ count: 40, spread: 70 });
       }
-      points -= hintsUsed * 10;
-      setScore((prev) => prev + Math.max(points, 10));
     } else {
       setStreak(0);
+      setLastBreakdown(null);
+      // Wrong-answer SFX fires from the showFeedback effect below (it also
+      // covers the timeout path).
     }
 
     if (currentChallenge) {
@@ -448,7 +572,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     }
 
     setTimeout(() => moveToNext(), 1500);
-  }, [currentChallenge, userInput, streak, isTimed, timeRemaining, config.timeLimits, hintsUsed, moveToNext, currentMode]);
+  }, [currentChallenge, userInput, streak, score, isTimed, timeRemaining, config.timeLimits, hintsUsed, moveToNext, currentMode, bestBefore]);
 
   const handleHint = useCallback(() => {
     if (hintsRemaining <= 0 || !currentChallenge) return;
@@ -590,9 +714,37 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         details: { mode: gameMode, difficulty, streak: maxStreak },
       });
 
+      // Achievement-granular event (On Fire): 5+ streak in one game. Separate
+      // activity type — doesn't disturb the spelling_challenges counter.
+      if (maxStreak >= 5) {
+        logActivity("spelling_hot_streak", {
+          sessionId: effectiveId || undefined,
+          score,
+          accuracy,
+          details: { mode: gameMode, difficulty, streak: maxStreak },
+        });
+      }
+
       if (onWordResult && correctWordsRef.current.size > 0) {
+        // Collect SRS outcomes from callers that return them (the card is
+        // omitted for fire-and-forget callers). Failures are swallowed — the
+        // card is decorative, never load-bearing.
+        const outcomes: VocabularySrsOutcome[] = [];
+        const settled: Promise<void>[] = [];
         for (const [word, correct] of correctWordsRef.current) {
-          onWordResult(word, correct);
+          const maybe = onWordResult(word, correct);
+          if (maybe && typeof maybe.then === "function") {
+            settled.push(
+              maybe
+                .then((o) => {
+                  if (o) outcomes.push(o);
+                })
+                .catch(() => {}),
+            );
+          }
+        }
+        if (settled.length > 0) {
+          void Promise.all(settled).then(() => setSrsOutcomes(outcomes));
         }
       }
 
@@ -868,6 +1020,8 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
           correctCount={correctCount}
           totalCount={challenges.length}
           maxStreak={maxStreak}
+          isNewBest={bestBefore > 0 && score > bestBefore}
+          srsOutcomes={srsOutcomes}
           onPlayAgain={() => setGameStatus("setup")}
         />
       </div>
@@ -887,19 +1041,27 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     : null;
 
   return (
-    <div className="flex flex-col items-center gap-4 py-4">
+    <div className="relative flex flex-col items-center gap-4 py-4">
+      {milestone && (
+        <MilestoneBanner
+          key={`mb-${milestone.seq}`}
+          message={t("reading.glossary.spelling.fx.milestone", { count: milestone.streak })}
+        />
+      )}
+      {newBestSeq > 0 && (
+        <MilestoneBanner
+          key={`nb-${newBestSeq}`}
+          message={t("reading.glossary.spelling.fx.newBest")}
+          className="top-12"
+        />
+      )}
       <div className="w-full max-w-md">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
               {currentIndex + 1} / {challenges.length}
             </span>
-            {streak >= 2 && (
-              <div className="flex items-center gap-1 text-orange-500">
-                <Flame className="h-4 w-4 animate-pulse" />
-                <span className="text-sm font-semibold">{streak}</span>
-              </div>
-            )}
+            <StreakFlame streak={streak} />
           </div>
           <div className="flex items-center gap-3">
             {hintsRemaining > 0 && (
@@ -913,7 +1075,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
               </button>
             )}
             {isTimed && (
-              <div className={cn("flex items-center gap-1 text-sm font-medium", timerColor)}>
+              <div className={cn("flex items-center gap-1 text-sm font-medium", timerColor, timeRemaining <= 3 && "animate-urgent-pulse")}>
                 <Timer className="h-4 w-4" />
                 {timeRemaining}s
               </div>
@@ -930,6 +1092,9 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       </div>
 
       <div className="w-full max-w-md bg-card border rounded-xl p-6 relative overflow-hidden">
+        {showFeedback && lastBreakdown && (
+          <PointPopup key={`pp-${lastBreakdown.seq}`} breakdown={lastBreakdown} />
+        )}
         <div className="text-center mb-4">
           <span className="text-xs px-2 py-1 bg-muted rounded-full">
             {t(`reading.glossary.spelling.modes.${currentMode}`)}
@@ -982,7 +1147,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                 setUserInput(e.target.value);
               }}
               placeholder={t("reading.glossary.spelling.typeAnswer")}
-              className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              className={cn(
+                "w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background",
+                showFeedback && isCorrect && "border-green-500 bg-green-500/10",
+                showFeedback && !isCorrect && "border-red-500 bg-red-500/10"
+              )}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -1097,7 +1266,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                 setUserInput(e.target.value);
               }}
               placeholder={t("reading.glossary.spelling.typeMissing")}
-              className="w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              className={cn(
+                "w-full px-4 py-3 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background",
+                showFeedback && isCorrect && "border-green-500 bg-green-500/10",
+                showFeedback && !isCorrect && "border-red-500 bg-red-500/10"
+              )}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
@@ -1132,7 +1305,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
             "w-full max-w-md p-4 rounded-xl flex items-center justify-center gap-3",
             isCorrect
               ? "bg-green-100 dark:bg-green-900/30 border-2 border-green-500"
-              : "bg-red-100 dark:bg-red-900/30 border-2 border-red-500"
+              : "bg-red-100 dark:bg-red-900/30 border-2 border-red-500 animate-shake-x"
           )}
         >
           {isCorrect ? (
@@ -1158,12 +1331,13 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <span>{t("reading.glossary.spelling.score")}:</span>
-        <span className="font-semibold text-foreground">{score}</span>
-        <span className="mx-2">|</span>
-        <span className="flex items-center gap-1">
-          <Flame className="h-4 w-4 text-orange-500" />
-          {streak}
-        </span>
+        <AnimatedScore value={score} className="font-semibold text-foreground" />
+        {streak >= 2 && (
+          <>
+            <span className="mx-1">|</span>
+            <StreakFlame streak={streak} />
+          </>
+        )}
       </div>
     </div>
   );

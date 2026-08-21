@@ -66,6 +66,20 @@ interface BattleStore {
   totalWords: number
   /** True after the results have been persisted (activity log, store, etc.). */
   resultPersisted: boolean
+  /**
+   * True when this battle's final score beat the player's previous
+   * `spellingGameBestScore` (computed in SpellingBattleFlow's persist effect
+   * BEFORE the best-score update, since the reading store only keeps a max).
+   * Drives the "New personal best!" celebration on the results screen.
+   */
+  newBestAchieved: boolean
+  /**
+   * Per-word SRS outcomes collected from the page-supplied onWordResult
+   * promises during result persistence — powers the results screen's
+   * "spaced repetition updated" card. Empty when the entry point supplied a
+   * fire-and-forget (or no) onWordResult.
+   */
+  srsOutcomes: VocabularySrsOutcome[]
 
   // ── Actions ──────────────────────────────────────────────────────────────
   setConnectionStatus: (status: RealtimeConnectionStatus) => void
@@ -88,6 +102,8 @@ interface BattleStore {
   setLiveRanking: (ranking: BattleRankingEntry[]) => void
   setGameEnd: (finalRanking: BattleRankingEntry[], totalWords: number) => void
   setResultPersisted: (value: boolean) => void
+  setNewBestAchieved: (value: boolean) => void
+  setSrsOutcomes: (outcomes: VocabularySrsOutcome[]) => void
   reset: () => void
 }
 
@@ -116,6 +132,8 @@ const initialRoomState = {
   finalRanking: [],
   totalWords: 0,
   resultPersisted: false,
+  newBestAchieved: false,
+  srsOutcomes: [],
 }
 
 export const useBattleStore = create<BattleStore>((set) => ({
@@ -142,9 +160,9 @@ export const useBattleStore = create<BattleStore>((set) => ({
       // Clear live game fields when the room is back in the lobby (rematch)
       // or finished — the next word_start/game_end repopulates them.
       ...(state.status === "lobby"
-        ? { countdownN: null, currentWord: null, wordEnded: null, myLastResult: null, liveRanking: [], finalRanking: [], myWordResults: [], resultPersisted: false }
+        ? { countdownN: null, currentWord: null, wordEnded: null, myLastResult: null, liveRanking: [], finalRanking: [], myWordResults: [], resultPersisted: false, newBestAchieved: false, srsOutcomes: [] }
         : state.status === "countdown"
-          ? { finalRanking: [], myWordResults: [], currentWord: null, wordEnded: null, resultPersisted: false } // fresh game
+          ? { finalRanking: [], myWordResults: [], currentWord: null, wordEnded: null, resultPersisted: false, newBestAchieved: false, srsOutcomes: [] } // fresh game
           : {}),
     }),
 
@@ -170,6 +188,10 @@ export const useBattleStore = create<BattleStore>((set) => ({
   setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, wordEnded: null, countdownN: null }),
 
   setResultPersisted: (resultPersisted) => set({ resultPersisted }),
+
+  setNewBestAchieved: (newBestAchieved) => set({ newBestAchieved }),
+
+  setSrsOutcomes: (srsOutcomes) => set({ srsOutcomes }),
 
   reset: () =>
     set({

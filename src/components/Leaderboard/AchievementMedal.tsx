@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles, Lock, CheckCircle2,
-  BookOpenCheck, GraduationCap, Gamepad2,
+  BookOpenCheck, GraduationCap, Gamepad2, Swords, Flame,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import type { AchievementState } from "@/store/achievements";
@@ -13,7 +13,7 @@ import type { AchievementState } from "@/store/achievements";
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles,
-  BookOpenCheck, GraduationCap, Gamepad2,
+  BookOpenCheck, GraduationCap, Gamepad2, Swords, Flame,
 };
 
 // ─── Color maps ───────────────────────────────────────────────────────────────
@@ -29,6 +29,8 @@ const COLOR_BG: Record<string, string> = {
   cyan:    "bg-cyan-500",
   fuchsia: "bg-fuchsia-500",
   amber:   "bg-amber-500",
+  violet:  "bg-violet-500",
+  rose:    "bg-rose-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -43,6 +45,8 @@ const COLOR_GLOW: Record<string, string> = {
   cyan:    "shadow-cyan-400/50",
   fuchsia: "shadow-fuchsia-400/50",
   amber:   "shadow-amber-400/50",
+  violet:  "shadow-violet-400/50",
+  rose:    "shadow-rose-400/50",
 };
 
 const COLOR_RING: Record<string, string> = {
@@ -57,6 +61,8 @@ const COLOR_RING: Record<string, string> = {
   cyan:    "stroke-cyan-500",
   fuchsia: "stroke-fuchsia-500",
   amber:   "stroke-amber-500",
+  violet:  "stroke-violet-500",
+  rose:    "stroke-rose-500",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -71,6 +77,8 @@ const COLOR_TEXT: Record<string, string> = {
   cyan:    "text-cyan-600 dark:text-cyan-400",
   fuchsia: "text-fuchsia-600 dark:text-fuchsia-400",
   amber:   "text-amber-600 dark:text-amber-400",
+  violet:  "text-violet-600 dark:text-violet-400",
+  rose:    "text-rose-600 dark:text-rose-400",
 };
 
 // ─── Progress ring SVG ────────────────────────────────────────────────────────

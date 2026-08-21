@@ -111,6 +111,38 @@ export default {
               "0 0 0 2px hsl(var(--primary) / 0.65), 0 0 28px 2px hsl(var(--primary) / 0.55)",
           },
         },
+        // ── Game juice animations (spelling/grammar games) ─────────────────
+        // One-shot pop for point badges / banners.
+        "pop-in": {
+          "0%": { transform: "scale(0.4)", opacity: "0" },
+          "70%": { transform: "scale(1.1)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        // Horizontal shake for wrong answers.
+        "shake-x": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-6px)" },
+          "40%": { transform: "translateX(6px)" },
+          "60%": { transform: "translateX(-4px)" },
+          "80%": { transform: "translateX(4px)" },
+        },
+        // One-shot rise + fade for floating point popups.
+        "float-fade": {
+          "0%": { transform: "translateY(6px)", opacity: "0" },
+          "15%": { transform: "translateY(0)", opacity: "1" },
+          "70%": { opacity: "1" },
+          "100%": { transform: "translateY(-26px)", opacity: "0" },
+        },
+        // Escalating pulse for high-streak flames.
+        "flame-pulse": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.25)" },
+        },
+        // Urgency pulse for the timer in its final seconds.
+        "urgent-pulse": {
+          "0%, 100%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(1.12)", opacity: "0.75" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -118,6 +150,11 @@ export default {
         "float-up": "float-up 3s ease-out infinite",
         shimmer: "shimmer 3s linear infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "pop-in": "pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both",
+        "shake-x": "shake-x 0.4s ease-in-out",
+        "float-fade": "float-fade 1.4s ease-out forwards",
+        "flame-pulse": "flame-pulse 1s ease-in-out infinite",
+        "urgent-pulse": "urgent-pulse 0.8s ease-in-out infinite",
       },
     },
   },

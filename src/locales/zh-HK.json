@@ -1718,6 +1718,24 @@
         "tipStreak": "連勝可獲得額外分數（每3次連勝+10%）",
         "tipHint": "提示會顯示字母，但會扣減分數",
         "tipTime": "計時獎勵會給回答較快的玩家額外分數",
+        "fx": {
+          "streakTier": {
+            "heatingUp": "漸入佳境",
+            "onFire": "火熱連勝",
+            "blazing": "烈焰狂飆",
+            "unstoppable": "勢不可擋"
+          },
+          "milestone": "連續答對 {{count}} 題！",
+          "newBest": "刷新個人紀錄！",
+          "perfect": "完美！",
+          "srs": {
+            "title": "間隔重複記憶已更新",
+            "leveledUp": "{{count}} 個單字升級了",
+            "today": "今天",
+            "inDays_one": "{{count}} 天後",
+            "inDays_other": "{{count}} 天後"
+          }
+        },
         "multiplayer": {
           "title": "多人拼字對戰",
           "subtitle": "與其他玩家進行即時拼字對決",
@@ -1781,6 +1799,7 @@
           "rulesWrongDesc": "0 分 — 連擊歸零",
           "liveRank": "即時排名",
           "awaitingFirst": "等待第一題…",
+          "overtaken": "你被超越了！",
           "points": "分",
           "youWon": "你贏了！🎉",
           "youFinished": "你排名第 {{rank}}",
@@ -2891,6 +2910,8 @@
     "ttsPlaybackRate": "播放速度",
     "autoSpeakFlashcard": "自動朗讀字卡",
     "autoSpeakFlashcardTip": "當字卡載入時自動朗讀生字",
+    "gameSoundEffects": "遊戲音效",
+    "gameSoundEffectsTip": "在串字和文法遊戲中播放簡短音效（答對、連續答對、倒數）",
     "cheatMode": "越獄模式",
     "cheatModeTip": "顯示進階答題和解題協助",
     "showGiveAnswer": "顯示「直接解答」",
@@ -3797,11 +3818,21 @@
         "description": "完成 {{count}} 次針對性閱讀練習",
         "hint": "練習閱讀測驗中的弱項技能"
       },
-      "spelling_challenges": {
-        "name": "拼字達人",
-        "description": "完成 {{count}} 次拼字挑戰",
-        "hint": "用詞彙生字進行拼字遊戲"
-      },
+    "spelling_challenges": {
+      "name": "拼字達人",
+      "description": "完成 {{count}} 次拼字挑戰",
+      "hint": "用詞彙生字進行拼字遊戲"
+    },
+    "spelling_battle_win": {
+      "name": "對戰冠軍",
+      "description": "贏得 {{count}} 場多人拼字對戰",
+      "hint": "在即時拼字對戰中以第一名完成比賽"
+    },
+    "spelling_hot_streak": {
+      "name": "火熱連勝",
+      "description": "達成 5 連勝以上 {{count}} 次",
+      "hint": "在一場拼字遊戲中連續答對 5 題"
+    },
       "vocabulary_quizzes": {
         "name": "詞彙測驗高手",
         "description": "完成 {{count}} 次詞彙測驗",

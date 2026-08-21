@@ -3,6 +3,8 @@ type ActivityType =
   | "test_complete"
   | "quiz_complete"
   | "spelling_complete"
+  | "spelling_battle_win"
+  | "spelling_hot_streak"
   | "flashcard_review"
   | "mindmap_generate"
   | "adapted_text_generate"

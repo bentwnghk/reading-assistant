@@ -68,6 +68,27 @@ export function isAudioUnlocked(): boolean {
 }
 
 /**
+ * The shared, app-lifetime AudioContext used for TTS playback. Re-exported for
+ * the game SFX engine (`src/utils/sfx.ts`), which schedules its own short
+ * oscillator envelopes on the SAME context — required by the iOS Safari
+ * autoplay policy (one gesture-resumed context serves all audio) and mandated
+ * by the "exactly one TTS/audio implementation" rule. SFX never touch
+ * `currentSource`, so TTS playback is unaffected.
+ */
+export function getSharedAudioContext(): AudioContext | null {
+  return getAudioContext();
+}
+
+/**
+ * Whether a TTS buffer is currently playing. The SFX engine mutes the
+ * countdown "tick" while a word is being spoken (listen-type mode) so the
+ * two never overlap.
+ */
+export function isSpeaking(): boolean {
+  return currentSource !== null;
+}
+
+/**
  * Resume the AudioContext from within a user gesture handler (click / touch /
  * pointerdown). This is the one-time iOS unlock: once the context is "running"
  * it stays running for the page's lifetime, and programmatic auto-play (from

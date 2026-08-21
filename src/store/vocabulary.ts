@@ -86,7 +86,7 @@ interface VocabularyStoreActions {
   updateWordReview: (
     word: string,
     correct: boolean
-  ) => Promise<void>;
+  ) => Promise<VocabularySrsOutcome | null>;
   setSearchQuery: (query: string) => void;
   fetchDueForReviewCount: () => Promise<void>;
   setSortBy: (sortBy: SortField) => void;
@@ -334,11 +334,11 @@ export const useVocabularyStore = create<
 
   updateWordReview: async (word, correct) => {
     const state = get();
-    if (state.viewingUserId) return;
+    if (state.viewingUserId) return null;
     const existingWord = state.words.find(
       (w) => w.word.toLowerCase() === word.toLowerCase()
     );
-    if (!existingWord) return;
+    if (!existingWord) return null;
 
     const { newMastery, nextReviewAt } = calculateNextReview(
       existingWord.masteryLevel,
@@ -373,8 +373,11 @@ export const useVocabularyStore = create<
             : w
         ),
       }));
+      // Outcome for the games' "spaced repetition updated" result card.
+      return { word, correct, newMastery, nextReviewAt };
     } catch (error) {
       console.error("Failed to update review:", error);
+      return null;
     }
   },
 

@@ -113,6 +113,8 @@ export interface SettingStore {
   ttsVoice: TTSVoice;
   ttsPlaybackRate: TTSPlaybackRate;
   autoSpeakFlashcard: boolean;
+  /** Game SFX (correct/wrong/streak/countdown…) played via the shared AudioContext. */
+  gameSoundEffects: boolean;
   cheatMode: boolean;
   showGiveAnswer: boolean;
   openAIApiKey: string;
@@ -217,6 +219,7 @@ export const defaultValues: SettingStore = {
   ttsVoice: "onyx",
   ttsPlaybackRate: 1.0 as TTSPlaybackRate,
   autoSpeakFlashcard: true,
+  gameSoundEffects: true,
   cheatMode: false,
   showGiveAnswer: false,
   openAIApiKey: "",

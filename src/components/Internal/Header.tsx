@@ -137,13 +137,26 @@ function Header() {
   // runs a pure UPDATE on user_vocabulary, so words the user doesn't already
   // have are skipped (0 rows) — battle words are NOT auto-inserted into the
   // joiner's My Vocabulary; only existing words' mastery is updated.
-  const handleBattleWordResult = useCallback((word: string, correct: boolean) => {
-    fetch("/api/vocabulary/word", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ word, correct }),
-    }).catch(() => {});
-  }, []);
+  const handleBattleWordResult = useCallback(
+    async (word: string, correct: boolean): Promise<VocabularySrsOutcome | null> => {
+      try {
+        const res = await fetch("/api/vocabulary/word", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ word, correct }),
+        });
+        if (!res.ok) return null;
+        const data = (await res.json()) as { newMastery?: number; nextReviewAt?: number };
+        if (typeof data.newMastery !== "number" || typeof data.nextReviewAt !== "number") {
+          return null;
+        }
+        return { word, correct, newMastery: data.newMastery, nextReviewAt: data.nextReviewAt };
+      } catch {
+        return null;
+      }
+    },
+    []
+  );
   const totalPending = pendingCount + pendingReviewListShareCount + pendingClassBattleCount;
   const manualUrl = i18n.language === "zh-HK" ? "/docs/user-manual-zh-hk.html" : "/docs/user-manual-en.html";
   const {
