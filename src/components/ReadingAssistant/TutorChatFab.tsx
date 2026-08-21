@@ -44,7 +44,7 @@ function TutorChatFab() {
         onClick={handleToggle}
         onTouchEnd={(e) => { e.preventDefault(); handleToggle(); }}
         className={cn(
-          "fixed bottom-20 right-6 z-50 h-12 w-12 rounded-full shadow-lg print:hidden",
+          "fixed bottom-20 right-6 z-50 h-12 w-12 md:w-auto md:px-5 rounded-full shadow-lg print:hidden",
           "bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70",
           "transition-all duration-300",
           openTutorChat && "scale-0 opacity-0"
@@ -53,6 +53,7 @@ function TutorChatFab() {
         title={t("reading.tutor.title")}
       >
         <MessageCircle className="w-5 h-5" />
+        <span className="hidden md:inline text-sm font-medium whitespace-nowrap">{t("reading.tutor.title")}</span>
       </Button>
 
       {openTutorChat && (
