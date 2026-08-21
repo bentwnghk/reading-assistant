@@ -280,6 +280,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   // #185). The ref survives StrictMode's double-invoked effects; it resets
   // when gameStatus leaves "completed" (play again / new game).
   const completionFiredRef = useRef(false);
+  // Engagement gate: true once the player submits any answer this game
+  // (set in checkAnswer). A game that was started but never answered — every
+  // word left to time out — is treated as not played: no achievement/
+  // leaderboard activity, no SRS updates, no review-session record.
+  const anyAnswerRef = useRef(false);
   // SRS outcomes collected from the parent's onWordResult promises — powers
   // the result screen's "spaced repetition updated" card.
   const [srsOutcomes, setSrsOutcomes] = useState<VocabularySrsOutcome[]>([]);
@@ -388,6 +393,8 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     setBestBefore(spellingGameBestScore);
     setNewBestSeq(0);
     newBestFiredRef.current = false;
+    anyAnswerRef.current = false;
+    correctWordsRef.current.clear();
     setSrsOutcomes([]);
     setGameStatus("playing");
     setCurrentMode(initialMode);
@@ -401,6 +408,13 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
             setIsCorrect(false);
             setShowFeedback(true);
             setStreak(0);
+            // Timed-out word = failed recall: record it so SRS
+            // (onWordResult) and the review-session history (onComplete) see
+            // every challenge, matching the result screen's denominator.
+            // Idempotent under StrictMode's double-invoked state updaters.
+            if (challengeRef.current) {
+              correctWordsRef.current.set(challengeRef.current.word, false);
+            }
             setTimeout(() => {
               if (currentIndex >= challenges.length - 1) {
                 setGameStatus("completed");
@@ -510,6 +524,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
   const checkAnswer = useCallback(() => {
     if (!currentChallenge) return;
+    anyAnswerRef.current = true;
 
     let correct: boolean;
 
@@ -722,8 +737,18 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       completionFiredRef.current = false;
       return;
     }
-    if (score <= 0 || completionFiredRef.current) return;
+    if (challenges.length === 0 || completionFiredRef.current) return;
     completionFiredRef.current = true;
+
+    // Engagement gate: zero submitted answers means the game was left idle
+    // (every word timed out) — not a played game. Skip best-score update,
+    // activity logging (achievements + leaderboard), SRS flush, review-session
+    // recording, and the session save; also drop the timeout-recorded
+    // failures so they can't leak into a later game's results.
+    if (!anyAnswerRef.current) {
+      correctWordsRef.current.clear();
+      return;
+    }
 
     const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
     setSpellingGameBestScore(score, accuracy);
