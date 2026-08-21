@@ -113,6 +113,7 @@ export default function TextDifficultyAnalyzer() {
   const [highlightTextType, setHighlightTextType] = React.useState<"original" | "adapted" | "simplified">("original");
 
   const handleAnalyze = async () => {
+    setShowCards(true);
     setIsAnalyzing(true);
     try {
       if (extractedText) {
@@ -155,7 +156,7 @@ export default function TextDifficultyAnalyzer() {
         <div className="flex items-center gap-2 ml-auto">
           <Button
             onClick={handleAnalyze}
-            disabled={!hasAnyText || isAnalyzing || !showCards}
+            disabled={!hasAnyText || isAnalyzing}
             size="sm"
             variant="outline"
             className="gap-1"
