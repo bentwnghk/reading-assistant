@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { getSchoolForUser } from "@/lib/users";
+import { getSchoolForUser, isUserBanned } from "@/lib/users";
 import { getPool } from "@/lib/db";
 import { issueRealtimeTicket } from "@/lib/realtime-ticket";
 
@@ -21,6 +21,11 @@ export async function GET() {
   }
 
   try {
+    // Banned users cannot obtain realtime tickets (blocks spelling battles).
+    if (await isUserBanned(session.user.id, session.user.email)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const schoolId = await getSchoolForUser(session.user.id);
 
     // Resolve classId for students (used for class-battle invite targeting).

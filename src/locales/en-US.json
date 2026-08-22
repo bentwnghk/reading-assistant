@@ -37,7 +37,8 @@
       "signOut": "Sign Out",
       "loading": "Loading...",
       "stuck": "This is taking longer than usual.",
-      "reload": "Reload"
+      "reload": "Reload",
+      "banned": "Your account has been banned from accessing this app. Please contact your administrator if you believe this is a mistake."
     },
     "shortcuts": {
       "title": "Keyboard Shortcuts",
@@ -3218,7 +3219,14 @@
       "deleteUser": "Delete",
       "deleteConfirm": "Permanently delete {{name}} and ALL associated data (sessions, vocabulary, subscriptions, achievements, etc.)? This action cannot be undone.",
       "deleteSuccess": "Deleted {{name}} and all associated data.",
-      "deleteFailed": "Failed to delete user."
+      "deleteFailed": "Failed to delete user.",
+      "banned": "Banned",
+      "banUser": "Ban",
+      "unbanUser": "Unban",
+      "banConfirm": "Ban {{name}} from accessing the app? They will be signed out immediately and blocked from signing in until unbanned.",
+      "banSuccess": "{{name}} has been banned.",
+      "unbanSuccess": "{{name}} has been unbanned and can sign in again.",
+      "banFailed": "Failed to update ban status."
     },
     "roleUpdated": "Role updated successfully",
     "roleUpdateFailed": "Failed to update role",

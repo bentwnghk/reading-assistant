@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
 import type { NextAuthConfig } from "next-auth"
-import { ensureUserRole, ensureUserSchool, type UserRole } from "@/lib/users"
+import { ensureUserRole, ensureUserSchool, isUserBanned, type UserRole } from "@/lib/users"
 import { authConfig } from "@/auth.config"
 import { enforceConcurrentSessionLimit } from "@/lib/session-security"
 
@@ -31,7 +31,20 @@ declare module "next-auth" {
 export const config: NextAuthConfig = {
   ...authConfig,
   adapter: PostgresAdapter(pool),
+  pages: {
+    // AccessDenied errors (banned users) redirect home with ?error=AccessDenied
+    // instead of the default built-in error page.
+    error: "/",
+  },
   callbacks: {
+    async signIn({ user }) {
+      // Banned users are rejected at sign-in. Returning false throws
+      // AccessDenied, which redirects to pages.error.
+      if (await isUserBanned(user.id, user.email)) {
+        return false
+      }
+      return true
+    },
     async session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id

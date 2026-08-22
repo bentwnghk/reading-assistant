@@ -437,6 +437,7 @@ export async function getLeaderboard(
       LEFT JOIN schools s ON s.id = u.school_id
       ${scopeJoin}
       WHERE ws.week_start_date = $1
+        AND COALESCE(u.banned, FALSE) = FALSE
         ${scopeWhere}
       ORDER BY ws.${sortBy} DESC NULLS LAST
       LIMIT $2`
@@ -568,7 +569,8 @@ export async function getLeaderboard(
            WHERE ws2.week_start_date = $1
              AND ws2.${sortBy} > ws.${sortBy}
              ${userSubScopeWhere}
-          ) AS rank
+             AND NOT EXISTS (SELECT 1 FROM users bu WHERE bu.id = ws2.user_id AND COALESCE(bu.banned, FALSE))
+           ) AS rank
         FROM weekly_stats ws
         JOIN users u ON u.id = ws.user_id
         LEFT JOIN class_members cm2 ON cm2.student_id = ws.user_id
@@ -908,6 +910,7 @@ export async function getAllTimeLeaderboard(
       LEFT JOIN schools s ON s.id = u.school_id
       ${scopeJoin}
       WHERE 1=1
+        AND COALESCE(u.banned, FALSE) = FALSE
         ${scopeWhere}
       ORDER BY ats.${sortBy} DESC NULLS LAST
       LIMIT $1`
@@ -993,7 +996,8 @@ export async function getAllTimeLeaderboard(
            ${userSubScopeJoin}
            WHERE ats2.${sortBy} > ats.${sortBy}
              ${userSubScopeWhere}
-          ) AS rank
+             AND NOT EXISTS (SELECT 1 FROM users bu WHERE bu.id = ats2.user_id AND COALESCE(bu.banned, FALSE))
+           ) AS rank
         FROM all_time_stats ats
         JOIN users u ON u.id = ats.user_id
         LEFT JOIN class_members cm2 ON cm2.student_id = ats.user_id
@@ -1001,6 +1005,7 @@ export async function getAllTimeLeaderboard(
         LEFT JOIN schools s ON s.id = u.school_id
         ${userScopeJoin}
         WHERE ats.user_id = $1
+          AND COALESCE(u.banned, FALSE) = FALSE
           ${userScopeWhere}`
 
       const userResult = await client.query(userSql, userParams)
@@ -1141,19 +1146,20 @@ export async function getPersonalStats(
       `SELECT CASE
          WHEN (SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1) IS NULL
          THEN NULL
-         ELSE (
-           SELECT (COUNT(*) + 1)::int
-           FROM weekly_stats ws2
-           JOIN class_members cm2 ON cm2.student_id = ws2.user_id
-           WHERE cm2.class_id = (
-               SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1
-             )
-             AND ws2.week_start_date = $2
-             AND ws2.weekly_score > COALESCE(
-               (SELECT weekly_score FROM weekly_stats
-                WHERE user_id = $1 AND week_start_date = $2), 0
-             )
-         )
+          ELSE (
+            SELECT (COUNT(*) + 1)::int
+            FROM weekly_stats ws2
+            JOIN class_members cm2 ON cm2.student_id = ws2.user_id
+            WHERE cm2.class_id = (
+                SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1
+              )
+              AND ws2.week_start_date = $2
+              AND ws2.weekly_score > COALESCE(
+                (SELECT weekly_score FROM weekly_stats
+                 WHERE user_id = $1 AND week_start_date = $2), 0
+              )
+              AND NOT EXISTS (SELECT 1 FROM users bu WHERE bu.id = ws2.user_id AND COALESCE(bu.banned, FALSE))
+          )
        END AS rank`,
       [userId, weekDateStr]
     )
@@ -1164,6 +1170,7 @@ export async function getPersonalStats(
        FROM weekly_stats ws2
        JOIN users u2 ON u2.id = ws2.user_id
        WHERE u2.school_id = (SELECT school_id FROM users WHERE id = $1)
+         AND COALESCE(u2.banned, FALSE) = FALSE
          AND ws2.week_start_date = $2
          AND ws2.weekly_score > COALESCE(
            (SELECT weekly_score FROM weekly_stats
@@ -1175,9 +1182,11 @@ export async function getPersonalStats(
     // ── Global rank ──
     const rankGlobalResult = await client.query(
       `SELECT (COUNT(*) + 1)::int AS rank
-       FROM weekly_stats
-       WHERE week_start_date = $1
-         AND weekly_score > COALESCE(
+       FROM weekly_stats ws3
+       JOIN users u3 ON u3.id = ws3.user_id
+       WHERE ws3.week_start_date = $1
+         AND COALESCE(u3.banned, FALSE) = FALSE
+         AND ws3.weekly_score > COALESCE(
            (SELECT weekly_score FROM weekly_stats
             WHERE user_id = $2 AND week_start_date = $1), 0
          )`,

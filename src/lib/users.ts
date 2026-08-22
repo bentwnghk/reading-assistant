@@ -38,6 +38,7 @@ export interface UserWithRole {
   hasActiveSubscription?: boolean
   hasMeterApiKey?: boolean
   hasAccessPassword?: boolean
+  banned?: boolean
   createdAt?: number
 }
 
@@ -192,10 +193,11 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
        JOIN class_members cm ON rs.user_id = cm.student_id
        JOIN users u ON rs.user_id = u.id
        WHERE cm.class_id = $1
+         AND COALESCE(u.banned, FALSE) = FALSE
        ORDER BY rs.updated_at DESC`,
       [classId]
     )
-    
+
     return result.rows.map(row => ({
       id: row.id,
       userId: row.user_id,
@@ -307,6 +309,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
        JOIN users u ON rs.user_id = u.id
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        WHERE u.school_id = $1 AND COALESCE(ur.role, 'student') = 'student'
+         AND COALESCE(u.banned, FALSE) = FALSE
        ORDER BY rs.updated_at DESC`,
       [schoolId]
     )
@@ -422,6 +425,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
        JOIN users u ON rs.user_id = u.id
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        WHERE COALESCE(ur.role, 'student') = 'student'
+         AND COALESCE(u.banned, FALSE) = FALSE
        ORDER BY rs.updated_at DESC`
     )
     
@@ -593,6 +597,50 @@ export async function setUserRole(userId: string, role: UserRole): Promise<boole
   }
 }
 
+/**
+ * Returns true if the user (looked up by id or email) is banned.
+ * Email lookup covers first-time sign-ins where the users row may be
+ * referenced by email before the adapter exposes the id.
+ */
+export async function isUserBanned(userId?: string | null, email?: string | null): Promise<boolean> {
+  if (!userId && !email) return false
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT COALESCE(banned, FALSE) as banned FROM users WHERE id = $1 OR email = $2 LIMIT 1`,
+      [userId ?? null, email ? email.toLowerCase() : null]
+    )
+    return result.rows.length > 0 && !!result.rows[0].banned
+  } catch {
+    return false
+  } finally {
+    client.release()
+  }
+}
+
+/**
+ * Ban or unban a user. Banning also deletes all their sessions so any
+ * active login (database session strategy) is terminated immediately.
+ */
+export async function setUserBanned(userId: string, banned: boolean): Promise<boolean> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `UPDATE users SET banned = $1 WHERE id = $2`,
+      [banned, userId]
+    )
+    if ((result.rowCount ?? 0) === 0) return false
+    if (banned) {
+      await client.query(`DELETE FROM sessions WHERE "userId" = $1`, [userId])
+    }
+    return true
+  } catch {
+    return false
+  } finally {
+    client.release()
+  }
+}
+
 export async function getAllUsers(): Promise<UserWithRole[]> {
   await ensureSchoolSubscriptionTables()
   const client = await getClient()
@@ -607,6 +655,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
         s.name as "schoolName",
         u.school_access_ends_at as "schoolAccessEndsAt",
         COALESCE(u.school_manually_removed, FALSE) as "schoolManuallyRemoved",
+        COALESCE(u.banned, FALSE) as "banned",
         us.settings->>'mode' as "billingMode",
         (
           EXISTS (
@@ -648,7 +697,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
        LEFT JOIN schools s ON u.school_id = s.id
        LEFT JOIN user_settings us ON u.id = us.user_id
        ORDER BY u."createdAt" DESC`
-    )
+     )
     
     return result.rows.map(row => ({
       id: row.id,
@@ -668,6 +717,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       hasActiveSubscription: !!row.hasActiveSubscription,
       hasMeterApiKey: !!row.hasMeterApiKey,
       hasAccessPassword: !!row.hasAccessPassword,
+      banned: !!row.banned,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
@@ -961,6 +1011,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
         s.name as "schoolName",
         u.school_access_ends_at as "schoolAccessEndsAt",
         COALESCE(u.school_manually_removed, FALSE) as "schoolManuallyRemoved",
+        COALESCE(u.banned, FALSE) as "banned",
         us.settings->>'mode' as "billingMode",
         (
           EXISTS (
@@ -1021,6 +1072,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       hasActiveSubscription: !!row.hasActiveSubscription,
       hasMeterApiKey: !!row.hasMeterApiKey,
       hasAccessPassword: !!row.hasAccessPassword,
+      banned: !!row.banned,
       classId: row.classId,
       className: row.className,
       taughtClassIds: row.taughtClassIds || [],
@@ -1068,6 +1120,7 @@ export async function getClassMembers(classId: string): Promise<ClassMember[]> {
        FROM class_members cm
        JOIN users u ON cm.student_id = u.id
        WHERE cm.class_id = $1
+         AND COALESCE(u.banned, FALSE) = FALSE
        ORDER BY cm.joined_at DESC`,
       [classId]
     )
@@ -1207,6 +1260,7 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
        JOIN class_members cm ON rs.user_id = cm.student_id
        JOIN users u ON rs.user_id = u.id
        WHERE cm.class_id = $1
+         AND COALESCE(u.banned, FALSE) = FALSE
        ORDER BY rs.updated_at DESC`,
       [classId]
     )
@@ -1730,6 +1784,7 @@ export async function getScopedStudents(actorId: string, actorRole: string, scho
        LEFT JOIN schools sch ON sch.id = u.school_id
        WHERE COALESCE(ur.role, 'student') = 'student'
          AND u.id <> $1
+         AND COALESCE(u.banned, FALSE) = FALSE
          ${scopeCondition}
        ORDER BY u.name ASC`,
       params

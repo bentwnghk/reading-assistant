@@ -69,6 +69,7 @@ export async function GET(
 
     const available = candidates.filter(u =>
       u.role === "student" &&
+      !u.banned &&
       !memberIds.has(u.id) &&
       !assignedStudentIds.has(u.id)
     )

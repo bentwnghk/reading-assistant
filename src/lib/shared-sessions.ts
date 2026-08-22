@@ -244,7 +244,7 @@ export async function getShareTargets(
     for (const school of schools) {
       const users = await getUsersInSchool(school.id)
       const targets = users
-        .filter((u) => u.id !== userId)
+        .filter((u) => u.id !== userId && !u.banned)
         .map((u) => ({
           id: u.id,
           name: u.name ?? null,
@@ -302,7 +302,7 @@ export async function getShareTargets(
     if (!schoolId) return []
     const users = await getUsersInSchool(schoolId)
     const targets = users
-      .filter((u) => u.id !== userId)
+      .filter((u) => u.id !== userId && !u.banned)
       .map((u) => ({
         id: u.id,
         name: u.name ?? null,

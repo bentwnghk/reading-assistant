@@ -136,10 +136,10 @@ async function resolveValidStudentIds(
 ): Promise<string[]> {
   if (role === "super-admin") {
     const all = await getAllUsers()
-    return all.filter((u) => u.role === "student").map((u) => u.id)
+    return all.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
   }
   const schoolId = await getSchoolForUser(requesterId)
   if (!schoolId) return []
   const users = await getUsersInSchool(schoolId)
-  return users.filter((u) => u.role === "student").map((u) => u.id)
+  return users.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
 }

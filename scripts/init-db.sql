@@ -243,6 +243,9 @@ ALTER TABLE users ADD COLUMN school_access_ends_at TIMESTAMP WITH TIME ZONE;
 
 ALTER TABLE users ADD COLUMN school_manually_removed BOOLEAN DEFAULT FALSE;
 
+-- Banned users are blocked from signing in (super-admin ban feature).
+ALTER TABLE users ADD COLUMN banned BOOLEAN DEFAULT FALSE;
+
 -- Classes table (belongs to a school)
 CREATE TABLE classes (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),

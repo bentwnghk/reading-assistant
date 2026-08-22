@@ -100,6 +100,7 @@ export async function getInactiveUsers(daysThreshold: number): Promise<InactiveU
       ) last_act ON true
       LEFT JOIN user_settings us ON us.user_id = u.id
       WHERE u.email IS NOT NULL
+        AND COALESCE(u.banned, FALSE) = FALSE
         AND last_act.created_at < NOW() - $1::INTERVAL
         AND (
           NOT EXISTS (

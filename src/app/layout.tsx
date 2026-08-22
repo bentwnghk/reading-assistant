@@ -8,6 +8,7 @@ import { AchievementUnlockedDialog } from "@/components/Leaderboard/AchievementU
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import { ClassBattlePoller } from "@/components/ClassBattlePoller";
+import { AuthErrorNotifier } from "@/components/Auth/AuthErrorNotifier";
 import Debugger from "@/components/Internal/Debugger";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -143,6 +144,7 @@ export default function RootLayout({
               {children}
               <AchievementUnlockedDialog />
               <ClassBattlePoller />
+              <AuthErrorNotifier />
             </I18Provider>
           </AuthProvider>
         </ThemeProvider>

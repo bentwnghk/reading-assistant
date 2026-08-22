@@ -32,7 +32,7 @@ export async function GET() {
       for (const school of schools) {
         const users = await getUsersInSchool(school.id)
         const targets: ShareTarget[] = users
-          .filter((u) => u.id !== session.user.id && u.role === "student")
+          .filter((u) => u.id !== session.user.id && u.role === "student" && !u.banned)
           .map((u) => ({
             id: u.id,
             name: u.name ?? null,
@@ -54,7 +54,7 @@ export async function GET() {
     const users = await getUsersInSchool(schoolId)
     const schoolName = users.find((u) => u.schoolId === schoolId)?.schoolName
     const targets: ShareTarget[] = users
-      .filter((u) => u.id !== session.user.id && u.role === "student")
+      .filter((u) => u.id !== session.user.id && u.role === "student" && !u.banned)
       .map((u) => ({
         id: u.id,
         name: u.name ?? null,

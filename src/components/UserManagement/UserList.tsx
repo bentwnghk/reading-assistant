@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Trash2 } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Trash2, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -62,6 +62,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [revoking, setRevoking] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [banningId, setBanningId] = useState<string | null>(null)
   const PAGE_SIZE = 20
 
   const loadData = useCallback(async () => {
@@ -410,6 +411,38 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
     }
   }
 
+  const handleBanToggle = async (userId: string, banned: boolean, userName: string, userEmail: string) => {
+    const displayName = userName || userEmail
+    if (banned) {
+      const confirmMsg = t("userManagement.users.banConfirm", { name: displayName })
+      if (!confirm(confirmMsg)) return
+    }
+
+    setBanningId(userId)
+    try {
+      const response = await fetch(`/api/users/${userId}/ban`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ banned }),
+      })
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        toast.error((err as { error?: string }).error || t("userManagement.users.banFailed"))
+        return
+      }
+
+      toast.success(banned
+        ? t("userManagement.users.banSuccess", { name: displayName })
+        : t("userManagement.users.unbanSuccess", { name: displayName }))
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, banned } : u))
+    } catch {
+      toast.error(t("userManagement.users.banFailed"))
+    } finally {
+      setBanningId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -549,7 +582,11 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                 : null
             const BillingIcon = billingMode ? BILLING_MODE_ICON[billingMode] : null
             return (
-              <TableRow key={user.id} data-state={selectedIds.has(user.id) ? "selected" : undefined}>
+              <TableRow
+                key={user.id}
+                data-state={selectedIds.has(user.id) ? "selected" : undefined}
+                className={user.banned ? "opacity-60" : undefined}
+              >
                 <TableCell>
                   <Checkbox
                     checked={selectedIds.has(user.id)}
@@ -595,10 +632,18 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                 </TableCell>
                 <TableCell className="truncate max-w-48">{user.email}</TableCell>
                 <TableCell>
-                  <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center w-fit">
-                    {getRoleIcon(user.role)}
-                    {t(`userManagement.roles.${user.role}`)}
-                  </Badge>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center w-fit">
+                      {getRoleIcon(user.role)}
+                      {t(`userManagement.roles.${user.role}`)}
+                    </Badge>
+                    {user.banned && (
+                      <Badge variant="destructive" className="flex items-center gap-1 w-fit">
+                        <Ban className="h-3 w-3" />
+                        {t("userManagement.users.banned")}
+                      </Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   {user.role === "teacher" && user.taughtClassNames && user.taughtClassNames.length > 0 ? (
@@ -707,25 +752,53 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                       </Select>
                     )}
                     {isSuperAdmin && user.role !== "super-admin" && user.id !== currentUserId && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-fit h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        disabled={deletingId === user.id}
-                        onClick={() => handleDeleteUser(
-                          user.id,
-                          user.name || t("userManagement.users.noName"),
-                          user.email || ""
-                        )}
-                        title={t("userManagement.users.deleteUser")}
-                      >
-                        {deletingId === user.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-3.5 w-3.5" />
-                        )}
-                        {t("userManagement.users.deleteUser")}
-                      </Button>
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-fit h-7 px-2 text-amber-600 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-500/10"
+                          disabled={banningId === user.id}
+                          onClick={() => handleBanToggle(
+                            user.id,
+                            !user.banned,
+                            user.name || t("userManagement.users.noName"),
+                            user.email || ""
+                          )}
+                          title={user.banned
+                            ? t("userManagement.users.unbanUser")
+                            : t("userManagement.users.banUser")}
+                        >
+                          {banningId === user.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : user.banned ? (
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                          ) : (
+                            <Ban className="h-3.5 w-3.5" />
+                          )}
+                          {user.banned
+                            ? t("userManagement.users.unbanUser")
+                            : t("userManagement.users.banUser")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-fit h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          disabled={deletingId === user.id}
+                          onClick={() => handleDeleteUser(
+                            user.id,
+                            user.name || t("userManagement.users.noName"),
+                            user.email || ""
+                          )}
+                          title={t("userManagement.users.deleteUser")}
+                        >
+                          {deletingId === user.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                          {t("userManagement.users.deleteUser")}
+                        </Button>
+                      </>
                     )}
                   </div>
                 </TableCell>

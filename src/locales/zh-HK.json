@@ -37,7 +37,8 @@
       "signOut": "登出",
       "loading": "載入中...",
       "stuck": "載入時間比平常長。",
-      "reload": "重新載入"
+      "reload": "重新載入",
+      "banned": "您的帳號已被封禁，無法使用此應用程式。如果您認為這是錯誤，請聯絡管理員。"
     },
     "shortcuts": {
       "title": "鍵盤快捷鍵",
@@ -3244,7 +3245,14 @@
       "deleteUser": "刪除",
       "deleteConfirm": "永久刪除 {{name}} 及其所有相關資料（閱讀紀錄、詞彙、訂閱、成就等）？此操作無法復原。",
       "deleteSuccess": "已刪除 {{name}} 及其所有相關資料。",
-      "deleteFailed": "刪除用戶失敗。"
+      "deleteFailed": "刪除用戶失敗。",
+      "banned": "已封禁",
+      "banUser": "封禁",
+      "unbanUser": "解封",
+      "banConfirm": "封禁 {{name}}？對方將立即被登出，且在解封前無法登入。",
+      "banSuccess": "已封禁 {{name}}。",
+      "unbanSuccess": "已解封 {{name}}，對方可重新登入。",
+      "banFailed": "更新封禁狀態失敗。"
     },
     "roleUpdated": "角色已更新",
     "roleUpdateFailed": "更新角色失敗",
