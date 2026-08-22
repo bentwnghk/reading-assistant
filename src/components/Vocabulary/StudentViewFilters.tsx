@@ -167,7 +167,7 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
     <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-card border rounded-lg">
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground shrink-0">
         <Eye className="h-4 w-4 text-amber-500" />
-        <span className="hidden sm:inline">
+        <span>
           {t("vocabulary.studentView.title")}
         </span>
       </div>
