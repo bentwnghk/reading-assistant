@@ -62,8 +62,8 @@ services:
       ACCESS_PASSWORD: ""
       OPENAI_COMPATIBLE_API_BASE_URL: "https://api.mr5ai.com"
       OPENAI_COMPATIBLE_API_KEY: ""
-      # Fallback model when the primary AI model fails (default: gemini-3-flash-preview)
-      FALLBACK_MODEL: "gemini-3-flash-preview"
+      # Fallback model when the primary AI model fails (default: gemini-3.7-flash)
+      FALLBACK_MODEL: "gemini-3.7-flash"
       # Text-to-image model for visualization generation (default: google/gemini-3.1-flash-image-preview)
       IMAGE_MODEL: "google/gemini-3.1-flash-image-preview"
       # ZenMux API key for visualization image generation (primary provider, comma-separated for load balancing)

@@ -5,7 +5,7 @@ export const AVAILABLE_MODELS = [
   "gpt-5.4-mini",
   "gpt-5.6-luna",
   "deepseek-v4-flash",
-  "gemini-3-flash-preview",
+  "gemini-3.7-flash",
 ] as const;
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
@@ -16,7 +16,7 @@ export type VisionModel = (typeof VISION_MODELS)[number];
 
 export const TUTOR_MODELS = [
   "gpt-5.4-mini",
-  "gemini-3-flash-preview",
+  "gemini-3.7-flash",
   "step-3.7-flash",
   "gpt-5.6-terra",
 ] as const;
@@ -34,7 +34,7 @@ export const READING_TEXT_MODELS = [
   "gpt-5.4-mini",
   "gpt-5.1",
   "deepseek-v4-flash",
-  "gemini-3-flash-preview",
+  "gemini-3.7-flash",
 ] as const;
 
 export type ReadingTextModel = (typeof READING_TEXT_MODELS)[number];
@@ -43,11 +43,11 @@ export type ReadingTextModel = (typeof READING_TEXT_MODELS)[number];
 // Super-admins and meter-billing (mode "local") users always see them.
 export const RESTRICTED_MODELS: string[] = [
   "gpt-5.4-mini",
-  "gemini-3-flash-preview",
+  "gemini-3.7-flash",
 ];
 
 export const RESTRICTED_TUTOR_MODELS: string[] = [
-  "gemini-3-flash-preview",
+  "gemini-3.7-flash",
   "gpt-5.6-terra",
 ];
 

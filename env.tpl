@@ -169,8 +169,8 @@ NEXT_PUBLIC_DISABLED_AI_PROVIDER=
 NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER=
 # (Optional) Customize the model list, add or delete models
 NEXT_PUBLIC_MODEL_LIST=
-# (Optional) Fallback model when the primary AI model fails (default: gemini-3-flash-preview)
-FALLBACK_MODEL=gemini-3-flash-preview
+# (Optional) Fallback model when the primary AI model fails (default: gemini-3.7-flash)
+FALLBACK_MODEL=gemini-3.7-flash
 # (Optional) Text-to-image model for visualization generation (default: google/gemini-3.1-flash-image-preview)
 IMAGE_MODEL=google/gemini-3.1-flash-image-preview
 # ZenMux API key — primary provider for visualization image generation (comma-separated for load balancing)

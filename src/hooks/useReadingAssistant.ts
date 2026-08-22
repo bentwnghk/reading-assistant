@@ -89,8 +89,8 @@ function getFallbackModel(): Promise<string> {
   if (!_fallbackModelPromise) {
     _fallbackModelPromise = fetch("/api/config")
       .then((r) => r.json())
-      .then((data) => data.fallbackModel || "gemini-3-flash-preview")
-      .catch(() => "gemini-3-flash-preview");
+      .then((data) => data.fallbackModel || "gemini-3.7-flash")
+      .catch(() => "gemini-3.7-flash");
   }
   return _fallbackModelPromise;
 }

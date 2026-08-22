@@ -713,7 +713,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <p>下表比較三者。三種模式皆可使用<em>所有</em>功能——只在乎計費與限額。</p>
+      <p>下表比較三者。三種模式皆可使用<em>所有</em>功能——分別只在於計費、限額及 AI 模型可見度：預覽模型（§3.2 中標 † 者）僅計量用戶及超級管理員可見。</p>
       <table class="ref">
         <tr><th></th><th>訂閱</th><th>計量（API 金鑰）</th><th>免費（密碼）</th></tr>
         <tr><th>誰付款</th><td>你（Stripe）</td><td>你（你的供應商）</td><td>Mr.🆖</td></tr>
@@ -900,11 +900,11 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <h3>3.2 模型分頁 — 為每項功能選擇 AI 引擎</h3>
-      <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。</p>
+      <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。標有 <b>†</b> 的模型為<b>預覽模型</b>——僅在<b>超級管理員</b>及<b>計量（API 金鑰）</b>用戶的下拉選單中出現。使用訂閱或免費模式時會隱藏，已儲存的相關選擇會在你登入或切換計費模式時自動重設為該功能的預設值。</p>
       <table class="ref">
         <tr><th>功能（標籤）</th><th>可用模型</th><th>預設</th></tr>
         <tr><td>視覺（OCR）模型</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
-        <tr><td>摘要模型</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>摘要模型</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td>讀前模型</td><td rowspan="10">與摘要相同</td><td>gpt-5.6-luna</td></tr>
         <tr><td>思維導圖模型</td><td>deepseek-v4-flash</td></tr>
         <tr><td>文本改寫模型</td><td>deepseek-v4-flash</td></tr>
@@ -915,11 +915,11 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>搭配模型</td><td>gpt-5.6-luna</td></tr>
         <tr><td>句子分析模型</td><td>deepseek-v4-flash</td></tr>
         <tr><td>語法模型</td><td>gpt-5.6-luna</td></tr>
-        <tr><td>閱讀文本生成模型</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>閱讀文本生成模型</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td>基礎 AI 導師模型</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
-        <tr><td>高級 AI 導師模型</td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
+        <tr><td>高級 AI 導師模型</td><td>gpt-5.4-mini · gemini-3.7-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
       </table>
-      <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>step-3.7-flash</code> 為推薦之選；切換至 <code>gpt-5.6-terra</code> 可得最強（亦最貴）的推理能力。</div>
+      <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>step-3.7-flash</code> 為推薦之選；切換至 <code>gpt-5.6-terra</code>† 可得最強（亦最貴）的推理能力——此預覽模型僅提供予超級管理員及計量用戶。</div>
 
       <h3>3.3 語音分頁</h3>
       <table class="ref">
@@ -2533,13 +2533,13 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>模型清單</th><th>成員</th><th>預設</th></tr>
         <tr><td><b>視覺</b>（OCR）</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
-        <tr><td><b>通用</b>——預設 <code>deepseek-v4-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>gpt-5.4-mini · gpt-5.6-luna · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>通用</b>——預設 <code>deepseek-v4-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>通用</b>——預設 <code>gpt-5.6-luna</code>（讀前、閱讀測驗、推薦生字、搭配、語法）</td><td>同上</td><td>gpt-5.6-luna</td></tr>
-        <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>gpt-5.4-mini · gpt-5.1 · deepseek-v4-flash · gemini-3-flash-preview</td><td>deepseek-v4-flash</td></tr>
+        <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
-        <tr><td><b>進階導師</b></td><td>gpt-5.4-mini · gemini-3-flash-preview · step-3.7-flash · gpt-5.6-terra</td><td>step-3.7-flash</td></tr>
+        <tr><td><b>進階導師</b></td><td>gpt-5.4-mini · gemini-3.7-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
       </table>
-      <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。</p>
+      <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。<b>†</b> 預覽模型——除非你是超級管理員或使用計量計費，否則不會出現在設定的下拉選單；已儲存的選擇會自動重設為該功能預設值。</p>
 
       <h3>B. 角色能力對照表</h3>
       <table class="ref">
@@ -2568,6 +2568,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>意外被登出</b></td><td>閒置逾時（預設 90 分鐘）或 3 天閱讀單元上限已到。閒置登出前 1 分鐘會有警告。</td></tr>
         <tr><td><b>導航後旋轉圖消失</b></td><td>非錯誤——生成在背景繼續；載入狀態存於 store，跨頁面保留。返回該區段即可見結果。</td></tr>
         <tr><td><b>編輯後設定沒變</b></td><td>須點設定底部的 <b>儲存</b>。已登入用戶的設定存於資料庫，每次登入重新載入。</td></tr>
+        <tr><td><b>之前選過的模型不見了</b></td><td>預覽模型（標 † 者）僅超級管理員及計量（API 金鑰）用戶可見。其他用戶不會顯示，且選擇會於下次登入時自動重設為該功能預設值。</td></tr>
         <tr><td><b>「附答案」匯出變灰</b></td><td>學生須完成測驗／測驗後才見答案。教師／管理員恒常可見。</td></tr>
         <tr><td><b>分享的閱讀單元沒有我的答案</b></td><td>預期行為——分享會剔除答案／分數／聊天以提供乾淨副本。你的原件不受影響。</td></tr>
         <tr><td><b>iOS 提取中途停止</b></td><td>iOS 或會暫停長請求；系統用 Screen Wake Lock 防止此情況。提取期間請保持螢幕開啟。</td></tr>
