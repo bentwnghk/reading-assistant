@@ -824,6 +824,7 @@
       "generating": "Generating...",
       "generatingWait": "Generating summary... This may take up to 30 seconds. Please wait.",
       "regenerate": "Regenerate",
+      "chineseLabel": "Chinese",
       "emptyTip": "Click the button above to generate a summary of the text",
       "oneSentence": "TL;DR",
       "mainPoints": "Main Points",

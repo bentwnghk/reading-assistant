@@ -15,6 +15,7 @@ import {
   extractTextFromImagePrompt,
   extractTitleFromTextPrompt,
   generateSummaryPrompt,
+  translateSummaryPrompt,
   generatePreReadingPrompt,
   adaptTextPrompt,
   simplifyTextPrompt,
@@ -438,12 +439,12 @@ function useReadingAssistant() {
     }
   }
 
-  async function generateSummary() {
+  async function generateSummary(useChinese: boolean = false) {
     if (useReadingStore.getState().activeGenerations["summary"]) return "";
     const isSameSession = createSessionGuard();
     const ac = getAbortController("summary");
-    const { studentAge, extractedText, setSummary, setError } = readingStore;
-    
+    const { studentAge, extractedText, summary, setSummary, setError } = readingStore;
+
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
       return "";
@@ -454,11 +455,16 @@ function useReadingAssistant() {
 
     try {
       const thinkingModel = await createModelProvider(summaryModel);
-      
+
       const result = streamText({
         model: thinkingModel,
         system: getSystemPrompt(),
-        prompt: generateSummaryPrompt(studentAge, extractedText),
+        // When a summary already exists, "Regenerate" is a TRANSLATION of the
+        // existing summary (same structure, new language), not a fresh
+        // summary of the text.
+        prompt: summary
+          ? translateSummaryPrompt(summary, useChinese)
+          : generateSummaryPrompt(studentAge, extractedText, useChinese),
         experimental_transform: smoothTextStream(smoothTextStreamType),
         abortSignal: ac.signal,
         onError: (error) => {

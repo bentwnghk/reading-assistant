@@ -855,6 +855,7 @@
       "generating": "正在生成...",
       "generatingWait": "正在生成摘要... 這可能需要最多 30 秒，請稍候。",
       "regenerate": "重新生成",
+      "chineseLabel": "中文",
       "emptyTip": "點擊上方按鈕生成文本摘要",
       "oneSentence": "一句話總結",
       "mainPoints": "主要重點",

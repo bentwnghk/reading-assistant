@@ -42,7 +42,7 @@ export function extractTextFromImagePrompt() {
 - Respond with ONLY the extracted text.`;
 }
 
-export function generateSummaryPrompt(age: number, text: string) {
+export function generateSummaryPrompt(age: number, text: string, useChinese: boolean = false) {
   const schoolLevel = age <= 11 ? "primary" : "secondary";
   
   const levelGuidance = age <= 11 ? `
@@ -96,10 +96,32 @@ ${levelGuidance}
 - Use bullet points (•) for all lists - NOT dashes or asterisks
 - Add relevant emojis: 📖🎯📝⭐💭🌟📌🏠👥❤️🎓🌍🎭💪🏆🌈
 - **Bold** key terms inline using double asterisks
-- Keep the same language as the original text for the main content
+- ${useChinese ? "Write ALL summary content in Traditional Chinese (繁體中文)." : "Keep the same language as the original text for the main content"}
 - Make sure TL;DR is truly the simplest possible summary
 
 **Respond with ONLY the formatted summary, no introduction or additional text.**`;
+}
+
+/** Translation-only "regeneration" for the summary: the existing Markdown
+ *  summary is translated verbatim (same structure, bullets, emojis, bold
+ *  terms) instead of being re-summarized from the source text. */
+export function translateSummaryPrompt(summary: string, useChinese: boolean = false) {
+  const languageInstruction = useChinese
+    ? "Translate the summary content into Traditional Chinese (繁體中文)."
+    : "Translate the summary content into English.";
+  return `Translate this reading summary for a Hong Kong student.
+
+<summary>
+${summary}
+</summary>
+
+**CRITICAL RULES:**
+1. ${languageInstruction}
+2. This is a TRANSLATION task, NOT a regeneration. Do NOT add, remove, merge, reorder, or rephrase any points.
+3. Preserve the Markdown structure EXACTLY: the same \`##\` headers (e.g. "## 🎯 TL;DR", "## 📝 Main Points") with the same emojis, the same number of bullet points (•) in the same order, and the same **bold** key terms (translated).
+4. Keep the same emojis in the same positions.
+5. Keep the translated reading level simple and student-friendly.
+6. Respond with ONLY the translated summary, no introduction or additional text.`;
 }
 
 export function adaptTextPrompt(age: number, text: string) {

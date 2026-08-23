@@ -1,9 +1,10 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
 import { FileText, LoaderCircle, ListChecks, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { useReadingStore } from "@/store/reading";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
@@ -15,6 +16,7 @@ function Summary() {
   const { extractedText, summary } = useReadingStore();
   const { activeGenerations, generateSummary } = useReadingAssistant();
   const isGenerating = !!activeGenerations["summary"];
+  const [useChinese, setUseChinese] = useState(false);
 
   if (!extractedText) {
     return null;
@@ -44,12 +46,21 @@ function Summary() {
             tipContentKey="reading.summary.help.tipContent"
           />
         </h3>
-        <Button
-          onClick={() => generateSummary()}
-          disabled={isGenerating}
-          size="sm"
-          variant={summary ? "secondary" : "default"}
-        >
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={useChinese}
+            onCheckedChange={setUseChinese}
+            disabled={isGenerating}
+          />
+          <span className="text-sm text-muted-foreground">
+            {t("reading.summary.chineseLabel")}
+          </span>
+          <Button
+            onClick={() => generateSummary(useChinese)}
+            disabled={isGenerating}
+            size="sm"
+            variant={summary ? "secondary" : "default"}
+          >
           {isGenerating ? (
             <>
               <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -66,7 +77,8 @@ function Summary() {
               <span>{t("reading.summary.generate")}</span>
             </>
           )}
-        </Button>
+          </Button>
+        </div>
       </div>
 
       {summary ? (
