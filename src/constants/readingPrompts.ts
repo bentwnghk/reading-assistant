@@ -275,6 +275,24 @@ Return ONLY a JSON object (no markdown fences, no commentary) with this exact sh
 6. Output ONLY the JSON object. Do not wrap it in markdown fences or add any text.`;
 }
 
+export function translateMindMapPrompt(mindMap: MindMapData, useChinese: boolean = false) {
+  const languageInstruction = useChinese
+    ? "Translate every node label into Traditional Chinese (繁體中文)."
+    : "Translate every node label into English.";
+  return `Translate this mind map for a Hong Kong student.
+
+<mind-map>
+${JSON.stringify(mindMap, null, 2)}
+</mind-map>
+
+**CRITICAL RULES:**
+1. ${languageInstruction}
+2. This is a TRANSLATION task, NOT a regeneration task. Do NOT add, remove, merge, reorder, or rephrase any nodes.
+3. The output MUST have exactly the same structure: the same single \`root\`, the same number of branches in the same order, and each branch must have the same number of leaves in the same order.
+4. Keep translations concise (aim for max 6 words / 12 characters per node) so the map stays readable.
+5. Output ONLY the translated JSON object with the identical shape. Do not wrap it in markdown fences or add any text.`;
+}
+
 export function getReadingTestPreset(age: number): ReadingTestQuestionCounts {
   const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "secondary" : "dse";
   switch (schoolLevel) {

@@ -19,6 +19,7 @@ import {
   adaptTextPrompt,
   simplifyTextPrompt,
   generateMindMapPrompt,
+  translateMindMapPrompt,
   generateReadingTestPrompt,
   generateTargetedPracticePrompt,
   generateGlossaryPrompt,
@@ -82,6 +83,20 @@ const mindMapDataSchema = z.object({
     )
     .min(1),
 });
+
+/** Parse a stored mind map into structured `MindMapData`. Returns null for
+ *  empty input or legacy sessions that stored Mermaid markdown instead of
+ *  JSON. Mirrors `tryParseMindMapData` in MindMap.tsx (kept local because
+ *  that one lives in a client component module). */
+function tryParseMindMapData(raw: string): MindMapData | null {
+  if (!raw || !raw.trim().startsWith("{")) return null;
+  try {
+    const parsed = mindMapDataSchema.safeParse(JSON.parse(raw));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
 
 let _fallbackModelPromise: Promise<string> | null = null;
 
@@ -725,7 +740,7 @@ function useReadingAssistant() {
     if (useReadingStore.getState().activeGenerations["mindmap"]) return "";
     const isSameSession = createSessionGuard();
     const ac = getAbortController("mindmap");
-    const { studentAge, extractedText, setMindMap, setError } = readingStore;
+    const { studentAge, extractedText, mindMap, setMindMap, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -735,9 +750,18 @@ function useReadingAssistant() {
     setGenerating("mindmap", true);
     const toastId = toast.info(i18next.t("reading.mindMap.generatingWait"), { duration: Infinity });
 
+    // If an existing structured mind map is present, "Regenerate" with a
+    // flipped language switch is a TRANSLATION of the existing map (same
+    // structure, new language), not a fresh analysis of the text. Legacy
+    // Mermaid-markdown maps can't be parsed into MindMapData, so those (and
+    // first-time generation) fall through to the full generation prompt.
+    const existingMindMap = mindMap ? tryParseMindMapData(mindMap) : null;
+
     try {
       const text = await mindMapGenerateText(
-        generateMindMapPrompt(studentAge, extractedText, useChinese),
+        existingMindMap
+          ? translateMindMapPrompt(existingMindMap, useChinese)
+          : generateMindMapPrompt(studentAge, extractedText, useChinese),
         getSystemPrompt(),
         mindMapModel,
         ac.signal,
