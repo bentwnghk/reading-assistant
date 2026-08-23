@@ -368,7 +368,10 @@ function VocabularyTable() {
           <span>
             {activeReviewListWordIds
               ? t("vocabulary.reviewLists.listWords", { count: filteredWords.length })
-              : t("vocabulary.showingWords", { count: filteredWords.length, total: words.length })
+              : t("vocabulary.showingWords", {
+                  count: filteredWords.length,
+                  total: words.filter((w) => w.entryType !== "phrase").length,
+                })
             }
           </span>
         <span>
