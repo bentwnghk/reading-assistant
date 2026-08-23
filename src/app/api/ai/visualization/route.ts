@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { generateVisualizationPrompt } from "@/constants/readingPrompts";
+import { generateVisualizationPrompt, translateVisualizationPrompt } from "@/constants/readingPrompts";
 import { multiApiKeyPolling } from "@/utils/model";
 import { getPool } from "@/lib/db";
 import { verifySubscriptionAccess } from "@/lib/subscription";
@@ -57,9 +57,19 @@ function formatModelResource(model: string): string {
   return `publishers/google/models/${model}`;
 }
 
+/** Split a `data:image/png;base64,...` URL into the raw base64 payload and
+ *  mime type expected by Gemini-style `inlineData` parts. Returns null for
+ *  anything that isn't a base64 data URL. */
+function parseDataUrl(dataUrl: string): { mimeType: string; data: string } | null {
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,([A-Za-z0-9+/=\s]+)$/);
+  if (!match) return null;
+  return { mimeType: match[1], data: match[2].replace(/\s/g, "") };
+}
+
 async function callZenMuxApi(
   prompt: string,
-  model: string
+  model: string,
+  inputImage?: { mimeType: string; data: string } | null
 ): Promise<Response> {
   const modelResource = formatModelResource(model);
   const url = `${ZENMUX_API_BASE_URL}/v1/${modelResource}:generateContent`;
@@ -75,7 +85,9 @@ async function callZenMuxApi(
       contents: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          parts: inputImage
+            ? [{ inlineData: inputImage }, { text: prompt }]
+            : [{ text: prompt }],
         },
       ],
       generationConfig: {
@@ -87,7 +99,8 @@ async function callZenMuxApi(
 
 async function callGoogleNativeApi(
   prompt: string,
-  model: string
+  model: string,
+  inputImage?: { mimeType: string; data: string } | null
 ): Promise<Response> {
   const url = `${GOOGLE_API_BASE_URL}/v1beta/models/${model}:generateContent`;
 
@@ -101,7 +114,9 @@ async function callGoogleNativeApi(
       contents: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          parts: inputImage
+            ? [{ inlineData: inputImage }, { text: prompt }]
+            : [{ text: prompt }],
         },
       ],
       generationConfig: {
@@ -114,13 +129,24 @@ async function callGoogleNativeApi(
 async function callOpenAICompatibleApi(
   prompt: string,
   model: string,
-  isSubscriptionMode: boolean
+  isSubscriptionMode: boolean,
+  inputImageDataUrl?: string | null
 ): Promise<Response> {
   const apiKey = multiApiKeyPolling(
     isSubscriptionMode
       ? (OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || OPENAI_COMPATIBLE_API_KEY)
       : OPENAI_COMPATIBLE_API_KEY
   );
+
+  // For translation edits the existing image is passed as a multimodal
+  // `image_url` data-URL part (best-effort: endpoints that support image
+  // output generally accept image input in this format too).
+  const content: unknown = inputImageDataUrl
+    ? [
+        { type: "text", text: prompt },
+        { type: "image_url", image_url: { url: inputImageDataUrl } },
+      ]
+    : prompt;
 
   return fetch(
     `${OPENAI_COMPATIBLE_API_BASE_URL}/v1/chat/completions`,
@@ -132,7 +158,7 @@ async function callOpenAICompatibleApi(
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: "user", content }],
         max_tokens: 4096,
         responseModalities: ["TEXT", "IMAGE"],
         responseFormat: {
@@ -340,11 +366,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text, studentAge, useChinese } = body as {
+    const { text, studentAge, useChinese, image } = body as {
       text: string;
       studentAge: number;
       useChinese?: boolean;
       mode?: string;
+      image?: string;
     };
 
     const signature = request.headers.get("x-access-signature") || undefined;
@@ -367,7 +394,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!text || typeof text !== "string") {
+    // Translation path: when an existing visualization image is supplied,
+    // "Regenerate" becomes an image-to-image edit that only translates the
+    // text in the image (same composition) instead of re-analyzing the text.
+    const inputImage = image && typeof image === "string" ? parseDataUrl(image) : null;
+    const isTranslation = !!inputImage;
+
+    if ((!text || typeof text !== "string") && !isTranslation) {
       return NextResponse.json(
         { error: "Missing or invalid text" },
         { status: 400 }
@@ -375,14 +408,16 @@ export async function POST(request: NextRequest) {
     }
 
     const age = typeof studentAge === "number" ? studentAge : 13;
-    const prompt = generateVisualizationPrompt(age, text, !!useChinese);
+    const prompt = isTranslation
+      ? translateVisualizationPrompt(!!useChinese)
+      : generateVisualizationPrompt(age, text, !!useChinese);
 
     const errors: string[] = [];
     let imageDataUrl: string | null = null;
 
     if (ZENMUX_API_KEY) {
       try {
-        const response = await callZenMuxApi(prompt, IMAGE_MODEL);
+        const response = await callZenMuxApi(prompt, IMAGE_MODEL, inputImage);
         if (response.ok) {
           const data = await response.json();
           imageDataUrl = extractBase64FromGeminiResponse(data);
@@ -397,7 +432,7 @@ export async function POST(request: NextRequest) {
 
     if (!imageDataUrl && GOOGLE_API_KEY) {
       try {
-        const response = await callGoogleNativeApi(prompt, IMAGE_MODEL);
+        const response = await callGoogleNativeApi(prompt, IMAGE_MODEL, inputImage);
         if (response.ok) {
           const data = await response.json();
           imageDataUrl = extractBase64FromGeminiResponse(data);
@@ -412,7 +447,7 @@ export async function POST(request: NextRequest) {
 
     if (!imageDataUrl && OPENAI_COMPATIBLE_API_KEY && OPENAI_COMPATIBLE_API_BASE_URL) {
       try {
-        const response = await callOpenAICompatibleApi(prompt, IMAGE_MODEL, body.mode === "subscription");
+        const response = await callOpenAICompatibleApi(prompt, IMAGE_MODEL, body.mode === "subscription", isTranslation ? image : null);
         if (response.ok) {
           const data = await response.json();
           imageDataUrl =

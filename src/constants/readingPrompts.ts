@@ -1173,6 +1173,27 @@ ${text}
 Generate the image now.`;
 }
 
+/** Image-to-image "translation" prompt: instead of re-analyzing the text and
+ *  composing a fresh image, the existing visualization is passed back to the
+ *  image model, which must only translate its readable text and keep the
+ *  composition (layout, characters, colors, style) otherwise identical. */
+export function translateVisualizationPrompt(useChinese: boolean = false): string {
+  const languageInstruction = useChinese
+    ? "Translate ALL readable text in the image into Traditional Chinese (繁體中文)."
+    : "Translate ALL readable text in the image into English.";
+  return `You are given an existing educational visualization image that already depicts a reading passage. Redraw the SAME image with its text translated.
+
+**CRITICAL RULES:**
+1. ${languageInstruction}
+2. This is a TRANSLATION edit, NOT a regeneration. Keep the composition EXACTLY the same: the same layout, panels/sections, characters, objects, icons, colors, art style, and aspect ratio.
+3. Do NOT add, remove, merge, or reorder any visual elements. Every label, caption, heading, and speech bubble stays in its same position — only its language changes.
+4. Keep translated labels concise and legible; shrink font size slightly if needed rather than overflowing the original label area.
+5. If an element contains no readable text, reproduce it unchanged.
+6. **1K resolution (1280x720), 16:9 aspect ratio, PNG format**
+
+Output the edited image now.`;
+}
+
 export function getSystemPrompt(): string {
   return systemInstruction.replace("{now}", new Date().toLocaleDateString(i18next.language));
 }

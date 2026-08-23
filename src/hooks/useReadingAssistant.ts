@@ -803,7 +803,7 @@ function useReadingAssistant() {
     if (useReadingStore.getState().activeGenerations["visualization"]) return null;
     const isSameSession = createSessionGuard();
     const ac = getAbortController("visualization");
-    const { studentAge, extractedText, setVisualizationImage, setError } = readingStore;
+    const { studentAge, extractedText, visualizationImage, setVisualizationImage, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -835,7 +835,18 @@ function useReadingAssistant() {
       const response = await fetch("/api/ai/visualization", {
         method: "POST",
         headers,
-        body: JSON.stringify({ text: extractedText, studentAge, useChinese, mode }),
+        // When a visualization already exists, its image is sent along so the
+        // server performs an image-to-image TRANSLATION edit (same picture,
+        // new language) instead of composing a fresh one. If the image isn't
+        // in the store (e.g. a restored session whose full media hasn't been
+        // lazy-loaded via loadFull), this falls back to fresh generation.
+        body: JSON.stringify({
+          text: extractedText,
+          studentAge,
+          useChinese,
+          mode,
+          ...(visualizationImage ? { image: visualizationImage } : {}),
+        }),
         signal: ac.signal,
       });
 
