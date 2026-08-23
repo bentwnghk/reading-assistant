@@ -131,7 +131,7 @@
         },
         "visual": {
           "title": "Visual Learning",
-          "desc": "AI generates quick summaries and interactive mind maps to help you understand key concepts and relationships."
+          "desc": "AI generates quick summaries and interactive mind maps to help you understand key concepts and relationships. Both support English and Traditional Chinese."
         },
         "tutor": {
           "title": "AI Tutor",
@@ -839,13 +839,18 @@
           "mainPoints": {
             "name": "Main Points",
             "desc": "Bullet points with emojis covering the most important ideas."
+          },
+          "bilingual": {
+            "name": "Bilingual Support",
+            "desc": "Toggle Chinese to generate the summary in Traditional Chinese."
           }
         },
         "stepsTitle": "How to use it",
         "steps": {
           "s1": "Click Generate Summary.",
           "s2": "Read the TL;DR for a quick overview.",
-          "s3": "Go through the main points."
+          "s3": "Go through the main points.",
+          "s4": "Toggle Chinese for a Traditional Chinese version of the summary."
         },
         "tipTitle": "Good to know",
         "tipContent": "The tone and complexity match your age — simpler and more visual for primary students, more academic for DSE students."

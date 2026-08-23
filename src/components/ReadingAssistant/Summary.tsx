@@ -2,7 +2,7 @@
 import { Suspense, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { FileText, LoaderCircle, ListChecks, Lightbulb } from "lucide-react";
+import { FileText, Languages, LoaderCircle, ListChecks, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import GuideDialog from "@/components/Internal/GuideDialog";
@@ -35,12 +35,14 @@ function Summary() {
             items={[
               { key: "tldr", icon: Lightbulb, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "mainPoints", icon: ListChecks, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
+              { key: "bilingual", icon: Languages, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
             ]}
             stepsTitleKey="reading.summary.help.stepsTitle"
             stepsKeys={[
               "reading.summary.help.steps.s1",
               "reading.summary.help.steps.s2",
               "reading.summary.help.steps.s3",
+              "reading.summary.help.steps.s4",
             ]}
             tipTitleKey="reading.summary.help.tipTitle"
             tipContentKey="reading.summary.help.tipContent"
