@@ -174,6 +174,10 @@ export interface ReadingStore {
   extractedText: string;
   generatedTextMeta: GeneratedTextMeta | null;
   summary: string;
+  /** Language the current summary was generated in. NULL when unknown
+   *  (legacy sessions / no summary yet) — regenerating then falls back to a
+   *  fresh summary instead of a translation of the existing one. */
+  summaryLanguage: "en" | "zh" | null;
   preReading: PreReadingData | null;
   preReadingGeneratedAt: number;
   studentPrediction: string;
@@ -186,7 +190,15 @@ export interface ReadingStore {
   highlightedWords: string[];
   analyzedSentences: Record<string, SentenceAnalysis>;
   mindMap: string;
+  /** Language the current mindMap was generated in. NULL when unknown
+   *  (legacy sessions / no map yet) — regenerating then falls back to a
+   *  fresh analysis instead of a structure-preserving translation. */
+  mindMapLanguage: "en" | "zh" | null;
   visualizationImage: string;
+  /** Language the current visualizationImage was generated in. NULL when
+   *  unknown (legacy sessions / no image yet) — regenerating then falls back
+   *  to a fresh composition instead of an image-to-image translation. */
+  visualizationLanguage: "en" | "zh" | null;
   visualizationGeneratedAt: number;
   readingTest: ReadingTestQuestion[];
   glossary: GlossaryEntry[];
@@ -271,7 +283,7 @@ interface ReadingActions {
   addOriginalImage: (image: string) => void;
   removeOriginalImage: (index: number) => void;
   setExtractedText: (text: string) => void;
-  setSummary: (summary: string) => void;
+  setSummary: (summary: string, language: "en" | "zh") => void;
   setPreReading: (data: PreReadingData | null) => void;
   setStudentPrediction: (prediction: string) => void;
   setPredictionRating: (rating: number | null) => void;
@@ -285,8 +297,8 @@ interface ReadingActions {
   setSentenceAnalysis: (sentence: string, analysis: string) => void;
   removeSentenceAnalysis: (sentence: string) => void;
   getSentenceAnalysis: (sentence: string) => SentenceAnalysis | null;
-  setMindMap: (mermaidCode: string) => void;
-  setVisualizationImage: (imageDataUrl: string) => void;
+  setMindMap: (mermaidCode: string, language: "en" | "zh") => void;
+  setVisualizationImage: (imageDataUrl: string, language: "en" | "zh") => void;
   setReadingTest: (questions: ReadingTestQuestion[]) => void;
   setUserAnswer: (questionId: string, answer: string) => void;
   setQuestionEarnedPoints: (questionId: string, points: number) => void;
@@ -358,6 +370,7 @@ const defaultValues: ReadingStore = {
   extractedText: "",
   generatedTextMeta: null,
   summary: "",
+  summaryLanguage: null,
   preReading: null,
   preReadingGeneratedAt: 0,
   studentPrediction: "",
@@ -370,7 +383,9 @@ const defaultValues: ReadingStore = {
   highlightedWords: [],
   analyzedSentences: {},
   mindMap: "",
+  mindMapLanguage: null,
   visualizationImage: "",
+  visualizationLanguage: null,
   visualizationGeneratedAt: 0,
   readingTest: [],
   glossary: [],
@@ -532,10 +547,11 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      setSummary: (summary) =>
+      setSummary: (summary, language) =>
         set((state) => {
           const newState = {
             summary,
+            summaryLanguage: language,
             summaryGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
@@ -713,10 +729,11 @@ export const useReadingStore = create(
         const key = sentence.trim().toLowerCase();
         return get().analyzedSentences[key] || null;
       },
-      setMindMap: (mermaidCode) =>
+      setMindMap: (mermaidCode, language) =>
         set((state) => {
           const newState = {
             mindMap: mermaidCode,
+            mindMapLanguage: language,
             mindMapGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
@@ -726,10 +743,11 @@ export const useReadingStore = create(
           }
           return newState;
         }),
-      setVisualizationImage: (imageDataUrl) =>
+      setVisualizationImage: (imageDataUrl, language) =>
         set((state) => {
           const newState = {
             visualizationImage: imageDataUrl,
+            visualizationLanguage: language,
             visualizationGeneratedAt: Date.now(),
             updatedAt: Date.now(),
           };
@@ -1523,6 +1541,7 @@ export const useReadingStore = create(
           (key) =>
             key !== "originalImages" &&
             key !== "visualizationImage" &&
+            key !== "visualizationLanguage" &&
             key !== "activeGenerations" &&
             key !== "readAlongIndex" &&
             key !== "readAlongPlaying"

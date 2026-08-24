@@ -443,7 +443,7 @@ function useReadingAssistant() {
     if (useReadingStore.getState().activeGenerations["summary"]) return "";
     const isSameSession = createSessionGuard();
     const ac = getAbortController("summary");
-    const { studentAge, extractedText, summary, setSummary, setError } = readingStore;
+    const { studentAge, extractedText, summary, summaryLanguage, setSummary, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -453,16 +453,21 @@ function useReadingAssistant() {
     setGenerating("summary", true);
     const toastId = toast.info(i18next.t("reading.summary.generatingWait"), { duration: Infinity });
 
+    // "Regenerate" while SWITCHING languages is a TRANSLATION of the existing
+    // summary (same structure, new language); regenerating in the SAME
+    // language must produce a fresh summary from the text. A NULL language
+    // (legacy sessions) is unknown and falls back to fresh generation.
+    const targetLanguage: "en" | "zh" = useChinese ? "zh" : "en";
+    const isLanguageSwitch =
+      !!summary && summaryLanguage !== null && summaryLanguage !== targetLanguage;
+
     try {
       const thinkingModel = await createModelProvider(summaryModel);
 
       const result = streamText({
         model: thinkingModel,
         system: getSystemPrompt(),
-        // When a summary already exists, "Regenerate" is a TRANSLATION of the
-        // existing summary (same structure, new language), not a fresh
-        // summary of the text.
-        prompt: summary
+        prompt: isLanguageSwitch
           ? translateSummaryPrompt(summary, useChinese)
           : generateSummaryPrompt(studentAge, extractedText, useChinese),
         experimental_transform: smoothTextStream(smoothTextStreamType),
@@ -481,7 +486,7 @@ function useReadingAssistant() {
         for await (const textPart of result.textStream) {
           if (!isSameSession() || ac.signal.aborted) break;
           text += textPart;
-          setSummary(text);
+          setSummary(text, targetLanguage);
         }
       } finally {
         setStreamingFlag(false);
@@ -493,7 +498,7 @@ function useReadingAssistant() {
         return "";
       }
 
-      setSummary(text);
+      setSummary(text, targetLanguage);
 
       setGenerating("summary", false);
       return text;
@@ -746,7 +751,7 @@ function useReadingAssistant() {
     if (useReadingStore.getState().activeGenerations["mindmap"]) return "";
     const isSameSession = createSessionGuard();
     const ac = getAbortController("mindmap");
-    const { studentAge, extractedText, mindMap, setMindMap, setError } = readingStore;
+    const { studentAge, extractedText, mindMap, mindMapLanguage, setMindMap, setError } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -756,16 +761,21 @@ function useReadingAssistant() {
     setGenerating("mindmap", true);
     const toastId = toast.info(i18next.t("reading.mindMap.generatingWait"), { duration: Infinity });
 
-    // If an existing structured mind map is present, "Regenerate" with a
-    // flipped language switch is a TRANSLATION of the existing map (same
-    // structure, new language), not a fresh analysis of the text. Legacy
-    // Mermaid-markdown maps can't be parsed into MindMapData, so those (and
-    // first-time generation) fall through to the full generation prompt.
+    // "Regenerate" while SWITCHING languages is a TRANSLATION of the existing
+    // map (same structure, new language); regenerating in the SAME language
+    // must re-analyze the text and compose a fresh map. Legacy Mermaid-markdown
+    // maps can't be parsed into MindMapData, and a NULL language (legacy
+    // sessions) is unknown — both fall through to the full generation prompt.
     const existingMindMap = mindMap ? tryParseMindMapData(mindMap) : null;
+    const targetLanguage: "en" | "zh" = useChinese ? "zh" : "en";
+    const isLanguageSwitch =
+      !!existingMindMap &&
+      mindMapLanguage !== null &&
+      mindMapLanguage !== targetLanguage;
 
     try {
       const text = await mindMapGenerateText(
-        existingMindMap
+        isLanguageSwitch
           ? translateMindMapPrompt(existingMindMap, useChinese)
           : generateMindMapPrompt(studentAge, extractedText, useChinese),
         getSystemPrompt(),
@@ -782,7 +792,7 @@ function useReadingAssistant() {
 
       const data = mindMapDataSchema.parse(JSON.parse(text));
       const json = JSON.stringify(data);
-      setMindMap(json);
+      setMindMap(json, targetLanguage);
 
       logActivity("mindmap_generate", { sessionId: readingStore.id || undefined });
 
@@ -809,7 +819,14 @@ function useReadingAssistant() {
     if (useReadingStore.getState().activeGenerations["visualization"]) return null;
     const isSameSession = createSessionGuard();
     const ac = getAbortController("visualization");
-    const { studentAge, extractedText, visualizationImage, setVisualizationImage, setError } = readingStore;
+    const {
+      studentAge,
+      extractedText,
+      visualizationImage,
+      visualizationLanguage,
+      setVisualizationImage,
+      setError,
+    } = readingStore;
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -838,20 +855,28 @@ function useReadingAssistant() {
         headers["x-access-signature"] = generateSignature(accessPassword, Date.now());
       }
 
+      const targetLanguage: "en" | "zh" = useChinese ? "zh" : "en";
+      // Only send the existing image when the user is SWITCHING languages —
+      // the server then performs an image-to-image TRANSLATION edit (same
+      // composition, new language). Regenerating in the SAME language must
+      // compose a fresh interpretation of the text, so the image is omitted.
+      // A NULL language (legacy sessions, or a restored session whose full
+      // media hasn't been lazy-loaded via loadFull) also falls back to fresh
+      // generation.
+      const isLanguageSwitch =
+        !!visualizationImage &&
+        visualizationLanguage !== null &&
+        visualizationLanguage !== targetLanguage;
+
       const response = await fetch("/api/ai/visualization", {
         method: "POST",
         headers,
-        // When a visualization already exists, its image is sent along so the
-        // server performs an image-to-image TRANSLATION edit (same picture,
-        // new language) instead of composing a fresh one. If the image isn't
-        // in the store (e.g. a restored session whose full media hasn't been
-        // lazy-loaded via loadFull), this falls back to fresh generation.
         body: JSON.stringify({
           text: extractedText,
           studentAge,
           useChinese,
           mode,
-          ...(visualizationImage ? { image: visualizationImage } : {}),
+          ...(isLanguageSwitch ? { image: visualizationImage } : {}),
         }),
         signal: ac.signal,
       });
@@ -883,7 +908,7 @@ function useReadingAssistant() {
         return null;
       }
 
-      setVisualizationImage(data.image);
+      setVisualizationImage(data.image, targetLanguage);
 
       logActivity("visualization_generate", { sessionId: readingStore.id || undefined });
 
