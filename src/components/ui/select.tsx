@@ -88,7 +88,12 @@ const SelectContent = React.forwardRef<
         className={cn(
           "p-1",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+          // Mobile touch scrolling: `touch-action: pan-y` lets the browser
+          // start a native (non-cancelable) vertical pan, which the scroll-lock
+          // listeners (react-remove-scroll) cannot preventDefault. Without it,
+          // option lists are not draggable by touch on mobile.
+          "overflow-y-auto overscroll-contain [touch-action:pan-y]"
         )}
       >
         {children}
