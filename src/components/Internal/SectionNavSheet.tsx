@@ -80,7 +80,11 @@ const sections: SectionItem[] = [
     id: "section-pre-reading",
     icon: Sparkles,
     labelKey: "toc.preReading",
-    checkCompleted: (store: ReadingStoreState) => !!store.preReading,
+    // Full completion mirrors WorkflowProgress: scaffolding generated AND the
+    // student submitted a prediction. Scaffolding alone is only "partial".
+    checkCompleted: (store: ReadingStoreState) =>
+      !!store.preReading && store.studentPrediction.trim().length > 0,
+    checkPartial: (store: ReadingStoreState) => !!store.preReading,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
@@ -143,7 +147,10 @@ const sections: SectionItem[] = [
     id: "section-test",
     icon: ClipboardCheck,
     labelKey: "toc.test",
+    // Full completion mirrors WorkflowProgress: testCompleted. Questions
+    // generated but not yet answered is only "partial".
     checkCompleted: (store: ReadingStoreState) => store.testCompleted,
+    checkPartial: (store: ReadingStoreState) => store.readingTest.length > 0,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
