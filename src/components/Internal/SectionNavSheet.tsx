@@ -46,16 +46,15 @@ interface SectionItem {
   isAccessible: (store: ReadingStoreState) => boolean;
 }
 
-// A check glyph with only its left half highlighted — the badge equivalent of
-// a half-star rating. Muted full check underneath, primary check clipped to
-// half width on top.
+// Partial-completion mark — "乄", a check-like glyph visually distinct from
+// the full ✓.
 function HalfCheck() {
   return (
-    <span className="relative inline-flex h-4 w-4 shrink-0" aria-hidden="true">
-      <Check className="h-4 w-4 text-muted-foreground/40" />
-      <span className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
-        <Check className="h-4 w-4 text-primary" />
-      </span>
+    <span
+      className="flex h-4 w-4 shrink-0 items-center justify-center text-base leading-none text-primary font-semibold"
+      aria-hidden="true"
+    >
+      乄
     </span>
   );
 }
