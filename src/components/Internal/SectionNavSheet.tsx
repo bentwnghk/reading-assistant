@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   FileText,
+  GraduationCap,
   ImageIcon,
   Layers,
   Library,
@@ -22,6 +23,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
@@ -180,9 +182,12 @@ interface PageLink {
   icon: LucideIcon;
   labelKey: string;
   separatorAbove?: boolean;
-  // Dialog entry (Learning Journey): opens the dashboard dialog instead of
-  // navigating. `href` is a stable key, not a route.
+  // Dialog entries (Learning Journey / Teacher Dashboard) open a dialog via
+  // the global store instead of navigating; `href` is a stable key, not a
+  // route. When `roles` is set, the entry renders only for those roles.
   openDashboard?: boolean;
+  openTeacherDashboard?: boolean;
+  roles?: UserRole[];
 }
 
 const pageLinks: PageLink[] = [
@@ -204,6 +209,13 @@ const pageLinks: PageLink[] = [
     separatorAbove: true,
   },
   {
+    href: "teacher-dashboard",
+    icon: GraduationCap,
+    labelKey: "teacherDashboard.title",
+    openTeacherDashboard: true,
+    roles: ["teacher", "admin", "super-admin"],
+  },
+  {
     href: "/leaderboard",
     icon: Trophy,
     labelKey: "leaderboard.title",
@@ -214,10 +226,13 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = session?.user?.role;
   const store = useReadingStore();
   const dueForReviewCount = useVocabularyStore((s) => s.dueForReviewCount);
   const overdueCount = useAssignmentsStore((s) => s.overdueCount);
   const setOpenDashboard = useGlobalStore((s) => s.setOpenDashboard);
+  const setOpenTeacherDashboard = useGlobalStore((s) => s.setOpenTeacherDashboard);
   const pageBadges: Record<string, number> = {
     "/vocabulary": dueForReviewCount,
     "/assignments": overdueCount,
@@ -243,6 +258,11 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
   function handlePageLinkClick(page: PageLink) {
     if (page.openDashboard) {
       setOpenDashboard(true);
+      onOpenChange(false);
+      return;
+    }
+    if (page.openTeacherDashboard) {
+      setOpenTeacherDashboard(true);
       onOpenChange(false);
       return;
     }
@@ -314,9 +334,11 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
                 );
               })}
               <div className="my-2 border-t" />
-              {pageLinks.map((page) => {
+              {pageLinks
+                .filter((page) => !page.roles || (role && page.roles.includes(role)))
+                .map((page) => {
                 const Icon = page.icon;
-                const isCurrent = !page.openDashboard && pathname === page.href;
+                const isCurrent = !page.openDashboard && !page.openTeacherDashboard && pathname === page.href;
                 const badgeCount = pageBadges[page.href] ?? 0;
                 const badgeTone = page.href === "/vocabulary" ? "bg-orange-500" : "bg-red-500";
                 return (
