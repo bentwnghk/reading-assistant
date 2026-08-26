@@ -136,6 +136,26 @@ function HomeContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoreReady, searchParams]);
 
+  // Deep-link support: /?goto=<section-id> scrolls to a section after
+  // cross-page navigation (SectionNavSheet on /vocabulary, /assignments, ...).
+  // Waits for the session restore so the page is fully rendered first.
+  useEffect(() => {
+    if (isLoading) return;
+    const goto = searchParams.get("goto");
+    if (!goto) return;
+    if (!session) {
+      router.replace("/");
+      return;
+    }
+    if (!restoreReady) return;
+    const element = document.getElementById(goto);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    router.replace("/");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, restoreReady, searchParams]);
+
   // Recover title generation after an iOS PWA page refresh that interrupted the
   // extraction flow. If the store has extracted text but no title (because the
   // async chain in ImageUpload was killed before generateTitle() ran), re-run it.

@@ -1,5 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
+import { useRouter, usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   BookMarked,
@@ -7,9 +8,11 @@ import {
   BookOpenCheck,
   Check,
   ClipboardCheck,
+  ClipboardList,
   FileText,
   ImageIcon,
   Layers,
+  Library,
   Sparkles,
   Upload,
   User,
@@ -18,6 +21,8 @@ import {
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore } from "@/store/reading";
+import { useVocabularyStore } from "@/store/vocabulary";
+import { useAssignmentsStore } from "@/store/assignments";
 import { cn } from "@/utils/style";
 
 interface SectionNavSheetProps {
@@ -107,15 +112,52 @@ const sections = [
   },
 ];
 
+const pageLinks = [
+  {
+    href: "/vocabulary",
+    icon: Library,
+    labelKey: "vocabulary.title",
+  },
+  {
+    href: "/assignments",
+    icon: ClipboardList,
+    labelKey: "assignments.navTitle",
+  },
+];
+
 function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
   const { t } = useTranslation();
+  const router = useRouter();
+  const pathname = usePathname();
   const store = useReadingStore();
+  const dueForReviewCount = useVocabularyStore((s) => s.dueForReviewCount);
+  const overdueCount = useAssignmentsStore((s) => s.overdueCount);
+  const pageBadges: Record<string, number> = {
+    "/vocabulary": dueForReviewCount,
+    "/assignments": overdueCount,
+  };
+  const isHome = pathname === "/";
 
   function handleSectionClick(id: string, accessible: boolean) {
     if (!accessible) return;
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (isHome) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } else {
+      // Section anchors only exist on the home page — deep-link back via the
+      // ?goto= param (handled in page.tsx after the store is restored).
+      router.push(`/?goto=${id}`);
+    }
+    onOpenChange(false);
+  }
+
+  function handlePageLinkClick(href: string) {
+    if (pathname !== href) {
+      router.push(href);
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
     onOpenChange(false);
   }
@@ -171,6 +213,47 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
                     <span className="flex-1">{t(section.labelKey)}</span>
                     {isCompleted && (
                       <Check className="h-4 w-4 shrink-0 text-primary" />
+                    )}
+                  </button>
+                );
+              })}
+              <div className="my-2 border-t" />
+              {pageLinks.map((page) => {
+                const Icon = page.icon;
+                const isCurrent = pathname === page.href;
+                const badgeCount = pageBadges[page.href] ?? 0;
+                const badgeTone = page.href === "/vocabulary" ? "bg-orange-500" : "bg-red-500";
+                return (
+                  <button
+                    key={page.href}
+                    onClick={() => handlePageLinkClick(page.href)}
+                    title={
+                      page.href === "/vocabulary" && badgeCount > 0
+                        ? t("vocabulary.dueBadgeHint", { count: badgeCount })
+                        : undefined
+                    }
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+                      "hover:bg-accent hover:text-accent-foreground",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      isCurrent && "bg-accent text-accent-foreground font-medium"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="flex-1">{t(page.labelKey)}</span>
+                    {badgeCount > 0 ? (
+                      <span
+                        className={cn(
+                          "flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white",
+                          badgeTone
+                        )}
+                      >
+                        {badgeCount > 9 ? "9+" : badgeCount}
+                      </span>
+                    ) : (
+                      isCurrent && (
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                      )
                     )}
                   </button>
                 );

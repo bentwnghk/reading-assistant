@@ -328,7 +328,7 @@ function Header() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden">
         <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center sm:h-14 gap-y-1 py-1 sm:py-0">
           <div className="flex items-center gap-1 self-center sm:self-auto">
-            {pathname === "/" && (
+            {pathname !== "/leaderboard" && (
               <Button
                 variant="ghost"
                 size="icon"
