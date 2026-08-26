@@ -34,9 +34,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Building2, Search } from "lucide-react";
+import { RecipientPicker } from "@/components/Internal/RecipientPicker";
 import { cn } from "@/utils/style";
 import type { ShareTargetGroup } from "@/lib/shared-sessions";
 
@@ -70,7 +68,6 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
   const [shareSelectedIds, setShareSelectedIds] = useState<Set<string>>(
     new Set()
   );
-  const [shareSearch, setShareSearch] = useState("");
   const [shareLoading, setShareLoading] = useState(false);
   const [shareSending, setShareSending] = useState(false);
 
@@ -120,7 +117,6 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
       setShareList(list);
       setShareOpen(true);
       setShareSelectedIds(new Set());
-      setShareSearch("");
       setShareLoading(true);
       fetch("/api/shares/targets")
         .then((r) => (r.ok ? r.json() : []))
@@ -173,29 +169,6 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
       setEditSaving(false);
     }
   }, [editId, editName, editWords, fetchLists, t]);
-
-  const hasSchools = shareGroups.some((g) => g.schoolId);
-
-  const filteredShareGroups = (() => {
-    if (!shareSearch.trim()) return shareGroups;
-    const q = shareSearch.toLowerCase();
-    return shareGroups
-      .map((g) => ({
-        ...g,
-        users: g.users.filter(
-          (u) =>
-            u.name?.toLowerCase().includes(q) ||
-            u.email?.toLowerCase().includes(q)
-        ),
-      }))
-      .filter((g) => g.users.length > 0);
-  })();
-
-  const shareAllIds = new Set(
-    filteredShareGroups.flatMap((g) => g.users.map((u) => u.id))
-  );
-  const shareAllSelected =
-    shareAllIds.size > 0 && [...shareAllIds].every((id) => shareSelectedIds.has(id));
 
   const handleShare = async () => {
     if (!shareList || shareSelectedIds.size === 0) return;
@@ -478,165 +451,12 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
               {t("vocabulary.share.noTargets")}
             </div>
           ) : (
-            <>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={shareSearch}
-                  onChange={(e) => setShareSearch(e.target.value)}
-                  placeholder={t("vocabulary.share.searchUsers")}
-                  className="w-full rounded-md border bg-background pl-9 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-
-              {filteredShareGroups.length > 1 && (
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={shareAllSelected}
-                    onCheckedChange={() =>
-                      setShareSelectedIds(
-                        shareAllSelected ? new Set() : shareAllIds
-                      )
-                    }
-                  />
-                  <span className="text-sm">
-                    {shareAllSelected
-                      ? t("share.deselectAll")
-                      : t("share.selectAll")}
-                  </span>
-                </div>
-              )}
-
-              <ScrollArea className="max-h-64">
-                <div className="space-y-4 pr-3">
-                  {(() => {
-                    const schoolMap = new Map<
-                      string | undefined,
-                      typeof filteredShareGroups
-                    >();
-                    if (hasSchools) {
-                      for (const g of filteredShareGroups) {
-                        if (!schoolMap.has(g.schoolId))
-                          schoolMap.set(g.schoolId, []);
-                        schoolMap.get(g.schoolId)!.push(g);
-                      }
-                    }
-
-                    const blocks = hasSchools
-                      ? [...schoolMap.entries()].map(
-                          ([schoolId, groups]) => ({
-                            schoolId,
-                            schoolName: groups[0]?.schoolName,
-                            groups,
-                          })
-                        )
-                      : [
-                          {
-                            schoolId: undefined,
-                            schoolName: undefined,
-                            groups: filteredShareGroups,
-                          },
-                        ];
-
-                    return blocks.map((block) => (
-                      <div key={block.schoolId ?? "__none__"}>
-                        {hasSchools && (
-                          <div className="flex items-center gap-2 mb-2 pb-1 border-b">
-                            <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                            <span className="text-sm font-semibold">
-                              {block.schoolName || "Other"}
-                            </span>
-                          </div>
-                        )}
-                        <div className="space-y-3">
-                          {block.groups.map((group) => {
-                            const groupIds = group.users.map((u) => u.id);
-                            const allSel = groupIds.every((id) =>
-                              shareSelectedIds.has(id)
-                            );
-                            const someSel =
-                              groupIds.some((id) =>
-                                shareSelectedIds.has(id)
-                              ) && !allSel;
-
-                            return (
-                              <div key={group.classId || group.label}>
-                                {(block.groups.length > 1 || hasSchools) && (
-                                  <div className="flex items-center gap-2 mb-1.5">
-                                    <Checkbox
-                                      checked={
-                                        allSel ? true : someSel ? "indeterminate" : false
-                                      }
-                                      onCheckedChange={() => {
-                                        setShareSelectedIds((prev) => {
-                                          const next = new Set(prev);
-                                          if (allSel) {
-                                            groupIds.forEach((id) =>
-                                              next.delete(id)
-                                            );
-                                          } else {
-                                            groupIds.forEach((id) =>
-                                              next.add(id)
-                                            );
-                                          }
-                                          return next;
-                                        });
-                                      }}
-                                    />
-                                    <span className="text-sm font-medium">
-                                      {group.classId
-                                        ? t("share.classGroup", {
-                                            name: group.label,
-                                          })
-                                        : group.label}
-                                    </span>
-                                  </div>
-                                )}
-                                <div className="space-y-1">
-                                  {group.users.map((user) => (
-                                    <div
-                                      key={user.id}
-                                      className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted"
-                                    >
-                                      <Checkbox
-                                        id={`rl-user-${user.id}`}
-                                        checked={shareSelectedIds.has(
-                                          user.id
-                                        )}
-                                        onCheckedChange={() => {
-                                          setShareSelectedIds((prev) => {
-                                            const next = new Set(prev);
-                                            if (next.has(user.id)) {
-                                              next.delete(user.id);
-                                            } else {
-                                              next.add(user.id);
-                                            }
-                                            return next;
-                                          });
-                                        }}
-                                      />
-                                      <label
-                                        htmlFor={`rl-user-${user.id}`}
-                                        className="text-sm cursor-pointer select-none flex-1 min-w-0"
-                                      >
-                                        <span className="truncate block">
-                                          {user.name || user.email || user.id}
-                                        </span>
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ));
-                  })()}
-                </div>
-              </ScrollArea>
-            </>
+            <RecipientPicker
+              groups={shareGroups}
+              selectedIds={shareSelectedIds}
+              onChange={setShareSelectedIds}
+              searchPlaceholder={t("vocabulary.share.searchUsers")}
+            />
           )}
 
           <DialogFooter>

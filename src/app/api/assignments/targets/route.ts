@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getSchoolForUser, getUsersInSchool, getAllSchools } from "@/lib/users"
+import { decorateGroupsWithClassMeta } from "@/lib/shared-sessions"
 import type { ShareTargetGroup, ShareTarget } from "@/lib/shared-sessions"
 
 /**
@@ -41,7 +42,7 @@ export async function GET() {
         if (targets.length === 0) continue
         result.push(...groupByClass(targets, school.id, school.name))
       }
-      return NextResponse.json(result)
+      return NextResponse.json(await decorateGroupsWithClassMeta(result))
     }
 
     const schoolId = await getSchoolForUser(session.user.id)
@@ -57,7 +58,7 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json(groupByClass(targets, schoolId, schoolName))
+    return NextResponse.json(await decorateGroupsWithClassMeta(groupByClass(targets, schoolId, schoolName)))
   } catch (error) {
     console.error("Error fetching assignment targets:", error)
     return NextResponse.json({ error: "Failed to fetch targets" }, { status: 500 })

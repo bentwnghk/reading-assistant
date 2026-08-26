@@ -1846,6 +1846,7 @@
           "selectClass": "選擇班級或名單…",
           "groupClasses": "班級",
           "groupRosters": "已儲存名單",
+          "searchTargets": "搜尋班別、名單、老師…",
           "rosterStudentsCount": "{{count}} 名學生",
           "noTargets": "沒有可用的班級或名單。",
           "aTeacher": "一位老師",
@@ -2884,6 +2885,7 @@
     "selectAll": "全選",
     "deselectAll": "取消全選",
     "classGroup": "班級：{{name}}",
+    "noMatches": "沒有符合的收件人",
     "noTargets": "沒有可分享的使用者。",
     "share": "分享",
     "sharing": "分享中...",
@@ -3205,7 +3207,8 @@
     "search": "搜尋班別、科目、老師…",
     "empty": "沒有符合的班別",
     "all": "所有班別",
-    "noClass": "無班別"
+    "noClass": "無班別",
+    "rosters": "已儲存名單"
   },
   "taxonomy": {
     "description": "管理學校的科目及級別清單。班別可選擇關聯其一，讓各處的班別選擇器自動分組顯示。",

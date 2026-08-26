@@ -1816,6 +1816,7 @@
           "selectClass": "Select a class or roster…",
           "groupClasses": "Classes",
           "groupRosters": "Saved rosters",
+          "searchTargets": "Search classes, rosters, teachers...",
           "rosterStudentsCount": "{{count}} students",
           "noTargets": "No classes or rosters available.",
           "aTeacher": "A teacher",
@@ -2858,6 +2859,7 @@
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
     "classGroup": "Class: {{name}}",
+    "noMatches": "No matching recipients",
     "noTargets": "No users available to share with.",
     "share": "Share",
     "sharing": "Sharing...",
@@ -3179,7 +3181,8 @@
     "search": "Search classes, subjects, teachers...",
     "empty": "No matching classes",
     "all": "All Classes",
-    "noClass": "No Class"
+    "noClass": "No Class",
+    "rosters": "Saved rosters"
   },
   "taxonomy": {
     "description": "Manage your school's subject and form/grade lists. Classes can optionally reference one of each — this powers grouped class pickers across the app.",

@@ -44,12 +44,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ClassBattleTargetCombobox } from "@/components/Internal/ClassCombobox";
 import { toast } from "sonner";
 import GuideDialog from "@/components/Internal/GuideDialog";
 
@@ -515,43 +514,21 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
               {classBattle && (
                 <div className="space-y-2">
                   <Label className="text-xs uppercase text-muted-foreground">{t(`${M}.targetClass`)}</Label>
-                  <Select
+                  <ClassBattleTargetCombobox
+                    classes={classes}
+                    rosters={rosters}
                     value={targetClassId ? `class:${targetClassId}` : targetPresetId ? `preset:${targetPresetId}` : ""}
-                    onValueChange={(v) => {
+                    onChange={(v) => {
                       const [kind, id] = v.split(":");
                       setTargetClassId(kind === "class" ? id : "");
                       setTargetPresetId(kind === "preset" ? id : "");
                     }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t(`${M}.selectClass`)} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {classes.length > 0 && (
-                        <SelectGroup>
-                          <SelectLabel className="text-xs uppercase text-muted-foreground">{t(`${M}.groupClasses`)}</SelectLabel>
-                          {classes.map((c) => (
-                            <SelectItem key={c.id} value={`class:${c.id}`}>
-                              {c.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      )}
-                      {rosters.length > 0 && (
-                        <SelectGroup>
-                          <SelectLabel className="text-xs uppercase text-muted-foreground">{t(`${M}.groupRosters`)}</SelectLabel>
-                          {rosters.map((r) => (
-                            <SelectItem key={r.id} value={`preset:${r.id}`}>
-                              {r.name} · {t(`${M}.rosterStudentsCount`, { count: r.studentCount })}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      )}
-                      {classes.length === 0 && rosters.length === 0 && (
-                        <div className="px-3 py-2 text-xs text-muted-foreground">{t(`${M}.noTargets`)}</div>
-                      )}
-                    </SelectContent>
-                  </Select>
+                    placeholder={t(`${M}.selectClass`)}
+                    emptyLabel={t(`${M}.noTargets`)}
+                    searchPlaceholder={t(`${M}.searchTargets`)}
+                    rostersLabel={t(`${M}.groupRosters`)}
+                    rosterCountLabel={(count) => t(`${M}.rosterStudentsCount`, { count })}
+                  />
                 </div>
               )}
             </>

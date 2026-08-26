@@ -26,6 +26,8 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { RecipientPicker } from "@/components/Internal/RecipientPicker"
+import type { ShareTargetGroup } from "@/lib/shared-sessions"
 
 export default function PresetsSection() {
   const { t } = useTranslation()
@@ -229,44 +231,22 @@ function PresetEditDialog({
   const [description, setDescription] = useState("")
   const [saving, setSaving] = useState(false)
 
-  // Student picker state
-  const [groups, setGroups] = useState<{ id: string; name: string | null; email: string | null }[]>([])
+  // Student picker state (class-grouped recipients; the selectedIds Set
+  // dedupes students who belong to multiple classes)
+  const [groups, setGroups] = useState<ShareTargetGroup[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [search, setSearch] = useState("")
 
   useEffect(() => {
     if (!preset) return
     setName(preset.name)
     setDescription(preset.description ?? "")
     setSelectedIds(new Set(preset.studentIds))
-    // Fetch all assignable targets (flat list) for the picker
+    // Fetch all assignable targets (grouped by class) for the picker
     fetch("/api/assignments/targets")
       .then((res) => (res.ok ? res.json() : []))
-      .then((data: { users: { id: string; name: string | null; email: string | null }[] }[]) => {
-        setGroups(data.flatMap((g) => g.users))
-      })
+      .then((data: ShareTargetGroup[]) => setGroups(data))
       .catch(() => setGroups([]))
   }, [preset])
-
-  const filtered = search.trim()
-    ? groups.filter(
-        (u) =>
-          u.name?.toLowerCase().includes(search.toLowerCase()) ||
-          u.email?.toLowerCase().includes(search.toLowerCase()),
-      )
-    : groups
-
-  const allSelected =
-    filtered.length > 0 && filtered.every((u) => selectedIds.has(u.id))
-
-  function toggleUser(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
 
   async function handleSave() {
     if (!preset) return
@@ -353,53 +333,21 @@ function PresetEditDialog({
               <Badge variant="secondary">{selectedIds.size}</Badge>
             </div>
 
-            <div className="relative mb-2">
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("assignments.create.searchStudents")}
-                className="h-8 pr-3 text-sm"
+            {groups.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-2">
+                {t("assignments.create.noStudents")}
+              </p>
+            ) : (
+              <RecipientPicker
+                groups={groups}
+                selectedIds={selectedIds}
+                onChange={setSelectedIds}
+                searchPlaceholder={t("assignments.create.searchStudents")}
+                selectAllLabel={t("assignments.create.selectAll")}
+                deselectAllLabel={t("assignments.create.deselectAll")}
+                listClassName="max-h-[35vh] border rounded p-2"
               />
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mb-2 h-7 text-xs"
-              onClick={() =>
-                allSelected
-                  ? setSelectedIds(new Set())
-                  : setSelectedIds(new Set(filtered.map((u) => u.id)))
-              }
-            >
-              {allSelected
-                ? t("assignments.create.deselectAll")
-                : t("assignments.create.selectAll")}
-            </Button>
-
-            <div className="max-h-[35vh] overflow-auto border rounded p-2 space-y-1">
-              {filtered.map((u) => (
-                <label
-                  key={u.id}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(u.id)}
-                    onChange={() => toggleUser(u.id)}
-                    className="h-4 w-4"
-                  />
-                  <span className="text-sm flex-1 min-w-0 truncate">
-                    {u.name || u.email || u.id}
-                  </span>
-                  {u.email && (
-                    <span className="text-xs text-muted-foreground truncate">
-                      {u.email}
-                    </span>
-                  )}
-                </label>
-              ))}
-            </div>
+            )}
           </div>
         </div>
 

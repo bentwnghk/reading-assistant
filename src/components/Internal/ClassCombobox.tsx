@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChevronsUpDown, GraduationCap, Layers, Users } from "lucide-react"
+import { Bookmark, ChevronsUpDown, GraduationCap, Layers, Users } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { cn } from "@/utils/style"
@@ -106,11 +106,13 @@ function CommandClassList({
   itemId,
   renderItem,
   emptyLabel,
+  footer,
 }: {
   options: ClassOption[]
   itemId: (c: ClassOption) => string
   renderItem: (c: ClassOption, secondaryLabel: string | undefined) => React.ReactNode
   emptyLabel: string
+  footer?: React.ReactNode
 }) {
   const groups = groupBySubject(options)
   // When the list spans multiple schools, show the school as secondary text
@@ -137,6 +139,7 @@ function CommandClassList({
           {gi < groups.length - 1 && <div className="h-1" />}
         </CommandGroup>
       ))}
+      {footer}
     </CommandList>
   )
 }
@@ -338,6 +341,158 @@ export function ClassMultiSelect({
                 )}
               </label>
             )}
+          />
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+// ─── Battle target (class OR roster) ─────────────────────────────────────────
+
+export interface BattleRosterTarget {
+  id: string
+  name: string
+  studentCount?: number
+}
+
+export interface ClassBattleTargetComboboxProps {
+  classes: ClassComboboxClass[]
+  rosters: BattleRosterTarget[]
+  /** Composite value: "class:<id>" | "preset:<id>" | "" */
+  value: string
+  onChange: (compositeValue: string) => void
+  placeholder?: string
+  emptyLabel?: string
+  searchPlaceholder?: string
+  rostersLabel?: string
+  rosterCountLabel?: (count: number) => string
+  disabled?: boolean
+  className?: string
+}
+
+/**
+ * Searchable picker for multiplayer class-battle targets: classes (grouped
+ * by subject/form) plus saved rosters. Emits composite "class:<id>" /
+ * "preset:<id>" values, mirroring the previous Select's value scheme.
+ */
+export function ClassBattleTargetCombobox({
+  classes,
+  rosters,
+  value,
+  onChange,
+  placeholder,
+  emptyLabel,
+  searchPlaceholder,
+  rostersLabel,
+  rosterCountLabel,
+  disabled = false,
+  className,
+}: ClassBattleTargetComboboxProps) {
+  const { t } = useTranslation()
+  const [open, setOpen] = React.useState(false)
+  const options = React.useMemo(() => toOptions(classes), [classes])
+  const rosterList = React.useMemo(
+    () => [...rosters].sort((a, b) => a.name.localeCompare(b.name)),
+    [rosters],
+  )
+
+  const selectedKind = value.includes(":") ? value.slice(0, value.indexOf(":")) : ""
+  const selectedId = value.includes(":") ? value.slice(value.indexOf(":") + 1) : ""
+  const selectedClass = selectedKind === "class" ? options.find(c => c.id === selectedId) : undefined
+  const selectedRoster = selectedKind === "preset" ? rosters.find(r => r.id === selectedId) : undefined
+
+  const select = (composite: string) => {
+    onChange(composite)
+    setOpen(false)
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className={cn("w-full justify-between font-normal", !selectedClass && !selectedRoster && "text-muted-foreground", className)}
+        >
+          <span className="truncate">
+            {selectedClass
+              ? classLabel(selectedClass)
+              : selectedRoster
+                ? rosterCountLabel
+                  ? `${selectedRoster.name} · ${rosterCountLabel(selectedRoster.studentCount ?? 0)}`
+                  : selectedRoster.name
+                : placeholder ?? t("classCombobox.selectClass")}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[min(22rem,calc(100vw-2rem))] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={searchPlaceholder ?? t("classCombobox.search")} />
+          <CommandClassList
+            options={options}
+            itemId={c => `class-${c.id}`}
+            emptyLabel={emptyLabel ?? t("classCombobox.empty")}
+            renderItem={(c, secondary) => (
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 text-left"
+                onClick={() => select(`class:${c.id}`)}
+              >
+                <Users className="h-4 w-4 shrink-0 opacity-60" />
+                <span className="flex-1 truncate">{classLabel(c)}</span>
+                {secondary && (
+                  <span className="max-w-24 truncate text-xs text-muted-foreground">{secondary}</span>
+                )}
+                <span className="h-4 w-4 shrink-0">
+                  {selectedKind === "class" && selectedId === c.id && (
+                    <Layers className="h-4 w-4 text-primary" />
+                  )}
+                </span>
+              </button>
+            )}
+            footer={
+              rosterList.length > 0 ? (
+                <CommandGroup
+                  value="rosters"
+                  heading={rostersLabel ?? t("classCombobox.rosters")}
+                >
+                  {rosterList.map(r => (
+                    <CommandItem
+                      key={`preset-${r.id}`}
+                      value={`preset ${r.name.toLowerCase()}`}
+                      onSelect={() => {}}
+                    >
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 text-left"
+                        onClick={() => select(`preset:${r.id}`)}
+                      >
+                        <Bookmark className="h-4 w-4 shrink-0 opacity-60" />
+                        <span className="flex-1 truncate">{r.name}</span>
+                        {typeof r.studentCount === "number" && (
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {r.studentCount}
+                          </span>
+                        )}
+                        <span className="h-4 w-4 shrink-0">
+                          {selectedKind === "preset" && selectedId === r.id && (
+                            <Layers className="h-4 w-4 text-primary" />
+                          )}
+                        </span>
+                      </button>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ) : options.length === 0 ? (
+                <div className="px-3 py-2 text-xs text-muted-foreground">
+                  {emptyLabel ?? t("classCombobox.empty")}
+                </div>
+              ) : undefined
+            }
           />
         </Command>
       </PopoverContent>

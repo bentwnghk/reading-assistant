@@ -28,10 +28,53 @@ export interface ShareTarget {
 export interface ShareTargetGroup {
   classId?: string
   className?: string
+  /** Class taxonomy context for group headers (best-effort) */
+  subjectName?: string
+  gradeName?: string
   schoolId?: string
   schoolName?: string
   label: string
   users: ShareTarget[]
+}
+
+/**
+ * Best-effort decoration of class groups with subject/grade names (used for
+ * disambiguating groups in recipient pickers at scale). Returns the groups
+ * unchanged when no class ids or on DB failure.
+ */
+export async function decorateGroupsWithClassMeta(
+  groups: ShareTargetGroup[]
+): Promise<ShareTargetGroup[]> {
+  const classIds = [...new Set(groups.filter(g => g.classId).map(g => g.classId!))]
+  if (classIds.length === 0) return groups
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT c.id, sub.name AS subject_name, g.name AS grade_name
+       FROM classes c
+       LEFT JOIN subjects sub ON sub.id = c.subject_id
+       LEFT JOIN grades g ON g.id = c.grade_id
+       WHERE c.id = ANY($1)`,
+      [classIds]
+    )
+    const meta = new Map(
+      result.rows.map((row: Record<string, unknown>) => [
+        row.id as string,
+        {
+          subjectName: (row.subject_name as string | null) || undefined,
+          gradeName: (row.grade_name as string | null) || undefined,
+        },
+      ])
+    )
+    return groups.map(gr => {
+      const m = gr.classId ? meta.get(gr.classId) : undefined
+      return m ? { ...gr, ...m } : gr
+    })
+  } catch {
+    return groups
+  } finally {
+    client.release()
+  }
 }
 
 function stripUserData(sessionData: ReadingStore): Record<string, unknown> {
@@ -332,7 +375,7 @@ export async function getShareTargets(
       result.push(...groupTargetsByClass(targets, { schoolId: school.id, schoolName: school.name }))
     }
 
-    return result
+    return decorateGroupsWithClassMeta(result)
   }
 
   if (role === "admin") {
@@ -363,7 +406,7 @@ export async function getShareTargets(
     }
 
     if (targets.length === 0) return []
-    return groupTargetsByClass(targets, {})
+    return decorateGroupsWithClassMeta(groupTargetsByClass(targets, {}))
   }
 
   if (role === "teacher") {
@@ -384,6 +427,8 @@ export async function getShareTargets(
         result.push({
           classId: cls.id,
           className: cls.name,
+          subjectName: cls.subjectName,
+          gradeName: cls.gradeName,
           label: cls.name,
           users: targets,
         })
@@ -403,11 +448,22 @@ export async function getShareTargets(
       const seen = new Set<string>()
 
       const classesResult = await client.query(
-        `SELECT id, name FROM classes WHERE id = ANY($1)`,
+        `SELECT c.id, c.name, sub.name AS subject_name, g.name AS grade_name
+         FROM classes c
+         LEFT JOIN subjects sub ON sub.id = c.subject_id
+         LEFT JOIN grades g ON g.id = c.grade_id
+         WHERE c.id = ANY($1)`,
         [classIds]
       )
-      const classNameById = new Map<string, string>(
-        classesResult.rows.map((row: Record<string, unknown>) => [row.id as string, row.name as string])
+      const classMetaById = new Map<string, { name: string; subjectName?: string; gradeName?: string }>(
+        classesResult.rows.map((row: Record<string, unknown>) => [
+          row.id as string,
+          {
+            name: row.name as string,
+            subjectName: (row.subject_name as string | null) || undefined,
+            gradeName: (row.grade_name as string | null) || undefined,
+          },
+        ])
       )
 
       for (const classId of classIds) {
@@ -421,14 +477,17 @@ export async function getShareTargets(
             name: m.studentName ?? null,
             email: m.studentEmail ?? null,
             classId,
-            className: classNameById.get(classId),
+            className: classMetaById.get(classId)?.name,
           })
         }
         if (targets.length > 0) {
-          const className = classNameById.get(classId)
+          const meta = classMetaById.get(classId)
+          const className = meta?.name
           result.push({
             classId,
             className,
+            subjectName: meta?.subjectName,
+            gradeName: meta?.gradeName,
             label: className || classId,
             users: targets,
           })
