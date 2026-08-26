@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useRouter, usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
+  BarChart3,
   BookMarked,
   BookOpen,
   BookOpenCheck,
@@ -25,6 +26,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { useAssignmentsStore } from "@/store/assignments";
+import { useGlobalStore } from "@/store/global";
 import { grammarGameBestScore } from "@/utils/sessionMetrics";
 import { cn } from "@/utils/style";
 
@@ -166,7 +168,17 @@ const sections: SectionItem[] = [
   },
 ];
 
-const pageLinks = [
+interface PageLink {
+  href: string;
+  icon: LucideIcon;
+  labelKey: string;
+  separatorAbove?: boolean;
+  // Dialog entry (Learning Journey): opens the dashboard dialog instead of
+  // navigating. `href` is a stable key, not a route.
+  openDashboard?: boolean;
+}
+
+const pageLinks: PageLink[] = [
   {
     href: "/vocabulary",
     icon: Library,
@@ -176,6 +188,13 @@ const pageLinks = [
     href: "/assignments",
     icon: ClipboardList,
     labelKey: "assignments.navTitle",
+  },
+  {
+    href: "dashboard",
+    icon: BarChart3,
+    labelKey: "dashboard.title",
+    openDashboard: true,
+    separatorAbove: true,
   },
   {
     href: "/leaderboard",
@@ -191,6 +210,7 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
   const store = useReadingStore();
   const dueForReviewCount = useVocabularyStore((s) => s.dueForReviewCount);
   const overdueCount = useAssignmentsStore((s) => s.overdueCount);
+  const setOpenDashboard = useGlobalStore((s) => s.setOpenDashboard);
   const pageBadges: Record<string, number> = {
     "/vocabulary": dueForReviewCount,
     "/assignments": overdueCount,
@@ -213,9 +233,14 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
     onOpenChange(false);
   }
 
-  function handlePageLinkClick(href: string) {
-    if (pathname !== href) {
-      router.push(href);
+  function handlePageLinkClick(page: PageLink) {
+    if (page.openDashboard) {
+      setOpenDashboard(true);
+      onOpenChange(false);
+      return;
+    }
+    if (pathname !== page.href) {
+      router.push(page.href);
     } else {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -284,14 +309,14 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
               <div className="my-2 border-t" />
               {pageLinks.map((page) => {
                 const Icon = page.icon;
-                const isCurrent = pathname === page.href;
+                const isCurrent = !page.openDashboard && pathname === page.href;
                 const badgeCount = pageBadges[page.href] ?? 0;
                 const badgeTone = page.href === "/vocabulary" ? "bg-orange-500" : "bg-red-500";
                 return (
                   <div key={page.href} className="w-full">
-                    {page.href === "/leaderboard" && <div className="my-2 border-t" />}
+                    {page.separatorAbove && <div className="my-2 border-t" />}
                     <button
-                      onClick={() => handlePageLinkClick(page.href)}
+                      onClick={() => handlePageLinkClick(page)}
                       title={
                         page.href === "/vocabulary" && badgeCount > 0
                           ? t("vocabulary.dueBadgeHint", { count: badgeCount })
