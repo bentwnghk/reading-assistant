@@ -139,12 +139,16 @@ function HomeContent() {
   // Deep-link support: /?goto=<section-id> scrolls to a section after
   // cross-page navigation (SectionNavSheet on /vocabulary, /assignments, ...).
   // Waits for the session restore so the page is fully rendered first.
+  // NOTE: router.replace MUST pass { scroll: false } — the default scroll reset
+  // scrolls to top after the URL cleanup, which on iOS (where scrollIntoView is
+  // effectively instant) lands AFTER the section is reached and yanks the page
+  // back to the top.
   useEffect(() => {
     if (isLoading) return;
     const goto = searchParams.get("goto");
     if (!goto) return;
     if (!session) {
-      router.replace("/");
+      router.replace("/", { scroll: false });
       return;
     }
     if (!restoreReady) return;
@@ -152,7 +156,7 @@ function HomeContent() {
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    router.replace("/");
+    router.replace("/", { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, restoreReady, searchParams]);
 
