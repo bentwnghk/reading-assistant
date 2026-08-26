@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Select,
   SelectContent,
@@ -216,7 +217,10 @@ export default function AssignRosterDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+        {/* Single scroll container (mobile: nested overflow divs inside the
+            dialog don't receive touch gestures on iOS — one ScrollArea works) */}
+        <ScrollArea className="max-h-[70vh]">
+        <div className="space-y-4 pr-3">
           {/* Metadata fields */}
           <div className="grid gap-3">
             <div className="space-y-1.5">
@@ -359,12 +363,13 @@ export default function AssignRosterDialog({
                   searchPlaceholder={t("assignments.create.searchStudents")}
                   selectAllLabel={t("assignments.create.selectAll")}
                   deselectAllLabel={t("assignments.create.deselectAll")}
-                  listClassName="max-h-[50vh] border rounded p-2"
+                  listClassName="border rounded p-2"
                 />
               </>
             )}
           </div>
         </div>
+        </ScrollArea>
 
         <DialogFooter>
           <Button
