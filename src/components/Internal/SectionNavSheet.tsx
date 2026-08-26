@@ -19,11 +19,13 @@ import {
   User,
   Waypoints,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { useAssignmentsStore } from "@/store/assignments";
+import { grammarGameBestScore } from "@/utils/sessionMetrics";
 import { cn } from "@/utils/style";
 
 interface SectionNavSheetProps {
@@ -33,7 +35,32 @@ interface SectionNavSheetProps {
 
 type ReadingStoreState = ReturnType<typeof useReadingStore.getState>;
 
-const sections = [
+interface SectionItem {
+  id: string;
+  icon: LucideIcon;
+  labelKey: string;
+  checkCompleted: (store: ReadingStoreState) => boolean;
+  // Optional "started but not finished" state — renders a half tick instead of
+  // no mark at all.
+  checkPartial?: (store: ReadingStoreState) => boolean;
+  isAccessible: (store: ReadingStoreState) => boolean;
+}
+
+// A check glyph with only its left half highlighted — the badge equivalent of
+// a half-star rating. Muted full check underneath, primary check clipped to
+// half width on top.
+function HalfCheck() {
+  return (
+    <span className="relative inline-flex h-4 w-4 shrink-0" aria-hidden="true">
+      <Check className="h-4 w-4 text-muted-foreground/40" />
+      <span className="absolute inset-y-0 left-0 w-1/2 overflow-hidden">
+        <Check className="h-4 w-4 text-primary" />
+      </span>
+    </span>
+  );
+}
+
+const sections: SectionItem[] = [
   {
     id: "section-student-info",
     icon: User,
@@ -80,14 +107,28 @@ const sections = [
     id: "section-adapted",
     icon: BookOpen,
     labelKey: "toc.adapted",
-    checkCompleted: (store: ReadingStoreState) => !!store.adaptedText,
+    // Full completion mirrors WorkflowProgress's steps for this section:
+    // adapted text AND sentence analysis AND word highlighting. Having the
+    // adapted text alone is only "partial".
+    checkCompleted: (store: ReadingStoreState) =>
+      !!store.adaptedText &&
+      Object.keys(store.analyzedSentences).length > 0 &&
+      store.highlightedWords.length > 0,
+    checkPartial: (store: ReadingStoreState) => !!store.adaptedText,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
     id: "section-glossary",
     icon: BookMarked,
     labelKey: "toc.glossary",
-    checkCompleted: (store: ReadingStoreState) => store.glossary.length > 0,
+    // Full completion mirrors WorkflowProgress's steps for this section:
+    // glossary extracted AND spelling game played AND vocab quiz done.
+    // Extracting the glossary alone is only "partial".
+    checkCompleted: (store: ReadingStoreState) =>
+      store.glossary.length > 0 &&
+      store.spellingGameBestScore > 0 &&
+      store.vocabularyQuizScore > 0,
+    checkPartial: (store: ReadingStoreState) => store.glossary.length > 0,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
@@ -108,7 +149,20 @@ const sections = [
     id: "section-grammar",
     icon: BookOpenCheck,
     labelKey: "toc.grammar",
-    checkCompleted: (store: ReadingStoreState) => store.grammarTopics.length > 0,
+    // Full completion mirrors WorkflowProgress's two grammar steps: quiz done
+    // AND a grammar game played. Extracting topics alone is only "partial".
+    checkCompleted: (store: ReadingStoreState) =>
+      store.grammarTopics.length > 0 &&
+      store.grammarQuizCompleted &&
+      store.grammarQuizScore > 0 &&
+      grammarGameBestScore({
+        grammarScrambleHighScore: store.grammarScrambleHighScore,
+        grammarWorkshopHighScore: store.grammarWorkshopHighScore,
+        grammarSurgeryHighScore: store.grammarSurgeryHighScore,
+        grammarRouletteHighScore: store.grammarRouletteHighScore,
+        grammarDuelHighScore: store.grammarDuelHighScore,
+      }) > 0,
+    checkPartial: (store: ReadingStoreState) => store.grammarTopics.length > 0,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
 ];
@@ -203,6 +257,8 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
               {sections.map((section) => {
                 const Icon = section.icon;
                 const isCompleted = section.checkCompleted(store);
+                const isPartial =
+                  !isCompleted && !!section.checkPartial?.(store);
                 const isAccessible = section.isAccessible(store);
                 return (
                   <button
@@ -218,8 +274,10 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
                   >
                     <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                     <span className="flex-1">{t(section.labelKey)}</span>
-                    {isCompleted && (
+                    {isCompleted ? (
                       <Check className="h-4 w-4 shrink-0 text-primary" />
+                    ) : (
+                      isPartial && <HalfCheck />
                     )}
                   </button>
                 );
