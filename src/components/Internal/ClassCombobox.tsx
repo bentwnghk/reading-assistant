@@ -203,7 +203,15 @@ export function ClassCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[min(22rem,calc(100vw-2rem))] p-0" align="start">
+      <PopoverContent
+        className="w-[min(22rem,calc(100vw-2rem))] p-0"
+        align="start"
+        // Mobile: when opened inside a Dialog, the dialog's scroll-lock
+        // (react-remove-scroll) preventDefaults touchmoves on this portaled
+        // ("outside") content at the document level, breaking touch scrolling.
+        // Stopping propagation here only is enough — native scrolling is untouched.
+        onTouchMoveCapture={(e) => e.stopPropagation()}
+      >
         <Command>
           <CommandInput placeholder={t("classCombobox.search")} />
           <CommandClassList
@@ -321,7 +329,15 @@ export function ClassMultiSelect({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[min(22rem,calc(100vw-2rem))] p-0" align="start">
+      <PopoverContent
+        className="w-[min(22rem,calc(100vw-2rem))] p-0"
+        align="start"
+        // Mobile: when opened inside a Dialog, the dialog's scroll-lock
+        // (react-remove-scroll) preventDefaults touchmoves on this portaled
+        // ("outside") content at the document level, breaking touch scrolling.
+        // Stopping propagation here only is enough — native scrolling is untouched.
+        onTouchMoveCapture={(e) => e.stopPropagation()}
+      >
         <Command>
           <CommandInput placeholder={t("classCombobox.search")} />
           <CommandClassList
@@ -429,7 +445,15 @@ export function ClassBattleTargetCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[min(22rem,calc(100vw-2rem))] p-0" align="start">
+      <PopoverContent
+        className="w-[min(22rem,calc(100vw-2rem))] p-0"
+        align="start"
+        // Mobile: when opened inside a Dialog, the dialog's scroll-lock
+        // (react-remove-scroll) preventDefaults touchmoves on this portaled
+        // ("outside") content at the document level, breaking touch scrolling.
+        // Stopping propagation here only is enough — native scrolling is untouched.
+        onTouchMoveCapture={(e) => e.stopPropagation()}
+      >
         <Command>
           <CommandInput placeholder={searchPlaceholder ?? t("classCombobox.search")} />
           <CommandClassList

@@ -82,6 +82,18 @@ const SelectContent = React.forwardRef<
       )}
       position={position}
       {...props}
+      onTouchMoveCapture={(e) => {
+        props.onTouchMoveCapture?.(e)
+        // Mobile touch scrolling: Radix wraps SelectContent in react-remove-scroll,
+        // which installs a document-level (bubble-phase) non-passive touchmove
+        // listener and preventDefaults() gestures it deems non-scrollable —
+        // e.g. a first finger move that drifts horizontal, or a drag at the
+        // top/bottom edge of the list. One preventDefault kills the native pan
+        // for the whole gesture on iOS, making the list undraggable.
+        // stopPropagation (NOT preventDefault) keeps the event from reaching
+        // that document listener while leaving native scrolling untouched.
+        e.stopPropagation()
+      }}
     >
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport

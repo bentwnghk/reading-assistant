@@ -72,6 +72,14 @@ const DropdownMenuContent = React.forwardRef<
         className
       )}
       {...props}
+      onTouchMoveCapture={(e) => {
+        props.onTouchMoveCapture?.(e)
+        // Mobile touch scrolling: menus portaled outside an open Dialog are
+        // "outside" the dialog's scroll-lock (react-remove-scroll), whose
+        // document-level touchmove listener preventDefaults them. Stop
+        // propagation so the listener never fires; native scrolling is intact.
+        e.stopPropagation()
+      }}
     />
   </DropdownMenuPrimitive.Portal>
 ))
