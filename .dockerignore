@@ -4,4 +4,7 @@ README.md
 .next
 .git
 out
+docs
+scripts
 graphify-out/
+.opencode
