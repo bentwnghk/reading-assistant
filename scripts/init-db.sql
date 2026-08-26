@@ -254,6 +254,7 @@ CREATE TABLE subjects (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   school_id TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE (school_id, name)
 );

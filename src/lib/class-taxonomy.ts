@@ -4,6 +4,7 @@ export interface SubjectInfo {
   id: string
   schoolId: string
   name: string
+  sortOrder: number
   createdAt: number
 }
 
@@ -20,6 +21,7 @@ function mapSubjectRow(row: Record<string, unknown>): SubjectInfo {
     id: row.id as string,
     schoolId: row.school_id as string,
     name: row.name as string,
+    sortOrder: typeof row.sort_order === "number" ? row.sort_order : parseInt(row.sort_order as string) || 0,
     createdAt: new Date(row.created_at as string).getTime(),
   }
 }
@@ -40,8 +42,8 @@ export async function getSubjectsForSchool(schoolId: string): Promise<SubjectInf
   const client = await getClient()
   try {
     const result = await client.query(
-      `SELECT id, school_id, name, created_at FROM subjects
-       WHERE school_id = $1 ORDER BY name ASC`,
+      `SELECT id, school_id, name, sort_order, created_at FROM subjects
+       WHERE school_id = $1 ORDER BY sort_order ASC, name ASC`,
       [schoolId]
     )
     return result.rows.map(mapSubjectRow)
@@ -54,7 +56,7 @@ export async function getAllSubjects(): Promise<SubjectInfo[]> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `SELECT id, school_id, name, created_at FROM subjects ORDER BY name ASC`
+      `SELECT id, school_id, name, sort_order, created_at FROM subjects ORDER BY sort_order ASC, name ASC`
     )
     return result.rows.map(mapSubjectRow)
   } finally {
@@ -62,13 +64,13 @@ export async function getAllSubjects(): Promise<SubjectInfo[]> {
   }
 }
 
-export async function createSubject(schoolId: string, name: string): Promise<SubjectInfo | null> {
+export async function createSubject(schoolId: string, name: string, sortOrder: number): Promise<SubjectInfo | null> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `INSERT INTO subjects (school_id, name) VALUES ($1, $2)
-       RETURNING id, school_id, name, created_at`,
-      [schoolId, name]
+      `INSERT INTO subjects (school_id, name, sort_order) VALUES ($1, $2, $3)
+       RETURNING id, school_id, name, sort_order, created_at`,
+      [schoolId, name, sortOrder]
     )
     return result.rows.length > 0 ? mapSubjectRow(result.rows[0]) : null
   } catch {
@@ -78,12 +80,12 @@ export async function createSubject(schoolId: string, name: string): Promise<Sub
   }
 }
 
-export async function updateSubject(id: string, schoolId: string, name: string): Promise<boolean> {
+export async function updateSubject(id: string, schoolId: string, name: string, sortOrder: number): Promise<boolean> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `UPDATE subjects SET name = $1 WHERE id = $2 AND school_id = $3`,
-      [name, id, schoolId]
+      `UPDATE subjects SET name = $1, sort_order = $2 WHERE id = $3 AND school_id = $4`,
+      [name, sortOrder, id, schoolId]
     )
     return (result.rowCount ?? 0) > 0
   } finally {

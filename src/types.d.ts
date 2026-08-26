@@ -653,8 +653,10 @@ interface ClassInfo {
   schoolName?: string;
   subjectId?: string;
   subjectName?: string;
+  subjectSortOrder?: number;
   gradeId?: string;
   gradeName?: string;
+  gradeSortOrder?: number;
   studentCount?: number;
   createdAt: number;
 }

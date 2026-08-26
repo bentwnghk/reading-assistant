@@ -73,8 +73,10 @@ export interface ClassInfo {
   schoolName?: string
   subjectId?: string
   subjectName?: string
+  subjectSortOrder?: number
   gradeId?: string
   gradeName?: string
+  gradeSortOrder?: number
   studentCount?: number
   createdAt: number
 }
@@ -951,7 +953,9 @@ const CLASS_SELECT = `
     u.name as teacher_name,
     s.name as school_name,
     sub.name as subject_name,
+    sub.sort_order as subject_sort_order,
     g.name as grade_name,
+    g.sort_order as grade_sort_order,
     (SELECT COUNT(*) FROM class_members WHERE class_id = c.id) as student_count
   FROM classes c
   LEFT JOIN users u ON c.teacher_id = u.id
@@ -971,8 +975,10 @@ function mapClassRow(row: Record<string, unknown>): ClassInfo {
     schoolName: row.school_name as string | undefined,
     subjectId: (row.subject_id as string | null) || undefined,
     subjectName: (row.subject_name as string | null) || undefined,
+    subjectSortOrder: (row.subject_sort_order as number | null) ?? undefined,
     gradeId: (row.grade_id as string | null) || undefined,
     gradeName: (row.grade_name as string | null) || undefined,
+    gradeSortOrder: (row.grade_sort_order as number | null) ?? undefined,
     studentCount: parseInt(row.student_count as string) || 0,
     createdAt: new Date(row.created_at as string).getTime(),
   }

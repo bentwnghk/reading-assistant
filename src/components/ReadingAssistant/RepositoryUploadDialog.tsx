@@ -39,7 +39,9 @@ interface TeacherClass {
   id: string;
   name: string;
   subjectName?: string;
+  subjectSortOrder?: number;
   gradeName?: string;
+  gradeSortOrder?: number;
   teacherName?: string;
   schoolName?: string;
 }

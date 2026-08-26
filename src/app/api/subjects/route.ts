@@ -6,6 +6,7 @@ import { getAllSubjects, getSubjectsForSchool, createSubject } from "@/lib/class
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
+  sortOrder: z.number().int().min(0).max(9999).default(0),
   schoolId: z.string().min(1).optional(),
 })
 
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "School is required" }, { status: 400 })
     }
 
-    const subject = await createSubject(schoolId, parsed.data.name.trim())
+    const subject = await createSubject(schoolId, parsed.data.name.trim(), parsed.data.sortOrder)
     if (!subject) {
       return NextResponse.json({ error: "Failed to create subject" }, { status: 500 })
     }

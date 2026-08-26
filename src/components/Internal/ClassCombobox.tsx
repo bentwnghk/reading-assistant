@@ -26,7 +26,9 @@ export interface ClassComboboxClass {
   id: string
   name: string
   subjectName?: string
+  subjectSortOrder?: number
   gradeName?: string
+  gradeSortOrder?: number
   teacherName?: string
   schoolName?: string
 }
@@ -54,28 +56,46 @@ function classLabel(c: ClassComboboxClass): string {
 }
 
 /**
+ * Orders classes within a subject group: by the school's form/grade sort
+ * order when available, falling back to grade name then class name.
+ */
+function compareByGradeThenName(a: ClassOption, b: ClassOption): number {
+  const ao = a.gradeSortOrder ?? Number.MAX_SAFE_INTEGER
+  const bo = b.gradeSortOrder ?? Number.MAX_SAFE_INTEGER
+  if (ao !== bo) return ao - bo
+  return (a.gradeName || "").localeCompare(b.gradeName || "") || a.name.localeCompare(b.name)
+}
+
+/**
  * Groups classes by subject (then grade) for hierarchical display.
- * Classes without subject/grade land in the ungrouped bucket.
+ * Subject groups are ordered by the school's subject sort order (falling back
+ * to name); classes within a group by grade sort order then names. Classes
+ * without subject/grade land in the ungrouped bucket at the end.
  */
 function groupBySubject(classes: ClassOption[]): Array<{ label: string; classes: ClassOption[] }> {
-  const groups = new Map<string, { sortKey: string; classes: ClassOption[] }>()
+  const groups = new Map<string, { classes: ClassOption[] }>()
   for (const c of classes) {
     const key = c.subjectName || ""
     if (!groups.has(key)) {
-      groups.set(key, { sortKey: c.gradeName || "", classes: [] })
+      groups.set(key, { classes: [] })
     }
     groups.get(key)!.classes.push(c)
   }
-  const result: Array<{ label: string; classes: ClassOption[] }> = []
+  const result: Array<{ label: string; classes: ClassOption[]; groupOrder?: number }> = []
   const unlabeled = groups.get("")
   for (const [key, entry] of groups) {
     if (key === "") continue
-    entry.classes.sort((a, b) => (a.gradeName || "").localeCompare(b.gradeName || "") || a.name.localeCompare(b.name))
-    result.push({ label: key, classes: entry.classes })
+    entry.classes.sort(compareByGradeThenName)
+    // All classes in a subject group share its sortOrder; take the group's min.
+    const groupOrder = Math.min(...entry.classes.map(c => c.subjectSortOrder ?? Number.MAX_SAFE_INTEGER))
+    result.push({ label: key, classes: entry.classes, groupOrder })
   }
-  result.sort((a, b) => a.label.localeCompare(b.label))
+  result.sort((a, b) =>
+    (a.groupOrder ?? Number.MAX_SAFE_INTEGER) - (b.groupOrder ?? Number.MAX_SAFE_INTEGER) ||
+    a.label.localeCompare(b.label)
+  )
   if (unlabeled) {
-    unlabeled.classes.sort((a, b) => (a.gradeName || "").localeCompare(b.gradeName || "") || a.name.localeCompare(b.name))
+    unlabeled.classes.sort(compareByGradeThenName)
     result.push({ label: "", classes: unlabeled.classes })
   }
   return result

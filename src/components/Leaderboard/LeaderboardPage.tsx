@@ -71,7 +71,9 @@ interface TeacherClass {
   name: string;
   schoolName?: string;
   subjectName?: string;
+  subjectSortOrder?: number;
   gradeName?: string;
+  gradeSortOrder?: number;
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────

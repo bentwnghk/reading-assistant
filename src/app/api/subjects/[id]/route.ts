@@ -6,6 +6,7 @@ import { updateSubject, deleteSubject } from "@/lib/class-taxonomy"
 
 const updateSchema = z.object({
   name: z.string().min(1).max(100),
+  sortOrder: z.number().int().min(0).max(9999).default(0),
   schoolId: z.string().min(1).optional(),
 })
 
@@ -39,7 +40,7 @@ export async function PUT(
       return NextResponse.json({ error: "School is required" }, { status: 400 })
     }
 
-    const success = await updateSubject(id, schoolId, parsed.data.name.trim())
+    const success = await updateSubject(id, schoolId, parsed.data.name.trim(), parsed.data.sortOrder)
     if (!success) {
       return NextResponse.json({ error: "Failed to update subject" }, { status: 500 })
     }
