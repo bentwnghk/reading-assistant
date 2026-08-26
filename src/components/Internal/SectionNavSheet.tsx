@@ -14,6 +14,7 @@ import {
   Layers,
   Library,
   Sparkles,
+  Trophy,
   Upload,
   User,
   Waypoints,
@@ -123,6 +124,11 @@ const pageLinks = [
     icon: ClipboardList,
     labelKey: "assignments.navTitle",
   },
+  {
+    href: "/leaderboard",
+    icon: Trophy,
+    labelKey: "leaderboard.title",
+  },
 ];
 
 function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
@@ -135,6 +141,7 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
   const pageBadges: Record<string, number> = {
     "/vocabulary": dueForReviewCount,
     "/assignments": overdueCount,
+    "/leaderboard": 0,
   };
   const isHome = pathname === "/";
 
@@ -224,38 +231,40 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
                 const badgeCount = pageBadges[page.href] ?? 0;
                 const badgeTone = page.href === "/vocabulary" ? "bg-orange-500" : "bg-red-500";
                 return (
-                  <button
-                    key={page.href}
-                    onClick={() => handlePageLinkClick(page.href)}
-                    title={
-                      page.href === "/vocabulary" && badgeCount > 0
-                        ? t("vocabulary.dueBadgeHint", { count: badgeCount })
-                        : undefined
-                    }
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
-                      "hover:bg-accent hover:text-accent-foreground",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      isCurrent && "bg-accent text-accent-foreground font-medium"
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <span className="flex-1">{t(page.labelKey)}</span>
-                    {badgeCount > 0 ? (
-                      <span
-                        className={cn(
-                          "flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white",
-                          badgeTone
-                        )}
-                      >
-                        {badgeCount > 9 ? "9+" : badgeCount}
-                      </span>
-                    ) : (
-                      isCurrent && (
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-                      )
-                    )}
-                  </button>
+                  <div key={page.href} className="w-full">
+                    {page.href === "/leaderboard" && <div className="my-2 border-t" />}
+                    <button
+                      onClick={() => handlePageLinkClick(page.href)}
+                      title={
+                        page.href === "/vocabulary" && badgeCount > 0
+                          ? t("vocabulary.dueBadgeHint", { count: badgeCount })
+                          : undefined
+                      }
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+                        "hover:bg-accent hover:text-accent-foreground",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        isCurrent && "bg-accent text-accent-foreground font-medium"
+                      )}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="flex-1">{t(page.labelKey)}</span>
+                      {badgeCount > 0 ? (
+                        <span
+                          className={cn(
+                            "flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white",
+                            badgeTone
+                          )}
+                        >
+                          {badgeCount > 9 ? "9+" : badgeCount}
+                        </span>
+                      ) : (
+                        isCurrent && (
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                        )
+                      )}
+                    </button>
+                  </div>
                 );
               })}
             </nav>
