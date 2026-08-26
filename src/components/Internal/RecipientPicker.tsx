@@ -6,6 +6,7 @@ import { Building2, ChevronDown, Search } from "lucide-react"
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/utils/style"
 import type { ShareTargetGroup } from "@/lib/shared-sessions"
 
 interface RecipientPickerProps {
@@ -15,11 +16,37 @@ interface RecipientPickerProps {
   searchPlaceholder?: string
   selectAllLabel?: string
   deselectAllLabel?: string
-  /** Classes on the scroll container (default: max-h-64) */
+  /**
+   * Classes on the scroll container (default: max-h-64). Ignored by the
+   * outermost element when `nestedScroll` is set — pass the cap here for
+   * the inner list.
+   */
   listClassName?: string
+  /**
+   * Render the list as a plain `overflow-y-auto` div instead of a Radix
+   * ScrollArea. Use when the picker is nested inside another scrollable
+   * container (e.g. a scrolling dialog form): a Radix ScrollArea nested
+   * in a plain scroller does not receive touch gestures on mobile, while
+   * plain-div-in-plain-div works.
+   */
+  nestedScroll?: boolean
 }
 
 const groupKey = (g: ShareTargetGroup) => g.classId || g.label
+
+/**
+ * Plain-scroll variant used when the picker is nested inside another
+ * scrollable container (see `nestedScroll` prop).
+ */
+function PlainScrollList({
+  className,
+  children,
+}: {
+  className?: string
+  children: React.ReactNode
+}) {
+  return <div className={cn("overflow-y-auto", className)}>{children}</div>
+}
 
 /**
  * Searchable, collapsible recipient picker for share/assign dialogs.
@@ -38,6 +65,7 @@ export function RecipientPicker({
   selectAllLabel,
   deselectAllLabel,
   listClassName = "max-h-64",
+  nestedScroll = false,
 }: RecipientPickerProps) {
   const { t } = useTranslation()
   const idPrefix = useId()
@@ -114,6 +142,10 @@ export function RecipientPicker({
   const isExpanded = (key: string) =>
     searching ? true : !(collapsed[key] ?? defaultCollapsed)
 
+  // Plain div when nested in another scroller (mobile touch gestures);
+  // Radix ScrollArea otherwise.
+  const ListContainer = nestedScroll ? PlainScrollList : ScrollArea
+
   return (
     <>
       <div className="relative">
@@ -148,7 +180,7 @@ export function RecipientPicker({
         </div>
       )}
 
-      <ScrollArea className={listClassName}>
+      <ListContainer className={listClassName}>
         <div className="space-y-4 pr-3">
           {filteredGroups.length === 0 && (
             <div className="text-center py-6 text-sm text-muted-foreground">
@@ -262,7 +294,7 @@ export function RecipientPicker({
             </div>
           ))}
         </div>
-      </ScrollArea>
+      </ListContainer>
     </>
   )
 }

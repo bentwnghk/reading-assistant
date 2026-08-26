@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
@@ -306,10 +305,10 @@ function PresetEditDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Single scroll container (mobile: nested overflow divs inside the
-            dialog don't receive touch gestures on iOS — one ScrollArea works) */}
-        <ScrollArea className="max-h-[65vh]">
-        <div className="space-y-3 pr-3">
+        {/* Plain scroller over a plain list scroller (pre-v4.43 arrangement):
+            a Radix ScrollArea nested in a plain scroller breaks mobile touch
+            scrolling, plain+plain works — see RecipientPicker nestedScroll. */}
+        <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
           <div className="space-y-1.5">
             <Label htmlFor="preset-name">{t("assignments.presets.nameLabel")}</Label>
             <Input
@@ -349,12 +348,12 @@ function PresetEditDialog({
                 searchPlaceholder={t("assignments.create.searchStudents")}
                 selectAllLabel={t("assignments.create.selectAll")}
                 deselectAllLabel={t("assignments.create.deselectAll")}
-                listClassName="border rounded p-2"
+                listClassName="max-h-[35vh] border rounded p-2"
+                nestedScroll
               />
             )}
           </div>
         </div>
-        </ScrollArea>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
