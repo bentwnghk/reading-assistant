@@ -45,6 +45,37 @@ const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingA
 const LOAD_WATCHDOG_KEY = "__next_load_reloaded";
 const LOAD_WATCHDOG_MS = 12_000;
 
+// Cross-page goto jumps scroll as soon as the store is restored, but the page
+// keeps assembling afterwards: next/dynamic chunks, lazy-loaded media and
+// restored sections above the target change the document height, shifting the
+// target AFTER the initial scrollIntoView (landing "an inch" off). Keep
+// re-aligning to the target while the layout settles, then stop.
+// Deliberately fire-and-forget (not tied to the effect's cleanup): the goto
+// effect re-runs right away when router.replace strips the ?goto param, which
+// would tear the settle logic down before it does its work.
+function scrollAndSettle(element: HTMLElement) {
+  element.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (typeof ResizeObserver === "undefined") return;
+  const settleMs = 2000;
+  const animationMs = 700; // let the initial smooth scroll finish first
+  const start = Date.now();
+  const align = () => element.scrollIntoView({ behavior: "auto", block: "start" });
+  const observer = new ResizeObserver(() => {
+    const elapsed = Date.now() - start;
+    if (elapsed < animationMs) return;
+    if (elapsed >= settleMs) {
+      observer.disconnect();
+      return;
+    }
+    align();
+  });
+  observer.observe(document.body);
+  setTimeout(() => {
+    observer.disconnect();
+    align();
+  }, settleMs);
+}
+
 function HomeContent() {
   const { t } = useTranslation();
   const { data: session, status } = useSession();
@@ -154,7 +185,7 @@ function HomeContent() {
     if (!restoreReady) return;
     const element = document.getElementById(goto);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollAndSettle(element);
     }
     router.replace("/", { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
