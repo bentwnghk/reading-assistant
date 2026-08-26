@@ -43,6 +43,17 @@ const DialogContent = React.forwardRef<
         className
       )}
       {...props}
+      onTouchMoveCapture={(e) => {
+        props.onTouchMoveCapture?.(e)
+        // Mobile touch scrolling: Radix mounts the dialog's scroll-lock
+        // (react-remove-scroll) on the *overlay*, with the content only as a
+        // "shard" — so touchmoves inside the content are judged by the lock's
+        // document-level non-passive listener, whose heuristics (horizontal
+        // first-move drift, edge detection) preventDefault() them and kill the
+        // native pan on iOS. stopPropagation (NOT preventDefault) keeps the
+        // event from reaching that listener; native scrolling stays intact.
+        e.stopPropagation()
+      }}
     >
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
