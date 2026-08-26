@@ -36,6 +36,7 @@ import {
   ImageIcon,
   Compass,
   Swords,
+  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -43,6 +44,7 @@ import { useSession, signOut, signIn } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/Internal/Button";
 import { Button as UiButton } from "@/components/ui/button";
+import SectionNavSheet from "@/components/Internal/SectionNavSheet";
 import UserManagementPanel from "@/components/UserManagement/UserManagementPanel";
 import {
   Dialog,
@@ -113,6 +115,7 @@ function Header() {
   const [openAbout, setOpenAbout] = useState<boolean>(false);
   const [openNoPending, setOpenNoPending] = useState<boolean>(false);
   const [openUserManagement, setOpenUserManagement] = useState<boolean>(false);
+  const [openSectionNav, setOpenSectionNav] = useState<boolean>(false);
   const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
@@ -324,14 +327,28 @@ function Header() {
     <>
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden">
         <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center sm:h-14 gap-y-1 py-1 sm:py-0">
-          <Link href="/" className="self-center sm:self-auto text-left text-xl font-semibold flex items-center gap-1.5 relative group">
-            <span className="text-blue-600 dark:text-blue-400">Mr.</span>
-            <span className="text-2xl leading-none">🆖</span>
-            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
-              ProReader
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
-            </span>
-          </Link>
+          <div className="flex items-center gap-1 self-center sm:self-auto">
+            {pathname === "/" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0"
+                title={t("toc.title")}
+                aria-label={t("toc.title")}
+                onClick={() => setOpenSectionNav(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
+            <Link href="/" className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
+              <span className="text-blue-600 dark:text-blue-400">Mr.</span>
+              <span className="text-2xl leading-none">🆖</span>
+              <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
+                ProReader
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
+              </span>
+            </Link>
+          </div>
           <div className="flex items-center justify-center sm:justify-start gap-1 flex-wrap max-sm:gap-0.5 max-sm:[&_button]:px-2">
             <Button
               className="h-8 gap-1.5 relative"
@@ -1015,6 +1032,7 @@ function Header() {
           </div>
         </DialogContent>
       </Dialog>
+      <SectionNavSheet open={openSectionNav} onOpenChange={setOpenSectionNav} />
       <Dialog open={openNoPending} onOpenChange={setOpenNoPending}>
         <DialogContent className="max-w-sm">
           <DialogHeader>

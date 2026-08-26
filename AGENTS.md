@@ -458,8 +458,7 @@ Grammar data is stored on the `reading_sessions` table:
 | `LearningRecommendationDialog.tsx` | Adaptive dialog suggesting next learning activities based on session progress |
 | `RepositoryUploadDialog.tsx` | Upload extracted text to the shared text repository |
 | `WorkflowProgress.tsx` | Step progress indicator at top of main page |
-| `TocDrawer.tsx` | Table of contents drawer for all workflow sections |
-| `TocFab.tsx` | Floating button to open TOC drawer on mobile |
+| `SectionNavSheet.tsx` (in `Internal/`) | Slide-in section navigation drawer opened from the Header hamburger (home page only) |
 | `TutorChatFab.tsx` | Floating button to open AI reading tutor chat |
 | `QuickQuestions.tsx` | Suggested questions for the reading tutor |
 | `ChatMessageBubble.tsx` | Renders individual chat messages with markdown |

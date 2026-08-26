@@ -31,7 +31,6 @@ const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingT
 const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
 const Collocations = dynamic(() => import("@/components/ReadingAssistant/Collocations"));
 const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
-const TocFab = dynamic(() => import("@/components/ReadingAssistant/TocFab"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
 const ReadAlongIndicator = dynamic(() => import("@/components/ReadingAssistant/ReadAlongIndicator"));
 const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
@@ -192,43 +191,42 @@ function HomeContent() {
       <Header />
       <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
         <SettingsBanner />
-      <main>
-        <section id="section-student-info">
+      <main className="scroll-mt-20">
+        <section id="section-student-info" className="scroll-mt-20">
           <StudentInfo />
         </section>
-        <section id="section-upload">
+        <section id="section-upload" className="scroll-mt-20">
           <ImageUpload />
         </section>
         <WorkflowProgress />
-        <section id="section-pre-reading">
+        <section id="section-pre-reading" className="scroll-mt-20">
           <PreReading />
         </section>
-        <section id="section-summary">
+        <section id="section-summary" className="scroll-mt-20">
           <Summary />
         </section>
-        <section id="section-mindmap">
+        <section id="section-mindmap" className="scroll-mt-20">
           <MindMap />
         </section>
-        <section id="section-visualization">
+        <section id="section-visualization" className="scroll-mt-20">
           <Visualization />
         </section>
-        <section id="section-adapted">
+        <section id="section-adapted" className="scroll-mt-20">
           <AdaptedText />
         </section>
-        <section id="section-glossary">
+        <section id="section-glossary" className="scroll-mt-20">
           <Glossary />
         </section>
-        <section id="section-collocations">
+        <section id="section-collocations" className="scroll-mt-20">
           <Collocations />
         </section>
-        <section id="section-test">
+        <section id="section-test" className="scroll-mt-20">
           <ReadingTest />
         </section>
-        <section id="section-grammar">
+        <section id="section-grammar" className="scroll-mt-20">
           <Grammar />
         </section>
       </main>
-      <TocFab />
       <TutorChatFab />
       <ReadAlongIndicator />
       <LearningRecommendationDialog />
