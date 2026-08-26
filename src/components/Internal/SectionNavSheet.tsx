@@ -132,8 +132,13 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
         >
           <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
             <div>
-              <DialogPrimitive.Title className="text-lg font-semibold leading-none tracking-tight">
-                {t("toc.title")}
+              <DialogPrimitive.Title className="text-left text-xl font-semibold flex items-center gap-1.5">
+                <span className="text-blue-600 dark:text-blue-400">Mr.</span>
+                <span className="text-2xl leading-none">🆖</span>
+                <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
+                  ProReader
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
+                </span>
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="text-sm text-muted-foreground mt-1.5">
                 {t("toc.description")}
