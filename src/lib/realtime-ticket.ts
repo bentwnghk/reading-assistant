@@ -6,11 +6,12 @@
  * is duplicated here. The format is:
  *
  *   ticket = `${base64url(payload)}.${base64url(signature)}`
- *   payload = { userId, name, image, role, schoolId, exp }
+ *   payload = { userId, name, image, role, schoolId, classId, classIds, exp }
  *   signature = HMAC-SHA256(base64url(payload), AUTH_SECRET)
  *
- * The realtime server verifies the signature with the shared AUTH_SECRET.
- * Keep both implementations in sync.
+ * `classId` is the legacy single-class field (first membership) kept for
+ * deploy-skew compatibility; `classIds` is the full multi-class list.
+ * The realtime server accepts either — keep both implementations in sync.
  */
 import { createHmac } from "crypto";
 
@@ -34,7 +35,10 @@ interface TicketPayload {
   image: string | null;
   role: UserRole;
   schoolId: string | null;
+  /** Legacy: first class membership (kept for rolling deploys) */
   classId: string | null;
+  /** All class memberships (multi-class capable) */
+  classIds: string[];
   exp: number;
 }
 
@@ -44,7 +48,10 @@ export interface RealtimeTicketUser {
   image: string | null;
   role: UserRole;
   schoolId: string | null;
+  /** Legacy: first class membership (kept for rolling deploys) */
   classId: string | null;
+  /** All class memberships (multi-class capable) */
+  classIds: string[];
 }
 
 /**
@@ -64,6 +71,7 @@ export function issueRealtimeTicket(
     role: user.role,
     schoolId: user.schoolId,
     classId: user.classId,
+    classIds: user.classIds,
     exp: Date.now() + ttlMs,
   };
   const payloadB64 = base64UrlEncode(Buffer.from(JSON.stringify(payload), "utf8"));

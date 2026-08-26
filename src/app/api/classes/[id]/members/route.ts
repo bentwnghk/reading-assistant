@@ -122,7 +122,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Student ID is required" }, { status: 400 })
     }
 
-    const success = await removeStudentFromClass(studentId)
+    const success = await removeStudentFromClass(id, studentId)
 
     if (!success) {
       return NextResponse.json({ error: "Failed to remove student from class" }, { status: 500 })

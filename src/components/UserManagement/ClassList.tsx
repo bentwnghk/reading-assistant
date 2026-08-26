@@ -32,13 +32,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import type { ClassInfo, UserWithRole, SchoolInfo } from "@/lib/users"
+import type { SubjectInfo, GradeInfo } from "@/lib/class-taxonomy"
 import ClassMembers from "./ClassMembers"
 
 interface ClassListProps {
   isSuperAdmin: boolean
   isAdmin: boolean
   currentUserId?: string
-  onViewStudents?: (className: string, schoolId?: string) => void
+  onViewStudents?: (classId: string, schoolId?: string) => void
 }
 
 type SortField = "name" | "teacherName" | "schoolName" | "studentCount"
@@ -52,11 +53,13 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
   const [classes, setClasses] = useState<ClassInfo[]>([])
   const [teachers, setTeachers] = useState<UserWithRole[]>([])
   const [schools, setSchools] = useState<SchoolInfo[]>([])
+  const [subjects, setSubjects] = useState<SubjectInfo[]>([])
+  const [grades, setGrades] = useState<GradeInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [membersDialogOpen, setMembersDialogOpen] = useState(false)
   const [selectedClass, setSelectedClass] = useState<ClassInfo | null>(null)
-  const [formData, setFormData] = useState({ name: "", description: "", teacherId: "", schoolId: "" })
+  const [formData, setFormData] = useState({ name: "", description: "", teacherId: "", schoolId: "", subjectId: "__none__", gradeId: "__none__" })
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc")
   const [page, setPage] = useState(1)
@@ -65,7 +68,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const fetches: Promise<Response>[] = [fetch("/api/classes")]
+      const fetches: Promise<Response>[] = [fetch("/api/classes"), fetch("/api/subjects"), fetch("/api/grades")]
       if (isSuperAdmin) {
         fetches.push(fetch("/api/schools"))
       }
@@ -78,8 +81,16 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
       if (classesRes.ok) {
         setClasses(await classesRes.json())
       }
+      const subjectsRes = responses[1]
+      if (subjectsRes.ok) {
+        setSubjects(await subjectsRes.json())
+      }
+      const gradesRes = responses[2]
+      if (gradesRes.ok) {
+        setGrades(await gradesRes.json())
+      }
 
-      let respIndex = 1
+      let respIndex = 3
       if (isSuperAdmin) {
         const schoolsRes = responses[respIndex]
         if (schoolsRes?.ok) {
@@ -106,6 +117,19 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Subjects/grades are school-scoped; super-admins filter by the selected school.
+  const dialogSchoolId = isSuperAdmin
+    ? (formData.schoolId === "__none__" ? null : formData.schoolId || null)
+    : (schools[0]?.id ?? null)
+  const filteredSubjects = useMemo(
+    () => dialogSchoolId ? subjects.filter(s => s.schoolId === dialogSchoolId) : subjects,
+    [subjects, dialogSchoolId]
+  )
+  const filteredGrades = useMemo(
+    () => dialogSchoolId ? grades.filter(g => g.schoolId === dialogSchoolId) : grades,
+    [grades, dialogSchoolId]
+  )
 
   const filteredTeachers = useMemo(() => {
     if (!isSuperAdmin) return teachers
@@ -177,7 +201,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
 
   const openCreateDialog = () => {
     setSelectedClass(null)
-    setFormData({ name: "", description: "", teacherId: "__none__", schoolId: "__none__" })
+    setFormData({ name: "", description: "", teacherId: "__none__", schoolId: "__none__", subjectId: "__none__", gradeId: "__none__" })
     setEditDialogOpen(true)
   }
 
@@ -188,6 +212,8 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
       description: classInfo.description || "",
       teacherId: classInfo.teacherId || "__none__",
       schoolId: classInfo.schoolId || "__none__",
+      subjectId: classInfo.subjectId || "__none__",
+      gradeId: classInfo.gradeId || "__none__",
     })
     setEditDialogOpen(true)
   }
@@ -215,6 +241,8 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
           description: formData.description.trim(),
           teacherId: formData.teacherId === "__none__" ? null : formData.teacherId,
           ...(isSuperAdmin ? { schoolId: formData.schoolId === "__none__" ? null : formData.schoolId } : {}),
+          subjectId: formData.subjectId === "__none__" ? null : formData.subjectId,
+          gradeId: formData.gradeId === "__none__" ? null : formData.gradeId,
         }),
       })
 
@@ -312,6 +340,17 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
               <TableCell>
                 <div>
                   <div className="font-medium">{classInfo.name}</div>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {classInfo.gradeName && (
+                      <span className="text-xs text-muted-foreground">{classInfo.gradeName}</span>
+                    )}
+                    {classInfo.gradeName && classInfo.subjectName && (
+                      <span className="text-xs text-muted-foreground">·</span>
+                    )}
+                    {classInfo.subjectName && (
+                      <span className="text-xs text-muted-foreground">{classInfo.subjectName}</span>
+                    )}
+                  </div>
                   {classInfo.description && (
                     <div className="text-sm text-muted-foreground truncate max-w-48">
                       {classInfo.description}
@@ -343,7 +382,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                   <button
                     type="button"
                     className="inline-flex cursor-pointer rounded-full transition hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    onClick={() => onViewStudents(classInfo.name, classInfo.schoolId ?? undefined)}
+                    onClick={() => onViewStudents(classInfo.id, classInfo.schoolId ?? undefined)}
                     title={t("userManagement.classes.viewStudents", { name: classInfo.name })}
                   >
                     <Badge variant="secondary" className="cursor-pointer">{classInfo.studentCount || 0}</Badge>
@@ -462,6 +501,46 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder={t("userManagement.classes.namePlaceholder")}
               />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">{t("userManagement.classes.subject")}</label>
+                <Select
+                  value={formData.subjectId}
+                  onValueChange={(value) => setFormData({ ...formData, subjectId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("userManagement.classes.subject")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("userManagement.classes.noSubject")}</SelectItem>
+                    {filteredSubjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">{t("userManagement.classes.grade")}</label>
+                <Select
+                  value={formData.gradeId}
+                  onValueChange={(value) => setFormData({ ...formData, gradeId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("userManagement.classes.grade")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("userManagement.classes.noGrade")}</SelectItem>
+                    {filteredGrades.map((grade) => (
+                      <SelectItem key={grade.id} value={grade.id}>
+                        {grade.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium">{t("userManagement.classes.descriptionLabel")}</label>

@@ -50,6 +50,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/utils/style";
+import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import { LeaderboardTable } from "./LeaderboardTable";
 import { AllTimeLeaderboardTable } from "./AllTimeLeaderboardTable";
 import { PersonalStatsCard } from "./PersonalStatsCard";
@@ -69,6 +70,8 @@ interface TeacherClass {
   id: string;
   name: string;
   schoolName?: string;
+  subjectName?: string;
+  gradeName?: string;
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -113,6 +116,7 @@ export function LeaderboardPage() {
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>("all");
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isStudent, setIsStudent] = useState(false);
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all");
 
@@ -122,7 +126,9 @@ export function LeaderboardPage() {
     async function fetchTeacherClasses() {
       if (!userId) return;
       const role = authSession?.user?.role;
-      if (role !== "super-admin" && role !== "admin" && role !== "teacher") return;
+      // Staff fetch their own/all classes; students fetch the classes they
+      // belong to (multi-class — used for the class-scope picker).
+      if (role !== "super-admin" && role !== "admin" && role !== "teacher" && role !== "student") return;
       try {
         const res = await fetch("/api/classes");
         if (res.ok) {
@@ -131,6 +137,11 @@ export function LeaderboardPage() {
             a.name.localeCompare(b.name) || (a.schoolName ?? "").localeCompare(b.schoolName ?? "")
           );
           setTeacherClasses(classes);
+          // Students pick one of THEIR classes — auto-select the first instead
+          // of relying on the server's first-class fallback.
+          if (role === "student" && classes.length > 0) {
+            setSelectedClassId(prev => prev === "all" ? classes[0].id : prev);
+          }
         }
       } catch {
         // Silently fail - teacher may not have classes
@@ -141,6 +152,7 @@ export function LeaderboardPage() {
 
   useEffect(() => {
     setIsSuperAdmin(authSession?.user?.role === "super-admin");
+    setIsStudent(authSession?.user?.role === "student");
   }, [authSession?.user?.role]);
 
   useEffect(() => {
@@ -388,21 +400,26 @@ export function LeaderboardPage() {
             })}
           </div>
 
-          {/* Class filter for teachers and super-admins */}
-          {scope === "class" && (teacherClasses.length > 1 || (isSuperAdmin && teacherClasses.length > 0)) && (
-            <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-              <SelectTrigger className="w-full text-sm">
-                <SelectValue placeholder={t("leaderboard.selectClass")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("leaderboard.allClasses")}</SelectItem>
-                {teacherClasses.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}{isSuperAdmin && c.schoolName ? ` (${c.schoolName})` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Class filter: staff pick from school/all classes; students pick
+              one of their own classes (auto-selected when only one). */}
+          {scope === "class" && isStudent && teacherClasses.length > 1 && (
+            <ClassCombobox
+              classes={teacherClasses}
+              value={selectedClassId === "all" ? null : selectedClassId}
+              onChange={(v) => { if (v && v !== "__none__") setSelectedClassId(v); }}
+              placeholder={t("leaderboard.selectClass")}
+            />
+          )}
+          {scope === "class" && !isStudent && (teacherClasses.length > 1 || (isSuperAdmin && teacherClasses.length > 0)) && (
+            <ClassCombobox
+              classes={teacherClasses}
+              value={selectedClassId === "all" ? null : selectedClassId}
+              onChange={(v) => setSelectedClassId(v ?? "all")}
+              placeholder={t("leaderboard.selectClass")}
+              emptyLabel={t("leaderboard.allClasses")}
+              allowAll
+              allLabel={t("leaderboard.allClasses")}
+            />
           )}
 
           {/* School filter for super-admins */}

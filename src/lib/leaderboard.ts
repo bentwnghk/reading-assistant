@@ -38,8 +38,12 @@ export interface LeaderboardEntry {
   userId: string
   userName: string
   userImage?: string | null
+  /** First class (legacy compat) */
   classId?: string | null
   className?: string | null
+  /** All classes of the user (multi-class capable) */
+  classIds?: string[]
+  classNames?: string[]
   schoolId?: string | null
   schoolName?: string | null
   weeklyScore: number
@@ -72,8 +76,12 @@ export interface AllTimeLeaderboardEntry {
   userId: string
   userName: string
   userImage?: string | null
+  /** First class (legacy compat) */
   classId?: string | null
   className?: string | null
+  /** All classes of the user (multi-class capable) */
+  classIds?: string[]
+  classNames?: string[]
   schoolId?: string | null
   schoolName?: string | null
   allTimeScore: number
@@ -116,6 +124,8 @@ export interface PersonalStats {
   rankInClass: number | null
   rankInSchool: number | null
   rankGlobal: number | null
+  /** Per-class weekly ranks (multi-class capable); empty when no membership */
+  classRanks: Array<{ classId: string; className: string; rank: number }>
 }
 
 interface WeeklyStatsRow {
@@ -361,6 +371,25 @@ export async function refreshWeeklyStatsForUser(
 }
 
 // ─── Get leaderboard ──────────────────────────────────────────────────────────
+
+// Aggregates the user's class memberships into arrays without row fan-out.
+// `statsAlias` is the weekly_stats/all_time_stats alias in the outer query.
+const CLASS_DISPLAY_LATERAL = (statsAlias: string) => `
+  LEFT JOIN LATERAL (
+    SELECT
+      COALESCE(json_agg(c.id ORDER BY cm2.joined_at, cm2.class_id), '[]'::json) AS class_ids,
+      COALESCE(json_agg(c.name ORDER BY cm2.joined_at, cm2.class_id), '[]'::json) AS class_names
+    FROM class_members cm2
+    JOIN classes c ON c.id = cm2.class_id
+    WHERE cm2.student_id = ${statsAlias}.user_id
+  ) m ON TRUE`
+
+const CLASS_DISPLAY_SELECT = `
+  m.class_ids->>0  AS class_id,
+  m.class_names->>0 AS class_name,
+  m.class_ids      AS class_ids,
+  m.class_names    AS class_names`
+
 export async function getLeaderboard(
   requestingUserId: string,
   options: {
@@ -395,29 +424,29 @@ export async function getLeaderboard(
       }
     }
 
-    let scopeJoin   = ""
     let scopeWhere  = ""
     const params: unknown[] = [weekStart.toISOString().slice(0, 10), limit]
 
     if (options.scope === "class" && effectiveClassIds.length > 0) {
-      scopeJoin  = `JOIN class_members cm ON cm.student_id = ws.user_id`
-      if (effectiveClassIds.length === 1) {
-        scopeWhere = `AND cm.class_id = $3`
-        params.push(effectiveClassIds[0])
-      } else {
-        const placeholders = effectiveClassIds.map((_, i) => `$${i + 3}`).join(", ")
-        scopeWhere = `AND cm.class_id IN (${placeholders})`
-        params.push(...effectiveClassIds)
-      }
+      // EXISTS (no join) — immune to multi-class membership fan-out.
+      scopeWhere = `AND EXISTS (
+        SELECT 1 FROM class_members cm
+        WHERE cm.student_id = ws.user_id AND cm.class_id = ANY($3)
+      )`
+      params.push(effectiveClassIds)
     } else if (options.scope === "school" && options.schoolId) {
-      scopeJoin  = `JOIN users su ON su.id = ws.user_id
-                    JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
-      scopeWhere = `AND su.school_id = $3`
+      scopeWhere = `AND EXISTS (
+        SELECT 1 FROM users su
+        JOIN user_roles ur ON ur.user_id = su.id AND ur.role = 'student'
+        WHERE su.id = ws.user_id AND su.school_id = $3
+      )`
       params.push(options.schoolId)
     } else if (options.scope === "global") {
       // global: restrict to students only
-      scopeJoin  = `JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
-      scopeWhere = ``
+      scopeWhere = `AND EXISTS (
+        SELECT 1 FROM user_roles ur
+        WHERE ur.user_id = ws.user_id AND ur.role = 'student'
+      )`
     }
 
     const sql = `
@@ -425,17 +454,14 @@ export async function getLeaderboard(
         ws.*,
         u.name            AS user_name,
         u.image           AS user_image,
-        cm2.class_id      AS class_id,
-        c.name            AS class_name,
+        ${CLASS_DISPLAY_SELECT},
         u.school_id       AS school_id,
         s.name            AS school_name,
         RANK() OVER (ORDER BY ws.${sortBy} DESC NULLS LAST) AS rank
       FROM weekly_stats ws
       JOIN users u ON u.id = ws.user_id
-      LEFT JOIN class_members cm2 ON cm2.student_id = ws.user_id
-      LEFT JOIN classes c ON c.id = cm2.class_id
+      ${CLASS_DISPLAY_LATERAL("ws")}
       LEFT JOIN schools s ON s.id = u.school_id
-      ${scopeJoin}
       WHERE ws.week_start_date = $1
         AND COALESCE(u.banned, FALSE) = FALSE
         ${scopeWhere}
@@ -450,35 +476,33 @@ export async function getLeaderboard(
     const priorWeekStart = new Date(weekStart)
     priorWeekStart.setDate(priorWeekStart.getDate() - 7)
 
-    let priorScopeJoin  = ""
     let priorScopeWhere = ""
     const priorParams: unknown[] = [priorWeekStart.toISOString().slice(0, 10)]
 
     if (options.scope === "class" && effectiveClassIds.length > 0) {
-      priorScopeJoin  = `JOIN class_members cm ON cm.student_id = ws.user_id`
-      if (effectiveClassIds.length === 1) {
-        priorScopeWhere = `AND cm.class_id = $2`
-        priorParams.push(effectiveClassIds[0])
-      } else {
-        const placeholders = effectiveClassIds.map((_, i) => `$${i + 2}`).join(", ")
-        priorScopeWhere = `AND cm.class_id IN (${placeholders})`
-        priorParams.push(...effectiveClassIds)
-      }
+      priorScopeWhere = `AND EXISTS (
+        SELECT 1 FROM class_members cm
+        WHERE cm.student_id = ws.user_id AND cm.class_id = ANY($2)
+      )`
+      priorParams.push(effectiveClassIds)
     } else if (options.scope === "school" && options.schoolId) {
-      priorScopeJoin  = `JOIN users su ON su.id = ws.user_id
-                         JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
-      priorScopeWhere = `AND su.school_id = $2`
+      priorScopeWhere = `AND EXISTS (
+        SELECT 1 FROM users su
+        JOIN user_roles ur ON ur.user_id = su.id AND ur.role = 'student'
+        WHERE su.id = ws.user_id AND su.school_id = $2
+      )`
       priorParams.push(options.schoolId)
     } else if (options.scope === "global") {
-      priorScopeJoin  = `JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
-      priorScopeWhere = ``
+      priorScopeWhere = `AND EXISTS (
+        SELECT 1 FROM user_roles ur
+        WHERE ur.user_id = ws.user_id AND ur.role = 'student'
+      )`
     }
 
     const priorSql = `
       SELECT ws.user_id,
-             RANK() OVER (ORDER BY ws.${sortBy} DESC NULLS LAST) AS prior_rank
+              RANK() OVER (ORDER BY ws.${sortBy} DESC NULLS LAST) AS prior_rank
       FROM weekly_stats ws
-      ${priorScopeJoin}
       WHERE ws.week_start_date = $1
         ${priorScopeWhere}`
 
@@ -494,6 +518,8 @@ export async function getLeaderboard(
       userImage:          row.user_image as string | null,
       classId:            row.class_id as string | null,
       className:          row.class_name as string | null,
+      classIds:           (row.class_ids as string[]) || [],
+      classNames:         (row.class_names as string[]) || [],
       schoolId:           row.school_id as string | null,
       schoolName:         row.school_name as string | null,
       weeklyScore:        Math.round(parseFloat(row.weekly_score as string) || 0),
@@ -521,38 +547,41 @@ export async function getLeaderboard(
       rankings.find(r => r.userId === requestingUserId) ?? null
 
     if (!currentUserRank) {
-      let userScopeJoin       = ""
       let userScopeWhere      = ""
-      let userSubScopeJoin    = ""
       let userSubScopeWhere   = ""
       const userParams: unknown[] = [weekStart.toISOString().slice(0, 10), requestingUserId]
 
       if (options.scope === "class" && effectiveClassIds.length > 0) {
-        userScopeJoin     = `JOIN class_members cm ON cm.student_id = ws.user_id`
-        userSubScopeJoin  = `JOIN class_members cm3 ON cm3.student_id = ws2.user_id`
-        if (effectiveClassIds.length === 1) {
-          userScopeWhere    = `AND cm.class_id = $3`
-          userSubScopeWhere = `AND cm3.class_id = $3`
-          userParams.push(effectiveClassIds[0])
-        } else {
-          const placeholders = effectiveClassIds.map((_, i) => `$${i + 3}`).join(", ")
-          userScopeWhere    = `AND cm.class_id IN (${placeholders})`
-          userSubScopeWhere = `AND cm3.class_id IN (${placeholders})`
-          userParams.push(...effectiveClassIds)
-        }
+        userScopeWhere    = `AND EXISTS (
+          SELECT 1 FROM class_members cm
+          WHERE cm.student_id = ws.user_id AND cm.class_id = ANY($3)
+        )`
+        userSubScopeWhere = `AND EXISTS (
+          SELECT 1 FROM class_members cm3
+          WHERE cm3.student_id = ws2.user_id AND cm3.class_id = ANY($3)
+        )`
+        userParams.push(effectiveClassIds)
       } else if (options.scope === "school" && options.schoolId) {
-        userScopeJoin     = `JOIN users su ON su.id = ws.user_id
-                             JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
-        userScopeWhere    = `AND su.school_id = $3`
-        userSubScopeJoin  = `JOIN users su2 ON su2.id = ws2.user_id
-                             JOIN user_roles ur2 ON ur2.user_id = ws2.user_id AND ur2.role = 'student'`
-        userSubScopeWhere = `AND su2.school_id = $3`
+        userScopeWhere    = `AND EXISTS (
+          SELECT 1 FROM users su
+          JOIN user_roles ur ON ur.user_id = su.id AND ur.role = 'student'
+          WHERE su.id = ws.user_id AND su.school_id = $3
+        )`
+        userSubScopeWhere = `AND EXISTS (
+          SELECT 1 FROM users su2
+          JOIN user_roles ur2 ON ur2.user_id = su2.id AND ur2.role = 'student'
+          WHERE su2.id = ws2.user_id AND su2.school_id = $3
+        )`
         userParams.push(options.schoolId)
       } else if (options.scope === "global") {
-        userScopeJoin     = `JOIN user_roles ur ON ur.user_id = ws.user_id AND ur.role = 'student'`
-        userScopeWhere    = ``
-        userSubScopeJoin  = `JOIN user_roles ur2 ON ur2.user_id = ws2.user_id AND ur2.role = 'student'`
-        userSubScopeWhere = ``
+        userScopeWhere    = `AND EXISTS (
+          SELECT 1 FROM user_roles ur
+          WHERE ur.user_id = ws.user_id AND ur.role = 'student'
+        )`
+        userSubScopeWhere = `AND EXISTS (
+          SELECT 1 FROM user_roles ur2
+          WHERE ur2.user_id = ws2.user_id AND ur2.role = 'student'
+        )`
       }
 
       const userSql = `
@@ -560,12 +589,10 @@ export async function getLeaderboard(
           ws.*,
           u.name          AS user_name,
           u.image         AS user_image,
-          cm2.class_id    AS class_id,
-          c.name          AS class_name,
+          ${CLASS_DISPLAY_SELECT},
           u.school_id     AS school_id,
           s.name          AS school_name,
           (SELECT COUNT(*) + 1 FROM weekly_stats ws2
-           ${userSubScopeJoin}
            WHERE ws2.week_start_date = $1
              AND ws2.${sortBy} > ws.${sortBy}
              ${userSubScopeWhere}
@@ -573,10 +600,8 @@ export async function getLeaderboard(
            ) AS rank
         FROM weekly_stats ws
         JOIN users u ON u.id = ws.user_id
-        LEFT JOIN class_members cm2 ON cm2.student_id = ws.user_id
-        LEFT JOIN classes c ON c.id = cm2.class_id
+        ${CLASS_DISPLAY_LATERAL("ws")}
         LEFT JOIN schools s ON s.id = u.school_id
-        ${userScopeJoin}
         WHERE ws.week_start_date = $1
           AND ws.user_id = $2
           ${userScopeWhere}`
@@ -869,28 +894,27 @@ export async function getAllTimeLeaderboard(
       }
     }
 
-    let scopeJoin   = ""
     let scopeWhere  = ""
     const params: unknown[] = [limit]
 
     if (options.scope === "class" && effectiveClassIds.length > 0) {
-      scopeJoin  = `JOIN class_members cm ON cm.student_id = ats.user_id`
-      if (effectiveClassIds.length === 1) {
-        scopeWhere = `AND cm.class_id = $2`
-        params.push(effectiveClassIds[0])
-      } else {
-        const placeholders = effectiveClassIds.map((_, i) => `$${i + 2}`).join(", ")
-        scopeWhere = `AND cm.class_id IN (${placeholders})`
-        params.push(...effectiveClassIds)
-      }
+      scopeWhere = `AND EXISTS (
+        SELECT 1 FROM class_members cm
+        WHERE cm.student_id = ats.user_id AND cm.class_id = ANY($2)
+      )`
+      params.push(effectiveClassIds)
     } else if (options.scope === "school" && options.schoolId) {
-      scopeJoin  = `JOIN users su ON su.id = ats.user_id
-                    JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
-      scopeWhere = `AND su.school_id = $2`
+      scopeWhere = `AND EXISTS (
+        SELECT 1 FROM users su
+        JOIN user_roles ur ON ur.user_id = su.id AND ur.role = 'student'
+        WHERE su.id = ats.user_id AND su.school_id = $2
+      )`
       params.push(options.schoolId)
     } else if (options.scope === "global") {
-      scopeJoin  = `JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
-      scopeWhere = ``
+      scopeWhere = `AND EXISTS (
+        SELECT 1 FROM user_roles ur
+        WHERE ur.user_id = ats.user_id AND ur.role = 'student'
+      )`
     }
 
     const sql = `
@@ -898,17 +922,14 @@ export async function getAllTimeLeaderboard(
         ats.*,
         u.name            AS user_name,
         u.image           AS user_image,
-        cm2.class_id      AS class_id,
-        c.name            AS class_name,
+        ${CLASS_DISPLAY_SELECT},
         u.school_id       AS school_id,
         s.name            AS school_name,
         RANK() OVER (ORDER BY ats.${sortBy} DESC NULLS LAST) AS rank
       FROM all_time_stats ats
       JOIN users u ON u.id = ats.user_id
-      LEFT JOIN class_members cm2 ON cm2.student_id = ats.user_id
-      LEFT JOIN classes c ON c.id = cm2.class_id
+      ${CLASS_DISPLAY_LATERAL("ats")}
       LEFT JOIN schools s ON s.id = u.school_id
-      ${scopeJoin}
       WHERE 1=1
         AND COALESCE(u.banned, FALSE) = FALSE
         ${scopeWhere}
@@ -924,6 +945,8 @@ export async function getAllTimeLeaderboard(
       userImage:          row.user_image as string | null,
       classId:            row.class_id as string | null,
       className:          row.class_name as string | null,
+      classIds:           (row.class_ids as string[]) || [],
+      classNames:         (row.class_names as string[]) || [],
       schoolId:           row.school_id as string | null,
       schoolName:         row.school_name as string | null,
       allTimeScore:       Math.round(parseFloat(row.all_time_score as string) || 0),
@@ -949,38 +972,41 @@ export async function getAllTimeLeaderboard(
       rankings.find(r => r.userId === requestingUserId) ?? null
 
     if (!currentUserRank) {
-      let userScopeJoin       = ""
       let userScopeWhere      = ""
-      let userSubScopeJoin    = ""
       let userSubScopeWhere   = ""
       const userParams: unknown[] = [requestingUserId]
 
       if (options.scope === "class" && effectiveClassIds.length > 0) {
-        userScopeJoin     = `JOIN class_members cm ON cm.student_id = ats.user_id`
-        userSubScopeJoin  = `JOIN class_members cm3 ON cm3.student_id = ats2.user_id`
-        if (effectiveClassIds.length === 1) {
-          userScopeWhere    = `AND cm.class_id = $2`
-          userSubScopeWhere = `AND cm3.class_id = $2`
-          userParams.push(effectiveClassIds[0])
-        } else {
-          const placeholders = effectiveClassIds.map((_, i) => `$${i + 2}`).join(", ")
-          userScopeWhere    = `AND cm.class_id IN (${placeholders})`
-          userSubScopeWhere = `AND cm3.class_id IN (${placeholders})`
-          userParams.push(...effectiveClassIds)
-        }
+        userScopeWhere    = `AND EXISTS (
+          SELECT 1 FROM class_members cm
+          WHERE cm.student_id = ats.user_id AND cm.class_id = ANY($2)
+        )`
+        userSubScopeWhere = `AND EXISTS (
+          SELECT 1 FROM class_members cm3
+          WHERE cm3.student_id = ats2.user_id AND cm3.class_id = ANY($2)
+        )`
+        userParams.push(effectiveClassIds)
       } else if (options.scope === "school" && options.schoolId) {
-        userScopeJoin     = `JOIN users su ON su.id = ats.user_id
-                             JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
-        userScopeWhere    = `AND su.school_id = $2`
-        userSubScopeJoin  = `JOIN users su2 ON su2.id = ats2.user_id
-                             JOIN user_roles ur2 ON ur2.user_id = ats2.user_id AND ur2.role = 'student'`
-        userSubScopeWhere = `AND su2.school_id = $2`
+        userScopeWhere    = `AND EXISTS (
+          SELECT 1 FROM users su
+          JOIN user_roles ur ON ur.user_id = su.id AND ur.role = 'student'
+          WHERE su.id = ats.user_id AND su.school_id = $2
+        )`
+        userSubScopeWhere = `AND EXISTS (
+          SELECT 1 FROM users su2
+          JOIN user_roles ur2 ON ur2.user_id = su2.id AND ur2.role = 'student'
+          WHERE su2.id = ats2.user_id AND su2.school_id = $2
+        )`
         userParams.push(options.schoolId)
       } else if (options.scope === "global") {
-        userScopeJoin     = `JOIN user_roles ur ON ur.user_id = ats.user_id AND ur.role = 'student'`
-        userScopeWhere    = ``
-        userSubScopeJoin  = `JOIN user_roles ur2 ON ur2.user_id = ats2.user_id AND ur2.role = 'student'`
-        userSubScopeWhere = ``
+        userScopeWhere    = `AND EXISTS (
+          SELECT 1 FROM user_roles ur
+          WHERE ur.user_id = ats.user_id AND ur.role = 'student'
+        )`
+        userSubScopeWhere = `AND EXISTS (
+          SELECT 1 FROM user_roles ur2
+          WHERE ur2.user_id = ats2.user_id AND ur2.role = 'student'
+        )`
       }
 
       const userSql = `
@@ -988,22 +1014,18 @@ export async function getAllTimeLeaderboard(
           ats.*,
           u.name          AS user_name,
           u.image         AS user_image,
-          cm2.class_id    AS class_id,
-          c.name          AS class_name,
+          ${CLASS_DISPLAY_SELECT},
           u.school_id     AS school_id,
           s.name          AS school_name,
           (SELECT COUNT(*) + 1 FROM all_time_stats ats2
-           ${userSubScopeJoin}
            WHERE ats2.${sortBy} > ats.${sortBy}
              ${userSubScopeWhere}
              AND NOT EXISTS (SELECT 1 FROM users bu WHERE bu.id = ats2.user_id AND COALESCE(bu.banned, FALSE))
            ) AS rank
         FROM all_time_stats ats
         JOIN users u ON u.id = ats.user_id
-        LEFT JOIN class_members cm2 ON cm2.student_id = ats.user_id
-        LEFT JOIN classes c ON c.id = cm2.class_id
+        ${CLASS_DISPLAY_LATERAL("ats")}
         LEFT JOIN schools s ON s.id = u.school_id
-        ${userScopeJoin}
         WHERE ats.user_id = $1
           AND COALESCE(u.banned, FALSE) = FALSE
           ${userScopeWhere}`
@@ -1140,29 +1162,35 @@ export async function getPersonalStats(
     )
     const longestStreak = parseInt(streakResult.rows[0]?.longest_streak ?? "0") || 0
 
-    // ── Rank in class ──
-    // Return NULL (not 1) when the user has no class membership yet.
-    const rankClassResult = await client.query(
-      `SELECT CASE
-         WHEN (SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1) IS NULL
-         THEN NULL
-          ELSE (
-            SELECT (COUNT(*) + 1)::int
-            FROM weekly_stats ws2
-            JOIN class_members cm2 ON cm2.student_id = ws2.user_id
-            WHERE cm2.class_id = (
-                SELECT class_id FROM class_members WHERE student_id = $1 LIMIT 1
-              )
-              AND ws2.week_start_date = $2
-              AND ws2.weekly_score > COALESCE(
-                (SELECT weekly_score FROM weekly_stats
-                 WHERE user_id = $1 AND week_start_date = $2), 0
-              )
-              AND NOT EXISTS (SELECT 1 FROM users bu WHERE bu.id = ws2.user_id AND COALESCE(bu.banned, FALSE))
-          )
-       END AS rank`,
+    // ── Ranks per class ──
+    // One row per class the student belongs to (multi-class capable).
+    // rankInClass (legacy) = best rank across classes.
+    const rankClassesResult = await client.query(
+      `SELECT c.id AS class_id, c.name AS class_name,
+              (SELECT (COUNT(*) + 1)::int
+               FROM weekly_stats ws2
+               WHERE EXISTS (
+                 SELECT 1 FROM class_members cm2
+                 WHERE cm2.student_id = ws2.user_id AND cm2.class_id = c.id
+               )
+                 AND ws2.week_start_date = $2
+                 AND ws2.weekly_score > COALESCE(
+                   (SELECT weekly_score FROM weekly_stats
+                    WHERE user_id = $1 AND week_start_date = $2), 0
+                 )
+                 AND NOT EXISTS (SELECT 1 FROM users bu WHERE bu.id = ws2.user_id AND COALESCE(bu.banned, FALSE))
+              ) AS rank
+       FROM classes c
+       JOIN class_members cm ON cm.class_id = c.id
+       WHERE cm.student_id = $1`,
       [userId, weekDateStr]
     )
+    const classRanks = rankClassesResult.rows.map((row: Record<string, unknown>) => ({
+      classId: row.class_id as string,
+      className: (row.class_name as string) ?? "",
+      rank: parseInt(row.rank as string) || 0,
+    }))
+    const rankClass = classRanks.length > 0 ? Math.min(...classRanks.map(r => r.rank)) : null
 
     // ── Rank in school ──
     const rankSchoolResult = await client.query(
@@ -1217,7 +1245,6 @@ export async function getPersonalStats(
     })
 
     const sessionStats = sessionStatsResult.rows[0]
-    const rankClass  = rankClassResult.rows[0]?.rank != null ? parseInt(rankClassResult.rows[0].rank) : null
     const rankSchool = parseInt(rankSchoolResult.rows[0]?.rank ?? "0") || null
     const rankGlobal = parseInt(rankGlobalResult.rows[0]?.rank ?? "0") || null
 
@@ -1240,6 +1267,7 @@ export async function getPersonalStats(
       rankInClass:  rankClass,
       rankInSchool: rankSchool,
       rankGlobal,
+      classRanks,
     }
   } finally {
     client.release()

@@ -17,7 +17,7 @@ import type { AuthenticatedUser } from "./auth";
 import type { BattleRoom, BattleRoomConfig } from "./game/types";
 
 function fakeUser(id: string): AuthenticatedUser {
-  return { userId: id, name: id, image: null, role: "student", schoolId: null, classId: null };
+  return { userId: id, name: id, image: null, role: "student", schoolId: null, classId: null, classIds: [] };
 }
 
 const baseConfig: BattleRoomConfig = {

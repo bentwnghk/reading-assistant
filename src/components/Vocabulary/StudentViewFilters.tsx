@@ -15,16 +15,39 @@ import {
 import { useVocabularyStore } from "@/store/vocabulary";
 import { cn } from "@/utils/style";
 
+interface ScopedStudentClass {
+  id: string;
+  name: string;
+  teacherId: string | null;
+  teacherName: string | null;
+}
+
 interface ScopedStudent {
   id: string;
   name: string | null;
   email: string | null;
+  /** First class (legacy compat) */
   classId: string | null;
   className: string | null;
   teacherId: string | null;
   teacherName: string | null;
+  /** All classes the student belongs to (multi-class capable) */
+  classes: ScopedStudentClass[];
   schoolId: string | null;
   schoolName: string | null;
+}
+
+function studentClasses(s: ScopedStudent): ScopedStudentClass[] {
+  if (Array.isArray(s.classes) && s.classes.length > 0) return s.classes;
+  if (s.classId) {
+    return [{
+      id: s.classId,
+      name: s.className || s.classId,
+      teacherId: s.teacherId,
+      teacherName: s.teacherName,
+    }];
+  }
+  return [];
 }
 
 interface StudentViewFiltersProps {
@@ -89,14 +112,16 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
   }, [isSuperAdmin, schoolFilter]);
 
   const hasNoClassStudents = useMemo(
-    () => students.some((s) => !s.classId),
+    () => students.some((s) => studentClasses(s).length === 0),
     [students]
   );
 
   const classOptions = useMemo(() => {
     const map = new Map<string, string>();
     for (const s of students) {
-      if (s.classId && s.className) map.set(s.classId, s.className);
+      for (const c of studentClasses(s)) {
+        map.set(c.id, c.name);
+      }
     }
     return [...map.entries()]
       .map(([id, name]) => ({ id, name }))
@@ -105,14 +130,16 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
 
   const classFiltered = useMemo(() => {
     if (classFilter === "all") return students;
-    if (classFilter === "none") return students.filter((s) => !s.classId);
-    return students.filter((s) => s.classId === classFilter);
+    if (classFilter === "none") return students.filter((s) => studentClasses(s).length === 0);
+    return students.filter((s) => studentClasses(s).some((c) => c.id === classFilter));
   }, [students, classFilter]);
 
   const teacherOptions = useMemo(() => {
     const map = new Map<string, string>();
     for (const s of classFiltered) {
-      if (s.teacherId && s.teacherName) map.set(s.teacherId, s.teacherName);
+      for (const c of studentClasses(s)) {
+        if (c.teacherId && c.teacherName) map.set(c.teacherId, c.teacherName);
+      }
     }
     return [...map.entries()]
       .map(([id, name]) => ({ id, name }))
@@ -121,7 +148,9 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
 
   const teacherFiltered = useMemo(() => {
     if (!showTeacherFilter || teacherFilter === "all") return classFiltered;
-    return classFiltered.filter((s) => s.teacherId === teacherFilter);
+    return classFiltered.filter((s) =>
+      studentClasses(s).some((c) => c.teacherId === teacherFilter)
+    );
   }, [classFiltered, teacherFilter, showTeacherFilter]);
 
   const studentOptions = useMemo(() => {

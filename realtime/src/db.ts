@@ -33,20 +33,20 @@ export async function closePool(): Promise<void> {
 }
 
 /**
- * Best-effort lookup of the class a student belongs to (one class per student
- * per the class_members PK). Returns null for non-students, students without a
- * class, or if the DB is unreachable — class battles degrade gracefully.
+ * Best-effort lookup of ALL classes a student belongs to (multi-class capable).
+ * Returns [] for non-students, students without classes, or if the DB is
+ * unreachable — class battles degrade gracefully.
  */
-export async function resolveClassId(userId: string): Promise<string | null> {
+export async function resolveClassIds(userId: string): Promise<string[]> {
   try {
     const p = getPool();
     const result = await p.query<{ class_id: string }>(
-      `SELECT class_id FROM class_members WHERE student_id = $1`,
+      `SELECT class_id FROM class_members WHERE student_id = $1 ORDER BY joined_at, class_id`,
       [userId],
     );
-    return result.rows.length > 0 ? result.rows[0].class_id : null;
+    return result.rows.map((row) => row.class_id);
   } catch {
-    return null;
+    return [];
   }
 }
 

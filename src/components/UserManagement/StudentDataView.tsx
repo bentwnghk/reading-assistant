@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ClassCombobox } from "@/components/Internal/ClassCombobox"
 import { toast } from "sonner"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
@@ -179,12 +180,17 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
       const allSessions: SessionWithSchool[] = []
       const attemptsMap: Record<string, number> = {}
+      // A student may belong to multiple classes — fetch their sessions once.
+      const seenStudents = new Set<string>()
 
       for (const cls of classesToLoad) {
         const response = await fetch(`/api/classes/${cls.id}/members`)
         if (!response.ok) continue
 
-        const members = await response.json()
+        const allMembers = await response.json()
+        const members = (allMembers as Array<{ studentId: string }>).filter(
+          (m) => !seenStudents.has(m.studentId)
+        )
         const studentDataPromises = members.map(async (member: { studentId: string }) => {
           const res = await fetch(`/api/classes/${cls.id}/students/${member.studentId}/sessions`)
           if (res.ok) {
@@ -204,6 +210,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
         const studentResults = await Promise.all(studentDataPromises)
         for (const r of studentResults) {
+          seenStudents.add(r.userId)
           allSessions.push(...r.sessions)
           attemptsMap[r.userId] = r.spellingReviewCount
         }
@@ -511,21 +518,17 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             </SelectContent>
           </Select>
         )}
-        <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder={t("userManagement.studentData.selectClass")} />
-          </SelectTrigger>
-          <SelectContent>
-            {(isSuperAdmin || isAdmin) && (
-              <SelectItem value="all">{t("userManagement.studentData.allClasses")}</SelectItem>
-            )}
-            {filteredClasses.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name} ({c.studentCount || 0} {t("userManagement.studentData.students")})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-56">
+          <ClassCombobox
+            classes={filteredClasses}
+            value={selectedClassId === "all" ? null : selectedClassId}
+            onChange={(v) => setSelectedClassId(v ?? "all")}
+            placeholder={t("userManagement.studentData.selectClass")}
+            emptyLabel={t("userManagement.studentData.noClasses")}
+            allowAll={isSuperAdmin || isAdmin}
+            allLabel={t("userManagement.studentData.allClasses")}
+          />
+        </div>
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

@@ -6,9 +6,10 @@
  *   - class-battle broadcasts (find connected students in a target class)
  *   - room membership sanity checks
  *
- * Auth is ticket-based (DB-free); classId is resolved once on connect via a
- * best-effort DB query (null if the DB is unreachable or the user has no
- * class — class battles gracefully degrade).
+ * Auth is ticket-based (DB-free); classIds are resolved once on connect via a
+ * best-effort DB query (empty if the DB is unreachable or the user has no
+ * class — class battles gracefully degrade). A user may belong to multiple
+ * classes and receives broadcasts for each of them.
  */
 import type { UserRole } from "./game/types";
 
@@ -19,7 +20,10 @@ export interface PresenceEntry {
   image: string | null;
   role: UserRole;
   schoolId: string | null;
+  /** Legacy single-class field (first membership) */
   classId: string | null;
+  /** All class memberships (multi-class capable) */
+  classIds: string[];
 }
 
 const presence = new Map<string, PresenceEntry>(); // userId -> entry
@@ -55,11 +59,11 @@ export function rebindSocket(userId: string, socketId: string): boolean {
   return true;
 }
 
-/** Connected user ids whose classId matches (for class-battle broadcasts). */
+/** Connected socket ids of users belonging to the class (for class-battle broadcasts). */
 export function getConnectedSocketIdsInClass(classId: string): string[] {
   const socketIds: string[] = [];
   for (const entry of presence.values()) {
-    if (entry.classId === classId) socketIds.push(entry.socketId);
+    if (entry.classIds.includes(classId)) socketIds.push(entry.socketId);
   }
   return socketIds;
 }

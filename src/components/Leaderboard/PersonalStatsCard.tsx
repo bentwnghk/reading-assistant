@@ -56,10 +56,21 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
     );
   }
 
-  const ranks = [
-    { label: t("leaderboard.personal.rankInClass"),  value: stats.rankInClass,  icon: <Medal className="h-3.5 w-3.5" /> },
-    { label: t("leaderboard.personal.rankInSchool"), value: stats.rankInSchool, icon: <Medal className="h-3.5 w-3.5" /> },
-    { label: t("leaderboard.personal.rankGlobal"),   value: stats.rankGlobal,   icon: <Trophy className="h-3.5 w-3.5" /> },
+  // Per-class rank chips (multi-class); falls back to the single legacy chip.
+  const classRankChips =
+    stats.classRanks && stats.classRanks.length > 0
+      ? stats.classRanks.map(cr => ({
+          key: cr.classId,
+          label: t("leaderboard.personal.rankInClassNamed", { class: cr.className }),
+          value: cr.rank as number | null | undefined,
+          icon: <Medal className="h-3.5 w-3.5" />,
+        }))
+      : [{ key: "class-legacy", label: t("leaderboard.personal.rankInClass"), value: stats.rankInClass, icon: <Medal className="h-3.5 w-3.5" /> }]
+
+  const ranks: Array<{ key: string; label: string; value: number | null | undefined; icon: React.ReactNode }> = [
+    ...classRankChips,
+    { key: "school", label: t("leaderboard.personal.rankInSchool"), value: stats.rankInSchool, icon: <Medal className="h-3.5 w-3.5" /> },
+    { key: "global", label: t("leaderboard.personal.rankGlobal"),   value: stats.rankGlobal,   icon: <Trophy className="h-3.5 w-3.5" /> },
   ].filter(r => r.value !== null && r.value !== undefined)
 
   return (
@@ -69,7 +80,7 @@ export function PersonalStatsCard({ stats }: PersonalStatsCardProps) {
         <div className="flex flex-wrap gap-2">
           {ranks.map(r => (
             <span
-              key={r.label}
+              key={r.key}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold"
             >
               {r.icon}

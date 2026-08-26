@@ -152,12 +152,14 @@ export function LeaderboardTable({
                   </span>
                 )}
               </div>
-              {scope === "school" && entry.className && (
-                <div className="text-xs text-muted-foreground truncate">{entry.className}</div>
-              )}
-              {scope === "global" && (entry.className || entry.schoolName) && (
+              {scope === "school" && (entry.classNames?.length || entry.className) && (
                 <div className="text-xs text-muted-foreground truncate">
-                  {[entry.className, entry.schoolName].filter(Boolean).join(" · ")}
+                  {(entry.classNames?.length ? entry.classNames : [entry.className!]).join(" · ")}
+                </div>
+              )}
+              {scope === "global" && ((entry.classNames?.length || entry.className) || entry.schoolName) && (
+                <div className="text-xs text-muted-foreground truncate">
+                  {[entry.classNames?.length ? entry.classNames.join(" · ") : entry.className, entry.schoolName].filter(Boolean).join(" · ")}
                 </div>
               )}
               {/* Rank trend */}

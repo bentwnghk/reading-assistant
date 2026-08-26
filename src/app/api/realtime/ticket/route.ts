@@ -28,16 +28,20 @@ export async function GET() {
 
     const schoolId = await getSchoolForUser(session.user.id);
 
-    // Resolve classId for students (used for class-battle invite targeting).
+    // Resolve class memberships for students (used for class-battle invite
+    // targeting). Signs both the legacy single classId (first membership) and
+    // the full classIds array — the realtime server accepts either.
     let classId: string | null = null;
+    let classIds: string[] = [];
     if (session.user.role === "student") {
       try {
         const pool = getPool();
         const result = await pool.query<{ class_id: string }>(
-          `SELECT class_id FROM class_members WHERE student_id = $1`,
+          `SELECT class_id FROM class_members WHERE student_id = $1 ORDER BY joined_at, class_id`,
           [session.user.id],
         );
-        classId = result.rows.length > 0 ? result.rows[0].class_id : null;
+        classIds = result.rows.map((row) => row.class_id);
+        classId = classIds.length > 0 ? classIds[0] : null;
       } catch {
         // best-effort — class battles gracefully degrade
       }
@@ -50,6 +54,7 @@ export async function GET() {
       role: session.user.role,
       schoolId,
       classId,
+      classIds,
     });
     return NextResponse.json({ ticket, expiresInMs: 30_000 });
   } catch (error) {

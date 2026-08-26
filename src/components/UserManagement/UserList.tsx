@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Trash2, ShieldCheck } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Trash2, ShieldCheck, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -19,9 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ClassCombobox, ClassMultiSelect } from "@/components/Internal/ClassCombobox"
 import { toast } from "sonner"
 import type { UserWithRole, UserRole, SchoolInfo, ClassInfo, BillingMode } from "@/lib/users"
 import { cn } from "@/utils/style"
@@ -93,18 +102,14 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
     loadData()
   }, [loadData])
 
-  const uniqueClasses = useMemo(() => {
-    const scopedUsers = schoolFilter === "all"
-      ? users
+  const filterableClasses = useMemo(() => {
+    const scopedClasses = schoolFilter === "all"
+      ? classes
       : schoolFilter === "__none__"
-        ? users.filter(u => !u.schoolId)
-        : users.filter(u => u.schoolId === schoolFilter)
-    const classSet = new Set<string>()
-    scopedUsers.forEach(u => {
-      if (u.className) classSet.add(u.className)
-    })
-    return Array.from(classSet).sort()
-  }, [users, schoolFilter])
+        ? classes.filter(c => !c.schoolId)
+        : classes.filter(c => c.schoolId === schoolFilter)
+    return scopedClasses
+  }, [classes, schoolFilter])
 
   const currentUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
 
@@ -122,7 +127,11 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
     }
 
     if (classFilter !== "all") {
-      result = result.filter(u => u.className === classFilter)
+      if (classFilter === "__none__") {
+        result = result.filter(u => (u.classIds ?? (u.classId ? [u.classId] : [])).length === 0)
+      } else {
+        result = result.filter(u => (u.classIds ?? (u.classId ? [u.classId] : [])).includes(classFilter))
+      }
     }
 
     if (schoolFilter !== "all") {
@@ -142,9 +151,12 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
         case "email":
           comparison = (a.email || "").localeCompare(b.email || "")
           break
-        case "className":
-          comparison = (a.className || "").localeCompare(b.className || "")
+        case "className": {
+          const aNames = a.classNames ?? (a.className ? [a.className] : [])
+          const bNames = b.classNames ?? (b.className ? [b.className] : [])
+          comparison = (aNames[0] || "").localeCompare(bNames[0] || "")
           break
+        }
         case "schoolName":
           comparison = (a.schoolName || "").localeCompare(b.schoolName || "")
           break
@@ -243,20 +255,27 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
     }
   }
 
-  const handleClassChange = async (userId: string, classId: string) => {
-    const resolvedClassId = classId === "__none__" ? null : classId
+  const handleClassesChange = async (userId: string, classIds: string[]) => {
     try {
       const response = await fetch(`/api/users/${userId}/class`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: resolvedClassId }),
+        body: JSON.stringify({ classIds }),
       })
 
       if (response.ok) {
-        const matchingClass = classes.find(c => c.id === resolvedClassId)
+        const classNames = classIds
+          .map(id => classes.find(c => c.id === id)?.name)
+          .filter((name): name is string => !!name)
         setUsers(users.map(u =>
           u.id === userId
-            ? { ...u, classId: resolvedClassId ?? undefined, className: matchingClass?.name }
+            ? {
+                ...u,
+                classIds,
+                classNames,
+                classId: classIds.length > 0 ? classIds[0] : undefined,
+                className: classNames.length > 0 ? classNames[0] : undefined,
+              }
             : u
         ))
         toast.success(t("userManagement.classUpdated"))
@@ -264,7 +283,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
         toast.error(t("userManagement.classUpdateFailed"))
       }
     } catch (error) {
-      console.error("Failed to update class:", error)
+      console.error("Failed to update classes:", error)
       toast.error(t("userManagement.classUpdateFailed"))
     }
   }
@@ -279,6 +298,34 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
         return <GraduationCap className="h-3 w-3 mr-1" />
       default:
         return <User className="h-3 w-3 mr-1" />
+    }
+  }
+
+  // ── Class editor dialog ───────────────────────────────────────────────────
+  const [editingUser, setEditingUser] = useState<UserWithRole | null>(null)
+  const [editingClassIds, setEditingClassIds] = useState<string[]>([])
+  const [savingClasses, setSavingClasses] = useState(false)
+
+  const openClassEditor = (user: UserWithRole) => {
+    setEditingUser(user)
+    setEditingClassIds(user.classIds ?? (user.classId ? [user.classId] : []))
+  }
+
+  const editorClassOptions = useMemo(() => {
+    if (!editingUser) return []
+    return classes
+      .filter(c => c.schoolId === editingUser.schoolId || (editingUser.classIds ?? []).includes(c.id))
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [classes, editingUser])
+
+  const saveClassEdits = async () => {
+    if (!editingUser) return
+    setSavingClasses(true)
+    try {
+      await handleClassesChange(editingUser.id, editingClassIds)
+      setEditingUser(null)
+    } finally {
+      setSavingClasses(false)
     }
   }
 
@@ -470,19 +517,19 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
             <SelectItem value="student">{t("userManagement.roles.student")}</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={classFilter} onValueChange={setClassFilter}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder={t("userManagement.users.class")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("userManagement.users.allClasses")}</SelectItem>
-            {uniqueClasses.map((className) => (
-              <SelectItem key={className} value={className}>
-                {className}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-56">
+          <ClassCombobox
+            classes={filterableClasses}
+            value={classFilter === "all" ? null : classFilter}
+            onChange={(value) => setClassFilter(value ?? "all")}
+            placeholder={t("userManagement.users.class")}
+            emptyLabel={t("userManagement.users.noClasses")}
+            allowAll
+            allLabel={t("userManagement.users.allClasses")}
+            allowNone
+            noneLabel={t("userManagement.users.noClass")}
+          />
+        </div>
         {isSuperAdmin && (
           <Select value={schoolFilter} onValueChange={setSchoolFilter}>
             <SelectTrigger className="w-44">
@@ -655,27 +702,24 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                       ))}
                     </div>
                   ) : user.role === "student" ? (
-                    <Select
-                      value={user.classId ?? "__none__"}
-                      onValueChange={(value) => handleClassChange(user.id, value)}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder={t("userManagement.users.noClass")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">
-                          <span className="text-muted-foreground">{t("userManagement.users.noClass")}</span>
-                        </SelectItem>
-                        {classes
-                          .filter(c => c.schoolId === user.schoolId || c.id === user.classId)
-                          .sort((a, b) => a.name.localeCompare(b.name))
-                          .map((cls) => (
-                            <SelectItem key={cls.id} value={cls.id}>
-                              {cls.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex flex-wrap items-center gap-1 max-w-48">
+                      {(user.classNames ?? (user.className ? [user.className] : [])).length > 0
+                        ? (user.classNames ?? (user.className ? [user.className] : [])).map((name, idx) => (
+                            <Badge key={(user.classIds ?? [])[idx] || idx} variant="outline" className="text-xs">
+                              {name}
+                            </Badge>
+                          ))
+                        : <span className="text-muted-foreground text-xs">{t("userManagement.users.noClass")}</span>}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => openClassEditor(user)}
+                        title={t("userManagement.users.editClasses")}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    </div>
                   ) : (
                     <span className="text-muted-foreground">-</span>
                   )}
@@ -835,6 +879,42 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
           </Button>
         </div>
       )}
+
+      <Dialog open={!!editingUser} onOpenChange={(open) => { if (!open) setEditingUser(null) }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("userManagement.users.editClasses")}</DialogTitle>
+            <DialogDescription>
+              {editingUser?.name || editingUser?.email || ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            {editorClassOptions.length > 0 ? (
+              <ClassMultiSelect
+                classes={editorClassOptions}
+                value={editingClassIds}
+                onChange={setEditingClassIds}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {t("userManagement.users.noClassesForSchool")}
+              </p>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("userManagement.users.editClassesHint")}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingUser(null)} disabled={savingClasses}>
+              {t("userManagement.cancel")}
+            </Button>
+            <Button onClick={saveClassEdits} disabled={savingClasses}>
+              {savingClasses && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+              {t("userManagement.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

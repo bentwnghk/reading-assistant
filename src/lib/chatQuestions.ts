@@ -112,24 +112,29 @@ export async function getAggregatedQuestions(options: {
     }
 
     if (options.classId) {
-      conditions.push(`cm.class_id = $${paramIndex}`)
+      conditions.push(`EXISTS (
+        SELECT 1 FROM class_members cm
+        WHERE cm.student_id = u.id AND cm.class_id = $${paramIndex}
+      )`)
       params.push(options.classId)
       paramIndex++
     } else if (options.classIds && options.classIds.length > 0) {
-      conditions.push(`cm.class_id = ANY($${paramIndex})`)
+      conditions.push(`EXISTS (
+        SELECT 1 FROM class_members cm
+        WHERE cm.student_id = u.id AND cm.class_id = ANY($${paramIndex})
+      )`)
       params.push(options.classIds)
       paramIndex++
     }
 
-    const whereClause = conditions.length > 0 
-      ? `WHERE ${conditions.join(" AND ")}` 
+    const whereClause = conditions.length > 0
+      ? `WHERE ${conditions.join(" AND ")}`
       : ""
 
     const countResult = await client.query(
       `SELECT COUNT(DISTINCT cq.question_hash) as total
        FROM chat_questions cq
        LEFT JOIN users u ON cq.user_id = u.id
-       LEFT JOIN class_members cm ON u.id = cm.student_id
        ${whereClause}`,
       params
     )
@@ -140,7 +145,7 @@ export async function getAggregatedQuestions(options: {
     const offset = options.offset ?? 0
 
     const result = await client.query(
-      `SELECT 
+      `SELECT
         cq.question_hash,
         MAX(cq.question_text) as question_text,
         COUNT(*) as frequency,
@@ -148,7 +153,6 @@ export async function getAggregatedQuestions(options: {
         COUNT(DISTINCT cq.user_id) as unique_user_count
        FROM chat_questions cq
        LEFT JOIN users u ON cq.user_id = u.id
-       LEFT JOIN class_members cm ON u.id = cm.student_id
        ${whereClause}
        GROUP BY cq.question_hash
        ORDER BY frequency DESC, last_asked DESC
@@ -205,17 +209,23 @@ export async function getQuestionInstances(
     }
 
     if (options.classId) {
-      conditions.push(`cm.class_id = $${paramIndex}`)
+      conditions.push(`EXISTS (
+        SELECT 1 FROM class_members cm
+        WHERE cm.student_id = u.id AND cm.class_id = $${paramIndex}
+      )`)
       params.push(options.classId)
       paramIndex++
     } else if (options.classIds && options.classIds.length > 0) {
-      conditions.push(`cm.class_id = ANY($${paramIndex})`)
+      conditions.push(`EXISTS (
+        SELECT 1 FROM class_members cm
+        WHERE cm.student_id = u.id AND cm.class_id = ANY($${paramIndex})
+      )`)
       params.push(options.classIds)
       paramIndex++
     }
 
     const result = await client.query(
-      `SELECT 
+      `SELECT
         cq.id,
         cq.question_text,
         cq.response_text,
@@ -226,7 +236,6 @@ export async function getQuestionInstances(
         u.email as user_email
        FROM chat_questions cq
        LEFT JOIN users u ON cq.user_id = u.id
-       LEFT JOIN class_members cm ON u.id = cm.student_id
        WHERE ${conditions.join(" AND ")}
        ORDER BY cq.created_at DESC`,
       params

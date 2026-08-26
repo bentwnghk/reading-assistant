@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { createClass, getClassesForTeacher, getClassesForSchool, getSchoolForUser, getAllClasses } from "@/lib/users"
+import { createClass, getClassesForTeacher, getClassesForSchool, getClassesForStudent, getSchoolForUser, getAllClasses } from "@/lib/users"
 
 export async function GET() {
   const session = await auth()
@@ -10,7 +10,7 @@ export async function GET() {
   }
 
   const role = session.user.role
-  if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
+  if (role !== "super-admin" && role !== "admin" && role !== "teacher" && role !== "student") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
@@ -21,8 +21,11 @@ export async function GET() {
     } else if (role === "admin") {
       const schoolId = await getSchoolForUser(session.user.id)
       classes = schoolId ? await getClassesForSchool(schoolId) : []
-    } else {
+    } else if (role === "teacher") {
       classes = await getClassesForTeacher(session.user.id)
+    } else {
+      // Students: the classes they belong to (for leaderboard scope picker, etc.)
+      classes = await getClassesForStudent(session.user.id)
     }
     return NextResponse.json(classes)
   } catch (error) {
@@ -45,7 +48,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { name, description, teacherId } = body
+    const { name, description, teacherId, subjectId, gradeId } = body
 
     if (!name || !name.trim()) {
       return NextResponse.json({ error: "Class name is required" }, { status: 400 })
@@ -71,7 +74,9 @@ export async function POST(request: Request) {
       name.trim(),
       description?.trim() || "",
       teacherId === null ? undefined : (teacherId || (role === "teacher" ? session.user.id : undefined)),
-      schoolId
+      schoolId,
+      typeof subjectId === "string" && subjectId ? subjectId : undefined,
+      typeof gradeId === "string" && gradeId ? gradeId : undefined
     )
 
     if (!classInfo) {

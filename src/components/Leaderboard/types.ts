@@ -29,8 +29,12 @@ export interface LeaderboardEntry {
   userId: string
   userName: string
   userImage?: string | null
+  /** First class (legacy compat) */
   classId?: string | null
   className?: string | null
+  /** All classes (multi-class capable) */
+  classIds?: string[]
+  classNames?: string[]
   schoolId?: string | null
   schoolName?: string | null
   weeklyScore: number
@@ -63,8 +67,12 @@ export interface AllTimeLeaderboardEntry {
   userId: string
   userName: string
   userImage?: string | null
+  /** First class (legacy compat) */
   classId?: string | null
   className?: string | null
+  /** All classes (multi-class capable) */
+  classIds?: string[]
+  classNames?: string[]
   schoolId?: string | null
   schoolName?: string | null
   allTimeScore: number
@@ -130,4 +138,6 @@ export interface PersonalStats {
   rankInClass: number | null
   rankInSchool: number | null
   rankGlobal: number | null
+  /** Per-class weekly ranks (multi-class capable); empty when no membership */
+  classRanks?: Array<{ classId: string; className: string; rank: number }>
 }

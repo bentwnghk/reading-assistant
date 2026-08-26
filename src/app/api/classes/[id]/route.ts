@@ -66,7 +66,7 @@ export async function PUT(
 
   try {
     const body = await request.json()
-    const { name, description, teacherId } = body
+    const { name, description, teacherId, subjectId, gradeId } = body
 
     if (!name || !name.trim()) {
       return NextResponse.json({ error: "Class name is required" }, { status: 400 })
@@ -85,7 +85,15 @@ export async function PUT(
       schoolId = userSchool ?? undefined
     }
 
-    const success = await updateClass(id, name.trim(), description?.trim() || "", teacherId, schoolId)
+    const success = await updateClass(
+      id,
+      name.trim(),
+      description?.trim() || "",
+      teacherId,
+      schoolId,
+      typeof subjectId === "string" && subjectId ? subjectId : undefined,
+      typeof gradeId === "string" && gradeId ? gradeId : undefined
+    )
 
     if (!success) {
       return NextResponse.json({ error: "Failed to update class" }, { status: 500 })

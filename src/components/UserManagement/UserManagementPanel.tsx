@@ -30,6 +30,7 @@ import ClassList from "./ClassList"
 import StudentDataView from "./StudentDataView"
 import SchoolList from "./SchoolList"
 import AiQuestionsView from "./AiQuestionsView"
+import TaxonomyManager from "./TaxonomyManager"
 import AdminSubscriptionsView from "@/components/Subscription/AdminSubscriptionsView"
 import UserManagementGuide from "./UserManagementGuide"
 
@@ -70,9 +71,9 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     setActiveTab("users")
   }, [])
 
-  const handleViewClassStudents = useCallback((className: string, schoolId?: string) => {
+  const handleViewClassStudents = useCallback((classId: string, schoolId?: string) => {
     setUsersSchoolFilter(schoolId || "all")
-    setUsersClassFilter(className)
+    setUsersClassFilter(classId)
     setActiveTab("users")
   }, [])
 
@@ -344,6 +345,9 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
               <TabsTrigger value="users">{t("userManagement.tabs.users")}</TabsTrigger>
             )}
             <TabsTrigger value="classes">{t("userManagement.tabs.classes")}</TabsTrigger>
+            {(isSuperAdmin || isAdmin) && (
+              <TabsTrigger value="taxonomy">{t("userManagement.tabs.taxonomy")}</TabsTrigger>
+            )}
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsTrigger value="students">{t("userManagement.tabs.studentData")}</TabsTrigger>
             )}
@@ -373,6 +377,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                 onViewStudents={isSuperAdmin || isAdmin ? handleViewClassStudents : undefined}
               />
             </TabsContent>
+            {(isSuperAdmin || isAdmin) && (
+              <TabsContent value="taxonomy" className="mt-0">
+                <TaxonomyManager isSuperAdmin={isSuperAdmin} />
+              </TabsContent>
+            )}
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
                 <StudentDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} />

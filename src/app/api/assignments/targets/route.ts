@@ -31,17 +31,13 @@ export async function GET() {
       const result: ShareTargetGroup[] = []
       for (const school of schools) {
         const users = await getUsersInSchool(school.id)
-        const targets: ShareTarget[] = users
-          .filter((u) => u.id !== session.user.id && u.role === "student" && !u.banned)
-          .map((u) => ({
-            id: u.id,
-            name: u.name ?? null,
-            email: u.email ?? null,
-            classId: u.classId ?? undefined,
-            className: u.className ?? undefined,
-            schoolId: school.id,
-            schoolName: school.name,
-          }))
+        const targets: ShareTarget[] = []
+        for (const u of users) {
+          if (u.id === session.user.id || u.role !== "student" || u.banned) continue
+          for (const t of expandUserClasses(u)) {
+            targets.push({ ...t, schoolId: school.id, schoolName: school.name })
+          }
+        }
         if (targets.length === 0) continue
         result.push(...groupByClass(targets, school.id, school.name))
       }
@@ -53,23 +49,44 @@ export async function GET() {
 
     const users = await getUsersInSchool(schoolId)
     const schoolName = users.find((u) => u.schoolId === schoolId)?.schoolName
-    const targets: ShareTarget[] = users
-      .filter((u) => u.id !== session.user.id && u.role === "student" && !u.banned)
-      .map((u) => ({
-        id: u.id,
-        name: u.name ?? null,
-        email: u.email ?? null,
-        classId: u.classId ?? undefined,
-        className: u.className ?? undefined,
-        schoolId,
-        schoolName,
-      }))
+    const targets: ShareTarget[] = []
+    for (const u of users) {
+      if (u.id === session.user.id || u.role !== "student" || u.banned) continue
+      for (const t of expandUserClasses(u)) {
+        targets.push({ ...t, schoolId, schoolName })
+      }
+    }
 
     return NextResponse.json(groupByClass(targets, schoolId, schoolName))
   } catch (error) {
     console.error("Error fetching assignment targets:", error)
     return NextResponse.json({ error: "Failed to fetch targets" }, { status: 500 })
   }
+}
+
+// Expands one user into N share targets (one per class membership).
+// Users without a class produce a single classless target.
+function expandUserClasses(u: {
+  id: string
+  name?: string | null
+  email?: string | null
+  classId?: string
+  className?: string
+  classIds?: string[]
+  classNames?: string[]
+}): ShareTarget[] {
+  const ids = u.classIds && u.classIds.length > 0 ? u.classIds : (u.classId ? [u.classId] : [])
+  const names = u.classNames && u.classNames.length > 0 ? u.classNames : (u.className ? [u.className] : [])
+  if (ids.length === 0) {
+    return [{ id: u.id, name: u.name ?? null, email: u.email ?? null }]
+  }
+  return ids.map((classId, i) => ({
+    id: u.id,
+    name: u.name ?? null,
+    email: u.email ?? null,
+    classId,
+    className: names[i] ?? classId,
+  }))
 }
 
 function groupByClass(

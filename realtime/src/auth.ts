@@ -9,7 +9,12 @@
  * dependency at connection time.
  *
  * Ticket format: `${base64url(payload)}.${base64url(signature)}`
- * Payload:      `{ userId, name, image, role, schoolId, exp }`
+ * Payload:      `{ userId, name, image, role, schoolId, classId, classIds, exp }`
+ *
+ * `classId` is the legacy single-class field (first membership); `classIds` is
+ * the full multi-class list. verifyTicket normalizes to classIds[] (accepting
+ * either field) so the app and realtime images may deploy in any order.
+ * MIRRORS `src/lib/realtime-ticket.ts` in the app — keep both in sync.
  *
  * Trade-off: a ticket authenticates the connection handshake only. If a user's
  * NextAuth session is revoked mid-connection, the socket stays alive until
@@ -26,7 +31,10 @@ export interface AuthenticatedUser {
   image: string | null;
   role: UserRole;
   schoolId: string | null;
+  /** Legacy single-class field (first membership) — kept for rolling deploys */
   classId: string | null;
+  /** All class memberships (multi-class capable) */
+  classIds: string[];
 }
 
 function base64UrlEncode(buf: Buffer): string {
@@ -52,6 +60,8 @@ export function issueTicket(user: AuthenticatedUser, ttlMs: number = config.tick
     image: user.image,
     role: user.role,
     schoolId: user.schoolId,
+    classId: user.classId,
+    classIds: user.classIds,
     exp: Date.now() + ttlMs,
   };
   const payloadB64 = base64UrlEncode(Buffer.from(JSON.stringify(payload), "utf8"));
@@ -82,6 +92,7 @@ export function verifyTicket(ticket: string | undefined): AuthenticatedUser | nu
     role?: unknown;
     schoolId?: unknown;
     classId?: unknown;
+    classIds?: unknown;
     exp?: unknown;
   };
   try {
@@ -94,12 +105,24 @@ export function verifyTicket(ticket: string | undefined): AuthenticatedUser | nu
   if (typeof payload.userId !== "string" || payload.userId.length === 0) return null;
   if (typeof payload.role !== "string") return null;
 
+  // Normalize memberships: prefer classIds[]; fall back to legacy classId so
+  // old-signer/new-verifier (and vice versa) deploys keep working.
+  let classIds: string[] = [];
+  if (Array.isArray(payload.classIds)) {
+    classIds = payload.classIds.filter((id): id is string => typeof id === "string");
+  }
+  const legacyClassId = typeof payload.classId === "string" ? payload.classId : null;
+  if (classIds.length === 0 && legacyClassId) {
+    classIds = [legacyClassId];
+  }
+
   return {
     userId: payload.userId,
     name: typeof payload.name === "string" ? payload.name : null,
     image: typeof payload.image === "string" ? payload.image : null,
     role: payload.role as UserRole,
     schoolId: typeof payload.schoolId === "string" ? payload.schoolId : null,
-    classId: typeof payload.classId === "string" ? payload.classId : null,
+    classId: classIds.length > 0 ? classIds[0] : null,
+    classIds,
   };
 }

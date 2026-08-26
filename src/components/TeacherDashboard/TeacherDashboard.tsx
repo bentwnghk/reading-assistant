@@ -13,13 +13,12 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import { useSession } from "next-auth/react";
 import { useTeacherDashboard } from "@/hooks/useTeacherDashboard";
 import {
@@ -228,36 +227,17 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
             </Select>
           )}
 
-          <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder={t("teacherDashboard.selectClass")} />
-            </SelectTrigger>
-            <SelectContent>
-              {isAdmin && (
-                <SelectItem value="all">{t("teacherDashboard.allClasses")}</SelectItem>
-              )}
-              {isSuperAdmin && selectedSchoolId === "all"
-                ? schools.map((school) => {
-                    const schoolClasses = filteredClasses.filter((c) => c.schoolId === school.id);
-                    if (schoolClasses.length === 0) return null;
-                    return (
-                      <SelectGroup key={school.id}>
-                        <SelectLabel>{school.name}</SelectLabel>
-                        {schoolClasses.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name} ({c.studentCount || 0})
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    );
-                  })
-                : filteredClasses.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name} ({c.studentCount || 0})
-                    </SelectItem>
-                  ))}
-            </SelectContent>
-          </Select>
+          <div className="w-64">
+            <ClassCombobox
+              classes={filteredClasses}
+              value={selectedClassId === "all" ? null : selectedClassId}
+              onChange={(v) => setSelectedClassId(v ?? "all")}
+              placeholder={t("teacherDashboard.selectClass")}
+              emptyLabel={t("teacherDashboard.noClasses")}
+              allowAll={isAdmin || isSuperAdmin}
+              allLabel={t("teacherDashboard.allClasses")}
+            />
+          </div>
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           {error && <span className="text-xs text-destructive">{error}</span>}
 

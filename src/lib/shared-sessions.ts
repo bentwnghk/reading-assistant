@@ -1,6 +1,6 @@
 import { getClient } from "./db"
 import { createReadingSession } from "./sessions"
-import { getSchoolForUser, getClassesForTeacher, getClassMembers, getStudentClassId, getUsersInSchool, getAllSchools } from "./users"
+import { getSchoolForUser, getClassesForTeacher, getClassMembers, getStudentClassIds, getUsersInSchool, getAllSchools } from "./users"
 import type { ReadingStore } from "@/store/reading"
 import type { UserRole, ClassMember } from "./users"
 
@@ -233,6 +233,64 @@ export async function rejectSharedSession(
   }
 }
 
+// Expands a user's memberships into (classId, className) groups.
+// Users may belong to multiple classes — they appear once per class group;
+// recipient Sets in the UI dedupe across groups.
+function userClassPairs(u: {
+  classId?: string
+  className?: string
+  classIds?: string[]
+  classNames?: string[]
+}): Array<{ classId: string; className: string }> {
+  const ids = u.classIds && u.classIds.length > 0 ? u.classIds : (u.classId ? [u.classId] : [])
+  const names = u.classNames && u.classNames.length > 0 ? u.classNames : (u.className ? [u.className] : [])
+  const pairs: Array<{ classId: string; className: string }> = []
+  for (let i = 0; i < ids.length; i++) {
+    pairs.push({ classId: ids[i], className: names[i] ?? ids[i] })
+  }
+  return pairs
+}
+
+function groupTargetsByClass(
+  targets: ShareTarget[],
+  groupMeta: { schoolId?: string; schoolName?: string }
+): ShareTargetGroup[] {
+  const groups: Record<string, { className: string; users: ShareTarget[] }> = {}
+  const ungrouped: ShareTarget[] = []
+
+  for (const t of targets) {
+    if (t.classId && t.className) {
+      if (!groups[t.classId]) groups[t.classId] = { className: t.className, users: [] }
+      groups[t.classId].users.push(t)
+    } else {
+      ungrouped.push(t)
+    }
+  }
+
+  const result: ShareTargetGroup[] = []
+  for (const [classId, entry] of Object.entries(groups).sort((a, b) =>
+    a[1].className.localeCompare(b[1].className)
+  )) {
+    result.push({
+      classId,
+      className: entry.className,
+      schoolId: groupMeta.schoolId,
+      schoolName: groupMeta.schoolName,
+      label: entry.className || classId,
+      users: entry.users,
+    })
+  }
+  if (ungrouped.length > 0) {
+    result.push({
+      schoolId: groupMeta.schoolId,
+      schoolName: groupMeta.schoolName,
+      label: "Other",
+      users: ungrouped,
+    })
+  }
+  return result
+}
+
 export async function getShareTargets(
   userId: string,
   role: UserRole
@@ -243,55 +301,35 @@ export async function getShareTargets(
 
     for (const school of schools) {
       const users = await getUsersInSchool(school.id)
-      const targets = users
-        .filter((u) => u.id !== userId && !u.banned)
-        .map((u) => ({
-          id: u.id,
-          name: u.name ?? null,
-          email: u.email ?? null,
-          classId: u.classId ?? undefined,
-          className: u.className ?? undefined,
-          schoolId: school.id,
-          schoolName: school.name,
-        }))
-
-      if (targets.length === 0) continue
-
-      const groupedByClass: Record<string, ShareTarget[]> = {}
-      const ungrouped: ShareTarget[] = []
-
-      for (const t of targets) {
-        if (t.classId && t.className) {
-          if (!groupedByClass[t.classId]) groupedByClass[t.classId] = []
-          groupedByClass[t.classId].push(t)
+      const targets: ShareTarget[] = []
+      for (const u of users) {
+        if (u.id === userId || u.banned) continue
+        const pairs = userClassPairs(u)
+        if (pairs.length === 0) {
+          targets.push({
+            id: u.id,
+            name: u.name ?? null,
+            email: u.email ?? null,
+            schoolId: school.id,
+            schoolName: school.name,
+          })
         } else {
-          ungrouped.push(t)
+          for (const p of pairs) {
+            targets.push({
+              id: u.id,
+              name: u.name ?? null,
+              email: u.email ?? null,
+              classId: p.classId,
+              className: p.className,
+              schoolId: school.id,
+              schoolName: school.name,
+            })
+          }
         }
       }
 
-      for (const [classId, clsUsers] of Object.entries(groupedByClass).sort((a, b) => {
-        const aName = a[1][0]?.className ?? a[0]
-        const bName = b[1][0]?.className ?? b[0]
-        return aName.localeCompare(bName)
-      })) {
-        result.push({
-          classId,
-          className: clsUsers[0].className,
-          schoolId: school.id,
-          schoolName: school.name,
-          label: clsUsers[0].className || classId,
-          users: clsUsers,
-        })
-      }
-
-      if (ungrouped.length > 0) {
-        result.push({
-          schoolId: school.id,
-          schoolName: school.name,
-          label: "Other",
-          users: ungrouped,
-        })
-      }
+      if (targets.length === 0) continue
+      result.push(...groupTargetsByClass(targets, { schoolId: school.id, schoolName: school.name }))
     }
 
     return result
@@ -301,47 +339,31 @@ export async function getShareTargets(
     const schoolId = await getSchoolForUser(userId)
     if (!schoolId) return []
     const users = await getUsersInSchool(schoolId)
-    const targets = users
-      .filter((u) => u.id !== userId && !u.banned)
-      .map((u) => ({
-        id: u.id,
-        name: u.name ?? null,
-        email: u.email ?? null,
-        classId: u.classId ?? undefined,
-        className: u.className ?? undefined,
-      }))
-
-    if (targets.length === 0) return []
-
-    const groups: Record<string, ShareTarget[]> = {}
-    const ungrouped: ShareTarget[] = []
-
-    for (const t of targets) {
-      if (t.classId && t.className) {
-        if (!groups[t.classId]) groups[t.classId] = []
-        groups[t.classId].push(t)
+    const targets: ShareTarget[] = []
+    for (const u of users) {
+      if (u.id === userId || u.banned) continue
+      const pairs = userClassPairs(u)
+      if (pairs.length === 0) {
+        targets.push({
+          id: u.id,
+          name: u.name ?? null,
+          email: u.email ?? null,
+        })
       } else {
-        ungrouped.push(t)
+        for (const p of pairs) {
+          targets.push({
+            id: u.id,
+            name: u.name ?? null,
+            email: u.email ?? null,
+            classId: p.classId,
+            className: p.className,
+          })
+        }
       }
     }
 
-    const result: ShareTargetGroup[] = []
-    for (const [classId, users] of Object.entries(groups).sort((a, b) => {
-      const aName = a[1][0]?.className ?? a[0]
-      const bName = b[1][0]?.className ?? b[0]
-      return aName.localeCompare(bName)
-    })) {
-      result.push({
-        classId,
-        className: users[0].className,
-        label: users[0].className || classId,
-        users,
-      })
-    }
-    if (ungrouped.length > 0) {
-      result.push({ label: "Other", users: ungrouped })
-    }
-    return result
+    if (targets.length === 0) return []
+    return groupTargetsByClass(targets, {})
   }
 
   if (role === "teacher") {
@@ -371,35 +393,48 @@ export async function getShareTargets(
   }
 
   if (role === "student") {
-    const classId = await getStudentClassId(userId)
-    if (!classId) return []
-    const members: ClassMember[] = await getClassMembers(classId)
-    const targets: ShareTarget[] = members
-      .filter((m) => m.studentId !== userId)
-      .map((m) => ({
-        id: m.studentId,
-        name: m.studentName ?? null,
-        email: m.studentEmail ?? null,
-        classId,
-      }))
-
-    if (targets.length === 0) return []
+    // Union of classmates across ALL the student's classes (deduped, self excluded).
+    const classIds = await getStudentClassIds(userId)
+    if (classIds.length === 0) return []
 
     const client = await getClient()
     try {
-      const classResult = await client.query(
-        `SELECT name FROM classes WHERE id = $1`,
-        [classId]
+      const result: ShareTargetGroup[] = []
+      const seen = new Set<string>()
+
+      const classesResult = await client.query(
+        `SELECT id, name FROM classes WHERE id = ANY($1)`,
+        [classIds]
       )
-      const className = classResult.rows[0]?.name
-      return [
-        {
-          classId,
-          className: className ?? undefined,
-          label: className || classId,
-          users: targets,
-        },
-      ]
+      const classNameById = new Map<string, string>(
+        classesResult.rows.map((row: Record<string, unknown>) => [row.id as string, row.name as string])
+      )
+
+      for (const classId of classIds) {
+        const members: ClassMember[] = await getClassMembers(classId)
+        const targets: ShareTarget[] = []
+        for (const m of members) {
+          if (m.studentId === userId || seen.has(m.studentId)) continue
+          seen.add(m.studentId)
+          targets.push({
+            id: m.studentId,
+            name: m.studentName ?? null,
+            email: m.studentEmail ?? null,
+            classId,
+            className: classNameById.get(classId),
+          })
+        }
+        if (targets.length > 0) {
+          const className = classNameById.get(classId)
+          result.push({
+            classId,
+            className,
+            label: className || classId,
+            users: targets,
+          })
+        }
+      }
+      return result
     } finally {
       client.release()
     }

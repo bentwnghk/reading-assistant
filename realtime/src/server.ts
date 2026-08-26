@@ -11,7 +11,7 @@ import { Server as SocketIOServer, type Socket } from "socket.io";
 
 import { config } from "./config";
 import { verifyTicket, type AuthenticatedUser } from "./auth";
-import { getPool, resolveClassId, canTargetClass, isClassMember, getClassInfo, getPresetTarget, closePool } from "./db";
+import { getPool, resolveClassIds, canTargetClass, isClassMember, getClassInfo, getPresetTarget, closePool } from "./db";
 import {
   registerPresence,
   unregisterPresenceBySocket,
@@ -83,9 +83,13 @@ function handlePendingClassInvites(req: IncomingMessage, res: ServerResponse): v
       res.end(JSON.stringify({ invites: [] }));
       return;
     }
-    // Class-targeted rooms (by classId) + roster-targeted rooms (by userId —
-    // roster members may have no class at all). Dedupe by roomCode for safety.
-    const invites = [...(user.classId ? findClassBattleInvites(user.classId) : []), ...findRosterBattleInvites(user.userId)];
+    // Class-targeted rooms (by each of the user's classIds — multi-class) +
+    // roster-targeted rooms (by userId — roster members may have no class at
+    // all). Dedupe by roomCode for safety.
+    const invites = [
+      ...user.classIds.flatMap((classId) => findClassBattleInvites(classId)),
+      ...findRosterBattleInvites(user.userId),
+    ];
     const seen = new Set<string>();
     const unique = invites.filter((i) => (seen.has(i.roomCode) ? false : seen.add(i.roomCode)));
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -210,31 +214,27 @@ io.on("connection", (socket: Socket) => {
   const { user } = (socket.data as ServerSocketData);
   console.log(`[realtime] connect   user=${user.userId} name=${user.name ?? "-"} role=${user.role} socket=${socket.id}`);
 
-  // Register presence with the ticket's classId (if available).
-  registerPresence({
-    userId: user.userId,
-    socketId: socket.id,
-    name: user.name,
-    image: user.image,
-    role: user.role,
-    schoolId: user.schoolId,
-    classId: user.classId ?? null,
-  });
-  // Fallback: resolve classId from DB if the ticket didn't carry it
-  // (older clients during rollout).
-  if (!user.classId) {
-    resolveClassId(user.userId)
-      .then((classId) => {
-        if (!classId) return;
-        registerPresence({
-          userId: user.userId,
-          socketId: socket.id,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-          schoolId: user.schoolId,
-          classId,
-        });
+  // Register presence with the ticket's classIds (if available).
+  const registerWithClasses = (classIds: string[]): void => {
+    registerPresence({
+      userId: user.userId,
+      socketId: socket.id,
+      name: user.name,
+      image: user.image,
+      role: user.role,
+      schoolId: user.schoolId,
+      classId: classIds.length > 0 ? classIds[0] : null,
+      classIds,
+    });
+  };
+  registerWithClasses(user.classIds);
+  // Fallback: resolve classIds from DB if the ticket didn't carry them
+  // (older signers during rollout).
+  if (user.classIds.length === 0) {
+    resolveClassIds(user.userId)
+      .then((classIds) => {
+        if (classIds.length === 0) return;
+        registerWithClasses(classIds);
       })
       .catch(() => {});
   }

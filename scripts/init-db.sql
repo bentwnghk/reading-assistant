@@ -249,6 +249,25 @@ ALTER TABLE users ADD COLUMN school_manually_removed BOOLEAN DEFAULT FALSE;
 -- Banned users are blocked from signing in (super-admin ban feature).
 ALTER TABLE users ADD COLUMN banned BOOLEAN DEFAULT FALSE;
 
+-- School-managed subject list (e.g. English, Mathematics)
+CREATE TABLE subjects (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  school_id TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (school_id, name)
+);
+
+-- School-managed form/grade list (e.g. Form 1..6, Grade 7..12)
+CREATE TABLE grades (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  school_id TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (school_id, name)
+);
+
 -- Classes table (belongs to a school)
 CREATE TABLE classes (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -256,6 +275,8 @@ CREATE TABLE classes (
   description TEXT DEFAULT '',
   teacher_id TEXT REFERENCES users(id) ON DELETE SET NULL,
   school_id TEXT REFERENCES schools(id) ON DELETE SET NULL,
+  subject_id TEXT REFERENCES subjects(id) ON DELETE SET NULL,
+  grade_id TEXT REFERENCES grades(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -263,21 +284,24 @@ CREATE TABLE classes (
 CREATE INDEX idx_classes_teacher_id ON classes(teacher_id);
 CREATE INDEX idx_classes_school_id ON classes(school_id);
 CREATE INDEX idx_classes_name ON classes(name);
+CREATE INDEX idx_classes_subject_id ON classes(subject_id);
+CREATE INDEX idx_classes_grade_id ON classes(grade_id);
 
 CREATE TRIGGER update_classes_updated_at
     BEFORE UPDATE ON classes
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Class memberships (one student can only be in one class)
+-- Class memberships (a student may belong to multiple classes)
 CREATE TABLE class_members (
   class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
   student_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  PRIMARY KEY (student_id)
+  PRIMARY KEY (class_id, student_id)
 );
 
 CREATE INDEX idx_class_members_class_id ON class_members(class_id);
+CREATE INDEX idx_class_members_student_id ON class_members(student_id);
 
 -- ─── Leaderboard tables ───────────────────────────────────────────────────────
 

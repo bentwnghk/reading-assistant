@@ -617,11 +617,30 @@ interface UserWithRole {
   email?: string | null;
   image?: string | null;
   role: UserRole;
+  /** First class (legacy compat) */
   classId?: string;
   className?: string;
+  /** All classes (multi-class capable) */
+  classIds?: string[];
+  classNames?: string[];
   schoolId?: string;
   schoolName?: string;
   createdAt?: number;
+}
+
+interface SubjectInfo {
+  id: string;
+  schoolId: string;
+  name: string;
+  createdAt: number;
+}
+
+interface GradeInfo {
+  id: string;
+  schoolId: string;
+  name: string;
+  sortOrder: number;
+  createdAt: number;
 }
 
 interface ClassInfo {
@@ -632,6 +651,10 @@ interface ClassInfo {
   teacherName?: string;
   schoolId?: string;
   schoolName?: string;
+  subjectId?: string;
+  subjectName?: string;
+  gradeId?: string;
+  gradeName?: string;
   studentCount?: number;
   createdAt: number;
 }

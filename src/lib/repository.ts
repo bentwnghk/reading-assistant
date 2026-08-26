@@ -114,14 +114,14 @@ async function getTeacherClassIds(teacherId: string): Promise<string[]> {
   }
 }
 
-async function getStudentClassId(studentId: string): Promise<string | null> {
+async function getStudentClassIds(studentId: string): Promise<string[]> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `SELECT class_id FROM class_members WHERE student_id = $1`,
+      `SELECT class_id FROM class_members WHERE student_id = $1 ORDER BY joined_at, class_id`,
       [studentId]
     )
-    return result.rows.length > 0 ? result.rows[0].class_id : null
+    return result.rows.map(r => r.class_id as string)
   } finally {
     client.release()
   }
@@ -132,13 +132,13 @@ function buildVisibilityClause(
   userId: string,
   schoolId: string | null | undefined,
   teacherClassIds: string[],
-  studentClassId: string | null,
+  studentClassIds: string[],
   startParam: number
 ): { sql: string; values: unknown[] } {
   if (role === "super-admin") {
     return { sql: "1=1", values: [] }
   }
-  
+
   if (role === "admin") {
     if (schoolId) {
       return {
@@ -148,51 +148,52 @@ function buildVisibilityClause(
     }
     return { sql: "tr.visibility = 'public'", values: [] }
   }
-  
+
   if (role === "teacher") {
     const conditions: string[] = ["tr.visibility = 'public'"]
     const values: unknown[] = []
     let paramIdx = startParam
-    
+
     if (schoolId) {
       conditions.push(`(tr.school_id = $${paramIdx} AND tr.visibility = 'school')`)
       values.push(schoolId)
       paramIdx++
     }
-    
+
     if (teacherClassIds.length > 0) {
       conditions.push(`(tr.created_by = $${paramIdx} AND tr.visibility = 'class')`)
       values.push(userId)
       paramIdx++
     }
-    
+
     return { sql: `(${conditions.join(" OR ")})`, values }
   }
-  
+
   if (role === "student") {
     const conditions: string[] = ["tr.visibility = 'public'"]
     const values: unknown[] = []
     let paramIdx = startParam
-    
+
     if (schoolId) {
       conditions.push(`(tr.school_id = $${paramIdx} AND tr.visibility = 'school')`)
       values.push(schoolId)
       paramIdx++
     }
-    
-    if (studentClassId) {
+
+    if (studentClassIds.length > 0) {
+      // Class-visible texts from ANY of the student's classes (multi-class).
       conditions.push(`
         (tr.visibility = 'class' AND tr.created_by IN (
-          SELECT teacher_id FROM classes WHERE id = $${paramIdx}
-        ) AND (tr.class_id IS NULL OR tr.class_id = $${paramIdx}))
+          SELECT teacher_id FROM classes WHERE id = ANY($${paramIdx})
+        ) AND (tr.class_id IS NULL OR tr.class_id = ANY($${paramIdx})))
       `)
-      values.push(studentClassId)
+      values.push(studentClassIds)
       paramIdx++
     }
-    
+
     return { sql: `(${conditions.join(" OR ")})`, values }
   }
-  
+
   return { sql: "tr.visibility = 'public'", values: [] }
 }
 
@@ -204,9 +205,9 @@ export async function getRepositoryTexts(
   const client = await getClient()
   try {
     const teacherClassIds = role === 'teacher' ? await getTeacherClassIds(userId) : []
-    const studentClassId = role === 'student' ? await getStudentClassId(userId) : null
-    
-    const { sql: vis, values } = buildVisibilityClause(role, userId, schoolId, teacherClassIds, studentClassId, 1)
+    const studentClassIds = role === 'student' ? await getStudentClassIds(userId) : []
+
+    const { sql: vis, values } = buildVisibilityClause(role, userId, schoolId, teacherClassIds, studentClassIds, 1)
     const result = await client.query(
       `SELECT
          tr.id,
@@ -266,9 +267,9 @@ export async function getRepositoryText(
   const client = await getClient()
   try {
     const teacherClassIds = role === 'teacher' ? await getTeacherClassIds(userId) : []
-    const studentClassId = role === 'student' ? await getStudentClassId(userId) : null
-    
-    const { sql: vis, values } = buildVisibilityClause(role, userId, schoolId, teacherClassIds, studentClassId, 2)
+    const studentClassIds = role === 'student' ? await getStudentClassIds(userId) : []
+
+    const { sql: vis, values } = buildVisibilityClause(role, userId, schoolId, teacherClassIds, studentClassIds, 2)
     const result = await client.query(
       `SELECT
          tr.*,

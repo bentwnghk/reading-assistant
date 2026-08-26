@@ -28,6 +28,8 @@ export interface UserWithRole {
   role: UserRole
   classId?: string
   className?: string
+  classIds?: string[]
+  classNames?: string[]
   taughtClassIds?: string[]
   taughtClassNames?: string[]
   schoolId?: string
@@ -42,6 +44,25 @@ export interface UserWithRole {
   createdAt?: number
 }
 
+// Aggregates a student's class memberships into arrays (multi-class capable)
+// without fan-out: one output row per user. Also exposes the first membership
+// as legacy singular classId/className for backward compatibility.
+const CLASS_MEMBERSHIP_JOIN = `
+  LEFT JOIN LATERAL (
+    SELECT
+      COALESCE(json_agg(cm.class_id ORDER BY cm.joined_at, cm.class_id), '[]'::json) AS class_ids,
+      COALESCE(json_agg(c.name ORDER BY cm.joined_at, cm.class_id), '[]'::json) AS class_names
+    FROM class_members cm
+    JOIN classes c ON c.id = cm.class_id
+    WHERE cm.student_id = u.id
+  ) m ON TRUE`
+
+const CLASS_MEMBERSHIP_SELECT = `
+  m.class_ids AS "classIds",
+  m.class_names AS "classNames",
+  m.class_ids->>0 AS "classId",
+  m.class_names->>0 AS "className"`
+
 export interface ClassInfo {
   id: string
   name: string
@@ -50,6 +71,10 @@ export interface ClassInfo {
   teacherName?: string
   schoolId?: string
   schoolName?: string
+  subjectId?: string
+  subjectName?: string
+  gradeId?: string
+  gradeName?: string
   studentCount?: number
   createdAt: number
 }
@@ -649,8 +674,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       `SELECT 
         u.id, u.name, u.email, u.image, u."createdAt",
         COALESCE(ur.role, 'student') as role,
-        cm.class_id as "classId",
-        c.name as "className",
+        ${CLASS_MEMBERSHIP_SELECT},
         u.school_id as "schoolId",
         s.name as "schoolName",
         u.school_access_ends_at as "schoolAccessEndsAt",
@@ -692,12 +716,11 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
         ) as "taughtClassNames"
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
-       LEFT JOIN class_members cm ON u.id = cm.student_id
-       LEFT JOIN classes c ON cm.class_id = c.id
+       ${CLASS_MEMBERSHIP_JOIN}
        LEFT JOIN schools s ON u.school_id = s.id
        LEFT JOIN user_settings us ON u.id = us.user_id
        ORDER BY u."createdAt" DESC`
-     )
+      )
     
     return result.rows.map(row => ({
       id: row.id,
@@ -707,6 +730,8 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       role: row.role as UserRole,
       classId: row.classId,
       className: row.className,
+      classIds: row.classIds || [],
+      classNames: row.classNames || [],
       taughtClassIds: row.taughtClassIds || [],
       taughtClassNames: row.taughtClassNames || [],
       schoolId: row.schoolId,
@@ -854,14 +879,21 @@ export async function assignUserSchool(userId: string, schoolId: string | null):
   }
 }
 
-export async function createClass(name: string, description: string, teacherId?: string, schoolId?: string): Promise<ClassInfo | null> {
+export async function createClass(
+  name: string,
+  description: string,
+  teacherId?: string,
+  schoolId?: string,
+  subjectId?: string,
+  gradeId?: string
+): Promise<ClassInfo | null> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `INSERT INTO classes (name, description, teacher_id, school_id) 
-       VALUES ($1, $2, $3, $4) 
-       RETURNING id, name, description, teacher_id, school_id, created_at`,
-      [name, description, teacherId || null, schoolId || null]
+      `INSERT INTO classes (name, description, teacher_id, school_id, subject_id, grade_id) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
+       RETURNING id, name, description, teacher_id, school_id, subject_id, grade_id, created_at`,
+      [name, description, teacherId || null, schoolId || null, subjectId || null, gradeId || null]
     )
     
     const row = result.rows[0]
@@ -871,6 +903,8 @@ export async function createClass(name: string, description: string, teacherId?:
       description: row.description,
       teacherId: row.teacher_id,
       schoolId: row.school_id,
+      subjectId: row.subject_id || undefined,
+      gradeId: row.grade_id || undefined,
       createdAt: new Date(row.created_at).getTime(),
     }
   } catch {
@@ -880,12 +914,20 @@ export async function createClass(name: string, description: string, teacherId?:
   }
 }
 
-export async function updateClass(classId: string, name: string, description: string, teacherId?: string, schoolId?: string): Promise<boolean> {
+export async function updateClass(
+  classId: string,
+  name: string,
+  description: string,
+  teacherId?: string,
+  schoolId?: string,
+  subjectId?: string,
+  gradeId?: string
+): Promise<boolean> {
   const client = await getClient()
   try {
     const result = await client.query(
-      `UPDATE classes SET name = $1, description = $2, teacher_id = $3, school_id = $4 WHERE id = $5`,
-      [name, description, teacherId || null, schoolId || null, classId]
+      `UPDATE classes SET name = $1, description = $2, teacher_id = $3, school_id = $4, subject_id = $5, grade_id = $6 WHERE id = $7`,
+      [name, description, teacherId || null, schoolId || null, subjectId || null, gradeId || null, classId]
     )
     return (result.rowCount ?? 0) > 0
   } finally {
@@ -905,13 +947,17 @@ export async function deleteClass(classId: string): Promise<boolean> {
 
 const CLASS_SELECT = `
   SELECT 
-    c.id, c.name, c.description, c.teacher_id, c.school_id, c.created_at,
+    c.id, c.name, c.description, c.teacher_id, c.school_id, c.subject_id, c.grade_id, c.created_at,
     u.name as teacher_name,
     s.name as school_name,
+    sub.name as subject_name,
+    g.name as grade_name,
     (SELECT COUNT(*) FROM class_members WHERE class_id = c.id) as student_count
   FROM classes c
   LEFT JOIN users u ON c.teacher_id = u.id
   LEFT JOIN schools s ON c.school_id = s.id
+  LEFT JOIN subjects sub ON c.subject_id = sub.id
+  LEFT JOIN grades g ON c.grade_id = g.id
 `
 
 function mapClassRow(row: Record<string, unknown>): ClassInfo {
@@ -923,6 +969,10 @@ function mapClassRow(row: Record<string, unknown>): ClassInfo {
     teacherName: row.teacher_name as string | undefined,
     schoolId: row.school_id as string | undefined,
     schoolName: row.school_name as string | undefined,
+    subjectId: (row.subject_id as string | null) || undefined,
+    subjectName: (row.subject_name as string | null) || undefined,
+    gradeId: (row.grade_id as string | null) || undefined,
+    gradeName: (row.grade_name as string | null) || undefined,
     studentCount: parseInt(row.student_count as string) || 0,
     createdAt: new Date(row.created_at as string).getTime(),
   }
@@ -963,6 +1013,23 @@ export async function getClassesForTeacher(teacherId: string): Promise<ClassInfo
        WHERE c.teacher_id = $1
        ORDER BY c.created_at DESC`,
       [teacherId]
+    )
+    return result.rows.map(mapClassRow)
+  } finally {
+    client.release()
+  }
+}
+
+/** All classes a student belongs to (multi-class capable) */
+export async function getClassesForStudent(studentId: string): Promise<ClassInfo[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `${CLASS_SELECT}
+       JOIN class_members cm ON cm.class_id = c.id
+       WHERE cm.student_id = $1
+       ORDER BY cm.joined_at, c.id`,
+      [studentId]
     )
     return result.rows.map(mapClassRow)
   } finally {
@@ -1036,8 +1103,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
           us.settings->>'mode' = 'proxy'
           AND COALESCE(us.settings->>'accessPassword', '') <> ''
         ) as "hasAccessPassword",
-        cm.class_id as "classId",
-        c.name as "className",
+        ${CLASS_MEMBERSHIP_SELECT},
         (
           SELECT COALESCE(json_agg(c2.id), '[]'::json)
           FROM classes c2
@@ -1052,8 +1118,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN schools s ON u.school_id = s.id
        LEFT JOIN user_settings us ON u.id = us.user_id
-       LEFT JOIN class_members cm ON u.id = cm.student_id
-       LEFT JOIN classes c ON cm.class_id = c.id
+       ${CLASS_MEMBERSHIP_JOIN}
        WHERE u.school_id = $1
        ORDER BY u."createdAt" DESC`,
       [schoolId]
@@ -1075,6 +1140,8 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       banned: !!row.banned,
       classId: row.classId,
       className: row.className,
+      classIds: row.classIds || [],
+      classNames: row.classNames || [],
       taughtClassIds: row.taughtClassIds || [],
       taughtClassNames: row.taughtClassNames || [],
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
@@ -1137,12 +1204,13 @@ export async function getClassMembers(classId: string): Promise<ClassMember[]> {
   }
 }
 
+/** Adds a membership. Additive (a student may belong to multiple classes); idempotent. */
 export async function addStudentToClass(classId: string, studentId: string): Promise<boolean> {
   const client = await getClient()
   try {
     await client.query(
       `INSERT INTO class_members (class_id, student_id) VALUES ($1, $2)
-       ON CONFLICT (student_id) DO UPDATE SET class_id = $1`,
+       ON CONFLICT (class_id, student_id) DO UPDATE SET joined_at = NOW()`,
       [classId, studentId]
     )
     return true
@@ -1153,7 +1221,22 @@ export async function addStudentToClass(classId: string, studentId: string): Pro
   }
 }
 
-export async function removeStudentFromClass(studentId: string): Promise<boolean> {
+/** Removes the membership row for one (class, student) pair. */
+export async function removeStudentFromClass(classId: string, studentId: string): Promise<boolean> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      'DELETE FROM class_members WHERE class_id = $1 AND student_id = $2',
+      [classId, studentId]
+    )
+    return (result.rowCount ?? 0) > 0
+  } finally {
+    client.release()
+  }
+}
+
+/** Removes every class membership of a student. */
+export async function removeStudentFromAllClasses(studentId: string): Promise<boolean> {
   const client = await getClient()
   try {
     const result = await client.query(
@@ -1166,17 +1249,27 @@ export async function removeStudentFromClass(studentId: string): Promise<boolean
   }
 }
 
-export async function getStudentClassId(studentId: string): Promise<string | null> {
+/** All class ids a student belongs to (multi-class capable). */
+export async function getStudentClassIds(studentId: string): Promise<string[]> {
   const client = await getClient()
   try {
     const result = await client.query(
-      'SELECT class_id FROM class_members WHERE student_id = $1',
+      'SELECT class_id FROM class_members WHERE student_id = $1 ORDER BY joined_at, class_id',
       [studentId]
     )
-    return result.rows.length > 0 ? result.rows[0].class_id : null
+    return result.rows.map(row => row.class_id as string)
   } finally {
     client.release()
   }
+}
+
+/**
+ * Legacy single-class accessor: the student's first class (earliest joined).
+ * Prefer getStudentClassIds for new code.
+ */
+export async function getStudentClassId(studentId: string): Promise<string | null> {
+  const classIds = await getStudentClassIds(studentId)
+  return classIds.length > 0 ? classIds[0] : null
 }
 
 // Thin adapter: normalizes a snake_case DB row to the camelCase ProgressInput
@@ -1469,8 +1562,7 @@ export async function getUsersForAdmin(adminSchoolId: string): Promise<UserWithR
         COALESCE(ur.role, 'student') as role,
         u.school_id as "schoolId",
         s.name as "schoolName",
-        cm.class_id as "classId",
-        c.name as "className",
+        ${CLASS_MEMBERSHIP_SELECT},
         (
           SELECT COALESCE(json_agg(c2.id), '[]'::json)
           FROM classes c2
@@ -1484,8 +1576,7 @@ export async function getUsersForAdmin(adminSchoolId: string): Promise<UserWithR
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN schools s ON u.school_id = s.id
-       LEFT JOIN class_members cm ON u.id = cm.student_id
-       LEFT JOIN classes c ON cm.class_id = c.id
+       ${CLASS_MEMBERSHIP_JOIN}
        WHERE u.school_id = $1
        ORDER BY u."createdAt" DESC`,
       [adminSchoolId]
@@ -1500,6 +1591,8 @@ export async function getUsersForAdmin(adminSchoolId: string): Promise<UserWithR
       schoolName: row.schoolName,
       classId: row.classId,
       className: row.className,
+      classIds: row.classIds || [],
+      classNames: row.classNames || [],
       taughtClassIds: row.taughtClassIds || [],
       taughtClassNames: row.taughtClassNames || [],
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
@@ -1703,14 +1796,24 @@ export async function deleteUser(userId: string): Promise<boolean> {
   }
 }
 
+export interface ScopedStudentClass {
+  id: string
+  name: string
+  teacherId: string | null
+  teacherName: string | null
+}
+
 export interface ScopedStudent {
   id: string
   name: string | null
   email: string | null
+  /** First class (earliest joined) — legacy compat; prefer classes[] */
   classId: string | null
   className: string | null
   teacherId: string | null
   teacherName: string | null
+  /** All classes the student belongs to (multi-class capable) */
+  classes: ScopedStudentClass[]
   schoolId: string | null
   schoolName: string | null
 }
@@ -1757,15 +1860,20 @@ export async function getScopedStudents(actorId: string, actorRole: string, scho
   const client = await getClient()
   try {
     const params: unknown[] = [actorId]
-    let scopeCondition = ''
+    let outerScope = ''
+    let innerClassScope = ''
+    let requiresScopedClass = ''
     if (actorRole === 'teacher') {
-      scopeCondition = 'AND c.teacher_id = $1'
+      // Only aggregate the teacher's own classes and only return students
+      // that have at least one membership in them.
+      innerClassScope = 'AND c.teacher_id = $1'
+      requiresScopedClass = "AND cls.classes <> '[]'::json"
     } else if (actorRole === 'admin') {
-      scopeCondition = 'AND u.school_id IS NOT NULL AND u.school_id = (SELECT school_id FROM users WHERE id = $1)'
+      outerScope = 'AND u.school_id IS NOT NULL AND u.school_id = (SELECT school_id FROM users WHERE id = $1)'
     } else if (actorRole === 'super-admin') {
       if (schoolId) {
         params.push(schoolId)
-        scopeCondition = 'AND u.school_id = $2'
+        outerScope = 'AND u.school_id = $2'
       }
     } else {
       return []
@@ -1773,33 +1881,47 @@ export async function getScopedStudents(actorId: string, actorRole: string, scho
 
     const result = await client.query(
       `SELECT u.id, u.name, u.email,
-              c.id AS class_id, c.name AS class_name,
-              t.id AS teacher_id, t.name AS teacher_name,
+              cls.classes AS classes,
               sch.id AS school_id, sch.name AS school_name
        FROM users u
        LEFT JOIN user_roles ur ON ur.user_id = u.id
-       LEFT JOIN class_members cm ON cm.student_id = u.id
-       LEFT JOIN classes c ON c.id = cm.class_id
-       LEFT JOIN users t ON t.id = c.teacher_id
+       LEFT JOIN LATERAL (
+         SELECT COALESCE(json_agg(json_build_object(
+                  'id', c.id,
+                  'name', c.name,
+                  'teacherId', t.id,
+                  'teacherName', t.name
+                ) ORDER BY cm.joined_at, c.id), '[]'::json) AS classes
+         FROM class_members cm
+         JOIN classes c ON c.id = cm.class_id
+         LEFT JOIN users t ON t.id = c.teacher_id
+         WHERE cm.student_id = u.id ${innerClassScope}
+       ) cls ON TRUE
        LEFT JOIN schools sch ON sch.id = u.school_id
        WHERE COALESCE(ur.role, 'student') = 'student'
          AND u.id <> $1
          AND COALESCE(u.banned, FALSE) = FALSE
-         ${scopeCondition}
+         ${outerScope}
+         ${requiresScopedClass}
        ORDER BY u.name ASC`,
       params
     )
-    return result.rows.map((row: Record<string, string | null>) => ({
-      id: row.id ?? '',
-      name: row.name ?? null,
-      email: row.email ?? null,
-      classId: row.class_id ?? null,
-      className: row.class_name ?? null,
-      teacherId: row.teacher_id ?? null,
-      teacherName: row.teacher_name ?? null,
-      schoolId: row.school_id ?? null,
-      schoolName: row.school_name ?? null,
-    }))
+    return result.rows.map((row: Record<string, unknown>) => {
+      const classes = (row.classes as ScopedStudentClass[]) || []
+      const first = classes.length > 0 ? classes[0] : null
+      return {
+        id: (row.id as string) ?? '',
+        name: (row.name as string) ?? null,
+        email: (row.email as string) ?? null,
+        classId: first?.id ?? null,
+        className: first?.name ?? null,
+        teacherId: first?.teacherId ?? null,
+        teacherName: first?.teacherName ?? null,
+        classes,
+        schoolId: (row.school_id as string) ?? null,
+        schoolName: (row.school_name as string) ?? null,
+      }
+    })
   } catch (error) {
     console.error('Failed to get scoped students:', error)
     return []

@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,10 @@ type TextVisibility = 'class' | 'school' | 'public'
 interface TeacherClass {
   id: string;
   name: string;
+  subjectName?: string;
+  gradeName?: string;
+  teacherName?: string;
+  schoolName?: string;
 }
 
 function readFileAsDataURL(file: File): Promise<string> {
@@ -564,25 +569,16 @@ function RepositoryUploadDialog({
                     <span className="text-sm">{t("reading.repository.loadingClasses")}</span>
                   </div>
                 ) : (
-                  <Select
-                    value={selectedClassId}
-                    onValueChange={setSelectedClassId}
+                  <ClassCombobox
+                    classes={teacherClasses}
+                    value={selectedClassId === "all" ? null : selectedClassId}
+                    onChange={(v) => setSelectedClassId(v ?? "all")}
+                    placeholder={t("reading.repository.selectClass")}
+                    emptyLabel={t("userManagement.classes.noClasses")}
+                    allowAll
+                    allLabel={t("reading.repository.allMyClasses")}
                     disabled={isProcessing}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        {t("reading.repository.allMyClasses")}
-                      </SelectItem>
-                      {teacherClasses.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 )}
                 <p className="text-xs text-muted-foreground mt-1.5">
                   {selectedClassId === "all"

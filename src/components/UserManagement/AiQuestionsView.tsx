@@ -6,6 +6,7 @@ import dynamic from "next/dynamic"
 import { Loader2, Search, ChevronDown, ChevronRight, ChevronLeft, MessageCircle, Users, FileText, ArrowUpDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { ClassCombobox } from "@/components/Internal/ClassCombobox"
 import {
   Select,
   SelectContent,
@@ -346,21 +347,17 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
             </SelectContent>
           </Select>
         )}
-        <Select value={selectedClassId} onValueChange={setSelectedClassId}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder={t("userManagement.aiQuestions.selectClass")} />
-          </SelectTrigger>
-          <SelectContent>
-            {(isSuperAdmin || isAdmin) && (
-              <SelectItem value="all">{t("userManagement.aiQuestions.allClasses")}</SelectItem>
-            )}
-            {filteredClasses.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-56">
+          <ClassCombobox
+            classes={filteredClasses}
+            value={selectedClassId === "all" ? null : selectedClassId}
+            onChange={(v) => setSelectedClassId(v ?? "all")}
+            placeholder={t("userManagement.aiQuestions.selectClass")}
+            emptyLabel={t("userManagement.classes.noClasses")}
+            allowAll={isSuperAdmin || isAdmin}
+            allLabel={t("userManagement.aiQuestions.allClasses")}
+          />
+        </div>
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

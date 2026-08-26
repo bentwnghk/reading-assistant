@@ -344,9 +344,8 @@ export async function POST(request: Request) {
       await client.query(
         `INSERT INTO class_members (class_id, student_id, joined_at)
          VALUES ($1, $2, $3)
-         ON CONFLICT (student_id) DO UPDATE
-           SET class_id  = EXCLUDED.class_id,
-               joined_at = EXCLUDED.joined_at`,
+         ON CONFLICT (class_id, student_id) DO UPDATE
+           SET joined_at = EXCLUDED.joined_at`,
         [m.classId, m.studentId, ts]
       )
       membershipsUpserted++
