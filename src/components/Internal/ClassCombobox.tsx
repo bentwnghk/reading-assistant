@@ -59,6 +59,19 @@ export function formatClassLabel(c: { name: string; subjectName?: string; gradeN
   return parts.join(" · ")
 }
 
+/**
+ * Word-aware search filter for cmdk. The default filter scores by character
+ * subsequence, so "gp4" matches "gp1 english s4" (g,p from "gp1" + 4 from
+ * "s4"). Require every whitespace-separated search token to appear as a
+ * substring of the item value instead.
+ */
+function commandFilter(value: string, search: string): number {
+  const tokens = search.toLowerCase().trim().split(/\s+/).filter(Boolean)
+  if (tokens.length === 0) return 1
+  const v = value.toLowerCase()
+  return tokens.every(t => v.includes(t)) ? 1 : 0
+}
+
 function classLabel(c: ClassComboboxClass): string {
   return formatClassLabel(c)
 }
@@ -228,7 +241,7 @@ export function ClassCombobox({
         // content ("isolation"), breaking mouse/trackpad scrolling of the list.
         onWheelCapture={(e) => e.stopPropagation()}
       >
-        <Command>
+        <Command filter={commandFilter}>
           <CommandInput placeholder={t("classCombobox.search")} />
           <CommandClassList
             options={options}
@@ -357,7 +370,7 @@ export function ClassMultiSelect({
         // content ("isolation"), breaking mouse/trackpad scrolling of the list.
         onWheelCapture={(e) => e.stopPropagation()}
       >
-        <Command>
+        <Command filter={commandFilter}>
           <CommandInput placeholder={t("classCombobox.search")} />
           <CommandClassList
             options={options}
@@ -476,7 +489,7 @@ export function ClassBattleTargetCombobox({
         // content ("isolation"), breaking mouse/trackpad scrolling of the list.
         onWheelCapture={(e) => e.stopPropagation()}
       >
-        <Command>
+        <Command filter={commandFilter}>
           <CommandInput placeholder={searchPlaceholder ?? t("classCombobox.search")} />
           <CommandClassList
             options={options}
