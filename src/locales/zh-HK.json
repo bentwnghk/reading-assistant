@@ -3403,6 +3403,7 @@
       "grammarGame": "語法遊戲",
       "grammarGameAccuracy": "語法遊戲正確率",
       "date": "最後更新",
+      "partialLoadFailed": "部分學生資料載入失敗，請重新整理再試",
       "dateRange": {
         "7days": "最近 7 天",
         "30days": "最近 30 天",

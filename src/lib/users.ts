@@ -1329,6 +1329,127 @@ function calculateProgress(row: {
   })
 }
 
+/**
+ * Column list for the student-session LIST queries (getStudentSessions /
+ * getStudentSessionsForClass). Deliberately avoids transferring heavy JSONB
+ * payloads (extracted_text, glossary, adapted_text, mind_map,
+ * analyzed_sentences, highlighted_words, collocations, pre_reading): the list
+ * endpoints only map presence flags / counts, and the Student Data tab fires
+ * one request per student in parallel — transferring full payloads for every
+ * session saturates the pg pool and OOMs the server (502s from the proxy).
+ * Full payloads are served lazily by /api/sessions/[id]/detail.
+ */
+const STUDENT_SESSION_SELECT = `
+  rs.id, rs.user_id, rs.student_age,
+  COALESCE(NULLIF(rs.doc_title, ''), left(rs.extracted_text, 50), 'Untitled') AS display_title,
+  rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+  COALESCE(rs.tests_completed, 0) as tests_completed,
+  COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
+  COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
+  rs.grammar_quiz_score, rs.grammar_quiz_completed,
+  COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
+  rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
+  rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
+  COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
+  COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
+  rs.summary IS NOT NULL AND rs.summary != '' AS has_summary,
+  rs.mind_map IS NOT NULL AND rs.mind_map != '' AS has_mind_map,
+  rs.adapted_text IS NOT NULL AND rs.adapted_text != '' AS has_adapted_text,
+  rs.extracted_text IS NOT NULL AND rs.extracted_text != '' AS has_extracted_text,
+  rs.pre_reading IS NOT NULL AS has_pre_reading,
+  rs.student_prediction,
+  rs.visualization_generated_at,
+  rs.analyzed_sentences IS NOT NULL AND rs.analyzed_sentences != '{}'::jsonb AS has_analyzed_sentences,
+  CASE WHEN jsonb_typeof(rs.highlighted_words) = 'array' THEN jsonb_array_length(rs.highlighted_words) ELSE 0 END AS highlighted_words_count,
+  CASE WHEN jsonb_typeof(rs.glossary) = 'array' THEN jsonb_array_length(rs.glossary) ELSE 0 END AS glossary_count,
+  CASE WHEN jsonb_typeof(rs.collocations) = 'array' THEN jsonb_array_length(rs.collocations) ELSE 0 END AS collocations_count,
+  rs.created_at, rs.updated_at,
+  u.name as user_name, u.email as user_email`
+
+/**
+ * Progress adapter for STUDENT_SESSION_SELECT rows: feeds the shared
+ * calculateProgress from presence flags / counts instead of full payloads.
+ * Fakes non-empty containers where the step only tests length (> 0).
+ */
+function calculateProgressFromFlags(row: {
+  has_extracted_text?: boolean
+  has_pre_reading?: boolean
+  student_prediction?: string
+  has_summary?: boolean
+  has_mind_map?: boolean
+  visualization_generated_at?: number | string
+  has_adapted_text?: boolean
+  has_analyzed_sentences?: boolean
+  highlighted_words_count?: number
+  glossary_count?: number
+  collocations_count?: number
+  spelling_game_best_score?: number
+  vocabulary_quiz_score?: number
+  test_completed?: boolean
+  grammar_quiz_completed?: boolean
+  grammar_quiz_score?: number
+  grammar_scramble_high_score?: number
+  grammar_workshop_high_score?: number
+  grammar_surgery_high_score?: number
+  grammar_roulette_high_score?: number
+  grammar_duel_high_score?: number
+}): number {
+  return sharedCalculateProgress({
+    extractedText: !!row.has_extracted_text,
+    preReading: !!row.has_pre_reading,
+    studentPrediction: row.student_prediction || '',
+    summary: row.has_summary ? 'y' : '',
+    mindMap: row.has_mind_map ? 'y' : '',
+    visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
+    adaptedText: row.has_adapted_text ? 'y' : '',
+    analyzedSentences: row.has_analyzed_sentences ? { _: 1 } : null,
+    highlightedWords: (row.highlighted_words_count || 0) > 0 ? ['y'] : [],
+    glossary: (row.glossary_count || 0) > 0 ? ['y'] : [],
+    collocations: (row.collocations_count || 0) > 0 ? ['y'] : [],
+    spellingGameBestScore: row.spelling_game_best_score,
+    vocabularyQuizScore: row.vocabulary_quiz_score,
+    testCompleted: row.test_completed,
+    grammarScrambleHighScore: row.grammar_scramble_high_score,
+    grammarWorkshopHighScore: row.grammar_workshop_high_score,
+    grammarSurgeryHighScore: row.grammar_surgery_high_score,
+    grammarRouletteHighScore: row.grammar_roulette_high_score,
+    grammarDuelHighScore: row.grammar_duel_high_score,
+    grammarQuizCompleted: row.grammar_quiz_completed,
+    grammarQuizScore: row.grammar_quiz_score,
+  })
+}
+
+/** Maps a STUDENT_SESSION_SELECT row to the list API shape. */
+function mapStudentSessionRow(row: any): StudentSessionData {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    userName: row.user_name,
+    userEmail: row.user_email,
+    docTitle: row.display_title || 'Untitled',
+    studentAge: row.student_age,
+    testScore: row.test_score,
+    testCompleted: row.test_completed,
+    vocabularyQuizScore: row.vocabulary_quiz_score,
+    spellingGameBestScore: row.spelling_game_best_score,
+    spellingGameAccuracy: row.spelling_game_accuracy || 0,
+    grammarQuizScore: row.grammar_quiz_score || 0,
+    grammarQuizCompleted: !!row.grammar_quiz_completed,
+    grammarGameBestScore: Math.max(
+      row.grammar_scramble_high_score || 0,
+      row.grammar_workshop_high_score || 0,
+      row.grammar_surgery_high_score || 0,
+      row.grammar_roulette_high_score || 0,
+      row.grammar_duel_high_score || 0,
+    ),
+    grammarGameAccuracy: row.grammar_game_accuracy || 0,
+    glossaryCount: row.glossary_count ?? 0,
+    progress: calculateProgressFromFlags(row),
+    createdAt: new Date(row.created_at).getTime(),
+    updatedAt: new Date(row.updated_at).getTime(),
+  }
+}
+
 export async function getStudentSessionsForClass(classId: string, viewer?: SessionViewer): Promise<StudentSessionData[]> {
   const client = await getClient()
   try {
@@ -1336,25 +1457,7 @@ export async function getStudentSessionsForClass(classId: string, viewer?: Sessi
     const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
     const result = await client.query(
       `SELECT
-        rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
-        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        COALESCE(rs.tests_completed, 0) as tests_completed,
-        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
-        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
-        rs.grammar_quiz_score, rs.grammar_quiz_completed,
-        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
-        rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
-        rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
-        rs.grammar_game_accuracy,
-        rs.spelling_game_accuracy,
-        rs.pre_reading, rs.student_prediction, rs.collocations,
-        rs.pre_reading IS NOT NULL as has_pre_reading,
-        rs.pre_reading_generated_at,
-        rs.collocations_generated_at,
-        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
-        rs.visualization_generated_at,
-        rs.created_at, rs.updated_at,
-        u.name as user_name, u.email as user_email
+        ${STUDENT_SESSION_SELECT}
        FROM reading_sessions rs
        JOIN class_members cm ON rs.user_id = cm.student_id
        JOIN users u ON rs.user_id = u.id
@@ -1364,36 +1467,8 @@ export async function getStudentSessionsForClass(classId: string, viewer?: Sessi
        ORDER BY rs.updated_at DESC`,
       tv ? [classId, tv.id] : [classId]
     )
-    
-    return result.rows.map(row => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: row.user_name,
-      userEmail: row.user_email,
-      docTitle: row.doc_title || row.extracted_text?.slice(0, 50) || 'Untitled',
-      studentAge: row.student_age,
-      summary: row.summary,
-      testScore: row.test_score,
-      testCompleted: row.test_completed,
-      vocabularyQuizScore: row.vocabulary_quiz_score,
-      spellingGameBestScore: row.spelling_game_best_score,
-      spellingGameAccuracy: row.spelling_game_accuracy || 0,
-      grammarQuizScore: row.grammar_quiz_score || 0,
-      grammarQuizCompleted: !!row.grammar_quiz_completed,
-      grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
-      grammarGameBestScore: Math.max(
-        row.grammar_scramble_high_score || 0,
-        row.grammar_workshop_high_score || 0,
-        row.grammar_surgery_high_score || 0,
-        row.grammar_roulette_high_score || 0,
-        row.grammar_duel_high_score || 0,
-      ),
-      grammarGameAccuracy: row.grammar_game_accuracy || 0,
-      glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
-      progress: calculateProgress(row),
-      createdAt: new Date(row.created_at).getTime(),
-      updatedAt: new Date(row.updated_at).getTime(),
-    }))
+
+    return result.rows.map(mapStudentSessionRow)
   } finally {
     client.release()
   }
@@ -1406,25 +1481,7 @@ export async function getStudentSessions(studentId: string, viewer?: SessionView
     const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
     const result = await client.query(
       `SELECT
-        rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
-        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        COALESCE(rs.tests_completed, 0) as tests_completed,
-        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
-        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
-        rs.grammar_quiz_score, rs.grammar_quiz_completed,
-        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
-        rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
-        rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
-        rs.grammar_game_accuracy,
-        rs.spelling_game_accuracy,
-        rs.pre_reading, rs.student_prediction, rs.collocations,
-        rs.pre_reading IS NOT NULL as has_pre_reading,
-        rs.pre_reading_generated_at,
-        rs.collocations_generated_at,
-        rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.mind_map,
-        rs.visualization_generated_at,
-        rs.created_at, rs.updated_at,
-        u.name as user_name, u.email as user_email
+        ${STUDENT_SESSION_SELECT}
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
        WHERE rs.user_id = $1
@@ -1432,36 +1489,8 @@ export async function getStudentSessions(studentId: string, viewer?: SessionView
        ORDER BY rs.updated_at DESC`,
       tv ? [studentId, tv.id] : [studentId]
     )
-    
-    return result.rows.map(row => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: row.user_name,
-      userEmail: row.user_email,
-      docTitle: row.doc_title || row.extracted_text?.slice(0, 50) || 'Untitled',
-      studentAge: row.student_age,
-      summary: row.summary,
-      testScore: row.test_score,
-      testCompleted: row.test_completed,
-      vocabularyQuizScore: row.vocabulary_quiz_score,
-      spellingGameBestScore: row.spelling_game_best_score,
-      spellingGameAccuracy: row.spelling_game_accuracy || 0,
-      grammarQuizScore: row.grammar_quiz_score || 0,
-      grammarQuizCompleted: !!row.grammar_quiz_completed,
-      grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
-      grammarGameBestScore: Math.max(
-        row.grammar_scramble_high_score || 0,
-        row.grammar_workshop_high_score || 0,
-        row.grammar_surgery_high_score || 0,
-        row.grammar_roulette_high_score || 0,
-        row.grammar_duel_high_score || 0,
-      ),
-      grammarGameAccuracy: row.grammar_game_accuracy || 0,
-      glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
-      progress: calculateProgress(row),
-      createdAt: new Date(row.created_at).getTime(),
-      updatedAt: new Date(row.updated_at).getTime(),
-    }))
+
+    return result.rows.map(mapStudentSessionRow)
   } finally {
     client.release()
   }

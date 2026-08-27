@@ -86,6 +86,15 @@ interface SessionWithSchool extends StudentSessionData {
   schoolName?: string
 }
 
+/**
+ * Batches per-student session fetches. The Student Data tab fans out one
+ * request per student (an "all classes" load can mean dozens at once); each
+ * request costs a NextAuth DB session lookup + pool client, so an unbounded
+ * parallel burst saturates the pg pool and 502s the entire load. Bounded
+ * batches keep the initial auto-load ("all") viable.
+ */
+const STUDENT_FETCH_BATCH = 5
+
 export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -182,6 +191,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
       const attemptsMap: Record<string, number> = {}
       // A student may belong to multiple classes — fetch their sessions once.
       const seenStudents = new Set<string>()
+      let failedStudentFetches = 0
 
       for (const cls of classesToLoad) {
         const response = await fetch(`/api/classes/${cls.id}/members`)
@@ -191,33 +201,44 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         const members = (allMembers as Array<{ studentId: string }>).filter(
           (m) => !seenStudents.has(m.studentId)
         )
-        const studentDataPromises = members.map(async (member: { studentId: string }) => {
-          const res = await fetch(`/api/classes/${cls.id}/students/${member.studentId}/sessions`)
-          if (res.ok) {
-            const data = await res.json()
-            const studentSessions: StudentSessionData[] = data.sessions ?? data
-            return {
-              sessions: studentSessions.map((s: StudentSessionData) => ({
-                ...s,
-                schoolName: cls.schoolName
-              })),
-              spellingReviewCount: data.spellingReviewCount ?? 0,
-              userId: member.studentId,
-            }
-          }
-          return { sessions: [] as SessionWithSchool[], spellingReviewCount: 0, userId: member.studentId }
-        })
 
-        const studentResults = await Promise.all(studentDataPromises)
-        for (const r of studentResults) {
-          seenStudents.add(r.userId)
-          allSessions.push(...r.sessions)
-          attemptsMap[r.userId] = r.spellingReviewCount
+        // Bounded batches: avoid overwhelming the server connection pool when
+        // a class (or an "all classes" load) has many students.
+        for (let i = 0; i < members.length; i += STUDENT_FETCH_BATCH) {
+          const batch = members.slice(i, i + STUDENT_FETCH_BATCH)
+          const studentResults = await Promise.all(batch.map(async (member: { studentId: string }) => {
+            const res = await fetch(`/api/classes/${cls.id}/students/${member.studentId}/sessions`)
+            if (res.ok) {
+              const data = await res.json()
+              const studentSessions: StudentSessionData[] = data.sessions ?? data
+              return {
+                ok: true,
+                sessions: studentSessions.map((s: StudentSessionData) => ({
+                  ...s,
+                  schoolName: cls.schoolName
+                })),
+                spellingReviewCount: data.spellingReviewCount ?? 0,
+                userId: member.studentId,
+              }
+            }
+            return { ok: false, sessions: [] as SessionWithSchool[], spellingReviewCount: 0, userId: member.studentId }
+          }))
+
+          for (const r of studentResults) {
+            if (!r.ok) failedStudentFetches++
+            seenStudents.add(r.userId)
+            allSessions.push(...r.sessions)
+            attemptsMap[r.userId] = r.spellingReviewCount
+          }
         }
       }
 
       setSessions(allSessions)
       setSpellingAttemptsByUser(attemptsMap)
+      // A failed per-student fetch otherwise looks like "no data" — surface it.
+      if (failedStudentFetches > 0) {
+        toast.error(t("userManagement.studentData.partialLoadFailed"))
+      }
     } catch (error) {
       console.error("Failed to load sessions:", error)
       toast.error(t("userManagement.loadFailed"))

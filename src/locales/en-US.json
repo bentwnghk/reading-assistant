@@ -3377,6 +3377,7 @@
       "grammarGame": "Grammar Game",
       "grammarGameAccuracy": "Grammar Game Accuracy",
       "date": "Last Update",
+      "partialLoadFailed": "Some students' data failed to load — try refreshing",
       "dateRange": {
         "7days": "Last 7 days",
         "30days": "Last 30 days",
