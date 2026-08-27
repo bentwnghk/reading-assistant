@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { getStudentSessionDetail, canAccessStudent } from "@/lib/users"
+import { getStudentSessionDetail, canAccessStudent, canViewStudentSession } from "@/lib/users"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
@@ -23,7 +23,9 @@ export async function GET(
       return NextResponse.json({ error: "Session not found" }, { status: 404 })
     }
 
-    const allowed = await canAccessStudent(session.user.id, role, detail.userId)
+    const allowed = role === "teacher"
+      ? await canViewStudentSession(session.user.id, role, params.id)
+      : await canAccessStudent(session.user.id, role, detail.userId)
     if (!allowed) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }

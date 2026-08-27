@@ -81,6 +81,49 @@ export interface ClassInfo {
   createdAt: number
 }
 
+/** Viewer context used to apply teacher session/question visibility rules. */
+export interface SessionViewer {
+  id: string
+  role: string
+}
+
+/**
+ * SQL fragment: true when `viewerParam` teaches an English-subject class that
+ * the given student belongs to.
+ */
+function isEnglishClassTeacherSql(studentExpr: string, viewerParam: string): string {
+  return `EXISTS (
+    SELECT 1 FROM class_members cmap
+    JOIN classes cmapc ON cmapc.id = cmap.class_id
+    LEFT JOIN subjects cmapsub ON cmapsub.id = cmapc.subject_id
+    WHERE cmap.student_id = ${studentExpr}
+      AND lower(COALESCE(cmapsub.name, '')) LIKE '%english%'
+      AND cmapc.teacher_id = ${viewerParam}
+  )`
+}
+
+/**
+ * SQL fragment: reading-session visibility for a teacher viewer.
+ * - Assignment working-copy sessions: visible only to the assigning teacher.
+ * - Every other session: visible only to teachers of an English-subject class
+ *   the session owner belongs to.
+ */
+export function teacherSessionVisibilitySql(sessionAlias: string, viewerParam: string): string {
+  return `(
+    (${sessionAlias}.assignment_id IS NOT NULL AND EXISTS (
+      SELECT 1 FROM assignments avis
+      WHERE avis.id = ${sessionAlias}.assignment_id AND avis.teacher_id = ${viewerParam}
+    ))
+    OR
+    (${sessionAlias}.assignment_id IS NULL AND ${isEnglishClassTeacherSql(`${sessionAlias}.user_id`, viewerParam)})
+  )`
+}
+
+/** Returns the viewer when it is a teacher (teachers get visibility filtering; admins do not). */
+function teacherViewer(viewer?: SessionViewer): SessionViewer | undefined {
+  return viewer?.role === 'teacher' ? viewer : undefined
+}
+
 export interface ClassMember {
   studentId: string
   studentName?: string
@@ -179,11 +222,82 @@ export interface TeacherSessionData {
   collocationsGeneratedAt: number
 }
 
-export async function getTeacherDashboardData(classId: string): Promise<TeacherSessionData[]> {
+/** Maps a teacher-dashboard query row (shared by all dashboard data queries). */
+function mapTeacherSessionRow(row: any): TeacherSessionData {
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    userName: row.user_name as string | undefined,
+    userEmail: row.user_email as string | undefined,
+    docTitle: row.doc_title || 'Untitled',
+    studentAge: row.student_age || 13,
+    summary: !!row.summary,
+    adaptedText: !!row.adapted_text,
+    simplifiedText: !!row.simplified_text,
+    mindMap: !!row.mind_map,
+    testScore: row.test_score || null,
+    testCompleted: !!row.test_completed,
+    vocabularyQuizScore: row.vocabulary_quiz_score || null,
+    spellingGameBestScore: row.spelling_game_best_score || null,
+    spellingGameAccuracy: row.spelling_game_accuracy || null,
+    testsCompleted: row.tests_completed ?? 0,
+    vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
+    spellingGamesCompleted: row.spelling_games_completed ?? 0,
+    grammarQuizScore: row.grammar_quiz_score || null,
+    grammarQuizCompleted: !!row.grammar_quiz_completed,
+    grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
+    grammarGameBestScore: row.grammar_game_best_score || null,
+    grammarGameAccuracy: row.grammar_game_accuracy || null,
+    grammarGamesCompleted: row.grammar_games_completed ?? 0,
+    grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
+    glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
+    sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
+    sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
+      ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
+          .map((e) => Number(e?.createdAt) || 0)
+      : [],
+    tutorQuestionCount: Array.isArray(row.chat_history)
+      ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
+      : 0,
+    tutorQuestionTimestamps: Array.isArray(row.chat_history)
+      ? row.chat_history
+          .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
+          .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
+      : [],
+    flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
+    flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
+      ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
+      : [],
+    grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
+    grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
+    grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
+    progress: calculateProgress(row),
+    createdAt: new Date(row.created_at as string).getTime(),
+    updatedAt: new Date(row.updated_at as string).getTime(),
+    summaryGeneratedAt: Number(row.summary_generated_at) || 0,
+    mindMapGeneratedAt: Number(row.mind_map_generated_at) || 0,
+    adaptedTextGeneratedAt: Number(row.adapted_text_generated_at) || 0,
+    simplifiedTextGeneratedAt: Number(row.simplified_text_generated_at) || 0,
+    glossaryGeneratedAt: Number(row.glossary_generated_at) || 0,
+    spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
+    vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
+    readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
+    visualization: !!row.visualization,
+    visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
+    preReading: !!row.has_pre_reading,
+    preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
+    collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
+    collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
+  }
+}
+
+export async function getTeacherDashboardData(classId: string, viewer?: SessionViewer): Promise<TeacherSessionData[]> {
   const client = await getClient()
   try {
+    const tv = teacherViewer(viewer)
+    const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
     const result = await client.query(
-      `SELECT 
+      `SELECT
         rs.id, rs.user_id, rs.doc_title,
         rs.summary IS NOT NULL AND rs.summary != '' as summary,
         rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
@@ -221,75 +335,12 @@ export async function getTeacherDashboardData(classId: string): Promise<TeacherS
        JOIN users u ON rs.user_id = u.id
        WHERE cm.class_id = $1
          AND COALESCE(u.banned, FALSE) = FALSE
+         ${visibility}
        ORDER BY rs.updated_at DESC`,
-      [classId]
+      tv ? [classId, tv.id] : [classId]
     )
 
-    return result.rows.map(row => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: row.user_name,
-      userEmail: row.user_email,
-      docTitle: row.doc_title || 'Untitled',
-      studentAge: row.student_age || 13,
-      summary: !!row.summary,
-      adaptedText: !!row.adapted_text,
-      simplifiedText: !!row.simplified_text,
-      mindMap: !!row.mind_map,
-      testScore: row.test_score || null,
-      testCompleted: !!row.test_completed,
-      vocabularyQuizScore: row.vocabulary_quiz_score || null,
-      spellingGameBestScore: row.spelling_game_best_score || null,
-      spellingGameAccuracy: row.spelling_game_accuracy || null,
-      testsCompleted: row.tests_completed ?? 0,
-      vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
-      spellingGamesCompleted: row.spelling_games_completed ?? 0,
-      grammarQuizScore: row.grammar_quiz_score || null,
-      grammarQuizCompleted: !!row.grammar_quiz_completed,
-      grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
-      grammarGameBestScore: row.grammar_game_best_score || null,
-      grammarGameAccuracy: row.grammar_game_accuracy || null,
-      grammarGamesCompleted: row.grammar_games_completed ?? 0,
-      grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
-      glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
-      sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
-      sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
-        ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
-            .map((e) => Number(e?.createdAt) || 0)
-        : [],
-      tutorQuestionCount: Array.isArray(row.chat_history)
-        ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
-        : 0,
-      tutorQuestionTimestamps: Array.isArray(row.chat_history)
-        ? row.chat_history
-            .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
-            .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
-        : [],
-      flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
-      flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
-        ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
-        : [],
-      grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
-      grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
-      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
-      progress: calculateProgress(row),
-      createdAt: new Date(row.created_at).getTime(),
-      updatedAt: new Date(row.updated_at).getTime(),
-      summaryGeneratedAt: Number(row.summary_generated_at) || 0,
-      mindMapGeneratedAt: Number(row.mind_map_generated_at) || 0,
-      adaptedTextGeneratedAt: Number(row.adapted_text_generated_at) || 0,
-      simplifiedTextGeneratedAt: Number(row.simplified_text_generated_at) || 0,
-      glossaryGeneratedAt: Number(row.glossary_generated_at) || 0,
-      spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
-      vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
-      readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
-      visualization: !!row.visualization,
-      visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
-      preReading: !!row.has_pre_reading,
-      preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
-      collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
-      collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
-    }))
+    return result.rows.map(mapTeacherSessionRow)
   } finally {
     client.release()
   }
@@ -341,71 +392,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
       [schoolId]
     )
     
-    return result.rows.map(row => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: row.user_name,
-      userEmail: row.user_email,
-      docTitle: row.doc_title || 'Untitled',
-      studentAge: row.student_age || 13,
-      summary: !!row.summary,
-      adaptedText: !!row.adapted_text,
-      simplifiedText: !!row.simplified_text,
-      mindMap: !!row.mind_map,
-      testScore: row.test_score || null,
-      testCompleted: !!row.test_completed,
-      vocabularyQuizScore: row.vocabulary_quiz_score || null,
-      spellingGameBestScore: row.spelling_game_best_score || null,
-      spellingGameAccuracy: row.spelling_game_accuracy || null,
-      testsCompleted: row.tests_completed ?? 0,
-      vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
-      spellingGamesCompleted: row.spelling_games_completed ?? 0,
-      grammarQuizScore: row.grammar_quiz_score || null,
-      grammarQuizCompleted: !!row.grammar_quiz_completed,
-      grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
-      grammarGameBestScore: row.grammar_game_best_score || null,
-      grammarGameAccuracy: row.grammar_game_accuracy || null,
-      grammarGamesCompleted: row.grammar_games_completed ?? 0,
-      grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
-      glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
-      sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
-      sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
-        ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
-            .map((e) => Number(e?.createdAt) || 0)
-        : [],
-      tutorQuestionCount: Array.isArray(row.chat_history)
-        ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
-        : 0,
-      tutorQuestionTimestamps: Array.isArray(row.chat_history)
-        ? row.chat_history
-            .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
-            .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
-        : [],
-      flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
-      flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
-        ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
-        : [],
-      grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
-      grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
-      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
-      progress: calculateProgress(row),
-      createdAt: new Date(row.created_at).getTime(),
-      updatedAt: new Date(row.updated_at).getTime(),
-      summaryGeneratedAt: Number(row.summary_generated_at) || 0,
-      mindMapGeneratedAt: Number(row.mind_map_generated_at) || 0,
-      adaptedTextGeneratedAt: Number(row.adapted_text_generated_at) || 0,
-      simplifiedTextGeneratedAt: Number(row.simplified_text_generated_at) || 0,
-      glossaryGeneratedAt: Number(row.glossary_generated_at) || 0,
-      spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
-      vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
-      readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
-      visualization: !!row.visualization,
-      visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
-      preReading: !!row.has_pre_reading,
-      preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
-      collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
-      collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
-    }))
+    return result.rows.map(mapTeacherSessionRow)
   } finally {
     client.release()
   }
@@ -453,74 +440,68 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        WHERE COALESCE(ur.role, 'student') = 'student'
          AND COALESCE(u.banned, FALSE) = FALSE
-       ORDER BY rs.updated_at DESC`
+        ORDER BY rs.updated_at DESC`
+     )
+
+    return result.rows.map(mapTeacherSessionRow)
+  } finally {
+    client.release()
+  }
+}
+
+/**
+ * Teacher dashboard data aggregated over several classes (the teacher's own
+ * classes), with teacher session-visibility applied. Students belonging to
+ * multiple of the classes are counted once.
+ */
+export async function getTeacherDashboardDataForClasses(classIds: string[], viewerId: string): Promise<TeacherSessionData[]> {
+  if (classIds.length === 0) return []
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT
+        rs.id, rs.user_id, rs.doc_title,
+        rs.summary IS NOT NULL AND rs.summary != '' as summary,
+        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
+        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
+        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
+        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        COALESCE(rs.tests_completed, 0) as tests_completed,
+        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
+        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
+        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
+        GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
+        COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
+        COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
+        rs.grammar_game_completed_at,
+        rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.pre_reading IS NOT NULL as has_pre_reading,
+        rs.pre_reading_generated_at,
+        rs.collocations_generated_at,
+        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
+        rs.highlighted_words,
+        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
+        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
+        rs.created_at, rs.updated_at,
+        rs.summary_generated_at, rs.mind_map_generated_at,
+        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
+        rs.glossary_generated_at, rs.spelling_game_completed_at,
+        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
+        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
+        rs.visualization_generated_at,
+        u.name as user_name, u.email as user_email
+       FROM reading_sessions rs
+       JOIN users u ON rs.user_id = u.id
+       WHERE rs.user_id IN (SELECT cm.student_id FROM class_members cm WHERE cm.class_id = ANY($1))
+         AND COALESCE(u.banned, FALSE) = FALSE
+         AND ${teacherSessionVisibilitySql('rs', '$2')}
+       ORDER BY rs.updated_at DESC`,
+      [classIds, viewerId]
     )
-    
-    return result.rows.map(row => ({
-      id: row.id,
-      userId: row.user_id,
-      userName: row.user_name,
-      userEmail: row.user_email,
-      docTitle: row.doc_title || 'Untitled',
-      studentAge: row.student_age || 13,
-      summary: !!row.summary,
-      adaptedText: !!row.adapted_text,
-      simplifiedText: !!row.simplified_text,
-      mindMap: !!row.mind_map,
-      testScore: row.test_score || null,
-      testCompleted: !!row.test_completed,
-      vocabularyQuizScore: row.vocabulary_quiz_score || null,
-      spellingGameBestScore: row.spelling_game_best_score || null,
-      spellingGameAccuracy: row.spelling_game_accuracy || null,
-      testsCompleted: row.tests_completed ?? 0,
-      vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
-      spellingGamesCompleted: row.spelling_games_completed ?? 0,
-      grammarQuizScore: row.grammar_quiz_score || null,
-      grammarQuizCompleted: !!row.grammar_quiz_completed,
-      grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
-      grammarGameBestScore: row.grammar_game_best_score || null,
-      grammarGameAccuracy: row.grammar_game_accuracy || null,
-      grammarGamesCompleted: row.grammar_games_completed ?? 0,
-      grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
-      glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
-      sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
-      sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
-        ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
-            .map((e) => Number(e?.createdAt) || 0)
-        : [],
-      tutorQuestionCount: Array.isArray(row.chat_history)
-        ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
-        : 0,
-      tutorQuestionTimestamps: Array.isArray(row.chat_history)
-        ? row.chat_history
-            .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
-            .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
-        : [],
-      flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
-      flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
-        ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
-        : [],
-      grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
-      grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
-      grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
-      progress: calculateProgress(row),
-      createdAt: new Date(row.created_at).getTime(),
-      updatedAt: new Date(row.updated_at).getTime(),
-      summaryGeneratedAt: Number(row.summary_generated_at) || 0,
-      mindMapGeneratedAt: Number(row.mind_map_generated_at) || 0,
-      adaptedTextGeneratedAt: Number(row.adapted_text_generated_at) || 0,
-      simplifiedTextGeneratedAt: Number(row.simplified_text_generated_at) || 0,
-      glossaryGeneratedAt: Number(row.glossary_generated_at) || 0,
-      spellingGameCompletedAt: Number(row.spelling_game_completed_at) || 0,
-      vocabQuizCompletedAt: Number(row.vocab_quiz_completed_at) || 0,
-      readingTestCompletedAt: Number(row.reading_test_completed_at) || 0,
-      visualization: !!row.visualization,
-      visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
-      preReading: !!row.has_pre_reading,
-      preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
-      collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
-      collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
-    }))
+
+    return result.rows.map(mapTeacherSessionRow)
   } finally {
     client.release()
   }
@@ -892,12 +873,12 @@ export async function createClass(
   const client = await getClient()
   try {
     const result = await client.query(
-      `INSERT INTO classes (name, description, teacher_id, school_id, subject_id, grade_id) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO classes (name, description, teacher_id, school_id, subject_id, grade_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, name, description, teacher_id, school_id, subject_id, grade_id, created_at`,
       [name, description, teacherId || null, schoolId || null, subjectId || null, gradeId || null]
     )
-    
+
     const row = result.rows[0]
     return {
       id: row.id,
@@ -948,7 +929,7 @@ export async function deleteClass(classId: string): Promise<boolean> {
 }
 
 const CLASS_SELECT = `
-  SELECT 
+  SELECT
     c.id, c.name, c.description, c.teacher_id, c.school_id, c.subject_id, c.grade_id, c.created_at,
     u.name as teacher_name,
     s.name as school_name,
@@ -1331,11 +1312,13 @@ function calculateProgress(row: {
   })
 }
 
-export async function getStudentSessionsForClass(classId: string): Promise<StudentSessionData[]> {
+export async function getStudentSessionsForClass(classId: string, viewer?: SessionViewer): Promise<StudentSessionData[]> {
   const client = await getClient()
   try {
+    const tv = teacherViewer(viewer)
+    const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
     const result = await client.query(
-      `SELECT 
+      `SELECT
         rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
         COALESCE(rs.tests_completed, 0) as tests_completed,
@@ -1360,8 +1343,9 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
        JOIN users u ON rs.user_id = u.id
        WHERE cm.class_id = $1
          AND COALESCE(u.banned, FALSE) = FALSE
+         ${visibility}
        ORDER BY rs.updated_at DESC`,
-      [classId]
+      tv ? [classId, tv.id] : [classId]
     )
     
     return result.rows.map(row => ({
@@ -1398,11 +1382,13 @@ export async function getStudentSessionsForClass(classId: string): Promise<Stude
   }
 }
 
-export async function getStudentSessions(studentId: string): Promise<StudentSessionData[]> {
+export async function getStudentSessions(studentId: string, viewer?: SessionViewer): Promise<StudentSessionData[]> {
   const client = await getClient()
   try {
+    const tv = teacherViewer(viewer)
+    const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
     const result = await client.query(
-      `SELECT 
+      `SELECT
         rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
         COALESCE(rs.tests_completed, 0) as tests_completed,
@@ -1425,8 +1411,9 @@ export async function getStudentSessions(studentId: string): Promise<StudentSess
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
        WHERE rs.user_id = $1
+         ${visibility}
        ORDER BY rs.updated_at DESC`,
-      [studentId]
+      tv ? [studentId, tv.id] : [studentId]
     )
     
     return result.rows.map(row => ({
@@ -1483,6 +1470,43 @@ export async function canAccessStudent(userId: string, userRole: string, student
          JOIN users u ON u.id = $1
          WHERE cm.student_id = $2 AND c.school_id = u.school_id AND c.school_id IS NOT NULL`,
         [userId, studentId]
+      )
+      return result.rows.length > 0
+    }
+    return false
+  } finally {
+    client.release()
+  }
+}
+
+/**
+ * Session-level visibility check (stricter than canAccessStudent for teachers):
+ * - super-admin: always
+ * - admin: same school as the session owner
+ * - teacher: assignment sessions only if they assigned them; every other
+ *   session only if they are the effective primary teacher of a class the
+ *   session owner belongs to.
+ */
+export async function canViewStudentSession(userId: string, userRole: string, sessionId: string): Promise<boolean> {
+  if (userRole === 'super-admin') return true
+
+  const client = await getClient()
+  try {
+    if (userRole === 'admin') {
+      const result = await client.query(
+        `SELECT 1 FROM users u1
+         JOIN reading_sessions rs ON rs.user_id = u1.id
+         JOIN users u2 ON u2.id = $1
+         WHERE rs.id = $2 AND u1.school_id IS NOT NULL AND u1.school_id = u2.school_id`,
+        [userId, sessionId]
+      )
+      return result.rows.length > 0
+    }
+    if (userRole === 'teacher') {
+      const result = await client.query(
+        `SELECT 1 FROM reading_sessions rs
+         WHERE rs.id = $2 AND ${teacherSessionVisibilitySql('rs', '$1')}`,
+        [userId, sessionId]
       )
       return result.rows.length > 0
     }
@@ -1807,6 +1831,8 @@ export interface ScopedStudentClass {
   name: string
   teacherId: string | null
   teacherName: string | null
+  subjectName?: string | null
+  gradeName?: string | null
 }
 
 export interface ScopedStudent {
@@ -1896,11 +1922,15 @@ export async function getScopedStudents(actorId: string, actorRole: string, scho
                   'id', c.id,
                   'name', c.name,
                   'teacherId', t.id,
-                  'teacherName', t.name
+                  'teacherName', t.name,
+                  'subjectName', sub.name,
+                  'gradeName', g.name
                 ) ORDER BY cm.joined_at, c.id), '[]'::json) AS classes
          FROM class_members cm
          JOIN classes c ON c.id = cm.class_id
          LEFT JOIN users t ON t.id = c.teacher_id
+         LEFT JOIN subjects sub ON sub.id = c.subject_id
+         LEFT JOIN grades g ON g.id = c.grade_id
          WHERE cm.student_id = u.id ${innerClassScope}
        ) cls ON TRUE
        LEFT JOIN schools sch ON sch.id = u.school_id

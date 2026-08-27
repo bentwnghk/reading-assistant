@@ -26,7 +26,7 @@ export async function GET(
 
   try {
     const [sessions, spellingReviewCount] = await Promise.all([
-      getStudentSessions(studentId),
+      getStudentSessions(studentId, { id: session.user.id, role: session.user.role }),
       getSpellingReviewSessionCount(studentId),
     ])
     return NextResponse.json({ sessions, spellingReviewCount })

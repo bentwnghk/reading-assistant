@@ -113,6 +113,7 @@ export async function GET(request: Request) {
       endDate,
       limit: query.limit,
       offset: query.offset,
+      viewerId: isTeacher ? session.user.id : undefined,
     })
 
     return NextResponse.json(result)

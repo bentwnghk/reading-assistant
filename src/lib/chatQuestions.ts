@@ -1,6 +1,32 @@
 import { getClient } from "./db"
 import crypto from "crypto"
 
+/**
+ * SQL fragment (condition on `cq` with `rsq` = LEFT JOIN reading_sessions ON
+ * cq.session_id = rsq.id): teacher visibility for AI tutor questions.
+ * - Questions asked during an assignment session: only the assigning teacher.
+ * - Every other question (non-assignment session or no session): only teachers
+ *   of an English-subject class the asker belongs to.
+ */
+function teacherQuestionVisibilitySql(viewerParamIndex: number): string {
+  const viewer = `$${viewerParamIndex}`
+  return `(
+    (rsq.assignment_id IS NOT NULL AND EXISTS (
+      SELECT 1 FROM assignments avis
+      WHERE avis.id = rsq.assignment_id AND avis.teacher_id = ${viewer}
+    ))
+    OR
+    (rsq.assignment_id IS NULL AND EXISTS (
+      SELECT 1 FROM class_members cmap
+      JOIN classes cmapc ON cmapc.id = cmap.class_id
+      LEFT JOIN subjects cmapsub ON cmapsub.id = cmapc.subject_id
+      WHERE cmap.student_id = cq.user_id
+        AND lower(COALESCE(cmapsub.name, '')) LIKE '%english%'
+        AND cmapc.teacher_id = ${viewer}
+    ))
+  )`
+}
+
 export interface ChatQuestion {
   id: string
   questionHash: string
@@ -86,6 +112,8 @@ export async function getAggregatedQuestions(options: {
   endDate?: Date
   limit?: number
   offset?: number
+  /** Teacher viewer id — when set, applies teacher question visibility rules. */
+  viewerId?: string
 }): Promise<{ questions: AggregatedQuestion[]; total: number }> {
   const client = await getClient()
   try {
@@ -127,6 +155,12 @@ export async function getAggregatedQuestions(options: {
       paramIndex++
     }
 
+    if (options.viewerId) {
+      conditions.push(teacherQuestionVisibilitySql(paramIndex))
+      params.push(options.viewerId)
+      paramIndex++
+    }
+
     const whereClause = conditions.length > 0
       ? `WHERE ${conditions.join(" AND ")}`
       : ""
@@ -135,6 +169,7 @@ export async function getAggregatedQuestions(options: {
       `SELECT COUNT(DISTINCT cq.question_hash) as total
        FROM chat_questions cq
        LEFT JOIN users u ON cq.user_id = u.id
+       LEFT JOIN reading_sessions rsq ON cq.session_id = rsq.id
        ${whereClause}`,
       params
     )
@@ -153,6 +188,7 @@ export async function getAggregatedQuestions(options: {
         COUNT(DISTINCT cq.user_id) as unique_user_count
        FROM chat_questions cq
        LEFT JOIN users u ON cq.user_id = u.id
+       LEFT JOIN reading_sessions rsq ON cq.session_id = rsq.id
        ${whereClause}
        GROUP BY cq.question_hash
        ORDER BY frequency DESC, last_asked DESC
@@ -182,6 +218,8 @@ export async function getQuestionInstances(
     classIds?: string[]
     startDate?: Date
     endDate?: Date
+    /** Teacher viewer id — when set, applies teacher question visibility rules. */
+    viewerId?: string
   } = {}
 ): Promise<QuestionInstance[]> {
   const client = await getClient()
@@ -224,6 +262,12 @@ export async function getQuestionInstances(
       paramIndex++
     }
 
+    if (options.viewerId) {
+      conditions.push(teacherQuestionVisibilitySql(paramIndex))
+      params.push(options.viewerId)
+      paramIndex++
+    }
+
     const result = await client.query(
       `SELECT
         cq.id,
@@ -236,6 +280,7 @@ export async function getQuestionInstances(
         u.email as user_email
        FROM chat_questions cq
        LEFT JOIN users u ON cq.user_id = u.id
+       LEFT JOIN reading_sessions rsq ON cq.session_id = rsq.id
        WHERE ${conditions.join(" AND ")}
        ORDER BY cq.created_at DESC`,
       params

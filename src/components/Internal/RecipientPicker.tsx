@@ -6,6 +6,7 @@ import { Building2, ChevronDown, Search } from "lucide-react"
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { formatClassLabel } from "@/components/Internal/ClassCombobox"
 import { cn } from "@/utils/style"
 import type { ShareTargetGroup } from "@/lib/shared-sessions"
 
@@ -210,9 +211,6 @@ export function RecipientPicker({
                   const groupSomeSelected =
                     selectedCount > 0 && !groupAllSelected
                   const open = isExpanded(key)
-                  const metaParts = [group.gradeName, group.subjectName]
-                    .filter(Boolean)
-                    .join(" · ")
 
                   return (
                     <div key={key}>
@@ -233,14 +231,13 @@ export function RecipientPicker({
                           />
                           <span className="text-sm font-medium truncate">
                             {group.classId
-                              ? t("share.classGroup", { name: group.label })
+                              ? formatClassLabel({
+                                  name: group.className || group.label,
+                                  subjectName: group.subjectName,
+                                  gradeName: group.gradeName,
+                                })
                               : group.label}
                           </span>
-                          {metaParts && (
-                            <span className="text-xs text-muted-foreground truncate hidden sm:inline">
-                              {metaParts}
-                            </span>
-                          )}
                           <span className="text-xs text-muted-foreground shrink-0">
                             {selectedCount > 0 ? `${selectedCount}/` : ""}
                             {userIds.length}

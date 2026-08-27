@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useVocabularyStore } from "@/store/vocabulary";
+import { formatClassLabel } from "@/components/Internal/ClassCombobox";
 import { cn } from "@/utils/style";
 
 interface ScopedStudentClass {
@@ -20,6 +21,8 @@ interface ScopedStudentClass {
   name: string;
   teacherId: string | null;
   teacherName: string | null;
+  subjectName?: string | null;
+  gradeName?: string | null;
 }
 
 interface ScopedStudent {
@@ -49,6 +52,13 @@ function studentClasses(s: ScopedStudent): ScopedStudentClass[] {
   }
   return [];
 }
+
+const classOptionLabel = (c: ScopedStudentClass) =>
+  formatClassLabel({
+    name: c.name,
+    subjectName: c.subjectName ?? undefined,
+    gradeName: c.gradeName ?? undefined,
+  });
 
 interface StudentViewFiltersProps {
   role: "teacher" | "admin" | "super-admin";
@@ -117,15 +127,13 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
   );
 
   const classOptions = useMemo(() => {
-    const map = new Map<string, string>();
+    const map = new Map<string, ScopedStudentClass>();
     for (const s of students) {
       for (const c of studentClasses(s)) {
-        map.set(c.id, c.name);
+        if (!map.has(c.id)) map.set(c.id, c);
       }
     }
-    return [...map.entries()]
-      .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
   }, [students]);
 
   const classFiltered = useMemo(() => {
@@ -247,7 +255,7 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
           )}
           {classOptions.map((c) => (
             <SelectItem key={c.id} value={c.id}>
-              {c.name}
+              {classOptionLabel(c)}
             </SelectItem>
           ))}
         </SelectContent>

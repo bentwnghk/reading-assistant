@@ -371,7 +371,8 @@ export async function getAssignmentsForTeacher(teacherId: string): Promise<Assig
  * School-wide assignment list for admins: every assignment created by any
  * teacher in the school (including the admin's own, and archived ones).
  * Each row also carries a derived rosterName matched against the school's
- * saved presets (assignment_presets).
+ * saved presets (assignment_presets), falling back to whole-class rosters
+ * labeled as "Form/Grade · Subject · Class Name".
  */
 export async function getSchoolAssignments(schoolId: string): Promise<Assignment[]> {
   const client = await getClient()
@@ -391,9 +392,12 @@ export async function getSchoolAssignments(schoolId: string): Promise<Assignment
       [schoolId],
     )
     const presets = await getRosterPresets(client, schoolId)
+    const classRefs = await getRosterClasses(client, schoolId)
     return result.rows.map((row) => ({
       ...mapAssignmentRow(row),
-      rosterName: resolveRosterName(row.roster_ids ?? [], presets),
+      rosterName:
+        resolveRosterName(row.roster_ids ?? [], presets) ??
+        resolveRosterName(row.roster_ids ?? [], classRefs),
     }))
   } finally {
     client.release()
@@ -421,9 +425,12 @@ export async function getAllAssignments(): Promise<Assignment[]> {
     // Student ids belong to exactly one school, so cross-school set
     // matching is safe: only the student's own school presets can match.
     const presets = await getRosterPresets(client)
+    const classRefs = await getRosterClasses(client)
     return result.rows.map((row) => ({
       ...mapAssignmentRow(row),
-      rosterName: resolveRosterName(row.roster_ids ?? [], presets),
+      rosterName:
+        resolveRosterName(row.roster_ids ?? [], presets) ??
+        resolveRosterName(row.roster_ids ?? [], classRefs),
       schoolName: (row.school_name as string) || undefined,
     }))
   } finally {
@@ -457,13 +464,46 @@ async function getRosterPresets(
 }
 
 /**
+ * Load classes (with their member ids) as roster-name candidates, labeled in
+ * the canonical "Form/Grade · Subject · Class Name" format. Classes with no
+ * members are skipped (they can never match an assignment roster).
+ */
+async function getRosterClasses(
+  client: PoolClient,
+  schoolId?: string,
+): Promise<RosterPresetRef[]> {
+  const { rows } = await client.query(
+    schoolId
+      ? `SELECT concat_ws(' · ', g.name, sub.name, c.name) AS name,
+                ARRAY_REMOVE(ARRAY_AGG(cm.student_id), NULL) AS student_ids
+         FROM classes c
+         JOIN class_members cm ON cm.class_id = c.id
+         LEFT JOIN subjects sub ON sub.id = c.subject_id
+         LEFT JOIN grades g ON g.id = c.grade_id
+         WHERE c.school_id = $1
+         GROUP BY c.id, sub.name, g.name
+         ORDER BY name ASC`
+      : `SELECT concat_ws(' · ', g.name, sub.name, c.name) AS name,
+                ARRAY_REMOVE(ARRAY_AGG(cm.student_id), NULL) AS student_ids
+         FROM classes c
+         JOIN class_members cm ON cm.class_id = c.id
+         LEFT JOIN subjects sub ON sub.id = c.subject_id
+         LEFT JOIN grades g ON g.id = c.grade_id
+         GROUP BY c.id, sub.name, g.name
+         ORDER BY name ASC`,
+    schoolId ? [schoolId] : [],
+  )
+  return rows.map(rowToPresetRef)
+}
+
+/**
  * Resolve an assignment's roster name by matching its student-id set against
- * the school's saved presets:
- *   1. exact set equality → that preset's name
- *   2. else the smallest preset whose set contains the roster (tolerates stale
- *      ids from students who have since left the preset)
+ * a list of roster candidates (saved presets or classes):
+ *   1. exact set equality → that candidate's name
+ *   2. else the smallest candidate whose set contains the roster (tolerates
+ *      stale ids from students who have since left the preset/class)
  *   3. else undefined → rendered as "Custom"
- * Presets must be pre-sorted by name for deterministic exact-match results.
+ * Candidates must be pre-sorted by name for deterministic exact-match results.
  */
 function resolveRosterName(
   rosterIds: string[],

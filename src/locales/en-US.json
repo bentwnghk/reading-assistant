@@ -2858,7 +2858,6 @@
     "searchUsers": "Search users...",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
-    "classGroup": "Class: {{name}}",
     "noMatches": "No matching recipients",
     "noTargets": "No users available to share with.",
     "share": "Share",
@@ -3336,7 +3335,7 @@
     "studentData": {
       "descriptionSuperAdmin": "View reading session data for all students across all schools. Filter by school and class.",
       "descriptionAdmin": "View reading session data for all students within your school. Filter by class.",
-      "descriptionTeacher": "View reading session data for students in your classes. Filter by your classes.",
+      "descriptionTeacher": "View reading session data for students in your classes: sessions from assignments you created, plus all other sessions if you teach an English-subject class.",
       "description": "View reading session data for students in your classes.",
       "selectClass": "Select a class",
       "selectSchool": "Select a school",
@@ -3409,7 +3408,7 @@
     "aiQuestions": {
       "descriptionSuperAdmin": "Track questions students ask the AI Tutor across all schools. Filter by school and class.",
       "descriptionAdmin": "Track questions students ask the AI Tutor within your school. Filter by class.",
-      "descriptionTeacher": "Track questions students ask the AI Tutor in your classes. Filter by your classes.",
+      "descriptionTeacher": "Track questions students ask the AI Tutor: questions from assignments you created, plus all other questions if you teach an English-subject class.",
       "description": "Track questions students ask the AI Tutor.",
       "selectSchool": "Select a school",
       "selectClass": "Select a class",
@@ -4052,7 +4051,7 @@
       "allStatuses": "All",
       "empty": "No assignments from teachers in your school yet.",
       "emptyFiltered": "No assignments match the current filters.",
-      "rosterNote": "Roster names are matched against saved rosters; assignments with a hand-picked roster are shown as \"Custom\"."
+      "rosterNote": "Roster names are matched against saved rosters and whole classes (shown as Form/Grade · Subject · Class); assignments with a hand-picked roster are shown as \"Custom\"."
     },
     "stats": {
       "sectionTitle": "Class insights",

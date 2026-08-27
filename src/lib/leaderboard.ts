@@ -373,14 +373,19 @@ export async function refreshWeeklyStatsForUser(
 // ─── Get leaderboard ──────────────────────────────────────────────────────────
 
 // Aggregates the user's class memberships into arrays without row fan-out.
+// Class names are decorated for display as "Form/Grade · Subject · Class Name".
 // `statsAlias` is the weekly_stats/all_time_stats alias in the outer query.
 const CLASS_DISPLAY_LATERAL = (statsAlias: string) => `
   LEFT JOIN LATERAL (
     SELECT
       COALESCE(json_agg(c.id ORDER BY cm2.joined_at, cm2.class_id), '[]'::json) AS class_ids,
-      COALESCE(json_agg(c.name ORDER BY cm2.joined_at, cm2.class_id), '[]'::json) AS class_names
+      COALESCE(json_agg(
+        concat_ws(' · ', g.name, sub.name, c.name) ORDER BY cm2.joined_at, cm2.class_id
+      ), '[]'::json) AS class_names
     FROM class_members cm2
     JOIN classes c ON c.id = cm2.class_id
+    LEFT JOIN subjects sub ON sub.id = c.subject_id
+    LEFT JOIN grades g ON g.id = c.grade_id
     WHERE cm2.student_id = ${statsAlias}.user_id
   ) m ON TRUE`
 
@@ -1166,7 +1171,8 @@ export async function getPersonalStats(
     // One row per class the student belongs to (multi-class capable).
     // rankInClass (legacy) = best rank across classes.
     const rankClassesResult = await client.query(
-      `SELECT c.id AS class_id, c.name AS class_name,
+      `SELECT c.id AS class_id,
+              concat_ws(' · ', g.name, sub.name, c.name) AS class_name,
               (SELECT (COUNT(*) + 1)::int
                FROM weekly_stats ws2
                WHERE EXISTS (
@@ -1182,6 +1188,8 @@ export async function getPersonalStats(
               ) AS rank
        FROM classes c
        JOIN class_members cm ON cm.class_id = c.id
+       LEFT JOIN subjects sub ON sub.id = c.subject_id
+       LEFT JOIN grades g ON g.id = c.grade_id
        WHERE cm.student_id = $1`,
       [userId, weekDateStr]
     )

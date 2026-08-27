@@ -2884,7 +2884,6 @@
     "searchUsers": "搜尋使用者...",
     "selectAll": "全選",
     "deselectAll": "取消全選",
-    "classGroup": "班級：{{name}}",
     "noMatches": "沒有符合的收件人",
     "noTargets": "沒有可分享的使用者。",
     "share": "分享",
@@ -3362,7 +3361,7 @@
     "studentData": {
       "descriptionSuperAdmin": "查看所有學校學生的閱讀記錄數據。可按學校和班別篩選。",
       "descriptionAdmin": "查看您學校內所有學生的閱讀記錄數據。可按班別篩選。",
-      "descriptionTeacher": "查看您班別中學生的閱讀記錄數據。可按您的班別篩選。",
+      "descriptionTeacher": "查看您班別學生的閱讀記錄數據：包括您派發功課的記錄；若您任教英文科班別，更可查看所有其他記錄。",
       "description": "查看班別中學生的閱讀記錄數據。",
       "selectClass": "選擇班別",
       "selectSchool": "選擇學校",
@@ -3435,7 +3434,7 @@
     "aiQuestions": {
       "descriptionSuperAdmin": "追蹤所有學校學生向 AI 導師提出的問題。可按學校和班別篩選。",
       "descriptionAdmin": "追蹤您學校內學生向 AI 導師提出的問題。可按班別篩選。",
-      "descriptionTeacher": "追蹤您班別中學生向 AI 導師提出的問題。可按您的班別篩選。",
+      "descriptionTeacher": "追蹤學生向 AI 導師提出的問題：包括您派發功課中的提問；若您任教英文科班別，更可查看所有其他提問。",
       "description": "追蹤學生向 AI 導師提出的問題。",
       "selectSchool": "選擇學校",
       "selectClass": "選擇班別",
@@ -4078,7 +4077,7 @@
       "allStatuses": "全部",
       "empty": "學校內尚未有教師建立任何功課。",
       "emptyFiltered": "沒有符合目前篩選條件的功課。",
-      "rosterNote": "名單名稱會與已儲存名單自動比對；以手動挑選學生建立的功課會顯示為「自訂」。"
+      "rosterNote": "名單名稱會與已儲存名單及整個班別（顯示為「級別 · 科目 · 班別」）自動比對；以手動挑選學生建立的功課會顯示為「自訂」。"
     },
     "stats": {
       "sectionTitle": "班級分析",

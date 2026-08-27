@@ -75,6 +75,7 @@ export async function GET(
       classIds,
       startDate,
       endDate,
+      viewerId: isTeacher ? session.user.id : undefined,
     })
 
     return NextResponse.json({ instances })

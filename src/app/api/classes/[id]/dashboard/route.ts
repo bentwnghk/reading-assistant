@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getTeacherDashboardData, getTeacherDashboardDataForSchool, getTeacherDashboardDataAllSchools, canAccessClass, getSchoolForUser } from "@/lib/users"
+import { getTeacherDashboardData, getTeacherDashboardDataForClasses, getTeacherDashboardDataForSchool, getTeacherDashboardDataAllSchools, canAccessClass, getClassesForTeacher, getSchoolForUser } from "@/lib/users"
 import { getReviewSessionsForUsers, getVocabularyCountsForUsers } from "@/lib/vocabulary"
 import { getSkillAveragesForUsers } from "@/lib/skill-profile"
 
@@ -33,18 +33,25 @@ export async function GET(
         } else {
           sessions = await getTeacherDashboardDataAllSchools()
         }
-      } else {
+      } else if (role === "admin") {
         const userSchoolId = await getSchoolForUser(session.user.id)
         if (!userSchoolId) {
           return NextResponse.json({ error: "No school assigned" }, { status: 400 })
         }
         sessions = await getTeacherDashboardDataForSchool(userSchoolId)
+      } else {
+        // Teachers: only their own classes, with session-visibility applied.
+        const teacherClasses = await getClassesForTeacher(session.user.id)
+        sessions = await getTeacherDashboardDataForClasses(
+          teacherClasses.map((c) => c.id),
+          session.user.id
+        )
       }
     } else {
       if (!await canAccessClass(session.user.id, role, id)) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 })
       }
-      sessions = await getTeacherDashboardData(id)
+      sessions = await getTeacherDashboardData(id, { id: session.user.id, role })
     }
 
     const userIds = [...new Set(sessions.map((s) => s.userId))]

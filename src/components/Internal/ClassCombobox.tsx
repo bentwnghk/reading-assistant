@@ -47,12 +47,20 @@ function toOptions(classes: ClassComboboxClass[]): ClassOption[] {
   }))
 }
 
-function classLabel(c: ClassComboboxClass): string {
+/**
+ * Canonical class display label: Form/Grade · Subject · Class Name
+ * (e.g. "S5 · English · Gp1"). Missing parts are skipped.
+ */
+export function formatClassLabel(c: { name: string; subjectName?: string; gradeName?: string }): string {
   const parts: string[] = []
   if (c.gradeName) parts.push(c.gradeName)
   if (c.subjectName) parts.push(c.subjectName)
   parts.push(c.name)
   return parts.join(" · ")
+}
+
+function classLabel(c: ClassComboboxClass): string {
+  return formatClassLabel(c)
 }
 
 /**
