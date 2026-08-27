@@ -140,7 +140,12 @@ function CommandClassList({
           heading={g.label || undefined}
         >
           {g.classes.map(c => (
-            <CommandItem key={itemId(c)} value={`${c.keywords} ${itemId(c)}`} onSelect={() => {}}>
+            // Search value = real words only (name/subject/grade/teacher/
+            // school). Never include the class id: cmdk fuzzy-matches by
+            // subsequence, so a UUID in the value makes any short query
+            // (e.g. "S5") match unrelated classes via its hex characters.
+            // Item uniqueness is preserved by the React key.
+            <CommandItem key={itemId(c)} value={c.keywords} onSelect={() => {}}>
               {renderItem(c, secondaryFor(c))}
             </CommandItem>
           ))}
