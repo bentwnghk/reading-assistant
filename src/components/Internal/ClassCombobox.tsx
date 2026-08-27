@@ -219,6 +219,9 @@ export function ClassCombobox({
         // ("outside") content at the document level, breaking touch scrolling.
         // Stopping propagation here only is enough — native scrolling is untouched.
         onTouchMoveCapture={(e) => e.stopPropagation()}
+        // Desktop: same scroll-lock preventDefaults wheel events on portaled
+        // content ("isolation"), breaking mouse/trackpad scrolling of the list.
+        onWheelCapture={(e) => e.stopPropagation()}
       >
         <Command>
           <CommandInput placeholder={t("classCombobox.search")} />
@@ -345,6 +348,9 @@ export function ClassMultiSelect({
         // ("outside") content at the document level, breaking touch scrolling.
         // Stopping propagation here only is enough — native scrolling is untouched.
         onTouchMoveCapture={(e) => e.stopPropagation()}
+        // Desktop: same scroll-lock preventDefaults wheel events on portaled
+        // content ("isolation"), breaking mouse/trackpad scrolling of the list.
+        onWheelCapture={(e) => e.stopPropagation()}
       >
         <Command>
           <CommandInput placeholder={t("classCombobox.search")} />
@@ -461,6 +467,9 @@ export function ClassBattleTargetCombobox({
         // ("outside") content at the document level, breaking touch scrolling.
         // Stopping propagation here only is enough — native scrolling is untouched.
         onTouchMoveCapture={(e) => e.stopPropagation()}
+        // Desktop: same scroll-lock preventDefaults wheel events on portaled
+        // content ("isolation"), breaking mouse/trackpad scrolling of the list.
+        onWheelCapture={(e) => e.stopPropagation()}
       >
         <Command>
           <CommandInput placeholder={searchPlaceholder ?? t("classCombobox.search")} />
