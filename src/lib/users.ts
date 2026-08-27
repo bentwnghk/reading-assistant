@@ -30,8 +30,12 @@ export interface UserWithRole {
   className?: string
   classIds?: string[]
   classNames?: string[]
+  /** Canonical display labels ("Form/Grade · Subject · Class Name") — same order as classIds. */
+  classDisplayNames?: string[]
   taughtClassIds?: string[]
   taughtClassNames?: string[]
+  /** Canonical display labels for taught classes — same order as taughtClassIds. */
+  taughtClassDisplayNames?: string[]
   schoolId?: string
   schoolName?: string
   schoolAccessEndsAt?: string | null
@@ -47,21 +51,50 @@ export interface UserWithRole {
 // Aggregates a student's class memberships into arrays (multi-class capable)
 // without fan-out: one output row per user. Also exposes the first membership
 // as legacy singular classId/className for backward compatibility.
+// class_display_names carries the canonical "Form/Grade · Subject · Class Name"
+// labels for display; class_ids/class_names stay raw (share-target grouping
+// relies on them).
 const CLASS_MEMBERSHIP_JOIN = `
   LEFT JOIN LATERAL (
     SELECT
       COALESCE(json_agg(cm.class_id ORDER BY cm.joined_at, cm.class_id), '[]'::json) AS class_ids,
-      COALESCE(json_agg(c.name ORDER BY cm.joined_at, cm.class_id), '[]'::json) AS class_names
+      COALESCE(json_agg(c.name ORDER BY cm.joined_at, cm.class_id), '[]'::json) AS class_names,
+      COALESCE(json_agg(
+        concat_ws(' · ', g.name, sub.name, c.name) ORDER BY cm.joined_at, cm.class_id
+      ), '[]'::json) AS class_display_names
     FROM class_members cm
     JOIN classes c ON c.id = cm.class_id
+    LEFT JOIN subjects sub ON sub.id = c.subject_id
+    LEFT JOIN grades g ON g.id = c.grade_id
     WHERE cm.student_id = u.id
   ) m ON TRUE`
 
 const CLASS_MEMBERSHIP_SELECT = `
   m.class_ids AS "classIds",
   m.class_names AS "classNames",
+  m.class_display_names AS "classDisplayNames",
   m.class_ids->>0 AS "classId",
   m.class_names->>0 AS "className"`
+
+/** Taught-classes aggregates (ids + raw names + canonical display labels). */
+const TAUGHT_CLASSES_SUBSELECT = `
+  (
+    SELECT COALESCE(json_agg(c2.id), '[]'::json)
+    FROM classes c2
+    WHERE c2.teacher_id = u.id
+  ) as "taughtClassIds",
+  (
+    SELECT COALESCE(json_agg(c3.name), '[]'::json)
+    FROM classes c3
+    WHERE c3.teacher_id = u.id
+  ) as "taughtClassNames",
+  (
+    SELECT COALESCE(json_agg(concat_ws(' · ', g3.name, sub3.name, c3.name)), '[]'::json)
+    FROM classes c3
+    LEFT JOIN subjects sub3 ON sub3.id = c3.subject_id
+    LEFT JOIN grades g3 ON g3.id = c3.grade_id
+    WHERE c3.teacher_id = u.id
+  ) as "taughtClassDisplayNames"`
 
 export interface ClassInfo {
   id: string
@@ -687,24 +720,15 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
           us.settings->>'mode' = 'proxy'
           AND COALESCE(us.settings->>'accessPassword', '') <> ''
         ) as "hasAccessPassword",
-        (
-          SELECT COALESCE(json_agg(c2.id), '[]'::json)
-          FROM classes c2
-          WHERE c2.teacher_id = u.id
-        ) as "taughtClassIds",
-        (
-          SELECT COALESCE(json_agg(c3.name), '[]'::json)
-          FROM classes c3
-          WHERE c3.teacher_id = u.id
-        ) as "taughtClassNames"
+        ${TAUGHT_CLASSES_SUBSELECT}
        FROM users u
-       LEFT JOIN user_roles ur ON u.id = ur.user_id
-       ${CLASS_MEMBERSHIP_JOIN}
-       LEFT JOIN schools s ON u.school_id = s.id
-       LEFT JOIN user_settings us ON u.id = us.user_id
-       ORDER BY u."createdAt" DESC`
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        ${CLASS_MEMBERSHIP_JOIN}
+        LEFT JOIN schools s ON u.school_id = s.id
+        LEFT JOIN user_settings us ON u.id = us.user_id
+        ORDER BY u."createdAt" DESC`
       )
-    
+
     return result.rows.map(row => ({
       id: row.id,
       name: row.name,
@@ -715,8 +739,10 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       className: row.className,
       classIds: row.classIds || [],
       classNames: row.classNames || [],
+      classDisplayNames: row.classDisplayNames || [],
       taughtClassIds: row.taughtClassIds || [],
       taughtClassNames: row.taughtClassNames || [],
+      taughtClassDisplayNames: row.taughtClassDisplayNames || [],
       schoolId: row.schoolId,
       schoolName: row.schoolName,
       schoolAccessEndsAt: row.schoolAccessEndsAt || null,
@@ -1089,18 +1115,9 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
         (
           us.settings->>'mode' = 'proxy'
           AND COALESCE(us.settings->>'accessPassword', '') <> ''
-        ) as "hasAccessPassword",
-        ${CLASS_MEMBERSHIP_SELECT},
-        (
-          SELECT COALESCE(json_agg(c2.id), '[]'::json)
-          FROM classes c2
-          WHERE c2.teacher_id = u.id
-        ) as "taughtClassIds",
-        (
-          SELECT COALESCE(json_agg(c3.name), '[]'::json)
-          FROM classes c3
-          WHERE c3.teacher_id = u.id
-        ) as "taughtClassNames"
+         ) as "hasAccessPassword",
+        ${TAUGHT_CLASSES_SUBSELECT},
+        ${CLASS_MEMBERSHIP_SELECT}
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN schools s ON u.school_id = s.id
@@ -1593,16 +1610,7 @@ export async function getUsersForAdmin(adminSchoolId: string): Promise<UserWithR
         u.school_id as "schoolId",
         s.name as "schoolName",
         ${CLASS_MEMBERSHIP_SELECT},
-        (
-          SELECT COALESCE(json_agg(c2.id), '[]'::json)
-          FROM classes c2
-          WHERE c2.teacher_id = u.id
-        ) as "taughtClassIds",
-        (
-          SELECT COALESCE(json_agg(c3.name), '[]'::json)
-          FROM classes c3
-          WHERE c3.teacher_id = u.id
-        ) as "taughtClassNames"
+        ${TAUGHT_CLASSES_SUBSELECT}
        FROM users u
        LEFT JOIN user_roles ur ON u.id = ur.user_id
        LEFT JOIN schools s ON u.school_id = s.id
@@ -1623,8 +1631,10 @@ export async function getUsersForAdmin(adminSchoolId: string): Promise<UserWithR
       className: row.className,
       classIds: row.classIds || [],
       classNames: row.classNames || [],
+      classDisplayNames: row.classDisplayNames || [],
       taughtClassIds: row.taughtClassIds || [],
       taughtClassNames: row.taughtClassNames || [],
+      taughtClassDisplayNames: row.taughtClassDisplayNames || [],
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {

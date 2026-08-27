@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import type { ClassInfo, UserWithRole, SchoolInfo } from "@/lib/users"
 import type { SubjectInfo, GradeInfo } from "@/lib/class-taxonomy"
+import { formatClassLabel } from "@/components/Internal/ClassCombobox"
 import ClassMembers from "./ClassMembers"
 
 interface ClassListProps {
@@ -339,17 +340,8 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
             <TableRow key={classInfo.id}>
               <TableCell>
                 <div>
-                  <div className="font-medium">{classInfo.name}</div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    {classInfo.gradeName && (
-                      <span className="text-xs text-muted-foreground">{classInfo.gradeName}</span>
-                    )}
-                    {classInfo.gradeName && classInfo.subjectName && (
-                      <span className="text-xs text-muted-foreground">·</span>
-                    )}
-                    {classInfo.subjectName && (
-                      <span className="text-xs text-muted-foreground">{classInfo.subjectName}</span>
-                    )}
+                  <div className="font-medium">
+                    {formatClassLabel(classInfo)}
                   </div>
                   {classInfo.description && (
                     <div className="text-sm text-muted-foreground truncate max-w-48">
@@ -586,7 +578,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {t("userManagement.classes.membersTitle", { name: selectedClass?.name })}
+              {t("userManagement.classes.membersTitle", { name: selectedClass ? formatClassLabel(selectedClass) : "" })}
               {isSuperAdmin && selectedClass?.schoolName && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
                   — {selectedClass.schoolName}

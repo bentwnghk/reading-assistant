@@ -695,7 +695,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                 <TableCell>
                   {user.role === "teacher" && user.taughtClassNames && user.taughtClassNames.length > 0 ? (
                     <div className="flex flex-wrap gap-1 max-w-48">
-                      {user.taughtClassNames.map((name, idx) => (
+                      {(user.taughtClassDisplayNames?.length ? user.taughtClassDisplayNames : user.taughtClassNames).map((name, idx) => (
                         <Badge key={user.taughtClassIds?.[idx] || idx} variant="outline" className="text-xs">
                           {name}
                         </Badge>
@@ -703,8 +703,8 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                     </div>
                   ) : user.role === "student" ? (
                     <div className="flex flex-wrap items-center gap-1 max-w-48">
-                      {(user.classNames ?? (user.className ? [user.className] : [])).length > 0
-                        ? (user.classNames ?? (user.className ? [user.className] : [])).map((name, idx) => (
+                      {(user.classIds ?? (user.classId ? [user.classId] : [])).length > 0
+                        ? (user.classDisplayNames?.length ? user.classDisplayNames : (user.classNames ?? (user.className ? [user.className] : []))).map((name, idx) => (
                             <Badge key={(user.classIds ?? [])[idx] || idx} variant="outline" className="text-xs">
                               {name}
                             </Badge>
