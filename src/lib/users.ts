@@ -1146,8 +1146,10 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       className: row.className,
       classIds: row.classIds || [],
       classNames: row.classNames || [],
+      classDisplayNames: row.classDisplayNames || [],
       taughtClassIds: row.taughtClassIds || [],
       taughtClassNames: row.taughtClassNames || [],
+      taughtClassDisplayNames: row.taughtClassDisplayNames || [],
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
   } finally {
