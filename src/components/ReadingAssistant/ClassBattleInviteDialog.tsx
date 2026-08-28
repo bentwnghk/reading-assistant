@@ -58,7 +58,7 @@ export function ClassBattleInviteDialog() {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sword className="h-5 w-5 text-primary" />
+            <Sword className="h-5 w-5 text-fuchsia-500" />
             {t(`${M}.classBattleInvites`)}
           </DialogTitle>
           <DialogDescription>{t(`${M}.classBattleInvitesDesc`)}</DialogDescription>

@@ -111,6 +111,18 @@ export default {
               "0 0 0 2px hsl(var(--primary) / 0.65), 0 0 28px 2px hsl(var(--primary) / 0.55)",
           },
         },
+        // Fuchsia variant for the multiplayer battle invite banner — no CSS
+        // var exists for fuchsia, so rgb values (fuchsia-500) are inlined.
+        "glow-pulse-fuchsia": {
+          "0%, 100%": {
+            boxShadow:
+              "0 0 0 1px rgb(217 70 239 / 0.4), 0 0 18px -4px rgb(217 70 239 / 0.4)",
+          },
+          "50%": {
+            boxShadow:
+              "0 0 0 2px rgb(217 70 239 / 0.65), 0 0 28px 2px rgb(217 70 239 / 0.55)",
+          },
+        },
         // ── Game juice animations (spelling/grammar games) ─────────────────
         // One-shot pop for point badges / banners.
         "pop-in": {
@@ -150,6 +162,7 @@ export default {
         "float-up": "float-up 3s ease-out infinite",
         shimmer: "shimmer 3s linear infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "glow-pulse-fuchsia": "glow-pulse-fuchsia 2s ease-in-out infinite",
         "pop-in": "pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both",
         "shake-x": "shake-x 0.4s ease-in-out",
         "float-fade": "float-fade 1.4s ease-out forwards",

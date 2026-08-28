@@ -192,12 +192,12 @@ export default function StudyPlanDialog({ onStartPlan }: StudyPlanDialogProps) {
       <DialogContent className="max-w-sm max-h-[85vh] text-center overflow-x-hidden overflow-y-auto scrollbar-hide">
         {step === "presets" && (
           <>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-violet-500" />
 
             <div className="flex flex-col items-center gap-4 pt-4 pb-2">
               <div className="relative flex items-center justify-center">
-                <div className="absolute w-20 h-20 rounded-full opacity-20 blur-xl animate-pulse bg-primary" />
-                <div className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg bg-primary shadow-primary/50">
+                <div className="absolute w-20 h-20 rounded-full opacity-20 blur-xl animate-pulse bg-blue-500" />
+                <div className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg bg-gradient-to-br from-blue-500 to-violet-600 shadow-blue-500/50">
                   <BookOpen className="w-8 h-8 text-white drop-shadow" />
                 </div>
               </div>
@@ -401,8 +401,8 @@ export default function StudyPlanDialog({ onStartPlan }: StudyPlanDialogProps) {
         {step === "getting-started" && (
           <div className="flex flex-col items-center gap-4 pt-6 pb-2">
             <div className="relative flex items-center justify-center">
-              <div className="absolute w-20 h-20 rounded-full opacity-20 blur-xl animate-pulse bg-primary" />
-              <div className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg bg-primary shadow-primary/50">
+              <div className="absolute w-20 h-20 rounded-full opacity-20 blur-xl animate-pulse bg-blue-500" />
+              <div className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg bg-gradient-to-br from-blue-500 to-violet-600 shadow-blue-500/50">
                 <BookOpen className="w-8 h-8 text-white drop-shadow" />
               </div>
             </div>

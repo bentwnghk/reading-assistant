@@ -125,7 +125,7 @@ export function ClassBattlePoller() {
                   window.setTimeout(() => toast.dismiss(copiedId), 2500);
                 }}
                 title={t(`${M}.copyCode`)}
-                className="inline-flex w-fit items-center gap-1.5 rounded-md bg-white/20 px-2.5 py-1 font-mono text-sm font-bold tracking-[0.2em] transition-colors hover:bg-white/30"
+                className="inline-flex w-fit items-center gap-1.5 rounded-md bg-black/20 px-2.5 py-1 font-mono text-sm font-bold tracking-[0.2em] transition-colors hover:bg-black/30"
               >
                 {invite.roomCode}
                 <Copy className="h-3 w-3" />
@@ -134,7 +134,7 @@ export function ClassBattlePoller() {
             {
               id: invite.roomCode,
               duration: Infinity,
-              className: "!bg-purple-600 !text-white !border-purple-700 dark:!bg-purple-500 dark:!border-purple-400",
+              className: "!bg-fuchsia-600 !text-white !border-fuchsia-700 dark:!bg-fuchsia-500 dark:!border-fuchsia-400",
               action: {
                 label: t(`${M}.classBattleToastAction`),
                 onClick: () => {

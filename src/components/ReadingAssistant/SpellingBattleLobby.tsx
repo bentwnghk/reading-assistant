@@ -776,8 +776,8 @@ function ClassInviteBanner({ onAccept }: { onAccept: () => void }) {
   const invite = useBattleStore((s) => s.classInvite);
   if (!invite) return null;
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-primary/50 bg-primary/10 p-3 animate-glow-pulse">
-      <Swords className="h-5 w-5 shrink-0 text-primary" />
+    <div className="flex items-center gap-3 rounded-lg border border-fuchsia-400/50 dark:border-fuchsia-500/40 bg-fuchsia-500/10 p-3 animate-glow-pulse-fuchsia">
+      <Swords className="h-5 w-5 shrink-0 text-fuchsia-500" />
       <div className="flex-1 text-sm">
         <p className="font-medium">
           {invite.hostName ?? t(`${M}.aTeacher`)} — {t(`${M}.classInviteTitle`)}
