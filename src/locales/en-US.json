@@ -1731,7 +1731,7 @@
           "title": "Multiplayer Spelling Battle",
           "subtitle": "Challenge other players to a live spelling duel",
           "navTitle": "Spelling Battle",
-          "dialogDesc": "Create a room to host, or join an existing battle with a room code.",
+          "dialogDesc": "Join a battle with a room code, or create a room to host.",
           "connecting": "Connecting to battle server…",
           "retry": "Retry",
           "unavailable": "Multiplayer battles are not available on this server.",
@@ -3465,7 +3465,7 @@
         "features": "Features"
       },
       "tabsContent": {
-        "intro": "The User Management panel provides six tabs for managing schools, users, classes, student data, AI questions, and subscriptions. Available tabs depend on your role.",
+        "intro": "The User Management panel provides seven tabs for managing schools, users, classes, subjects & forms, student data, AI questions, and subscriptions. Available tabs depend on your role.",
         "items": {
           "schools": {
             "name": "Schools",
@@ -3478,6 +3478,10 @@
           "classes": {
             "name": "Classes",
             "desc": "Create, edit, and delete classes. Assign a teacher to each class and manage student membership. Teachers see only their own classes."
+          },
+          "taxonomy": {
+            "name": "Subjects & Forms",
+            "desc": "Manage your school's subject and form/grade lists. Classes can optionally reference one subject and one form — this powers grouped class pickers across the app. Deleting a subject or form only detaches it from classes. Super-admins can manage any school via the school selector. Admin and super-admin only."
           },
           "classMembers": {
             "name": "Class Members",

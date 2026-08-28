@@ -234,7 +234,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <DialogTitle className="flex items-center gap-2">

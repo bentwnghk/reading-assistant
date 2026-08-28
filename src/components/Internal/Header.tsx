@@ -1060,7 +1060,7 @@ function Header() {
       */}
       <Dialog open={showBattleLobbyDialog} onOpenChange={setShowBattleLobbyDialog}>
         <DialogContent
-          className="max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-hide"
+          className="max-lg:max-w-screen-sm max-w-screen-xl max-h-[90vh] overflow-y-auto scrollbar-hide"
           onInteractOutside={(e) => { if (battleActive) e.preventDefault(); }}
           onEscapeKeyDown={(e) => { if (battleActive) e.preventDefault(); }}
         >

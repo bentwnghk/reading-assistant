@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowUpDown,
+  BookMarked,
   BookOpen,
   Brain,
   Building2,
@@ -42,6 +43,7 @@ const TAB_ITEMS: { key: string; icon: React.ElementType; bgClass: string; iconCl
   { key: "schools", icon: School, bgClass: "bg-violet-500/10", iconClass: "text-violet-500" },
   { key: "users", icon: Users, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
   { key: "classes", icon: GraduationCap, bgClass: "bg-emerald-500/10", iconClass: "text-emerald-500" },
+  { key: "taxonomy", icon: BookMarked, bgClass: "bg-fuchsia-500/10", iconClass: "text-fuchsia-500" },
   { key: "classMembers", icon: UserCog, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
   { key: "studentData", icon: BookOpen, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
   { key: "aiQuestions", icon: Brain, bgClass: "bg-purple-500/10", iconClass: "text-purple-500" },
