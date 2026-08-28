@@ -35,6 +35,7 @@ const COLOR_BG: Record<string, string> = {
   emerald: "bg-emerald-500",
   lime:    "bg-lime-500",
   slate:   "bg-slate-500",
+  yellow:  "bg-yellow-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -55,6 +56,7 @@ const COLOR_GLOW: Record<string, string> = {
   emerald: "shadow-emerald-400/50",
   lime:    "shadow-lime-400/50",
   slate:   "shadow-slate-400/50",
+  yellow:  "shadow-yellow-400/50",
 };
 
 const COLOR_RING: Record<string, string> = {
@@ -75,6 +77,7 @@ const COLOR_RING: Record<string, string> = {
   emerald: "stroke-emerald-500",
   lime:    "stroke-lime-500",
   slate:   "stroke-slate-500",
+  yellow:  "stroke-yellow-500",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -95,6 +98,7 @@ const COLOR_TEXT: Record<string, string> = {
   emerald: "text-emerald-600 dark:text-emerald-400",
   lime:    "text-lime-600 dark:text-lime-400",
   slate:   "text-slate-600 dark:text-slate-400",
+  yellow:  "text-yellow-600 dark:text-yellow-400",
 };
 
 // ─── Progress ring SVG ────────────────────────────────────────────────────────

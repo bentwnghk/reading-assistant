@@ -41,6 +41,7 @@ const COLOR_BG: Record<string, string> = {
   emerald: "bg-emerald-500",
   lime:   "bg-lime-500",
   slate:  "bg-slate-500",
+  yellow: "bg-yellow-500",
 };
 
 const COLOR_GLOW: Record<string, string> = {
@@ -61,6 +62,7 @@ const COLOR_GLOW: Record<string, string> = {
   emerald: "shadow-emerald-400/60",
   lime:   "shadow-lime-400/60",
   slate:  "shadow-slate-400/60",
+  yellow: "shadow-yellow-400/60",
 };
 
 const COLOR_TEXT: Record<string, string> = {
@@ -81,6 +83,7 @@ const COLOR_TEXT: Record<string, string> = {
   emerald: "text-emerald-600 dark:text-emerald-300",
   lime:   "text-lime-600 dark:text-lime-300",
   slate:  "text-slate-600 dark:text-slate-300",
+  yellow: "text-yellow-600 dark:text-yellow-300",
 };
 
 const COLOR_FROM: Record<string, string> = {
@@ -101,6 +104,7 @@ const COLOR_FROM: Record<string, string> = {
   emerald: "from-emerald-500/10",
   lime:   "from-lime-500/10",
   slate:  "from-slate-500/10",
+  yellow: "from-yellow-500/10",
 };
 
 interface MedalDisplayProps {
