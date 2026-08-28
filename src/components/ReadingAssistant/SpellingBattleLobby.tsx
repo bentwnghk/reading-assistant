@@ -347,6 +347,44 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       {/* Class-battle invite banner */}
       <ClassInviteBanner onAccept={acceptClassInvite} />
 
+      {/* Join room */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <DoorOpen className="h-5 w-5" />
+            {t(`${M}.joinRoom`)}
+            <GuideDialog
+              titleKey={`${M}.joinHelp.title`}
+              introKey={`${M}.joinHelp.intro`}
+              stepsTitleKey={`${M}.joinHelp.stepsTitle`}
+              stepsKeys={[
+                `${M}.joinHelp.steps.s1`,
+                `${M}.joinHelp.steps.s2`,
+                `${M}.joinHelp.steps.s3`,
+              ]}
+              tipTitleKey={`${M}.joinHelp.tipTitle`}
+              tipContentKey={`${M}.joinHelp.tipContent`}
+            />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-end gap-2">
+          <div className="flex-1 space-y-2">
+            <Label className="text-xs uppercase text-muted-foreground">{t(`${M}.enterCode`)}</Label>
+            <Input
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              placeholder="ABCDEF"
+              maxLength={6}
+              className="font-mono text-lg tracking-[0.3em]"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleJoin();
+              }}
+            />
+          </div>
+          <Button onClick={handleJoin}>{t(`${M}.join`)}</Button>
+        </CardContent>
+      </Card>
+
       {/* Create room */}
       <Card>
         <CardHeader className="pb-3">
@@ -359,7 +397,6 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
               itemsBaseKey={`${M}.help.items`}
               items={[
                 { key: "create", icon: Swords, bgClass: "bg-fuchsia-500/10", iconClass: "text-fuchsia-500" },
-                { key: "join", icon: DoorOpen, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
                 { key: "gameplay", icon: Volume2, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
                 { key: "ranking", icon: Crown, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
               ]}
@@ -538,32 +575,6 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
             <Swords className="mr-2 h-4 w-4" />
             {t(`${M}.createAndHost`)}
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Join room */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <DoorOpen className="h-5 w-5" />
-            {t(`${M}.joinRoom`)}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-end gap-2">
-          <div className="flex-1 space-y-2">
-            <Label className="text-xs uppercase text-muted-foreground">{t(`${M}.enterCode`)}</Label>
-            <Input
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              placeholder="ABCDEF"
-              maxLength={6}
-              className="font-mono text-lg tracking-[0.3em]"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleJoin();
-              }}
-            />
-          </div>
-          <Button onClick={handleJoin}>{t(`${M}.join`)}</Button>
         </CardContent>
       </Card>
 

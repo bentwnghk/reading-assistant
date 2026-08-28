@@ -1853,16 +1853,12 @@
             "multiplayer_unavailable": "Multiplayer is not available."
         },
         "help": {
-          "title": "How It Works — Multiplayer Spelling Battle",
-          "intro": "Challenge classmates to a live spelling duel in real time! Pick a game mode (Listen & Type, Letter Scramble, Fill Blanks, or Mixed), create or join a battle room, and race to master each word.",
+          "title": "How to Create a Battle",
+          "intro": "Host a live spelling duel for your classmates! Pick a game mode (Listen & Type, Letter Scramble, Fill Blanks, or Mixed), choose a word source, and open a battle room.",
           "items": {
             "create": {
               "name": "Create & Host",
               "desc": "Pick a game mode and word source (glossary, your vocabulary, or a review list), set the difficulty and word count, then create a room. Teachers can also launch battles for a whole class or a saved roster."
-            },
-            "join": {
-              "name": "Join a Room",
-              "desc": "Enter the 6-character room code your friend or teacher shared to jump into their battle room."
             },
             "gameplay": {
               "name": "Word Challenges",
@@ -1873,15 +1869,27 @@
               "desc": "A live leaderboard updates after every word. After the final word you see the final ranking, your tier badge (Master / Great / Good / Keep Practicing) and accuracy."
             }
           },
-          "stepsTitle": "How to play",
+          "stepsTitle": "How to host",
           "steps": {
-            "s1": "Create a room: choose a game mode, word source, difficulty and word count.",
-            "s2": "Share the 6-character room code with opponents (teachers can toggle Class Battle and pick a target class or a saved roster to auto-notify those students).",
-            "s3": "The host presses Start Game — a 3-2-1 countdown begins, then words are served one by one.",
-            "s4": "After the last word, see the final ranking, your tier badge and accuracy. The host can start a rematch."
+            "s1": "Choose a game mode, word source, difficulty and word count, then press Create & Host.",
+            "s2": "Share the 6-character room code with your opponents (teachers can toggle Class Battle and pick a target class or a saved roster to auto-notify those students).",
+            "s3": "When everyone is in the room, press Start Game — a 3-2-1 countdown begins, then words are served one by one.",
+            "s4": "After the last word, review the final ranking, your tier badge and accuracy — then start a rematch!"
           },
           "tipTitle": "Good to know",
           "tipContent": "Up to 35 players per room. Your score feeds into the same best-score, leaderboard and SRS mastery as solo spelling, so every battle counts!"
+        },
+        "joinHelp": {
+          "title": "How to Join a Battle",
+          "intro": "Joining a battle is quick — all you need is the 6-character room code from the host.",
+          "stepsTitle": "How to join",
+          "steps": {
+            "s1": "Ask the host (a friend or teacher) for the 6-character room code, e.g. ABCDEF.",
+            "s2": "Type the code into the box and press Join — you'll land in the battle room lobby.",
+            "s3": "Wait until the host presses Start Battle, then beat the clock on every word!"
+          },
+          "tipTitle": "Good to know",
+          "tipContent": "Can't find the code? If your teacher started a Class Battle, you'll get a notification toast and a bell badge — tap Join Battle and you'll be taken straight to the room."
         },
         "q12": {
           "q": "Can I challenge my classmates to a live spelling battle?",
