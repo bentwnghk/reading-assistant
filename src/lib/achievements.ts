@@ -100,7 +100,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
   },
   tests_completed: {
     icon: "FileCheck",
-    color: "blue",
+    color: "sky",
     activityTypes: ["test_complete"],
     initialMilestone: 5,
   },
@@ -112,13 +112,13 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
   },
   spelling_challenges: {
     icon: "PenTool",
-    color: "pink",
+    color: "violet",
     activityTypes: ["spelling_complete"],
     initialMilestone: 5,
   },
   spelling_battle_win: {
     icon: "Swords",
-    color: "violet",
+    color: "fuchsia",
     activityTypes: ["spelling_battle_win"],
     initialMilestone: 1,
   },
@@ -130,19 +130,19 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
   },
   vocabulary_quizzes: {
     icon: "Brain",
-    color: "purple",
+    color: "emerald",
     activityTypes: ["quiz_complete"],
     initialMilestone: 5,
   },
   grammar_analysis: {
     icon: "BookOpenCheck",
-    color: "teal",
+    color: "lime",
     activityTypes: ["grammar_analyze"],
     initialMilestone: 5,
   },
   grammar_quizzes: {
     icon: "GraduationCap",
-    color: "fuchsia",
+    color: "slate",
     activityTypes: ["grammar_quiz_complete"],
     initialMilestone: 5,
   },
@@ -154,7 +154,7 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
   },
   grammar_hot_streak: {
     icon: "Zap",
-    color: "orange",
+    color: "yellow",
     activityTypes: ["grammar_hot_streak"],
     initialMilestone: 1,
   },
