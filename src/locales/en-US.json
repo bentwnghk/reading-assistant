@@ -4260,6 +4260,10 @@
           "name": "Export to Excel",
           "desc": "On the detail page, export the full roster with scores and progress to an Excel file for grading or records."
         },
+        "schoolView": {
+          "name": "All Teachers tab",
+          "desc": "Admins and super-admins see a second \"All Teachers\" tab listing every assignment created by teachers in your school (super-admins: across all schools). Filter by teacher, roster, subject or status, click a column header to sort, and open any title for the full roster. Super-admins can manage any assignment; admins only their own."
+        },
         "tip": {
           "title": "Note:",
           "content": "Archiving hides an assignment from students without deleting their work — useful at the end of a term."
