@@ -15,6 +15,7 @@ import {
   ImageIcon,
   Layers,
   Library,
+  MessageCircle,
   Sparkles,
   Trophy,
   Upload,
@@ -233,6 +234,7 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
   const overdueCount = useAssignmentsStore((s) => s.overdueCount);
   const setOpenDashboard = useGlobalStore((s) => s.setOpenDashboard);
   const setOpenTeacherDashboard = useGlobalStore((s) => s.setOpenTeacherDashboard);
+  const setOpenTutorChat = useGlobalStore((s) => s.setOpenTutorChat);
   const pageBadges: Record<string, number> = {
     "/vocabulary": dueForReviewCount,
     "/assignments": overdueCount,
@@ -252,6 +254,18 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
       // ?goto= param (handled in page.tsx after the store is restored).
       router.push(`/?goto=${id}`);
     }
+    onOpenChange(false);
+  }
+
+  function handleTutorClick() {
+    // The tutor chat needs extracted text (same gate as the section items) and
+    // its UI only renders on the home page — navigate home first when opened
+    // elsewhere; the persisted openTutorChat flag opens the chat on arrival.
+    if (!store.extractedText) return;
+    if (!isHome) {
+      router.push("/");
+    }
+    setOpenTutorChat(true);
     onOpenChange(false);
   }
 
@@ -333,6 +347,20 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
                   </button>
                 );
               })}
+              <div className="my-2 border-t" />
+              <button
+                onClick={handleTutorClick}
+                disabled={!store.extractedText}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  !store.extractedText && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
+                )}
+              >
+                <MessageCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="flex-1">{t("reading.tutor.title")}</span>
+              </button>
               <div className="my-2 border-t" />
               {pageLinks
                 .filter((page) => !page.roles || (role && page.roles.includes(role)))
