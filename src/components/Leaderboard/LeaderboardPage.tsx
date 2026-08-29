@@ -623,8 +623,8 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                  <FileCheck className="h-5 w-5 text-blue-500" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center">
+                  <FileCheck className="h-5 w-5 text-sky-500" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.tests_completed.name")}</h4>
@@ -643,8 +643,8 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center">
-                  <PenTool className="h-5 w-5 text-pink-500" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center">
+                  <PenTool className="h-5 w-5 text-violet-500" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.spelling_challenges.name")}</h4>
@@ -653,8 +653,8 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center">
-                  <Swords className="h-5 w-5 text-violet-500" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-fuchsia-500/10 flex items-center justify-center">
+                  <Swords className="h-5 w-5 text-fuchsia-500" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.spelling_battle_win.name")}</h4>
@@ -673,8 +673,8 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                  <Brain className="h-5 w-5 text-purple-500" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-emerald-500" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.vocabulary_quizzes.name")}</h4>
@@ -683,8 +683,8 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-teal-500/10 flex items-center justify-center">
-                  <BookOpenCheck className="h-5 w-5 text-teal-500" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-lime-500/10 flex items-center justify-center">
+                  <BookOpenCheck className="h-5 w-5 text-lime-500" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.grammar_analysis.name")}</h4>
@@ -693,8 +693,8 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-fuchsia-500/10 flex items-center justify-center">
-                  <GraduationCap className="h-5 w-5 text-fuchsia-500" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-slate-500/10 flex items-center justify-center">
+                  <GraduationCap className="h-5 w-5 text-slate-500" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.grammar_quizzes.name")}</h4>
@@ -713,8 +713,8 @@ export function LeaderboardPage() {
               </div>
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-orange-500" />
+                <div className="shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-yellow-500" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-sm">{t("leaderboard.help.achievements.types.grammar_hot_streak.name")}</h4>
