@@ -2026,7 +2026,7 @@
     "emptyDesc": "Start reading to collect vocabulary words. They will appear here for review.",
     "startReading": "Start Reading",
     "studentView": {
-      "title": "Student data",
+      "title": "View student data",
       "myVocabulary": "My vocabulary",
       "allSchools": "All schools",
       "allClasses": "All classes",
@@ -2395,7 +2395,7 @@
           "desc": "See past review sessions with per-word results. Flashcard sessions show Again/Hard/Good/Easy counts; Quiz and Spelling sessions show accuracy."
         },
         "studentView": {
-          "name": "Student Data (Teachers)",
+          "name": "View student data (Teachers)",
           "desc": "Teachers and admins can browse a student's vocabulary in read-only mode. Filter by school, class, or teacher, then pick a student to see their words, phrases, stats, and review history. Export stays available; nothing can be modified."
         },
         "tip": {
