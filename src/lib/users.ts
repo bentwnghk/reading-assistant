@@ -2046,9 +2046,10 @@ export async function getScopedStudents(actorId: string, actorRole: string, scho
     let requiresScopedClass = ''
     if (actorRole === 'teacher') {
       // Only aggregate the teacher's own classes and only return students
-      // that have at least one membership in them.
+      // that have at least one membership in them. (json_array_length, not
+      // a '<>' comparison — the json type has no inequality operator.)
       innerClassScope = 'AND c.teacher_id = $1'
-      requiresScopedClass = "AND cls.classes <> '[]'::json"
+      requiresScopedClass = 'AND json_array_length(cls.classes) > 0'
     } else if (actorRole === 'admin') {
       outerScope = 'AND u.school_id IS NOT NULL AND u.school_id = (SELECT school_id FROM users WHERE id = $1)'
     } else if (actorRole === 'super-admin') {
