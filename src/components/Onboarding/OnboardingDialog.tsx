@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Crown,
   Gauge,
+  Gift,
   GraduationCap,
   KeyRound,
   Loader2,
@@ -55,6 +56,7 @@ function OptionCard({
   title,
   desc,
   badge,
+  trialText,
   bgClass,
   iconClass,
   onClick,
@@ -63,6 +65,7 @@ function OptionCard({
   title: string;
   desc: string;
   badge?: string;
+  trialText?: string | null;
   bgClass: string;
   iconClass: string;
   onClick: () => void;
@@ -96,6 +99,12 @@ function OptionCard({
         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
           {desc}
         </p>
+        {trialText && (
+          <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 mt-1">
+            <Gift className="h-3.5 w-3.5 shrink-0" />
+            <span>{trialText}</span>
+          </div>
+        )}
       </div>
       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-3" />
     </button>
@@ -219,7 +228,7 @@ function OnboardingDialog() {
   ]);
 
   useEffect(() => {
-    if (step !== "subscription" || pricingLoaded) return;
+    if (!open || pricingLoaded) return;
     fetch("/api/subscription/pricing")
       .then((r) => r.json())
       .then((data) => {
@@ -234,7 +243,7 @@ function OnboardingDialog() {
       })
       .catch(() => {})
       .finally(() => setPricingLoaded(true));
-  }, [step, pricingLoaded]);
+  }, [open, pricingLoaded]);
 
   function complete() {
     setHasCompletedOnboarding(true);
@@ -290,6 +299,16 @@ function OnboardingDialog() {
     step === "choice" ? 0 : step === "done" ? 2 : 1;
   const showBack = step === "subscription" || step === "free" || step === "meter";
 
+  const trialPeriodDays = pricingInfo?.trialPeriodDays ?? 0;
+  const subscriptionTrialText =
+    !personalLoading &&
+    personalSub?.trialEligible !== false &&
+    trialPeriodDays > 0
+      ? trialPeriodDays === 1
+        ? t("subscription.trialPeriodOneDay")
+        : t("subscription.trialPeriod", { days: trialPeriodDays })
+      : null;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto scrollbar-hide">
@@ -314,6 +333,7 @@ function OnboardingDialog() {
               title={t("onboarding.choice.subscription.title")}
               desc={t("onboarding.choice.subscription.desc")}
               badge={t("onboarding.choice.badgeRecommended")}
+              trialText={subscriptionTrialText}
               bgClass="bg-blue-100 dark:bg-blue-900/40"
               iconClass="text-blue-600 dark:text-blue-400"
               onClick={() => setStep("subscription")}
