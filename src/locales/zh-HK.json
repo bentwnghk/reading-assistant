@@ -4176,6 +4176,7 @@
       "selectAll": "全選",
       "deselectAll": "取消全選",
       "noStudents": "目前沒有可選的學生。請先將學生加入您的學校。",
+      "noClassesHint": "您目前沒有自己的班級。可在上方載入已儲存的名單來選擇學生。",
       "submit": "建立功課（{{count}}）",
       "creating": "建立中⋯",
       "success": "功課已建立。",

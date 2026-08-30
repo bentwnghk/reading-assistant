@@ -241,7 +241,9 @@ export default function AssignmentsList() {
         />
       ) : (
         <>
-      {isTeacher && <PresetsSection />}
+      {/* Preset management is admin/super-admin only — teachers apply
+          presets inside the assign dialog instead */}
+      {hasSchoolTab && <PresetsSection />}
 
       {assignments.length === 0 ? (
         <Card>

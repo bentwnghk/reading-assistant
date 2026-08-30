@@ -26,7 +26,8 @@ const SELECT_COLS = `ap.id, ap.teacher_id, ap.school_id, ap.name, ap.description
 /**
  * Resolve presets visible to the requester:
  *   - super-admin: all presets across all schools
- *   - admin / teacher: all presets in their school
+ *   - admin / teacher: all presets in their school (teachers are read-only —
+ *     only admins/super-admins can create/modify presets)
  */
 export async function getPresetsForUser(
   userId: string,
@@ -55,6 +56,21 @@ export async function getPresetsForUser(
     [schoolId],
   )
   return rows.map(mapPresetRow)
+}
+
+/** Fetch a single preset by id (null when not found). */
+export async function getPresetById(
+  presetId: string,
+): Promise<AssignmentPreset | null> {
+  const pool = getPool()
+  const { rows } = await pool.query(
+    `SELECT ${SELECT_COLS}
+     FROM assignment_presets ap
+     LEFT JOIN users u ON u.id = ap.teacher_id
+     WHERE ap.id = $1`,
+    [presetId],
+  )
+  return rows.length > 0 ? mapPresetRow(rows[0]) : null
 }
 
 export interface CreatePresetInput {
@@ -99,10 +115,10 @@ export interface UpdatePresetInput {
 }
 
 /**
- * Update a preset. Permission: creator, or admin/super-admin.
+ * Update a preset. Permission: admin/super-admin only.
  *   - super-admin: any preset
  *   - admin: any preset in their school
- *   - teacher: only their own
+ *   - teacher: never
  */
 export async function updatePreset(
   presetId: string,
@@ -164,7 +180,7 @@ export async function updatePreset(
 }
 
 /**
- * Delete a preset. Permission: creator, or admin/super-admin.
+ * Delete a preset. Permission: admin/super-admin only.
  */
 export async function deletePreset(
   presetId: string,
@@ -187,7 +203,7 @@ export async function deletePreset(
  * Resolve whether the requester may modify a given preset.
  *   - super-admin: always
  *   - admin: same school as the preset
- *   - teacher: only if they created it
+ *   - teacher: never (teachers may only view/apply presets)
  */
 async function checkAccess(
   presetId: string,
@@ -206,6 +222,6 @@ async function checkAccess(
     const requesterSchool = await getSchoolForUser(requesterId)
     return requesterSchool === preset.school_id
   }
-  // teacher
-  return preset.teacher_id === requesterId
+  // teacher — read/apply only
+  return false
 }

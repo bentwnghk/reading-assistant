@@ -8,6 +8,7 @@ import {
   canEditClass,
   getClassSchoolId,
   getSchoolForUser,
+  getStudentUserIds,
 } from "@/lib/users"
 
 export async function GET(
@@ -66,6 +67,17 @@ export async function POST(
     const idsToAdd = studentIds || (studentId ? [studentId] : [])
     if (idsToAdd.length === 0) {
       return NextResponse.json({ error: "Student ID is required" }, { status: 400 })
+    }
+
+    // Only current, non-banned students may join a class — reject
+    // nonexistent/banned/non-student ids outright (defense at the source;
+    // assignment targeting re-checks as well).
+    const validStudentIds = await getStudentUserIds(idsToAdd)
+    if (idsToAdd.some((sid: string) => !validStudentIds.has(sid))) {
+      return NextResponse.json(
+        { error: "Only current students can be added to a class" },
+        { status: 400 },
+      )
     }
 
     const classSchoolId = await getClassSchoolId(id)

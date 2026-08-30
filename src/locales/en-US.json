@@ -4150,6 +4150,7 @@
       "selectAll": "Select all",
       "deselectAll": "Deselect all",
       "noStudents": "No students are available. Add students to your school first.",
+      "noClassesHint": "You have no classes of your own. Load a saved roster above to select students.",
       "submit": "Create assignment ({{count}})",
       "creating": "Creating…",
       "success": "Assignment created.",

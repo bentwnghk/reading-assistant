@@ -586,6 +586,31 @@ export async function getUserRole(userId: string, email?: string | null): Promis
   }
 }
 
+/**
+ * From a batch of user ids, resolve those that are current, non-banned
+ * students (mirrors getUserRole's default of 'student' when no role row
+ * exists). Ids not in the returned set are nonexistent, banned, or
+ * non-student roles — class membership APIs must reject those.
+ */
+export async function getStudentUserIds(userIds: string[]): Promise<Set<string>> {
+  if (userIds.length === 0) return new Set()
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT u.id
+       FROM users u
+       LEFT JOIN user_roles ur ON ur.user_id = u.id
+       WHERE u.id = ANY($1)
+         AND COALESCE(ur.role, 'student') = 'student'
+         AND COALESCE(u.banned, FALSE) = FALSE`,
+      [userIds],
+    )
+    return new Set(result.rows.map((row) => row.id as string))
+  } finally {
+    client.release()
+  }
+}
+
 export async function ensureUserRole(userId: string, email?: string | null): Promise<UserRole> {
   const role = await getUserRole(userId, email)
   

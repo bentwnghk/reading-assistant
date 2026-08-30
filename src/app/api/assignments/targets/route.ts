@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getSchoolForUser, getUsersInSchool, getAllSchools } from "@/lib/users"
+import { getSchoolForUser, getUsersInSchool, getAllSchools, getClassesForTeacher, getClassMembers } from "@/lib/users"
 import { decorateGroupsWithClassMeta } from "@/lib/shared-sessions"
 import type { ShareTargetGroup, ShareTarget } from "@/lib/shared-sessions"
 
@@ -10,8 +10,8 @@ import type { ShareTargetGroup, ShareTarget } from "@/lib/shared-sessions"
  * Resolves students who can be added to a new assignment:
  *   - super-admin: any student across all schools, grouped by school/class
  *   - admin: students in the admin's school, grouped by class
- *   - teacher: students in the teacher's school (NOT restricted to classes they
- *     own — this is the LxC use case where a non-English teacher has no class).
+ *   - teacher: students in the classes the teacher owns (one group per class,
+ *     mirroring getShareTargets in shared-sessions.ts).
  *
  * Students are filtered by role === 'student' and exclude the requester.
  */
@@ -43,6 +43,34 @@ export async function GET() {
         result.push(...groupByClass(targets, school.id, school.name))
       }
       return NextResponse.json(await decorateGroupsWithClassMeta(result))
+    }
+
+    if (role === "teacher") {
+      const classes = await getClassesForTeacher(session.user.id)
+      const sortedClasses = [...classes].sort((a, b) => a.name.localeCompare(b.name))
+      const result: ShareTargetGroup[] = []
+
+      for (const cls of sortedClasses) {
+        const members = await getClassMembers(cls.id)
+        const targets: ShareTarget[] = members.map((m) => ({
+          id: m.studentId,
+          name: m.studentName ?? null,
+          email: m.studentEmail ?? null,
+          classId: cls.id,
+          className: cls.name,
+        }))
+        if (targets.length > 0) {
+          result.push({
+            classId: cls.id,
+            className: cls.name,
+            subjectName: cls.subjectName,
+            gradeName: cls.gradeName,
+            label: cls.name,
+            users: targets,
+          })
+        }
+      }
+      return NextResponse.json(result)
     }
 
     const schoolId = await getSchoolForUser(session.user.id)

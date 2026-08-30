@@ -20,8 +20,11 @@ export async function PATCH(
     }
 
     const role = session.user.role
-    if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (role !== "admin" && role !== "super-admin") {
+      return NextResponse.json(
+        { error: "Only admins can modify presets" },
+        { status: 403 },
+      )
     }
 
     const { id } = await params
@@ -60,8 +63,11 @@ export async function DELETE(
     }
 
     const role = session.user.role
-    if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (role !== "admin" && role !== "super-admin") {
+      return NextResponse.json(
+        { error: "Only admins can modify presets" },
+        { status: 403 },
+      )
     }
 
     const { id } = await params

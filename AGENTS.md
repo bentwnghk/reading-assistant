@@ -622,7 +622,7 @@ Teachers can create assignments from a reading session (their own or from the te
 
 - **`assignments`**: Teacher-created assignments. Columns: `id`, `teacher_id`, `title`, `description`, `subject`, `source_session_id`, `source_doc_title`, `due_date`, `status` (`'active'`|`'archived'`), `student_ids` (JSONB array), `created_at`, `updated_at`.
 - **`assignment_submissions`**: Per-student working state. Columns: `id`, `assignment_id` (FK cascade), `student_id`, `student_session_id`, `progress`, cached score columns (`test_score`, `vocabulary_quiz_score`, `spelling_game_best_score`, `grammar_quiz_score`, `grammar_game_best_score`, etc.), `test_completed`, `last_viewed_at`, `submitted_at`, `created_at`.
-- **`assignment_presets`**: Reusable, **school-wide** student-group presets. Columns: `id`, `teacher_id`, `school_id`, `name`, `description`, `student_ids` (JSONB array), `student_count`, `created_at`, `updated_at`. Shared across the school; only the creator (or admin/super-admin) can edit/delete.
+- **`assignment_presets`**: Reusable, **school-wide** student-group presets. Columns: `id`, `teacher_id` (creator — always an admin/super-admin), `school_id`, `name`, `description`, `student_ids` (JSONB array), `student_count`, `created_at`, `updated_at`. Shared across the school; only admins/super-admins can create/edit/delete — teachers can view and apply them when creating assignments. **Preset members are assignable even when not in the teacher's own classes**: the create-assignment POST carries the applied `presetId`, and `resolveValidStudentIds` unions own-class members with *that one preset's* members (validated to be in the teacher's school). Hand-picking students from presets that were not applied is rejected.
 
 ### Key Modules
 

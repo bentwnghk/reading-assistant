@@ -9,7 +9,8 @@ import {
   getAllAssignments,
 } from "@/lib/assignments"
 import { getReadingSession } from "@/lib/sessions"
-import { getSchoolForUser, getUsersInSchool, getAllUsers } from "@/lib/users"
+import { getSchoolForUser, getUsersInSchool, getAllUsers, getClassesForTeacher, getClassMembers } from "@/lib/users"
+import { getPresetById } from "@/lib/assignment-presets"
 
 const createSchema = z.object({
   title: z.string().min(1).max(200),
@@ -18,6 +19,9 @@ const createSchema = z.object({
   dueDate: z.string().datetime().nullable().optional(),
   sourceSessionId: z.string().min(1),
   studentIds: z.array(z.string().min(1)).min(1),
+  /** The saved preset applied in the dialog, if any. Its members become
+   *  assignable even when not in the teacher's own classes. */
+  presetId: z.string().min(1).optional(),
 })
 
 export async function GET(request: Request) {
@@ -81,7 +85,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { sourceSessionId, studentIds, dueDate, ...rest } = parsed.data
+    const { sourceSessionId, studentIds, dueDate, presetId, ...rest } = parsed.data
 
     // Fetch the source session — must belong to the requesting teacher
     const sourceSession = await getReadingSession(session.user.id, sourceSessionId)
@@ -95,8 +99,28 @@ export async function POST(request: Request) {
       )
     }
 
+    // Validate the applied preset (if any): must exist and belong to the
+    // requester's school (any school for super-admin).
+    let presetStudentIds: string[] | undefined
+    if (presetId) {
+      const preset = await getPresetById(presetId)
+      if (!preset) {
+        return NextResponse.json({ error: "Preset not found" }, { status: 404 })
+      }
+      if (role !== "super-admin") {
+        const requesterSchoolId = await getSchoolForUser(session.user.id)
+        if (preset.schoolId !== requesterSchoolId) {
+          return NextResponse.json(
+            { error: "Preset not available in your school" },
+            { status: 403 },
+          )
+        }
+      }
+      presetStudentIds = preset.studentIds
+    }
+
     // Resolve valid student ids based on requester role
-    const candidateIds = await resolveValidStudentIds(session.user.id, role)
+    const candidateIds = await resolveValidStudentIds(session.user.id, role, presetStudentIds)
     const validIds = new Set(candidateIds)
     const filteredStudentIds = studentIds.filter((id) => validIds.has(id) && id !== session.user.id)
 
@@ -127,18 +151,43 @@ export async function POST(request: Request) {
  * Resolve the set of student ids the requester is allowed to assign to.
  *   - super-admin: any student across all schools
  *   - admin: any student in their school
- *   - teacher: any student in their school (no class ownership required —
- *     this is the LxC use case where non-English teachers have no class)
+ *   - teacher: students in the classes the teacher owns, plus the members
+ *     of the single preset applied with the request (admin-curated rosters
+ *     may extend beyond the teacher's classes; hand-picking students from
+ *     presets that were not applied is not allowed)
  */
 async function resolveValidStudentIds(
   requesterId: string,
   role: string,
+  presetStudentIds?: string[],
 ): Promise<string[]> {
   if (role === "super-admin") {
     const all = await getAllUsers()
     return all.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
   }
   const schoolId = await getSchoolForUser(requesterId)
+  if (role === "teacher") {
+    // Class members and preset members alike must be current, non-banned
+    // students in the school. class_members rows are not role-checked at
+    // the membership API, so re-verify every id here.
+    const schoolStudentIds = new Set(
+      schoolId
+        ? (await getUsersInSchool(schoolId))
+            .filter((u) => u.role === "student" && !u.banned)
+            .map((u) => u.id)
+        : [],
+    )
+    const ids = new Set<string>()
+    for (const cls of await getClassesForTeacher(requesterId)) {
+      for (const m of await getClassMembers(cls.id)) {
+        if (schoolStudentIds.has(m.studentId)) ids.add(m.studentId)
+      }
+    }
+    for (const id of presetStudentIds ?? []) {
+      if (schoolStudentIds.has(id)) ids.add(id)
+    }
+    return [...ids]
+  }
   if (!schoolId) return []
   const users = await getUsersInSchool(schoolId)
   return users.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)

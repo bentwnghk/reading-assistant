@@ -45,8 +45,11 @@ export async function POST(request: Request) {
     }
 
     const role = session.user.role
-    if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (role !== "admin" && role !== "super-admin") {
+      return NextResponse.json(
+        { error: "Only admins can create presets" },
+        { status: 403 },
+      )
     }
 
     const body = await request.json()

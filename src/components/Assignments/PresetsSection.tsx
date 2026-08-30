@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
@@ -31,10 +30,6 @@ import type { ShareTargetGroup } from "@/lib/shared-sessions"
 
 export default function PresetsSection() {
   const { t } = useTranslation()
-  const { data: session } = useSession()
-  const currentUserId = session?.user?.id
-  const currentRole = session?.user?.role
-  const canManageAny = currentRole === "admin" || currentRole === "super-admin"
 
   const [presets, setPresets] = useState<AssignmentPreset[]>([])
   const [loading, setLoading] = useState(true)
@@ -130,8 +125,6 @@ export default function PresetsSection() {
         ) : (
           <div className="grid gap-2 py-2">
             {presets.map((p) => {
-              const canManage =
-                canManageAny || p.teacherId === currentUserId
               return (
                 <div
                   key={p.id}
@@ -160,27 +153,23 @@ export default function PresetsSection() {
                       </p>
                     )}
                   </div>
-                  {canManage && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCreating(p)}
-                      title={t("assignments.presets.edit")}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                  {canManage && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => setDeleting(p)}
-                      title={t("assignments.presets.delete")}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCreating(p)}
+                    title={t("assignments.presets.edit")}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setDeleting(p)}
+                    title={t("assignments.presets.delete")}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               )
             })}

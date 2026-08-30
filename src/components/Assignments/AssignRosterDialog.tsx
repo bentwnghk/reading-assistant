@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Loader2, BookmarkPlus, Save } from "lucide-react"
@@ -57,6 +58,11 @@ export default function AssignRosterDialog({
 }: AssignRosterDialogProps) {
   const { t } = useTranslation()
   const router = useRouter()
+  const { data: authSession } = useSession()
+  // Only admins/super-admins can create presets; teachers may only apply them
+  const canSavePreset =
+    authSession?.user?.role === "admin" ||
+    authSession?.user?.role === "super-admin"
 
   const [groups, setGroups] = useState<ShareTargetGroup[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -73,6 +79,11 @@ export default function AssignRosterDialog({
   const [showSavePreset, setShowSavePreset] = useState(false)
   const [presetName, setPresetName] = useState("")
   const [savingPreset, setSavingPreset] = useState(false)
+  // The preset currently applied to the selection. Sent with the create
+  // request so the server can authorize its members (who may be outside
+  // the teacher's own classes). Own-class students can still be toggled
+  // on top; replacing the selection with another preset swaps this id.
+  const [appliedPresetId, setAppliedPresetId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) {
@@ -84,6 +95,7 @@ export default function AssignRosterDialog({
       setDueDate("")
       setShowSavePreset(false)
       setPresetName("")
+      setAppliedPresetId(null)
       return
     }
     // Pre-fill title from the source session
@@ -102,28 +114,20 @@ export default function AssignRosterDialog({
       .catch(() => setPresets([]))
   }, [open, session])
 
-  // Set of all user ids currently available in the roster (used to drop
-  // stale ids when applying a preset whose members have since left).
-  const availableIds = useMemo(
-    () => new Set(groups.flatMap((g) => g.users.map((u) => u.id))),
-    [groups],
-  )
-
+  // Presets are admin-curated rosters: their members are assignable even
+  // when they are not in the teacher's own classes, so apply the full list
+  // unfiltered. The applied preset id is remembered so the server can
+  // authorize exactly these members on submit. Members who are no longer
+  // active students are dropped server-side.
   const applyPreset = useCallback(
     (presetId: string) => {
       const preset = presets.find((p) => p.id === presetId)
       if (!preset) return
-      const valid = preset.studentIds.filter((id) => availableIds.has(id))
-      const dropped = preset.studentIds.length - valid.length
-      setSelectedIds(new Set(valid))
-      if (dropped > 0) {
-        toast.info(
-          t("assignments.presets.staleWarning", { count: dropped }),
-        )
-      }
+      setSelectedIds(new Set(preset.studentIds))
+      setAppliedPresetId(presetId)
       toast.success(t("assignments.presets.loaded"))
     },
-    [presets, availableIds, t],
+    [presets, t],
   )
 
   async function handleSavePreset() {
@@ -179,6 +183,9 @@ export default function AssignRosterDialog({
         subject: subject.trim(),
         sourceSessionId: session.id,
         studentIds: [...selectedIds],
+      }
+      if (appliedPresetId) {
+        body.presetId = appliedPresetId
       }
       if (dueDate) {
         body.dueDate = new Date(dueDate).toISOString()
@@ -281,13 +288,10 @@ export default function AssignRosterDialog({
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            ) : groups.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                {t("assignments.create.noStudents")}
-              </div>
             ) : (
               <>
-                {/* Preset (saved roster) bar */}
+                {/* Preset (saved roster) bar — shown even with no classes of
+                    your own; presets may target students outside them */}
                 {presets.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <Select onValueChange={applyPreset}>
@@ -305,8 +309,9 @@ export default function AssignRosterDialog({
                   </div>
                 )}
 
-                {/* Save current selection as a preset */}
-                {showSavePreset ? (
+                {/* Save current selection as a preset (admin/super-admin only) */}
+                {canSavePreset &&
+                  (showSavePreset ? (
                   <div className="flex items-center gap-2 mb-2">
                     <Input
                       autoFocus
@@ -353,18 +358,26 @@ export default function AssignRosterDialog({
                       {t("assignments.presets.saveAs")}
                     </Button>
                   )
-                )}
+                ))}
 
-                <RecipientPicker
-                  groups={groups}
-                  selectedIds={selectedIds}
-                  onChange={setSelectedIds}
-                  searchPlaceholder={t("assignments.create.searchStudents")}
-                  selectAllLabel={t("assignments.create.selectAll")}
-                  deselectAllLabel={t("assignments.create.deselectAll")}
-                  listClassName="max-h-[50vh] border rounded p-2"
-                  nestedScroll
-                />
+                {groups.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    {presets.length > 0
+                      ? t("assignments.create.noClassesHint")
+                      : t("assignments.create.noStudents")}
+                  </div>
+                ) : (
+                  <RecipientPicker
+                    groups={groups}
+                    selectedIds={selectedIds}
+                    onChange={setSelectedIds}
+                    searchPlaceholder={t("assignments.create.searchStudents")}
+                    selectAllLabel={t("assignments.create.selectAll")}
+                    deselectAllLabel={t("assignments.create.deselectAll")}
+                    listClassName="max-h-[50vh] border rounded p-2"
+                    nestedScroll
+                  />
+                )}
               </>
             )}
           </div>
