@@ -51,6 +51,12 @@ function AuthStateManager() {
       setStudyPlanDialogChecked(false)
       const currentLanguage = useSettingStore.getState().language
       useSettingStore.getState().loadFromServer({ ...defaultValues, language: currentLanguage })
+      // Only release the first-run UI gate on a definitive sign-out. While the
+      // session is still "loading", keep it closed — a whitelisted user's
+      // free-access flag isn't known until the sign-in sequence settles.
+      if (status === "unauthenticated") {
+        useSettingStore.setState({ authDataLoaded: true })
+      }
       return cleanup
     }
 
@@ -83,6 +89,11 @@ function AuthStateManager() {
     syncedUserIdRef.current = userId
     const expectedUserId = userId
 
+    // Hold the first-run UI gate (onboarding dialog, settings banner) closed
+    // until this user's sign-in data — including the free-access ticket
+    // result — has settled, so whitelisted users never see a setup flash.
+    useSettingStore.setState({ authDataLoaded: false })
+
     const preSignInLanguage = useSettingStore.getState().language
 
     const sessionsPromise = useHistoryStore.getState().loadFromAPI?.() ?? Promise.resolve([])
@@ -102,7 +113,8 @@ function AuthStateManager() {
 
         // Applied after loadFromServer (which resets it to the default) so
         // the server settings merge can't clobber the live ticket state.
-        useSettingStore.setState({ freeAccessGranted })
+        // authDataLoaded releases the first-run UI gate in the same tick.
+        useSettingStore.setState({ freeAccessGranted, authDataLoaded: true })
 
         // Reset restricted model selections (persisted server-side or in
         // hydrated localStorage) back to defaults for non-privileged users.

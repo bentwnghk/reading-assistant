@@ -128,6 +128,14 @@ export interface SettingStore {
    * proxy mode without an Access Password. Never synced to user_settings.
    */
   freeAccessGranted: boolean;
+  /**
+   * Whether this page load's auth bootstrap has settled (AuthProvider's
+   * sign-in sequence finished — server settings + free-access ticket loaded).
+   * Boot-only gate for first-run UI (onboarding dialog, settings banner) so
+   * they can't flash open before freeAccessGranted is known. Never restored
+   * from localStorage and never synced to the server.
+   */
+  authDataLoaded: boolean;
   language: string;
   theme: string;
   debug: "enable" | "disable";
@@ -190,6 +198,7 @@ function toSyncPayload(
     reset: _reset,
     loadFromServer: _loadFromServer,
     freeAccessGranted: _freeAccessGranted,
+    authDataLoaded: _authDataLoaded,
     ...payload
   } = settings;
 
@@ -235,6 +244,7 @@ export const defaultValues: SettingStore = {
   openaicompatibleApiProxy: "https://api.mr5ai.com",
   accessPassword: "",
   freeAccessGranted: false,
+  authDataLoaded: false,
   language: "system",
   theme: "system",
   debug: "disable",
@@ -311,6 +321,10 @@ export const useSettingStore = create(
             if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
               state.readingTextModel = defaultValues.readingTextModel;
             }
+            // Boot-only flag: never restore "auth data loaded" from a
+            // previous page load — the current load's AuthProvider must
+            // re-settle before first-run UI may open.
+            state.authDataLoaded = false;
             return parsed;
           } catch {
             // iOS Safari can leave truncated/corrupt localStorage after tab

@@ -10,7 +10,7 @@ import useSchoolSubscription from "@/hooks/useSchoolSubscription";
 
 function SettingsBanner() {
   const { t } = useTranslation();
-  const { openaicompatibleApiKey, accessPassword, freeAccessGranted } = useSettingStore();
+  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, authDataLoaded } = useSettingStore();
   const { setOpenSetting } = useGlobalStore();
   const { subscription: personalSub, loading: personalLoading } = useSubscription();
   const { subscription: schoolSub, loading: schoolLoading } = useSchoolSubscription();
@@ -28,6 +28,9 @@ function SettingsBanner() {
 
   if (!isHydrated) return null;
   if (personalLoading || schoolLoading) return null;
+  // Wait for AuthProvider's sign-in sequence (incl. the free-access ticket)
+  // to settle — otherwise whitelisted users get a "set up billing" flash.
+  if (!authDataLoaded) return null;
 
   const hasActivePersonalSub = personalSub?.hasSubscription ?? false;
   const hasActiveSchoolSub = schoolSub?.hasSubscription ?? false;

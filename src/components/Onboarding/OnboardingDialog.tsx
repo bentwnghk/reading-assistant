@@ -163,7 +163,7 @@ function StepDots({ total, active }: { total: number; active: number }) {
 function OnboardingDialog() {
   const { t } = useTranslation();
   const { data: sessionData } = useSession();
-  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, update } = useSettingStore();
+  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, authDataLoaded, update } = useSettingStore();
   const { hasCompletedOnboarding, setHasCompletedOnboarding, setOpenSetting } =
     useGlobalStore();
   const {
@@ -212,6 +212,9 @@ function OnboardingDialog() {
     if (open || hasCompletedOnboarding || !isHydrated) return;
     if (isOnboardingDismissed()) return;
     if (personalLoading || schoolLoading) return;
+    // Wait for AuthProvider's sign-in sequence (server settings + free-access
+    // ticket) to settle — otherwise whitelisted users get a setup flash.
+    if (!authDataLoaded) return;
     if (!needsSetup) {
       setHasCompletedOnboarding(true);
       return;
@@ -224,6 +227,7 @@ function OnboardingDialog() {
     isHydrated,
     personalLoading,
     schoolLoading,
+    authDataLoaded,
     needsSetup,
     setHasCompletedOnboarding,
   ]);
