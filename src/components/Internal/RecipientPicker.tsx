@@ -236,8 +236,8 @@ export function RecipientPicker({
                                   subjectName: group.subjectName,
                                   gradeName: group.gradeName,
                                 })
-                              : group.label === "Teachers"
-                                ? t("share.teachersGroup")
+                              : group.label === "Staff"
+                                ? t("share.staffGroup")
                                 : group.label}
                           </span>
                           <span className="text-xs text-muted-foreground shrink-0">

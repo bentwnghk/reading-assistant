@@ -2863,7 +2863,7 @@
   "share": {
     "title": "Share Reading Session",
     "shareWith": "Share with",
-    "teachersGroup": "Teachers",
+    "staffGroup": "Staff",
     "searchUsers": "Search users...",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
