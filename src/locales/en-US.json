@@ -72,12 +72,12 @@
       "title": "You're all set!",
       "subtitle": "Your account is ready. Here's how to start:",
       "upload": {
-        "title": "Add a text",
-        "desc": "Upload an image or PDF, paste a URL, or type your own text."
+        "title": "Add or select a text",
+        "desc": "Upload an image or PDF, select a text from the repository, generate a text with AI."
       },
       "features": {
         "title": "Explore the toolkit",
-        "desc": "Summaries, mind maps, reading tests, glossary, grammar games and more."
+        "desc": "Mind maps, text visualizations, AI Tutor, glossary, spelling games, reading tests, grammar games and more."
       },
       "settings": {
         "title": "Fine-tune anytime",
