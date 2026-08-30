@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
 import type { NextAuthConfig } from "next-auth"
-import { ensureUserRole, ensureUserSchool, isUserBanned, type UserRole } from "@/lib/users"
+import { ensureUserRole, ensureUserSchool, isUserBanned, refreshGoogleProfile, type UserRole } from "@/lib/users"
 import { authConfig } from "@/auth.config"
 import { enforceConcurrentSessionLimit } from "@/lib/session-security"
 
@@ -60,8 +60,11 @@ export const config: NextAuthConfig = {
   },
   events: {
     // #4: Concurrent session limiting — prune old sessions on new sign-in
-    async signIn({ user }) {
+    async signIn({ user, account, profile }) {
       if (user.id) {
+        if (account?.provider === "google" && profile) {
+          await refreshGoogleProfile(user.id, profile)
+        }
         await enforceConcurrentSessionLimit(user.id)
       }
     },

@@ -3458,6 +3458,13 @@
       "importConfirm": "This will merge the backup data with existing records. Reading sessions and images will be fully restored. Continue?",
       "tooltip": "Export or import a full system backup (.zip) including all users, classes, and reading history with images"
     },
+    "sessionRefresh": {
+      "label": "Sync Google Profiles",
+      "working": "Signing out users...",
+      "confirm": "This will sign out all users (except you). Their name and profile photo will refresh from Google the next time they sign in. Continue?",
+      "success": "Signed out {{count}} session(s). Profiles will refresh as users sign back in.",
+      "failed": "Failed to sign out users"
+    },
     "help": {
       "title": "User Management Guide",
       "tabs": {

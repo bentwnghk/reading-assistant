@@ -682,6 +682,54 @@ export async function setUserBanned(userId: string, banned: boolean): Promise<bo
   }
 }
 
+export async function refreshGoogleProfile(
+  userId: string,
+  profile: { name?: unknown; picture?: unknown }
+): Promise<void> {
+  const name =
+    typeof profile.name === "string" && profile.name.trim() ? profile.name : null
+  const image =
+    typeof profile.picture === "string" && profile.picture ? profile.picture : null
+  if (!name && !image) return
+  const client = await getClient()
+  try {
+    await client.query(
+      `UPDATE users
+       SET name = COALESCE($1, name), image = COALESCE($2, image)
+       WHERE id = $3
+         AND (name IS DISTINCT FROM $1 OR image IS DISTINCT FROM $2)`,
+      [name, image, userId]
+    )
+  } catch {
+  } finally {
+    client.release()
+  }
+}
+
+export async function expireUserSessions(
+  options: { userIds?: string[]; excludeUserId?: string } = {}
+): Promise<number> {
+  const { userIds, excludeUserId } = options
+  const conditions: string[] = []
+  const values: unknown[] = []
+  if (userIds && userIds.length > 0) {
+    values.push(userIds)
+    conditions.push(`"userId" = ANY($${values.length}::text[])`)
+  }
+  if (excludeUserId) {
+    values.push(excludeUserId)
+    conditions.push(`"userId" <> $${values.length}`)
+  }
+  const where = conditions.length > 0 ? ` WHERE ${conditions.join(" AND ")}` : ""
+  const client = await getClient()
+  try {
+    const result = await client.query(`DELETE FROM sessions${where}`, values)
+    return result.rowCount ?? 0
+  } finally {
+    client.release()
+  }
+}
+
 export async function getAllUsers(): Promise<UserWithRole[]> {
   await ensureSchoolSubscriptionTables()
   const client = await getClient()

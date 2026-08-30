@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Download, HelpCircle, Info, Loader2, Mail, Upload, ChevronDown } from "lucide-react"
+import { Download, HelpCircle, Info, Loader2, Mail, RefreshCw, Upload, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -52,6 +52,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const [exporting, setExporting] = useState(false)
   const [importing, setImporting] = useState(false)
   const [sendingTest, setSendingTest] = useState(false)
+  const [expiring, setExpiring] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const importFileRef = useRef<HTMLInputElement>(null)
 
@@ -220,6 +221,35 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     }
   }
 
+  const handleExpireSessions = async () => {
+    if (!confirm(t("userManagement.sessionRefresh.confirm"))) return
+    setExpiring(true)
+    try {
+      const res = await fetch("/api/admin/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(
+          (data as { error?: string }).error ||
+            t("userManagement.sessionRefresh.failed")
+        )
+        return
+      }
+      toast.success(
+        t("userManagement.sessionRefresh.success", {
+          count: (data as { deletedSessions?: number }).deletedSessions ?? 0,
+        })
+      )
+    } catch {
+      toast.error(t("userManagement.sessionRefresh.failed"))
+    } finally {
+      setExpiring(false)
+    }
+  }
+
   const testEmailOptions = [
     { type: "reminder", label: t("reminder.testTypes.reminder") },
     { type: "subscription_activated", label: t("reminder.testTypes.subscriptionActivated") },
@@ -268,7 +298,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                   variant="outline"
                   size="sm"
                   onClick={handleExport}
-                  disabled={exporting || importing}
+                  disabled={exporting || importing || expiring}
                 >
                   {exporting ? (
                     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -284,7 +314,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                   variant="outline"
                   size="sm"
                   onClick={handleImportClick}
-                  disabled={exporting || importing}
+                  disabled={exporting || importing || expiring}
                 >
                   {importing ? (
                     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -304,12 +334,28 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                   onChange={handleFileSelected}
                 />
 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExpireSessions}
+                  disabled={exporting || importing || sendingTest || expiring}
+                >
+                  {expiring ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                  )}
+                  {expiring
+                    ? t("userManagement.sessionRefresh.working")
+                    : t("userManagement.sessionRefresh.label")}
+                </Button>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={exporting || importing || sendingTest}
+                      disabled={exporting || importing || sendingTest || expiring}
                     >
                       {sendingTest ? (
                         <Loader2 className="h-4 w-4 mr-1 animate-spin" />
