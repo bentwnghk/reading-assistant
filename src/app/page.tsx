@@ -34,6 +34,7 @@ const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
 const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
 const ReadAlongIndicator = dynamic(() => import("@/components/ReadingAssistant/ReadAlongIndicator"));
 const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
+const OnboardingDialog = dynamic(() => import("@/components/Onboarding/OnboardingDialog"));
 
 // iOS Safari can leave the auth/session network fetch pending indefinitely after
 // the browser killed and restored a tab, keeping the page stuck on the loading
@@ -285,6 +286,9 @@ function HomeContent() {
       <TutorChatFab />
       <ReadAlongIndicator />
       <LearningRecommendationDialog />
+      <Suspense fallback={null}>
+        <OnboardingDialog />
+      </Suspense>
       <Footer />
     </div>
     </>

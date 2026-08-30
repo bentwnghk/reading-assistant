@@ -24,6 +24,67 @@
     "message": "Please activate your personal/school subscription, or configure your API Key or Access Password in Settings to use this app.",
     "openSettings": "Open Settings"
   },
+  "onboarding": {
+    "title": "Welcome to Mr.🆖 ProReader",
+    "subtitle": "One quick step before you start: choose how you want to power the AI features.",
+    "skip": "Skip for now",
+    "back": "Back",
+    "save": "Save and continue",
+    "startReading": "Start reading",
+    "openSettingsHint": "Prefer the full Settings dialog?",
+    "choice": {
+      "badgeRecommended": "Recommended",
+      "subscription": {
+        "title": "Subscription",
+        "desc": "Flat monthly or yearly fee for full access — personal or school plan."
+      },
+      "free": {
+        "title": "Free",
+        "desc": "Use an Access Password from Mr.🆖 — no payment needed."
+      },
+      "meter": {
+        "title": "Meter",
+        "desc": "Pay only for your exact AI usage with your own API Key."
+      }
+    },
+    "subscription": {
+      "subtitle": "Pick a personal plan below, or set up a school subscription.",
+      "personalTitle": "Personal plan",
+      "schoolTitle": "School subscription",
+      "schoolDesc": "Cover students and teachers in your school, with seat management and billing.",
+      "schoolCta": "Set up school plan",
+      "unavailable": "Plans are temporarily unavailable. You can also activate your subscription in Settings."
+    },
+    "free": {
+      "subtitle": "Enter the Access Password shared by Mr.🆖 to use the app for free.",
+      "label": "Access Password",
+      "placeholder": "Enter the access password",
+      "hint": "💡 Get the access password from Mr.🆖",
+      "saved": "Access Password saved — you're ready to go!"
+    },
+    "meter": {
+      "subtitle": "Enter your API Key to pay only for your exact AI usage.",
+      "label": "API Key",
+      "placeholder": "Enter your API key",
+      "saved": "API Key saved — you're ready to go!"
+    },
+    "done": {
+      "title": "You're all set!",
+      "subtitle": "Your account is ready. Here's how to start:",
+      "upload": {
+        "title": "Add a text",
+        "desc": "Upload an image or PDF, paste a URL, or type your own text."
+      },
+      "features": {
+        "title": "Explore the toolkit",
+        "desc": "Summaries, mind maps, reading tests, glossary, grammar games and more."
+      },
+      "settings": {
+        "title": "Fine-tune anytime",
+        "desc": "AI models, voices and notifications live in the Settings dialog."
+      }
+    }
+  },
   "header": {
     "session": {
       "export": "Export Session",

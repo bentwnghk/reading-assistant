@@ -24,6 +24,67 @@
     "message": "請在設定中啟用你的個人/學校訂閱，或配置你的 API 金鑰或訪問密碼以使用此應用程式。",
     "openSettings": "開啟設定"
   },
+  "onboarding": {
+    "title": "歡迎使用 Mr.🆖 ProReader",
+    "subtitle": "開始之前只需一步：選擇驅動 AI 功能的方式。",
+    "skip": "暫時跳過",
+    "back": "返回",
+    "save": "儲存並繼續",
+    "startReading": "開始閱讀",
+    "openSettingsHint": "想使用完整的設定對話框？",
+    "choice": {
+      "badgeRecommended": "推薦",
+      "subscription": {
+        "title": "訂閱",
+        "desc": "按月或按年付費，暢享全部功能 — 支援個人或學校方案。"
+      },
+      "free": {
+        "title": "免費",
+        "desc": "使用 Mr.🆖 提供的訪問密碼 — 無需付款。"
+      },
+      "meter": {
+        "title": "用量",
+        "desc": "使用自己的 API 金鑰，按實際 AI 用量付費。"
+      }
+    },
+    "subscription": {
+      "subtitle": "在下方選擇個人方案，或設定學校訂閱。",
+      "personalTitle": "個人方案",
+      "schoolTitle": "學校訂閱",
+      "schoolDesc": "為學校的學生和老師提供席位管理與帳單功能。",
+      "schoolCta": "設定學校方案",
+      "unavailable": "方案暫時無法載入。你也可以在設定中啟用訂閱。"
+    },
+    "free": {
+      "subtitle": "輸入 Mr.🆖 分享的訪問密碼，即可免費使用本應用。",
+      "label": "訪問密碼",
+      "placeholder": "輸入訪問密碼",
+      "hint": "💡 從 Mr.🆖 那裡取得訪問密碼",
+      "saved": "訪問密碼已儲存 — 一切就緒！"
+    },
+    "meter": {
+      "subtitle": "輸入你的 API 金鑰，只為實際 AI 用量付費。",
+      "label": "API 金鑰",
+      "placeholder": "輸入你的 API 金鑰",
+      "saved": "API 金鑰已儲存 — 一切就緒！"
+    },
+    "done": {
+      "title": "設定完成！",
+      "subtitle": "你的帳戶已就緒。可以這樣開始：",
+      "upload": {
+        "title": "新增文本",
+        "desc": "上傳圖片或 PDF、貼上網址，或輸入自己的文字。"
+      },
+      "features": {
+        "title": "探索學習工具",
+        "desc": "摘要、思維導圖、閱讀測驗、詞彙表、語法遊戲等。"
+      },
+      "settings": {
+        "title": "隨時微調",
+        "desc": "AI 模型、語音與通知選項都在設定對話框中。"
+      }
+    }
+  },
   "header": {
     "session": {
       "export": "匯出閱讀單元",
