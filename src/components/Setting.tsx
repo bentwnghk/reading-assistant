@@ -464,11 +464,6 @@ function Setting({ open, onClose }: SettingProps) {
                           {t("setting.accessPassword")}
                           <InfoTooltip content={t("setting.accessPasswordTip")} />
                         </FormLabel>
-                        {freeAccessGranted && (
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                            {t("setting.freeAccessNotice")}
-                          </p>
-                        )}
                         <FormControl className="form-field">
                           <Input
                             type="password"
@@ -479,6 +474,11 @@ function Setting({ open, onClose }: SettingProps) {
                             }
                           />
                         </FormControl>
+                        {freeAccessGranted && (
+                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                            {t("setting.freeAccessNotice")}
+                          </p>
+                        )}
                       </FormItem>
                     )}
                   />
