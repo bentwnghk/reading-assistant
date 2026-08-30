@@ -1,6 +1,6 @@
 import { getClient } from "./db"
 import { createReadingSession } from "./sessions"
-import { getSchoolForUser, getClassesForTeacher, getClassMembers, getStudentClassIds, getUsersInSchool, getAllSchools } from "./users"
+import { getSchoolForUser, getClassesForTeacher, getClassMembers, getStudentClassIds, getUsersInSchool, getTeachersInSchool, getAllSchools } from "./users"
 import type { ReadingStore } from "@/store/reading"
 import type { UserRole, ClassMember } from "./users"
 
@@ -434,6 +434,24 @@ export async function getShareTargets(
         })
       }
     }
+
+    // Fellow teachers in the same school (excluded self / banned).
+    // Label is a stable sentinel — RecipientPicker translates it client-side.
+    const schoolId = await getSchoolForUser(userId)
+    if (schoolId) {
+      const colleagues = await getTeachersInSchool(schoolId, userId)
+      if (colleagues.length > 0) {
+        result.push({
+          label: "Teachers",
+          users: colleagues.map((c) => ({
+            id: c.id,
+            name: c.name ?? null,
+            email: c.email ?? null,
+          })),
+        })
+      }
+    }
+
     return result
   }
 

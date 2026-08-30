@@ -1230,6 +1230,34 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
   }
 }
 
+/** Lean query for fellow teachers in a school (excluding the given user and banned users) */
+export async function getTeachersInSchool(
+  schoolId: string,
+  excludeUserId: string
+): Promise<Array<{ id: string; name: string | null; email: string | null }>> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT u.id, u.name, u.email
+       FROM users u
+       JOIN user_roles ur ON u.id = ur.user_id
+       WHERE u.school_id = $1
+         AND ur.role = 'teacher'
+         AND u.id <> $2
+         AND COALESCE(u.banned, FALSE) = FALSE
+       ORDER BY u.name ASC NULLS LAST, u.email ASC`,
+      [schoolId, excludeUserId]
+    )
+    return result.rows.map((row) => ({
+      id: row.id,
+      name: row.name ?? null,
+      email: row.email ?? null,
+    }))
+  } finally {
+    client.release()
+  }
+}
+
 /**
  * Returns true if the teacher belongs to the same school as the class,
  * or if role is admin (admins bypass school scoping).
