@@ -295,7 +295,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
               ? t("userManagement.classes.descriptionAdmin")
               : t("userManagement.classes.descriptionTeacher")}
         </p>
-        {(isSuperAdmin || isAdmin) && (
+        {(isSuperAdmin || isAdmin || isTeacher) && (
           <Button onClick={openCreateDialog} variant="outline" size="sm" className="shrink-0">
             <Plus className="h-4 w-4 mr-1" />
             {t("userManagement.classes.create")}
@@ -543,7 +543,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                 rows={3}
               />
             </div>
-            {!(isTeacher && selectedClass?.teacherId === session?.user?.id) && (
+            {!isTeacher && (
               <div>
                 <label className="text-sm font-medium">{t("userManagement.classes.teacher")}</label>
                 <Select

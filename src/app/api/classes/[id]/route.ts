@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { updateClass, deleteClass, getAllClasses, getClassesForSchool, getClassesForTeacher, canAccessClass, canManageClass, getSchoolForUser } from "@/lib/users"
+import { updateClass, deleteClass, getAllClasses, getClassesForSchool, getClassesForTeacher, canEditClass, canManageClass, getSchoolForUser } from "@/lib/users"
 
 export async function GET(
   _request: Request,
@@ -60,8 +60,8 @@ export async function PUT(
 
   const { id } = await params
 
-  if (!await canAccessClass(session.user.id, role, id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!await canEditClass(session.user.id, role, id)) {
+    return NextResponse.json({ error: "Forbidden - teachers can only edit their own classes" }, { status: 403 })
   }
 
   try {

@@ -5,6 +5,7 @@ import {
   addStudentToClass,
   removeStudentFromClass,
   canAccessClass,
+  canEditClass,
   getClassSchoolId,
   getSchoolForUser,
 } from "@/lib/users"
@@ -54,8 +55,8 @@ export async function POST(
 
   const { id } = await params
 
-  if (!await canAccessClass(session.user.id, session.user.role, id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!await canEditClass(session.user.id, session.user.role, id)) {
+    return NextResponse.json({ error: "Forbidden - teachers can only edit their own classes" }, { status: 403 })
   }
 
   try {
@@ -110,8 +111,8 @@ export async function DELETE(
 
   const { id } = await params
 
-  if (!await canAccessClass(session.user.id, session.user.role, id)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!await canEditClass(session.user.id, session.user.role, id)) {
+    return NextResponse.json({ error: "Forbidden - teachers can only edit their own classes" }, { status: 403 })
   }
 
   try {

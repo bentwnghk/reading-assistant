@@ -3288,7 +3288,7 @@
     "classes": {
       "descriptionSuperAdmin": "Manage all classes across all schools. Create, edit, delete classes and manage members.",
       "descriptionAdmin": "Manage classes within your school. Create, edit, delete classes and manage members.",
-      "descriptionTeacher": "Manage your own classes. Edit class details and manage student members.",
+      "descriptionTeacher": "Manage your own classes. Create classes, edit class details and manage student members.",
       "description": "Manage classes. Teachers can create and edit classes within their school.",
       "name": "Class Name",
       "school": "School",

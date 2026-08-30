@@ -1774,6 +1774,13 @@ export async function canManageClass(actorId: string, actorRole: string, classId
   }
 }
 
+export async function canEditClass(userId: string, userRole: string, classId: string): Promise<boolean> {
+  if (userRole === 'super-admin') return true
+  if (userRole === 'admin') return canAccessClass(userId, userRole, classId)
+  if (userRole === 'teacher') return isTeacherOfClass(userId, classId)
+  return false
+}
+
 export async function isTeacherOfClass(teacherId: string, classId: string): Promise<boolean> {
   const client = await getClient()
   try {
