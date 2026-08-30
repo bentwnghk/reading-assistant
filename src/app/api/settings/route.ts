@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { getUserSettings, upsertUserSettings, ensureSettingsTable } from "@/lib/settings"
+import { applyFreeAccessSettings } from "@/lib/free-access"
 import { NextResponse } from "next/server"
 import type { SettingStore } from "@/store/setting"
 
@@ -11,8 +12,20 @@ export async function GET() {
     }
 
     await ensureSettingsTable()
-    const settings = await getUserSettings(session.user.id)
-    return NextResponse.json(settings || {})
+    const stored = await getUserSettings(session.user.id)
+    // Users whose email matches FREE_ACCESS_EMAILS are defaulted onto Free
+    // (proxy) billing mode. No password is injected — AI access is granted
+    // identity-bound via a session-bound ticket cookie issued by
+    // /api/free-access/ticket, so the shared password never reaches clients.
+    // Persist the mode change so admin views (billing badge) stay consistent.
+    const { settings, changed } = applyFreeAccessSettings(
+      stored ?? {},
+      session.user.email
+    )
+    if (changed) {
+      await upsertUserSettings(session.user.id, settings)
+    }
+    return NextResponse.json(settings)
   } catch (error) {
     console.error("Error fetching settings:", error)
     return NextResponse.json(

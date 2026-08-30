@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { Md5 } from "ts-md5";
+import { hasValidFreeAccessTicket } from "@/utils/free-access-ticket";
 
 export const runtime = "edge";
 export const maxDuration = 300;
@@ -72,8 +73,12 @@ async function handler(req: NextRequest) {
   } else if (ACCESS_PASSWORD && API_KEY) {
     const token = clientAuth.replace("Bearer ", "");
     const validPasswords = parseAccessPasswords(ACCESS_PASSWORD);
-    
-    if (!token || !verifySignature(token, validPasswords)) {
+    const freeAccess = await hasValidFreeAccessTicket(req);
+
+    if (
+      !token ||
+      (!verifySignature(token, validPasswords) && !freeAccess)
+    ) {
       return NextResponse.json(
         { error: { code: 403, message: "No permissions", status: "FORBIDDEN" } },
         { status: 403 }

@@ -1,5 +1,6 @@
 import { getClient } from "./db"
 import { ensureSchoolSubscriptionTables } from "./school-subscription"
+import { isFreeAccessEmail } from "./free-access"
 import { calculateProgress as sharedCalculateProgress } from "@/utils/progress"
 
 export type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student'
@@ -823,7 +824,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       billingMode: normalizeBillingMode(row.billingMode),
       hasActiveSubscription: !!row.hasActiveSubscription,
       hasMeterApiKey: !!row.hasMeterApiKey,
-      hasAccessPassword: !!row.hasAccessPassword,
+      hasAccessPassword: !!row.hasAccessPassword || isFreeAccessEmail(row.email),
       banned: !!row.banned,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
@@ -1213,7 +1214,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       billingMode: normalizeBillingMode(row.billingMode),
       hasActiveSubscription: !!row.hasActiveSubscription,
       hasMeterApiKey: !!row.hasMeterApiKey,
-      hasAccessPassword: !!row.hasAccessPassword,
+      hasAccessPassword: !!row.hasAccessPassword || isFreeAccessEmail(row.email),
       banned: !!row.banned,
       classId: row.classId,
       className: row.className,

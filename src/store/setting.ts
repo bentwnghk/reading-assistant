@@ -122,6 +122,12 @@ export interface SettingStore {
   openaicompatibleApiKey: string;
   openaicompatibleApiProxy: string;
   accessPassword: string;
+  /**
+   * Identity-bound free (proxy) AI access granted via FREE_ACCESS_EMAILS.
+   * Client mirror of /api/free-access/ticket — true means AI requests work in
+   * proxy mode without an Access Password. Never synced to user_settings.
+   */
+  freeAccessGranted: boolean;
   language: string;
   theme: string;
   debug: "enable" | "disable";
@@ -183,6 +189,7 @@ function toSyncPayload(
     update: _update,
     reset: _reset,
     loadFromServer: _loadFromServer,
+    freeAccessGranted: _freeAccessGranted,
     ...payload
   } = settings;
 
@@ -227,6 +234,7 @@ export const defaultValues: SettingStore = {
   openaicompatibleApiKey: "",
   openaicompatibleApiProxy: "https://api.mr5ai.com",
   accessPassword: "",
+  freeAccessGranted: false,
   language: "system",
   theme: "system",
   debug: "disable",

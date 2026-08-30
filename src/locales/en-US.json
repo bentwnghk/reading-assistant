@@ -3000,6 +3000,7 @@
     "accessPassword": "Access Password",
     "accessPasswordPlaceholder": "Enter access password",
     "accessPasswordTip": "💡 Get the access password from Mr.🆖",
+    "freeAccessNotice": "✅ Free AI access is enabled for your account — no Access Password needed.",
     "language": "UI Language",
     "languageTip": "The system will auto-select based on your browser",
     "theme": "UI Theme",

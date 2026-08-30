@@ -60,6 +60,14 @@ services:
     environment:
       # Access Password (comma-separated, case-sensitive)
       ACCESS_PASSWORD: ""
+      # Email addresses/domains granted Free (proxy) AI access automatically
+      # (comma-separated, case-insensitive). Full addresses match exactly;
+      # "@domain" or "domain" matches every user at that domain. Matching
+      # signed-in users get "Free" billing mode with identity-bound access —
+      # no Access Password entry or sharing (a session-bound ticket cookie is
+      # used instead of the password).
+      # Example: "@school.edu,teacher@gmail.com"
+      FREE_ACCESS_EMAILS: ""
       OPENAI_COMPATIBLE_API_BASE_URL: "https://api.mr5ai.com"
       OPENAI_COMPATIBLE_API_KEY: ""
       # Fallback model when the primary AI model fails (default: gemini-3.7-flash)

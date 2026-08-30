@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { getCustomModelList, multiApiKeyPolling } from "@/utils/model";
 import { verifySignature, parseAccessPasswords, verifyDirectPassword } from "@/utils/signature";
+import { hasValidFreeAccessTicket } from "@/utils/free-access-ticket";
 import { generateAuthToken } from "@/utils/vertexAuth";
 const NODE_ENV = process.env.NODE_ENV;
 const accessPasswords = parseAccessPasswords(process.env.ACCESS_PASSWORD || "");
@@ -55,6 +56,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Identity-bound free access: users whose email matches FREE_ACCESS_EMAILS
+  // hold a short-lived ticket cookie (issued by /api/free-access/ticket) that
+  // is HMAC-signed with AUTH_SECRET and bound to their session token. It
+  // satisfies the access gates below without sharing the Access Password.
+  // Cheap short-circuit: requests without the cookie skip all crypto work.
+  const freeAccess = await hasValidFreeAccessTicket(request);
+
   const disabledAIProviders =
     DISABLED_AI_PROVIDER.length > 0 ? DISABLED_AI_PROVIDER.split(",") : [];
   const disabledSearchProviders =
@@ -94,7 +102,7 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("x-goog-api-key") || "";
     const isDisabledGeminiModel = hasDisabledGeminiModel();
     if (
-      !verifySignature(authorization, accessPasswords, Date.now()) ||
+      !(verifySignature(authorization, accessPasswords, Date.now()) || freeAccess) ||
       disabledAIProviders.includes("google") ||
       isDisabledGeminiModel
     ) {
@@ -134,10 +142,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("openrouter") ||
       isDisabledModel
@@ -174,10 +185,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("openaicompatible") ||
       isDisabledModel
@@ -215,10 +229,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("openai") ||
       isDisabledModel
@@ -255,7 +272,7 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("x-api-key") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(authorization, accessPasswords, Date.now()) ||
+      !(verifySignature(authorization, accessPasswords, Date.now()) || freeAccess) ||
       disabledAIProviders.includes("anthropic") ||
       isDisabledModel
     ) {
@@ -295,10 +312,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("deepseek") ||
       isDisabledModel
@@ -335,10 +355,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("xai") ||
       isDisabledModel
@@ -375,10 +398,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("mistral") ||
       isDisabledModel
@@ -415,7 +441,7 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("api-key") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(authorization, accessPasswords, Date.now()) ||
+      !(verifySignature(authorization, accessPasswords, Date.now()) || freeAccess) ||
       disabledAIProviders.includes("azure") ||
       isDisabledModel
     ) {
@@ -451,10 +477,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("google-vertex") ||
       isDisabledModel
@@ -497,10 +526,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("pollinations") ||
       isDisabledModel
@@ -527,10 +559,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
     if (
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledAIProviders.includes("ollama") ||
       isDisabledModel
@@ -556,10 +591,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     if (
       request.method.toUpperCase() !== "POST" ||
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledSearchProviders.includes("tavily")
     ) {
@@ -595,10 +633,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     if (
       request.method.toUpperCase() !== "POST" ||
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledSearchProviders.includes("firecrawl")
     ) {
@@ -634,10 +675,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     if (
       request.method.toUpperCase() !== "POST" ||
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledSearchProviders.includes("exa")
     ) {
@@ -673,10 +717,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     if (
       request.method.toUpperCase() !== "POST" ||
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledSearchProviders.includes("bocha")
     ) {
@@ -712,10 +759,13 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     if (
       request.method.toUpperCase() !== "POST" ||
-      !verifySignature(
-        authorization.substring(7),
-        accessPasswords,
-        Date.now()
+      !(
+        verifySignature(
+          authorization.substring(7),
+          accessPasswords,
+          Date.now()
+        ) ||
+        freeAccess
       ) ||
       disabledSearchProviders.includes("searxng")
     ) {
@@ -741,7 +791,10 @@ export async function middleware(request: NextRequest) {
     const authorization = request.headers.get("authorization") || "";
     if (
       request.method.toUpperCase() !== "POST" ||
-      !verifySignature(authorization.substring(7), accessPasswords, Date.now())
+      !(
+        verifySignature(authorization.substring(7), accessPasswords, Date.now()) ||
+        freeAccess
+      )
     ) {
       return NextResponse.json(
         { error: ERRORS.NO_PERMISSIONS },
@@ -768,7 +821,10 @@ export async function middleware(request: NextRequest) {
     } else if (request.method.toUpperCase() === "GET") {
       authorization = request.nextUrl.searchParams.get("password") || "";
     }
-    if (!verifyDirectPassword(authorization, process.env.ACCESS_PASSWORD || "")) {
+    if (
+      !verifyDirectPassword(authorization, process.env.ACCESS_PASSWORD || "") &&
+      !freeAccess
+    ) {
       return NextResponse.json(
         { error: ERRORS.NO_PERMISSIONS },
         { status: 403 }
@@ -789,7 +845,10 @@ export async function middleware(request: NextRequest) {
   }
   if (request.nextUrl.pathname.startsWith("/api/mcp")) {
     const authorization = request.headers.get("authorization") || "";
-    if (!verifyDirectPassword(authorization.substring(7), process.env.ACCESS_PASSWORD || "")) {
+    if (
+      !verifyDirectPassword(authorization.substring(7), process.env.ACCESS_PASSWORD || "") &&
+      !freeAccess
+    ) {
       const responseHeaders = new Headers();
       responseHeaders.set("WWW-Authenticate", ERRORS.NO_PERMISSIONS.message);
       return NextResponse.json(

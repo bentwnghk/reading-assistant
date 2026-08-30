@@ -507,7 +507,7 @@ body.toc-noscroll{overflow:hidden}
       </ul>
       <div class="callout tip"><strong>一個來源，一堂課</strong> 無論你輸入甚麼，上述所有產出皆由同一篇文章生成，並按讀者年齡自動調校——因此 9 歲讀者拿到的摘要、詞彙表與遊戲，全部都比 16 歲讀者拿到的簡單。</div>
 
-      <p>它可在瀏覽器中運行，亦可<strong>安裝為手機／桌面應用程式</strong>（漸進式網頁應用，PWA）。登入使用 Google 帳戶。在底層，每項 AI 功能可由個人或學校訂閱、你自己的 API 金鑰，或免費訪問密碼來驅動——由你選擇。</p>
+      <p>它可在瀏覽器中運行，亦可<strong>安裝為手機／桌面應用程式</strong>（漸進式網頁應用，PWA）。登入使用 Google 帳戶。在底層，每項 AI 功能可由個人或學校訂閱、你自己的 API 金鑰，或免費訪問來驅動——學校 Google 電郵網域已列入白名單者自動生效，否則使用 Mr.🆖 提供的訪問密碼。</p>
 
       <h3>本指南的對象</h3>
       <p>本手冊涵蓋<strong>所有功能</strong>，由首次登入到進階教師儀表板。大部分功能人人可用；少數僅限教師或管理員。全手冊中，受角色限制的項目均有清楚標示：</p>
@@ -568,7 +568,7 @@ body.toc-noscroll{overflow:hidden}
       <h3>開始前你需要準備</h3>
       <ul>
         <li>一個 <strong>Google 帳戶</strong>（個人、學校或工作場所皆可）。</li>
-        <li>三種<strong> AI 存取方式</strong>之一（見第 2 章）：訂閱、自己的 API 金鑰，或 Mr.🆖 提供的免費訪問密碼。</li>
+        <li>三種<strong> AI 存取方式</strong>之一（見第 2 章）：訂閱、自己的 API 金鑰，或免費訪問——學校 Google 電郵網域已列入白名單者自動生效，否則使用 Mr.🆖 提供的訪問密碼。</li>
         <li>閱讀材料：照片／掃描、PDF，或學校文本庫中的文章。</li>
       </ul>
 
@@ -697,7 +697,7 @@ body.toc-noscroll{overflow:hidden}
       <p>點按<b>開始閱讀！</b>載入文本並直接略過上傳步驟，或點按<b>換一篇</b>隨機另一篇。<b>稍後再說</b>關閉彈窗，停留在空白的閱讀頁面，可使用任何工作流程。</p>
 
       <h3>2.4 選擇你的 AI 存取模式</h3>
-      <p>任何 AI 功能運作前，你必須在 <b>設定 → 一般</b> 選擇一個 <strong>計費模式</strong>。共有三個選項。首次開啟設定時應用程式會自動建議一個，但你可隨時更改。</p>
+      <p>任何 AI 功能運作前，你必須在 <b>設定 → 一般</b> 選擇一個 <strong>計費模式</strong>。共有三個選項。首次開啟設定時應用程式會自動建議一個，但你可隨時更改。唯一例外：已列入白名單的學校帳戶（見下方模式 C）會在登入時自動設定，毋須任何配置。</p>
 
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:18px 0">
         <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--green)">
@@ -718,9 +718,9 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th></th><th>訂閱</th><th>計量（API 金鑰）</th><th>免費（密碼）</th></tr>
         <tr><th>誰付款</th><td>你（Stripe）</td><td>你（你的供應商）</td><td>Mr.🆖</td></tr>
-        <tr><th>你要輸入</th><td>無（結帳後）</td><td>API 金鑰</td><td>訪問密碼</td></tr>
+        <tr><th>你要輸入</th><td>無（結帳後）</td><td>API 金鑰</td><td>無（學校帳戶）或訪問密碼</td></tr>
         <tr><th>圖像生成</th><td>每天 2 張</td><td class="yes">無限</td><td>每天 1 張</td></tr>
-        <tr><th>設定難度</th><td>最易</td><td>需技術</td><td>容易（需密碼）</td></tr>
+        <tr><th>設定難度</th><td>最易</td><td>需技術</td><td>最易（學校帳戶全自動）</td></tr>
         <tr><th>最適合</th><td>多數用戶</td><td>進階用戶／開發者</td><td>試用</td></tr>
       </table>
 
@@ -803,8 +803,17 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="callout tip"><strong>為何用 計量？</strong> 可享<b>無限</b>圖像生成，並只為實際用量向自己的供應商付款。適合進階用戶。</div>
 
-      <h4>模式 C — 免費（訪問密碼）</h4>
-      <p>若 Mr.🆖 給了你訪問密碼則選此。此模式下 Mr.🆖 承擔 AI 成本，故每日限額較緊（每天 1 張 AI 圖像）。</p>
+      <h4>模式 C — 免費（學校帳戶或訪問密碼）</h4>
+      <div class="callout tip"><strong>學校帳戶：零設定</strong> 若你的學校 Google 電郵網域已列入本部署的白名單（例如 <code>@gs.keichi.edu.hk</code>），則毋須輸入任何東西——沒有密碼、沒有設定對話框。以學校 Google 帳戶登入後，所有 AI 功能即時可用：應用程式會自動為你選擇<b>免費</b>模式、略過首次設定對話框，並在 <b>設定 → 一般</b> 顯示綠色提示——<i>「✅ 你的帳戶已啟用免費 AI 訪問 — 無需訪問密碼。」</i>訪問權綁定你登入的學校帳戶（而非可分享的密碼），因此無法轉交校外人士。請確保以<b>學校</b>帳戶登入——個人 Google 帳戶不在白名單內。</div>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">⚙ 設定 → 一般 — 白名單學校帳戶</span></div>
+        <div class="mock-body">
+          <div style="margin-bottom:10px"><span class="small">計費模式 <span class="helpdot">?</span></span><br><span class="input-fake" style="width:auto;display:inline-block">免費 ▾</span></div>
+          <div style="margin-bottom:10px"><span class="small">訪問密碼 <span class="helpdot">?</span></span><br><span class="input-fake">輸入訪問密碼</span></div>
+          <p class="small" style="margin-top:8px;margin-bottom:0;color:var(--green)">✅ 你的帳戶已啟用免費 AI 訪問 — 無需訪問密碼。</p>
+        </div>
+      </div>
+      <p>不在白名單網域？若 Mr.🆖 給了你訪問密碼則選此。此模式下 Mr.🆖 承擔 AI 成本，故每日限額較緊（每天 1 張 AI 圖像）。</p>
       <ol class="steps">
         <li>在 <b>設定 → 一般 → 計費模式</b> 選 <b>免費</b>。</li>
         <li>輸入你收到的 <b>訪問密碼</b>。</li>
@@ -891,7 +900,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>計費模式</strong></td><td>訂閱 · 計量 · 免費</td><td>見第 2 章。</td></tr>
         <tr><td><strong>AI 供應商</strong></td><td>Mr.🆖 AI Hub</td><td>介面中唯一選項。</td></tr>
         <tr><td><strong>API 金鑰</strong>／<strong>API 基礎網址</strong></td><td>文字（密碼欄）</td><td>僅於 計量 模式顯示。API 基礎網址 唯讀（<code>https://api.mr5ai.com</code>）。</td></tr>
-        <tr><td><strong>訪問密碼</strong></td><td>文字（密碼欄）</td><td>僅於 免費 模式顯示。</td></tr>
+        <tr><td><strong>訪問密碼</strong></td><td>文字（密碼欄）</td><td>僅於 免費 模式顯示。帳戶已自動享有免費訪問時可留空——欄位上方會出現綠色提示。</td></tr>
         <tr><td><strong>訂閱面板</strong></td><td>定價／狀態卡</td><td>訂閱 模式且已登入時顯示。學校訂閱會停用個人訂閱。</td></tr>
         <tr><td><strong>界面語言</strong></td><td>跟隨系統 · English · 繁體中文</td><td>更改全部介面文字。</td></tr>
         <tr><td><strong>界面主題</strong></td><td>跟隨系統 · 淺色 · 深色</td><td>預設跟隨作業系統。</td></tr>
@@ -2647,7 +2656,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>C. 疑難排解／常見問題</h3>
       <table class="ref">
         <tr><th>問題</th><th>可能原因與解決</th></tr>
-        <tr><td><b>AI 功能無反應／報錯</b></td><td>未設定計費模式，或缺金鑰／密碼。到 <b>設定 → 一般</b> 完成一種設定（第 2 章）。</td></tr>
+        <tr><td><b>AI 功能無反應／報錯</b></td><td>未設定計費模式，或缺金鑰／密碼。到 <b>設定 → 一般</b> 完成一種設定（第 2 章）。若你的學校電郵網域已列入白名單，只需登入即可——請確認使用<b>學校</b> Google 帳戶而非個人帳戶。</td></tr>
+        <tr><td><b>在學校使用 AI 時出現「無權限」</b></td><td>你以個人 Google 帳戶登入了。請登出，再以學校帳戶登入——自動免費訪問綁定學校電郵網域。</td></tr>
         <tr><td><b>圖像生成「額度已滿」</b></td><td>當日視覺化配額已用罄。免費 每天 1 張、訂閱 每天 2 張，每日重設；或改用 計量 模式享無限。</td></tr>
         <tr><td><b>意外被登出</b></td><td>閒置逾時（預設 90 分鐘）或 3 天閱讀單元上限已到。閒置登出前 1 分鐘會有警告。</td></tr>
         <tr><td><b>導航後旋轉圖消失</b></td><td>非錯誤——生成在背景繼續；載入狀態存於 store，跨頁面保留。返回該區段即可見結果。</td></tr>
@@ -2661,7 +2671,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>D. 詞彙表</h3>
       <table class="ref">
         <tr><th>術語</th><th>含義</th></tr>
-        <tr><td><b>計費模式</b></td><td>AI 用量的付費方式：訂閱、計量（自有金鑰）或免費（訪問密碼）。</td></tr>
+        <tr><td><b>計費模式</b></td><td>AI 用量的付費方式：訂閱、計量（自有金鑰）或免費（學校帳戶或訪問密碼）。</td></tr>
+        <tr><td><b>免費訪問（白名單網域）</b></td><td>Google 電郵網域獲部署預先列入白名單的登入用戶，自動享有免費模式。毋須密碼；訪問權綁定帳戶工作階段，無法轉交非學校用戶。</td></tr>
         <tr><td><b>CEFR</b></td><td>歐洲共同語文參考架構——六個語言級別 A1（初學）→ C2（精通），用於詞彙難度高亮。</td></tr>
         <tr><td><b>SRS</b></td><td>間隔重複系統——Leitner 五格演算法，按遞增間隔排程詞彙複習。</td></tr>
         <tr><td><b>HMAC 簽章</b></td><td>用以安全傳送訪問密碼的單向雜湊（結合當前時間），無法被重用。</td></tr>

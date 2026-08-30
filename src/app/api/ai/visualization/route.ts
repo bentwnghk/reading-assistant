@@ -4,6 +4,7 @@ import { generateVisualizationPrompt, translateVisualizationPrompt } from "@/con
 import { multiApiKeyPolling } from "@/utils/model";
 import { getPool } from "@/lib/db";
 import { verifySubscriptionAccess } from "@/lib/subscription";
+import { isFreeAccessEmail } from "@/lib/free-access";
 import { verifySignature, parseAccessPasswords } from "@/utils/signature";
 
 const ZENMUX_API_KEY = process.env.ZENMUX_API_KEY || "";
@@ -275,6 +276,7 @@ function forbiddenResponse() {
 
 async function verifyModeAccess(
   userId: string,
+  email: string | null | undefined,
   mode: string | undefined,
   signature: string | undefined
 ): Promise<boolean> {
@@ -286,8 +288,15 @@ async function verifyModeAccess(
     }
   }
   if (mode === "proxy") {
-    if (!signature || ACCESS_PASSWORDS.length === 0) return false;
-    return verifySignature(signature, ACCESS_PASSWORDS, Date.now());
+    if (
+      signature &&
+      ACCESS_PASSWORDS.length > 0 &&
+      verifySignature(signature, ACCESS_PASSWORDS, Date.now())
+    ) {
+      return true;
+    }
+    // Identity-bound free access (FREE_ACCESS_EMAILS) — no password needed.
+    return isFreeAccessEmail(email);
   }
   if (mode === "local") {
     return true;
@@ -342,7 +351,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("mode") || undefined;
     const signature = request.headers.get("x-access-signature") || undefined;
-    const hasAccess = await verifyModeAccess(session.user.id, mode, signature);
+    const hasAccess = await verifyModeAccess(
+      session.user.id,
+      session.user.email,
+      mode,
+      signature
+    );
     if (!hasAccess) {
       return forbiddenResponse();
     }
@@ -375,7 +389,12 @@ export async function POST(request: NextRequest) {
     };
 
     const signature = request.headers.get("x-access-signature") || undefined;
-    const hasAccess = await verifyModeAccess(session.user.id, body.mode, signature);
+    const hasAccess = await verifyModeAccess(
+      session.user.id,
+      session.user.email,
+      body.mode,
+      signature
+    );
     if (!hasAccess) {
       return forbiddenResponse();
     }

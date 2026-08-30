@@ -33,10 +33,15 @@ function AuthStateManager() {
   useEffect(() => {
     const isAuthenticated = status === "authenticated"
     const userId = session?.user?.id || null
-    
+
     setUserId(userId)
     setAuthState(isAuthenticated, userId)
     setSettingUserId(userId)
+
+    let ticketInterval: ReturnType<typeof setInterval> | null = null
+    const cleanup = () => {
+      if (ticketInterval) clearInterval(ticketInterval)
+    }
 
     if (!isAuthenticated || !userId) {
       syncedUserIdRef.current = null
@@ -46,22 +51,45 @@ function AuthStateManager() {
       setStudyPlanDialogChecked(false)
       const currentLanguage = useSettingStore.getState().language
       useSettingStore.getState().loadFromServer({ ...defaultValues, language: currentLanguage })
-      return
+      return cleanup
     }
 
+    // Refresh the identity-bound free-access ticket cookie (24h TTL) so
+    // long-lived SPA sessions keep a valid ticket. granted=false also clears
+    // stale tickets for users removed from FREE_ACCESS_EMAILS.
+    const refreshFreeAccessFlag = async (): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/free-access/ticket")
+        if (!response.ok) return false
+        const data = (await response.json()) as { granted?: boolean }
+        return !!data.granted
+      } catch {
+        return false
+      }
+    }
+
+    ticketInterval = setInterval(() => {
+      refreshFreeAccessFlag().then((granted) => {
+        if (syncedUserIdRef.current === userId) {
+          useSettingStore.setState({ freeAccessGranted: granted })
+        }
+      })
+    }, 6 * 60 * 60 * 1000)
+
     if (syncedUserIdRef.current === userId) {
-      return
+      return cleanup
     }
 
     syncedUserIdRef.current = userId
     const expectedUserId = userId
-    
+
     const preSignInLanguage = useSettingStore.getState().language
 
     const sessionsPromise = useHistoryStore.getState().loadFromAPI?.() ?? Promise.resolve([])
     const settingsPromise = loadSettingsFromAPI()
+    const ticketPromise = refreshFreeAccessFlag()
 
-    Promise.all([sessionsPromise, settingsPromise]).then(([sessions, settings]) => {
+    Promise.all([sessionsPromise, settingsPromise, ticketPromise]).then(([sessions, settings, freeAccessGranted]) => {
         if (syncedUserIdRef.current !== expectedUserId) {
           return
         }
@@ -71,6 +99,10 @@ function AuthStateManager() {
         } else {
           useSettingStore.getState().update({ language: preSignInLanguage })
         }
+
+        // Applied after loadFromServer (which resets it to the default) so
+        // the server settings merge can't clobber the live ticket state.
+        useSettingStore.setState({ freeAccessGranted })
 
         // Reset restricted model selections (persisted server-side or in
         // hydrated localStorage) back to defaults for non-privileged users.
@@ -138,6 +170,8 @@ function AuthStateManager() {
           setShareCheckComplete(true)
         })
       })
+
+    return cleanup
   }, [session?.user?.id, session?.user?.role, status, t])
   
   return null

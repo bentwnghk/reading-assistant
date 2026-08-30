@@ -261,7 +261,7 @@ The middleware (`src/middleware.ts`) and `next.config.ts` rewrites proxy request
 
 - **AI Providers**: Google, Google Vertex, OpenRouter, OpenAI, Anthropic, DeepSeek, xAI, Mistral, Azure, OpenAI Compatible, Pollinations, Ollama.
 - **Search Providers**: Tavily, Firecrawl, Exa, Bocha, Brave, SearXNG.
-- **Access Control**: All proxied routes require HMAC-signed `ACCESS_PASSWORD`. The middleware replaces client tokens with server-side API keys.
+- **Access Control**: All proxied routes require HMAC-signed `ACCESS_PASSWORD`. The middleware replaces client tokens with server-side API keys. Exception: users whose email matches `FREE_ACCESS_EMAILS` are granted identity-bound free access — `/api/free-access/ticket` (Node) issues a 24h httpOnly ticket cookie, HMAC-signed with `AUTH_SECRET` and bound to the caller's NextAuth session token (SHA-256). The Edge middleware (`hasValidFreeAccessTicket` in `src/utils/free-access-ticket.ts`) verifies it without DB access; Node-side verifiers (visualization route, openaicompatible fallback) check the session email via `isFreeAccessEmail`. **The shared Access Password is never sent to whitelisted clients** — a copied ticket is useless without the matching session cookie.
 - **Disabled Providers**: `NEXT_PUBLIC_DISABLED_AI_PROVIDER` and `NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER` env vars can disable entire providers. `NEXT_PUBLIC_MODEL_LIST` supports `-all,+model` syntax for fine-grained model control.
 
 ### 4. Subscriptions & Billing (Stripe)
@@ -280,7 +280,7 @@ The middleware (`src/middleware.ts`) and `next.config.ts` rewrites proxy request
 ### 6. Environment Variables
 
 - Refer to `env.tpl` for all available environment variables (~70+ variables).
-- **Categories**: AI provider keys/URLs, search provider keys/URLs, auth (NextAuth + Google OAuth), database (`DATABASE_URL`, `POSTGRES_PASSWORD`), Stripe/billing, email (Mailtrap), access control (`ACCESS_PASSWORD`, `ADMIN_EMAILS`, `SUPER_ADMIN_EMAILS`), session security (`SESSION_MAX_AGE`, `MAX_CONCURRENT_SESSIONS`, `SESSION_IDLE_TIMEOUT_MINUTES`), MCP server config, feature flags (`NEXT_PUBLIC_DISABLED_AI_PROVIDER`, `NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER`, `NEXT_PUBLIC_MODEL_LIST`).
+- **Categories**: AI provider keys/URLs, search provider keys/URLs, auth (NextAuth + Google OAuth), database (`DATABASE_URL`, `POSTGRES_PASSWORD`), Stripe/billing, email (Mailtrap), access control (`ACCESS_PASSWORD`, `FREE_ACCESS_EMAILS`, `ADMIN_EMAILS`, `SUPER_ADMIN_EMAILS`), session security (`SESSION_MAX_AGE`, `MAX_CONCURRENT_SESSIONS`, `SESSION_IDLE_TIMEOUT_MINUTES`), MCP server config, feature flags (`NEXT_PUBLIC_DISABLED_AI_PROVIDER`, `NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER`, `NEXT_PUBLIC_MODEL_LIST`).
 - **Never commit** `.env` or `.env.local` files.
 - **CRITICAL — Runtime vs Build-time**: `NEXT_PUBLIC_*` env vars are **inlined at build time** — changing them requires a rebuild. For values that should be configurable at deployment/runtime (e.g., timeouts, limits, feature toggles), use **server-side env vars** (no `NEXT_PUBLIC_` prefix) and expose them to the client via an API route (e.g., `/api/config`). The Docker image is built once and deployed with different env var values across environments, so avoid `NEXT_PUBLIC_*` for anything that varies per deployment.
 

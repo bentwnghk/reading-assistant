@@ -507,7 +507,7 @@ body.toc-noscroll{overflow:hidden}
       </ul>
       <div class="callout tip"><strong>One source, one lesson</strong> Whatever you feed in, every output above is generated from the same source text and calibrated to the reader's age — so a 9-year-old's summary, glossary and games all land simpler than a 16-year-old's.</div>
 
-      <p>It works in the browser and can be <strong>installed as a mobile / desktop app</strong> (a Progressive Web App, PWA). Sign-in uses a Google account. Under the hood, every AI feature can be powered by your personal or school subscription, your own API key, or a free access password — you choose.</p>
+      <p>It works in the browser and can be <strong>installed as a mobile / desktop app</strong> (a Progressive Web App, PWA). Sign-in uses a Google account. Under the hood, every AI feature can be powered by your personal or school subscription, your own API key, or free access — automatic if your school's Google email domain is whitelisted, otherwise via an access password from Mr.🆖.</p>
 
       <h3>Who this guide is for</h3>
       <p>This manual documents <strong>every feature</strong>, from first sign-in to advanced teacher dashboards. Most features are available to everyone; a few are reserved for teachers or administrators. Throughout the guide, role-restricted items are clearly flagged:</p>
@@ -568,7 +568,7 @@ body.toc-noscroll{overflow:hidden}
       <h3>What you'll need before you start</h3>
       <ul>
         <li>A <strong>Google account</strong> (personal, school, or workspace — any Google login works).</li>
-        <li>One of three <strong>AI access methods</strong> (covered in Chapter 2): a subscription, your own API key, or a free access password from Mr.🆖.</li>
+        <li>One of three <strong>AI access methods</strong> (covered in Chapter 2): a subscription, your own API key, or free access — automatic if your school's Google email domain is whitelisted, otherwise via an access password from Mr.🆖.</li>
         <li>Reading material: a photo/scan, a PDF, or a text from your school's repository.</li>
       </ul>
 
@@ -697,7 +697,7 @@ body.toc-noscroll{overflow:hidden}
       <p>Tap <b>Start reading!</b> to load the text and skip the upload step entirely, or <b>Pick another</b> to roll a different text. <b>Maybe later</b> dismisses the popup and leaves you on a blank reading page ready for any workflow.</p>
 
       <h3>2.4 Choosing your AI access mode</h3>
-      <p>Before any AI feature will work, you must pick a <strong>Billing Mode</strong> in <b>Settings → General</b>. There are three options. The app auto-suggests one when you first open Settings, but you can change it any time.</p>
+      <p>Before any AI feature will work, you must pick a <strong>Billing Mode</strong> in <b>Settings → General</b>. There are three options. The app auto-suggests one when you first open Settings, but you can change it any time. One exception: whitelisted school accounts (Mode C below) are set up automatically the moment you sign in — nothing to configure.</p>
 
       <div style="display:flex;gap:14px;flex-wrap:wrap;margin:18px 0">
         <div class="card-mini" style="flex:1;min-width:180px;border-top:4px solid var(--green)">
@@ -718,9 +718,9 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th></th><th>Subscription</th><th>Meter (API Key)</th><th>Free (Password)</th></tr>
         <tr><th>Who pays</th><td>You (Stripe)</td><td>You (your provider)</td><td>Mr.🆖</td></tr>
-        <tr><th>What you enter</th><td>Nothing (after checkout)</td><td>API key</td><td>Access password</td></tr>
+        <tr><th>What you enter</th><td>Nothing (after checkout)</td><td>API key</td><td>Nothing (school account) or an access password</td></tr>
         <tr><th>Image generation</th><td>2 / day</td><td class="yes">Unlimited</td><td>1 / day</td></tr>
-        <tr><th>Setup difficulty</th><td>Easiest</td><td>Technical</td><td>Easy (need a password)</td></tr>
+        <tr><th>Setup difficulty</th><td>Easiest</td><td>Technical</td><td>Easiest (automatic for school accounts)</td></tr>
         <tr><th>Best for</th><td>Most users</td><td>Power users / devs</td><td>Trying it out</td></tr>
       </table>
 
@@ -803,8 +803,17 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="callout tip"><strong>Why Meter?</strong> You get <b>unlimited</b> image generation and pay only for your actual usage through your own provider. Ideal for power users.</div>
 
-      <h4>Mode C — Free (Access Password)</h4>
-      <p>Choose this if Mr.🆖 gave you an access password. In this mode Mr.🆖 pays the AI cost, so daily limits are tighter (1 AI image per day).</p>
+      <h4>Mode C — Free (school account or Access Password)</h4>
+      <div class="callout tip"><strong>School accounts: zero setup</strong> If your school's Google email domain is whitelisted for this deployment (for example <code>@gs.keichi.edu.hk</code>), there is nothing to enter — no password, no setup dialog. Sign in with your school Google account and every AI feature works immediately: the app selects <b>Free</b> for you automatically, the first-run setup dialog is skipped, and <b>Settings → General</b> shows a green notice — <i>"✅ Free AI access is enabled for your account — no Access Password needed."</i> Access is tied to your signed-in school account (never to a shareable password), so it can't be passed on to people outside the school. Just make sure you sign in with your <b>school</b> account — personal Google accounts are not whitelisted.</div>
+      <div class="mock">
+        <div class="mock-bar"><span class="pill">⚙ Settings → General — whitelisted school account</span></div>
+        <div class="mock-body">
+          <div style="margin-bottom:10px"><span class="small">Billing Mode <span class="helpdot">?</span></span><br><span class="input-fake" style="width:auto;display:inline-block">Free ▾</span></div>
+          <div style="margin-bottom:10px"><span class="small">Access Password <span class="helpdot">?</span></span><br><span class="input-fake">Enter access password</span></div>
+          <p class="small" style="margin-top:8px;margin-bottom:0;color:var(--green)">✅ Free AI access is enabled for your account — no Access Password needed.</p>
+        </div>
+      </div>
+      <p>Not on a whitelisted domain? Choose this mode if Mr.🆖 gave you an access password. In this mode Mr.🆖 pays the AI cost, so daily limits are tighter (1 AI image per day).</p>
       <ol class="steps">
         <li>In <b>Settings → General → Billing Mode</b>, choose <b>Free</b>.</li>
         <li>Enter the <b>Access Password</b> you received.</li>
@@ -891,7 +900,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>Billing Mode</strong></td><td>Subscription · Meter · Free</td><td>See Chapter 2.</td></tr>
         <tr><td><strong>AI Provider</strong></td><td>Mr.🆖 AI Hub</td><td>Single option in the UI.</td></tr>
         <tr><td><strong>API Key</strong> / <strong>API Base URL</strong></td><td>text (password)</td><td>Shown only when mode = Meter. Base URL read-only (<code>https://api.mr5ai.com</code>).</td></tr>
-        <tr><td><strong>Access Password</strong></td><td>text (password)</td><td>Shown only when mode = Free.</td></tr>
+        <tr><td><strong>Access Password</strong></td><td>text (password)</td><td>Shown only when mode = Free. Can stay empty when your account has automatic free access — a green notice appears above the field.</td></tr>
         <tr><td><strong>Subscription panels</strong></td><td>Pricing / status cards</td><td>Shown when mode = Subscription &amp; signed in. School sub disables personal.</td></tr>
         <tr><td><strong>UI Language</strong></td><td>System · English · 繁體中文</td><td>Changes all interface text.</td></tr>
         <tr><td><strong>UI Theme</strong></td><td>System · Light · Dark</td><td>Follows your OS by default.</td></tr>
@@ -2647,7 +2656,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>C. Troubleshooting / FAQ</h3>
       <table class="ref">
         <tr><th>Problem</th><th>Likely cause &amp; fix</th></tr>
-        <tr><td><b>AI features do nothing / error</b></td><td>No Billing Mode set, or key/password missing. Open <b>Settings → General</b> and complete one of the three setup modes (Chapter 2).</td></tr>
+        <tr><td><b>AI features do nothing / error</b></td><td>No Billing Mode set, or key/password missing. Open <b>Settings → General</b> and complete one of the three setup modes (Chapter 2). If your school email domain is whitelisted, signing in is enough — check you're using the <b>school</b> Google account, not a personal one.</td></tr>
+        <tr><td><b>"No permissions" on AI calls at school</b></td><td>You're signed in with a personal Google account. Sign out, then sign in again with your school account — automatic free access is tied to the school email domain.</td></tr>
         <tr><td><b>"Limit reached" on image generation</b></td><td>Daily visualization quota hit. Free = 1/day, Subscription = 2/day. Resets daily, or switch to Meter mode for unlimited.</td></tr>
         <tr><td><b>Signed out unexpectedly</b></td><td>The idle timeout (default 90 min) or the 3-day session ceiling was reached. A 1-minute warning toast precedes idle sign-out.</td></tr>
         <tr><td><b>Spinner vanished mid-generation after navigating</b></td><td>Not a bug — generation continues in the background; the loading state lives in the store and survives navigation. Return to the section to see results.</td></tr>
@@ -2661,7 +2671,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>D. Glossary of terms</h3>
       <table class="ref">
         <tr><th>Term</th><th>Meaning</th></tr>
-        <tr><td><b>Billing Mode</b></td><td>How AI usage is paid for: Subscription, Meter (your key), or Free (access password).</td></tr>
+        <tr><td><b>Billing Mode</b></td><td>How AI usage is paid for: Subscription, Meter (your key), or Free (school account or access password).</td></tr>
+        <tr><td><b>Free access (whitelisted domain)</b></td><td>Automatic Free-mode access for signed-in users whose Google email domain is pre-listed by the deployment. No password involved; access is bound to your account session and can't be shared with non-school users.</td></tr>
         <tr><td><b>CEFR</b></td><td>Common European Framework of Reference — six language levels A1 (beginner) → C2 (mastery), used for word-difficulty highlighting.</td></tr>
         <tr><td><b>SRS</b></td><td>Spaced Repetition System — the Leitner 5-box algorithm that schedules vocabulary reviews at increasing intervals.</td></tr>
         <tr><td><b>HMAC signature</b></td><td>The one-way hash used to send your access password safely (combined with the current time) so it can't be replayed.</td></tr>

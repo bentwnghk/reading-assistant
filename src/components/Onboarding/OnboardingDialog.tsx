@@ -163,7 +163,7 @@ function StepDots({ total, active }: { total: number; active: number }) {
 function OnboardingDialog() {
   const { t } = useTranslation();
   const { data: sessionData } = useSession();
-  const { openaicompatibleApiKey, accessPassword, update } = useSettingStore();
+  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, update } = useSettingStore();
   const { hasCompletedOnboarding, setHasCompletedOnboarding, setOpenSetting } =
     useGlobalStore();
   const {
@@ -204,7 +204,8 @@ function OnboardingDialog() {
     hasActivePersonalSub ||
     hasActiveSchoolSub ||
     openaicompatibleApiKey ||
-    accessPassword
+    accessPassword ||
+    freeAccessGranted
   );
 
   useEffect(() => {

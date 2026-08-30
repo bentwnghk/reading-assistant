@@ -2,6 +2,15 @@
 # Supports multiple passwords separated by commas (e.g., pass1,pass2,pass3)
 ACCESS_PASSWORD=
 
+# (Optional) Email addresses/domains granted Free (proxy) AI access automatically
+# Comma-separated, case-insensitive. Full addresses match exactly; entries with
+# a leading "@" (or bare domains) match every user at that domain. Users signed
+# in with a matching Google account get "Free" billing mode with identity-bound
+# access — no Access Password entry or sharing needed (the browser holds a
+# session-bound ticket cookie instead of the password).
+# Example: @school.edu,teacher@gmail.com
+FREE_ACCESS_EMAILS=
+
 # ─── Session Security Configuration ─────────────────────────────────────────
 # Session maximum lifetime in seconds (default: 259200 = 3 days)
 SESSION_MAX_AGE=259200
