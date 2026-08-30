@@ -39,6 +39,17 @@ import { cn } from "@/utils/style";
 
 type OnboardingStep = "choice" | "subscription" | "free" | "meter" | "done";
 
+// Session-scope dismissal (module-level, resets on full reload): skip/X/ESC must
+// not persist hasCompletedOnboarding, but still has to stop the auto-open
+// effect from immediately re-showing the dialog in the same SPA session.
+let _onboardingDismissed = false;
+function setOnboardingDismissed(value: boolean) {
+  _onboardingDismissed = value;
+}
+function isOnboardingDismissed() {
+  return _onboardingDismissed;
+}
+
 function OptionCard({
   icon: Icon,
   title,
@@ -189,6 +200,7 @@ function OnboardingDialog() {
 
   useEffect(() => {
     if (open || hasCompletedOnboarding || !isHydrated) return;
+    if (isOnboardingDismissed()) return;
     if (personalLoading || schoolLoading) return;
     if (!needsSetup) {
       setHasCompletedOnboarding(true);
@@ -229,12 +241,12 @@ function OnboardingDialog() {
   }
 
   function handleOpenChange(next: boolean) {
-    if (!next) complete();
+    if (!next) setOnboardingDismissed(true);
     setOpen(next);
   }
 
   function handleSkip() {
-    complete();
+    setOnboardingDismissed(true);
     setOpen(false);
   }
 

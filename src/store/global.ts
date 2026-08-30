@@ -8,7 +8,8 @@ interface GlobalStore {
   /** Optional tab to focus when the Dashboard dialog opens ("overview" | "sessions"). */
   dashboardInitialTab: string;
   hasOpenedAbout: boolean;
-  /** Set once the user completes, skips, or dismisses the first-run setup wizard. */
+  /** Persisted only when the user completes setup (saves credentials, starts
+   *  checkout, or jumps into Settings). Skip/dismiss is session-scope only. */
   hasCompletedOnboarding: boolean;
   openTutorChat: boolean;
   tutorChatSelectedText: string;
