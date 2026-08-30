@@ -464,21 +464,23 @@ function Setting({ open, onClose }: SettingProps) {
                           {t("setting.accessPassword")}
                           <InfoTooltip content={t("setting.accessPasswordTip")} />
                         </FormLabel>
-                        <FormControl className="form-field">
-                          <Input
-                            type="password"
-                            placeholder={t("setting.accessPasswordPlaceholder")}
-                            {...field}
-                            onBlur={() =>
-                              updateSetting("accessPassword", form.getValues("accessPassword"))
-                            }
-                          />
-                        </FormControl>
-                        {freeAccessGranted && (
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                            {t("setting.freeAccessNotice")}
-                          </p>
-                        )}
+                        <div className="col-span-3 lg:col-span-4 space-y-1">
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder={t("setting.accessPasswordPlaceholder")}
+                              {...field}
+                              onBlur={() =>
+                                updateSetting("accessPassword", form.getValues("accessPassword"))
+                              }
+                            />
+                          </FormControl>
+                          {freeAccessGranted && (
+                            <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                              {t("setting.freeAccessNotice")}
+                            </p>
+                          )}
+                        </div>
                       </FormItem>
                     )}
                   />
