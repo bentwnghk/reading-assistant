@@ -358,13 +358,10 @@ function computeStudentMetrics(
     if (item.collocations) {
       getDay(toDateString(item.collocationsGeneratedAt || item.createdAt)).collocations += 1;
     }
-    // NOTE: spelling games are counted solely from vocabulary review sessions
-    // (the loop below) to avoid double-counting — every spelling completion
-    // (solo/multiplayer, reading/vocabulary page) creates a review-session row
-    // via the onComplete callback, which is the authoritative per-game record.
-    if (item.vocabularyQuizScore && item.vocabularyQuizScore > 0) {
-      getDay(toDateString(item.vocabQuizCompletedAt || item.createdAt)).vocabQuiz += item.vocabQuizzesCompleted || 1;
-    }
+    // NOTE: spelling games and vocab quizzes are counted solely from vocabulary
+    // review sessions (the loop below) to avoid double-counting — every spelling
+    // / quiz completion (reading or vocabulary page) creates a review-session
+    // row via the onComplete callback, which is the authoritative per-game record.
     if (item.testCompleted) {
       getDay(toDateString(item.readingTestCompletedAt || item.createdAt)).readingTest += item.testsCompleted || 1;
     }
