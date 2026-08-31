@@ -136,14 +136,16 @@ Rewrite this text to match the student's English level.
 
 **CRITICAL REQUIREMENTS:**
 - **Preserve the exact same title.**
-- **Preserve the exact same paragraph structure** - same number of paragraphs in the same order.
-- **Do not merge, split, or rearrange paragraphs.**
+- **Preserve any subtitles, headings, and subheadings exactly as they appear** - same wording, same order, same Markdown heading levels (\`#\`, \`##\`, etc.).
+- **Preserve the exact same section and paragraph structure** - same number of sections and paragraphs in the same order, with the same breaks between them.
+- **Do not merge, split, or rearrange sections or paragraphs.**
+- **Preserve any paragraph numbers in square brackets (e.g., [1], [2], [3]) exactly as they appear at the start of each paragraph** - do not remove, renumber, or alter them.
 - Simplify complex vocabulary to age-appropriate words.
 - Break long sentences into shorter, clearer ones.
 - Keep the same meaning and key information.
 - Use the same language as the original text.
 
-**Respond with ONLY the adapted text, maintaining the paragraph structure.**`;
+**Respond with ONLY the adapted text, maintaining the original heading, section, and paragraph structure.**`;
 }
 
 export function simplifyTextPrompt(age: number, text: string) {
@@ -158,8 +160,10 @@ Make this text even simpler while preserving its core meaning.
 
 **CRITICAL REQUIREMENTS:**
 - **Preserve the exact same title.**
-- **Preserve the exact same paragraph structure** - same number of paragraphs in the same order.
-- **Do not merge, split, or rearrange paragraphs.**
+- **Preserve any subtitles, headings, and subheadings exactly as they appear** - same wording, same order, same Markdown heading levels (\`#\`, \`##\`, etc.).
+- **Preserve the exact same section and paragraph structure** - same number of sections and paragraphs in the same order, with the same breaks between them.
+- **Do not merge, split, or rearrange sections or paragraphs.**
+- **Preserve any paragraph numbers in square brackets (e.g., [1], [2], [3]) exactly as they appear at the start of each paragraph** - do not remove, renumber, or alter them.
 - Use the simplest possible vocabulary (basic English words).
 - Make sentences very short and clear (6-10 words max per sentence).
 - Replace difficult words with easier synonyms.
@@ -167,7 +171,7 @@ Make this text even simpler while preserving its core meaning.
 - Use simple sentence structures (subject-verb-object).
 - Keep the same meaning but make it extremely easy to read.
 
-  **Respond with ONLY the simplified text, maintaining the paragraph structure.**`;
+  **Respond with ONLY the simplified text, maintaining the original heading, section, and paragraph structure.**`;
 }
 
 export function extractTitleFromTextPrompt(text: string): string {
