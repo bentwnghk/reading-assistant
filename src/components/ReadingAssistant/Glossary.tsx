@@ -164,20 +164,28 @@ function Glossary() {
     []
   );
 
+  // Shared by the flashcard review, the vocabulary quiz and the spelling game —
+  // persists the completed round to /api/vocabulary/review-sessions so it shows
+  // up in the My Vocabulary History tab.
   const handleGameComplete = useCallback(
     (mode: VocabularyReviewMode) =>
-      (results: { word: string; correct: boolean }[]) => {
+      (
+        results: { word: string; correct: boolean; rating?: SRSAction; attempts?: number }[],
+        ratingCounts?: VocabularyRatingCounts
+      ) => {
         if (results.length === 0) return;
         const reviewResults: VocabularyReviewResult[] = results.map((r) => ({
           word: r.word,
           correct: r.correct,
           masteryBefore: 0,
           masteryAfter: 0,
+          rating: r.rating,
+          attempts: r.attempts,
         }));
         fetch("/api/vocabulary/review-sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode, results: reviewResults }),
+          body: JSON.stringify({ mode, results: reviewResults, ratingCounts }),
         }).catch((_err) => {});
       },
     [],
@@ -534,7 +542,13 @@ function Glossary() {
       case "phrases":
         return renderGlossaryTable(phraseEntries, "reading.glossary.phrasesEmpty");
       case "flashcard":
-        return <VocabularyFlashcard glossary={sortedGlossary} onWordAction={handleSRSAction} />;
+        return (
+          <VocabularyFlashcard
+            glossary={sortedGlossary}
+            onWordAction={handleSRSAction}
+            onComplete={handleGameComplete("flashcard")}
+          />
+        );
       case "quiz":
         return (
           <VocabularyQuiz
