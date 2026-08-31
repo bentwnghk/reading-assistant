@@ -395,15 +395,6 @@ function computeStudentMetrics(
         getDay(toDateString(item.createdAt)).tutorQuestion += item.tutorQuestionCount;
       }
     }
-    if (item.flashcardReviewCount > 0) {
-      if (item.flashcardReviewTimestamps.length > 0) {
-        for (const ts of item.flashcardReviewTimestamps) {
-          getDay(toDateString(ts || item.createdAt)).flashcardReview += 1;
-        }
-      } else {
-        getDay(toDateString(item.createdAt)).flashcardReview += item.flashcardReviewCount;
-      }
-    }
   }
 
   // Review sessions from the My Vocabulary page — add to daily activities

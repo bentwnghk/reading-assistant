@@ -256,12 +256,11 @@ export function computeDashboardMetrics(
     0
   );
 
-  const totalFlashcardReviews =
-    sorted.reduce(
-      (sum, item) => sum + (item.flashcardReviewDates || []).length,
-      0
-    ) +
-    reviewSessions.filter((s) => s.mode === "flashcard").length;
+  // Flashcard reviews are counted solely from vocabulary review sessions —
+  // every deck completion (reading or vocabulary page) creates a
+  // review-session row via the onComplete callback, while the session's
+  // flashcardReviewDates would duplicate the reading-page ones.
+  const totalFlashcardReviews = reviewSessions.filter((s) => s.mode === "flashcard").length;
 
   const readingSpellingScores: SessionScore[] = sorted
     .filter((h) => (h.spellingGameBestScore || 0) > 0)
@@ -430,10 +429,6 @@ export function computeDashboardMetrics(
       getDay(dailyMap, toDateString(msg.timestamp || item.createdAt)).tutorQuestion += 1;
     }
 
-    // flashcardReview — array of completion timestamps
-    for (const ts of (item.flashcardReviewDates || [])) {
-      getDay(dailyMap, toDateString(ts)).flashcardReview += 1;
-    }
   }
 
   // Review sessions from the My Vocabulary page — add to daily activities
