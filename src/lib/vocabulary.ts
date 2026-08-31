@@ -359,17 +359,44 @@ export async function createReviewSession(
   const now = Date.now();
   const sessionId = crypto.randomUUID();
 
-  const totalWords = results.length;
-  const correctCount = results.filter((r) => r.correct).length;
+  // Clients can't reliably know each word's mastery level — the main-page
+  // glossary games and spelling battles review words that live in
+  // user_vocabulary, not in any client store, so they send masteryAfter as a
+  // placeholder 0. The per-word SRS PATCHes of the same review round have
+  // already committed by the time this POST lands, so the authoritative
+  // post-review level is simply the row's current mastery_level. Enrich from
+  // the DB; keep the client value only for words that were never synced into
+  // user_vocabulary.
+  let enrichedResults = results;
+  if (results.length > 0) {
+    const { rows: masteryRows } = await pool.query(
+      `SELECT word, mastery_level FROM user_vocabulary
+       WHERE user_id = $1 AND word = ANY($2::text[])`,
+      [userId, results.map((r) => r.word.toLowerCase())]
+    );
+    const masteryByWord = new Map<string, number>(
+      masteryRows.map((row) => [row.word as string, row.mastery_level as number])
+    );
+    if (masteryByWord.size > 0) {
+      enrichedResults = results.map((r) => ({
+        ...r,
+        masteryAfter:
+          masteryByWord.get(r.word.toLowerCase()) ?? r.masteryAfter,
+      }));
+    }
+  }
+
+  const totalWords = enrichedResults.length;
+  const correctCount = enrichedResults.filter((r) => r.correct).length;
   const accuracy = totalWords > 0 ? Math.round((correctCount / totalWords) * 100) : 0;
 
   const counts: VocabularyRatingCounts | null =
     mode === "flashcard"
       ? ratingCounts ?? {
-          again: results.filter((r) => r.rating === "again").length,
-          hard: results.filter((r) => r.rating === "hard").length,
-          good: results.filter((r) => r.rating === "good").length,
-          easy: results.filter((r) => r.rating === "easy").length,
+          again: enrichedResults.filter((r) => r.rating === "again").length,
+          hard: enrichedResults.filter((r) => r.rating === "hard").length,
+          good: enrichedResults.filter((r) => r.rating === "good").length,
+          easy: enrichedResults.filter((r) => r.rating === "easy").length,
         }
       : null;
 
@@ -379,14 +406,14 @@ export async function createReviewSession(
     [sessionId, userId, mode, totalWords, correctCount, accuracy, counts ? JSON.stringify(counts) : null, entryType, now - 60000, now]
   );
 
-  if (results.length > 0) {
-    const values = results
+  if (enrichedResults.length > 0) {
+    const values = enrichedResults
       .map(
         (_, i) =>
           `($${i * 7 + 1}, $${i * 7 + 2}, $${i * 7 + 3}, $${i * 7 + 4}, $${i * 7 + 5}, $${i * 7 + 6}, $${i * 7 + 7})`
       )
       .join(", ");
-    const params = results.flatMap((r) => [
+    const params = enrichedResults.flatMap((r) => [
       crypto.randomUUID(),
       sessionId,
       r.word,

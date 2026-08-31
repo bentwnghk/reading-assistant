@@ -16,7 +16,7 @@ import { sortGlossaryByPriority } from "@/utils/vocabulary";
 interface VocabularyFlashcardProps {
   glossary: GlossaryEntry[];
   mergedRatings?: Record<string, GlossaryRating>;
-  onWordAction?: (word: string, action: "again" | "hard" | "good" | "easy") => void;
+  onWordAction?: (word: string, action: "again" | "hard" | "good" | "easy") => void | Promise<unknown>;
   onComplete?: (results: { word: string; correct: boolean; rating: SRSAction; attempts: number }[], ratingCounts: VocabularyRatingCounts) => void;
   /**
    * True when rendered outside the reading-session context (e.g. the
@@ -51,6 +51,9 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
   const [srsCounts, setSrsCounts] = useState<SRSCounts>({ again: 0, hard: 0, good: 0, easy: 0 });
   const [isReviewComplete, setIsReviewComplete] = useState(false);
   const flashcardResultsRef = useRef<Map<string, { correct: boolean; rating: SRSAction; attempts: number }>>(new Map());
+  // Per-word SRS PATCH promises fired during the session — drained before
+  // onComplete so the review-session record is written after they commit.
+  const srsSettledRef = useRef<Promise<unknown>[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Keep a ref to the latest effectiveRatings so toolbar handlers always use fresh data
@@ -72,6 +75,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
     setIsFlipped(false);
     setIsReviewComplete(false);
     setSrsCounts({ again: 0, hard: 0, good: 0, easy: 0 });
+    srsSettledRef.current = [];
   }, []);
 
   // Initialize queue only when the glossary list itself changes, not on every rating update.
@@ -176,7 +180,10 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
       });
 
       if (onWordAction) {
-        onWordAction(current.word, action);
+        const outcome = onWordAction(current.word, action);
+        if (outcome instanceof Promise) {
+          srsSettledRef.current.push(outcome);
+        }
       }
 
       setReviewQueue(newQueue);
@@ -187,12 +194,27 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         if (!disableSessionGlossary) {
           incrementFlashcardReviewCount();
         }
+        const settled = srsSettledRef.current;
+        srsSettledRef.current = [];
         if (onComplete) {
           const results = Array.from(flashcardResultsRef.current.entries()).map(
             ([word, data]) => ({ word, correct: data.correct, rating: data.rating, attempts: data.attempts })
           );
-          onComplete(results, { ...srsCounts, [action]: srsCounts[action] + 1 });
-          flashcardResultsRef.current.clear();
+          const counts = { ...srsCounts, [action]: srsCounts[action] + 1 };
+          // Wait for the per-word SRS PATCHes to commit before recording the
+          // review session, so the server-side mastery enrichment reads the
+          // already-updated levels.
+          if (settled.length > 0) {
+            void Promise.all(settled)
+              .catch(() => {})
+              .then(() => {
+                onComplete(results, counts);
+                flashcardResultsRef.current.clear();
+              });
+          } else {
+            onComplete(results, counts);
+            flashcardResultsRef.current.clear();
+          }
         }
       }
     },

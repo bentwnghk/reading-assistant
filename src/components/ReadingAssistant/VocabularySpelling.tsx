@@ -792,12 +792,12 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       });
     }
 
+    // Collect SRS outcomes from callers that return them (the card is
+    // omitted for fire-and-forget callers). Failures are swallowed — the
+    // card is decorative, never load-bearing.
+    const outcomes: VocabularySrsOutcome[] = [];
+    const settled: Promise<void>[] = [];
     if (onWordResult && correctWordsRef.current.size > 0) {
-      // Collect SRS outcomes from callers that return them (the card is
-      // omitted for fire-and-forget callers). Failures are swallowed — the
-      // card is decorative, never load-bearing.
-      const outcomes: VocabularySrsOutcome[] = [];
-      const settled: Promise<void>[] = [];
       for (const [word, correct] of correctWordsRef.current) {
         const maybe = onWordResult(word, correct);
         if (maybe && typeof maybe.then === "function") {
@@ -810,16 +810,26 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
           );
         }
       }
-      if (settled.length > 0) {
-        void Promise.all(settled).then(() => setSrsOutcomes(outcomes));
-      }
     }
 
-    if (onComplete && correctWordsRef.current.size > 0) {
-      const results = Array.from(correctWordsRef.current.entries()).map(
-        ([word, correct]) => ({ word, correct })
-      );
-      onComplete(results);
+    // Materialize the results synchronously — correctWordsRef is cleared
+    // below, which also re-arms the effect's re-run guard.
+    const wordResults = Array.from(correctWordsRef.current.entries()).map(
+      ([word, correct]) => ({ word, correct })
+    );
+
+    // Wait for the per-word SRS PATCHes to commit before recording the
+    // review session, so the server-side mastery enrichment reads the
+    // already-updated levels.
+    if (settled.length > 0) {
+      void Promise.all(settled).then(() => {
+        setSrsOutcomes(outcomes);
+        if (onComplete && wordResults.length > 0) {
+          onComplete(wordResults);
+        }
+      });
+    } else if (onComplete && wordResults.length > 0) {
+      onComplete(wordResults);
     }
 
     correctWordsRef.current.clear();

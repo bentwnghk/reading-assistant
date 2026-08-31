@@ -348,10 +348,11 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
   // Shared by both completion paths (submit on last question + timer expiry).
   // Collect SRS outcomes from callers that return them (the result-screen card
   // is omitted for fire-and-forget callers). Failures are swallowed — the card
-  // is decorative, never load-bearing.
+  // is decorative, never load-bearing. Returns a promise that settles once
+  // every per-word SRS PATCH has committed.
   const collectSrsOutcomes = useCallback(
-    (qs: VocabularyQuizQuestion[], ans: Record<string, string>) => {
-      if (!onWordResult) return;
+    (qs: VocabularyQuizQuestion[], ans: Record<string, string>): Promise<void> => {
+      if (!onWordResult) return Promise.resolve();
       const outcomes: VocabularySrsOutcome[] = [];
       const settled: Promise<void>[] = [];
       for (const q of qs) {
@@ -366,9 +367,8 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
           );
         }
       }
-      if (settled.length > 0) {
-        void Promise.all(settled).then(() => setSrsOutcomes(outcomes));
-      }
+      if (settled.length === 0) return Promise.resolve();
+      return Promise.all(settled).then(() => setSrsOutcomes(outcomes));
     },
     [onWordResult],
   );
@@ -389,15 +389,18 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
     setQuizState("completed");
     logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
 
-    collectSrsOutcomes(questions, answers);
-
-    if (onComplete) {
-      const results = questions.map((q) => ({
-        word: q.wordRef,
-        correct: answers[q.id] === q.correctAnswer,
-      }));
-      onComplete(results);
-    }
+    // Record the review session only after the per-word SRS PATCHes have
+    // committed, so the server-side mastery enrichment reads the
+    // already-updated levels.
+    void collectSrsOutcomes(questions, answers).then(() => {
+      if (onComplete) {
+        const results = questions.map((q) => ({
+          word: q.wordRef,
+          correct: answers[q.id] === q.correctAnswer,
+        }));
+        onComplete(results);
+      }
+    });
 
     if (!disableSessionGlossary && id) {
       const session = backup();

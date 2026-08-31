@@ -291,6 +291,9 @@ function VocabularyContainer() {
         const w = store.words.find(
           (vw) => vw.word.toLowerCase() === r.word.toLowerCase()
         );
+        // Store values are only a fallback — the server enriches masteryAfter
+        // from user_vocabulary when the review session is recorded (words
+        // outside the store, e.g. review-list queue entries, send 0).
         return {
           word: r.word,
           correct: r.correct,
@@ -357,12 +360,15 @@ function VocabularyContainer() {
   const handleWordAction = useCallback(
     (word: string, action: "again" | "hard" | "good" | "easy") => {
       const store = useVocabularyStore.getState();
-      store.recordSRSAction(word, action);
-      if (action === "again" || action === "hard") {
-        store.updateWordReview(word, false);
-      } else {
-        store.updateWordReview(word, true);
-      }
+      const srs = store.recordSRSAction(word, action);
+      const review = store.updateWordReview(
+        word,
+        action === "again" || action === "hard" ? false : true
+      );
+      // Returned so the flashcard's completion can await the SRS PATCHes
+      // (updateWordReview commits the new mastery level) before recording
+      // the review session.
+      return Promise.all([srs, review]);
     },
     []
   );

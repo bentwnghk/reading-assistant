@@ -140,7 +140,9 @@ export function SpellingBattleFlow({
     //    POST. The vocabulary_review_sessions row is the authoritative
     //    per-game record the dashboards count from, so it must be created for
     //    every battle regardless of entry point. Matches the solo game's
-    //    review-session payload (mode "spelling", masteryBefore/After = 0).
+    //    review-session payload (mode "spelling"); the server enriches each
+    //    word's masteryAfter from user_vocabulary, so the POST must wait for
+    //    the per-word PATCHes to commit first.
     const wordResults = battle.myWordResults;
     if (wordResults.length > 0) {
       // Collect SRS outcomes from callers that return them (the results-screen
@@ -161,24 +163,28 @@ export function SpellingBattleFlow({
           }
         }
       }
-      const reviewResults = wordResults.map((wr) => ({
-        word: wr.word,
-        correct: wr.correct,
-        masteryBefore: 0,
-        masteryAfter: 0,
-      }));
-      fetch("/api/vocabulary/review-sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "spelling", results: reviewResults }),
-      }).catch(() => {
-        // Silent — battle result tracking must never break the UX.
-      });
-
+      const postReviewSession = () => {
+        const reviewResults = wordResults.map((wr) => ({
+          word: wr.word,
+          correct: wr.correct,
+          masteryBefore: 0,
+          masteryAfter: 0,
+        }));
+        fetch("/api/vocabulary/review-sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "spelling", results: reviewResults }),
+        }).catch(() => {
+          // Silent — battle result tracking must never break the UX.
+        });
+      };
       if (settled.length > 0) {
         void Promise.all(settled).then(() => {
           useBattleStore.getState().setSrsOutcomes(outcomes);
+          postReviewSession();
         });
+      } else {
+        postReviewSession();
       }
     }
 

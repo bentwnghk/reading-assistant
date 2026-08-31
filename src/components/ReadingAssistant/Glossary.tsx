@@ -137,7 +137,9 @@ function Glossary() {
 
   const handleSRSAction = useCallback((word: string, action: SRSAction) => {
     const store = useVocabularyStore.getState();
-    store.recordSRSAction(word, action);
+    // Returned so the flashcard's completion can await the SRS PATCH before
+    // recording the review session.
+    return store.recordSRSAction(word, action);
   }, []);
 
   // Shared by the spelling game and the vocabulary quiz — returns the word's
@@ -174,6 +176,9 @@ function Glossary() {
         ratingCounts?: VocabularyRatingCounts
       ) => {
         if (results.length === 0) return;
+        // masteryBefore/After are placeholders — this page has no client-side
+        // mastery state for glossary words. The server enriches masteryAfter
+        // from user_vocabulary when the review session is recorded.
         const reviewResults: VocabularyReviewResult[] = results.map((r) => ({
           word: r.word,
           correct: r.correct,
