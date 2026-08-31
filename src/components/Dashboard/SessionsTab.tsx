@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useSession } from "next-auth/react";
 import { TrashIcon, FileOutput, Download, Upload, Share2, GraduationCap } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -123,6 +124,8 @@ function formatTime(timestamp: number, locale: string): string {
 
 function SessionsTab({ onClose }: SessionsTabProps) {
   const { t, i18n } = useTranslation();
+  const { data: session } = useSession();
+  const canAssign = !!session?.user?.role && session.user.role !== "student";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { backup, restore, reset } = useReadingStore();
   const { history, save, loadFull, update, remove } = useHistoryStore();
@@ -346,17 +349,19 @@ function SessionsTab({ onClose }: SessionsTabProps) {
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex justify-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={t("assignments.create.actionTitle")}
-                          onClick={() => {
-                            setAssignSession(item);
-                            setAssignOpen(true);
-                          }}
-                        >
-                          <GraduationCap className="h-4 w-4" />
-                        </Button>
+                        {canAssign && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={t("assignments.create.actionTitle")}
+                            onClick={() => {
+                              setAssignSession(item);
+                              setAssignOpen(true);
+                            }}
+                          >
+                            <GraduationCap className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
