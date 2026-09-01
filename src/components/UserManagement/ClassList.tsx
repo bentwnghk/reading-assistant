@@ -152,7 +152,7 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
       let comparison = 0
       switch (sortField) {
         case "name":
-          comparison = a.name.localeCompare(b.name)
+          comparison = formatClassLabel(a).localeCompare(formatClassLabel(b))
           break
         case "teacherName":
           comparison = (a.teacherName || "").localeCompare(b.teacherName || "")
