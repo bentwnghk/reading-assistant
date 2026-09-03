@@ -4219,6 +4219,11 @@
       "success": "Assignment created.",
       "error": "Failed to create assignment."
     },
+    "edit": {
+      "students": "Students",
+      "outsideStudents": "These assigned students are not in your classes (e.g. added from a saved roster):",
+      "removeStudent": "Remove"
+    },
     "presets": {
       "title": "Class presets",
       "sectionTitle": "Saved rosters",
@@ -4325,7 +4330,7 @@
         },
         "edit": {
           "name": "Edit, archive, delete",
-          "desc": "Use the actions at the bottom of each card to update details, archive when done, or permanently delete an assignment."
+          "desc": "Use the actions at the bottom of each card to update details, add or remove students, archive when done, or permanently delete an assignment."
         },
         "export": {
           "name": "Export to Excel",

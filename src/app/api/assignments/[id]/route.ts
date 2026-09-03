@@ -4,6 +4,9 @@ import { z } from "zod"
 import {
   getAssignment,
   updateAssignment,
+  updateAssignmentRoster,
+  getAssignmentStudentIds,
+  resolveAssignableStudentIds,
   deleteAssignment,
 } from "@/lib/assignments"
 
@@ -13,6 +16,12 @@ const updateSchema = z.object({
   subject: z.string().max(100).optional(),
   dueDate: z.string().datetime().nullable().optional(),
   status: z.enum(["active", "archived"]).optional(),
+  /**
+   * Full replacement roster. Existing members stay valid even when they
+   * are no longer in the requester's classes (e.g. added via a saved
+   * preset at create time); newly added members must be assignable.
+   */
+  studentIds: z.array(z.string().min(1)).min(1).optional(),
 })
 
 export async function GET(
@@ -68,7 +77,28 @@ export async function PATCH(
       )
     }
 
-    const success = await updateAssignment(id, existing.teacherId, parsed.data)
+    const { studentIds, ...fieldUpdates } = parsed.data
+
+    // Roster replacement: validate the new list against the ids this
+    // requester may assign to, unioned with the current roster (so
+    // preset-sourced members outside the requester's own classes are
+    // preserved rather than silently dropped on every edit).
+    if (studentIds) {
+      const [assignable, currentIds] = await Promise.all([
+        resolveAssignableStudentIds(session.user.id, session.user.role),
+        getAssignmentStudentIds(id),
+      ])
+      const validIds = new Set([...assignable, ...currentIds])
+      const filteredStudentIds = [...new Set(studentIds)].filter(
+        (sid) => validIds.has(sid) && sid !== session.user.id,
+      )
+      if (filteredStudentIds.length === 0) {
+        return NextResponse.json({ error: "No valid students selected" }, { status: 400 })
+      }
+      await updateAssignmentRoster(id, filteredStudentIds)
+    }
+
+    const success = await updateAssignment(id, existing.teacherId, fieldUpdates)
     if (!success) {
       return NextResponse.json({ error: "Failed to update assignment" }, { status: 500 })
     }

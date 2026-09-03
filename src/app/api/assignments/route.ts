@@ -7,9 +7,10 @@ import {
   getAssignmentsForStudent,
   getSchoolAssignments,
   getAllAssignments,
+  resolveAssignableStudentIds,
 } from "@/lib/assignments"
 import { getReadingSession } from "@/lib/sessions"
-import { getSchoolForUser, getUsersInSchool, getAllUsers, getClassesForTeacher, getClassMembers } from "@/lib/users"
+import { getSchoolForUser } from "@/lib/users"
 import { getPresetById } from "@/lib/assignment-presets"
 
 const createSchema = z.object({
@@ -120,7 +121,7 @@ export async function POST(request: Request) {
     }
 
     // Resolve valid student ids based on requester role
-    const candidateIds = await resolveValidStudentIds(session.user.id, role, presetStudentIds)
+    const candidateIds = await resolveAssignableStudentIds(session.user.id, role, presetStudentIds)
     const validIds = new Set(candidateIds)
     const filteredStudentIds = studentIds.filter((id) => validIds.has(id) && id !== session.user.id)
 
@@ -145,50 +146,4 @@ export async function POST(request: Request) {
     console.error("Error creating assignment:", error)
     return NextResponse.json({ error: "Failed to create assignment" }, { status: 500 })
   }
-}
-
-/**
- * Resolve the set of student ids the requester is allowed to assign to.
- *   - super-admin: any student across all schools
- *   - admin: any student in their school
- *   - teacher: students in the classes the teacher owns, plus the members
- *     of the single preset applied with the request (admin-curated rosters
- *     may extend beyond the teacher's classes; hand-picking students from
- *     presets that were not applied is not allowed)
- */
-async function resolveValidStudentIds(
-  requesterId: string,
-  role: string,
-  presetStudentIds?: string[],
-): Promise<string[]> {
-  if (role === "super-admin") {
-    const all = await getAllUsers()
-    return all.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
-  }
-  const schoolId = await getSchoolForUser(requesterId)
-  if (role === "teacher") {
-    // Class members and preset members alike must be current, non-banned
-    // students in the school. class_members rows are not role-checked at
-    // the membership API, so re-verify every id here.
-    const schoolStudentIds = new Set(
-      schoolId
-        ? (await getUsersInSchool(schoolId))
-            .filter((u) => u.role === "student" && !u.banned)
-            .map((u) => u.id)
-        : [],
-    )
-    const ids = new Set<string>()
-    for (const cls of await getClassesForTeacher(requesterId)) {
-      for (const m of await getClassMembers(cls.id)) {
-        if (schoolStudentIds.has(m.studentId)) ids.add(m.studentId)
-      }
-    }
-    for (const id of presetStudentIds ?? []) {
-      if (schoolStudentIds.has(id)) ids.add(id)
-    }
-    return [...ids]
-  }
-  if (!schoolId) return []
-  const users = await getUsersInSchool(schoolId)
-  return users.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
 }

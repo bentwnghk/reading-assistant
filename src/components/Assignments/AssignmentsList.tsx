@@ -26,6 +26,7 @@ import {
   Download,
   Info,
   GraduationCap,
+  X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -47,6 +48,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useGlobalStore } from "@/store/global"
 import { cn } from "@/utils/style"
+import { RecipientPicker } from "@/components/Internal/RecipientPicker"
+import type { ShareTargetGroup } from "@/lib/shared-sessions"
 import PresetsSection from "./PresetsSection"
 import SchoolAssignmentsTable from "./SchoolAssignmentsTable"
 
@@ -712,6 +715,14 @@ function EditDialog({
   const [dueDate, setDueDate] = useState("")
   const [saving, setSaving] = useState(false)
 
+  // Roster editing state
+  const [groups, setGroups] = useState<ShareTargetGroup[]>([])
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [rosterInfo, setRosterInfo] = useState<
+    Map<string, { name?: string | null; email?: string | null }>
+  >(new Map())
+  const [rosterLoaded, setRosterLoaded] = useState(false)
+
   useEffect(() => {
     if (!assignment) return
     setTitle(assignment.title)
@@ -726,10 +737,60 @@ function EditDialog({
     } else {
       setDueDate("")
     }
+
+    // Load assignable targets + the current roster in parallel; preselect
+    // the roster so the teacher can add/remove students.
+    setGroups([])
+    setSelectedIds(new Set())
+    setRosterInfo(new Map())
+    setRosterLoaded(false)
+    let cancelled = false
+    Promise.all([
+      fetch("/api/assignments/targets").then((res) => (res.ok ? res.json() : [])),
+      fetch(`/api/assignments/${assignment.id}/submissions`).then((res) =>
+        res.ok ? res.json() : [],
+      ),
+    ])
+      .then(
+        ([targetGroups, roster]: [ShareTargetGroup[], AssignmentSubmission[]]) => {
+          if (cancelled) return
+          setGroups(targetGroups)
+          setSelectedIds(new Set(roster.map((s) => s.studentId)))
+          setRosterInfo(
+            new Map(
+              roster.map((s) => [
+                s.studentId,
+                { name: s.studentName, email: s.studentEmail },
+              ]),
+            ),
+          )
+          setRosterLoaded(true)
+        },
+      )
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
   }, [assignment])
+
+  // Roster members that don't appear in any target group (e.g. added via a
+  // saved preset outside the teacher's classes) can't be rendered inside
+  // the picker — surface them as removable chips instead.
+  const targetIds = new Set(groups.flatMap((g) => g.users.map((u) => u.id)))
+  const outsideStudents = [...selectedIds].filter((id) => !targetIds.has(id))
+
+  function removeOutsideStudent(id: string) {
+    const next = new Set(selectedIds)
+    next.delete(id)
+    setSelectedIds(next)
+  }
 
   async function handleSave() {
     if (!assignment) return
+    if (rosterLoaded && selectedIds.size === 0) {
+      toast.error(t("assignments.error.noStudents"))
+      return
+    }
     setSaving(true)
     try {
       const body: Record<string, unknown> = {
@@ -742,17 +803,27 @@ function EditDialog({
       } else {
         body.dueDate = null
       }
+      if (rosterLoaded) {
+        body.studentIds = [...selectedIds]
+      }
       const res = await fetch(`/api/assignments/${assignment.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
-      if (!res.ok) throw new Error("Failed")
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Failed")
+      }
       toast.success(t("assignments.teacherView.edited"))
       onClose()
       onSaved()
-    } catch {
-      toast.error(t("assignments.error.loadFailed"))
+    } catch (err) {
+      toast.error(
+        err instanceof Error && err.message !== "Failed"
+          ? err.message
+          : t("assignments.error.loadFailed"),
+      )
     } finally {
       setSaving(false)
     }
@@ -760,11 +831,13 @@ function EditDialog({
 
   return (
     <Dialog open={!!assignment} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("assignments.teacherView.edit")}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3 py-2">
+        {/* Plain scroller over a plain list scroller (see RecipientPicker
+            nestedScroll) so mobile touch scrolling works. */}
+        <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto pr-1">
           <div className="space-y-1.5">
             <Label htmlFor="edit-title">{t("assignments.create.titleLabel")}</Label>
             <Input
@@ -801,12 +874,82 @@ function EditDialog({
               rows={3}
             />
           </div>
+
+          <div className="border-t pt-3 space-y-2">
+            <Label className="text-sm font-medium">
+              {t("assignments.edit.students")}
+              <span className="ml-1.5 text-muted-foreground font-normal">
+                ({selectedIds.size})
+              </span>
+            </Label>
+
+            {!rosterLoaded ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <>
+                {outsideStudents.length > 0 && (
+                  <div className="space-y-1.5">
+                    <p className="text-xs text-muted-foreground">
+                      {t("assignments.edit.outsideStudents")}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {outsideStudents.map((id) => {
+                        const info = rosterInfo.get(id)
+                        return (
+                          <Badge
+                            key={id}
+                            variant="secondary"
+                            className="gap-1 pl-2 pr-1 font-normal"
+                          >
+                            {info?.name || info?.email || id}
+                            <button
+                              type="button"
+                              aria-label={t("assignments.edit.removeStudent")}
+                              title={t("assignments.edit.removeStudent")}
+                              onClick={() => removeOutsideStudent(id)}
+                              className="rounded-full p-0.5 hover:bg-muted-foreground/20"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {groups.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground text-sm">
+                    {selectedIds.size === 0 && t("assignments.create.noStudents")}
+                  </div>
+                ) : (
+                  <RecipientPicker
+                    groups={groups}
+                    selectedIds={selectedIds}
+                    onChange={setSelectedIds}
+                    searchPlaceholder={t("assignments.create.searchStudents")}
+                    selectAllLabel={t("assignments.create.selectAll")}
+                    deselectAllLabel={t("assignments.create.deselectAll")}
+                    listClassName="max-h-[40vh] border rounded p-2"
+                    nestedScroll
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>
             {t("assignments.cancel")}
           </Button>
-          <Button onClick={handleSave} disabled={saving || !title.trim()}>
+          <Button
+            onClick={handleSave}
+            disabled={
+              saving || !title.trim() || (rosterLoaded && selectedIds.size === 0)
+            }
+          >
             {saving ? t("assignments.create.creating") : t("assignments.teacherView.edit")}
           </Button>
         </DialogFooter>

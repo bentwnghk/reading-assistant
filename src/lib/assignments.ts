@@ -1,7 +1,13 @@
 import { getClient } from "./db"
 import type { PoolClient } from "pg"
 import { logActivity } from "./activity"
-import { getSchoolForUser } from "./users"
+import {
+  getSchoolForUser,
+  getUsersInSchool,
+  getAllUsers,
+  getClassesForTeacher,
+  getClassMembers,
+} from "./users"
 import type { ReadingStore } from "@/store/reading"
 import { calculateProgress } from "@/utils/progress"
 import { grammarGameBestScore } from "@/utils/sessionMetrics"
@@ -90,6 +96,162 @@ export function calculateAssignmentProgress(session: ReadingStore): number {
   return calculateProgress(session)
 }
 
+/**
+ * Create one student's personal working session from the frozen assignment
+ * snapshot, plus their submission row, on an existing transaction client.
+ * Shared by createAssignment and updateAssignmentRoster so both write
+ * identical rows.
+ */
+async function insertStudentAssignmentSession(
+  client: PoolClient,
+  assignmentId: string,
+  studentId: string,
+  snapshot: Record<string, unknown>,
+): Promise<string> {
+  const { nanoid } = await import("nanoid")
+  const studentSessionId = nanoid()
+  const now = Date.now()
+
+  // Slimmed-down session: heavy originalImages omitted; content present.
+  const studentSession = {
+    ...(snapshot as unknown as ReadingStore),
+    id: studentSessionId,
+    source: "assignment" as const,
+    originalImages: [] as string[],
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  // Stamp assignment_id by writing it directly after createReadingSession
+  // (createReadingSession doesn't know about assignment_id; we patch it
+  // in the same transaction).
+  // Note: createReadingSession starts its own BEGIN/COMMIT — to keep this
+  // atomic we instead inline a minimal INSERT here.
+  await client.query(
+    `INSERT INTO reading_sessions (
+       id, user_id, doc_title, source, student_age, extracted_text, summary,
+       adapted_text, simplified_text, highlighted_words, analyzed_sentences,
+       mind_map, visualization_image, visualization_generated_at, reading_test, glossary, glossary_ratings, test_score,
+       test_completed, test_earned_points, test_total_points, test_show_chinese,
+       test_mode, vocabulary_quiz_score, spelling_game_best_score, spelling_game_accuracy, chat_history,
+       tests_completed, vocab_quizzes_completed, spelling_games_completed,
+       original_difficulty, adapted_difficulty, simplified_difficulty,
+       include_glossary, include_sentence_analysis,
+       grammar_topics, grammar_quiz, grammar_quiz_score, grammar_quiz_completed,
+       grammar_quizzes_completed,
+       grammar_quiz_earned_points, grammar_quiz_total_points,
+       grammar_generated_at, grammar_quiz_completed_at,
+       grammar_highlight_enabled, grammar_highlight_topic_id,
+       grammar_quiz_mode,
+       grammar_scramble_high_score, grammar_workshop_high_score,
+       grammar_surgery_high_score, grammar_roulette_high_score,
+       grammar_duel_high_score, grammar_game_accuracy,
+       grammar_games_completed, grammar_game_completed_at,
+       grammar_scramble_accuracy, grammar_workshop_accuracy,
+       grammar_surgery_accuracy, grammar_roulette_accuracy,
+       grammar_duel_accuracy,
+       grammar_scramble_completed, grammar_workshop_completed,
+       grammar_surgery_completed, grammar_roulette_completed,
+       grammar_duel_completed,
+       grammar_error_challenges,
+       grammar_scramble_challenges, grammar_workshop_challenges,
+       grammar_game_questions,
+        assignment_id, created_at, visualization_language, mind_map_language,
+        summary_language
+       ) VALUES (
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+         $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
+         $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
+         $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
+         $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74
+       )`,
+    [
+      studentSession.id,
+      studentId,
+      studentSession.docTitle,
+      "assignment",
+      studentSession.studentAge,
+      studentSession.extractedText ?? "",
+      studentSession.summary ?? "",
+      studentSession.adaptedText ?? "",
+      studentSession.simplifiedText ?? "",
+      JSON.stringify(studentSession.highlightedWords ?? []),
+      JSON.stringify(studentSession.analyzedSentences ?? {}),
+      studentSession.mindMap ?? "",
+      studentSession.visualizationImage ?? "",
+      studentSession.visualizationGeneratedAt ?? 0,
+      JSON.stringify(studentSession.readingTest ?? []),
+      JSON.stringify(studentSession.glossary ?? []),
+      JSON.stringify(studentSession.glossaryRatings ?? {}),
+      studentSession.testScore ?? 0,
+      studentSession.testCompleted ?? false,
+      studentSession.testEarnedPoints ?? 0,
+      studentSession.testTotalPoints ?? 0,
+      studentSession.testShowChinese ?? false,
+      studentSession.testMode ?? "all-at-once",
+      studentSession.vocabularyQuizScore ?? 0,
+      studentSession.spellingGameBestScore ?? 0,
+      studentSession.spellingGameAccuracy ?? 0,
+      JSON.stringify(studentSession.chatHistory ?? []),
+      studentSession.testsCompleted ?? 0,
+      studentSession.vocabQuizzesCompleted ?? 0,
+      studentSession.spellingGamesCompleted ?? 0,
+      studentSession.originalDifficulty ? JSON.stringify(studentSession.originalDifficulty) : null,
+      studentSession.adaptedDifficulty ? JSON.stringify(studentSession.adaptedDifficulty) : null,
+      studentSession.simplifiedDifficulty ? JSON.stringify(studentSession.simplifiedDifficulty) : null,
+      studentSession.includeGlossary ?? true,
+      studentSession.includeSentenceAnalysis ?? true,
+      JSON.stringify(studentSession.grammarTopics ?? []),
+      JSON.stringify(studentSession.grammarQuiz ?? []),
+      studentSession.grammarQuizScore ?? 0,
+      studentSession.grammarQuizCompleted ?? false,
+      studentSession.grammarQuizzesCompleted ?? 0,
+      studentSession.grammarQuizEarnedPoints ?? 0,
+      studentSession.grammarQuizTotalPoints ?? 0,
+      studentSession.grammarGeneratedAt ?? 0,
+      studentSession.grammarQuizCompletedAt ?? 0,
+      studentSession.grammarHighlightEnabled ?? false,
+      studentSession.grammarHighlightTopicId ?? null,
+      studentSession.grammarQuizMode ?? "all-at-once",
+      studentSession.grammarScrambleHighScore ?? 0,
+      studentSession.grammarWorkshopHighScore ?? 0,
+      studentSession.grammarSurgeryHighScore ?? 0,
+      studentSession.grammarRouletteHighScore ?? 0,
+      studentSession.grammarDuelHighScore ?? 0,
+      studentSession.grammarGameAccuracy ?? 0,
+      studentSession.grammarGamesCompleted ?? 0,
+      null,
+      studentSession.grammarScrambleAccuracy ?? 0,
+      studentSession.grammarWorkshopAccuracy ?? 0,
+      studentSession.grammarSurgeryAccuracy ?? 0,
+      studentSession.grammarRouletteAccuracy ?? 0,
+      studentSession.grammarDuelAccuracy ?? 0,
+      studentSession.grammarScrambleCompleted ?? 0,
+      studentSession.grammarWorkshopCompleted ?? 0,
+      studentSession.grammarSurgeryCompleted ?? 0,
+      studentSession.grammarRouletteCompleted ?? 0,
+      studentSession.grammarDuelCompleted ?? 0,
+      JSON.stringify(studentSession.grammarErrorChallenges ?? []),
+      JSON.stringify(studentSession.grammarScrambleChallenges ?? []),
+      JSON.stringify(studentSession.grammarWorkshopChallenges ?? []),
+      JSON.stringify(studentSession.grammarGameQuestions ?? []),
+      assignmentId,
+      new Date(now),
+      (studentSession.visualizationLanguage as "en" | "zh" | null) ?? null,
+      (studentSession.mindMapLanguage as "en" | "zh" | null) ?? null,
+      (studentSession.summaryLanguage as "en" | "zh" | null) ?? null,
+    ],
+  )
+
+  await client.query(
+    `INSERT INTO assignment_submissions (assignment_id, student_id, student_session_id)
+     VALUES ($1, $2, $3)`,
+    [assignmentId, studentId, studentSessionId],
+  )
+
+  return studentSessionId
+}
+
 export interface CreateAssignmentInput {
   teacherId: string
   title: string
@@ -141,150 +303,11 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
     const updatedAt = assignmentResult.rows[0].updated_at
 
     // 2. For each student, create a personal session + submission row
-    const { nanoid } = await import("nanoid")
     const studentSessionIds: string[] = []
     for (const studentId of input.studentIds) {
       if (studentId === input.teacherId) continue
-
-      const studentSessionId = nanoid()
-      studentSessionIds.push(studentSessionId)
-      const now = Date.now()
-
-      // Slimmed-down session: heavy originalImages omitted; content present.
-      const studentSession = {
-        ...(snapshot as unknown as ReadingStore),
-        id: studentSessionId,
-        source: "assignment" as const,
-        originalImages: [] as string[],
-        createdAt: now,
-        updatedAt: now,
-      }
-
-      // Stamp assignment_id by writing it directly after createReadingSession
-      // (createReadingSession doesn't know about assignment_id; we patch it
-      // in the same transaction).
-      // Note: createReadingSession starts its own BEGIN/COMMIT — to keep this
-      // atomic we instead inline a minimal INSERT here.
-      await client.query(
-        `INSERT INTO reading_sessions (
-           id, user_id, doc_title, source, student_age, extracted_text, summary,
-           adapted_text, simplified_text, highlighted_words, analyzed_sentences,
-           mind_map, visualization_image, visualization_generated_at, reading_test, glossary, glossary_ratings, test_score,
-           test_completed, test_earned_points, test_total_points, test_show_chinese,
-           test_mode, vocabulary_quiz_score, spelling_game_best_score, spelling_game_accuracy, chat_history,
-           tests_completed, vocab_quizzes_completed, spelling_games_completed,
-           original_difficulty, adapted_difficulty, simplified_difficulty,
-           include_glossary, include_sentence_analysis,
-           grammar_topics, grammar_quiz, grammar_quiz_score, grammar_quiz_completed,
-           grammar_quizzes_completed,
-           grammar_quiz_earned_points, grammar_quiz_total_points,
-           grammar_generated_at, grammar_quiz_completed_at,
-           grammar_highlight_enabled, grammar_highlight_topic_id,
-           grammar_quiz_mode,
-           grammar_scramble_high_score, grammar_workshop_high_score,
-           grammar_surgery_high_score, grammar_roulette_high_score,
-           grammar_duel_high_score, grammar_game_accuracy,
-           grammar_games_completed, grammar_game_completed_at,
-           grammar_scramble_accuracy, grammar_workshop_accuracy,
-           grammar_surgery_accuracy, grammar_roulette_accuracy,
-           grammar_duel_accuracy,
-           grammar_scramble_completed, grammar_workshop_completed,
-           grammar_surgery_completed, grammar_roulette_completed,
-           grammar_duel_completed,
-           grammar_error_challenges,
-           grammar_scramble_challenges, grammar_workshop_challenges,
-           grammar_game_questions,
-            assignment_id, created_at, visualization_language, mind_map_language,
-            summary_language
-           ) VALUES (
-             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-             $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
-             $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
-              $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
-              $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74
-            )`,
-        [
-          studentSession.id,
-          studentId,
-          studentSession.docTitle,
-          "assignment",
-          studentSession.studentAge,
-          studentSession.extractedText ?? "",
-          studentSession.summary ?? "",
-          studentSession.adaptedText ?? "",
-          studentSession.simplifiedText ?? "",
-          JSON.stringify(studentSession.highlightedWords ?? []),
-          JSON.stringify(studentSession.analyzedSentences ?? {}),
-          studentSession.mindMap ?? "",
-          studentSession.visualizationImage ?? "",
-          studentSession.visualizationGeneratedAt ?? 0,
-          JSON.stringify(studentSession.readingTest ?? []),
-          JSON.stringify(studentSession.glossary ?? []),
-          JSON.stringify(studentSession.glossaryRatings ?? {}),
-          studentSession.testScore ?? 0,
-          studentSession.testCompleted ?? false,
-          studentSession.testEarnedPoints ?? 0,
-          studentSession.testTotalPoints ?? 0,
-          studentSession.testShowChinese ?? false,
-          studentSession.testMode ?? "all-at-once",
-          studentSession.vocabularyQuizScore ?? 0,
-          studentSession.spellingGameBestScore ?? 0,
-          studentSession.spellingGameAccuracy ?? 0,
-          JSON.stringify(studentSession.chatHistory ?? []),
-          studentSession.testsCompleted ?? 0,
-          studentSession.vocabQuizzesCompleted ?? 0,
-          studentSession.spellingGamesCompleted ?? 0,
-          studentSession.originalDifficulty ? JSON.stringify(studentSession.originalDifficulty) : null,
-          studentSession.adaptedDifficulty ? JSON.stringify(studentSession.adaptedDifficulty) : null,
-          studentSession.simplifiedDifficulty ? JSON.stringify(studentSession.simplifiedDifficulty) : null,
-          studentSession.includeGlossary ?? true,
-          studentSession.includeSentenceAnalysis ?? true,
-          JSON.stringify(studentSession.grammarTopics ?? []),
-          JSON.stringify(studentSession.grammarQuiz ?? []),
-          studentSession.grammarQuizScore ?? 0,
-          studentSession.grammarQuizCompleted ?? false,
-          studentSession.grammarQuizzesCompleted ?? 0,
-          studentSession.grammarQuizEarnedPoints ?? 0,
-          studentSession.grammarQuizTotalPoints ?? 0,
-          studentSession.grammarGeneratedAt ?? 0,
-          studentSession.grammarQuizCompletedAt ?? 0,
-          studentSession.grammarHighlightEnabled ?? false,
-          studentSession.grammarHighlightTopicId ?? null,
-          studentSession.grammarQuizMode ?? "all-at-once",
-          studentSession.grammarScrambleHighScore ?? 0,
-          studentSession.grammarWorkshopHighScore ?? 0,
-          studentSession.grammarSurgeryHighScore ?? 0,
-          studentSession.grammarRouletteHighScore ?? 0,
-          studentSession.grammarDuelHighScore ?? 0,
-          studentSession.grammarGameAccuracy ?? 0,
-          studentSession.grammarGamesCompleted ?? 0,
-          null,
-          studentSession.grammarScrambleAccuracy ?? 0,
-          studentSession.grammarWorkshopAccuracy ?? 0,
-          studentSession.grammarSurgeryAccuracy ?? 0,
-          studentSession.grammarRouletteAccuracy ?? 0,
-          studentSession.grammarDuelAccuracy ?? 0,
-          studentSession.grammarScrambleCompleted ?? 0,
-          studentSession.grammarWorkshopCompleted ?? 0,
-          studentSession.grammarSurgeryCompleted ?? 0,
-          studentSession.grammarRouletteCompleted ?? 0,
-          studentSession.grammarDuelCompleted ?? 0,
-          JSON.stringify(studentSession.grammarErrorChallenges ?? []),
-          JSON.stringify(studentSession.grammarScrambleChallenges ?? []),
-          JSON.stringify(studentSession.grammarWorkshopChallenges ?? []),
-          JSON.stringify(studentSession.grammarGameQuestions ?? []),
-          assignmentId,
-          new Date(now),
-          (studentSession.visualizationLanguage as "en" | "zh" | null) ?? null,
-          (studentSession.mindMapLanguage as "en" | "zh" | null) ?? null,
-          (studentSession.summaryLanguage as "en" | "zh" | null) ?? null,
-        ],
-      )
-
-      await client.query(
-        `INSERT INTO assignment_submissions (assignment_id, student_id, student_session_id)
-         VALUES ($1, $2, $3)`,
-        [assignmentId, studentId, studentSessionId],
+      studentSessionIds.push(
+        await insertStudentAssignmentSession(client, assignmentId, studentId, snapshot),
       )
     }
 
@@ -746,6 +769,138 @@ export async function updateAssignment(
   } finally {
     client.release()
   }
+}
+
+/** Student ids currently on an assignment's roster (submission rows). */
+export async function getAssignmentStudentIds(assignmentId: string): Promise<string[]> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT student_id FROM assignment_submissions WHERE assignment_id = $1`,
+      [assignmentId],
+    )
+    return result.rows.map((row) => row.student_id as string)
+  } finally {
+    client.release()
+  }
+}
+
+export interface UpdateAssignmentRosterResult {
+  added: string[]
+  removed: string[]
+}
+
+/**
+ * Replace an assignment's roster with the given student ids. Newly added
+ * students receive a fresh working session + submission row created from
+ * the frozen assignment snapshot (same rows createAssignment writes).
+ * Removed students' submission rows are deleted, which drops the
+ * assignment from their list; their existing session copy stays in their
+ * history — the same visibility they get when a whole assignment is
+ * deleted (reading_sessions.assignment_id is a soft link, no FK).
+ */
+export async function updateAssignmentRoster(
+  assignmentId: string,
+  newStudentIds: string[],
+): Promise<UpdateAssignmentRosterResult> {
+  const client = await getClient()
+  try {
+    const snapshotRes = await client.query(
+      `SELECT source_session_snapshot FROM assignments WHERE id = $1`,
+      [assignmentId],
+    )
+    if (snapshotRes.rows.length === 0) return { added: [], removed: [] }
+    const snapshot = snapshotRes.rows[0].source_session_snapshot as Record<string, unknown>
+
+    const currentRes = await client.query(
+      `SELECT student_id FROM assignment_submissions WHERE assignment_id = $1`,
+      [assignmentId],
+    )
+    const currentIds = new Set(currentRes.rows.map((row) => row.student_id as string))
+    const nextIds = new Set(newStudentIds)
+    const added = [...nextIds].filter((id) => !currentIds.has(id))
+    const removed = [...currentIds].filter((id) => !nextIds.has(id))
+    if (added.length === 0 && removed.length === 0) return { added: [], removed: [] }
+
+    await client.query("BEGIN")
+    try {
+      if (removed.length > 0) {
+        await client.query(
+          `DELETE FROM assignment_submissions
+           WHERE assignment_id = $1 AND student_id = ANY($2)`,
+          [assignmentId, removed],
+        )
+      }
+      const newSessionIds: string[] = []
+      for (const studentId of added) {
+        newSessionIds.push(
+          await insertStudentAssignmentSession(client, assignmentId, studentId, snapshot),
+        )
+      }
+      await client.query(`UPDATE assignments SET updated_at = NOW() WHERE id = $1`, [
+        assignmentId,
+      ])
+      await client.query("COMMIT")
+
+      // Seed initial progress for new student sessions (fire-and-forget,
+      // same as createAssignment).
+      for (const sessionId of newSessionIds) {
+        syncSubmissionMetrics(sessionId).catch(() => {})
+      }
+      return { added, removed }
+    } catch (error) {
+      await client.query("ROLLBACK")
+      throw error
+    }
+  } finally {
+    client.release()
+  }
+}
+
+/**
+ * Resolve the set of student ids the requester is allowed to assign to.
+ *   - super-admin: any student across all schools
+ *   - admin: any student in their school
+ *   - teacher: students in the classes the teacher owns, plus the members
+ *     of the single preset applied with the request (admin-curated rosters
+ *     may extend beyond the teacher's classes; hand-picking students from
+ *     presets that were not applied is not allowed)
+ */
+export async function resolveAssignableStudentIds(
+  requesterId: string,
+  role: string,
+  presetStudentIds?: string[],
+): Promise<string[]> {
+  if (role === "super-admin") {
+    const all = await getAllUsers()
+    return all.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
+  }
+  const schoolId = await getSchoolForUser(requesterId)
+  if (role === "teacher") {
+    // Class members and preset members alike must be current, non-banned
+    // students in the school. class_members rows are not role-checked at
+    // the membership API, so re-verify every id here.
+    const schoolStudentIds = new Set(
+      schoolId
+        ? (await getUsersInSchool(schoolId))
+            .filter((u) => u.role === "student" && !u.banned)
+            .map((u) => u.id)
+        : [],
+    )
+    const ids = new Set<string>()
+    for (const cls of await getClassesForTeacher(requesterId)) {
+      for (const m of await getClassMembers(cls.id)) {
+        if (schoolStudentIds.has(m.studentId)) ids.add(m.studentId)
+      }
+    }
+    for (const id of presetStudentIds ?? []) {
+      if (schoolStudentIds.has(id)) ids.add(id)
+    }
+    return [...ids]
+  }
+  if (!schoolId) return []
+  const users = await getUsersInSchool(schoolId)
+  return users.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
 }
 
 export async function deleteAssignment(assignmentId: string, teacherId: string): Promise<boolean> {
