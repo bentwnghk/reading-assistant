@@ -92,39 +92,40 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
       if (response.ok) {
         const data: ClassInfo[] = await response.json();
         setAllClasses(data);
+
+        // Saved rosters (teachers only) load in the same pass so the
+        // initial selection can fall back to the first used roster for
+        // teachers with no classes of their own.
+        let loadedPresets: AssignmentPreset[] = [];
+        if (isTeacher) {
+          const presetsRes = await fetch("/api/assignments/presets?scope=used");
+          if (presetsRes.ok) {
+            loadedPresets = await presetsRes.json();
+          }
+          setPresets(loadedPresets);
+        }
+
         if (isAdmin) {
           setSelectedClassId("all");
         } else if (data.length > 0) {
           setSelectedClassId(`class:${data[0].id}`);
+        } else if (loadedPresets.length > 0) {
+          setSelectedClassId(`preset:${loadedPresets[0].id}`);
         }
       }
     } catch (err) {
       console.error("Failed to load classes:", err);
     }
-  }, [isAdmin]);
-
-  const loadPresets = useCallback(async () => {
-    try {
-      const response = await fetch("/api/assignments/presets?scope=used");
-      if (response.ok) {
-        setPresets(await response.json());
-      }
-    } catch (err) {
-      console.error("Failed to load presets:", err);
-    }
-  }, []);
+  }, [isAdmin, isTeacher]);
 
   useEffect(() => {
     if (open && (isTeacher || isAdmin)) {
       loadClasses();
-      if (isTeacher) {
-        loadPresets();
-      }
       if (isSuperAdmin) {
         loadSchools();
       }
     }
-  }, [open, isTeacher, isAdmin, isSuperAdmin, loadClasses, loadPresets, loadSchools]);
+  }, [open, isTeacher, isAdmin, isSuperAdmin, loadClasses, loadSchools]);
 
   useEffect(() => {
     if (isSuperAdmin && selectedSchoolId !== "all") {
