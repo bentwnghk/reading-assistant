@@ -73,6 +73,47 @@ export async function getPresetById(
   return rows.length > 0 ? mapPresetRow(rows[0]) : null
 }
 
+/**
+ * Fetch a preset when the viewer may use it (read access mirrors
+ * getPresetsForUser: super-admin any preset; teacher/admin presets in
+ * their own school). Null when not found or out of scope.
+ */
+export async function getPresetForViewer(
+  presetId: string,
+  userId: string,
+  role: UserRole,
+): Promise<AssignmentPreset | null> {
+  const preset = await getPresetById(presetId)
+  if (!preset) return null
+  if (role === "super-admin") return preset
+  const schoolId = await getSchoolForUser(userId)
+  if (!schoolId || preset.schoolId !== schoolId) return null
+  return preset
+}
+
+/**
+ * Presets referenced by any assignment the user created
+ * (assignments.applied_preset_id — set at create time). Exact, no roster
+ * heuristics; used by the Teacher Dashboard / Student Data dropdowns so
+ * teachers only see rosters relevant to their own assignments. Deleted
+ * presets drop out via the inner join.
+ */
+export async function getPresetsUsedByUser(
+  userId: string,
+): Promise<AssignmentPreset[]> {
+  const pool = getPool()
+  const { rows } = await pool.query(
+    `SELECT DISTINCT ${SELECT_COLS}
+     FROM assignment_presets ap
+     JOIN assignments a ON a.applied_preset_id = ap.id
+     LEFT JOIN users u ON u.id = ap.teacher_id
+     WHERE a.teacher_id = $1
+     ORDER BY ap.name ASC`,
+    [userId],
+  )
+  return rows.map(mapPresetRow)
+}
+
 export interface CreatePresetInput {
   teacherId: string
   role: UserRole

@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ClassCombobox } from "@/components/Internal/ClassCombobox"
+import { ClassCombobox, ClassBattleTargetCombobox } from "@/components/Internal/ClassCombobox"
 import { toast } from "sonner"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
@@ -99,6 +99,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
+  const [presets, setPresets] = useState<AssignmentPreset[]>([])
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all")
   const [selectedClassId, setSelectedClassId] = useState<string>("")
   const [sessions, setSessions] = useState<SessionWithSchool[]>([])
@@ -147,7 +148,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     questions?: ReadingTestQuestion[]
   } | null>(null)
 
-  const _isTeacher = !isSuperAdmin && !isAdmin
+  const isTeacher = !isSuperAdmin && !isAdmin
 
   const loadClassesAndSchools = useCallback(async () => {
     try {
@@ -159,7 +160,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           if (isSuperAdmin || isAdmin) {
             setSelectedClassId("all")
           } else {
-            setSelectedClassId(data[0].id)
+            setSelectedClassId(`class:${data[0].id}`)
           }
         }
       }
@@ -170,22 +171,48 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           setSchools(await schoolsResponse.json())
         }
       }
+
+      if (isTeacher) {
+        const presetsResponse = await fetch("/api/assignments/presets?scope=used")
+        if (presetsResponse.ok) {
+          setPresets(await presetsResponse.json())
+        }
+      }
     } catch (error) {
       console.error("Failed to load data:", error)
       toast.error(t("userManagement.loadFailed"))
     } finally {
       setLoading(false)
     }
-  }, [selectedClassId, t, isSuperAdmin, isAdmin])
+  }, [selectedClassId, t, isSuperAdmin, isAdmin, isTeacher])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return
 
     setLoadingSessions(true)
     try {
-      const classesToLoad = selectedClassId === "all"
+      // Saved-roster entries load every member's sessions in one request —
+      // roster members may sit outside the viewer's own classes.
+      if (selectedClassId.startsWith("preset:")) {
+        const res = await fetch(
+          `/api/assignments/presets/${selectedClassId.slice("preset:".length)}/sessions`
+        )
+        if (!res.ok) throw new Error("Failed to load preset sessions")
+        const data: {
+          sessions: StudentSessionData[]
+          spellingReviewCounts: Record<string, number>
+        } = await res.json()
+        setSessions(data.sessions ?? [])
+        setSpellingAttemptsByUser(data.spellingReviewCounts ?? {})
+        return
+      }
+
+      const targetClassId = selectedClassId.startsWith("class:")
+        ? selectedClassId.slice("class:".length)
+        : selectedClassId
+      const classesToLoad = targetClassId === "all"
         ? classes.filter(c => selectedSchoolId === "all" || c.schoolId === selectedSchoolId)
-        : classes.filter(c => c.id === selectedClassId)
+        : classes.filter(c => c.id === targetClassId)
 
       const allSessions: SessionWithSchool[] = []
       const attemptsMap: Record<string, number> = {}
@@ -252,7 +279,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   }, [loadClassesAndSchools])
 
   useEffect(() => {
-    if (selectedClassId && classes.length > 0) {
+    if (selectedClassId && (classes.length > 0 || selectedClassId.startsWith("preset:"))) {
       loadSessions()
     }
   }, [selectedClassId, selectedSchoolId, classes.length, loadSessions])
@@ -351,9 +378,13 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
       const selectedSchool = selectedSchoolId !== "all" 
         ? schools.find(s => s.id === selectedSchoolId)?.name 
         : undefined
-      const selectedClass = selectedClassId !== "all" 
-        ? classes.find(c => c.id === selectedClassId)?.name 
-        : undefined
+      const selectedClass = selectedClassId.startsWith("class:")
+        ? classes.find(c => c.id === selectedClassId.slice("class:".length))?.name
+        : selectedClassId.startsWith("preset:")
+          ? presets.find(p => p.id === selectedClassId.slice("preset:".length))?.name
+          : selectedClassId !== "all"
+            ? classes.find(c => c.id === selectedClassId)?.name
+            : undefined
       
       await exportStudentDataToExcel({
         sessions: filteredAndSortedSessions,
@@ -540,15 +571,34 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           </Select>
         )}
         <div className="w-56">
-          <ClassCombobox
-            classes={filteredClasses}
-            value={selectedClassId === "all" ? null : selectedClassId}
-            onChange={(v) => setSelectedClassId(v ?? "all")}
-            placeholder={t("userManagement.studentData.selectClass")}
-            emptyLabel={t("userManagement.studentData.noClasses")}
-            allowAll={isSuperAdmin || isAdmin}
-            allLabel={t("userManagement.studentData.allClasses")}
-          />
+          {isTeacher ? (
+            <ClassBattleTargetCombobox
+              classes={filteredClasses}
+              rosters={presets.map((p) => ({
+                id: p.id,
+                name: p.name,
+                studentCount: p.studentCount,
+              }))}
+              value={selectedClassId}
+              onChange={setSelectedClassId}
+              placeholder={t("userManagement.studentData.selectClass")}
+              emptyLabel={t("userManagement.studentData.noClasses")}
+              rostersLabel={t("classCombobox.rosters")}
+              rosterCountLabel={(count) =>
+                t("assignments.presets.studentCount", { count })
+              }
+            />
+          ) : (
+            <ClassCombobox
+              classes={filteredClasses}
+              value={selectedClassId === "all" ? null : selectedClassId}
+              onChange={(v) => setSelectedClassId(v ?? "all")}
+              placeholder={t("userManagement.studentData.selectClass")}
+              emptyLabel={t("userManagement.studentData.noClasses")}
+              allowAll={isSuperAdmin || isAdmin}
+              allLabel={t("userManagement.studentData.allClasses")}
+            />
+          )}
         </div>
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

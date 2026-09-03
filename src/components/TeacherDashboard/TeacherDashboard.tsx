@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ClassCombobox } from "@/components/Internal/ClassCombobox";
+import { ClassCombobox, ClassBattleTargetCombobox } from "@/components/Internal/ClassCombobox";
 import { useSession } from "next-auth/react";
 import { useTeacherDashboard } from "@/hooks/useTeacherDashboard";
 import {
@@ -53,6 +53,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
 
   const [allClasses, setAllClasses] = useState<ClassInfo[]>([]);
   const [schools, setSchools] = useState<SchoolInfo[]>([]);
+  const [presets, setPresets] = useState<AssignmentPreset[]>([]);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [isExporting, setIsExporting] = useState(false);
@@ -94,7 +95,7 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
         if (isAdmin) {
           setSelectedClassId("all");
         } else if (data.length > 0) {
-          setSelectedClassId(data[0].id);
+          setSelectedClassId(`class:${data[0].id}`);
         }
       }
     } catch (err) {
@@ -102,14 +103,28 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
     }
   }, [isAdmin]);
 
+  const loadPresets = useCallback(async () => {
+    try {
+      const response = await fetch("/api/assignments/presets?scope=used");
+      if (response.ok) {
+        setPresets(await response.json());
+      }
+    } catch (err) {
+      console.error("Failed to load presets:", err);
+    }
+  }, []);
+
   useEffect(() => {
     if (open && (isTeacher || isAdmin)) {
       loadClasses();
+      if (isTeacher) {
+        loadPresets();
+      }
       if (isSuperAdmin) {
         loadSchools();
       }
     }
-  }, [open, isTeacher, isAdmin, isSuperAdmin, loadClasses, loadSchools]);
+  }, [open, isTeacher, isAdmin, isSuperAdmin, loadClasses, loadPresets, loadSchools]);
 
   useEffect(() => {
     if (isSuperAdmin && selectedSchoolId !== "all") {
@@ -171,14 +186,19 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
         }
       }
 
-      // Determine class/school names for the filename and report header
-      const selectedClass = allClasses.find((c) => c.id === selectedClassId);
+      // Determine class/roster/school names for the filename and report header
+      const selectedClass = selectedClassId.startsWith("class:")
+        ? allClasses.find((c) => c.id === selectedClassId.slice("class:".length))
+        : undefined;
+      const selectedPreset = selectedClassId.startsWith("preset:")
+        ? presets.find((p) => p.id === selectedClassId.slice("preset:".length))
+        : undefined;
       const selectedSchool = schools.find((s) => s.id === selectedSchoolId);
 
       await exportTeacherDashboardToExcel({
         metrics,
         chartImages,
-        className: selectedClass?.name,
+        className: selectedClass?.name ?? selectedPreset?.name,
         schoolName: selectedSchool?.name,
       });
     } catch (err) {
@@ -228,15 +248,34 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
           )}
 
           <div className="w-64">
-            <ClassCombobox
-              classes={filteredClasses}
-              value={selectedClassId === "all" ? null : selectedClassId}
-              onChange={(v) => setSelectedClassId(v ?? "all")}
-              placeholder={t("teacherDashboard.selectClass")}
-              emptyLabel={t("teacherDashboard.noClasses")}
-              allowAll={isAdmin || isSuperAdmin}
-              allLabel={t("teacherDashboard.allClasses")}
-            />
+            {isTeacher ? (
+              <ClassBattleTargetCombobox
+                classes={filteredClasses}
+                rosters={presets.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  studentCount: p.studentCount,
+                }))}
+                value={selectedClassId}
+                onChange={setSelectedClassId}
+                placeholder={t("teacherDashboard.selectClass")}
+                emptyLabel={t("teacherDashboard.noClasses")}
+                rostersLabel={t("classCombobox.rosters")}
+                rosterCountLabel={(count) =>
+                  t("assignments.presets.studentCount", { count })
+                }
+              />
+            ) : (
+              <ClassCombobox
+                classes={filteredClasses}
+                value={selectedClassId === "all" ? null : selectedClassId}
+                onChange={(v) => setSelectedClassId(v ?? "all")}
+                placeholder={t("teacherDashboard.selectClass")}
+                emptyLabel={t("teacherDashboard.noClasses")}
+                allowAll={isAdmin || isSuperAdmin}
+                allLabel={t("teacherDashboard.allClasses")}
+              />
+            )}
           </div>
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           {error && <span className="text-xs text-destructive">{error}</span>}

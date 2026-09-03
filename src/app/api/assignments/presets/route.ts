@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import { z } from "zod"
 import {
   getPresetsForUser,
+  getPresetsUsedByUser,
   createPreset,
 } from "@/lib/assignment-presets"
 
@@ -14,7 +15,7 @@ const createSchema = z.object({
   schoolId: z.string().min(1).optional(),
 })
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth()
     if (!session?.user?.id) {
@@ -24,6 +25,14 @@ export async function GET() {
     const role = session.user.role
     if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    // scope=used: only presets referenced by the requester's own
+    // assignments (Teacher Dashboard / Student Data dropdowns). Default:
+    // every preset the requester can see (create dialog, preset management).
+    const scope = new URL(request.url).searchParams.get("scope")
+    if (scope === "used") {
+      return NextResponse.json(await getPresetsUsedByUser(session.user.id))
     }
 
     const presets = await getPresetsForUser(session.user.id, role)

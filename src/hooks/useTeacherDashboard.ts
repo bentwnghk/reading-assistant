@@ -29,7 +29,15 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
       const params = new URLSearchParams();
       if (schoolId) params.set("schoolId", schoolId);
       const qs = params.toString();
-      const response = await fetch(`/api/classes/${classId}/dashboard${qs ? `?${qs}` : ""}`);
+      // Composite targets ("preset:<id>") load a saved roster instead of a
+      // class; plain ids (and "all") keep hitting the class endpoint.
+      const isPreset = classId.startsWith("preset:");
+      const classPart = classId.startsWith("class:") ? classId.slice("class:".length) : classId;
+      const response = await fetch(
+        isPreset
+          ? `/api/assignments/presets/${classId.slice("preset:".length)}/dashboard`
+          : `/api/classes/${classPart}/dashboard${qs ? `?${qs}` : ""}`
+      );
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || "Failed to fetch");

@@ -261,6 +261,13 @@ export interface CreateAssignmentInput {
   sourceSessionId?: string
   sourceSessionData: ReadingStore
   studentIds: string[]
+  /**
+   * The saved roster applied in the create dialog, if any. Recorded as the
+   * assignment's origin preset (assignments.applied_preset_id) — the exact
+   * link the dashboard/Student Data dropdowns filter on. Never updated
+   * after creation, even when the roster is later edited.
+   */
+  appliedPresetId?: string | null
 }
 
 /**
@@ -284,8 +291,9 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
     const assignmentResult = await client.query(
       `INSERT INTO assignments (
          teacher_id, title, description, subject,
-         source_session_id, source_session_snapshot, source_doc_title, due_date
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         source_session_id, source_session_snapshot, source_doc_title, due_date,
+         applied_preset_id
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, created_at, updated_at`,
       [
         input.teacherId,
@@ -296,6 +304,7 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
         JSON.stringify(snapshot),
         input.sourceSessionData.docTitle || "",
         input.dueDate ? new Date(input.dueDate) : null,
+        input.appliedPresetId || null,
       ],
     )
     const assignmentId = assignmentResult.rows[0].id

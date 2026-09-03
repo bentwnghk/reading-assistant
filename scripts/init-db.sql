@@ -763,6 +763,7 @@ CREATE TABLE assignments (
   source_session_snapshot  JSONB NOT NULL,
   source_doc_title         TEXT DEFAULT '',
   due_date                 TIMESTAMP WITH TIME ZONE,
+  applied_preset_id        TEXT,
   status                   TEXT NOT NULL DEFAULT 'active'
                            CHECK (status IN ('active', 'archived')),
   created_at               TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

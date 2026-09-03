@@ -541,6 +541,65 @@ export async function getTeacherDashboardDataForClasses(classIds: string[], view
   }
 }
 
+/**
+ * Teacher dashboard data for an arbitrary student list (e.g. a saved
+ * roster/preset), with the same teacher session-visibility applied as the
+ * class-scoped variants: assignment working copies are visible to the
+ * assigning teacher, other sessions to the student's English-class teachers.
+ */
+export async function getTeacherDashboardDataForStudents(studentIds: string[], viewerId: string): Promise<TeacherSessionData[]> {
+  if (studentIds.length === 0) return []
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT
+        rs.id, rs.user_id, rs.doc_title,
+        rs.summary IS NOT NULL AND rs.summary != '' as summary,
+        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
+        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
+        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
+        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+        COALESCE(rs.tests_completed, 0) as tests_completed,
+        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
+        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
+        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
+        rs.grammar_quiz_score, rs.grammar_quiz_completed,
+        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
+        GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
+        COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
+        COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
+        rs.grammar_game_completed_at,
+        rs.pre_reading, rs.student_prediction, rs.collocations,
+        rs.pre_reading IS NOT NULL as has_pre_reading,
+        rs.pre_reading_generated_at,
+        rs.collocations_generated_at,
+        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
+        rs.highlighted_words,
+        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
+        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
+        rs.created_at, rs.updated_at,
+        rs.summary_generated_at, rs.mind_map_generated_at,
+        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
+        rs.glossary_generated_at, rs.spelling_game_completed_at,
+        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
+        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
+        rs.visualization_generated_at,
+        u.name as user_name, u.email as user_email
+       FROM reading_sessions rs
+        JOIN users u ON rs.user_id = u.id
+        WHERE rs.user_id = ANY($1)
+          AND COALESCE(u.banned, FALSE) = FALSE
+          AND ${teacherSessionVisibilitySql('rs', '$2')}
+        ORDER BY rs.updated_at DESC`,
+      [studentIds, viewerId]
+    )
+
+    return result.rows.map(mapTeacherSessionRow)
+  } finally {
+    client.release()
+  }
+}
+
 export function getAdminEmails(): string[] {
   const adminEmails = process.env.ADMIN_EMAILS || ''
   return adminEmails.split(',').map(email => email.trim().toLowerCase()).filter(Boolean)
@@ -1594,6 +1653,35 @@ export async function getStudentSessions(studentId: string, viewer?: SessionView
          ${visibility}
        ORDER BY rs.updated_at DESC`,
       tv ? [studentId, tv.id] : [studentId]
+    )
+
+    return result.rows.map(mapStudentSessionRow)
+  } finally {
+    client.release()
+  }
+}
+
+/**
+ * Student-session list rows for an arbitrary student list (e.g. a saved
+ * roster/preset), with the same teacher session-visibility applied as
+ * getStudentSessions. Used by the Student Data tab's preset entries so
+ * roster members outside the viewer's classes remain reachable.
+ */
+export async function getStudentSessionsForStudentIds(studentIds: string[], viewer?: SessionViewer): Promise<StudentSessionData[]> {
+  if (studentIds.length === 0) return []
+  const client = await getClient()
+  try {
+    const tv = teacherViewer(viewer)
+    const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
+    const result = await client.query(
+      `SELECT
+        ${STUDENT_SESSION_SELECT}
+       FROM reading_sessions rs
+        JOIN users u ON rs.user_id = u.id
+        WHERE rs.user_id = ANY($1)
+          ${visibility}
+        ORDER BY rs.updated_at DESC`,
+      tv ? [studentIds, tv.id] : [studentIds]
     )
 
     return result.rows.map(mapStudentSessionRow)

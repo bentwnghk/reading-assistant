@@ -138,6 +138,7 @@ export async function POST(request: Request) {
       sourceSessionData: sourceSession,
       studentIds: filteredStudentIds,
       dueDate: dueDate ?? null,
+      appliedPresetId: presetId ?? null,
       ...rest,
     })
 

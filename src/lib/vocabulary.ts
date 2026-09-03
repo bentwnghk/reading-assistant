@@ -451,6 +451,24 @@ export async function getSpellingReviewSessionCount(userId: string): Promise<num
   return rows[0]?.count ?? 0;
 }
 
+/** Batch variant of getSpellingReviewSessionCount, keyed by user id. */
+export async function getSpellingReviewSessionCountsForUsers(
+  userIds: string[]
+): Promise<Record<string, number>> {
+  if (userIds.length === 0) return {};
+  const pool = getPool();
+  const { rows } = await pool.query(
+    `SELECT user_id, COUNT(*)::int AS count
+     FROM vocabulary_review_sessions
+     WHERE user_id = ANY($1) AND mode = 'spelling'
+     GROUP BY user_id`,
+    [userIds]
+  );
+  return Object.fromEntries(
+    rows.map((r) => [r.user_id as string, Number(r.count) || 0])
+  );
+}
+
 export async function getReviewSessionsForUsers(
   userIds: string[]
 ): Promise<ReviewSessionRecord[]> {
