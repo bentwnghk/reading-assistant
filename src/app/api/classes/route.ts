@@ -70,10 +70,14 @@ export async function POST(request: Request) {
       schoolId = teacherSchool ?? undefined
     }
 
+    // Teachers always own the classes they create: the UI hides the teacher dropdown for them,
+    // so the client sends teacherId: null — which must still resolve to the creator.
+    const effectiveTeacherId = role === "teacher" ? session.user.id : (teacherId || undefined)
+
     const classInfo = await createClass(
       name.trim(),
       description?.trim() || "",
-      teacherId === null ? undefined : (teacherId || (role === "teacher" ? session.user.id : undefined)),
+      effectiveTeacherId,
       schoolId,
       typeof subjectId === "string" && subjectId ? subjectId : undefined,
       typeof gradeId === "string" && gradeId ? gradeId : undefined

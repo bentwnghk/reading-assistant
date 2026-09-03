@@ -85,11 +85,15 @@ export async function PUT(
       schoolId = userSchool ?? undefined
     }
 
+    // Teachers can only edit their own classes; pin ownership to the editor
+    // so it can never be transferred or cleared from a teacher account.
+    const effectiveTeacherId = role === "teacher" ? session.user.id : teacherId
+
     const success = await updateClass(
       id,
       name.trim(),
       description?.trim() || "",
-      teacherId,
+      effectiveTeacherId,
       schoolId,
       typeof subjectId === "string" && subjectId ? subjectId : undefined,
       typeof gradeId === "string" && gradeId ? gradeId : undefined
