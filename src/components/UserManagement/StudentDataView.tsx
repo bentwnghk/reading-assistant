@@ -174,8 +174,16 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
       if (isTeacher) {
         const presetsResponse = await fetch("/api/assignments/presets?scope=used")
+        let loadedPresets: AssignmentPreset[] = []
         if (presetsResponse.ok) {
-          setPresets(await presetsResponse.json())
+          loadedPresets = await presetsResponse.json()
+        }
+        setPresets(loadedPresets)
+        // Teachers with no classes of their own (rosters via saved presets)
+        // get their first used roster preselected so the table isn't stuck
+        // on an empty selection.
+        if (loadedPresets.length > 0 && !selectedClassId) {
+          setSelectedClassId(`preset:${loadedPresets[0].id}`)
         }
       }
     } catch (error) {
@@ -534,7 +542,10 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     )
   }
 
-  if (classes.length === 0) {
+  // No classes AND no used saved rosters: nothing to pick, keep the old
+  // empty state. Teachers whose rosters come entirely from saved presets
+  // (no classes of their own) still get the toolbar + preset dropdown.
+  if (classes.length === 0 && presets.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         {t("userManagement.studentData.noClasses")}
