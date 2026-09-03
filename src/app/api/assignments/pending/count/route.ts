@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { getOverdueAssignmentCount } from "@/lib/assignments"
+import { getPendingAssignmentCount } from "@/lib/assignments"
 
 export async function GET() {
   try {
@@ -11,12 +11,12 @@ export async function GET() {
     if (session.user.role !== "student") {
       return NextResponse.json({ count: 0 })
     }
-    const count = await getOverdueAssignmentCount(session.user.id)
+    const count = await getPendingAssignmentCount(session.user.id)
     return NextResponse.json({ count })
   } catch (error) {
-    console.error("Error fetching overdue assignment count:", error)
+    console.error("Error fetching pending assignment count:", error)
     return NextResponse.json(
-      { error: "Failed to fetch overdue assignment count" },
+      { error: "Failed to fetch pending assignment count" },
       { status: 500 },
     )
   }

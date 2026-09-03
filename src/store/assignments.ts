@@ -1,34 +1,34 @@
 import { create } from "zustand";
 
 interface AssignmentsStoreState {
-  overdueCount: number;
+  pendingAssignmentCount: number;
 }
 
 interface AssignmentsStoreActions {
-  fetchOverdueAssignmentCount: () => Promise<number>;
-  resetOverdueCount: () => void;
+  fetchPendingAssignmentCount: () => Promise<number>;
+  resetPendingAssignmentCount: () => void;
 }
 
 export const useAssignmentsStore = create<
   AssignmentsStoreState & AssignmentsStoreActions
 >()((set) => ({
-  overdueCount: 0,
+  pendingAssignmentCount: 0,
 
-  fetchOverdueAssignmentCount: async () => {
+  fetchPendingAssignmentCount: async () => {
     try {
-      const res = await fetch("/api/assignments/overdue/count");
+      const res = await fetch("/api/assignments/pending/count");
       if (!res.ok) {
-        set({ overdueCount: 0 });
+        set({ pendingAssignmentCount: 0 });
         return 0;
       }
       const data = await res.json();
-      set({ overdueCount: data.count ?? 0 });
+      set({ pendingAssignmentCount: data.count ?? 0 });
       return data.count ?? 0;
     } catch {
-      set({ overdueCount: 0 });
+      set({ pendingAssignmentCount: 0 });
       return 0;
     }
   },
 
-  resetOverdueCount: () => set({ overdueCount: 0 }),
+  resetPendingAssignmentCount: () => set({ pendingAssignmentCount: 0 }),
 }));

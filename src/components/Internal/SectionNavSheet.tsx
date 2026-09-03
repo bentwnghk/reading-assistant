@@ -231,13 +231,13 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
   const role = session?.user?.role;
   const store = useReadingStore();
   const dueForReviewCount = useVocabularyStore((s) => s.dueForReviewCount);
-  const overdueCount = useAssignmentsStore((s) => s.overdueCount);
+  const pendingAssignmentCount = useAssignmentsStore((s) => s.pendingAssignmentCount);
   const setOpenDashboard = useGlobalStore((s) => s.setOpenDashboard);
   const setOpenTeacherDashboard = useGlobalStore((s) => s.setOpenTeacherDashboard);
   const setOpenTutorChat = useGlobalStore((s) => s.setOpenTutorChat);
   const pageBadges: Record<string, number> = {
     "/vocabulary": dueForReviewCount,
-    "/assignments": overdueCount,
+    "/assignments": pendingAssignmentCount,
     "/leaderboard": 0,
   };
   const isHome = pathname === "/";

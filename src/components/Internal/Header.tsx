@@ -124,7 +124,7 @@ function Header() {
     dueForReviewCount,
     fetchDueForReviewCount,
   } = useVocabularyStore();
-  const { overdueCount, fetchOverdueAssignmentCount } = useAssignmentsStore();
+  const { pendingAssignmentCount, fetchPendingAssignmentCount } = useAssignmentsStore();
   const pendingClassBattleCount = useBattleStore((s) => s.pendingClassBattleInvites.length);
   const setShowClassBattleInviteDialog = useBattleStore((s) => s.setShowClassBattleInviteDialog);
   // Prevent accidental dialog dismissal while a live game is in progress —
@@ -208,15 +208,15 @@ function Header() {
     fetchPendingCount();
     fetchPendingReviewListShareCount();
     fetchDueForReviewCount();
-    if (session.user.role === "student") fetchOverdueAssignmentCount();
+    if (session.user.role === "student") fetchPendingAssignmentCount();
     const interval = setInterval(() => {
       fetchPendingCount();
       fetchPendingReviewListShareCount();
       fetchDueForReviewCount();
-      if (session.user.role === "student") fetchOverdueAssignmentCount();
+      if (session.user.role === "student") fetchPendingAssignmentCount();
     }, 60_000);
     return () => clearInterval(interval);
-  }, [session?.user?.id, session?.user?.role, fetchPendingCount, fetchPendingReviewListShareCount, fetchDueForReviewCount, fetchOverdueAssignmentCount]);
+  }, [session?.user?.id, session?.user?.role, fetchPendingCount, fetchPendingReviewListShareCount, fetchDueForReviewCount, fetchPendingAssignmentCount]);
 
   const exportSnapshot = useCallback(() => {
     const { backup } = useReadingStore.getState();
@@ -384,9 +384,9 @@ function Header() {
               >
                 <span className="relative">
                   <ClipboardList className="h-4 w-4" />
-                  {overdueCount > 0 && (
+                  {pendingAssignmentCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                      {overdueCount > 9 ? "9+" : overdueCount}
+                      {pendingAssignmentCount > 9 ? "9+" : pendingAssignmentCount}
                     </span>
                   )}
                 </span>
@@ -402,9 +402,9 @@ function Header() {
                 >
                   <span className="relative">
                     <ClipboardList className="h-4 w-4" />
-                    {overdueCount > 0 && (
+                    {pendingAssignmentCount > 0 && (
                       <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                        {overdueCount > 9 ? "9+" : overdueCount}
+                        {pendingAssignmentCount > 9 ? "9+" : pendingAssignmentCount}
                       </span>
                     )}
                   </span>

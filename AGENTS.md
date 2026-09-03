@@ -251,7 +251,7 @@ API routes are in `src/app/api/`. Key route groups:
 - **`cron/*`**: Scheduled tasks (email reminders).
 - **`config/*`**: Public config endpoints (e.g., fallback model).
 - **`shares/*`**: Reading session sharing (create, list pending, accept/reject, get targets).
-- **`assignments/*`**: Teacher assignments CRUD, student submissions, view, overdue count, and reusable student-group presets (`/presets`).
+- **`assignments/*`**: Teacher assignments CRUD, student submissions, view, pending (incomplete) assignment count, and reusable student-group presets (`/presets`).
 - **`skill-profile/*`**: Comprehension skill-profile snapshot (per-session + cross-session rollup).
 - **`realtime/*`**: HMAC ticket issuance for the standalone Socket.io server (`/realtime/ticket`).
 
@@ -630,7 +630,7 @@ Teachers can create assignments from a reading session (their own or from the te
 |--------|---------|
 | `src/lib/assignments.ts` | Assignment CRUD, submission scoring, **`stripSessionForAssignment`** |
 | `src/lib/assignment-presets.ts` | Preset CRUD |
-| `src/store/assignments.ts` | Client state (active/overdue counts, current assignment) |
+| `src/store/assignments.ts` | Client state (pending assignment count, current assignment) |
 | `src/utils/progress.ts` | `calculateProgress` — shared completion proxy used here + dashboards |
 
 ### `stripSessionForAssignment` vs `stripUserData`
@@ -645,7 +645,7 @@ Teachers can create assignments from a reading session (their own or from the te
 | `/api/assignments/[id]` | GET, PATCH, DELETE | Assignment CRUD |
 | `/api/assignments/[id]/submissions` | GET | List student submissions |
 | `/api/assignments/[id]/view` | GET | Student fetches their stripped working copy |
-| `/api/assignments/overdue/count` | GET | Student overdue count (badge) |
+| `/api/assignments/pending/count` | GET | Student pending (active, incomplete) assignment count (Header badge) |
 | `/api/assignments/targets` | GET | Assignable students (teacher's classes) |
 | `/api/assignments/presets` | GET, POST | Preset CRUD |
 | `/api/assignments/presets/[id]` | GET, PATCH, DELETE | Single preset |

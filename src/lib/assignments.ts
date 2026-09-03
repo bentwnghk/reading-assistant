@@ -589,7 +589,12 @@ export async function getAssignmentsForStudent(studentId: string): Promise<Assig
   }
 }
 
-export async function getOverdueAssignmentCount(studentId: string): Promise<number> {
+/**
+ * Count of a student's active assignments that are not yet complete
+ * (progress < 100), regardless of due date — drives the Header badge that
+ * reminds students they have assignments waiting to be worked on.
+ */
+export async function getPendingAssignmentCount(studentId: string): Promise<number> {
   const client = await getClient()
   try {
     const result = await client.query(
@@ -598,8 +603,6 @@ export async function getOverdueAssignmentCount(studentId: string): Promise<numb
        JOIN assignments a ON a.id = s.assignment_id
        WHERE s.student_id = $1
          AND a.status = 'active'
-         AND a.due_date IS NOT NULL
-         AND a.due_date < NOW()
          AND COALESCE(s.progress, 0) < 100`,
       [studentId],
     )
