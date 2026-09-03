@@ -108,6 +108,8 @@ export async function getAggregatedQuestions(options: {
   schoolId?: string
   classId?: string
   classIds?: string[]
+  /** Restrict to an explicit student-id list (e.g. a saved roster). */
+  studentIds?: string[]
   startDate?: Date
   endDate?: Date
   limit?: number
@@ -152,6 +154,12 @@ export async function getAggregatedQuestions(options: {
         WHERE cm.student_id = u.id AND cm.class_id = ANY($${paramIndex})
       )`)
       params.push(options.classIds)
+      paramIndex++
+    }
+
+    if (options.studentIds && options.studentIds.length > 0) {
+      conditions.push(`cq.user_id = ANY($${paramIndex})`)
+      params.push(options.studentIds)
       paramIndex++
     }
 
@@ -216,6 +224,8 @@ export async function getQuestionInstances(
     schoolId?: string
     classId?: string
     classIds?: string[]
+    /** Restrict to an explicit student-id list (e.g. a saved roster). */
+    studentIds?: string[]
     startDate?: Date
     endDate?: Date
     /** Teacher viewer id — when set, applies teacher question visibility rules. */
@@ -259,6 +269,12 @@ export async function getQuestionInstances(
         WHERE cm.student_id = u.id AND cm.class_id = ANY($${paramIndex})
       )`)
       params.push(options.classIds)
+      paramIndex++
+    }
+
+    if (options.studentIds && options.studentIds.length > 0) {
+      conditions.push(`cq.user_id = ANY($${paramIndex})`)
+      params.push(options.studentIds)
       paramIndex++
     }
 

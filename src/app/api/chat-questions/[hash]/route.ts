@@ -1,12 +1,15 @@
 import { auth } from "@/auth"
 import { getQuestionInstances } from "@/lib/chatQuestions"
 import { getClassesForTeacher, getSchoolForUser } from "@/lib/users"
+import { getPresetForViewer } from "@/lib/assignment-presets"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
 const QuerySchema = z.object({
   schoolId: z.string().optional(),
   classId: z.string().optional(),
+  /** Saved-roster scope: filters to the preset's student ids. */
+  presetId: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
 })
@@ -40,6 +43,7 @@ export async function GET(
     const query = QuerySchema.parse({
       schoolId: searchParams.get("schoolId") || undefined,
       classId: searchParams.get("classId") || undefined,
+      presetId: searchParams.get("presetId") || undefined,
       startDate: searchParams.get("startDate") || undefined,
       endDate: searchParams.get("endDate") || undefined,
     })
@@ -50,16 +54,25 @@ export async function GET(
     let effectiveSchoolId = query.schoolId
     const classId = query.classId
     let classIds: string[] | undefined
+    let studentIds: string[] | undefined
+
+    if (query.presetId) {
+      const preset = await getPresetForViewer(query.presetId, session.user.id, role)
+      if (!preset) {
+        return NextResponse.json({ instances: [] })
+      }
+      studentIds = preset.studentIds
+    }
 
     if (isTeacher) {
       const teacherClasses = await getClassesForTeacher(session.user.id)
       const teacherClassIds = teacherClasses.map(c => c.id)
-      
+
       if (classId && !teacherClassIds.includes(classId)) {
         return NextResponse.json({ instances: [] })
       }
-      
-      if (!classId && teacherClassIds.length > 0) {
+
+      if (!classId && !studentIds && teacherClassIds.length > 0) {
         classIds = teacherClassIds
       }
     } else if (isAdmin) {
@@ -73,6 +86,7 @@ export async function GET(
       schoolId: effectiveSchoolId,
       classId,
       classIds,
+      studentIds,
       startDate,
       endDate,
       viewerId: isTeacher ? session.user.id : undefined,

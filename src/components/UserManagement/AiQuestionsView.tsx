@@ -6,7 +6,7 @@ import dynamic from "next/dynamic"
 import { Loader2, Search, ChevronDown, ChevronRight, ChevronLeft, MessageCircle, Users, FileText, ArrowUpDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ClassCombobox } from "@/components/Internal/ClassCombobox"
+import { ClassCombobox, ClassBattleTargetCombobox } from "@/components/Internal/ClassCombobox"
 import {
   Select,
   SelectContent,
@@ -119,6 +119,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
+  const [presets, setPresets] = useState<AssignmentPreset[]>([])
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>("all")
   const [selectedClassId, setSelectedClassId] = useState<string>("all")
   const [dateRange, setDateRange] = useState<DateRange>("7")
@@ -137,23 +138,39 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
 
   const loadInitialData = useCallback(async () => {
     try {
+      let loadedClasses: ClassInfo[] = []
       const [classesRes, schoolsRes] = await Promise.all([
         fetch("/api/classes"),
         isSuperAdmin ? fetch("/api/schools") : null,
       ])
 
       if (classesRes.ok) {
-        const data: ClassInfo[] = await classesRes.json()
-        setClasses(data)
-        
-        if (isTeacher && data.length > 0 && !initializedTeacherClass) {
-          setSelectedClassId(data[0].id)
-          setInitializedTeacherClass(true)
-        }
+        loadedClasses = await classesRes.json()
+        setClasses(loadedClasses)
       }
 
       if (schoolsRes && schoolsRes.ok) {
         setSchools(await schoolsRes.json())
+      }
+
+      let loadedPresets: AssignmentPreset[] = []
+      if (isTeacher) {
+        const presetsRes = await fetch("/api/assignments/presets?scope=used")
+        if (presetsRes.ok) {
+          loadedPresets = await presetsRes.json()
+        }
+        setPresets(loadedPresets)
+      }
+
+      // Teachers start on their first class; classless teachers (rosters via
+      // saved presets) start on their first used roster instead.
+      if (isTeacher && !initializedTeacherClass) {
+        if (loadedClasses.length > 0) {
+          setSelectedClassId(`class:${loadedClasses[0].id}`)
+        } else if (loadedPresets.length > 0) {
+          setSelectedClassId(`preset:${loadedPresets[0].id}`)
+        }
+        setInitializedTeacherClass(true)
       }
     } catch (error) {
       console.error("Failed to load data:", error)
@@ -161,17 +178,27 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
     }
   }, [t, isSuperAdmin, isTeacher, initializedTeacherClass])
 
+  // Composite targets from the teacher dropdown: "preset:<id>" filters by
+  // saved roster, "class:<id>" by class; plain ids/"all" unchanged.
+  const applyTargetParam = useCallback((params: URLSearchParams) => {
+    if (selectedClassId.startsWith("preset:")) {
+      params.set("presetId", selectedClassId.slice("preset:".length))
+    } else if (selectedClassId.startsWith("class:")) {
+      params.set("classId", selectedClassId.slice("class:".length))
+    } else if (selectedClassId && selectedClassId !== "all") {
+      params.set("classId", selectedClassId)
+    }
+  }, [selectedClassId])
+
   const loadQuestions = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
-      
+
       if (selectedSchoolId && selectedSchoolId !== "all") {
         params.set("schoolId", selectedSchoolId)
       }
-      if (selectedClassId && selectedClassId !== "all") {
-        params.set("classId", selectedClassId)
-      }
+      applyTargetParam(params)
 
       const startDate = getStartDate(dateRange)
       if (startDate) {
@@ -192,7 +219,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
     } finally {
       setLoading(false)
     }
-  }, [selectedSchoolId, selectedClassId, dateRange, t])
+  }, [selectedSchoolId, dateRange, t, applyTargetParam])
 
   useEffect(() => {
     loadInitialData()
@@ -283,9 +310,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
         if (selectedSchoolId && selectedSchoolId !== "all") {
           params.set("schoolId", selectedSchoolId)
         }
-        if (selectedClassId && selectedClassId !== "all") {
-          params.set("classId", selectedClassId)
-        }
+        applyTargetParam(params)
 
         const startDate = getStartDate(dateRange)
         if (startDate) {
@@ -348,15 +373,34 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
           </Select>
         )}
         <div className="w-56">
-          <ClassCombobox
-            classes={filteredClasses}
-            value={selectedClassId === "all" ? null : selectedClassId}
-            onChange={(v) => setSelectedClassId(v ?? "all")}
-            placeholder={t("userManagement.aiQuestions.selectClass")}
-            emptyLabel={t("userManagement.classes.noClasses")}
-            allowAll={isSuperAdmin || isAdmin}
-            allLabel={t("userManagement.aiQuestions.allClasses")}
-          />
+          {isTeacher ? (
+            <ClassBattleTargetCombobox
+              classes={filteredClasses}
+              rosters={presets.map((p) => ({
+                id: p.id,
+                name: p.name,
+                studentCount: p.studentCount,
+              }))}
+              value={selectedClassId}
+              onChange={setSelectedClassId}
+              placeholder={t("userManagement.aiQuestions.selectClass")}
+              emptyLabel={t("userManagement.classes.noClasses")}
+              rostersLabel={t("classCombobox.rosters")}
+              rosterCountLabel={(count) =>
+                t("assignments.presets.studentCount", { count })
+              }
+            />
+          ) : (
+            <ClassCombobox
+              classes={filteredClasses}
+              value={selectedClassId === "all" ? null : selectedClassId}
+              onChange={(v) => setSelectedClassId(v ?? "all")}
+              placeholder={t("userManagement.aiQuestions.selectClass")}
+              emptyLabel={t("userManagement.classes.noClasses")}
+              allowAll={isSuperAdmin || isAdmin}
+              allLabel={t("userManagement.aiQuestions.allClasses")}
+            />
+          )}
         </div>
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
