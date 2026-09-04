@@ -66,7 +66,6 @@ src/
 │   ├── Provider/               # Context providers (Theme, I18n)
 │   ├── PWAInstallPrompt.tsx    # PWA install dialog (iOS + standard browsers)
 │   ├── ServiceWorkerRegistrar.tsx # Service worker registration on mount
-│   ├── History.tsx             # Reading session history browser with import/export
 │   ├── ReminderPreferences.tsx # Email reminder frequency settings
 │   └── Setting.tsx             # Application settings panel
 ├── hooks/                      # Custom React hooks (see Hooks section)
