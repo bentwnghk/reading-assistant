@@ -668,7 +668,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                         </span>
                       )}
                     </div>
-                    <span className="truncate max-w-32" title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
+                    <span title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
                     {user.schoolAccessEndsAt && new Date(user.schoolAccessEndsAt) > new Date() && (
                       <Badge variant="outline" className="flex items-center gap-1 text-xs text-amber-600 border-amber-300 bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:bg-amber-950 shrink-0">
                         <Clock className="h-3 w-3" />
