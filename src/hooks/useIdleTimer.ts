@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useCallback, useState } from "react"
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
@@ -95,17 +95,39 @@ export function useIdleTimer() {
     }
   }, [])
 
-  const doSignOut = useCallback(() => {
+  const doSignOut = useCallback(async () => {
     if (signingOutRef.current) return
     signingOutRef.current = true
     // Drop the persisted clock so the next sign-in starts fresh, never
     // tripping the boot check on this session's stale idle timestamp.
     clearLastActivity()
     channelRef.current?.postMessage({ type: "signout" })
-    signOut({ callbackUrl: "/" }).catch(() => {
-      // If the sign-out request failed, allow a later tick to retry.
+    try {
+      // Sign out through our own authoritative route instead of next-auth's
+      // client signOut(): that flow navigates to whatever URL the server
+      // returns — on server-side failure it redirects to "/?error=Configuration"
+      // WITHOUT deleting the session, leaving the user signed in. This route
+      // deletes the session row and clears the cookie, and only a 2xx means
+      // success — we never navigate on an unconfirmed sign-out.
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15_000)
+      const res = await fetch("/api/auth/idle-timeout", {
+        method: "POST",
+        signal: controller.signal,
+      })
+      clearTimeout(timeout)
+      if (!res.ok) {
+        throw new Error(`idle-timeout sign-out failed with HTTP ${res.status}`)
+      }
+    } catch (e) {
+      // Sign-out not confirmed server-side (e.g. iOS suspended network after
+      // thaw). Release the guard so the next interval tick retries; stay on
+      // the page instead of navigating to a half-signed-out state.
+      console.error("[idle-timer] sign-out failed, will retry", e)
       signingOutRef.current = false
-    })
+      return
+    }
+    window.location.href = "/"
   }, [])
 
   const recordActivity = useCallback(() => {
