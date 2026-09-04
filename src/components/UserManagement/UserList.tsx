@@ -677,7 +677,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="truncate max-w-48">{user.email}</TableCell>
+                <TableCell className="truncate max-w-24 sm:max-w-48" title={user.email || undefined}>{user.email}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1 flex-wrap">
                     <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center w-fit">
