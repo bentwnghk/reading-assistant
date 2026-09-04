@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { auth } from "@/auth";
 import { getPool } from "@/lib/db";
 import { parseError } from "@/utils/error";
 
@@ -15,6 +14,15 @@ import { parseError } from "@/utils/error";
 // signed in (and on iOS, resurrecting the session on the next reload). This
 // route deletes the session row directly and reports explicit success/failure
 // so the client only navigates once the sign-out is confirmed server-side.
+//
+// The session-token cookie is itself the credential: whoever presents it may
+// delete its own row — that IS sign-out. No `auth()` call is needed (or
+// wanted: it would re-introduce the Auth.js runtime as a failure point).
+//
+// Methods:
+// - POST: JSON `{ ok: true }` — used by the idle timer (fetch + sendBeacon).
+// - GET: same deletion, then a 303 redirect to "/" — the last-resort
+//   top-level-navigation fallback when POSTs repeatedly fail.
 
 // Session-token cookie names for both http (dev) and https (prod, `__Secure-`
 // prefixed) deployments. Mirrors @auth/core's `defaultCookies(useSecureCookies)`.
@@ -49,43 +57,46 @@ function readSessionToken(
 
 function clearSessionCookies(response: NextResponse): NextResponse {
   for (const base of SESSION_COOKIE_BASES) {
-    const attrs =
-      base.startsWith("__Secure-")
-        ? "Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure"
-        : "Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+    const attrs = base.startsWith("__Secure-")
+      ? "Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Secure"
+      : "Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
     response.headers.append("Set-Cookie", `${base}=; ${attrs}`);
   }
   return response;
 }
 
+async function performSignOut(): Promise<void> {
+  const cookieStore = await cookies();
+  const sessionToken = readSessionToken(cookieStore.getAll());
+  if (sessionToken) {
+    // Same table/column as @auth/pg-adapter's deleteSession. Deleting by
+    // token only ever signs out this device, not the user's other sessions.
+    await getPool().query(`delete from sessions where "sessionToken" = $1`, [
+      sessionToken,
+    ]);
+  }
+}
+
 export async function POST() {
   try {
-    const cookieStore = await cookies();
-    const sessionToken = readSessionToken(cookieStore.getAll());
-
-    // Validate the session server-side. If this throws, the error is logged
-    // below and surfaced as a 500 — visible in server logs, unlike the
-    // Auth.js action handler's generic `?error=Configuration` redirect.
-    const session = await auth();
-
-    if (!sessionToken && !session?.user) {
-      // Already signed out server-side — nothing left to do.
-      return clearSessionCookies(NextResponse.json({ ok: true }));
-    }
-
-    if (sessionToken) {
-      // Same table/column as @auth/pg-adapter's deleteSession. Deleting by
-      // token only ever signs out this device, not the user's other sessions.
-      await getPool().query(
-        `delete from sessions where "sessionToken" = $1`,
-        [sessionToken]
-      );
-    }
-
+    await performSignOut();
     return clearSessionCookies(NextResponse.json({ ok: true }));
   } catch (error) {
     const message = parseError(error);
     console.error(`[api/auth/idle-timeout] ${message}`);
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  try {
+    await performSignOut();
+  } catch (error) {
+    const message = parseError(error);
+    console.error(`[api/auth/idle-timeout] ${message}`);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+  return clearSessionCookies(
+    NextResponse.redirect(new URL("/", request.url), 303)
+  );
 }

@@ -9,16 +9,23 @@ const DEFAULT_IDLE_TIMEOUT_MS = 30 * 60 * 1000
 const WARNING_MS = 60 * 1000
 const CHECK_INTERVAL_MS = 10 * 1000
 const THROTTLE_MS = 10 * 1000
+// After this many consecutive failed sign-out POSTs (~1 minute of retries),
+// fall back to a plain top-level navigation to the route's GET variant,
+// which performs the same deletion server-side and redirects to "/".
+const MAX_SIGNOUT_ATTEMPTS = 6
 
 // The idle clock must survive scenarios where in-memory refs are not enough:
-// - Frozen tabs: locked screens, backgrounded PWAs and throttled/hidden tabs
+// - Frozen pages: locked screens, backgrounded PWAs and throttled/frozen tabs
 //   stop the interval entirely. On thaw, the user's first returning gesture
-//   (touchstart/mousemove) resets `lastActivityRef` BEFORE the thawed interval
-//   can observe the accumulated idle duration — so the timer never fires.
-// - Discarded tabs: Chrome Memory Saver and iOS PWA relaunches reload the page
-//   with the session cookie intact, losing the in-memory clock completely.
-// A localStorage timestamp bridges both, and also reflects activity from other
-// tabs of the same browser (activity anywhere keeps every tab alive).
+//   (touchstart/mousemove) can reset `lastActivityRef` BEFORE the thawed
+//   interval observes the accumulated idle duration — so the timer never
+//   fires. Screen lock on desktop does not even fire `visibilitychange`,
+//   and iOS does not fire it reliably for PWAs, so lifecycle events alone
+//   cannot be trusted.
+// - Discarded tabs: Chrome Memory Saver and iOS PWA relaunches reload the
+//   page with the session cookie intact, losing the in-memory clock.
+// A localStorage timestamp bridges both, and also reflects activity from
+// other tabs of the same browser (activity anywhere keeps every tab alive).
 const LAST_ACTIVITY_KEY = "idle-timer:last-activity"
 
 const ACTIVITY_EVENTS: (keyof WindowEventMap)[] = [
@@ -56,36 +63,29 @@ export function useIdleTimer() {
   const { status } = useSession()
   const { t } = useTranslation()
   const [idleTimeoutMs, setIdleTimeoutMs] = useState(DEFAULT_IDLE_TIMEOUT_MS)
-  const lastActivityRef = useRef<number>(Date.now())
+  // Mirror so stable callbacks (created once) always read the latest value.
+  const idleTimeoutMsRef = useRef(DEFAULT_IDLE_TIMEOUT_MS)
+  // 0 = not armed yet (signed out / not initialized). The effect NEVER
+  // rewrites a non-zero value — re-renders must not reset the idle clock.
+  const lastActivityRef = useRef<number>(0)
   const lastBroadcastRef = useRef<number>(0)
   const warnedRef = useRef<boolean>(false)
   const channelRef = useRef<BroadcastChannel | null>(null)
-  // Snapshot of `lastActivityRef` taken the moment the page became hidden.
-  // Judged on the next visibilitychange → visible, BEFORE the returning
-  // gesture can reset the clock — this is what makes frozen tabs time out.
-  const hiddenSinceRef = useRef<number | null>(null)
-  // The last value this tab itself persisted, so a read-back can tell activity
-  // from OTHER tabs/page-lives apart from our own writes.
-  const lastSelfWriteRef = useRef<number | null>(null)
-  const configLoadedRef = useRef(false)
-  const bootCheckedRef = useRef(false)
   const signingOutRef = useRef(false)
+  const signOutAttemptsRef = useRef(0)
+  const bootHandledRef = useRef(false)
 
   useEffect(() => {
     fetch("/api/config")
       .then((r) => r.json())
       .then((data) => {
-        if (data.idleTimeoutMinutes) {
-          const minutes = Number(data.idleTimeoutMinutes)
-          if (Number.isFinite(minutes) && minutes > 0) {
-            setIdleTimeoutMs(minutes * 60 * 1000)
-          }
+        const minutes = Number(data.idleTimeoutMinutes)
+        if (Number.isFinite(minutes) && minutes > 0) {
+          idleTimeoutMsRef.current = minutes * 60 * 1000
+          setIdleTimeoutMs(minutes * 60 * 1000)
         }
       })
       .catch(() => {})
-      .finally(() => {
-        configLoadedRef.current = true
-      })
   }, [])
 
   const resetWarning = useCallback(() => {
@@ -99,9 +99,14 @@ export function useIdleTimer() {
     if (signingOutRef.current) return
     signingOutRef.current = true
     // Drop the persisted clock so the next sign-in starts fresh, never
-    // tripping the boot check on this session's stale idle timestamp.
+    // tripping on this session's stale idle timestamp.
     clearLastActivity()
     channelRef.current?.postMessage({ type: "signout" })
+    // Fire-and-forget beacon first: the browser queues beacons even from
+    // frozen/backgrounded pages where a fetch may never be sent.
+    try {
+      navigator.sendBeacon?.("/api/auth/idle-timeout")
+    } catch {}
     try {
       // Sign out through our own authoritative route instead of next-auth's
       // client signOut(): that flow navigates to whatever URL the server
@@ -120,54 +125,73 @@ export function useIdleTimer() {
         throw new Error(`idle-timeout sign-out failed with HTTP ${res.status}`)
       }
     } catch (e) {
-      // Sign-out not confirmed server-side (e.g. iOS suspended network after
-      // thaw). Release the guard so the next interval tick retries; stay on
-      // the page instead of navigating to a half-signed-out state.
+      // Sign-out not confirmed server-side (e.g. network asleep while the
+      // device was locked). Release the guard so the next interval tick
+      // retries; stay on the page instead of navigating to a
+      // half-signed-out state.
       console.error("[idle-timer] sign-out failed, will retry", e)
       signingOutRef.current = false
+      signOutAttemptsRef.current += 1
+      if (signOutAttemptsRef.current >= MAX_SIGNOUT_ATTEMPTS) {
+        // Last resort: a top-level navigation, the most reliable request a
+        // throttled/suspended page can make. The GET variant performs the
+        // same deletion and redirects to "/".
+        window.location.href = "/api/auth/idle-timeout"
+      }
       return
     }
     window.location.href = "/"
   }, [])
 
   const recordActivity = useCallback(() => {
-    lastActivityRef.current = Date.now()
+    const now = Date.now()
+    const previous = lastActivityRef.current
+    // Self-defending clock: if the PREVIOUS clock value is already past the
+    // idle limit, this gesture is a return from too-long idle (the page was
+    // frozen — locked screen, suspended PWA, frozen tab — so the interval
+    // never got to fire, or its sign-out retries never completed). Sign out
+    // instead of resetting the clock. This is what makes the timer immune
+    // to the gesture-races that lifecycle events cannot reliably cover.
+    if (previous > 0 && now - previous >= idleTimeoutMsRef.current) {
+      doSignOut()
+      return
+    }
+    lastActivityRef.current = now
     resetWarning()
 
-    const now = Date.now()
     if (now - lastBroadcastRef.current > THROTTLE_MS) {
       lastBroadcastRef.current = now
       channelRef.current?.postMessage({ type: "activity" })
       writeLastActivity(now)
-      lastSelfWriteRef.current = now
     }
-  }, [resetWarning])
+  }, [doSignOut, resetWarning])
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      // Definitive sign-out (manual, expired, or idle-triggered): release the
-      // persisted idle clock so a later sign-in boots clean. While "loading",
-      // keep it — the session may still be resolving.
+      // Definitive sign-out (manual, expired, or idle-triggered): release
+      // the idle clock so a later sign-in starts fresh.
+      lastActivityRef.current = 0
       clearLastActivity()
       return
     }
     if (status !== "authenticated") return
 
-    // Boot check (runs once per page life, after the server config arrives):
-    // if the tab was discarded / the PWA relaunched / the page reloaded after
-    // a long freeze, the persisted clock tells us the idle limit was already
-    // exceeded while this page wasn't running — sign out instead of silently
-    // resuming the authenticated session.
-    if (!bootCheckedRef.current && configLoadedRef.current) {
-      bootCheckedRef.current = true
+    // Arm the clock exactly once per signed-in page life, resuming from the
+    // persisted clock when one exists: after a tab discard / PWA relaunch
+    // mid-idle, the true idle duration carries over — if it is already past
+    // the limit, the first interval tick signs out (and keeps retrying on
+    // failure). Effect re-runs (config load, re-renders) must never rewrite
+    // an armed clock.
+    if (!bootHandledRef.current) {
+      bootHandledRef.current = true
       const persisted = readLastActivity()
-      if (persisted !== null && Date.now() - persisted >= idleTimeoutMs) {
-        doSignOut()
-        return
+      if (persisted !== null && persisted < Date.now()) {
+        lastActivityRef.current = persisted
       }
     }
-
-    lastActivityRef.current = Date.now()
+    if (lastActivityRef.current === 0) {
+      lastActivityRef.current = Date.now()
+    }
 
     let channel: BroadcastChannel | null = null
     try {
@@ -182,54 +206,33 @@ export function useIdleTimer() {
     if (channel) {
       channel.onmessage = (e: MessageEvent) => {
         if (e.data?.type === "activity") {
+          // Another tab is active; keep this tab's clock fresh so activity
+          // anywhere keeps every tab alive. (Judged against the timeout the
+          // same way — a stale incoming clock is impossible: the sender
+          // only broadcasts fresh activity.)
           lastActivityRef.current = Date.now()
           resetWarning()
-          // Another tab is keeping the session alive while we're hidden; keep
-          // the hide snapshot fresh so thawing doesn't misjudge the idle time.
-          if (
-            document.visibilityState === "hidden" &&
-            hiddenSinceRef.current !== null
-          ) {
-            hiddenSinceRef.current = Date.now()
-          }
         } else if (e.data?.type === "signout") {
           doSignOut()
         }
       }
     }
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        // Snapshot and persist the idle clock before the tab freezes. A
-        // frozen tab cannot run any code, so this write is the only record
-        // of when the user was last active.
-        hiddenSinceRef.current = lastActivityRef.current
+    // Persist the clock whenever the page is about to be hidden or frozen.
+    // A frozen page cannot run any code, so these writes are the only record
+    // of when the user was last active if the page is discarded / the PWA
+    // relaunches. `pagehide` is the reliable event on iOS; `visibilitychange`
+    // covers desktop browsers.
+    const persistClock = () => {
+      if (lastActivityRef.current > 0) {
         writeLastActivity(lastActivityRef.current)
-        lastSelfWriteRef.current = lastActivityRef.current
-        return
-      }
-
-      const hiddenSince = hiddenSinceRef.current
-      hiddenSinceRef.current = null
-      if (hiddenSince === null) return
-
-      // The tab is thawing. The user's returning gesture may already have
-      // reset `lastActivityRef` (and re-persisted it) before this handler
-      // ran, so judge idleness from the hide-time snapshot plus any clock
-      // value persisted by OTHER tabs while we were frozen — never from our
-      // own post-thaw writes.
-      const persisted = readLastActivity()
-      const external =
-        persisted !== null && persisted !== lastSelfWriteRef.current
-          ? persisted
-          : 0
-      const effectiveLast = Math.max(hiddenSince, external)
-      lastActivityRef.current = Math.max(lastActivityRef.current, effectiveLast)
-      if (Date.now() - effectiveLast >= idleTimeoutMs) {
-        doSignOut()
       }
     }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") persistClock()
+    }
     document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("pagehide", persistClock)
 
     const throttledHandler = (() => {
       let lastCall = 0
@@ -247,7 +250,13 @@ export function useIdleTimer() {
     })
 
     const interval = setInterval(() => {
-      const idleDuration = Date.now() - lastActivityRef.current
+      // Judge against the freshest of this tab's in-memory clock and the
+      // persisted clock (written by this tab on hide and by other tabs on
+      // their activity). The persisted half also covers a page that was
+      // discarded and reloaded mid-idle: the first tick after boot already
+      // sees the true idle duration.
+      const persisted = readLastActivity() ?? 0
+      const idleDuration = Date.now() - Math.max(lastActivityRef.current, persisted)
 
       if (!warnedRef.current && idleDuration >= idleTimeoutMs - WARNING_MS) {
         warnedRef.current = true
@@ -267,10 +276,10 @@ export function useIdleTimer() {
         window.removeEventListener(event, throttledHandler)
       })
       document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("pagehide", persistClock)
       clearInterval(interval)
       channel?.close()
       channelRef.current = null
-      hiddenSinceRef.current = null
       toast.dismiss("idle-warning")
     }
   }, [status, idleTimeoutMs, t, recordActivity, resetWarning, doSignOut])
