@@ -3384,6 +3384,7 @@
       "selectSchool": "選擇學校",
       "noSchool": "未分配學校",
       "namePlaceholder": "輸入班別名稱",
+      "displaysAs": "顯示為",
       "descriptionLabel": "描述",
       "descriptionPlaceholder": "輸入班別描述（可選）",
       "teacher": "負責老師",

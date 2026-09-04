@@ -3358,6 +3358,7 @@
       "selectSchool": "Select a school",
       "noSchool": "No school assigned",
       "namePlaceholder": "Enter class name",
+      "displaysAs": "Displays as",
       "nameRequired": "Class name is required",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Enter class description (optional)",

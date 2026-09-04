@@ -138,6 +138,18 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
     return teachers.filter(t => t.schoolId === formData.schoolId)
   }, [teachers, isSuperAdmin, formData.schoolId])
 
+  // Live preview of the label shown in the Classes table's Class Name column
+  // (Grade · Subject · Name). Looked up from the full lists so the preview
+  // matches what gets saved even when a super-admin changes the school filter.
+  const trimmedClassName = formData.name.trim()
+  const previewLabel = trimmedClassName
+    ? formatClassLabel({
+        name: trimmedClassName,
+        subjectName: subjects.find(s => s.id === formData.subjectId)?.name,
+        gradeName: grades.find(g => g.id === formData.gradeId)?.name,
+      })
+    : ""
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc")
@@ -493,6 +505,12 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder={t("userManagement.classes.namePlaceholder")}
               />
+              {previewLabel && (
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  {t("userManagement.classes.displaysAs")}:{" "}
+                  <span className="font-medium text-foreground">{previewLabel}</span>
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
