@@ -192,6 +192,12 @@ async function callOpenAICompatibleApi(
   );
 }
 
+/** grok-imagine models accept a `quality` dial; "low" is cheaper/faster and
+ *  sufficient for visualization images. */
+function imagesApiExtraParams(model: string): Record<string, unknown> {
+  return /imagine/i.test(model) ? { quality: "low" } : {};
+}
+
 async function callOpenAIImagesGenerationsApi(
   prompt: string,
   model: string,
@@ -209,7 +215,7 @@ async function callOpenAIImagesGenerationsApi(
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ model, prompt, n: 1 }),
+    body: JSON.stringify({ model, prompt, n: 1, ...imagesApiExtraParams(model) }),
   });
 }
 
@@ -231,6 +237,9 @@ async function callOpenAIImagesEditsApi(
   form.append("model", model);
   form.append("prompt", prompt);
   form.append("n", "1");
+  for (const [key, value] of Object.entries(imagesApiExtraParams(model))) {
+    form.append(key, String(value));
+  }
   const bytes = new Uint8Array(Buffer.from(inputImage.data, "base64"));
   form.append(
     "image",
