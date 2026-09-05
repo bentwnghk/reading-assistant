@@ -1453,11 +1453,11 @@ function AdaptedText() {
             introKey="reading.adaptedText.help.intro"
             itemsBaseKey="reading.adaptedText.help.items"
             items={[
+              { key: "difficulty", icon: BarChart3, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
               { key: "versions", icon: BookOpen, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "highlight", icon: Plus, bgClass: "bg-yellow-500/10", iconClass: "text-yellow-500" },
               { key: "analysis", icon: Brain, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
               { key: "tts", icon: Volume2, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
-              { key: "difficulty", icon: BarChart3, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
             ]}
             stepsTitleKey="reading.adaptedText.help.stepsTitle"
             stepsKeys={[

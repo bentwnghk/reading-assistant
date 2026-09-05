@@ -960,11 +960,15 @@
       "suggestParseError": "Could not parse the AI response. Please try again.",
       "help": {
         "title": "Text Analysis & Adaptation Guide",
-        "intro": "Read the text your way. Compare the original with a version rewritten for your level, highlight words to learn, and analyse any sentence in detail.",
+        "intro": "Read the text your way. Check how difficult the text is, compare the original with a version rewritten for your level, highlight words to learn, and analyse any sentence in detail.",
         "items": {
+          "difficulty": {
+            "name": "Difficulty Analysis",
+            "desc": "Sits at the top of this section, above the text tabs. Click 'Analyze Difficulty' to compare readability across the three versions, and toggle CEFR highlighting to see words colour-coded by level (A1–C2)."
+          },
           "versions": {
             "name": "Three Text Versions",
-            "desc": "Original (as extracted), Adapted (rewritten for your level) and Simplified (even easier). Switch tabs to compare them."
+            "desc": "Below the difficulty panel: Original (as extracted), Adapted (rewritten for your level) and Simplified (even easier). Switch tabs to compare them."
           },
           "highlight": {
             "name": "Highlight Vocabulary",
@@ -977,10 +981,6 @@
           "tts": {
             "name": "Read Aloud & Read Along",
             "desc": "Select a word and click 'Read aloud' to hear natural pronunciation. Or click 'Read Along' to listen to the whole text sentence-by-sentence with each sentence highlighted in green — click any sentence to jump to it instantly."
-          },
-          "difficulty": {
-            "name": "Difficulty Analysis",
-            "desc": "Compare readability across the three versions and see words colour-coded by CEFR level (A1–C2)."
           }
         },
         "stepsTitle": "How to use it",
