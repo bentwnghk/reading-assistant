@@ -911,12 +911,14 @@ body.toc-noscroll{overflow:hidden}
 
       <h3>3.2 模型分頁 — 為每項功能選擇 AI 引擎</h3>
       <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。標有 <b>†</b> 的模型為<b>預覽模型</b>——僅在<b>超級管理員</b>及<b>計量（API 金鑰）</b>用戶的下拉選單中出現。使用訂閱或免費模式時會隱藏，已儲存的相關選擇會在你登入或切換計費模式時自動重設為該功能的預設值。</p>
+      <p>「<b>視覺化模型</b>」一列選擇文本視覺化（§4.7）所用的圖像生成器。該列中標有 <b>‡</b> 的模型為<b>高級圖像模型</b>——僅在<b>管理員／超級管理員</b>及<b>計量（API 金鑰）</b>用戶的下拉選單中出現；其他帳戶不會看到，生成時亦會自動改用預設模型。</p>
       <table class="ref">
         <tr><th>功能（標籤）</th><th>可用模型</th><th>預設</th></tr>
         <tr><td>視覺（OCR）模型</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
         <tr><td>摘要模型</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>讀前模型</td><td rowspan="10">與摘要相同</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>讀前模型</td><td rowspan="11">與摘要相同</td><td>gpt-5.6-luna</td></tr>
         <tr><td>思維導圖模型</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>視覺化模型</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
         <tr><td>文本改寫模型</td><td>deepseek-v4-flash</td></tr>
         <tr><td>文本簡化模型</td><td>deepseek-v4-flash</td></tr>
         <tr><td>閱讀測驗模型</td><td>gpt-5.6-luna</td></tr>
@@ -1236,7 +1238,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>4.7 視覺化</h3>
-      <p>AI 根據文字內容生成插圖（可切換中／英文提示）。生成後可<b>下載（PNG）</b>或點擊圖片全螢幕縮放。<strong>設有額度</strong>：免費 每天 1 張、訂閱 每天 2 張、計量 無限。「剩餘：N」計數器顯示配額；為 0 時出現鎖定畫面。</p>
+      <p>AI 根據文字內容生成插圖（可切換中／英文提示）。生成後可<b>下載（PNG）</b>或點擊圖片全螢幕縮放。<strong>設有額度</strong>：免費 每天 1 張、訂閱 每天 2 張、計量 無限。「剩餘：N」計數器顯示配額；為 0 時出現鎖定畫面。圖像生成器可於 設定 → 模型 → <b>視覺化模型</b>（§3.2）選擇。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-image"/></svg> 文本視覺化</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-download"/></svg> 下載</span><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> 中文</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-image"/></svg> 重新生成</span><span class="small">今日剩餘 1 次</span></div>
         <div class="mock-body" style="background:#fff">
@@ -2626,13 +2628,14 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>模型清單</th><th>成員</th><th>預設</th></tr>
         <tr><td><b>視覺</b>（OCR）</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
+        <tr><td><b>圖像</b>（視覺化）</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
         <tr><td><b>通用</b>——預設 <code>deepseek-v4-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>通用</b>——預設 <code>gpt-5.6-luna</code>（讀前、閱讀測驗、推薦生字、搭配、語法）</td><td>同上</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>基本導師</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>進階導師</b></td><td>gpt-5.4-mini · gemini-3.7-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
       </table>
-      <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。<b>†</b> 預覽模型——除非你是超級管理員或使用計量計費，否則不會出現在設定的下拉選單；已儲存的選擇會自動重設為該功能預設值。</p>
+      <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。<b>†</b> 預覽模型——除非你是超級管理員或使用計量計費，否則不會出現在設定的下拉選單；已儲存的選擇會自動重設為該功能預設值。<b>‡</b> 高級圖像模型——僅管理員／超級管理員及計量（API 金鑰）用戶可在 設定 → 模型 → 視覺化模型 中選用；其他帳戶生成時會自動採用預設模型。</p>
 
       <h3>B. 角色能力對照表</h3>
       <table class="ref">

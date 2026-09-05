@@ -911,12 +911,14 @@ body.toc-noscroll{overflow:hidden}
 
       <h3>3.2 Models tab — choose the AI engine per feature</h3>
       <p>Each AI-powered feature can use a different model. Lighter/faster models are cheaper; larger models are smarter. You can mix and match. If a stored model is ever removed from the app, it auto-resets to the default. Models marked <b>†</b> are <b>preview models</b> — they only appear in the dropdowns for <b>super-admins</b> and <b>Meter (API key)</b> users. On Subscription or Free they are hidden, and any stored selection of them auto-resets to the feature default when you sign in or switch billing mode.</p>
+      <p>The <b>Visualization Model</b> row picks the image generator used by Text Visualization (§4.7). In that row, the model marked <b>‡</b> is a <b>premium image model</b> — it only appears in the dropdown for <b>admins / super-admins</b> and <b>Meter (API key)</b> users; other accounts don't see it, and generation silently falls back to the default model.</p>
       <table class="ref">
         <tr><th>Feature (label)</th><th>Available models</th><th>Default</th></tr>
         <tr><td>Vision (OCR) Model</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
         <tr><td>Summary Model</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
-        <tr><td>Pre-reading Model</td><td rowspan="10">same list as Summary</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>Pre-reading Model</td><td rowspan="11">same list as Summary</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Mind Map Model</td><td>deepseek-v4-flash</td></tr>
+        <tr><td>Visualization Model</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
         <tr><td>Adapt Text Model</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Simplify Text Model</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Reading Test Model</td><td>gpt-5.6-luna</td></tr>
@@ -1236,7 +1238,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>4.7 Visualization</h3>
-      <p>AI generates an illustration of the text's content (toggle Chinese/English for the prompt). After generation you can <b>Download (PNG)</b> or click the image for a fullscreen zoom. <strong>Rate-limited</strong>: Free = 1/day, Subscription = 2/day, Meter = unlimited. A "remaining: N" counter shows your quota; when 0 a lock screen appears.</p>
+      <p>AI generates an illustration of the text's content (toggle Chinese/English for the prompt). After generation you can <b>Download (PNG)</b> or click the image for a fullscreen zoom. <strong>Rate-limited</strong>: Free = 1/day, Subscription = 2/day, Meter = unlimited. A "remaining: N" counter shows your quota; when 0 a lock screen appears. The image generator itself is chosen in Settings → Models → <b>Visualization Model</b> (§3.2).</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-image"/></svg> Text Visualization</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-download"/></svg> Download</span><span class="small" style="display:inline-flex;align-items:center;gap:6px"><span class="switch"></span> Chinese</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-image"/></svg> Regenerate</span><span class="small">1 left today</span></div>
         <div class="mock-body" style="background:#fff">
@@ -2626,13 +2628,14 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>Model list</th><th>Members</th><th>Default</th></tr>
         <tr><td><b>Vision</b> (OCR)</td><td>gpt-5-nano · gpt-5.6-luna</td><td>gpt-5-nano</td></tr>
+        <tr><td><b>Image</b> (visualization)</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
         <tr><td><b>Available</b> — default <code>deepseek-v4-flash</code> (summary, mind map, adapt, simplify, glossary, sentence-analysis)</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>Available</b> — default <code>gpt-5.6-luna</code> (pre-reading, reading test, suggest vocabulary, collocations, grammar)</td><td>same list as above</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>Reading Text</b> (AI text generator)</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>Basic Tutor</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>Advanced Tutor</b></td><td>gpt-5.4-mini · gemini-3.7-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
       </table>
-      <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>. <b>†</b> Preview model — hidden from the Settings dropdowns unless you are a super-admin or on Meter billing; stored selections auto-reset to the feature default.</p>
+      <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>. <b>†</b> Preview model — hidden from the Settings dropdowns unless you are a super-admin or on Meter billing; stored selections auto-reset to the feature default. <b>‡</b> Premium image model — shown in Settings → Models → Visualization Model only to admins/super-admins and Meter (API key) users; other accounts are silently served the default model.</p>
 
       <h3>B. Role-capability matrix</h3>
       <table class="ref">
