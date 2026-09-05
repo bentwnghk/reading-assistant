@@ -295,7 +295,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
         "fixed bottom-4 right-4 z-50 flex flex-col bg-background border border-border rounded-2xl shadow-2xl transition-all duration-300 print:hidden",
         isExpanded
           ? "inset-4 md:inset-8 max-w-none"
-          : "w-[95vw] max-w-md h-[70vh] max-h-[600px] tablet:h-[80vh] tablet:max-h-[900px] supports-[height:100dvh]:h-[70dvh] supports-[height:100dvh]:tablet:h-[80dvh]"
+          : "w-[95vw] max-w-md h-[70vh] max-h-[600px] md:h-[80vh] md:max-h-[900px] xl:h-[70vh] xl:max-h-[600px] supports-[height:100dvh]:h-[70dvh] supports-[height:100dvh]:md:h-[80dvh] supports-[height:100dvh]:xl:h-[70dvh]"
       )}
     >
       <div className="flex items-center justify-between p-3 border-b border-border">
