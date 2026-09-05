@@ -727,50 +727,6 @@ function Setting({ open, onClose }: SettingProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="imageModel"
-                  render={({ field }) => (
-                    <FormItem className="from-item">
-                      <FormLabel className="from-label">
-                        {t("setting.imageModel")}
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            updateSetting("imageModel", value);
-                          }}
-                        >
-                          <SelectTrigger className="form-field">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {imageModelOptions.map((m) => (
-                              <SelectItem key={m} value={m}>
-                                {m}
-                              </SelectItem>
-                            ))}
-                            {/* Keep the current value listed (disabled) when
-                                it's filtered out for this role, so the Select
-                                still renders the active model correctly. */}
-                            {field.value &&
-                              !imageModelOptions.includes(field.value) && (
-                                <SelectItem
-                                  key={field.value}
-                                  value={field.value}
-                                  disabled
-                                >
-                                  {field.value}
-                                </SelectItem>
-                              )}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="prereadingModel"
                   render={({ field }) => (
                     <FormItem className="from-item">
@@ -856,6 +812,50 @@ function Setting({ open, onClose }: SettingProps) {
                                 {m}
                               </SelectItem>
                             ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="imageModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.imageModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("imageModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {imageModelOptions.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                            {/* Keep the current value listed (disabled) when
+                                it's filtered out for this role, so the Select
+                                still renders the active model correctly. */}
+                            {field.value &&
+                              !imageModelOptions.includes(field.value) && (
+                                <SelectItem
+                                  key={field.value}
+                                  value={field.value}
+                                  disabled
+                                >
+                                  {field.value}
+                                </SelectItem>
+                              )}
                           </SelectContent>
                         </Select>
                       </FormControl>
