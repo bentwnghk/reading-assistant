@@ -193,9 +193,17 @@ async function callOpenAICompatibleApi(
 }
 
 /** grok-imagine models accept a `quality` dial; "low" is cheaper/faster and
- *  sufficient for visualization images. */
-function imagesApiExtraParams(model: string): Record<string, unknown> {
-  return /imagine/i.test(model) ? { quality: "low" } : {};
+ *  sufficient for visualization images.
+ *
+ *  Edits additionally need an xAI-style resolution: gateways relay the OpenAI
+ *  `size` field verbatim into xAI's `resolution` parameter, which only accepts
+ *  "1k"/"2k" — the OpenAI default "1024x1024" is rejected with 422. Send "1k"
+ *  via both `size` and `resolution` so either mapping style works. */
+function imagesApiExtraParams(model: string, isEdit: boolean): Record<string, unknown> {
+  if (!/imagine/i.test(model)) return {};
+  return isEdit
+    ? { quality: "low", size: "1k", resolution: "1k" }
+    : { quality: "low" };
 }
 
 async function callOpenAIImagesGenerationsApi(
@@ -215,7 +223,7 @@ async function callOpenAIImagesGenerationsApi(
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ model, prompt, n: 1, ...imagesApiExtraParams(model) }),
+    body: JSON.stringify({ model, prompt, n: 1, ...imagesApiExtraParams(model, false) }),
   });
 }
 
@@ -237,7 +245,7 @@ async function callOpenAIImagesEditsApi(
   form.append("model", model);
   form.append("prompt", prompt);
   form.append("n", "1");
-  for (const [key, value] of Object.entries(imagesApiExtraParams(model))) {
+  for (const [key, value] of Object.entries(imagesApiExtraParams(model, true))) {
     form.append(key, String(value));
   }
   const bytes = new Uint8Array(Buffer.from(inputImage.data, "base64"));
