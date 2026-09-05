@@ -2810,6 +2810,25 @@ function TextAnalysisTabs({ active }: { active: "original" | "adapted" | "simpli
   );
 }
 
+/* Shared collapsed Text Difficulty bar — the difficulty panel now sits at the
+   top of the Text Analysis & Adaptation section, above the tabs. Mirrors the
+   header row of TextDifficultyAnalyzer.tsx in its collapsed state (cards and
+   CEFR highlighter hidden, "Show Cards" still offered). */
+function TextDifficultyBar() {
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2.5 py-2">
+      <BarChart3 className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+      <span className="font-display text-[10px] font-semibold text-[var(--lp-ink)]">Text Difficulty Analysis</span>
+      <span className="ml-auto inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+        <Gauge className="h-3 w-3" /> Analyze
+      </span>
+      <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+        <Eye className="h-3 w-3" /> Show Cards
+      </span>
+    </div>
+  );
+}
+
 /* ── Slide 1. Mind map — left-to-right, 4 branches with sub-leaves ──
    Based on the Mermaid mindmap:
      root((The Myth of Recycling))
@@ -3095,13 +3114,15 @@ export function UnderstandVisualizationMockup() {
   );
 }
 
-/* ── Slide 3. Text Analysis — Original tab ──
-   2 paragraphs, highlighted yellow chips, glossary popover underneath,
-   floating selection toolbar above the text body. */
+/* ── Slide 4. Text Analysis — Original tab ──
+   Difficulty bar above the tabs (new order), 2 paragraphs, highlighted yellow
+   chips, glossary popover underneath, floating selection toolbar above the
+   text body. */
 export function UnderstandOriginalMockup() {
   return (
     <MockupFrame label="TEXT ANALYSIS · Mr.🆖 ProReader">
       <TextAnalysisHeader />
+      <TextDifficultyBar />
       <TextAnalysisTabs active="original" />
 
       {/* control row — Read Along · Edit (mirrors AdaptedText.tsx) */}
@@ -3222,11 +3243,12 @@ export function UnderstandOriginalMockup() {
   );
 }
 
-/* ── Slide 4. Text Analysis — Adapted tab ── */
+/* ── Slide 5. Text Analysis — Adapted tab ── */
 export function UnderstandAdaptedMockup() {
   return (
     <MockupFrame label="TEXT ANALYSIS · Mr.🆖 ProReader">
       <TextAnalysisHeader />
+      <TextDifficultyBar />
       <TextAnalysisTabs active="adapted" />
 
       {/* control row — Regenerate (student age) */}
@@ -3256,11 +3278,12 @@ export function UnderstandAdaptedMockup() {
   );
 }
 
-/* ── Slide 5. Text Analysis — Simplified tab ── */
+/* ── Slide 6. Text Analysis — Simplified tab ── */
 export function UnderstandSimplifiedMockup() {
   return (
     <MockupFrame label="TEXT ANALYSIS · Mr.🆖 ProReader">
       <TextAnalysisHeader />
+      <TextDifficultyBar />
       <TextAnalysisTabs active="simplified" />
 
       {/* simplified text body — 2 short paragraphs */}
@@ -3283,7 +3306,10 @@ export function UnderstandSimplifiedMockup() {
   );
 }
 
-/* ── Slide 6. Text Difficulty Analysis + CEFR Word Highlight ── */
+/* ── Slide 3. Text Difficulty Analysis + CEFR Word Highlight ──
+   The difficulty panel now sits at the TOP of the Text Analysis &
+   Adaptation section, above the three text tabs (see AdaptedText.tsx) —
+   mocked here with the section header above and the tab strip below. */
 export function UnderstandDifficultyMockup() {
   // 3 DifficultyCards (Original / Adapted / Simplified) — mirrors
   // DifficultyCard in TextDifficultyAnalyzer.tsx
@@ -3319,7 +3345,9 @@ export function UnderstandDifficultyMockup() {
   ];
 
   return (
-    <MockupFrame label="DIFFICULTY · Mr.🆖 ProReader">
+    <MockupFrame label="TEXT ANALYSIS · Mr.🆖 ProReader">
+      <TextAnalysisHeader />
+
       {/* header — title + analyze + hide/show cards toggle */}
       <div className="mb-3 flex flex-wrap items-center gap-2 border-b border-[var(--lp-rule)] pb-3">
         <BarChart3 className="h-4 w-4 text-[var(--lp-ink-soft)]" />
@@ -3438,6 +3466,11 @@ export function UnderstandDifficultyMockup() {
             than it saved.
           </p>
         </div>
+      </div>
+
+      {/* the three text tabs follow below the difficulty panel */}
+      <div className="mt-3">
+        <TextAnalysisTabs active="original" />
       </div>
     </MockupFrame>
   );

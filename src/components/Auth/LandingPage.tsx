@@ -434,10 +434,10 @@ function UnderstandCarousel() {
   const slides = [
     { key: "mindmap", label: t("landing.chapters.understand.carousel.mindmap"), node: <UnderstandMindMapMockup /> },
     { key: "visualization", label: t("landing.chapters.understand.carousel.visualization"), node: <UnderstandVisualizationMockup /> },
+    { key: "difficulty", label: t("landing.chapters.understand.carousel.difficulty"), node: <UnderstandDifficultyMockup /> },
     { key: "original", label: t("landing.chapters.understand.carousel.original"), node: <UnderstandOriginalMockup /> },
     { key: "adapted", label: t("landing.chapters.understand.carousel.adapted"), node: <UnderstandAdaptedMockup /> },
     { key: "simplified", label: t("landing.chapters.understand.carousel.simplified"), node: <UnderstandSimplifiedMockup /> },
-    { key: "difficulty", label: t("landing.chapters.understand.carousel.difficulty"), node: <UnderstandDifficultyMockup /> },
   ];
   const count = slides.length;
   const carouselRef = useRef<HTMLDivElement>(null);

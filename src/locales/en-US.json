@@ -380,11 +380,11 @@
       "understand": {
         "eyebrow": "Understand",
         "title": "Make sense of it.",
-        "lede": "Flip between Original, Adapted, and Simplified versions. Pull up a mind map, watch the AI visualization, and let the difficulty metrics tell you exactly what you're dealing with.",
+        "lede": "Pull up a mind map, watch the AI visualization, check the difficulty metrics, then flip between Original, Adapted, and Simplified versions.",
         "bullets": [
-          "Original · Adapted · Simplified",
           "Mind map & AI visualization",
-          "CEFR levels & readability scores"
+          "CEFR levels & readability scores",
+          "Original · Adapted · Simplified"
         ],
         "carousel": {
           "label": "Understand features",
