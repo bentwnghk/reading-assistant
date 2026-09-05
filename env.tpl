@@ -180,10 +180,12 @@ NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER=
 NEXT_PUBLIC_MODEL_LIST=
 # (Optional) Fallback model when the primary AI model fails (default: gemini-3.7-flash)
 FALLBACK_MODEL=gemini-3.7-flash
-# (Optional) Text-to-image model for visualization generation (default: google/gemini-3.1-flash-image-preview)
+# (Optional) Default text-to-image model for visualization generation (default: google/gemini-3.1-flash-lite-image)
+# Users can override this in Settings → Models with: google/gemini-3.1-flash-lite-image or x-ai/grok-imagine-image-2.0
+# (admins/super-admins and meter-billing "local" mode users can additionally select google/gemini-3.1-flash-image)
 # Chat-capable image models (e.g. gemini-*-image-*) use /v1/chat/completions; image-only models
 # (e.g. grok-imagine-image-*, dall-e-*, gpt-image-*, flux) automatically use /v1/images/generations
-IMAGE_MODEL=google/gemini-3.1-flash-image-preview
+IMAGE_MODEL=google/gemini-3.1-flash-lite-image
 # ZenMux API key — primary provider for visualization image generation (comma-separated for load balancing)
 ZENMUX_API_KEY=
 # (Optional) ZenMux base URL (default: https://zenmux.ai/api/vertex-ai)

@@ -2949,6 +2949,7 @@
     "tabTTS": "TTS",
     "model": "Model",
     "visionModel": "Vision Model",
+    "imageModel": "Visualization Model",
     "prereadingModel": "Pre-reading Model",
     "summaryModel": "Summary Model",
     "mindMapModel": "Mind Map Model",

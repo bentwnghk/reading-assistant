@@ -833,7 +833,7 @@ function useReadingAssistant() {
       return null;
     }
 
-    const { mode, accessPassword, provider, openAIApiKey, openaicompatibleApiKey } = useSettingStore.getState();
+    const { mode, accessPassword, provider, openAIApiKey, openaicompatibleApiKey, imageModel } = useSettingStore.getState();
 
     if (mode === "local") {
       const hasKey =
@@ -876,6 +876,7 @@ function useReadingAssistant() {
           studentAge,
           useChinese,
           mode,
+          imageModel,
           ...(isLanguageSwitch ? { image: visualizationImage } : {}),
         }),
         signal: ac.signal,

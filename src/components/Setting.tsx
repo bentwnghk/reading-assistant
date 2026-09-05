@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -62,6 +62,7 @@ const formSchema = z.object({
   provider: z.string(),
   mode: z.enum(["local", "proxy", "subscription"]).optional(),
   visionModel: z.enum(VISION_MODELS),
+  imageModel: z.enum(IMAGE_MODELS),
   prereadingModel: z.enum(AVAILABLE_MODELS),
   summaryModel: z.enum(AVAILABLE_MODELS),
   mindMapModel: z.enum(AVAILABLE_MODELS),
@@ -147,6 +148,15 @@ function Setting({ open, onClose }: SettingProps) {
   const tutorModelOptions = showRestrictedModels
     ? TUTOR_MODELS
     : TUTOR_MODELS.filter((m) => !RESTRICTED_TUTOR_MODELS.includes(m));
+  // The premium image model is only selectable by admins/super-admins and
+  // meter-billing (mode "local") users.
+  const isAdminRole =
+    sessionData?.user?.role === "admin" ||
+    sessionData?.user?.role === "super-admin";
+  const imageModelOptions =
+    isAdminRole || mode === "local"
+      ? IMAGE_MODELS
+      : IMAGE_MODELS.filter((m) => !RESTRICTED_IMAGE_MODELS.includes(m));
 
   useEffect(() => {
     fetch("/api/subscription/pricing")
@@ -709,6 +719,50 @@ function Setting({ open, onClose }: SettingProps) {
                                 {m}
                               </SelectItem>
                             ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="imageModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.imageModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("imageModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {imageModelOptions.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                            {/* Keep the current value listed (disabled) when
+                                it's filtered out for this role, so the Select
+                                still renders the active model correctly. */}
+                            {field.value &&
+                              !imageModelOptions.includes(field.value) && (
+                                <SelectItem
+                                  key={field.value}
+                                  value={field.value}
+                                  disabled
+                                >
+                                  {field.value}
+                                </SelectItem>
+                              )}
                           </SelectContent>
                         </Select>
                       </FormControl>

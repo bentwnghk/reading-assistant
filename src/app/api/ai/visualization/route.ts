@@ -34,7 +34,21 @@ const OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY =
   process.env.OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || "";
 
 const IMAGE_MODEL =
-  process.env.IMAGE_MODEL || "google/gemini-3.1-flash-image-preview";
+  process.env.IMAGE_MODEL || "google/gemini-3.1-flash-lite-image";
+
+/** Models users may pick in Settings → Models → Visualization Model.
+ *  Client selections are validated against this list; anything else falls
+ *  back to the server-side IMAGE_MODEL default. */
+const IMAGE_MODEL_OPTIONS = new Set([
+  "google/gemini-3.1-flash-lite-image",
+  "x-ai/grok-imagine-image-2.0",
+]);
+
+/** Additional image model only admins/super-admins and meter-billing
+ *  (mode "local") users may select. */
+const ADMIN_IMAGE_MODEL_OPTIONS = new Set([
+  "google/gemini-3.1-flash-image",
+]);
 
 function extractBase64FromGeminiResponse(data: any): string | null {
   const parts = data?.candidates?.[0]?.content?.parts;
@@ -103,7 +117,10 @@ async function callGoogleNativeApi(
   model: string,
   inputImage?: { mimeType: string; data: string } | null
 ): Promise<Response> {
-  const url = `${GOOGLE_API_BASE_URL}/v1beta/models/${model}:generateContent`;
+  // Strip a vendor prefix ("google/...") — Gemini-native model URLs take the
+  // bare model name.
+  const bareModel = model.includes("/") ? model.split("/").pop()! : model;
+  const url = `${GOOGLE_API_BASE_URL}/v1beta/models/${bareModel}:generateContent`;
 
   return fetch(url, {
     method: "POST",
@@ -503,13 +520,27 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text, studentAge, useChinese, image } = body as {
+    const { text, studentAge, useChinese, image, imageModel } = body as {
       text: string;
       studentAge: number;
       useChinese?: boolean;
       mode?: string;
       image?: string;
+      imageModel?: string;
     };
+
+    // User-selected visualization model (Settings → Models); validated
+    // against the allowlist (admins/super-admins and meter-billing users may
+    // additionally pick the premium model), falling back to the server
+    // default.
+    const canUsePremiumModel =
+      ADMIN_ROLES.has(session.user.role || "") || body.mode === "local";
+    const model =
+      typeof imageModel === "string" &&
+      (IMAGE_MODEL_OPTIONS.has(imageModel) ||
+        (canUsePremiumModel && ADMIN_IMAGE_MODEL_OPTIONS.has(imageModel)))
+        ? imageModel
+        : IMAGE_MODEL;
 
     const signature = request.headers.get("x-access-signature") || undefined;
     const hasAccess = await verifyModeAccess(
@@ -559,7 +590,7 @@ export async function POST(request: NextRequest) {
 
     if (ZENMUX_API_KEY) {
       try {
-        const response = await callZenMuxApi(prompt, IMAGE_MODEL, inputImage);
+        const response = await callZenMuxApi(prompt, model, inputImage);
         if (response.ok) {
           const data = await response.json();
           imageDataUrl = extractBase64FromGeminiResponse(data);
@@ -574,7 +605,7 @@ export async function POST(request: NextRequest) {
 
     if (!imageDataUrl && GOOGLE_API_KEY) {
       try {
-        const response = await callGoogleNativeApi(prompt, IMAGE_MODEL, inputImage);
+        const response = await callGoogleNativeApi(prompt, model, inputImage);
         if (response.ok) {
           const data = await response.json();
           imageDataUrl = extractBase64FromGeminiResponse(data);
@@ -595,8 +626,8 @@ export async function POST(request: NextRequest) {
       const attemptImagesApi = async (): Promise<void> => {
         try {
           const response = isTranslation && inputImage
-            ? await callOpenAIImagesEditsApi(prompt, IMAGE_MODEL, isSubscriptionMode, inputImage)
-            : await callOpenAIImagesGenerationsApi(prompt, IMAGE_MODEL, isSubscriptionMode);
+            ? await callOpenAIImagesEditsApi(prompt, model, isSubscriptionMode, inputImage)
+            : await callOpenAIImagesGenerationsApi(prompt, model, isSubscriptionMode);
           if (response.ok) {
             const data = await response.json();
             let extracted = extractFromImagesResponse(data);
@@ -620,13 +651,13 @@ export async function POST(request: NextRequest) {
         }
       };
 
-      if (isImagesOnlyModel(IMAGE_MODEL)) {
+      if (isImagesOnlyModel(model)) {
         await attemptImagesApi();
       } else {
         try {
           const response = await callOpenAICompatibleApi(
             prompt,
-            IMAGE_MODEL,
+            model,
             isSubscriptionMode,
             isTranslation ? image : null
           );

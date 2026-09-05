@@ -72,8 +72,8 @@ services:
       OPENAI_COMPATIBLE_API_KEY: ""
       # Fallback model when the primary AI model fails (default: gemini-3.7-flash)
       FALLBACK_MODEL: "gemini-3.7-flash"
-      # Text-to-image model for visualization generation (default: google/gemini-3.1-flash-image-preview)
-      IMAGE_MODEL: "google/gemini-3.1-flash-image-preview"
+      # Text-to-image model for visualization generation (default: google/gemini-3.1-flash-lite-image)
+      IMAGE_MODEL: "google/gemini-3.1-flash-lite-image"
       # ZenMux API key for visualization image generation (primary provider, comma-separated for load balancing)
       # Single key:   ZENMUX_API_KEY: "zk-abc123"
       # Multiple keys: ZENMUX_API_KEY: "zk-abc123,zk-def456,zk-ghi789"

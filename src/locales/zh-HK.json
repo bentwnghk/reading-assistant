@@ -2975,6 +2975,7 @@
     "tabTTS": "語音",
     "model": "模型",
     "visionModel": "視覺模型",
+    "imageModel": "視覺化模型",
     "prereadingModel": "讀前模型",
     "summaryModel": "摘要模型",
     "mindMapModel": "思維導圖模型",

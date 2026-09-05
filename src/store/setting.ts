@@ -14,6 +14,20 @@ export const VISION_MODELS = ["gpt-5-nano", "gpt-5.6-luna"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
+export const IMAGE_MODELS = [
+  "google/gemini-3.1-flash-lite-image",
+  "x-ai/grok-imagine-image-2.0",
+  "google/gemini-3.1-flash-image",
+] as const;
+
+export type ImageModel = (typeof IMAGE_MODELS)[number];
+
+// Premium image model selectable only by admins/super-admins and
+// meter-billing (mode "local") users; hidden from everyone else's dropdown.
+export const RESTRICTED_IMAGE_MODELS: string[] = [
+  "google/gemini-3.1-flash-image",
+];
+
 export const TUTOR_MODELS = [
   "gpt-5.4-mini",
   "gemini-3.7-flash",
@@ -96,6 +110,7 @@ export interface SettingStore {
   provider: string;
   mode: ApiMode;
   visionModel: VisionModel;
+  imageModel: ImageModel;
   prereadingModel: AvailableModel;
   summaryModel: AvailableModel;
   mindMapModel: AvailableModel;
@@ -218,6 +233,7 @@ export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
   visionModel: "gpt-5-nano",
+  imageModel: "google/gemini-3.1-flash-lite-image",
   prereadingModel: "gpt-5.6-luna",
   summaryModel: "deepseek-v4-flash",
   mindMapModel: "deepseek-v4-flash",
@@ -311,6 +327,9 @@ export const useSettingStore = create(
             }
             if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
               state.visionModel = defaultValues.visionModel;
+            }
+            if (!IMAGE_MODELS.includes(state.imageModel as ImageModel)) {
+              state.imageModel = defaultValues.imageModel;
             }
             if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
               state.tutorModel = defaultValues.tutorModel;
