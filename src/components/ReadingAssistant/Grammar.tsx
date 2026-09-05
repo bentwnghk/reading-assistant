@@ -81,6 +81,7 @@ import {
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { Progress } from "@/components/ui/progress";
 import GrammarGames from "./GrammarGames";
+import GrammarTextHighlighter from "./GrammarTextHighlighter";
 
 type TabType = "topics" | "lessons" | "quiz" | "games";
 
@@ -2290,6 +2291,8 @@ function Grammar() {
           <p>{t("reading.grammar.analyzeFirst")}</p>
         </div>
       )}
+
+      <GrammarTextHighlighter text={extractedText} />
     </section>
   );
 }

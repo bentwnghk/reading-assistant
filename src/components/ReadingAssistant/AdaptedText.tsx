@@ -24,7 +24,6 @@ import {
   FileMinus,
 } from "lucide-react";
 import TextDifficultyAnalyzer from "./TextDifficultyAnalyzer";
-import GrammarTextHighlighter from "./GrammarTextHighlighter";
 import { formatDateTime } from "@/utils/formatDate";
 import {
   Document,
@@ -1508,6 +1507,8 @@ function AdaptedText() {
         </div>
       </div>
 
+      <TextDifficultyAnalyzer />
+
       <Tabs ref={tabsRef} value={activeTab} onValueChange={setActiveTab} className="scroll-mt-20">
         <TabsList className="w-full">
           <TabsTrigger value="original" className="flex-1 gap-1">
@@ -2142,9 +2143,6 @@ function AdaptedText() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <TextDifficultyAnalyzer />
-      <GrammarTextHighlighter text={extractedText} />
     </section>
   );
 }
