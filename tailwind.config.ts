@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 import tailwindcssTypography from "@tailwindcss/typography";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: ["class"],
@@ -171,5 +172,11 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate, tailwindcssTypography],
+  plugins: [
+    tailwindcssAnimate,
+    tailwindcssTypography,
+    plugin(({ addVariant }) => {
+      addVariant("touch", "@media (any-pointer: coarse)");
+    }),
+  ],
 } satisfies Config;
