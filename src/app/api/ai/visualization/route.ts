@@ -127,6 +127,25 @@ async function callGoogleNativeApi(
   });
 }
 
+/** Image-only models are served by `/v1/images/generations` (or `/edits`),
+ *  not `/v1/chat/completions` — gateways route strictly by endpoint. */
+function isImagesOnlyModel(model: string): boolean {
+  return (
+    /dall-e|gpt-image|imagine|flux|seedream|stable-?diffusion|sd3|cogview|wanx|ideogram|recraft|midjourney|mj-/i.test(
+      model
+    ) || /\.(png|jpg|jpeg|webp)$/i.test(model)
+  );
+}
+
+/** A failed chat-completions response that means "this model belongs on the
+ *  images endpoint" — triggers a retry via `/v1/images/generations`. */
+function isModelNotSupportedForChat(status: number, body: string): boolean {
+  if (status !== 400 && status !== 404) return false;
+  return /model_not_supported|not supported by .*chat\/completions|only supports? .*images\/generations|does not support.*chat/i.test(
+    body
+  );
+}
+
 async function callOpenAICompatibleApi(
   prompt: string,
   model: string,
@@ -171,6 +190,59 @@ async function callOpenAICompatibleApi(
       }),
     }
   );
+}
+
+async function callOpenAIImagesGenerationsApi(
+  prompt: string,
+  model: string,
+  isSubscriptionMode: boolean
+): Promise<Response> {
+  const apiKey = multiApiKeyPolling(
+    isSubscriptionMode
+      ? (OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || OPENAI_COMPATIBLE_API_KEY)
+      : OPENAI_COMPATIBLE_API_KEY
+  );
+
+  return fetch(`${OPENAI_COMPATIBLE_API_BASE_URL}/v1/images/generations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({ model, prompt, n: 1 }),
+  });
+}
+
+/** Image-to-image edits for image-only models use the standard multipart
+ *  `/v1/images/edits` endpoint. */
+async function callOpenAIImagesEditsApi(
+  prompt: string,
+  model: string,
+  isSubscriptionMode: boolean,
+  inputImage: { mimeType: string; data: string }
+): Promise<Response> {
+  const apiKey = multiApiKeyPolling(
+    isSubscriptionMode
+      ? (OPENAI_COMPATIBLE_SUBSCRIPTION_API_KEY || OPENAI_COMPATIBLE_API_KEY)
+      : OPENAI_COMPATIBLE_API_KEY
+  );
+
+  const form = new FormData();
+  form.append("model", model);
+  form.append("prompt", prompt);
+  form.append("n", "1");
+  const bytes = new Uint8Array(Buffer.from(inputImage.data, "base64"));
+  form.append(
+    "image",
+    new Blob([bytes], { type: inputImage.mimeType }),
+    `input.${inputImage.mimeType.split("/")[1] || "png"}`
+  );
+
+  return fetch(`${OPENAI_COMPATIBLE_API_BASE_URL}/v1/images/edits`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form,
+  });
 }
 
 function truncateBase64ForLog(str: string): string {
@@ -263,6 +335,40 @@ function extractFromOpenAIResponse(data: any): string | null {
   }
 
   return findDataUrlDeep(data);
+}
+
+/** Extract an image from an `/v1/images/generations` (or `/edits`) response.
+ *  Returns a data URL, or a remote URL that the caller must download. */
+function extractFromImagesResponse(data: any): string | null {
+  const items = data?.data;
+  if (Array.isArray(items)) {
+    for (const item of items) {
+      if (typeof item?.b64_json === "string" && item.b64_json) {
+        const b64 = item.b64_json.replace(/\s/g, "");
+        const mime = b64.startsWith("/9j/") ? "image/jpeg" : "image/png";
+        return `data:${mime};base64,${b64}`;
+      }
+      if (typeof item?.url === "string" && item.url) {
+        return item.url;
+      }
+    }
+  }
+  return findDataUrlDeep(data);
+}
+
+/** Download a remote image URL returned by the images API and inline it as a
+ *  base64 data URL (the app persists images as base64 in the DB). */
+async function fetchUrlAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.startsWith("image/")) return null;
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return `data:${contentType};base64,${buffer.toString("base64")}`;
+  } catch {
+    return null;
+  }
 }
 
 const ADMIN_ROLES = new Set(["admin", "super-admin"]);
@@ -465,27 +571,73 @@ export async function POST(request: NextRequest) {
     }
 
     if (!imageDataUrl && OPENAI_COMPATIBLE_API_KEY && OPENAI_COMPATIBLE_API_BASE_URL) {
-      try {
-        const response = await callOpenAICompatibleApi(prompt, IMAGE_MODEL, body.mode === "subscription", isTranslation ? image : null);
-        if (response.ok) {
-          const data = await response.json();
-          imageDataUrl =
-            extractFromOpenAIResponse(data) ?? extractBase64FromGeminiResponse(data);
-          if (!imageDataUrl) {
-            const msg = data?.choices?.[0]?.message;
-            const debugInfo = msg
-              ? truncateBase64ForLog(JSON.stringify(msg)).substring(0, 600)
-              : truncateBase64ForLog(JSON.stringify(data)).substring(0, 600);
-            errors.push(
-              `OpenAI-compatible (200): could not extract image. message=${debugInfo}`
-            );
+      const isSubscriptionMode = body.mode === "subscription";
+
+      // Image-only models (grok-imagine, dall-e, gpt-image, flux, ...) are
+      // served by the images endpoint, not chat completions.
+      const attemptImagesApi = async (): Promise<void> => {
+        try {
+          const response = isTranslation && inputImage
+            ? await callOpenAIImagesEditsApi(prompt, IMAGE_MODEL, isSubscriptionMode, inputImage)
+            : await callOpenAIImagesGenerationsApi(prompt, IMAGE_MODEL, isSubscriptionMode);
+          if (response.ok) {
+            const data = await response.json();
+            let extracted = extractFromImagesResponse(data);
+            if (extracted && /^https?:\/\//.test(extracted)) {
+              const downloaded = await fetchUrlAsDataUrl(extracted);
+              if (downloaded) extracted = downloaded;
+            }
+            if (extracted) {
+              imageDataUrl = extracted;
+            } else {
+              errors.push(
+                `OpenAI-images (200): could not extract image. ${truncateBase64ForLog(JSON.stringify(data)).substring(0, 600)}`
+              );
+            }
+          } else {
+            const errorText = await response.text();
+            errors.push(`OpenAI-images (${response.status}): ${errorText.substring(0, 200)}`);
           }
-        } else {
-          const errorText = await response.text();
-          errors.push(`OpenAI-compatible (${response.status}): ${errorText.substring(0, 200)}`);
+        } catch (e) {
+          errors.push(`OpenAI-images: ${e instanceof Error ? e.message : String(e)}`);
         }
-      } catch (e) {
-        errors.push(`OpenAI-compatible: ${e instanceof Error ? e.message : String(e)}`);
+      };
+
+      if (isImagesOnlyModel(IMAGE_MODEL)) {
+        await attemptImagesApi();
+      } else {
+        try {
+          const response = await callOpenAICompatibleApi(
+            prompt,
+            IMAGE_MODEL,
+            isSubscriptionMode,
+            isTranslation ? image : null
+          );
+          if (response.ok) {
+            const data = await response.json();
+            imageDataUrl =
+              extractFromOpenAIResponse(data) ?? extractBase64FromGeminiResponse(data);
+            if (!imageDataUrl) {
+              const msg = data?.choices?.[0]?.message;
+              const debugInfo = msg
+                ? truncateBase64ForLog(JSON.stringify(msg)).substring(0, 600)
+                : truncateBase64ForLog(JSON.stringify(data)).substring(0, 600);
+              errors.push(
+                `OpenAI-compatible (200): could not extract image. message=${debugInfo}`
+              );
+            }
+          } else {
+            const errorText = await response.text();
+            errors.push(`OpenAI-compatible (${response.status}): ${errorText.substring(0, 200)}`);
+            // The gateway rejected the model on chat completions (e.g.
+            // "model_not_supported") — retry once via the images endpoint.
+            if (isModelNotSupportedForChat(response.status, errorText)) {
+              await attemptImagesApi();
+            }
+          }
+        } catch (e) {
+          errors.push(`OpenAI-compatible: ${e instanceof Error ? e.message : String(e)}`);
+        }
       }
     }
 
