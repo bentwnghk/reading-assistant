@@ -71,9 +71,9 @@ function AutoSelectPanel({ entryType = "word" }: { entryType?: "word" | "phrase"
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
-            className="h-8 border-primary/40 bg-background text-primary hover:bg-primary/10 hover:text-primary"
+            className="h-8 shadow-sm"
           >
             {t("vocabulary.autoSelect")}
             <ChevronDown className="h-3 w-3 ml-1" />
