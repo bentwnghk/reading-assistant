@@ -63,11 +63,18 @@ function AutoSelectPanel({ entryType = "word" }: { entryType?: "word" | "phrase"
   ];
 
   return (
-    <div className="flex items-center gap-2 mb-4">
+    <div className="inline-flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 dark:bg-primary/10 pl-3 pr-1.5 py-1.5 shadow-sm">
+      <span className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+        <Wand2 className="h-4 w-4" />
+        {t("vocabulary.reviewLabel")}
+      </span>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9">
-            <Wand2 className="h-4 w-4 mr-1" />
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 border-primary/40 bg-background text-primary hover:bg-primary/10 hover:text-primary"
+          >
             {t("vocabulary.autoSelect")}
             <ChevronDown className="h-3 w-3 ml-1" />
           </Button>

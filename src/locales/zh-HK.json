@@ -2230,6 +2230,7 @@
       "backToMyVocab": "返回我的詞彙",
       "listWords": "此列表共 {{count}} 個詞彙"
     },
+    "reviewLabel": "複習",
     "autoSelect": "自動選擇",
     "wordCount": "詞彙數量",
     "phraseCount": "詞組數量",

@@ -2204,6 +2204,7 @@
       "backToMyVocab": "Back to My Vocabulary",
       "listWords": "{{count}} words in this list"
     },
+    "reviewLabel": "Review",
     "autoSelect": "Auto Select",
     "wordCount": "Number of words",
     "phraseCount": "Number of phrases",
