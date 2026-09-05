@@ -96,6 +96,12 @@ const formSchema = z.object({
 
 let preLoading = false;
 
+/** Display label for image models — strips the vendor prefix
+ *  ("google/", "x-ai/"); the underlying value keeps the full string. */
+function stripModelPrefix(model: string): string {
+  return model.replace(/^(google|x-ai)\//, "");
+}
+
 function InfoTooltip({ content }: { content: string }) {
   const [open, setOpen] = useState(false);
 
@@ -840,7 +846,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {imageModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {stripModelPrefix(m)}
                               </SelectItem>
                             ))}
                             {/* Keep the current value listed (disabled) when
@@ -853,7 +859,7 @@ function Setting({ open, onClose }: SettingProps) {
                                   value={field.value}
                                   disabled
                                 >
-                                  {field.value}
+                                  {stripModelPrefix(field.value)}
                                 </SelectItem>
                               )}
                           </SelectContent>
