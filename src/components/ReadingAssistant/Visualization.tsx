@@ -19,7 +19,7 @@ function Visualization() {
   const isRateLimitedRole = userRole === "student" || userRole === "teacher";
   const { mode, accessPassword } = useSettingStore();
   const isMeterMode = mode === "local";
-  const { extractedText, visualizationImage, docTitle, source } = useReadingStore();
+  const { extractedText, visualizationImage, docTitle } = useReadingStore();
   const { activeGenerations, generateVisualization } = useReadingAssistant();
   const isGenerating = !!activeGenerations["visualization"];
   const [zoomed, setZoomed] = useState(false);
@@ -74,8 +74,7 @@ function Visualization() {
     link.click();
   }
 
-  const isStudentOnShared = userRole === "student" && source === "shared";
-  const canGenerateControls = !isLimitReached && !(isStudentOnShared && visualizationImage);
+  const canGenerateControls = !isLimitReached;
 
   return (
     <section className="p-4 border rounded-md mt-4">
