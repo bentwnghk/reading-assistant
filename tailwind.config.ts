@@ -11,6 +11,10 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        // Tablet range (iPad / Android tablet) — phones are below, desktops above.
+        tablet: { min: "768px", max: "1279px" },
+      },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "Georgia", "serif"],
