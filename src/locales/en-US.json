@@ -3275,6 +3275,7 @@
       "users": "Users",
       "classes": "Classes",
       "studentData": "Student Data",
+      "teacherData": "Teacher Data",
       "schools": "Schools",
       "taxonomy": "Subjects & Forms",
       "aiQuestions": "AI Questions",
@@ -3451,6 +3452,57 @@
         "allTime": "All time"
       }
     },
+    "teacherData": {
+      "descriptionSuperAdmin": "View reading session data for all teachers across all schools. Filter by school and teacher.",
+      "descriptionAdmin": "View reading session data for all teachers within your school. Filter by teacher.",
+      "selectSchool": "Select a school",
+      "allSchools": "All Schools",
+      "selectTeacher": "Select a teacher",
+      "allTeachers": "All Teachers",
+      "search": "Search by teacher...",
+      "export": "Export Excel",
+      "exporting": "Exporting...",
+      "exportFailed": "Failed to export Excel",
+      "noTeachers": "No teachers available. Please contact an administrator.",
+      "noSessions": "No reading sessions found for this teacher",
+      "noResults": "No sessions match your search",
+      "showing": "Showing {{count}} sessions",
+      "partialLoadFailed": "Some teachers' data failed to load — try refreshing",
+      "school": "School",
+      "teacher": "Teacher",
+      "title": "Reading Text",
+      "viewReadingText": "View reading text",
+      "viewGlossary": "View glossary",
+      "noReadingText": "No reading text available",
+      "legendVocabulary": "Vocabulary",
+      "legendAnalyzedSentence": "Analyzed sentence",
+      "noGlossary": "No glossary available",
+      "viewVocabQuiz": "View vocabulary quiz",
+      "viewGrammarQuiz": "View grammar quiz",
+      "viewReadingTest": "View reading test",
+      "noVocabQuiz": "No vocabulary quiz data available",
+      "noGrammarQuiz": "No grammar quiz data available",
+      "noReadingTest": "No reading test data available",
+      "noAnswer": "Not answered",
+      "progress": "Learning Progress",
+      "testScore": "Reading Test",
+      "vocabulary": "Vocabulary Count",
+      "spelling": "Spelling Challenge",
+      "spellingAccuracy": "Spelling Challenge Accuracy",
+      "quiz": "Vocabulary Quiz",
+      "grammarQuiz": "Grammar Quiz",
+      "grammarGame": "Grammar Game",
+      "grammarGameAccuracy": "Grammar Game Accuracy",
+      "date": "Last Update",
+      "dateRange": {
+        "7days": "Last 7 days",
+        "30days": "Last 30 days",
+        "90days": "Last 90 days",
+        "180days": "Last 180 days",
+        "360days": "Last 360 days",
+        "allTime": "All time"
+      }
+    },
     "schools": {
       "description": "Manage all schools. Super-admins can view, edit, and delete schools. Schools are automatically created from user email domains.",
       "name": "School Name",
@@ -3553,6 +3605,10 @@
           "studentData": {
             "name": "Student Data",
             "desc": "View detailed reading session data for students across classes. Filter by school, class, date range, or search by student name. Export filtered data to Excel for offline analysis."
+          },
+          "teacherData": {
+            "name": "Teacher Data",
+            "desc": "View detailed reading session data for teachers across schools. Filter by school, teacher, date range, or search by teacher name. Export filtered data to Excel for offline analysis. Available to admins and super-admins only."
           },
           "aiQuestions": {
             "name": "AI Questions",

@@ -28,6 +28,7 @@ import {
 import UserList from "./UserList"
 import ClassList from "./ClassList"
 import StudentDataView from "./StudentDataView"
+import TeacherDataView from "./TeacherDataView"
 import SchoolList from "./SchoolList"
 import AiQuestionsView from "./AiQuestionsView"
 import TaxonomyManager from "./TaxonomyManager"
@@ -397,6 +398,9 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsTrigger value="students">{t("userManagement.tabs.studentData")}</TabsTrigger>
             )}
+            {(isSuperAdmin || isAdmin) && (
+              <TabsTrigger value="teacherData">{t("userManagement.tabs.teacherData")}</TabsTrigger>
+            )}
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsTrigger value="aiQuestions">{t("userManagement.tabs.aiQuestions")}</TabsTrigger>
             )}
@@ -431,6 +435,11 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
                 <StudentDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} />
+              </TabsContent>
+            )}
+            {(isSuperAdmin || isAdmin) && (
+              <TabsContent value="teacherData" className="mt-0">
+                <TeacherDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} />
               </TabsContent>
             )}
             {(isSuperAdmin || isAdmin || isTeacher) && (

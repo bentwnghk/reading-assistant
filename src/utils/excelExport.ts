@@ -34,6 +34,10 @@ interface ExportOptions {
   schoolName?: string
   className?: string
   spellingAttemptsByUser?: Record<string, number>
+  /** Row-subject label ("Student" by default; pass "Teacher" for the teacher data export). */
+  subjectLabel?: string
+  /** Selected teacher name (teacher data export only). */
+  teacherName?: string
 }
 
 interface SchoolBreakdownStats {
@@ -221,19 +225,20 @@ function calculateSummaryStats(
 }
 
 export async function exportStudentDataToExcel(options: ExportOptions): Promise<void> {
-  const { sessions, isAdmin, filename, schoolName, className, spellingAttemptsByUser } = options
+  const { sessions, isAdmin, filename, schoolName, className, teacherName, spellingAttemptsByUser } = options
+  const subjectLabel = options.subjectLabel || "Student"
 
   const workbook = new ExcelJS.Workbook()
   workbook.creator = "Mr.🆖 ProReader"
   workbook.created = new Date()
 
-  const dataSheet = workbook.addWorksheet("Student Data", {
+  const dataSheet = workbook.addWorksheet(`${subjectLabel} Data`, {
     views: [{ state: "frozen", ySplit: 1 }],
   })
 
   const headers = isAdmin
-    ? ["School", "Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Spelling Challenge Accuracy", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
-    : ["Student", "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Spelling Challenge Accuracy", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
+    ? ["School", subjectLabel, "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Spelling Challenge Accuracy", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
+    : [subjectLabel, "Email", "Reading Text", "Learning Progress", "Vocabulary Count", "Spelling Challenge", "Spelling Challenge Accuracy", "Vocabulary Quiz", "Grammar Quiz", "Grammar Game", "Grammar Game Accuracy", "Reading Test", "Last Update"]
 
   dataSheet.columns = headers.map(header => ({
     header,
@@ -446,7 +451,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
     { width: 25 },
   ]
 
-  const titleRow = summarySheet.addRow(["Mr.🆖 ProReader Student Data Report"])
+  const titleRow = summarySheet.addRow([`Mr.🆖 ProReader ${subjectLabel} Data Report`])
   titleRow.height = 32
   titleRow.getCell(1).font = {
     bold: true,
@@ -457,7 +462,7 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
   titleRow.getCell(1).alignment = { vertical: "middle" }
 
   summarySheet.addRow([])
-  if (schoolName || className) {
+  if (schoolName || className || teacherName) {
     if (schoolName) {
       const schoolRow = summarySheet.addRow(["School:", schoolName])
       schoolRow.getCell(1).font = { bold: true, size: 11, color: { argb: "FF666666" } }
@@ -467,6 +472,11 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
       const classRow = summarySheet.addRow(["Class:", className])
       classRow.getCell(1).font = { bold: true, size: 11, color: { argb: "FF666666" } }
       classRow.getCell(2).font = { size: 11, color: { argb: "FF333333" } }
+    }
+    if (teacherName) {
+      const teacherRow = summarySheet.addRow(["Teacher:", teacherName])
+      teacherRow.getCell(1).font = { bold: true, size: 11, color: { argb: "FF666666" } }
+      teacherRow.getCell(2).font = { size: 11, color: { argb: "FF333333" } }
     }
     summarySheet.addRow([])
   }
@@ -597,9 +607,11 @@ export async function exportStudentDataToExcel(options: ExportOptions): Promise<
     name: "Calibri",
   }
 
-  const baseFilename = className 
+  const baseFilename = className
     ? `Mr.NG-ProReader-${className.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "-")}-${dayjs().format("YYYY-MM-DD-HHmmss")}`
-    : `Mr.NG-ProReader-student-data-${dayjs().format("YYYY-MM-DD-HHmmss")}`
+    : teacherName
+      ? `Mr.NG-ProReader-${teacherName.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "-")}-${dayjs().format("YYYY-MM-DD-HHmmss")}`
+      : `Mr.NG-ProReader-${subjectLabel.toLowerCase()}-data-${dayjs().format("YYYY-MM-DD-HHmmss")}`
   const exportFilename = filename || `${baseFilename}.xlsx`
 
   const buffer = await workbook.xlsx.writeBuffer()

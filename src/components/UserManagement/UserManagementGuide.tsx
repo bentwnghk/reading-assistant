@@ -17,6 +17,7 @@ import {
   Layers,
   Mail,
   MousePointer,
+  Presentation,
   School,
   Search,
   Shield,
@@ -46,6 +47,7 @@ const TAB_ITEMS: { key: string; icon: React.ElementType; bgClass: string; iconCl
   { key: "taxonomy", icon: BookMarked, bgClass: "bg-fuchsia-500/10", iconClass: "text-fuchsia-500" },
   { key: "classMembers", icon: UserCog, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
   { key: "studentData", icon: BookOpen, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
+  { key: "teacherData", icon: Presentation, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
   { key: "aiQuestions", icon: Brain, bgClass: "bg-purple-500/10", iconClass: "text-purple-500" },
   { key: "subscriptions", icon: CreditCard, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
 ];
