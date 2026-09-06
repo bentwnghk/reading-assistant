@@ -2581,13 +2581,14 @@ body.toc-noscroll{overflow:hidden}
       <p>Reachable from the Dashboard's Sessions tab. Browse, <b>search</b> (fuzzy), <b>import</b> (.json, multi-select, validated), <b>load</b>, <b>download</b>, or <b>delete</b> any past session. Loading while an AI generation runs triggers a safety confirm.</p>
 
       <h3>11.5 User Management <span class="tag-teacher"></span></h3>
-      <div class="callout teacher"><strong><span class="tag-teacher"></span>Teacher / admin / super-admin only</strong> Hidden from students. Six role-gated tabs manage the whole deployment.</div>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>Teacher / admin / super-admin only</strong> Hidden from students. Role-gated tabs manage the whole deployment.</div>
       <table class="ref">
         <tr><th>Tab</th><th>Visible to</th><th>Purpose</th></tr>
         <tr><td><b>Schools</b></td><td><span class="role super">super-admin</span></td><td>CRUD schools</td></tr>
         <tr><td><b>Users</b></td><td>super-admin + admin</td><td>Change role, assign school/class, bulk-revoke access, delete</td></tr>
         <tr><td><b>Classes</b></td><td>all staff</td><td>CRUD classes; view members</td></tr>
         <tr><td><b>Student Data</b></td><td>all staff</td><td>Cross-student session analytics + Excel export</td></tr>
+        <tr><td><b>Teacher Data</b></td><td>super-admin + admin</td><td>Cross-teacher session analytics + Excel export</td></tr>
         <tr><td><b>AI Questions</b></td><td>all staff</td><td>Browse AI Tutor questions students asked</td></tr>
         <tr><td><b>Subscriptions</b></td><td>super-admin + admin</td><td>Manage Stripe subscriptions</td></tr>
       </table>
@@ -2604,6 +2605,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Reading Test</b></td><td>Same colour-coded review, including AI-graded short-answer questions. Covers multiple-choice, true/false/not given, inference, vocabulary-in-context, and referencing types.</td></tr>
       </table>
       <div class="callout tip"><strong>Lazy-loaded</strong> Detail data is fetched on demand only when you click — the table itself loads fast even for large classes. A spinner appears briefly while fetching.</div>
+
+      <h4>Teacher Data — staff usage at a glance <span class="tag-admin"></span></h4>
+      <p>A parallel table of <b>teachers' own reading sessions</b>, visible to admins and super-admins only. It mirrors the Student Data table — same columns, sorting, date-range filter, search, pagination, and all five click-to-view detail dialogs — but filters by <b>teacher</b> instead of class: pick a school <span class="role super">super-admin</span>, then a single teacher or All Teachers. Excel export produces a "Teacher Data" report with the selected school/teacher named in the summary sheet.</p>
+      <div class="callout tip"><strong>Why it exists</strong> Teachers are readers too — their own practice sessions, glossaries, and quiz attempts appear here so school leads can support staff learning the same way they follow students.</div>
 
       <h3>11.6 Account &amp; session security</h3>
       <p>Three layers protect your account — you don't configure these, but it helps to know they exist:</p>
@@ -2652,6 +2657,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Teacher Dashboard</td><td class="no">—</td><td class="small">own classes</td><td class="small">all classes</td><td class="small">all schools</td></tr>
         <tr><td>User Management (classes)</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>User Management (users / data)</td><td class="no">—</td><td class="small">view</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Teacher Data tab</td><td class="no">—</td><td class="no">—</td><td class="small">own school</td><td class="small">all schools</td></tr>
         <tr><td>Schools / Subscriptions / Import-Export</td><td class="no">—</td><td class="no">—</td><td class="small">partial</td><td class="yes">✓</td></tr>
         <tr><td>Buy School Subscription</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>Delete own account</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>

@@ -2581,13 +2581,14 @@ body.toc-noscroll{overflow:hidden}
       <p>從儀表板的閱讀記錄分頁進入。可瀏覽、<b>搜尋</b>（模糊）、<b>匯入</b>（.json，可多選並驗證）、<b>載入</b>、<b>下載</b>或<b>刪除</b>任何過往閱讀記錄。AI 生成進行中載入會觸發安全確認。</p>
 
       <h3>11.5 用戶管理 <span class="tag-teacher"></span></h3>
-      <div class="callout teacher"><strong><span class="tag-teacher"></span>僅限教師／管理員／超級管理員</strong> 學生介面隱藏。六個按角色控管的分頁管理整個部署。</div>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>僅限教師／管理員／超級管理員</strong> 學生介面隱藏。各個按角色控管的分頁管理整個部署。</div>
       <table class="ref">
         <tr><th>分頁</th><th>可見於</th><th>用途</th></tr>
         <tr><td><b>學校</b></td><td><span class="role super">超級管理員</span></td><td>學校增刪查改</td></tr>
         <tr><td><b>用戶</b></td><td>超級管理員＋管理員</td><td>改角色、指派學校／班別、批量撤銷存取、刪除</td></tr>
         <tr><td><b>班別</b></td><td>全體職員</td><td>班別增刪查改；查看成員</td></tr>
         <tr><td><b>學生數據</b></td><td>全體職員</td><td>跨學生閱讀記錄數據＋Excel 匯出</td></tr>
+        <tr><td><b>教師數據</b></td><td>超級管理員＋管理員</td><td>跨教師閱讀記錄數據＋Excel 匯出</td></tr>
         <tr><td><b>AI 問題</b></td><td>全體職員</td><td>瀏覽學生問過的 AI 導師問題</td></tr>
         <tr><td><b>訂閱</b></td><td>超級管理員＋管理員</td><td>管理 Stripe 訂閱</td></tr>
       </table>
@@ -2604,6 +2605,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>閱讀測驗</b></td><td>同上彩色標示，包括 AI 評分的簡答題。涵蓋選擇題、是非／未提及、推論、詞彙語境及指代題型。</td></tr>
       </table>
       <div class="callout tip"><strong>按需載入</strong> 詳情數據僅在點擊時才從伺服器讀取——表格本身即使班別人數眾多也能快速載入。讀取時短暫顯示載入圖示。</div>
+
+      <h4>教師數據——教師使用情況一目了然 <span class="tag-admin"></span></h4>
+      <p>與學生數據平行的<b>教師本人閱讀記錄</b>表格，僅限管理員及超級管理員。欄位、排序、日期範圍、搜尋、分頁及全部五個點擊查看詳情對話框均與學生數據相同，但改為按<b>教師</b>而非班別篩選：先選學校（<span class="role super">超級管理員</span>），再選單一教師或所有教師。匯出 Excel 會生成「教師數據」報告，摘要工作表列明所選學校／教師。</p>
+      <div class="callout tip"><strong>用途</strong> 教師也是讀者——他們自己的練習記錄、詞彙表及測驗作答都會顯示於此，讓學校負責人可以像跟進學生一樣支援教師的學習。</div>
 
       <h3>11.6 帳戶與閱讀工作階段安全</h3>
       <p>三層保護你的帳戶——你毋須設定，但了解有益：</p>
@@ -2652,6 +2657,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>教師儀表板</td><td class="no">—</td><td class="small">自己的班別</td><td class="small">所有班別</td><td class="small">所有學校</td></tr>
         <tr><td>用戶管理（班別）</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>用戶管理（用戶／數據）</td><td class="no">—</td><td class="small">查看</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>教師數據分頁</td><td class="no">—</td><td class="no">—</td><td class="small">本校</td><td class="small">所有學校</td></tr>
         <tr><td>學校／訂閱／匯入匯出</td><td class="no">—</td><td class="no">—</td><td class="small">部分</td><td class="yes">✓</td></tr>
         <tr><td>購買學校訂閱</td><td class="no">—</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>刪除自己的帳戶</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">—</td></tr>

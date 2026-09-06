@@ -851,6 +851,7 @@ function Header() {
                     <li>• {t("header.about.roles.admin.manageSchools")}</li>
                     <li>• {t("header.about.roles.admin.manageUsers")}</li>
                     <li>• {t("header.about.roles.admin.manageClasses")}</li>
+                    <li>• {t("header.about.roles.admin.viewSessionData")}</li>
                     <li>• {t("header.about.roles.admin.uploadTexts")}</li>
                   </ul>
                 </div>
