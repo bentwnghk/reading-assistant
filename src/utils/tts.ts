@@ -16,6 +16,7 @@
  */
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
+import { logActivity } from "@/utils/activityLogger";
 
 export interface SpeakWordOptions {
   word: string;
@@ -221,6 +222,10 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
 
     const audioData = await response.arrayBuffer();
 
+    // Playback is about to start — count it as a TTS use (fire-and-forget,
+    // silent; popularity tracking must never break playback).
+    logActivity("tts_playback");
+
     // Preferred path: Web Audio (deterministic auto-play after one unlock).
     if (ctx) {
       const decoded = await decodeAudioDataP(ctx, audioData);
@@ -315,6 +320,9 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
   }
 
   const myToken = ++_readAlongToken;
+
+  // Count one TTS use per read-along run (not per sentence) — fire-and-forget.
+  logActivity("tts_playback");
 
   for (let i = opts.startIndex ?? 0; i < opts.sentences.length; i++) {
     if (_readAlongToken !== myToken) return;

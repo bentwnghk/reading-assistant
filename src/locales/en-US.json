@@ -3279,6 +3279,7 @@
       "schools": "Schools",
       "taxonomy": "Subjects & Forms",
       "aiQuestions": "AI Questions",
+      "featurePopularity": "Feature Popularity",
       "subscriptions": "Subscriptions"
     },
     "roles": {
@@ -3452,6 +3453,40 @@
         "allTime": "All time"
       }
     },
+      "featurePopularity": {
+        "description": "Compare how popular each learning function is among students (filtered by class or all classes) and teachers. Hover a bar to see both usage counts and unique users.",
+        "chartTitle": "Feature Usage — Students vs Teachers",
+        "noData": "No feature usage in the selected scope yet.",
+        "ttsNote": "Note: Read Along / TTS tracking is new — counts start accruing from the update onward and historical playback is not included.",
+        "metric": {
+          "uses": "Total uses",
+          "users": "Unique users"
+        },
+        "series": {
+          "students": "Students",
+          "teachers": "Teachers"
+        },
+        "features": {
+          "beforeYouRead": "Before You Read",
+          "summary": "Summary",
+          "mindMap": "Mind Map",
+          "visualization": "Text Visualization",
+          "adaptText": "Adapt Text",
+          "simplifyText": "Simplify Text",
+          "sentenceAnalysis": "Sentence Analysis",
+          "glossary": "Glossary",
+          "collocations": "Phrases & Collocations",
+          "flashcardReview": "Flashcard Review",
+          "spellingGame": "Spelling Game",
+          "vocabQuiz": "Vocab Quiz",
+          "readingTest": "Reading Test",
+          "grammarAnalysis": "Grammar Analysis",
+          "grammarGame": "Grammar Game",
+          "grammarQuiz": "Grammar Quiz",
+          "aiTutor": "AI Tutor",
+          "ttsPlayback": "Read Along / TTS"
+        }
+      },
     "teacherData": {
       "descriptionSuperAdmin": "View reading session data for all teachers across all schools. Filter by school and teacher.",
       "descriptionAdmin": "View reading session data for all teachers within your school. Filter by teacher.",
@@ -3613,6 +3648,10 @@
           "aiQuestions": {
             "name": "AI Questions",
             "desc": "View aggregated AI Tutor questions asked by students. See question frequency, unique user counts, and last-asked dates. Click any question to expand and view individual instances with AI responses."
+          },
+          "featurePopularity": {
+            "name": "Feature Popularity",
+            "desc": "Admin analytics: bar charts comparing how often each learning function (Before You Read, Mind Map, games, AI Tutor, TTS…) is used by students per class and by teachers, switchable between total uses and unique users."
           },
           "subscriptions": {
             "name": "Subscriptions",

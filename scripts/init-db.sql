@@ -338,6 +338,7 @@ CREATE TABLE activity_logs (
       'reading_text_generate',
       'pre_reading_generate',
       'collocations_generate',
+      'tts_playback',
       'assignment_create',
       'assignment_start',
       'assignment_submit'

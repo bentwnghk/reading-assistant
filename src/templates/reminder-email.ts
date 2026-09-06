@@ -100,6 +100,7 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
       targeted_practice_complete: "completed targeted practice",
       glossary_add: "built a vocabulary glossary",
       ai_tutor_question: "asked the AI Tutor",
+      tts_playback: "listened to read-along audio",
     },
     textIntro: (days, activity, date) =>
       `It\u2019s been ${days} since you last ${activity} on ${date}.`,
@@ -153,6 +154,7 @@ const STRINGS: Record<LocaleKey, EmailStrings> = {
       targeted_practice_complete: "\u{5B8C}\u{6210}\u{91DD}\u{5C0D}\u{6027}\u{7DF4}\u{7FD2}",
       glossary_add: "\u{5EFA}\u{7ACB}\u{8A5E}\u{5F59}\u{8868}",
       ai_tutor_question: "\u{5411} AI \u{5C0E}\u{5E2B}\u{63D0}\u{554F}",
+      tts_playback: "\u{807D}\u{53D6}\u{9038}\u{8B80}\u{8A9E}\u{97F3}",
     },
     textIntro: (days, activity, date) =>
       `\u{5DF2}\u{7D93} ${days} \u{6C92}\u{6709}${activity}\u{4E86}\u{FF0C}\u{4E0A}\u{6B21}\u{662F}\u{5728} ${date}\u{3002}`,

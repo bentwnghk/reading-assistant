@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowUpDown,
+  BarChart3,
   BookMarked,
   BookOpen,
   Brain,
@@ -49,6 +50,7 @@ const TAB_ITEMS: { key: string; icon: React.ElementType; bgClass: string; iconCl
   { key: "studentData", icon: BookOpen, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
   { key: "teacherData", icon: Presentation, bgClass: "bg-cyan-500/10", iconClass: "text-cyan-500" },
   { key: "aiQuestions", icon: Brain, bgClass: "bg-purple-500/10", iconClass: "text-purple-500" },
+  { key: "featurePopularity", icon: BarChart3, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
   { key: "subscriptions", icon: CreditCard, bgClass: "bg-amber-500/10", iconClass: "text-amber-500" },
 ];
 
