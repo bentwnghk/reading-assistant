@@ -190,6 +190,10 @@ export interface StudentSessionData {
   analyzedSentences?: Record<string, SentenceAnalysis>
   adaptedText?: string
   simplifiedText?: string
+  mindMap?: string
+  /** Lightweight proxy for a generated visualization (Rule §C) — the base64
+   *  image itself is served lazily by /api/sessions/[id]/visualization. */
+  visualizationGeneratedAt?: number
   vocabularyQuiz?: VocabularyQuizQuestion[]
   readingTest?: ReadingTestQuestion[]
   grammarQuiz?: GrammarQuizQuestion[]
@@ -1769,6 +1773,7 @@ export async function getStudentSessionDetail(sessionId: string): Promise<Studen
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
         rs.grammar_game_accuracy,
         rs.glossary, rs.highlighted_words, rs.analyzed_sentences, rs.adapted_text, rs.simplified_text,
+        rs.mind_map, rs.visualization_generated_at,
         rs.vocabulary_quiz,
         rs.reading_test, rs.grammar_quiz,
         rs.created_at, rs.updated_at,
@@ -1811,6 +1816,8 @@ export async function getStudentSessionDetail(sessionId: string): Promise<Studen
       analyzedSentences: row.analyzed_sentences && typeof row.analyzed_sentences === "object" ? row.analyzed_sentences : {},
       adaptedText: row.adapted_text || undefined,
       simplifiedText: row.simplified_text || undefined,
+      mindMap: row.mind_map || undefined,
+      visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
       vocabularyQuiz: Array.isArray(row.vocabulary_quiz) ? row.vocabulary_quiz : [],
       readingTest: Array.isArray(row.reading_test) ? row.reading_test : [],
       grammarQuiz: Array.isArray(row.grammar_quiz) ? row.grammar_quiz : [],
@@ -1818,6 +1825,25 @@ export async function getStudentSessionDetail(sessionId: string): Promise<Studen
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
     }
+  } finally {
+    client.release()
+  }
+}
+
+/** Fetch only the visualization image (+ owner) of a session. The base64
+ *  payload is intentionally excluded from getStudentSessionDetail so detail
+ *  dialogs don't transfer megabytes unless the image is actually viewed —
+ *  this serves it on demand for teacher/admin viewers. */
+export async function getSessionVisualization(sessionId: string): Promise<{ userId: string; image: string } | null> {
+  const client = await getClient()
+  try {
+    const result = await client.query(
+      `SELECT user_id, visualization_image FROM reading_sessions WHERE id = $1`,
+      [sessionId]
+    )
+    if (result.rows.length === 0) return null
+    const row = result.rows[0]
+    return { userId: row.user_id, image: row.visualization_image ?? "" }
   } finally {
     client.release()
   }

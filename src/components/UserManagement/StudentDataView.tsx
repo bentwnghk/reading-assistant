@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { useTranslation } from "react-i18next"
 import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -34,6 +35,49 @@ import { toast } from "sonner"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
 import { highlightTextAndSentences } from "@/utils/highlight"
+
+const MagicDown = dynamic(() => import("@/components/MagicDown/View"))
+
+/** Parse a stored mind map into structured `MindMapData`. Returns null for
+ *  empty input or legacy sessions that stored Mermaid markdown instead of
+ *  JSON. Mirrors `tryParseMindMapData` in MindMap.tsx (kept local because
+ *  that one lives in a client component module). */
+function tryParseMindMapData(raw: string): MindMapData | null {
+  if (!raw) return null
+  const trimmed = raw.trim()
+  // Legacy Mermaid markdown starts with a code fence or a diagram keyword.
+  if (!trimmed.startsWith("{")) return null
+  try {
+    const obj = JSON.parse(trimmed)
+    if (
+      obj &&
+      typeof obj.root === "string" &&
+      Array.isArray(obj.branches) &&
+      obj.branches.length > 0
+    ) {
+      return obj as MindMapData
+    }
+  } catch {
+    // Not valid JSON — fall through to Mermaid rendering.
+  }
+  return null
+}
+
+/** Render structured mind-map data as a radial Mermaid `mindmap` diagram.
+ *  Mirrors `mindMapDataToMermaid` in MindMap.tsx (kept local — see
+ *  tryParseMindMapData). Labels are JSON-quoted to tolerate special
+ *  characters. */
+function mindMapDataToMermaid(data: MindMapData): string {
+  const clean = (s: string) => s.replace(/"/g, "'").replace(/\s+/g, " ").trim()
+  const lines: string[] = ["mindmap", `  root((${clean(data.root)}))`]
+  data.branches.forEach((b, bi) => {
+    lines.push(`    b${bi}[${JSON.stringify(clean(b.label))}]`)
+    b.leaves.forEach((leaf, li) => {
+      lines.push(`      l${bi}_${li}[${JSON.stringify(clean(leaf))}]`)
+    })
+  })
+  return "```mermaid\n" + lines.join("\n") + "\n```"
+}
 
 function isGrammarAnswerCorrect(q: GrammarQuizQuestion): boolean {
   if (q.type === "rewrite" || q.type === "fill-in") {
@@ -114,6 +158,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 20
   const [viewingText, setViewingText] = useState<{
+    id: string
     title: string
     student?: string
     text?: string
@@ -122,7 +167,14 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     glossary?: GlossaryEntry[]
     adaptedText?: string
     simplifiedText?: string
+    summary?: string
+    mindMap?: string
+    visualizationGeneratedAt?: number
   } | null>(null)
+  // Visualization image is fetched on demand (first tab activation) — the
+  // multi-MB base64 payload never rides along with the detail response.
+  const [visualizationImage, setVisualizationImage] = useState<string | null>(null)
+  const [visualizationLoading, setVisualizationLoading] = useState(false)
   const [viewingGlossary, setViewingGlossary] = useState<{
     title: string
     student?: string
@@ -436,14 +488,23 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     return (viewingText.highlightedWords?.length ?? 0) > 0 || Object.keys(viewingText.analyzedSentences || {}).length > 0
   }, [viewingText])
 
+  const mindMapMarkdown = useMemo(() => {
+    if (!viewingText?.mindMap) return null
+    const parsed = tryParseMindMapData(viewingText.mindMap)
+    return parsed ? mindMapDataToMermaid(parsed) : viewingText.mindMap
+  }, [viewingText?.mindMap])
+
   const handleViewText = useCallback(async (session: SessionWithSchool) => {
     setTextTab("original")
-    setViewingText({ title: session.docTitle, student: session.userName || undefined })
+    setVisualizationImage(null)
+    setVisualizationLoading(false)
+    setViewingText({ id: session.id, title: session.docTitle, student: session.userName || undefined })
     try {
       const res = await fetch(`/api/sessions/${session.id}/detail`)
       if (res.ok) {
         const detail: StudentSessionData = await res.json()
         setViewingText({
+          id: session.id,
           title: session.docTitle,
           student: session.userName || undefined,
           text: detail.extractedText,
@@ -452,6 +513,9 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           glossary: detail.glossary,
           adaptedText: detail.adaptedText,
           simplifiedText: detail.simplifiedText,
+          summary: detail.summary,
+          mindMap: detail.mindMap,
+          visualizationGeneratedAt: detail.visualizationGeneratedAt,
         })
       }
     } catch {
@@ -914,20 +978,52 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
               <DialogDescription>{viewingText.student}</DialogDescription>
             )}
           </DialogHeader>
-          <Tabs value={textTab} onValueChange={setTextTab} className="flex-1 flex flex-col overflow-hidden">
+          <Tabs
+            value={textTab}
+            onValueChange={(tab) => {
+              setTextTab(tab)
+              if (
+                tab === "visualization" &&
+                viewingText &&
+                (viewingText.visualizationGeneratedAt ?? 0) > 0 &&
+                visualizationImage === null &&
+                !visualizationLoading
+              ) {
+                setVisualizationLoading(true)
+                fetch(`/api/sessions/${viewingText.id}/visualization`)
+                  .then(async (res) => {
+                    if (!res.ok) throw new Error("Failed to load visualization")
+                    const data: { image?: string } = await res.json()
+                    setVisualizationImage(data.image || "")
+                  })
+                  .catch(() => toast.error(t("userManagement.loadFailed")))
+                  .finally(() => setVisualizationLoading(false))
+              }
+            }}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
             {viewingText?.text === undefined ? (
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
             ) : (
               <>
-                <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, !!viewingText?.adaptedText, !!viewingText?.simplifiedText].filter(Boolean).length}, minmax(0, 1fr))` }}>
+                <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${[true, !!viewingText?.adaptedText, !!viewingText?.simplifiedText, !!viewingText?.summary, !!viewingText?.mindMap, (viewingText?.visualizationGeneratedAt ?? 0) > 0].filter(Boolean).length}, minmax(0, 1fr))` }}>
                   <TabsTrigger value="original">{t("reading.adaptedText.originalTab")}</TabsTrigger>
                   {viewingText?.adaptedText && (
                     <TabsTrigger value="adapted">{t("reading.adaptedText.adaptedTab")}</TabsTrigger>
                   )}
                   {viewingText?.simplifiedText && (
                     <TabsTrigger value="simplified">{t("reading.adaptedText.simplifiedTab")}</TabsTrigger>
+                  )}
+                  {viewingText?.summary && (
+                    <TabsTrigger value="summary">{t("userManagement.studentData.summaryTab")}</TabsTrigger>
+                  )}
+                  {viewingText?.mindMap && (
+                    <TabsTrigger value="mindmap">{t("userManagement.studentData.mindMapTab")}</TabsTrigger>
+                  )}
+                  {viewingText && (viewingText.visualizationGeneratedAt ?? 0) > 0 && (
+                    <TabsTrigger value="visualization">{t("userManagement.studentData.visualizationTab")}</TabsTrigger>
                   )}
                 </TabsList>
                 <TabsContent value="original" className="flex-1 overflow-y-auto mt-2">
@@ -960,6 +1056,60 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                     <div className="whitespace-pre-wrap break-words text-sm leading-relaxed">
                       {viewingText.simplifiedText}
                     </div>
+                  </TabsContent>
+                )}
+                {viewingText?.summary && (
+                  <TabsContent value="summary" className="flex-1 overflow-y-auto mt-2">
+                    {/* MagicDown is lazy-loaded via next/dynamic with no Suspense
+                        boundary of its own — a local boundary keeps the first
+                        render's loading state scoped to this tab instead of
+                        blanking the whole page (see Architectural Rules §B). */}
+                    <Suspense
+                      fallback={
+                        <div className="flex justify-center items-center py-12">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        </div>
+                      }
+                    >
+                      <div className="prose prose-slate dark:prose-invert max-w-full text-[15px]">
+                        <MagicDown disableMath>{viewingText.summary}</MagicDown>
+                      </div>
+                    </Suspense>
+                  </TabsContent>
+                )}
+                {viewingText?.mindMap && (
+                  <TabsContent value="mindmap" className="flex-1 overflow-y-auto mt-2">
+                    {/* Radial (Mermaid) view only: structured data is converted
+                        to a Mermaid mindmap; legacy markdown renders as-is. */}
+                    <Suspense
+                      fallback={
+                        <div className="flex justify-center items-center py-12">
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        </div>
+                      }
+                    >
+                      <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
+                        <MagicDown hideMermaidDownload>
+                          {mindMapMarkdown}
+                        </MagicDown>
+                      </div>
+                    </Suspense>
+                  </TabsContent>
+                )}
+                {viewingText && (viewingText.visualizationGeneratedAt ?? 0) > 0 && (
+                  <TabsContent value="visualization" className="flex-1 overflow-y-auto mt-2">
+                    {visualizationLoading || visualizationImage === null ? (
+                      <div className="flex justify-center items-center py-12">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      </div>
+                    ) : visualizationImage ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={visualizationImage}
+                        alt={viewingText.title}
+                        className="mx-auto max-w-full h-auto rounded-md"
+                      />
+                    ) : null}
                   </TabsContent>
                 )}
               </>
