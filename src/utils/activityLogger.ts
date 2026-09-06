@@ -25,7 +25,6 @@ type ActivityType =
   | "reading_text_generate"
   | "pre_reading_generate"
   | "collocations_generate"
-  | "tts_playback"
 
 interface ActivityDetails {
   cardsReviewed?: number

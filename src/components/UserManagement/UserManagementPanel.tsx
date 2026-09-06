@@ -31,7 +31,6 @@ import StudentDataView from "./StudentDataView"
 import TeacherDataView from "./TeacherDataView"
 import SchoolList from "./SchoolList"
 import AiQuestionsView from "./AiQuestionsView"
-import FeaturePopularityView from "./FeaturePopularityView"
 import TaxonomyManager from "./TaxonomyManager"
 import AdminSubscriptionsView from "@/components/Subscription/AdminSubscriptionsView"
 import UserManagementGuide from "./UserManagementGuide"
@@ -406,9 +405,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
               <TabsTrigger value="aiQuestions">{t("userManagement.tabs.aiQuestions")}</TabsTrigger>
             )}
             {(isSuperAdmin || isAdmin) && (
-              <TabsTrigger value="featurePopularity">{t("userManagement.tabs.featurePopularity")}</TabsTrigger>
-            )}
-            {(isSuperAdmin || isAdmin) && (
               <TabsTrigger value="subscriptions">{t("userManagement.tabs.subscriptions")}</TabsTrigger>
             )}
           </TabsList>
@@ -449,11 +445,6 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="aiQuestions" className="mt-0">
                 <AiQuestionsView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} />
-              </TabsContent>
-            )}
-            {(isSuperAdmin || isAdmin) && (
-              <TabsContent value="featurePopularity" className="mt-0">
-                <FeaturePopularityView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} />
               </TabsContent>
             )}
             {(isSuperAdmin || isAdmin) && (
