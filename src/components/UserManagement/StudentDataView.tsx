@@ -1076,19 +1076,26 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   <TabsContent value="mindmap" className="flex-1 overflow-y-auto mt-2">
                     {/* Radial (Mermaid) view only: structured data is converted
                         to a Mermaid mindmap; legacy markdown renders as-is. */}
-                    <Suspense
-                      fallback={
-                        <div className="flex justify-center items-center py-12">
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                        </div>
-                      }
-                    >
-                      <div ref={mindMapContentRef} className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
+                    {/* The ref div must live OUTSIDE the Suspense boundary: while
+                        the MagicDown chunk loads, React unmounts everything
+                        inside <Suspense> and shows the fallback — a ref on an
+                        inner div is null at effect time, so the colorize
+                        MutationObserver would never attach (the main page's
+                        MindMap.tsx keeps its ref outside for the same
+                        reason). */}
+                    <div ref={mindMapContentRef} className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
+                      <Suspense
+                        fallback={
+                          <div className="flex justify-center items-center py-12">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                          </div>
+                        }
+                      >
                         <MagicDown hideMermaidDownload>
                           {mindMapMarkdown}
                         </MagicDown>
-                      </div>
-                    </Suspense>
+                      </Suspense>
+                    </div>
                   </TabsContent>
                 )}
                 {viewingText && (viewingText.visualizationGeneratedAt ?? 0) > 0 && (
