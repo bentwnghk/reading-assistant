@@ -2813,7 +2813,7 @@ function TextAnalysisTabs({ active }: { active: "original" | "adapted" | "simpli
 /* Shared collapsed Text Difficulty bar — the difficulty panel now sits at the
    top of the Text Analysis & Adaptation section, above the tabs. Mirrors the
    header row of TextDifficultyAnalyzer.tsx in its collapsed state (cards and
-   CEFR highlighter hidden, "Show Cards" still offered). */
+   CEFR highlighter hidden, "Show" still offered). */
 function TextDifficultyBar() {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 px-2.5 py-2">
@@ -2823,7 +2823,7 @@ function TextDifficultyBar() {
         <Gauge className="h-3 w-3" /> Analyze
       </span>
       <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
-        <Eye className="h-3 w-3" /> Show Cards
+        <Eye className="h-3 w-3" /> Show
       </span>
     </div>
   );
