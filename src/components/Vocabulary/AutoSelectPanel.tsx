@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Wand2, ChevronDown } from "lucide-react";
+import { BookOpen, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -65,7 +65,7 @@ function AutoSelectPanel({ entryType = "word" }: { entryType?: "word" | "phrase"
   return (
     <div className="inline-flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 dark:bg-primary/10 pl-3 pr-1.5 py-1.5 shadow-sm">
       <span className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-        <Wand2 className="h-4 w-4" />
+        <BookOpen className="h-4 w-4" />
         {t("vocabulary.reviewLabel")}
       </span>
       <Popover>
