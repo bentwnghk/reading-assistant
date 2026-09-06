@@ -485,6 +485,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <Input
                               type="password"
                               placeholder={t("setting.accessPasswordPlaceholder")}
+                              disabled={freeAccessGranted}
                               {...field}
                               onBlur={() =>
                                 updateSetting("accessPassword", form.getValues("accessPassword"))
