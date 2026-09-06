@@ -28,9 +28,11 @@ function AutoSelectPanel({ entryType = "word" }: { entryType?: "word" | "phrase"
 
   const [count, setCount] = useState(10);
   const [strategy, setStrategy] = useState<VocabularySelectionStrategy>("due");
+  const [open, setOpen] = useState(false);
 
   const handleAutoSelect = useCallback(() => {
     autoSelectForReview(count, strategy, entryType);
+    setOpen(false);
   }, [count, strategy, autoSelectForReview, entryType]);
 
   const strategies: { key: VocabularySelectionStrategy; label: string }[] = [
@@ -68,7 +70,7 @@ function AutoSelectPanel({ entryType = "word" }: { entryType?: "word" | "phrase"
         <BookOpen className="h-4 w-4" />
         {t("vocabulary.reviewLabel")}
       </span>
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="default"
