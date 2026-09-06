@@ -266,7 +266,14 @@ function SessionsTab({ onClose }: SessionsTabProps) {
             <Table className="min-w-[800px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("history.name")}</TableHead>
+                  <TableHead>
+                    <span className="flex items-baseline gap-1 flex-wrap">
+                      {t("history.name")}
+                      <span className="text-xs font-normal text-muted-foreground">
+                        ({t("history.clickToLoad")})
+                      </span>
+                    </span>
+                  </TableHead>
                   <TableHead className="w-16 text-center whitespace-normal break-words">
                     {t("history.progress")}
                   </TableHead>

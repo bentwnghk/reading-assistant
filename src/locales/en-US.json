@@ -2887,6 +2887,7 @@
   },
   "history": {
     "name": "Reading Text",
+    "clickToLoad": "Click to load",
     "date": "Last Update",
     "actions": "Action",
     "import": "Import",
