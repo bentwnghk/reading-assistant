@@ -463,30 +463,48 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
   // Colorize the Mermaid mindmap SVG after Mermaid finishes rendering — same
   // two-tone palette as the main-page Mind Map section (indigo root,
-  // saturated branches, light-tint leaves). MutationObserver because Mermaid
-  // renders asynchronously (dynamic import + async render); our inline-style
-  // writes are attribute changes, not childList changes, so the observer
-  // does NOT loop.
+  // saturated branches, light-tint leaves). The diagram arrives at the end of
+  // a chain of lazily-loaded chunks and async renders (MagicDown → Mermaid →
+  // mermaid.render), and the exact ordering versus passive-effect timing
+  // inside the dialog is a race — so besides the MutationObserver (for
+  // immediacy) a short bounded poll re-resolves the container and retries
+  // until the SVG is colorized, then stops. Inline-style writes don't
+  // retrigger the childList observer.
   useEffect(() => {
     if (textTab !== "mindmap" || !viewingText?.mindMap) return
     const parsed = tryParseMindMapData(viewingText.mindMap)
     if (!parsed) return
-    const container = mindMapContentRef.current
-    if (!container) return
 
-    const tryColorize = () => {
+    let colorized = false
+    const tick = () => {
+      if (colorized) return
+      const container = mindMapContentRef.current
+      if (!container) return
       const svg = pickMindMapSvg(container)
       if (svg && svg.querySelector("g.mindmap-node")) {
         colorizeMindMapSvg(svg, parsed)
+        colorized = true
       }
     }
 
-    // Try immediately in case the SVG is already in the DOM.
-    tryColorize()
+    tick()
 
-    const observer = new MutationObserver(tryColorize)
-    observer.observe(container, { childList: true, subtree: true })
-    return () => observer.disconnect()
+    const observer = new MutationObserver(tick)
+    if (mindMapContentRef.current) {
+      observer.observe(mindMapContentRef.current, { childList: true, subtree: true })
+    }
+
+    const poll = window.setInterval(tick, 250)
+    const deadline = window.setTimeout(() => {
+      window.clearInterval(poll)
+      observer.disconnect()
+    }, 15000)
+
+    return () => {
+      window.clearInterval(poll)
+      window.clearTimeout(deadline)
+      observer.disconnect()
+    }
   }, [textTab, viewingText?.mindMap])
 
   const handleViewText = useCallback(async (session: SessionWithSchool) => {
