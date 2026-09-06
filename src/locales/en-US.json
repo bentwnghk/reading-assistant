@@ -853,10 +853,10 @@
       "generating": "Extracting...",
       "generatingWait": "Extracting collocations and L1 transfer notes... This may take 1-2 minutes. Please wait.",
       "emptyTip": "Click the button above to extract useful phrases and collocations, with notes on common Cantonese-L1 mistakes.",
-      "addToPhrases": "Add to Phrases",
+      "addToPhrases": "Add Phrase",
       "addedButton": "Added to Phrases",
       "added": "Added \"{{chunk}}\" to your phrases.",
-      "addAll": "Add All to Phrases",
+      "addAll": "Add All Phrases",
       "addAllSuccess": "Added all phrases to your phrases.",
       "addError": "Could not add phrase. Please try again.",
       "parseError": "Could not parse collocations. Please try again.",
@@ -873,7 +873,7 @@
         "steps": {
           "s1": "Click Extract Collocations to scan the text for useful multi-word expressions.",
           "s2": "Read each phrase's contrast note to see what to avoid saying.",
-          "s3": "Tap Add to Phrases on the phrases you want to review later."
+          "s3": "Tap Add Phrase on the phrases you want to review later."
         },
         "tipTitle": "Tip",
         "tipContent": "Roughly half of the collocation errors Hong Kong learners make come from word-for-word translation — the contrast notes are where you'll catch them."

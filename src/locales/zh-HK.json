@@ -887,7 +887,7 @@
       "addToPhrases": "加入詞組",
       "addedButton": "已加入詞組庫",
       "added": "已將「{{chunk}}」加入你的詞組庫。",
-      "addAll": "全部加入詞組",
+      "addAll": "加入全部詞組",
       "addAllSuccess": "已將所有詞組加入你的詞組庫。",
       "addError": "無法加入詞組，請重試。",
       "parseError": "無法解析搭配詞，請重試。",
