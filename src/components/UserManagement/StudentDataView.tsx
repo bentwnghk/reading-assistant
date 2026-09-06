@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react"
 import dynamic from "next/dynamic"
 import { useTranslation } from "react-i18next"
 import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Check, X } from "lucide-react"
@@ -35,49 +35,14 @@ import { toast } from "sonner"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
 import { highlightTextAndSentences } from "@/utils/highlight"
+import {
+  tryParseMindMapData,
+  mindMapDataToMermaid,
+  pickMindMapSvg,
+  colorizeMindMapSvg,
+} from "@/utils/mindmap"
 
 const MagicDown = dynamic(() => import("@/components/MagicDown/View"))
-
-/** Parse a stored mind map into structured `MindMapData`. Returns null for
- *  empty input or legacy sessions that stored Mermaid markdown instead of
- *  JSON. Mirrors `tryParseMindMapData` in MindMap.tsx (kept local because
- *  that one lives in a client component module). */
-function tryParseMindMapData(raw: string): MindMapData | null {
-  if (!raw) return null
-  const trimmed = raw.trim()
-  // Legacy Mermaid markdown starts with a code fence or a diagram keyword.
-  if (!trimmed.startsWith("{")) return null
-  try {
-    const obj = JSON.parse(trimmed)
-    if (
-      obj &&
-      typeof obj.root === "string" &&
-      Array.isArray(obj.branches) &&
-      obj.branches.length > 0
-    ) {
-      return obj as MindMapData
-    }
-  } catch {
-    // Not valid JSON — fall through to Mermaid rendering.
-  }
-  return null
-}
-
-/** Render structured mind-map data as a radial Mermaid `mindmap` diagram.
- *  Mirrors `mindMapDataToMermaid` in MindMap.tsx (kept local — see
- *  tryParseMindMapData). Labels are JSON-quoted to tolerate special
- *  characters. */
-function mindMapDataToMermaid(data: MindMapData): string {
-  const clean = (s: string) => s.replace(/"/g, "'").replace(/\s+/g, " ").trim()
-  const lines: string[] = ["mindmap", `  root((${clean(data.root)}))`]
-  data.branches.forEach((b, bi) => {
-    lines.push(`    b${bi}[${JSON.stringify(clean(b.label))}]`)
-    b.leaves.forEach((leaf, li) => {
-      lines.push(`      l${bi}_${li}[${JSON.stringify(clean(leaf))}]`)
-    })
-  })
-  return "```mermaid\n" + lines.join("\n") + "\n```"
-}
 
 function isGrammarAnswerCorrect(q: GrammarQuizQuestion): boolean {
   if (q.type === "rewrite" || q.type === "fill-in") {
@@ -493,6 +458,36 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     const parsed = tryParseMindMapData(viewingText.mindMap)
     return parsed ? mindMapDataToMermaid(parsed) : viewingText.mindMap
   }, [viewingText?.mindMap])
+
+  const mindMapContentRef = useRef<HTMLDivElement>(null)
+
+  // Colorize the Mermaid mindmap SVG after Mermaid finishes rendering — same
+  // two-tone palette as the main-page Mind Map section (indigo root,
+  // saturated branches, light-tint leaves). MutationObserver because Mermaid
+  // renders asynchronously (dynamic import + async render); our inline-style
+  // writes are attribute changes, not childList changes, so the observer
+  // does NOT loop.
+  useEffect(() => {
+    if (textTab !== "mindmap" || !viewingText?.mindMap) return
+    const parsed = tryParseMindMapData(viewingText.mindMap)
+    if (!parsed) return
+    const container = mindMapContentRef.current
+    if (!container) return
+
+    const tryColorize = () => {
+      const svg = pickMindMapSvg(container)
+      if (svg && svg.querySelector("g.mindmap-node")) {
+        colorizeMindMapSvg(svg, parsed)
+      }
+    }
+
+    // Try immediately in case the SVG is already in the DOM.
+    tryColorize()
+
+    const observer = new MutationObserver(tryColorize)
+    observer.observe(container, { childList: true, subtree: true })
+    return () => observer.disconnect()
+  }, [textTab, viewingText?.mindMap])
 
   const handleViewText = useCallback(async (session: SessionWithSchool) => {
     setTextTab("original")
@@ -1088,7 +1083,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                         </div>
                       }
                     >
-                      <div className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
+                      <div ref={mindMapContentRef} className="prose prose-slate dark:prose-invert max-w-full overflow-x-auto">
                         <MagicDown hideMermaidDownload>
                           {mindMapMarkdown}
                         </MagicDown>
