@@ -74,6 +74,20 @@ const toEntry = (w: { word: string; syllabification?: string; partOfSpeech: stri
   example: w.example || undefined,
 });
 
+/**
+ * Dominant type across a (possibly mixed) review list; ties default to
+ * "word". Drives the landing tab and the entryType recorded for review
+ * sessions started from review lists.
+ */
+function dominantEntryTypeIsPhrase(words: ReviewListWord[]): boolean {
+  const phraseCount = words.filter(
+    (w) =>
+      (w.entryType ?? (w.word.trim().includes(" ") ? "phrase" : "word")) ===
+      "phrase"
+  ).length;
+  return phraseCount > words.length - phraseCount;
+}
+
 function VocabularyContainer() {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -146,10 +160,8 @@ function VocabularyContainer() {
     // Never merge a just-accepted review list into a student's read-only view
     if (useVocabularyStore.getState().viewingUserId) return;
     loadReviewListIntoQueue(w);
-    const first = w[0] as ReviewListWord;
-    const isPhrase =
-      (first.entryType ??
-        (first.word.trim().includes(" ") ? "phrase" : "word")) === "phrase";
+    const isPhrase = dominantEntryTypeIsPhrase(w);
+    currentEntryType.current = isPhrase ? "phrase" : "word";
     setActiveTab(isPhrase ? "phrases" : "table");
   }, [acceptedReviewListWords, words, loadReviewListIntoQueue, setAcceptedReviewListWords]);
 
@@ -325,10 +337,10 @@ function VocabularyContainer() {
         const data = await res.json();
       if (data.words?.length > 0) {
         loadReviewListIntoQueue(data.words);
-        const first = data.words[0] as ReviewListWord;
-        const isPhrase =
-          (first.entryType ??
-            (first.word.trim().includes(" ") ? "phrase" : "word")) === "phrase";
+        const isPhrase = dominantEntryTypeIsPhrase(
+          data.words as ReviewListWord[]
+        );
+        currentEntryType.current = isPhrase ? "phrase" : "word";
         setActiveTab(isPhrase ? "phrases" : "table");
       }
       } catch (err) {

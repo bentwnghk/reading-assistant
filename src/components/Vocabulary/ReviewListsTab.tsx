@@ -13,6 +13,8 @@ import {
   Pencil,
   X,
   Play,
+  Plus,
+  Search,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -36,6 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { RecipientPicker } from "@/components/Internal/RecipientPicker";
 import { cn } from "@/utils/style";
+import { useVocabularyStore } from "@/store/vocabulary";
 import type { ShareTargetGroup } from "@/lib/shared-sessions";
 
 type ReviewListSummary = {
@@ -44,6 +47,28 @@ type ReviewListSummary = {
   wordCount: number;
   createdAt: number;
 };
+
+function entryTypeOf(w: ReviewListWord): "word" | "phrase" {
+  return w.entryType ?? (w.word.trim().includes(" ") ? "phrase" : "word");
+}
+
+function EntryTypeBadge({ entryType }: { entryType: "word" | "phrase" }) {
+  const { t } = useTranslation();
+  return (
+    <span
+      className={cn(
+        "shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded",
+        entryType === "phrase"
+          ? "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
+          : "bg-muted text-muted-foreground"
+      )}
+    >
+      {entryType === "phrase"
+        ? t("vocabulary.reviewLists.typePhrase")
+        : t("vocabulary.reviewLists.typeWord")}
+    </span>
+  );
+}
 
 interface ReviewListsTabProps {
   onReviewList?: (listId: string) => void;
@@ -77,6 +102,8 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
   const [editWords, setEditWords] = useState<ReviewListWord[]>([]);
   const [editLoading, setEditLoading] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+  const [addSearch, setAddSearch] = useState("");
+  const vocabWords = useVocabularyStore((s) => s.words);
 
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,6 +158,7 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
     setEditId(list.id);
     setEditName(list.name);
     setEditWords([]);
+    setAddSearch("");
     setEditOpen(true);
     setEditLoading(true);
     try {
@@ -149,6 +177,36 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
   const handleEditRemoveWord = useCallback((index: number) => {
     setEditWords((prev) => prev.filter((_, i) => i !== index));
   }, []);
+
+  const handleEditAddWord = useCallback((vw: VocabularyWord) => {
+    setEditWords((prev) => [
+      ...prev,
+      {
+        word: vw.word,
+        syllabification: vw.syllabification,
+        partOfSpeech: vw.partOfSpeech,
+        englishDefinition: vw.englishDefinition,
+        chineseDefinition: vw.chineseDefinition,
+        example: vw.example,
+        entryType: vw.entryType ?? (vw.word.trim().includes(" ") ? "phrase" : "word"),
+      },
+    ]);
+  }, []);
+
+  const addQuery = addSearch.trim();
+  const addQueryLower = addQuery.toLowerCase();
+  const existingInList = new Set(editWords.map((w) => w.word.toLowerCase()));
+  const addResults = addQuery
+    ? vocabWords
+        .filter(
+          (w) =>
+            !existingInList.has(w.word.toLowerCase()) &&
+            (w.word.toLowerCase().includes(addQueryLower) ||
+              w.englishDefinition.toLowerCase().includes(addQueryLower) ||
+              w.chineseDefinition.includes(addQuery))
+        )
+        .slice(0, 8)
+    : [];
 
   const handleEditSave = useCallback(async () => {
     if (!editId || !editName.trim() || editWords.length === 0) return;
@@ -519,6 +577,7 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
                         className="flex items-center gap-2 text-sm py-2 px-3 hover:bg-muted min-w-0"
                       >
                         <span className="font-medium shrink-0">{w.word}</span>
+                        <EntryTypeBadge entryType={entryTypeOf(w)} />
                         <span className="text-muted-foreground truncate min-w-0 flex-1">
                           {w.chineseDefinition}
                         </span>
@@ -539,6 +598,58 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-muted-foreground mb-1">
+                  {t("vocabulary.reviewLists.addItems")}
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    value={addSearch}
+                    onChange={(e) => setAddSearch(e.target.value)}
+                    placeholder={t("vocabulary.reviewLists.addSearchPlaceholder")}
+                    className="pl-8"
+                  />
+                </div>
+                {addQuery !== "" && (
+                  <div className="border rounded-md mt-2 max-h-40 min-h-0 overflow-y-auto">
+                    <div className="divide-y">
+                      {addResults.map((w) => (
+                        <div
+                          key={w.id}
+                          className="flex items-center gap-2 text-sm py-2 px-3 hover:bg-muted min-w-0"
+                        >
+                          <span className="font-medium shrink-0">{w.word}</span>
+                          <EntryTypeBadge
+                            entryType={
+                              w.entryType ??
+                              (w.word.trim().includes(" ") ? "phrase" : "word")
+                            }
+                          />
+                          <span className="text-muted-foreground truncate min-w-0 flex-1">
+                            {w.chineseDefinition || w.englishDefinition}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0 text-muted-foreground hover:text-primary"
+                            title={t("vocabulary.reviewLists.addToList")}
+                            onClick={() => handleEditAddWord(w)}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ))}
+                      {addResults.length === 0 && (
+                        <div className="text-center py-4 text-muted-foreground text-sm">
+                          {t("vocabulary.reviewLists.noMatches")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
