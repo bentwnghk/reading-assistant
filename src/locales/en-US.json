@@ -2038,6 +2038,10 @@
             "name": "Answer Help",
             "desc": "Add or paste a photo of a reading question, then tap 'Hint me', 'Step-by-step' or 'Give answer'. If an image is already there it sends right away; otherwise it waits for one."
           },
+          "answerCheck": {
+            "name": "Checks Your Written Answer",
+            "desc": "Already written your answer on the worksheet? 'Hint me' won't spoil whether it's right — you get hints to check it yourself. 'Step-by-step' walks you through the reasoning so you can compare at the end. 'Give answer' tells you if yours is correct and why."
+          },
           "quick": {
             "name": "Quick Questions",
             "desc": "Tap a suggested button for common questions like 'Main idea', 'Vocab help' or 'Explain'."
@@ -2065,11 +2069,11 @@
         "explain": "Explain",
         "explainQuestion": "Can you explain what this text is about?",
         "helpWithImageStepByStep": "Step-by-step",
-        "helpWithImageStepByStepQuestion": "I've uploaded an image of a reading comprehension question. Based on the passage I'm reading, please help me understand and answer this question step by step.",
+        "helpWithImageStepByStepQuestion": "I've uploaded an image of a reading comprehension question. Based on the passage I'm reading, please help me understand and answer this question step by step. If I have already written my own answer on the worksheet, do not judge it upfront — walk me through the reasoning step by step so I can compare it with my own answer at the end.",
         "helpWithImageHint": "Hint me",
-        "helpWithImageHintQuestion": "I've uploaded a reading question. Please guide me to find the answer myself by giving hints and asking guiding questions, without giving me the answer directly.",
+        "helpWithImageHintQuestion": "I've uploaded a reading comprehension question. Please guide me to find the answer myself by giving hints and asking guiding questions, without giving me the answer directly. If I have already written my own answer on the worksheet, do not tell me whether it is correct — just give hints and guiding questions that help me check and revise it myself.",
         "helpWithImageAnswer": "Give answer",
-        "helpWithImageAnswerQuestion": "Help me answer this reading comprehension question. Give me the answer with a clear explanation."
+        "helpWithImageAnswerQuestion": "Help me answer this reading comprehension question. Give me the answer with a clear explanation. If I have already written my own answer on the worksheet, also tell me whether it is correct and explain why."
       }
     }
   },

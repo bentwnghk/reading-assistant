@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { nanoid } from "nanoid";
-import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon, Languages, TextSelect, Lightbulb } from "lucide-react";
+import { X, Send, Loader2, Trash2, Maximize2, Minimize2, MessageCircle, ImagePlus, X as XIcon, Languages, TextSelect, Lightbulb, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import GuideDialog from "@/components/Internal/GuideDialog";
@@ -311,6 +311,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
                 { key: "context", icon: MessageCircle, bgClass: "bg-primary/10", iconClass: "text-primary" },
                 { key: "selection", icon: TextSelect, bgClass: "bg-blue-500/10", iconClass: "text-blue-500" },
                 { key: "image", icon: ImagePlus, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
+                { key: "answerCheck", icon: ClipboardCheck, bgClass: "bg-purple-500/10", iconClass: "text-purple-500" },
                 { key: "quick", icon: Lightbulb, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
               ]}
               stepsTitleKey="reading.tutor.help.stepsTitle"
