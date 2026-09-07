@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { recordSRSAction, updateVocabularyReview, getVocabularyWordMastery } from "@/lib/vocabulary";
+import { recordSRSAction, updateVocabularyReview, insertVocabularyWordOnReview, getVocabularyWordMastery } from "@/lib/vocabulary";
 import { calculateNextReview } from "@/utils/srs";
 
 export async function PATCH(request: Request) {
@@ -49,7 +49,25 @@ export async function PATCH(request: Request) {
         currentLevel as 0 | 1 | 2 | 3 | 4 | 5,
         correct
       );
-      await updateVocabularyReview(session.user.id, word, correct, newMastery, calculatedNext);
+      const updated = await updateVocabularyReview(session.user.id, word, correct, newMastery, calculatedNext);
+      if (!updated) {
+        // The word was never synced into user_vocabulary (failed glossary
+        // sync, or the review raced the first sync). Create it carrying this
+        // review's outcome; if a concurrent PATCH (the rating branch
+        // auto-inserts too) won the insert race, apply the UPDATE to the
+        // now-existing row instead.
+        const inserted = await insertVocabularyWordOnReview(
+          session.user.id,
+          word,
+          correct,
+          newMastery,
+          calculatedNext,
+          wordData ?? undefined
+        );
+        if (!inserted) {
+          await updateVocabularyReview(session.user.id, word, correct, newMastery, calculatedNext);
+        }
+      }
       // Surface the SRS outcome so callers (spelling games' result screens)
       // can show the "leveled up / next review" reward framing.
       return NextResponse.json({ success: true, newMastery, nextReviewAt: calculatedNext });

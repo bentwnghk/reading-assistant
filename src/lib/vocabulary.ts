@@ -300,10 +300,10 @@ export async function updateVocabularyReview(
   correct: boolean,
   masteryLevel: VocabularyMasteryLevel,
   nextReviewAt: number
-): Promise<void> {
+): Promise<boolean> {
   const pool = getPool();
   const now = Date.now();
-  await pool.query(
+  const { rowCount } = await pool.query(
     `UPDATE user_vocabulary SET
       review_count = review_count + 1,
       correct_count = correct_count + CASE WHEN $3 THEN 1 ELSE 0 END,
@@ -314,6 +314,52 @@ export async function updateVocabularyReview(
      WHERE user_id = $1 AND word = $2`,
     [userId, word.toLowerCase(), correct, masteryLevel, nextReviewAt, now]
   );
+  return (rowCount ?? 0) > 0;
+}
+
+/**
+ * Inserts a word row carrying the review outcome when a review PATCH arrives
+ * for a word that was never synced into user_vocabulary (failed glossary
+ * sync, or review racing the first sync). ON CONFLICT DO NOTHING guards the
+ * concurrent-insert case (the rating branch auto-inserts too) — the caller
+ * re-runs the UPDATE then. Returns true when this call created the row.
+ */
+export async function insertVocabularyWordOnReview(
+  userId: string,
+  word: string,
+  correct: boolean,
+  masteryLevel: VocabularyMasteryLevel,
+  nextReviewAt: number,
+  wordData?: WordData
+): Promise<boolean> {
+  const pool = getPool();
+  const now = Date.now();
+  const normalizedWord = word.toLowerCase();
+  const { rowCount } = await pool.query(
+    `INSERT INTO user_vocabulary (
+      id, user_id, word, syllabification, part_of_speech,
+      english_definition, chinese_definition, example,
+      entry_type, mastery_level, review_count, correct_count,
+      last_reviewed_at, next_review_at, created_at, updated_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 1, $11, $12, $13, $12, $12)
+    ON CONFLICT (user_id, word) DO NOTHING`,
+    [
+      crypto.randomUUID(),
+      userId,
+      normalizedWord,
+      wordData?.syllabification || "",
+      wordData?.partOfSpeech || "",
+      wordData?.englishDefinition || "",
+      wordData?.chineseDefinition || "",
+      wordData?.example || "",
+      isMultiWordEntry(normalizedWord) ? "phrase" : "word",
+      masteryLevel,
+      correct ? 1 : 0,
+      now,
+      nextReviewAt,
+    ]
+  );
+  return (rowCount ?? 0) > 0;
 }
 
 export async function deleteVocabularyBySession(

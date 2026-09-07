@@ -328,7 +328,7 @@ A dedicated auth-gated page for systematic vocabulary review across all reading 
 - **Rating**: Derived from cumulative `srs_counts`: `again`/`hard` presses → `hard` count, `good` presses → `medium` count, `easy` is dismissal (not counted). Rating logic: both 0 → "easy", hard ≥ medium → "hard", medium > hard → "medium"
 - **Actions**: `recordSRSAction` in `src/lib/vocabulary.ts` auto-inserts words not yet in DB (with `wordData` payload), then updates `srs_counts` via `jsonb_set`
 - **Due for Review**: Words where `next_review_at = 0` (never reviewed) OR `next_review_at <= now()`
-- **Unified flow**: Both main page and vocabulary page flashcards use `onWordAction` → `recordSRSAction`
+- **Unified flow**: Both main page and vocabulary page flashcards use `onWordAction`, which fires `recordSRSAction` (rating/srs_counts) **plus** a review PATCH that advances `mastery_level`, review/correct counts, `last_reviewed_at` and `next_review_at` ("again"/"hard" = incorrect, "good"/"easy" = correct). The /vocabulary page computes the new level client-side via `store.updateWordReview`; the main page (Glossary) PATCHes `{word, correct}` so the server computes it from the authoritative DB mastery (its vocabulary store `words` may be unloaded)
 
 ### Key Components
 

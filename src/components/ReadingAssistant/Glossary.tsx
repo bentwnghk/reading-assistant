@@ -135,23 +135,35 @@ function Glossary() {
     }
   }, [sortField, sortOrder]);
 
-  const handleSRSAction = useCallback((word: string, action: SRSAction) => {
-    const store = useVocabularyStore.getState();
-    // Returned so the flashcard's completion can await the SRS PATCH before
-    // recording the review session.
-    return store.recordSRSAction(word, action);
-  }, []);
-
-  // Shared by the spelling game and the vocabulary quiz — returns the word's
-  // SRS outcome so the games' result screens can surface the "leveled up /
-  // next review" card.
+  // Shared by the flashcard, the spelling game and the vocabulary quiz —
+  // PATCHes {word, correct} so the server advances mastery_level, review/
+  // correct counts, last_reviewed_at and next_review_at from the
+  // authoritative DB mastery. Includes wordData from the glossary entry so
+  // the server can auto-insert the word (with definitions) when the glossary
+  // sync never landed. Returns the word's SRS outcome so the games' result
+  // screens can surface the "leveled up / next review" card.
   const handleWordResult = useCallback(
     async (word: string, correct: boolean): Promise<VocabularySrsOutcome | null> => {
       try {
+        const entry = useReadingStore
+          .getState()
+          .glossary.find((g) => g.word.toLowerCase() === word.toLowerCase());
         const res = await fetch("/api/vocabulary/word", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ word, correct }),
+          body: JSON.stringify({
+            word,
+            correct,
+            wordData: entry && {
+              syllabification: entry.syllabification || "",
+              partOfSpeech: entry.partOfSpeech || "",
+              englishDefinition: entry.englishDefinition || "",
+              chineseDefinition: entry.chineseDefinition || "",
+              example: entry.example || "",
+              source: "own",
+              sharedBy: null,
+            },
+          }),
         });
         if (!res.ok) return null;
         const data = (await res.json()) as { newMastery?: number; nextReviewAt?: number };
@@ -164,6 +176,23 @@ function Glossary() {
       }
     },
     []
+  );
+
+  // Mirrors the /vocabulary page flashcard (VocabularyContainer.handleWordAction):
+  // "again"/"hard" count as incorrect, "good"/"easy" as correct, so mastery and
+  // last_reviewed_at advance here too — not just srs_counts/rating. Uses the
+  // server-computed handleWordResult PATCH instead of store.updateWordReview
+  // because the vocabulary store's words are only loaded on the /vocabulary page.
+  const handleSRSAction = useCallback(
+    (word: string, action: SRSAction) => {
+      const store = useVocabularyStore.getState();
+      const srs = store.recordSRSAction(word, action);
+      const review = handleWordResult(word, action === "good" || action === "easy");
+      // Returned so the flashcard's completion awaits both PATCHes before
+      // recording the review session.
+      return Promise.all([srs, review]);
+    },
+    [handleWordResult]
   );
 
   // Shared by the flashcard review, the vocabulary quiz and the spelling game —
