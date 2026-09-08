@@ -35,3 +35,17 @@ export function formatSize(
 export function getTextByteSize(str: string): number {
   return new TextEncoder().encode(str).length;
 }
+
+export function openImageInNewTab(src: string) {
+  if (!src.startsWith("data:")) {
+    window.open(src, "_blank");
+    return;
+  }
+  fetch(src)
+    .then((res) => res.blob())
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    });
+}

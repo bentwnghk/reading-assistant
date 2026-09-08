@@ -1,6 +1,9 @@
 "use client";
-import { User, Bot } from "lucide-react";
+import { User, Bot, Maximize2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/style";
+import { openImageInNewTab } from "@/utils/file";
+import { Button } from "@/components/ui/button";
 import View from "@/components/MagicDown/View";
 
 interface ChatMessageBubbleProps {
@@ -9,6 +12,7 @@ interface ChatMessageBubbleProps {
 }
 
 function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
+  const { t } = useTranslation();
   const isUser = message.role === "user";
 
   return (
@@ -44,13 +48,26 @@ function ChatMessageBubble({ message, isStreaming }: ChatMessageBubbleProps) {
         {message.images && message.images.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-2">
             {message.images.map((img, index) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={index}
-                src={img}
-                alt={`Uploaded ${index + 1}`}
-                className="max-w-[120px] max-h-[120px] object-cover rounded border border-white/20"
-              />
+              <div key={index} className="relative group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img}
+                  alt={`Uploaded ${index + 1}`}
+                  className="max-w-[120px] max-h-[120px] object-cover rounded border border-white/20"
+                />
+                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-6 w-6 bg-green-100 dark:bg-secondary hover:bg-green-200 dark:hover:bg-secondary/80 text-green-800 dark:text-green-200"
+                    title={t("reading.imageUpload.openInNewTab")}
+                    onClick={() => openImageInNewTab(img)}
+                    onTouchEnd={(e) => { e.preventDefault(); openImageInNewTab(img); }}
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         )}
