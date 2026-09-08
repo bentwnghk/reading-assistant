@@ -4,6 +4,15 @@ export function multiApiKeyPolling(apiKeys = "") {
   return shuffle(apiKeys.split(","))[0];
 }
 
+export const DEEPSEEK_V4_FLASH_MAX_TOKENS = 384000;
+
+export function isDeepSeekV4FlashFamily(model: string) {
+  return (
+    model === "deepseek-v4-flash" ||
+    model === "deepseek-v4-flash-vision-exp"
+  );
+}
+
 export function isThinkingModel(model: string) {
   return (
     model.includes("thinking") ||

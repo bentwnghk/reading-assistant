@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { verifyIndividualSubscriptionAccess, ensureSubscriptionTable } from "@/lib/subscription";
 import { recordSeatUsage, ensureSchoolSubscriptionTables, verifySchoolSubscriptionAccess } from "@/lib/school-subscription";
 import { getSchoolForUser } from "@/lib/users";
+import { DEEPSEEK_V4_FLASH_MAX_TOKENS, isDeepSeekV4FlashFamily } from "@/utils/model";
 import { NextResponse, type NextRequest } from "next/server";
 
 const API_PROXY_BASE_URL = process.env.OPENAI_COMPATIBLE_API_BASE_URL || "";
@@ -75,8 +76,8 @@ async function handleRequest(req: NextRequest) {
       },
     };
     if (body) {
-      if (body.model === "deepseek-v4-flash") {
-        body.max_tokens = 384000;
+      if (isDeepSeekV4FlashFamily(body.model)) {
+        body.max_tokens = DEEPSEEK_V4_FLASH_MAX_TOKENS;
       }
       payload.body = JSON.stringify(body);
     }

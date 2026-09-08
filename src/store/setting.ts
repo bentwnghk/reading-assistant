@@ -29,8 +29,8 @@ export const RESTRICTED_IMAGE_MODELS: string[] = [
 ];
 
 export const TUTOR_MODELS = [
-  "gpt-5.4-mini",
-  "gemini-3.7-flash",
+  "deepseek-v4-flash-vision-exp",
+  "gemini-3.8-flash",
   "step-3.7-flash",
   "gpt-5.6-terra",
 ] as const;
@@ -61,9 +61,16 @@ export const RESTRICTED_MODELS: string[] = [
 ];
 
 export const RESTRICTED_TUTOR_MODELS: string[] = [
-  "gemini-3.7-flash",
+  "gemini-3.8-flash",
   "gpt-5.6-terra",
 ];
+
+// Retired Advanced AI Tutor models remapped to their replacements.
+// Keep in sync with scripts/migrate-tutor-model-replacements.sql.
+const TUTOR_MODEL_REPLACEMENTS: Record<string, TutorModel> = {
+  "gpt-5.4-mini": "deepseek-v4-flash-vision-exp",
+  "gemini-3.7-flash": "gemini-3.8-flash",
+};
 
 export const RESTRICTED_MODEL_FIELD_NAMES = [
   "prereadingModel",
@@ -270,6 +277,41 @@ export const defaultValues: SettingStore = {
   lastOpenedSessionId: "",
 };
 
+function sanitizeModelSettings(state: Record<string, unknown>) {
+  const tutorModel = state.tutorModel;
+  if (
+    typeof tutorModel === "string" &&
+    tutorModel in TUTOR_MODEL_REPLACEMENTS
+  ) {
+    state.tutorModel = TUTOR_MODEL_REPLACEMENTS[tutorModel];
+  }
+  const modelFields: (keyof SettingStore)[] = [
+    "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
+    "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
+    "collocationModel", "grammarModel",
+  ];
+  for (const field of modelFields) {
+    if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {
+      state[field] = defaultValues[field];
+    }
+  }
+  if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
+    state.visionModel = defaultValues.visionModel;
+  }
+  if (!IMAGE_MODELS.includes(state.imageModel as ImageModel)) {
+    state.imageModel = defaultValues.imageModel;
+  }
+  if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
+    state.tutorModel = defaultValues.tutorModel;
+  }
+  if (!BASIC_TUTOR_MODELS.includes(state.basicTutorModel as BasicTutorModel)) {
+    state.basicTutorModel = defaultValues.basicTutorModel;
+  }
+  if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
+    state.readingTextModel = defaultValues.readingTextModel;
+  }
+}
+
 export const useSettingStore = create(
   persist<SettingStore & SettingActions>(
     (set) => ({
@@ -292,9 +334,16 @@ export const useSettingStore = create(
         });
       },
       loadFromServer: (settings) => {
+        const sanitized = { ...settings } as unknown as Record<string, unknown>;
+        // Settings loaded from user_settings bypass the persist getItem
+        // sanitization, so stale model selections (e.g. after a model list
+        // change whose SQL migration has not run yet) must be corrected here
+        // too — otherwise the Settings form schema (z.enum over the model
+        // lists) rejects the whole form.
+        sanitizeModelSettings(sanitized);
         set(() => ({
           ...defaultValues,
-          ...settings,
+          ...sanitized,
         }));
       },
       syncNow: () => {
@@ -315,31 +364,7 @@ export const useSettingStore = create(
             if (!value) return null;
             const parsed = JSON.parse(value) as StorageValue<SettingStore & SettingActions>;
             const state = parsed.state as unknown as Record<string, unknown>;
-            const modelFields: (keyof SettingStore)[] = [
-              "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
-              "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
-              "collocationModel", "grammarModel",
-            ];
-            for (const field of modelFields) {
-              if (!AVAILABLE_MODELS.includes(state[field] as AvailableModel)) {
-                state[field] = defaultValues[field];
-              }
-            }
-            if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
-              state.visionModel = defaultValues.visionModel;
-            }
-            if (!IMAGE_MODELS.includes(state.imageModel as ImageModel)) {
-              state.imageModel = defaultValues.imageModel;
-            }
-            if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
-              state.tutorModel = defaultValues.tutorModel;
-            }
-            if (!BASIC_TUTOR_MODELS.includes(state.basicTutorModel as BasicTutorModel)) {
-              state.basicTutorModel = defaultValues.basicTutorModel;
-            }
-            if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
-              state.readingTextModel = defaultValues.readingTextModel;
-            }
+            sanitizeModelSettings(state);
             // Boot-only flag: never restore "auth data loaded" from a
             // previous page load — the current load's AuthProvider must
             // re-settle before first-run UI may open.

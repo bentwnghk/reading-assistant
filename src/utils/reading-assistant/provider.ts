@@ -1,5 +1,9 @@
 import type { GoogleVertexProviderSettings } from "@ai-sdk/google-vertex/edge";
 import type { AzureOpenAIProviderSettings } from "@ai-sdk/azure";
+import {
+  DEEPSEEK_V4_FLASH_MAX_TOKENS,
+  isDeepSeekV4FlashFamily,
+} from "@/utils/model";
 
 export interface AIProviderOptions {
   provider: string;
@@ -52,14 +56,14 @@ export async function createAIProvider({
       baseURL,
       apiKey,
       headers,
-      ...(provider === "openaicompatible" && model === "deepseek-v4-flash"
+      ...(provider === "openaicompatible" && isDeepSeekV4FlashFamily(model)
         ? {
             fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
               if (init?.body && typeof init.body === "string") {
                 try {
                   const body = JSON.parse(init.body);
-                  if (body.model === "deepseek-v4-flash") {
-                    body.max_tokens = 384000;
+                  if (isDeepSeekV4FlashFamily(body.model)) {
+                    body.max_tokens = DEEPSEEK_V4_FLASH_MAX_TOKENS;
                     init = { ...init, body: JSON.stringify(body) };
                   }
                 } catch {}

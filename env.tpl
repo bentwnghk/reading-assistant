@@ -178,8 +178,8 @@ NEXT_PUBLIC_DISABLED_AI_PROVIDER=
 NEXT_PUBLIC_DISABLED_SEARCH_PROVIDER=
 # (Optional) Customize the model list, add or delete models
 NEXT_PUBLIC_MODEL_LIST=
-# (Optional) Fallback model when the primary AI model fails (default: gemini-3.7-flash)
-FALLBACK_MODEL=gemini-3.7-flash
+# (Optional) Fallback model when the primary AI model fails (default: gemini-3.8-flash)
+FALLBACK_MODEL=gemini-3.8-flash
 # (Optional) Default text-to-image model for visualization generation (default: google/gemini-3.1-flash-lite-image)
 # Users can override this in Settings → Models with: google/gemini-3.1-flash-lite-image or x-ai/grok-imagine-image-2.0
 # (admins/super-admins and meter-billing "local" mode users can additionally select google/gemini-3.1-flash-image)

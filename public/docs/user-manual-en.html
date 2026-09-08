@@ -929,7 +929,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Grammar Model</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Reading Text Generator Model</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td>Basic AI Tutor Model</td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
-        <tr><td>Advanced AI Tutor Model</td><td>gpt-5.4-mini · gemini-3.7-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
+        <tr><td>Advanced AI Tutor Model</td><td>deepseek-v4-flash-vision-exp · gemini-3.8-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
       </table>
       <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code>† for the most capable (and costliest) reasoning — this preview model is only offered to super-admins and Meter users.</div>
 
@@ -2639,7 +2639,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Available</b> — default <code>gpt-5.6-luna</code> (pre-reading, reading test, suggest vocabulary, collocations, grammar)</td><td>same list as above</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>Reading Text</b> (AI text generator)</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-v4-flash · gemini-3.7-flash†</td><td>deepseek-v4-flash</td></tr>
         <tr><td><b>Basic Tutor</b></td><td>deepseek-v4-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
-        <tr><td><b>Advanced Tutor</b></td><td>gpt-5.4-mini · gemini-3.7-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
+        <tr><td><b>Advanced Tutor</b></td><td>deepseek-v4-flash-vision-exp · gemini-3.8-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
       </table>
       <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>. <b>†</b> Preview model — hidden from the Settings dropdowns unless you are a super-admin or on Meter billing; stored selections auto-reset to the feature default. <b>‡</b> Premium image model — shown in Settings → Models → Visualization Model only to admins/super-admins and Meter (API key) users; other accounts are silently served the default model.</p>
 
