@@ -572,7 +572,7 @@ CREATE INDEX idx_email_reminder_logs_sent ON email_reminder_logs(sent_at DESC);
 CREATE TABLE email_reminder_preferences (
   user_id         TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   enabled         BOOLEAN NOT NULL DEFAULT true,
-  frequency_days  INTEGER NOT NULL DEFAULT 3 CHECK (frequency_days >= 1),
+  frequency_days  INTEGER NOT NULL DEFAULT 7 CHECK (frequency_days >= 1),
   created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

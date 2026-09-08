@@ -55,7 +55,7 @@ export async function ensureReminderTables(): Promise<boolean> {
       CREATE TABLE IF NOT EXISTS email_reminder_preferences (
         user_id         TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         enabled         BOOLEAN NOT NULL DEFAULT true,
-        frequency_days  INTEGER NOT NULL DEFAULT 3 CHECK (frequency_days >= 1),
+        frequency_days  INTEGER NOT NULL DEFAULT 7 CHECK (frequency_days >= 1),
         created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
@@ -162,7 +162,7 @@ export async function getReminderPreference(userId: string): Promise<ReminderPre
       [userId]
     )
     if (result.rows.length === 0) {
-      return { enabled: true, frequencyDays: 3 }
+      return { enabled: true, frequencyDays: 7 }
     }
     return {
       enabled: result.rows[0].enabled,
@@ -170,7 +170,7 @@ export async function getReminderPreference(userId: string): Promise<ReminderPre
     }
   } catch (error) {
     console.error("[reminders] Failed to get preference:", error)
-    return { enabled: true, frequencyDays: 3 }
+    return { enabled: true, frequencyDays: 7 }
   } finally {
     client.release()
   }

@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         )
       }
 
-      await setReminderPreference(userId, false, 3)
+      await setReminderPreference(userId, false, 7)
 
       const appUrl = process.env.APP_URL || new URL("/", request.url).origin
 

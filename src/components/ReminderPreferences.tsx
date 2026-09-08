@@ -18,7 +18,7 @@ export default function ReminderPreferences() {
   const { data: session, status } = useSession()
   const [prefs, setPrefs] = useState<ReminderPreferencesState>({
     enabled: true,
-    frequencyDays: 3,
+    frequencyDays: 7,
     loaded: false,
   })
 
@@ -36,7 +36,7 @@ export default function ReminderPreferences() {
           if (!cancelled) {
             setPrefs({
               enabled: data.enabled ?? true,
-              frequencyDays: data.frequencyDays ?? 3,
+              frequencyDays: data.frequencyDays ?? 7,
               loaded: true,
             })
           }
@@ -135,12 +135,11 @@ export default function ReminderPreferences() {
           }}
           className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <option value={1}>1 {t("reminder.day")}</option>
-          <option value={2}>2 {t("reminder.days")}</option>
-          <option value={3}>3 {t("reminder.days")}</option>
-          <option value={5}>5 {t("reminder.days")}</option>
-          <option value={7}>7 {t("reminder.days")}</option>
-          <option value={14}>14 {t("reminder.days")}</option>
+          {[3, 5, 7, 14, 21, 30].map((days) => (
+            <option key={days} value={days}>
+              {days} {days === 1 ? t("reminder.day") : t("reminder.days")}
+            </option>
+          ))}
         </select>
       </div>
     </div>
