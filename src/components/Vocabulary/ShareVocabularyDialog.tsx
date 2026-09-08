@@ -20,6 +20,7 @@ interface ShareVocabularyDialogProps {
   onOpenChange: (open: boolean) => void;
   selectedWordIds: Set<string>;
   wordCount: number;
+  entryType?: "word" | "phrase";
 }
 
 export default function ShareVocabularyDialog({
@@ -27,8 +28,10 @@ export default function ShareVocabularyDialog({
   onOpenChange,
   selectedWordIds,
   wordCount,
+  entryType = "word",
 }: ShareVocabularyDialogProps) {
   const { t } = useTranslation();
+  const isPhrase = entryType === "phrase";
   const [groups, setGroups] = useState<ShareTargetGroup[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
@@ -66,10 +69,16 @@ export default function ShareVocabularyDialog({
       const data = await res.json();
       const msg =
         data.skipped > 0
-          ? t("vocabulary.share.success", { count: data.inserted }) +
+          ? t(isPhrase
+              ? "vocabulary.share.successPhrase"
+              : "vocabulary.share.success", { count: data.inserted }) +
             " " +
-            t("vocabulary.share.skipped", { count: data.skipped })
-          : t("vocabulary.share.success", { count: data.inserted });
+            t(isPhrase
+              ? "vocabulary.share.skippedPhrase"
+              : "vocabulary.share.skipped", { count: data.skipped })
+          : t(isPhrase
+              ? "vocabulary.share.successPhrase"
+              : "vocabulary.share.success", { count: data.inserted });
       toast.success(msg);
       onOpenChange(false);
     } catch {
@@ -83,9 +92,20 @@ export default function ShareVocabularyDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("vocabulary.share.title")}</DialogTitle>
+          <DialogTitle>
+            {t(
+              isPhrase
+                ? "vocabulary.share.titlePhrase"
+                : "vocabulary.share.title"
+            )}
+          </DialogTitle>
           <DialogDescription>
-            {t("vocabulary.share.description", { count: wordCount })}
+            {t(
+              isPhrase
+                ? "vocabulary.share.descriptionPhrase"
+                : "vocabulary.share.description",
+              { count: wordCount }
+            )}
           </DialogDescription>
         </DialogHeader>
 

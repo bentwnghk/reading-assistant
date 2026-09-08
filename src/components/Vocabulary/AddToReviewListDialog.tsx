@@ -30,6 +30,9 @@ export default function AddToReviewListDialog({
   const { selectedWordIds, words } = useVocabularyStore();
 
   const selectedWords = words.filter((w) => selectedWordIds.has(w.id));
+  // Selections are type-homogeneous (the container clears cross-type
+  // selections on tab change), so one entry decides the wording.
+  const isPhrase = selectedWords.some((w) => (w.entryType ?? "word") === "phrase");
 
   const handleSave = async () => {
     if (!name.trim() || selectedWords.length === 0) return;
@@ -51,7 +54,12 @@ export default function AddToReviewListDialog({
       });
       if (!res.ok) throw new Error("Failed");
       toast.success(
-        t("vocabulary.reviewLists.created", { count: selectedWords.length })
+        t(
+          isPhrase
+            ? "vocabulary.reviewLists.createdPhrase"
+            : "vocabulary.reviewLists.created",
+          { count: selectedWords.length }
+        )
       );
       setName("");
       onOpenChange(false);
@@ -68,9 +76,14 @@ export default function AddToReviewListDialog({
         <DialogHeader>
           <DialogTitle>{t("vocabulary.reviewLists.addTitle")}</DialogTitle>
           <DialogDescription>
-            {t("vocabulary.reviewLists.addDescription", {
-              count: selectedWords.length,
-            })}
+            {t(
+              isPhrase
+                ? "vocabulary.reviewLists.addDescriptionPhrase"
+                : "vocabulary.reviewLists.addDescription",
+              {
+                count: selectedWords.length,
+              }
+            )}
           </DialogDescription>
         </DialogHeader>
 

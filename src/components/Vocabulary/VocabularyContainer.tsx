@@ -716,6 +716,7 @@ function VocabularyContainer() {
             onOpenChange={setShareOpen}
             selectedWordIds={selectedWordIds}
             wordCount={selectedWordIds.size}
+            entryType={activeTab === "phrases" ? "phrase" : "word"}
           />
           <AddToReviewListDialog
             open={addToListOpen}
