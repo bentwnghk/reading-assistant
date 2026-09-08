@@ -2323,20 +2323,20 @@
       "custom": "自訂計劃",
       "chooseMode": "選擇複習模式",
       "chooseModeTitle": "你想用甚麼方式複習？",
-      "chooseModeDesc": "已選 {{count}} 個詞彙 — 請選擇複習模式。",
+      "chooseModeDesc": "已選 {{count}} 個單詞 — 請選擇複習模式。",
       "back": "返回",
       "gettingStarted": "建立你的詞彙庫！",
       "gettingStartedDesc": "開始閱讀以收集生詞，之後再回來這裡複習。",
       "gettingStartedCta": "開始閱讀",
       "presets": {
-        "due": "複習到期詞彙",
-        "dueDesc": "根據你的間隔重複計劃已到期的詞彙。",
-        "new": "學習新詞彙",
-        "newDesc": "你尚未練習過的新詞彙。",
-        "hard": "練習困難詞彙",
-        "hardDesc": "你標記為困難的詞彙。",
+        "due": "複習到期單詞",
+        "dueDesc": "根據你的間隔重複計劃已到期的單詞。",
+        "new": "學習新單詞",
+        "newDesc": "你尚未練習過的新單詞。",
+        "hard": "練習困難單詞",
+        "hardDesc": "你標記為困難的單詞。",
         "random": "隨機混合練習",
-        "randomDesc": "從你所有詞彙中隨機抽取的混合練習。"
+        "randomDesc": "從你所有單詞中隨機抽取的混合練習。"
       },
       "totalCount": "{{count}} 個",
       "studyingCount": "將練習 {{count}} 個",
@@ -2344,7 +2344,7 @@
         "flashcard": "閃卡",
         "flashcardDesc": "翻轉卡片並以 SRS 評分你的記憶。",
         "quiz": "測驗",
-        "quizDesc": "將詞彙配對至釋義並填空。",
+        "quizDesc": "將單詞配對至釋義並填空。",
         "spelling": "拼寫",
         "spellingDesc": "聽打、重組字母及填補缺失字母。"
       }
