@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { Crown, RotateCcw, LogOut, Trophy, Flame } from "lucide-react";
+import { Crown, RotateCcw, LogOut, Trophy, Flame, ChevronDown } from "lucide-react";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { playSfx } from "@/utils/sfx";
@@ -88,6 +88,8 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
   const isNewBest = battle.newBestAchieved;
 
   const [animateIn, setAnimateIn] = useState(false);
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
   const confettiFiredRef = useRef(false);
 
   // Staggered entrance.
@@ -95,6 +97,24 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
     const tm = setTimeout(() => setAnimateIn(true), 80);
     return () => clearTimeout(tm);
   }, []);
+
+  // The ranking list scrolls inside a viewport-capped container with a hidden
+  // scrollbar, so rows below the fold give no visual cue. Track how much
+  // content remains and show a bottom fade + chevron while more entries are
+  // reachable (hidden once the list is fully scrolled).
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const check = () => setHasMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 8);
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    const ro = new ResizeObserver(check); // vh-based caps resize with the viewport
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", check);
+      ro.disconnect();
+    };
+  }, [ranking]);
 
   // Confetti for the winner (and a smaller burst for other top-3 finishers).
   useEffect(() => {
@@ -219,6 +239,7 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
             {t(`${M}.finalRanking`)}
           </div>
           <div
+            ref={listRef}
             className={cn(
               // In-container scroll with a hidden scrollbar (matches
               // GuideDialog's `scrollbar-hide`). Caps are viewport-relative so
@@ -226,6 +247,8 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
               // stay fully visible without scrolling the page/dialog. `compact`
               // lowers the caps for the shorter Header battle dialog; the
               // inline spelling-tab mount uses the more generous defaults.
+              // Rows hidden below the fold are hinted by the sticky bottom
+              // fade + chevron rendered as the container's last child.
               "space-y-2 overflow-y-auto scrollbar-hide",
               compact ? "max-h-[34vh] md:max-h-[50vh]" : "max-h-[46vh] md:max-h-[65vh]",
             )}
@@ -276,6 +299,14 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
                 </div>
               );
             })}
+            {hasMoreBelow && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none sticky bottom-0 flex justify-center bg-gradient-to-t from-card via-card/85 to-transparent pt-8 pb-1.5"
+              >
+                <ChevronDown className="h-4 w-4 animate-bounce text-muted-foreground" />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
