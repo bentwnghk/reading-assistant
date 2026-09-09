@@ -562,48 +562,60 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         </div>
       </div>
 
-      {/* SRS buttons — only shown when card is flipped */}
-      {isFlipped && (
-        <div className="w-full max-w-md space-y-2">
-          <div className="text-center text-sm text-muted-foreground">
-            {t("reading.glossary.flashcard.rateCard")}
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => { e.stopPropagation(); handleSRS("again"); }}
-              className="border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-950/50"
-            >
-              {t("reading.glossary.flashcard.again")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => { e.stopPropagation(); handleSRS("hard"); }}
-              className="border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:hover:bg-orange-950/50"
-            >
-              {t("reading.glossary.flashcard.hard")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => { e.stopPropagation(); handleSRS("good"); }}
-              className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/50"
-            >
-              {t("reading.glossary.flashcard.good")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => { e.stopPropagation(); handleSRS("easy"); }}
-              className="border-green-300 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/50"
-            >
-              {t("reading.glossary.flashcard.easy")}
-            </Button>
-          </div>
+      {/* SRS buttons — space is reserved even when hidden so flipping a card
+          never changes the document height (prevents scroll-anchoring jumps
+          that progressively shift the card up the page during review) */}
+      <div className="w-full max-w-md space-y-2">
+        <div
+          className={cn(
+            "text-center text-sm text-muted-foreground transition-opacity duration-200",
+            isFlipped ? "opacity-100" : "opacity-0"
+          )}
+        >
+          {t("reading.glossary.flashcard.rateCard")}
         </div>
-      )}
+        <div
+          className={cn("grid grid-cols-4 gap-2", !isFlipped && "invisible")}
+          aria-hidden={!isFlipped}
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            tabIndex={isFlipped ? 0 : -1}
+            onClick={(e) => { e.stopPropagation(); handleSRS("again"); }}
+            className="border-rose-300 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-950/50"
+          >
+            {t("reading.glossary.flashcard.again")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            tabIndex={isFlipped ? 0 : -1}
+            onClick={(e) => { e.stopPropagation(); handleSRS("hard"); }}
+            className="border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:hover:bg-orange-950/50"
+          >
+            {t("reading.glossary.flashcard.hard")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            tabIndex={isFlipped ? 0 : -1}
+            onClick={(e) => { e.stopPropagation(); handleSRS("good"); }}
+            className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/50"
+          >
+            {t("reading.glossary.flashcard.good")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            tabIndex={isFlipped ? 0 : -1}
+            onClick={(e) => { e.stopPropagation(); handleSRS("easy"); }}
+            className="border-green-300 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-950/50"
+          >
+            {t("reading.glossary.flashcard.easy")}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
