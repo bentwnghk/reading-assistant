@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { Md5 } from "ts-md5";
 import { hasValidFreeAccessTicket } from "@/utils/free-access-ticket";
-import { DEEPSEEK_V4_FLASH_MAX_TOKENS, isDeepSeekV4FlashFamily } from "@/utils/model";
+import { DEEPSEEK_FLASH_MAX_TOKENS, isDeepSeekFlashModel } from "@/utils/model";
 
 export const runtime = "edge";
 export const maxDuration = 300;
@@ -103,8 +103,8 @@ async function handler(req: NextRequest) {
       },
     };
     if (body) {
-      if (isDeepSeekV4FlashFamily(body.model)) {
-        body.max_tokens = DEEPSEEK_V4_FLASH_MAX_TOKENS;
+      if (isDeepSeekFlashModel(body.model)) {
+        body.max_tokens = DEEPSEEK_FLASH_MAX_TOKENS;
       }
       payload.body = JSON.stringify(body);
     }

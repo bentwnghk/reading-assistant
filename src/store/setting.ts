@@ -4,7 +4,7 @@ import { persist, StorageValue } from "zustand/middleware";
 export const AVAILABLE_MODELS = [
   "gpt-5.4-mini",
   "gpt-5.6-luna",
-  "deepseek-v4-flash",
+  "deepseek-flash",
   "gemini-3.7-flash",
 ] as const;
 
@@ -29,7 +29,7 @@ export const RESTRICTED_IMAGE_MODELS: string[] = [
 ];
 
 export const TUTOR_MODELS = [
-  "deepseek-v4-flash-vision-exp",
+  "deepseek-flash",
   "gemini-3.8-flash",
   "step-3.7-flash",
   "gpt-5.6-terra",
@@ -38,7 +38,7 @@ export const TUTOR_MODELS = [
 export type TutorModel = (typeof TUTOR_MODELS)[number];
 
 export const BASIC_TUTOR_MODELS = [
-  "deepseek-v4-flash",
+  "deepseek-flash",
   "gpt-5.6-luna",
 ] as const;
 
@@ -47,7 +47,7 @@ export type BasicTutorModel = (typeof BASIC_TUTOR_MODELS)[number];
 export const READING_TEXT_MODELS = [
   "gpt-5.4-mini",
   "gpt-5.1",
-  "deepseek-v4-flash",
+  "deepseek-flash",
   "gemini-3.7-flash",
 ] as const;
 
@@ -65,10 +65,18 @@ export const RESTRICTED_TUTOR_MODELS: string[] = [
   "gpt-5.6-terra",
 ];
 
+// Pure model-id renames — the old ids are no longer valid anywhere.
+// Applies to every model setting. Keep in sync with
+// scripts/migrate-deepseek-flash-rename.sql.
+const RENAMED_MODELS: Record<string, string> = {
+  "deepseek-v4-flash": "deepseek-flash",
+  "deepseek-v4-flash-vision-exp": "deepseek-flash",
+};
+
 // Retired Advanced AI Tutor models remapped to their replacements.
 // Keep in sync with scripts/migrate-tutor-model-replacements.sql.
 const TUTOR_MODEL_REPLACEMENTS: Record<string, TutorModel> = {
-  "gpt-5.4-mini": "deepseek-v4-flash-vision-exp",
+  "gpt-5.4-mini": "deepseek-flash",
   "gemini-3.7-flash": "gemini-3.8-flash",
 };
 
@@ -242,17 +250,17 @@ export const defaultValues: SettingStore = {
   visionModel: "gpt-5-nano",
   imageModel: "google/gemini-3.1-flash-lite-image",
   prereadingModel: "gpt-5.6-luna",
-  summaryModel: "deepseek-v4-flash",
-  mindMapModel: "deepseek-v4-flash",
-  adaptedTextModel: "deepseek-v4-flash",
-  simplifyModel: "deepseek-v4-flash",
+  summaryModel: "deepseek-flash",
+  mindMapModel: "deepseek-flash",
+  adaptedTextModel: "deepseek-flash",
+  simplifyModel: "deepseek-flash",
   readingTestModel: "gpt-5.6-luna",
-  glossaryModel: "deepseek-v4-flash",
+  glossaryModel: "deepseek-flash",
   suggestVocabModel: "gpt-5.6-luna",
-  sentenceAnalysisModel: "deepseek-v4-flash",
+  sentenceAnalysisModel: "deepseek-flash",
   collocationModel: "gpt-5.6-luna",
   grammarModel: "gpt-5.6-luna",
-  readingTextModel: "deepseek-v4-flash",
+  readingTextModel: "deepseek-flash",
   tutorModel: "step-3.7-flash",
   basicTutorModel: "gpt-5.6-luna",
   ttsVoice: "onyx",
@@ -278,6 +286,17 @@ export const defaultValues: SettingStore = {
 };
 
 function sanitizeModelSettings(state: Record<string, unknown>) {
+  const allModelFields: (keyof SettingStore)[] = [
+    "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
+    "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
+    "collocationModel", "grammarModel", "readingTextModel", "tutorModel", "basicTutorModel",
+  ];
+  for (const field of allModelFields) {
+    const value = state[field];
+    if (typeof value === "string" && value in RENAMED_MODELS) {
+      state[field] = RENAMED_MODELS[value];
+    }
+  }
   const tutorModel = state.tutorModel;
   if (
     typeof tutorModel === "string" &&
