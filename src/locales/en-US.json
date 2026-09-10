@@ -1962,10 +1962,6 @@
           },
           "tipTitle": "Good to know",
           "tipContent": "Can't find the code? If your teacher started a Class Battle, you'll get a notification toast and a bell badge — tap Join Battle and you'll be taken straight to the room."
-        },
-        "q12": {
-          "q": "Can I challenge my classmates to a live spelling battle?",
-            "a": "<p>Yes! The <strong>Multiplayer Spelling Battle</strong> supports multiple game modes (Listen &amp; Type, Letter Scramble, Fill Blanks, or Mixed) in a real-time competition.</p><p><strong>For Students:</strong> Open <strong>Spelling Challenge</strong> → click <strong>Multiplayer Battle</strong>. Create a room (pick your game mode and word source) or join one with a 6-character code. The host starts the game — a 3-2-1 countdown begins, then each word challenge adapts to your chosen mode. A live ranking shows everyone's score after every word. At the end you see the final ranking, your tier badge, and accuracy. Results count toward your spelling best score, the leaderboard, and SRS mastery — just like solo play.</p><p><strong>For Teachers:</strong> Create or join rooms like any student. Additionally, toggle <strong>Class Battle</strong> when creating a room and pick a target class or a saved roster (your reusable assignment student groups) — those students receive a notification (persistent toast + red badge on the header bell) with the room code. They can join from anywhere in the app, not just the spelling page. Teachers can also tick <strong>Host only (don't play)</strong> to run the battle as a spectator — you keep host controls (start, rematch) but don't play and aren't scored. In Listen &amp; Type the word is read aloud so the class can follow on a smartboard, while the answer stays hidden on the spectator screen until each word ends — players can't read it off the projector.</p><p><strong>Tip:</strong> Host can start a rematch after the game ends. Up to 35 players per room.</p>"
         }
       }
     }
