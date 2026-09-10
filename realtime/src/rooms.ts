@@ -63,7 +63,7 @@ export function countActiveRoomsByHost(hostId: string): number {
   return count;
 }
 
-function newPlayer(user: AuthenticatedUser, socketId: string): RoomPlayer {
+function newPlayer(user: AuthenticatedUser, socketId: string, spectator = false): RoomPlayer {
   return {
     userId: user.userId,
     name: user.name,
@@ -72,6 +72,7 @@ function newPlayer(user: AuthenticatedUser, socketId: string): RoomPlayer {
     socketId,
     status: "present",
     disconnectedAt: null,
+    spectator,
     score: 0,
     streak: 0,
     maxStreak: 0,
@@ -89,6 +90,8 @@ export interface CreateRoomInput {
   classId: string | null;
   /** Roster (assignment preset) target for roster battles; null otherwise. */
   preset: { id: string; name: string; studentIds: string[] } | null;
+  /** Staff-only: host joins as a spectator (keeps host controls, never plays). */
+  hostAsSpectator: boolean;
 }
 
 export function createRoom(input: CreateRoomInput): BattleRoom {
@@ -114,7 +117,7 @@ export function createRoom(input: CreateRoomInput): BattleRoom {
     wordSubmissions: new Set(),
     wordResults: new Map(),
   };
-  room.players.set(input.host.userId, newPlayer(input.host, input.socketId));
+  room.players.set(input.host.userId, newPlayer(input.host, input.socketId, input.hostAsSpectator));
   rooms.set(code, room);
   return room;
 }
@@ -148,13 +151,13 @@ export function removePlayer(room: BattleRoom, userId: string): RemovePlayerResu
   const existed = room.players.delete(userId);
   let newHostId: string | null = null;
   if (existed && room.hostId === userId) {
-    // Transfer host to the next present player (insertion order).
-    for (const candidate of room.players.values()) {
-      if (candidate.status === "present") {
-        room.hostId = candidate.userId;
-        newHostId = candidate.userId;
-        break;
-      }
+    // Transfer host to the next present player (insertion order), preferring
+    // playing members over spectators so gameplay authority lands on a player.
+    const candidates = [...room.players.values()].filter((p) => p.status === "present");
+    const nextPlayer = candidates.find((p) => !p.spectator) ?? candidates[0];
+    if (nextPlayer) {
+      room.hostId = nextPlayer.userId;
+      newHostId = nextPlayer.userId;
     }
   }
   touchRoom(room);
@@ -189,6 +192,19 @@ export function markReconnected(room: BattleRoom, userId: string, socketId: stri
 
 export function touchRoom(room: BattleRoom): void {
   room.lastActivityAt = Date.now();
+}
+
+/**
+ * Count present, playing (non-spectator) members — the pool the engine
+ * scores and gates on. Spectators (host-only today) never count toward the
+ * 2-player minimum or the in-progress abort check.
+ */
+export function countPresentPlayers(room: BattleRoom): number {
+  let count = 0;
+  for (const p of room.players.values()) {
+    if (p.status === "present" && !p.spectator) count++;
+  }
+  return count;
 }
 
 export function setRoomSource(
@@ -279,6 +295,7 @@ export function toRoomStatePayload(room: BattleRoom): RoomStatePayload {
       image: p.image,
       role: p.role,
       isHost: room.hostId === p.userId,
+      spectator: p.spectator,
       status: p.status,
       score: p.score,
       streak: p.streak,

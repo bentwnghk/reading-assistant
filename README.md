@@ -429,6 +429,7 @@ Available both in-session and on the My Vocabulary page across all your words. C
 - 👑 **Host Controls**: Pick the game mode (Listen & Type, Letter Scramble, Fill Blanks, or Mixed), word source (glossary, vocabulary bank, or review list), difficulty, and word count
 - 🏆 **Live Ranking**: See everyone's scores update after every word; ties share the same rank
 - 🎓 **Class Battles** (Teachers): Launch a battle for your whole class — students get a persistent notification with a one-click "Go to Battle" action
+- 🎭 **Host as Spectator** (Teachers/Admins): Tick "Host only (don't play)" when creating a battle to run it for students without competing — keep host controls, watch the live ranking, and never be scored
 - 📈 **Unified Stats**: Battle results count toward your best score, leaderboard, and SRS mastery — just like solo play
 
 ---

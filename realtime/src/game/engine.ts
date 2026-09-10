@@ -13,7 +13,7 @@
 import type { Server as SocketIOServer } from "socket.io";
 
 import { BETWEEN_WORDS_MS, SUBMIT_GRACE_MS, WORD_DURATION_MS, clampHintsUsed, judgeAnswer, scoreAnswer } from "./scoring";
-import { toRoomStatePayload } from "../rooms";
+import { toRoomStatePayload, countPresentPlayers } from "../rooms";
 import type {
   BattleGameMode,
   BattleRoom,
@@ -64,11 +64,14 @@ export function clearTimers(code: string): void {
 }
 
 function buildRanking(room: BattleRoom): RankingEntry[] {
-  const sorted = [...room.players.values()].sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    if (b.correctCount !== a.correctCount) return b.correctCount - a.correctCount;
-    return a.userId.localeCompare(b.userId);
-  });
+  // Spectators never appear in rankings — they hold no score.
+  const sorted = [...room.players.values()]
+    .filter((p) => !p.spectator)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.correctCount !== a.correctCount) return b.correctCount - a.correctCount;
+      return a.userId.localeCompare(b.userId);
+    });
   let rank = 0;
   let prevScore = -1;
   let prevCorrect = -1;
@@ -115,8 +118,8 @@ function resetAccumulators(room: BattleRoom): void {
 /** Host starts the battle: lock the room + run the 3-2-1 countdown. */
 export function startGame(io: SocketIOServer, room: BattleRoom): boolean {
   if (room.status !== "lobby") return false;
-  const presentCount = [...room.players.values()].filter((p) => p.status === "present").length;
-  if (presentCount < 2) return false;
+  // Spectators don't count — a host-spectator alone can't start a battle.
+  if (countPresentPlayers(room) < 2) return false;
 
   clearTimers(room.code);
   resetAccumulators(room);
@@ -191,7 +194,7 @@ export function submitAnswer(
 ): void {
   if (room.status !== "playing") return;
   const player = room.players.get(userId);
-  if (!player || player.status !== "present") return;
+  if (!player || player.status !== "present" || player.spectator) return;
   if (payload.index !== room.currentIndex) return;
   if (player.lastSubmittedIndex === payload.index) return; // double-submit guard
 
@@ -231,8 +234,9 @@ export function submitAnswer(
   io.to(room.code).emit("player_progress", progress);
 
   // If every present player has submitted, resolve the word immediately.
+  // Spectators never submit, so they must not hold the word open.
   const allSubmitted = [...room.players.values()]
-    .filter((p) => p.status === "present")
+    .filter((p) => p.status === "present" && !p.spectator)
     .every((p) => room.wordSubmissions.has(p.userId));
   if (allSubmitted) {
     resolveWord(io, room, payload.index);
@@ -246,6 +250,8 @@ function resolveWord(io: SocketIOServer, room: BattleRoom, index: number): void 
   const word = room.canonicalWords[index];
   const results: WordEndResult[] = [];
   for (const p of room.players.values()) {
+    // Spectators are not scored and never appear in per-word results.
+    if (p.spectator) continue;
     const submitted = room.wordSubmissions.has(p.userId);
     if (!submitted && p.status === "present") {
       // Timed out / didn't answer — resets streak, no points.

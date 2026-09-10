@@ -308,6 +308,8 @@ interface BattlePlayerSummary {
   image: string | null;
   role: UserRole;
   isHost: boolean;
+  /** Spectator (host-only today) — excluded from play, scoring and ranking. */
+  spectator: boolean;
   /** present = connected; disconnected = within reconnect grace window. */
   status: "present" | "disconnected";
   score: number;
@@ -338,6 +340,12 @@ interface BattleCreateRoomPayload {
   targetClassId?: string;
   /** For roster battles: the target assignment-preset id (must be in the requester's school). */
   targetPresetId?: string;
+  /**
+   * Staff-only: create the room as a host-spectator — the host keeps host
+   * controls (start / rematch / source) but is excluded from play. Rejected
+   * for students (`spectate_not_allowed`).
+   */
+  hostAsSpectator?: boolean;
 }
 
 interface BattleJoinRoomPayload {
@@ -377,6 +385,7 @@ type BattleRoomErrorCode =
   | "invalid_source"
   | "not_connected"
   | "class_not_allowed"
+  | "spectate_not_allowed"
   | "internal_error";
 
 interface BattleRoomErrorPayload {

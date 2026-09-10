@@ -15,6 +15,8 @@ import {
   LogOut,
   Clock,
   Delete,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -141,6 +143,9 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
 
   const word = battle.currentWord;
   const myUserId = session?.user?.id;
+  // Spectator seat (host-only): watch the battle — no input, scoring, SFX or
+  // TTS. Rendered as a supervision view further below.
+  const isSpectator = battle.isSpectator;
   const gameMode: SpellingGameMode = word?.gameMode ?? "listen-type";
   // Scramble uses whole-word tiles for multi-unit entries (the entry's "word"
   // contains spaces OR hyphens) instead of individual characters, so phrases
@@ -191,20 +196,23 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     // Only listen-type reveals the word via audio; the other modes show a visual clue.
     // Auto-play only when the audio session is already unlocked — otherwise iOS
     // Safari blocks it. The speaker button (always visible) lets the user unlock
-    // with one tap, after which all later words auto-play.
+    // with one tap, after which all later words auto-play. Spectators hear the
+    // word too (classroom smartboard) — but never SEE it before word_end, so
+    // the audio is their only live feed.
     const speakTimer =
       gameMode === "listen-type" && isAudioUnlocked()
         ? setTimeout(() => {
             void doSpeak(word.word);
           }, 250)
         : null;
-    const focusTimer = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 300);
+    const focusTimer =
+      !isSpectator ? setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 300) : null;
     // Re-center after the browser settles the newly focused input (mobile
     // landscape keyboard scroll). See centerGameArea.
     centerGameArea(gameAreaRef, 650);
     return () => {
       if (speakTimer) clearTimeout(speakTimer);
-      clearTimeout(focusTimer);
+      if (focusTimer) clearTimeout(focusTimer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [word?.index]);
@@ -374,7 +382,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
   // ── Derived game state (used by the juice effects below AND the render) ──
   const durationMs = word?.durationMs ?? 0;
   const timeRemainingMs = word ? Math.max(0, durationMs - elapsedMs) : 0;
-  const timedOut = !!word && timeRemainingMs === 0 && !hasSubmitted;
+  const timedOut = !!word && !isSpectator && timeRemainingMs === 0 && !hasSubmitted;
   const myResult = battle.myLastResult;
   const showCorrect = hasSubmitted ? (myResult?.correct ?? optimisticCorrect ?? false) : null;
   // The current word is over for this player if they submitted, their local
@@ -387,9 +395,10 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
   // ── Juice: reveal SFX (fire once per word — the derived booleans transition
   // false→true exactly once: on submit, timeout, or server reveal). A locked
   // word without a correct reveal (wrong submit, timeout, or the server
-  // resolving the word before this player answered) counts as wrong. ────────
-  const correctRevealed = locked && showCorrect === true;
-  const wrongRevealed = locked && !correctRevealed;
+  // resolving the word before this player answered) counts as wrong.
+  // Spectators hear none of it — the outcome isn't theirs. ──────────────────
+  const correctRevealed = !isSpectator && locked && showCorrect === true;
+  const wrongRevealed = !isSpectator && locked && !correctRevealed;
   useEffect(() => {
     if (correctRevealed) playSfx("correct");
   }, [correctRevealed]);
@@ -401,6 +410,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
   // breakdown is reconstructed from mirrored scoring inputs captured at
   // submit; the displayed total is the authoritative server value. ─────────
   useEffect(() => {
+    if (isSpectator) return;
     const r = battle.myLastResult;
     if (!r || !word || r.index !== word.index || !r.correct) return;
     const remainingFraction = Math.max(
@@ -432,13 +442,13 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
       setMilestone({ streak: r.streak, seq: fxSeqRef.current });
       burstConfetti({ count: 24, spread: 55 });
     }
-  }, [battle.myLastResult, word]);
+  }, [battle.myLastResult, word, isSpectator]);
 
   // ── Juice: final-seconds tick (muted while TTS speaks — see playSfx) ─────
   useEffect(() => {
-    if (!word || locked || secondsLeft < 1 || secondsLeft > 3) return;
+    if (isSpectator || !word || locked || secondsLeft < 1 || secondsLeft > 3) return;
     playSfx("tick");
-  }, [secondsLeft, word, locked]);
+  }, [secondsLeft, word, locked, isSpectator]);
 
   // ── Juice: pre-game countdown blips ───────────────────────────────────────
   useEffect(() => {
@@ -469,6 +479,173 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
   }
 
   const timePct = Math.min(100, (timeRemainingMs / durationMs) * 100);
+
+  // ── Spectator view (host-only seat): watch the battle without playing.
+  // The word is SPOKEN (listen-type, classroom smartboard) but hidden from
+  // this screen until the server resolves it (word_end) — the battle may be
+  // projected where players can read it. In scramble / fill-blanks the screen
+  // instead mirrors the exact visual clue every player already sees (tiles /
+  // masked blanks / definitions), so nothing extra is leaked. ──────────────
+  if (isSpectator) {
+    // True once the server resolved THIS word (word_end carries the answer).
+    const revealed = wordEndedForThisWord;
+    const revealedWord = battle.wordEnded?.correctWord ?? word.word;
+    return (
+      <div ref={gameAreaRef} className="relative mx-auto max-w-3xl space-y-4">
+        {/* Top bar: progress + spectating badge + exit */}
+        <div className="flex items-center justify-between gap-3">
+          <Badge variant="secondary">
+            {t(`${M}.wordNOf`, { current: word.index + 1, total: word.total })}
+          </Badge>
+          <Badge variant="outline" className="gap-1 text-muted-foreground">
+            <Eye className="h-3 w-3" />
+            {t(`${M}.spectating`)}
+          </Badge>
+          <Button variant="ghost" size="sm" onClick={onExit}>
+            <LogOut className="h-4 w-4 mr-1" />
+            {t(`${M}.leave`)}
+          </Button>
+        </div>
+
+        {/* Timer bar (informational for the spectator) */}
+        <div className="space-y-1">
+          <Progress value={timePct} className="h-1.5" />
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {(timeRemainingMs / 1000).toFixed(1)}s
+            </span>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-[1fr_220px]">
+          <Card>
+            <CardContent className="space-y-4 py-6">
+              {/* Mode badge */}
+              <div className="text-center">
+                <Badge variant="secondary" className="text-xs">
+                  {t(`reading.glossary.spelling.modes.${gameMode}`)}
+                </Badge>
+              </div>
+
+              {/* Listen + replay (listen-type only). The button is ALWAYS
+                  available — it is the persistent unlock + replay affordance
+                  (iOS / smartboard browsers need a gesture before audio can
+                  auto-play). One tap resumes the AudioContext inside the
+                  gesture; afterwards every word auto-plays. */}
+              {gameMode === "listen-type" && (
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className={cn(
+                      "h-16 w-16 rounded-full",
+                      !soundEnabled && "animate-pulse ring-2 ring-primary ring-offset-2 ring-offset-background",
+                    )}
+                    onClick={async () => {
+                      const unlocked = await unlockAudio();
+                      setSoundEnabled(unlocked || isAudioUnlocked());
+                      void doSpeak(word.word);
+                    }}
+                    title={t("reading.glossary.spelling.clickToHear")}
+                  >
+                    {isTTSLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Volume2 className="h-6 w-6" />}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    {soundEnabled
+                      ? t("reading.glossary.spelling.clickToHear")
+                      : t(`${M}.tapToEnableSound`)}
+                  </span>
+                </div>
+              )}
+
+              {revealed ? (
+                <>
+                  <p className="text-center text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {t(`${M}.spectatorWord`)}
+                  </p>
+                  <div className="text-center font-mono text-3xl font-bold tracking-wider break-all">
+                    {revealedWord}
+                  </div>
+                  {(word.partOfSpeech || word.syllabification) && (
+                    <p className="text-center text-xs text-muted-foreground">
+                      {[word.partOfSpeech, word.syllabification].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                  {(word.englishDefinition || word.chineseDefinition) && (
+                    <div className="rounded-lg border bg-muted/40 p-3 text-center text-sm">
+                      {word.englishDefinition && <p>{word.englishDefinition}</p>}
+                      {word.chineseDefinition && <p className="text-muted-foreground">{word.chineseDefinition}</p>}
+                    </div>
+                  )}
+                </>
+              ) : gameMode === "listen-type" ? (
+                /* listen-type: players only HEAR the word — showing it here
+                   would spoil the answer on a projected screen. Masked until
+                   word_end. */
+                <div className="flex flex-col items-center gap-2 py-6">
+                  <EyeOff className="h-8 w-8 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{t(`${M}.spectatorHidden`)}</p>
+                </div>
+              ) : (
+                /* scramble / fill-blanks: mirror the players' visual clue
+                   exactly — the same tiles / masked blanks / definition every
+                   player's screen shows, so the big screen adds no leaks.
+                   Non-interactive: the spectator never enters an answer. */
+                <>
+                  {(word.englishDefinition || word.chineseDefinition) && (
+                    <div className="rounded-lg border bg-muted/40 p-3 text-center text-sm">
+                      {word.englishDefinition && <p>{word.englishDefinition}</p>}
+                      {word.chineseDefinition && <p className="text-muted-foreground">{word.chineseDefinition}</p>}
+                      {word.partOfSpeech && <Badge variant="secondary" className="mt-1 text-xs">{word.partOfSpeech}</Badge>}
+                    </div>
+                  )}
+
+                  {gameMode === "fill-blanks" ? (
+                    /* Masked word — identical to the player view's display,
+                       minus the player's own typed/hint letters (blanks stay
+                       empty boxes). */
+                    <div className="text-center font-mono text-2xl tracking-wider">
+                      {word.word.split("").map((ch, idx) => {
+                        const blanks = word.blankPositions ?? [];
+                        if (blanks.includes(idx)) {
+                          return <span key={idx} className="inline-block w-6 h-8 mx-0.5 border-b-2 border-primary align-bottom" />;
+                        }
+                        return <span key={idx} className="inline-block w-6 h-8 mx-0.5">{ch}</span>;
+                      })}
+                    </div>
+                  ) : (
+                    /* Scramble — the same shuffled letter tiles every player
+                       sees (word-tiles for phrases/hyphenates), static. */
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {(word.shuffledLetters ?? []).map((letter, idx) => (
+                        <span
+                          key={idx}
+                          className={cn(
+                            "inline-flex items-center justify-center rounded-lg border-2 border-primary bg-primary/10 text-lg font-semibold",
+                            scrambleByWord ? "h-10 px-3" : "w-10 h-10",
+                          )}
+                        >
+                          {scrambleByWord ? letter : letter.toUpperCase()}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              <p className="text-center text-xs text-muted-foreground">
+                {t(`${M}.spectatorWatching`)}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Live ranking strip */}
+          <RankingStrip ranking={battle.liveRanking} myUserId={myUserId} compact={compact} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={gameAreaRef} className="relative mx-auto max-w-3xl space-y-4">

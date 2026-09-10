@@ -26,6 +26,8 @@ import {
   XCircle,
   ScrollText,
   Timer,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import copy from "copy-to-clipboard";
 
@@ -104,6 +106,8 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
   const [classBattle, setClassBattle] = useState(false);
   const [targetClassId, setTargetClassId] = useState<string>("");
   const [targetPresetId, setTargetPresetId] = useState<string>("");
+  // Staff-only: create the room as a host-spectator (host controls without playing).
+  const [hostAsSpectator, setHostAsSpectator] = useState(false);
 
   // ── Fetched data ─────────────────────────────────────────────────────────
   const [reviewLists, setReviewLists] = useState<{ id: string; name: string; wordCount: number }[]>([]);
@@ -182,8 +186,9 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       config: { source, difficulty, gameMode, wordCount, timed, classBattle },
       targetClassId: classBattle && targetClassId ? targetClassId : undefined,
       targetPresetId: classBattle && targetPresetId ? targetPresetId : undefined,
+      hostAsSpectator: canHostClassBattle && hostAsSpectator ? true : undefined,
     });
-  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, targetPresetId, difficulty, gameMode, wordCount, timed, battle, t]);
+  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, targetPresetId, hostAsSpectator, canHostClassBattle, difficulty, gameMode, wordCount, timed, battle, t]);
 
   const handleJoin = useCallback(() => {
     if (joinCode.trim().length < 4) {
@@ -257,6 +262,9 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
   // ── In-room view ─────────────────────────────────────────────────────────
   if (battle.roomCode) {
     const players = battle.players ?? [];
+    // Playing members only — a host-spectator occupies a seat but is not a
+    // player, so the Start gate and player count exclude them.
+    const playerCount = players.filter((p) => !p.spectator).length;
     return (
       <div className="mx-auto max-w-2xl space-y-4">
         {battle.error && <ErrorBanner code={battle.error} t={t} onDismiss={battle.clearError} />}
@@ -289,7 +297,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Users className="h-4 w-4" />
-                {t(`${M}.players`)} ({players.length})
+                {t(`${M}.players`)} ({playerCount})
               </div>
               <div className="space-y-1.5">
                 {players.map((p) => (
@@ -319,7 +327,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
                 <Button
                   className="flex-1"
                   onClick={battle.startGame}
-                  disabled={players.length < 2}
+                  disabled={playerCount < 2}
                 >
                   <Play className="mr-2 h-4 w-4" />
                   {t(`${M}.startBattle`)}
@@ -330,7 +338,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
                 {t(`${M}.leave`)}
               </Button>
             </div>
-            {battle.isHost && players.length < 2 && (
+            {battle.isHost && playerCount < 2 && (
               <p className="text-center text-xs text-muted-foreground">{t(`${M}.needMorePlayers`)}</p>
             )}
           </CardContent>
@@ -571,6 +579,20 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
             </>
           )}
 
+          {/* Host as spectator (teachers/admins) — host the battle without playing */}
+          {canHostClassBattle && (
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex items-start gap-2">
+                <EyeOff className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                <div>
+                  <Label className="text-sm">{t(`${M}.hostSpectate`)}</Label>
+                  <p className="text-xs text-muted-foreground">{t(`${M}.hostSpectateDesc`)}</p>
+                </div>
+              </div>
+              <Switch checked={hostAsSpectator} onCheckedChange={setHostAsSpectator} />
+            </div>
+          )}
+
           <Button className="w-full" onClick={handleCreate}>
             <Swords className="mr-2 h-4 w-4" />
             {t(`${M}.createAndHost`)}
@@ -742,6 +764,12 @@ function PlayerRow({ player, currentUserId }: { player: BattlePlayerSummary; cur
       {player.status === "disconnected" && (
         <Badge variant="outline" className="text-xs text-muted-foreground">
           {t("reading.glossary.spelling.multiplayer.disconnected")}
+        </Badge>
+      )}
+      {player.spectator && (
+        <Badge variant="outline" className="gap-1 text-xs text-muted-foreground">
+          <Eye className="h-3 w-3" />
+          {t("reading.glossary.spelling.multiplayer.spectator")}
         </Badge>
       )}
       {player.isHost && (

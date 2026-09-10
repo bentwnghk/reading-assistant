@@ -80,6 +80,7 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
   const myUserId = session?.user?.id;
 
   const ranking = battle.finalRanking;
+  const isSpectator = battle.isSpectator;
   const me = ranking.find((r) => r.userId === myUserId);
   const totalWords = battle.totalWords || ranking.length;
   const myAccuracy = me && totalWords > 0 ? Math.round((me.correctCount / totalWords) * 100) : 0;
@@ -156,7 +157,9 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
       .catch(() => {});
   }, [me, isNewBest]);
 
-  if (!me) {
+  // A host-spectator never has a personal result — show the spectator summary
+  // + final ranking instead of the "no result" dead-end.
+  if (!me && !isSpectator) {
     return (
       <div className="flex flex-col items-center gap-3 py-12">
         <p className="text-muted-foreground">{t(`${M}.noResult`)}</p>
@@ -172,54 +175,69 @@ export function SpellingBattleResults({ onExit, compact }: SpellingBattleResults
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      {/* My result headline */}
-      <Card
-        className={cn(
-          "relative overflow-hidden transition-all duration-500",
-          iWon && "border-amber-500/50",
-          animateIn ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
-        )}
-        style={iWon ? { background: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.06) 50%, rgba(255,237,160,0.15) 100%)" } : undefined}
-      >
-        {iWon && <FloatingParticles color={tierCfg.particle} count={20} />}
-        <CardContent className="relative flex flex-col items-center gap-2 py-8 text-center">
-          <div className="text-5xl">
-            {me.rank === 1 ? "🏆" : me.rank === 2 ? "🥈" : me.rank === 3 ? "🥉" : `#${me.rank}`}
-          </div>
-          <p className="text-xl font-bold">
-            {iWon ? t(`${M}.youWon`) : t(`${M}.youFinished`, { rank: me.rank })}
-          </p>
-          {/* Tier badge */}
-          <Badge className={cn("gap-1", tierCfg.badge)}>
-            <span>{tierCfg.emoji}</span>
-            {t(`${TIER}.${myTier}`)}
-          </Badge>
-          {isNewBest && (
-            <Badge className="gap-1 bg-amber-500 text-white">
-              <Trophy className="h-3.5 w-3.5" />
-              {t("reading.glossary.spelling.fx.newBest")}
-            </Badge>
+      {/* Result headline — player stats, or a host-spectator summary */}
+      {me ? (
+        <Card
+          className={cn(
+            "relative overflow-hidden transition-all duration-500",
+            iWon && "border-amber-500/50",
+            animateIn ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
           )}
-          <div className="mt-1 flex items-center gap-5 text-sm">
-            <span className="flex items-center gap-1">
-              <Trophy className="h-4 w-4 text-yellow-500" />
-              <span className="font-bold">{me.total}</span>
-              <span className="text-muted-foreground">{t(`${M}.points`)}</span>
-            </span>
-            <span className="text-muted-foreground">
-              <span className="font-bold text-foreground">{myAccuracy}%</span>
-            </span>
-            <span className="text-muted-foreground">
-              <span className="font-bold text-foreground">{me.correctCount}</span>/{totalWords}
-            </span>
-            {me.correctCount >= 3 && (
-              <span className="flex items-center gap-1 text-orange-500">
-                <Flame className="h-4 w-4" />
-              </span>
+          style={iWon ? { background: "linear-gradient(135deg, rgba(255,237,160,0.15) 0%, rgba(251,191,36,0.06) 50%, rgba(255,237,160,0.15) 100%)" } : undefined}
+        >
+          {iWon && <FloatingParticles color={tierCfg.particle} count={20} />}
+          <CardContent className="relative flex flex-col items-center gap-2 py-8 text-center">
+            <div className="text-5xl">
+              {me.rank === 1 ? "🏆" : me.rank === 2 ? "🥈" : me.rank === 3 ? "🥉" : `#${me.rank}`}
+            </div>
+            <p className="text-xl font-bold">
+              {iWon ? t(`${M}.youWon`) : t(`${M}.youFinished`, { rank: me.rank })}
+            </p>
+            {/* Tier badge */}
+            <Badge className={cn("gap-1", tierCfg.badge)}>
+              <span>{tierCfg.emoji}</span>
+              {t(`${TIER}.${myTier}`)}
+            </Badge>
+            {isNewBest && (
+              <Badge className="gap-1 bg-amber-500 text-white">
+                <Trophy className="h-3.5 w-3.5" />
+                {t("reading.glossary.spelling.fx.newBest")}
+              </Badge>
             )}
-          </div>
-        </CardContent>
-      </Card>
+            <div className="mt-1 flex items-center gap-5 text-sm">
+              <span className="flex items-center gap-1">
+                <Trophy className="h-4 w-4 text-yellow-500" />
+                <span className="font-bold">{me.total}</span>
+                <span className="text-muted-foreground">{t(`${M}.points`)}</span>
+              </span>
+              <span className="text-muted-foreground">
+                <span className="font-bold text-foreground">{myAccuracy}%</span>
+              </span>
+              <span className="text-muted-foreground">
+                <span className="font-bold text-foreground">{me.correctCount}</span>/{totalWords}
+              </span>
+              {me.correctCount >= 3 && (
+                <span className="flex items-center gap-1 text-orange-500">
+                  <Flame className="h-4 w-4" />
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card
+          className={cn(
+            "relative overflow-hidden transition-all duration-500",
+            animateIn ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
+          )}
+        >
+          <CardContent className="relative flex flex-col items-center gap-2 py-8 text-center">
+            <div className="text-5xl">⚔️</div>
+            <p className="text-xl font-bold">{t(`${M}.battleOver`)}</p>
+            <p className="text-sm text-muted-foreground">{t(`${M}.spectatorResultNote`)}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Spaced-repetition reward framing (only when the entry point returned
           SRS outcomes for its words). */}

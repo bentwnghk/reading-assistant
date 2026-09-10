@@ -21,6 +21,7 @@ import {
 import {
   addPlayer,
   countActiveRoomsByHost,
+  countPresentPlayers,
   createRoom,
   destroyRoom,
   findClassBattleInvites,
@@ -248,6 +249,13 @@ io.on("connection", (socket: Socket) => {
       }
       // Normalize the game mode (default to listen-type for older clients).
       payload.config.gameMode = normalizeGameMode(payload.config.gameMode);
+      // Host-as-spectator is staff-only (teachers host classroom battles
+      // without playing). Students sending the flag are rejected outright so
+      // the room is never silently created in a different shape.
+      const hostAsSpectator = payload.hostAsSpectator === true;
+      if (hostAsSpectator && user.role !== "teacher" && user.role !== "admin" && user.role !== "super-admin") {
+        return emitRoomError(socket, "spectate_not_allowed", "Only teachers and admins can host as a spectator");
+      }
       // A user may host at most N active rooms.
       if (countActiveRoomsByHost(user.userId) >= config.maxRoomsPerHost) {
         return emitRoomError(socket, "too_many_rooms", "Too many active rooms");
@@ -302,6 +310,7 @@ io.on("connection", (socket: Socket) => {
         resolved,
         classId,
         preset,
+        hostAsSpectator,
       });
       socket.join(room.code);
       // The host's player socketId is set at creation; ensure it matches.
@@ -414,6 +423,7 @@ io.on("connection", (socket: Socket) => {
             image: player.image,
             role: player.role,
             isHost: room.hostId === player.userId,
+            spectator: player.spectator,
             status: player.status,
             score: player.score,
             streak: player.streak,
@@ -524,9 +534,10 @@ io.on("connection", (socket: Socket) => {
     const room = findRoomByPlayer(user.userId);
     if (room) {
       markDisconnected(room, user.userId, Date.now());
-      // If an in-progress game drops below 2 present players, abort to lobby.
-      const presentCount = [...room.players.values()].filter((p) => p.status === "present").length;
-      if (presentCount < 2 && (room.status === "playing" || room.status === "countdown")) {
+      // If an in-progress game drops below 2 present PLAYERS, abort to lobby.
+      // Spectators (host-only) don't count — a teacher's dropped connection
+      // must never cancel a battle the students are still playing.
+      if (countPresentPlayers(room) < 2 && (room.status === "playing" || room.status === "countdown")) {
         cancelGame(io, room);
       } else {
         broadcastRoomState(room);

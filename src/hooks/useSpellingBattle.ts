@@ -149,6 +149,8 @@ export interface UseSpellingBattle {
   players: BattlePlayerSummary[]
   actualWordCount: number
   isHost: boolean
+  /** True when the current user's room seat is a spectator (host-only today). */
+  isSpectator: boolean
   // game-loop state
   countdownN: number | null
   currentWord: BattleWordStartPayload | null
@@ -295,6 +297,9 @@ export function useSpellingBattle(): UseSpellingBattle {
 
   const currentUserId = session?.user?.id ?? null
   const isHost = currentUserId !== null && hostId === currentUserId
+  // Spectator seat resolution: derived from the server's player list so it
+  // survives SPA navigation and reconnects (the flag lives on the seat).
+  const isSpectator = currentUserId !== null && (players.find((p) => p.userId === currentUserId)?.spectator ?? false)
 
   // Game-loop state (read from the store; updated by server events wired above).
   const countdownN = useBattleStore((s) => s.countdownN)
@@ -323,6 +328,7 @@ export function useSpellingBattle(): UseSpellingBattle {
     players,
     actualWordCount,
     isHost,
+    isSpectator,
     countdownN,
     currentWord,
     wordEnded,
