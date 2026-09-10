@@ -43,12 +43,24 @@ function SkimHelper({ text, title }: SkimHelperProps) {
   const [open, setOpen] = useState(true);
   const excerpts = useMemo(() => extractSkimExcerpts(text), [text]);
 
+  // Self-heal a stale docTitle: if the passed title no longer appears in the
+  // text (user edited the title line after the title was generated), fall
+  // back to the first heading extracted from the current text. Whitespace-
+  // normalized, case-insensitive containment so OCR line-wrap/casing fixes
+  // don't count as staleness.
+  const effectiveTitle = useMemo(() => {
+    if (!title) return undefined;
+    const norm = (s: string) => normalizeExcerpt(s).toLowerCase();
+    if (norm(text).includes(norm(title))) return title;
+    return excerpts.subheadings[0];
+  }, [title, text, excerpts.subheadings]);
+
   const subheadings = useMemo(
     () =>
-      title
-        ? excerpts.subheadings.filter((h) => h.trim() !== title.trim())
+      effectiveTitle
+        ? excerpts.subheadings.filter((h) => h.trim() !== effectiveTitle.trim())
         : excerpts.subheadings,
-    [excerpts.subheadings, title],
+    [excerpts.subheadings, effectiveTitle],
   );
 
   // Drop topic sentences already shown verbatim inside the first/last paragraph
@@ -65,7 +77,7 @@ function SkimHelper({ text, title }: SkimHelperProps) {
   }, [excerpts.topicSentences, excerpts.firstParagraph, excerpts.lastParagraph]);
 
   const hasAny =
-    !!title ||
+    !!effectiveTitle ||
     !!excerpts.firstParagraph ||
     subheadings.length > 0 ||
     topicSentences.length > 0 ||
@@ -73,11 +85,11 @@ function SkimHelper({ text, title }: SkimHelperProps) {
   if (!hasAny) return null;
 
   const items: { icon: typeof Eye; label: string; node: React.ReactNode }[] = [];
-  if (title) {
+  if (effectiveTitle) {
     items.push({
       icon: Heading,
       label: t("reading.preReading.skim.title"),
-      node: <p className="font-medium">{title}</p>,
+      node: <p className="font-medium">{effectiveTitle}</p>,
     });
   }
   if (excerpts.firstParagraph) {

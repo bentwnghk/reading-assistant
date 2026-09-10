@@ -417,7 +417,7 @@ function AdaptedText() {
     sentenceAnalysisModel,
   } = useSettingStore();
 
-  const { activeGenerations, adaptText, simplifyText, suggestVocabulary } = useReadingAssistant();
+  const { activeGenerations, adaptText, simplifyText, suggestVocabulary, generateTitle } = useReadingAssistant();
   const { createModelProvider } = useModelProvider();
   const { setGenerating } = useReadingStore();
 
@@ -544,29 +544,43 @@ function AdaptedText() {
     setEditText("");
   }, []);
 
+  // The AI-extracted docTitle can go stale when the user edits the extracted
+  // text (e.g. fixes a garbled OCR title line). Re-run title generation when
+  // the current title no longer appears in the edited text — a cheap
+  // staleness check that avoids burning tokens on every edit. Must be called
+  // AFTER setExtractedText so generateTitle() reads the new text from the store.
+  const regenerateTitleIfStale = useCallback((newText: string) => {
+    if (!newText.trim()) return;
+    const { docTitle } = useReadingStore.getState();
+    if (docTitle && newText.includes(docTitle.trim())) return;
+    generateTitle();
+  }, [generateTitle]);
+
   const handleSaveEdit = useCallback(() => {
     const hasChanges = editText !== extractedText;
     const hasDerivedData = adaptedText || simplifiedText || highlightedWords.length > 0 || Object.keys(analyzedSentences).length > 0 || glossary.length > 0;
-    
+
     if (hasChanges && hasDerivedData) {
       setShowClearConfirm(true);
     } else if (hasChanges) {
       setExtractedText(editText);
+      regenerateTitleIfStale(editText);
       setIsEditing(false);
       setEditText("");
     } else {
       setIsEditing(false);
       setEditText("");
     }
-  }, [editText, extractedText, adaptedText, simplifiedText, highlightedWords, analyzedSentences, glossary, setExtractedText]);
+  }, [editText, extractedText, adaptedText, simplifiedText, highlightedWords, analyzedSentences, glossary, setExtractedText, regenerateTitleIfStale]);
 
   const confirmClearAndSave = useCallback(() => {
     setExtractedText(editText);
     clearDerivedData();
+    regenerateTitleIfStale(editText);
     setIsEditing(false);
     setEditText("");
     setShowClearConfirm(false);
-  }, [editText, setExtractedText, clearDerivedData]);
+  }, [editText, setExtractedText, clearDerivedData, regenerateTitleIfStale]);
 
   const handleSuggestVocabulary = useCallback(async () => {
     await suggestVocabulary(suggestCount);
