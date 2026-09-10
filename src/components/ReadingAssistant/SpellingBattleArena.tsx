@@ -1107,7 +1107,10 @@ function RankingStrip({
                     {(entry.name ?? "?").slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 truncate text-xs">
+                <div
+                  className="flex-1 break-words text-xs leading-tight line-clamp-2"
+                  title={entry.name ?? undefined}
+                >
                   {entry.name ?? t(`${M}.anonymous`)}
                   {isMe && <span className="ml-1 text-primary">({t(`${M}.you`)})</span>}
                 </div>
