@@ -143,8 +143,8 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
 
   const word = battle.currentWord;
   const myUserId = session?.user?.id;
-  // Spectator seat (host-only): watch the battle — no input, scoring, SFX or
-  // TTS. Rendered as a supervision view further below.
+  // Spectator seat (host-only): watch the battle — no input, scoring, or
+  // outcome SFX. Rendered as a supervision view further below.
   const isSpectator = battle.isSpectator;
   const gameMode: SpellingGameMode = word?.gameMode ?? "listen-type";
   // Scramble uses whole-word tiles for multi-unit entries (the entry's "word"
@@ -444,11 +444,13 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     }
   }, [battle.myLastResult, word, isSpectator]);
 
-  // ── Juice: final-seconds tick (muted while TTS speaks — see playSfx) ─────
+  // ── Juice: final-seconds tick (muted while TTS speaks — see playSfx).
+  // Spectators hear it too — it is ambient timing info on the shared clock,
+  // not an outcome cue. ─────────────────────────────────────────────────────
   useEffect(() => {
-    if (isSpectator || !word || locked || secondsLeft < 1 || secondsLeft > 3) return;
+    if (!word || locked || secondsLeft < 1 || secondsLeft > 3) return;
     playSfx("tick");
-  }, [secondsLeft, word, locked, isSpectator]);
+  }, [secondsLeft, word, locked]);
 
   // ── Juice: pre-game countdown blips ───────────────────────────────────────
   useEffect(() => {
@@ -511,7 +513,12 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
         <div className="space-y-1">
           <Progress value={timePct} className="h-1.5" />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
+            <span
+              className={cn(
+                "flex items-center gap-1",
+                secondsLeft <= 3 && !locked && "font-semibold text-destructive animate-urgent-pulse",
+              )}
+            >
               <Clock className="h-3 w-3" />
               {(timeRemainingMs / 1000).toFixed(1)}s
             </span>

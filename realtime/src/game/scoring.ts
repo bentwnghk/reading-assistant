@@ -43,8 +43,8 @@ export const WORD_DURATION_MS: Record<BattleGameMode, Record<SpellingDifficulty,
 /** Late-submission grace added to the per-word timeout (ms). */
 export const SUBMIT_GRACE_MS = 500;
 
-/** Pause between words (matches the solo game's 1.5s feedback window). */
-export const BETWEEN_WORDS_MS = 1_500;
+/** Pause between words — how long the correct answer stays revealed (ms). */
+export const BETWEEN_WORDS_MS = 2_000;
 
 /**
  * Hard cap on hints per word. A player may use at most this many hints on a

@@ -63,6 +63,10 @@ interface VocabularySpellingProps {
 
 type GameStatus = "setup" | "playing" | "completed";
 
+/** How long the answer/feedback stays on screen before advancing (ms).
+ *  Mirrors the battle server's BETWEEN_WORDS_MS — keep both in sync. */
+const FEEDBACK_DISPLAY_MS = 2000;
+
 const DIFFICULTY_CONFIG: Record<SpellingDifficulty, { timeLimits: Record<SpellingGameMode, number>; hintsAllowed: number; blankRatio: number }> = {
   easy: { timeLimits: { "listen-type": 30, scramble: 45, "fill-blanks": 30, mixed: 30 }, hintsAllowed: 5, blankRatio: 0.2 },
   medium: { timeLimits: { "listen-type": 20, scramble: 30, "fill-blanks": 20, mixed: 20 }, hintsAllowed: 3, blankRatio: 0.35 },
@@ -456,7 +460,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                 // Re-center after the browser settles the newly focused input.
                 centerGameArea(gameAreaRef, 450);
               }
-            }, 1500);
+            }, FEEDBACK_DISPLAY_MS);
             return config.timeLimits[currentMode];
           }
           return prev - 1;
@@ -617,7 +621,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       correctWordsRef.current.set(currentChallenge.word, correct);
     }
 
-    setTimeout(() => moveToNext(), 1500);
+    setTimeout(() => moveToNext(), FEEDBACK_DISPLAY_MS);
   }, [currentChallenge, userInput, streak, score, isTimed, timeRemaining, config.timeLimits, hintsUsed, moveToNext, currentMode, bestBefore]);
 
   const handleHint = useCallback(() => {
