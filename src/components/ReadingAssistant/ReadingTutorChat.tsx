@@ -27,6 +27,10 @@ const isIOS =
   (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
+const isCoarsePointer =
+  typeof window !== "undefined" &&
+  window.matchMedia("(pointer: coarse)").matches;
+
 function readImageFiles(files: File[]): Promise<string[]> {
   const imageFiles = files.filter((f) => f.type.startsWith("image/"));
   return Promise.all(
@@ -80,18 +84,23 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   // steals browser focus and cancels the ongoing mouse selection.
   const initialSelectedTextRef = useRef(tutorChatSelectedText);
   useEffect(() => {
-    if (initialSelectedTextRef.current && inputRef.current) {
+    // Skip the auto-focus on touch devices: focus() here runs inside the tap
+    // gesture that opened the dialog, so mobile browsers raise the on-screen
+    // keyboard (with the iOS zoom/scroll side effects). The user can tap the
+    // textarea when they want to type; Quick Questions send without focus.
+    if (!isCoarsePointer && initialSelectedTextRef.current && inputRef.current) {
       // preventScroll: the dialog is fixed to the viewport, so scrolling the
       // focused control "into view" can only drag the document toward it.
       inputRef.current.focus({ preventScroll: true });
     }
   }, []);
 
-  // On iOS, focusing the bottom-anchored textarea still scrolls the document
-  // downward (keyboard/zoom bring-the-caret-into-view behavior), so the user
-  // loses their place next to the selected text. Capture the page offset
-  // before the auto-focus runs and restore it when the dialog unmounts (all
-  // close paths: X button, FAB toggle, store-driven closes). The restore
+  // On iOS, the on-screen keyboard (opened when the user taps the textarea,
+  // since we no longer auto-focus on touch devices) scrolls the document
+  // downward to keep the bottom-anchored input visible, so the user loses
+  // their place next to the selected text. Capture the page offset at mount
+  // — where the selection was made — and restore it when the dialog unmounts
+  // (all close paths: X button, FAB toggle, store-driven closes). The restore
   // blurs first and re-applies once after ~350ms because iOS re-adjusts the
   // scroll while the keyboard-dismiss animation is still playing. Scoped to
   // iOS + the selection flow — the only path that displaces the page — so
