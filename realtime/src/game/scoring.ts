@@ -91,8 +91,18 @@ export function nextHintCost(usedSoFar: number): number | null {
 }
 
 /**
- * Normalize a word/answer for case-, whitespace-, and hyphen-insensitive
- * comparison.
+ * Fold the three apostrophe variants — U+0027 ('), U+2018 (') and U+2019 (')
+ * — onto the straight ASCII apostrophe so answers typed with any keyboard's
+ * curly quote match a canonical entry (and vice versa). Mirrored in
+ * SpellingBattleArena.tsx and VocabularySpelling.tsx on the client.
+ */
+function foldApostrophes(s: string): string {
+  return s.replace(/['‘’]/g, "'");
+}
+
+/**
+ * Normalize a word/answer for case-, whitespace-, hyphen-, and
+ * apostrophe-variant-insensitive comparison.
  *
  * Internal whitespace AND hyphens are collapsed to single spaces so that:
  *   - multi-word phrases reconstructed from word-tile scramble (or typed in
@@ -104,7 +114,7 @@ export function nextHintCost(usedSoFar: number): number | null {
  * and the battle arena's normalize() in SpellingBattleArena.tsx.
  */
 export function normalizeWord(s: string): string {
-  return s.replace(/[\s-]+/g, " ").trim().toLowerCase();
+  return foldApostrophes(s.replace(/[\s-]+/g, " ")).trim().toLowerCase();
 }
 
 /**
@@ -126,8 +136,10 @@ export function judgeAnswer(
 ): boolean {
   if (mode === "fill-blanks") {
     if (!blankPositions || blankPositions.length === 0) return false;
-    const missingLetters = blankPositions.map((p) => word[p].toLowerCase()).join("");
-    return answer.toLowerCase() === missingLetters;
+    const missingLetters = blankPositions
+      .map((p) => foldApostrophes(word[p].toLowerCase()))
+      .join("");
+    return foldApostrophes(answer.toLowerCase()) === missingLetters;
   }
   // listen-type / scramble (mixed is resolved to a base mode by the caller).
   return normalizeWord(answer) === normalizeWord(word);

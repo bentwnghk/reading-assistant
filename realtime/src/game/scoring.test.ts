@@ -324,6 +324,23 @@ describe("judgeAnswer", () => {
   it("fill-blanks: returns false when no blank positions provided", () => {
     expect(judgeAnswer("fill-blanks", "cat", "cat")).toBe(false);
   });
+
+  it("apostrophe variants (U+0027/U+2018/U+2019) are interchangeable", () => {
+    // Straight vs right curly quote on listen-type.
+    expect(judgeAnswer("listen-type", "don\u2019t", "don't")).toBe(true);
+    expect(judgeAnswer("listen-type", "don't", "don\u2019t")).toBe(true);
+    // Left curly quote is interchangeable too.
+    expect(judgeAnswer("listen-type", "don\u2018t", "don\u2019t")).toBe(true);
+    // Phrases with apostrophes in any position.
+    expect(judgeAnswer("listen-type", "it\u2019s a piece of cake", "it's a piece  of cake")).toBe(true);
+    // Removing the apostrophe entirely is NOT the same as a variant swap.
+    expect(judgeAnswer("listen-type", "don't", "dont")).toBe(false);
+    // fill-blanks: a blanked apostrophe position accepts any variant.
+    expect(judgeAnswer("fill-blanks", "don't", "\u2019", [3])).toBe(true);
+    expect(judgeAnswer("fill-blanks", "don\u2019t", "'", [3])).toBe(true);
+    // scramble: same folding applies.
+    expect(judgeAnswer("scramble", "can't", "can\u2019t")).toBe(true);
+  });
 });
 
 describe("hint helpers", () => {

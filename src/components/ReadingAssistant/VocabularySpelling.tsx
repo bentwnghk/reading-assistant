@@ -102,6 +102,16 @@ function getResultTier(score: number) {
 }
 
 /**
+ * Fold the three apostrophe variants — U+0027 ('), U+2018 (') and U+2019 (')
+ * — onto the straight ASCII apostrophe so any keyboard's curly quote matches
+ * the canonical entry. Mirrors foldApostrophes in realtime/src/game/scoring.ts
+ * and SpellingBattleArena.tsx.
+ */
+function foldApostrophes(s: string): string {
+  return s.replace(/['‘’]/g, "'");
+}
+
+/**
  * Solo scoring, extracted verbatim from the old inline math in `checkAnswer`
  * so the breakdown (base / time / streak / hint) can be surfaced to the UI
  * (PointPopup). Do NOT change the formula — solo and battle scores are meant
@@ -553,18 +563,22 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     if (currentMode === "fill-blanks") {
       // Do not trim — blank positions can include space characters, and trimming
       // would remove a trailing space typed by the user, causing a false negative.
-      const normalizedInput = userInput.toLowerCase();
+      // Apostrophe variants (U+0027/U+2018/U+2019) are folded onto "'" so any
+      // keyboard's curly quote matches the canonical entry (mirrored in
+      // SpellingBattleArena.tsx and realtime/src/game/scoring.ts).
+      const normalizedInput = foldApostrophes(userInput.toLowerCase());
       const missingLetters = currentChallenge.blankPositions
-        .map((pos) => currentChallenge.word[pos].toLowerCase())
+        .map((pos) => foldApostrophes(currentChallenge.word[pos].toLowerCase()))
         .join("");
       correct = normalizedInput === missingLetters;
     } else {
       // Normalize internal whitespace AND hyphens to single spaces so
       // multi-unit entries reconstructed from word-tile scramble (or typed in
       // listen-type) match regardless of which separator the canonical entry
-      // uses. Mirrors the server's normalizeWord in realtime/src/game/scoring.ts.
-      const normalizedInput = userInput.toLowerCase().replace(/[\s-]+/g, " ").trim();
-      const normalizedAnswer = currentChallenge.word.toLowerCase().replace(/[\s-]+/g, " ").trim();
+      // uses, and fold apostrophe variants onto "'" (mirrors the server's
+      // normalizeWord in realtime/src/game/scoring.ts).
+      const normalizedInput = foldApostrophes(userInput.toLowerCase().replace(/[\s-]+/g, " ")).trim();
+      const normalizedAnswer = foldApostrophes(currentChallenge.word.toLowerCase().replace(/[\s-]+/g, " ")).trim();
       correct = normalizedInput === normalizedAnswer;
     }
 

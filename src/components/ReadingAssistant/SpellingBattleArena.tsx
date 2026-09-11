@@ -43,13 +43,21 @@ interface SpellingBattleArenaProps {
   compact?: boolean;
 }
 
+// Fold the three apostrophe variants — U+0027 ('), U+2018 (') and U+2019 (')
+// — onto the straight ASCII apostrophe so any keyboard's curly quote matches
+// the canonical entry. Mirrors foldApostrophes in realtime/src/game/scoring.ts
+// and the solo game's checkAnswer in VocabularySpelling.tsx.
+function foldApostrophes(s: string): string {
+  return s.replace(/['‘’]/g, "'");
+}
+
 function normalize(s: string): string {
   // Collapse internal whitespace AND hyphens to single spaces so multi-unit
   // entries reconstructed from word-tile scramble (or typed in listen-type)
   // match regardless of which separator the canonical entry uses. Mirrors the
   // server's normalizeWord in realtime/src/game/scoring.ts and the solo game's
   // checkAnswer in VocabularySpelling.tsx.
-  return s.replace(/[\s-]+/g, " ").trim().toLowerCase();
+  return foldApostrophes(s.replace(/[\s-]+/g, " ")).trim().toLowerCase();
 }
 
 // Mirror of the authoritative hint policy in `realtime/src/game/scoring.ts`.
@@ -80,8 +88,8 @@ function checkAnswer(
 ): boolean {
   if (gameMode === "fill-blanks") {
     if (!blankPositions || blankPositions.length === 0) return false;
-    const missing = blankPositions.map((p) => wordStr[p].toLowerCase()).join("");
-    return answer.toLowerCase() === missing;
+    const missing = blankPositions.map((p) => foldApostrophes(wordStr[p].toLowerCase())).join("");
+    return foldApostrophes(answer.toLowerCase()) === missing;
   }
   return normalize(answer) === normalize(wordStr);
 }
