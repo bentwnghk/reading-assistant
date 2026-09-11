@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Download, HelpCircle, Info, Loader2, Mail, RefreshCw, Upload, ChevronDown } from "lucide-react"
+import { Download, HelpCircle, Info, Loader2, Mail, RefreshCw, Upload, ChevronDown, Users } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -269,6 +269,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
         <DialogHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
               {t("userManagement.title")}
               <Button
                 variant="ghost"

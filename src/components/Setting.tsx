@@ -302,9 +302,14 @@ function Setting({ open, onClose }: SettingProps) {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md print:hidden">
-        <DialogHeader>
-          <DialogTitle>{t("setting.title")}</DialogTitle>
-          <DialogDescription>{t("setting.description")}</DialogDescription>
+        <DialogHeader className="text-left">
+          <DialogTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5 text-primary" />
+            {t("setting.title")}
+          </DialogTitle>
+          <DialogDescription className="text-left">
+            {t("setting.description")}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
