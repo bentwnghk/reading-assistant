@@ -159,22 +159,22 @@ const DIFFICULTY_CONFIG: Record<QuizDifficulty, { timeLimit: number }> = {
 };
 
 function generateQuestionCountOptions(total: number): (number | "all")[] {
-  const options: number[] = [5, 10, 15];
+  const options: number[] = [10, 15];
   for (const n of options) {
     if (n >= total) {
-      const result: (number | "all")[] = [5, 10, 15].filter((x) => x <= total);
+      const result: (number | "all")[] = [10, 15].filter((x) => x <= total);
       result.push("all");
       return result;
     }
   }
   for (const n of [20, 25, 30]) {
     if (n >= total) {
-      const result: (number | "all")[] = [5, 10, 15, 20, 25, 30].filter((x) => x <= total);
+      const result: (number | "all")[] = [10, 15, 20, 25, 30].filter((x) => x <= total);
       result.push("all");
       return result;
     }
   }
-  return [5, 10, 15, 20, 25, 30, "all" as const] as (number | "all")[];
+  return [10, 15, 20, 25, 30, "all" as const] as (number | "all")[];
 }
 
 function QuizResultScreen({
