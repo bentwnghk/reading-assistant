@@ -122,6 +122,14 @@ export interface BattleRoom {
   actualWordCount: number;
   // ── Game-loop state (populated in Phase 4) ────────────────────────────────
   currentIndex: number;
+  /**
+   * Index of the most recently RESOLVED word (-1 = none). `currentIndex`
+   * stays at the resolved word through the between-words pause, so this seal
+   * is what makes resolveWord idempotent and lets submitAnswer reject late
+   * submits for an already-ended word (prevents duplicate word_end events,
+   * which inflate every client's per-word result accumulation).
+   */
+  resolvedIndex: number;
   wordStartedAt: number;
   /** userIds that have submitted for the current word. */
   wordSubmissions: Set<string>;

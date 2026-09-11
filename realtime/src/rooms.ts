@@ -113,6 +113,7 @@ export function createRoom(input: CreateRoomInput): BattleRoom {
     canonicalWords: input.resolved.words,
     actualWordCount: input.resolved.actualCount,
     currentIndex: -1,
+    resolvedIndex: -1,
     wordStartedAt: 0,
     wordSubmissions: new Set(),
     wordResults: new Map(),

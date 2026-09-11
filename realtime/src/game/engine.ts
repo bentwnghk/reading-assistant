@@ -46,8 +46,14 @@ function broadcastRoomState(io: SocketIOServer, room: BattleRoom): void {
   io.to(room.code).emit("room:state", toRoomStatePayload(room));
 }
 
-// roomCode -> pending timers (countdown ticks, word timeouts, between-word pauses)
+// roomCode -> pending timers (countdown ticks, between-word pauses)
 const timers = new Map<string, NodeJS.Timeout[]>();
+
+// roomCode -> the CURRENT word's deadline timer. Tracked separately from
+// `timers` so it can be cancelled the moment the word resolves early (all
+// players submitted): a deadline firing during the between-words pause used
+// to re-resolve the already-resolved word and emit a duplicate word_end.
+const wordDeadlines = new Map<string, NodeJS.Timeout>();
 
 function addTimer(code: string, t: NodeJS.Timeout): void {
   const arr = timers.get(code);
@@ -55,12 +61,22 @@ function addTimer(code: string, t: NodeJS.Timeout): void {
   else timers.set(code, [t]);
 }
 
+function clearWordDeadline(code: string): void {
+  const t = wordDeadlines.get(code);
+  if (t) clearTimeout(t);
+  wordDeadlines.delete(code);
+}
+
 /** Cancel all pending timers for a room (call before destroy / cancel). */
 export function clearTimers(code: string): void {
   const arr = timers.get(code);
-  if (!arr) return;
+  if (!arr) {
+    clearWordDeadline(code);
+    return;
+  }
   for (const t of arr) clearTimeout(t);
   timers.delete(code);
+  clearWordDeadline(code);
 }
 
 function buildRanking(room: BattleRoom): RankingEntry[] {
@@ -111,6 +127,7 @@ function resetAccumulators(room: BattleRoom): void {
   }
   room.currentIndex = -1;
   room.wordStartedAt = 0;
+  room.resolvedIndex = -1;
 }
 
 // ── Public engine API ────────────────────────────────────────────────────────
@@ -153,7 +170,15 @@ function startWord(io: SocketIOServer, room: BattleRoom, index: number): void {
     endGame(io, room);
     return;
   }
+  // Duplicate-start guard: a word must only ever start once. `currentIndex`
+  // stays at the resolved word during the between-words pause, so a stray
+  // duplicate pause timer re-invoking startWord(next) lands here with
+  // index === currentIndex (or lower) and must be dropped — otherwise it
+  // would wipe wordSubmissions (lastSubmittedIndex blocks re-submission, so
+  // already-submitted answers would be lost) and schedule a second deadline.
+  if (index <= room.currentIndex) return;
   room.currentIndex = index;
+  room.resolvedIndex = -1;
   room.wordStartedAt = Date.now();
   room.wordSubmissions.clear();
   room.wordResults.clear();
@@ -180,9 +205,12 @@ function startWord(io: SocketIOServer, room: BattleRoom, index: number): void {
   broadcastRoomState(io, room);
   io.to(room.code).emit("word_start", payload);
 
-  // Resolve the word when time is up (unless all submit early).
+  // Resolve the word when time is up (unless all submit early — the deadline
+  // is then cancelled inside resolveWord so it can never fire into the
+  // between-words pause and re-resolve the sealed word).
+  clearWordDeadline(room.code);
   const t = setTimeout(() => resolveWord(io, room, index), durationMs + SUBMIT_GRACE_MS);
-  addTimer(room.code, t);
+  wordDeadlines.set(room.code, t);
 }
 
 /** Process a player's submitted answer for the current word. */
@@ -196,6 +224,10 @@ export function submitAnswer(
   const player = room.players.get(userId);
   if (!player || player.status !== "present" || player.spectator) return;
   if (payload.index !== room.currentIndex) return;
+  // The word is already resolved (deadline fired / all submitted) — it is
+  // sealed. A late "buzzer-beater" submit racing the deadline must not be
+  // scored or re-resolve the word: clients already received its word_end.
+  if (room.resolvedIndex === payload.index) return;
   if (player.lastSubmittedIndex === payload.index) return; // double-submit guard
 
   const word = room.canonicalWords[room.currentIndex];
@@ -245,7 +277,16 @@ export function submitAnswer(
 
 /** Resolve the current word: clear timer, mark non-submitters, broadcast results. */
 function resolveWord(io: SocketIOServer, room: BattleRoom, index: number): void {
-  if (index !== room.currentIndex || room.status !== "playing") return; // already resolved / not playing
+  if (index !== room.currentIndex || room.status !== "playing") return; // not the live word / not playing
+  if (room.resolvedIndex === index) return; // already resolved — idempotency seal
+
+  // Seal the word: cancel its pending deadline so it can never re-resolve the
+  // word during the between-words pause, and mark it resolved so late submits
+  // are rejected. currentIndex intentionally stays at `index` until the next
+  // startWord advances it (clients + room state rely on it), which is exactly
+  // why the seal must live in its own field.
+  room.resolvedIndex = index;
+  clearWordDeadline(room.code);
 
   const word = room.canonicalWords[index];
   const results: WordEndResult[] = [];
@@ -273,9 +314,13 @@ function resolveWord(io: SocketIOServer, room: BattleRoom, index: number): void 
   io.to(room.code).emit("word_end", endPayload);
   emitLiveRanking(io, room, index);
 
-  // Pause for feedback, then advance.
+  // Pause for feedback, then advance. The guard drops stale duplicate pause
+  // timers (only the one that still matches the sealed word may advance the
+  // game) — combined with startWord's duplicate-start guard this keeps the
+  // loop single-threaded even if a resolution path ever races another.
   const nextIndex = index + 1;
   const t = setTimeout(() => {
+    if (room.status !== "playing" || room.currentIndex !== index) return;
     if (nextIndex >= room.canonicalWords.length) {
       endGame(io, room);
     } else {

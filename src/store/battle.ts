@@ -98,7 +98,18 @@ interface BattleStore {
   setCurrentWord: (word: BattleWordStartPayload | null) => void
   setWordEnded: (info: { index: number; correctWord: string } | null) => void
   setMyLastResult: (result: BattleStore["myLastResult"]) => void
-  pushWordResult: (word: string, correct: boolean) => void
+  /**
+   * Accumulate MY per-word result for SRS + review-session persistence.
+   * Index-aware so the list can never outgrow the battle that produced it:
+   * - `index === 0` starts a fresh list — a word_end for the FIRST word of a
+   *   battle always means a new game, so any leftover results (e.g. from a
+   *   previous battle whose end/lobby/countdown transitions were missed while
+   *   disconnected) are discarded instead of merging two battles into one
+   *   review-session record.
+   * - `index < myWordResults.length` is a duplicate word_end for a word this
+   *   client already recorded — ignored.
+   */
+  pushWordResult: (word: string, correct: boolean, index: number) => void
   setLiveRanking: (ranking: BattleRankingEntry[]) => void
   setGameEnd: (finalRanking: BattleRankingEntry[], totalWords: number) => void
   setResultPersisted: (value: boolean) => void
@@ -182,8 +193,12 @@ export const useBattleStore = create<BattleStore>((set) => ({
   setCurrentWord: (currentWord) => set({ currentWord, wordEnded: null }),
   setWordEnded: (wordEnded) => set({ wordEnded }),
   setMyLastResult: (myLastResult) => set({ myLastResult }),
-  pushWordResult: (word, correct) =>
-    set((state) => ({ myWordResults: [...state.myWordResults, { word, correct }] })),
+  pushWordResult: (word, correct, index) =>
+    set((state) => {
+      if (index === 0) return { myWordResults: [{ word, correct }] };
+      if (index < state.myWordResults.length) return {};
+      return { myWordResults: [...state.myWordResults, { word, correct }] };
+    }),
   setLiveRanking: (liveRanking) => set({ liveRanking }),
   setGameEnd: (finalRanking, totalWords) => set({ finalRanking, totalWords, currentWord: null, wordEnded: null, countdownN: null }),
 

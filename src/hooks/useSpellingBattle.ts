@@ -79,11 +79,14 @@ function wireEventsOnce(socket: NonNullable<ReturnType<typeof getRealtimeSocket>
 
   socket.on("word_end", (payload: BattleWordEndPayload) => {
     // Accumulate MY per-word result for SRS + review-session persistence.
+    // pushWordResult is index-aware: it resets on a battle's first word (0)
+    // and drops duplicates, so the list stays scoped to ONE battle even if
+    // this client missed the lobby/countdown transitions (reconnect races).
     const me = useBattleStore.getState().currentUserId
     if (me) {
       const myResult = payload.results.find((r) => r.userId === me)
       if (myResult) {
-        useBattleStore.getState().pushWordResult(payload.word, myResult.correct)
+        useBattleStore.getState().pushWordResult(payload.word, myResult.correct, payload.index)
       }
     }
     // Signal the arena to reveal the correct answer — covers both the local
