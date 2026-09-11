@@ -504,7 +504,10 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t("reading.tutor.inputPlaceholder")}
-            className="min-h-[40px] max-h-[120px] resize-none text-sm"
+            // 16px on mobile: iOS Safari auto-zooms the page when an input
+            // with a computed font-size < 16px is focused (the selection flow
+            // auto-focuses this textarea on mount). Desktop keeps text-sm.
+            className="min-h-[40px] max-h-[120px] resize-none text-base md:text-sm"
             disabled={isLoading}
           />
           <div className="flex flex-col gap-1">
