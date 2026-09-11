@@ -22,6 +22,11 @@ interface ReadingTutorChatProps {
   onClose?: () => void;
 }
 
+const isIOS =
+  typeof navigator !== "undefined" &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
 function readImageFiles(files: File[]): Promise<string[]> {
   const imageFiles = files.filter((f) => f.type.startsWith("image/"));
   return Promise.all(
@@ -76,8 +81,32 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
   const initialSelectedTextRef = useRef(tutorChatSelectedText);
   useEffect(() => {
     if (initialSelectedTextRef.current && inputRef.current) {
-      inputRef.current.focus();
+      // preventScroll: the dialog is fixed to the viewport, so scrolling the
+      // focused control "into view" can only drag the document toward it.
+      inputRef.current.focus({ preventScroll: true });
     }
+  }, []);
+
+  // On iOS, focusing the bottom-anchored textarea still scrolls the document
+  // downward (keyboard/zoom bring-the-caret-into-view behavior), so the user
+  // loses their place next to the selected text. Capture the page offset
+  // before the auto-focus runs and restore it when the dialog unmounts (all
+  // close paths: X button, FAB toggle, store-driven closes). The restore
+  // blurs first and re-applies once after ~350ms because iOS re-adjusts the
+  // scroll while the keyboard-dismiss animation is still playing. Scoped to
+  // iOS + the selection flow — the only path that displaces the page — so
+  // desktop users who deliberately scroll mid-chat are never snapped back.
+  useEffect(() => {
+    if (!isIOS || !initialSelectedTextRef.current) return;
+    const input = inputRef.current;
+    const savedTop = window.scrollY;
+    const savedLeft = window.scrollX;
+    return () => {
+      input?.blur();
+      const restore = () => window.scrollTo(savedLeft, savedTop);
+      restore();
+      setTimeout(restore, 350);
+    };
   }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
