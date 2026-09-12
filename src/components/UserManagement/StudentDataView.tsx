@@ -70,8 +70,9 @@ interface StudentDataViewProps {
   isAdmin: boolean
   currentUserId?: string
   /** When opened by clicking a user in the Users tab: pre-selects her class
-   *  and pre-fills the search box with her email so only her sessions show. */
-  initialStudentFocus?: { email?: string | null; name?: string | null; classId?: string } | null
+   *  (preferring an English-subject class) and pre-fills the search box with
+   *  her email so only her sessions show. */
+  initialStudentFocus?: { email?: string | null; name?: string | null; classIds?: string[] } | null
 }
 
 type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "spellingAccuracy" | "quizScore" | "grammarQuizScore" | "grammarGameScore" | "grammarGameAccuracy"
@@ -177,9 +178,17 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         const data: ClassInfo[] = await classesResponse.json()
         setClasses(data)
         if (data.length > 0 && !selectedClassId) {
-          const focusClassId = initialStudentFocus?.classId
-          if (focusClassId && data.some(c => c.id === focusClassId)) {
-            setSelectedClassId(`class:${focusClassId}`)
+          // Prefer the student's English-subject class (same "%english%"
+          // subject match as the session-visibility SQL); fall back to their
+          // first class. classIds arrive ordered by join date.
+          const focusClasses = (initialStudentFocus?.classIds ?? [])
+            .map(id => data.find(c => c.id === id))
+            .filter((c): c is ClassInfo => !!c)
+          const focused =
+            focusClasses.find(c => (c.subjectName || "").toLowerCase().includes("english")) ??
+            focusClasses[0]
+          if (focused) {
+            setSelectedClassId(`class:${focused.id}`)
           } else if (isSuperAdmin || isAdmin) {
             setSelectedClassId("all")
           } else {
