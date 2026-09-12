@@ -26,6 +26,7 @@ import {
   Download,
   Info,
   GraduationCap,
+  BookOpen,
   X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -356,6 +357,14 @@ export default function AssignmentsList() {
 
                   {isTeacher && (
                     <div className="flex flex-wrap items-center gap-1 pt-2 border-t">
+                      {a.sourceSessionId && (
+                        <Button asChild variant="ghost" size="sm">
+                          <Link href={`/?session=${encodeURIComponent(a.sourceSessionId)}`}>
+                            <BookOpen className="h-3.5 w-3.5 mr-1" />
+                            {t("assignments.teacherView.viewSession")}
+                          </Link>
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"

@@ -238,6 +238,15 @@ export default function AssignmentDetailPage({
   }
 
   const overdue = assignment.status === "active" && isOverdue(assignment.dueDate)
+  // Deep-link target for the title: the owner teacher opens the source
+  // session the assignment was created from; students open their own
+  // working copy. Other teachers/admins (arriving via the All Teachers
+  // tab) get no link — the source session isn't accessible to them.
+  const titleSessionId = isTeacher
+    ? assignment.teacherId === session?.user?.id
+      ? assignment.sourceSessionId
+      : undefined
+    : assignment.studentSessionId
 
   async function handleExport() {
     if (!assignment) return
@@ -275,7 +284,19 @@ export default function AssignmentDetailPage({
           <CardContent className="pt-6 space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1 overflow-hidden">
-                <h1 className="text-2xl font-bold truncate">{assignment.title}</h1>
+                <h1 className="text-2xl font-bold truncate">
+                  {titleSessionId ? (
+                    <Link
+                      href={`/?session=${encodeURIComponent(titleSessionId)}`}
+                      className="hover:underline"
+                      title={t("assignments.teacherView.viewSession")}
+                    >
+                      {assignment.title}
+                    </Link>
+                  ) : (
+                    assignment.title
+                  )}
+                </h1>
                 {assignment.subject && (
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {assignment.subject}

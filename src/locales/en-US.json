@@ -4176,6 +4176,7 @@
       "unarchive": "Unarchive",
       "delete": "Delete",
       "edit": "Edit",
+      "viewSession": "View session",
       "deleteConfirm": "Delete this assignment? Student work will be lost.",
       "edited": "Assignment updated.",
       "exportExcel": "Export to Excel",
