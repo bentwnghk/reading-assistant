@@ -67,7 +67,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const [activeTab, setActiveTab] = useState(defaultTab)
   const [usersSchoolFilter, setUsersSchoolFilter] = useState<string>("all")
   const [usersClassFilter, setUsersClassFilter] = useState<string>("all")
-  const [studentDataFocus, setStudentDataFocus] = useState<{ email?: string | null; name?: string | null; classIds?: string[] } | null>(null)
+  const [studentDataFocus, setStudentDataFocus] = useState<{ userId?: string; email?: string | null; name?: string | null; schoolName?: string | null; classIds?: string[] } | null>(null)
   const [teacherDataFocus, setTeacherDataFocus] = useState<string | null>(null)
 
   const handleViewSchoolUsers = useCallback((schoolId: string) => {
@@ -90,8 +90,10 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     } else if (user.role === "student") {
       setTeacherDataFocus(null)
       setStudentDataFocus({
+        userId: user.id,
         email: user.email,
         name: user.name,
+        schoolName: user.schoolName,
         classIds: user.classIds ?? (user.classId ? [user.classId] : []),
       })
       setActiveTab("students")

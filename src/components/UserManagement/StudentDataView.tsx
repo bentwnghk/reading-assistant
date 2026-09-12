@@ -71,8 +71,9 @@ interface StudentDataViewProps {
   currentUserId?: string
   /** When opened by clicking a user in the Users tab: pre-selects her class
    *  (preferring an English-subject class) and pre-fills the search box with
-   *  her email so only her sessions show. */
-  initialStudentFocus?: { email?: string | null; name?: string | null; classIds?: string[] } | null
+   *  her email so only her sessions show. Classless students fall back to a
+   *  single-student "user:<id>" mode backed by the admin user-sessions API. */
+  initialStudentFocus?: { userId?: string; email?: string | null; name?: string | null; schoolName?: string | null; classIds?: string[] } | null
 }
 
 type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "spellingAccuracy" | "quizScore" | "grammarQuizScore" | "grammarGameScore" | "grammarGameAccuracy"
@@ -171,13 +172,19 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
   const isTeacher = !isSuperAdmin && !isAdmin
 
+  // In single-student mode the combobox value matches no class — show the
+  // student's name instead of the bare placeholder.
+  const focusStudentLabel = selectedClassId.startsWith("user:") && initialStudentFocus
+    ? initialStudentFocus.name || initialStudentFocus.email || undefined
+    : undefined
+
   const loadClassesAndSchools = useCallback(async () => {
     try {
       const classesResponse = await fetch("/api/classes")
       if (classesResponse.ok) {
         const data: ClassInfo[] = await classesResponse.json()
         setClasses(data)
-        if (data.length > 0 && !selectedClassId) {
+        if (!selectedClassId) {
           // Prefer the student's English-subject class (same "%english%"
           // subject match as the session-visibility SQL); fall back to their
           // first class. classIds arrive ordered by join date.
@@ -189,10 +196,16 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             focusClasses[0]
           if (focused) {
             setSelectedClassId(`class:${focused.id}`)
-          } else if (isSuperAdmin || isAdmin) {
-            setSelectedClassId("all")
-          } else {
-            setSelectedClassId(`class:${data[0].id}`)
+          } else if (initialStudentFocus?.userId) {
+            // Classless (or class-out-of-scope) student: single-student mode —
+            // class rosters can't reach her, so load via the user-sessions API.
+            setSelectedClassId(`user:${initialStudentFocus.userId}`)
+          } else if (data.length > 0) {
+            if (isSuperAdmin || isAdmin) {
+              setSelectedClassId("all")
+            } else {
+              setSelectedClassId(`class:${data[0].id}`)
+            }
           }
         }
       }
@@ -244,6 +257,24 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         } = await res.json()
         setSessions(data.sessions ?? [])
         setSpellingAttemptsByUser(data.spellingReviewCounts ?? {})
+        return
+      }
+
+      // Single-student mode (clicked a classless student in the Users tab):
+      // one direct fetch — she appears in no class roster.
+      if (selectedClassId.startsWith("user:")) {
+        const userId = selectedClassId.slice("user:".length)
+        const res = await fetch(`/api/users/${userId}/sessions`)
+        if (!res.ok) throw new Error("Failed to load user sessions")
+        const data: {
+          sessions: StudentSessionData[]
+          spellingReviewCount: number
+        } = await res.json()
+        setSessions((data.sessions ?? []).map((s: StudentSessionData) => ({
+          ...s,
+          schoolName: initialStudentFocus?.schoolName ?? undefined,
+        })))
+        setSpellingAttemptsByUser({ [userId]: data.spellingReviewCount ?? 0 })
         return
       }
 
@@ -312,14 +343,17 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     } finally {
       setLoadingSessions(false)
     }
-  }, [selectedClassId, selectedSchoolId, classes, t])
+  }, [selectedClassId, selectedSchoolId, classes, t, initialStudentFocus])
 
   useEffect(() => {
     loadClassesAndSchools()
   }, [loadClassesAndSchools])
 
   useEffect(() => {
-    if (selectedClassId && (classes.length > 0 || selectedClassId.startsWith("preset:"))) {
+    if (
+      selectedClassId &&
+      (classes.length > 0 || selectedClassId.startsWith("preset:") || selectedClassId.startsWith("user:"))
+    ) {
       loadSessions()
     }
   }, [selectedClassId, selectedSchoolId, classes.length, loadSessions])
@@ -635,9 +669,11 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   }
 
   // No classes AND no used saved rosters: nothing to pick, keep the old
-  // empty state. Teachers whose rosters come entirely from saved presets
-  // (no classes of their own) still get the toolbar + preset dropdown.
-  if (classes.length === 0 && presets.length === 0) {
+  // empty state. Single-student mode (classless student) bypasses it — her
+  // sessions don't depend on any class existing. Teachers whose rosters come
+  // entirely from saved presets (no classes of their own) still get the
+  // toolbar + preset dropdown.
+  if (classes.length === 0 && presets.length === 0 && !selectedClassId.startsWith("user:")) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         {t("userManagement.studentData.noClasses")}
@@ -700,6 +736,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
               emptyLabel={t("userManagement.studentData.noClasses")}
               allowAll={isSuperAdmin || isAdmin}
               allLabel={t("userManagement.studentData.allClasses")}
+              customLabel={focusStudentLabel}
             />
           )}
         </div>

@@ -184,6 +184,9 @@ export interface ClassComboboxProps {
   /** Show a "No class" option that selects the "__none__" sentinel. Default: false */
   allowNone?: boolean
   noneLabel?: string
+  /** Display label for a value that matches no class (e.g. a composite
+   *  "user:<id>" single-student selection set outside this component). */
+  customLabel?: string
   disabled?: boolean
   className?: string
 }
@@ -198,6 +201,7 @@ export function ClassCombobox({
   allowAll = false,
   allowNone = false,
   noneLabel,
+  customLabel,
   disabled = false,
   className,
 }: ClassComboboxProps) {
@@ -215,7 +219,7 @@ export function ClassCombobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className={cn("w-full justify-between font-normal", !selected && value !== "__none__" && "text-muted-foreground", className)}
+          className={cn("w-full justify-between font-normal", !selected && value !== "__none__" && !customLabel && "text-muted-foreground", className)}
         >
           <span className="truncate">
             {allowAll && (value === "all" || value == null)
@@ -224,7 +228,9 @@ export function ClassCombobox({
                 ? noneOptionLabel
                 : selected
                   ? classLabel(selected)
-                  : placeholder ?? t("classCombobox.selectClass")}
+                  : customLabel
+                    ? customLabel
+                    : placeholder ?? t("classCombobox.selectClass")}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
