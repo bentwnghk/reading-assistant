@@ -3321,6 +3321,7 @@
       "class": "Class",
       "actions": "Actions",
       "noName": "No name",
+      "viewData": "View reading data",
       "noUsers": "No users found",
       "allRoles": "All Roles",
       "allClasses": "All Classes",

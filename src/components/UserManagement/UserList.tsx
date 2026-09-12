@@ -54,9 +54,10 @@ interface UserListProps {
   isSuperAdmin: boolean
   initialSchoolFilter?: string
   initialClassFilter?: string
+  onViewUserData?: (user: UserWithRole) => void
 }
 
-export default function UserList({ isSuperAdmin, initialSchoolFilter, initialClassFilter }: UserListProps) {
+export default function UserList({ isSuperAdmin, initialSchoolFilter, initialClassFilter, onViewUserData }: UserListProps) {
   const { t } = useTranslation()
   const [users, setUsers] = useState<UserWithRole[]>([])
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -668,7 +669,18 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                         </span>
                       )}
                     </div>
-                    <span title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
+                    {onViewUserData && (user.role === "student" || user.role === "teacher") ? (
+                      <button
+                        type="button"
+                        onClick={() => onViewUserData(user)}
+                        className="text-left text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+                        title={t("userManagement.users.viewData")}
+                      >
+                        {user.name || t("userManagement.users.noName")}
+                      </button>
+                    ) : (
+                      <span title={user.name || t("userManagement.users.noName")}>{user.name || t("userManagement.users.noName")}</span>
+                    )}
                     {user.schoolAccessEndsAt && new Date(user.schoolAccessEndsAt) > new Date() && (
                       <Badge variant="outline" className="flex items-center gap-1 text-xs text-amber-600 border-amber-300 bg-amber-50 dark:text-amber-400 dark:border-amber-700 dark:bg-amber-950 shrink-0">
                         <Clock className="h-3 w-3" />

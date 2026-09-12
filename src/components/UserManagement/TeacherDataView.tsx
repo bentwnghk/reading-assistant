@@ -67,6 +67,9 @@ function isReadingTestAnswerCorrect(q: ReadingTestQuestion): boolean {
 interface TeacherDataViewProps {
   isSuperAdmin: boolean
   isAdmin: boolean
+  /** When opened by clicking a teacher in the Users tab: pre-selects that
+   *  teacher in the dropdown so only their sessions are loaded. */
+  initialTeacherId?: string | null
 }
 
 type SortField = "date" | "teacher" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "spellingAccuracy" | "quizScore" | "grammarQuizScore" | "grammarGameScore" | "grammarGameAccuracy"
@@ -100,7 +103,7 @@ interface SessionWithSchool extends StudentSessionData {
  */
 const TEACHER_FETCH_BATCH = 5
 
-export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin }: TeacherDataViewProps) {
+export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initialTeacherId }: TeacherDataViewProps) {
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [teachers, setTeachers] = useState<UserWithRole[]>([])
@@ -165,7 +168,14 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin }: Tea
       const usersResponse = await fetch("/api/users")
       if (usersResponse.ok) {
         const users: UserWithRole[] = await usersResponse.json()
-        setTeachers(users.filter(u => u.role === "teacher" && !u.banned))
+        const teacherList = users.filter(u => u.role === "teacher" && !u.banned)
+        setTeachers(teacherList)
+        // Applied in the same tick as setTeachers so the sessions effect
+        // fires once with the focused teacher instead of first loading
+        // "all teachers" and then reloading.
+        if (initialTeacherId && teacherList.some(tc => tc.id === initialTeacherId)) {
+          setSelectedTeacherId(initialTeacherId)
+        }
       }
 
       if (isSuperAdmin) {
@@ -180,7 +190,7 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin }: Tea
     } finally {
       setLoading(false)
     }
-  }, [t, isSuperAdmin])
+  }, [t, isSuperAdmin, initialTeacherId])
 
   const loadSessions = useCallback(async () => {
     setLoadingSessions(true)

@@ -69,6 +69,9 @@ interface StudentDataViewProps {
   isSuperAdmin: boolean
   isAdmin: boolean
   currentUserId?: string
+  /** When opened by clicking a user in the Users tab: pre-selects her class
+   *  and pre-fills the search box with her email so only her sessions show. */
+  initialStudentFocus?: { email?: string | null; name?: string | null; classId?: string } | null
 }
 
 type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "spellingAccuracy" | "quizScore" | "grammarQuizScore" | "grammarGameScore" | "grammarGameAccuracy"
@@ -104,7 +107,7 @@ interface SessionWithSchool extends StudentSessionData {
  */
 const STUDENT_FETCH_BATCH = 5
 
-export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId }: StudentDataViewProps) {
+export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, initialStudentFocus }: StudentDataViewProps) {
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
@@ -115,7 +118,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
   const [spellingAttemptsByUser, setSpellingAttemptsByUser] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [loadingSessions, setLoadingSessions] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(initialStudentFocus?.email || initialStudentFocus?.name || "")
   const [sortField, setSortField] = useState<SortField>("date")
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
   const [exporting, setExporting] = useState(false)
@@ -174,7 +177,10 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         const data: ClassInfo[] = await classesResponse.json()
         setClasses(data)
         if (data.length > 0 && !selectedClassId) {
-          if (isSuperAdmin || isAdmin) {
+          const focusClassId = initialStudentFocus?.classId
+          if (focusClassId && data.some(c => c.id === focusClassId)) {
+            setSelectedClassId(`class:${focusClassId}`)
+          } else if (isSuperAdmin || isAdmin) {
             setSelectedClassId("all")
           } else {
             setSelectedClassId(`class:${data[0].id}`)
@@ -209,7 +215,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     } finally {
       setLoading(false)
     }
-  }, [selectedClassId, t, isSuperAdmin, isAdmin, isTeacher])
+  }, [selectedClassId, t, isSuperAdmin, isAdmin, isTeacher, initialStudentFocus])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return

@@ -34,6 +34,7 @@ import AiQuestionsView from "./AiQuestionsView"
 import TaxonomyManager from "./TaxonomyManager"
 import AdminSubscriptionsView from "@/components/Subscription/AdminSubscriptionsView"
 import UserManagementGuide from "./UserManagementGuide"
+import type { UserWithRole } from "@/lib/users"
 
 interface UserManagementPanelProps {
   open: boolean
@@ -66,6 +67,8 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const [activeTab, setActiveTab] = useState(defaultTab)
   const [usersSchoolFilter, setUsersSchoolFilter] = useState<string>("all")
   const [usersClassFilter, setUsersClassFilter] = useState<string>("all")
+  const [studentDataFocus, setStudentDataFocus] = useState<{ email?: string | null; name?: string | null; classId?: string } | null>(null)
+  const [teacherDataFocus, setTeacherDataFocus] = useState<string | null>(null)
 
   const handleViewSchoolUsers = useCallback((schoolId: string) => {
     setUsersSchoolFilter(schoolId)
@@ -79,16 +82,42 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     setActiveTab("users")
   }, [])
 
+  const handleViewUserData = useCallback((user: UserWithRole) => {
+    if (user.role === "teacher") {
+      setStudentDataFocus(null)
+      setTeacherDataFocus(user.id)
+      setActiveTab("teacherData")
+    } else if (user.role === "student") {
+      setTeacherDataFocus(null)
+      setStudentDataFocus({
+        email: user.email,
+        name: user.name,
+        classId: (user.classIds ?? (user.classId ? [user.classId] : []))[0],
+      })
+      setActiveTab("students")
+    }
+  }, [])
+
   const handleTabChange = (next: string) => {
     if (next !== "users") {
       setUsersSchoolFilter("all")
       setUsersClassFilter("all")
     }
+    if (next !== "students") {
+      setStudentDataFocus(null)
+    }
+    if (next !== "teacherData") {
+      setTeacherDataFocus(null)
+    }
     setActiveTab(next)
   }
 
   const handleClose = (open: boolean) => {
-    if (!open) onClose()
+    if (!open) {
+      setStudentDataFocus(null)
+      setTeacherDataFocus(null)
+      onClose()
+    }
   }
 
   const handleExport = async () => {
@@ -417,7 +446,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             )}
             {(isSuperAdmin || isAdmin) && (
               <TabsContent value="users" className="mt-0">
-                <UserList isSuperAdmin={isSuperAdmin} initialSchoolFilter={usersSchoolFilter} initialClassFilter={usersClassFilter} />
+                <UserList isSuperAdmin={isSuperAdmin} initialSchoolFilter={usersSchoolFilter} initialClassFilter={usersClassFilter} onViewUserData={handleViewUserData} />
               </TabsContent>
             )}
             <TabsContent value="classes" className="mt-0">
@@ -435,12 +464,12 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             )}
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
-                <StudentDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} />
+                <StudentDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} initialStudentFocus={studentDataFocus} />
               </TabsContent>
             )}
             {(isSuperAdmin || isAdmin) && (
               <TabsContent value="teacherData" className="mt-0">
-                <TeacherDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} />
+                <TeacherDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} initialTeacherId={teacherDataFocus} />
               </TabsContent>
             )}
             {(isSuperAdmin || isAdmin || isTeacher) && (
