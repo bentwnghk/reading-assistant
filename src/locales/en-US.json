@@ -3716,7 +3716,7 @@
           },
           "studentDataDetails": {
             "name": "Click-to-View Details",
-            "desc": "In the Student Data tab, click any value in the Reading Text, Vocabulary Count, Vocabulary Quiz, Spelling, Grammar Quiz, Grammar Game, or Reading Test columns to view full details in a popup dialog — including the original text with vocabulary highlights, glossary table, quiz questions with the student's answers (color-coded green/red), per-word spelling challenge results, per-round grammar game results, and adapted/simplified text tabs."
+            "desc": "In the Student Data tab, click any value in the Reading Text, Vocabulary Count, Vocabulary Quiz, Spelling, Grammar Quiz, Grammar Game, or Reading Test columns to view full details in a popup dialog — including the reading text with up to six tabs (Original with vocabulary highlights, Adapted, Simplified, Summary, Mind Map, Visualization), the glossary table, quiz questions with the student's answers (color-coded green/red), per-word spelling challenges (fill-blanks misses show only the correct missing letters), and per-round grammar game results."
           }
         },
         "tip": {
