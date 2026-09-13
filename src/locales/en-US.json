@@ -4216,6 +4216,7 @@
       "colSchool": "School",
       "colRoster": "Roster",
       "colSubject": "Subject",
+      "colCompleted": "Completed",
       "colProgress": "Avg. progress",
       "colDueDate": "Due date",
       "colCreated": "Created",

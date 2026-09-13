@@ -6,6 +6,7 @@ import Link from "next/link"
 import {
   Archive,
   ArchiveRestore,
+  BadgeCheck,
   Calendar,
   ChevronLeft,
   ChevronRight,
@@ -244,8 +245,8 @@ export default function SchoolAssignmentsTable({
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
   const safePage = Math.min(page, totalPages)
   const paged = sorted.slice((safePage - 1) * pageSize, safePage * pageSize)
-  // Title + Teacher + Roster + Subject + Progress + Due + Status + Created + Actions
-  const colCount = isSuperAdmin ? 10 : 9
+  // Title + Teacher + Roster + Subject + Completed + Progress + Due + Status + Created + Actions
+  const colCount = isSuperAdmin ? 11 : 10
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -438,6 +439,9 @@ export default function SchoolAssignmentsTable({
               >
                 {t("assignments.schoolView.colSubject")}
               </SortableHead>
+              <TableHead className="w-24">
+                {t("assignments.schoolView.colCompleted")}
+              </TableHead>
               <TableHead className="w-28">
                 {t("assignments.schoolView.colProgress")}
               </TableHead>
@@ -526,6 +530,12 @@ export default function SchoolAssignmentsTable({
                     <TableCell className="text-muted-foreground">
                       <span className="block truncate max-w-[120px]">
                         {a.subject || "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center gap-1 text-xs tabular-nums">
+                        <BadgeCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        {a.completedCount ?? 0}/{a.studentCount ?? 0}
                       </span>
                     </TableCell>
                     <TableCell>
