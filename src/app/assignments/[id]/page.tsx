@@ -9,9 +9,9 @@ import { toast } from "sonner"
 import {
   ArrowLeft,
   ArrowRight,
+  BadgeCheck,
   Calendar,
   CalendarClock,
-  Users,
   Loader2,
   Download,
   TrendingUp,
@@ -320,14 +320,6 @@ export default function AssignmentDetailPage({
               </p>
             )}
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
-              {isTeacher && (
-                <span className="inline-flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" />
-                  {t("assignments.teacherView.studentCount", {
-                    count: assignment.studentCount ?? roster.length,
-                  })}
-                </span>
-              )}
               {assignment.dueDate ? (
                 <span
                   className={`inline-flex items-center gap-1 ${
@@ -343,6 +335,17 @@ export default function AssignmentDetailPage({
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
                   {t("assignments.studentView.noDueDate")}
+                </span>
+              )}
+              {isTeacher && (
+                <span className="inline-flex items-center gap-1">
+                  <BadgeCheck className="h-3.5 w-3.5" />
+                  {t("assignments.teacherView.completedCount", {
+                    count:
+                      assignment.completedCount ??
+                      roster.filter((s) => s.progress >= 100).length,
+                    total: assignment.studentCount ?? roster.length,
+                  })}
                 </span>
               )}
               <span className="inline-flex items-center gap-1">

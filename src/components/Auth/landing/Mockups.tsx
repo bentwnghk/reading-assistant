@@ -36,6 +36,7 @@ import {
   Camera,
   Check,
   CheckCircle2,
+  BadgeCheck,
   Calendar,
   Users,
   TrendingUp,
@@ -1572,10 +1573,10 @@ export function AssignmentsMockup() {
         </p>
         <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 border-t border-[var(--lp-rule)] pt-2.5 text-[11px] text-[var(--lp-ink-soft)]">
           <span className="inline-flex items-center gap-1">
-            <Users className="h-3 w-3" /> 28 students
+            <Calendar className="h-3 w-3" /> Due Jun 12
           </span>
           <span className="inline-flex items-center gap-1">
-            <Calendar className="h-3 w-3" /> Due Jun 12
+            <BadgeCheck className="h-3 w-3" /> Completed 18/28 students
           </span>
           <span className="inline-flex items-center gap-1">
             <TrendingUp className="h-3 w-3" /> Avg 64%

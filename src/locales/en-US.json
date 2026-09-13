@@ -4180,6 +4180,7 @@
       "empty": "No assignments yet. To create one, click \"Create assignment\" above. In the dialog that opens, find the reading session you want to assign, and click the graduation-cap icon next to it. Then pick your students, optionally set a due date, and submit.",
       "new": "Create assignment",
       "studentCount": "{{count}} students",
+      "completedCount": "Completed: {{count}}/{{total}} students",
       "avgProgress": "Avg progress: {{progress}}%",
       "due": "Due {{date}}",
       "overdue": "Overdue",
@@ -4365,7 +4366,7 @@
         "intro": "The Assignments page lists every reading task your teacher has shared with you, or that you have assigned to your students.",
         "list": {
           "name": "Assignment cards",
-          "desc": "Each card shows the title, subject, description, status, due date and progress at a glance."
+          "desc": "Each card shows the title, subject, description, status, due date, completed count and progress at a glance."
         },
         "status": {
           "name": "Status badges",
@@ -4386,9 +4387,9 @@
           "name": "Average progress",
           "desc": "The TrendingUp icon shows the average completion across all assigned students for each assignment."
         },
-        "studentCount": {
-          "name": "Student count",
-          "desc": "See how many students are included in each assignment at a glance."
+        "completedCount": {
+          "name": "Completed count",
+          "desc": "The BadgeCheck icon shows how many students have reached 100% progress (\"Completed: X/Y students\") on each assignment card and detail page."
         },
         "overdue": {
           "name": "Overdue alerts",

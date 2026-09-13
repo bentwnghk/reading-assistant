@@ -351,6 +351,7 @@ export async function createAssignment(input: CreateAssignmentInput): Promise<As
       status: "active",
       studentCount: input.studentIds.length,
       avgProgress: 0,
+      completedCount: 0,
       createdAt,
       updatedAt,
     }
@@ -376,6 +377,7 @@ function mapAssignmentRow(row: Record<string, unknown>): Assignment {
     status: row.status as AssignmentStatus,
     studentCount: (row.student_count as number) ?? 0,
     avgProgress: row.avg_progress != null ? Math.round(Number(row.avg_progress)) : undefined,
+    completedCount: (row.completed_count as number) ?? 0,
     createdAt: new Date(row.created_at as string).toISOString(),
     updatedAt: new Date(row.updated_at as string).toISOString(),
   }
@@ -387,7 +389,8 @@ export async function getAssignmentsForTeacher(teacherId: string): Promise<Assig
     const result = await client.query(
       `SELECT a.*,
               COALESCE(COUNT(s.id), 0)::int AS student_count,
-              COALESCE(AVG(s.progress), 0)::float AS avg_progress
+              COALESCE(AVG(s.progress), 0)::float AS avg_progress,
+              COUNT(s.id) FILTER (WHERE s.progress >= 100)::int AS completed_count
        FROM assignments a
        LEFT JOIN assignment_submissions s ON s.assignment_id = a.id
        WHERE a.teacher_id = $1
@@ -416,6 +419,7 @@ export async function getSchoolAssignments(schoolId: string): Promise<Assignment
               u.name AS teacher_name,
               COALESCE(COUNT(s.id), 0)::int AS student_count,
               COALESCE(AVG(s.progress), 0)::float AS avg_progress,
+              COUNT(s.id) FILTER (WHERE s.progress >= 100)::int AS completed_count,
               ARRAY_REMOVE(ARRAY_AGG(s.student_id), NULL) AS roster_ids
        FROM assignments a
        JOIN users u ON u.id = a.teacher_id
@@ -448,6 +452,7 @@ export async function getAllAssignments(): Promise<Assignment[]> {
               sc.name AS school_name,
               COALESCE(COUNT(s.id), 0)::int AS student_count,
               COALESCE(AVG(s.progress), 0)::float AS avg_progress,
+              COUNT(s.id) FILTER (WHERE s.progress >= 100)::int AS completed_count,
               ARRAY_REMOVE(ARRAY_AGG(s.student_id), NULL) AS roster_ids
        FROM assignments a
        JOIN users u ON u.id = a.teacher_id
@@ -624,7 +629,8 @@ export async function getAssignment(
     const result = await client.query(
       `SELECT a.*,
               COALESCE(COUNT(s_all.id), 0)::int AS student_count,
-              COALESCE(AVG(s_all.progress), 0)::float AS avg_progress
+              COALESCE(AVG(s_all.progress), 0)::float AS avg_progress,
+              COUNT(s_all.id) FILTER (WHERE s_all.progress >= 100)::int AS completed_count
        FROM assignments a
        LEFT JOIN assignment_submissions s_all ON s_all.assignment_id = a.id
        WHERE a.id = $1

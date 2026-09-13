@@ -727,6 +727,8 @@ interface Assignment {
   status: AssignmentStatus;
   studentCount?: number;
   avgProgress?: number;
+  /** Roster-wide count of submissions at 100% progress (teacher-facing). */
+  completedCount?: number;
   /**
    * Derived (never persisted): the saved roster/preset name (e.g. "S3A")
    * matched from the school's assignment_presets against the roster's

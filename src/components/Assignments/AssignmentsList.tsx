@@ -308,14 +308,6 @@ export default function AssignmentsList() {
                     </p>
                   )}
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                    {isTeacher && (
-                      <span className="inline-flex items-center gap-1">
-                        <Users className="h-3.5 w-3.5" />
-                        {t("assignments.teacherView.studentCount", {
-                          count: a.studentCount ?? 0,
-                        })}
-                      </span>
-                    )}
                     {!isTeacher && a.teacherName && (
                       <span className="inline-flex items-center gap-1">
                         <GraduationCap className="h-3.5 w-3.5" />
@@ -339,6 +331,15 @@ export default function AssignmentsList() {
                       <span className="inline-flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" />
                         {t("assignments.studentView.noDueDate")}
+                      </span>
+                    )}
+                    {isTeacher && (
+                      <span className="inline-flex items-center gap-1">
+                        <BadgeCheck className="h-3.5 w-3.5" />
+                        {t("assignments.teacherView.completedCount", {
+                          count: a.completedCount ?? 0,
+                          total: a.studentCount ?? 0,
+                        })}
                       </span>
                     )}
                     {(a.avgProgress ?? 0) > 0 && (
@@ -521,6 +522,22 @@ export default function AssignmentsList() {
                 {t("assignments.help.tracking.intro")}
               </p>
 
+              {isTeacher && (
+                <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
+                    <BadgeCheck className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm">
+                      {t("assignments.help.tracking.completedCount.name")}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {t("assignments.help.tracking.completedCount.desc")}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
                   <TrendingUp className="h-5 w-5 text-green-500" />
@@ -534,22 +551,6 @@ export default function AssignmentsList() {
                   </p>
                 </div>
               </div>
-
-              {isTeacher && (
-                <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-purple-500" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm">
-                      {t("assignments.help.tracking.studentCount.name")}
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("assignments.help.tracking.studentCount.desc")}
-                    </p>
-                  </div>
-                </div>
-              )}
 
               <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
