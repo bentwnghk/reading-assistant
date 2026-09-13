@@ -1500,7 +1500,15 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
                       {!r.correct && (
                         <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
                           <Check className="h-3 w-3 shrink-0" />
-                          <span>{r.word}</span>
+                          {/* Fill-blanks: the correct answer is just the blanked
+                           *  letters the player had to type, not the whole word
+                           *  (falls back to the word for battle/legacy entries
+                           *  recorded without blankPositions). */}
+                          <span className="break-words">
+                            {r.mode === "fill-blanks" && r.blankPositions?.length
+                              ? r.blankPositions.map((p) => r.word[p]).join("")
+                              : r.word}
+                          </span>
                         </div>
                       )}
                     </div>

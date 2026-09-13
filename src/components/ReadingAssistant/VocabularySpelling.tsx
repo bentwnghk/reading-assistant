@@ -324,9 +324,10 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const revealedPositionsRef = useRef<number[]>([]);
   // Per-word outcomes for the finished game, keyed by word: correctness feeds
   // SRS (onWordResult) + the review-session record (onComplete), while the
-  // typed answer + mode are persisted via setSpellingResults for the teacher
-  // drill-down dialog (ReadingStore.spellingResults).
-  const correctWordsRef = useRef<Map<string, { correct: boolean; userAnswer: string; mode: SpellingGameMode }>>(new Map());
+  // typed answer + mode (+ fill-blanks positions, so the drill-down dialog
+  // can show only the missing letters) are persisted via setSpellingResults
+  // for the teacher drill-down dialog (ReadingStore.spellingResults).
+  const correctWordsRef = useRef<Map<string, { correct: boolean; userAnswer: string; mode: SpellingGameMode; blankPositions?: number[] }>>(new Map());
   const fxSeqRef = useRef(0);
 
   const currentChallenge = challenges[currentIndex];
@@ -445,7 +446,12 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
             // every challenge, matching the result screen's denominator.
             // Idempotent under StrictMode's double-invoked state updaters.
             if (challengeRef.current) {
-              correctWordsRef.current.set(challengeRef.current.word, { correct: false, userAnswer: "", mode: currentMode });
+              correctWordsRef.current.set(challengeRef.current.word, {
+                correct: false,
+                userAnswer: "",
+                mode: currentMode,
+                ...(currentMode === "fill-blanks" ? { blankPositions: challengeRef.current.blankPositions } : {}),
+              });
             }
             setTimeout(() => {
               if (currentIndex >= challenges.length - 1) {
@@ -636,7 +642,12 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     }
 
     if (currentChallenge) {
-      correctWordsRef.current.set(currentChallenge.word, { correct, userAnswer: userInput, mode: currentMode });
+      correctWordsRef.current.set(currentChallenge.word, {
+        correct,
+        userAnswer: userInput,
+        mode: currentMode,
+        ...(currentMode === "fill-blanks" ? { blankPositions: currentChallenge.blankPositions } : {}),
+      });
     }
 
     setTimeout(() => moveToNext(), FEEDBACK_DISPLAY_MS);

@@ -262,6 +262,11 @@ interface SpellingResultEntry {
   userAnswer: string;
   correct: boolean;
   mode: SpellingGameMode;
+  /** Fill-blanks only: the blanked letter indices the player had to type.
+   *  Present only on solo-game entries (battles and pre-v5.52 sessions have
+   *  none) — the drill-down dialog uses it to show just the missing letters
+   *  instead of the whole word as the correct answer. */
+  blankPositions?: number[];
 }
 
 /** Which of the five grammar games a result entry came from. Values match the
