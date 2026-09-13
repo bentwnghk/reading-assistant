@@ -246,8 +246,9 @@ ${text}
     "pattern": "V + N (idiomatic)",
     "meaning": "to consider something when judging a situation",
     "meaningZh": "考慮；把……計算在內",
-    "contrastNote": "Cantonese speakers often say 「考慮」 directly; English requires the full chunk 'take into account', NOT 'consider into'.",
-    "example": "We must take the cost into account."
+    "contrastNote": "廣東話學習者常直接把「考慮」逐字翻譯；英文必須用完整短語 'take into account'，而不是 'consider into'。",
+    "example": "We must take the cost into account.",
+    "exampleZh": "我們必須把成本考慮在內。"
   }
 ]
 
@@ -257,8 +258,9 @@ ${text}
 - "pattern": a short label (e.g. "Phrasal verb", "V+N", "Adj+N", "Prepositional phrase", "Idiom", "Fixed expression").
 - "meaning": concise English meaning a ${age}-year-old can grasp.
 - "meaningZh": Traditional Chinese (繁體中文) gloss.
-- "contrastNote": FOR CHUNKS WITH A KNOWN CANTONESE-L1 TRANSFER PITFALL, give a short note explaining how a Chinese-speaking learner typically gets it wrong (e.g. wrong preposition, word-for-word translation, missing article). This is the KEY value of this feature — include it whenever a transfer error is common. If the chunk has no notable transfer issue, omit "contrastNote".
+- "contrastNote": FOR CHUNKS WITH A KNOWN CANTONESE-L1 TRANSFER PITFALL, write a short note in Traditional Chinese (繁體中文, standard written form — NOT Cantonese colloquial) explaining how a Chinese-speaking learner typically gets it wrong (e.g. wrong preposition, word-for-word translation, missing article). Keep the English chunk itself (and any wrong forms) in English inside the note. This is the KEY value of this feature — include it whenever a transfer error is common. If the chunk has no notable transfer issue, omit "contrastNote".
 - "example": one example sentence (preferably from the text if present, otherwise generated and natural).
+- "exampleZh": Traditional Chinese (繁體中文) translation of the "example" sentence.
 
 **CRITICAL:**
 - Focus on chunks, NOT single words already in the glossary.

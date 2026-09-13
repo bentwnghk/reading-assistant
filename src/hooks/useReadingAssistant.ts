@@ -1162,6 +1162,7 @@ function useReadingAssistant() {
             meaningZh: z.string(),
             contrastNote: z.string().optional(),
             example: z.string(),
+            exampleZh: z.string().optional(),
           }),
         )
         .safeParse(JSON.parse(text));
@@ -1179,6 +1180,7 @@ function useReadingAssistant() {
         meaningZh: c.meaningZh,
         contrastNote: c.contrastNote,
         example: c.example,
+        exampleZh: c.exampleZh,
       }));
 
       setCollocations(chunks);

@@ -235,6 +235,9 @@ function Collocations() {
                 {chunk.example && (
                   <p className="text-xs italic text-muted-foreground">&ldquo;{chunk.example}&rdquo;</p>
                 )}
+                {chunk.exampleZh && (
+                  <p className="text-xs text-muted-foreground -mt-1">{chunk.exampleZh}</p>
+                )}
                 <div className="mt-auto pt-1">
                   <Button
                     onClick={() => addPhrase(chunk.chunk)}

@@ -89,6 +89,7 @@ interface CollocationChunk {
   meaningZh: string;
   contrastNote?: string;
   example: string;
+  exampleZh?: string;
   syllabification?: string;
 }
 
