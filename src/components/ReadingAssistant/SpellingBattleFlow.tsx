@@ -64,7 +64,7 @@ export function SpellingBattleFlow({
 }: SpellingBattleFlowProps) {
   const battle = useSpellingBattle();
   const { data: session } = useSession();
-  const { id, setSpellingGameBestScore, backup } = useReadingStore();
+  const { id, setSpellingGameBestScore, setSpellingResults, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
 
   const handleExit = useCallback(() => {
@@ -94,6 +94,20 @@ export function SpellingBattleFlow({
     const isNewBest = previousBest > 0 && me.total > previousBest;
     useBattleStore.getState().setNewBestAchieved(isNewBest);
     setSpellingGameBestScore(me.total, accuracy);
+
+    // 1b. Per-word drill-down record (teacher Student Data view). Battles only
+    //     track correctness client-side (myWordResults has no answer text), so
+    //     userAnswer is empty — the dialog shows the word + green/red state.
+    if (battle.myWordResults.length > 0) {
+      setSpellingResults(
+        battle.myWordResults.map((wr) => ({
+          word: wr.word,
+          userAnswer: "",
+          correct: wr.correct,
+          mode: gameMode,
+        }))
+      );
+    }
 
     // 2. Activity log → leaderboard (both call sites). The `multiplayer` flag
     //    + opponentCount/rank enrich the existing spelling_complete stream.

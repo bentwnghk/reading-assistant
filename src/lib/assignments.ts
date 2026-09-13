@@ -39,6 +39,7 @@ export function stripSessionForAssignment(sessionData: ReadingStore): Record<str
     spellingGameBestScore: 0,
     spellingGameAccuracy: 0,
     spellingGamesCompleted: 0,
+    spellingResults: [],
     vocabQuizzesCompleted: 0,
     testsCompleted: 0,
     // SRS / ratings

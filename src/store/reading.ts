@@ -252,6 +252,7 @@ export interface ReadingStore {
   spellingGameBestScore: number;
   spellingGameAccuracy: number;
   spellingGamesCompleted: number;
+  spellingResults: SpellingResultEntry[];
   flashcardReviewDates: number[];
   summaryGeneratedAt: number;
   mindMapGeneratedAt: number;
@@ -336,6 +337,7 @@ interface ReadingActions {
   setVocabularyQuizScore: (score: number) => void;
   setVocabularyQuiz: (questions: VocabularyQuizQuestion[]) => void;
   setSpellingGameBestScore: (score: number, accuracy: number) => void;
+  setSpellingResults: (results: SpellingResultEntry[]) => void;
   incrementFlashcardReviewCount: () => void; // appends Date.now() to flashcardReviewDates
   addChatMessage: (message: ChatMessage) => void;
   removeChatMessage: (id: string) => void;
@@ -437,6 +439,7 @@ const defaultValues: ReadingStore = {
     spellingGameBestScore: 0,
     spellingGameAccuracy: 0,
     spellingGamesCompleted: 0,
+    spellingResults: [],
   flashcardReviewDates: [],
   summaryGeneratedAt: 0,
   mindMapGeneratedAt: 0,
@@ -1226,6 +1229,17 @@ export const useReadingStore = create(
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setSpellingResults: (results) =>
+        set((state) => {
+          const newState = {
+            spellingResults: results,
+            updatedAt: Date.now(),
+          };
           if (currentUserId && state.id) {
             syncToAPI(state.id, newState);
           }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react"
 import dynamic from "next/dynamic"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Check, X } from "lucide-react"
+import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Keyboard, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -171,6 +171,13 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     student?: string
     score?: number
     questions?: ReadingTestQuestion[]
+  } | null>(null)
+  const [viewingSpelling, setViewingSpelling] = useState<{
+    title: string
+    student?: string
+    score?: number
+    accuracy?: number
+    results?: SpellingResultEntry[]
   } | null>(null)
 
   const isTeacher = !isSuperAdmin && !isAdmin
@@ -668,6 +675,31 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     }
   }, [t])
 
+  const handleViewSpelling = useCallback(async (session: SessionWithSchool) => {
+    if ((session.spellingGameBestScore ?? 0) === 0 && (session.spellingGameAccuracy || 0) === 0) return
+    setViewingSpelling({
+      title: session.docTitle,
+      student: session.userName || undefined,
+      score: session.spellingGameBestScore,
+      accuracy: session.spellingGameAccuracy,
+    })
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/detail`)
+      if (res.ok) {
+        const detail: StudentSessionData = await res.json()
+        setViewingSpelling({
+          title: session.docTitle,
+          student: session.userName || undefined,
+          score: session.spellingGameBestScore,
+          accuracy: session.spellingGameAccuracy,
+          results: detail.spellingResults || [],
+        })
+      }
+    } catch {
+      toast.error(t("userManagement.loadFailed"))
+    }
+  }, [t])
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -914,16 +946,32 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </TableCell>
                   <TableCell className="text-center">
                     {(session.spellingGameBestScore ?? 0) > 0 ? (
-                      session.spellingGameBestScore
+                      <button
+                        type="button"
+                        onClick={() => handleViewSpelling(session)}
+                        className="inline-flex"
+                        title={`${t("userManagement.studentData.viewSpelling")}: ${session.docTitle}`}
+                      >
+                        <Badge variant={session.spellingGameBestScore! >= 70 ? "default" : "secondary"} className="cursor-pointer">
+                          {session.spellingGameBestScore}
+                        </Badge>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {(session.spellingGameAccuracy || 0) > 0 ? (
-                      <Badge variant={session.spellingGameAccuracy! >= 70 ? "default" : "destructive"}>
-                        {session.spellingGameAccuracy}%
-                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleViewSpelling(session)}
+                        className="inline-flex"
+                        title={`${t("userManagement.studentData.viewSpelling")}: ${session.docTitle}`}
+                      >
+                        <Badge variant={session.spellingGameAccuracy! >= 70 ? "default" : "destructive"} className="cursor-pointer">
+                          {session.spellingGameAccuracy}%
+                        </Badge>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -1483,6 +1531,76 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 {t("userManagement.studentData.noReadingTest")}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingSpelling} onOpenChange={(open) => { if (!open) setViewingSpelling(null) }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <Keyboard className="h-5 w-5 shrink-0" />
+              <span className="truncate">{viewingSpelling?.title}</span>
+              {viewingSpelling?.score !== undefined && (
+                <Badge variant="secondary" className="ml-auto">
+                  {viewingSpelling.score}
+                </Badge>
+              )}
+              {viewingSpelling?.accuracy !== undefined && viewingSpelling.accuracy > 0 && (
+                <Badge variant={viewingSpelling.accuracy >= 70 ? "default" : "destructive"}>
+                  {viewingSpelling.accuracy}%
+                </Badge>
+              )}
+            </DialogTitle>
+            {viewingSpelling?.student && (
+              <DialogDescription>{viewingSpelling.student}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
+            {viewingSpelling?.results === undefined ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : viewingSpelling.results.length > 0 ? (
+              viewingSpelling.results.map((r, idx) => (
+                <div key={`${r.word}-${idx}`} className="border rounded-lg p-3 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">W{idx + 1}</span>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="text-sm font-medium">{r.word}</p>
+                      {r.mode && (
+                        <span className="text-xs text-muted-foreground">{t(`reading.glossary.spelling.modes.${r.mode}`)}</span>
+                      )}
+                      {r.userAnswer ? (
+                        <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${r.correct ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
+                          {r.correct ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
+                          <span>{r.userAnswer}</span>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">{t("userManagement.studentData.noAnswer")}</p>
+                      )}
+                      {!r.correct && (
+                        <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
+                          <Check className="h-3 w-3 shrink-0" />
+                          <span>{r.word}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0">
+                      {r.correct ? (
+                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-500 dark:text-red-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {t("userManagement.studentData.noSpellingResults")}
               </div>
             )}
           </div>

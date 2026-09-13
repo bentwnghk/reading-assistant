@@ -106,6 +106,7 @@ function stripUserData(sessionData: ReadingStore): Record<string, unknown> {
     spellingGameBestScore: 0,
     spellingGameAccuracy: 0,
     spellingGamesCompleted: 0,
+    spellingResults: [],
     grammarQuizScore: 0,
     grammarQuizCompleted: false,
     grammarQuizzesCompleted: 0,

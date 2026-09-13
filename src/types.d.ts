@@ -249,6 +249,21 @@ interface SpellingGameResult {
   completedAt: number;
 }
 
+/** One word's outcome in a session's most recent spelling game (solo or
+ *  multiplayer battle) — persisted on reading_sessions.spelling_results so
+ *  teachers can drill into a session's spelling score/accuracy from the
+ *  Student Data table. `userAnswer` is the raw typed/reconstructed answer
+ *  (empty when the word timed out or the record came from a battle, where
+ *  only correctness is available client-side); `mode` is the per-word game
+ *  mode. Like `vocabularyQuiz`, the array reflects the latest game, while
+ *  the score badge shows the best across games. */
+interface SpellingResultEntry {
+  word: string;
+  userAnswer: string;
+  correct: boolean;
+  mode: SpellingGameMode;
+}
+
 // ── Multiplayer Spelling Battle types ───────────────────────────────────────
 // Mirrored in realtime/src/game/types.ts (the realtime package is standalone
 // and does not import from src/). Keep both sides in sync.

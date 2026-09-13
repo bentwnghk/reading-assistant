@@ -243,7 +243,7 @@ function SpellingResultScreen({
 function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete, disableSessionGlossary }: VocabularySpellingProps) {
   const { t } = useTranslation();
   const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
-  const { id, spellingGameBestScore, setSpellingGameBestScore, glossaryRatings, backup } = useReadingStore();
+  const { id, spellingGameBestScore, setSpellingGameBestScore, setSpellingResults, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
   const effectiveId = disableSessionGlossary ? undefined : id;
@@ -322,7 +322,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const challengeRef = useRef<SpellingWordChallenge | null>(null);
   const revealedPositionsRef = useRef<number[]>([]);
-  const correctWordsRef = useRef<Map<string, boolean>>(new Map());
+  // Per-word outcomes for the finished game, keyed by word: correctness feeds
+  // SRS (onWordResult) + the review-session record (onComplete), while the
+  // typed answer + mode are persisted via setSpellingResults for the teacher
+  // drill-down dialog (ReadingStore.spellingResults).
+  const correctWordsRef = useRef<Map<string, { correct: boolean; userAnswer: string; mode: SpellingGameMode }>>(new Map());
   const fxSeqRef = useRef(0);
 
   const currentChallenge = challenges[currentIndex];
@@ -441,7 +445,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
             // every challenge, matching the result screen's denominator.
             // Idempotent under StrictMode's double-invoked state updaters.
             if (challengeRef.current) {
-              correctWordsRef.current.set(challengeRef.current.word, false);
+              correctWordsRef.current.set(challengeRef.current.word, { correct: false, userAnswer: "", mode: currentMode });
             }
             setTimeout(() => {
               if (currentIndex >= challenges.length - 1) {
@@ -632,7 +636,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     }
 
     if (currentChallenge) {
-      correctWordsRef.current.set(currentChallenge.word, correct);
+      correctWordsRef.current.set(currentChallenge.word, { correct, userAnswer: userInput, mode: currentMode });
     }
 
     setTimeout(() => moveToNext(), FEEDBACK_DISPLAY_MS);
@@ -792,6 +796,12 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
     const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
     setSpellingGameBestScore(score, accuracy);
+    // Per-word drill-down record for the teacher Student Data view. Mirrors
+    // setVocabularyQuiz after setVocabularyQuizScore in VocabularyQuiz.tsx —
+    // same call-site conditions as the score update above.
+    setSpellingResults(
+      Array.from(correctWordsRef.current.entries()).map(([word, entry]) => ({ word, ...entry }))
+    );
     logActivity("spelling_complete", {
       sessionId: effectiveId || undefined,
       score,
@@ -816,7 +826,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     const outcomes: VocabularySrsOutcome[] = [];
     const settled: Promise<void>[] = [];
     if (onWordResult && correctWordsRef.current.size > 0) {
-      for (const [word, correct] of correctWordsRef.current) {
+      for (const [word, { correct }] of correctWordsRef.current) {
         const maybe = onWordResult(word, correct);
         if (maybe && typeof maybe.then === "function") {
           settled.push(
@@ -831,9 +841,10 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     }
 
     // Materialize the results synchronously — correctWordsRef is cleared
-    // below, which also re-arms the effect's re-run guard.
+    // below, which also re-arms the effect's re-run guard. The onComplete
+    // contract stays {word, correct}[] (it feeds the review-session API).
     const wordResults = Array.from(correctWordsRef.current.entries()).map(
-      ([word, correct]) => ({ word, correct })
+      ([word, { correct }]) => ({ word, correct })
     );
 
     // Wait for the per-word SRS PATCHes to commit before recording the
@@ -859,7 +870,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         save(session);
       }
     }
-  }, [gameStatus, score, setSpellingGameBestScore, effectiveId, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete, correctCount, challenges]);
+  }, [gameStatus, score, setSpellingGameBestScore, setSpellingResults, effectiveId, id, backup, update, save, gameMode, difficulty, maxStreak, onWordResult, onComplete, correctCount, challenges]);
 
   // Battle mode must be reachable even with an empty glossary: joining a room
   // (by code or via a class-battle invite) needs no word source — the host
