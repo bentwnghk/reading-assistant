@@ -3430,7 +3430,8 @@
       "noGrade": "無級別",
       "nameRequired": "班別名稱為必填項",
       "membersTitle": "{{name}} 的學生",
-      "viewStudents": "查看「{{name}}」的學生"
+      "viewStudents": "查看「{{name}}」的學生",
+      "viewData": "查看「{{name}}」的閱讀數據"
     },
     "members": {
       "description": "管理此班別的學生。學生可同時屬於多個班別。",

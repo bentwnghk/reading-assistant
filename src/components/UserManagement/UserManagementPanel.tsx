@@ -68,6 +68,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const [usersSchoolFilter, setUsersSchoolFilter] = useState<string>("all")
   const [usersClassFilter, setUsersClassFilter] = useState<string>("all")
   const [studentDataFocus, setStudentDataFocus] = useState<{ userId?: string; email?: string | null; name?: string | null; schoolName?: string | null; classIds?: string[] } | null>(null)
+  const [studentDataClassFocus, setStudentDataClassFocus] = useState<string | null>(null)
   const [teacherDataFocus, setTeacherDataFocus] = useState<string | null>(null)
 
   const handleViewSchoolUsers = useCallback((schoolId: string) => {
@@ -85,10 +86,12 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const handleViewUserData = useCallback((user: UserWithRole) => {
     if (user.role === "teacher") {
       setStudentDataFocus(null)
+      setStudentDataClassFocus(null)
       setTeacherDataFocus(user.id)
       setActiveTab("teacherData")
     } else if (user.role === "student") {
       setTeacherDataFocus(null)
+      setStudentDataClassFocus(null)
       setStudentDataFocus({
         userId: user.id,
         email: user.email,
@@ -100,6 +103,13 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     }
   }, [])
 
+  const handleViewClassData = useCallback((classId: string) => {
+    setStudentDataFocus(null)
+    setTeacherDataFocus(null)
+    setStudentDataClassFocus(classId)
+    setActiveTab("students")
+  }, [])
+
   const handleTabChange = (next: string) => {
     if (next !== "users") {
       setUsersSchoolFilter("all")
@@ -107,6 +117,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
     }
     if (next !== "students") {
       setStudentDataFocus(null)
+      setStudentDataClassFocus(null)
     }
     if (next !== "teacherData") {
       setTeacherDataFocus(null)
@@ -117,6 +128,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
   const handleClose = (open: boolean) => {
     if (!open) {
       setStudentDataFocus(null)
+      setStudentDataClassFocus(null)
       setTeacherDataFocus(null)
       onClose()
     }
@@ -457,6 +469,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
                 isAdmin={isAdmin}
                 currentUserId={currentUserId}
                 onViewStudents={isSuperAdmin || isAdmin ? handleViewClassStudents : undefined}
+                onViewClassData={handleViewClassData}
               />
             </TabsContent>
             {(isSuperAdmin || isAdmin) && (
@@ -466,7 +479,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
             )}
             {(isSuperAdmin || isAdmin || isTeacher) && (
               <TabsContent value="students" className="mt-0">
-                <StudentDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} initialStudentFocus={studentDataFocus} />
+                <StudentDataView isSuperAdmin={isSuperAdmin} isAdmin={isAdmin} currentUserId={currentUserId} initialStudentFocus={studentDataFocus} initialClassId={studentDataClassFocus} />
               </TabsContent>
             )}
             {(isSuperAdmin || isAdmin) && (

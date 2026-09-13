@@ -41,12 +41,13 @@ interface ClassListProps {
   isAdmin: boolean
   currentUserId?: string
   onViewStudents?: (classId: string, schoolId?: string) => void
+  onViewClassData?: (classId: string) => void
 }
 
 type SortField = "name" | "teacherName" | "schoolName" | "studentCount"
 type SortOrder = "asc" | "desc"
 
-export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, onViewStudents }: ClassListProps) {
+export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, onViewStudents, onViewClassData }: ClassListProps) {
   const { t } = useTranslation()
   const { data: session } = useSession()
   const isTeacher = session?.user?.role === "teacher"
@@ -353,7 +354,18 @@ export default function ClassList({ isSuperAdmin, isAdmin, currentUserId: _curre
               <TableCell>
                 <div>
                   <div className="font-medium">
-                    {formatClassLabel(classInfo)}
+                    {onViewClassData ? (
+                      <button
+                        type="button"
+                        onClick={() => onViewClassData(classInfo.id)}
+                        className="text-left text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+                        title={t("userManagement.classes.viewData", { name: formatClassLabel(classInfo) })}
+                      >
+                        {formatClassLabel(classInfo)}
+                      </button>
+                    ) : (
+                      formatClassLabel(classInfo)
+                    )}
                   </div>
                   {classInfo.description && (
                     <div className="text-sm text-muted-foreground truncate max-w-48">

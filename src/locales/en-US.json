@@ -3400,7 +3400,8 @@
       "grade": "Form / Grade",
       "noGrade": "No Form / Grade",
       "membersTitle": "Members of {{name}}",
-      "viewStudents": "View students in {{name}}"
+      "viewStudents": "View students in {{name}}",
+      "viewData": "View reading data for {{name}}"
     },
     "members": {
       "description": "Manage students in this class. Students may belong to more than one class.",

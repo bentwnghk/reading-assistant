@@ -74,6 +74,9 @@ interface StudentDataViewProps {
    *  her email so only her sessions show. Classless students fall back to a
    *  single-student "user:<id>" mode backed by the admin user-sessions API. */
   initialStudentFocus?: { userId?: string; email?: string | null; name?: string | null; schoolName?: string | null; classIds?: string[] } | null
+  /** When opened by clicking a class name in the Classes tab: pre-selects
+   *  that class. Takes priority over initialStudentFocus. */
+  initialClassId?: string | null
 }
 
 type SortField = "date" | "student" | "school" | "title" | "progress" | "testScore" | "vocabularyCount" | "spellingScore" | "spellingAccuracy" | "quizScore" | "grammarQuizScore" | "grammarGameScore" | "grammarGameAccuracy"
@@ -109,7 +112,7 @@ interface SessionWithSchool extends StudentSessionData {
  */
 const STUDENT_FETCH_BATCH = 5
 
-export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, initialStudentFocus }: StudentDataViewProps) {
+export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, initialStudentFocus, initialClassId }: StudentDataViewProps) {
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
@@ -185,13 +188,18 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         const data: ClassInfo[] = await classesResponse.json()
         setClasses(data)
         if (!selectedClassId) {
-          // Prefer the student's English-subject class (same "%english%"
-          // subject match as the session-visibility SQL); fall back to their
-          // first class. classIds arrive ordered by join date.
+          // Explicit class click (Classes tab) wins; otherwise prefer the
+          // student's English-subject class (same "%english%" subject match
+          // as the session-visibility SQL), then their first class.
+          // classIds arrive ordered by join date.
+          const explicitClass = initialClassId
+            ? data.find(c => c.id === initialClassId)
+            : undefined
           const focusClasses = (initialStudentFocus?.classIds ?? [])
             .map(id => data.find(c => c.id === id))
             .filter((c): c is ClassInfo => !!c)
           const focused =
+            explicitClass ??
             focusClasses.find(c => (c.subjectName || "").toLowerCase().includes("english")) ??
             focusClasses[0]
           if (focused) {
@@ -237,7 +245,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     } finally {
       setLoading(false)
     }
-  }, [selectedClassId, t, isSuperAdmin, isAdmin, isTeacher, initialStudentFocus])
+  }, [selectedClassId, t, isSuperAdmin, isAdmin, isTeacher, initialStudentFocus, initialClassId])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return
