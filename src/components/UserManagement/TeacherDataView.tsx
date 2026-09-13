@@ -1449,7 +1449,7 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
                           <span>{r.userAnswer}</span>
                         </div>
                       ) : (
-                        <p className="text-xs text-muted-foreground italic">{t("userManagement.teacherData.noAnswer")}</p>
+                        <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.teacherData.noAnswer")}</p>
                       )}
                       {!r.correct && (
                         <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">

@@ -1221,9 +1221,12 @@ export const useReadingStore = create(
           const count = state.spellingGamesCompleted + 1;
           const newState = {
             spellingGameBestScore: Math.max(state.spellingGameBestScore, score),
-            spellingGameAccuracy: Math.round(
-              (state.spellingGameAccuracy * state.spellingGamesCompleted + accuracy) / count
-            ),
+            // Latest game's accuracy (overwrite) — mirrors vocabularyQuizScore
+            // and keeps the badge consistent with the spellingResults
+            // drill-down, which shows the latest game's per-word answers.
+            // The former running average silently diluted new results with
+            // legacy games that never recorded accuracy (counted as 0%).
+            spellingGameAccuracy: accuracy,
             spellingGamesCompleted: count,
             spellingGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
