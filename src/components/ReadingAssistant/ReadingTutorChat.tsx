@@ -97,22 +97,30 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
 
   // On iOS, the on-screen keyboard (opened when the user taps the textarea,
   // since we no longer auto-focus on touch devices) scrolls the document
-  // downward to keep the bottom-anchored input visible, so the user loses
-  // their place next to the selected text. Capture the page offset at mount
-  // — where the selection was made — and restore it when the dialog unmounts
-  // (all close paths: X button, FAB toggle, store-driven closes). The restore
-  // blurs first and re-applies once after ~350ms because iOS re-adjusts the
-  // scroll while the keyboard-dismiss animation is still playing. Scoped to
-  // iOS + the selection flow — the only path that displaces the page — so
-  // desktop users who deliberately scroll mid-chat are never snapped back.
+  // downward to keep the bottom-anchored input visible. Record the page
+  // offset on FIRST focus — before the displacement starts — and restore it
+  // when the dialog unmounts (all close paths: X button, FAB toggle,
+  // store-driven closes). Works whether or not text was selected before
+  // opening; no-op when the input was never focused (keyboard never raised),
+  // and it preserves deliberate background scrolling done before the first
+  // tap into the input. The restore blurs first and re-applies once after
+  // ~350ms because iOS re-adjusts the scroll while the keyboard-dismiss
+  // animation is still playing. iOS-only — desktop focus never displaces
+  // the page.
+  const preKeyboardScrollRef = useRef<{ top: number; left: number } | null>(null);
+  const handleInputFocus = () => {
+    if (preKeyboardScrollRef.current === null) {
+      preKeyboardScrollRef.current = { top: window.scrollY, left: window.scrollX };
+    }
+  };
   useEffect(() => {
-    if (!isIOS || !initialSelectedTextRef.current) return;
+    if (!isIOS) return;
     const input = inputRef.current;
-    const savedTop = window.scrollY;
-    const savedLeft = window.scrollX;
     return () => {
+      const saved = preKeyboardScrollRef.current;
+      if (!saved) return;
       input?.blur();
-      const restore = () => window.scrollTo(savedLeft, savedTop);
+      const restore = () => window.scrollTo(saved.left, saved.top);
       restore();
       setTimeout(restore, 350);
     };
@@ -541,6 +549,7 @@ function ReadingTutorChat({ onClose }: ReadingTutorChatProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={handleInputFocus}
             placeholder={t("reading.tutor.inputPlaceholder")}
             // 16px on mobile: iOS Safari auto-zooms the page when an input
             // with a computed font-size < 16px is focused (the selection flow
