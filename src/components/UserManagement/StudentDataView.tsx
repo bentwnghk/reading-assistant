@@ -1397,7 +1397,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                           })}
                         </div>
                         {q.userAnswer === undefined && (
-                          <p className="text-xs text-muted-foreground italic mt-1">{t("userManagement.studentData.noAnswer")}</p>
+                          <p className="text-xs text-red-500 dark:text-red-400 italic mt-1">{t("userManagement.studentData.noAnswer")}</p>
                         )}
                       </div>
                       <div className="shrink-0">
@@ -1480,7 +1480,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                                   <span>{q.correctAnswer}</span>
                                 </div>
                               )}
-                              {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.studentData.noAnswer")}</p>}
+                              {q.userAnswer === undefined && <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.studentData.noAnswer")}</p>}
                             </div>
                           )}
                         </div>
@@ -1561,7 +1561,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                                   <span>{q.correctAnswer}</span>
                                 </div>
                               )}
-                              {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.studentData.noAnswer")}</p>}
+                              {q.userAnswer === undefined && <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.studentData.noAnswer")}</p>}
                             </div>
                           )}
                         </div>

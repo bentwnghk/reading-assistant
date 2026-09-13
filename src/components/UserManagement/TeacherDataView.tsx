@@ -1267,7 +1267,7 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
                           })}
                         </div>
                         {q.userAnswer === undefined && (
-                          <p className="text-xs text-muted-foreground italic mt-1">{t("userManagement.teacherData.noAnswer")}</p>
+                          <p className="text-xs text-red-500 dark:text-red-400 italic mt-1">{t("userManagement.teacherData.noAnswer")}</p>
                         )}
                       </div>
                       <div className="shrink-0">
@@ -1350,7 +1350,7 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
                                   <span>{q.correctAnswer}</span>
                                 </div>
                               )}
-                              {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.teacherData.noAnswer")}</p>}
+                              {q.userAnswer === undefined && <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.teacherData.noAnswer")}</p>}
                             </div>
                           )}
                         </div>
@@ -1431,7 +1431,7 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
                                   <span>{q.correctAnswer}</span>
                                 </div>
                               )}
-                              {q.userAnswer === undefined && <p className="text-xs text-muted-foreground italic">{t("userManagement.teacherData.noAnswer")}</p>}
+                              {q.userAnswer === undefined && <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.teacherData.noAnswer")}</p>}
                             </div>
                           )}
                         </div>
