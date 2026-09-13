@@ -3619,11 +3619,11 @@
           },
           "users": {
             "name": "Users",
-            "desc": "View all users in a sortable, filterable table. Change roles (student, teacher, admin), assign users to schools, and assign students to classes. Filter by role, class, or school."
+            "desc": "View all users in a sortable, filterable table. Change roles (student, teacher, admin), assign users to schools, and assign students to classes. Filter by role, class, or school. Click a student's or teacher's name to jump to their reading session data."
           },
           "classes": {
             "name": "Classes",
-            "desc": "Create, edit, and delete classes. Assign a teacher to each class and manage student membership. Teachers see only their own classes."
+            "desc": "Create, edit, and delete classes. Assign a teacher to each class and manage student membership. Teachers see only their own classes. Click a class name to open its reading session data in the Student Data tab."
           },
           "taxonomy": {
             "name": "Subjects & Forms",
@@ -3635,11 +3635,11 @@
           },
           "studentData": {
             "name": "Student Data",
-            "desc": "View detailed reading session data for students across classes. Filter by school, class, date range, or search by student name. Export filtered data to Excel for offline analysis."
+            "desc": "View detailed reading session data for students across classes. Filter by school, class, date range, or search by student name. Export filtered data to Excel for offline analysis. Reached by clicking a name in the Users tab or a class name in the Classes tab — the class is pre-selected (English class preferred) and classless students are loaded directly."
           },
           "teacherData": {
             "name": "Teacher Data",
-            "desc": "View detailed reading session data for teachers across schools. Filter by school, teacher, date range, or search by teacher name. Export filtered data to Excel for offline analysis. Available to admins and super-admins only."
+            "desc": "View detailed reading session data for teachers across schools. Filter by school, teacher, date range, or search by teacher name. Export filtered data to Excel for offline analysis. Available to admins and super-admins only. Clicking a teacher's name in the Users tab pre-selects them here."
           },
           "aiQuestions": {
             "name": "AI Questions",
@@ -3669,6 +3669,10 @@
           "pagination": {
             "name": "Pagination",
             "desc": "All tables display 20 items per page with page navigation at the bottom. Large datasets are split across pages for faster loading."
+          },
+          "quickJump": {
+            "name": "Click-Through Navigation",
+            "desc": "In the Users tab, click a student's or teacher's name to jump straight to their reading session data in the Student Data or Teacher Data tab. For students in multiple classes, their English class is pre-selected (first class otherwise); students without a class are loaded directly. In the Classes tab, click a class name to open that class's data in the Student Data tab."
           },
           "roleManagement": {
             "name": "Role Management",
