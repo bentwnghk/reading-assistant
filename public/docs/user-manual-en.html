@@ -2595,19 +2595,21 @@ body.toc-noscroll{overflow:hidden}
       <p>Header-level tools <span class="tag-super"></span>: full <b>Export</b> (.zip backup of schools/users/classes/sessions), <b>Import</b> (.zip/.json), and <b>Send Test Email</b> (9 template types).</p>
 
       <h4>Student Data — click-to-view details</h4>
-      <p>Five columns in the Student Data table are interactive. Click any highlighted value to open a popup dialog with the student's full work:</p>
+      <p>Seven columns in the Student Data table are interactive. Click any highlighted value to open a popup dialog with the student's full work:</p>
       <table class="ref">
         <tr><th>Column</th><th>What you see when you click</th></tr>
         <tr><td><b>Reading Text</b></td><td>The full extracted text with <b>three tabs</b>: <em>Original</em> (vocabulary words highlighted in yellow, AI-analyzed sentences underlined in blue), <em>Adapted</em>, and <em>Simplified</em> (shown only if generated). A legend explains the colour coding.</td></tr>
         <tr><td><b>Vocabulary Count</b></td><td>The complete glossary table — every word with its syllabification, part of speech, English/Chinese definitions, and example sentence.</td></tr>
         <tr><td><b>Vocabulary Quiz</b></td><td>Every quiz question with all four options. The student's chosen answer and the correct answer are <span style="color:#16a34a;font-weight:bold">highlighted green</span> / <span style="color:#dc2626;font-weight:bold">red</span>. A score badge and per-question ✓/✗ indicators appear in the header and margin.</td></tr>
+        <tr><td><b>Spelling</b></td><td>Every word from the latest spelling game in order, each labelled with its mode (listen-type, scramble, or fill-blanks). The student's typed answer is colour-coded green/red against the correct answer; fill-blanks misses show only the missing letters, and timed-out words show a red <em>Not answered</em> note. Score + accuracy badges in the header.</td></tr>
         <tr><td><b>Grammar Quiz</b></td><td>Same colour-coded review as above, including AI-graded rewrite/fill-in questions (judged by earned points, not exact string match). Topic name shown per question.</td></tr>
+        <tr><td><b>Grammar Game</b></td><td>Every round from the latest grammar game, each labelled with its game (Roulette, Error Surgery, Workshop, Duel, or Word Scramble) and the question/prompt. Answers are colour-coded green/red, the correct answer appears on misses, and timeouts show a red <em>Not answered</em> note. Score + accuracy badges in the header; the list reflects the latest game while the score badge keeps the best.</td></tr>
         <tr><td><b>Reading Test</b></td><td>Same colour-coded review, including AI-graded short-answer questions. Covers multiple-choice, true/false/not given, inference, vocabulary-in-context, and referencing types.</td></tr>
       </table>
       <div class="callout tip"><strong>Lazy-loaded</strong> Detail data is fetched on demand only when you click — the table itself loads fast even for large classes. A spinner appears briefly while fetching.</div>
 
       <h4>Teacher Data — staff usage at a glance <span class="tag-admin"></span></h4>
-      <p>A parallel table of <b>teachers' own reading sessions</b>, visible to admins and super-admins only. It mirrors the Student Data table — same columns, sorting, date-range filter, search, pagination, and all five click-to-view detail dialogs — but filters by <b>teacher</b> instead of class: pick a school <span class="role super">super-admin</span>, then a single teacher or All Teachers. Excel export produces a "Teacher Data" report with the selected school/teacher named in the summary sheet.</p>
+      <p>A parallel table of <b>teachers' own reading sessions</b>, visible to admins and super-admins only. It mirrors the Student Data table — same columns, sorting, date-range filter, search, pagination, and all seven click-to-view detail dialogs — but filters by <b>teacher</b> instead of class: pick a school <span class="role super">super-admin</span>, then a single teacher or All Teachers. Excel export produces a "Teacher Data" report with the selected school/teacher named in the summary sheet.</p>
       <div class="callout tip"><strong>Why it exists</strong> Teachers are readers too — their own practice sessions, glossaries, and quiz attempts appear here so school leads can support staff learning the same way they follow students.</div>
 
       <h3>11.6 Account &amp; session security</h3>
