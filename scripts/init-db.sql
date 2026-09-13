@@ -120,6 +120,7 @@ CREATE TABLE reading_sessions (
   vocab_quiz_completed_at BIGINT DEFAULT 0,
   vocabulary_quiz JSONB DEFAULT '[]'::jsonb,
   spelling_results JSONB DEFAULT '[]'::jsonb,
+  grammar_results JSONB DEFAULT '[]'::jsonb,
   reading_test_completed_at BIGINT DEFAULT 0,
   chat_history JSONB DEFAULT '[]'::jsonb,
   original_difficulty JSONB,

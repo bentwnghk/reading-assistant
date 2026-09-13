@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react"
 import dynamic from "next/dynamic"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Keyboard, Check, X } from "lucide-react"
+import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Keyboard, Gamepad2, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -178,6 +178,13 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     score?: number
     accuracy?: number
     results?: SpellingResultEntry[]
+  } | null>(null)
+  const [viewingGrammarGame, setViewingGrammarGame] = useState<{
+    title: string
+    student?: string
+    score?: number
+    accuracy?: number
+    results?: GrammarResultEntry[]
   } | null>(null)
 
   const isTeacher = !isSuperAdmin && !isAdmin
@@ -700,6 +707,31 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     }
   }, [t])
 
+  const handleViewGrammarGame = useCallback(async (session: SessionWithSchool) => {
+    if ((session.grammarGameBestScore || 0) === 0 && (session.grammarGameAccuracy || 0) === 0) return
+    setViewingGrammarGame({
+      title: session.docTitle,
+      student: session.userName || undefined,
+      score: session.grammarGameBestScore,
+      accuracy: session.grammarGameAccuracy,
+    })
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/detail`)
+      if (res.ok) {
+        const detail: StudentSessionData = await res.json()
+        setViewingGrammarGame({
+          title: session.docTitle,
+          student: session.userName || undefined,
+          score: session.grammarGameBestScore,
+          accuracy: session.grammarGameAccuracy,
+          results: detail.grammarResults || [],
+        })
+      }
+    } catch {
+      toast.error(t("userManagement.loadFailed"))
+    }
+  }, [t])
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -1010,18 +1042,32 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
                   </TableCell>
                   <TableCell className="text-center">
                     {(session.grammarGameBestScore || 0) > 0 ? (
-                      <Badge variant={session.grammarGameBestScore! >= 70 ? "default" : "destructive"}>
-                        {session.grammarGameBestScore}
-                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleViewGrammarGame(session)}
+                        className="inline-flex"
+                        title={`${t("userManagement.studentData.viewGrammarGame")}: ${session.docTitle}`}
+                      >
+                        <Badge variant={session.grammarGameBestScore! >= 70 ? "default" : "secondary"} className="cursor-pointer">
+                          {session.grammarGameBestScore}
+                        </Badge>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {(session.grammarGameAccuracy || 0) > 0 ? (
-                      <Badge variant={session.grammarGameAccuracy! >= 70 ? "default" : "destructive"}>
-                        {session.grammarGameAccuracy}%
-                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleViewGrammarGame(session)}
+                        className="inline-flex"
+                        title={`${t("userManagement.studentData.viewGrammarGame")}: ${session.docTitle}`}
+                      >
+                        <Badge variant={session.grammarGameAccuracy! >= 70 ? "default" : "destructive"} className="cursor-pointer">
+                          {session.grammarGameAccuracy}%
+                        </Badge>
+                      </button>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -1601,6 +1647,76 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 {t("userManagement.studentData.noSpellingResults")}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!viewingGrammarGame} onOpenChange={(open) => { if (!open) setViewingGrammarGame(null) }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-6">
+              <Gamepad2 className="h-5 w-5 shrink-0" />
+              <span className="truncate">{viewingGrammarGame?.title}</span>
+              {viewingGrammarGame?.score !== undefined && (
+                <Badge variant="secondary" className="ml-auto">
+                  {viewingGrammarGame.score}
+                </Badge>
+              )}
+              {viewingGrammarGame?.accuracy !== undefined && viewingGrammarGame.accuracy > 0 && (
+                <Badge variant={viewingGrammarGame.accuracy >= 70 ? "default" : "destructive"}>
+                  {viewingGrammarGame.accuracy}%
+                </Badge>
+              )}
+            </DialogTitle>
+            {viewingGrammarGame?.student && (
+              <DialogDescription>{viewingGrammarGame.student}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
+            {viewingGrammarGame?.results === undefined ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : viewingGrammarGame.results.length > 0 ? (
+              viewingGrammarGame.results.map((r, idx) => (
+                <div key={`${r.game}-${idx}`} className="border rounded-lg p-3 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      {r.game && (
+                        <span className="text-xs text-muted-foreground">{t(`reading.grammar.games.${r.game}.name`)}</span>
+                      )}
+                      <p className="text-sm font-medium break-words whitespace-pre-wrap">{r.question}</p>
+                      {r.userAnswer ? (
+                        <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${r.correct ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
+                          {r.correct ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
+                          <span className="break-words">{r.userAnswer}</span>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.studentData.noAnswer")}</p>
+                      )}
+                      {!r.correct && r.correctAnswer && (
+                        <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
+                          <Check className="h-3 w-3 shrink-0" />
+                          <span className="break-words">{r.correctAnswer}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0">
+                      {r.correct ? (
+                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <X className="h-4 w-4 text-red-500 dark:text-red-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                {t("userManagement.studentData.noGrammarGameResults")}
               </div>
             )}
           </div>

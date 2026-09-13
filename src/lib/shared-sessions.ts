@@ -129,6 +129,7 @@ function stripUserData(sessionData: ReadingStore): Record<string, unknown> {
     grammarRouletteCompleted: 0,
     grammarDuelCompleted: 0,
     grammarGamesCompleted: 0,
+    grammarResults: [],
     flashcardReviewDates: [],
     glossaryRatings: {},
     chatHistory: [],

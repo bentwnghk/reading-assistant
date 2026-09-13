@@ -264,6 +264,27 @@ interface SpellingResultEntry {
   mode: SpellingGameMode;
 }
 
+/** Which of the five grammar games a result entry came from. Values match the
+ *  `reading.grammar.games.<game>.name` i18n key segments. */
+type GrammarGameType = "roulette" | "surgery" | "workshop" | "duel" | "scramble";
+
+/** One round's outcome in a session's most recent grammar game — persisted on
+ *  reading_sessions.grammar_results so teachers can drill into a session's
+ *  grammar game score/accuracy from the Student Data table. `question` is the
+ *  round's prompt (MCQ question, surgery sentence, workshop template, or the
+ *  scramble target sentence); `userAnswer` is the player's submitted answer
+ *  ("" when the round timed out or — in Duel — the AI answered first);
+ *  `correctAnswer` is the expected answer. Like `spellingResults`, the array
+ *  reflects the latest game while the score badge shows the best across
+ *  games. */
+interface GrammarResultEntry {
+  game: GrammarGameType;
+  question: string;
+  userAnswer: string;
+  correctAnswer: string;
+  correct: boolean;
+}
+
 // ── Multiplayer Spelling Battle types ───────────────────────────────────────
 // Mirrored in realtime/src/game/types.ts (the realtime package is standalone
 // and does not import from src/). Keep both sides in sync.

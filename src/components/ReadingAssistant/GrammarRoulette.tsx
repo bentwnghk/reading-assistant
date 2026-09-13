@@ -75,6 +75,7 @@ export default function GrammarRoulette({ onBack }: Props) {
     grammarRouletteAccuracy,
     setGrammarRouletteHighScore,
     setGrammarGameAccuracy,
+    setGrammarResults,
     id, backup,
   } = useReadingStore();
   const { generateGrammarQuestions } = useReadingAssistant();
@@ -102,7 +103,15 @@ export default function GrammarRoulette({ onBack }: Props) {
   const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const usedQuestionIds = useRef<Set<string>>(new Set());
+  // Per-round outcomes for the teacher drill-down (ReadingStore.grammarResults).
+  // Keyed `${roundIndex}|${question}` so timeout-path writes from inside
+  // double-invoked state updaters (StrictMode) stay idempotent.
+  const resultsRef = useRef<Map<string, GrammarResultEntry>>(new Map());
+  // Render-synced mirror of currentRound — the round timer's interval closure
+  // must read the live round without going through a state updater.
+  const currentRoundRef = useRef<RouletteRound | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
+  currentRoundRef.current = currentRound;
 
   // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
   // banner components remount (replaying their one-shot animations) per answer.
@@ -150,6 +159,16 @@ export default function GrammarRoulette({ onBack }: Props) {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
+          const r = currentRoundRef.current;
+          if (r) {
+            resultsRef.current.set(`${roundIndex}|${r.question.question}`, {
+              game: "roulette",
+              question: r.question.question,
+              userAnswer: "",
+              correctAnswer: r.question.options[r.question.correctIndex] ?? "",
+              correct: false,
+            });
+          }
           setCurrentRound((r) => r ? { ...r, answered: true, correct: false } : r);
           setStreak(0);
           setTimeout(() => {
@@ -234,6 +253,14 @@ export default function GrammarRoulette({ onBack }: Props) {
     const isCorrect = optIdx === currentRound.question.correctIndex;
     const topic = grammarTopics[currentRound.topicIndex];
 
+    resultsRef.current.set(`${roundIndex}|${currentRound.question.question}`, {
+      game: "roulette",
+      question: currentRound.question.question,
+      userAnswer: currentRound.question.options[optIdx] ?? "",
+      correctAnswer: currentRound.question.options[currentRound.question.correctIndex] ?? "",
+      correct: isCorrect,
+    });
+
     const newStreak = isCorrect ? streak + 1 : 0;
 
     if (isCorrect) {
@@ -311,6 +338,7 @@ export default function GrammarRoulette({ onBack }: Props) {
     setNewBestSeq(0);
     newBestFiredRef.current = false;
     usedQuestionIds.current = new Set();
+    resultsRef.current.clear();
     setGameStatus("playing");
   }, []);
 
@@ -343,6 +371,7 @@ export default function GrammarRoulette({ onBack }: Props) {
       const accuracy = totalRounds > 0 ? Math.round((correctCount / totalRounds) * 100) : 0;
       setGrammarRouletteHighScore(coins, accuracy);
       setGrammarGameAccuracy(accuracy);
+      setGrammarResults(Array.from(resultsRef.current.values()));
       logActivity("grammar_roulette_complete", { sessionId: id || undefined, score: coins, accuracy });
       // Achievement-granular event (On Fire): 5+ streak in one game. Separate
       // activity type — doesn't disturb the roulette completion counter.

@@ -234,6 +234,7 @@ export interface ReadingStore {
   grammarGameAccuracy: number;
   grammarGamesCompleted: number;
   grammarGameCompletedAt: number;
+  grammarResults: GrammarResultEntry[];
   // Grammar Games — cached AI content
   grammarErrorChallenges: ErrorSurgeryChallenge[];
   grammarScrambleChallenges: GrammarScrambleChallenge[];
@@ -324,6 +325,7 @@ interface ReadingActions {
   setGrammarRouletteHighScore: (score: number, accuracy: number) => void;
   setGrammarDuelHighScore: (score: number, accuracy: number) => void;
   setGrammarGameAccuracy: (accuracy: number) => void;
+  setGrammarResults: (results: GrammarResultEntry[]) => void;
   // Grammar Games setters — cached AI content
   setGrammarErrorChallenges: (challenges: ErrorSurgeryChallenge[]) => void;
   setGrammarScrambleChallenges: (challenges: GrammarScrambleChallenge[]) => void;
@@ -422,6 +424,7 @@ const defaultValues: ReadingStore = {
   grammarGameAccuracy: 0,
   grammarGamesCompleted: 0,
   grammarGameCompletedAt: 0,
+  grammarResults: [],
   grammarErrorChallenges: [],
   grammarScrambleChallenges: [],
   grammarWorkshopChallenges: [],
@@ -1089,15 +1092,31 @@ export const useReadingStore = create(
         set((state) => {
           const count = state.grammarGamesCompleted + 1;
           const newState = {
-            grammarGameAccuracy: Math.round(
-              (state.grammarGameAccuracy * state.grammarGamesCompleted + accuracy) / count
-            ),
+            // Latest game's accuracy (overwrite) — mirrors the spelling fix
+            // and keeps the badge consistent with the grammarResults
+            // drill-down, which shows the latest game's per-round answers.
+            // The former running average silently diluted new results with
+            // legacy games that never recorded accuracy (counted as 0%).
+            grammarGameAccuracy: accuracy,
             grammarGamesCompleted: count,
             grammarGameCompletedAt: Date.now(),
             updatedAt: Date.now(),
           };
           syncToHistoryIfNeeded({ ...state, ...newState });
-          if (currentUserId && state.id) syncToAPI(state.id, newState);
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
+          return newState;
+        }),
+      setGrammarResults: (results) =>
+        set((state) => {
+          const newState = {
+            grammarResults: results,
+            updatedAt: Date.now(),
+          };
+          if (currentUserId && state.id) {
+            syncToAPI(state.id, newState);
+          }
           return newState;
         }),
       setGrammarErrorChallenges: (challenges) =>

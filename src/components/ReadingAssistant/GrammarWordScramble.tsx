@@ -92,6 +92,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
     grammarScrambleAccuracy,
     setGrammarScrambleHighScore,
     setGrammarGameAccuracy,
+    setGrammarResults,
     id, backup,
   } = useReadingStore();
   const { generateGrammarScrambleContent } = useReadingAssistant();
@@ -112,6 +113,14 @@ export default function GrammarWordScramble({ onBack }: Props) {
   const isGenerating = !!activeGenerations["grammar-scramble"];
   const isAutoGenerating = isGenerating && challenges.length === 0;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Per-round outcomes for the teacher drill-down (ReadingStore.grammarResults).
+  // Keyed `${roundIndex}|${sentence}` so timeout-path writes from inside
+  // double-invoked state updaters (StrictMode) stay idempotent.
+  const resultsRef = useRef<Map<string, GrammarResultEntry>>(new Map());
+  // Render-synced mirror of round — handleTimeUp (called from inside the
+  // timer's state updater) must read the live round, not a stale closure.
+  const roundRef = useRef<RoundState | null>(null);
+  roundRef.current = round;
 
   // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
   // banner components remount (replaying their one-shot animations) per answer.
@@ -186,6 +195,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
     setBestBefore(useReadingStore.getState().grammarScrambleHighScore);
     setNewBestSeq(0);
     newBestFiredRef.current = false;
+    resultsRef.current.clear();
     setGameStatus("playing");
   }, [challenges, grammarTopics, buildRound]);
 
@@ -205,10 +215,20 @@ export default function GrammarWordScramble({ onBack }: Props) {
 
   const handleTimeUp = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
+    const r = roundRef.current;
+    if (r) {
+      resultsRef.current.set(`${roundIndex}|${r.challenge.sentence}`, {
+        game: "scramble",
+        question: r.challenge.sentence,
+        userAnswer: "",
+        correctAnswer: r.challenge.sentence,
+        correct: false,
+      });
+    }
     setRound((prev) => prev ? { ...prev, result: "incorrect" } : prev);
     setStreak(0);
     setTimeout(() => advanceRound(), 3000);
-  }, [advanceRound]);
+  }, [advanceRound, roundIndex]);
 
   const placeChip = useCallback((chip: WordChip) => {
     if (!round || round.result !== "pending" || chip.placed) return;
@@ -247,6 +267,14 @@ export default function GrammarWordScramble({ onBack }: Props) {
 
     const playerSentence = round.answer.map((c) => c.word).join(" ");
     const correct = playerSentence.trim() === round.challenge.sentence.trim();
+
+    resultsRef.current.set(`${roundIndex}|${round.challenge.sentence}`, {
+      game: "scramble",
+      question: round.challenge.sentence,
+      userAnswer: playerSentence,
+      correctAnswer: round.challenge.sentence,
+      correct,
+    });
 
     if (correct) {
       const newStreak = streak + 1;
@@ -315,6 +343,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
       const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
       setGrammarScrambleHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
+      setGrammarResults(Array.from(resultsRef.current.values()));
       logActivity("grammar_scramble_complete", { sessionId: id || undefined, score, accuracy });
       // Achievement-granular event (On Fire): 5+ streak in one game. Separate
       // activity type — doesn't disturb the scramble completion counter.

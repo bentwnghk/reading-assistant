@@ -88,6 +88,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     grammarSurgeryAccuracy,
     setGrammarSurgeryHighScore,
     setGrammarGameAccuracy,
+    setGrammarResults,
     id,
     backup,
   } = useReadingStore();
@@ -111,6 +112,13 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   const isGenerating = !!activeGenerations["grammar-surgery"];
   const isAutoGenerating = isGenerating && challenges.length === 0;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Per-round outcomes for the teacher drill-down (ReadingStore.grammarResults).
+  // Keyed `${roundIndex}|${sentence}` so timeout-path writes from inside
+  // double-invoked state updaters (StrictMode) stay idempotent.
+  const resultsRef = useRef<Map<string, GrammarResultEntry>>(new Map());
+  // Render-synced mirror of currentChallenge — the round timer's interval
+  // closure must read the live challenge without going through a state updater.
+  const currentChallengeRef = useRef<ErrorSurgeryChallenge | null>(null);
 
   // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
   // banner components remount (replaying their one-shot animations) per answer.
@@ -142,6 +150,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
   }, []);
 
   const currentChallenge = challenges[roundIndex] ?? null;
+  currentChallengeRef.current = currentChallenge;
   const topicName = grammarTopics.find((t) => t.id === currentChallenge?.topicId)?.name ?? "";
 
   // ── Build correction options for the selected error word ─────────────────
@@ -174,6 +183,14 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     const isCorrect =
       selectedWord?.toLowerCase().replace(/[,.]$/, "") === currentChallenge.errorWord.toLowerCase().replace(/[,.]$/, "") &&
       correction.toLowerCase() === currentChallenge.correction.toLowerCase();
+
+    resultsRef.current.set(`${roundIndex}|${currentChallenge.sentence}`, {
+      game: "surgery",
+      question: currentChallenge.sentence,
+      userAnswer: `${selectedWord ?? ""} → ${correction}`,
+      correctAnswer: `${currentChallenge.errorWord} → ${currentChallenge.correction}`,
+      correct: isCorrect,
+    });
 
     if (isCorrect) {
       const newStreak = streak + 1;
@@ -244,6 +261,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     setBestBefore(useReadingStore.getState().grammarSurgeryHighScore);
     setNewBestSeq(0);
     newBestFiredRef.current = false;
+    resultsRef.current.clear();
     setGameStatus("playing");
   }, [challenges]);
 
@@ -258,6 +276,16 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
           // Time's up — count as incorrect, advance
+          const c = currentChallengeRef.current;
+          if (c) {
+            resultsRef.current.set(`${roundIndex}|${c.sentence}`, {
+              game: "surgery",
+              question: c.sentence,
+              userAnswer: "",
+              correctAnswer: `${c.errorWord} → ${c.correction}`,
+              correct: false,
+            });
+          }
           setStreak(0);
           setResult("incorrect");
           setShowOptions(false);
@@ -311,6 +339,7 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
       const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
       setGrammarSurgeryHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
+      setGrammarResults(Array.from(resultsRef.current.values()));
       logActivity("grammar_surgery_complete", { sessionId: id || undefined, score, accuracy });
       // Achievement-granular event (On Fire): 5+ streak in one game. Separate
       // activity type — doesn't disturb the surgery completion counter.

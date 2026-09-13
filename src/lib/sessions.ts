@@ -53,8 +53,9 @@ export async function createReadingSession(
         pre_reading_generated_at, student_prediction, prediction_rating,
         skill_breakdown, collocations, collocations_generated_at,
         visualization_language, mind_map_language, summary_language,
-        spelling_results
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83)
+        spelling_results,
+        grammar_results
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84)
       ON CONFLICT (id) DO UPDATE SET
         doc_title = EXCLUDED.doc_title,
         source = EXCLUDED.source,
@@ -135,7 +136,8 @@ export async function createReadingSession(
         visualization_language = EXCLUDED.visualization_language,
         mind_map_language = EXCLUDED.mind_map_language,
         summary_language = EXCLUDED.summary_language,
-        spelling_results = EXCLUDED.spelling_results`,
+        spelling_results = EXCLUDED.spelling_results,
+        grammar_results = EXCLUDED.grammar_results`,
       [
         sessionData.id,
         userId,
@@ -220,6 +222,7 @@ export async function createReadingSession(
         sessionData.mindMapLanguage ?? null,
         sessionData.summaryLanguage ?? null,
         JSON.stringify(sessionData.spellingResults ?? []),
+        JSON.stringify(sessionData.grammarResults ?? []),
       ]
     )
     
@@ -312,6 +315,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
       spellingResults: row.spelling_results ?? [],
+      grammarResults: row.grammar_results ?? [],
       flashcardReviewDates: row.flashcard_review_dates ?? [],
       summaryGeneratedAt: Number(row.summary_generated_at ?? 0),
       mindMapGeneratedAt: Number(row.mind_map_generated_at ?? 0),
@@ -460,6 +464,7 @@ export async function getReadingSession(
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
       spellingResults: row.spelling_results ?? [],
+      grammarResults: row.grammar_results ?? [],
       flashcardReviewDates: row.flashcard_review_dates ?? [],
       summaryGeneratedAt: Number(row.summary_generated_at ?? 0),
       mindMapGeneratedAt: Number(row.mind_map_generated_at ?? 0),
@@ -567,6 +572,7 @@ export async function updateReadingSession(
       spellingGameBestScore: "spelling_game_best_score",
       spellingGameAccuracy: "spelling_game_accuracy",
       spellingResults: "spelling_results",
+      grammarResults: "grammar_results",
       testsCompleted: "tests_completed",
       vocabQuizzesCompleted: "vocab_quizzes_completed",
       spellingGamesCompleted: "spelling_games_completed",
@@ -639,7 +645,8 @@ export async function updateReadingSession(
              "grammarTopics", "grammarQuiz", "grammarErrorChallenges",
               "grammarScrambleChallenges", "grammarWorkshopChallenges",
               "grammarGameQuestions", "generatedTextMeta", "vocabularyQuiz",
-              "preReading", "skillBreakdown", "collocations", "spellingResults"].includes(key)) {
+              "preReading", "skillBreakdown", "collocations", "spellingResults",
+              "grammarResults"].includes(key)) {
           values.push(value ? JSON.stringify(value) : null)
         } else if (key === "grammarGameCompletedAt") {
           values.push(value ? new Date(value as number) : null)

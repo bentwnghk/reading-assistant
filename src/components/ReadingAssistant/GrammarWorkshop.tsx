@@ -64,6 +64,7 @@ export default function GrammarWorkshop({ onBack }: Props) {
     grammarWorkshopAccuracy,
     setGrammarWorkshopHighScore,
     setGrammarGameAccuracy,
+    setGrammarResults,
     id, backup,
   } = useReadingStore();
   const { generateGrammarWorkshopContent } = useReadingAssistant();
@@ -86,6 +87,14 @@ export default function GrammarWorkshop({ onBack }: Props) {
   const isGenerating = !!activeGenerations["grammar-workshop"];
   const isAutoGenerating = isGenerating && challenges.length === 0;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Per-round outcomes for the teacher drill-down (ReadingStore.grammarResults).
+  // Keyed `${roundIndex}|${template}` so timeout-path writes from inside
+  // double-invoked state updaters (StrictMode) stay idempotent.
+  const resultsRef = useRef<Map<string, GrammarResultEntry>>(new Map());
+  // Render-synced mirror of currentChallenge — the round timer's interval
+  // closure must read the live challenge without going through a state updater.
+  const currentChallengeRef = useRef<GrammarWorkshopChallenge | null>(null);
+  currentChallengeRef.current = currentChallenge;
 
   // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
   // banner components remount (replaying their one-shot animations) per answer.
@@ -141,6 +150,7 @@ export default function GrammarWorkshop({ onBack }: Props) {
     setBestBefore(useReadingStore.getState().grammarWorkshopHighScore);
     setNewBestSeq(0);
     newBestFiredRef.current = false;
+    resultsRef.current.clear();
     loadChallenge(0, challenges);
     setGameStatus("playing");
   }, [challenges, loadChallenge]);
@@ -156,6 +166,16 @@ export default function GrammarWorkshop({ onBack }: Props) {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
           // Time's up — mark as incorrect and advance
+          const c = currentChallengeRef.current;
+          if (c) {
+            resultsRef.current.set(`${roundIndex}|${c.template}`, {
+              game: "workshop",
+              question: c.template,
+              userAnswer: "",
+              correctAnswer: c.slots.map((s) => s.answer).join(", "),
+              correct: false,
+            });
+          }
           setStreak(0);
           setResult("incorrect");
           setTimeout(() => {
@@ -208,6 +228,14 @@ export default function GrammarWorkshop({ onBack }: Props) {
     const isCorrect = currentChallenge.slots.every(
       (slot, i) => filledSlots[i]?.toLowerCase().replace(/[,.]$/, "") === slot.answer.toLowerCase().replace(/[,.]$/, "")
     );
+
+    resultsRef.current.set(`${roundIndex}|${currentChallenge.template}`, {
+      game: "workshop",
+      question: currentChallenge.template,
+      userAnswer: filledSlots.join(", "),
+      correctAnswer: currentChallenge.slots.map((s) => s.answer).join(", "),
+      correct: isCorrect,
+    });
 
     if (isCorrect) {
       const newStreak = streak + 1;
@@ -282,6 +310,7 @@ export default function GrammarWorkshop({ onBack }: Props) {
       const accuracy = challenges.length > 0 ? Math.round((correctCount / challenges.length) * 100) : 0;
       setGrammarWorkshopHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
+      setGrammarResults(Array.from(resultsRef.current.values()));
       logActivity("grammar_workshop_complete", { sessionId: id || undefined, score, accuracy });
       // Achievement-granular event (On Fire): 5+ streak in one game. Separate
       // activity type — doesn't disturb the workshop completion counter.

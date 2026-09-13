@@ -184,6 +184,10 @@ export interface StudentSessionData {
    *  detail behind the Student/Teacher Data spelling badges). Only populated
    *  by getStudentSessionDetail — list queries never fetch it. */
   spellingResults?: SpellingResultEntry[]
+  /** Per-round results of the session's most recent grammar game (drill-down
+   *  detail behind the Student/Teacher Data grammar game badges). Only
+   *  populated by getStudentSessionDetail — list queries never fetch it. */
+  grammarResults?: GrammarResultEntry[]
   grammarQuizScore?: number
   grammarQuizCompleted?: boolean
   grammarGameBestScore?: number
@@ -1771,7 +1775,7 @@ export async function getStudentSessionDetail(sessionId: string): Promise<Studen
       `SELECT
         rs.id, rs.user_id, rs.doc_title, rs.student_age, rs.extracted_text, rs.summary,
         rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        rs.spelling_game_accuracy, rs.spelling_results,
+        rs.spelling_game_accuracy, rs.spelling_results, rs.grammar_results,
         rs.grammar_quiz_score, rs.grammar_quiz_completed,
         rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
         rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
@@ -1805,6 +1809,7 @@ export async function getStudentSessionDetail(sessionId: string): Promise<Studen
       spellingGameBestScore: row.spelling_game_best_score,
       spellingGameAccuracy: row.spelling_game_accuracy || 0,
       spellingResults: Array.isArray(row.spelling_results) ? row.spelling_results : [],
+      grammarResults: Array.isArray(row.grammar_results) ? row.grammar_results : [],
       grammarQuizScore: row.grammar_quiz_score || 0,
       grammarQuizCompleted: !!row.grammar_quiz_completed,
       grammarGameBestScore: Math.max(

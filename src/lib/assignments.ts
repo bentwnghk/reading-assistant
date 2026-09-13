@@ -66,6 +66,7 @@ export function stripSessionForAssignment(sessionData: ReadingStore): Record<str
     grammarDuelHighScore: 0,
     grammarGameAccuracy: 0,
     grammarGamesCompleted: 0,
+    grammarResults: [],
     grammarGameCompletedAt: 0,
     grammarScrambleAccuracy: 0,
     grammarWorkshopAccuracy: 0,

@@ -54,6 +54,7 @@ export default function GrammarDuel({ onBack }: Props) {
     grammarDuelAccuracy,
     setGrammarDuelHighScore,
     setGrammarGameAccuracy,
+    setGrammarResults,
     id, backup,
   } = useReadingStore();
   const { generateGrammarQuestions } = useReadingAssistant();
@@ -83,6 +84,11 @@ export default function GrammarDuel({ onBack }: Props) {
 
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const usedQIndices = useRef<Set<number>>(new Set());
+  // Per-round outcomes for the teacher drill-down (ReadingStore.grammarResults).
+  // Plain array (not a keyed Map): Duel's questions can repeat within a game,
+  // and both record sites (handleAnswer + the AI think-timer callback) run
+  // exactly once per resolved round — never from a state updater.
+  const resultsRef = useRef<GrammarResultEntry[]>([]);
 
   // Game-juice state (see GameFx.tsx). `seq` keys each event so the popup /
   // banner components remount (replaying their one-shot animations) per answer.
@@ -146,6 +152,14 @@ export default function GrammarDuel({ onBack }: Props) {
 
     const isCorrect = optIdx === currentQuestion.correctIndex;
     setTotalAnswered((n) => n + 1);
+
+    resultsRef.current.push({
+      game: "duel",
+      question: currentQuestion.question,
+      userAnswer: currentQuestion.options[optIdx] ?? "",
+      correctAnswer: currentQuestion.options[currentQuestion.correctIndex] ?? "",
+      correct: isCorrect,
+    });
 
     if (isCorrect) {
       const newStreak = playerStreak + 1;
@@ -232,6 +246,19 @@ export default function GrammarDuel({ onBack }: Props) {
       setIsAnswered(true);
       setTotalAnswered((n) => n + 1);
 
+      // The AI struck first — the player never answered this round. Recorded
+      // as not-answered so the drill-down matches the accuracy denominator
+      // (totalAnswered includes AI-first rounds).
+      if (currentQuestion) {
+        resultsRef.current.push({
+          game: "duel",
+          question: currentQuestion.question,
+          userAnswer: "",
+          correctAnswer: currentQuestion.options[currentQuestion.correctIndex] ?? "",
+          correct: false,
+        });
+      }
+
       if (aiCorrect) {
         applyDamage("player", BASE_DAMAGE);
         setPlayerStreak(0);
@@ -275,6 +302,7 @@ export default function GrammarDuel({ onBack }: Props) {
     setBestBefore(useReadingStore.getState().grammarDuelHighScore);
     setNewBestSeq(0);
     newBestFiredRef.current = false;
+    resultsRef.current = [];
     setGameStatus("playing");
   }, [questions]);
 
@@ -293,6 +321,7 @@ export default function GrammarDuel({ onBack }: Props) {
       const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
       setGrammarDuelHighScore(score, accuracy);
       setGrammarGameAccuracy(accuracy);
+      setGrammarResults([...resultsRef.current]);
       logActivity("grammar_duel_complete", { sessionId: id || undefined, score, accuracy });
       // Achievement-granular event (On Fire): 5+ streak in one game. Separate
       // activity type — doesn't disturb the duel completion counter.
