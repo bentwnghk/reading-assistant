@@ -65,6 +65,22 @@ function isOverdue(iso: string | null | undefined): boolean {
   return new Date(iso).getTime() < Date.now()
 }
 
+const CJK_CHAR =
+  /[\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]/
+
+/**
+ * Split a bilingual subject at the first CJK character so the English and
+ * Chinese parts can be rendered on separate lines.
+ */
+function splitSubjectParts(subject: string): { latin: string; cjk: string | null } {
+  const idx = subject.search(CJK_CHAR)
+  if (idx <= 0) return { latin: subject, cjk: null }
+  return {
+    latin: subject.slice(0, idx).trimEnd(),
+    cjk: subject.slice(idx).trimStart(),
+  }
+}
+
 function SortableHead({
   col,
   current,
@@ -483,16 +499,16 @@ export default function SchoolAssignmentsTable({
                   isOverdue(a.dueDate) &&
                   (a.avgProgress ?? 0) < 100
                 const canManage = a.teacherId === currentUserId || isSuperAdmin
+                const subject = splitSubjectParts(a.subject || "—")
                 return (
                   <TableRow key={a.id} className={a.status === "archived" ? "opacity-60" : ""}>
                     <TableCell>
                       <Link
                         href={`/assignments/${a.id}`}
                         className="font-medium hover:underline"
+                        title={a.title}
                       >
-                        <span className="block truncate max-w-[220px]">
-                          {a.title}
-                        </span>
+                        {a.title}
                       </Link>
                     </TableCell>
                     {isSuperAdmin && (
@@ -522,8 +538,16 @@ export default function SchoolAssignmentsTable({
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      <span className="block truncate max-w-[120px]">
-                        {a.subject || "—"}
+                      <span className="block max-w-[140px]">
+                        {subject.cjk ? (
+                          <>
+                            {subject.latin}
+                            <br />
+                            {subject.cjk}
+                          </>
+                        ) : (
+                          subject.latin
+                        )}
                       </span>
                     </TableCell>
                     <TableCell>
