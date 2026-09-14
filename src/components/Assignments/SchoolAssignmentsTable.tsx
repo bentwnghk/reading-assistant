@@ -531,11 +531,6 @@ export default function SchoolAssignmentsTable({
                           {t("assignments.schoolView.customRoster")}
                         </Badge>
                       )}
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {t("assignments.teacherView.studentCount", {
-                          count: a.studentCount ?? 0,
-                        })}
-                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       <span className="block max-w-[140px]">
@@ -582,16 +577,18 @@ export default function SchoolAssignmentsTable({
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={a.status === "active" ? "default" : "secondary"}
-                      >
-                        {t(`assignments.status.${a.status}`)}
-                      </Badge>
-                      {overdue && (
-                        <Badge variant="destructive" className="ml-1">
-                          {t("assignments.teacherView.overdue")}
+                      <div className="flex flex-col items-start gap-1">
+                        <Badge
+                          variant={a.status === "active" ? "default" : "secondary"}
+                        >
+                          {t(`assignments.status.${a.status}`)}
                         </Badge>
-                      )}
+                        {overdue && (
+                          <Badge variant="destructive">
+                            {t("assignments.teacherView.overdue")}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {formatDate(a.createdAt, i18n.language)}
