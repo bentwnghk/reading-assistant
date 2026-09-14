@@ -6,15 +6,12 @@ import Link from "next/link"
 import {
   Archive,
   ArchiveRestore,
-  BadgeCheck,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
   ChevronDown,
   ChevronUp,
   ClipboardCheck,
-  GraduationCap,
   Loader2,
   Pencil,
   Trash2,
@@ -506,11 +503,8 @@ export default function SchoolAssignmentsTable({
                       </TableCell>
                     )}
                     <TableCell>
-                      <span className="inline-flex items-center gap-1.5">
-                        <GraduationCap className="h-3.5 w-3.5 text-primary shrink-0" />
-                        <span className="truncate max-w-[140px]">
-                          {a.teacherName || a.teacherId}
-                        </span>
+                      <span className="block truncate max-w-[140px]">
+                        {a.teacherName || a.teacherId}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -533,8 +527,7 @@ export default function SchoolAssignmentsTable({
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex items-center gap-1 text-xs tabular-nums">
-                        <BadgeCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      <span className="text-xs tabular-nums">
                         {a.completedCount ?? 0}/{a.studentCount ?? 0}
                       </span>
                     </TableCell>
@@ -554,11 +547,10 @@ export default function SchoolAssignmentsTable({
                     <TableCell>
                       {a.dueDate ? (
                         <span
-                          className={`inline-flex items-center gap-1 text-sm ${
+                          className={`text-sm ${
                             overdue ? "text-destructive" : "text-muted-foreground"
                           }`}
                         >
-                          <Calendar className="h-3.5 w-3.5" />
                           {formatDate(a.dueDate, i18n.language)}
                         </span>
                       ) : (
