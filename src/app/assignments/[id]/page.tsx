@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -44,7 +44,15 @@ import {
 } from "@/components/ui/table"
 import { exportAssignmentRoster } from "@/utils/assignmentExcel"
 import { AssignmentStats } from "@/components/Assignments/AssignmentStats"
+import {
+  GrammarGameDrillDownDialog,
+  GrammarQuizDrillDownDialog,
+  ReadingTestDrillDownDialog,
+  SpellingDrillDownDialog,
+  VocabQuizDrillDownDialog,
+} from "@/components/Internal/SessionResultDialogs"
 import { Footer } from "@/components/Internal/Footer"
+import type { StudentSessionData } from "@/lib/users"
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -83,6 +91,39 @@ function isOverdue(iso?: string | null): boolean {
 function scoreCell(score: number | null | undefined): string {
   if (score == null) return "-"
   return String(score)
+}
+
+/** Which activity a roster drill-down was opened for. */
+type DrillDownView = "reading-test" | "vocab-quiz" | "grammar-quiz" | "spelling" | "grammar-game"
+
+/**
+ * Clickable score cell: opens the per-question drill-down dialog (student's
+ * answers color-coded) for the row's student. Rendered inert when there is
+ * no score yet or no working-copy session to fetch details from.
+ */
+function DrillDownScoreCell({
+  value,
+  title,
+  onClick,
+  disabled,
+}: {
+  value: number | null | undefined
+  title: string
+  onClick: () => void
+  disabled?: boolean
+}) {
+  if (value == null) return <span>-</span>
+  if (disabled) return <span>{value}</span>
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+    >
+      {value}
+    </button>
+  )
 }
 
 function SortableHead({
@@ -129,6 +170,17 @@ export default function AssignmentDetailPage({
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [exporting, setExporting] = useState(false)
+
+  // Roster drill-down: which activity was clicked + whose working-copy
+  // session to load. Detail (per-question data) arrives via the same
+  // session-detail API the User Management Student Data tab uses; while
+  // null the dialogs show their loading spinner.
+  const [drillDown, setDrillDown] = useState<{
+    view: DrillDownView
+    submission: AssignmentSubmission
+  } | null>(null)
+  const [drillDownDetail, setDrillDownDetail] = useState<StudentSessionData | null>(null)
+  const drillDownSeq = useRef(0)
 
   // Graceful auth redirect: bounce unauthenticated visitors to home.
   useEffect(() => {
@@ -218,6 +270,27 @@ export default function AssignmentDetailPage({
     load()
   }, [load])
 
+  const handleDrillDown = useCallback(
+    async (submission: AssignmentSubmission, view: DrillDownView) => {
+      if (!submission.studentSessionId) return
+      const seq = ++drillDownSeq.current
+      setDrillDown({ view, submission })
+      setDrillDownDetail(null)
+      try {
+        const res = await fetch(`/api/sessions/${submission.studentSessionId}/detail`)
+        if (!res.ok) throw new Error("Failed to load session detail")
+        const detail: StudentSessionData = await res.json()
+        if (drillDownSeq.current !== seq) return
+        setDrillDownDetail(detail)
+      } catch {
+        if (drillDownSeq.current !== seq) return
+        setDrillDown(null)
+        toast.error(t("assignments.error.loadFailed"))
+      }
+    },
+    [t],
+  )
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -238,6 +311,62 @@ export default function AssignmentDetailPage({
   }
 
   const overdue = assignment.status === "active" && isOverdue(assignment.dueDate)
+
+  // Drill-down dialog payloads — derived from the clicked roster cell's
+  // cached scores; per-question data arrives from drillDownDetail (null
+  // while loading → dialogs render their spinner).
+  const drillDownStudent = drillDown
+    ? drillDown.submission.studentName || drillDown.submission.studentEmail || undefined
+    : undefined
+  const drillDownTitle = assignment.title
+  const readingTestDrillDown =
+    drillDown?.view === "reading-test"
+      ? {
+          title: drillDownTitle,
+          student: drillDownStudent,
+          score: drillDown.submission.testScore ?? undefined,
+          questions: drillDownDetail?.readingTest,
+        }
+      : null
+  const vocabQuizDrillDown =
+    drillDown?.view === "vocab-quiz"
+      ? {
+          title: drillDownTitle,
+          student: drillDownStudent,
+          score: drillDown.submission.vocabularyQuizScore ?? undefined,
+          questions: drillDownDetail?.vocabularyQuiz,
+        }
+      : null
+  const grammarQuizDrillDown =
+    drillDown?.view === "grammar-quiz"
+      ? {
+          title: drillDownTitle,
+          student: drillDownStudent,
+          score: drillDown.submission.grammarQuizScore ?? undefined,
+          questions: drillDownDetail?.grammarQuiz,
+        }
+      : null
+  const spellingDrillDown =
+    drillDown?.view === "spelling"
+      ? {
+          title: drillDownTitle,
+          student: drillDownStudent,
+          score: drillDown.submission.spellingGameBestScore ?? undefined,
+          accuracy: drillDown.submission.spellingGameAccuracy ?? undefined,
+          results: drillDownDetail?.spellingResults,
+        }
+      : null
+  const grammarGameDrillDown =
+    drillDown?.view === "grammar-game"
+      ? {
+          title: drillDownTitle,
+          student: drillDownStudent,
+          score: drillDown.submission.grammarGameBestScore ?? undefined,
+          accuracy: drillDown.submission.grammarGameAccuracy ?? undefined,
+          results: drillDownDetail?.grammarResults,
+        }
+      : null
+
   // Deep-link target for the title: the owner teacher opens the source
   // session the assignment was created from; students open their own
   // working copy. Other teachers/admins (arriving via the All Teachers
@@ -446,11 +575,46 @@ export default function AssignmentDetailPage({
                             <span className="text-xs tabular-nums">{s.progress}%</span>
                           </div>
                         </TableCell>
-                        <TableCell className="tabular-nums">{scoreCell(s.testScore)}</TableCell>
-                        <TableCell className="tabular-nums">{scoreCell(s.vocabularyQuizScore)}</TableCell>
-                        <TableCell className="tabular-nums">{scoreCell(s.spellingGameAccuracy)}</TableCell>
-                        <TableCell className="tabular-nums">{scoreCell(s.grammarQuizScore)}</TableCell>
-                        <TableCell className="tabular-nums">{scoreCell(s.grammarGameAccuracy)}</TableCell>
+                        <TableCell className="tabular-nums">
+                          <DrillDownScoreCell
+                            value={s.testScore}
+                            disabled={!s.studentSessionId}
+                            title={t("userManagement.studentData.viewReadingTest")}
+                            onClick={() => handleDrillDown(s, "reading-test")}
+                          />
+                        </TableCell>
+                        <TableCell className="tabular-nums">
+                          <DrillDownScoreCell
+                            value={s.vocabularyQuizScore}
+                            disabled={!s.studentSessionId}
+                            title={t("userManagement.studentData.viewVocabQuiz")}
+                            onClick={() => handleDrillDown(s, "vocab-quiz")}
+                          />
+                        </TableCell>
+                        <TableCell className="tabular-nums">
+                          <DrillDownScoreCell
+                            value={s.spellingGameAccuracy}
+                            disabled={!s.studentSessionId}
+                            title={t("userManagement.studentData.viewSpelling")}
+                            onClick={() => handleDrillDown(s, "spelling")}
+                          />
+                        </TableCell>
+                        <TableCell className="tabular-nums">
+                          <DrillDownScoreCell
+                            value={s.grammarQuizScore}
+                            disabled={!s.studentSessionId}
+                            title={t("userManagement.studentData.viewGrammarQuiz")}
+                            onClick={() => handleDrillDown(s, "grammar-quiz")}
+                          />
+                        </TableCell>
+                        <TableCell className="tabular-nums">
+                          <DrillDownScoreCell
+                            value={s.grammarGameAccuracy}
+                            disabled={!s.studentSessionId}
+                            title={t("userManagement.studentData.viewGrammarGame")}
+                            onClick={() => handleDrillDown(s, "grammar-game")}
+                          />
+                        </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           {s.lastViewedAt
                             ? formatDateTime(s.lastViewedAt, i18n.language)
@@ -467,6 +631,28 @@ export default function AssignmentDetailPage({
           <StudentAssignmentDetail assignment={assignment} />
         )}
       </div>
+
+      <ReadingTestDrillDownDialog
+        data={readingTestDrillDown}
+        onClose={() => setDrillDown(null)}
+      />
+      <VocabQuizDrillDownDialog
+        data={vocabQuizDrillDown}
+        onClose={() => setDrillDown(null)}
+      />
+      <GrammarQuizDrillDownDialog
+        data={grammarQuizDrillDown}
+        onClose={() => setDrillDown(null)}
+      />
+      <SpellingDrillDownDialog
+        data={spellingDrillDown}
+        onClose={() => setDrillDown(null)}
+      />
+      <GrammarGameDrillDownDialog
+        data={grammarGameDrillDown}
+        onClose={() => setDrillDown(null)}
+      />
+
       <Footer />
     </div>
   )

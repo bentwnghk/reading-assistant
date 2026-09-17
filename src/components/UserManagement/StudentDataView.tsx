@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react"
 import dynamic from "next/dynamic"
 import { useTranslation } from "react-i18next"
-import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked, ClipboardList, Keyboard, Gamepad2, Check, X } from "lucide-react"
+import { Loader2, Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, FileText, BookMarked } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -31,6 +31,13 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ClassCombobox, ClassBattleTargetCombobox } from "@/components/Internal/ClassCombobox"
+import {
+  GrammarGameDrillDownDialog,
+  GrammarQuizDrillDownDialog,
+  ReadingTestDrillDownDialog,
+  SpellingDrillDownDialog,
+  VocabQuizDrillDownDialog,
+} from "@/components/Internal/SessionResultDialogs"
 import { toast } from "sonner"
 import type { ClassInfo, StudentSessionData, SchoolInfo } from "@/lib/users"
 import { exportStudentDataToExcel } from "@/utils/excelExport"
@@ -43,27 +50,6 @@ import {
 } from "@/utils/mindmap"
 
 const MagicDown = dynamic(() => import("@/components/MagicDown/View"))
-
-function isGrammarAnswerCorrect(q: GrammarQuizQuestion): boolean {
-  if (q.type === "rewrite" || q.type === "fill-in") {
-    return (q.earnedPoints ?? 0) >= q.points
-  }
-  const ua = q.userAnswer?.toLowerCase().trim()
-  const ca = q.correctAnswer.toLowerCase().trim()
-  return ua === ca || ua === ca.charAt(0)
-}
-
-function isReadingTestAnswerCorrect(q: ReadingTestQuestion): boolean {
-  if (q.type === "short-answer") {
-    return (q.earnedPoints ?? 0) >= q.points
-  }
-  const ua = q.userAnswer?.toLowerCase().trim().replace(/[-\s]+/g, "-")
-  const ca = q.correctAnswer.toLowerCase().trim().replace(/[-\s]+/g, "-")
-  if (q.type === "multiple-choice" || q.type === "inference" || q.type === "vocab-context" || q.type === "referencing") {
-    return ua === ca || ua === ca.charAt(0)
-  }
-  return ua === ca
-}
 
 interface StudentDataViewProps {
   isSuperAdmin: boolean
@@ -1344,392 +1330,15 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!viewingQuiz} onOpenChange={(open) => { if (!open) setViewingQuiz(null) }}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pr-6">
-              <ClipboardList className="h-5 w-5 shrink-0" />
-              <span className="truncate">{viewingQuiz?.title}</span>
-              {viewingQuiz?.score !== undefined && (
-                <Badge variant={viewingQuiz.score >= 70 ? "default" : "destructive"} className="ml-auto">
-                  {viewingQuiz.score}%
-                </Badge>
-              )}
-            </DialogTitle>
-            {viewingQuiz?.student && (
-              <DialogDescription>{viewingQuiz.student}</DialogDescription>
-            )}
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
-            {viewingQuiz?.questions === undefined ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : viewingQuiz.questions.length > 0 ? (
-              viewingQuiz.questions.map((q, idx) => {
-                const isCorrect = q.userAnswer === q.correctAnswer
-                return (
-                  <div key={q.id} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{q.question}</p>
-                        <div className="mt-2 space-y-1">
-                          {q.options.map((opt) => {
-                            const isUserAnswer = opt === q.userAnswer
-                            const isCorrectAnswer = opt === q.correctAnswer
-                            return (
-                              <div
-                                key={opt}
-                                className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${
-                                  isCorrectAnswer
-                                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium"
-                                    : isUserAnswer
-                                      ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                                      : "text-muted-foreground"
-                                }`}
-                              >
-                                {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
-                                {isUserAnswer && !isCorrectAnswer && <X className="h-3 w-3 shrink-0" />}
-                                <span>{opt}</span>
-                              </div>
-                            )
-                          })}
-                        </div>
-                        {q.userAnswer === undefined && (
-                          <p className="text-xs text-red-500 dark:text-red-400 italic mt-1">{t("userManagement.studentData.noAnswer")}</p>
-                        )}
-                      </div>
-                      <div className="shrink-0">
-                        {isCorrect ? (
-                          <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <X className="h-4 w-4 text-red-500 dark:text-red-400" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {t("userManagement.studentData.noVocabQuiz")}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <VocabQuizDrillDownDialog data={viewingQuiz} onClose={() => setViewingQuiz(null)} />
 
-      <Dialog open={!!viewingGrammarQuiz} onOpenChange={(open) => { if (!open) setViewingGrammarQuiz(null) }}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pr-6">
-              <ClipboardList className="h-5 w-5 shrink-0" />
-              <span className="truncate">{viewingGrammarQuiz?.title}</span>
-              {viewingGrammarQuiz?.score !== undefined && (
-                <Badge variant={viewingGrammarQuiz.score >= 70 ? "default" : "destructive"} className="ml-auto">
-                  {viewingGrammarQuiz.score}%
-                </Badge>
-              )}
-            </DialogTitle>
-            {viewingGrammarQuiz?.student && (
-              <DialogDescription>{viewingGrammarQuiz.student}</DialogDescription>
-            )}
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
-            {viewingGrammarQuiz?.questions === undefined ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : viewingGrammarQuiz.questions.length > 0 ? (
-              viewingGrammarQuiz.questions.map((q, idx) => {
-                const hasOptions = q.options && q.options.length > 0
-                const isCorrect = isGrammarAnswerCorrect(q)
-                return (
-                  <div key={q.id} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
-                      <div className="flex-1 min-w-0">
-                        {q.topicName && <span className="text-xs text-muted-foreground">{q.topicName}</span>}
-                        <p className="text-sm font-medium">{q.question}</p>
-                        <div className="mt-2 space-y-1">
-                          {hasOptions ? (
-                            q.options!.map((opt) => {
-                              const optLetter = opt.charAt(0).toUpperCase()
-                              const isUserAnswer = opt === q.userAnswer || optLetter === q.userAnswer?.toUpperCase().trim()
-                              const isCorrectAnswer = opt === q.correctAnswer || optLetter === q.correctAnswer.toUpperCase().trim()
-                              return (
-                                <div key={opt} className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrectAnswer ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : isUserAnswer ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" : "text-muted-foreground"}`}>
-                                  {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
-                                  {isUserAnswer && !isCorrectAnswer && <X className="h-3 w-3 shrink-0" />}
-                                  <span>{opt}</span>
-                                </div>
-                              )
-                            })
-                          ) : (
-                            <div className="space-y-1">
-                              {q.userAnswer !== undefined && (
-                                <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrect ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
-                                  {isCorrect ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
-                                  <span>{q.userAnswer}</span>
-                                </div>
-                              )}
-                              {!isCorrect && (
-                                <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
-                                  <Check className="h-3 w-3 shrink-0" />
-                                  <span>{q.correctAnswer}</span>
-                                </div>
-                              )}
-                              {q.userAnswer === undefined && <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.studentData.noAnswer")}</p>}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        {isCorrect ? <Check className="h-4 w-4 text-green-600 dark:text-green-400" /> : <X className="h-4 w-4 text-red-500 dark:text-red-400" />}
-                        {q.earnedPoints !== undefined && <span className="text-xs text-muted-foreground block mt-1">{q.earnedPoints}/{q.points}</span>}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {t("userManagement.studentData.noGrammarQuiz")}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <GrammarQuizDrillDownDialog data={viewingGrammarQuiz} onClose={() => setViewingGrammarQuiz(null)} />
 
-      <Dialog open={!!viewingReadingTest} onOpenChange={(open) => { if (!open) setViewingReadingTest(null) }}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pr-6">
-              <FileText className="h-5 w-5 shrink-0" />
-              <span className="truncate">{viewingReadingTest?.title}</span>
-              {viewingReadingTest?.score !== undefined && (
-                <Badge variant={viewingReadingTest.score >= 70 ? "default" : "destructive"} className="ml-auto">
-                  {viewingReadingTest.score}%
-                </Badge>
-              )}
-            </DialogTitle>
-            {viewingReadingTest?.student && (
-              <DialogDescription>{viewingReadingTest.student}</DialogDescription>
-            )}
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
-            {viewingReadingTest?.questions === undefined ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : viewingReadingTest.questions.length > 0 ? (
-              viewingReadingTest.questions.map((q, idx) => {
-                const hasOptions = q.options && q.options.length > 0
-                const isCorrect = isReadingTestAnswerCorrect(q)
-                return (
-                  <div key={q.id} className="border rounded-lg p-3 space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{q.question}</p>
-                        <div className="mt-2 space-y-1">
-                          {hasOptions ? (
-                            q.options!.map((opt) => {
-                              const optLetter = opt.charAt(0).toUpperCase()
-                              const isUserAnswer = opt === q.userAnswer || optLetter === q.userAnswer?.toUpperCase().trim()
-                              const isCorrectAnswer = opt === q.correctAnswer || optLetter === q.correctAnswer.toUpperCase().trim()
-                              return (
-                                <div key={opt} className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrectAnswer ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : isUserAnswer ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" : "text-muted-foreground"}`}>
-                                  {isCorrectAnswer && <Check className="h-3 w-3 shrink-0" />}
-                                  {isUserAnswer && !isCorrectAnswer && <X className="h-3 w-3 shrink-0" />}
-                                  <span>{opt}</span>
-                                </div>
-                              )
-                            })
-                          ) : (
-                            <div className="space-y-1">
-                              {q.userAnswer !== undefined && (
-                                <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${isCorrect ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
-                                  {isCorrect ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
-                                  <span>{q.userAnswer}</span>
-                                </div>
-                              )}
-                              {!isCorrect && (
-                                <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
-                                  <Check className="h-3 w-3 shrink-0" />
-                                  <span>{q.correctAnswer}</span>
-                                </div>
-                              )}
-                              {q.userAnswer === undefined && <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.studentData.noAnswer")}</p>}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        {isCorrect ? <Check className="h-4 w-4 text-green-600 dark:text-green-400" /> : <X className="h-4 w-4 text-red-500 dark:text-red-400" />}
-                        {q.earnedPoints !== undefined && <span className="text-xs text-muted-foreground block mt-1">{q.earnedPoints}/{q.points}</span>}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {t("userManagement.studentData.noReadingTest")}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ReadingTestDrillDownDialog data={viewingReadingTest} onClose={() => setViewingReadingTest(null)} />
 
-      <Dialog open={!!viewingSpelling} onOpenChange={(open) => { if (!open) setViewingSpelling(null) }}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pr-6">
-              <Keyboard className="h-5 w-5 shrink-0" />
-              <span className="truncate">{viewingSpelling?.title}</span>
-              {viewingSpelling?.score !== undefined && (
-                <Badge variant="secondary" className="ml-auto">
-                  {viewingSpelling.score}
-                </Badge>
-              )}
-              {viewingSpelling?.accuracy !== undefined && viewingSpelling.accuracy > 0 && (
-                <Badge variant={viewingSpelling.accuracy >= 70 ? "default" : "destructive"}>
-                  {viewingSpelling.accuracy}%
-                </Badge>
-              )}
-            </DialogTitle>
-            {viewingSpelling?.student && (
-              <DialogDescription>{viewingSpelling.student}</DialogDescription>
-            )}
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
-            {viewingSpelling?.results === undefined ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : viewingSpelling.results.length > 0 ? (
-              viewingSpelling.results.map((r, idx) => (
-                <div key={`${r.word}-${idx}`} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">W{idx + 1}</span>
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <p className="text-sm font-medium">{r.word}</p>
-                      {r.mode && (
-                        <span className="text-xs text-muted-foreground">{t(`reading.glossary.spelling.modes.${r.mode}`)}</span>
-                      )}
-                      {r.userAnswer ? (
-                        <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${r.correct ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
-                          {r.correct ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
-                          <span>{r.userAnswer}</span>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.studentData.noAnswer")}</p>
-                      )}
-                      {!r.correct && (
-                        <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
-                          <Check className="h-3 w-3 shrink-0" />
-                          {/* Fill-blanks: the correct answer is just the blanked
-                           *  letters the player had to type, not the whole word
-                           *  (falls back to the word for battle/legacy entries
-                           *  recorded without blankPositions). */}
-                          <span className="break-words">
-                            {r.mode === "fill-blanks" && r.blankPositions?.length
-                              ? r.blankPositions.map((p) => r.word[p]).join("")
-                              : r.word}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="shrink-0">
-                      {r.correct ? (
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <X className="h-4 w-4 text-red-500 dark:text-red-400" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {t("userManagement.studentData.noSpellingResults")}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <SpellingDrillDownDialog data={viewingSpelling} onClose={() => setViewingSpelling(null)} />
 
-      <Dialog open={!!viewingGrammarGame} onOpenChange={(open) => { if (!open) setViewingGrammarGame(null) }}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pr-6">
-              <Gamepad2 className="h-5 w-5 shrink-0" />
-              <span className="truncate">{viewingGrammarGame?.title}</span>
-              {viewingGrammarGame?.score !== undefined && (
-                <Badge variant="secondary" className="ml-auto">
-                  {viewingGrammarGame.score}
-                </Badge>
-              )}
-              {viewingGrammarGame?.accuracy !== undefined && viewingGrammarGame.accuracy > 0 && (
-                <Badge variant={viewingGrammarGame.accuracy >= 70 ? "default" : "destructive"}>
-                  {viewingGrammarGame.accuracy}%
-                </Badge>
-              )}
-            </DialogTitle>
-            {viewingGrammarGame?.student && (
-              <DialogDescription>{viewingGrammarGame.student}</DialogDescription>
-            )}
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto mt-2 space-y-3">
-            {viewingGrammarGame?.results === undefined ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : viewingGrammarGame.results.length > 0 ? (
-              viewingGrammarGame.results.map((r, idx) => (
-                <div key={`${r.game}-${idx}`} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="text-xs font-medium text-muted-foreground shrink-0 mt-0.5">Q{idx + 1}</span>
-                    <div className="flex-1 min-w-0 space-y-1">
-                      {r.game && (
-                        <span className="text-xs text-muted-foreground">{t(`reading.grammar.games.${r.game}.name`)}</span>
-                      )}
-                      <p className="text-sm font-medium break-words whitespace-pre-wrap">{r.question}</p>
-                      {r.userAnswer ? (
-                        <div className={`text-xs px-2 py-1 rounded flex items-center gap-1.5 ${r.correct ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium" : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"}`}>
-                          {r.correct ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
-                          <span className="break-words">{r.userAnswer}</span>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-red-500 dark:text-red-400 italic">{t("userManagement.studentData.noAnswer")}</p>
-                      )}
-                      {!r.correct && r.correctAnswer && (
-                        <div className="text-xs px-2 py-1 rounded flex items-center gap-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
-                          <Check className="h-3 w-3 shrink-0" />
-                          <span className="break-words">{r.correctAnswer}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="shrink-0">
-                      {r.correct ? (
-                        <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-                      ) : (
-                        <X className="h-4 w-4 text-red-500 dark:text-red-400" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                {t("userManagement.studentData.noGrammarGameResults")}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <GrammarGameDrillDownDialog data={viewingGrammarGame} onClose={() => setViewingGrammarGame(null)} />
     </div>
   )
 }
