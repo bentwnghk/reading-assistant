@@ -7,6 +7,8 @@ import Link from "next/link"
 import { toast } from "sonner"
 import {
   Calendar,
+  ChevronLeft,
+  ChevronRight,
   Users,
   Loader2,
   Plus,
@@ -47,6 +49,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useGlobalStore } from "@/store/global"
 import { cn } from "@/utils/style"
 import { RecipientPicker } from "@/components/Internal/RecipientPicker"
@@ -72,6 +81,8 @@ function isOverdue(iso: string | null | undefined): boolean {
   return new Date(iso).getTime() < Date.now()
 }
 
+type StatusFilter = "all" | "active" | "archived"
+
 export default function AssignmentsList() {
   const { data: session } = useSession()
   const { t, i18n } = useTranslation()
@@ -82,6 +93,9 @@ export default function AssignmentsList() {
   const [schoolAssignments, setSchoolAssignments] = useState<Assignment[]>([])
   const [schoolLoading, setSchoolLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<"mine" | "school">("mine")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [editing, setEditing] = useState<Assignment | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null)
   const [showHelp, setShowHelp] = useState(false)
@@ -169,6 +183,23 @@ export default function AssignmentsList() {
     }
   }
 
+  // Students only ever receive active assignments from the API, so the
+  // status filter is teacher-facing only. Default "all" keeps the previous
+  // behavior of showing active + archived together.
+  const filtered =
+    statusFilter === "all"
+      ? assignments
+      : assignments.filter((a) => a.status === statusFilter)
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const safePage = Math.min(page, totalPages)
+  const paged = filtered.slice((safePage - 1) * pageSize, safePage * pageSize)
+  const emptyMessage =
+    assignments.length === 0
+      ? isTeacher
+        ? t("assignments.teacherView.empty")
+        : t("assignments.studentView.empty")
+      : t("assignments.schoolView.emptyFiltered")
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -249,17 +280,40 @@ export default function AssignmentsList() {
           presets inside the assign dialog instead */}
       {hasSchoolTab && <PresetsSection />}
 
-      {assignments.length === 0 ? (
+      {isTeacher && assignments.length > 0 && (
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => {
+            setStatusFilter(v as StatusFilter)
+            setPage(1)
+          }}
+        >
+          <SelectTrigger className="h-8 w-auto min-w-[110px] text-xs">
+            <SelectValue placeholder={t("assignments.schoolView.allStatuses")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              {t("assignments.schoolView.allStatuses")}
+            </SelectItem>
+            <SelectItem value="active">
+              {t("assignments.status.active")}
+            </SelectItem>
+            <SelectItem value="archived">
+              {t("assignments.status.archived")}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+
+      {filtered.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {isTeacher
-              ? t("assignments.teacherView.empty")
-              : t("assignments.studentView.empty")}
+            {emptyMessage}
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-3 min-w-0">
-          {assignments.map((a) => {
+          {paged.map((a) => {
             const overdue =
               a.status === "active" &&
               isOverdue(a.dueDate) &&
@@ -406,6 +460,89 @@ export default function AssignmentsList() {
               </Card>
             )
           })}
+        </div>
+      )}
+
+      {filtered.length > pageSize && (
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">
+              {t("vocabulary.rowsPerPage")}:
+            </span>
+            {[10, 20, 30, 50].map((size) => (
+              <button
+                key={size}
+                onClick={() => {
+                  setPageSize(size)
+                  setPage(1)
+                }}
+                className={cn(
+                  "px-2 py-0.5 text-xs rounded transition-colors",
+                  pageSize === size
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted",
+                )}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => {
+                if (totalPages <= 7) return true
+                if (p === 1 || p === totalPages) return true
+                return Math.abs(p - safePage) <= 1
+              })
+              .reduce<(number | "ellipsis")[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) {
+                  acc.push("ellipsis")
+                }
+                acc.push(p)
+                return acc
+              }, [])
+              .map((item, i) =>
+                item === "ellipsis" ? (
+                  <span
+                    key={`e${i}`}
+                    className="text-xs text-muted-foreground px-1"
+                  >
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    onClick={() => setPage(item)}
+                    className={cn(
+                      "h-7 w-7 text-xs rounded transition-colors",
+                      safePage === item
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {item}
+                  </button>
+                ),
+              )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
         </>
