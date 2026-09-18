@@ -363,17 +363,21 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     return shuffled;
   };
 
-  const generateChallenge = useCallback((entry: GlossaryEntry, challengeMode: SpellingGameMode): SpellingWordChallenge => {
+  const generateChallenge = useCallback((entry: GlossaryEntry): SpellingWordChallenge => {
     const word = entry.word.toLowerCase();
     const isPhrase = /[\s-]/.test(word.trim());
     const scrambleTiles = isPhrase ? shuffleArray(word.trim().split(/[\s-]+/)) : shuffleArray(word.split(""));
     const letters = word.split("");
 
     // "Spell whole word" blanks out EVERY letter (the challenge renders as all
-    // underscores) — applies only to fill-blanks challenges, so mixed mode
-    // keeps partial blanks for words that roll other modes.
+    // underscores). Challenge data is mode-agnostic — in mixed mode the
+    // per-word DISPLAY mode is rolled separately at play time, so whenever
+    // the option is on every challenge must carry full blanks; otherwise a
+    // word generated for another mode but displayed as fill-blanks would show
+    // partial blanks.
+    const wholeWord = spellWholeWord && (gameMode === "fill-blanks" || gameMode === "mixed");
     const positions =
-      spellWholeWord && challengeMode === "fill-blanks"
+      wholeWord
         ? [...Array(word.length).keys()]
         : shuffleArray([...Array(word.length).keys()]).slice(0, Math.max(1, Math.floor(word.length * config.blankRatio)));
     const blankedWord = letters
@@ -389,7 +393,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       blankPositions: positions.sort((a, b) => a - b),
       revealedHints: [],
     };
-  }, [config.blankRatio, spellWholeWord]);
+  }, [config.blankRatio, spellWholeWord, gameMode]);
 
   const startGame = useCallback(() => {
     // Game start is a user gesture — resume the AudioContext now so the first
@@ -403,12 +407,10 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     if (wordCountLimit !== "all" && sortedGlossary.length > wordCountLimit) {
       sortedGlossary = sortedGlossary.slice(0, wordCountLimit);
     }
-    const gameChallenges = sortedGlossary.map((entry) => {
-      const actualMode = gameMode === "mixed" 
-        ? (["listen-type", "scramble", "fill-blanks"] as SpellingGameMode[])[Math.floor(Math.random() * 3)]
-        : gameMode;
-      return generateChallenge(entry, actualMode);
-    });
+    // Challenge data is mode-agnostic (every challenge carries both scramble
+    // tiles and blank positions); the per-word DISPLAY mode for mixed mode is
+    // rolled separately at play time (initialMode below / moveToNext).
+    const gameChallenges = sortedGlossary.map((entry) => generateChallenge(entry));
 
     setChallenges(gameChallenges);
     setCurrentIndex(0);
