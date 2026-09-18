@@ -1754,6 +1754,8 @@
         "clickToHear": "點擊聽取生字",
         "typeAnswer": "輸入你聽到的生字...",
         "typeMissing": "輸入缺少的字母...",
+        "spellWholeWord": "拼寫整個單詞",
+        "spellWholeWordDesc": "隱藏所有字母——整個單詞以底線顯示，憑記憶輸入完整單詞",
         "clear": "清除",
         "undo": "撤銷上一個字母",
         "submit": "提交",
@@ -1783,6 +1785,10 @@
             "fill-blanks": {
               "name": "填空拼字",
               "desc": "輸入底線處缺少的字母。專注於特定字母組合！"
+            },
+            "spell-whole-word": {
+              "name": "拼寫整個單詞",
+              "desc": "填空與混合模式的選用開關 — 隱藏所有字母，整個單詞以底線顯示，憑記憶輸入完整單詞。終極記憶挑戰！"
             },
             "mixed": {
               "name": "混合模式",

@@ -249,6 +249,10 @@ io.on("connection", (socket: Socket) => {
       }
       // Normalize the game mode (default to listen-type for older clients).
       payload.config.gameMode = normalizeGameMode(payload.config.gameMode);
+      // "Spell whole word" (fill-blanks / mixed): blank every letter. Only
+      // meaningful for fill-blanks words (enrichWords ignores it otherwise);
+      // normalize to a strict boolean — older clients omit the flag.
+      payload.config.fullBlank = payload.config.fullBlank === true;
       // Host-as-spectator is staff-only (teachers host classroom battles
       // without playing). Students sending the flag are rejected outright so
       // the room is never silently created in a different shape.
@@ -301,7 +305,7 @@ io.on("connection", (socket: Socket) => {
       }
       // Precompute mode-specific challenge data (blanks / tiles / per-word mode)
       // so the server judges authoritatively and all players see identical data.
-      resolved.words = enrichWords(resolved.words, payload.config.gameMode, payload.config.difficulty);
+      resolved.words = enrichWords(resolved.words, payload.config.gameMode, payload.config.difficulty, payload.config.fullBlank === true);
 
       const room = createRoom({
         host: user,
@@ -454,7 +458,7 @@ io.on("connection", (socket: Socket) => {
       } catch (e) {
         return emitRoomError(socket, "invalid_source", e instanceof Error ? e.message : "Invalid word source");
       }
-      resolved.words = enrichWords(resolved.words, room.config.gameMode, room.config.difficulty);
+      resolved.words = enrichWords(resolved.words, room.config.gameMode, room.config.difficulty, room.config.fullBlank === true);
       setRoomSource(room, payload.source, resolved);
       console.log(`[realtime] room:set_source code=${room.code} words=${resolved.actualCount}`);
       broadcastRoomState(room);
@@ -505,14 +509,14 @@ io.on("connection", (socket: Socket) => {
 
     try {
       const resolved = await resolveWordList(user.userId, room.config.source, room.config.wordCount);
-      const enriched = enrichWords(resolved.words, room.config.gameMode, room.config.difficulty);
+      const enriched = enrichWords(resolved.words, room.config.gameMode, room.config.difficulty, room.config.fullBlank === true);
       setRoomSource(room, room.config.source, { words: enriched, actualCount: resolved.actualCount });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.warn(`[realtime] room:rematch re-resolve failed code=${room.code}: ${msg}`);
       if (room.canonicalWords.length > 0) {
         // Source gone — keep the same word pool but refresh mode-specific data.
-        room.canonicalWords = enrichWords(room.canonicalWords, room.config.gameMode, room.config.difficulty);
+        room.canonicalWords = enrichWords(room.canonicalWords, room.config.gameMode, room.config.difficulty, room.config.fullBlank === true);
       } else {
         return emitRoomError(socket, "invalid_source", "Word source is no longer available; please pick a new one");
       }

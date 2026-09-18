@@ -1723,6 +1723,8 @@
         "clickToHear": "Click to hear the word",
         "typeAnswer": "Type the word you hear...",
         "typeMissing": "Type the missing letters...",
+        "spellWholeWord": "Spell whole word",
+        "spellWholeWordDesc": "Hide all letters — the word shows entirely as underscores and you type it from memory",
         "clear": "Clear",
         "undo": "Undo",
         "submit": "Submit",
@@ -1752,6 +1754,10 @@
             "fill-blanks": {
               "name": "Fill Blanks",
               "desc": "Type the missing letters shown as underscores. Focus on specific letter patterns!"
+            },
+            "spell-whole-word": {
+              "name": "Spell Whole Word",
+              "desc": "An optional switch for Fill Blanks and Mixed Mode — every letter is hidden, so the word shows entirely as underscores and you type it from memory. The ultimate recall challenge!"
             },
             "mixed": {
               "name": "Mixed Mode",

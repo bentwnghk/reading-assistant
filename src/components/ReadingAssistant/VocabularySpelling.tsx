@@ -15,6 +15,7 @@ import {
   Shuffle,
   Keyboard,
   Eye,
+  EyeOff,
   HelpCircle,
   Target,
   Crown,
@@ -262,6 +263,9 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
   }, [shouldOpenBattle, setShouldOpenBattle]);
 
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
+  // fill-blanks / mixed only: blank out every letter so the whole word shows
+  // as underscores and the player types it from memory.
+  const [spellWholeWord, setSpellWholeWord] = useState(false);
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
   const [isTimed, setIsTimed] = useState(true);
   const [prioritizeHardWords, setPrioritizeHardWords] = useState(false);
@@ -359,14 +363,19 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     return shuffled;
   };
 
-  const generateChallenge = useCallback((entry: GlossaryEntry, _mode: SpellingGameMode): SpellingWordChallenge => {
+  const generateChallenge = useCallback((entry: GlossaryEntry, challengeMode: SpellingGameMode): SpellingWordChallenge => {
     const word = entry.word.toLowerCase();
     const isPhrase = /[\s-]/.test(word.trim());
     const scrambleTiles = isPhrase ? shuffleArray(word.trim().split(/[\s-]+/)) : shuffleArray(word.split(""));
     const letters = word.split("");
 
-    const blankCount = Math.max(1, Math.floor(word.length * config.blankRatio));
-    const positions = shuffleArray([...Array(word.length).keys()]).slice(0, blankCount);
+    // "Spell whole word" blanks out EVERY letter (the challenge renders as all
+    // underscores) — applies only to fill-blanks challenges, so mixed mode
+    // keeps partial blanks for words that roll other modes.
+    const positions =
+      spellWholeWord && challengeMode === "fill-blanks"
+        ? [...Array(word.length).keys()]
+        : shuffleArray([...Array(word.length).keys()]).slice(0, Math.max(1, Math.floor(word.length * config.blankRatio)));
     const blankedWord = letters
       .map((letter, idx) => (positions.includes(idx) ? "_" : letter))
       .join("");
@@ -380,7 +389,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       blankPositions: positions.sort((a, b) => a - b),
       revealedHints: [],
     };
-  }, [config.blankRatio]);
+  }, [config.blankRatio, spellWholeWord]);
 
   const startGame = useCallback(() => {
     // Game start is a user gesture — resume the AudioContext now so the first
@@ -921,6 +930,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                 { key: "listen-type", icon: Volume2, bgClass: "bg-primary/10", iconClass: "text-primary" },
                 { key: "scramble", icon: Shuffle, bgClass: "bg-primary/10", iconClass: "text-primary" },
                 { key: "fill-blanks", icon: Keyboard, bgClass: "bg-primary/10", iconClass: "text-primary" },
+                { key: "spell-whole-word", icon: EyeOff, bgClass: "bg-primary/10", iconClass: "text-primary" },
                 { key: "mixed", icon: HelpCircle, bgClass: "bg-primary/10", iconClass: "text-primary" },
               ]}
               tipContentKey="reading.glossary.spelling.help.tip"
@@ -999,6 +1009,35 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
               ))}
             </div>
           </div>
+
+          {(gameMode === "fill-blanks" || gameMode === "mixed") && (
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2 pr-3">
+                <Keyboard className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div>
+                  <div className="text-sm">{t("reading.glossary.spelling.spellWholeWord")}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {t("reading.glossary.spelling.spellWholeWordDesc")}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSpellWholeWord(!spellWholeWord)}
+                aria-pressed={spellWholeWord}
+                className={cn(
+                  "w-12 h-6 rounded-full transition-colors relative shrink-0",
+                  spellWholeWord ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <div
+                  className={cn(
+                    "absolute top-1 w-4 h-4 rounded-full bg-white transition-transform",
+                    spellWholeWord ? "translate-x-7" : "translate-x-1"
+                  )}
+                />
+              </button>
+            </div>
+          )}
 
           <div>
             <label className="text-sm font-medium mb-3 block">

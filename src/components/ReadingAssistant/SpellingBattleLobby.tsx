@@ -100,6 +100,9 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
   const [vocabFilter, setVocabFilter] = useState<VocabularyFilter>("random");
   const [reviewListId, setReviewListId] = useState<string>("");
   const [gameMode, setGameMode] = useState<SpellingGameMode>("listen-type");
+  // fill-blanks / mixed only: blank out every letter so players spell the
+  // whole word from memory (all underscores shown).
+  const [fullBlank, setFullBlank] = useState(false);
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
   const [wordCount, setWordCount] = useState(10);
   const [timed, setTimed] = useState(true);
@@ -183,12 +186,12 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
     }
     battle.clearError();
     battle.createRoom({
-      config: { source, difficulty, gameMode, wordCount, timed, classBattle },
+      config: { source, difficulty, gameMode, wordCount, timed, classBattle, fullBlank },
       targetClassId: classBattle && targetClassId ? targetClassId : undefined,
       targetPresetId: classBattle && targetPresetId ? targetPresetId : undefined,
       hostAsSpectator: canHostClassBattle && hostAsSpectator ? true : undefined,
     });
-  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, targetPresetId, hostAsSpectator, canHostClassBattle, difficulty, gameMode, wordCount, timed, battle, t]);
+  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, targetPresetId, hostAsSpectator, canHostClassBattle, difficulty, gameMode, fullBlank, wordCount, timed, battle, t]);
 
   const handleJoin = useCallback(() => {
     if (joinCode.trim().length < 4) {
@@ -465,6 +468,22 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
               ))}
             </div>
           </div>
+
+          {/* Spell whole word (fill-blanks / mixed only) */}
+          {(gameMode === "fill-blanks" || gameMode === "mixed") && (
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex items-start gap-2">
+                <Keyboard className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                <div>
+                  <Label className="text-sm">{t("reading.glossary.spelling.spellWholeWord")}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t("reading.glossary.spelling.spellWholeWordDesc")}
+                  </p>
+                </div>
+              </div>
+              <Switch checked={fullBlank} onCheckedChange={setFullBlank} />
+            </div>
+          )}
 
           {sourceType === "vocabulary" && (
             <div className="space-y-2">

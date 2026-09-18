@@ -64,6 +64,9 @@ export interface BattleRoomConfig {
   difficulty: SpellingDifficulty;
   /** Game mode (listen-type / scramble / fill-blanks / mixed). */
   gameMode: BattleGameMode;
+  /** fill-blanks / mixed only: blank out every letter so players spell the
+   *  whole word (shown as all underscores). Ignored for other modes. */
+  fullBlank?: boolean;
   /** Requested word count; server caps to the number actually available. */
   wordCount: number;
   timed: boolean;

@@ -71,4 +71,45 @@ describe("enrichWords", () => {
     // overwhelmingly likely (>1 - (2/3)^60). If this flakes, re-run.
     expect(sawScrambleWordTiles).toBe(true);
   });
+
+  it("fullBlank blanks every letter of a fill-blanks word", () => {
+    const words: BattleWord[] = [{ word: "cat" }];
+    const enriched = enrichWords(words, "fill-blanks", "medium", true);
+    expect(enriched[0]?.blankPositions).toEqual([0, 1, 2]);
+  });
+
+  it("fullBlank is ignored without the flag (partial blanks)", () => {
+    const words: BattleWord[] = [{ word: "cat" }];
+    const enriched = enrichWords(words, "fill-blanks", "medium");
+    // medium = 0.35 ratio → exactly 1 blank of 3 letters.
+    expect(enriched[0]?.blankPositions).toHaveLength(1);
+  });
+
+  it("fullBlank produces no blanks for non-fill-blanks modes", () => {
+    const words: BattleWord[] = [{ word: "cat" }];
+    expect(enrichWords(words, "listen-type", "medium", true)[0]?.blankPositions).toBeUndefined();
+    expect(enrichWords(words, "scramble", "medium", true)[0]?.blankPositions).toBeUndefined();
+  });
+
+  it("fullBlank in mixed mode applies only to fill-blanks words", () => {
+    // Run enough times to observe both a fill-blanks and a non-fill-blanks
+    // assignment; fullBlank must cover ALL positions when fill-blanks is
+    // rolled and produce nothing otherwise.
+    const words: BattleWord[] = [{ word: "cat" }];
+    let sawFillBlanks = false;
+    let sawOther = false;
+    for (let i = 0; i < 60; i++) {
+      const w = enrichWords(words, "mixed", "medium", true)[0];
+      if (w?.perWordMode === "fill-blanks") {
+        expect(w.blankPositions).toEqual([0, 1, 2]);
+        sawFillBlanks = true;
+      } else {
+        expect(w?.blankPositions).toBeUndefined();
+        sawOther = true;
+      }
+      if (sawFillBlanks && sawOther) break;
+    }
+    expect(sawFillBlanks).toBe(true);
+    expect(sawOther).toBe(true);
+  });
 });

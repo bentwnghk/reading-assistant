@@ -181,9 +181,12 @@ const BLANK_RATIO: Record<SpellingDifficulty, number> = {
 /** The three base modes "mixed" randomly picks from per word. */
 const BASE_MODES: BattleGameMode[] = ["listen-type", "scramble", "fill-blanks"];
 
-function computeBlankPositions(word: string, blankRatio: number): number[] {
+function computeBlankPositions(word: string, blankRatio: number, fullBlank = false): number[] {
   const len = word.length;
   if (len === 0) return [];
+  // "Spell whole word": every position blanked — the challenge renders as all
+  // underscores and players type the entire word from memory.
+  if (fullBlank) return [...Array(len).keys()];
   const blankCount = Math.max(1, Math.floor(len * blankRatio));
   return shuffle([...Array(len).keys()]).slice(0, blankCount).sort((a, b) => a - b);
 }
@@ -210,6 +213,7 @@ export function enrichWords(
   words: BattleWord[],
   gameMode: BattleGameMode,
   difficulty: SpellingDifficulty,
+  fullBlank = false,
 ): BattleWord[] {
   const blankRatio = BLANK_RATIO[difficulty];
   return words.map((w) => {
@@ -217,7 +221,7 @@ export function enrichWords(
       gameMode === "mixed" ? BASE_MODES[Math.floor(Math.random() * BASE_MODES.length)] : gameMode;
     const enriched: BattleWord = { ...w, perWordMode };
     if (perWordMode === "fill-blanks") {
-      enriched.blankPositions = computeBlankPositions(w.word, blankRatio);
+      enriched.blankPositions = computeBlankPositions(w.word, blankRatio, fullBlank);
     } else if (perWordMode === "scramble") {
       enriched.shuffledLetters = computeShuffledLetters(w.word);
     }
