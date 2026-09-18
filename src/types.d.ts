@@ -268,6 +268,15 @@ interface SpellingResultEntry {
    *  none) — the drill-down dialog uses it to show just the missing letters
    *  instead of the whole word as the correct answer. */
   blankPositions?: number[];
+  /** Battles only: marks that the entry came from a multiplayer battle (the
+   *  drill-down dialog badges battle records so teachers can tell them apart
+   *  from solo games). Absent on solo-game and legacy entries. */
+  source?: "battle";
+  /** Battles only: 0–1 fraction of the battle's words that belong to this
+   *  session's text (stemmed glossary/raw-text matching — see
+   *  utils/battleAttribution.ts). Persisted for transparency: an attributed
+   *  battle with e.g. 0.6 overlap means 40% of the words came from elsewhere. */
+  overlap?: number;
 }
 
 /** Which of the five grammar games a result entry came from. Values match the

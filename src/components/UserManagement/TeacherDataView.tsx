@@ -29,6 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { BattleSourceBadge } from "@/components/Internal/SessionResultDialogs"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import type { UserWithRole, StudentSessionData, SchoolInfo } from "@/lib/users"
@@ -1469,6 +1470,7 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
                   {viewingSpelling.accuracy}%
                 </Badge>
               )}
+              <BattleSourceBadge results={viewingSpelling?.results} />
             </DialogTitle>
             {viewingSpelling?.teacher && (
               <DialogDescription>{viewingSpelling.teacher}</DialogDescription>

@@ -8,6 +8,7 @@ import {
   Gamepad2,
   Keyboard,
   Loader2,
+  Swords,
   X,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -357,6 +358,27 @@ export function ReadingTestDrillDownDialog({
   )
 }
 
+/**
+ * Badge for spelling drill-downs whose latest record came from a multiplayer
+ * battle. Entries are tagged `source: "battle"` + the session-overlap
+ * fraction when persisted (SpellingBattleFlow), so a teacher can tell at a
+ * glance that the score was a battle and how much of it was this text's
+ * words — an attributed battle at e.g. 60% means the rest came from the
+ * host's selection. Renders nothing for solo/legacy records.
+ */
+export function BattleSourceBadge({ results }: { results?: SpellingResultEntry[] }) {
+  const { t } = useTranslation()
+  const battle = results?.find((r) => r.source === "battle")
+  if (!battle) return null
+  const overlap = Math.round((battle.overlap ?? 0) * 100)
+  return (
+    <Badge variant="outline" className="shrink-0 gap-1 whitespace-nowrap">
+      <Swords className="h-3 w-3" />
+      {t("userManagement.spellingBattleSource", { overlap })}
+    </Badge>
+  )
+}
+
 export function SpellingDrillDownDialog({
   data,
   onClose,
@@ -382,6 +404,7 @@ export function SpellingDrillDownDialog({
                 {data.accuracy}%
               </Badge>
             )}
+            <BattleSourceBadge results={data?.results} />
           </DialogTitle>
           {data?.student && (
             <DialogDescription>{data.student}</DialogDescription>

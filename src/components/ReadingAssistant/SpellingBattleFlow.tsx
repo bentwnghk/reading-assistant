@@ -8,6 +8,7 @@ import { useReadingStore } from "@/store/reading";
 import { useBattleStore } from "@/store/battle";
 import { useHistoryStore } from "@/store/history";
 import { logActivity } from "@/utils/activityLogger";
+import { computeBattleSessionAttribution } from "@/utils/battleAttribution";
 import { SpellingBattleLobby } from "./SpellingBattleLobby";
 import { SpellingBattleArena } from "./SpellingBattleArena";
 import { SpellingBattleResults } from "./SpellingBattleResults";
@@ -54,6 +55,23 @@ interface SpellingBattleFlowProps {
  * battles started from ANY entry point (Header dialog, reading page,
  * vocabulary page) are tracked — previously a page-supplied `onComplete`
  * silently dropped battles from entry points that didn't wire it.
+ *
+ * SESSION-ATTRIBUTION GATE: battle words come from the HOST's word source
+ * (their glossary, vocabulary bank, review list, hand-picked selection) and
+ * may have nothing to do with the reading session currently open on this
+ * client. Session-scoped writes (best score, spellingResults drill-down,
+ * history persistence, sessionId on the activity log) only fire when the
+ * battled words actually belong to the active session — decided by
+ * utils/battleAttribution.ts: stemmed matching against the session's glossary
+ * OR raw extracted text, full match required below 3 words, otherwise a
+ * majority with a floor of 3 hits. Same-text class battles pass (each
+ * player's AI glossary differs, and the words still occur in the shared
+ * text); foreign-source battles (e.g. an invited battle on the host's
+ * vocabulary bank) don't. Persisted battle entries carry the overlap fraction
+ * so the teacher drill-down can badge them. User-scoped records (SRS PATCH,
+ * `vocabulary_review_sessions`, activity log row itself) are ALWAYS written —
+ * the leaderboard and dashboards count spelling from those, not from the
+ * session columns.
  */
 export function SpellingBattleFlow({
   defaultGlossarySessionId,
@@ -87,32 +105,65 @@ export function SpellingBattleFlow({
     const difficulty = battle.config?.difficulty ?? "medium";
     const gameMode = battle.config?.gameMode ?? "listen-type";
 
+    // Session-attribution gate (see file-level comment + utils/battleAttribution.ts):
+    // do the battled words belong to the reading session currently open on
+    // this client? Matching is stemmed glossary/raw-text occurrence, so the
+    // host's own glossary is a 100% match, a same-text class battle matches
+    // despite AI-glossary drift and inflection differences, and foreign
+    // sources (the host's vocabulary bank, another session, a review list)
+    // score little to none. Threshold: full match below 3 words, otherwise
+    // max(majority, 3 hits). `overlap` is persisted on the drill-down record
+    // so teachers can see how much of an attributed battle was actually this
+    // text's words.
+    const store = useReadingStore.getState();
+    const { belongsToSession, overlap } = computeBattleSessionAttribution({
+      sessionId: id,
+      battleWords: battle.myWordResults.map((wr) => wr.word),
+      glossaryWords: store.glossary.map((g) => g.word),
+      extractedText: store.extractedText,
+    });
+
     // 1. Reading store: best score + running accuracy (both call sites).
     //    Read the PREVIOUS best BEFORE the max-update so the results screen
     //    can celebrate a new personal best (the store only keeps a max).
-    const previousBest = useReadingStore.getState().spellingGameBestScore;
-    const isNewBest = previousBest > 0 && me.total > previousBest;
-    useBattleStore.getState().setNewBestAchieved(isNewBest);
-    setSpellingGameBestScore(me.total, accuracy);
+    //    Session-scoped — skipped for battles whose words aren't from this
+    //    session (the "new best" celebration is skipped too: celebrating a
+    //    best that is never recorded would be misleading).
+    if (belongsToSession) {
+      const previousBest = store.spellingGameBestScore;
+      const isNewBest = previousBest > 0 && me.total > previousBest;
+      useBattleStore.getState().setNewBestAchieved(isNewBest);
+      setSpellingGameBestScore(me.total, accuracy);
+    }
 
     // 1b. Per-word drill-down record (teacher Student Data view). Battles only
     //     track correctness client-side (myWordResults has no answer text), so
     //     userAnswer is empty — the dialog shows the word + green/red state.
-    if (battle.myWordResults.length > 0) {
+    //     Entries are tagged `source: "battle"` + the session-overlap fraction
+    //     so the drill-down can badge the record honestly (transparency for
+    //     imperfect attribution — see #3 in the gate's design notes).
+    //     Same gate: a drill-down of foreign words on a session's spelling
+    //     record is exactly the confusion this gate prevents.
+    if (belongsToSession && battle.myWordResults.length > 0) {
       setSpellingResults(
         battle.myWordResults.map((wr) => ({
           word: wr.word,
           userAnswer: "",
           correct: wr.correct,
           mode: gameMode,
-        }))
+          source: "battle" as const,
+          overlap,
+        })),
       );
     }
 
     // 2. Activity log → leaderboard (both call sites). The `multiplayer` flag
     //    + opponentCount/rank enrich the existing spelling_complete stream.
+    //    The row itself is user-scoped (always logged); the sessionId
+    //    attribution follows the gate.
+    const attributedSessionId = belongsToSession ? id : undefined;
     logActivity("spelling_complete", {
-      sessionId: id || undefined,
+      sessionId: attributedSessionId,
       score: me.total,
       accuracy,
       details: {
@@ -130,7 +181,7 @@ export function SpellingBattleFlow({
     //     spelling_challenges counter (spelling_complete) undisturbed.
     if (me.rank === 1 && battle.finalRanking.length > 1) {
       logActivity("spelling_battle_win", {
-        sessionId: id || undefined,
+        sessionId: attributedSessionId,
         score: me.total,
         accuracy,
         details: {
@@ -143,7 +194,7 @@ export function SpellingBattleFlow({
     }
     if ((me.maxStreak ?? 0) >= 5) {
       logActivity("spelling_hot_streak", {
-        sessionId: id || undefined,
+        sessionId: attributedSessionId,
         score: me.total,
         accuracy,
         details: { mode: gameMode, difficulty, streak: me.maxStreak },
@@ -202,8 +253,11 @@ export function SpellingBattleFlow({
       }
     }
 
-    // 4. History persistence (reading session with updated spelling best score).
-    if (id) {
+    // 4. History persistence (reading session with updated spelling best
+    //    score). Same gate — only persist into the session the battle was
+    //    attributed to. Unattributed battles still live in
+    //    vocabulary_review_sessions + activity_logs (steps 2/3).
+    if (id && belongsToSession) {
       const sessionSnapshot = backup();
       const updated = update(id, sessionSnapshot);
       if (!updated) {

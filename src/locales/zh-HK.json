@@ -3329,6 +3329,7 @@
   "userManagement": {
     "title": "用戶管理",
     "loadFailed": "載入資料失敗",
+    "spellingBattleSource": "對戰 · {{overlap}}% 字詞來自本文",
     "tabs": {
       "users": "用戶",
       "classes": "班別",

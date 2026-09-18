@@ -3299,6 +3299,7 @@
   "userManagement": {
     "title": "User Management",
     "loadFailed": "Failed to load data",
+    "spellingBattleSource": "Battle · {{overlap}}% same-text words",
     "tabs": {
       "users": "Users",
       "classes": "Classes",
