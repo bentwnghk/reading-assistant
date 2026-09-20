@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, DEFAULT_TTS_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -1235,17 +1235,25 @@ function Setting({ open, onClose }: SettingProps) {
                         <Select
                           value={field.value}
                           onValueChange={(value) => {
+                            const prevModel = form.getValues("ttsModel");
                             field.onChange(value);
                             updateSetting("ttsModel", value);
-                            // Voice catalogs differ per model — coerce the
-                            // current voice into the new model's list so the
-                            // stored model/voice pair is always valid.
-                            const voices = TTS_MODEL_VOICES[value as import("@/store/setting").TtsModel];
-                            if (!voices.includes(form.getValues("ttsVoice"))) {
-                              const fallback = DEFAULT_TTS_VOICES[value as import("@/store/setting").TtsModel];
-                              form.setValue("ttsVoice", fallback);
-                              updateSetting("ttsVoice", fallback);
+                            // Voice catalogs differ per model. Remember the
+                            // voice paired with the OUTGOING model, then
+                            // restore the incoming model's own remembered
+                            // voice (or its default) — switching back and
+                            // forth must not lose either model's selection.
+                            const currentVoice = form.getValues("ttsVoice");
+                            const prevVoices = (TTS_MODEL_VOICES[prevModel as import("@/store/setting").TtsModel] ?? TTS_VOICES) as readonly string[];
+                            const voiceMap = { ...useSettingStore.getState().ttsVoiceByModel };
+                            if (prevVoices.includes(currentVoice)) {
+                              voiceMap[prevModel] = currentVoice;
                             }
+                            const nextVoice = getSavedTtsVoiceFor(value, voiceMap);
+                            voiceMap[value] = nextVoice;
+                            update({ ttsVoiceByModel: voiceMap });
+                            form.setValue("ttsVoice", nextVoice as (typeof ALL_TTS_VOICES)[number]);
+                            updateSetting("ttsVoice", nextVoice);
                           }}
                         >
                           <SelectTrigger className="form-field">
@@ -1281,6 +1289,11 @@ function Setting({ open, onClose }: SettingProps) {
                           onValueChange={(value) => {
                             field.onChange(value);
                             updateSetting("ttsVoice", value);
+                            // Record the selection under the active model so
+                            // switching models (and back) restores it.
+                            const voiceMap = { ...useSettingStore.getState().ttsVoiceByModel };
+                            voiceMap[form.getValues("ttsModel")] = value;
+                            update({ ttsVoiceByModel: voiceMap });
                           }}
                         >
                           <SelectTrigger className="form-field">

@@ -143,6 +143,21 @@ export function getEffectiveTtsVoice(model: string, voice: string): string {
   return DEFAULT_TTS_VOICES[model as TtsModel] ?? DEFAULT_TTS_VOICES["tts-1"];
 }
 
+/** The voice remembered for a model in the per-model memory map — falling
+ *  back to the model's default when nothing (or something invalid) was
+ *  saved. Used when switching ttsModel so each model keeps its own voice. */
+export function getSavedTtsVoiceFor(
+  model: string,
+  byModel: Record<string, string> | undefined
+): string {
+  const remembered = byModel?.[model];
+  const voices = TTS_MODEL_VOICES[model as TtsModel];
+  if (remembered && voices?.includes(remembered as AnyTtsVoice)) {
+    return remembered;
+  }
+  return DEFAULT_TTS_VOICES[model as TtsModel] ?? DEFAULT_TTS_VOICES["tts-1"];
+}
+
 /** Gemini TTS models are LLM-based and treat the request input as a
  *  controllable *prompt* (style/tone/role directions are read out of the text
  *  itself — see the official prompting guide). Bare inputs like the single
@@ -201,6 +216,14 @@ export interface SettingStore {
   basicTutorModel: BasicTutorModel;
   ttsModel: TtsModel;
   ttsVoice: string;
+  /**
+   * Per-model remembered TTS voice selections, so switching ttsModel back and
+   * forth restores each model's last-used voice instead of resetting to the
+   * model default. Keys are TtsModel ids; values are validated against each
+   * model's catalog in sanitizeModelSettings. `ttsVoice` always mirrors the
+   * active model's voice (kept for all call sites + server sync).
+   */
+  ttsVoiceByModel: Record<string, string>;
   ttsPlaybackRate: TTSPlaybackRate;
   autoSpeakFlashcard: boolean;
   /** Game SFX (correct/wrong/streak/countdown…) played via the shared AudioContext. */
@@ -325,6 +348,7 @@ export const defaultValues: SettingStore = {
   basicTutorModel: "gpt-5.6-luna",
   ttsModel: "tts-1",
   ttsVoice: "onyx",
+  ttsVoiceByModel: {},
   ttsPlaybackRate: 1.0 as TTSPlaybackRate,
   autoSpeakFlashcard: true,
   gameSoundEffects: true,
@@ -397,6 +421,30 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   // model's catalog so model/voice are always a valid pair.
   if (typeof state.ttsVoice === "string") {
     state.ttsVoice = getEffectiveTtsVoice(state.ttsModel as TtsModel, state.ttsVoice);
+  }
+  // Per-model voice memory: keep only valid (model, voice) pairs, and seed
+  // the ACTIVE model's entry from ttsVoice so a legacy single-voice setting
+  // (saved before per-model memory existed) carries over instead of being
+  // reset to the default on the first model switch.
+  const rawVoiceMap = state.ttsVoiceByModel as unknown;
+  const cleanedVoiceMap: Record<string, string> = {};
+  if (rawVoiceMap && typeof rawVoiceMap === "object" && !Array.isArray(rawVoiceMap)) {
+    for (const model of TTS_MODELS) {
+      const voice = (rawVoiceMap as Record<string, unknown>)[model];
+      if (
+        typeof voice === "string" &&
+        (TTS_MODEL_VOICES[model] as readonly string[]).includes(voice)
+      ) {
+        cleanedVoiceMap[model] = voice;
+      }
+    }
+  }
+  state.ttsVoiceByModel = cleanedVoiceMap;
+  if (
+    typeof state.ttsVoice === "string" &&
+    !cleanedVoiceMap[state.ttsModel as TtsModel]
+  ) {
+    cleanedVoiceMap[state.ttsModel as TtsModel] = state.ttsVoice;
   }
 }
 
