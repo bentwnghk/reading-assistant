@@ -106,7 +106,7 @@ Any questions? Contact your teacher or the school admin. Happy reading! 📚
 Mr.🆖 ProReader 可以像原生 App 一樣安裝在你的 iPad 上，從主畫面開啟即全螢幕顯示。
 
 1. 在 iPad 上開啟 **Safari**。
-2. 前往 **https://read.mr5ai.com**。
+2. 前往 https://read.mr5ai.com。
 3. 點擊 Safari 工具列頂部的 **「分享」按鈕** — 帶有向上箭頭（↑）的方形圖示。
 4. 在分享選單中向下滑動，點擊 **「更多」**，然後 **「加入主畫面」**。
 5. 保留名稱 **Mr.🆖 ProReader**，點擊右上角的 **「加入」**。
@@ -115,7 +115,7 @@ Mr.🆖 ProReader 可以像原生 App 一樣安裝在你的 iPad 上，從主畫
 ### 第二部分 — 登入即用
 
 **步驟一 — 使用學校 Google 帳戶登入**
-開啟應用程式（ **https://read.mr5ai.com** 或新的主畫面圖示 ），以 **學校帳戶**（ **@gs.keichi.edu.hk** ）透過 Google 登入。
+開啟應用程式（ https://read.mr5ai.com 或新的主畫面圖示 ），以 **學校帳戶**（ **@gs.keichi.edu.hk** ）透過 Google 登入。
 
 **步驟二 — 就是這麼簡單！**
 所有 AI 功能即時可用。應用程式會自動設定為 **免費** 模式——沒有設定對話框、沒有訪問密碼。開啟 **設定 → 一般** 可看到確認訊息：*「✅ 你的帳戶已啟用免費 AI 訪問 — 無需訪問密碼。」*
