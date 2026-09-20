@@ -143,6 +143,18 @@ export function getEffectiveTtsVoice(model: string, voice: string): string {
   return DEFAULT_TTS_VOICES[model as TtsModel] ?? DEFAULT_TTS_VOICES["tts-1"];
 }
 
+/** Gemini TTS models are LLM-based and treat the request input as a
+ *  controllable *prompt* (style/tone/role directions are read out of the text
+ *  itself — see the official prompting guide). Bare inputs like the single
+ *  word "antagonist" get interpreted as a performance direction ("act as an
+ *  antagonist") instead of content to recite, and the resulting "performance"
+ *  can trip the safety filter (PROHIBITED_CONTENT → 400/500). Callers must
+ *  wrap input for these models with an explicit recitation instruction —
+ *  see buildTtsRequest() in src/utils/tts.ts. */
+export function isGeminiTtsModel(model: string): boolean {
+  return model.startsWith("gemini");
+}
+
 export const TTS_VOICE_LABELS: Record<string, string> = {
   alloy: "Alloy (US male)",
   nova: "Nova (US female)",

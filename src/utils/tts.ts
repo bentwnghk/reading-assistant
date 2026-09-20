@@ -20,6 +20,7 @@ import {
   TTS_MODELS,
   TTS_MODEL_RESPONSE_FORMATS,
   getEffectiveTtsVoice,
+  isGeminiTtsModel,
   type TtsModel,
 } from "@/store/setting";
 
@@ -217,6 +218,26 @@ function resolveTtsModel(model: string | undefined): TtsModel {
   return TTS_MODELS.includes(model as TtsModel) ? (model as TtsModel) : "tts-1";
 }
 
+/** Recitation framing for Gemini TTS models. They are LLM-based and treat the
+ *  input as a controllable prompt (the official docs steer delivery with
+ *  patterns like `Say in a spooky whisper: "..."`). A bare payload — e.g. the
+ *  single word "antagonist" or "romantic" — is ambiguous, so the model
+ *  sometimes *performs* it (acts out the word) instead of reciting it, and the
+ *  improvised performance can trip the safety filter (PROHIBITED_CONTENT →
+ *  400/500, which the docs list as a known gemini-3.1-flash-tts-preview
+ *  limitation). Framing the payload as an explicit verbatim recitation
+ *  instruction resolves both failure modes. Inner double quotes are normalized
+ *  to apostrophes so they can't break the quotation convention.
+ *  Ref: https://ai.google.dev/gemini-api/docs/speech-generation */
+const GEMINI_TTS_RECITATION_PREFIX =
+  "Say the following text exactly as written, word for word, in a neutral and clear tone";
+
+function frameTtsInput(model: TtsModel, text: string): string {
+  return isGeminiTtsModel(model)
+    ? `${GEMINI_TTS_RECITATION_PREFIX}: "${text.replace(/"/g, "'")}"`
+    : text;
+}
+
 interface TtsRequest {
   url: string;
   headers: HeadersInit;
@@ -259,7 +280,7 @@ function buildTtsRequest(opts: {
 
   const body: Record<string, unknown> = {
     model: ttsModel,
-    input: opts.text,
+    input: frameTtsInput(ttsModel, opts.text),
     voice,
     response_format: responseFormat,
   };
