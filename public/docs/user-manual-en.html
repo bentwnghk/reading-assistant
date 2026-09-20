@@ -930,13 +930,14 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Reading Text Generator Model</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-flash · gemini-3.7-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>Basic AI Tutor Model</td><td>deepseek-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Advanced AI Tutor Model</td><td>deepseek-flash · gemini-3.8-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
+        <tr><td>TTS Model</td><td>tts-1 · gemini-3.1-flash-tts-preview</td><td>gemini-3.1-flash-tts-preview</td></tr>
       </table>
       <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code>† for the most capable (and costliest) reasoning — this preview model is only offered to super-admins and Meter users.</div>
 
       <h3>3.3 TTS tab — text-to-speech</h3>
       <table class="ref">
         <tr><th>Setting</th><th>Options</th><th>Notes</th></tr>
-        <tr><td><strong>TTS Voice</strong></td><td>Alloy (US male) · Nova (US female) · Adam (US male) · Phoebe (US female) · Ollie (UK male) · Ada (UK female)</td><td>Used by glossary speak buttons, flashcards, spelling game.</td></tr>
+        <tr><td><strong>TTS Voice</strong></td><td>Depends on the TTS Model (see §3.2):<br><b>tts-1</b> — Alloy (US male) · Nova (US female) · Adam (US male) · Phoebe (US female) · Ollie (UK male) · Ada (UK female)<br><b>gemini-3.1-flash-tts-preview</b> — Enceladus (breathy male) · Kore (firm female) · Puck (upbeat male) · Aoede (breezy female) · Orus (firm male) · Gacrux (mature female)</td><td>Default: Kore (firm female). Each model remembers its own voice when you switch. Used by glossary speak buttons, flashcards, spelling game.</td></tr>
         <tr><td><strong>Playback Speed</strong></td><td>0.25× · 0.5× · 0.75× · 1.0×</td><td>Slower speeds help language learners.</td></tr>
         <tr><td><strong>Auto-speak Flashcard</strong></td><td>on / off</td><td>Reads each word aloud automatically when a flashcard loads. On by default.</td></tr>
       </table>

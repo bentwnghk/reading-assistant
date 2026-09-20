@@ -455,7 +455,7 @@ Perfect your pronunciation with natural voice reading.
 | 🗣️ **Read Words** | Click any word to hear it |
 | 📖 **Read Sentences** | Listen to full sentences |
 | 📝 **Text Selection Popup** | Select any text and tap Read Aloud |
-| 🎙️ **Voice Selection** | Choose from 6 voices (alloy, nova, echo, fable, onyx, shimmer) |
+| 🎙️ **TTS Model & Voice Selection** | Default `gemini-3.1-flash-tts-preview` with 6 Gemini voices (Enceladus, Kore, Puck, Aoede, Orus, Gacrux — Kore default); or `tts-1` with 6 OpenAI voices (alloy, nova, echo, fable, onyx, shimmer). Each model remembers its own voice |
 | ⏱️ **Playback Speed** | Adjustable rate (0.25x, 0.5x, 0.75x, 1.0x) |
 | 🔄 **Auto-Speak** | Flashcards can auto-read on load |
 
