@@ -19,13 +19,13 @@ UI labels quoted in the email mirror `setting.freeAccessNotice` in `src/locales/
 
 ## Subject
 
-> Welcome to Mr.🆖 ProReader — Free Access for {{SCHOOL_NAME_EN}} | 歡迎使用 Mr.🆖 ProReader — {{SCHOOL_NAME_ZH}}免費使用
+> Welcome to Mr.🆖 ProReader | 歡迎使用 Mr.🆖 ProReader
 
 ---
 
 ## Email body
 
-Dear Teachers and Students,
+Dear Colleagues,
 
 Welcome to **Mr.🆖 ProReader**! Our school has arranged **free access** for all {{SCHOOL_NAME_EN}} members. There is **no password to enter** — access is linked to your school Google account, so simply signing in is enough. Nothing to remember, nothing to type.
 
@@ -97,16 +97,16 @@ Any questions? Contact your teacher or the school admin. Happy reading! 📚
 
 ---
 
-**各位老師：**
+**各位同事：**
 
-歡迎使用 **Mr.🆖 ProReader**！學校已為全體{{SCHOOL_NAME_ZH}}師生安排 **免費使用**。 **毋須輸入任何密碼** ——訪問權已與你的學校 Google 帳戶綁定，只要登入即可使用，不用記、不用打。
+學校已為全體師生安排免費使用 **Mr.🆖 ProReader**。 **毋須輸入任何密碼** ——訪問權已與你的學校 Google 帳戶綁定，只要登入即可使用。
 
 ### 第一部分 — 在 iPad 上安裝應用程式（請先完成）
 
 Mr.🆖 ProReader 可以像原生 App 一樣安裝在你的 iPad 上，從主畫面開啟即全螢幕顯示。
 
 1. 在 iPad 上開啟 **Safari**。
-2. 前往 **{{APP_URL}}**。
+2. 前往 **https://read.mr5ai.com**。
 3. 點擊 Safari 工具列頂部的 **「分享」按鈕** — 帶有向上箭頭（↑）的方形圖示。
 4. 在分享選單中向下滑動，點擊 **「更多」**，然後 **「加入主畫面」**。
 5. 保留名稱 **Mr.🆖 ProReader**，點擊右上角的 **「加入」**。
@@ -115,10 +115,10 @@ Mr.🆖 ProReader 可以像原生 App 一樣安裝在你的 iPad 上，從主畫
 ### 第二部分 — 登入即用
 
 **步驟一 — 使用學校 Google 帳戶登入**
-開啟應用程式（**{{APP_URL}}** 或新的主畫面圖示），以**學校帳戶**（**{{SCHOOL_EMAIL_DOMAIN}}**）透過 Google 登入。
+開啟應用程式（ **https://read.mr5ai.com** 或新的主畫面圖示 ），以 **學校帳戶**（ **@gs.keichi.edu.hk** ）透過 Google 登入。
 
 **步驟二 — 就是這麼簡單！**
-所有 AI 功能即時可用。應用程式會自動設定為**免費**模式——沒有設定對話框、沒有訪問密碼。開啟**設定 → 一般**可看到確認訊息：*「✅ 你的帳戶已啟用免費 AI 訪問 — 無需訪問密碼。」*
+所有 AI 功能即時可用。應用程式會自動設定為 **免費** 模式——沒有設定對話框、沒有訪問密碼。開啟 **設定 → 一般** 可看到確認訊息：*「✅ 你的帳戶已啟用免費 AI 訪問 — 無需訪問密碼。」*
 
 **步驟三 — 開始閱讀**
 上傳閱讀材料的照片，或從文本庫選擇文章，或使用 AI 生成，然後試試摘要、思維導圖、文本分析和改寫、詞彙或遊戲等功能。
@@ -161,8 +161,8 @@ Mr.🆖 ProReader 可以像原生 App 一樣安裝在你的 iPad 上，從主畫
 
 ### 重要事項
 
-- **請使用學校帳戶**（{{SCHOOL_EMAIL_DOMAIN}}）——個人 Google 帳戶不會自動享有免費訪問。
+- **請使用學校帳戶**（ @gs.keichi.edu.hk ）——個人 Google 帳戶不會自動享有免費訪問。
 - 免費訪問綁定你登入的學校帳戶，無法轉交校外人士。
 - 若 AI 功能出現 *「無權限」*，你很可能以個人 Google 帳戶登入了——請登出後再以學校帳戶登入。
 
-如有疑問，請聯絡本人。祝閱讀愉快！📚
+如欲了解更多功能和使用說明，請查看 **用戶手冊** (https://read.mr5ai.com/docs/user-manual-zh-hk.html)。如有疑問，請聯絡本人。
