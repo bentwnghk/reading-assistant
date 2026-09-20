@@ -62,6 +62,7 @@ export default function PhrasesTab() {
   const {
     mode,
     accessPassword,
+    ttsModel,
     ttsVoice,
     ttsPlaybackRate,
     openaicompatibleApiKey,
@@ -75,6 +76,7 @@ export default function PhrasesTab() {
       await unlockAudio();
       await speakWord({
         word: phrase,
+        model: ttsModel,
         voice: ttsVoice,
         speed: ttsPlaybackRate,
         mode,
@@ -85,7 +87,7 @@ export default function PhrasesTab() {
         onError: (msg) => toast.error(msg),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+    [ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
   );
 
   useEffect(() => () => stopSpeaking(), []);

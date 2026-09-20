@@ -243,7 +243,7 @@ function SpellingResultScreen({
 
 function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete, disableSessionGlossary }: VocabularySpellingProps) {
   const { t } = useTranslation();
-  const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
+  const { ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } = useSettingStore();
   const { id, spellingGameBestScore, setSpellingGameBestScore, setSpellingResults, glossaryRatings, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
   const effectiveRatings = mergedRatings ?? glossaryRatings;
@@ -560,6 +560,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     async (word: string) => {
       await speakWordShared({
         word,
+        model: ttsModel,
         voice: ttsVoice,
         speed: ttsPlaybackRate,
         mode,
@@ -572,7 +573,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
         onError: (msg) => toast.error(msg),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
+    [ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
   );
 
   const checkAnswer = useCallback(() => {

@@ -112,7 +112,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
   const { t } = useTranslation();
   const { data: session } = useSession();
   const battle = useSpellingBattle();
-  const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } =
+  const { ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy } =
     useSettingStore();
 
   const [userInput, setUserInput] = useState("");
@@ -166,6 +166,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
     async (text: string) => {
       await speakWord({
         word: text,
+        model: ttsModel,
         voice: ttsVoice,
         speed: ttsPlaybackRate,
         mode,
@@ -183,7 +184,7 @@ export function SpellingBattleArena({ onExit, compact }: SpellingBattleArenaProp
         onBlocked: () => setSoundEnabled(false),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
+    [ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy],
   );
 
   // Per-word lifecycle: reset state + speak the word (listen-type only) on a new word.

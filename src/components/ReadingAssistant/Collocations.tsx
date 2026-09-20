@@ -28,6 +28,7 @@ function Collocations() {
   const {
     mode,
     accessPassword,
+    ttsModel,
     ttsVoice,
     ttsPlaybackRate,
     openaicompatibleApiKey,
@@ -43,6 +44,7 @@ function Collocations() {
       await unlockAudio();
       await speakWord({
         word: chunk,
+        model: ttsModel,
         voice: ttsVoice,
         speed: ttsPlaybackRate,
         mode,
@@ -53,7 +55,7 @@ function Collocations() {
         onError: (msg) => toast.error(msg),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+    [ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
   );
 
   useEffect(() => () => stopSpeaking(), []);

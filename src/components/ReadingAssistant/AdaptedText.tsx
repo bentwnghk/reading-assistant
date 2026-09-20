@@ -74,12 +74,10 @@ import {
 import { useReadingStore, getAbortController, removeAbortController } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import { useGlobalStore } from "@/store/global";
-import { generateSignature } from "@/utils/signature";
-import { completePath } from "@/utils/url";
 import { parseError } from "@/utils/error";
 import { sanitizeSentenceAnalysis } from "@/utils/text";
 import { splitSentences } from "@/utils/sentences";
-import { readAlong, stopReadAlong, stopSpeaking, unlockAudio, isAudioUnlocked } from "@/utils/tts";
+import { readAlong, stopReadAlong, stopSpeaking, unlockAudio, isAudioUnlocked, speakWord } from "@/utils/tts";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import useModelProvider from "@/hooks/useAiProvider";
 import { analyzeSentencePrompt } from "@/constants/readingPrompts";
@@ -408,6 +406,7 @@ function AdaptedText() {
   const { setTutorChatSelectedText } = useGlobalStore();
 
   const {
+    ttsModel,
     ttsVoice,
     ttsPlaybackRate,
     mode,
@@ -886,100 +885,28 @@ function AdaptedText() {
         audioRef.current = null;
       }
 
-      setIsTTSLoading(true);
+      // The click is a user gesture — unlock the AudioContext (idempotent) so
+      // the shared Web Audio TTS path can play. See src/utils/tts.ts.
+      await unlockAudio();
+      await speakWord({
+        word: selectedText,
+        model: ttsModel,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        openaicompatibleApiProxy,
+        accessPassword,
+        audioRef,
+        onStart: () => setIsTTSLoading(true),
+        onEnd: () => setIsTTSLoading(false),
+        onError: (msg) => toast.error(msg),
+      });
 
-      try {
-        const headers: HeadersInit = {
-          "Content-Type": "application/json",
-        };
-
-        let url: string;
-        if (mode === "local") {
-          url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
-          if (openaicompatibleApiKey) {
-            headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
-          }
-        } else if (mode === "subscription") {
-          url = "/api/ai/subscription/v1/audio/speech";
-        } else {
-          url = "/api/ai/openaicompatible/v1/audio/speech";
-          if (accessPassword) {
-            headers["Authorization"] = `Bearer ${generateSignature(
-              accessPassword,
-              Date.now()
-            )}`;
-          }
-        }
-
-        const response = await fetch(url, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            model: "tts-1",
-            input: selectedText,
-            voice: ttsVoice,
-            response_format: "mp3",
-            speed: ttsPlaybackRate,
-          }),
-        });
-
-        if (!response.ok) {
-          const errText = await response.text();
-          let errorMsg = `TTS request failed (${response.status})`;
-          try {
-            const parsed = JSON.parse(errText);
-            if (parsed.error?.status && parsed.error?.message) {
-              errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
-            }
-          } catch {}
-          toast.error(errorMsg);
-          return;
-        }
-
-        const audioBuffer = await response.arrayBuffer();
-        const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        await new Promise<void>((resolve, reject) => {
-          const audio = new Audio();
-          audioRef.current = audio;
-
-          audio.oncanplay = () => {
-            audio.play().then(resolve).catch(reject);
-          };
-
-          audio.onended = () => {
-            URL.revokeObjectURL(audioUrl);
-            audioRef.current = null;
-          };
-
-          audio.onerror = (e) => {
-            URL.revokeObjectURL(audioUrl);
-            audioRef.current = null;
-            reject(new Error(`Audio element error: ${JSON.stringify(e)}`));
-          };
-
-          audio.src = audioUrl;
-          audio.load();
-        });
-
-        setSelection(null);
-        selectionObj?.removeAllRanges();
-      } catch (error) {
-        toast.error(parseError(error));
-      } finally {
-        setIsTTSLoading(false);
-      }
+      setSelection(null);
+      selectionObj?.removeAllRanges();
     },
-    [
-      selection,
-      ttsVoice,
-      ttsPlaybackRate,
-      mode,
-      openaicompatibleApiKey,
-      accessPassword,
-      openaicompatibleApiProxy,
-    ]
+    [selection, ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
   );
 
   const handleAnalyzeSentence = useCallback(
@@ -1144,6 +1071,7 @@ function AdaptedText() {
       void readAlong({
         sentences: readAlongSentences,
         startIndex,
+        model: ttsModel,
         voice: ttsVoice,
         speed: ttsPlaybackRate,
         mode,
@@ -1162,7 +1090,7 @@ function AdaptedText() {
         },
       });
     },
-    [readAlongSentences, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword, setReadAlong, t],
+    [readAlongSentences, ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword, setReadAlong, t],
   );
 
   const handleToggleReadAlong = useCallback(async () => {
@@ -1374,55 +1302,25 @@ function AdaptedText() {
         audioRef.current = null;
       }
 
-      setIsTTSLoading(true);
-      try {
-        const headers: HeadersInit = { "Content-Type": "application/json" };
-        let url: string;
-        if (mode === "local") {
-          url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
-          if (openaicompatibleApiKey) headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
-        } else if (mode === "subscription") {
-          url = "/api/ai/subscription/v1/audio/speech";
-        } else {
-          url = "/api/ai/openaicompatible/v1/audio/speech";
-          if (accessPassword) headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
-        }
-        const response = await fetch(url, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ model: "tts-1", input: word, voice: ttsVoice, response_format: "mp3", speed: ttsPlaybackRate }),
-        });
-        if (!response.ok) {
-          const errText = await response.text();
-          let errorMsg = `TTS failed (${response.status})`;
-          try {
-            const parsed = JSON.parse(errText);
-            if (parsed.error?.status && parsed.error?.message) {
-              errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
-            }
-          } catch {}
-          toast.error(errorMsg);
-          return;
-        }
-        const audioBuffer = await response.arrayBuffer();
-        const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        await new Promise<void>((resolve, reject) => {
-          const audio = new Audio();
-          audioRef.current = audio;
-          audio.oncanplay = () => audio.play().then(resolve).catch(reject);
-          audio.onended = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; };
-          audio.onerror = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; reject(new Error("Audio error")); };
-          audio.src = audioUrl;
-          audio.load();
-        });
-      } catch (error) {
-        toast.error(parseError(error));
-      } finally {
-        setIsTTSLoading(false);
-      }
+      // The click is a user gesture — unlock the AudioContext (idempotent) so
+      // the shared Web Audio TTS path can play. See src/utils/tts.ts.
+      await unlockAudio();
+      await speakWord({
+        word,
+        model: ttsModel,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        openaicompatibleApiProxy,
+        accessPassword,
+        audioRef,
+        onStart: () => setIsTTSLoading(true),
+        onEnd: () => setIsTTSLoading(false),
+        onError: (msg) => toast.error(msg),
+      });
     },
-    [glossaryPopover, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
+    [glossaryPopover, ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
   );
 
   const setContainerRef = useCallback(

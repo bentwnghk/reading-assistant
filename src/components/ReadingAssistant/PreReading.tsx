@@ -189,6 +189,7 @@ function PreReading() {
   const {
     mode,
     accessPassword,
+    ttsModel,
     ttsVoice,
     ttsPlaybackRate,
     openaicompatibleApiKey,
@@ -212,6 +213,7 @@ function PreReading() {
       await unlockAudio();
       await speakWord({
         word,
+        model: ttsModel,
         voice: ttsVoice,
         speed: ttsPlaybackRate,
         mode,
@@ -222,7 +224,7 @@ function PreReading() {
         onError: (msg) => toast.error(msg),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+    [ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
   );
 
   useEffect(() => () => stopSpeaking(), []);

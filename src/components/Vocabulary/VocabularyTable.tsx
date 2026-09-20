@@ -65,6 +65,7 @@ function VocabularyTable() {
   const {
     mode,
     accessPassword,
+    ttsModel,
     ttsVoice,
     ttsPlaybackRate,
     openaicompatibleApiKey,
@@ -78,6 +79,7 @@ function VocabularyTable() {
       await unlockAudio();
       await speakWord({
         word,
+        model: ttsModel,
         voice: ttsVoice,
         speed: ttsPlaybackRate,
         mode,
@@ -88,7 +90,7 @@ function VocabularyTable() {
         onError: (msg) => toast.error(msg),
       });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
+    [ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, openaicompatibleApiProxy, accessPassword],
   );
 
   useEffect(() => () => stopSpeaking(), []);

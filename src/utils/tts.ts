@@ -16,9 +16,17 @@
  */
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
+import {
+  TTS_MODELS,
+  TTS_MODEL_RESPONSE_FORMATS,
+  getEffectiveTtsVoice,
+  type TtsModel,
+} from "@/store/setting";
 
 export interface SpeakWordOptions {
   word: string;
+  /** TTS model id (a TTS_MODELS entry). Defaults to "tts-1". */
+  model?: string;
   voice: string;
   speed: number;
   /** "local" | "subscription" | (default proxy) */
@@ -157,8 +165,128 @@ function decodeAudioDataP(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBu
   });
 }
 
+// ── Raw PCM (response_format "pcm") support ────────────────────────────────
+// Some OpenAI-compatible TTS models (e.g. gemini-3.1-flash-tts-preview) only
+// return raw PCM — 16-bit little-endian mono at 24kHz (the OpenAI-compatible
+// "pcm" contract) — instead of a container format. Browsers can neither
+// decodeAudioData() headerless PCM nor play it as a plain Blob, so it is
+// converted manually into an AudioBuffer (or wrapped with a RIFF/WAV header
+// for the <audio> fallback path).
+const PCM_SAMPLE_RATE = 24000;
+const PCM_CHANNELS = 1;
+
+function pcm16ToAudioBuffer(ctx: AudioContext, data: ArrayBuffer): AudioBuffer {
+  const sampleCount = Math.floor(data.byteLength / 2);
+  const buffer = ctx.createBuffer(PCM_CHANNELS, sampleCount, PCM_SAMPLE_RATE);
+  const channel = buffer.getChannelData(0);
+  const int16 = new Int16Array(data, 0, sampleCount);
+  for (let i = 0; i < sampleCount; i++) {
+    channel[i] = int16[i] / 32768;
+  }
+  return buffer;
+}
+
+function pcm16ToWavBlob(data: ArrayBuffer): Blob {
+  const sampleCount = Math.floor(data.byteLength / 2);
+  const header = new ArrayBuffer(44);
+  const view = new DataView(header);
+  const writeAscii = (offset: number, text: string) => {
+    for (let i = 0; i < text.length; i++) {
+      view.setUint8(offset + i, text.charCodeAt(i));
+    }
+  };
+  writeAscii(0, "RIFF");
+  view.setUint32(4, 36 + sampleCount * 2, true);
+  writeAscii(8, "WAVE");
+  writeAscii(12, "fmt ");
+  view.setUint32(16, 16, true); // fmt chunk size
+  view.setUint16(20, 1, true); // PCM format
+  view.setUint16(22, PCM_CHANNELS, true);
+  view.setUint32(24, PCM_SAMPLE_RATE, true);
+  view.setUint32(28, (PCM_SAMPLE_RATE * PCM_CHANNELS * 2), true); // byte rate
+  view.setUint16(32, PCM_CHANNELS * 2, true); // block align
+  view.setUint16(34, 16, true); // bits per sample
+  writeAscii(36, "data");
+  view.setUint32(40, sampleCount * 2, true);
+  return new Blob([header, data], { type: "audio/wav" });
+}
+
+// ── Shared request building ────────────────────────────────────────────────
+
+function resolveTtsModel(model: string | undefined): TtsModel {
+  return TTS_MODELS.includes(model as TtsModel) ? (model as TtsModel) : "tts-1";
+}
+
+interface TtsRequest {
+  url: string;
+  headers: HeadersInit;
+  body: string;
+}
+
+/** Builds the /v1/audio/speech request for the given model/voice/format.
+ *  Handles all three billing modes (local / subscription / proxy signature).
+ *  The `speed` param is only sent to mp3 models — pcm-only models ignore or
+ *  reject it, so playback rate is applied client-side there instead. */
+function buildTtsRequest(opts: {
+  text: string;
+  model?: string;
+  voice: string;
+  speed: number;
+  mode: string;
+  openaicompatibleApiKey?: string;
+  openaicompatibleApiProxy?: string;
+  accessPassword?: string;
+}): TtsRequest {
+  const ttsModel = resolveTtsModel(opts.model);
+  const voice = getEffectiveTtsVoice(ttsModel, opts.voice);
+  const responseFormat = TTS_MODEL_RESPONSE_FORMATS[ttsModel];
+
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  let url: string;
+  if (opts.mode === "local") {
+    url = `${completePath(opts.openaicompatibleApiProxy ?? "", "/v1")}/audio/speech`;
+    if (opts.openaicompatibleApiKey) {
+      headers["Authorization"] = `Bearer ${opts.openaicompatibleApiKey}`;
+    }
+  } else if (opts.mode === "subscription") {
+    url = "/api/ai/subscription/v1/audio/speech";
+  } else {
+    url = "/api/ai/openaicompatible/v1/audio/speech";
+    if (opts.accessPassword) {
+      headers["Authorization"] = `Bearer ${generateSignature(opts.accessPassword, Date.now())}`;
+    }
+  }
+
+  const body: Record<string, unknown> = {
+    model: ttsModel,
+    input: opts.text,
+    voice,
+    response_format: responseFormat,
+  };
+  if (responseFormat !== "pcm") {
+    body.speed = opts.speed;
+  }
+
+  return { url, headers, body: JSON.stringify(body) };
+}
+
+/** Parses a non-ok TTS response into a user-facing error message. */
+async function parseTtsError(response: Response): Promise<string> {
+  const errText = await response.text();
+  let errorMsg = `TTS request failed (${response.status})`;
+  try {
+    const parsed = JSON.parse(errText);
+    if (parsed.error?.status && parsed.error?.message) {
+      errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
+    }
+  } catch {
+    // keep default message
+  }
+  return errorMsg;
+}
+
 export async function speakWord(opts: SpeakWordOptions): Promise<void> {
-  const { word, voice, speed, mode } = opts;
+  const { word } = opts;
   if (!word) return;
 
   const ctx = getAudioContext();
@@ -175,46 +303,14 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
   opts.onStart?.();
 
   try {
-    const headers: HeadersInit = { "Content-Type": "application/json" };
-    let url: string;
-    if (mode === "local") {
-      url = `${completePath(opts.openaicompatibleApiProxy ?? "", "/v1")}/audio/speech`;
-      if (opts.openaicompatibleApiKey) {
-        headers["Authorization"] = `Bearer ${opts.openaicompatibleApiKey}`;
-      }
-    } else if (mode === "subscription") {
-      url = "/api/ai/subscription/v1/audio/speech";
-    } else {
-      url = "/api/ai/openaicompatible/v1/audio/speech";
-      if (opts.accessPassword) {
-        headers["Authorization"] = `Bearer ${generateSignature(opts.accessPassword, Date.now())}`;
-      }
-    }
+    const ttsModel = resolveTtsModel(opts.model);
+    const responseFormat = TTS_MODEL_RESPONSE_FORMATS[ttsModel];
+    const { url, headers, body } = buildTtsRequest({ ...opts, text: word });
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        model: "tts-1",
-        input: word,
-        voice,
-        response_format: "mp3",
-        speed,
-      }),
-    });
+    const response = await fetch(url, { method: "POST", headers, body });
 
     if (!response.ok) {
-      const errText = await response.text();
-      let errorMsg = `TTS request failed (${response.status})`;
-      try {
-        const parsed = JSON.parse(errText);
-        if (parsed.error?.status && parsed.error?.message) {
-          errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
-        }
-      } catch {
-        // keep default message
-      }
-      opts.onError?.(errorMsg);
+      opts.onError?.(await parseTtsError(response));
       opts.onEnd?.();
       return;
     }
@@ -223,11 +319,18 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
 
     // Preferred path: Web Audio (deterministic auto-play after one unlock).
     if (ctx) {
-      const decoded = await decodeAudioDataP(ctx, audioData);
+      const decoded =
+        responseFormat === "pcm"
+          ? pcm16ToAudioBuffer(ctx, audioData)
+          : await decodeAudioDataP(ctx, audioData);
       stopSpeaking(); // cut off any still-playing previous word
       const source = ctx.createBufferSource();
       source.buffer = decoded;
       source.connect(ctx.destination);
+      // pcm models don't take a server-side speed param — apply it here.
+      if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+        source.playbackRate.value = opts.speed;
+      }
       currentSource = source;
       source.onended = () => {
         if (currentSource === source) currentSource = null;
@@ -240,11 +343,17 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
     // Fallback: HTMLAudioElement (only when AudioContext is unavailable — e.g.
     // very old browsers). Subject to autoplay policy, but those environments
     // are generally desktop and lenient.
-    const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+    const audioBlob =
+      responseFormat === "pcm"
+        ? pcm16ToWavBlob(audioData)
+        : new Blob([audioData], { type: "audio/mpeg" });
     const audioUrl = URL.createObjectURL(audioBlob);
     await new Promise<void>((resolve, reject) => {
       const audio = new Audio();
       opts.audioRef.current = audio;
+      if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+        audio.playbackRate = opts.speed;
+      }
       audio.oncanplay = () => {
         audio.play().then(resolve).catch(reject);
       };
@@ -273,6 +382,8 @@ export interface ReadAlongOptions {
   sentences: string[];
   /** Index to begin playback from (default 0). Used for click-to-jump. */
   startIndex?: number;
+  /** TTS model id (a TTS_MODELS entry). Defaults to "tts-1". */
+  model?: string;
   voice: string;
   speed: number;
   mode: string;
@@ -324,48 +435,16 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
     opts.onSentenceStart?.(i);
 
     try {
-      const headers: HeadersInit = { "Content-Type": "application/json" };
-      let url: string;
-      if (opts.mode === "local") {
-        url = `${completePath(opts.openaicompatibleApiProxy ?? "", "/v1")}/audio/speech`;
-        if (opts.openaicompatibleApiKey) {
-          headers["Authorization"] = `Bearer ${opts.openaicompatibleApiKey}`;
-        }
-      } else if (opts.mode === "subscription") {
-        url = "/api/ai/subscription/v1/audio/speech";
-      } else {
-        url = "/api/ai/openaicompatible/v1/audio/speech";
-        if (opts.accessPassword) {
-          headers["Authorization"] = `Bearer ${generateSignature(opts.accessPassword, Date.now())}`;
-        }
-      }
+      const ttsModel = resolveTtsModel(opts.model);
+      const responseFormat = TTS_MODEL_RESPONSE_FORMATS[ttsModel];
+      const { url, headers, body } = buildTtsRequest({ ...opts, text: sentence });
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          model: "tts-1",
-          input: sentence,
-          voice: opts.voice,
-          response_format: "mp3",
-          speed: opts.speed,
-        }),
-      });
+      const response = await fetch(url, { method: "POST", headers, body });
 
       if (_readAlongToken !== myToken) return;
 
       if (!response.ok) {
-        const errText = await response.text();
-        let errorMsg = `TTS request failed (${response.status})`;
-        try {
-          const parsed = JSON.parse(errText);
-          if (parsed.error?.status && parsed.error?.message) {
-            errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
-          }
-        } catch {
-          // keep default
-        }
-        opts.onError?.(errorMsg);
+        opts.onError?.(await parseTtsError(response));
         continue;
       }
 
@@ -373,12 +452,19 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
       if (_readAlongToken !== myToken) return;
 
       if (ctx) {
-        const decoded = await decodeAudioDataP(ctx, audioData);
+        const decoded =
+          responseFormat === "pcm"
+            ? pcm16ToAudioBuffer(ctx, audioData)
+            : await decodeAudioDataP(ctx, audioData);
         if (_readAlongToken !== myToken) return;
         stopSpeaking();
         const source = ctx.createBufferSource();
         source.buffer = decoded;
         source.connect(ctx.destination);
+        // pcm models don't take a server-side speed param — apply it here.
+        if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+          source.playbackRate.value = opts.speed;
+        }
         currentSource = source;
         await new Promise<void>((resolve) => {
           source.onended = () => {
@@ -390,11 +476,17 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
         });
       } else {
         // Fallback: HTMLAudioElement (lenient environments)
-        const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+        const audioBlob =
+          responseFormat === "pcm"
+            ? pcm16ToWavBlob(audioData)
+            : new Blob([audioData], { type: "audio/mpeg" });
         const audioUrl = URL.createObjectURL(audioBlob);
         await new Promise<void>((resolve) => {
           const audio = new Audio();
           opts.audioRef.current = audio;
+          if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+            audio.playbackRate = opts.speed;
+          }
           audio.oncanplay = () => {
             audio.play().then(resolve).catch(resolve);
           };

@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useReadingStore } from "@/store/reading";
 import { logActivity } from "@/utils/activityLogger";
 import { useSettingStore } from "@/store/setting";
-import { generateSignature } from "@/utils/signature";
-import { completePath } from "@/utils/url";
-import { parseError } from "@/utils/error";
+import { speakWord as speakWordShared, unlockAudio } from "@/utils/tts";
 import { cn } from "@/utils/style";
 import { sortGlossaryByPriority } from "@/utils/vocabulary";
 
@@ -40,7 +38,7 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
   const { id, glossaryRatings, incrementFlashcardReviewCount } = useReadingStore();
   const effectiveId = disableSessionGlossary ? undefined : id;
   const effectiveRatings = mergedRatings ?? glossaryRatings;
-  const { ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
+  const { ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy, autoSpeakFlashcard } = useSettingStore();
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
@@ -222,6 +220,9 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
   );
 
   // ── TTS ──────────────────────────────────────────────────────────────────
+  // Delegates to the shared tts utility (Web Audio API playback) — the
+  // iOS-safe path: once the AudioContext is resumed inside a gesture (the
+  // speaker button), per-card auto-speak works without further gestures.
   const speakWord = useCallback(
     async (word: string) => {
       if (!word) return;
@@ -229,60 +230,23 @@ function VocabularyFlashcard({ glossary, mergedRatings, onWordAction, onComplete
         audioRef.current.pause();
         audioRef.current = null;
       }
-      setIsTTSLoading(true);
-      try {
-        const headers: HeadersInit = { "Content-Type": "application/json" };
-        let url: string;
-        if (mode === "local") {
-          url = `${completePath(openaicompatibleApiProxy, "/v1")}/audio/speech`;
-          if (openaicompatibleApiKey) headers["Authorization"] = `Bearer ${openaicompatibleApiKey}`;
-        } else if (mode === "subscription") {
-          url = "/api/ai/subscription/v1/audio/speech";
-        } else {
-          url = "/api/ai/openaicompatible/v1/audio/speech";
-          if (accessPassword)
-            headers["Authorization"] = `Bearer ${generateSignature(accessPassword, Date.now())}`;
-        }
-        const response = await fetch(url, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ model: "tts-1", input: word, voice: ttsVoice, response_format: "mp3", speed: ttsPlaybackRate }),
-        });
-        if (!response.ok) {
-          const errText = await response.text();
-          let errorMsg = `TTS request failed (${response.status})`;
-          try {
-            const parsed = JSON.parse(errText);
-            if (parsed.error?.status && parsed.error?.message) {
-              errorMsg = `[${parsed.error.status}]: ${parsed.error.message}`;
-            }
-          } catch {}
-          toast.error(errorMsg);
-          return;
-        }
-        const audioBuffer = await response.arrayBuffer();
-        const audioBlob = new Blob([audioBuffer], { type: "audio/mpeg" });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        await new Promise<void>((resolve, reject) => {
-          const audio = new Audio();
-          audioRef.current = audio;
-          audio.oncanplay = () => audio.play().then(resolve).catch(reject);
-          audio.onended = () => { URL.revokeObjectURL(audioUrl); audioRef.current = null; };
-          audio.onerror = () => {
-            URL.revokeObjectURL(audioUrl);
-            audioRef.current = null;
-            reject(new Error("Audio element error"));
-          };
-          audio.src = audioUrl;
-          audio.load();
-        });
-      } catch (error) {
-        toast.error(parseError(error));
-      } finally {
-        setIsTTSLoading(false);
-      }
+      await unlockAudio();
+      await speakWordShared({
+        word,
+        model: ttsModel,
+        voice: ttsVoice,
+        speed: ttsPlaybackRate,
+        mode,
+        openaicompatibleApiKey,
+        accessPassword,
+        openaicompatibleApiProxy,
+        audioRef,
+        onStart: () => setIsTTSLoading(true),
+        onEnd: () => setIsTTSLoading(false),
+        onError: (msg) => toast.error(msg),
+      });
     },
-    [ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
+    [ttsModel, ttsVoice, ttsPlaybackRate, mode, openaicompatibleApiKey, accessPassword, openaicompatibleApiProxy]
   );
 
   const handleSpeak = useCallback(

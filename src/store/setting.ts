@@ -102,13 +102,60 @@ export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] 
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
 
-export const TTS_VOICE_LABELS: Record<TTSVoice, string> = {
+export const TTS_MODELS = ["tts-1", "gemini-3.1-flash-tts-preview"] as const;
+
+export type TtsModel = (typeof TTS_MODELS)[number];
+
+export const GEMINI_TTS_VOICES = ["enceladus", "kore", "puck", "aoede", "orus", "gacrux"] as const;
+
+export const ALL_TTS_VOICES = [...TTS_VOICES, ...GEMINI_TTS_VOICES] as const;
+
+export type AnyTtsVoice = (typeof ALL_TTS_VOICES)[number];
+
+/** Voice catalog per TTS model — the Settings TTS tab renders the list for the
+ *  currently selected model, and switching models coerces ttsVoice into the
+ *  new list (see getEffectiveTtsVoice). */
+export const TTS_MODEL_VOICES: Record<TtsModel, readonly AnyTtsVoice[]> = {
+  "tts-1": TTS_VOICES,
+  "gemini-3.1-flash-tts-preview": GEMINI_TTS_VOICES,
+};
+
+export const DEFAULT_TTS_VOICES: Record<TtsModel, AnyTtsVoice> = {
+  "tts-1": "onyx",
+  "gemini-3.1-flash-tts-preview": "kore",
+};
+
+/** Audio format each TTS model is requested with (and returns) from
+ *  /v1/audio/speech. tts-1 serves mp3; the Gemini TTS model only supports raw
+ *  PCM (24kHz 16-bit mono), which the client decodes manually — see
+ *  src/utils/tts.ts. */
+export const TTS_MODEL_RESPONSE_FORMATS: Record<TtsModel, "mp3" | "pcm"> = {
+  "tts-1": "mp3",
+  "gemini-3.1-flash-tts-preview": "pcm",
+};
+
+/** Resolves the voice to actually send for a model: the stored voice when it
+ *  belongs to the model's catalog, else the model's default. Guards stale
+ *  persisted pairs (e.g. DB settings saved before a model switch). */
+export function getEffectiveTtsVoice(model: string, voice: string): string {
+  const voices = TTS_MODEL_VOICES[model as TtsModel] ?? TTS_VOICES;
+  if (voices.includes(voice as AnyTtsVoice)) return voice;
+  return DEFAULT_TTS_VOICES[model as TtsModel] ?? DEFAULT_TTS_VOICES["tts-1"];
+}
+
+export const TTS_VOICE_LABELS: Record<string, string> = {
   alloy: "Alloy (US male)",
   nova: "Nova (US female)",
   echo: "Adam (US male)",
   fable: "Phoebe (US female)",
   onyx: "Ollie (UK male)",
   shimmer: "Ada (UK female)",
+  enceladus: "Enceladus (breathy male)",
+  kore: "Kore (firm female)",
+  puck: "Puck (upbeat male)",
+  aoede: "Aoede (breezy female)",
+  orus: "Orus (firm male)",
+  gacrux: "Gacrux (mature female)",
 };
 
 export const TTS_PLAYBACK_RATES = [0.25, 0.5, 0.75, 1.0] as const;
@@ -140,7 +187,8 @@ export interface SettingStore {
   readingTextModel: ReadingTextModel;
   tutorModel: TutorModel;
   basicTutorModel: BasicTutorModel;
-  ttsVoice: TTSVoice;
+  ttsModel: TtsModel;
+  ttsVoice: string;
   ttsPlaybackRate: TTSPlaybackRate;
   autoSpeakFlashcard: boolean;
   /** Game SFX (correct/wrong/streak/countdown…) played via the shared AudioContext. */
@@ -263,6 +311,7 @@ export const defaultValues: SettingStore = {
   readingTextModel: "deepseek-flash",
   tutorModel: "step-3.7-flash",
   basicTutorModel: "gpt-5.6-luna",
+  ttsModel: "tts-1",
   ttsVoice: "onyx",
   ttsPlaybackRate: 1.0 as TTSPlaybackRate,
   autoSpeakFlashcard: true,
@@ -328,6 +377,14 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   }
   if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
     state.readingTextModel = defaultValues.readingTextModel;
+  }
+  if (!TTS_MODELS.includes(state.ttsModel as TtsModel)) {
+    state.ttsModel = defaultValues.ttsModel;
+  }
+  // Coerce a stale voice (saved for a different TTS model) into the current
+  // model's catalog so model/voice are always a valid pair.
+  if (typeof state.ttsVoice === "string") {
+    state.ttsVoice = getEffectiveTtsVoice(state.ttsModel as TtsModel, state.ttsVoice);
   }
 }
 

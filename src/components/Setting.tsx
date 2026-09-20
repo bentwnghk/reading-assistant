@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, DEFAULT_TTS_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels } from "@/store/setting";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -77,7 +77,8 @@ const formSchema = z.object({
   readingTextModel: z.enum(READING_TEXT_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
   basicTutorModel: z.enum(BASIC_TUTOR_MODELS),
-  ttsVoice: z.enum(TTS_VOICES),
+  ttsModel: z.enum(TTS_MODELS),
+  ttsVoice: z.enum(ALL_TTS_VOICES),
   ttsPlaybackRate: z.union([z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1.0)]),
   autoSpeakFlashcard: z.boolean().optional(),
   gameSoundEffects: z.boolean().optional(),
@@ -202,6 +203,12 @@ function Setting({ open, onClose }: SettingProps) {
     resolver: zodResolver(formSchema),
     defaultValues: getFormValues(),
   });
+
+  // The voice catalog is model-specific (e.g. OpenAI alloy/onyx/shimmer vs.
+  // Gemini Kore/Puck/Aoede…), so the TTS tab's voice dropdown renders the
+  // options for the currently selected TTS model.
+  const activeTtsModel = form.watch("ttsModel");
+  const ttsVoiceOptions = TTS_MODEL_VOICES[activeTtsModel] ?? TTS_VOICES;
 
   // Reset the form from the store every time the dialog opens so that
   // server-loaded settings (from AuthProvider → loadFromServer) are
@@ -1215,6 +1222,47 @@ function Setting({ open, onClose }: SettingProps) {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="ttsModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label flex items-center gap-1">
+                        {t("setting.ttsModel")}
+                        <InfoTooltip content={t("setting.ttsModelTip")} />
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("ttsModel", value);
+                            // Voice catalogs differ per model — coerce the
+                            // current voice into the new model's list so the
+                            // stored model/voice pair is always valid.
+                            const voices = TTS_MODEL_VOICES[value as import("@/store/setting").TtsModel];
+                            if (!voices.includes(form.getValues("ttsVoice"))) {
+                              const fallback = DEFAULT_TTS_VOICES[value as import("@/store/setting").TtsModel];
+                              form.setValue("ttsVoice", fallback);
+                              updateSetting("ttsVoice", fallback);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {TTS_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {m}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </TabsContent>
 
               <TabsContent value="tts" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
@@ -1223,8 +1271,9 @@ function Setting({ open, onClose }: SettingProps) {
                   name="ttsVoice"
                   render={({ field }) => (
                     <FormItem className="from-item">
-                      <FormLabel className="from-label">
+                      <FormLabel className="from-label flex items-center gap-1">
                         {t("setting.ttsVoice")}
+                        <InfoTooltip content={t("setting.ttsVoiceTip")} />
                       </FormLabel>
                       <FormControl>
                         <Select
@@ -1238,9 +1287,9 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {TTS_VOICES.map((voice) => (
+                            {ttsVoiceOptions.map((voice) => (
                               <SelectItem key={voice} value={voice}>
-                                {TTS_VOICE_LABELS[voice]}
+                                {TTS_VOICE_LABELS[voice] ?? voice}
                               </SelectItem>
                             ))}
                           </SelectContent>
