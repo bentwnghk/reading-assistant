@@ -126,10 +126,20 @@ function Glossary() {
   const [suggestTarget, setSuggestTarget] = useState(10);
   const suggestDeficit = Math.max(0, suggestTarget - highlightedWords.length);
 
-  const handleSuggestMore = useCallback(() => {
+  const handleSuggestMore = useCallback(async () => {
     if (suggestDeficit === 0) return;
-    void suggestVocabulary(suggestDeficit, highlightedWords);
-  }, [suggestVocabulary, suggestDeficit, highlightedWords]);
+    const added = await suggestVocabulary(suggestDeficit, highlightedWords);
+    // Auto-regenerate to finish what the banner promised: suggestions that
+    // actually landed + glossary still under the game minimum → refresh
+    // definitions so the games unlock without a second manual step. Skipped
+    // when nothing new was added (banner stays, no wasted AI call).
+    // generateGlossary has its own double-run guard, spinner and toast.
+    // Read the glossary from the store — the closure value is stale after
+    // the await (e.g. a manual Regenerate during the suggest).
+    if (added.length > 0 && useReadingStore.getState().glossary.length < MIN_GAME_WORDS) {
+      await generateGlossary();
+    }
+  }, [suggestVocabulary, generateGlossary, suggestDeficit, highlightedWords]);
 
   const sortedGlossary = useMemo(() => {
     if (!sortField) return glossary;
