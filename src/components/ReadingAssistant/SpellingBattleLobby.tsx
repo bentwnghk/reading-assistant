@@ -85,6 +85,12 @@ const WORD_DURATION_MS: Record<SpellingGameMode, Record<SpellingDifficulty, numb
 };
 const BASE_MODES: SpellingGameMode[] = ["listen-type", "scramble", "fill-blanks"];
 
+// Minimum words a battle's word source must supply. Mirror of
+// MIN_BATTLE_WORDS in `realtime/src/game/words.ts` (the server enforces it on
+// every resolved source; this copy gates the "selected words" pre-check and
+// the word-count slider). Keep both sides in sync.
+const MIN_BATTLE_WORDS = 10;
+
 export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, onExit }: SpellingBattleLobbyProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -176,7 +182,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       toast.error(t(`${M}.errors.needReviewList`));
       return;
     }
-    if (source.type === "selected" && (!source.words || source.words.length < 3)) {
+    if (source.type === "selected" && (!source.words || source.words.length < MIN_BATTLE_WORDS)) {
       toast.error(t(`${M}.errors.needSelected`));
       return;
     }
@@ -546,10 +552,10 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
             </div>
             <Slider
               value={[wordCount]}
-              min={5}
+              min={MIN_BATTLE_WORDS}
               max={30}
               step={1}
-              onValueChange={(v) => setWordCount(v[0] ?? 10)}
+              onValueChange={(v) => setWordCount(v[0] ?? MIN_BATTLE_WORDS)}
             />
           </div>
 

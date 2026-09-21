@@ -1,6 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { enrichWords } from "./words";
+// Mock the DB pool so resolveWordList can be tested without a database.
+// enrichWords (the other export under test) never touches the pool.
+const { mockQuery } = vi.hoisted(() => ({ mockQuery: vi.fn() }));
+vi.mock("../db", () => ({ getPool: () => ({ query: mockQuery }) }));
+
+import { enrichWords, resolveWordList, NotEnoughWordsError, MIN_BATTLE_WORDS } from "./words";
 import type { BattleWord } from "./types";
 
 describe("enrichWords", () => {
@@ -111,5 +116,51 @@ describe("enrichWords", () => {
     }
     expect(sawFillBlanks).toBe(true);
     expect(sawOther).toBe(true);
+  });
+});
+
+// user_vocabulary-shaped rows returned by the mocked pool for the
+// "vocabulary" word source.
+function vocabRows(n: number) {
+  return Array.from({ length: n }, (_, i) => ({
+    word: `word${i}`,
+    syllabification: null,
+    part_of_speech: null,
+    english_definition: null,
+    chinese_definition: null,
+    example: null,
+  }));
+}
+
+describe("resolveWordList minimum word count", () => {
+  beforeEach(() => {
+    mockQuery.mockReset();
+  });
+
+  it("throws NotEnoughWordsError when the source has fewer than MIN_BATTLE_WORDS words", async () => {
+    mockQuery.mockResolvedValue({ rows: vocabRows(MIN_BATTLE_WORDS - 1) });
+    await expect(
+      resolveWordList("user-1", { type: "vocabulary", filter: "random" }, 30),
+    ).rejects.toBeInstanceOf(NotEnoughWordsError);
+  });
+
+  it("rejects a sub-minimum requested word count even with a large source (server is the law)", async () => {
+    mockQuery.mockResolvedValue({ rows: vocabRows(30) });
+    await expect(
+      resolveWordList("user-1", { type: "vocabulary", filter: "random" }, MIN_BATTLE_WORDS - 1),
+    ).rejects.toBeInstanceOf(NotEnoughWordsError);
+  });
+
+  it("resolves a large source capped to the requested count", async () => {
+    mockQuery.mockResolvedValue({ rows: vocabRows(30) });
+    const result = await resolveWordList("user-1", { type: "vocabulary", filter: "random" }, MIN_BATTLE_WORDS);
+    expect(result.actualCount).toBe(MIN_BATTLE_WORDS);
+    expect(result.words).toHaveLength(MIN_BATTLE_WORDS);
+  });
+
+  it("resolves an oversized source capped by requestedCount when above the minimum", async () => {
+    mockQuery.mockResolvedValue({ rows: vocabRows(MIN_BATTLE_WORDS + 2) });
+    const result = await resolveWordList("user-1", { type: "vocabulary", filter: "random" }, 30);
+    expect(result.actualCount).toBe(MIN_BATTLE_WORDS + 2);
   });
 });

@@ -34,7 +34,7 @@ import {
   setRoomSource,
   toRoomStatePayload,
 } from "./rooms";
-import { resolveWordList, enrichWords } from "./game/words";
+import { resolveWordList, enrichWords, NotEnoughWordsError } from "./game/words";
 import { startGame, submitAnswer, rematch, cancelGame, clearTimers } from "./game/engine";
 import type {
   BattleGameMode,
@@ -298,10 +298,10 @@ io.on("connection", (socket: Socket) => {
       try {
         resolved = await resolveWordList(user.userId, payload.config.source, payload.config.wordCount);
       } catch (e) {
+        if (e instanceof NotEnoughWordsError) {
+          return emitRoomError(socket, "not_enough_words", e.message);
+        }
         return emitRoomError(socket, "invalid_source", e instanceof Error ? e.message : "Invalid word source");
-      }
-      if (resolved.actualCount === 0) {
-        return emitRoomError(socket, "invalid_source", "Word source is empty");
       }
       // Precompute mode-specific challenge data (blanks / tiles / per-word mode)
       // so the server judges authoritatively and all players see identical data.
@@ -456,6 +456,9 @@ io.on("connection", (socket: Socket) => {
       try {
         resolved = await resolveWordList(user.userId, payload.source, payload.wordCount);
       } catch (e) {
+        if (e instanceof NotEnoughWordsError) {
+          return emitRoomError(socket, "not_enough_words", e.message);
+        }
         return emitRoomError(socket, "invalid_source", e instanceof Error ? e.message : "Invalid word source");
       }
       resolved.words = enrichWords(resolved.words, room.config.gameMode, room.config.difficulty, room.config.fullBlank === true);

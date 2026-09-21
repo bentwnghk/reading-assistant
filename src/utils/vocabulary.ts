@@ -1,5 +1,13 @@
 type PriorityRating = "hard" | "medium" | "easy" | "unrated";
 
+/**
+ * Minimum words/phrases required to start a vocabulary game — the solo
+ * spelling game and quiz gates, and the advisory hint in the Glossary
+ * section. Keep in sync with the multiplayer battle minimum,
+ * MIN_BATTLE_WORDS in realtime/src/game/words.ts.
+ */
+export const MIN_GAME_WORDS = 10;
+
 function getPriority(rating?: GlossaryRating): PriorityRating {
   if (!rating) return "unrated";
   return rating;

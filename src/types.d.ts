@@ -437,6 +437,7 @@ type BattleRoomErrorCode =
   | "not_host"
   | "too_many_rooms"
   | "invalid_source"
+  | "not_enough_words"
   | "not_connected"
   | "class_not_allowed"
   | "spectate_not_allowed"

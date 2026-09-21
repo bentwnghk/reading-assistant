@@ -160,6 +160,21 @@ async function fetchSelectedWords(hostUserId: string, words: string[] | undefine
 
 // ── Public API ───────────────────────────────────────────────────────────────
 
+/**
+ * Minimum words a battle's word source must supply (applied to the resolved,
+ * capped list). Mirrored client-side in `SpellingBattleLobby.tsx`
+ * (MIN_BATTLE_WORDS) — keep both sides in sync.
+ */
+export const MIN_BATTLE_WORDS = 10;
+
+/** Raised when a word source resolves to fewer than MIN_BATTLE_WORDS entries. */
+export class NotEnoughWordsError extends Error {
+  constructor(public readonly actual: number) {
+    super(`word source resolved to ${actual} words; need at least ${MIN_BATTLE_WORDS}`);
+    this.name = "NotEnoughWordsError";
+  }
+}
+
 function shuffle<T>(arr: T[]): T[] {
   const out = arr.slice();
   for (let i = out.length - 1; i > 0; i--) {
@@ -234,7 +249,8 @@ export interface ResolvedWordList {
   actualCount: number;
 }
 
-/** Resolve, shuffle, and cap a word list for a room. Throws on invalid source. */
+/** Resolve, shuffle, and cap a word list for a room. Throws on invalid source
+ *  or when the resolved list is below MIN_BATTLE_WORDS. */
 export async function resolveWordList(
   hostUserId: string,
   source: WordSource,
@@ -259,5 +275,10 @@ export async function resolveWordList(
   }
   const cap = Math.max(1, Math.min(requestedCount, raw.length));
   const words = shuffle(raw).slice(0, cap);
+  // The minimum applies to the final (capped) list, so a client requesting a
+  // sub-minimum wordCount is rejected too — the server is the law.
+  if (words.length < MIN_BATTLE_WORDS) {
+    throw new NotEnoughWordsError(words.length);
+  }
   return { words, actualCount: words.length };
 }

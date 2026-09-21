@@ -2,7 +2,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine, Volume2 } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine, Volume2, Info, Wand2 } from "lucide-react";
 import Link from "next/link";
 import {
   Document,
@@ -39,6 +39,7 @@ import { useVocabularyStore } from "@/store/vocabulary";
 import { useBattleStore } from "@/store/battle";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
 import { speakWord, stopSpeaking, unlockAudio } from "@/utils/tts";
+import { MIN_GAME_WORDS } from "@/utils/vocabulary";
 
 import { cn } from "@/utils/style";
 import VocabularyFlashcard from "./VocabularyFlashcard";
@@ -56,7 +57,7 @@ function isMultiWord(word: string): boolean {
 function Glossary() {
   const { t } = useTranslation();
   const { extractedText, highlightedWords, glossary } = useReadingStore();
-  const { activeGenerations, generateGlossary } = useReadingAssistant();
+  const { activeGenerations, generateGlossary, suggestVocabulary } = useReadingAssistant();
   const {
     mode,
     accessPassword,
@@ -103,6 +104,19 @@ function Glossary() {
   }, [shouldOpenBattle]);
 
   const isGenerating = !!activeGenerations["glossary"];
+  const isSuggesting = !!activeGenerations["vocabulary-suggest"];
+  // Advisory (not a gate): spelling and quiz need MIN_GAME_WORDS glossary
+  // entries, which requires at least that many highlighted words. Hidden once
+  // a full-size glossary exists — the games themselves enforce the minimum.
+  const belowGameMinimum =
+    glossary.length < MIN_GAME_WORDS &&
+    highlightedWords.length > 0 &&
+    highlightedWords.length < MIN_GAME_WORDS;
+
+  const handleSuggestMore = useCallback(() => {
+    // 20 matches the Text Analysis & Adaptation section's default suggest count.
+    void suggestVocabulary(20);
+  }, [suggestVocabulary]);
 
   const sortedGlossary = useMemo(() => {
     if (!sortField) return glossary;
@@ -682,6 +696,26 @@ function Glossary() {
           </Button>
         </div>
       </div>
+
+      {belowGameMinimum && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 mb-4 text-sm">
+          <Info className="h-4 w-4 shrink-0 text-amber-500" />
+          <span className="flex-1 min-w-0">
+            {t("reading.glossary.minWordsHint", {
+              count: MIN_GAME_WORDS,
+              selected: highlightedWords.length,
+            })}
+          </span>
+          <Button size="sm" variant="outline" onClick={handleSuggestMore} disabled={isSuggesting}>
+            {isSuggesting ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <Wand2 className="h-4 w-4" />
+            )}
+            <span>{t("reading.adaptedText.suggestButton")}</span>
+          </Button>
+        </div>
+      )}
 
       {glossary.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-4 border-b">

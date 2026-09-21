@@ -36,7 +36,7 @@ import { logActivity } from "@/utils/activityLogger";
 import { cn } from "@/utils/style";
 import { speakWord as speakWordShared, stopSpeaking, unlockAudio } from "@/utils/tts";
 import { playSfx } from "@/utils/sfx";
-import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
+import { sortGlossaryByPriority, getWordStats, generateWordCountOptions, MIN_GAME_WORDS } from "@/utils/vocabulary";
 import { joinScrambleUnits } from "@/utils/text";
 import { SpellingBattleFlow } from "./SpellingBattleFlow";
 import { PointPopup, AnimatedScore, StreakFlame, MilestoneBanner, burstConfetti, SrsUpdateCard, STREAK_MILESTONES, type PointBreakdown } from "./GameFx";
@@ -911,10 +911,10 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
     );
   }
 
-  if (glossary.length < 3) {
+  if (glossary.length < MIN_GAME_WORDS) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>{t("reading.glossary.spelling.notEnoughWords")}</p>
+        <p>{t("reading.glossary.spelling.notEnoughWords", { count: MIN_GAME_WORDS })}</p>
       </div>
     );
   }

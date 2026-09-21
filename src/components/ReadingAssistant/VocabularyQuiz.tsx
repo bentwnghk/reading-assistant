@@ -29,7 +29,7 @@ import { useSession } from "next-auth/react";
 import { cn } from "@/utils/style";
 import { logActivity } from "@/utils/activityLogger";
 import { nanoid } from "nanoid";
-import { sortGlossaryByPriority, getWordStats, generateWordCountOptions } from "@/utils/vocabulary";
+import { sortGlossaryByPriority, getWordStats, generateWordCountOptions, MIN_GAME_WORDS } from "@/utils/vocabulary";
 import GuideDialog from "@/components/Internal/GuideDialog";
 import { HelpCircle, PenLine } from "lucide-react";
 import { SrsUpdateCard } from "./GameFx";
@@ -613,10 +613,10 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
     }
   }, [questions, extractedText, docTitle, glossary, effectiveRatings, prioritizeHardWords, t]);
 
-  if (glossary.length < 4) {
+  if (glossary.length < MIN_GAME_WORDS) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>{t("reading.glossary.quiz.noQuizWords")}</p>
+        <p>{t("reading.glossary.quiz.noQuizWords", { count: MIN_GAME_WORDS })}</p>
       </div>
     );
   }
