@@ -33,6 +33,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import GuideDialog from "@/components/Internal/GuideDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useReadingStore } from "@/store/reading";
 import { useSettingStore } from "@/store/setting";
 import { useVocabularyStore } from "@/store/vocabulary";
@@ -113,10 +120,16 @@ function Glossary() {
     highlightedWords.length > 0 &&
     highlightedWords.length < MIN_GAME_WORDS;
 
+  // Target-total semantics: the dropdown picks the desired TOTAL word count;
+  // only the deficit is requested (excluding already-selected words in the
+  // prompt), so e.g. 5 selected + target 10 → 5 more words.
+  const [suggestTarget, setSuggestTarget] = useState(10);
+  const suggestDeficit = Math.max(0, suggestTarget - highlightedWords.length);
+
   const handleSuggestMore = useCallback(() => {
-    // 20 matches the Text Analysis & Adaptation section's default suggest count.
-    void suggestVocabulary(20);
-  }, [suggestVocabulary]);
+    if (suggestDeficit === 0) return;
+    void suggestVocabulary(suggestDeficit, highlightedWords);
+  }, [suggestVocabulary, suggestDeficit, highlightedWords]);
 
   const sortedGlossary = useMemo(() => {
     if (!sortField) return glossary;
@@ -706,7 +719,28 @@ function Glossary() {
               selected: highlightedWords.length,
             })}
           </span>
-          <Button size="sm" variant="outline" onClick={handleSuggestMore} disabled={isSuggesting}>
+          <Select
+            value={String(suggestTarget)}
+            onValueChange={(v) => setSuggestTarget(Number(v))}
+            disabled={isSuggesting}
+          >
+            <SelectTrigger className="w-[80px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 30, 40, 50].map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSuggestMore}
+            disabled={isSuggesting || suggestDeficit === 0}
+          >
             {isSuggesting ? (
               <LoaderCircle className="h-4 w-4 animate-spin" />
             ) : (

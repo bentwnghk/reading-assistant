@@ -1047,7 +1047,7 @@ function useReadingAssistant() {
     }
   }
 
-  async function suggestVocabulary(count: number) {
+  async function suggestVocabulary(count: number, excludeWords?: string[]) {
     if (useReadingStore.getState().activeGenerations["vocabulary-suggest"]) return [];
     const isSameSession = createSessionGuard();
     const ac = getAbortController("vocabulary-suggest");
@@ -1063,7 +1063,7 @@ function useReadingAssistant() {
 
     try {
       const text = await glossaryGenerateText(
-        suggestVocabularyPrompt(studentAge, extractedText, count),
+        suggestVocabularyPrompt(studentAge, extractedText, count, excludeWords),
         getSystemPrompt(),
         suggestVocabModel,
         ac.signal,

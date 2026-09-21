@@ -617,7 +617,7 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
   **Respond with ONLY the JSON array, no markdown, no code blocks.`;
 }
 
-export function suggestVocabularyPrompt(age: number, text: string, count: number) {
+export function suggestVocabularyPrompt(age: number, text: string, count: number, excludeWords?: string[]) {
   const schoolLevel = age <= 11 ? "primary" : age <= 15 ? "junior secondary" : "senior secondary/DSE";
 
   const levelGuidance = age <= 11 ? `
@@ -637,12 +637,17 @@ export function suggestVocabularyPrompt(age: number, text: string, count: number
 - Do NOT include words a typical senior secondary student already knows.
 `;
 
+  const exclusion = excludeWords && excludeWords.length > 0 ? `
+**Words already selected by the student (do NOT suggest any of these again):**
+${excludeWords.map((w) => `- ${w}`).join("\n")}
+` : "";
+
   return `You are an expert English reading teacher for Hong Kong students. Identify exactly **${count}** single words from the text below that a ${age}-year-old ${schoolLevel} student is unlikely to already know, and that are therefore worth learning.
 
 <text>
 ${text}
 </text>
-${levelGuidance}
+${exclusion}${levelGuidance}
 **Selection rules:**
 - Return AT MOST ${count} items. If the text contains fewer than ${count} genuinely challenging items, return fewer — never pad the list with easy words.
 - Prefer items in order of their first appearance in the text.
