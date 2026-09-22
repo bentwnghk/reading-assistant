@@ -988,7 +988,11 @@ function useReadingAssistant() {
     if (useReadingStore.getState().activeGenerations["glossary"]) return [];
     const isSameSession = createSessionGuard();
     const ac = getAbortController("glossary");
-    const { extractedText, highlightedWords, setGlossary, setError } = readingStore;
+    // Read FRESH state — this is often chained right after another store
+    // write (the Glossary banner's suggest → auto-regenerate flow), and the
+    // render-scoped `readingStore` snapshot would still hold the pre-suggest
+    // highlighted words, generating definitions for the old list only.
+    const { extractedText, highlightedWords, setGlossary, setError } = useReadingStore.getState();
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -1051,7 +1055,9 @@ function useReadingAssistant() {
     if (useReadingStore.getState().activeGenerations["vocabulary-suggest"]) return [];
     const isSameSession = createSessionGuard();
     const ac = getAbortController("vocabulary-suggest");
-    const { extractedText, studentAge, highlightedWords, setHighlightedWords } = readingStore;
+    // Fresh state at call time (see generateGlossary) — the render-scoped
+    // snapshot may be stale when chained behind another store write.
+    const { extractedText, studentAge, setHighlightedWords } = useReadingStore.getState();
 
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -1085,7 +1091,11 @@ function useReadingAssistant() {
         throw new Error(i18next.t("reading.adaptedText.suggestParseError"));
       }
 
-      const existing = new Set(highlightedWords.map((w) => w.toLowerCase().trim()));
+      // Fresh read at completion: the user may have highlighted words in the
+      // text while the AI was generating. setHighlightedWords replaces the
+      // whole array, so appending to a stale base would clobber those.
+      const current = useReadingStore.getState().highlightedWords;
+      const existing = new Set(current.map((w) => w.toLowerCase().trim()));
       const newWords: string[] = [];
       for (const word of parsed.data) {
         const normalized = word.toLowerCase().trim();
@@ -1096,14 +1106,14 @@ function useReadingAssistant() {
       }
 
       if (newWords.length > 0) {
-        setHighlightedWords([...highlightedWords, ...newWords]);
+        setHighlightedWords([...current, ...newWords]);
       }
 
       toast.dismiss(toastId);
       toast.success(
         i18next.t("reading.adaptedText.suggestSuccess", {
           added: newWords.length,
-          total: highlightedWords.length + newWords.length,
+          total: current.length + newWords.length,
         }),
       );
       setGenerating("vocabulary-suggest", false);
