@@ -102,13 +102,15 @@ export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] 
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
 
-export const TTS_MODELS = ["tts-1", "gemini-3.1-flash-tts-preview"] as const;
+export const TTS_MODELS = ["tts-1", "gemini-3.1-flash-tts-preview", "x-ai/grok-voice-tts-1.0"] as const;
 
 export type TtsModel = (typeof TTS_MODELS)[number];
 
 export const GEMINI_TTS_VOICES = ["enceladus", "kore", "puck", "aoede", "orus", "gacrux"] as const;
 
-export const ALL_TTS_VOICES = [...TTS_VOICES, ...GEMINI_TTS_VOICES] as const;
+export const GROK_TTS_VOICES = ["leo", "eve", "rex", "ara", "orion", "luna"] as const;
+
+export const ALL_TTS_VOICES = [...TTS_VOICES, ...GEMINI_TTS_VOICES, ...GROK_TTS_VOICES] as const;
 
 export type AnyTtsVoice = (typeof ALL_TTS_VOICES)[number];
 
@@ -118,20 +120,23 @@ export type AnyTtsVoice = (typeof ALL_TTS_VOICES)[number];
 export const TTS_MODEL_VOICES: Record<TtsModel, readonly AnyTtsVoice[]> = {
   "tts-1": TTS_VOICES,
   "gemini-3.1-flash-tts-preview": GEMINI_TTS_VOICES,
+  "x-ai/grok-voice-tts-1.0": GROK_TTS_VOICES,
 };
 
 export const DEFAULT_TTS_VOICES: Record<TtsModel, AnyTtsVoice> = {
   "tts-1": "onyx",
   "gemini-3.1-flash-tts-preview": "kore",
+  "x-ai/grok-voice-tts-1.0": "eve",
 };
 
 /** Audio format each TTS model is requested with (and returns) from
- *  /v1/audio/speech. tts-1 serves mp3; the Gemini TTS model only supports raw
- *  PCM (24kHz 16-bit mono), which the client decodes manually — see
- *  src/utils/tts.ts. */
+ *  /v1/audio/speech. tts-1 and the Grok voice model serve mp3; the Gemini
+ *  TTS model only supports raw PCM (24kHz 16-bit mono), which the client
+ *  decodes manually — see src/utils/tts.ts. */
 export const TTS_MODEL_RESPONSE_FORMATS: Record<TtsModel, "mp3" | "pcm"> = {
   "tts-1": "mp3",
   "gemini-3.1-flash-tts-preview": "pcm",
+  "x-ai/grok-voice-tts-1.0": "mp3",
 };
 
 /** Resolves the voice to actually send for a model: the stored voice when it
@@ -183,6 +188,12 @@ export const TTS_VOICE_LABELS: Record<string, string> = {
   aoede: "Aoede (breezy female)",
   orus: "Orus (firm male)",
   gacrux: "Gacrux (mature female)",
+  leo: "Leo (UK male)",
+  eve: "Eve (UK female)",
+  rex: "Rex (male)",
+  ara: "Ara (female)",
+  orion: "Orion (male)",
+  luna: "Luna (female)",
 };
 
 export const TTS_PLAYBACK_RATES = [0.25, 0.5, 0.75, 1.0] as const;
