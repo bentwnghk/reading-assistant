@@ -1,5 +1,12 @@
 import { shuffle } from "radash";
 
+/** Display label for model dropdowns — strips any leading vendor prefix
+ *  ("google/", "x-ai/", ...). The underlying value (and the model id sent
+ *  to the LLM API) keeps the full string. */
+export function formatModelLabel(model: string): string {
+  return model.replace(/^[^/]+\//, "");
+}
+
 export function multiApiKeyPolling(apiKeys = "") {
   return shuffle(apiKeys.split(","))[0];
 }

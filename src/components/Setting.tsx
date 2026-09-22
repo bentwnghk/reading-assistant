@@ -40,6 +40,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
+import { formatModelLabel } from "@/utils/model";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
 import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
@@ -96,12 +97,6 @@ const formSchema = z.object({
 });
 
 let preLoading = false;
-
-/** Display label for image models — strips the vendor prefix
- *  ("google/", "x-ai/"); the underlying value keeps the full string. */
-function stripModelPrefix(model: string): string {
-  return model.replace(/^(google|x-ai)\//, "");
-}
 
 function InfoTooltip({ content }: { content: string }) {
   const [open, setOpen] = useState(false);
@@ -735,7 +730,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {VISION_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -766,7 +761,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -797,7 +792,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -828,7 +823,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -859,7 +854,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {imageModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {stripModelPrefix(m)}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                             {/* Keep the current value listed (disabled) when
@@ -872,7 +867,7 @@ function Setting({ open, onClose }: SettingProps) {
                                   value={field.value}
                                   disabled
                                 >
-                                  {stripModelPrefix(field.value)}
+                                  {formatModelLabel(field.value)}
                                 </SelectItem>
                               )}
                           </SelectContent>
@@ -903,7 +898,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -934,7 +929,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -965,7 +960,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -996,7 +991,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1027,7 +1022,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1058,7 +1053,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1089,7 +1084,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1120,7 +1115,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {availableModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1151,7 +1146,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {readingTextModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1182,7 +1177,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {BASIC_TUTOR_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1213,7 +1208,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {tutorModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -1262,7 +1257,7 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {TTS_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
-                                {m}
+                                {formatModelLabel(m)}
                               </SelectItem>
                             ))}
                           </SelectContent>
