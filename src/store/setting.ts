@@ -126,7 +126,7 @@ export const TTS_MODEL_VOICES: Record<TtsModel, readonly AnyTtsVoice[]> = {
 export const DEFAULT_TTS_VOICES: Record<TtsModel, AnyTtsVoice> = {
   "tts-1": "onyx",
   "gemini-3.1-flash-tts-preview": "kore",
-  "x-ai/grok-voice-tts-1.0": "eve",
+  "x-ai/grok-voice-tts-1.0": "orion",
 };
 
 /** Audio format each TTS model is requested with (and returns) from
@@ -357,8 +357,8 @@ export const defaultValues: SettingStore = {
   readingTextModel: "deepseek-flash",
   tutorModel: "step-3.7-flash",
   basicTutorModel: "gpt-5.6-luna",
-  ttsModel: "gemini-3.1-flash-tts-preview",
-  ttsVoice: "kore",
+  ttsModel: "x-ai/grok-voice-tts-1.0",
+  ttsVoice: "orion",
   ttsVoiceByModel: {},
   ttsPlaybackRate: 1.0 as TTSPlaybackRate,
   autoSpeakFlashcard: true,
