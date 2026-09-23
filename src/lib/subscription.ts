@@ -102,9 +102,22 @@ export function getAppUrl(): string {
 }
 
 let tableEnsured = false;
+let ensureTablePromise: Promise<boolean> | null = null;
 
 export async function ensureSubscriptionTable(): Promise<boolean> {
   if (tableEnsured) return true;
+  // Deduplicate concurrent first-callers (startup fires several subscription
+  // status checks in parallel). Cleared on completion so a failed run is
+  // retried on the next call; successful runs short-circuit on tableEnsured.
+  if (!ensureTablePromise) {
+    ensureTablePromise = runEnsureSubscriptionTable().finally(() => {
+      ensureTablePromise = null;
+    });
+  }
+  return ensureTablePromise;
+}
+
+async function runEnsureSubscriptionTable(): Promise<boolean> {
   const client = await getClient();
 
   try {
@@ -127,12 +140,12 @@ export async function ensureSubscriptionTable(): Promise<boolean> {
     `);
     // Migrate existing deployments: ensure 'inactive' is in the status check constraint.
     // The original constraint omitted 'inactive', causing INSERT failures during checkout init.
+    // DROP + ADD in ONE statement: ALTER TABLE holds an ACCESS EXCLUSIVE lock
+    // for the whole statement, so concurrent ensure runs serialize instead of
+    // racing into "constraint already exists".
     await client.query(`
       ALTER TABLE subscriptions
-        DROP CONSTRAINT IF EXISTS subscriptions_status_check
-    `);
-    await client.query(`
-      ALTER TABLE subscriptions
+        DROP CONSTRAINT IF EXISTS subscriptions_status_check,
         ADD CONSTRAINT subscriptions_status_check
           CHECK (status IN ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused', 'inactive'))
     `);
@@ -186,17 +199,10 @@ async function ensureSubscriptionEventsTable(
         ON subscription_events(stripe_subscription_id, event_time DESC)
     `);
     await client.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM pg_constraint WHERE conname = 'subscription_events_dedup_key'
-             AND conrelid = 'subscription_events'::regclass
-        ) THEN
-          ALTER TABLE subscription_events
-            ADD CONSTRAINT subscription_events_dedup_key
-              UNIQUE (stripe_subscription_id, event_type, period_start);
-        END IF;
-      END $$
+      ALTER TABLE subscription_events
+        DROP CONSTRAINT IF EXISTS subscription_events_dedup_key,
+        ADD CONSTRAINT subscription_events_dedup_key
+          UNIQUE (stripe_subscription_id, event_type, period_start)
     `);
   };
 
