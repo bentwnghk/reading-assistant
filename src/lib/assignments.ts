@@ -805,6 +805,69 @@ export async function getAssignmentStudentIds(assignmentId: string): Promise<str
   }
 }
 
+/**
+ * SQL fragment: true when a submission/session pair is "un-started" — the
+ * submission was never viewed or submitted AND the session row shows no
+ * student-authored work. The stripped snapshot ships with AI content
+ * present, so progress alone can't discriminate — only student-authored
+ * fields can. Aliases: s = assignment_submissions, r = reading_sessions.
+ */
+const UNSTARTED_SESSION_SQL = `
+  s.last_viewed_at IS NULL
+  AND s.submitted_at IS NULL
+  AND COALESCE(r.student_prediction, '') = ''
+  AND r.test_completed = FALSE
+  AND COALESCE(r.tests_completed, 0) = 0
+  AND COALESCE(r.vocab_quizzes_completed, 0) = 0
+  AND COALESCE(r.spelling_games_completed, 0) = 0
+  AND COALESCE(r.grammar_quizzes_completed, 0) = 0
+  AND COALESCE(r.grammar_games_completed, 0) = 0
+  AND COALESCE(r.chat_history, '[]'::jsonb) = '[]'::jsonb
+  AND COALESCE(r.glossary_ratings, '{}'::jsonb) = '{}'::jsonb`
+
+/**
+ * Collect the ids of an assignment's un-started student sessions (optionally
+ * restricted to specific students). MUST run before the submission rows are
+ * deleted — they carry the student_session_id links this query joins on.
+ */
+async function collectUnstartedSessionIds(
+  client: PoolClient,
+  assignmentId: string,
+  studentIds?: string[],
+): Promise<string[]> {
+  const res = await client.query(
+    `SELECT s.student_session_id
+     FROM assignment_submissions s
+     JOIN reading_sessions r ON r.id = s.student_session_id
+     WHERE s.assignment_id = $1
+       AND ${UNSTARTED_SESSION_SQL}
+       ${studentIds ? "AND s.student_id = ANY($2)" : ""}`,
+    studentIds ? [assignmentId, studentIds] : [assignmentId],
+  )
+  return res.rows
+    .map((row: { student_session_id: string | null }) => row.student_session_id)
+    .filter((id: string | null): id is string => !!id)
+}
+
+/**
+ * Delete student working-copy sessions by id. Guarded by assignment_id +
+ * source so a stale/foreign id can never delete a row this operation
+ * didn't own. Returns the number of rows removed.
+ */
+async function deleteAssignmentSessionCopies(
+  client: PoolClient,
+  sessionIds: string[],
+  assignmentId: string,
+): Promise<number> {
+  if (sessionIds.length === 0) return 0
+  const removed = await client.query(
+    `DELETE FROM reading_sessions
+     WHERE id = ANY($1::text[]) AND assignment_id = $2 AND source = 'assignment'`,
+    [sessionIds, assignmentId],
+  )
+  return removed.rowCount ?? 0
+}
+
 export interface UpdateAssignmentRosterResult {
   added: string[]
   removed: string[]
@@ -814,10 +877,10 @@ export interface UpdateAssignmentRosterResult {
  * Replace an assignment's roster with the given student ids. Newly added
  * students receive a fresh working session + submission row created from
  * the frozen assignment snapshot (same rows createAssignment writes).
- * Removed students' submission rows are deleted, which drops the
- * assignment from their list; their existing session copy stays in their
- * history — the same visibility they get when a whole assignment is
- * deleted (reading_sessions.assignment_id is a soft link, no FK).
+ * Removed students' submission rows are deleted and their un-started
+ * session copies are removed — the same semantics as deleting a whole
+ * assignment. A removed student's started session copy stays in their
+ * history (reading_sessions.assignment_id is a soft link, no FK).
  */
 export async function updateAssignmentRoster(
   assignmentId: string,
@@ -845,11 +908,20 @@ export async function updateAssignmentRoster(
     await client.query("BEGIN")
     try {
       if (removed.length > 0) {
+        // Collect un-started copies while the submission rows (and their
+        // student_session_id links) still exist, then drop submissions and
+        // the collected sessions together.
+        const removedUnstartedIds = await collectUnstartedSessionIds(
+          client,
+          assignmentId,
+          removed,
+        )
         await client.query(
           `DELETE FROM assignment_submissions
            WHERE assignment_id = $1 AND student_id = ANY($2)`,
           [assignmentId, removed],
         )
+        await deleteAssignmentSessionCopies(client, removedUnstartedIds, assignmentId)
       }
       const newSessionIds: string[] = []
       for (const studentId of added) {
@@ -923,14 +995,51 @@ export async function resolveAssignableStudentIds(
   return users.filter((u) => u.role === "student" && !u.banned).map((u) => u.id)
 }
 
-export async function deleteAssignment(assignmentId: string, teacherId: string): Promise<boolean> {
+export interface DeleteAssignmentResult {
+  deleted: boolean
+  removedSessions: number
+}
+
+/**
+ * Delete an assignment (submissions cascade) and — always — the students'
+ * un-started working copies from reading_sessions, so they vanish from every
+ * view (student dashboard, teacher dashboard, Student Data) for every role.
+ * Started sessions are kept: they survive in the student's history
+ * (reading_sessions.assignment_id is a soft link, no FK).
+ */
+export async function deleteAssignment(
+  assignmentId: string,
+  teacherId: string,
+): Promise<DeleteAssignmentResult> {
   const client = await getClient()
   try {
+    await client.query("BEGIN")
+
+    // Collect un-started session ids BEFORE deleting the assignment —
+    // assignment_submissions cascade away with the parent row, taking the
+    // student_session_id links with them.
+    const unstartedSessionIds = await collectUnstartedSessionIds(client, assignmentId)
+
     const result = await client.query(
       `DELETE FROM assignments WHERE id = $1 AND teacher_id = $2`,
       [assignmentId, teacherId],
     )
-    return (result.rowCount ?? 0) > 0
+    if ((result.rowCount ?? 0) === 0) {
+      await client.query("ROLLBACK")
+      return { deleted: false, removedSessions: 0 }
+    }
+
+    const removedSessions = await deleteAssignmentSessionCopies(
+      client,
+      unstartedSessionIds,
+      assignmentId,
+    )
+
+    await client.query("COMMIT")
+    return { deleted: true, removedSessions }
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
   } finally {
     client.release()
   }

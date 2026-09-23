@@ -110,7 +110,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -128,11 +128,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const success = await deleteAssignment(id, existing.teacherId)
-    if (!success) {
+    // Un-started student copies are always removed along with the assignment
+    // (see deleteAssignment); the response reports how many.
+    const { deleted, removedSessions } = await deleteAssignment(id, existing.teacherId)
+    if (!deleted) {
       return NextResponse.json({ error: "Failed to delete assignment" }, { status: 500 })
     }
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, removedSessions })
   } catch (error) {
     console.error("Error deleting assignment:", error)
     return NextResponse.json({ error: "Failed to delete assignment" }, { status: 500 })

@@ -175,7 +175,16 @@ export default function AssignmentsList() {
     try {
       const res = await fetch(`/api/assignments/${assignment.id}`, { method: "DELETE" })
       if (!res.ok) throw new Error("Failed")
-      toast.success(t("assignments.teacherView.deleted"))
+      const data: { removedSessions?: number } = await res
+        .json()
+        .catch(() => ({ removedSessions: 0 }))
+      toast.success(
+        (data.removedSessions ?? 0) > 0
+          ? t("assignments.teacherView.deletedRemoved", {
+              count: data.removedSessions ?? 0,
+            })
+          : t("assignments.teacherView.deleted"),
+      )
     } catch {
       setAssignments(original)
       setSchoolAssignments(originalSchool)
