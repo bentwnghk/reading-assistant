@@ -382,10 +382,20 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
       (q) => answers[q.id] === q.correctAnswer
     ).length;
     const percentage = Math.round((correct / questions.length) * 100);
-    if (!disableSessionGlossary) {
-      setVocabularyQuizScore(percentage);
+    // Only the first recorded completion updates the session-level score and
+    // drill-down questions (read via getState() so SPA navigation doesn't
+    // stale it). Full and missed-words retries are practice-only — their
+    // scores are shown on the results screen but never reach dashboards,
+    // Student Data, or assignment details. The counter round-trips through
+    // localStorage, the DB, and both strip functions, so a shared/assigned
+    // session starts fresh for the recipient.
+    const isRetry = useReadingStore.getState().vocabQuizzesCompleted > 0;
+    if (!isRetry) {
+      if (!disableSessionGlossary) {
+        setVocabularyQuizScore(percentage);
+      }
+      setVocabularyQuiz(questions.map((q) => ({ ...q, userAnswer: answers[q.id] })));
     }
-    setVocabularyQuiz(questions.map((q) => ({ ...q, userAnswer: answers[q.id] })));
     setQuizState("completed");
     logActivity("quiz_complete", { sessionId: effectiveId || undefined, score: percentage });
 
