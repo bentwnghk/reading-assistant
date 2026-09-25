@@ -1644,7 +1644,7 @@
         "pressKey": "Press",
         "wordsAvailable": "Test your understanding of {{count}} words",
         "scoreFormat": "{{correct}} / {{total}} Correct",
-        "lastScore": "First Attempt Score:",
+        "lastScore": "Last Score:",
         "downloadWord": "Download Word",
         "downloadBlank": "Download Blank Quiz",
         "downloadWithAnswers": "Download with Answers",

@@ -312,6 +312,10 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
   const [srsOutcomes, setSrsOutcomes] = useState<VocabularySrsOutcome[]>([]);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // Per-run retry type: true when the current run was started by retryMissed.
+  // Component-local is correct here — the run's questions/answers are also
+  // component state, so the flag has no meaning after unmount.
+  const isMissedRetryRef = useRef(false);
 
   const config = DIFFICULTY_CONFIG[difficulty];
 
@@ -328,6 +332,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
       sortedGlossary = sortedGlossary.slice(0, questionCountLimit);
     }
     const generatedQuestions = generateQuizQuestions(sortedGlossary);
+    isMissedRetryRef.current = false;
     setQuestions(generatedQuestions);
     setAnswers({});
     setCurrentQuestionIndex(0);
@@ -382,15 +387,13 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
       (q) => answers[q.id] === q.correctAnswer
     ).length;
     const percentage = Math.round((correct / questions.length) * 100);
-    // Only the first recorded completion updates the session-level score and
-    // drill-down questions (read via getState() so SPA navigation doesn't
-    // stale it). Full and missed-words retries are practice-only — their
-    // scores are shown on the results screen but never reach dashboards,
-    // Student Data, or assignment details. The counter round-trips through
-    // localStorage, the DB, and both strip functions, so a shared/assigned
-    // session starts fresh for the recipient.
-    const isRetry = useReadingStore.getState().vocabQuizzesCompleted > 0;
-    if (!isRetry) {
+    // Missed-words retries are practice-only — their score is shown on the
+    // results screen but never recorded: the session-level score, drill-down
+    // questions, and completion counters keep the latest full-quiz attempt.
+    // Full attempts (first attempt or full retry) DO record, overwriting the
+    // previous full attempt, since each runs a freshly generated full
+    // question set.
+    if (!isMissedRetryRef.current) {
       if (!disableSessionGlossary) {
         setVocabularyQuizScore(percentage);
       }
@@ -489,6 +492,7 @@ function VocabularyQuiz({ glossary, mergedRatings, onWordResult, onComplete, dis
       shuffle: true,
     });
     const newQuestions = generateQuizQuestions(sortedMissed);
+    isMissedRetryRef.current = true;
     setQuestions(newQuestions);
     setAnswers({});
     setCurrentQuestionIndex(0);

@@ -1213,10 +1213,10 @@ export const useReadingStore = create(
       setVocabularyQuizScore: (score) =>
         set((state) => {
           const newState = {
-            // First-attempt-only by convention: the sole caller
-            // (VocabularyQuiz's completeQuiz) skips this setter when
-            // vocabQuizzesCompleted > 0, so full and missed-words retries
-            // never touch the session-level score.
+            // Records a full-quiz attempt (first or full retry — overwrite
+            // semantics, since each full attempt is a freshly generated
+            // question set). The sole caller (VocabularyQuiz's completeQuiz)
+            // skips this setter for practice-only missed-words retries.
             vocabularyQuizScore: score,
             vocabQuizzesCompleted: state.vocabQuizzesCompleted + 1,
             vocabQuizCompletedAt: Date.now(),

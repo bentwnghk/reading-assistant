@@ -1687,14 +1687,14 @@ Guidelines:
     }
   }
 
-  function calculateGrammarQuizScore() {
+  function calculateGrammarQuizScore(questions?: GrammarQuizQuestion[]) {
     const { setGrammarQuizScore, setGrammarQuizCompleted, setGrammarQuizPoints } = readingStore;
-    const { grammarQuiz } = useReadingStore.getState();
+    const quiz = questions ?? useReadingStore.getState().grammarQuiz;
 
     let earnedPoints = 0;
     let totalPoints = 0;
 
-    for (const question of grammarQuiz) {
+    for (const question of quiz) {
       totalPoints += question.points;
 
       if (question.type === "rewrite" || question.type === "fill-in") {
@@ -1713,16 +1713,21 @@ Guidelines:
     }
 
     const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
-    setGrammarQuizScore(score);
-    setGrammarQuizCompleted(true);
-    setGrammarQuizPoints(earnedPoints, totalPoints);
+    // Passing `questions` marks a practice-only retry: the score is returned
+    // for display but never written to the store, so the recorded attempt's
+    // score fields (session store, DB, dashboards) stay intact.
+    if (!questions) {
+      setGrammarQuizScore(score);
+      setGrammarQuizCompleted(true);
+      setGrammarQuizPoints(earnedPoints, totalPoints);
+    }
 
     logActivity("grammar_quiz_complete", {
       sessionId: useReadingStore.getState().id || undefined,
       score,
     });
 
-    return score;
+    return { score, earnedPoints, totalPoints };
   }
 
   async function evaluateGrammarOpenAnswer(
@@ -1730,13 +1735,16 @@ Guidelines:
     question: string,
     correctAnswer: string,
     userAnswer: string,
-    maxPoints: number
+    maxPoints: number,
+    record = true
   ) {
     const isSameSession = createSessionGuard();
     const { setGrammarQuizQuestionPoints } = readingStore;
 
     if (!userAnswer.trim()) {
-      setGrammarQuizQuestionPoints(questionId, 0);
+      if (record) {
+        setGrammarQuizQuestionPoints(questionId, 0);
+      }
       return { earnedPoints: 0, feedback: "No answer provided." };
     }
 
@@ -1751,13 +1759,17 @@ Guidelines:
       const evaluation = JSON.parse(text);
       const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
 
-      setGrammarQuizQuestionPoints(questionId, earnedPoints);
+      if (record) {
+        setGrammarQuizQuestionPoints(questionId, earnedPoints);
+      }
 
       return { earnedPoints, feedback: evaluation.feedback };
     } catch (error) {
       console.error("Error evaluating grammar answer:", error);
       if (!isSameSession()) return { earnedPoints: 0, feedback: "Session changed." };
-      setGrammarQuizQuestionPoints(questionId, 0);
+      if (record) {
+        setGrammarQuizQuestionPoints(questionId, 0);
+      }
       return { earnedPoints: 0, feedback: "Could not evaluate answer." };
     }
   }

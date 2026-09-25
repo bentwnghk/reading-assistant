@@ -822,10 +822,27 @@ function Grammar() {
 
   const timerConfig = DIFFICULTY_CONFIG[difficulty];
 
-  const effectiveQuiz = useMemo(
-    () => questionCountLimit === "all" ? grammarQuiz : grammarQuiz.slice(0, questionCountLimit),
-    [grammarQuiz, questionCountLimit]
-  );
+  // Practice-retry shadow run: when non-null, the in-progress quiz is a retry
+  // whose answers/points live in this component-local copy instead of the
+  // store, so the recorded attempt (grammarQuiz answers + score fields, which
+  // sync to the DB) stays intact. Abandoning a retry just drops the shadow.
+  const [retryQuiz, setRetryQuiz] = useState<GrammarQuizQuestion[] | null>(null);
+  // Retry's display-only result; recorded runs read the store fields instead.
+  const [retryResult, setRetryResult] = useState<{ score: number; earnedPoints: number; totalPoints: number } | null>(null);
+
+  const effectiveQuiz = useMemo(() => {
+    const base = retryQuiz ?? grammarQuiz;
+    return questionCountLimit === "all" ? base : base.slice(0, questionCountLimit);
+  }, [retryQuiz, grammarQuiz, questionCountLimit]);
+
+  // A regenerated (or restored) quiz invalidates any retry context. During a
+  // retry run the store's grammarQuiz is never written, so its identity is
+  // stable and the shadow survives; recorded-run keystrokes change the
+  // identity but the shadow is already null then.
+  useEffect(() => {
+    setRetryQuiz(null);
+    setRetryResult(null);
+  }, [grammarQuiz]);
 
   const isAnalyzing = !!activeGenerations["grammar-topics"];
   const isGeneratingQuiz = !!activeGenerations["grammar-quiz"];
@@ -835,10 +852,23 @@ function Grammar() {
   }, [analyzeGrammarTopics]);
 
   const handleGenerateQuiz = useCallback(async () => {
-    await generateGrammarQuiz();
+    const questions = await generateGrammarQuiz();
+    // Regeneration installs a fresh question set and zeroes the recorded
+    // attempt (setGrammarQuiz). Return to the setup screen on success —
+    // otherwise a stale results screen (possibly a retry's display-only
+    // result) would linger over the reset store. The retry shadow itself is
+    // dropped by the grammarQuiz identity effect.
+    if (questions.length > 0) {
+      setQuizState("idle");
+      setShowReview(false);
+      setCurrentQuestionIndex(0);
+    }
   }, [generateGrammarQuiz]);
 
   const handleStartQuiz = useCallback(() => {
+    // A start-quiz run always records — drop any retry context first.
+    setRetryQuiz(null);
+    setRetryResult(null);
     setQuizState("in-progress");
     setShowReview(false);
     setCurrentQuestionIndex(0);
@@ -854,18 +884,34 @@ function Grammar() {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    const isRetry = retryQuiz !== null;
     const openQuestions = effectiveQuiz.filter(
       (q) => (q.type === "rewrite" || q.type === "fill-in") && q.userAnswer?.trim()
     );
+    const pointsById: Record<string, number> = {};
     for (const q of openQuestions) {
       setEvaluatingId(q.id);
-      await evaluateGrammarOpenAnswer(q.id, q.question, q.correctAnswer, q.userAnswer!, q.points);
+      // Retries evaluate without recording — earned points return here and
+      // are merged into the shadow, never into the store.
+      const evaluation = await evaluateGrammarOpenAnswer(q.id, q.question, q.correctAnswer, q.userAnswer!, q.points, !isRetry);
+      pointsById[q.id] = evaluation.earnedPoints;
     }
     setEvaluatingId(null);
-    calculateGrammarQuizScore();
+    if (isRetry) {
+      setRetryQuiz((prev) =>
+        prev ? prev.map((q) => (pointsById[q.id] !== undefined ? { ...q, earnedPoints: pointsById[q.id] } : q)) : prev
+      );
+      const merged = effectiveQuiz.map((q) =>
+        pointsById[q.id] !== undefined ? { ...q, earnedPoints: pointsById[q.id] } : q
+      );
+      // Score the retry for display only — store score fields untouched.
+      setRetryResult(calculateGrammarQuizScore(merged));
+    } else {
+      calculateGrammarQuizScore();
+    }
     setQuizState("completed");
     setShowReview(true);
-  }, [effectiveQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer]);
+  }, [effectiveQuiz, retryQuiz, calculateGrammarQuizScore, evaluateGrammarOpenAnswer]);
 
   const handleSubmitQuiz = useCallback(async () => {
     const unanswered = effectiveQuiz.filter((q) => !q.userAnswer?.trim());
@@ -876,11 +922,26 @@ function Grammar() {
   }, [effectiveQuiz, completeQuiz]);
 
   const handleRetry = useCallback(() => {
-    useReadingStore.getState().clearGrammarQuizAnswers();
+    // Practice-only retry: same questions, answers kept in component-local
+    // shadow state. The recorded attempt in the store/DB (answers, earned
+    // points, score, completed flags) is left untouched, and the retry's own
+    // score is shown on the results screen via retryResult only.
+    setRetryQuiz(effectiveQuiz.map((q) => ({ ...q, userAnswer: undefined, earnedPoints: undefined })));
+    setRetryResult(null);
     setQuizState("in-progress");
     setShowReview(false);
     setCurrentQuestionIndex(0);
-  }, []);
+  }, [effectiveQuiz]);
+
+  const handleQuizAnswer = useCallback((questionId: string, value: string) => {
+    if (retryQuiz) {
+      setRetryQuiz((prev) =>
+        prev ? prev.map((q) => (q.id === questionId ? { ...q, userAnswer: value } : q)) : prev
+      );
+    } else {
+      useReadingStore.getState().setGrammarQuizAnswer(questionId, value);
+    }
+  }, [retryQuiz]);
 
   useEffect(() => {
     if (quizState !== "in-progress" || !isTimed) return;
@@ -921,17 +982,29 @@ function Grammar() {
 
   // Latest quiz state captured in a ref so the unmount cleanup (empty deps) can
   // read the value current at unmount time rather than the initial "idle".
+  // Latest quiz state captured in a ref so the unmount cleanup (empty deps) can
+  // read the value current at unmount time rather than the initial "idle".
   const quizStateRef = useRef(quizState);
   useEffect(() => {
     quizStateRef.current = quizState;
   }, [quizState]);
 
+  // Whether the abandoned in-progress run was a practice retry — its answers
+  // live in component state and die with the component, so the cleanup below
+  // must NOT strip the recorded attempt's answers from the store.
+  const retryInProgressRef = useRef(false);
+  useEffect(() => {
+    retryInProgressRef.current = retryQuiz !== null && quizState === "in-progress";
+  }, [retryQuiz, quizState]);
+
   // Discard partial answers / earned points for an un-submitted (in-progress)
-  // quiz from the Zustand store. Mirrors VocabularyQuiz, whose answers live in
-  // local useState and are destroyed when its host unmounts; the grammar quiz
-  // instead stores them on grammarQuiz[] (synced to the DB on each keystroke),
-  // so they must be cleared explicitly. Completed results are preserved.
+  // recording run from the Zustand store. Mirrors VocabularyQuiz, whose answers
+  // live in local useState and are destroyed when its host unmounts; the grammar
+  // quiz instead stores them on grammarQuiz[] (synced to the DB on each
+  // keystroke), so they must be cleared explicitly. Completed results are
+  // preserved. Retry runs never reach the store and need no discarding.
   const discardInProgressAnswers = useCallback(() => {
+    if (retryInProgressRef.current) return;
     useReadingStore.getState().clearGrammarQuizAnswers();
   }, []);
 
@@ -955,6 +1028,8 @@ function Grammar() {
     prevTabRef.current = activeTab;
     if (prev === "quiz" && activeTab !== "quiz" && quizState === "in-progress") {
       discardInProgressAnswers();
+      setRetryQuiz(null);
+      setRetryResult(null);
       setQuizState("idle");
       setShowReview(false);
       setCurrentQuestionIndex(0);
@@ -1823,19 +1898,24 @@ function Grammar() {
     }
 
     if (quizState === "completed") {
+      // A practice retry shows its own (never-recorded) result; a recorded
+      // run shows the store fields that dashboards and exports read.
+      const displayScore = retryResult ? retryResult.score : grammarQuizScore;
+      const displayEarned = retryResult ? retryResult.earnedPoints : grammarQuizEarnedPoints;
+      const displayTotal = retryResult ? retryResult.totalPoints : grammarQuizTotalPoints;
       const scoreMessage =
-        grammarQuizScore >= 80
+        displayScore >= 80
           ? t("reading.grammar.quiz.excellent")
-          : grammarQuizScore >= 60
+          : displayScore >= 60
             ? t("reading.grammar.quiz.good")
             : t("reading.grammar.quiz.keepPracticing");
 
       return (
         <>
           <QuizResultScreen
-            score={grammarQuizScore}
-            earnedPoints={grammarQuizEarnedPoints}
-            totalPoints={grammarQuizTotalPoints}
+            score={displayScore}
+            earnedPoints={displayEarned}
+            totalPoints={displayTotal}
             scoreMessage={scoreMessage}
             showReview={showReview}
             onReview={() => setShowReview(!showReview)}
@@ -1946,9 +2026,7 @@ function Grammar() {
         {q.type === "identify" || q.type === "error-spot" ? (
           <RadioGroup
             value={q.userAnswer || ""}
-            onValueChange={(val) =>
-              useReadingStore.getState().setGrammarQuizAnswer(q.id, val)
-            }
+            onValueChange={(val) => handleQuizAnswer(q.id, val)}
           >
             {q.options?.map((opt, oi) => (
               <div key={oi} className="flex items-center gap-2 mb-1.5">
@@ -1963,9 +2041,7 @@ function Grammar() {
           <Input
             placeholder={t("reading.grammar.quiz.typeAnswer")}
             value={q.userAnswer || ""}
-            onChange={(e) =>
-              useReadingStore.getState().setGrammarQuizAnswer(q.id, e.target.value)
-            }
+            onChange={(e) => handleQuizAnswer(q.id, e.target.value)}
             className="text-sm"
           />
         )}
