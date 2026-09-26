@@ -10,7 +10,7 @@ export const AVAILABLE_MODELS = [
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
 
-export const VISION_MODELS = ["gpt-5-nano", "gpt-5.6-luna"] as const;
+export const VISION_MODELS = ["gpt-5.6-luna", "gpt-6-luna"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
@@ -341,7 +341,7 @@ function debouncedSync(settings: Partial<SettingStore>) {
 export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
-  visionModel: "gpt-5-nano",
+  visionModel: "gpt-5.6-luna",
   imageModel: "google/gemini-3.1-flash-lite-image",
   prereadingModel: "gpt-5.6-luna",
   summaryModel: "deepseek-flash",
