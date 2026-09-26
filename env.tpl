@@ -233,3 +233,9 @@ REALTIME_CORS_ORIGIN=http://localhost:3000
 # Dev:     http://localhost:3001
 # Prod:    wss://battle.your-domain.com  (or https://...  — socket.io upgrades to ws)
 REALTIME_URL=http://localhost:3001
+#
+# Server-side runtime variable (NOT NEXT_PUBLIC_*) — controls whether the PWA
+# install prompt dialog is shown. Exposed to the client at runtime via
+# /api/config so it can be toggled per deployment without rebuilding.
+# true = show prompt (default), false = hide prompt.
+PWA_INSTALL_PROMPT_ENABLED=true

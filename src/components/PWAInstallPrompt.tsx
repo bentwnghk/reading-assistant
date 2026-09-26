@@ -36,18 +36,34 @@ export default function PWAInstallPrompt() {
   const [showIOS, setShowIOS] = useState(false);
 
   useEffect(() => {
-    if (isStandalone()) return;
-    let dismissed = false;
-    try {
-      dismissed = !!sessionStorage.getItem(DISMISSED_KEY);
-    } catch {}
-    if (dismissed) return;
+    let cancelled = false;
+    (async () => {
+      let enabled = true;
+      try {
+        const res = await fetch("/api/config");
+        if (res.ok) {
+          const data = (await res.json()) as {
+            pwaInstallPromptEnabled?: boolean;
+          };
+          enabled = data.pwaInstallPromptEnabled !== false;
+        }
+      } catch {}
+      if (cancelled || !enabled || isStandalone()) return;
+      let dismissed = false;
+      try {
+        dismissed = !!sessionStorage.getItem(DISMISSED_KEY);
+      } catch {}
+      if (dismissed) return;
 
-    if (canInstall) {
-      setShow(true);
-    } else if (isIOS() && !canInstall) {
-      setShowIOS(true);
-    }
+      if (canInstall) {
+        setShow(true);
+      } else if (isIOS() && !canInstall) {
+        setShowIOS(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [canInstall]);
 
   const handleInstall = () => {

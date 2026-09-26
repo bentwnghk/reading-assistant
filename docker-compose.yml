@@ -125,6 +125,10 @@ services:
       # spelling battles. Server-side runtime variable exposed via /api/config.
       # Empty string disables the multiplayer option in the UI.
       REALTIME_URL: "${REALTIME_URL:-http://localhost:3001}"
+      # Show the PWA install prompt dialog (default: true).
+      # Server-side runtime variable exposed via /api/config — set to "false"
+      # to hide the install prompt without rebuilding the image.
+      PWA_INSTALL_PROMPT_ENABLED: "true"
 
   # Realtime (Socket.io) server for multiplayer spelling battles.
   # Shares AUTH_SECRET + DATABASE_URL with the app. The app issues short-lived
