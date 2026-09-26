@@ -455,7 +455,7 @@ Perfect your pronunciation with natural voice reading.
 | 🗣️ **Read Words** | Click any word to hear it |
 | 📖 **Read Sentences** | Listen to full sentences |
 | 📝 **Text Selection Popup** | Select any text and tap Read Aloud |
-| 🎙️ **TTS Model & Voice Selection** | Default `x-ai/grok-voice-tts-1.0` with 6 Grok voices (Leo, Eve, Rex, Ara, Orion, Luna — Orion default); or `tts-1` (alloy, nova, echo, fable, onyx, shimmer) and `gemini-3.1-flash-tts-preview` (Enceladus, Kore, Puck, Aoede, Orus, Gacrux). Each model remembers its own voice |
+| 🎙️ **TTS Model & Voice Selection** | Default `x-ai/grok-voice-tts-1.0` with 6 Grok voices (Leo, Eve, Rex, Ara, Orion, Luna — Ara default); or `tts-1` (alloy, nova, echo, fable, onyx, shimmer) and `gemini-3.1-flash-tts-preview` (Enceladus, Kore, Puck, Aoede, Orus, Gacrux). Each model remembers its own voice |
 | ⏱️ **Playback Speed** | Adjustable rate (0.25x, 0.5x, 0.75x, 1.0x) |
 | 🔄 **Auto-Speak** | Flashcards can auto-read on load |
 
