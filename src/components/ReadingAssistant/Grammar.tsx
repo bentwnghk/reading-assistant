@@ -866,9 +866,22 @@ function Grammar() {
   }, [generateGrammarQuiz]);
 
   const handleStartQuiz = useCallback(() => {
-    // A start-quiz run always records — drop any retry context first.
-    setRetryQuiz(null);
-    setRetryResult(null);
+    // A start-quiz run records only if this question set has never been
+    // completed. Re-attempting an already-completed quiz (same questions,
+    // even after a reload — grammarQuizCompleted round-trips through
+    // localStorage and the DB) is practice-only: a blank shadow copy whose
+    // results are displayed but never recorded, mirroring the Retry button.
+    if (useReadingStore.getState().grammarQuizCompleted) {
+      setRetryQuiz(effectiveQuiz.map((q) => ({ ...q, userAnswer: undefined, earnedPoints: undefined })));
+      setRetryResult(null);
+    } else {
+      setRetryQuiz(null);
+      setRetryResult(null);
+      // Blank slate for the recording run (e.g. partial answers left by an
+      // abandoned run that dodged cleanup). No-op when already clean; score
+      // fields are preserved.
+      useReadingStore.getState().clearGrammarQuizAnswers();
+    }
     setQuizState("in-progress");
     setShowReview(false);
     setCurrentQuestionIndex(0);
@@ -877,7 +890,7 @@ function Grammar() {
         ? timerConfig.timeLimit * effectiveQuiz.length
         : timerConfig.timeLimit
     );
-  }, [timerConfig.timeLimit, grammarQuizMode, effectiveQuiz.length]);
+  }, [timerConfig.timeLimit, grammarQuizMode, effectiveQuiz]);
 
   const completeQuiz = useCallback(async () => {
     if (timerRef.current) {
@@ -1017,17 +1030,22 @@ function Grammar() {
     };
   }, [discardInProgressAnswers]);
 
-  // (2) Clear when switching away from the Quiz tab to Topics/Lessons/Games.
+  // (2) Reset when switching away from the Quiz tab to Topics/Lessons/Games.
   // The Grammar component stays mounted across tab switches, so local quizState
   // would otherwise survive — unlike VocabularyQuiz, which unmounts and loses
-  // its local answers. Reset local progress so returning to the tab shows the
-  // fresh start screen.
+  // its local state. Mirroring VocabularyQuiz, ANY departure from the quiz tab
+  // returns to the fresh setup screen: in-progress answers are discarded
+  // (retry shadows just dropped, recording-run answers stripped from the
+  // store), while completed results stay recorded in the store and surface
+  // via the setup screen's score badge.
   const prevTabRef = useRef(activeTab);
   useEffect(() => {
     const prev = prevTabRef.current;
     prevTabRef.current = activeTab;
-    if (prev === "quiz" && activeTab !== "quiz" && quizState === "in-progress") {
-      discardInProgressAnswers();
+    if (prev === "quiz" && activeTab !== "quiz") {
+      if (quizState === "in-progress") {
+        discardInProgressAnswers();
+      }
       setRetryQuiz(null);
       setRetryResult(null);
       setQuizState("idle");
