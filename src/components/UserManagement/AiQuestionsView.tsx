@@ -56,6 +56,7 @@ const QUICK_QUESTION_KEYS: Array<{ questionKey: string; labelKey: string }> = [
   { questionKey: "reading.tutor.quickQuestions.helpWithImageHintQuestion", labelKey: "reading.tutor.quickQuestions.helpWithImageHint" },
   { questionKey: "reading.tutor.quickQuestions.helpWithImageStepByStepQuestion", labelKey: "reading.tutor.quickQuestions.helpWithImageStepByStep" },
   { questionKey: "reading.tutor.quickQuestions.helpWithImageAnswerQuestion", labelKey: "reading.tutor.quickQuestions.helpWithImageAnswer" },
+  { questionKey: "reading.tutor.quickQuestions.checkAnswerQuestion", labelKey: "reading.tutor.quickQuestions.checkAnswer" },
 ]
 
 function getNestedValue(obj: unknown, path: string): string | undefined {
