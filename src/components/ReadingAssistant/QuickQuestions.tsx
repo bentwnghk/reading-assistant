@@ -87,7 +87,7 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
           <Lightbulb className="w-3 h-3" />
           {t("reading.tutor.quickQuestions.title")}
         </span>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1">
           {mainQuickQuestions.map((q, index) => (
             <Button
               key={index}
@@ -96,9 +96,9 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
               onClick={() => onSelectQuestion(q.question, q.action, q.label)}
               onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
               disabled={disabled}
-              className="h-7 text-xs"
+              className="h-7 text-xs px-1.5 gap-0.5"
             >
-              <q.icon className="w-3 h-3 mr-1" />
+              <q.icon className="w-3 h-3" />
               {q.label}
             </Button>
           ))}
@@ -110,7 +110,7 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
             <ImagePlus className="w-3 h-3" />
             {t("reading.tutor.quickQuestions.imageHelpTitle")}
           </span>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1">
             {visibleImageQuestions.map((q, index) => (
               <Button
                 key={index}
@@ -119,9 +119,9 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
                 onClick={() => onSelectQuestion(q.question, q.action, q.label)}
                 onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
                 disabled={disabled}
-                className="h-7 text-xs"
+                className="h-7 text-xs px-1.5 gap-0.5"
               >
-                <q.icon className="w-3 h-3 mr-1" />
+                <q.icon className="w-3 h-3" />
                 {q.label}
               </Button>
             ))}
