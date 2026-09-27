@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Lightbulb, BookOpen, MessageSquareQuote, ImagePlus } from "lucide-react";
+import { Lightbulb, BookOpen, MessageSquareQuote, ImagePlus, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
 
@@ -61,6 +61,12 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
       action: "upload-image",
       requiresCheatMode: true,
       requiresShowGiveAnswer: true,
+    },
+    {
+      icon: ClipboardCheck,
+      label: t("reading.tutor.quickQuestions.checkAnswer"),
+      question: t("reading.tutor.quickQuestions.checkAnswerQuestion"),
+      action: "upload-image",
     },
   ];
 

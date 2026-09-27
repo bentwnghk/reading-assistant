@@ -404,11 +404,12 @@
       "tutor": {
         "eyebrow": "AI Tutor",
         "title": "A patient coach that knows your text.",
-        "lede": "The AI Tutor reads the passage with you, so every answer stays grounded in what you're reading. Snap and upload a photo of a reading comprehension question and pick the help you need — a nudge, a guided walkthrough, or the full solution.",
+        "lede": "The AI Tutor reads the passage with you, so every answer stays grounded in what you're reading. Snap and upload a photo of a reading comprehension question and pick the help you need — a nudge, a guided walkthrough, the full solution, or a check of your own written answer.",
         "bullets": [
           "Hint me — guiding questions, never the answer",
           "Step-by-step — walks you to the answer",
-          "Give answer — the solution with a clear explanation"
+          "Give answer — the solution with a clear explanation",
+          "Check answer — tells you if your written answer is right; if not, walks you to the correct one"
         ]
       },
       "practice": {
@@ -2049,11 +2050,11 @@
           },
           "image": {
             "name": "Answer Help",
-            "desc": "Add or paste a photo of a reading question, then tap 'Hint me', 'Step-by-step' or 'Give answer'. If an image is already there it sends right away; otherwise it waits for one."
+            "desc": "Add or paste a photo of a reading question, then tap 'Hint me', 'Step-by-step', 'Give answer' or 'Check answer'. If an image is already there it sends right away; otherwise it waits for one."
           },
           "answerCheck": {
             "name": "Checks Your Written Answer",
-            "desc": "Already written your answer on the worksheet? 'Hint me' won't spoil whether it's right — you get hints to check it yourself. 'Step-by-step' walks you through the reasoning so you can compare at the end. 'Give answer' tells you if yours is correct and why."
+            "desc": "Already written your answer on the worksheet? Add or paste a photo of it and tap 'Check answer' — the tutor tells you whether your answer is correct, and if it's wrong, explains why and walks you to the correct answer step by step."
           },
           "quick": {
             "name": "Quick Questions",
@@ -2082,11 +2083,13 @@
         "explain": "Explain",
         "explainQuestion": "Can you explain what this text is about?",
         "helpWithImageStepByStep": "Step-by-step",
-        "helpWithImageStepByStepQuestion": "I've uploaded an image of a reading comprehension question. Based on the passage I'm reading, please help me understand and answer this question step by step. If I have already written my own answer on the worksheet, do not judge it upfront — walk me through the reasoning step by step so I can compare it with my own answer at the end.",
+        "helpWithImageStepByStepQuestion": "I've uploaded an image of a reading comprehension question. Based on the passage I'm reading, please help me understand and answer this question step by step.",
         "helpWithImageHint": "Hint me",
-        "helpWithImageHintQuestion": "I've uploaded a reading comprehension question. Please guide me to find the answer myself by giving hints and asking guiding questions, without giving me the answer directly. If I have already written my own answer on the worksheet, do not tell me whether it is correct — just give hints and guiding questions that help me check and revise it myself.",
+        "helpWithImageHintQuestion": "I've uploaded a reading comprehension question. Please guide me to find the answer myself by giving hints and asking guiding questions, without giving me the answer directly.",
         "helpWithImageAnswer": "Give answer",
-        "helpWithImageAnswerQuestion": "Help me answer this reading comprehension question. Give me the answer with a clear explanation. If I have already written my own answer on the worksheet, also tell me whether it is correct and explain why."
+        "helpWithImageAnswerQuestion": "Help me answer this reading comprehension question. Give me the answer with a clear explanation.",
+        "checkAnswer": "Check answer",
+        "checkAnswerQuestion": "I've uploaded an image of a worksheet question together with the answer I have written on it. Read the question and my written answer from the image, then tell me clearly whether my answer is correct or not. If my answer is incorrect, explain clearly why it is incorrect and walk me to the correct answer step by step."
       }
     }
   },

@@ -501,7 +501,7 @@ body.toc-noscroll{overflow:hidden}
         <li><strong>Before You Read</strong> — a <b>pre-reading</b> panel that activates prior knowledge, sets a purpose, pre-teaches key vocabulary, supplies background, and invites a <b>prediction</b>.</li>
         <li><strong>Understand</strong> — an AI <b>summary</b>; <b>Original / Adapted / Simplified</b> text with <b>Read Along</b>; a <b>mind map</b> and <b>image visualization</b>; <b>readability scores</b> and <b>CEFR highlighting</b>; a <b>vocabulary glossary</b>; and a <b>Phrases &amp; Collocations</b> panel.</li>
         <li><strong>Practice</strong> — <b>flashcards</b>, <b>vocabulary quizzes</b>, solo and real-time multiplayer <b>spelling games</b>, a multi-type <b>reading test</b>, and a full <b>grammar</b> module (topics, lessons, quiz, and five games).</li>
-        <li><strong>AI Tutor</strong> — a chat-based <b>reading tutor</b> grounded in your text: ask for a <i>hint</i>, a <i>step-by-step</i> walkthrough, or the <i>answer</i>.</li>
+        <li><strong>AI Tutor</strong> — a chat-based <b>reading tutor</b> grounded in your text: ask for a <i>hint</i>, a <i>step-by-step</i> walkthrough, the <i>answer</i>, or a <i>check</i> of your own written answer.</li>
         <li><strong>Master</strong> — a cross-session <b>skill profile</b> with adaptive <b>targeted practice</b>; <b>leaderboards</b> and <b>achievements</b>; and the <b>My Vocabulary</b> hub with spaced-repetition review.</li>
         <li><strong>For classrooms</strong> — a shared <b>text repository</b>, <b>session sharing &amp; assignments</b>, vocabulary and review-list sharing, one-click <b>Excel exports</b>, and live <b>class dashboards</b>.</li>
       </ul>
@@ -2161,7 +2161,7 @@ body.toc-noscroll{overflow:hidden}
             </div>
             <div style="padding:8px 12px;border-top:1px solid var(--border);background:var(--subtle)">
               <div class="small" style="font-size:11px;margin-bottom:4px"><svg class="ic sm" style="color:#d97706"><use href="#i-lightbulb"/></svg> Quick Questions: <span class="chip">Main idea</span> <span class="chip">Vocab help</span> <span class="chip">Explain</span></div>
-              <div class="small" style="font-size:11px;margin-bottom:6px"><svg class="ic sm pri"><use href="#i-image-plus"/></svg> Answer Help: <span class="chip">Hint me</span> <span class="chip">Step-by-step</span> <span class="chip">Give answer</span></div>
+              <div class="small" style="font-size:11px;margin-bottom:6px"><svg class="ic sm pri"><use href="#i-image-plus"/></svg> Answer Help: <span class="chip">Hint me</span> <span class="chip">Step-by-step</span> <span class="chip">Give answer</span> <span class="chip">Check answer</span></div>
               <div style="display:flex;gap:6px;align-items:center"><span class="btn sm ghost" style="padding:6px"><svg class="ic sm"><use href="#i-image-plus"/></svg></span><span class="input-fake" style="flex:1;font-size:11px">Type your question...</span><span class="btn primary sm"><svg class="ic sm"><use href="#i-send"/></svg></span></div>
             </div>
           </div>
@@ -2181,12 +2181,13 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <h3>8.2 Image help &amp; "Jailbreak" mode</h3>
-      <p>Three image-related quick questions exist. <b>"Help with image — Hint"</b> is always available (upload an image for a guided hint). The other two are gated behind <b>Jailbreak Mode</b> in Settings:</p>
+      <p>Four image-related quick questions exist. <b>"Hint me"</b> and <b>"Check answer"</b> are always available. The other two are gated behind <b>Jailbreak Mode</b> in Settings:</p>
       <table class="ref">
         <tr><th>Quick question</th><th>Requires</th><th>What it does</th></tr>
         <tr><td>Hint me</td><td>—</td><td>Guides you toward finding the answer yourself.</td></tr>
         <tr><td>Step-by-step</td><td>Jailbreak Mode ON</td><td>Walks you to the answer step by step.</td></tr>
         <tr><td>Give answer</td><td>Jailbreak Mode ON <b>and</b> Show "Give Answer" ON</td><td>Reveals the answer directly.</td></tr>
+        <tr><td>Check answer</td><td>—</td><td>Upload a photo of the question <em>with your written answer</em> — tells you whether your answer is correct, and if it's wrong, explains why and walks you to the correct answer step by step.</td></tr>
       </table>
       <div class="callout warn"><strong>Why "Jailbreak"?</strong> These two toggles are intended for teachers or self-learners who want full solutions. In a classroom, keep them <b>off</b> so students must reason themselves. Both live in <b>Settings → General</b>.</div>
 

@@ -685,7 +685,7 @@ export function AITutorMockup() {
             <ImagePlus className="h-2.5 w-2.5" /> Answer Help:
           </p>
           <div className="flex flex-wrap gap-1">
-            {["Hint me", "Step-by-step", "Give answer"].map((label) => (
+            {["Hint me", "Step-by-step", "Give answer", "Check answer"].map((label) => (
               <span
                 key={label}
                 className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-0.5 text-[10px] text-[var(--lp-ink)]"
