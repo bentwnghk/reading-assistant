@@ -232,6 +232,24 @@ function resolveTtsModel(model: string | undefined): TtsModel {
 const GEMINI_TTS_RECITATION_PREFIX =
   "Say the following text exactly as written, word for word, in a neutral and clear tone";
 
+/**
+ * Replaces unspaced intra-word hyphens with spaces before synthesis.
+ *
+ * LLM-based TTS models (e.g. x-ai/grok-voice-tts-1.0) verbalize "-" as the
+ * word "dash" whenever a hyphenated compound is missing from their text
+ * normalizer — "carbon-neutral" becomes "carbon dash neutral" — while
+ * dictionary compounds ("bad-tempered", "cost-effective") pass through fine.
+ * A hyphen inside a compound is purely orthographic: swapping it for a space
+ * is pronunciation-identical for every model, so it is normalized
+ * unconditionally. Only hyphens between LETTERS are rewritten (chained
+ * compounds like "state-of-the-art" included); spaced dashes (punctuation)
+ * and numeric ranges ("1990-1995") are left untouched. No regex lookbehind —
+ * it would fail to parse on older Safari and brick the whole bundle.
+ */
+export function normalizeHyphensForTts(text: string): string {
+  return text.replace(/\p{L}+(?:-+\p{L}+)+/gu, (compound) => compound.replace(/-+/g, " "));
+}
+
 function frameTtsInput(model: TtsModel, text: string): string {
   return isGeminiTtsModel(model)
     ? `${GEMINI_TTS_RECITATION_PREFIX}: "${text.replace(/"/g, "'")}"`
@@ -280,7 +298,7 @@ function buildTtsRequest(opts: {
 
   const body: Record<string, unknown> = {
     model: ttsModel,
-    input: frameTtsInput(ttsModel, opts.text),
+    input: frameTtsInput(ttsModel, normalizeHyphensForTts(opts.text)),
     voice,
     response_format: responseFormat,
   };
