@@ -3,7 +3,7 @@ import { persist, StorageValue } from "zustand/middleware";
 
 export const AVAILABLE_MODELS = [
   "claude-sonnet-5-5",
-  "gpt-5.6-luna",
+  "gpt-6-luna",
   "deepseek-flash",
   "gemini-3.8-flash",
 ] as const;
@@ -59,9 +59,10 @@ export const RESTRICTED_TUTOR_MODELS: string[] = [
   "gemini-3.8-flash",
 ];
 
-// Pure model-id renames — the old ids are no longer valid anywhere.
-// Applies to every model setting. Keep in sync with
-// scripts/migrate-deepseek-flash-rename.sql and
+// Pure model-id renames for the general/reading-text/tutor model fields —
+// visionModel is NOT in this pass, so a rename never touches the Vision
+// Model setting even when the old id is still valid there.
+// Keep in sync with scripts/migrate-deepseek-flash-rename.sql and
 // scripts/migrate-unified-tutor-model.sql.
 const RENAMED_MODELS: Record<string, string> = {
   "deepseek-v4-flash": "deepseek-flash",
@@ -69,6 +70,7 @@ const RENAMED_MODELS: Record<string, string> = {
   "gpt-5.4-mini": "claude-sonnet-5-5",
   "gemini-3.7-flash": "gemini-3.8-flash",
   "gpt-5.1": "gpt-6.1-sol",
+  "gpt-5.6-luna": "gpt-6-luna",
 };
 
 // Retired AI Tutor models remapped to their replacements in the unified
@@ -340,17 +342,17 @@ export const defaultValues: SettingStore = {
   mode: "subscription" as ApiMode | "",
   visionModel: "gpt-5.6-luna",
   imageModel: "google/gemini-3.1-flash-lite-image",
-  prereadingModel: "gpt-5.6-luna",
+  prereadingModel: "gpt-6-luna",
   summaryModel: "deepseek-flash",
   mindMapModel: "deepseek-flash",
   adaptedTextModel: "deepseek-flash",
   simplifyModel: "deepseek-flash",
-  readingTestModel: "gpt-5.6-luna",
+  readingTestModel: "gpt-6-luna",
   glossaryModel: "deepseek-flash",
-  suggestVocabModel: "gpt-5.6-luna",
+  suggestVocabModel: "gpt-6-luna",
   sentenceAnalysisModel: "deepseek-flash",
-  collocationModel: "gpt-5.6-luna",
-  grammarModel: "gpt-5.6-luna",
+  collocationModel: "gpt-6-luna",
+  grammarModel: "gpt-6-luna",
   readingTextModel: "deepseek-flash",
   tutorModel: "step-3.7-flash",
   ttsModel: "x-ai/grok-voice-tts-1.0",
