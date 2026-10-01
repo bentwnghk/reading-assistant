@@ -742,8 +742,9 @@ All models are served through the **Mr.🆖 AI Hub** (an OpenAI-compatible gatew
 
 | Provider | Models |
 |----------|--------|
-| 🟢 **Google Gemini** | gemini-3.7-flash, gemini-3.8-flash |
-| 🔵 **OpenAI** | gpt-5.1, gpt-5.4-mini, gpt-5.6-luna, gpt-5.6-terra, gpt-6-luna |
+| 🟢 **Google Gemini** | gemini-3.8-flash |
+| 🔵 **OpenAI** | gpt-5.6-luna, gpt-6-luna, gpt-6.1-sol |
+| 🟣 **Anthropic** | claude-sonnet-5-5 |
 | 🔴 **DeepSeek** | deepseek-flash |
 | 🟠 **OpenRouter** | step-3.7-flash |
 

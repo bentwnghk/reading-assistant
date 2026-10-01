@@ -1399,7 +1399,7 @@ Guidelines:
     const isSameSession = createSessionGuard();
     const ac = getAbortController("tutor");
     const { studentAge, extractedText } = useReadingStore.getState();
-    const { tutorModel, basicTutorModel } = useSettingStore.getState();
+    const { tutorModel } = useSettingStore.getState();
     
     if (!extractedText) {
       toast.error("Please extract text from an image first.");
@@ -1407,8 +1407,7 @@ Guidelines:
     }
 
     const hasImages = images && images.length > 0;
-    const modelToUse = hasImages ? tutorModel : basicTutorModel;
-    const visionModel = await createModelProvider(modelToUse);
+    const visionModel = await createModelProvider(tutorModel);
 
     const messages: any[] = history
       .slice(-20)

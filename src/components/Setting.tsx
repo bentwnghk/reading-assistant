@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, BASIC_TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
 import { formatModelLabel } from "@/utils/model";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
@@ -77,7 +77,6 @@ const formSchema = z.object({
   grammarModel: z.enum(AVAILABLE_MODELS),
   readingTextModel: z.enum(READING_TEXT_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
-  basicTutorModel: z.enum(BASIC_TUTOR_MODELS),
   ttsModel: z.enum(TTS_MODELS),
   ttsVoice: z.enum(ALL_TTS_VOICES),
   ttsPlaybackRate: z.union([z.literal(0.25), z.literal(0.5), z.literal(0.75), z.literal(1.0)]),
@@ -137,10 +136,13 @@ function Setting({ open, onClose }: SettingProps) {
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Restricted preview models are only visible to super-admins and
+  // Admins/super-admins and meter-billing (local mode) users.
+  const isAdminRole =
+    sessionData?.user?.role === "admin" ||
+    sessionData?.user?.role === "super-admin";
+  // Restricted preview models are only visible to admins, super-admins and
   // meter-billing (local mode) users; hidden from everyone else's dropdowns.
-  const showRestrictedModels =
-    sessionData?.user?.role === "super-admin" || mode === "local";
+  const showRestrictedModels = isAdminRole || mode === "local";
   const availableModelOptions = showRestrictedModels
     ? AVAILABLE_MODELS
     : AVAILABLE_MODELS.filter((m) => !RESTRICTED_MODELS.includes(m));
@@ -152,9 +154,6 @@ function Setting({ open, onClose }: SettingProps) {
     : TUTOR_MODELS.filter((m) => !RESTRICTED_TUTOR_MODELS.includes(m));
   // The premium image model is only selectable by admins/super-admins and
   // meter-billing (mode "local") users.
-  const isAdminRole =
-    sessionData?.user?.role === "admin" ||
-    sessionData?.user?.role === "super-admin";
   const imageModelOptions =
     isAdminRole || mode === "local"
       ? IMAGE_MODELS
@@ -1145,37 +1144,6 @@ function Setting({ open, onClose }: SettingProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {readingTextModelOptions.map((m) => (
-                              <SelectItem key={m} value={m}>
-                                {formatModelLabel(m)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="basicTutorModel"
-                  render={({ field }) => (
-                    <FormItem className="from-item">
-                      <FormLabel className="from-label">
-                        {t("setting.basicTutorModel")}
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            updateSetting("basicTutorModel", value);
-                          }}
-                        >
-                          <SelectTrigger className="form-field">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {BASIC_TUTOR_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {formatModelLabel(m)}
                               </SelectItem>

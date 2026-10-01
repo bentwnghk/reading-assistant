@@ -714,7 +714,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <p>The table below compares them. All three give access to <em>every</em> feature — they only differ in billing, rate limits, and AI-model visibility: preview models (marked † in §3.2) appear only for Meter users and super-admins.</p>
+      <p>The table below compares them. All three give access to <em>every</em> feature — they only differ in billing, rate limits, and AI-model visibility: preview models (marked † in §3.2) appear only for Meter users, admins and super-admins.</p>
       <table class="ref">
         <tr><th></th><th>Subscription</th><th>Meter (API Key)</th><th>Free (Password)</th></tr>
         <tr><th>Who pays</th><td>You (Stripe)</td><td>You (your provider)</td><td>Mr.🆖</td></tr>
@@ -910,12 +910,12 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <h3>3.2 Models tab — choose the AI engine per feature</h3>
-      <p>Each AI-powered feature can use a different model. Lighter/faster models are cheaper; larger models are smarter. You can mix and match. If a stored model is ever removed from the app, it auto-resets to the default. Models marked <b>†</b> are <b>preview models</b> — they only appear in the dropdowns for <b>super-admins</b> and <b>Meter (API key)</b> users. On Subscription or Free they are hidden, and any stored selection of them auto-resets to the feature default when you sign in or switch billing mode.</p>
+      <p>Each AI-powered feature can use a different model. Lighter/faster models are cheaper; larger models are smarter. You can mix and match. If a stored model is ever removed from the app, it auto-resets to the default. Models marked <b>†</b> are <b>preview models</b> — they only appear in the dropdowns for <b>admins/super-admins</b> and <b>Meter (API key)</b> users. On Subscription or Free they are hidden, and any stored selection of them auto-resets to the feature default when you sign in or switch billing mode.</p>
       <p>The <b>Visualization Model</b> row picks the image generator used by Text Visualization (§4.7). In that row, the model marked <b>‡</b> is a <b>premium image model</b> — it only appears in the dropdown for <b>admins / super-admins</b> and <b>Meter (API key)</b> users; other accounts don't see it, and generation silently falls back to the default model.</p>
       <table class="ref">
         <tr><th>Feature (label)</th><th>Available models</th><th>Default</th></tr>
         <tr><td>Vision (OCR) Model</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-5.6-luna</td></tr>
-        <tr><td>Summary Model</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-flash · gemini-3.7-flash†</td><td>deepseek-flash</td></tr>
+        <tr><td>Summary Model</td><td>claude-sonnet-5-5† · gpt-5.6-luna · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>Pre-reading Model</td><td rowspan="2">same list as Summary</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Mind Map Model</td><td>deepseek-flash</td></tr>
         <tr><td>Visualization Model</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
@@ -927,12 +927,11 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Collocations Model</td><td>gpt-5.6-luna</td></tr>
         <tr><td>Sentence Analysis Model</td><td>deepseek-flash</td></tr>
         <tr><td>Grammar Model</td><td>gpt-5.6-luna</td></tr>
-        <tr><td>Reading Text Generator Model</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-flash · gemini-3.7-flash†</td><td>deepseek-flash</td></tr>
-        <tr><td>Basic AI Tutor Model</td><td>deepseek-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
-        <tr><td>Advanced AI Tutor Model</td><td>deepseek-flash · gemini-3.8-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
+        <tr><td>Reading Text Generator Model</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
+        <tr><td>AI Tutor Model</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
         <tr><td>TTS Model</td><td>tts-1 · gemini-3.1-flash-tts-preview · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
-      <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; switch to <code>gpt-5.6-terra</code>† for the most capable (and costliest) reasoning — this preview model is only offered to super-admins and Meter users.</div>
+      <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; <code>claude-sonnet-5-5</code>† and <code>gemini-3.8-flash</code>† are the strongest (and costliest) options — these preview models are only offered to admins/super-admins and Meter users.</div>
 
       <h3>3.3 TTS tab — text-to-speech</h3>
       <table class="ref">
@@ -2175,7 +2174,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Ask a question</b></td><td>Type in the box and press <b>Enter</b> (use <b>Shift+Enter</b> for a newline). The answer streams in.</td></tr>
         <tr><td><b>Language toggle</b></td><td>Switch the AI Tutor's replies between <b>English</b> and <b>Chinese</b> (remembers your choice).</td></tr>
         <tr><td><b>Selected-text context</b></td><td>Select any text in the original text area — it appears as a quoted "context chip" above the input, so the AI Tutor answers <em>about that specific passage</em>.</td></tr>
-        <tr><td><b>Attach an image</b></td><td>Paperclip button → upload an image with your question (uses the vision-capable Advanced Tutor model).</td></tr>
+        <tr><td><b>Attach an image</b></td><td>Paperclip button → upload an image with your question (sent to the vision-capable AI Tutor model).</td></tr>
         <tr><td><b>Quick questions</b></td><td>One-tap buttons: <i>Main Idea</i>, <i>Vocab Help</i>, <i>Explain</i>, plus image-based help (see below).</td></tr>
         <tr><td><b>Clear history</b></td><td>Trash button wipes the conversation. Up to 20 messages are kept as context.</td></tr>
       </table>
@@ -2639,14 +2638,13 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>Model list</th><th>Members</th><th>Default</th></tr>
         <tr><td><b>Vision</b> (OCR)</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-5.6-luna</td></tr>
         <tr><td><b>Image</b> (visualization)</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
-        <tr><td><b>Available</b> — default <code>deepseek-flash</code> (summary, mind map, adapt, simplify, glossary, sentence-analysis)</td><td>gpt-5.4-mini† · gpt-5.6-luna · deepseek-flash · gemini-3.7-flash†</td><td>deepseek-flash</td></tr>
+        <tr><td><b>Available</b> — default <code>deepseek-flash</code> (summary, mind map, adapt, simplify, glossary, sentence-analysis)</td><td>claude-sonnet-5-5† · gpt-5.6-luna · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td><b>Available</b> — default <code>gpt-5.6-luna</code> (pre-reading, reading test, suggest vocabulary, collocations, grammar)</td><td>same list as above</td><td>gpt-5.6-luna</td></tr>
-        <tr><td><b>Reading Text</b> (AI text generator)</td><td>gpt-5.4-mini† · gpt-5.1 · deepseek-flash · gemini-3.7-flash†</td><td>deepseek-flash</td></tr>
-        <tr><td><b>Basic Tutor</b></td><td>deepseek-flash · gpt-5.6-luna</td><td>gpt-5.6-luna</td></tr>
-        <tr><td><b>Advanced Tutor</b></td><td>deepseek-flash · gemini-3.8-flash† · step-3.7-flash · gpt-5.6-terra†</td><td>step-3.7-flash</td></tr>
+        <tr><td><b>Reading Text</b> (AI text generator)</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
+        <tr><td><b>AI Tutor</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
         <tr><td><b>TTS</b> (text-to-speech)</td><td>tts-1 · gemini-3.1-flash-tts-preview · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
-      <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>. <b>†</b> Preview model — hidden from the Settings dropdowns unless you are a super-admin or on Meter billing; stored selections auto-reset to the feature default. <b>‡</b> Premium image model — shown in Settings → Models → Visualization Model only to admins/super-admins and Meter (API key) users; other accounts are silently served the default model.</p>
+      <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>. <b>†</b> Preview model — hidden from the Settings dropdowns unless you are an admin/super-admin or on Meter billing; stored selections auto-reset to the feature default. <b>‡</b> Premium image model — shown in Settings → Models → Visualization Model only to admins/super-admins and Meter (API key) users; other accounts are silently served the default model.</p>
 
       <h3>B. Role-capability matrix</h3>
       <table class="ref">
@@ -2677,7 +2675,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Signed out unexpectedly</b></td><td>The idle timeout (default 90 min) or the 3-day session ceiling was reached. A 1-minute warning toast precedes idle sign-out.</td></tr>
         <tr><td><b>Spinner vanished mid-generation after navigating</b></td><td>Not a bug — generation continues in the background; the loading state lives in the store and survives navigation. Return to the section to see results.</td></tr>
         <tr><td><b>Settings won't change after editing</b></td><td>Click <b>Save</b> at the bottom of Settings. Authenticated users' settings are stored in the DB and reload on each sign-in.</td></tr>
-        <tr><td><b>A model I previously picked is gone</b></td><td>Preview models (marked †) are shown only to super-admins and Meter (API key) users. For everyone else they are hidden and the selection auto-resets to the feature default on the next sign-in.</td></tr>
+        <tr><td><b>A model I previously picked is gone</b></td><td>Preview models (marked †) are shown only to admins, super-admins and Meter (API key) users. For everyone else they are hidden and the selection auto-resets to the feature default on the next sign-in.</td></tr>
         <tr><td><b>"With Answers" export is greyed out</b></td><td>Students see answers only after completing the test/quiz. Teachers/admins always see them.</td></tr>
         <tr><td><b>Shared session missing my answers</b></td><td>Expected — sharing strips answers/scores/chat to give recipients a clean copy. Your original is untouched.</td></tr>
         <tr><td><b>iOS extraction stopped mid-way</b></td><td>iOS may suspend long requests; a Screen Wake Lock is used to prevent this. Keep the screen on during extraction.</td></tr>

@@ -2,10 +2,10 @@ import { create } from "zustand";
 import { persist, StorageValue } from "zustand/middleware";
 
 export const AVAILABLE_MODELS = [
-  "gpt-5.4-mini",
+  "claude-sonnet-5-5",
   "gpt-5.6-luna",
   "deepseek-flash",
-  "gemini-3.7-flash",
+  "gemini-3.8-flash",
 ] as const;
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
@@ -30,54 +30,52 @@ export const RESTRICTED_IMAGE_MODELS: string[] = [
 
 export const TUTOR_MODELS = [
   "deepseek-flash",
-  "gemini-3.8-flash",
   "step-3.7-flash",
-  "gpt-5.6-terra",
+  "gpt-6-luna",
+  "claude-sonnet-5-5",
+  "gemini-3.8-flash",
 ] as const;
 
 export type TutorModel = (typeof TUTOR_MODELS)[number];
 
-export const BASIC_TUTOR_MODELS = [
-  "deepseek-flash",
-  "gpt-5.6-luna",
-] as const;
-
-export type BasicTutorModel = (typeof BASIC_TUTOR_MODELS)[number];
-
 export const READING_TEXT_MODELS = [
-  "gpt-5.4-mini",
-  "gpt-5.1",
+  "claude-sonnet-5-5",
+  "gpt-6.1-sol",
   "deepseek-flash",
-  "gemini-3.7-flash",
+  "gemini-3.8-flash",
 ] as const;
 
 export type ReadingTextModel = (typeof READING_TEXT_MODELS)[number];
 
 // Preview models hidden from the Settings dropdowns for regular users.
-// Super-admins and meter-billing (mode "local") users always see them.
+// Admins, super-admins and meter-billing (mode "local") users always see them.
 export const RESTRICTED_MODELS: string[] = [
-  "gpt-5.4-mini",
-  "gemini-3.7-flash",
+  "claude-sonnet-5-5",
+  "gemini-3.8-flash",
 ];
 
 export const RESTRICTED_TUTOR_MODELS: string[] = [
+  "claude-sonnet-5-5",
   "gemini-3.8-flash",
-  "gpt-5.6-terra",
 ];
 
 // Pure model-id renames — the old ids are no longer valid anywhere.
 // Applies to every model setting. Keep in sync with
-// scripts/migrate-deepseek-flash-rename.sql.
+// scripts/migrate-deepseek-flash-rename.sql and
+// scripts/migrate-unified-tutor-model.sql.
 const RENAMED_MODELS: Record<string, string> = {
   "deepseek-v4-flash": "deepseek-flash",
   "deepseek-v4-flash-vision-exp": "deepseek-flash",
+  "gpt-5.4-mini": "claude-sonnet-5-5",
+  "gemini-3.7-flash": "gemini-3.8-flash",
+  "gpt-5.1": "gpt-6.1-sol",
 };
 
-// Retired Advanced AI Tutor models remapped to their replacements.
-// Keep in sync with scripts/migrate-tutor-model-replacements.sql.
+// Retired AI Tutor models remapped to their replacements in the unified
+// AI Tutor Model setting. Keep in sync with
+// scripts/migrate-unified-tutor-model.sql.
 const TUTOR_MODEL_REPLACEMENTS: Record<string, TutorModel> = {
-  "gpt-5.4-mini": "deepseek-flash",
-  "gemini-3.7-flash": "gemini-3.8-flash",
+  "gpt-5.6-terra": "step-3.7-flash",
 };
 
 export const RESTRICTED_MODEL_FIELD_NAMES = [
@@ -224,7 +222,6 @@ export interface SettingStore {
   grammarModel: AvailableModel;
   readingTextModel: ReadingTextModel;
   tutorModel: TutorModel;
-  basicTutorModel: BasicTutorModel;
   ttsModel: TtsModel;
   ttsVoice: string;
   /**
@@ -356,7 +353,6 @@ export const defaultValues: SettingStore = {
   grammarModel: "gpt-5.6-luna",
   readingTextModel: "deepseek-flash",
   tutorModel: "step-3.7-flash",
-  basicTutorModel: "gpt-5.6-luna",
   ttsModel: "x-ai/grok-voice-tts-1.0",
   ttsVoice: "ara",
   ttsVoiceByModel: {},
@@ -382,10 +378,13 @@ export const defaultValues: SettingStore = {
 };
 
 function sanitizeModelSettings(state: Record<string, unknown>) {
+  // The Basic/Advanced AI Tutor split was removed; drop the stale key so it
+  // is not resurrected into the store or re-synced to user_settings.
+  delete state.basicTutorModel;
   const allModelFields: (keyof SettingStore)[] = [
     "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
     "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
-    "collocationModel", "grammarModel", "readingTextModel", "tutorModel", "basicTutorModel",
+    "collocationModel", "grammarModel", "readingTextModel", "tutorModel",
   ];
   for (const field of allModelFields) {
     const value = state[field];
@@ -418,9 +417,6 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   }
   if (!TUTOR_MODELS.includes(state.tutorModel as TutorModel)) {
     state.tutorModel = defaultValues.tutorModel;
-  }
-  if (!BASIC_TUTOR_MODELS.includes(state.basicTutorModel as BasicTutorModel)) {
-    state.basicTutorModel = defaultValues.basicTutorModel;
   }
   if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
     state.readingTextModel = defaultValues.readingTextModel;
@@ -569,11 +565,13 @@ export function getRestrictedModelResets(
 }
 
 // Reset any restricted model selection back to its default for users who are
-// neither super-admin nor on meter billing (mode "local"). Persists the
-// correction via update() (debounced server sync for authenticated users).
+// not admins/super-admins and are not on meter billing (mode "local").
+// Persists the correction via update() (debounced server sync for
+// authenticated users).
 export function enforceRestrictedModels(role?: string | null) {
   const state = useSettingStore.getState();
-  const isPrivileged = role === "super-admin" || state.mode === "local";
+  const isPrivileged =
+    role === "admin" || role === "super-admin" || state.mode === "local";
   const updates = getRestrictedModelResets(state, isPrivileged);
   if (Object.keys(updates).length > 0) {
     state.update(updates);
