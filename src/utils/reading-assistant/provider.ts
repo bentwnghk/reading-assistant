@@ -1,6 +1,6 @@
 import type { GoogleVertexProviderSettings } from "@ai-sdk/google-vertex/edge";
 import type { AzureOpenAIProviderSettings } from "@ai-sdk/azure";
-import { DEEPSEEK_FLASH_MAX_TOKENS, isDeepSeekFlashModel } from "@/utils/model";
+import { DEEPSEEK_FLASH_MAX_TOKENS, isDeepSeekFlashModel, isTemperatureUnsupportedModel } from "@/utils/model";
 
 export interface AIProviderOptions {
   provider: string;
@@ -10,6 +10,31 @@ export interface AIProviderOptions {
   headers?: Record<string, string>;
   model: string;
   settings?: any;
+}
+
+/** Wrap fetch to patch chat-completion request bodies per model:
+ *  - deepseek-flash: raise max_tokens to the full output window
+ *  - temperature-deprecated models (Claude 5 family): strip `temperature`,
+ *    which the AI SDK defaults to 0 and the upstream API rejects with 400 */
+async function patchModelRequestBody(
+  input: RequestInfo | URL,
+  init?: RequestInit
+) {
+  if (init?.body && typeof init.body === "string") {
+    try {
+      const body = JSON.parse(init.body);
+      if (typeof body.model === "string") {
+        if (isDeepSeekFlashModel(body.model)) {
+          body.max_tokens = DEEPSEEK_FLASH_MAX_TOKENS;
+        }
+        if (isTemperatureUnsupportedModel(body.model) && "temperature" in body) {
+          delete body.temperature;
+        }
+        init = { ...init, body: JSON.stringify(body) };
+      }
+    } catch {}
+  }
+  return fetch(input, init);
 }
 
 export async function createAIProvider({
@@ -53,22 +78,7 @@ export async function createAIProvider({
       baseURL,
       apiKey,
       headers,
-      ...(provider === "openaicompatible" && isDeepSeekFlashModel(model)
-        ? {
-            fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
-              if (init?.body && typeof init.body === "string") {
-                try {
-                  const body = JSON.parse(init.body);
-                  if (isDeepSeekFlashModel(body.model)) {
-                    body.max_tokens = DEEPSEEK_FLASH_MAX_TOKENS;
-                    init = { ...init, body: JSON.stringify(body) };
-                  }
-                } catch {}
-              }
-              return fetch(input, init);
-            },
-          }
-        : {}),
+      fetch: patchModelRequestBody,
     });
     return openai(model, settings);
   } else if (provider === "anthropic") {
@@ -77,6 +87,7 @@ export async function createAIProvider({
       baseURL,
       apiKey,
       headers,
+      fetch: patchModelRequestBody,
     });
     return anthropic(model, settings);
   } else if (provider === "deepseek") {

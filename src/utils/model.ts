@@ -17,6 +17,13 @@ export function isDeepSeekFlashModel(model: string) {
   return model === "deepseek-flash";
 }
 
+/** Claude 5-family models: the upstream API rejects the `temperature`
+ *  parameter ("temperature is deprecated for this model"), so it must be
+ *  stripped from request bodies — the AI SDK defaults it to 0. */
+export function isTemperatureUnsupportedModel(model: string) {
+  return model.startsWith("claude-sonnet-5");
+}
+
 export function isThinkingModel(model: string) {
   return (
     model.includes("thinking") ||
