@@ -17,6 +17,7 @@ import {
 
 import { useHistoryStore } from "@/store/history"
 import { initAchievementCallbacks } from "@/store/achievements"
+import { useGlobalStore } from "@/store/global"
 import { useSharingStore, setShareCheckComplete } from "@/store/sharing"
 import { useVocabularyStore, setStudyPlanDialogChecked } from "@/store/vocabulary"
 import { useIdleTimer } from "@/hooks/useIdleTimer"
@@ -94,6 +95,38 @@ function AuthStateManager() {
     // account switches.
     setRestoreComplete(false)
     setShareCheckComplete(false)
+
+    // Cross-account hygiene on shared devices. When the account changes,
+    // device-scoped localStorage left by the previous account must not leak
+    // into this sign-in:
+    // - hasCompletedOnboarding=true would permanently suppress the onboarding
+    //   wizard for the new user (safe to reset: the wizard silently
+    //   self-re-completes when the new user already has AI access);
+    // - a stale persisted reading session would surface as the previous
+    //   user's "Welcome back!" session, block the wizard's no-session guard,
+    //   and get stamped into the new user's lastOpenedSessionId;
+    // - open dialog flags would auto-open Settings for the new user.
+    // A missing lastSignedInUserId (pre-migration device) is treated as a
+    // change so contaminated profiles are cleaned up on first boot.
+    const { lastSignedInUserId } = useGlobalStore.getState()
+    if (lastSignedInUserId !== userId) {
+      useGlobalStore.setState({
+        lastSignedInUserId: userId,
+        hasCompletedOnboarding: false,
+        openSetting: false,
+        openHistory: false,
+        openDashboard: false,
+        openTutorChat: false,
+        openTeacherDashboard: false,
+      })
+      if (useReadingStore.getState().id) {
+        useReadingStore.getState().reset()
+      }
+      // Purge the persisted copy too — reset()'s persist write is suppressed
+      // while authenticated (see setItem in store/reading.ts), so without
+      // this the stale session rehydrates back on the next reload.
+      useReadingStore.persist.clearStorage()
+    }
 
     // Hold the first-run UI gate (onboarding dialog, settings banner) closed
     // until this user's sign-in data — including the free-access ticket
