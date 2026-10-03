@@ -1538,8 +1538,7 @@ function AdaptedText() {
 
               {/* AI vocabulary suggestion */}
               <div className="mb-4 flex flex-wrap items-center gap-2 p-3 bg-muted/50 rounded-md">
-                <Wand2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-sm text-muted-foreground mr-1">
+                <span className="text-sm text-muted-foreground">
                   {t("reading.adaptedText.suggestLabel")}
                 </span>
                 <Select
@@ -1547,7 +1546,7 @@ function AdaptedText() {
                   onValueChange={(v) => setSuggestCount(Number(v))}
                   disabled={isSuggesting}
                 >
-                  <SelectTrigger className="w-[80px] h-8">
+                  <SelectTrigger className="w-[64px] h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
