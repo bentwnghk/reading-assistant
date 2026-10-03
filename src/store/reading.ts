@@ -77,7 +77,31 @@ export function setHistorySyncFn(fn: (store: ReadingStore) => void) {
   syncToHistoryFn = fn;
 }
 
+// Set while a lightweight-restored session is waiting for its full server
+// data (heavy JSONB fields + media stripped from the list response). While
+// set, history writes are suppressed: a backup() taken in this window would
+// persist gutted quiz/test arrays AND mark the history entry "hydrated",
+// permanently breaking the loadFull fast path if the background fetch fails.
+let _pendingFullHydration: string | null = null;
+
+export function setPendingFullHydration(sessionId: string | null) {
+  _pendingFullHydration = sessionId;
+}
+
+/** Clears the gate only if it still points at the given session — never
+ * stomps a gate armed for a different (newer) restore. */
+export function clearPendingFullHydration(sessionId: string) {
+  if (_pendingFullHydration === sessionId) {
+    _pendingFullHydration = null;
+  }
+}
+
+export function isPendingFullHydration(): boolean {
+  return _pendingFullHydration !== null;
+}
+
 function syncToHistoryIfNeeded(state: ReadingStore) {
+  if (isPendingFullHydration()) return;
   if (syncToHistoryFn && state.id && state.extractedText) {
     const dataKeys = Object.keys(defaultValues) as (keyof ReadingStore)[];
     const dataOnly = pick(state, dataKeys);
@@ -1518,6 +1542,7 @@ export const useReadingStore = create(
         }),
       reset: () => {
         abortAllGenerations();
+        setPendingFullHydration(null);
         set(() => ({
           ...defaultValues,
         }));
@@ -1530,6 +1555,10 @@ export const useReadingStore = create(
       },
       restore: async (session) => {
         abortAllGenerations();
+        // A fresh restore invalidates any in-flight hydration of the previous
+        // session. Callers restoring lightweight data re-arm the flag right
+        // after this synchronous body runs (see AuthProvider).
+        setPendingFullHydration(null);
         set(() => ({
           ...defaultValues,
           ...session,

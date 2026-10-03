@@ -259,12 +259,21 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
   const client = await getClient()
 
   try {
-    // Lightweight list query: visualizationImage (a large base64 TEXT column)
-    // is intentionally EXCLUDED from the SELECT — never use SELECT * here, it
-    // would make PostgreSQL read and ship megabytes of base64 per row that the
-    // mapping below then discards. originalImages live in a separate table and
-    // are equally omitted. Sessions are hydrated with full media on demand via
-    // getReadingSession / loadFull.
+    // Lightweight list query — two classes of heavy data are EXCLUDED:
+    //   1. visualization_image (large base64 TEXT) — never use SELECT * here;
+    //      it would make PostgreSQL read and ship megabytes of base64 per row
+    //      that the mapping below then discards.
+    //   2. Restore-only JSONB arrays (reading_test, grammar_quiz,
+    //      vocabulary_quiz, spelling/grammar results, grammar challenge
+    //      caches) — read ONLY by the reading store after restore; dashboards
+    //      and progress use the kept scalar scores/flags/timestamps. The
+    //      restored session fetches them from /api/sessions/[id] in the
+    //      background (see AuthProvider's pendingFullHydration merge).
+    // Fields with dashboard/progress readers (preReading, collocations,
+    // grammarTopics, analyzedSentences, chatHistory, glossary, texts) STAY.
+    // SESSIONS_LIST_LIMIT caps pathological histories; AuthProvider falls
+    // back to a direct /api/sessions/[id] fetch when the preferred session
+    // falls outside the cap.
     const result = await client.query(
       `SELECT
          id, user_id, doc_title, source, student_age,
@@ -278,21 +287,22 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
          pre_reading, pre_reading_generated_at,
          student_prediction, prediction_rating, skill_breakdown,
          collocations, collocations_generated_at,
-         reading_test, reading_test_completed_at,
+         reading_test_completed_at,
          glossary, glossary_ratings, glossary_generated_at,
          test_score, test_completed, test_earned_points, test_total_points,
          test_show_chinese, test_mode, tests_completed,
-         vocabulary_quiz, vocabulary_quiz_score,
+         vocabulary_quiz_score,
          vocab_quizzes_completed, vocab_quiz_completed_at,
          spelling_game_best_score, spelling_game_accuracy,
-         spelling_games_completed, spelling_game_completed_at, spelling_results,
+         spelling_games_completed, spelling_game_completed_at,
          flashcard_review_dates,
          chat_history,
          original_difficulty, adapted_difficulty, simplified_difficulty,
          include_glossary, include_sentence_analysis,
-         grammar_topics, grammar_quiz, grammar_quiz_score, grammar_quiz_completed,
+         grammar_topics,
+         grammar_quiz_score, grammar_quiz_completed,
          grammar_quizzes_completed, grammar_quiz_earned_points, grammar_quiz_total_points,
-         grammar_generated_at, grammar_quiz_completed_at, grammar_results,
+         grammar_generated_at, grammar_quiz_completed_at,
          grammar_highlight_enabled, grammar_highlight_topic_id, grammar_quiz_mode,
          grammar_scramble_high_score, grammar_workshop_high_score, grammar_surgery_high_score,
          grammar_roulette_high_score, grammar_duel_high_score,
@@ -301,12 +311,11 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
          grammar_roulette_accuracy, grammar_duel_accuracy,
          grammar_scramble_completed, grammar_workshop_completed, grammar_surgery_completed,
          grammar_roulette_completed, grammar_duel_completed,
-         grammar_error_challenges, grammar_scramble_challenges,
-         grammar_workshop_challenges, grammar_game_questions,
          assignment_id, created_at, updated_at
        FROM reading_sessions rs
        WHERE rs.user_id = $1
-       ORDER BY rs.updated_at DESC`,
+       ORDER BY rs.updated_at DESC
+       LIMIT 500`,
       [userId]
     )
 
@@ -338,7 +347,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       visualizationImage: "",
       visualizationLanguage: row.visualization_language ?? null,
       visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
-      readingTest: row.reading_test,
+      readingTest: [], // stripped from list — hydrated via /api/sessions/[id]
       glossary: row.glossary,
       glossaryRatings: row.glossary_ratings,
       testScore: row.test_score,
@@ -348,14 +357,14 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       testShowChinese: row.test_show_chinese,
       testMode: row.test_mode,
       vocabularyQuizScore: row.vocabulary_quiz_score,
-      vocabularyQuiz: row.vocabulary_quiz ?? [],
+      vocabularyQuiz: [],
       spellingGameBestScore: row.spelling_game_best_score,
       spellingGameAccuracy: row.spelling_game_accuracy ?? 0,
       testsCompleted: row.tests_completed ?? 0,
       vocabQuizzesCompleted: row.vocab_quizzes_completed ?? 0,
       spellingGamesCompleted: row.spelling_games_completed ?? 0,
-      spellingResults: row.spelling_results ?? [],
-      grammarResults: row.grammar_results ?? [],
+      spellingResults: [],
+      grammarResults: [],
       flashcardReviewDates: row.flashcard_review_dates ?? [],
       summaryGeneratedAt: Number(row.summary_generated_at ?? 0),
       mindMapGeneratedAt: Number(row.mind_map_generated_at ?? 0),
@@ -375,7 +384,7 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       includeGlossary: row.include_glossary ?? true,
       includeSentenceAnalysis: row.include_sentence_analysis ?? true,
       grammarTopics: row.grammar_topics ?? [],
-      grammarQuiz: row.grammar_quiz ?? [],
+      grammarQuiz: [],
       grammarQuizScore: row.grammar_quiz_score ?? 0,
       grammarQuizCompleted: row.grammar_quiz_completed ?? false,
       grammarQuizzesCompleted: row.grammar_quizzes_completed ?? 0,
@@ -404,10 +413,10 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
       grammarSurgeryCompleted: row.grammar_surgery_completed ?? 0,
       grammarRouletteCompleted: row.grammar_roulette_completed ?? 0,
       grammarDuelCompleted: row.grammar_duel_completed ?? 0,
-      grammarErrorChallenges: row.grammar_error_challenges ?? [],
-      grammarScrambleChallenges: row.grammar_scramble_challenges ?? [],
-      grammarWorkshopChallenges: row.grammar_workshop_challenges ?? [],
-      grammarGameQuestions: row.grammar_game_questions ?? [],
+      grammarErrorChallenges: [],
+      grammarScrambleChallenges: [],
+      grammarWorkshopChallenges: [],
+      grammarGameQuestions: [],
       createdAt: new Date(row.created_at).getTime(),
       updatedAt: new Date(row.updated_at).getTime(),
       userId: row.user_id,

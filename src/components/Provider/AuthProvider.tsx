@@ -4,7 +4,7 @@ import { SessionProvider, useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
-import { setUserId, useReadingStore, setRestoreComplete, setWelcomeDialogChecked } from "@/store/reading"
+import { setUserId, useReadingStore, setRestoreComplete, setWelcomeDialogChecked, setPendingFullHydration, clearPendingFullHydration } from "@/store/reading"
 import { setAuthState } from "@/store/history"
 import {
   setSettingUserId,
@@ -157,14 +157,19 @@ function AuthStateManager() {
           setRestoreComplete(true)
         } else if (sessions.length > 0) {
           const preferredSessionId = settings?.lastOpenedSessionId
-          const sessionToRestore =
-            sessions.find((item) => item.id === preferredSessionId) ?? sessions[0]
+          const inList = preferredSessionId
+            ? sessions.find((item) => item.id === preferredSessionId)
+            : undefined
 
-          if (sessionToRestore) {
-            // Restore the lightweight session immediately so the UI (and the
-            // "Welcome back!" dialog) is not blocked on a network request. The
-            // session list omits originalImages/visualizationImage for speed.
+          // Restores a lightweight list entry immediately (UI + "Welcome
+          // back!" dialog are never blocked on a network request), then
+          // hydrates the fields the list response strips for speed (media +
+          // heavy per-session JSONB) from /api/sessions/[id] in the
+          // background. While hydration is pending, history writes are
+          // suppressed (see isPendingFullHydration in store/reading.ts).
+          const restoreLightweight = (sessionToRestore: (typeof sessions)[number]) => {
             useReadingStore.getState().restore(sessionToRestore)
+            setPendingFullHydration(sessionToRestore.id)
             markLastOpenedSession(sessionToRestore.id)
 
             const sessionTitle =
@@ -173,23 +178,81 @@ function AuthStateManager() {
               sessionToRestore.id
             toast.message(t("history.restored", { title: sessionTitle }))
 
-            // Then fetch the full session (with media) in the background and
-            // merge only the missing media fields, so any quick user edits to
-            // text content are not overwritten.
             fetch(`/api/sessions/${sessionToRestore.id}`)
               .then((res) => (res.ok ? res.json() : null))
               .then((fullData) => {
-                if (!fullData) return
-                if (syncedUserIdRef.current !== expectedUserId) return
+                if (syncedUserIdRef.current !== expectedUserId) {
+                  clearPendingFullHydration(sessionToRestore.id)
+                  return
+                }
                 // Only merge if the user hasn't switched to another session.
-                if (useReadingStore.getState().id !== sessionToRestore.id) return
+                if (useReadingStore.getState().id !== sessionToRestore.id) {
+                  clearPendingFullHydration(sessionToRestore.id)
+                  return
+                }
+                if (!fullData) {
+                  // Fetch failed: release the history-write gate anyway so
+                  // the session keeps autosaving. The (already lightweight)
+                  // entry simply stays un-hydrated and loadFull retries.
+                  clearPendingFullHydration(sessionToRestore.id)
+                  return
+                }
+                // Merge only the fields missing from the lightweight entry,
+                // and never overwrite a field the user may have already
+                // populated during the fetch window (merge-if-still-default).
+                const current = useReadingStore.getState()
                 useReadingStore.setState({
                   originalImages: fullData.originalImages ?? [],
                   visualizationImage: fullData.visualizationImage ?? "",
+                  readingTest: current.readingTest.length ? current.readingTest : fullData.readingTest ?? [],
+                  grammarQuiz: current.grammarQuiz.length ? current.grammarQuiz : fullData.grammarQuiz ?? [],
+                  vocabularyQuiz: current.vocabularyQuiz.length ? current.vocabularyQuiz : fullData.vocabularyQuiz ?? [],
+                  spellingResults: current.spellingResults.length ? current.spellingResults : fullData.spellingResults ?? [],
+                  grammarResults: current.grammarResults.length ? current.grammarResults : fullData.grammarResults ?? [],
+                  grammarErrorChallenges: current.grammarErrorChallenges.length
+                    ? current.grammarErrorChallenges
+                    : fullData.grammarErrorChallenges ?? [],
+                  grammarScrambleChallenges: current.grammarScrambleChallenges.length
+                    ? current.grammarScrambleChallenges
+                    : fullData.grammarScrambleChallenges ?? [],
+                  grammarWorkshopChallenges: current.grammarWorkshopChallenges.length
+                    ? current.grammarWorkshopChallenges
+                    : fullData.grammarWorkshopChallenges ?? [],
+                  grammarGameQuestions: current.grammarGameQuestions.length
+                    ? current.grammarGameQuestions
+                    : fullData.grammarGameQuestions ?? [],
                 })
+                clearPendingFullHydration(sessionToRestore.id)
                 useHistoryStore.getState().hydrate(sessionToRestore.id, fullData)
               })
-              .catch(() => {})
+              .catch(() => {
+                clearPendingFullHydration(sessionToRestore.id)
+              })
+          }
+
+          if (preferredSessionId && !inList) {
+            // The preferred (last opened) session exists but fell outside the
+            // list query's recency cap — fetch it directly instead of silently
+            // restoring the wrong (most recent) session. The [id] response is
+            // complete, so no background hydration is needed.
+            fetch(`/api/sessions/${preferredSessionId}`)
+              .then((res) => (res.ok ? res.json() : null))
+              .then((full) => {
+                if (syncedUserIdRef.current !== expectedUserId) return
+                if (full) {
+                  useReadingStore.getState().restore(full)
+                  markLastOpenedSession(full.id)
+                  const sessionTitle =
+                    full.docTitle || full.extractedText?.slice(0, 40) || full.id
+                  toast.message(t("history.restored", { title: sessionTitle }))
+                } else {
+                  // Preferred session no longer exists — fall back to newest.
+                  restoreLightweight(sessions[0])
+                }
+              })
+              .catch(() => restoreLightweight(sessions[0]))
+          } else {
+            restoreLightweight(inList ?? sessions[0])
           }
         }
 

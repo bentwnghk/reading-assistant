@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useReadingStore, isStreamingActive } from "@/store/reading";
+import { useReadingStore, isStreamingActive, isPendingFullHydration } from "@/store/reading";
 import { useHistoryStore } from "@/store/history";
 
 function useAutoSave() {
@@ -35,6 +35,14 @@ function useAutoSave() {
     // every token, which would trigger a localforage (IndexedDB) write storm
     // and crash iOS Safari. The final save runs when the flag is cleared.
     if (isStreamingActive()) {
+      return;
+    }
+
+    // Skip while a lightweight-restored session is still waiting for its full
+    // server data — a backup() taken now would persist gutted quiz/test arrays
+    // and mark the history entry hydrated with incomplete data. The merge in
+    // AuthProvider changes these deps, so this effect re-runs when it clears.
+    if (isPendingFullHydration()) {
       return;
     }
 
