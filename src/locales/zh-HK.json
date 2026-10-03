@@ -3647,8 +3647,7 @@
       "importFailed": "匯入失敗",
       "importInvalidFile": "檔案無效：請選擇有效的備份檔案",
       "wrongFileType": "請選擇 .zip 或 .json 備份檔案",
-      "importConfirm": "此操作將把備份資料合併至現有記錄，閱讀記錄及圖片將被完整恢復。確定繼續？",
-      "tooltip": "匯出或匯入完整系統備份（.zip），包含所有用戶、班別及閱讀歷史記錄與圖片"
+      "importConfirm": "此操作將把備份資料合併至現有記錄，閱讀記錄及圖片將被完整恢復。確定繼續？"
     },
     "sessionRefresh": {
       "label": "同步 Google 個人檔案",

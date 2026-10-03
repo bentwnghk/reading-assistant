@@ -3617,8 +3617,7 @@
       "importFailed": "Import failed",
       "importInvalidFile": "Invalid file: please select a valid backup file",
       "wrongFileType": "Please select a .zip or .json backup file",
-      "importConfirm": "This will merge the backup data with existing records. Reading sessions and images will be fully restored. Continue?",
-      "tooltip": "Export or import a full system backup (.zip) including all users, classes, and reading history with images"
+      "importConfirm": "This will merge the backup data with existing records. Reading sessions and images will be fully restored. Continue?"
     },
     "sessionRefresh": {
       "label": "Sync Google Profiles",
