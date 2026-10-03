@@ -387,7 +387,7 @@ function MindMap() {
               aria-pressed={mindMapRenderer === "mermaid"}
             >
               <Waypoints className="h-4 w-4" />
-              <span>{t("reading.mindMap.rendererMap")}</span>
+              <span className="text-[10px]">{t("reading.mindMap.rendererMap")}</span>
             </Button>
             <Button
               type="button"
@@ -403,7 +403,7 @@ function MindMap() {
               aria-pressed={mindMapRenderer === "tree"}
             >
               <Network className="h-4 w-4" />
-              <span>{t("reading.mindMap.rendererTree")}</span>
+              <span className="text-[10px]">{t("reading.mindMap.rendererTree")}</span>
             </Button>
           </div>
           <div className="flex items-center gap-1">
@@ -412,7 +412,7 @@ function MindMap() {
               onCheckedChange={setUseChinese}
               disabled={isGenerating}
             />
-            <span className="text-xs text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               {t("reading.mindMap.chineseLabel")}
             </span>
           </div>
