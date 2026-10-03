@@ -1,8 +1,10 @@
 "use client";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Lightbulb, BookOpen, MessageSquareQuote, ImagePlus, ClipboardCheck } from "lucide-react";
+import { Lightbulb, BookOpen, MessageSquareQuote, ImagePlus, ClipboardCheck, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettingStore } from "@/store/setting";
+import { cn } from "@/utils/style";
 
 interface QuickQuestionItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -18,9 +20,21 @@ interface QuickQuestionsProps {
   disabled?: boolean;
 }
 
+// UI-only collapsed preference (AGENTS.md §A lightweight pattern): module-level
+// so it survives dialog remounts and SPA navigation for the session, without
+// persisting user data. Defaults to expanded on all devices.
+let collapsedState = false;
+
 function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
   const { t } = useTranslation();
   const { cheatMode, showGiveAnswer } = useSettingStore();
+  const [isCollapsed, setIsCollapsed] = useState(collapsedState);
+
+  const toggleCollapsed = () => {
+    const next = !isCollapsed;
+    collapsedState = next;
+    setIsCollapsed(next);
+  };
 
   const mainQuickQuestions: QuickQuestionItem[] = [
     {
@@ -81,51 +95,74 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
   });
 
   return (
-    <div className="flex flex-col gap-2 p-3 border-t border-border bg-muted/30">
-      <div>
-        <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-          <Lightbulb className="w-3 h-3" />
-          {t("reading.tutor.quickQuestions.title")}
+    <div className="border-t border-border bg-muted/30">
+      <button
+        type="button"
+        onClick={toggleCollapsed}
+        onTouchEnd={(e) => { e.preventDefault(); toggleCollapsed(); }}
+        aria-expanded={!isCollapsed}
+        title={isCollapsed ? t("reading.tutor.quickQuestions.expand") : t("reading.tutor.quickQuestions.collapse")}
+        className="flex w-full items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:bg-muted/60 transition-colors"
+      >
+        <Lightbulb className="w-3 h-3 flex-shrink-0" />
+        <span className="flex-1 text-left font-medium truncate">
+          {t("reading.tutor.quickQuestions.toggleTitle")}
         </span>
-        <div className="flex flex-wrap gap-1">
-          {mainQuickQuestions.map((q, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              size="sm"
-              onClick={() => onSelectQuestion(q.question, q.action, q.label)}
-              onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
-              disabled={disabled}
-              className="h-7 text-xs px-1.5 gap-0.5"
-            >
-              <q.icon className="w-3 h-3" />
-              {q.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-      {visibleImageQuestions.length > 0 && (
-        <div>
-          <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-            <ImagePlus className="w-3 h-3" />
-            {t("reading.tutor.quickQuestions.imageHelpTitle")}
-          </span>
-          <div className="flex flex-wrap gap-1">
-            {visibleImageQuestions.map((q, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                onClick={() => onSelectQuestion(q.question, q.action, q.label)}
-                onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
-                disabled={disabled}
-                className="h-7 text-xs px-1.5 gap-0.5"
-              >
-                <q.icon className="w-3 h-3" />
-                {q.label}
-              </Button>
-            ))}
+        <ChevronDown
+          className={cn(
+            "w-4 h-4 flex-shrink-0 transition-transform",
+            !isCollapsed && "rotate-180"
+          )}
+        />
+      </button>
+      {!isCollapsed && (
+        <div className="flex flex-col gap-2 px-3 pb-3">
+          <div>
+            <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+              <Lightbulb className="w-3 h-3" />
+              {t("reading.tutor.quickQuestions.title")}
+            </span>
+            <div className="flex flex-wrap gap-1">
+              {mainQuickQuestions.map((q, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onSelectQuestion(q.question, q.action, q.label)}
+                  onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
+                  disabled={disabled}
+                  className="h-7 text-xs px-1.5 gap-0.5"
+                >
+                  <q.icon className="w-3 h-3" />
+                  {q.label}
+                </Button>
+              ))}
+            </div>
           </div>
+          {visibleImageQuestions.length > 0 && (
+            <div>
+              <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                <ImagePlus className="w-3 h-3" />
+                {t("reading.tutor.quickQuestions.imageHelpTitle")}
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {visibleImageQuestions.map((q, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSelectQuestion(q.question, q.action, q.label)}
+                    onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
+                    disabled={disabled}
+                    className="h-7 text-xs px-1.5 gap-0.5"
+                  >
+                    <q.icon className="w-3 h-3" />
+                    {q.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
