@@ -2365,7 +2365,7 @@ function Grammar() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-2 sm:px-4 text-sm font-medium transition-colors",
+                  "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
                   "border-b-2 -mb-px",
                   activeTab === tab.key
                     ? "border-primary text-primary"
