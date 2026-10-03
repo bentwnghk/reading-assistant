@@ -108,8 +108,9 @@ function Visualization() {
               size="sm"
               variant="ghost"
               disabled={isGenerating}
+              className="gap-1"
             >
-              <Download className="h-4 w-4 mr-1" />
+              <Download className="h-4 w-4" />
               {t("reading.visualization.download")}
             </Button>
           )}
@@ -131,20 +132,21 @@ function Visualization() {
               disabled={isGenerating}
               size="sm"
               variant={visualizationImage ? "secondary" : "default"}
+              className="gap-1"
             >
               {isGenerating ? (
                 <>
-                  <LoaderCircle className="h-4 w-4 mr-1 animate-spin" />
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
                   {t("reading.visualization.generating")}
                 </>
               ) : visualizationImage ? (
                 <>
-                  <ImageIcon className="h-4 w-4 mr-1" />
+                  <ImageIcon className="h-4 w-4" />
                   {t("reading.visualization.regenerate")}
                 </>
               ) : (
                 <>
-                  <ImageIcon className="h-4 w-4 mr-1" />
+                  <ImageIcon className="h-4 w-4" />
                   {t("reading.visualization.generate")}
                 </>
               )}

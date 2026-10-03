@@ -362,8 +362,9 @@ function MindMap() {
               size="sm"
               variant="ghost"
               disabled={isGenerating}
+              className="gap-1"
             >
-              <Download className="h-4 w-4 mr-1" />
+              <Download className="h-4 w-4" />
               {t("reading.mindMap.download")}
             </Button>
           )}
@@ -420,6 +421,7 @@ function MindMap() {
             disabled={isGenerating}
             size="sm"
             variant={mindMap ? "secondary" : "default"}
+            className="gap-1"
           >
             {isGenerating ? (
               <>
