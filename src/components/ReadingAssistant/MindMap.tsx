@@ -355,16 +355,16 @@ function MindMap() {
             tipContentKey="reading.mindMap.help.tipContent"
           />
         </h3>
-        <div className="flex flex-wrap items-center justify-end gap-1 ml-auto">
+        <div className="flex flex-wrap items-center justify-end gap-1 md:gap-2 ml-auto">
           {canDownload && (
             <Button
               onClick={handleDownload}
               size="sm"
               variant="ghost"
               disabled={isGenerating}
-              className="gap-1 px-2"
+              className="gap-1 md:gap-2 px-2 md:px-3"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 md:mr-1" />
               {t("reading.mindMap.download")}
             </Button>
           )}
@@ -387,7 +387,7 @@ function MindMap() {
               aria-pressed={mindMapRenderer === "mermaid"}
             >
               <Waypoints className="h-4 w-4" />
-              <span className="text-[10px]">{t("reading.mindMap.rendererMap")}</span>
+              <span className="text-[10px] md:text-xs">{t("reading.mindMap.rendererMap")}</span>
             </Button>
             <Button
               type="button"
@@ -403,10 +403,10 @@ function MindMap() {
               aria-pressed={mindMapRenderer === "tree"}
             >
               <Network className="h-4 w-4" />
-              <span className="text-[10px]">{t("reading.mindMap.rendererTree")}</span>
+              <span className="text-[10px] md:text-xs">{t("reading.mindMap.rendererTree")}</span>
             </Button>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 md:gap-2">
             <Switch
               checked={useChinese}
               onCheckedChange={setUseChinese}
@@ -421,7 +421,7 @@ function MindMap() {
             disabled={isGenerating}
             size="sm"
             variant={mindMap ? "secondary" : "default"}
-            className="gap-1 px-2"
+            className="gap-1 md:gap-2 px-2 md:px-3"
           >
             {isGenerating ? (
               <>

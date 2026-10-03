@@ -101,16 +101,16 @@ function Visualization() {
             tipContentKey="reading.visualization.help.tipContent"
           />
         </h3>
-        <div className="flex items-center gap-1 ml-auto">
+        <div className="flex items-center gap-1 md:gap-2 ml-auto">
           {visualizationImage && (
             <Button
               onClick={handleDownload}
               size="sm"
               variant="ghost"
               disabled={isGenerating}
-              className="gap-1"
+              className="gap-1 md:gap-2"
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 md:mr-1" />
               {t("reading.visualization.download")}
             </Button>
           )}
@@ -132,21 +132,21 @@ function Visualization() {
               disabled={isGenerating}
               size="sm"
               variant={visualizationImage ? "secondary" : "default"}
-              className="gap-1 px-2"
+              className="gap-1 md:gap-2 px-2 md:px-3"
             >
               {isGenerating ? (
                 <>
-                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                  <LoaderCircle className="h-4 w-4 md:mr-1 animate-spin" />
                   {t("reading.visualization.generating")}
                 </>
               ) : visualizationImage ? (
                 <>
-                  <ImageIcon className="h-4 w-4" />
+                  <ImageIcon className="h-4 w-4 md:mr-1" />
                   {t("reading.visualization.regenerate")}
                 </>
               ) : (
                 <>
-                  <ImageIcon className="h-4 w-4" />
+                  <ImageIcon className="h-4 w-4 md:mr-1" />
                   {t("reading.visualization.generate")}
                 </>
               )}
