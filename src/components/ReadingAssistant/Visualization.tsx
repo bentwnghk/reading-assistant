@@ -101,7 +101,7 @@ function Visualization() {
             tipContentKey="reading.visualization.help.tipContent"
           />
         </h3>
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-1 ml-auto">
           {visualizationImage && (
             <Button
               onClick={handleDownload}
@@ -132,7 +132,7 @@ function Visualization() {
               disabled={isGenerating}
               size="sm"
               variant={visualizationImage ? "secondary" : "default"}
-              className="gap-1"
+              className="gap-1 px-2"
             >
               {isGenerating ? (
                 <>

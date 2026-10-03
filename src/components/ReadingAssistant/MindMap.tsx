@@ -355,7 +355,7 @@ function MindMap() {
             tipContentKey="reading.mindMap.help.tipContent"
           />
         </h3>
-        <div className="flex flex-wrap items-center justify-end gap-2 ml-auto">
+        <div className="flex flex-wrap items-center justify-end gap-1 ml-auto">
           {canDownload && (
             <Button
               onClick={handleDownload}
@@ -421,7 +421,7 @@ function MindMap() {
             disabled={isGenerating}
             size="sm"
             variant={mindMap ? "secondary" : "default"}
-            className="gap-1"
+            className="gap-1 px-2"
           >
             {isGenerating ? (
               <>
