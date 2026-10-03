@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
-import { Download, HelpCircle, Info, Loader2, Mail, RefreshCw, Upload, ChevronDown, Users } from "lucide-react"
+import { Download, HelpCircle, Loader2, Mail, RefreshCw, Upload, ChevronDown, Users } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -12,12 +12,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
@@ -325,20 +319,7 @@ export default function UserManagementPanel({ open, onClose }: UserManagementPan
               </Button>
             </DialogTitle>
             {isSuperAdmin && (
-              <div className="flex items-center gap-1 pr-6 flex-shrink-0">
-                <TooltipProvider delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button tabIndex={-1} className="p-1 rounded hover:bg-muted cursor-pointer">
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-64 text-center">
-                      {t("userManagement.exportImport.tooltip")}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
+              <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1 pr-6">
                 <Button
                   variant="outline"
                   size="sm"
