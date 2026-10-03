@@ -89,6 +89,12 @@ function AuthStateManager() {
     syncedUserIdRef.current = userId
     const expectedUserId = userId
 
+    // A different user is signing in: close both first-run gates until THIS
+    // user's restore + share checks settle, so stale counts never leak across
+    // account switches.
+    setRestoreComplete(false)
+    setShareCheckComplete(false)
+
     // Hold the first-run UI gate (onboarding dialog, settings banner) closed
     // until this user's sign-in data — including the free-access ticket
     // result — has settled, so whitelisted users never see a setup flash.
@@ -99,6 +105,28 @@ function AuthStateManager() {
     const sessionsPromise = useHistoryStore.getState().loadFromAPI?.() ?? Promise.resolve([])
     const settingsPromise = loadSettingsFromAPI()
     const ticketPromise = refreshFreeAccessFlag()
+
+    // The share-count checks have no dependency on the results above — fire
+    // them in the SAME wave instead of chaining a second round-trip
+    // generation behind Promise.all. The first-paint gate in page.tsx waits
+    // for both restore AND share checks, so serializing them added a full
+    // network round-trip to every sign-in for nothing.
+    const sessionSharePromise = useSharingStore.getState().fetchPendingCount().then((count) => {
+      if (count > 0 && syncedUserIdRef.current === expectedUserId) {
+        useSharingStore.getState().setShowSharedDialog(true)
+      }
+    })
+    const reviewListSharePromise = useVocabularyStore.getState().fetchPendingReviewListShareCount().then((count) => {
+      if (count > 0 && syncedUserIdRef.current === expectedUserId) {
+        useVocabularyStore.getState().setShowReviewListShareDialog(true)
+      }
+    })
+
+    Promise.all([sessionSharePromise, reviewListSharePromise]).finally(() => {
+      if (syncedUserIdRef.current === expectedUserId) {
+        setShareCheckComplete(true)
+      }
+    })
 
     Promise.all([sessionsPromise, settingsPromise, ticketPromise]).then(([sessions, settings, freeAccessGranted]) => {
         if (syncedUserIdRef.current !== expectedUserId) {
@@ -166,21 +194,6 @@ function AuthStateManager() {
         }
 
         setRestoreComplete(true)
-
-        const sessionSharePromise = useSharingStore.getState().fetchPendingCount().then((count) => {
-          if (count > 0) {
-            useSharingStore.getState().setShowSharedDialog(true)
-          }
-        })
-        const reviewListSharePromise = useVocabularyStore.getState().fetchPendingReviewListShareCount().then((count) => {
-          if (count > 0) {
-            useVocabularyStore.getState().setShowReviewListShareDialog(true)
-          }
-        })
-
-        Promise.all([sessionSharePromise, reviewListSharePromise]).finally(() => {
-          setShareCheckComplete(true)
-        })
       })
 
     return cleanup

@@ -8,6 +8,7 @@ import { Copy } from "lucide-react";
 import copy from "copy-to-clipboard";
 
 import { useBattleStore } from "@/store/battle";
+import { fetchAppConfig } from "@/utils/app-config";
 
 const M = "reading.glossary.spelling.multiplayer";
 
@@ -27,9 +28,7 @@ let cachedRealtimeUrl: string | null = null;
 async function fetchRealtimeUrl(): Promise<string | null> {
   if (cachedRealtimeUrl) return cachedRealtimeUrl;
   try {
-    const res = await fetch("/api/config");
-    if (!res.ok) return null;
-    const data = (await res.json()) as { realtimeUrl?: string };
+    const data = await fetchAppConfig();
     cachedRealtimeUrl = data.realtimeUrl ?? null;
     return cachedRealtimeUrl;
   } catch {

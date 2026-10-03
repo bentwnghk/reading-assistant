@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { getPendingShares, createSharedSessions } from "@/lib/shared-sessions"
+import { getPendingShares, getPendingShareCount, createSharedSessions } from "@/lib/shared-sessions"
 import { getReadingSession } from "@/lib/sessions"
 import { NextResponse } from "next/server"
 import { z } from "zod"
@@ -9,11 +9,18 @@ const shareSchema = z.object({
   recipientIds: z.array(z.string().min(1)).min(1),
 })
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth()
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Lightweight badge/count polling (Header + sign-in gate) — returns a
+    // COUNT instead of materializing every pending share row.
+    if (new URL(request.url).searchParams.get("count") === "1") {
+      const count = await getPendingShareCount(session.user.id)
+      return NextResponse.json({ count })
     }
 
     const pending = await getPendingShares(session.user.id)

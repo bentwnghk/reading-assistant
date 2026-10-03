@@ -53,14 +53,18 @@ export const useSharingStore = create<SharingStore>((set, get) => ({
 
   fetchPendingCount: async () => {
     try {
-      const res = await fetch("/api/shares")
+      // Count-only endpoint (mirrors review-lists' ?count=1): the sign-in
+      // gate and the Header badge poll this every 60s and never need the
+      // full share rows — SharedSessionDialog fetches those itself on open.
+      const res = await fetch("/api/shares?count=1")
       if (!res.ok) {
         set({ pendingCount: 0 })
         return 0
       }
-      const shares: SharedSession[] = await res.json()
-      set({ pendingCount: shares.length })
-      return shares.length
+      const data = (await res.json()) as { count?: number }
+      const count = data.count ?? 0
+      set({ pendingCount: count })
+      return count
     } catch {
       set({ pendingCount: 0 })
       return 0

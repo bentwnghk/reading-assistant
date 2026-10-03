@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { fetchAppConfig } from "@/utils/app-config";
 
 const DISMISSED_KEY = "pwa-install-dismissed";
 
@@ -40,13 +41,8 @@ export default function PWAInstallPrompt() {
     (async () => {
       let enabled = true;
       try {
-        const res = await fetch("/api/config");
-        if (res.ok) {
-          const data = (await res.json()) as {
-            pwaInstallPromptEnabled?: boolean;
-          };
-          enabled = data.pwaInstallPromptEnabled !== false;
-        }
+        const data = await fetchAppConfig();
+        enabled = data.pwaInstallPromptEnabled !== false;
       } catch {}
       if (cancelled || !enabled || isStandalone()) return;
       let dismissed = false;

@@ -14,27 +14,74 @@ import { isShareCheckComplete } from "@/store/sharing";
 import useAutoSave from "@/hooks/useAutoSave";
 import { useVocabularySync } from "@/hooks/useVocabularySync";
 import useReadingAssistant from "@/hooks/useReadingAssistant";
-import { LandingPage } from "@/components/Auth/LandingPage";
 import { Footer } from "@/components/Internal/Footer";
 
-const Header = dynamic(() => import("@/components/Internal/Header"));
-const SettingsBanner = dynamic(() => import("@/components/Internal/SettingsBanner"));
-const StudentInfo = dynamic(() => import("@/components/ReadingAssistant/StudentInfo"));
-const ImageUpload = dynamic(() => import("@/components/ReadingAssistant/ImageUpload"));
-const PreReading = dynamic(() => import("@/components/ReadingAssistant/PreReading"));
-const WorkflowProgress = dynamic(() => import("@/components/ReadingAssistant/WorkflowProgress"));
-const Summary = dynamic(() => import("@/components/ReadingAssistant/Summary"));
-const AdaptedText = dynamic(() => import("@/components/ReadingAssistant/AdaptedText"));
-const MindMap = dynamic(() => import("@/components/ReadingAssistant/MindMap"));
-const Visualization = dynamic(() => import("@/components/ReadingAssistant/Visualization"));
-const ReadingTest = dynamic(() => import("@/components/ReadingAssistant/ReadingTest"));
-const Glossary = dynamic(() => import("@/components/ReadingAssistant/Glossary"));
-const Collocations = dynamic(() => import("@/components/ReadingAssistant/Collocations"));
-const Grammar = dynamic(() => import("@/components/ReadingAssistant/Grammar"));
-const TutorChatFab = dynamic(() => import("@/components/ReadingAssistant/TutorChatFab"));
-const ReadAlongIndicator = dynamic(() => import("@/components/ReadingAssistant/ReadAlongIndicator"));
-const LearningRecommendationDialog = dynamic(() => import("@/components/ReadingAssistant/LearningRecommendationDialog"));
-const OnboardingDialog = dynamic(() => import("@/components/Onboarding/OnboardingDialog"));
+const loadLandingPage = () => import("@/components/Auth/LandingPage").then((m) => m.LandingPage);
+const loadHeader = () => import("@/components/Internal/Header");
+const loadSettingsBanner = () => import("@/components/Internal/SettingsBanner");
+const loadStudentInfo = () => import("@/components/ReadingAssistant/StudentInfo");
+const loadImageUpload = () => import("@/components/ReadingAssistant/ImageUpload");
+const loadPreReading = () => import("@/components/ReadingAssistant/PreReading");
+const loadWorkflowProgress = () => import("@/components/ReadingAssistant/WorkflowProgress");
+const loadSummary = () => import("@/components/ReadingAssistant/Summary");
+const loadAdaptedText = () => import("@/components/ReadingAssistant/AdaptedText");
+const loadMindMap = () => import("@/components/ReadingAssistant/MindMap");
+const loadVisualization = () => import("@/components/ReadingAssistant/Visualization");
+const loadReadingTest = () => import("@/components/ReadingAssistant/ReadingTest");
+const loadGlossary = () => import("@/components/ReadingAssistant/Glossary");
+const loadCollocations = () => import("@/components/ReadingAssistant/Collocations");
+const loadGrammar = () => import("@/components/ReadingAssistant/Grammar");
+const loadTutorChatFab = () => import("@/components/ReadingAssistant/TutorChatFab");
+const loadReadAlongIndicator = () => import("@/components/ReadingAssistant/ReadAlongIndicator");
+const loadLearningRecommendationDialog = () => import("@/components/ReadingAssistant/LearningRecommendationDialog");
+const loadOnboardingDialog = () => import("@/components/Onboarding/OnboardingDialog");
+
+const LandingPage = dynamic(loadLandingPage);
+const Header = dynamic(loadHeader);
+const SettingsBanner = dynamic(loadSettingsBanner);
+const StudentInfo = dynamic(loadStudentInfo);
+const ImageUpload = dynamic(loadImageUpload);
+const PreReading = dynamic(loadPreReading);
+const WorkflowProgress = dynamic(loadWorkflowProgress);
+const Summary = dynamic(loadSummary);
+const AdaptedText = dynamic(loadAdaptedText);
+const MindMap = dynamic(loadMindMap);
+const Visualization = dynamic(loadVisualization);
+const ReadingTest = dynamic(loadReadingTest);
+const Glossary = dynamic(loadGlossary);
+const Collocations = dynamic(loadCollocations);
+const Grammar = dynamic(loadGrammar);
+const TutorChatFab = dynamic(loadTutorChatFab);
+const ReadAlongIndicator = dynamic(loadReadAlongIndicator);
+const LearningRecommendationDialog = dynamic(loadLearningRecommendationDialog);
+const OnboardingDialog = dynamic(loadOnboardingDialog);
+
+// Every section chunk the authenticated home page is guaranteed to render.
+// While the sign-in data gate shows its spinner, the early return below means
+// none of these next/dynamic chunks would start downloading until ALL data
+// requests settle — serializing chunk downloads behind the network waterfall.
+// Preloading them here lets JS fetch and data fetch run in parallel; the
+// import() promise is cached by the bundler, so first render resolves instantly.
+const SECTION_LOADERS = [
+  loadHeader,
+  loadSettingsBanner,
+  loadStudentInfo,
+  loadImageUpload,
+  loadPreReading,
+  loadWorkflowProgress,
+  loadSummary,
+  loadAdaptedText,
+  loadMindMap,
+  loadVisualization,
+  loadReadingTest,
+  loadGlossary,
+  loadCollocations,
+  loadGrammar,
+  loadTutorChatFab,
+  loadReadAlongIndicator,
+  loadLearningRecommendationDialog,
+  loadOnboardingDialog,
+];
 
 // iOS Safari can leave the auth/session network fetch pending indefinitely after
 // the browser killed and restored a tab, keeping the page stuck on the loading
@@ -93,6 +140,16 @@ function HomeContent() {
   const [restoreReady, setRestoreReady] = useState(false);
   const [stuckLoading, setStuckLoading] = useState(false);
   const isLoading = status === "loading" || (status === "authenticated" && !restoreReady);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    if (isRestoreComplete() && isShareCheckComplete()) return;
+    // Fire-and-forget: warm the dynamic section chunks while the sign-in data
+    // gate shows its spinner (see SECTION_LOADERS comment above).
+    for (const load of SECTION_LOADERS) {
+      load().catch(() => {});
+    }
+  }, [status]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -239,7 +296,17 @@ function HomeContent() {
   }
 
   if (!session) {
-    return <LandingPage />;
+    return (
+      <Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center">
+            <LoaderCircle className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        }
+      >
+        <LandingPage />
+      </Suspense>
+    );
   }
 
   return (

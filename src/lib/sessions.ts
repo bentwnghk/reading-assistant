@@ -259,11 +259,51 @@ export async function getUserSessions(userId: string): Promise<SessionWithImages
   const client = await getClient()
 
   try {
-    // Lightweight list query: originalImages and visualizationImage are
-    // intentionally omitted (they are large base64 payloads). Sessions are
-    // hydrated with full media on demand via getReadingSession / loadFull.
+    // Lightweight list query: visualizationImage (a large base64 TEXT column)
+    // is intentionally EXCLUDED from the SELECT — never use SELECT * here, it
+    // would make PostgreSQL read and ship megabytes of base64 per row that the
+    // mapping below then discards. originalImages live in a separate table and
+    // are equally omitted. Sessions are hydrated with full media on demand via
+    // getReadingSession / loadFull.
     const result = await client.query(
-      `SELECT *
+      `SELECT
+         id, user_id, doc_title, source, student_age,
+         extracted_text, generated_text_meta,
+         summary, summary_language, summary_generated_at,
+         adapted_text, adapted_text_generated_at,
+         simplified_text, simplified_text_generated_at,
+         highlighted_words, analyzed_sentences,
+         mind_map, mind_map_language, mind_map_generated_at,
+         visualization_generated_at, visualization_language,
+         pre_reading, pre_reading_generated_at,
+         student_prediction, prediction_rating, skill_breakdown,
+         collocations, collocations_generated_at,
+         reading_test, reading_test_completed_at,
+         glossary, glossary_ratings, glossary_generated_at,
+         test_score, test_completed, test_earned_points, test_total_points,
+         test_show_chinese, test_mode, tests_completed,
+         vocabulary_quiz, vocabulary_quiz_score,
+         vocab_quizzes_completed, vocab_quiz_completed_at,
+         spelling_game_best_score, spelling_game_accuracy,
+         spelling_games_completed, spelling_game_completed_at, spelling_results,
+         flashcard_review_dates,
+         chat_history,
+         original_difficulty, adapted_difficulty, simplified_difficulty,
+         include_glossary, include_sentence_analysis,
+         grammar_topics, grammar_quiz, grammar_quiz_score, grammar_quiz_completed,
+         grammar_quizzes_completed, grammar_quiz_earned_points, grammar_quiz_total_points,
+         grammar_generated_at, grammar_quiz_completed_at, grammar_results,
+         grammar_highlight_enabled, grammar_highlight_topic_id, grammar_quiz_mode,
+         grammar_scramble_high_score, grammar_workshop_high_score, grammar_surgery_high_score,
+         grammar_roulette_high_score, grammar_duel_high_score,
+         grammar_game_accuracy, grammar_games_completed, grammar_game_completed_at,
+         grammar_scramble_accuracy, grammar_workshop_accuracy, grammar_surgery_accuracy,
+         grammar_roulette_accuracy, grammar_duel_accuracy,
+         grammar_scramble_completed, grammar_workshop_completed, grammar_surgery_completed,
+         grammar_roulette_completed, grammar_duel_completed,
+         grammar_error_challenges, grammar_scramble_challenges,
+         grammar_workshop_challenges, grammar_game_questions,
+         assignment_id, created_at, updated_at
        FROM reading_sessions rs
        WHERE rs.user_id = $1
        ORDER BY rs.updated_at DESC`,

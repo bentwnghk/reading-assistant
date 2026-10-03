@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { fetchAppConfig } from "@/utils/app-config"
 
 const DEFAULT_IDLE_TIMEOUT_MS = 30 * 60 * 1000
 const WARNING_MS = 60 * 1000
@@ -76,8 +77,7 @@ export function useIdleTimer() {
   const bootHandledRef = useRef(false)
 
   useEffect(() => {
-    fetch("/api/config")
-      .then((r) => r.json())
+    fetchAppConfig()
       .then((data) => {
         const minutes = Number(data.idleTimeoutMinutes)
         if (Number.isFinite(minutes) && minutes > 0) {

@@ -43,6 +43,7 @@ import {
   type ReadingTextType,
 } from "@/constants/readingPrompts";
 import { parseError } from "@/utils/error";
+import { fetchAppConfig } from "@/utils/app-config";
 import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { computeSkillBreakdown } from "@/utils/skillProfile";
@@ -103,8 +104,7 @@ let _fallbackModelPromise: Promise<string> | null = null;
 
 function getFallbackModel(): Promise<string> {
   if (!_fallbackModelPromise) {
-    _fallbackModelPromise = fetch("/api/config")
-      .then((r) => r.json())
+    _fallbackModelPromise = fetchAppConfig()
       .then((data) => data.fallbackModel || "gemini-3.8-flash")
       .catch(() => "gemini-3.8-flash");
   }

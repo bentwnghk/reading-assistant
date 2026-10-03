@@ -19,6 +19,8 @@
  * and is code-split (only loaded when a user actually starts a battle).
  */
 
+import { fetchAppConfig } from "@/utils/app-config";
+
 export type RealtimeConnectionStatus =
   | "idle"
   | "connecting"
@@ -36,10 +38,6 @@ interface TicketResponse {
   expiresInMs: number;
 }
 
-interface ConfigResponse {
-  realtimeUrl?: string;
-}
-
 type StatusListener = (status: RealtimeConnectionStatus) => void;
 
 let socket: import("socket.io-client").Socket | null = null;
@@ -52,9 +50,7 @@ function emitStatus(status: RealtimeConnectionStatus): void {
 
 async function fetchRealtimeConfig(): Promise<RealtimeConfig> {
   if (cachedConfig) return cachedConfig;
-  const res = await fetch("/api/config");
-  if (!res.ok) throw new Error(`/api/config returned ${res.status}`);
-  const data = (await res.json()) as ConfigResponse;
+  const data = await fetchAppConfig();
   cachedConfig = { realtimeUrl: data.realtimeUrl ?? "" };
   return cachedConfig;
 }
