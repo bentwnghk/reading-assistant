@@ -102,42 +102,37 @@ function QuickQuestions({ onSelectQuestion, disabled }: QuickQuestionsProps) {
         onTouchEnd={(e) => { e.preventDefault(); toggleCollapsed(); }}
         aria-expanded={!isCollapsed}
         title={isCollapsed ? t("reading.tutor.quickQuestions.expand") : t("reading.tutor.quickQuestions.collapse")}
-        className="flex w-full items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:bg-muted/60 transition-colors"
+        className={cn(
+          "flex w-full items-center gap-1 px-3 text-xs text-muted-foreground hover:text-foreground transition-colors",
+          isCollapsed ? "py-2" : "pt-3 pb-1"
+        )}
       >
         <Lightbulb className="w-3 h-3 flex-shrink-0" />
-        <span className="flex-1 text-left font-medium truncate">
-          {t("reading.tutor.quickQuestions.toggleTitle")}
-        </span>
+        <span className="flex-1 text-left">{t("reading.tutor.quickQuestions.title")}</span>
         <ChevronDown
           className={cn(
-            "w-4 h-4 flex-shrink-0 transition-transform",
+            "w-3.5 h-3.5 flex-shrink-0 transition-transform",
             !isCollapsed && "rotate-180"
           )}
         />
       </button>
       {!isCollapsed && (
         <div className="flex flex-col gap-2 px-3 pb-3">
-          <div>
-            <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-              <Lightbulb className="w-3 h-3" />
-              {t("reading.tutor.quickQuestions.title")}
-            </span>
-            <div className="flex flex-wrap gap-1">
-              {mainQuickQuestions.map((q, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onSelectQuestion(q.question, q.action, q.label)}
-                  onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
-                  disabled={disabled}
-                  className="h-7 text-xs px-1.5 gap-0.5"
-                >
-                  <q.icon className="w-3 h-3" />
-                  {q.label}
-                </Button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-1">
+            {mainQuickQuestions.map((q, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => onSelectQuestion(q.question, q.action, q.label)}
+                onTouchEnd={(e) => { e.preventDefault(); onSelectQuestion(q.question, q.action, q.label); }}
+                disabled={disabled}
+                className="h-7 text-xs px-1.5 gap-0.5"
+              >
+                <q.icon className="w-3 h-3" />
+                {q.label}
+              </Button>
+            ))}
           </div>
           {visibleImageQuestions.length > 0 && (
             <div>
