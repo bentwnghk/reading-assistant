@@ -362,7 +362,7 @@ function MindMap() {
               size="sm"
               variant="ghost"
               disabled={isGenerating}
-              className="gap-1"
+              className="gap-1 px-2"
             >
               <Download className="h-4 w-4" />
               {t("reading.mindMap.download")}
@@ -406,13 +406,13 @@ function MindMap() {
               <span>{t("reading.mindMap.rendererTree")}</span>
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Switch
               checked={useChinese}
               onCheckedChange={setUseChinese}
               disabled={isGenerating}
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               {t("reading.mindMap.chineseLabel")}
             </span>
           </div>
