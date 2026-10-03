@@ -768,7 +768,7 @@ function Glossary() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "flex items-center gap-0.5 sm:gap-2 px-1.5 sm:px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
+                "flex items-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
                 "border-b-2 -mb-px",
                 activeTab === tab.key
                   ? "border-primary text-primary"
