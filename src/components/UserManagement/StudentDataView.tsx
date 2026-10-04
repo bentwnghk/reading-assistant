@@ -339,6 +339,36 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         }
       }
 
+      // Class-roster enumeration can't reach students who are in NO class at
+      // all (e.g. fresh/free-trial users who already saved a session) — they
+      // appear in no roster, so "all" merges them via the dedicated endpoint.
+      // Teachers stay roster-scoped by design; admins/super-admins only.
+      if (targetClassId === "all" && (isSuperAdmin || isAdmin)) {
+        try {
+          const params = new URLSearchParams()
+          if (isSuperAdmin && selectedSchoolId !== "all") {
+            params.set("schoolId", selectedSchoolId)
+          }
+          const res = await fetch(
+            `/api/users/classless-sessions${params.toString() ? `?${params}` : ""}`
+          )
+          if (res.ok) {
+            const data: {
+              sessions: SessionWithSchool[]
+              spellingReviewCounts: Record<string, number>
+            } = await res.json()
+            allSessions.push(...(data.sessions ?? []))
+            for (const [uid, count] of Object.entries(
+              data.spellingReviewCounts ?? {}
+            )) {
+              attemptsMap[uid] = count
+            }
+          }
+        } catch {
+          // Non-fatal: roster rows still render; classless rows stay hidden.
+        }
+      }
+
       setSessions(allSessions)
       setSpellingAttemptsByUser(attemptsMap)
       // A failed per-student fetch otherwise looks like "no data" — surface it.
@@ -351,7 +381,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     } finally {
       setLoadingSessions(false)
     }
-  }, [selectedClassId, selectedSchoolId, classes, t, initialStudentFocus])
+  }, [selectedClassId, selectedSchoolId, classes, t, initialStudentFocus, isSuperAdmin, isAdmin])
 
   useEffect(() => {
     loadClassesAndSchools()

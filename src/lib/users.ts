@@ -1717,6 +1717,62 @@ export async function getStudentSessionsForStudentIds(studentIds: string[], view
   }
 }
 
+export interface ClasslessStudentSessionRow extends StudentSessionData {
+  schoolId?: string
+  schoolName?: string
+}
+
+/**
+ * Session rows for students who are in NO class at all (e.g. fresh or
+ * free-trial users who already saved a session). The Student Data tab's
+ * "all classes" view walks class rosters, which can never reach these users —
+ * so admins/super-admins fetch them through this dedicated query instead.
+ * Admins are scoped to their own school (same rule as canAccessStudent);
+ * super-admins may pass a schoolId filter or see all schools.
+ */
+export async function getClasslessStudentSessions(
+  viewerId: string,
+  role: "admin" | "super-admin",
+  schoolId?: string | null
+): Promise<ClasslessStudentSessionRow[]> {
+  const client = await getClient()
+  try {
+    const conditions = [
+      `COALESCE(ur.role, 'student') = 'student'`,
+      `NOT EXISTS (SELECT 1 FROM class_members cm WHERE cm.student_id = u.id)`,
+    ]
+    const params: unknown[] = []
+    if (role === "admin") {
+      // Server-side school scope: an admin without a school sees nobody.
+      conditions.push(`u.school_id = (SELECT school_id FROM users WHERE id = $1)`)
+      params.push(viewerId)
+    } else if (schoolId) {
+      params.push(schoolId)
+      conditions.push(`u.school_id = $${params.length}`)
+    }
+    const result = await client.query(
+      `SELECT
+        ${STUDENT_SESSION_SELECT},
+        u.school_id as "user_school_id",
+        s.name as "user_school_name"
+       FROM users u
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN schools s ON u.school_id = s.id
+       JOIN reading_sessions rs ON rs.user_id = u.id
+       WHERE ${conditions.join(" AND ")}
+       ORDER BY rs.updated_at DESC`,
+      params
+    )
+    return result.rows.map((row) => ({
+      ...mapStudentSessionRow(row),
+      schoolId: row.user_school_id || undefined,
+      schoolName: row.user_school_name || undefined,
+    }))
+  } finally {
+    client.release()
+  }
+}
+
 export async function canAccessStudent(userId: string, userRole: string, studentId: string): Promise<boolean> {
   if (userRole === 'super-admin') return true
 
