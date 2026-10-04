@@ -21,7 +21,8 @@
   },
   "settingsBanner": {
     "message": "Please activate your personal/school subscription, or configure your API Key or Access Password in Settings to use this app.",
-    "openSettings": "Open Settings"
+    "openSettings": "Open Settings",
+    "startTrial": "Start {{days}}-day free trial"
   },
   "onboarding": {
     "title": "Welcome to Mr.🆖 ProReader",
@@ -30,7 +31,6 @@
     "back": "Back",
     "save": "Save and continue",
     "startReading": "Start reading",
-    "openSettingsHint": "Prefer the full Settings dialog?",
     "choice": {
       "badgeRecommended": "Recommended",
       "subscription": {

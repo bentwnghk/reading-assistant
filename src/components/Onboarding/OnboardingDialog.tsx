@@ -38,6 +38,7 @@ import { useReadingStore } from "@/store/reading";
 import useSubscription from "@/hooks/useSubscription";
 import useSchoolSubscription from "@/hooks/useSchoolSubscription";
 import type { SubscriptionPlan } from "@/lib/subscription";
+import { activateFreeTrial } from "@/utils/trial";
 import { cn } from "@/utils/style";
 
 type OnboardingStep = "choice" | "subscription" | "free" | "meter" | "trial" | "done";
@@ -329,39 +330,26 @@ function OnboardingDialog() {
     if (startingTrial) return;
     setStartingTrial(true);
     try {
-      const response = await fetch("/api/trial", { method: "POST" });
-      const data = await response.json().catch(() => ({}));
-      if (response.status === 409) {
-        toast.error(t("onboarding.trial.alreadyUsed"));
-        setTrialInfo((prev) => (prev ? { ...prev, usedBefore: true } : prev));
-        return;
-      }
-      if (!response.ok || !data.active) {
+      const result = await activateFreeTrial(role);
+      if (!result.ok) {
         toast.error(
-          response.status === 403
-            ? t("onboarding.trial.notEnabled")
-            : t("onboarding.trial.startFailed")
+          t(
+            result.reason === "used"
+              ? "onboarding.trial.alreadyUsed"
+              : result.reason === "disabled"
+                ? "onboarding.trial.notEnabled"
+                : "onboarding.trial.startFailed"
+          )
         );
+        if (result.reason === "used") {
+          setTrialInfo((prev) => (prev ? { ...prev, usedBefore: true } : prev));
+        }
         return;
       }
-      // Ride the identity-bound free-access ticket in proxy mode (same path
-      // as FREE_ACCESS_EMAILS users) — no password or API key needed. Fetch
-      // the ticket NOW so AI works immediately without waiting for the next
-      // AuthProvider ticket refresh.
-      update({ mode: "proxy" });
-      enforceRestrictedModels(role);
-      useSettingStore.getState().syncNow();
-      useSettingStore.setState({
-        trialActive: true,
-        trialExpiresAt: data.expiresAt || "",
-      });
-      fetch("/api/free-access/ticket").catch(() => {});
       setTrialInfo((prev) => (prev ? { ...prev, active: true } : prev));
       complete();
       setStep("done");
       toast.success(t("onboarding.trial.started"));
-    } catch {
-      toast.error(t("onboarding.trial.startFailed"));
     } finally {
       setStartingTrial(false);
     }
@@ -711,26 +699,6 @@ function OnboardingDialog() {
             )}
           </div>
         </div>
-
-        {(step === "subscription" || step === "free" || step === "meter") && (
-          <p className="text-center">
-            <button
-              type="button"
-              className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
-              onClick={() =>
-                handleOpenSettings(
-                  step === "subscription"
-                    ? "subscription"
-                    : step === "free"
-                      ? "proxy"
-                      : "local",
-                )
-              }
-            >
-              {t("onboarding.openSettingsHint")}
-            </button>
-          </p>
-        )}
       </DialogContent>
     </Dialog>
   );

@@ -76,22 +76,54 @@ function AuthStateManager() {
       }
     }
 
-    // Free-trial status (onboarding wizard): mirrors the free-access ticket
-    // flag so first-run UI and the settings banner treat an active trial as
-    // "already set up", and expiry is picked up on later refreshes. Does NOT
+    // Free-trial status (onboarding wizard + settings banner offer): mirrors
+    // the full /api/trial status so first-run UI and the banner treat an
+    // active trial as "already set up", know whether the offer is enabled /
+    // still available, and expiry is picked up on later refreshes. Does NOT
     // touch the store — callers apply the synced-user guard before setState.
-    const fetchTrialStatus = async (): Promise<{ active: boolean; expiresAt: string } | null> => {
+    const fetchTrialStatus = async (): Promise<{
+      enabled: boolean
+      days: number
+      active: boolean
+      usedBefore: boolean
+      expiresAt: string
+    } | null> => {
       try {
         const response = await fetch("/api/trial")
         if (!response.ok) return null
         const data = (await response.json()) as {
+          enabled?: boolean
+          days?: number
           active?: boolean
+          usedBefore?: boolean
           expiresAt?: string | null
         }
-        return { active: !!data.active, expiresAt: data.expiresAt || "" }
+        return {
+          enabled: !!data.enabled,
+          days: data.days ?? 0,
+          active: !!data.active,
+          usedBefore: !!data.usedBefore,
+          expiresAt: data.expiresAt || "",
+        }
       } catch {
         return null
       }
+    }
+
+    const applyTrialStatus = (trial: {
+      enabled: boolean
+      days: number
+      active: boolean
+      usedBefore: boolean
+      expiresAt: string
+    }) => {
+      useSettingStore.setState({
+        trialEnabled: trial.enabled,
+        trialDays: trial.days,
+        trialActive: trial.active,
+        trialUsed: trial.usedBefore,
+        trialExpiresAt: trial.expiresAt,
+      })
     }
 
     ticketInterval = setInterval(() => {
@@ -102,10 +134,7 @@ function AuthStateManager() {
       })
       fetchTrialStatus().then((trial) => {
         if (trial && syncedUserIdRef.current === userId) {
-          useSettingStore.setState({
-            trialActive: trial.active,
-            trialExpiresAt: trial.expiresAt,
-          })
+          applyTrialStatus(trial)
         }
       })
     }, 6 * 60 * 60 * 1000)
@@ -205,10 +234,11 @@ function AuthStateManager() {
         // authDataLoaded releases the first-run UI gate in the same tick.
         useSettingStore.setState({
           freeAccessGranted,
-          trialActive: trial?.active ?? false,
-          trialExpiresAt: trial?.expiresAt ?? "",
           authDataLoaded: true,
         })
+        if (trial) {
+          applyTrialStatus(trial)
+        }
 
         // Reset restricted model selections (persisted server-side or in
         // hydrated localStorage) back to defaults for non-privileged users.

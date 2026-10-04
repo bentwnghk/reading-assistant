@@ -1,20 +1,34 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Hourglass, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/Internal/Button";
 import { useSettingStore } from "@/store/setting";
 import { useGlobalStore } from "@/store/global";
 import useSubscription from "@/hooks/useSubscription";
 import useSchoolSubscription from "@/hooks/useSchoolSubscription";
+import { activateFreeTrial } from "@/utils/trial";
 
 function SettingsBanner() {
   const { t } = useTranslation();
-  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, trialActive, authDataLoaded } = useSettingStore();
+  const { data: sessionData } = useSession();
+  const {
+    openaicompatibleApiKey,
+    accessPassword,
+    freeAccessGranted,
+    trialActive,
+    trialEnabled,
+    trialDays,
+    trialUsed,
+    authDataLoaded,
+  } = useSettingStore();
   const { setOpenSetting } = useGlobalStore();
   const { subscription: personalSub, loading: personalLoading } = useSubscription();
   const { subscription: schoolSub, loading: schoolLoading } = useSchoolSubscription();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [startingTrial, setStartingTrial] = useState(false);
 
   useEffect(() => {
     const unsubHydrate = useSettingStore.persist.onFinishHydration(() => {
@@ -42,6 +56,35 @@ function SettingsBanner() {
     trialActive
   );
 
+  // Second-chance trial offer for users who dismissed the onboarding wizard:
+  // feature enabled on this deployment and this user hasn't consumed their
+  // one-time trial yet.
+  const trialEligible =
+    trialEnabled && trialDays > 0 && !trialUsed && !trialActive;
+
+  async function handleStartTrial() {
+    if (startingTrial) return;
+    setStartingTrial(true);
+    try {
+      const result = await activateFreeTrial(sessionData?.user?.role);
+      if (!result.ok) {
+        toast.error(
+          t(
+            result.reason === "used"
+              ? "onboarding.trial.alreadyUsed"
+              : result.reason === "disabled"
+                ? "onboarding.trial.notEnabled"
+                : "onboarding.trial.startFailed"
+          )
+        );
+        return;
+      }
+      toast.success(t("onboarding.trial.started"));
+    } finally {
+      setStartingTrial(false);
+    }
+  }
+
   if (hasActiveSub || hasCredentials) return null;
 
   return (
@@ -53,14 +96,32 @@ function SettingsBanner() {
             {t("settingsBanner.message")}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="shrink-0 border-amber-500 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800"
-          onClick={() => setOpenSetting(true)}
-        >
-          {t("settingsBanner.openSettings")}
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {trialEligible && (
+            <Button
+              size="sm"
+              onClick={handleStartTrial}
+              disabled={startingTrial}
+              className="border-violet-500 dark:border-violet-600 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40"
+              variant="outline"
+            >
+              {startingTrial ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Hourglass className="h-4 w-4" />
+              )}
+              {t("settingsBanner.startTrial", { days: trialDays })}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-amber-500 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800"
+            onClick={() => setOpenSetting(true)}
+          >
+            {t("settingsBanner.openSettings")}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -261,6 +261,15 @@ export interface SettingStore {
   /** ISO timestamp of when the active free trial ends ("" when none). */
   trialExpiresAt: string;
   /**
+   * Client mirror of the /api/trial offer: whether the feature is enabled on
+   * this deployment (FREE_TRIAL_DAYS > 0), its length in days, and whether
+   * this user has already consumed their one-time trial. Drives the settings
+   * banner's "start trial" offer eligibility. Never synced to user_settings.
+   */
+  trialEnabled: boolean;
+  trialDays: number;
+  trialUsed: boolean;
+  /**
    * Whether this page load's auth bootstrap has settled (AuthProvider's
    * sign-in sequence finished — server settings + free-access ticket loaded).
    * Boot-only gate for first-run UI (onboarding dialog, settings banner) so
@@ -332,6 +341,9 @@ function toSyncPayload(
     freeAccessGranted: _freeAccessGranted,
     trialActive: _trialActive,
     trialExpiresAt: _trialExpiresAt,
+    trialEnabled: _trialEnabled,
+    trialDays: _trialDays,
+    trialUsed: _trialUsed,
     authDataLoaded: _authDataLoaded,
     ...payload
   } = settings;
@@ -382,6 +394,9 @@ export const defaultValues: SettingStore = {
   freeAccessGranted: false,
   trialActive: false,
   trialExpiresAt: "",
+  trialEnabled: false,
+  trialDays: 0,
+  trialUsed: false,
   authDataLoaded: false,
   language: "system",
   theme: "system",
