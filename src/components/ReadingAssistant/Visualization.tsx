@@ -39,7 +39,11 @@ function Visualization() {
       const res = await fetch(`/api/ai/visualization?mode=${mode}`, { headers });
       if (res.ok) {
         const data = await res.json();
-        setRemaining(data.remaining);
+        // Users without AI access yet (fresh sign-ups) report hasAccess:false
+        // — don't show a misleading "X remaining" for them.
+        if (data.hasAccess !== false) {
+          setRemaining(data.remaining);
+        }
       }
     } catch {}
   }, [session?.user?.id, isMeterMode, isRateLimitedRole, mode, accessPassword]);

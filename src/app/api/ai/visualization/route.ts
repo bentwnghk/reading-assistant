@@ -502,12 +502,13 @@ export async function GET(request: NextRequest) {
       mode,
       signature
     );
-    if (!hasAccess) {
-      return forbiddenResponse();
-    }
     const isMeterMode = mode === "local";
     const info = await getDailyLimitInfo(session.user.id, session.user.role, isMeterMode);
-    return NextResponse.json(info);
+    // The quota check is informational (drives the "X remaining" UI), so
+    // users without AI access yet get hasAccess:false instead of a 403 —
+    // a fresh sign-up would otherwise log a console error on every mount.
+    // The POST route still enforces access strictly.
+    return NextResponse.json({ ...info, hasAccess });
   } catch (error) {
     console.error("Visualization limit check error:", error);
     return NextResponse.json(
