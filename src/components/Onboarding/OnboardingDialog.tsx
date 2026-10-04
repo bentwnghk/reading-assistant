@@ -344,20 +344,20 @@ function OnboardingDialog() {
               onClick={() => setStep("subscription")}
             />
             <OptionCard
-              icon={KeyRound}
-              title={t("onboarding.choice.free.title")}
-              desc={t("onboarding.choice.free.desc")}
-              bgClass="bg-emerald-100 dark:bg-emerald-900/40"
-              iconClass="text-emerald-600 dark:text-emerald-400"
-              onClick={() => setStep("free")}
-            />
-            <OptionCard
               icon={Gauge}
               title={t("onboarding.choice.meter.title")}
               desc={t("onboarding.choice.meter.desc")}
               bgClass="bg-amber-100 dark:bg-amber-900/40"
               iconClass="text-amber-600 dark:text-amber-400"
               onClick={() => setStep("meter")}
+            />
+            <OptionCard
+              icon={KeyRound}
+              title={t("onboarding.choice.free.title")}
+              desc={t("onboarding.choice.free.desc")}
+              bgClass="bg-emerald-100 dark:bg-emerald-900/40"
+              iconClass="text-emerald-600 dark:text-emerald-400"
+              onClick={() => setStep("free")}
             />
           </div>
         )}
