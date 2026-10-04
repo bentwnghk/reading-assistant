@@ -252,6 +252,15 @@ export interface SettingStore {
    */
   freeAccessGranted: boolean;
   /**
+   * Whether this user has an active onboarding free trial (user_trials table,
+   * started via the wizard). Client mirror of /api/trial — true means AI
+   * requests work in proxy mode without an Access Password for the trial's
+   * duration. Never synced to user_settings.
+   */
+  trialActive: boolean;
+  /** ISO timestamp of when the active free trial ends ("" when none). */
+  trialExpiresAt: string;
+  /**
    * Whether this page load's auth bootstrap has settled (AuthProvider's
    * sign-in sequence finished — server settings + free-access ticket loaded).
    * Boot-only gate for first-run UI (onboarding dialog, settings banner) so
@@ -321,6 +330,8 @@ function toSyncPayload(
     reset: _reset,
     loadFromServer: _loadFromServer,
     freeAccessGranted: _freeAccessGranted,
+    trialActive: _trialActive,
+    trialExpiresAt: _trialExpiresAt,
     authDataLoaded: _authDataLoaded,
     ...payload
   } = settings;
@@ -369,6 +380,8 @@ export const defaultValues: SettingStore = {
   openaicompatibleApiProxy: "https://api.mr5ai.com",
   accessPassword: "",
   freeAccessGranted: false,
+  trialActive: false,
+  trialExpiresAt: "",
   authDataLoaded: false,
   language: "system",
   theme: "system",

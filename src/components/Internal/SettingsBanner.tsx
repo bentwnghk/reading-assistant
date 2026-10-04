@@ -10,7 +10,7 @@ import useSchoolSubscription from "@/hooks/useSchoolSubscription";
 
 function SettingsBanner() {
   const { t } = useTranslation();
-  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, authDataLoaded } = useSettingStore();
+  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, trialActive, authDataLoaded } = useSettingStore();
   const { setOpenSetting } = useGlobalStore();
   const { subscription: personalSub, loading: personalLoading } = useSubscription();
   const { subscription: schoolSub, loading: schoolLoading } = useSchoolSubscription();
@@ -35,7 +35,12 @@ function SettingsBanner() {
   const hasActivePersonalSub = personalSub?.hasSubscription ?? false;
   const hasActiveSchoolSub = schoolSub?.hasSubscription ?? false;
   const hasActiveSub = hasActivePersonalSub || hasActiveSchoolSub;
-  const hasCredentials = !!(openaicompatibleApiKey || accessPassword || freeAccessGranted);
+  const hasCredentials = !!(
+    openaicompatibleApiKey ||
+    accessPassword ||
+    freeAccessGranted ||
+    trialActive
+  );
 
   if (hasActiveSub || hasCredentials) return null;
 

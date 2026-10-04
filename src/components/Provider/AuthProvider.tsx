@@ -63,7 +63,8 @@ function AuthStateManager() {
 
     // Refresh the identity-bound free-access ticket cookie (24h TTL) so
     // long-lived SPA sessions keep a valid ticket. granted=false also clears
-    // stale tickets for users removed from FREE_ACCESS_EMAILS.
+    // stale tickets for users removed from FREE_ACCESS_EMAILS or whose
+    // onboarding free trial expired.
     const refreshFreeAccessFlag = async (): Promise<boolean> => {
       try {
         const response = await fetch("/api/free-access/ticket")
@@ -75,10 +76,36 @@ function AuthStateManager() {
       }
     }
 
+    // Free-trial status (onboarding wizard): mirrors the free-access ticket
+    // flag so first-run UI and the settings banner treat an active trial as
+    // "already set up", and expiry is picked up on later refreshes. Does NOT
+    // touch the store — callers apply the synced-user guard before setState.
+    const fetchTrialStatus = async (): Promise<{ active: boolean; expiresAt: string } | null> => {
+      try {
+        const response = await fetch("/api/trial")
+        if (!response.ok) return null
+        const data = (await response.json()) as {
+          active?: boolean
+          expiresAt?: string | null
+        }
+        return { active: !!data.active, expiresAt: data.expiresAt || "" }
+      } catch {
+        return null
+      }
+    }
+
     ticketInterval = setInterval(() => {
       refreshFreeAccessFlag().then((granted) => {
         if (syncedUserIdRef.current === userId) {
           useSettingStore.setState({ freeAccessGranted: granted })
+        }
+      })
+      fetchTrialStatus().then((trial) => {
+        if (trial && syncedUserIdRef.current === userId) {
+          useSettingStore.setState({
+            trialActive: trial.active,
+            trialExpiresAt: trial.expiresAt,
+          })
         }
       })
     }, 6 * 60 * 60 * 1000)
@@ -138,6 +165,7 @@ function AuthStateManager() {
     const sessionsPromise = useHistoryStore.getState().loadFromAPI?.() ?? Promise.resolve([])
     const settingsPromise = loadSettingsFromAPI()
     const ticketPromise = refreshFreeAccessFlag()
+    const trialPromise = fetchTrialStatus()
 
     // The share-count checks have no dependency on the results above — fire
     // them in the SAME wave instead of chaining a second round-trip
@@ -161,7 +189,7 @@ function AuthStateManager() {
       }
     })
 
-    Promise.all([sessionsPromise, settingsPromise, ticketPromise]).then(([sessions, settings, freeAccessGranted]) => {
+    Promise.all([sessionsPromise, settingsPromise, ticketPromise, trialPromise]).then(([sessions, settings, freeAccessGranted, trial]) => {
         if (syncedUserIdRef.current !== expectedUserId) {
           return
         }
@@ -175,7 +203,12 @@ function AuthStateManager() {
         // Applied after loadFromServer (which resets it to the default) so
         // the server settings merge can't clobber the live ticket state.
         // authDataLoaded releases the first-run UI gate in the same tick.
-        useSettingStore.setState({ freeAccessGranted, authDataLoaded: true })
+        useSettingStore.setState({
+          freeAccessGranted,
+          trialActive: trial?.active ?? false,
+          trialExpiresAt: trial?.expiresAt ?? "",
+          authDataLoaded: true,
+        })
 
         // Reset restricted model selections (persisted server-side or in
         // hydrated localStorage) back to defaults for non-privileged users.

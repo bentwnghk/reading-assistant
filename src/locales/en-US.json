@@ -44,6 +44,10 @@
       "meter": {
         "title": "Meter",
         "desc": "Pay only for your exact AI usage with your own API Key."
+      },
+      "trial": {
+        "title": "Free Trial",
+        "desc": "Not sure yet? Try every AI feature free for a few days — no password, no API key, no payment."
       }
     },
     "subscription": {
@@ -66,6 +70,22 @@
       "label": "API Key",
       "placeholder": "Enter your API key",
       "saved": "API Key saved — you're ready to go!"
+    },
+    "trial": {
+      "subtitle": "Start your free trial — full access to all AI features, no payment needed.",
+      "badgeDays": "{{days}}-day free trial",
+      "summary": "You'll get {{days}} days of full AI access with no password, API key, or payment. Visualization generation is limited to {{limit}} images per day.",
+      "daysTitle": "{{days}} days of full access",
+      "daysDesc": "All AI features included: summaries, mind maps, tests, glossary, grammar games, AI Tutor chat and more.",
+      "visualizationTitle": "Visualization: {{limit}} per day",
+      "visualizationDesc": "AI image generation from your reading text is capped daily during the trial.",
+      "noPaymentTitle": "No payment, no credentials",
+      "noPaymentDesc": "When the trial ends, pick a plan, or enter an Access Password or your own API key in Settings.",
+      "start": "Start free trial",
+      "started": "Free trial activated — enjoy!",
+      "alreadyUsed": "You've already used your free trial on this account.",
+      "notEnabled": "Free trial is not currently available.",
+      "startFailed": "Couldn't start the free trial. Please try again."
     },
     "done": {
       "title": "You're all set!",

@@ -44,6 +44,10 @@
       "meter": {
         "title": "用量",
         "desc": "使用自己的 API 金鑰，按實際 AI 用量付費。"
+      },
+      "trial": {
+        "title": "免費試用",
+        "desc": "還未決定？免費試用所有 AI 功能數天 — 無需密碼、API 金鑰或付款。"
       }
     },
     "subscription": {
@@ -66,6 +70,22 @@
       "label": "API 金鑰",
       "placeholder": "輸入你的 API 金鑰",
       "saved": "API 金鑰已儲存 — 一切就緒！"
+    },
+    "trial": {
+      "subtitle": "開始免費試用 — 全面使用所有 AI 功能，無需付款。",
+      "badgeDays": "{{days}} 天免費試用",
+      "summary": "你將獲得 {{days}} 天完整 AI 存取權，無需密碼、API 金鑰或付款。試用期間文本視覺化每天限產 {{limit}} 張圖片。",
+      "daysTitle": "{{days}} 天完整存取",
+      "daysDesc": "包含所有 AI 功能：摘要、思維導圖、測驗、詞彙表、語法遊戲、AI 導師對話等。",
+      "visualizationTitle": "文本視覺化：每天 {{limit}} 張",
+      "visualizationDesc": "試用期間，由閱讀文本生成 AI 圖片每日設有上限。",
+      "noPaymentTitle": "無需付款、無需憑證",
+      "noPaymentDesc": "試用結束後，可在設定中選擇訂閱方案、輸入訪問密碼或輸入自己的 API 金鑰。",
+      "start": "開始免費試用",
+      "started": "免費試用已啟用 — 盡情體驗！",
+      "alreadyUsed": "此帳戶已使用過免費試用。",
+      "notEnabled": "目前未啟用免費試用。",
+      "startFailed": "無法啟動免費試用，請重試。"
     },
     "done": {
       "title": "設定完成！",

@@ -5,6 +5,7 @@ import { multiApiKeyPolling } from "@/utils/model";
 import { getPool } from "@/lib/db";
 import { verifySubscriptionAccess } from "@/lib/subscription";
 import { isFreeAccessEmail } from "@/lib/free-access";
+import { hasActiveTrial } from "@/lib/trial";
 import { verifySignature, parseAccessPasswords } from "@/utils/signature";
 
 const ZENMUX_API_KEY = process.env.ZENMUX_API_KEY || "";
@@ -436,7 +437,11 @@ async function verifyModeAccess(
       return true;
     }
     // Identity-bound free access (FREE_ACCESS_EMAILS) — no password needed.
-    return isFreeAccessEmail(email);
+    if (isFreeAccessEmail(email)) {
+      return true;
+    }
+    // Active free trial (onboarding wizard) — same identity-bound access.
+    return hasActiveTrial(userId);
   }
   if (mode === "local") {
     return true;

@@ -11,6 +11,14 @@ ACCESS_PASSWORD=
 # Example: @school.edu,teacher@gmail.com
 FREE_ACCESS_EMAILS=
 
+# ─── Free Trial Access (onboarding wizard "Try free trial" option) ───────────
+# Trial length in days for users who start the free trial in the onboarding
+# wizard (no Access Password / API key / subscription needed). One trial per
+# user, ever. During the trial, visualization generation is limited to
+# VISUALIZATION_DAILY_LIMIT_FREE per day. 0 or empty disables the option.
+# Example: 7
+FREE_TRIAL_DAYS=0
+
 # ─── Session Security Configuration ─────────────────────────────────────────
 # Session maximum lifetime in seconds (default: 259200 = 3 days)
 SESSION_MAX_AGE=259200

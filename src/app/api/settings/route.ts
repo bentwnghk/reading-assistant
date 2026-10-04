@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { getUserSettings, upsertUserSettings, ensureSettingsTable } from "@/lib/settings"
 import { applyFreeAccessSettings } from "@/lib/free-access"
+import { applyTrialSettings } from "@/lib/trial"
 import { NextResponse } from "next/server"
 import type { SettingStore } from "@/store/setting"
 
@@ -18,10 +19,16 @@ export async function GET() {
     // identity-bound via a session-bound ticket cookie issued by
     // /api/free-access/ticket, so the shared password never reaches clients.
     // Persist the mode change so admin views (billing badge) stay consistent.
-    const { settings, changed } = applyFreeAccessSettings(
-      stored ?? {},
-      session.user.email
-    )
+    const { settings: freeAccessSettings, changed: freeAccessChanged } =
+      applyFreeAccessSettings(stored ?? {}, session.user.email)
+    // Users with an active onboarding free trial get the same proxy default.
+    let settings = freeAccessSettings
+    let changed = freeAccessChanged
+    if (!changed) {
+      const trialResult = await applyTrialSettings(session.user.id, settings)
+      settings = trialResult.settings
+      changed = trialResult.changed
+    }
     if (changed) {
       await upsertUserSettings(session.user.id, settings)
     }

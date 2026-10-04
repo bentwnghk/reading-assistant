@@ -13,6 +13,8 @@ import {
   Gauge,
   Gift,
   GraduationCap,
+  Hourglass,
+  Image,
   KeyRound,
   Loader2,
   Settings,
@@ -38,7 +40,15 @@ import useSchoolSubscription from "@/hooks/useSchoolSubscription";
 import type { SubscriptionPlan } from "@/lib/subscription";
 import { cn } from "@/utils/style";
 
-type OnboardingStep = "choice" | "subscription" | "free" | "meter" | "done";
+type OnboardingStep = "choice" | "subscription" | "free" | "meter" | "trial" | "done";
+
+interface TrialInfo {
+  enabled: boolean;
+  days: number;
+  active: boolean;
+  usedBefore: boolean;
+  visualizationDailyLimit: number;
+}
 
 // Session-scope dismissal (module-level, resets on full reload): skip/X/ESC must
 // not persist hasCompletedOnboarding, but still has to stop the auto-open
@@ -163,7 +173,7 @@ function StepDots({ total, active }: { total: number; active: number }) {
 function OnboardingDialog() {
   const { t } = useTranslation();
   const { data: sessionData } = useSession();
-  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, authDataLoaded, update } = useSettingStore();
+  const { openaicompatibleApiKey, accessPassword, freeAccessGranted, trialActive, authDataLoaded, update } = useSettingStore();
   const { hasCompletedOnboarding, setHasCompletedOnboarding, setOpenSetting } =
     useGlobalStore();
   const {
@@ -178,6 +188,9 @@ function OnboardingDialog() {
   const [step, setStep] = useState<OnboardingStep>("choice");
   const [passwordValue, setPasswordValue] = useState("");
   const [apiKeyValue, setApiKeyValue] = useState("");
+  const [trialInfo, setTrialInfo] = useState<TrialInfo | null>(null);
+  const [trialLoaded, setTrialLoaded] = useState(false);
+  const [startingTrial, setStartingTrial] = useState(false);
   const [pricingInfo, setPricingInfo] = useState<{
     monthly: number;
     currency: string;
@@ -205,7 +218,8 @@ function OnboardingDialog() {
     hasActiveSchoolSub ||
     openaicompatibleApiKey ||
     accessPassword ||
-    freeAccessGranted
+    freeAccessGranted ||
+    trialActive
   );
 
   useEffect(() => {
@@ -249,6 +263,17 @@ function OnboardingDialog() {
       .catch(() => {})
       .finally(() => setPricingLoaded(true));
   }, [open, pricingLoaded]);
+
+  useEffect(() => {
+    if (!open || trialLoaded) return;
+    fetch("/api/trial")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: TrialInfo | null) => {
+        if (data) setTrialInfo(data);
+      })
+      .catch(() => {})
+      .finally(() => setTrialLoaded(true));
+  }, [open, trialLoaded]);
 
   function complete() {
     setHasCompletedOnboarding(true);
@@ -300,9 +325,58 @@ function OnboardingDialog() {
     setOpen(false);
   }
 
+  async function handleStartTrial() {
+    if (startingTrial) return;
+    setStartingTrial(true);
+    try {
+      const response = await fetch("/api/trial", { method: "POST" });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 409) {
+        toast.error(t("onboarding.trial.alreadyUsed"));
+        setTrialInfo((prev) => (prev ? { ...prev, usedBefore: true } : prev));
+        return;
+      }
+      if (!response.ok || !data.active) {
+        toast.error(
+          response.status === 403
+            ? t("onboarding.trial.notEnabled")
+            : t("onboarding.trial.startFailed")
+        );
+        return;
+      }
+      // Ride the identity-bound free-access ticket in proxy mode (same path
+      // as FREE_ACCESS_EMAILS users) — no password or API key needed. Fetch
+      // the ticket NOW so AI works immediately without waiting for the next
+      // AuthProvider ticket refresh.
+      update({ mode: "proxy" });
+      enforceRestrictedModels(role);
+      useSettingStore.getState().syncNow();
+      useSettingStore.setState({
+        trialActive: true,
+        trialExpiresAt: data.expiresAt || "",
+      });
+      fetch("/api/free-access/ticket").catch(() => {});
+      setTrialInfo((prev) => (prev ? { ...prev, active: true } : prev));
+      complete();
+      setStep("done");
+      toast.success(t("onboarding.trial.started"));
+    } catch {
+      toast.error(t("onboarding.trial.startFailed"));
+    } finally {
+      setStartingTrial(false);
+    }
+  }
+
   const stepIndex =
     step === "choice" ? 0 : step === "done" ? 2 : 1;
-  const showBack = step === "subscription" || step === "free" || step === "meter";
+  const showBack =
+    step === "subscription" || step === "free" || step === "meter" || step === "trial";
+  const showTrialCard =
+    trialLoaded &&
+    !!trialInfo &&
+    trialInfo.enabled &&
+    trialInfo.days > 0 &&
+    !trialInfo.usedBefore;
 
   const trialPeriodDays = pricingInfo?.trialPeriodDays ?? 0;
   const subscriptionTrialText =
@@ -327,6 +401,7 @@ function OnboardingDialog() {
             {step === "subscription" && t("onboarding.subscription.subtitle")}
             {step === "free" && t("onboarding.free.subtitle")}
             {step === "meter" && t("onboarding.meter.subtitle")}
+            {step === "trial" && t("onboarding.trial.subtitle")}
             {step === "done" && t("onboarding.done.subtitle")}
           </DialogDescription>
         </DialogHeader>
@@ -359,6 +434,19 @@ function OnboardingDialog() {
               iconClass="text-emerald-600 dark:text-emerald-400"
               onClick={() => setStep("free")}
             />
+            {showTrialCard && (
+              <OptionCard
+                icon={Hourglass}
+                title={t("onboarding.choice.trial.title")}
+                desc={t("onboarding.choice.trial.desc")}
+                badge={t("onboarding.trial.badgeDays", {
+                  days: trialInfo!.days,
+                })}
+                bgClass="bg-violet-100 dark:bg-violet-900/40"
+                iconClass="text-violet-600 dark:text-violet-400"
+                onClick={() => setStep("trial")}
+              />
+            )}
           </div>
         )}
 
@@ -550,7 +638,48 @@ function OnboardingDialog() {
             <StepDots total={3} active={stepIndex} />
           </div>
           <div className="flex-1 flex justify-end">
-            {step === "done" && (
+        {step === "trial" && (
+          <div className="space-y-3">
+            <div className="rounded-lg border border-violet-200 dark:border-violet-900/60 bg-violet-50 dark:bg-violet-900/20 p-3.5 flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
+                <Hourglass className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <p className="text-sm leading-relaxed">
+                {t("onboarding.trial.summary", {
+                  days: trialInfo?.days ?? 0,
+                  limit: trialInfo?.visualizationDailyLimit ?? 0,
+                })}
+              </p>
+            </div>
+            <NextStepCard
+              icon={Hourglass}
+              bgClass="bg-violet-100 dark:bg-violet-900/40"
+              iconClass="text-violet-600 dark:text-violet-400"
+              title={t("onboarding.trial.daysTitle", {
+                days: trialInfo?.days ?? 0,
+              })}
+              desc={t("onboarding.trial.daysDesc")}
+            />
+            <NextStepCard
+              icon={Image}
+              bgClass="bg-blue-100 dark:bg-blue-900/40"
+              iconClass="text-blue-600 dark:text-blue-400"
+              title={t("onboarding.trial.visualizationTitle", {
+                limit: trialInfo?.visualizationDailyLimit ?? 0,
+              })}
+              desc={t("onboarding.trial.visualizationDesc")}
+            />
+            <NextStepCard
+              icon={Gift}
+              bgClass="bg-emerald-100 dark:bg-emerald-900/40"
+              iconClass="text-emerald-600 dark:text-emerald-400"
+              title={t("onboarding.trial.noPaymentTitle")}
+              desc={t("onboarding.trial.noPaymentDesc")}
+            />
+          </div>
+        )}
+
+        {step === "done" && (
               <Button type="button" size="sm" onClick={handleStartReading}>
                 {t("onboarding.startReading")}
               </Button>
@@ -566,6 +695,18 @@ function OnboardingDialog() {
               >
                 {t("onboarding.save")}
                 <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
+            {step === "trial" && (
+              <Button
+                type="button"
+                size="sm"
+                disabled={startingTrial}
+                onClick={handleStartTrial}
+              >
+                {startingTrial && <Loader2 className="h-4 w-4 animate-spin" />}
+                {t("onboarding.trial.start")}
+                {!startingTrial && <ChevronRight className="h-4 w-4" />}
               </Button>
             )}
           </div>

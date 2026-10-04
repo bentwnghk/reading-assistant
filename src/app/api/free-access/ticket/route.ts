@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import { isFreeAccessEmail } from "@/lib/free-access"
+import { hasActiveTrial } from "@/lib/trial"
 import {
   FREE_ACCESS_TICKET_COOKIE,
   getSessionToken,
@@ -12,10 +13,13 @@ import {
  * Issues (or clears) the identity-bound free-access ticket cookie for the
  * signed-in user. Called by the client on sign-in and periodically to refresh.
  *
- * - Whitelisted email + session token readable → sets a short-lived httpOnly
- *   ticket cookie bound to the current session token (see free-access-ticket).
- * - Not whitelisted (or signed out) → clears any stale ticket. This also takes
- *   effect for users removed from FREE_ACCESS_EMAILS while still signed in.
+ * - Whitelisted email (FREE_ACCESS_EMAILS) OR an active free trial
+ *   (user_trials, started via the onboarding wizard) + session token
+ *   readable → sets a short-lived httpOnly ticket cookie bound to the current
+ *   session token (see free-access-ticket).
+ * - Neither (or signed out) → clears any stale ticket. This also takes
+ *   effect for users removed from FREE_ACCESS_EMAILS or whose trial expired
+ *   while still signed in.
  */
 export async function GET() {
   const clearTicket = (response: NextResponse) => {
@@ -30,7 +34,11 @@ export async function GET() {
 
   try {
     const session = await auth()
-    const granted = !!session?.user?.id && isFreeAccessEmail(session.user.email)
+    const trialGranted =
+      !!session?.user?.id && (await hasActiveTrial(session.user.id))
+    const granted =
+      (!!session?.user?.id && isFreeAccessEmail(session.user.email)) ||
+      trialGranted
     const response = NextResponse.json({ granted })
 
     if (!granted) {
