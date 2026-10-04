@@ -89,15 +89,6 @@ interface SessionWithSchool extends StudentSessionData {
   schoolName?: string
 }
 
-/**
- * Batches per-student session fetches. The Student Data tab fans out one
- * request per student (an "all classes" load can mean dozens at once); each
- * request costs a NextAuth DB session lookup + pool client, so an unbounded
- * parallel burst saturates the pg pool and 502s the entire load. Bounded
- * batches keep the initial auto-load ("all") viable.
- */
-const STUDENT_FETCH_BATCH = 5
-
 export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, initialStudentFocus, initialClassId }: StudentDataViewProps) {
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -175,6 +166,14 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
 
   const isTeacher = !isSuperAdmin && !isAdmin
 
+  // Mirrors selectedClassId without adding it to loadClassesAndSchools'
+  // dependency list — auto-selecting a scope used to re-trigger the whole
+  // metadata fetch (and with it a second full session load).
+  const selectedClassIdRef = useRef("")
+  useEffect(() => {
+    selectedClassIdRef.current = selectedClassId
+  }, [selectedClassId])
+
   // In single-student mode the combobox value matches no class — show the
   // student's name instead of the bare placeholder.
   const focusStudentLabel = selectedClassId.startsWith("user:") && initialStudentFocus
@@ -182,12 +181,22 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     : undefined
 
   const loadClassesAndSchools = useCallback(async () => {
+    // Independent metadata requests run in parallel — they used to be
+    // awaited sequentially, adding 1-2 round-trips before the first session
+    // load could start.
+    let autoSelected = false
+
     try {
-      const classesResponse = await fetch("/api/classes")
-      if (classesResponse.ok) {
+      const [classesResponse, schoolsResponse, presetsResponse] = await Promise.all([
+        fetch("/api/classes"),
+        isSuperAdmin ? fetch("/api/schools") : null,
+        isTeacher ? fetch("/api/assignments/presets?scope=used") : null,
+      ])
+
+      if (classesResponse?.ok) {
         const data: ClassInfo[] = await classesResponse.json()
         setClasses(data)
-        if (!selectedClassId) {
+        if (!selectedClassIdRef.current) {
           // Explicit class click (Classes tab) wins; otherwise prefer the
           // student's English-subject class (same "%english%" subject match
           // as the session-visibility SQL), then their first class.
@@ -204,29 +213,28 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             focusClasses[0]
           if (focused) {
             setSelectedClassId(`class:${focused.id}`)
+            autoSelected = true
           } else if (initialStudentFocus?.userId) {
             // Classless (or class-out-of-scope) student: single-student mode —
             // class rosters can't reach her, so load via the user-sessions API.
             setSelectedClassId(`user:${initialStudentFocus.userId}`)
+            autoSelected = true
           } else if (data.length > 0) {
             if (isSuperAdmin || isAdmin) {
               setSelectedClassId("all")
             } else {
               setSelectedClassId(`class:${data[0].id}`)
             }
+            autoSelected = true
           }
         }
       }
 
-      if (isSuperAdmin) {
-        const schoolsResponse = await fetch("/api/schools")
-        if (schoolsResponse.ok) {
-          setSchools(await schoolsResponse.json())
-        }
+      if (schoolsResponse?.ok) {
+        setSchools(await schoolsResponse.json())
       }
 
-      if (isTeacher) {
-        const presetsResponse = await fetch("/api/assignments/presets?scope=used")
+      if (presetsResponse) {
         let loadedPresets: AssignmentPreset[] = []
         if (presetsResponse.ok) {
           loadedPresets = await presetsResponse.json()
@@ -235,7 +243,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         // Teachers with no classes of their own (rosters via saved presets)
         // get their first used roster preselected so the table isn't stuck
         // on an empty selection.
-        if (loadedPresets.length > 0 && !selectedClassId) {
+        if (loadedPresets.length > 0 && !autoSelected && !selectedClassIdRef.current) {
           setSelectedClassId(`preset:${loadedPresets[0].id}`)
         }
       }
@@ -245,7 +253,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     } finally {
       setLoading(false)
     }
-  }, [selectedClassId, t, isSuperAdmin, isAdmin, isTeacher, initialStudentFocus, initialClassId])
+  }, [t, isSuperAdmin, isAdmin, isTeacher, initialStudentFocus, initialClassId])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return
@@ -286,102 +294,32 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         return
       }
 
+      // Class scopes ("all" or a single class) load every member's sessions
+      // in ONE batched request — the server resolves the roster, applies
+      // teacher session-visibility, merges classless students (admins/
+      // super-admins, "all" only) and returns per-row school names.
       const targetClassId = selectedClassId.startsWith("class:")
         ? selectedClassId.slice("class:".length)
         : selectedClassId
-      const classesToLoad = targetClassId === "all"
-        ? classes.filter(c => selectedSchoolId === "all" || c.schoolId === selectedSchoolId)
-        : classes.filter(c => c.id === targetClassId)
-
-      const allSessions: SessionWithSchool[] = []
-      const attemptsMap: Record<string, number> = {}
-      // A student may belong to multiple classes — fetch their sessions once.
-      const seenStudents = new Set<string>()
-      let failedStudentFetches = 0
-
-      for (const cls of classesToLoad) {
-        const response = await fetch(`/api/classes/${cls.id}/members`)
-        if (!response.ok) continue
-
-        const allMembers = await response.json()
-        const members = (allMembers as Array<{ studentId: string }>).filter(
-          (m) => !seenStudents.has(m.studentId)
-        )
-
-        // Bounded batches: avoid overwhelming the server connection pool when
-        // a class (or an "all classes" load) has many students.
-        for (let i = 0; i < members.length; i += STUDENT_FETCH_BATCH) {
-          const batch = members.slice(i, i + STUDENT_FETCH_BATCH)
-          const studentResults = await Promise.all(batch.map(async (member: { studentId: string }) => {
-            const res = await fetch(`/api/classes/${cls.id}/students/${member.studentId}/sessions`)
-            if (res.ok) {
-              const data = await res.json()
-              const studentSessions: StudentSessionData[] = data.sessions ?? data
-              return {
-                ok: true,
-                sessions: studentSessions.map((s: StudentSessionData) => ({
-                  ...s,
-                  schoolName: cls.schoolName
-                })),
-                spellingReviewCount: data.spellingReviewCount ?? 0,
-                userId: member.studentId,
-              }
-            }
-            return { ok: false, sessions: [] as SessionWithSchool[], spellingReviewCount: 0, userId: member.studentId }
-          }))
-
-          for (const r of studentResults) {
-            if (!r.ok) failedStudentFetches++
-            seenStudents.add(r.userId)
-            allSessions.push(...r.sessions)
-            attemptsMap[r.userId] = r.spellingReviewCount
-          }
-        }
+      const params = new URLSearchParams({ classId: targetClassId })
+      if (isSuperAdmin && selectedSchoolId !== "all") {
+        params.set("schoolId", selectedSchoolId)
       }
-
-      // Class-roster enumeration can't reach students who are in NO class at
-      // all (e.g. fresh/free-trial users who already saved a session) — they
-      // appear in no roster, so "all" merges them via the dedicated endpoint.
-      // Teachers stay roster-scoped by design; admins/super-admins only.
-      if (targetClassId === "all" && (isSuperAdmin || isAdmin)) {
-        try {
-          const params = new URLSearchParams()
-          if (isSuperAdmin && selectedSchoolId !== "all") {
-            params.set("schoolId", selectedSchoolId)
-          }
-          const res = await fetch(
-            `/api/users/classless-sessions${params.toString() ? `?${params}` : ""}`
-          )
-          if (res.ok) {
-            const data: {
-              sessions: SessionWithSchool[]
-              spellingReviewCounts: Record<string, number>
-            } = await res.json()
-            allSessions.push(...(data.sessions ?? []))
-            for (const [uid, count] of Object.entries(
-              data.spellingReviewCounts ?? {}
-            )) {
-              attemptsMap[uid] = count
-            }
-          }
-        } catch {
-          // Non-fatal: roster rows still render; classless rows stay hidden.
-        }
-      }
-
-      setSessions(allSessions)
-      setSpellingAttemptsByUser(attemptsMap)
-      // A failed per-student fetch otherwise looks like "no data" — surface it.
-      if (failedStudentFetches > 0) {
-        toast.error(t("userManagement.studentData.partialLoadFailed"))
-      }
+      const res = await fetch(`/api/users/roster-sessions?${params.toString()}`)
+      if (!res.ok) throw new Error("Failed to load roster sessions")
+      const data: {
+        sessions: SessionWithSchool[]
+        spellingReviewCounts: Record<string, number>
+      } = await res.json()
+      setSessions(data.sessions ?? [])
+      setSpellingAttemptsByUser(data.spellingReviewCounts ?? {})
     } catch (error) {
       console.error("Failed to load sessions:", error)
       toast.error(t("userManagement.loadFailed"))
     } finally {
       setLoadingSessions(false)
     }
-  }, [selectedClassId, selectedSchoolId, classes, t, initialStudentFocus, isSuperAdmin, isAdmin])
+  }, [selectedClassId, selectedSchoolId, t, initialStudentFocus, isSuperAdmin])
 
   useEffect(() => {
     loadClassesAndSchools()

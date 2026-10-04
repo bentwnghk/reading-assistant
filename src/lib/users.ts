@@ -1688,13 +1688,21 @@ export async function getStudentSessions(studentId: string, viewer?: SessionView
   }
 }
 
+/** Student-session list row enriched with the session owner's school. */
+export interface StudentSessionWithSchool extends StudentSessionData {
+  schoolId?: string
+  schoolName?: string
+}
+
 /**
  * Student-session list rows for an arbitrary student list (e.g. a saved
  * roster/preset), with the same teacher session-visibility applied as
  * getStudentSessions. Used by the Student Data tab's preset entries so
- * roster members outside the viewer's classes remain reachable.
+ * roster members outside the viewer's classes remain reachable. Rows carry
+ * the owner's school (schoolId/schoolName) so roster-wide consumers don't
+ * need to re-derive it from class rosters client-side.
  */
-export async function getStudentSessionsForStudentIds(studentIds: string[], viewer?: SessionViewer): Promise<StudentSessionData[]> {
+export async function getStudentSessionsForStudentIds(studentIds: string[], viewer?: SessionViewer): Promise<StudentSessionWithSchool[]> {
   if (studentIds.length === 0) return []
   const client = await getClient()
   try {
@@ -1702,16 +1710,23 @@ export async function getStudentSessionsForStudentIds(studentIds: string[], view
     const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
     const result = await client.query(
       `SELECT
-        ${STUDENT_SESSION_SELECT}
+        ${STUDENT_SESSION_SELECT},
+        u.school_id as "user_school_id",
+        s.name as "user_school_name"
        FROM reading_sessions rs
         JOIN users u ON rs.user_id = u.id
+        LEFT JOIN schools s ON u.school_id = s.id
         WHERE rs.user_id = ANY($1)
           ${visibility}
         ORDER BY rs.updated_at DESC`,
       tv ? [studentIds, tv.id] : [studentIds]
     )
 
-    return result.rows.map(mapStudentSessionRow)
+    return result.rows.map((row) => ({
+      ...mapStudentSessionRow(row),
+      schoolId: row.user_school_id || undefined,
+      schoolName: row.user_school_name || undefined,
+    }))
   } finally {
     client.release()
   }
@@ -1771,6 +1786,77 @@ export async function getClasslessStudentSessions(
   } finally {
     client.release()
   }
+}
+
+/**
+ * Student-session rows for a whole class scope ("all" or a single class id)
+ * in one batched call — the Student Data tab's initial-load path. Replaces
+ * the former client-side fan-out (one members request per class plus one
+ * sessions request per student, each costing a NextAuth DB session lookup
+ * and a pool client).
+ *
+ * Scope resolution ("all" only): super-admin sees all classes (optionally
+ * narrowed by schoolId), admin sees their own school's classes, teacher
+ * sees the classes they teach. Single-class scopes rely on the caller's
+ * canAccessClass check (same rule as the per-student route). Teacher
+ * session-visibility applies inside the session query. Admin/super-admin
+ * "all" scopes also merge classless students, mirroring the dedicated
+ * classless endpoint; teachers stay roster-scoped by design.
+ */
+export async function getRosterSessions(
+  viewer: { id: string; role: string },
+  scope: { classId: string; schoolId?: string | null }
+): Promise<StudentSessionWithSchool[]> {
+  const { id: viewerId, role } = viewer
+  const isAll = scope.classId === "all"
+
+  let classIds: string[]
+  if (!isAll) {
+    classIds = [scope.classId]
+  } else {
+    let classes: ClassInfo[]
+    if (role === "super-admin") {
+      classes = scope.schoolId ? await getClassesForSchool(scope.schoolId) : await getAllClasses()
+    } else if (role === "admin") {
+      const schoolId = await getSchoolForUser(viewerId)
+      classes = schoolId ? await getClassesForSchool(schoolId) : []
+    } else {
+      classes = await getClassesForTeacher(viewerId)
+    }
+    classIds = classes.map((c) => c.id)
+  }
+
+  // Distinct, non-banned roster student ids across every class in scope.
+  let studentIds: string[] = []
+  if (classIds.length > 0) {
+    const client = await getClient()
+    try {
+      const result = await client.query(
+        `SELECT DISTINCT cm.student_id
+         FROM class_members cm
+         JOIN users u ON u.id = cm.student_id
+         WHERE cm.class_id = ANY($1)
+           AND COALESCE(u.banned, FALSE) = FALSE`,
+        [classIds]
+      )
+      studentIds = result.rows.map((row) => row.student_id as string)
+    } finally {
+      client.release()
+    }
+  }
+
+  const sessions = await getStudentSessionsForStudentIds(studentIds, { id: viewerId, role })
+
+  if (isAll && (role === "admin" || role === "super-admin")) {
+    const classless = await getClasslessStudentSessions(
+      viewerId,
+      role,
+      role === "super-admin" ? (scope.schoolId ?? null) : null
+    )
+    sessions.push(...classless)
+  }
+
+  return sessions
 }
 
 export async function canAccessStudent(userId: string, userRole: string, studentId: string): Promise<boolean> {
