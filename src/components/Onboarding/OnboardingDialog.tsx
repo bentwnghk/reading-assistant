@@ -572,6 +572,47 @@ function OnboardingDialog() {
           </div>
         )}
 
+        {step === "trial" && (
+          <div className="space-y-3">
+            <div className="rounded-lg border border-violet-200 dark:border-violet-900/60 bg-violet-50 dark:bg-violet-900/20 p-3.5 flex items-start gap-3">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
+                <Hourglass className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <p className="text-sm leading-relaxed">
+                {t("onboarding.trial.summary", {
+                  days: trialInfo?.days ?? 0,
+                  limit: trialInfo?.visualizationDailyLimit ?? 0,
+                })}
+              </p>
+            </div>
+            <NextStepCard
+              icon={Hourglass}
+              bgClass="bg-violet-100 dark:bg-violet-900/40"
+              iconClass="text-violet-600 dark:text-violet-400"
+              title={t("onboarding.trial.daysTitle", {
+                days: trialInfo?.days ?? 0,
+              })}
+              desc={t("onboarding.trial.daysDesc")}
+            />
+            <NextStepCard
+              icon={Image}
+              bgClass="bg-blue-100 dark:bg-blue-900/40"
+              iconClass="text-blue-600 dark:text-blue-400"
+              title={t("onboarding.trial.visualizationTitle", {
+                limit: trialInfo?.visualizationDailyLimit ?? 0,
+              })}
+              desc={t("onboarding.trial.visualizationDesc")}
+            />
+            <NextStepCard
+              icon={Gift}
+              bgClass="bg-emerald-100 dark:bg-emerald-900/40"
+              iconClass="text-emerald-600 dark:text-emerald-400"
+              title={t("onboarding.trial.noPaymentTitle")}
+              desc={t("onboarding.trial.noPaymentDesc")}
+            />
+          </div>
+        )}
+
         {step === "done" && (
           <div className="space-y-4">
             <div className="flex justify-center pt-1">
@@ -638,48 +679,7 @@ function OnboardingDialog() {
             <StepDots total={3} active={stepIndex} />
           </div>
           <div className="flex-1 flex justify-end">
-        {step === "trial" && (
-          <div className="space-y-3">
-            <div className="rounded-lg border border-violet-200 dark:border-violet-900/60 bg-violet-50 dark:bg-violet-900/20 p-3.5 flex items-start gap-3">
-              <div className="shrink-0 w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
-                <Hourglass className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-              </div>
-              <p className="text-sm leading-relaxed">
-                {t("onboarding.trial.summary", {
-                  days: trialInfo?.days ?? 0,
-                  limit: trialInfo?.visualizationDailyLimit ?? 0,
-                })}
-              </p>
-            </div>
-            <NextStepCard
-              icon={Hourglass}
-              bgClass="bg-violet-100 dark:bg-violet-900/40"
-              iconClass="text-violet-600 dark:text-violet-400"
-              title={t("onboarding.trial.daysTitle", {
-                days: trialInfo?.days ?? 0,
-              })}
-              desc={t("onboarding.trial.daysDesc")}
-            />
-            <NextStepCard
-              icon={Image}
-              bgClass="bg-blue-100 dark:bg-blue-900/40"
-              iconClass="text-blue-600 dark:text-blue-400"
-              title={t("onboarding.trial.visualizationTitle", {
-                limit: trialInfo?.visualizationDailyLimit ?? 0,
-              })}
-              desc={t("onboarding.trial.visualizationDesc")}
-            />
-            <NextStepCard
-              icon={Gift}
-              bgClass="bg-emerald-100 dark:bg-emerald-900/40"
-              iconClass="text-emerald-600 dark:text-emerald-400"
-              title={t("onboarding.trial.noPaymentTitle")}
-              desc={t("onboarding.trial.noPaymentDesc")}
-            />
-          </div>
-        )}
-
-        {step === "done" && (
+            {step === "done" && (
               <Button type="button" size="sm" onClick={handleStartReading}>
                 {t("onboarding.startReading")}
               </Button>
