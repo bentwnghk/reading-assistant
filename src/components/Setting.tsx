@@ -123,7 +123,7 @@ function InfoTooltip({ content }: { content: string }) {
 
 function Setting({ open, onClose }: SettingProps) {
   const { t } = useTranslation();
-  const { mode, provider, freeAccessGranted, update } = useSettingStore();
+  const { mode, provider, freeAccessGranted, trialActive, trialExpiresAt, update } = useSettingStore();
   const { status: authStatus, data: sessionData } = useSession();
   const isAuthenticated = authStatus === "authenticated";
   const [pricingInfo, setPricingInfo] = useState<{ monthly: number; currency: string; trialPeriodDays: number } | null>(null);
@@ -158,6 +158,15 @@ function Setting({ open, onClose }: SettingProps) {
     isAdminRole || mode === "local"
       ? IMAGE_MODELS
       : IMAGE_MODELS.filter((m) => !RESTRICTED_IMAGE_MODELS.includes(m));
+  // Days left on the active onboarding free trial (min 1 so the notice never
+  // reads "0 days" on the last hours of the trial). Falls back to 1 when no
+  // expiry is known (invalid date) — only rendered when trialActive anyway.
+  const trialRemainingDays = Math.max(
+    1,
+    Math.ceil(
+      (new Date(trialExpiresAt || 0).getTime() - Date.now()) / 86400000
+    )
+  );
 
   useEffect(() => {
     fetch("/api/subscription/pricing")
@@ -498,9 +507,16 @@ function Setting({ open, onClose }: SettingProps) {
                               }
                             />
                           </FormControl>
-                          {freeAccessGranted && (
+                          {(freeAccessGranted || trialActive) && (
                             <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                              {t("setting.freeAccessNotice")}
+                              {trialActive
+                                ? t(
+                                    trialRemainingDays === 1
+                                      ? "setting.trialAccessNoticeOneDay"
+                                      : "setting.trialAccessNotice",
+                                    { days: trialRemainingDays }
+                                  )
+                                : t("setting.freeAccessNotice")}
                             </p>
                           )}
                         </div>

@@ -3050,6 +3050,8 @@
     "accessPasswordPlaceholder": "Enter access password",
     "accessPasswordTip": "💡 Get the access password from Mr.🆖",
     "freeAccessNotice": "✅ Free AI access is enabled for your account — no Access Password needed.",
+    "trialAccessNotice": "✅ Free trial access is enabled for your account — no Access Password needed for {{days}} days.",
+    "trialAccessNoticeOneDay": "✅ Free trial access is enabled for your account — no Access Password needed for 1 day.",
     "language": "UI Language",
     "languageTip": "The system will auto-select based on your browser",
     "theme": "UI Theme",
