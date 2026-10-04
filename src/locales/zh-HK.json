@@ -3412,7 +3412,8 @@
       "billingMode": {
         "subscription": "訂閱",
         "local": "計量",
-        "proxy": "免費"
+        "proxy": "免費",
+        "trial": "免費試用"
       },
       "deleteUser": "刪除",
       "deleteConfirm": "永久刪除 {{name}} 及其所有相關資料（閱讀記錄、詞彙、訂閱、成就等）？此操作無法復原。",

@@ -3382,7 +3382,8 @@
       "billingMode": {
         "subscription": "Subscription",
         "local": "Meter",
-        "proxy": "Free"
+        "proxy": "Free",
+        "trial": "Free Trial"
       },
       "deleteUser": "Delete",
       "deleteConfirm": "Permanently delete {{name}} and ALL associated data (sessions, vocabulary, subscriptions, achievements, etc.)? This action cannot be undone.",

@@ -1,6 +1,7 @@
 import { getClient } from "./db"
 import { ensureSchoolSubscriptionTables } from "./school-subscription"
 import { isFreeAccessEmail } from "./free-access"
+import { ensureTrialTable } from "./trial"
 import { calculateProgress as sharedCalculateProgress } from "@/utils/progress"
 
 export type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student'
@@ -45,6 +46,8 @@ export interface UserWithRole {
   hasActiveSubscription?: boolean
   hasMeterApiKey?: boolean
   hasAccessPassword?: boolean
+  /** Active onboarding free trial (user_trials row not yet expired). */
+  onFreeTrial?: boolean
   banned?: boolean
   createdAt?: number
 }
@@ -829,6 +832,7 @@ export async function expireUserSessions(
 
 export async function getAllUsers(): Promise<UserWithRole[]> {
   await ensureSchoolSubscriptionTables()
+  await ensureTrialTable()
   const client = await getClient()
   try {
     const result = await client.query(
@@ -865,6 +869,10 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
           us.settings->>'mode' = 'proxy'
           AND COALESCE(us.settings->>'accessPassword', '') <> ''
         ) as "hasAccessPassword",
+        EXISTS (
+          SELECT 1 FROM user_trials ut
+          WHERE ut.user_id = u.id AND ut.expires_at > NOW()
+        ) as "onFreeTrial",
         ${TAUGHT_CLASSES_SUBSELECT}
        FROM users u
         LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -896,6 +904,7 @@ export async function getAllUsers(): Promise<UserWithRole[]> {
       hasActiveSubscription: !!row.hasActiveSubscription,
       hasMeterApiKey: !!row.hasMeterApiKey,
       hasAccessPassword: !!row.hasAccessPassword || isFreeAccessEmail(row.email),
+      onFreeTrial: !!row.onFreeTrial,
       banned: !!row.banned,
       createdAt: row.createdAt ? new Date(row.createdAt).getTime() : undefined,
     }))
@@ -1226,6 +1235,7 @@ export async function getClassSchoolId(classId: string): Promise<string | null> 
 /** All users (of any role) belonging to a given school */
 export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]> {
   await ensureSchoolSubscriptionTables()
+  await ensureTrialTable()
   const client = await getClient()
   try {
     const result = await client.query(
@@ -1261,6 +1271,10 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
           us.settings->>'mode' = 'proxy'
           AND COALESCE(us.settings->>'accessPassword', '') <> ''
          ) as "hasAccessPassword",
+        EXISTS (
+          SELECT 1 FROM user_trials ut
+          WHERE ut.user_id = u.id AND ut.expires_at > NOW()
+        ) as "onFreeTrial",
         ${TAUGHT_CLASSES_SUBSELECT},
         ${CLASS_MEMBERSHIP_SELECT}
        FROM users u
@@ -1286,6 +1300,7 @@ export async function getUsersInSchool(schoolId: string): Promise<UserWithRole[]
       hasActiveSubscription: !!row.hasActiveSubscription,
       hasMeterApiKey: !!row.hasMeterApiKey,
       hasAccessPassword: !!row.hasAccessPassword || isFreeAccessEmail(row.email),
+      onFreeTrial: !!row.onFreeTrial,
       banned: !!row.banned,
       classId: row.classId,
       className: row.className,

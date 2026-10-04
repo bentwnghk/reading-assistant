@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Trash2, ShieldCheck, Pencil } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Hourglass, Trash2, ShieldCheck, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -38,16 +38,22 @@ import { cn } from "@/utils/style"
 type SortField = "name" | "email" | "className" | "schoolName"
 type SortOrder = "asc" | "desc"
 
-const BILLING_MODE_ICON: Record<BillingMode, typeof CreditCard> = {
+/** Avatar badge modes: the three billing modes plus the onboarding free trial
+ *  (which overrides the underlying proxy mode while it lasts). */
+type DisplayBillingMode = BillingMode | "trial"
+
+const BILLING_MODE_ICON: Record<DisplayBillingMode, typeof CreditCard> = {
   subscription: CreditCard,
   local: Gauge,
   proxy: Gift,
+  trial: Hourglass,
 }
 
-const BILLING_MODE_STYLES: Record<BillingMode, string> = {
+const BILLING_MODE_STYLES: Record<DisplayBillingMode, string> = {
   subscription: "bg-blue-500 text-white",
   local: "bg-amber-500 text-white",
   proxy: "bg-emerald-500 text-white",
+  trial: "bg-violet-500 text-white",
 }
 
 interface UserListProps {
@@ -628,7 +634,12 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
               !(rawBillingMode === "proxy" && !user.hasAccessPassword)
                 ? rawBillingMode
                 : null
-            const BillingIcon = billingMode ? BILLING_MODE_ICON[billingMode] : null
+            // Active free trial wins over the underlying billing mode badge —
+            // it's the user's current access state until it expires.
+            const badgeMode: DisplayBillingMode | null = user.onFreeTrial
+              ? "trial"
+              : billingMode
+            const BillingIcon = badgeMode ? BILLING_MODE_ICON[badgeMode] : null
             return (
               <TableRow
                 key={user.id}
@@ -649,13 +660,13 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
                         <AvatarImage src={user.image || undefined} />
                         <AvatarFallback>{user.name?.[0] || user.email?.[0] || "?"}</AvatarFallback>
                       </Avatar>
-                      {billingMode && BillingIcon && (
+                      {badgeMode && BillingIcon && (
                         <span
                           className={cn(
                             "absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full ring-2 ring-background",
-                            BILLING_MODE_STYLES[billingMode]
+                            BILLING_MODE_STYLES[badgeMode]
                           )}
-                          title={t("userManagement.users.billingModeLabel", { mode: t(`userManagement.users.billingMode.${billingMode}`) })}
+                          title={t("userManagement.users.billingModeLabel", { mode: t(`userManagement.users.billingMode.${badgeMode}`) })}
                         >
                           <BillingIcon className="h-2.5 w-2.5" />
                         </span>
