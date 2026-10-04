@@ -1859,6 +1859,62 @@ export async function getRosterSessions(
   return sessions
 }
 
+/**
+ * Teacher-owned session rows for a teacher scope ("all" or a single teacher
+ * id) in one batched call — the Teacher Data tab's initial-load path.
+ * Replaces the former client-side fan-out (one /api/users/[id]/sessions
+ * request per teacher, each costing a NextAuth DB session lookup and a pool
+ * client). Reuses the lightweight STUDENT_SESSION_SELECT list shape and
+ * returns per-row school names from the session owner's school.
+ *
+ * Scope resolution ("all" only): admin sees teachers in their own school,
+ * super-admin sees all teachers (optionally narrowed by schoolId). Single
+ * teacher scopes rely on the caller's canAccessStudent check (same rule as
+ * the per-user sessions route). No teacher visibility filter applies — the
+ * viewer is always an admin/super-admin.
+ */
+export async function getTeacherRosterSessions(
+  viewer: { id: string; role: string },
+  scope: { teacherId: string; schoolId?: string | null }
+): Promise<StudentSessionWithSchool[]> {
+  const { id: viewerId, role } = viewer
+  const isAll = scope.teacherId === "all"
+
+  let teacherIds: string[]
+  if (!isAll) {
+    teacherIds = [scope.teacherId]
+  } else {
+    const client = await getClient()
+    try {
+      const conditions = [
+        `COALESCE(ur.role, 'student') = 'teacher'`,
+        `COALESCE(u.banned, FALSE) = FALSE`,
+      ]
+      const params: unknown[] = []
+      if (role === "admin") {
+        // Server-side school scope: an admin without a school sees nobody.
+        conditions.push(`u.school_id = (SELECT school_id FROM users WHERE id = $1)`)
+        params.push(viewerId)
+      } else if (scope.schoolId) {
+        params.push(scope.schoolId)
+        conditions.push(`u.school_id = $${params.length}`)
+      }
+      const result = await client.query(
+        `SELECT u.id
+         FROM users u
+         LEFT JOIN user_roles ur ON u.id = ur.user_id
+         WHERE ${conditions.join(" AND ")}`,
+        params
+      )
+      teacherIds = result.rows.map((row) => row.id as string)
+    } finally {
+      client.release()
+    }
+  }
+
+  return getStudentSessionsForStudentIds(teacherIds, { id: viewerId, role })
+}
+
 export async function canAccessStudent(userId: string, userRole: string, studentId: string): Promise<boolean> {
   if (userRole === 'super-admin') return true
 

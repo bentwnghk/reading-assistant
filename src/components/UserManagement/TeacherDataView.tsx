@@ -97,13 +97,6 @@ interface SessionWithSchool extends StudentSessionData {
   schoolName?: string
 }
 
-/**
- * Batches per-teacher session fetches (mirrors the Student Data tab's
- * STUDENT_FETCH_BATCH): each request costs a NextAuth DB session lookup +
- * pool client, so an unbounded parallel burst saturates the pg pool.
- */
-const TEACHER_FETCH_BATCH = 5
-
 export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initialTeacherId }: TeacherDataViewProps) {
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -180,8 +173,15 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
 
   const loadTeachersAndSchools = useCallback(async () => {
     try {
-      const usersResponse = await fetch("/api/users")
-      if (usersResponse.ok) {
+      // Independent metadata requests run in parallel — they used to be
+      // awaited sequentially, adding a round-trip before the first session
+      // load could start.
+      const [usersResponse, schoolsResponse] = await Promise.all([
+        fetch("/api/users"),
+        isSuperAdmin ? fetch("/api/schools") : null,
+      ])
+
+      if (usersResponse?.ok) {
         const users: UserWithRole[] = await usersResponse.json()
         const teacherList = users.filter(u => u.role === "teacher" && !u.banned)
         setTeachers(teacherList)
@@ -193,11 +193,8 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
         }
       }
 
-      if (isSuperAdmin) {
-        const schoolsResponse = await fetch("/api/schools")
-        if (schoolsResponse.ok) {
-          setSchools(await schoolsResponse.json())
-        }
+      if (schoolsResponse?.ok) {
+        setSchools(await schoolsResponse.json())
       }
     } catch (error) {
       console.error("Failed to load data:", error)
@@ -210,56 +207,29 @@ export default function TeacherDataView({ isSuperAdmin, isAdmin: _isAdmin, initi
   const loadSessions = useCallback(async () => {
     setLoadingSessions(true)
     try {
-      const teachersToLoad = selectedTeacherId === "all"
-        ? teachers.filter(tc => selectedSchoolId === "all" || tc.schoolId === selectedSchoolId)
-        : teachers.filter(tc => tc.id === selectedTeacherId)
-
-      const allSessions: SessionWithSchool[] = []
-      const attemptsMap: Record<string, number> = {}
-      let failedTeacherFetches = 0
-
-      // Bounded batches: avoid overwhelming the server connection pool when
-      // "all teachers" means many parallel requests.
-      for (let i = 0; i < teachersToLoad.length; i += TEACHER_FETCH_BATCH) {
-        const batch = teachersToLoad.slice(i, i + TEACHER_FETCH_BATCH)
-        const teacherResults = await Promise.all(batch.map(async (teacher) => {
-          const res = await fetch(`/api/users/${teacher.id}/sessions`)
-          if (res.ok) {
-            const data = await res.json()
-            const teacherSessions: StudentSessionData[] = data.sessions ?? []
-            return {
-              ok: true,
-              sessions: teacherSessions.map((s: StudentSessionData) => ({
-                ...s,
-                schoolName: teacher.schoolName
-              })),
-              spellingReviewCount: data.spellingReviewCount ?? 0,
-              userId: teacher.id,
-            }
-          }
-          return { ok: false, sessions: [] as SessionWithSchool[], spellingReviewCount: 0, userId: teacher.id }
-        }))
-
-        for (const r of teacherResults) {
-          if (!r.ok) failedTeacherFetches++
-          allSessions.push(...r.sessions)
-          attemptsMap[r.userId] = r.spellingReviewCount
-        }
+      // Every scope ("all teachers" or a single teacher) loads in ONE
+      // batched request — the server resolves the teacher roster (admin:
+      // own school, super-admin: all or ?schoolId=) and returns per-row
+      // school names plus batched spelling review counts.
+      const params = new URLSearchParams({ teacherId: selectedTeacherId })
+      if (isSuperAdmin && selectedSchoolId !== "all") {
+        params.set("schoolId", selectedSchoolId)
       }
-
-      setSessions(allSessions)
-      setSpellingAttemptsByUser(attemptsMap)
-      // A failed per-teacher fetch otherwise looks like "no data" — surface it.
-      if (failedTeacherFetches > 0) {
-        toast.error(t("userManagement.teacherData.partialLoadFailed"))
-      }
+      const res = await fetch(`/api/users/teacher-sessions?${params.toString()}`)
+      if (!res.ok) throw new Error("Failed to load teacher sessions")
+      const data: {
+        sessions: SessionWithSchool[]
+        spellingReviewCounts: Record<string, number>
+      } = await res.json()
+      setSessions(data.sessions ?? [])
+      setSpellingAttemptsByUser(data.spellingReviewCounts ?? {})
     } catch (error) {
       console.error("Failed to load sessions:", error)
       toast.error(t("userManagement.loadFailed"))
     } finally {
       setLoadingSessions(false)
     }
-  }, [selectedTeacherId, selectedSchoolId, teachers, t])
+  }, [selectedTeacherId, selectedSchoolId, t, isSuperAdmin])
 
   useEffect(() => {
     loadTeachersAndSchools()
