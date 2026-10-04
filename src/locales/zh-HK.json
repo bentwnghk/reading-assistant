@@ -74,9 +74,9 @@
     "trial": {
       "subtitle": "開始免費試用 — 全面使用所有 AI 功能，無需付款。",
       "badgeDays": "{{days}} 天免費試用",
-      "summary": "你將獲得 {{days}} 天完整 AI 存取權，無需密碼、API 金鑰或付款。試用期間文本視覺化每天限產 {{limit}} 張圖片。",
+      "summary": "你將獲得 {{days}} 天完整 AI 存取權，無需密碼、API 金鑰或付款。",
       "daysTitle": "{{days}} 天完整存取",
-      "daysDesc": "包含所有 AI 功能：摘要、思維導圖、測驗、詞彙表、語法遊戲、AI 導師對話等。",
+      "daysDesc": "包含所有 AI 功能：摘要、思維導圖、測驗、詞彙表、拼字及語法遊戲、AI 導師對話等。",
       "visualizationTitle": "文本視覺化：每天 {{limit}} 張",
       "visualizationDesc": "試用期間，由閱讀文本生成 AI 圖片每日設有上限。",
       "noPaymentTitle": "無需付款、無需憑證",

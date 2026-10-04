@@ -74,9 +74,9 @@
     "trial": {
       "subtitle": "Start your free trial — full access to all AI features, no payment needed.",
       "badgeDays": "{{days}}-day free trial",
-      "summary": "You'll get {{days}} days of full AI access with no password, API key, or payment. Visualization generation is limited to {{limit}} images per day.",
+      "summary": "You'll get {{days}} days of full AI access with no password, API key, or payment.",
       "daysTitle": "{{days}} days of full access",
-      "daysDesc": "All AI features included: summaries, mind maps, tests, glossary, grammar games, AI Tutor chat and more.",
+      "daysDesc": "All AI features included: summaries, mind maps, tests, glossary, spelling and grammar games, AI Tutor chat and more.",
       "visualizationTitle": "Visualization: {{limit}} per day",
       "visualizationDesc": "AI image generation from your reading text is capped daily during the trial.",
       "noPaymentTitle": "No payment, no credentials",
