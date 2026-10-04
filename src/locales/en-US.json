@@ -1822,6 +1822,8 @@
           "navTitle": "Spelling Battle",
           "dialogDesc": "Join a battle with a room code, or create a room to host.",
           "connecting": "Connecting to battle server…",
+          "noAccessTitle": "AI access required for spelling battles",
+          "noAccessDesc": "Set up a subscription, an Access Password, or your own API key — or start a free trial — to create and join spelling battles.",
           "retry": "Retry",
           "unavailable": "Multiplayer battles are not available on this server.",
           "back": "Back",

@@ -71,6 +71,7 @@ import {
 import { useGlobalStore } from "@/store/global";
 import { useReadingStore } from "@/store/reading";
 import { markLastOpenedSession } from "@/store/setting";
+import useAiAccess from "@/hooks/useAiAccess";
 import { downloadFile } from "@/utils/file";
 import { useSharingStore } from "@/store/sharing";
 import { useBattleStore } from "@/store/battle";
@@ -135,6 +136,10 @@ function Header() {
   const battleActive = battleStatus === "countdown" || battleStatus === "playing" || !!battleCurrentWord;
   const showBattleLobbyDialog = useBattleStore((s) => s.showBattleLobbyDialog);
   const setShowBattleLobbyDialog = useBattleStore((s) => s.setShowBattleLobbyDialog);
+  // Hide the battle entry from users with no AI access path — the flow's
+  // lobby is gated anyway (listen-type needs TTS), so a dead button would
+  // only frustrate. While sign-in data is still settling, keep the button.
+  const { hasAiAccess: battleHasAiAccess, accessKnown: battleAccessKnown } = useAiAccess();
   // Per-word SRS for battles started from the Header dialog. Uses the same
   // `correct`-only PATCH as the solo spelling game (Glossary.tsx). That path
   // runs a pure UPDATE on user_vocabulary, so words the user doesn't already
@@ -453,7 +458,7 @@ function Header() {
                 </Button>
               </Link>
             )}
-            {session?.user && (
+            {session?.user && (!battleAccessKnown || battleHasAiAccess) && (
               <Button
                 variant="ghost"
                 size="sm"

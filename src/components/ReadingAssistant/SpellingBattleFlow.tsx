@@ -2,13 +2,18 @@
 
 import { useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "react-i18next";
+import { Lock, Swords } from "lucide-react";
 
+import useAiAccess from "@/hooks/useAiAccess";
+import { useGlobalStore } from "@/store/global";
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useReadingStore } from "@/store/reading";
 import { useBattleStore } from "@/store/battle";
 import { useHistoryStore } from "@/store/history";
 import { logActivity } from "@/utils/activityLogger";
 import { computeBattleSessionAttribution } from "@/utils/battleAttribution";
+import { Button } from "@/components/ui/button";
 import { SpellingBattleLobby } from "./SpellingBattleLobby";
 import { SpellingBattleArena } from "./SpellingBattleArena";
 import { SpellingBattleResults } from "./SpellingBattleResults";
@@ -80,7 +85,10 @@ export function SpellingBattleFlow({
   onExitToSolo,
   compact,
 }: SpellingBattleFlowProps) {
+  const { t } = useTranslation();
   const battle = useSpellingBattle();
+  const { hasAiAccess, accessKnown } = useAiAccess();
+  const { setOpenSetting } = useGlobalStore();
   const { data: session } = useSession();
   const { id, setSpellingGameBestScore, setSpellingResults, backup } = useReadingStore();
   const { update, save } = useHistoryStore();
@@ -279,6 +287,45 @@ export function SpellingBattleFlow({
   // In-progress (countdown / playing) → arena.
   if (battle.status === "playing" || battle.status === "countdown" || battle.currentWord !== null) {
     return <SpellingBattleArena onExit={handleExit} compact={compact} />;
+  }
+
+  // ── AI-access gate (lobby only) ──────────────────────────────────────────
+  // Entering a battle requires an AI access path: hosting needs TTS-capable
+  // AI for word audio, and listen-type words are revealed ONLY via TTS, so a
+  // zero-access player could join but never hear those words. Ongoing
+  // battles are NOT interrupted (scoring is server-authoritative) — only
+  // new lobby entries are gated. Placed after the arena/results returns so
+  // it can never kick a player mid-battle.
+  if (accessKnown && !hasAiAccess) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+          <Lock className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <div className="space-y-1">
+          <h4 className="flex items-center justify-center gap-2 font-semibold text-sm">
+            <Swords className="h-4 w-4 text-muted-foreground" />
+            {t("reading.glossary.spelling.multiplayer.noAccessTitle")}
+          </h4>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
+            {t("reading.glossary.spelling.multiplayer.noAccessDesc")}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button type="button" size="sm" onClick={() => setOpenSetting(true)}>
+            {t("settingsBanner.openSettings")}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onExitToSolo}
+          >
+            {t("onboarding.back")}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   // Otherwise → lobby (create / join / waiting room).
