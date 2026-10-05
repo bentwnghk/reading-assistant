@@ -47,7 +47,6 @@ import ExportPanel from "./ExportPanel";
 import ShareVocabularyDialog from "./ShareVocabularyDialog";
 import AddToReviewListDialog from "./AddToReviewListDialog";
 import ReviewListsTab from "./ReviewListsTab";
-import ReviewListShareDialog from "./ReviewListShareDialog";
 import StudyPlanDialog from "./StudyPlanDialog";
 import StudentViewFilters from "./StudentViewFilters";
 
@@ -722,7 +721,6 @@ function VocabularyContainer() {
             open={addToListOpen}
             onOpenChange={setAddToListOpen}
           />
-          <ReviewListShareDialog />
           {!isStudentView && <StudyPlanDialog onStartPlan={handleStartPlan} />}
 
           <Dialog open={showHelp} onOpenChange={setShowHelp}>

@@ -122,6 +122,7 @@ function Header() {
   const {
     pendingReviewListShareCount,
     fetchPendingReviewListShareCount,
+    setShowReviewListShareDialog,
     dueForReviewCount,
     fetchDueForReviewCount,
   } = useVocabularyStore();
@@ -359,13 +360,20 @@ function Header() {
               size="sm"
               title={t("share.bellTitle")}
               onClick={() => {
+                let opened = false;
                 if (pendingCount > 0) {
                   setShowSharedDialog(true);
-                } else if (pendingReviewListShareCount > 0) {
-                  void router.push("/vocabulary?openReviewListShare=1");
-                } else if (pendingClassBattleCount > 0) {
+                  opened = true;
+                }
+                if (pendingReviewListShareCount > 0) {
+                  setShowReviewListShareDialog(true);
+                  opened = true;
+                }
+                if (pendingClassBattleCount > 0) {
                   setShowClassBattleInviteDialog(true);
-                } else {
+                  opened = true;
+                }
+                if (!opened) {
                   setOpenNoPending(true);
                 }
               }}
