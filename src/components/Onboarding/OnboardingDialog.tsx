@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   BookOpen,
+  CalendarDays,
   Check,
   ChevronRight,
   Crown,
@@ -574,7 +575,7 @@ function OnboardingDialog() {
               </p>
             </div>
             <NextStepCard
-              icon={Hourglass}
+              icon={CalendarDays}
               bgClass="bg-violet-100 dark:bg-violet-900/40"
               iconClass="text-violet-600 dark:text-violet-400"
               title={t("onboarding.trial.daysTitle", {
