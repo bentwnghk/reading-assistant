@@ -9,7 +9,7 @@ import { useHistoryStore } from "@/store/history";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, GameModeSelector, AnswerFeedback } from "./GrammarGames";
+import { GameBackButton, GameModeSelector, AnswerFeedback, useFeedbackAdvance, type FeedbackPhase } from "./GrammarGames";
 import {
   PointPopup,
   AnimatedScore,
@@ -171,18 +171,8 @@ export default function GrammarRoulette({ onBack }: Props) {
           }
           setCurrentRound((r) => r ? { ...r, answered: true, correct: false } : r);
           setStreak(0);
-          setTimeout(() => {
-            setRoundIndex((ri) => {
-              const nextRound = ri + 1;
-              if (nextRound >= totalRounds) {
-                setGameStatus("completed");
-                return ri;
-              }
-              setCurrentRound(null);
-              setSelectedOption(null);
-              return nextRound;
-            });
-          }, 3000);
+          // Feedback flow (wrong-answer duration + Continue button) is owned
+          // by useFeedbackAdvance, triggered by the answered flip above.
           return 0;
         }
         return prev - 1;
@@ -202,6 +192,22 @@ export default function GrammarRoulette({ onBack }: Props) {
     usedQuestionIds.current.add(`${q.topicId}-${q.question}`);
     return q;
   }, [questionsByTopic]);
+
+  const advanceRound = useCallback(() => {
+    const nextRound = roundIndex + 1;
+    if (nextRound >= totalRounds) {
+      setGameStatus("completed");
+    } else {
+      setRoundIndex(nextRound);
+      setCurrentRound(null);
+      setSelectedOption(null);
+    }
+  }, [roundIndex, totalRounds]);
+
+  const feedbackPhase: FeedbackPhase = currentRound?.answered
+    ? currentRound.correct ? "correct" : "incorrect"
+    : "hidden";
+  const { canContinue, continueNow } = useFeedbackAdvance(feedbackPhase, advanceRound);
 
   const spinWheel = useCallback(() => {
     if (isSpinning || grammarTopics.length === 0) return;
@@ -304,18 +310,8 @@ export default function GrammarRoulette({ onBack }: Props) {
     }
 
     setCurrentRound((r) => r ? { ...r, answered: true, correct: isCorrect } : r);
-
-    setTimeout(() => {
-      const nextRound = roundIndex + 1;
-      if (nextRound >= totalRounds) {
-        setGameStatus("completed");
-      } else {
-        setRoundIndex(nextRound);
-        setCurrentRound(null);
-        setSelectedOption(null);
-      }
-    }, 3000);
-  }, [currentRound, streak, coins, bestBefore, hotTopicId, hotTopicStreak, grammarTopics, roundIndex, totalRounds, mode, timeLeft]);
+    // Auto-advance + Continue button handled by useFeedbackAdvance.
+  }, [currentRound, streak, coins, bestBefore, hotTopicId, hotTopicStreak, grammarTopics, roundIndex, mode, timeLeft]);
 
   const startGame = useCallback(() => {
     setRoundIndex(0);
@@ -661,6 +657,8 @@ export default function GrammarRoulette({ onBack }: Props) {
               isCorrect={currentRound.correct}
               explanation={currentRound.question.explanation}
               points={currentRound.correct ? (hotMultiplier > 1 ? 100 * hotMultiplier : 100) : undefined}
+              canContinue={canContinue}
+              onContinue={continueNow}
             />
           )}
         </div>

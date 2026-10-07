@@ -65,8 +65,12 @@ interface VocabularySpellingProps {
 type GameStatus = "setup" | "playing" | "completed";
 
 /** How long the answer/feedback stays on screen before advancing (ms).
- *  Mirrors the battle server's BETWEEN_WORDS_MS — keep both in sync. */
-const FEEDBACK_DISPLAY_MS = 2000;
+ *  Correct answers only confirm what the student just spelled, so they
+ *  advance at the battle server's pace (BETWEEN_WORDS_MS — keep in sync).
+ *  Wrong answers reveal the correct spelling + definition — new material a
+ *  struggling reader needs extra time to study, so they linger longer. */
+const CORRECT_FEEDBACK_MS = 2000;
+const WRONG_FEEDBACK_MS = 4000;
 
 const DIFFICULTY_CONFIG: Record<SpellingDifficulty, { timeLimits: Record<SpellingGameMode, number>; hintsAllowed: number; blankRatio: number }> = {
   easy: { timeLimits: { "listen-type": 30, scramble: 45, "fill-blanks": 30, mixed: 30 }, hintsAllowed: 5, blankRatio: 0.2 },
@@ -491,7 +495,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                 // Re-center after the browser settles the newly focused input.
                 centerGameArea(gameAreaRef, 450);
               }
-            }, FEEDBACK_DISPLAY_MS);
+            }, WRONG_FEEDBACK_MS);
             return config.timeLimits[currentMode];
           }
           return prev - 1;
@@ -662,7 +666,7 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
       });
     }
 
-    setTimeout(() => moveToNext(), FEEDBACK_DISPLAY_MS);
+    setTimeout(() => moveToNext(), correct ? CORRECT_FEEDBACK_MS : WRONG_FEEDBACK_MS);
   }, [currentChallenge, userInput, streak, score, isTimed, timeRemaining, config.timeLimits, hintsUsed, moveToNext, currentMode, bestBefore]);
 
   const handleHint = useCallback(() => {

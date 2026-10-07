@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Shuffle,
@@ -8,6 +8,7 @@ import {
   CircleDot,
   Swords,
   ArrowLeft,
+  ChevronRight,
   Trophy,
   Star,
   Target,
@@ -246,15 +247,93 @@ export function GameModeSelector({
   );
 }
 
-/** Shared feedback overlay shown after each answer */
+/** ── Feedback pacing ───────────────────────────────────────────────────────
+ * Correct answers only confirm what the student just produced — keep the
+ * game snappy (3s auto-advance, as before). Wrong answers reveal new
+ * material (the rule explanation), so they linger longer before the
+ * fallback auto-advance; the Continue button lets faster students move on
+ * the moment they finish reading. */
+export const CORRECT_FEEDBACK_MS = 3000;
+export const WRONG_FEEDBACK_MS = 6000;
+export const CORRECT_CONTINUE_MS = 1200;
+export const WRONG_CONTINUE_MS = 1500;
+
+export type FeedbackPhase = "hidden" | "correct" | "incorrect";
+
+/**
+ * Shared answer-feedback flow: auto-advances after a correct/incorrect
+ * duration and exposes `canContinue`/`continueNow` so the Continue button
+ * can skip the wait early. Keyed on the `phase` primitive only — `advance`
+ * and `opts` are read through refs so their changing identities never
+ * restart the timers (AGENTS.md §N).
+ */
+export function useFeedbackAdvance(
+  phase: FeedbackPhase,
+  advance: () => void,
+  opts?: { correctMs?: number; wrongMs?: number }
+) {
+  const [canContinue, setCanContinue] = useState(false);
+  const advanceRef = useRef(advance);
+  advanceRef.current = advance;
+  const optsRef = useRef(opts);
+  optsRef.current = opts;
+  const autoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearAutoTimer = () => {
+    if (autoTimerRef.current) {
+      clearTimeout(autoTimerRef.current);
+      autoTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (phase === "hidden") {
+      setCanContinue(false);
+      clearAutoTimer();
+      return;
+    }
+    const isCorrect = phase === "correct";
+    setCanContinue(false);
+    const continueTimer = setTimeout(
+      () => setCanContinue(true),
+      isCorrect ? CORRECT_CONTINUE_MS : WRONG_CONTINUE_MS
+    );
+    autoTimerRef.current = setTimeout(
+      () => {
+        autoTimerRef.current = null;
+        advanceRef.current();
+      },
+      isCorrect ? optsRef.current?.correctMs ?? CORRECT_FEEDBACK_MS : optsRef.current?.wrongMs ?? WRONG_FEEDBACK_MS
+    );
+    return () => {
+      clearTimeout(continueTimer);
+      clearAutoTimer();
+    };
+  }, [phase]);
+
+  const continueNow = useCallback(() => {
+    if (!canContinue) return;
+    clearAutoTimer();
+    advanceRef.current();
+  }, [canContinue]);
+
+  return { canContinue, continueNow };
+}
+
+/** Shared feedback overlay shown after each answer. When wired to
+ * `useFeedbackAdvance`, a Continue button appears after the minimum reading
+ * time so faster students can skip the auto-advance wait. */
 export function AnswerFeedback({
   isCorrect,
   explanation,
   points,
+  canContinue,
+  onContinue,
 }: {
   isCorrect: boolean;
   explanation: string;
   points?: number;
+  canContinue?: boolean;
+  onContinue?: () => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -282,6 +361,12 @@ export function AnswerFeedback({
         )}
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">{explanation}</p>
+      {canContinue && onContinue && (
+        <Button size="sm" variant="outline" onClick={onContinue} className="mt-1 w-full">
+          {t("reading.grammar.games.continue")}
+          <ChevronRight className="ml-1 h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }

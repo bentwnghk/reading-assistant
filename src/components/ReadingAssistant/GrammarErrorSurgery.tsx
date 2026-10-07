@@ -10,7 +10,7 @@ import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, GameModeSelector, AnswerFeedback } from "./GrammarGames";
+import { GameBackButton, GameModeSelector, AnswerFeedback, useFeedbackAdvance, type FeedbackPhase } from "./GrammarGames";
 import {
   PointPopup,
   AnimatedScore,
@@ -228,19 +228,8 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
 
     setResult(isCorrect ? "correct" : "incorrect");
     setShowOptions(false);
-    setTimeout(() => {
-      const nextIndex = roundIndex + 1;
-      if (nextIndex >= challenges.length) {
-        setGameStatus("completed");
-      } else {
-        setRoundIndex(nextIndex);
-        setSelectedWord(null);
-        setSelectedSpan(null);
-        setResult("pending");
-        setTimeLeft(20);
-      }
-    }, 3000);
-  }, [currentChallenge, selectedWord, streak, score, bestBefore, roundIndex, challenges.length, mode, timeLeft]);
+    // Auto-advance + Continue button handled by useFeedbackAdvance.
+  }, [currentChallenge, selectedWord, streak, score, bestBefore, roundIndex, mode, timeLeft]);
 
   const startGame = useCallback(() => {
     if (challenges.length === 0) return;
@@ -264,6 +253,22 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
     resultsRef.current.clear();
     setGameStatus("playing");
   }, [challenges]);
+
+  const advanceRound = useCallback(() => {
+    const nextIndex = roundIndex + 1;
+    if (nextIndex >= challenges.length) {
+      setGameStatus("completed");
+    } else {
+      setRoundIndex(nextIndex);
+      setSelectedWord(null);
+      setSelectedSpan(null);
+      setResult("pending");
+      setTimeLeft(20);
+    }
+  }, [roundIndex, challenges.length]);
+
+  const feedbackPhase: FeedbackPhase = result === "pending" ? "hidden" : result;
+  const { canContinue, continueNow } = useFeedbackAdvance(feedbackPhase, advanceRound);
 
   // ── Arcade / Mastery countdown timer ─────────────────────────────────────
   useEffect(() => {
@@ -289,27 +294,14 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
           setStreak(0);
           setResult("incorrect");
           setShowOptions(false);
-          setTimeout(() => {
-            setRoundIndex((ri) => {
-              const nextIndex = ri + 1;
-              if (nextIndex >= challenges.length) {
-                setGameStatus("completed");
-                return ri;
-              }
-              setSelectedWord(null);
-              setSelectedSpan(null);
-              setResult("pending");
-              setTimeLeft(20);
-              return nextIndex;
-            });
-          }, 3000);
+          // Feedback flow (wrong-answer duration + Continue button) is owned
+          // by useFeedbackAdvance, triggered by the result flip above.
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStatus, mode, result, roundIndex]);
 
   // Wrong-answer SFX lives in an effect (not the timeout callback) because the
@@ -549,6 +541,8 @@ export default function GrammarErrorSurgery({ onBack }: Props) {
         <AnswerFeedback
           isCorrect={result === "correct"}
           explanation={`${currentChallenge.errorWord} → ${currentChallenge.correction}. ${currentChallenge.explanation}`}
+          canContinue={canContinue}
+          onContinue={continueNow}
         />
       )}
     </div>

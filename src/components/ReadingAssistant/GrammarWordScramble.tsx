@@ -10,7 +10,7 @@ import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, GameModeSelector, AnswerFeedback } from "./GrammarGames";
+import { GameBackButton, GameModeSelector, AnswerFeedback, useFeedbackAdvance, type FeedbackPhase } from "./GrammarGames";
 import {
   PointPopup,
   AnimatedScore,
@@ -213,6 +213,9 @@ export default function GrammarWordScramble({ onBack }: Props) {
     });
   }, [roundIndex, challenges, grammarTopics, buildRound]);
 
+  const feedbackPhase: FeedbackPhase = !round || round.result === "pending" ? "hidden" : round.result;
+  const { canContinue, continueNow } = useFeedbackAdvance(feedbackPhase, advanceRound);
+
   const handleTimeUp = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     const r = roundRef.current;
@@ -227,8 +230,9 @@ export default function GrammarWordScramble({ onBack }: Props) {
     }
     setRound((prev) => prev ? { ...prev, result: "incorrect" } : prev);
     setStreak(0);
-    setTimeout(() => advanceRound(), 3000);
-  }, [advanceRound, roundIndex]);
+    // Feedback flow (wrong-answer duration + Continue button) is owned
+    // by useFeedbackAdvance, triggered by the result flip above.
+  }, [roundIndex]);
 
   const placeChip = useCallback((chip: WordChip) => {
     if (!round || round.result !== "pending" || chip.placed) return;
@@ -311,7 +315,7 @@ export default function GrammarWordScramble({ onBack }: Props) {
     }
 
     setRound((prev) => prev ? { ...prev, result: correct ? "correct" : "incorrect" } : prev);
-    setTimeout(() => advanceRound(), 3000);
+    // Auto-advance + Continue button handled by useFeedbackAdvance.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, mode, timeLeft, streak, score, bestBefore, hintsUsed]);
 
@@ -589,6 +593,8 @@ export default function GrammarWordScramble({ onBack }: Props) {
               ? t("reading.grammar.games.correct")
               : `${t("reading.grammar.games.incorrect")} ${originalWords.join(" ")}`
           }
+          canContinue={canContinue}
+          onContinue={continueNow}
         />
       )}
 

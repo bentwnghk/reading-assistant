@@ -11,7 +11,7 @@ import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, AnswerFeedback } from "./GrammarGames";
+import { GameBackButton, AnswerFeedback, useFeedbackAdvance, type FeedbackPhase } from "./GrammarGames";
 import {
   PointPopup,
   AnimatedScore,
@@ -204,34 +204,42 @@ export default function GrammarDuel({ onBack }: Props) {
         burstConfetti({ count: 40, spread: 70 });
       }
 
-      setTimeout(() => {
-        const newAiHp = Math.max(0, (aiHp - dmg));
-        if (newAiHp <= 0) { setGameStatus("completed"); return; }
-        advanceRound();
-      }, isPower ? 3500 : 3000);
+      // Auto-advance (3s, or 3.5s after a Power Move) + Continue button
+      // handled by useFeedbackAdvance.
     } else {
       setPlayerStreak(0);
       setLastBreakdown(null);
       // Wrong/overtaken SFX fires from the round-result effect below.
       applyDamage("player", BASE_DAMAGE);
       setRoundResult("ai-wins");
-      setTimeout(() => {
-        const newPlayerHp = Math.max(0, (playerHp - BASE_DAMAGE));
-        if (newPlayerHp <= 0) { setGameStatus("completed"); return; }
-        advanceRound();
-      }, 3000);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnswered, currentQuestion, playerStreak, score, bestBefore, aiHp, playerHp, applyDamage]);
 
   const advanceRound = useCallback(() => {
+    // Defeat checks — HP state already reflects this round's damage by the
+    // time the feedback flow calls this.
+    if (aiHp <= 0 || playerHp <= 0) { setGameStatus("completed"); return; }
     setSelectedOption(null);
     setIsAnswered(false);
     setRoundResult(null);
     const next = getNextQueueIndex(queueIndex, questions.length);
     usedQIndices.current.add(next);
     setQueueIndex(next);
-  }, [queueIndex, questions.length, getNextQueueIndex]);
+  }, [aiHp, playerHp, queueIndex, questions.length, getNextQueueIndex]);
+
+  // Power-Move rounds keep their longer 3.5s damage-animation pause.
+  const isPowerRound =
+    roundResult === "player-wins" &&
+    playerStreak >= POWER_MOVE_THRESHOLD &&
+    playerStreak % POWER_MOVE_THRESHOLD === 0;
+  const feedbackPhase: FeedbackPhase =
+    selectedOption !== null
+      ? roundResult === "player-wins" ? "correct" : "incorrect"
+      : "hidden";
+  const { canContinue, continueNow } = useFeedbackAdvance(feedbackPhase, advanceRound, {
+    correctMs: isPowerRound ? 3500 : undefined,
+  });
 
   // AI think timer — starts each new question
   useEffect(() => {
@@ -580,6 +588,8 @@ export default function GrammarDuel({ onBack }: Props) {
               : currentQuestion.explanation
           }
           points={roundResult === "player-wins" ? (playerStreak >= POWER_MOVE_THRESHOLD ? 200 : 100) : undefined}
+          canContinue={canContinue}
+          onContinue={continueNow}
         />
       )}
     </div>
