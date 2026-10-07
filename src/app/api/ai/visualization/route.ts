@@ -43,6 +43,7 @@ const IMAGE_MODEL =
 const IMAGE_MODEL_OPTIONS = new Set([
   "google/gemini-3.1-flash-lite-image",
   "x-ai/grok-imagine-image-2.0",
+  "google/gemini-nano-banana-2.1",
 ]);
 
 /** Additional image model only admins/super-admins and meter-billing

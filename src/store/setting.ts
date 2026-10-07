@@ -17,6 +17,7 @@ export type VisionModel = (typeof VISION_MODELS)[number];
 export const IMAGE_MODELS = [
   "google/gemini-3.1-flash-lite-image",
   "x-ai/grok-imagine-image-2.0",
+  "google/gemini-nano-banana-2.1",
   "google/gemini-3.1-flash-image",
 ] as const;
 
