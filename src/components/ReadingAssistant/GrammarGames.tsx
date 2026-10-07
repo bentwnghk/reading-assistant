@@ -248,13 +248,13 @@ export function GameModeSelector({
 }
 
 /** ── Feedback pacing ───────────────────────────────────────────────────────
- * Correct answers only confirm what the student just produced — keep the
- * game snappy (3s auto-advance, as before). Wrong answers reveal new
- * material (the rule explanation), so they linger longer before the
- * fallback auto-advance; the Continue button lets faster students move on
- * the moment they finish reading. */
-export const CORRECT_FEEDBACK_MS = 3000;
-export const WRONG_FEEDBACK_MS = 6000;
+ * Correct answers only confirm what the student just produced, so they get
+ * a shorter window than wrong answers; wrong answers reveal new material
+ * (the rule explanation), so they linger long before the fallback
+ * auto-advance. Both are safety nets — the Continue button lets anyone who
+ * finishes reading early move on immediately. */
+export const CORRECT_FEEDBACK_MS = 4000;
+export const WRONG_FEEDBACK_MS = 8000;
 export const CORRECT_CONTINUE_MS = 1200;
 export const WRONG_CONTINUE_MS = 1500;
 

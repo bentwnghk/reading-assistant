@@ -11,7 +11,7 @@ import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { GameBackButton, AnswerFeedback, useFeedbackAdvance, type FeedbackPhase } from "./GrammarGames";
+import { GameBackButton, AnswerFeedback, useFeedbackAdvance, CORRECT_FEEDBACK_MS, type FeedbackPhase } from "./GrammarGames";
 import {
   PointPopup,
   AnimatedScore,
@@ -77,8 +77,16 @@ export default function GrammarDuel({ onBack }: Props) {
   const [isAnswered, setIsAnswered] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [hitAnimation, setHitAnimation] = useState<"player" | "ai" | null>(null);
-  const [isPowerMove, setIsPowerMove] = useState(false);
   const [roundResult, setRoundResult] = useState<"player-wins" | "ai-wins" | "draw" | null>(null);
+
+  // Hit juice: floating damage number (keyed by seq so the one-shot animation
+  // replays per hit) + screen-shake state. Consecutive shakes alternate two
+  // identical keyframe names (duel-shake-a/b) because re-adding the same
+  // animation class does not restart a CSS animation.
+  const [damageFx, setDamageFx] = useState<{ seq: number; target: "player" | "ai"; amount: number; power: boolean } | null>(null);
+  const [hitSeq, setHitSeq] = useState(0);
+  const [shakeParity, setShakeParity] = useState(false);
+  const damageFxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isGenerating = !!activeGenerations["grammar-questions"];
   const isAutoGenerating = isGenerating && questions.length === 0;
 
@@ -135,7 +143,15 @@ export default function GrammarDuel({ onBack }: Props) {
     return next;
   }, []);
 
-  const applyDamage = useCallback((target: "player" | "ai", dmg: number) => {
+  const applyDamage = useCallback((target: "player" | "ai", dmg: number, power = false) => {
+    fxSeqRef.current += 1;
+    setDamageFx({ seq: fxSeqRef.current, target, amount: dmg, power });
+    // Bound the floating number's lifetime (also covers reduced-motion, where
+    // the CSS animation that normally fades it out is disabled).
+    if (damageFxTimerRef.current) clearTimeout(damageFxTimerRef.current);
+    damageFxTimerRef.current = setTimeout(() => setDamageFx(null), 1200);
+    setHitSeq((n) => n + 1);
+    setShakeParity((p) => !p);
     setHitAnimation(target);
     setTimeout(() => setHitAnimation(null), 600);
     if (target === "player") setPlayerHp((hp) => Math.max(0, hp - dmg));
@@ -169,9 +185,8 @@ export default function GrammarDuel({ onBack }: Props) {
 
       const isPower = newStreak >= POWER_MOVE_THRESHOLD && newStreak % POWER_MOVE_THRESHOLD === 0;
       const dmg = isPower ? BASE_DAMAGE * 2 : BASE_DAMAGE;
-      if (isPower) setIsPowerMove(true);
 
-      applyDamage("ai", dmg);
+      applyDamage("ai", dmg, isPower);
       // Power Move extra rides in the streakBonus slot (base 100 → 200).
       const awarded = isPower ? 200 : 100;
       const breakdown: PointBreakdown = {
@@ -188,13 +203,15 @@ export default function GrammarDuel({ onBack }: Props) {
 
       playSfx("correct");
       // Milestone fanfare takes precedence when streak 3 is BOTH a milestone
-      // and a Power Move — one fanfare per answer.
+      // and a Power Move — one fanfare per answer. Power Moves celebrate
+      // bigger (double confetti) either way.
       if (STREAK_MILESTONES.includes(newStreak)) {
         playSfx("streak");
         setMilestone({ streak: newStreak, seq: fxSeqRef.current });
-        burstConfetti({ count: 24, spread: 55 });
+        burstConfetti({ count: isPower ? 40 : 24, spread: isPower ? 70 : 55 });
       } else if (isPower) {
         playSfx("streak");
+        burstConfetti({ count: 40, spread: 70 });
       }
       // First time this game's running total passes the previous best score.
       if (bestBefore > 0 && score + awarded > bestBefore && !newBestFiredRef.current) {
@@ -204,8 +221,8 @@ export default function GrammarDuel({ onBack }: Props) {
         burstConfetti({ count: 40, spread: 70 });
       }
 
-      // Auto-advance (3s, or 3.5s after a Power Move) + Continue button
-      // handled by useFeedbackAdvance.
+      // Auto-advance (correct base, +500ms after a Power Move) + Continue
+      // button handled by useFeedbackAdvance.
     } else {
       setPlayerStreak(0);
       setLastBreakdown(null);
@@ -228,7 +245,8 @@ export default function GrammarDuel({ onBack }: Props) {
     setQueueIndex(next);
   }, [aiHp, playerHp, queueIndex, questions.length, getNextQueueIndex]);
 
-  // Power-Move rounds keep their longer 3.5s damage-animation pause.
+  // Power-Move rounds get the base correct window +500ms so the doubled
+  // damage animation has room to land.
   const isPowerRound =
     roundResult === "player-wins" &&
     playerStreak >= POWER_MOVE_THRESHOLD &&
@@ -238,7 +256,7 @@ export default function GrammarDuel({ onBack }: Props) {
       ? roundResult === "player-wins" ? "correct" : "incorrect"
       : "hidden";
   const { canContinue, continueNow } = useFeedbackAdvance(feedbackPhase, advanceRound, {
-    correctMs: isPowerRound ? 3500 : undefined,
+    correctMs: isPowerRound ? CORRECT_FEEDBACK_MS + 500 : undefined,
   });
 
   // AI think timer — starts each new question
@@ -301,8 +319,10 @@ export default function GrammarDuel({ onBack }: Props) {
     setSelectedOption(null);
     setIsAnswered(false);
     setRoundResult(null);
-    setIsPowerMove(false);
     setHitAnimation(null);
+    setDamageFx(null);
+    setHitSeq(0);
+    setShakeParity(false);
     setLastBreakdown(null);
     setMilestone(null);
     // Snapshot via getState() — startGame's closure would otherwise capture a
@@ -463,7 +483,12 @@ export default function GrammarDuel({ onBack }: Props) {
   if (!currentQuestion) return null;
 
   return (
-    <div className="relative space-y-4">
+    <div
+      className={cn(
+        "relative space-y-4",
+        hitAnimation === "player" && (shakeParity ? "animate-duel-shake-a" : "animate-duel-shake-b")
+      )}
+    >
       {milestone && (
         <MilestoneBanner
           key={`mb-${milestone.seq}`}
@@ -479,12 +504,24 @@ export default function GrammarDuel({ onBack }: Props) {
       )}
       <GameBackButton onBack={onBack} />
 
-      {/* Power Move overlay */}
-      {isPowerMove && (
-        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-yellow-400/10 animate-in fade-in duration-100">
-          <div className="text-center animate-bounce">
-            <Zap className="h-16 w-16 text-yellow-500 mx-auto" />
-            <p className="text-2xl font-black text-yellow-600 drop-shadow-lg">
+      {/* Hurt flash — red vignette when the player takes damage. Keyed per
+          hit so the one-shot fade replays. */}
+      {hitAnimation === "player" && (
+        <div
+          key={`hurt-${hitSeq}`}
+          className="fixed inset-0 z-40 pointer-events-none animate-hurt-flash bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(239,68,68,0.5)_100%)]"
+        />
+      )}
+
+      {/* Power Move slam — one-shot per power round (streak 3, 6, 9…), gone
+          once the round advances. The old persistent overlay bounced over the
+          game for the rest of the match. */}
+      {isPowerRound && (
+        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+          <div key={`pm-${playerStreak}`} className="absolute inset-0 bg-white animate-power-flash" />
+          <div className="text-center animate-power-slam">
+            <Zap className="h-16 w-16 text-yellow-500 mx-auto drop-shadow-lg" fill="currentColor" />
+            <p className="text-3xl font-black text-yellow-500 drop-shadow-lg">
               {t("reading.grammar.games.duel.powerMove")}
             </p>
           </div>
@@ -494,8 +531,17 @@ export default function GrammarDuel({ onBack }: Props) {
       {/* HP Bars */}
       <div className="grid grid-cols-2 gap-3">
         {/* Player */}
-        <div className={cn("rounded-xl border-2 p-3 space-y-1.5 transition-all",
+        <div className={cn("relative rounded-xl border-2 p-3 space-y-1.5 transition-all",
           hitAnimation === "player" ? "border-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse" : "border-blue-400 dark:border-blue-600")}>
+          {/* Floating damage number (cleared by applyDamage after 1.2s). */}
+          {damageFx?.target === "player" && (
+            <span
+              key={`dmg-${damageFx.seq}`}
+              className="pointer-events-none absolute inset-x-0 top-5 z-10 text-center text-2xl font-black text-red-500 drop-shadow animate-damage-float"
+            >
+              -{damageFx.amount}
+            </span>
+          )}
           <div className="flex justify-center">
             <Image src="/duel-player.svg" alt="Player" width={48} height={48} priority />
           </div>
@@ -508,9 +554,17 @@ export default function GrammarDuel({ onBack }: Props) {
               </span>
             )}
           </div>
-          <Progress value={(playerHp / MAX_HP) * 100}
-            className="h-3"
-            style={{ ["--progress-color" as string]: playerHp > 40 ? "#3b82f6" : playerHp > 20 ? "#f59e0b" : "#ef4444" }}
+          {/* Bar color follows HP (blue → amber → red); the indicator's
+              built-in transition-all animates both width and color. Pulses
+              when critically low. (The old --progress-color style was dead —
+              the indicator hardcodes its own background.) */}
+          <Progress
+            value={(playerHp / MAX_HP) * 100}
+            className={cn(
+              "h-3",
+              playerHp > 40 ? "[&>div]:bg-blue-500" : playerHp > 20 ? "[&>div]:bg-amber-500" : "[&>div]:bg-red-500",
+              playerHp <= 20 && "animate-pulse"
+            )}
           />
           <p className={cn("text-xs font-semibold text-right",
             playerHp > 40 ? "text-blue-600 dark:text-blue-400" : playerHp > 20 ? "text-amber-500" : "text-red-500"
@@ -520,17 +574,47 @@ export default function GrammarDuel({ onBack }: Props) {
         </div>
 
         {/* AI Opponent */}
-        <div className={cn("rounded-xl border-2 p-3 space-y-1.5 transition-all",
-          hitAnimation === "ai" ? "border-green-500 bg-green-50 dark:bg-green-900/20 animate-pulse" : "border-red-400 dark:border-red-600")}>
-          <div className="flex justify-center">
+        <div className={cn("relative rounded-xl border-2 p-3 space-y-1.5 transition-all",
+          hitAnimation === "ai" ? "border-green-500 bg-green-50 dark:bg-green-900/20 animate-pulse"
+            : isAiThinking ? "border-amber-400 dark:border-amber-600"
+            : "border-red-400 dark:border-red-600")}>
+          {damageFx?.target === "ai" && (
+            <span
+              key={`dmg-${damageFx.seq}`}
+              className={cn(
+                "pointer-events-none absolute inset-x-0 top-5 z-10 text-center font-black drop-shadow animate-damage-float",
+                damageFx.power ? "text-3xl text-amber-500" : "text-2xl text-red-500"
+              )}
+            >
+              -{damageFx.amount}
+            </span>
+          )}
+          <div className={cn("flex justify-center", isAiThinking && "animate-pulse")}>
             <Image src="/duel-opponent.svg" alt="AI Opponent" width={48} height={48} priority />
           </div>
           <div className="flex items-center gap-1.5">
             <Swords className="h-4 w-4 text-red-500" />
             <span className="text-xs font-bold text-red-600 dark:text-red-400">{t("reading.grammar.games.duel.opponent")}</span>
-            {isAiThinking && <LoaderCircle className="h-3 w-3 animate-spin text-muted-foreground ml-auto" />}
+            {isAiThinking && (
+              <span className="ml-auto flex items-center gap-0.5" aria-hidden>
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="h-1.5 w-1.5 rounded-full bg-red-400 animate-dot-bounce"
+                    style={{ animationDelay: `${i * 150}ms` }}
+                  />
+                ))}
+              </span>
+            )}
           </div>
-          <Progress value={(aiHp / MAX_HP) * 100} className="h-3" />
+          <Progress
+            value={(aiHp / MAX_HP) * 100}
+            className={cn(
+              "h-3",
+              aiHp > 40 ? "[&>div]:bg-red-500" : aiHp > 20 ? "[&>div]:bg-red-600" : "[&>div]:bg-red-700",
+              aiHp <= 20 && "animate-pulse"
+            )}
+          />
           <p className={cn("text-xs font-semibold text-right",
             aiHp > 40 ? "text-red-500" : aiHp > 20 ? "text-amber-500" : "text-red-600"
           )}>

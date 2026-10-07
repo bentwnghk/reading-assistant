@@ -379,15 +379,24 @@
 }
 
 /* Game-juice animations (Tailwind animate-pop-in / shake-x / float-fade /
-   flame-pulse / urgent-pulse). Under reduced motion, decorative movement is
-   disabled — content stays visible at its final state (popups keep their
-   info and auto-dismiss via the same JS timers). */
+   flame-pulse / urgent-pulse, and the Duel effects duel-shake-a/b,
+   damage-float, power-slam, power-flash, hurt-flash, dot-bounce). Under
+   reduced motion, decorative movement is disabled — content stays visible
+   at its final state (popups keep their info and auto-dismiss via the same
+   JS timers; damage numbers are also JS-cleared after 1.2s). */
 @media (prefers-reduced-motion: reduce) {
   .animate-pop-in,
   .animate-shake-x,
   .animate-float-fade,
   .animate-flame-pulse,
-  .animate-urgent-pulse {
+  .animate-urgent-pulse,
+  .animate-duel-shake-a,
+  .animate-duel-shake-b,
+  .animate-damage-float,
+  .animate-power-slam,
+  .animate-power-flash,
+  .animate-hurt-flash,
+  .animate-dot-bounce {
     animation: none;
   }
 }

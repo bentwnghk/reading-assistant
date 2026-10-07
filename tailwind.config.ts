@@ -156,6 +156,51 @@ export default {
           "0%, 100%": { transform: "scale(1)", opacity: "1" },
           "50%": { transform: "scale(1.12)", opacity: "0.75" },
         },
+        // ── Grammar Duel juice ─────────────────────────────────────────────
+        // Container shake when the player takes damage. Two identical
+        // keyframes: re-adding the same animation class does not restart a
+        // CSS animation, so consecutive hits alternate names to retrigger.
+        "duel-shake-a": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-8px)" },
+          "40%": { transform: "translateX(7px)" },
+          "60%": { transform: "translateX(-5px)" },
+          "80%": { transform: "translateX(3px)" },
+        },
+        "duel-shake-b": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-8px)" },
+          "40%": { transform: "translateX(7px)" },
+          "60%": { transform: "translateX(-5px)" },
+          "80%": { transform: "translateX(3px)" },
+        },
+        // One-shot rise + fade for damage numbers floating off an HP bar.
+        "damage-float": {
+          "0%": { transform: "translateY(0) scale(0.7)", opacity: "0" },
+          "20%": { transform: "translateY(-10px) scale(1.15)", opacity: "1" },
+          "100%": { transform: "translateY(-44px) scale(1)", opacity: "0" },
+        },
+        // Power Move slam text: drops in oversized, overshoots, settles.
+        "power-slam": {
+          "0%": { transform: "scale(2.4) rotate(-8deg)", opacity: "0" },
+          "60%": { transform: "scale(0.95) rotate(2deg)", opacity: "1" },
+          "100%": { transform: "scale(1) rotate(0deg)", opacity: "1" },
+        },
+        // Power Move white flash overlay.
+        "power-flash": {
+          "0%": { opacity: "0.75" },
+          "100%": { opacity: "0" },
+        },
+        // Red vignette flash when the player takes damage.
+        "hurt-flash": {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
+        // AI "thinking" dots (staggered via inline animation-delay).
+        "dot-bounce": {
+          "0%, 80%, 100%": { transform: "translateY(0)", opacity: "0.5" },
+          "40%": { transform: "translateY(-4px)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -169,6 +214,13 @@ export default {
         "float-fade": "float-fade 1.4s ease-out forwards",
         "flame-pulse": "flame-pulse 1s ease-in-out infinite",
         "urgent-pulse": "urgent-pulse 0.8s ease-in-out infinite",
+        "duel-shake-a": "duel-shake-a 0.45s ease-in-out",
+        "duel-shake-b": "duel-shake-b 0.45s ease-in-out",
+        "damage-float": "damage-float 1.1s ease-out forwards",
+        "power-slam": "power-slam 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both",
+        "power-flash": "power-flash 0.55s ease-out forwards",
+        "hurt-flash": "hurt-flash 0.6s ease-out forwards",
+        "dot-bounce": "dot-bounce 0.9s ease-in-out infinite",
       },
     },
   },
