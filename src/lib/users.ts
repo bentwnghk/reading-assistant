@@ -271,8 +271,72 @@ export interface TeacherSessionData {
   collocationsGeneratedAt: number
 }
 
-/** Maps a teacher-dashboard query row (shared by all dashboard data queries). */
+/**
+ * Shared SELECT list for the teacher-dashboard session queries.
+ *
+ * Performance contract: dashboards only need counts / presence flags /
+ * per-event timestamps, so heavy JSONB payloads (chat transcripts, glossary
+ * entries, sentence analyses, grammar topics, pre-reading data, base64
+ * visualization images) are reduced to scalars INSIDE PostgreSQL instead of
+ * being transferred, JSON-parsed and discarded in Node for every row.
+ * Timestamps used by the daily-activity chart are extracted with
+ * jsonb_path_query_array (missing values surface as null → mapped to 0 →
+ * caller falls back to the session createdAt, matching the old JS mapping).
+ * `visualization` uses the lightweight visualization_generated_at > 0 proxy
+ * per AGENTS.md §C (detoasting the base64 image just for a boolean is costly).
+ */
+const TEACHER_DASHBOARD_SELECT = `
+  rs.id, rs.user_id, rs.doc_title, rs.student_age,
+  rs.summary IS NOT NULL AND rs.summary != '' AS has_summary,
+  rs.adapted_text IS NOT NULL AND rs.adapted_text != '' AS has_adapted_text,
+  rs.simplified_text IS NOT NULL AND rs.simplified_text != '' AS has_simplified_text,
+  rs.mind_map IS NOT NULL AND rs.mind_map != '' AS has_mind_map,
+  rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
+  COALESCE(rs.tests_completed, 0) AS tests_completed,
+  COALESCE(rs.vocab_quizzes_completed, 0) AS vocab_quizzes_completed,
+  COALESCE(rs.spelling_games_completed, 0) AS spelling_games_completed,
+  COALESCE(rs.spelling_game_accuracy, 0) AS spelling_game_accuracy,
+  rs.grammar_quiz_score, rs.grammar_quiz_completed,
+  COALESCE(rs.grammar_quizzes_completed, 0) AS grammar_quizzes_completed,
+  rs.grammar_scramble_high_score, rs.grammar_workshop_high_score,
+  rs.grammar_surgery_high_score, rs.grammar_roulette_high_score, rs.grammar_duel_high_score,
+  GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) AS grammar_game_best_score,
+  COALESCE(rs.grammar_game_accuracy, 0) AS grammar_game_accuracy,
+  COALESCE(rs.grammar_games_completed, 0) AS grammar_games_completed,
+  rs.grammar_game_completed_at,
+  rs.pre_reading IS NOT NULL AS has_pre_reading,
+  rs.pre_reading_generated_at,
+  TRIM(COALESCE(rs.student_prediction, '')) != '' AS has_prediction,
+  CASE WHEN jsonb_typeof(rs.collocations) = 'array' THEN jsonb_array_length(rs.collocations) ELSE 0 END AS collocations_count,
+  rs.collocations_generated_at,
+  rs.extracted_text IS NOT NULL AND rs.extracted_text != '' AS has_extracted_text,
+  CASE WHEN jsonb_typeof(rs.highlighted_words) = 'array' THEN jsonb_array_length(rs.highlighted_words) ELSE 0 END AS highlighted_words_count,
+  CASE WHEN jsonb_typeof(rs.glossary) = 'array' THEN jsonb_array_length(rs.glossary) ELSE 0 END AS glossary_count,
+  CASE WHEN jsonb_typeof(rs.analyzed_sentences) = 'object' THEN jsonb_path_query_array(rs.analyzed_sentences, '$.keyvalue().value.createdAt') ELSE '[]'::jsonb END AS sentence_analysis_timestamps,
+  rs.analyzed_sentences IS NOT NULL AND rs.analyzed_sentences != '{}'::jsonb AS has_analyzed_sentences,
+  COALESCE(jsonb_path_query_array(rs.chat_history, '$[*] ? (@.role == "user").timestamp'), '[]'::jsonb) AS tutor_question_timestamps,
+  rs.flashcard_review_dates,
+  CASE WHEN jsonb_typeof(rs.grammar_topics) = 'array' THEN jsonb_array_length(rs.grammar_topics) ELSE 0 END AS grammar_topics_count,
+  rs.grammar_generated_at, rs.grammar_quiz_completed_at,
+  rs.created_at, rs.updated_at,
+  rs.summary_generated_at, rs.mind_map_generated_at,
+  rs.adapted_text_generated_at, rs.simplified_text_generated_at,
+  rs.glossary_generated_at, rs.spelling_game_completed_at,
+  rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
+  COALESCE(rs.visualization_generated_at, 0) > 0 AS visualization,
+  rs.visualization_generated_at,
+  u.name AS user_name, u.email AS user_email`
+
+/** Maps a teacher-dashboard query row (shared by all dashboard data queries).
+ * Consumes the slim TEACHER_DASHBOARD_SELECT shape: counts, presence flags
+ * and timestamp arrays computed in SQL (heavy JSONB is never transferred). */
 function mapTeacherSessionRow(row: any): TeacherSessionData {
+  const sentenceAnalysisTimestamps: number[] = (Array.isArray(row.sentence_analysis_timestamps) ? row.sentence_analysis_timestamps : [])
+    .map((ts: unknown) => Number(ts) || 0)
+  const tutorQuestionTimestamps: number[] = (Array.isArray(row.tutor_question_timestamps) ? row.tutor_question_timestamps : [])
+    .map((ts: unknown) => Number(ts) || 0)
+  const flashcardReviewTimestamps: number[] = (Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates : [])
+    .map((ts: unknown) => Number(ts) || 0)
   return {
     id: row.id as string,
     userId: row.user_id as string,
@@ -280,10 +344,10 @@ function mapTeacherSessionRow(row: any): TeacherSessionData {
     userEmail: row.user_email as string | undefined,
     docTitle: row.doc_title || 'Untitled',
     studentAge: row.student_age || 13,
-    summary: !!row.summary,
-    adaptedText: !!row.adapted_text,
-    simplifiedText: !!row.simplified_text,
-    mindMap: !!row.mind_map,
+    summary: !!row.has_summary,
+    adaptedText: !!row.has_adapted_text,
+    simplifiedText: !!row.has_simplified_text,
+    mindMap: !!row.has_mind_map,
     testScore: row.test_score || null,
     testCompleted: !!row.test_completed,
     vocabularyQuizScore: row.vocabulary_quiz_score || null,
@@ -299,28 +363,17 @@ function mapTeacherSessionRow(row: any): TeacherSessionData {
     grammarGameAccuracy: row.grammar_game_accuracy || null,
     grammarGamesCompleted: row.grammar_games_completed ?? 0,
     grammarGameCompletedAt: Number(row.grammar_game_completed_at) || 0,
-    glossaryCount: Array.isArray(row.glossary) ? row.glossary.length : 0,
-    sentenceAnalysisCount: Object.keys(row.analyzed_sentences || {}).length,
-    sentenceAnalysisTimestamps: row.analyzed_sentences && typeof row.analyzed_sentences === 'object'
-      ? (Object.values(row.analyzed_sentences) as Array<{ createdAt?: number }>)
-          .map((e) => Number(e?.createdAt) || 0)
-      : [],
-    tutorQuestionCount: Array.isArray(row.chat_history)
-      ? row.chat_history.filter((m: { role: string }) => m.role === 'user').length
-      : 0,
-    tutorQuestionTimestamps: Array.isArray(row.chat_history)
-      ? row.chat_history
-          .filter((m: { role: string; timestamp?: number }) => m.role === 'user')
-          .map((m: { timestamp?: number }) => Number(m.timestamp) || 0)
-      : [],
-    flashcardReviewCount: Array.isArray(row.flashcard_review_dates) ? row.flashcard_review_dates.length : 0,
-    flashcardReviewTimestamps: Array.isArray(row.flashcard_review_dates)
-      ? row.flashcard_review_dates.map((ts: unknown) => Number(ts) || 0)
-      : [],
-    grammarAnalysisCount: Array.isArray(row.grammar_topics) ? row.grammar_topics.length : 0,
+    glossaryCount: row.glossary_count ?? 0,
+    sentenceAnalysisCount: sentenceAnalysisTimestamps.length,
+    sentenceAnalysisTimestamps,
+    tutorQuestionCount: tutorQuestionTimestamps.length,
+    tutorQuestionTimestamps,
+    flashcardReviewCount: flashcardReviewTimestamps.length,
+    flashcardReviewTimestamps,
+    grammarAnalysisCount: row.grammar_topics_count ?? 0,
     grammarGeneratedAt: Number(row.grammar_generated_at) || 0,
     grammarQuizCompletedAt: Number(row.grammar_quiz_completed_at) || 0,
-    progress: calculateProgress(row),
+    progress: calculateProgressFromFlags(row),
     createdAt: new Date(row.created_at as string).getTime(),
     updatedAt: new Date(row.updated_at as string).getTime(),
     summaryGeneratedAt: Number(row.summary_generated_at) || 0,
@@ -335,7 +388,7 @@ function mapTeacherSessionRow(row: any): TeacherSessionData {
     visualizationGeneratedAt: Number(row.visualization_generated_at) || 0,
     preReading: !!row.has_pre_reading,
     preReadingGeneratedAt: Number(row.pre_reading_generated_at) || 0,
-    collocations: Array.isArray(row.collocations) && row.collocations.length > 0,
+    collocations: (row.collocations_count ?? 0) > 0,
     collocationsGeneratedAt: Number(row.collocations_generated_at) || 0,
   }
 }
@@ -347,38 +400,7 @@ export async function getTeacherDashboardData(classId: string, viewer?: SessionV
     const visibility = tv ? `AND ${teacherSessionVisibilitySql('rs', '$2')}` : ''
     const result = await client.query(
       `SELECT
-        rs.id, rs.user_id, rs.doc_title,
-        rs.summary IS NOT NULL AND rs.summary != '' as summary,
-        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
-        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
-        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
-        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        COALESCE(rs.tests_completed, 0) as tests_completed,
-        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
-        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
-        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
-        rs.grammar_quiz_score, rs.grammar_quiz_completed,
-        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
-        GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
-        COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
-        COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
-        rs.grammar_game_completed_at,
-        rs.pre_reading, rs.student_prediction, rs.collocations,
-        rs.pre_reading IS NOT NULL as has_pre_reading,
-        rs.pre_reading_generated_at,
-        rs.collocations_generated_at,
-        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
-        rs.highlighted_words,
-        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
-        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
-        rs.created_at, rs.updated_at,
-        rs.summary_generated_at, rs.mind_map_generated_at,
-        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
-        rs.glossary_generated_at, rs.spelling_game_completed_at,
-        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
-        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
-        rs.visualization_generated_at,
-        u.name as user_name, u.email as user_email
+        ${TEACHER_DASHBOARD_SELECT}
        FROM reading_sessions rs
        JOIN class_members cm ON rs.user_id = cm.student_id
        JOIN users u ON rs.user_id = u.id
@@ -400,38 +422,7 @@ export async function getTeacherDashboardDataForSchool(schoolId: string): Promis
   try {
     const result = await client.query(
       `SELECT 
-        rs.id, rs.user_id, rs.doc_title,
-        rs.summary IS NOT NULL AND rs.summary != '' as summary,
-        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
-        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
-        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
-        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        COALESCE(rs.tests_completed, 0) as tests_completed,
-        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
-        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
-        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
-        rs.grammar_quiz_score, rs.grammar_quiz_completed,
-        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
-        GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
-        COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
-        COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
-        rs.grammar_game_completed_at,
-        rs.pre_reading, rs.student_prediction, rs.collocations,
-        rs.pre_reading IS NOT NULL as has_pre_reading,
-        rs.pre_reading_generated_at,
-        rs.collocations_generated_at,
-        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
-        rs.highlighted_words,
-        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
-        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
-        rs.created_at, rs.updated_at,
-        rs.summary_generated_at, rs.mind_map_generated_at,
-        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
-        rs.glossary_generated_at, rs.spelling_game_completed_at,
-        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
-        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
-        rs.visualization_generated_at,
-        u.name as user_name, u.email as user_email
+        ${TEACHER_DASHBOARD_SELECT}
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
        LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -452,38 +443,7 @@ export async function getTeacherDashboardDataAllSchools(): Promise<TeacherSessio
   try {
     const result = await client.query(
       `SELECT 
-        rs.id, rs.user_id, rs.doc_title,
-        rs.summary IS NOT NULL AND rs.summary != '' as summary,
-        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
-        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
-        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
-        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        COALESCE(rs.tests_completed, 0) as tests_completed,
-        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
-        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
-        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
-        rs.grammar_quiz_score, rs.grammar_quiz_completed,
-        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
-        GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
-        COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
-        COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
-        rs.grammar_game_completed_at,
-        rs.pre_reading, rs.student_prediction, rs.collocations,
-        rs.pre_reading IS NOT NULL as has_pre_reading,
-        rs.pre_reading_generated_at,
-        rs.collocations_generated_at,
-        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
-        rs.highlighted_words,
-        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
-        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
-        rs.created_at, rs.updated_at,
-        rs.summary_generated_at, rs.mind_map_generated_at,
-        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
-        rs.glossary_generated_at, rs.spelling_game_completed_at,
-        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
-        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
-        rs.visualization_generated_at,
-        u.name as user_name, u.email as user_email
+        ${TEACHER_DASHBOARD_SELECT}
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
        LEFT JOIN user_roles ur ON u.id = ur.user_id
@@ -509,38 +469,7 @@ export async function getTeacherDashboardDataForClasses(classIds: string[], view
   try {
     const result = await client.query(
       `SELECT
-        rs.id, rs.user_id, rs.doc_title,
-        rs.summary IS NOT NULL AND rs.summary != '' as summary,
-        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
-        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
-        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
-        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        COALESCE(rs.tests_completed, 0) as tests_completed,
-        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
-        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
-        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
-        rs.grammar_quiz_score, rs.grammar_quiz_completed,
-        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
-        GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
-        COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
-        COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
-        rs.grammar_game_completed_at,
-        rs.pre_reading, rs.student_prediction, rs.collocations,
-        rs.pre_reading IS NOT NULL as has_pre_reading,
-        rs.pre_reading_generated_at,
-        rs.collocations_generated_at,
-        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
-        rs.highlighted_words,
-        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
-        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
-        rs.created_at, rs.updated_at,
-        rs.summary_generated_at, rs.mind_map_generated_at,
-        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
-        rs.glossary_generated_at, rs.spelling_game_completed_at,
-        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
-        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
-        rs.visualization_generated_at,
-        u.name as user_name, u.email as user_email
+        ${TEACHER_DASHBOARD_SELECT}
        FROM reading_sessions rs
        JOIN users u ON rs.user_id = u.id
        WHERE rs.user_id IN (SELECT cm.student_id FROM class_members cm WHERE cm.class_id = ANY($1))
@@ -568,38 +497,7 @@ export async function getTeacherDashboardDataForStudents(studentIds: string[], v
   try {
     const result = await client.query(
       `SELECT
-        rs.id, rs.user_id, rs.doc_title,
-        rs.summary IS NOT NULL AND rs.summary != '' as summary,
-        rs.adapted_text IS NOT NULL AND rs.adapted_text != '' as adapted_text,
-        rs.simplified_text IS NOT NULL AND rs.simplified_text != '' as simplified_text,
-        rs.mind_map IS NOT NULL AND rs.mind_map != '' as mind_map,
-        rs.test_score, rs.test_completed, rs.vocabulary_quiz_score, rs.spelling_game_best_score,
-        COALESCE(rs.tests_completed, 0) as tests_completed,
-        COALESCE(rs.vocab_quizzes_completed, 0) as vocab_quizzes_completed,
-        COALESCE(rs.spelling_games_completed, 0) as spelling_games_completed,
-        COALESCE(rs.spelling_game_accuracy, 0) as spelling_game_accuracy,
-        rs.grammar_quiz_score, rs.grammar_quiz_completed,
-        COALESCE(rs.grammar_quizzes_completed, 0) as grammar_quizzes_completed,
-        GREATEST(COALESCE(rs.grammar_scramble_high_score,0), COALESCE(rs.grammar_workshop_high_score,0), COALESCE(rs.grammar_surgery_high_score,0), COALESCE(rs.grammar_roulette_high_score,0), COALESCE(rs.grammar_duel_high_score,0)) as grammar_game_best_score,
-        COALESCE(rs.grammar_game_accuracy, 0) as grammar_game_accuracy,
-        COALESCE(rs.grammar_games_completed, 0) as grammar_games_completed,
-        rs.grammar_game_completed_at,
-        rs.pre_reading, rs.student_prediction, rs.collocations,
-        rs.pre_reading IS NOT NULL as has_pre_reading,
-        rs.pre_reading_generated_at,
-        rs.collocations_generated_at,
-        rs.extracted_text IS NOT NULL AND rs.extracted_text != '' as extracted_text,
-        rs.highlighted_words,
-        rs.glossary, rs.analyzed_sentences, rs.chat_history, rs.flashcard_review_dates,
-        rs.grammar_topics, rs.grammar_generated_at, rs.grammar_quiz_completed_at,
-        rs.created_at, rs.updated_at,
-        rs.summary_generated_at, rs.mind_map_generated_at,
-        rs.adapted_text_generated_at, rs.simplified_text_generated_at,
-        rs.glossary_generated_at, rs.spelling_game_completed_at,
-        rs.vocab_quiz_completed_at, rs.reading_test_completed_at,
-        rs.visualization_image IS NOT NULL AND rs.visualization_image != '' as visualization,
-        rs.visualization_generated_at,
-        u.name as user_name, u.email as user_email
+        ${TEACHER_DASHBOARD_SELECT}
        FROM reading_sessions rs
         JOIN users u ON rs.user_id = u.id
         WHERE rs.user_id = ANY($1)
@@ -1468,59 +1366,6 @@ export async function getStudentClassId(studentId: string): Promise<string | nul
   return classIds.length > 0 ? classIds[0] : null
 }
 
-// Thin adapter: normalizes a snake_case DB row to the camelCase ProgressInput
-// expected by the shared calculateProgress in @/utils/progress. The algorithm
-// lives in ONE place (the util); this only renames fields. Used by all
-// reading-session queries in this module (3 teacher-dashboard queries +
-// getStudentSessionsForClass + getStudentSessions).
-function calculateProgress(row: {
-  extracted_text?: string | boolean
-  pre_reading?: unknown
-  student_prediction?: string
-  summary?: string
-  mind_map?: string
-  visualization_generated_at?: number | string
-  adapted_text?: string
-  test_completed?: boolean
-  analyzed_sentences?: Record<string, unknown>
-  highlighted_words?: string[]
-  glossary?: unknown[]
-  collocations?: unknown[]
-  spelling_game_best_score?: number
-  vocabulary_quiz_score?: number
-  grammar_quiz_completed?: boolean
-  grammar_quiz_score?: number
-  grammar_scramble_high_score?: number
-  grammar_workshop_high_score?: number
-  grammar_surgery_high_score?: number
-  grammar_roulette_high_score?: number
-  grammar_duel_high_score?: number
-}): number {
-  return sharedCalculateProgress({
-    extractedText: row.extracted_text,
-    preReading: row.pre_reading,
-    studentPrediction: row.student_prediction,
-    summary: row.summary,
-    mindMap: row.mind_map,
-    visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
-    adaptedText: row.adapted_text,
-    analyzedSentences: row.analyzed_sentences,
-    highlightedWords: row.highlighted_words,
-    glossary: row.glossary,
-    collocations: row.collocations,
-    spellingGameBestScore: row.spelling_game_best_score,
-    vocabularyQuizScore: row.vocabulary_quiz_score,
-    testCompleted: row.test_completed,
-    grammarScrambleHighScore: row.grammar_scramble_high_score,
-    grammarWorkshopHighScore: row.grammar_workshop_high_score,
-    grammarSurgeryHighScore: row.grammar_surgery_high_score,
-    grammarRouletteHighScore: row.grammar_roulette_high_score,
-    grammarDuelHighScore: row.grammar_duel_high_score,
-    grammarQuizCompleted: row.grammar_quiz_completed,
-    grammarQuizScore: row.grammar_quiz_score,
-  })
-}
-
 /**
  * Column list for the student-session LIST queries (getStudentSessions /
  * getStudentSessionsForClass). Deliberately avoids transferring heavy JSONB
@@ -1567,6 +1412,9 @@ function calculateProgressFromFlags(row: {
   has_extracted_text?: boolean
   has_pre_reading?: boolean
   student_prediction?: string
+  /** Boolean presence proxy for student_prediction (teacher-dashboard SELECT
+   *  emits this instead of transferring the prediction TEXT for every row). */
+  has_prediction?: boolean
   has_summary?: boolean
   has_mind_map?: boolean
   visualization_generated_at?: number | string
@@ -1589,7 +1437,7 @@ function calculateProgressFromFlags(row: {
   return sharedCalculateProgress({
     extractedText: !!row.has_extracted_text,
     preReading: !!row.has_pre_reading,
-    studentPrediction: row.student_prediction || '',
+    studentPrediction: row.has_prediction ? 'y' : (row.student_prediction || ''),
     summary: row.has_summary ? 'y' : '',
     mindMap: row.has_mind_map ? 'y' : '',
     visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),

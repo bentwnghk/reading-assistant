@@ -88,30 +88,31 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
 
   const loadClasses = useCallback(async () => {
     try {
-      const response = await fetch("/api/classes");
-      if (response.ok) {
-        const data: ClassInfo[] = await response.json();
-        setAllClasses(data);
+      // Classes and saved rosters load in parallel — the presets fetch used to
+      // await the classes fetch, adding a full round-trip before the initial
+      // class selection (and therefore the dashboard data fetch) could start.
+      const [classesRes, presetsRes] = await Promise.all([
+        fetch("/api/classes"),
+        isTeacher
+          ? fetch("/api/assignments/presets?scope=used")
+          : Promise.resolve(null),
+      ]);
+      if (!classesRes.ok) return;
+      const data: ClassInfo[] = await classesRes.json();
+      setAllClasses(data);
 
-        // Saved rosters (teachers only) load in the same pass so the
-        // initial selection can fall back to the first used roster for
-        // teachers with no classes of their own.
-        let loadedPresets: AssignmentPreset[] = [];
-        if (isTeacher) {
-          const presetsRes = await fetch("/api/assignments/presets?scope=used");
-          if (presetsRes.ok) {
-            loadedPresets = await presetsRes.json();
-          }
-          setPresets(loadedPresets);
-        }
+      let loadedPresets: AssignmentPreset[] = [];
+      if (isTeacher && presetsRes && presetsRes.ok) {
+        loadedPresets = await presetsRes.json();
+        setPresets(loadedPresets);
+      }
 
-        if (isAdmin) {
-          setSelectedClassId("all");
-        } else if (data.length > 0) {
-          setSelectedClassId(`class:${data[0].id}`);
-        } else if (loadedPresets.length > 0) {
-          setSelectedClassId(`preset:${loadedPresets[0].id}`);
-        }
+      if (isAdmin) {
+        setSelectedClassId("all");
+      } else if (data.length > 0) {
+        setSelectedClassId(`class:${data[0].id}`);
+      } else if (loadedPresets.length > 0) {
+        setSelectedClassId(`preset:${loadedPresets[0].id}`);
       }
     } catch (err) {
       console.error("Failed to load classes:", err);
@@ -120,6 +121,12 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
 
   useEffect(() => {
     if (open && (isTeacher || isAdmin)) {
+      // Admins always default to "all" — set it immediately so the dashboard
+      // data fetch starts in parallel with the class/school list loads
+      // instead of waiting for them to resolve first.
+      if (isAdmin) {
+        setSelectedClassId((prev) => prev || "all");
+      }
       loadClasses();
       if (isSuperAdmin) {
         loadSchools();
