@@ -334,8 +334,8 @@ function Header() {
       <header
         className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b print:hidden pt-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap))]"
       >
-        <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center sm:h-14 gap-y-1 py-1 sm:py-0">
-          <div className="flex items-center gap-1 self-center sm:self-auto">
+        <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex flex-col lg:flex-row lg:justify-between lg:items-center lg:h-14 gap-y-1 py-1 lg:py-0">
+          <div className="flex items-center gap-1 self-center lg:self-auto">
             <Button
               variant="ghost"
               size="icon"
@@ -355,7 +355,7 @@ function Header() {
               </span>
             </Link>
           </div>
-          <div className="flex items-center justify-center sm:justify-end gap-1 flex-wrap max-sm:gap-0.5 max-sm:[&_button]:px-2">
+          <div className="flex items-center justify-center lg:justify-end gap-1 flex-wrap max-sm:gap-0.5 max-sm:[&_button]:px-2">
             <Button
               className="h-8 gap-1.5 relative"
               variant="ghost"
@@ -561,8 +561,8 @@ function Header() {
               </DropdownMenu>
             ) : (
               <Button onClick={() => signIn("google")} size="sm" variant="ghost">
-                <LogIn className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">{t("header.auth.signIn")}</span>
+                <LogIn className="h-4 w-4 lg:mr-2" />
+                <span className="hidden lg:inline">{t("header.auth.signIn")}</span>
               </Button>
             )}
           </div>
