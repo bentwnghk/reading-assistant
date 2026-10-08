@@ -124,6 +124,11 @@ export default function RootLayout({
   return (
     <html lang="en" dir="auto" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var n=navigator;if(n.standalone!==true)return;if(!(n.maxTouchPoints>0))return;var ua=n.userAgent;if(/Chrome|CriOS|FxiOS|EdgiOS/.test(ua))return;var m=/Version\\/(\\d+)/.exec(ua);if(m&&parseInt(m[1],10)>=27){document.documentElement.classList.add("ios-standalone-blur-gap")}}catch(e){}})();`,
+          }}
+        />
         {HEAD_SCRIPTS ? <Script id="headscript">{HEAD_SCRIPTS}</Script> : null}
         <Debugger />
       </head>

@@ -114,6 +114,23 @@
   }
 }
 
+/*
+ * iOS/iPadOS 27 home-screen (standalone) web apps draw a system progressive
+ * blur over the top ~20-40px of the page content, below the status/title bar.
+ * It fogs whatever is rendered in that band — e.g. the sticky Header's first
+ * row — while Safari tabs and iOS 26.x are unaffected. On-device testing
+ * (meshmonitor#5286) showed no CSS defeats that blur, so the only reliable fix
+ * is keeping content out of the band. The pre-paint script in layout.tsx adds
+ * the `ios-standalone-blur-gap` class to <html> on affected devices only;
+ * everywhere else the gap stays 0px and nothing changes.
+ */
+:root {
+  --ios-status-bar-gap: 0px;
+}
+html.ios-standalone-blur-gap {
+  --ios-status-bar-gap: 24px;
+}
+
 @page {
   size: "A4";
 }
