@@ -4557,7 +4557,6 @@
       "emptyFilter": "No essays match these filters.",
       "page": "Page {{page}} of {{total}}",
       "detailTranscript": "Transcript",
-      "detailCorrections": "Corrections",
       "detailNoCorrections": "This essay has not been checked yet."
     },
     "ocr": {

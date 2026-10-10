@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -26,13 +27,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  STATUS_TONE,
-  categoryStyle,
-  explanationFor,
-  useCategoryLabel,
-  DiffChips,
-} from "@/components/LanguageCheck/shared";
+import ResultsView from "@/components/LanguageCheck/ResultsView";
+import { STATUS_TONE } from "@/components/LanguageCheck/shared";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
@@ -59,8 +55,8 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50];
 export default function StaffEssayLog() {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const categoryLabel = useCategoryLabel();
   const language = useLanguageCheckStore((s) => s.explanationLanguage);
+  const setLanguage = useLanguageCheckStore((s) => s.setExplanationLanguage);
   const role = session?.user?.role;
 
   const [data, setData] = useState<StaffListResponse | null>(null);
@@ -378,7 +374,7 @@ export default function StaffEssayLog() {
       )}
 
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-h-[85vh] max-w-[min(95vw,48rem)] overflow-y-auto">
+        <DialogContent className="h-[92vh] max-w-[min(95vw,72rem)] grid-rows-[auto_minmax(0,1fr)]">
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center gap-2 pr-6">
               {detail?.title || t("languageCheck.list.untitled")}
@@ -404,56 +400,63 @@ export default function StaffEssayLog() {
           </DialogHeader>
 
           {detail && (
-            <div className="flex flex-col gap-4">
-              {detail.corrections.length > 0 ? (
-                <div>
-                  <p className="mb-2 text-sm font-semibold">
-                    {t("languageCheck.staff.detailCorrections")}
-                  </p>
-                  <ul className="flex flex-col gap-2">
-                    {detail.corrections.map((error, index) => (
-                      <li
-                        key={error.id}
-                        className={cn(
-                          "rounded-lg border border-l-4 bg-muted/30 p-3",
-                          categoryStyle(error.category).border,
-                        )}
-                      >
-                        <div className="mb-1.5 flex items-center gap-2">
-                          <span
-                            className={cn(
-                              "rounded px-1.5 py-0.5 text-[11px] font-medium text-white",
-                              categoryStyle(error.category).badge,
-                            )}
-                          >
-                            {index + 1}. {categoryLabel(error.category)}
-                          </span>
-                        </div>
-                        <DiffChips
-                          original={error.original}
-                          correction={error.correction}
-                        />
-                        <p className="mt-1.5 text-sm leading-snug text-muted-foreground">
-                          {explanationFor(error, language)}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
+            <div className="flex min-h-0 flex-col gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  {formatDateTime(detail.createdAt)}
+                  {` · ${t("languageCheck.list.expires", {
+                    date: formatDateTime(
+                      detail.createdAt +
+                        LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000,
+                    ),
+                  })}`}
+                  {detail.checkModel &&
+                    ` · ${t("languageCheck.results.checkedWith", { model: detail.checkModel })}`}
+                </p>
+                <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
+                  <span
+                    className={language === "en" ? "font-semibold" : "text-muted-foreground"}
+                  >
+                    English
+                  </span>
+                  <Switch
+                    checked={language === "zh"}
+                    onCheckedChange={(c) => setLanguage(c ? "zh" : "en")}
+                    aria-label={t("languageCheck.results.explanationLanguage")}
+                  />
+                  <span
+                    className={language === "zh" ? "font-semibold" : "text-muted-foreground"}
+                  >
+                    繁體中文
+                  </span>
+                </div>
+              </div>
+
+              {detail.status === "checked" && detail.checkedText ? (
+                <div className="min-h-0 overflow-y-auto">
+                  {/* Same view students see: inline highlights, popovers,
+                      category filter and the cross-linked correction cards.
+                      ResultsView never reads `images`. */}
+                  <ResultsView
+                    essay={{ ...detail, images: [] }}
+                    language={language}
+                  />
                 </div>
               ) : (
-                <p className="rounded-lg border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-                  {t("languageCheck.staff.detailNoCorrections")}
-                </p>
+                <div className="flex min-h-0 flex-col gap-4 overflow-y-auto">
+                  <p className="rounded-lg border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+                    {t("languageCheck.staff.detailNoCorrections")}
+                  </p>
+                  <div>
+                    <p className="mb-2 text-sm font-semibold">
+                      {t("languageCheck.staff.detailTranscript")}
+                    </p>
+                    <p className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border bg-muted/30 p-3 text-sm leading-relaxed">
+                      {detail.transcript || "—"}
+                    </p>
+                  </div>
+                </div>
               )}
-
-              <div>
-                <p className="mb-2 text-sm font-semibold">
-                  {t("languageCheck.staff.detailTranscript")}
-                </p>
-                <p className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border bg-muted/30 p-3 text-sm leading-relaxed">
-                  {detail.transcript || detail.checkedText || "—"}
-                </p>
-              </div>
             </div>
           )}
         </DialogContent>
