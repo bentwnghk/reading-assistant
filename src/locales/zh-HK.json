@@ -4556,7 +4556,8 @@
       "deleteTitle": "刪除這篇作文？",
       "deleteDesc": "「{{title}}」及其掃描圖片和更正內容將被永久刪除。",
       "expires": "{{date}} 到期",
-      "retentionHint": "文章及其掃描圖片會在上傳 {{days}} 天後自動刪除。"
+      "retentionHint": "文章及其掃描圖片會在上傳 {{days}} 天後自動刪除。",
+      "rowsPerPage": "每頁"
     },
     "ocr": {
       "verify": "覆核謄寫內容",

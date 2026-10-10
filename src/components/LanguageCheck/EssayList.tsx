@@ -1,7 +1,15 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FileText, ImagePlus, LoaderCircle, Trash2, Upload } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  ImagePlus,
+  LoaderCircle,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +52,17 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
   const [dragging, setDragging] = useState(false);
   const [toDelete, setToDelete] = useState<LanguageCheckEssaySummary | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // safePage clamps automatically when the list shrinks (deletion, retention
+  // sweep on reload) so the controls never point past the last page.
+  const totalPages = Math.max(1, Math.ceil(essays.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const visibleEssays = essays.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize,
+  );
 
   function accept(list: FileList | File[] | null) {
     if (!list || preparing) return;
@@ -160,8 +179,9 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
             {t("languageCheck.list.empty")}
           </p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {essays.map((essay) => (
+          <>
+          <ul className="flex max-h-[26rem] flex-col gap-2 overflow-y-auto pr-1">
+            {visibleEssays.map((essay) => (
               <li key={essay.id} className="flex items-stretch gap-2">
                 <button
                   type="button"
@@ -207,6 +227,89 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
               </li>
             ))}
           </ul>
+          {essays.length > pageSize && (
+            <div className="mt-3 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-muted-foreground">
+                  {t("languageCheck.list.rowsPerPage")}:
+                </span>
+                {[10, 20, 50].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => {
+                      setPageSize(size);
+                      setCurrentPage(1);
+                    }}
+                    className={cn(
+                      "rounded px-2 py-0.5 text-xs transition-colors",
+                      pageSize === size
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={safePage <= 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => {
+                    if (totalPages <= 7) return true;
+                    if (p === 1 || p === totalPages) return true;
+                    return Math.abs(p - safePage) <= 1;
+                  })
+                  .reduce<(number | "ellipsis")[]>((acc, p, i, arr) => {
+                    if (i > 0 && p - (arr[i - 1] as number) > 1) {
+                      acc.push("ellipsis");
+                    }
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item, i) =>
+                    item === "ellipsis" ? (
+                      <span
+                        key={`e${i}`}
+                        className="px-1 text-xs text-muted-foreground"
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => setCurrentPage(item)}
+                        className={cn(
+                          "h-7 w-7 rounded text-xs transition-colors",
+                          safePage === item
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-muted",
+                        )}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={safePage >= totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+          </>
         )}
       </div>
 
