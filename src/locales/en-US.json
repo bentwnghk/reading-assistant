@@ -4631,6 +4631,8 @@
       "viewScan": "Original scan",
       "editTranscript": "Edit transcript",
       "recheck": "Check again",
+      "expiredDisabled": "Scans are removed after the retention period",
+      "expiredNotice": "This essay is past its {{days}}-day retention period: the original scan was removed to save storage. The transcript and corrections are kept for review.",
       "export": "Export .docx",
       "explanationLanguage": "Explanation language",
       "hideCategory": "Hide {{category}}",

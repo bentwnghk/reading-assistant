@@ -38,6 +38,7 @@ import { useSettingStore } from "@/store/setting";
 import {
   LANGUAGE_CHECK_MAX_IMAGE_CHARS,
   LANGUAGE_CHECK_MAX_PAGES,
+  LANGUAGE_CHECK_RETENTION_DAYS,
   isExpressionCategory,
 } from "@/constants/languageCheck";
 import { downscaleImage, readFileAsDataURL } from "@/utils/image";
@@ -165,6 +166,16 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const checkRunning = busyHere && !!generating["language-check"];
   const ocrRunning = busyHere && !!generating["ocr"];
 
+  // Past the retention window the essay becomes a read-only archive: the
+  // scans are purged server-side, so scan/edit/recheck are disabled while
+  // the transcript and corrections stay viewable.
+  const expired =
+    Date.now() - essay.createdAt >=
+    LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000;
+  const expiredTitle = expired
+    ? t("languageCheck.results.expiredDisabled")
+    : undefined;
+
   // Results are shown once a check exists, unless the user chose to edit.
   const effective: Exclude<View, "auto"> =
     view !== "auto" ? view : essay.status === "checked" ? "results" : "review";
@@ -252,11 +263,23 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
                 繁體中文
               </span>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setScanOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setScanOpen(true)}
+              disabled={expired}
+              title={expiredTitle}
+            >
               <ScanText className="mr-1.5 h-4 w-4" />
               {t("languageCheck.results.viewScan")}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setView("review")}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setView("review")}
+              disabled={expired}
+              title={expiredTitle}
+            >
               <Eye className="mr-1.5 h-4 w-4" />
               {t("languageCheck.results.editTranscript")}
             </Button>
@@ -269,7 +292,8 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
               <Button
                 variant="outline"
                 size="sm"
-                disabled={ocrRunning}
+                disabled={ocrRunning || expired}
+                title={expiredTitle}
                 onClick={handleRecheck}
               >
                 <RefreshCw className="mr-1.5 h-4 w-4" />
@@ -290,6 +314,13 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
 
       {effective === "results" && hasResults ? (
         <>
+          {expired && (
+            <p className="rounded-xl border border-dashed border-amber-500/50 bg-amber-500/5 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+              {t("languageCheck.results.expiredNotice", {
+                days: LANGUAGE_CHECK_RETENTION_DAYS,
+              })}
+            </p>
+          )}
           <ResultsSummary essay={essay} checking={checkRunning} />
           {essay.corrections.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-xl border bg-card p-10 text-center">

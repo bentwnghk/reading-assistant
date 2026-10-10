@@ -4654,6 +4654,8 @@
       "viewScan": "原稿掃描",
       "editTranscript": "編輯文字",
       "recheck": "重新檢查",
+      "expiredDisabled": "超過保留期後掃描圖片已被移除",
+      "expiredNotice": "此作文已超過 {{days}} 天保留期：原始掃描圖片已移除以節省儲存空間，文字記錄與批改結果會保留供溫習。",
       "export": "匯出 .docx",
       "explanationLanguage": "說明語言",
       "hideCategory": "隱藏「{{category}}」",
