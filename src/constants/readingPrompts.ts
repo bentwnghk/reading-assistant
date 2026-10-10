@@ -1,4 +1,5 @@
 import i18next from "i18next";
+import { LANGUAGE_CHECK_ILLEGIBLE_MARKER } from "@/constants/languageCheck";
 
 export const systemInstruction = `You are an expert English reading teacher for Hong Kong primary and secondary school students. Today is {now}. Follow these instructions:
 
@@ -1229,21 +1230,66 @@ Output the edited image now.`;
 
 // ─── Language Check (handwritten/scanned essay error correction) ──────────────
 
+/**
+ * System prompt for the OCR step. It deliberately redefines the model as a
+ * mechanical transcriber (NOT a teacher/marker): vision models default to
+ * helpfully returning clean, corrected text, which would erase the very
+ * mistakes the essay is about to be checked for.
+ */
+export function transcriberSystemPrompt(): string {
+  return `You are a high-fidelity document transcription engine. You are NOT a teacher, editor or proofreader. Your only job is a literal, character-by-character (diplomatic) transcription of the page image.
+
+The text you produce is the evidence for a later language check, so every spelling mistake, grammar mistake, wrong word, missing word, odd capital letter and missing or wrong punctuation mark written by the student MUST appear in your output exactly as written.
+
+Rules:
+1. FIDELITY OVER FLUENCY. Copy exactly what is on the page. A misspelling or grammar error that you reproduce faithfully is a CORRECT transcription. Silently fixing it is a FAILURE.
+2. NEVER NORMALISE. Do not correct spelling, grammar, tense, articles, prepositions, plurals, word choice, capitalisation or punctuation. Do not add a missing word, remove an extra one, or reorder anything. Do not "complete" a half-written word.
+3. NEVER GUESS FROM CONTEXT. Read each word from the pen strokes, not from what the sentence "should" say. If a word is only readable because the surrounding sentence makes it obvious, but the letters on the page say something else, write the letters on the page.
+4. UNREADABLE TEXT. If a word or part of a word cannot be read from the strokes, write ${LANGUAGE_CHECK_ILLEGIBLE_MARKER} in its place. Use ${LANGUAGE_CHECK_ILLEGIBLE_MARKER} only when you truly cannot tell; never use it for a word that is merely misspelt.
+5. NO CHAT. Output ONLY the transcription: no introduction, no notes, no explanations, no markdown, no code fences.
+
+Examples (described in words; do not copy their wording into your output):
+- The page reads "I have many informations about it." -> output exactly: I have many informations about it.   (NOT "information")
+- The page reads "I very like playing basketball with my freinds." -> output exactly: I very like playing basketball with my freinds.   (NOT "I really like ... friends")
+- The page reads "We discuss about the problem yesterday" with no full stop -> output exactly: We discuss about the problem yesterday   (NOT "discussed", NOT "problem.")
+- The page reads "she dont know wat to do" in lower case -> output exactly: she dont know wat to do   (do not add apostrophes, capitals or a full stop)
+- The page has one smudged word in "I went to the ??? with my family" -> output: I went to the ${LANGUAGE_CHECK_ILLEGIBLE_MARKER} with my family`;
+}
+
 export function extractHandwrittenEssayPrompt(): string {
   return `Transcribe the handwritten or scanned student essay in this image into digital text.
 
 **This is a verbatim transcription. The essay will be checked for language errors afterwards, so the student's mistakes MUST be preserved.**
 
 **Instructions:**
-- Copy every word exactly as the student wrote it.
-- **Do NOT correct spelling, grammar, punctuation, capitalisation or word choice** - even when something is clearly wrong. Never "fix" or improve the text.
+- Copy every word exactly as the student wrote it, including misspellings.
+- **Do NOT correct spelling, grammar, punctuation, capitalisation or word choice** - even when something is clearly wrong or the sentence is obviously missing a word. Never "fix", complete or improve the text.
+- Read the letters actually written; do not replace a word with the one you expect from context.
 - Preserve the title (if any) as the first line.
 - **Preserve paragraph breaks:** separate paragraphs with ONE blank line. Treat an indented new line or a clearly larger gap between lines as a new paragraph. Join lines that merely wrap inside the same paragraph into one continuous line.
 - Ignore line numbers or word counts in the margin, page numbers, teacher marks, ticks, crosses and corrections written in a different colour by a marker.
-- Where the student crossed out a word, omit the crossed-out word.
-- If a word is genuinely unreadable, write [illegible] instead of guessing.
+- Where the student crossed out a word, omit the crossed-out word (keep any replacement the student wrote in its place).
+- If a word is genuinely unreadable, write ${LANGUAGE_CHECK_ILLEGIBLE_MARKER} instead of guessing.
 - Do not add any commentary, headings or explanations.
 - Respond with ONLY the transcribed text.`;
+}
+
+/**
+ * Second pass: the model sees the image plus its own draft and must revert
+ * any place where the draft silently "fixed" the student's writing.
+ */
+export function verifyTranscriptionPrompt(draft: string): string {
+  return `Below is a DRAFT transcription of the handwritten page in the image. Drafts made by AI often silently correct the writer's mistakes. Your job is to make the transcription faithful again.
+
+Compare the draft with the image, word by word. Wherever the draft differs from what is actually written on the page because it fixed a spelling mistake, grammar error, wrong word, missing or extra word, tense, plural, article, preposition, capitalisation or punctuation, change the draft back to exactly what the page says. Also fix any word the draft got wrong or skipped. Do NOT correct anything the student got wrong, and do not improve the text.
+
+Keep the same format: title (if any) on the first line, ONE blank line between paragraphs, wrapped lines joined within a paragraph, crossed-out words omitted, margin numbers and teacher marks ignored. Use ${LANGUAGE_CHECK_ILLEGIBLE_MARKER} only for words that truly cannot be read.
+
+Output ONLY the complete final transcription of the whole page - no commentary, no list of changes, no markdown, no code fences.
+
+<draft>
+${draft}
+</draft>`;
 }
 
 export function languageCheckSystemPrompt(): string {
@@ -1341,7 +1387,7 @@ Return a JSON array. Each element describes ONE item:
 - "original" MUST be an exact, contiguous substring of the paragraph (same spelling, spacing and punctuation). Never paraphrase it. Keep it as short as possible while still covering the issue; for Tier 2 it may be a phrase or clause, but never a whole paragraph.
 - Items must not overlap each other. If a Tier 2 suggestion would overlap a Tier 1 error, report only the Tier 1 error.
 - A Tier 2 "correction" must keep the student's meaning and must differ meaningfully from "original".
-- If a word or phrase is marked [illegible], ignore it.
+- If a word or phrase is marked ${LANGUAGE_CHECK_ILLEGIBLE_MARKER}, ignore it: never report it and never include it inside an "original" span.
 - If there is nothing to report, return [].
 - Respond with ONLY the JSON array - no markdown fences, no commentary.`;
 }

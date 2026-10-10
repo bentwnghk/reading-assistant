@@ -3,7 +3,10 @@
 import { generateText, streamText } from "ai";
 import i18next from "i18next";
 import { toast } from "sonner";
-import { isExpressionCategory } from "@/constants/languageCheck";
+import {
+  LANGUAGE_CHECK_ILLEGIBLE_MARKER,
+  isExpressionCategory,
+} from "@/constants/languageCheck";
 import useModelProvider from "@/hooks/useAiProvider";
 import { useSettingStore } from "@/store/setting";
 import {
@@ -13,12 +16,15 @@ import {
 } from "@/store/languageCheck";
 import {
   extractHandwrittenEssayPrompt,
+  transcriberSystemPrompt,
+  verifyTranscriptionPrompt,
   languageCheckPrompt,
   languageCheckSystemPrompt,
 } from "@/constants/readingPrompts";
 import { fetchAppConfig } from "@/utils/app-config";
 import { parseError } from "@/utils/error";
 import {
+  acceptVerifiedTranscript,
   chunkParagraphs,
   deriveTitle,
   joinPages,
@@ -54,7 +60,11 @@ function getFallbackModel(): Promise<string> {
 export default function useLanguageCheck() {
   const { createModelProvider } = useModelProvider();
 
-  /** One vision call per page, run sequentially. Streams into the essay transcript. */
+  /**
+   * One vision call per page, run sequentially. Streams the first pass into the
+   * essay transcript; when the "verify" preference is on, a second call per
+   * page shows the model its own draft and asks it to revert silent fixes.
+   */
   async function transcribe(essayId: string): Promise<void> {
     const store = useLanguageCheckStore.getState();
     if (store.activeGenerations["ocr"]) return;
@@ -62,6 +72,7 @@ export default function useLanguageCheck() {
     if (!essay || essay.id !== essayId || essay.images.length === 0) return;
 
     const { visionModel } = useSettingStore.getState();
+    const verify = useLanguageCheckStore.getState().verifyTranscription;
     const ac = getLanguageCheckAbort("ocr");
     store.setGenerating("ocr", true);
     store.setGeneratingEssayId(essayId);
@@ -70,6 +81,7 @@ export default function useLanguageCheck() {
     });
 
     const pages: string[] = [];
+    let restored = 0;
     try {
       const model = await createModelProvider(visionModel);
       for (let i = 0; i < essay.images.length; i++) {
@@ -80,13 +92,20 @@ export default function useLanguageCheck() {
 
         const result = streamText({
           model,
-          // No marker/teacher system prompt here: OCR must stay verbatim.
+          // Transcriber persona only (never the teacher/marker prompt): vision
+          // models default to returning clean text, which erases the mistakes.
+          // (temperature is already 0 — the AI SDK v4 default.)
+          system: transcriberSystemPrompt(),
           messages: [
             {
               role: "user",
               content: [
                 { type: "text", text: extractHandwrittenEssayPrompt() },
-                { type: "image", image: essay.images[i] },
+                {
+                  type: "image",
+                  image: essay.images[i],
+                  providerOptions: { openai: { imageDetail: "high" } },
+                },
               ],
             },
           ],
@@ -107,6 +126,54 @@ export default function useLanguageCheck() {
         if (!pageText.trim()) {
           throw new Error(i18next.t("languageCheck.ocr.empty", { page: i + 1 }));
         }
+
+        if (verify) {
+          toast.info(
+            i18next.t("languageCheck.ocr.verifying", {
+              current: i + 1,
+              total: essay.images.length,
+            }),
+            { id: loadingToast, duration: Infinity },
+          );
+          try {
+            const second = await generateText({
+              model,
+              system: transcriberSystemPrompt(),
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: verifyTranscriptionPrompt(pageText) },
+                    {
+                      type: "image",
+                      image: essay.images[i],
+                      providerOptions: { openai: { imageDetail: "high" } },
+                    },
+                  ],
+                },
+              ],
+              abortSignal: ac.signal,
+            });
+            const verified = acceptVerifiedTranscript(
+              pageText,
+              second.text,
+              LANGUAGE_CHECK_ILLEGIBLE_MARKER,
+            );
+            if (verified.accepted) pageText = verified.text;
+            if (verified.accepted && verified.changedWords > 0) restored += verified.changedWords;
+            useLanguageCheckStore
+              .getState()
+              .updateLocal(essayId, { transcript: joinPages([...pages, pageText]) });
+          } catch (verifyError) {
+            // The draft is already a valid transcript; verification is a bonus.
+            if (ac.signal.aborted || isAbortError(verifyError)) throw verifyError;
+            console.warn("Transcript verification failed, keeping draft:", verifyError);
+          }
+          toast.info(i18next.t("languageCheck.ocr.working"), {
+            id: loadingToast,
+            duration: Infinity,
+          });
+        }
         pages.push(pageText);
       }
 
@@ -124,7 +191,11 @@ export default function useLanguageCheck() {
         corrections: [],
         droppedCount: 0,
       });
-      toast.success(i18next.t("languageCheck.ocr.done"));
+      toast.success(
+        verify && restored > 0
+          ? i18next.t("languageCheck.ocr.doneVerified", { count: restored })
+          : i18next.t("languageCheck.ocr.done"),
+      );
     } catch (error) {
       if (isAbortError(error) || ac.signal.aborted) {
         toast.warning(i18next.t("languageCheck.cancelled"));

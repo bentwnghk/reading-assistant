@@ -29,6 +29,8 @@ interface LanguageCheckState {
   activeLoading: boolean;
   /** Persisted UI preference. */
   explanationLanguage: ExplanationLanguage;
+  /** Persisted preference: run a second OCR pass that reverts silent corrections. */
+  verifyTranscription: boolean;
   /** AI generation flags — store-level so spinners survive SPA navigation. */
   activeGenerations: Record<string, boolean>;
   /** Essay id the running generation belongs to. */
@@ -38,6 +40,7 @@ interface LanguageCheckState {
 
 interface LanguageCheckActions {
   setExplanationLanguage: (lang: ExplanationLanguage) => void;
+  setVerifyTranscription: (on: boolean) => void;
   setGenerating: (type: LanguageCheckGeneration, active: boolean) => void;
   setGeneratingEssayId: (id: string | null) => void;
   setProgress: (progress: LanguageCheckProgress | null) => void;
@@ -124,12 +127,19 @@ const initialData: Pick<
 };
 
 export const useLanguageCheckStore = create(
-  persist<LanguageCheckState & LanguageCheckActions, [], [], { explanationLanguage: ExplanationLanguage }>(
+  persist<
+    LanguageCheckState & LanguageCheckActions,
+    [],
+    [],
+    { explanationLanguage: ExplanationLanguage; verifyTranscription: boolean }
+  >(
     (set, get) => ({
       ...initialData,
       explanationLanguage: "en",
+      verifyTranscription: false,
 
       setExplanationLanguage: (explanationLanguage) => set({ explanationLanguage }),
+      setVerifyTranscription: (verifyTranscription) => set({ verifyTranscription }),
 
       setGenerating: (type, active) =>
         set((s) => ({
@@ -249,7 +259,10 @@ export const useLanguageCheckStore = create(
     }),
     {
       name: "languageCheck",
-      partialize: (state) => ({ explanationLanguage: state.explanationLanguage }),
+      partialize: (state) => ({
+        explanationLanguage: state.explanationLanguage,
+        verifyTranscription: state.verifyTranscription,
+      }),
     },
   ),
 );

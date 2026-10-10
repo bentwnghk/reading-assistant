@@ -4528,6 +4528,11 @@
       "deleteDesc": "\"{{title}}\" and its scans and corrections will be permanently deleted."
     },
     "ocr": {
+      "verify": "Double-check transcription",
+      "verifyHint": "Runs a second pass per page that restores any spelling or grammar mistakes the AI silently corrected. Slower and uses twice the vision-model calls.",
+      "verifying": "Double-checking page {{current}} of {{total}} for silently corrected mistakes…",
+      "doneVerified_one": "Transcription ready. The double-check restored {{count}} word the AI had changed. Please review it before running the check.",
+      "doneVerified_other": "Transcription ready. The double-check restored {{count}} words the AI had changed. Please review it before running the check.",
       "working": "Reading your handwriting…",
       "progress": "Reading page {{current}} of {{total}}",
       "done": "Transcription ready. Please review it before running the check.",

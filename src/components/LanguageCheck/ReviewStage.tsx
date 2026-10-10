@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { LoaderCircle, RefreshCw, ScanText, SpellCheck, Square } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ResizableHandle,
@@ -38,6 +39,8 @@ export default function ReviewStage({ essay, onChecked }: ReviewStageProps) {
   const generating = useLanguageCheckStore((s) => s.activeGenerations);
   const generatingId = useLanguageCheckStore((s) => s.generatingEssayId);
   const progress = useLanguageCheckStore((s) => s.progress);
+  const verifyTranscription = useLanguageCheckStore((s) => s.verifyTranscription);
+  const setVerifyTranscription = useLanguageCheckStore((s) => s.setVerifyTranscription);
 
   const busyHere = generatingId === essay.id;
   const ocrRunning = busyHere && !!generating["ocr"];
@@ -141,15 +144,29 @@ export default function ReviewStage({ essay, onChecked }: ReviewStageProps) {
               {t("languageCheck.stop")}
             </Button>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={checkRunning || !!otherBusy}
-              onClick={handleRetranscribe}
-            >
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-              {t("languageCheck.ocr.retry")}
-            </Button>
+            <>
+              <label
+                className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground"
+                title={t("languageCheck.ocr.verifyHint")}
+              >
+                <Switch
+                  checked={verifyTranscription}
+                  onCheckedChange={setVerifyTranscription}
+                  disabled={checkRunning || !!otherBusy}
+                  aria-label={t("languageCheck.ocr.verify")}
+                />
+                {t("languageCheck.ocr.verify")}
+              </label>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={checkRunning || !!otherBusy}
+                onClick={handleRetranscribe}
+              >
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                {t("languageCheck.ocr.retry")}
+              </Button>
+            </>
           )}
           {checkRunning ? (
             <Button size="sm" onClick={() => abortLanguageCheck("language-check")}>

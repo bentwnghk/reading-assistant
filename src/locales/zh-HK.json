@@ -4556,6 +4556,10 @@
       "deleteDesc": "「{{title}}」及其掃描圖片和更正內容將被永久刪除。"
     },
     "ocr": {
+      "verify": "覆核謄寫內容",
+      "verifyHint": "每頁多執行一次比對，還原 AI 在謄寫時悄悄改正的拼寫或語法錯誤。速度較慢，並會多用一倍視覺模型呼叫次數。",
+      "verifying": "正在覆核第 {{current}} / {{total}} 頁，檢查有否被悄悄改正的錯誤…",
+      "doneVerified_other": "謄寫完成。覆核已還原 {{count}} 個被 AI 改動的字詞。執行檢查前請先核對內容。",
       "working": "正在辨識手寫內容…",
       "progress": "正在辨識第 {{current}} / {{total}} 頁",
       "done": "轉錄完成，請在檢查前先核對內容。",

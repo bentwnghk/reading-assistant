@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  acceptVerifiedTranscript,
   applyCorrections,
   buildSegments,
   chunkParagraphs,
@@ -274,5 +275,74 @@ describe("expression tier", () => {
     expect(applyCorrections(t, errors, { includeExpression: true })).toBe(
       "He goes there. It is excellent.",
     );
+  });
+});
+
+describe("illegible marker", () => {
+  it("drops errors whose original covers [?]", () => {
+    const text = "I went to the [?] with my family.";
+    const { errors, dropped } = resolveErrors(text, [
+      raw({ original: "the [?] with", correction: "the park with" }),
+    ]);
+    expect(errors).toHaveLength(0);
+    expect(dropped).toBe(1);
+  });
+});
+
+describe("acceptVerifiedTranscript", () => {
+  const draft =
+    "My Holiday\n\nI have many information about it. We discuss about the problem yesterday and she dont know what to do.\n\nIt was fun.";
+  const M = "[?]";
+
+  it("accepts a faithful revert and counts the restored words", () => {
+    const verified = draft.replace("many information", "many informations").replace("dont", "dont");
+    const r = acceptVerifiedTranscript(draft, verified, M);
+    expect(r.accepted).toBe(true);
+    expect(r.text).toContain("many informations");
+    expect(r.changedWords).toBeGreaterThan(0);
+  });
+
+  it("accepts an identical transcript with zero changes", () => {
+    const r = acceptVerifiedTranscript(draft, draft, M);
+    expect(r).toMatchObject({ accepted: true, changedWords: 0 });
+  });
+
+  it("strips code fences from the verified output", () => {
+    const r = acceptVerifiedTranscript(draft, "```\n" + draft + "\n```", M);
+    expect(r.accepted).toBe(true);
+    expect(r.text.startsWith("My Holiday")).toBe(true);
+  });
+
+  it("falls back to the draft when the verifier returns nothing", () => {
+    expect(acceptVerifiedTranscript(draft, "   ", M)).toEqual({
+      text: draft,
+      accepted: false,
+      changedWords: 0,
+    });
+  });
+
+  it("rejects output that dropped a lot of text", () => {
+    const r = acceptVerifiedTranscript(draft, "My Holiday\n\nI have many informations.", M);
+    expect(r.accepted).toBe(false);
+    expect(r.text).toBe(draft);
+  });
+
+  it("rejects output padded with commentary", () => {
+    const verified = `Here is the corrected transcription, I restored two words and checked every line carefully against the image:\n\n${draft}\n\nLet me know if you need anything else about this page.`;
+    expect(acceptVerifiedTranscript(draft, verified, M).accepted).toBe(false);
+  });
+
+  it("rejects a flood of illegible markers", () => {
+    const verified = draft.replace(/problem yesterday and she dont know/, `${M} ${M} ${M} ${M} ${M}`);
+    expect(acceptVerifiedTranscript(draft, verified, M).accepted).toBe(false);
+  });
+
+  it("rejects output that lost the paragraph structure", () => {
+    const flat = draft.replace(/\n\s*\n/g, " ");
+    expect(acceptVerifiedTranscript(draft, flat, M).accepted).toBe(false);
+  });
+
+  it("falls back when the draft has no words", () => {
+    expect(acceptVerifiedTranscript("", "something", M).accepted).toBe(false);
   });
 });

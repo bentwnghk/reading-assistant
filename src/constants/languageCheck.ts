@@ -292,6 +292,12 @@ export const LANGUAGE_CHECK_STATUSES = [
 
 export type LanguageCheckStatus = (typeof LANGUAGE_CHECK_STATUSES)[number];
 
+/**
+ * Marker the OCR step writes for a word it cannot read. The check prompt is
+ * told to ignore it, so the two prompts MUST share this constant.
+ */
+export const LANGUAGE_CHECK_ILLEGIBLE_MARKER = "[?]";
+
 /** Server-side caps (also enforced client-side for friendlier errors). */
 export const LANGUAGE_CHECK_MAX_PAGES = 10;
 export const LANGUAGE_CHECK_MAX_ESSAYS = 100;

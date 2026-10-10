@@ -46,9 +46,16 @@ import { parseError } from "@/utils/error";
 
 type View = "auto" | "review" | "results";
 
-/** Downscale a page; retry smaller if it is still above the server cap. */
+/**
+ * Downscale a page; retry smaller if it is still above the server cap. The
+ * first rung keeps JPEG quality high: compression artefacts blur thin pen
+ * strokes, and a model that cannot read a letter "reads" the word it expects.
+ */
 async function preparePage(dataUrl: string): Promise<string> {
-  let out = await downscaleImage(dataUrl, 2000, 0.85);
+  let out = await downscaleImage(dataUrl, 2000, 0.92);
+  if (out.length > LANGUAGE_CHECK_MAX_IMAGE_CHARS) {
+    out = await downscaleImage(dataUrl, 2000, 0.8);
+  }
   if (out.length > LANGUAGE_CHECK_MAX_IMAGE_CHARS) {
     out = await downscaleImage(dataUrl, 1400, 0.7);
   }

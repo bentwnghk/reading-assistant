@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   LANGUAGE_CHECK_CATEGORIES,
+  LANGUAGE_CHECK_ILLEGIBLE_MARKER,
   LANGUAGE_CHECK_MAX_ALTERNATIVES,
   isExpressionCategory,
 } from "@/constants/languageCheck";
@@ -157,7 +158,13 @@ export function resolveErrors(
 
   for (const item of ordered) {
     const original = item.original;
-    if (!original.trim() || original === item.correction) {
+    // [?] marks text the OCR could not read: it is not the student's wording,
+    // so never report on it (the prompt says so, this enforces it).
+    if (
+      !original.trim() ||
+      original === item.correction ||
+      original.includes(LANGUAGE_CHECK_ILLEGIBLE_MARKER)
+    ) {
       dropped += 1;
       continue;
     }
@@ -396,6 +403,58 @@ export function stripJsonFences(text: string): string {
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/i, "")
     .trim();
+}
+
+export interface VerifiedTranscript {
+  /** The text to use: the verified version when it passes the sanity checks, else the draft. */
+  text: string;
+  /** True when the verified version replaced the draft. */
+  accepted: boolean;
+  /** Number of words the second pass restored/changed (0 when rejected). */
+  changedWords: number;
+}
+
+const WORD_RE = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
+/** Above this many words per page the O(n*m) diff is skipped (count unknown). */
+const MAX_DIFF_WORDS = 1500;
+
+/**
+ * Decides whether the second-pass ("revert silent corrections") output can
+ * replace the first-pass draft. The verifier is a model too, so it can drop
+ * paragraphs, add commentary or give up with a wall of the illegible marker;
+ * any of those would be worse than the draft, so they fall back to it.
+ * A faithful revert only touches a few words, so the length must stay close.
+ */
+export function acceptVerifiedTranscript(
+  draft: string,
+  verifiedRaw: string,
+  illegibleMarker: string,
+): VerifiedTranscript {
+  const reject: VerifiedTranscript = { text: draft, accepted: false, changedWords: 0 };
+  const verified = stripJsonFences(verifiedRaw).replace(/\r\n/g, "\n").trim();
+  if (!verified) return reject;
+
+  const draftWords = draft.match(WORD_RE) ?? [];
+  const verifiedWords = verified.match(WORD_RE) ?? [];
+  if (draftWords.length === 0) return reject;
+
+  const ratio = verifiedWords.length / draftWords.length;
+  if (ratio < 0.85 || ratio > 1.15) return reject;
+
+  const count = (s: string) => s.split(illegibleMarker).length - 1;
+  if (count(verified) > count(draft) + 2) return reject;
+
+  // Paragraph structure should survive (the check is paragraph-scoped).
+  const paras = (s: string) => s.split(/\n\s*\n/).filter((p) => p.trim()).length;
+  if (paras(draft) > 1 && paras(verified) < Math.ceil(paras(draft) / 2)) return reject;
+
+  let changedWords = 0;
+  if (draftWords.length <= MAX_DIFF_WORDS && verifiedWords.length <= MAX_DIFF_WORDS) {
+    for (const t of wordDiff(draftWords.join(" "), verifiedWords.join(" "))) {
+      if (t.type === "removed") changedWords += t.text.split(" ").length;
+    }
+  }
+  return { text: verified, accepted: true, changedWords };
 }
 
 /** Title from the first non-empty line, clipped. */
