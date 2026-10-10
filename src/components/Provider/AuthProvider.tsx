@@ -21,6 +21,7 @@ import { useGlobalStore } from "@/store/global"
 import { useSharingStore, setShareCheckComplete } from "@/store/sharing"
 import { useVocabularyStore, setStudyPlanDialogChecked } from "@/store/vocabulary"
 import { useIdleTimer } from "@/hooks/useIdleTimer"
+import { useLanguageCheckStore } from "@/store/languageCheck"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
@@ -46,6 +47,9 @@ function AuthStateManager() {
 
     if (!isAuthenticated || !userId) {
       syncedUserIdRef.current = null
+      // Language Check essays are per-account server data cached in this
+      // store; never let them linger after sign-out.
+      useLanguageCheckStore.getState().reset()
       setRestoreComplete(false)
       setShareCheckComplete(false)
       setWelcomeDialogChecked(false)
@@ -182,6 +186,8 @@ function AuthStateManager() {
       // while authenticated (see setItem in store/reading.ts), so without
       // this the stale session rehydrates back on the next reload.
       useReadingStore.persist.clearStorage()
+      // Drop essays cached for the previous account (they refetch per user).
+      useLanguageCheckStore.getState().reset()
     }
 
     // Hold the first-run UI gate (onboarding dialog, settings banner) closed

@@ -927,6 +927,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Collocations Model</td><td>gpt-6-luna</td></tr>
         <tr><td>Sentence Analysis Model</td><td>deepseek-flash</td></tr>
         <tr><td>Grammar Model</td><td>gpt-6-luna</td></tr>
+        <tr><td>Language Check Model</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>gpt-6.1-sol</td></tr>
         <tr><td>Reading Text Generator Model</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>AI Tutor Model</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
         <tr><td>TTS Model</td><td>tts-1 · gemini-3.1-flash-tts-preview · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
@@ -2508,6 +2509,17 @@ body.toc-noscroll{overflow:hidden}
       <p><b>Class insights</b> includes: four overview cards (students assessed, average participation, class average, and those <b>needing attention</b>); a <b>performance-by-activity</b> bar chart (mean score 0–100, hardest first); a <b>participation &amp; mastery</b> breakdown; and an <b>at-risk</b> list naming students below the threshold and their weak areas. Scores use a three-tier scale: &lt;50 <b>struggling</b> (red), 50–69 <b>developing</b> (amber), ≥70 <b>mastery</b> (green); games are measured on their 0–100 <i>accuracy</i> so all activities share one scale.</p>
       <p>The <b>roster table</b> has eight sortable columns — student, progress, reading test, vocab quiz, spelling (accuracy), grammar quiz, grammar game (accuracy), and last-viewed time. Click any header to sort and quickly find who needs help. <b>Export to Excel</b> downloads the full roster with scores and progress as an <code>.xlsx</code> for grading or records.</p>
       <p>From the assignments list, each card offers <svg class="ic sm"><use href="#i-pencil"/></svg> <b>Edit</b> (title, subject, due date, instructions), <b>Archive</b> / <b>Unarchive</b> (hide from students without deleting work), and <svg class="ic sm"><use href="#i-trash-2"/></svg> <b>Delete</b> (permanent — student work is lost).</p>
+
+      <h3>10.8 Language Check <span style="font-weight:400;font-size:.8em">(<code>/language-check</code>)</span></h3>
+      <p>Open <b>Language Check</b> from the <svg class="ic sm"><use href="#i-menu"/></svg> hamburger menu. It is separate from your reading sessions: essays are saved in their own list and never touch the reading workspace.</p>
+      <ol>
+        <li><b>Upload</b> a handwritten essay or scanned work (JPG/PNG/PDF, up to 10 pages) by choosing files, dragging them in, or pasting a photo.</li>
+        <li>The <b>Vision Model</b> from Settings reads the handwriting and keeps the paragraph breaks. It copies the student's words <i>exactly</i> &mdash; spelling and grammar mistakes are kept, because they are what gets checked.</li>
+        <li><b>Review</b> the transcript beside the original scan (zoom, pan, page through). Fix any misread words, then press <b>Run language check</b>.</li>
+        <li>Errors are <b>highlighted inline</b>, colour-coded by category (subject-verb agreement, tense, articles, prepositions, collocation/Chinglish, run-ons, punctuation and more) with a numbered superscript. <b>Hover or tap</b> a highlight for a card showing the correction and a short grammar note; the right-hand cards show <b>Original</b>, a red-strikethrough &rarr; green change, the <b>Corrections</b> and the <b>Explanation</b>.</li>
+        <li>Use the <b>English / 繁體中文</b> switch to change the language of the grammar notes instantly. <b>Export .docx</b> produces a marked essay, a clean corrected copy and numbered notes.</li>
+      </ol>
+      <div class="callout"><strong>Choosing the model</strong> Pick the <b>Language Check Model</b> in Settings &rarr; Models (<code>gpt-6.1-sol</code> by default; <code>deepseek-flash</code>, <code>gemini-3.8-flash</code>† and <code>claude-sonnet-5-5</code>† are also available). Corrections follow HKDSE Writing &ldquo;Language&rdquo; expectations and favour minimal edits that keep the student's own meaning and voice.</div>
 
       </section>
     <!-- ============ CHAPTER 11: LEADERBOARD, ACHIEVEMENTS, ADMIN, ACCOUNT ============ -->

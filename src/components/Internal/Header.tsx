@@ -825,6 +825,13 @@ function Header() {
                   </div>
                 </div>
                 <div className="flex items-start gap-2 bg-card border rounded-md p-2">
+                  <span className="text-lg leading-none mt-0.5 shrink-0">🔍</span>
+                  <div>
+                    <div className="font-medium">{t("header.about.features.languageCheck.title")}</div>
+                    <div className="text-xs text-muted-foreground">{t("header.about.features.languageCheck.desc")}</div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
                   <span className="text-lg leading-none mt-0.5 shrink-0">🏆</span>
                   <div>
                     <div className="font-medium">{t("header.about.features.achievements.title")}</div>

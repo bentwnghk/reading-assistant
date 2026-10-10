@@ -1111,3 +1111,48 @@ interface RepositoryTextListItem {
   createdAt: number;
   updatedAt: number;
 }
+
+// ─── Language Check (essay error correction; independent of reading sessions) ──
+
+/** A resolved error anchored to [start, end) in LanguageCheckEssay.checkedText. */
+interface LanguageCheckError {
+  id: string;
+  start: number;
+  end: number;
+  /** Exact substring of checkedText at [start, end). */
+  original: string;
+  /** Suggested replacement; "" means delete. */
+  correction: string;
+  /** One of LANGUAGE_CHECK_CATEGORIES (src/constants/languageCheck.ts). */
+  category: string;
+  explanation: string;
+  explanationZh: string;
+}
+
+interface LanguageCheckEssaySummary {
+  id: string;
+  title: string;
+  status: "draft" | "transcribed" | "checked";
+  pageCount: number;
+  errorCount: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface LanguageCheckEssay {
+  id: string;
+  title: string;
+  /** Downscaled JPEG data URLs (one per scanned page). */
+  images: string[];
+  transcript: string;
+  status: "draft" | "transcribed" | "checked";
+  /** Snapshot of the text that was checked — offsets in corrections refer to it. */
+  checkedText: string;
+  corrections: LanguageCheckError[];
+  ocrModel: string;
+  checkModel: string;
+  /** Errors the model reported that could not be anchored in the text. */
+  droppedCount: number;
+  createdAt: number;
+  updatedAt: number;
+}

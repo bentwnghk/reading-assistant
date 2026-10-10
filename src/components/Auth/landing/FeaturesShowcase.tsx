@@ -41,6 +41,7 @@ const FEATURES: { key: string; emoji: string }[] = [
   { key: "grammarGames", emoji: "🎮" },
   { key: "vocabularyPage", emoji: "📚" },
   { key: "assignments", emoji: "📋" },
+  { key: "languageCheck", emoji: "🔍" },
   { key: "achievements", emoji: "🏆" },
   { key: "leaderboard", emoji: "🏅" },
   { key: "wordExport", emoji: "📄" },

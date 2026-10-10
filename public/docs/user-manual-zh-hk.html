@@ -927,6 +927,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>搭配模型</td><td>gpt-6-luna</td></tr>
         <tr><td>句子分析模型</td><td>deepseek-flash</td></tr>
         <tr><td>語法模型</td><td>gpt-6-luna</td></tr>
+        <tr><td>語言檢查模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>gpt-6.1-sol</td></tr>
         <tr><td>閱讀文本生成模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>AI 導師模型</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
         <tr><td>語音模型</td><td>tts-1 · gemini-3.1-flash-tts-preview · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
@@ -2508,6 +2509,17 @@ body.toc-noscroll{overflow:hidden}
       <p><b>班級分析</b>包含：四張概覽卡（已評量學生、平均參與率、班級平均，以及<b>需要關注</b>者）；<b>各項活動表現</b>長條圖（平均分數 0–100，最弱者在最上方）；<b>參與率與精熟度</b>拆解；以及<b>需要關注</b>名單，列出低於門檻的學生及其弱項。成績採三級量表：&lt;50 <b>待加強</b>（紅）、50–69 <b>發展中</b>（琥珀）、≥70 <b>精熟</b>（綠）；遊戲以 0–100 的<i>正確率</i>計算，使所有活動共用同一量尺。</p>
       <p><b>學生名單表格</b>有八個可排序欄——學生、進度、閱讀測驗、詞彙測驗、拼字（正確率）、語法測驗、語法遊戲（正確率），以及上次瀏覽時間。點擊任一欄標題即可排序，快速找出需要協助的學生。<b>匯出 Excel</b> 可下載含成績與進度的完整名單為 <code>.xlsx</code>，方便評分或存檔。</p>
       <p>在功課列表中，每張卡片提供<svg class="ic sm"><use href="#i-pencil"/></svg><b>編輯</b>（標題、科目、截止日期、指示）、<b>封存</b>／<b>取消封存</b>（對學生隱藏但不刪除作答），以及<svg class="ic sm"><use href="#i-trash-2"/></svg><b>刪除</b>（永久——學生的作答將遺失）。</p>
+
+      <h3>10.8 語言檢查 <span style="font-weight:400;font-size:.8em">(<code>/language-check</code>)</span></h3>
+      <p>從 <svg class="ic sm"><use href="#i-menu"/></svg> 漢堡選單開啟<b>語言檢查</b>。此功能獨立於閱讀記錄：作文有自己的清單，不會影響閱讀工作區。</p>
+      <ol>
+        <li><b>上載</b>手寫作文或掃描習作（JPG/PNG/PDF，最多 10 頁），可選擇檔案、拖放或貼上相片。</li>
+        <li>設定中的<b>視覺模型</b>會辨識手寫內容並保留段落。轉錄時會<i>逐字照抄</i>，拼寫及文法錯誤會被保留，因為那正是檢查的對象。</li>
+        <li>在原稿旁<b>核對</b>轉錄文字（可縮放、拖曳、翻頁），修正辨識錯誤後按<b>開始語言檢查</b>。</li>
+        <li>錯誤會以<b>行內標示</b>並按類別配色（主謂一致、時態、冠詞、介詞、詞語搭配／中式英語、連寫句、標點等），附有上標編號。<b>滑過或點按</b>標示可看到更正及簡短語法說明；右側卡片顯示<b>原文</b>、紅色刪除線 &rarr; 綠色的修改、<b>更正</b>及<b>說明</b>。</li>
+        <li>以 <b>English / 繁體中文</b> 開關即時切換語法說明的語言。<b>匯出 .docx</b> 會產生批改後的作文、乾淨的更正版本及編號說明。</li>
+      </ol>
+      <div class="callout"><strong>選擇模型</strong> 可在「設定 &rarr; 模型」選擇<b>語言檢查模型</b>（預設為 <code>gpt-6.1-sol</code>；亦可選 <code>deepseek-flash</code>、<code>gemini-3.8-flash</code>†、<code>claude-sonnet-5-5</code>†）。更正配合 HKDSE 寫作「語言」範疇，以最少修改為原則，保留學生原本的意思和語氣。</div>
 
       </section>
     <!-- ============ CHAPTER 11: LEADERBOARD, ACHIEVEMENTS, ADMIN, ACCOUNT ============ -->

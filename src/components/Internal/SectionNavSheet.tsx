@@ -16,6 +16,7 @@ import {
   Layers,
   Library,
   MessageCircle,
+  SpellCheck,
   Sparkles,
   Trophy,
   Upload,
@@ -201,6 +202,11 @@ const pageLinks: PageLink[] = [
     href: "/assignments",
     icon: ClipboardList,
     labelKey: "assignments.navTitle",
+  },
+  {
+    href: "/language-check",
+    icon: SpellCheck,
+    labelKey: "languageCheck.navTitle",
   },
   {
     href: "dashboard",

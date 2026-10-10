@@ -278,6 +278,10 @@
           "title": "My Vocabulary Hub",
           "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Teachers can share curated review lists with students!"
         },
+        "languageCheck": {
+          "title": "Language Check",
+          "desc": "Upload a handwritten essay or scanned work (image or PDF). AI digitises it with paragraph breaks, you review the transcript next to the original, then get colour-coded inline corrections, side-by-side original vs. correction cards and short grammar notes aligned with HKDSE writing — in English or 繁體中文. Export the marked essay as Word."
+        },
         "assignments": {
           "title": "Assignments",
           "desc": "Turn any reading session into homework for a whole class. Track each student's live progress and scores, flag who's stuck, and export the roster to Excel."
@@ -3021,6 +3025,7 @@
     "sentenceAnalysisModel": "Sentence Analysis Model",
     "grammarModel": "Grammar Model",
     "readingTextModel": "Reading Text Generator Model",
+    "languageCheckModel": "Language Check Model",
     "tutorModel": "AI Tutor Model",
     "ttsModel": "TTS Model",
     "ttsModelTip": "The TTS model used for all pronunciation and read-aloud playback.",
@@ -4487,5 +4492,125 @@
     "cancel": "Cancel",
     "close": "Close",
     "back": "Back"
+  },
+  "languageCheck": {
+    "navTitle": "Language Check",
+    "title": "Language Check",
+    "subtitle": "Upload a handwritten essay or scanned work. We digitise it, you review the transcript, then get inline corrections with grammar notes aligned with HKDSE writing.",
+    "back": "Back",
+    "cancel": "Cancel",
+    "stop": "Stop",
+    "rename": "Rename essay",
+    "cancelled": "Cancelled.",
+    "upload": {
+      "drop": "Drop images or a PDF here, or paste a photo",
+      "hint": "JPG, PNG or PDF of a handwritten essay (up to {{max}} pages). Pages are downscaled before upload.",
+      "choose": "Choose files",
+      "preparing": "Preparing your pages…",
+      "unsupported": "Please upload an image or a PDF file.",
+      "tooManyPages": "Too many pages. Please upload at most {{max}} pages per essay."
+    },
+    "list": {
+      "title": "Your essays",
+      "empty": "No essays yet. Upload your first one above.",
+      "untitled": "Untitled essay",
+      "pages_one": "{{count}} page",
+      "pages_other": "{{count}} pages",
+      "errors_one": "{{count}} error",
+      "errors_other": "{{count}} errors",
+      "status": {
+        "draft": "Draft",
+        "transcribed": "Transcribed",
+        "checked": "Checked"
+      },
+      "delete": "Delete",
+      "deleteTitle": "Delete this essay?",
+      "deleteDesc": "\"{{title}}\" and its scans and corrections will be permanently deleted."
+    },
+    "ocr": {
+      "working": "Reading your handwriting…",
+      "progress": "Reading page {{current}} of {{total}}",
+      "done": "Transcription ready. Please review it before running the check.",
+      "empty": "No text could be read from page {{page}}. Try a clearer photo or type the text in manually.",
+      "retry": "Re-transcribe",
+      "retryConfirm": "Re-transcribing will replace the current transcript, including your edits. Continue?"
+    },
+    "review": {
+      "hint": "Compare the transcript with the original scan and fix any misread words. Keep the student's own mistakes — they are what gets checked.",
+      "scan": "Original scan",
+      "transcript": "Transcript",
+      "wordCount_one": "{{count}} word",
+      "wordCount_other": "{{count}} words",
+      "placeholder": "The transcript will appear here. You can also type or paste the essay.",
+      "paragraphHint": "Separate paragraphs with a blank line. Do not correct spelling or grammar here.",
+      "runCheck": "Run language check",
+      "backToResults": "Back to results",
+      "changedSince": "The transcript was edited after the last check. Run the check again to update the corrections.",
+      "page": "Page {{current}} / {{total}}",
+      "prevPage": "Previous page",
+      "nextPage": "Next page",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "resetZoom": "Reset zoom",
+      "pageAlt": "Scanned page {{page}}"
+    },
+    "check": {
+      "working": "Checking…",
+      "noText": "There is no text to check.",
+      "parseError": "The AI returned an unreadable result. Please try again.",
+      "noErrors": "No language errors found.",
+      "done": "Found {{count}} corrections.",
+      "dropped_one": "{{count}} suggestion could not be placed in the text and was skipped.",
+      "dropped_other": "{{count}} suggestions could not be placed in the text and were skipped."
+    },
+    "results": {
+      "errorsFound_one": "{{count}} correction",
+      "errorsFound_other": "{{count}} corrections",
+      "checkedWith": "Model: {{model}}",
+      "legend": "Error categories",
+      "original": "Original",
+      "corrections": "Corrections",
+      "explanation": "Explanation",
+      "correctionLabel": "Correction:",
+      "insert": "(insert)",
+      "delete": "(delete this)",
+      "deleteShort": "(deleted)",
+      "noExplanation": "No explanation provided.",
+      "viewScan": "Original scan",
+      "editTranscript": "Edit transcript",
+      "recheck": "Check again",
+      "export": "Export .docx",
+      "explanationLanguage": "Explanation language",
+      "noErrors": "No errors found",
+      "noErrorsHint": "Nothing needed correcting. If you expected corrections, check that the transcript matches the handwriting exactly."
+    },
+    "export": {
+      "subtitle": "{{count}} corrections · {{date}}",
+      "marked": "Marked essay",
+      "corrected": "Corrected essay",
+      "notes": "Correction notes",
+      "generatedBy": "Generated by Mr.🆖 ProReader on {{date}}"
+    },
+    "categories": {
+      "subject-verb-agreement": "Subject-verb agreement",
+      "tense": "Tense / time frame",
+      "article": "Articles",
+      "plural-countable": "Plurals & countability",
+      "preposition": "Prepositions",
+      "pronoun": "Pronouns & reference",
+      "word-form": "Word form",
+      "word-choice": "Word choice",
+      "collocation": "Collocation / Chinglish",
+      "register": "Register (too informal)",
+      "redundancy": "Redundancy",
+      "fragment": "Sentence fragment",
+      "run-on": "Run-on / comma splice",
+      "missing-element": "Missing subject or verb",
+      "word-order": "Word order",
+      "connector": "Connectors & cohesion",
+      "spelling": "Spelling",
+      "punctuation": "Punctuation",
+      "capitalisation": "Capitalisation"
+    }
   }
 }

@@ -278,6 +278,10 @@
           "title": "我的詞彙中心",
           "desc": "專屬生字管理頁面！間隔重複排程、掌握度追蹤、智能自動選字、複習列表、字卡/拼字/測驗模式、複習歷史、詞彙分享，以及匯出為 Word/PDF/圖片。老師可分享精選複習列表給學生！"
         },
+        "languageCheck": {
+          "title": "語言檢查",
+          "desc": "上載手寫作文或掃描習作（圖片或 PDF），AI 會保留段落轉成文字，你可對照原稿核對，再獲得以顏色分類的行內更正、原文與更正並列的卡片，以及配合 HKDSE 寫作要求的簡短語法說明（英文或繁體中文），並可將批改後的作文匯出為 Word。"
+        },
         "assignments": {
           "title": "功課指派",
           "desc": "把任何一項閱讀變成全班功課。即時追蹤每位學生的進度與成績、自動標記需要協助的學生，並可將名單匯出為 Excel。"
@@ -3051,6 +3055,7 @@
     "sentenceAnalysisModel": "句子分析模型",
     "grammarModel": "語法模型",
     "readingTextModel": "閱讀文本生成模型",
+    "languageCheckModel": "語言檢查模型",
     "tutorModel": "AI 導師模型",
     "ttsModel": "語音模型",
     "ttsModelTip": "用於所有發音及朗讀播放的語音模型。",
@@ -4517,5 +4522,120 @@
     "cancel": "取消",
     "close": "關閉",
     "back": "返回"
+  },
+  "languageCheck": {
+    "navTitle": "語言檢查",
+    "title": "語言檢查",
+    "subtitle": "上載手寫作文或掃描習作，系統會先轉成文字供你核對，再以行內標示提供更正及語法說明，並配合 HKDSE 寫作要求。",
+    "back": "返回",
+    "cancel": "取消",
+    "stop": "停止",
+    "rename": "重新命名作文",
+    "cancelled": "已取消。",
+    "upload": {
+      "drop": "將圖片或 PDF 拖放至此，或貼上相片",
+      "hint": "支援手寫作文的 JPG、PNG 或 PDF（最多 {{max}} 頁）。上載前會先縮小圖片。",
+      "choose": "選擇檔案",
+      "preparing": "正在準備頁面…",
+      "unsupported": "請上載圖片或 PDF 檔案。",
+      "tooManyPages": "頁數過多，每篇作文最多可上載 {{max}} 頁。"
+    },
+    "list": {
+      "title": "我的作文",
+      "empty": "暫時沒有作文，請在上方上載第一篇。",
+      "untitled": "未命名作文",
+      "pages_other": "{{count}} 頁",
+      "errors_other": "{{count}} 項錯誤",
+      "status": {
+        "draft": "草稿",
+        "transcribed": "已轉錄",
+        "checked": "已檢查"
+      },
+      "delete": "刪除",
+      "deleteTitle": "刪除這篇作文？",
+      "deleteDesc": "「{{title}}」及其掃描圖片和更正內容將被永久刪除。"
+    },
+    "ocr": {
+      "working": "正在辨識手寫內容…",
+      "progress": "正在辨識第 {{current}} / {{total}} 頁",
+      "done": "轉錄完成，請在檢查前先核對內容。",
+      "empty": "無法從第 {{page}} 頁辨識任何文字。請嘗試更清晰的相片，或手動輸入文字。",
+      "retry": "重新轉錄",
+      "retryConfirm": "重新轉錄會取代目前的文字（包括你的修改）。是否繼續？"
+    },
+    "review": {
+      "hint": "請對照原稿核對轉錄文字，並修正辨識錯誤的字詞。請保留學生原有的錯誤，因為那正是檢查的對象。",
+      "scan": "原稿掃描",
+      "transcript": "轉錄文字",
+      "wordCount_other": "{{count}} 字",
+      "placeholder": "轉錄文字會顯示在此。你亦可直接輸入或貼上作文。",
+      "paragraphHint": "請以空白行分隔段落。請勿在此更正拼寫或文法。",
+      "runCheck": "開始語言檢查",
+      "backToResults": "返回結果",
+      "changedSince": "自上次檢查後文字已被修改。請重新檢查以更新更正內容。",
+      "page": "第 {{current}} / {{total}} 頁",
+      "prevPage": "上一頁",
+      "nextPage": "下一頁",
+      "zoomIn": "放大",
+      "zoomOut": "縮小",
+      "resetZoom": "重設縮放",
+      "pageAlt": "掃描第 {{page}} 頁"
+    },
+    "check": {
+      "working": "檢查中…",
+      "noText": "沒有可檢查的文字。",
+      "parseError": "AI 傳回的結果無法讀取，請重試。",
+      "noErrors": "沒有發現語言錯誤。",
+      "done": "共發現 {{count}} 項更正。",
+      "dropped_other": "有 {{count}} 項建議無法對應到文中位置，已略過。"
+    },
+    "results": {
+      "errorsFound_other": "{{count}} 項更正",
+      "checkedWith": "模型：{{model}}",
+      "legend": "錯誤類別",
+      "original": "原文",
+      "corrections": "更正",
+      "explanation": "說明",
+      "correctionLabel": "更正：",
+      "insert": "（加入）",
+      "delete": "（刪去）",
+      "deleteShort": "（已刪去）",
+      "noExplanation": "沒有提供說明。",
+      "viewScan": "原稿掃描",
+      "editTranscript": "編輯文字",
+      "recheck": "重新檢查",
+      "export": "匯出 .docx",
+      "explanationLanguage": "說明語言",
+      "noErrors": "沒有發現錯誤",
+      "noErrorsHint": "沒有需要更正的地方。如果你預期有更正，請檢查轉錄文字是否與手寫內容完全一致。"
+    },
+    "export": {
+      "subtitle": "{{count}} 項更正 · {{date}}",
+      "marked": "批改後的作文",
+      "corrected": "更正後的作文",
+      "notes": "更正說明",
+      "generatedBy": "由 Mr.🆖 ProReader 於 {{date}} 生成"
+    },
+    "categories": {
+      "subject-verb-agreement": "主謂一致",
+      "tense": "時態／時間框架",
+      "article": "冠詞",
+      "plural-countable": "複數及可數性",
+      "preposition": "介詞",
+      "pronoun": "代詞及指代",
+      "word-form": "詞形",
+      "word-choice": "用詞",
+      "collocation": "詞語搭配／中式英語",
+      "register": "語體（過於口語）",
+      "redundancy": "冗贅",
+      "fragment": "殘缺句",
+      "run-on": "連寫句／逗號連接",
+      "missing-element": "缺少主語或動詞",
+      "word-order": "詞序",
+      "connector": "連接詞及連貫",
+      "spelling": "拼寫",
+      "punctuation": "標點符號",
+      "capitalisation": "大小寫"
+    }
   }
 }

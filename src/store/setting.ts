@@ -94,6 +94,7 @@ export const RESTRICTED_MODEL_FIELD_NAMES = [
   "collocationModel",
   "grammarModel",
   "readingTextModel",
+  "languageCheckModel",
   "tutorModel",
 ] as const;
 
@@ -224,6 +225,7 @@ export interface SettingStore {
   collocationModel: AvailableModel;
   grammarModel: AvailableModel;
   readingTextModel: ReadingTextModel;
+  languageCheckModel: ReadingTextModel;
   tutorModel: TutorModel;
   ttsModel: TtsModel;
   ttsVoice: string;
@@ -378,6 +380,7 @@ export const defaultValues: SettingStore = {
   collocationModel: "gpt-6-luna",
   grammarModel: "gpt-6-luna",
   readingTextModel: "deepseek-flash",
+  languageCheckModel: "gpt-6.1-sol",
   tutorModel: "step-3.7-flash",
   ttsModel: "x-ai/grok-voice-tts-1.0",
   ttsVoice: "ara",
@@ -415,7 +418,7 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   const allModelFields: (keyof SettingStore)[] = [
     "prereadingModel", "summaryModel", "mindMapModel", "adaptedTextModel",
     "simplifyModel", "readingTestModel", "glossaryModel", "suggestVocabModel", "sentenceAnalysisModel",
-    "collocationModel", "grammarModel", "readingTextModel", "tutorModel",
+    "collocationModel", "grammarModel", "readingTextModel", "languageCheckModel", "tutorModel",
   ];
   for (const field of allModelFields) {
     const value = state[field];
@@ -451,6 +454,9 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   }
   if (!READING_TEXT_MODELS.includes(state.readingTextModel as ReadingTextModel)) {
     state.readingTextModel = defaultValues.readingTextModel;
+  }
+  if (!READING_TEXT_MODELS.includes(state.languageCheckModel as ReadingTextModel)) {
+    state.languageCheckModel = defaultValues.languageCheckModel;
   }
   if (!TTS_MODELS.includes(state.ttsModel as TtsModel)) {
     state.ttsModel = defaultValues.ttsModel;

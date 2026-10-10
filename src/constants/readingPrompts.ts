@@ -1227,6 +1227,90 @@ export function translateVisualizationPrompt(useChinese: boolean = false): strin
 Output the edited image now.`;
 }
 
+// ─── Language Check (handwritten/scanned essay error correction) ──────────────
+
+export function extractHandwrittenEssayPrompt(): string {
+  return `Transcribe the handwritten or scanned student essay in this image into digital text.
+
+**This is a verbatim transcription. The essay will be checked for language errors afterwards, so the student's mistakes MUST be preserved.**
+
+**Instructions:**
+- Copy every word exactly as the student wrote it.
+- **Do NOT correct spelling, grammar, punctuation, capitalisation or word choice** - even when something is clearly wrong. Never "fix" or improve the text.
+- Preserve the title (if any) as the first line.
+- **Preserve paragraph breaks:** separate paragraphs with ONE blank line. Treat an indented new line or a clearly larger gap between lines as a new paragraph. Join lines that merely wrap inside the same paragraph into one continuous line.
+- Ignore line numbers or word counts in the margin, page numbers, teacher marks, ticks, crosses and corrections written in a different colour by a marker.
+- Where the student crossed out a word, omit the crossed-out word.
+- If a word is genuinely unreadable, write [illegible] instead of guessing.
+- Do not add any commentary, headings or explanations.
+- Respond with ONLY the transcribed text.`;
+}
+
+export function languageCheckSystemPrompt(): string {
+  return `You are an experienced English teacher and HKDSE English Language Paper 2 (Writing) marker for Hong Kong secondary students (S4-S6). Today is {now}.
+
+You correct ESL/EFL learners' writing the way a good teacher marks a script: precisely, minimally and pedagogically. Follow these principles:
+
+- **Minimal edits.** Change only what is wrong. Keep the student's meaning, ideas, voice and vocabulary level. Never rewrite for style, never "upgrade" acceptable words, never add content.
+- **Only genuine errors.** If you are not confident something is an error, leave it. Do not flag acceptable variation (e.g. British/American spelling, optional commas, stylistic choices).
+- **Phrase-level spans.** When several adjacent words form one error, mark the whole phrase as one correction rather than many tiny ones.
+- **Explain the rule.** Each explanation is a concise grammar note (1-2 sentences) that states the underlying rule and why this case breaks it, so the student can avoid the mistake next time. Do not just say "wrong".
+- **Be aware of typical Hong Kong learner error patterns**, including: subject-verb agreement (especially third-person -s and "there is/are"), tense and time-frame consistency (e.g. past narrative slipping into present), missing or wrong articles, countable/uncountable nouns and plurals (e.g. "informations", "advices"), prepositions (e.g. "discuss about", "arrive at/in"), word form (e.g. "success/successful", "advise/advice"), Chinglish and L1 transfer (e.g. "open the light", "learn knowledge", "very much people"), collocation errors, missing subjects or copulas, run-on sentences and comma splices, sentence fragments, informal register in formal writing (contractions, "kids", "a lot of"), and weak or wrong connectors.
+- Use Traditional Chinese (繁體中文, Hong Kong written style) for the Chinese explanations.`.replace(
+    "{now}",
+    new Date().toLocaleDateString(i18next.language),
+  );
+}
+
+export function languageCheckPrompt(paragraphs: { index: number; text: string }[]): string {
+  const numbered = paragraphs.map((p) => `[Paragraph ${p.index}]\n${p.text}`).join("\n\n");
+  return `Check the following student essay for language errors. The essay is split into numbered paragraphs.
+
+<essay>
+${numbered}
+</essay>
+
+Return a JSON array. Each element describes ONE error:
+
+{
+  "paragraph": 1,
+  "before": "the 2-4 words immediately before the error (empty string if it starts the paragraph)",
+  "original": "the exact erroneous text copied character-for-character from the paragraph",
+  "correction": "the corrected text that replaces 'original' (empty string to delete it)",
+  "category": "one of the categories below",
+  "explanation": "concise English grammar note explaining the rule",
+  "explanationZh": "the same grammar note in Traditional Chinese (繁體中文)"
+}
+
+**Categories (the value of "category" MUST be exactly one of these):**
+- "subject-verb-agreement" - verb does not agree with its subject
+- "tense" - wrong tense or inconsistent time frame
+- "article" - missing, unnecessary or wrong a/an/the
+- "plural-countable" - wrong plural form or countable/uncountable misuse
+- "preposition" - wrong, missing or unnecessary preposition
+- "pronoun" - wrong pronoun form or unclear/inconsistent reference
+- "word-form" - wrong part of speech or word form (e.g. success/successful)
+- "word-choice" - a word that is wrong or inappropriate for the meaning
+- "collocation" - unnatural word combination or Chinglish / L1 transfer
+- "register" - too informal for formal writing
+- "redundancy" - unnecessary repetition or wordiness
+- "fragment" - incomplete sentence
+- "run-on" - run-on sentence or comma splice
+- "missing-element" - missing subject, verb, or other essential element
+- "word-order" - words in the wrong order
+- "connector" - missing, wrong or weak linking word / cohesion
+- "spelling" - misspelt word
+- "punctuation" - wrong or missing punctuation
+- "capitalisation" - wrong capital or lower-case letter
+
+**Rules:**
+- "original" MUST be an exact, contiguous substring of the paragraph (same spelling, spacing and punctuation). Never paraphrase it. Keep it as short as possible while still covering the error.
+- Errors must not overlap each other.
+- If a word or phrase is marked [illegible], ignore it.
+- If the essay has no errors, return [].
+- Respond with ONLY the JSON array - no markdown fences, no commentary.`;
+}
+
 export function getSystemPrompt(): string {
   return systemInstruction.replace("{now}", new Date().toLocaleDateString(i18next.language));
 }

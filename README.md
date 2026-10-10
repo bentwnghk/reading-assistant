@@ -699,6 +699,20 @@ Full subscription lifecycle powered by Stripe for both individual users and scho
 
 ---
 
+### 🔍 Language Check (essay error correction)
+
+A standalone page (`/language-check`, opened from the hamburger menu) that is independent of reading sessions and has its own store and database table.
+
+| Step | What happens |
+|------|--------------|
+| 📷 **Upload** | Handwritten essay or scanned work as images or PDF (up to 10 pages) |
+| 🔤 **OCR** | The Settings *Vision Model* transcribes it **verbatim** (mistakes kept) with paragraph breaks preserved |
+| 👀 **Review** | Edit the transcript side by side with the zoomable original scan |
+| ✍️ **Check** | The Settings *Language Check Model* (`deepseek-flash`, `gemini-3.8-flash`, `gpt-6.1-sol`, `claude-sonnet-5-5`) finds errors tuned to common ESL/EFL (HK) patterns and HKDSE Writing |
+| 🎨 **Results** | Colour-coded inline highlights, hover/tap popover (original vs. correction + grammar note), side cards with red→green changes, English / 繁體中文 notes, `.docx` export |
+
+---
+
 ## 🐳 27. Docker Deployment
 
 The application runs as three Docker containers managed by `docker-compose.yml`:
@@ -795,6 +809,7 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes (AI, auth, admin, subscriptions, etc.)
 │   ├── assignments/       # Assignments page (list, detail, roster)
+│   ├── language-check/    # Language Check page (essay OCR + error correction)
 │   ├── leaderboard/       # Leaderboard page
 │   ├── vocabulary/        # My Vocabulary page
 │   ├── image-viewer/      # Standalone image viewer
@@ -810,6 +825,7 @@ src/
 │   ├── Dashboard/         # Student dashboard + session sharing dialogs
 │   ├── TeacherDashboard/  # Teacher dashboard (10 charts + guide)
 │   ├── Assignments/       # Assignment list, stats, roster dialog, presets
+│   ├── LanguageCheck/     # Essay upload, scan/transcript review, inline corrections
 │   ├── Leaderboard/       # Leaderboard & achievements
 │   ├── Subscription/      # Subscription/billing UI (individual + school)
 │   ├── MagicDown/         # Markdown rendering and editing

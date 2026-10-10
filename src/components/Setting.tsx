@@ -76,6 +76,7 @@ const formSchema = z.object({
   collocationModel: z.enum(AVAILABLE_MODELS),
   grammarModel: z.enum(AVAILABLE_MODELS),
   readingTextModel: z.enum(READING_TEXT_MODELS),
+  languageCheckModel: z.enum(READING_TEXT_MODELS),
   tutorModel: z.enum(TUTOR_MODELS),
   ttsModel: z.enum(TTS_MODELS),
   ttsVoice: z.enum(ALL_TTS_VOICES),
@@ -1153,6 +1154,37 @@ function Setting({ open, onClose }: SettingProps) {
                           onValueChange={(value) => {
                             field.onChange(value);
                             updateSetting("readingTextModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {readingTextModelOptions.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {formatModelLabel(m)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="languageCheckModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.languageCheckModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("languageCheckModel", value);
                           }}
                         >
                           <SelectTrigger className="form-field">

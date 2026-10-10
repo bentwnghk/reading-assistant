@@ -91,6 +91,8 @@ src/
 │   ├── assignments.ts          # Assignment CRUD + stripSessionForAssignment (teacher→student)
 │   ├── assignment-presets.ts   # Reusable school-wide student-group presets
 │   ├── skill-profile.ts        # Comprehension skill-profile snapshot + cross-session rollup
+│   ├── language-check.ts       # Language Check essay CRUD (list is lightweight; images only in getEssay)
+│   ├── language-check-schema.ts # Zod schemas for /api/language-check bodies (categories derive from constants)
 │   ├── subscription.ts         # Subscription data access
 │   └── subscription-email.ts   # Subscription email templates
 ├── templates/                  # Email template files
@@ -162,7 +164,7 @@ realtime/                       # Standalone Socket.io server for multiplayer sp
 ### 4. State Management
 
 - **Zustand**: Used for global client-side state and persistence.
-- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts`, `sharing.ts`, `assignments.ts`, `battle.ts` — all in `src/store/`.
+- **Stores**: `reading.ts`, `global.ts`, `setting.ts`, `history.ts`, `achievements.ts`, `vocabulary.ts`, `sharing.ts`, `assignments.ts`, `battle.ts`, `languageCheck.ts` — all in `src/store/`.
 - **Persistence**: Most stores use the `persist` middleware to save data in `localStorage`. Exceptions: `battle.ts` is **non-persisted** (ephemeral connection state, lives at module scope — see Architectural Rules §A).
 - **Radash**: Use **radash** utilities for common operations like `pick`, `isString`, `isObject`, etc.
 - **History store lightweight/full split**: The `src/store/history.ts` store tracks sessions in two states. `loadFromAPI` populates the array with **lightweight** entries. `getUserSessions()` (the `/api/sessions` list) strips: `originalImages`/`visualizationImage` (base64 media) **and** the restore-only JSONB arrays (`readingTest`, `grammarQuiz`, `vocabularyQuiz`, `spellingResults`, `grammarResults`, the 4 grammar challenge caches), emitting them as `[]` — dashboards/progress read only the kept scalar scores/flags/timestamps (`preReading`, `collocations`, `grammarTopics`, `analyzedSentences`, `chatHistory`, `glossary`, and all texts STAY because client-side metrics read them). The list is capped at `LIMIT 500` by recency; AuthProvider falls back to a direct `/api/sessions/[id]` fetch when the preferred (`lastOpenedSessionId`) session falls outside the cap. The async `loadFull(id)` method fetches the complete session on demand via `/api/sessions/[id]`, deduplicates concurrent fetches, and merges via `hydrate(id, data)`. A module-level `hydratedSessionIds` Set records which entries already contain full data. Use `loadFull` (not `load`) whenever media or stripped fields are needed (restore, download, assignment snapshots); use `load` only for synchronous reads of already-present text fields. **Sign-in restore hydration gate**: AuthProvider restores the lightweight entry, arms `setPendingFullHydration(id)` (module flag in `store/reading.ts`), then merge-if-still-defaults the stripped fields from `/api/sessions/[id]`; while the flag is set, `useAutoSave` and `syncToHistoryIfNeeded` suppress history writes — otherwise a `backup()` taken in that window persists gutted arrays AND marks the entry hydrated, permanently breaking the `loadFull` fast path if the fetch fails. See Architectural Rules §C below.
@@ -458,7 +460,7 @@ Grammar data is stored on the `reading_sessions` table:
 | `LearningRecommendationDialog.tsx` | Adaptive dialog suggesting next learning activities based on session progress |
 | `RepositoryUploadDialog.tsx` | Upload extracted text to the shared text repository |
 | `WorkflowProgress.tsx` | Step progress indicator at top of main page |
-| `SectionNavSheet.tsx` (in `Internal/`) | Slide-in section navigation drawer opened from the Header hamburger (home page only) |
+| `SectionNavSheet.tsx` (in `Internal/`) | Slide-in section navigation drawer opened from the Header hamburger on **every** page (reading-workflow rows deep-link to `/?goto=<id>` off the home page; add new page entries to `pageLinks[]`) |
 | `TutorChatFab.tsx` | Floating button to open AI reading tutor chat |
 | `QuickQuestions.tsx` | Suggested questions for the reading tutor |
 | `ChatMessageBubble.tsx` | Renders individual chat messages with markdown |
@@ -654,6 +656,36 @@ Activity types added: `assignment_create`, `assignment_start`, `assignment_submi
 
 ---
 
+## Language Check (`/language-check`)
+
+Standalone essay error-correction tool, reachable from the hamburger menu (`SectionNavSheet` → `pageLinks[]`). **Independent of reading sessions**: own table, store, API, hook and components — it must never read/write `reading.ts`, `history.ts` or `reading_sessions`.
+
+**Flow**: upload images/PDF → `downscaleImage` (`utils/image.ts`, ≤2000px JPEG) → `POST /api/language-check` → vision-model OCR (`visionModel` setting, **verbatim** prompt `extractHandwrittenEssayPrompt`, one call per page, no teacher system prompt so mistakes are not fixed) → user reviews transcript beside the zoomable scan (`ReviewStage`) → `runCheck` with `languageCheckModel` → inline highlights + popover + side cards (`ResultsView`, `ErrorSpan`, `CorrectionCard`) → optional `.docx` export.
+
+| Piece | Location |
+|-------|----------|
+| Category taxonomy (single source: Zod enum, colours, labels, statuses, caps) | `src/constants/languageCheck.ts` — `LANGUAGE_CHECK_CATEGORIES`; i18n labels `languageCheck.categories.<id>` |
+| Pure logic (paragraphs, chunking, anchor resolver, segments, word diff, context) + Vitest | `src/utils/languageCheck.ts`, `languageCheck.test.ts` |
+| Prompts | `readingPrompts.ts`: `extractHandwrittenEssayPrompt`, `languageCheckSystemPrompt`, `languageCheckPrompt` |
+| AI actions (OCR + check, fallback model retry) | `src/hooks/useLanguageCheck.ts` |
+| Store (cache + generation state; only `explanationLanguage` persisted) | `src/store/languageCheck.ts` |
+| Data access / API | `src/lib/language-check.ts`; `/api/language-check`, `/api/language-check/[id]` |
+| Docx export | `src/utils/languageCheckExport.ts` |
+| Setting | `languageCheckModel` (`READING_TEXT_MODELS`, default `gpt-6.1-sol`; in `RESTRICTED_MODEL_FIELD_NAMES`) |
+
+**Database**: `language_check_essays` (`scripts/add-language-check.sql` + `init-db.sql`). Columns: `images` JSONB (downscaled JPEG data URLs), `transcript`, `status` (`draft`/`transcribed`/`checked`), `checked_text` (snapshot the offsets refer to), `corrections` JSONB (`LanguageCheckError[]`), `ocr_model`, `check_model`, `dropped_count`. `listEssays` never selects images/transcript/corrections (lightweight/full split, like the history store). Caps: 100 essays/user, 10 pages/essay, ~3.5M chars/page.
+
+**Rules**:
+- **LLM offsets are never trusted.** The model returns `{paragraph, before, original, correction, category, explanation, explanationZh}`; `resolveErrors` anchors `original` by exact-substring search (paragraph-scoped, `before` disambiguates, case-insensitive fallback). Unanchorable/overlapping/no-op errors are dropped and counted in `droppedCount`. Resolved `{start,end}` refer to `checkedText`, **not** the live transcript — always render from `checkedText`, so editing the transcript after a check never misaligns highlights.
+- **Verbatim OCR**: never add a correcting/teacher system prompt to the OCR call.
+- **Derive enums**: any schema over categories uses `z.enum(LANGUAGE_CHECK_CATEGORIES)` (§M). Adding a category = extend the array + `LANGUAGE_CHECK_CATEGORY_GROUP` + `LANGUAGE_CHECK_CATEGORY_STYLES` (unique hue) + the AI prompt category list + both locales.
+- **Generation state is store-level** (`activeGenerations` keys `ocr` / `language-check`, module-level abort controllers, `generatingEssayId`) so it survives SPA navigation; results are saved against the essay **id** that started the job (never "whatever is open").
+- **Reset on account change**: `AuthProvider` calls `useLanguageCheckStore.getState().reset()` on sign-out and account switch (essays are per-account server data cached in-memory).
+- Popover is a hand-composed Radix `Popover` (no hover-card dependency): hover-intent for mouse, tap/Enter for touch/keyboard, `onOpenAutoFocus` prevented (no scroll jump), `onInteractOutside` ignores the anchor.
+- Transcript textarea and OCR output suppress spell-check/autocorrect (it is the proofreading target).
+
+---
+
 ## App Routes
 
 Next.js App Router pages in `src/app/`:
@@ -663,6 +695,7 @@ Next.js App Router pages in `src/app/`:
 | `/` (`page.tsx`) | Main reading assistant page (core workflow) |
 | `/vocabulary` | My Vocabulary page (auth-gated) |
 | `/leaderboard` | Leaderboard + achievements page (auth-gated) |
+| `/language-check` | Language Check: essay OCR + inline error correction (auth-gated, noindex) |
 | `/image-viewer` | Standalone image viewer with zoom/pan |
 | `/privacy-policy` | Privacy policy page |
 | `/terms-of-service` | Terms of service page |
