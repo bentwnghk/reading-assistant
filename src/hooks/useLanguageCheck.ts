@@ -3,6 +3,7 @@
 import { generateText, streamText } from "ai";
 import i18next from "i18next";
 import { toast } from "sonner";
+import { isExpressionCategory } from "@/constants/languageCheck";
 import useModelProvider from "@/hooks/useAiProvider";
 import { useSettingStore } from "@/store/setting";
 import {
@@ -238,8 +239,14 @@ export default function useLanguageCheck() {
       if (errors.length === 0) {
         toast.success(i18next.t("languageCheck.check.noErrors"));
       } else {
+        const suggestions = errors.filter((e) =>
+          isExpressionCategory(e.category),
+        ).length;
         toast.success(
-          i18next.t("languageCheck.check.done", { count: errors.length }),
+          i18next.t("languageCheck.check.done", {
+            errors: errors.length - suggestions,
+            suggestions,
+          }),
         );
       }
       return true;

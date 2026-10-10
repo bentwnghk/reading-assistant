@@ -6,6 +6,7 @@ import { cn } from "@/utils/style";
 import { buildSegments } from "@/utils/languageCheck";
 import {
   LANGUAGE_CHECK_CATEGORIES,
+  isExpressionCategory,
   type LanguageCheckCategory,
 } from "@/constants/languageCheck";
 import ErrorSpan from "@/components/LanguageCheck/ErrorSpan";
@@ -51,6 +52,9 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
     }));
   }, [essay.corrections]);
 
+  const errorCounts = counts.filter((c) => !isExpressionCategory(c.category));
+  const suggestionCounts = counts.filter((c) => isExpressionCategory(c.category));
+
   const totalCount = essay.corrections.length;
   const visibleCount = essay.corrections.filter(
     (e) => !hidden.has(e.category),
@@ -61,6 +65,19 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
       const next = new Set(prev);
       if (next.has(category)) next.delete(category);
       else next.add(category);
+      return next;
+    });
+  }
+
+  /** Hide a whole tier, or show it again if every chip in it is already off. */
+  function toggleTier(tier: { category: LanguageCheckCategory }[]) {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      const allOff = tier.every((c) => next.has(c.category));
+      for (const c of tier) {
+        if (allOff) next.delete(c.category);
+        else next.add(c.category);
+      }
       return next;
     });
   }
@@ -90,68 +107,71 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
   return (
     <div className="flex min-h-0 flex-col gap-3">
       {counts.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <div
-            role="group"
-            className="flex flex-wrap gap-1.5"
-            aria-label={t("languageCheck.results.legend")}
-          >
-            {counts.map(({ category, count }) => {
-              const on = !hidden.has(category);
-              const label = categoryLabel(category);
+        <div className="flex flex-col gap-2" aria-label={t("languageCheck.results.legend")}>
+          {[
+            { key: "errors", title: t("languageCheck.results.tierErrors"), tier: errorCounts },
+            { key: "suggestions", title: t("languageCheck.results.tierSuggestions"), tier: suggestionCounts },
+          ]
+            .filter((row) => row.tier.length > 0)
+            .map(({ key, title, tier }) => {
+              const allOff = tier.every((c) => hidden.has(c.category));
               return (
-                <button
-                  key={category}
-                  type="button"
-                  aria-pressed={on}
-                  title={t(
-                    on
-                      ? "languageCheck.results.hideCategory"
-                      : "languageCheck.results.showCategory",
-                    { category: label },
-                  )}
-                  onClick={() => toggleCategory(category)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    on
-                      ? "bg-card hover:bg-accent"
-                      : "border-dashed bg-transparent text-muted-foreground hover:bg-accent/50",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "h-2.5 w-2.5 rounded-full",
-                      on
-                        ? categoryStyle(category).dot
-                        : "border border-muted-foreground/60",
-                    )}
-                  />
-                  <span className={cn(!on && "line-through")}>{label}</span>
-                  <span className="font-semibold tabular-nums text-muted-foreground">
-                    {count}
+                <div key={key} role="group" aria-label={title} className="flex flex-wrap items-center gap-1.5">
+                  <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {title}
                   </span>
-                </button>
+                  {tier.map(({ category, count }) => {
+                    const on = !hidden.has(category);
+                    const label = categoryLabel(category);
+                    return (
+                      <button
+                        key={category}
+                        type="button"
+                        aria-pressed={on}
+                        title={t(
+                          on
+                            ? "languageCheck.results.hideCategory"
+                            : "languageCheck.results.showCategory",
+                          { category: label },
+                        )}
+                        onClick={() => toggleCategory(category)}
+                        className={cn(
+                          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          on
+                            ? "bg-card hover:bg-accent"
+                            : "border-dashed bg-transparent text-muted-foreground hover:bg-accent/50",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "h-2.5 w-2.5 rounded-full",
+                            on
+                              ? categoryStyle(category).dot
+                              : "border border-muted-foreground/60",
+                          )}
+                        />
+                        <span className={cn(!on && "line-through")}>{label}</span>
+                        <span className="font-semibold tabular-nums text-muted-foreground">
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => toggleTier(tier)}
+                  >
+                    {allOff
+                      ? t("languageCheck.results.showTier")
+                      : t("languageCheck.results.hideTier")}
+                  </Button>
+                </div>
               );
             })}
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={() =>
-              setHidden(
-                hidden.size > 0
-                  ? new Set()
-                  : new Set(counts.map((c) => c.category)),
-              )
-            }
-          >
-            {hidden.size > 0
-              ? t("languageCheck.results.showAll")
-              : t("languageCheck.results.hideAll")}
-          </Button>
           {hidden.size > 0 && (
             <span className="text-xs text-muted-foreground" aria-live="polite">
               {t("languageCheck.results.showing", {

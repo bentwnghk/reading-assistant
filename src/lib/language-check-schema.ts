@@ -2,6 +2,7 @@ import { z } from "zod"
 import {
   LANGUAGE_CHECK_CATEGORIES,
   LANGUAGE_CHECK_STATUSES,
+  LANGUAGE_CHECK_MAX_ALTERNATIVES,
   LANGUAGE_CHECK_MAX_IMAGE_CHARS,
   LANGUAGE_CHECK_MAX_PAGES,
   LANGUAGE_CHECK_MAX_TRANSCRIPT_CHARS,
@@ -21,6 +22,10 @@ export const errorSchema = z.object({
   category: z.enum(LANGUAGE_CHECK_CATEGORIES),
   explanation: z.string().max(2000),
   explanationZh: z.string().max(2000),
+  alternatives: z
+    .array(z.string().max(2000))
+    .max(LANGUAGE_CHECK_MAX_ALTERNATIVES)
+    .optional(),
 })
 
 export const createSchema = z.object({

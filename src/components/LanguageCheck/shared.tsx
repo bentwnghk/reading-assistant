@@ -34,6 +34,35 @@ export function explanationFor(
   return primary.trim() || secondary.trim();
 }
 
+/** "Other ways to say it" chips for expression-tier suggestions. */
+export function AlternativesList({
+  alternatives,
+  className,
+}: {
+  alternatives: string[] | undefined;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  if (!alternatives || alternatives.length === 0) return null;
+  return (
+    <div className={className}>
+      <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        {t("languageCheck.results.alternatives")}
+      </p>
+      <ul className="mt-1 space-y-1">
+        {alternatives.map((a) => (
+          <li
+            key={a}
+            className="rounded-md border bg-muted/50 px-2 py-1 text-sm leading-snug"
+          >
+            {a}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** Red-strikethrough → green chips, e.g. "of receiving" → "regarding". */
 export function DiffChips({
   original,

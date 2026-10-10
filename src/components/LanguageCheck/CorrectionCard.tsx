@@ -2,7 +2,9 @@
 import { useTranslation } from "react-i18next";
 import { cn } from "@/utils/style";
 import { contextAround } from "@/utils/languageCheck";
+import { isExpressionCategory } from "@/constants/languageCheck";
 import {
+  AlternativesList,
   DiffChips,
   categoryStyle,
   explanationFor,
@@ -33,6 +35,7 @@ export default function CorrectionCard({
   const style = categoryStyle(error.category);
   const ctx = contextAround(text, error.start, error.end);
   const explanation = explanationFor(error, language);
+  const isSuggestion = isExpressionCategory(error.category);
 
   return (
     <div
@@ -62,6 +65,11 @@ export default function CorrectionCard({
           {number}
         </span>
         <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        {isSuggestion && (
+          <span className="ml-auto rounded-full border border-dashed px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {t("languageCheck.results.suggestionTag")}
+          </span>
+        )}
       </div>
 
       <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
@@ -80,7 +88,11 @@ export default function CorrectionCard({
       </div>
 
       <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400">
-        {t("languageCheck.results.corrections")}
+        {t(
+          isSuggestion
+            ? "languageCheck.results.betterVersion"
+            : "languageCheck.results.corrections",
+        )}
       </p>
       <p className="mt-1 text-sm leading-relaxed text-green-700 dark:text-green-400">
         {ctx.before}
@@ -90,8 +102,14 @@ export default function CorrectionCard({
         {ctx.after}
       </p>
 
+      <AlternativesList alternatives={error.alternatives} className="mt-3" />
+
       <p className="mt-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-        {t("languageCheck.results.explanation")}
+        {t(
+          isSuggestion
+            ? "languageCheck.results.whyBetter"
+            : "languageCheck.results.explanation",
+        )}
       </p>
       <p className="mt-1 text-sm leading-relaxed">
         {explanation || t("languageCheck.results.noExplanation")}

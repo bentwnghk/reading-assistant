@@ -5,12 +5,14 @@ import {
   Packer,
   Paragraph,
   TextRun,
+  UnderlineType,
   type ParagraphChild,
 } from "docx";
 import { saveAs } from "file-saver";
 import {
   DEFAULT_CATEGORY_STYLE,
   LANGUAGE_CHECK_CATEGORY_STYLES,
+  isExpressionCategory,
   type LanguageCheckCategory,
 } from "@/constants/languageCheck";
 import { applyCorrections, buildSegments } from "@/utils/languageCheck";
@@ -71,21 +73,46 @@ export async function exportLanguageCheckDocx({
       markedParts.push({ text: seg.text, make: (x) => new TextRun({ text: x }) });
       continue;
     }
-    markedParts.push({
-      text: seg.text,
-      make: (x) => new TextRun({ text: x, strike: true, color: RED }),
-    });
-    if (seg.error.correction) {
+    if (isExpressionCategory(seg.error.category)) {
+      // Suggestion: the original stays readable (it is not an error) with a
+      // dotted underline in the category colour; the better version follows
+      // in italics so it is visibly optional.
+      const hex =
+        LANGUAGE_CHECK_CATEGORY_STYLES[seg.error.category as LanguageCheckCategory]
+          ?.hex ?? DEFAULT_CATEGORY_STYLE.hex;
       markedParts.push({
-        text: seg.error.correction,
+        text: seg.text,
         make: (x) =>
           new TextRun({
-            text: ` ${x}`,
-            color: GREEN,
-            underline: {},
-            bold: true,
+            text: x,
+            color: hex,
+            underline: { type: UnderlineType.DOTTED, color: hex },
           }),
       });
+      if (seg.error.correction) {
+        markedParts.push({
+          text: seg.error.correction,
+          make: (x) =>
+            new TextRun({ text: ` ${x}`, color: hex, italics: true, bold: true }),
+        });
+      }
+    } else {
+      markedParts.push({
+        text: seg.text,
+        make: (x) => new TextRun({ text: x, strike: true, color: RED }),
+      });
+      if (seg.error.correction) {
+        markedParts.push({
+          text: seg.error.correction,
+          make: (x) =>
+            new TextRun({
+              text: ` ${x}`,
+              color: GREEN,
+              underline: {},
+              bold: true,
+            }),
+        });
+      }
     }
     markedParts.push({
       text: " ",
@@ -94,9 +121,17 @@ export async function exportLanguageCheckDocx({
     });
   }
 
-  // 2. Clean corrected essay.
+  // 2. Clean corrected essay (errors only) and, when there are suggestions, a
+  //    polished version that also applies them.
   const corrected = applyCorrections(text, errors);
   const cleanParts = [{ text: corrected, make: (x: string) => new TextRun({ text: x }) }];
+  const hasSuggestions = errors.some((e) => isExpressionCategory(e.category));
+  const polishedParts = [
+    {
+      text: applyCorrections(text, errors, { includeExpression: true }),
+      make: (x: string) => new TextRun({ text: x }),
+    },
+  ];
 
   // 3. Numbered notes.
   const notes: Paragraph[] = errors.map((e, i) => {
@@ -106,19 +141,40 @@ export async function exportLanguageCheckDocx({
     const explanation =
       (language === "zh" ? e.explanationZh : e.explanation).trim() ||
       (e.explanation || e.explanationZh).trim();
+    const suggestion = isExpressionCategory(e.category);
     return new Paragraph({
       spacing: { after: 160 },
       children: [
         new TextRun({ text: `${i + 1}. `, bold: true }),
         new TextRun({ text: categoryLabel(e.category), bold: true, color: style.hex }),
+        ...(suggestion
+          ? [
+              new TextRun({
+                text: ` (${t("languageCheck.results.suggestionTag")})`,
+                italics: true,
+                color: "7F7F7F",
+              }),
+            ]
+          : []),
         new TextRun({ text: "  " }),
-        new TextRun({ text: e.original, strike: true, color: RED }),
+        suggestion
+          ? new TextRun({ text: e.original, color: style.hex })
+          : new TextRun({ text: e.original, strike: true, color: RED }),
         new TextRun({ text: "  →  " }),
         new TextRun({
           text: e.correction || t("languageCheck.results.deleteShort"),
           bold: true,
-          color: GREEN,
+          color: suggestion ? style.hex : GREEN,
         }),
+        ...(e.alternatives && e.alternatives.length > 0
+          ? [
+              new TextRun({
+                text: `${t("languageCheck.results.alternatives")}: ${e.alternatives.join(" / ")}`,
+                break: 1,
+                color: "404040",
+              }),
+            ]
+          : []),
         ...(explanation
           ? [new TextRun({ text: explanation, break: 1, italics: true, color: "404040" })]
           : []),
@@ -177,6 +233,16 @@ export async function exportLanguageCheckDocx({
             spacing: { before: 400 },
           }),
           ...toParagraphs(cleanParts),
+          ...(hasSuggestions
+            ? [
+                new Paragraph({
+                  text: t("languageCheck.export.polished"),
+                  heading: HeadingLevel.HEADING_1,
+                  spacing: { before: 400 },
+                }),
+                ...toParagraphs(polishedParts),
+              ]
+            : []),
           ...(notes.length > 0
             ? [
                 new Paragraph({

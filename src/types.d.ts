@@ -1127,6 +1127,11 @@ interface LanguageCheckError {
   category: string;
   explanation: string;
   explanationZh: string;
+  /**
+   * Other drop-in phrasings for `original` (expression-tier suggestions).
+   * Absent on essays checked before this field existed — treat as [].
+   */
+  alternatives?: string[];
 }
 
 interface LanguageCheckEssaySummary {

@@ -6,6 +6,11 @@
  * spelling/punctuation, register). The Zod enum (API + AI response), colour
  * map, i18n labels and legend ALL derive from this single list — never retype
  * it as a literal elsewhere.
+ *
+ * Two tiers share the one list: clear errors (grammar, mechanics, wrong words)
+ * and an "expression" tier (group "expression", see `isExpressionCategory`) for
+ * text that is grammatical but unclear, unnatural, Chinglish, wordy or
+ * improvable.
  */
 export const LANGUAGE_CHECK_CATEGORIES = [
   "subject-verb-agreement",
@@ -27,6 +32,11 @@ export const LANGUAGE_CHECK_CATEGORIES = [
   "spelling",
   "punctuation",
   "capitalisation",
+  // Expression tier — grammatical, but unclear / unnatural / improvable.
+  "unclear-phrasing",
+  "chinglish",
+  "concision",
+  "vocabulary-upgrade",
 ] as const;
 
 export type LanguageCheckCategory = (typeof LANGUAGE_CHECK_CATEGORIES)[number];
@@ -35,7 +45,8 @@ export type LanguageCheckGroup =
   | "grammar"
   | "vocabulary"
   | "structure"
-  | "mechanics";
+  | "mechanics"
+  | "expression";
 
 export const LANGUAGE_CHECK_CATEGORY_GROUP: Record<
   LanguageCheckCategory,
@@ -60,7 +71,26 @@ export const LANGUAGE_CHECK_CATEGORY_GROUP: Record<
   spelling: "mechanics",
   punctuation: "mechanics",
   capitalisation: "mechanics",
+  "unclear-phrasing": "expression",
+  chinglish: "expression",
+  concision: "expression",
+  "vocabulary-upgrade": "expression",
 };
+
+/**
+ * Expression-tier categories are suggestions (the text is grammatical), not
+ * errors. They are drawn with a dotted underline, listed separately in the
+ * legend, and are not part of the "corrected" essay.
+ */
+export function isExpressionCategory(category: string): boolean {
+  return (
+    LANGUAGE_CHECK_CATEGORY_GROUP[category as LanguageCheckCategory] ===
+    "expression"
+  );
+}
+
+/** Max alternative phrasings kept per suggestion. */
+export const LANGUAGE_CHECK_MAX_ALTERNATIVES = 3;
 
 export interface CategoryStyle {
   /** Inline highlight in the essay text. */
@@ -212,6 +242,41 @@ export const LANGUAGE_CHECK_CATEGORY_STYLES: Record<
     dot: "bg-stone-500",
     border: "border-l-stone-500",
     hex: "57534E",
+  },
+  // Expression tier: every Tailwind hue above is taken, so these use bespoke
+  // colours (olive, orchid, green, brown) plus a dotted underline so they read
+  // as suggestions rather than errors.
+  "unclear-phrasing": {
+    highlight:
+      "bg-[#eef1b4] dark:bg-[#4a4f12] underline decoration-dotted decoration-2 underline-offset-4 decoration-[#a7b620]",
+    badge: "bg-[#7f8b18] text-white",
+    dot: "bg-[#a7b620]",
+    border: "border-l-[#a7b620]",
+    hex: "7F8B18",
+  },
+  chinglish: {
+    highlight:
+      "bg-[#f7cdee] dark:bg-[#57194c] underline decoration-dotted decoration-2 underline-offset-4 decoration-[#b6209b]",
+    badge: "bg-[#8b1876] text-white",
+    dot: "bg-[#b6209b]",
+    border: "border-l-[#b6209b]",
+    hex: "8B1876",
+  },
+  concision: {
+    highlight:
+      "bg-[#cfe9c4] dark:bg-[#1f4a18] underline decoration-dotted decoration-2 underline-offset-4 decoration-[#3f9a2c]",
+    badge: "bg-[#2f7a20] text-white",
+    dot: "bg-[#3f9a2c]",
+    border: "border-l-[#3f9a2c]",
+    hex: "2F7A20",
+  },
+  "vocabulary-upgrade": {
+    highlight:
+      "bg-[#ebd5c0] dark:bg-[#573319] underline decoration-dotted decoration-2 underline-offset-4 decoration-[#b0652b]",
+    badge: "bg-[#7c4a2d] text-white",
+    dot: "bg-[#b0652b]",
+    border: "border-l-[#b0652b]",
+    hex: "7C4A2D",
   },
 };
 

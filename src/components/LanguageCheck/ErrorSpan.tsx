@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
 import { cn } from "@/utils/style";
+import { isExpressionCategory } from "@/constants/languageCheck";
 import {
+  AlternativesList,
   categoryStyle,
   explanationFor,
   useCategoryLabel,
@@ -55,6 +57,7 @@ export default function ErrorSpan({
   useEffect(() => clearTimer, []);
 
   const explanation = explanationFor(error, language);
+  const isSuggestion = isExpressionCategory(error.category);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -126,7 +129,11 @@ export default function ErrorSpan({
           </p>
           <div className="mt-2 rounded-lg bg-muted px-3 py-2 text-sm">
             <span className="font-medium text-muted-foreground">
-              {t("languageCheck.results.correctionLabel")}
+              {t(
+                isSuggestion
+                  ? "languageCheck.results.suggestionLabel"
+                  : "languageCheck.results.correctionLabel",
+              )}
             </span>{" "}
             {error.correction ? (
               <span className="font-semibold text-green-700 dark:text-green-400">
@@ -138,6 +145,7 @@ export default function ErrorSpan({
               </span>
             )}
           </div>
+          <AlternativesList alternatives={error.alternatives} className="mt-2" />
           <p className="mt-2 text-sm leading-relaxed">
             {explanation || t("languageCheck.results.noExplanation")}
           </p>

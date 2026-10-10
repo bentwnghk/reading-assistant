@@ -280,7 +280,7 @@
         },
         "languageCheck": {
           "title": "語言檢查",
-          "desc": "上載手寫作文或掃描習作（圖片或 PDF），AI 會保留段落轉成文字，你可對照原稿核對，再獲得以顏色分類的行內更正、原文與更正並列的卡片，以及配合 HKDSE 寫作要求的簡短語法說明（英文或繁體中文），並可將批改後的作文匯出為 Word。"
+          "desc": "上載手寫作文或掃描習作（圖片或 PDF），AI 會保留段落轉成文字，你可對照原稿核對，再獲得以顏色分類的行內更正，以及針對表達不清、中式英語或冗長字句的建議（附其他說法及「為何這樣更好」的說明），配合 HKDSE 寫作要求，說明可選英文或繁體中文，並可將批改後的作文匯出為 Word。"
         },
         "assignments": {
           "title": "功課指派",
@@ -4545,7 +4545,7 @@
       "empty": "暫時沒有作文，請在上方上載第一篇。",
       "untitled": "未命名作文",
       "pages_other": "{{count}} 頁",
-      "errors_other": "{{count}} 項錯誤",
+      "errors_other": "{{count}} 項批註",
       "status": {
         "draft": "草稿",
         "transcribed": "已轉錄",
@@ -4586,10 +4586,20 @@
       "noText": "沒有可檢查的文字。",
       "parseError": "AI 傳回的結果無法讀取，請重試。",
       "noErrors": "沒有發現語言錯誤。",
-      "done": "共發現 {{count}} 項更正。",
+      "done": "共發現 {{errors}} 項錯誤及 {{suggestions}} 項表達建議。",
       "dropped_other": "有 {{count}} 項建議無法對應到文中位置，已略過。"
     },
     "results": {
+      "tierErrors": "錯誤",
+      "tierSuggestions": "表達建議",
+      "hideTier": "隱藏此組",
+      "showTier": "顯示此組",
+      "suggestionsFound_other": "{{count}} 項建議",
+      "suggestionTag": "建議",
+      "suggestionLabel": "可改為：",
+      "betterVersion": "較清晰的寫法",
+      "whyBetter": "為何這樣更好",
+      "alternatives": "其他說法",
       "errorsFound_other": "{{count}} 項更正",
       "checkedWith": "模型：{{model}}",
       "legend": "錯誤類別",
@@ -4616,13 +4626,18 @@
       "noErrorsHint": "沒有需要更正的地方。如果你預期有更正，請檢查轉錄文字是否與手寫內容完全一致。"
     },
     "export": {
-      "subtitle": "{{count}} 項更正 · {{date}}",
+      "polished": "潤飾版作文（包含表達建議）",
+      "subtitle": "{{count}} 項更正及建議 · {{date}}",
       "marked": "批改後的作文",
       "corrected": "更正後的作文",
       "notes": "更正說明",
       "generatedBy": "由 Mr.🆖 ProReader 於 {{date}} 生成"
     },
     "categories": {
+      "unclear-phrasing": "表達不清／生硬",
+      "chinglish": "中式英語（逐字翻譯）",
+      "concision": "冗長，宜精簡",
+      "vocabulary-upgrade": "更精準的用詞",
       "subject-verb-agreement": "主謂一致",
       "tense": "時態／時間框架",
       "article": "冠詞",

@@ -22,6 +22,7 @@ const raw = (o: Partial<RawLanguageError>): RawLanguageError => ({
   category: "tense",
   explanation: "",
   explanationZh: "",
+  alternatives: [],
   ...o,
 });
 
@@ -191,5 +192,87 @@ describe("contextAround", () => {
     const c = contextAround(long, i, i + 3, 20);
     expect(c.before.startsWith("…")).toBe(true);
     expect(c.after.endsWith("…")).toBe(true);
+  });
+});
+
+describe("expression tier", () => {
+  const text = "Because of the reason that he was late, I am angry with him very much.";
+
+  it("parses alternatives leniently (string, null, junk)", () => {
+    const base = { paragraph: 1, original: "a", correction: "b", category: "chinglish" };
+    const parse = (alternatives: unknown) =>
+      parseRawErrors([{ ...base, alternatives }]).errors[0]?.alternatives;
+    expect(parse(["x", " y ", ""])).toEqual(["x", "y"]);
+    expect(parse("only one")).toEqual(["only one"]);
+    expect(parse(null)).toEqual([]);
+    expect(parse([1, "ok", {}])).toEqual(["ok"]);
+    expect(
+      parseRawErrors([{ ...base, alternatives: undefined }]).errors[0]?.alternatives,
+    ).toEqual([]);
+  });
+
+  it("accepts the new categories and rejects unknown ones per item", () => {
+    const { errors, invalid } = parseRawErrors([
+      { paragraph: 1, original: "a", correction: "b", category: "unclear-phrasing" },
+      { paragraph: 1, original: "a", correction: "b", category: "style" },
+    ]);
+    expect(errors).toHaveLength(1);
+    expect(invalid).toBe(1);
+  });
+
+  it("lets genuine errors win over an overlapping suggestion", () => {
+    const { errors, dropped } = resolveErrors(text, [
+      // Listed first on purpose: the suggestion must still lose.
+      raw({
+        original: "I am angry with him very much",
+        correction: "I am furious with him",
+        category: "chinglish",
+      }),
+      raw({ original: "very much", correction: "extremely", category: "word-choice" }),
+    ]);
+    expect(errors.map((e) => e.category)).toEqual(["word-choice"]);
+    expect(dropped).toBe(1);
+  });
+
+  it("keeps non-overlapping suggestions alongside errors, in reading order", () => {
+    const { errors } = resolveErrors(text, [
+      raw({ original: "am angry", correction: "feel angry", category: "tense" }),
+      raw({
+        original: "Because of the reason that he was late",
+        correction: "Because he was late",
+        category: "concision",
+        alternatives: ["Since he was late", "Due to his lateness"],
+      }),
+    ]);
+    expect(errors.map((e) => e.category)).toEqual(["concision", "tense"]);
+    expect(errors[0]?.alternatives).toEqual(["Since he was late", "Due to his lateness"]);
+  });
+
+  it("cleans, dedupes and caps alternatives; ignores them on plain errors", () => {
+    const { errors } = resolveErrors(text, [
+      raw({
+        original: "very much",
+        correction: "greatly",
+        category: "chinglish",
+        alternatives: ["greatly", "VERY MUCH", "deeply", "deeply", "so much", "a lot", "terribly"],
+      }),
+      raw({ original: "was", correction: "had been", category: "tense", alternatives: ["x"] }),
+    ]);
+    const chinglish = errors.find((e) => e.category === "chinglish");
+    expect(chinglish?.alternatives).toEqual(["deeply", "so much", "a lot"]);
+    const tense = errors.find((e) => e.category === "tense");
+    expect(tense && "alternatives" in tense).toBe(false);
+  });
+
+  it("applyCorrections skips suggestions unless polishing", () => {
+    const { errors } = resolveErrors("He go there. It is very good.", [
+      raw({ original: "go", correction: "goes", category: "subject-verb-agreement" }),
+      raw({ original: "very good", correction: "excellent", category: "vocabulary-upgrade" }),
+    ]);
+    const t = "He go there. It is very good.";
+    expect(applyCorrections(t, errors)).toBe("He goes there. It is very good.");
+    expect(applyCorrections(t, errors, { includeExpression: true })).toBe(
+      "He goes there. It is excellent.",
+    );
   });
 });

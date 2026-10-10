@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { LANGUAGE_CHECK_CATEGORIES } from "@/constants/languageCheck";
+import {
+  LANGUAGE_CHECK_CATEGORIES,
+  LANGUAGE_CHECK_MAX_ALTERNATIVES,
+  isExpressionCategory,
+} from "@/constants/languageCheck";
 
 // ─── Paragraphs ──────────────────────────────────────────────────────────────
 
@@ -65,6 +69,19 @@ export const rawErrorSchema = z.object({
   category: z.enum(LANGUAGE_CHECK_CATEGORIES),
   explanation: z.string().default(""),
   explanationZh: z.string().default(""),
+  // Expression tier only. Tolerate null / a lone string from the model.
+  alternatives: z
+    .preprocess(
+      (v) => (typeof v === "string" ? [v] : Array.isArray(v) ? v : []),
+      z.array(z.unknown()),
+    )
+    .transform((list) =>
+      list
+        .filter((x): x is string => typeof x === "string")
+        .map((x) => x.trim())
+        .filter(Boolean),
+    )
+    .default([]),
 });
 
 export type RawLanguageError = z.infer<typeof rawErrorSchema>;
@@ -130,7 +147,15 @@ export function resolveErrors(
   const accepted: LanguageCheckError[] = [];
   let dropped = 0;
 
-  for (const item of raw) {
+  // Clear errors claim their spans first; expression-tier suggestions (which
+  // often cover a whole clause) only get what is left, so a stylistic
+  // suggestion can never hide a genuine grammar error underneath it.
+  const ordered = [
+    ...raw.filter((r) => !isExpressionCategory(r.category)),
+    ...raw.filter((r) => isExpressionCategory(r.category)),
+  ];
+
+  for (const item of ordered) {
     const original = item.original;
     if (!original.trim() || original === item.correction) {
       dropped += 1;
@@ -167,6 +192,18 @@ export function resolveErrors(
       continue;
     }
 
+    // Alternatives: de-duplicated, never equal to the original/main
+    // correction, capped. Only meaningful for the expression tier.
+    const alternatives = isExpressionCategory(item.category)
+      ? [...new Set(item.alternatives)]
+          .filter(
+            (a) =>
+              a !== item.correction &&
+              a.toLowerCase() !== original.trim().toLowerCase(),
+          )
+          .slice(0, LANGUAGE_CHECK_MAX_ALTERNATIVES)
+      : [];
+
     accepted.push({
       id: makeId(accepted.length + 1),
       start: chosen,
@@ -176,6 +213,7 @@ export function resolveErrors(
       category: item.category,
       explanation: item.explanation,
       explanationZh: item.explanationZh,
+      ...(alternatives.length > 0 ? { alternatives } : {}),
     });
   }
 
@@ -219,13 +257,23 @@ export function buildSegments(
   return segments;
 }
 
-/** The corrected essay with every suggestion applied. */
+/**
+ * The essay with corrections applied. Expression-tier suggestions are optional
+ * polish, so they are only applied when `includeExpression` is true (the
+ * "polished" version); by default the result is the error-corrected essay.
+ */
 export function applyCorrections(
   text: string,
   errors: LanguageCheckError[],
+  { includeExpression = false }: { includeExpression?: boolean } = {},
 ): string {
   return buildSegments(text, errors)
-    .map((s) => (s.kind === "error" ? s.error.correction : s.text))
+    .map((s) =>
+      s.kind === "error" &&
+      (includeExpression || !isExpressionCategory(s.error.category))
+        ? s.error.correction
+        : s.text,
+    )
     .join("");
 }
 

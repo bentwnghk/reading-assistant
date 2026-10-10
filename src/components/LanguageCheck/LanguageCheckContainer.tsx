@@ -34,7 +34,11 @@ import {
   useLanguageCheckStore,
 } from "@/store/languageCheck";
 import { useSettingStore } from "@/store/setting";
-import { LANGUAGE_CHECK_MAX_IMAGE_CHARS, LANGUAGE_CHECK_MAX_PAGES } from "@/constants/languageCheck";
+import {
+  LANGUAGE_CHECK_MAX_IMAGE_CHARS,
+  LANGUAGE_CHECK_MAX_PAGES,
+  isExpressionCategory,
+} from "@/constants/languageCheck";
 import { downscaleImage, readFileAsDataURL } from "@/utils/image";
 import { processPdfFile } from "@/utils/parser/pdfParser";
 import { exportLanguageCheckDocx } from "@/utils/languageCheckExport";
@@ -315,11 +319,17 @@ function ResultsSummary({
   checking: boolean;
 }) {
   const { t } = useTranslation();
+  const suggestionTotal = essay.corrections.filter((e) =>
+    isExpressionCategory(e.category),
+  ).length;
+  const errorTotal = essay.corrections.length - suggestionTotal;
   return (
     <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
       {checking && <LoaderCircle className="h-4 w-4 animate-spin" />}
       <span className="font-medium text-foreground">
-        {t("languageCheck.results.errorsFound", { count: essay.corrections.length })}
+        {t("languageCheck.results.errorsFound", { count: errorTotal })}
+        {suggestionTotal > 0 &&
+          ` · ${t("languageCheck.results.suggestionsFound", { count: suggestionTotal })}`}
       </span>
       {essay.checkModel && (
         <span>{t("languageCheck.results.checkedWith", { model: essay.checkModel })}</span>

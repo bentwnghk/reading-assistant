@@ -708,7 +708,7 @@ A standalone page (`/language-check`, opened from the hamburger menu) that is in
 | 📷 **Upload** | Handwritten essay or scanned work as images or PDF (up to 10 pages) |
 | 🔤 **OCR** | The Settings *Vision Model* transcribes it **verbatim** (mistakes kept) with paragraph breaks preserved |
 | 👀 **Review** | Edit the transcript side by side with the zoomable original scan |
-| ✍️ **Check** | The Settings *Language Check Model* (`deepseek-flash`, `gemini-3.8-flash`, `gpt-6.1-sol`, `claude-sonnet-5-5`) finds errors tuned to common ESL/EFL (HK) patterns and HKDSE Writing |
+| ✍️ **Check** | The Settings *Language Check Model* (`deepseek-flash`, `gemini-3.8-flash`, `gpt-6.1-sol`, `claude-sonnet-5-5`) finds **errors** tuned to common ESL/EFL (HK) patterns and HKDSE Writing, plus optional **expression suggestions**: unclear/awkward phrasing, Chinglish (literal translation), wordiness and stronger word choice, each with alternatives and a "why" note |
 | 🎨 **Results** | Colour-coded inline highlights, hover/tap popover (original vs. correction + grammar note), side cards with red→green changes, English / 繁體中文 notes, `.docx` export |
 
 ---
