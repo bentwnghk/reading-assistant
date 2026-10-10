@@ -914,7 +914,7 @@ body.toc-noscroll{overflow:hidden}
       <p>The <b>Visualization Model</b> row picks the image generator used by Text Visualization (§4.7). In that row, the model marked <b>‡</b> is a <b>premium image model</b> — it only appears in the dropdown for <b>admins / super-admins</b> and <b>Meter (API key)</b> users; other accounts don't see it, and generation silently falls back to the default model.</p>
       <table class="ref">
         <tr><th>Feature (label)</th><th>Available models</th><th>Default</th></tr>
-        <tr><td>Vision (OCR) Model</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
+        <tr><td>Vision (OCR) Model</td><td>claude-haiku-5-5 · gpt-6-luna</td><td>gpt-6-luna</td></tr>
         <tr><td>Summary Model</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>Pre-reading Model</td><td rowspan="2">same list as Summary</td><td>gpt-6-luna</td></tr>
         <tr><td>Mind Map Model</td><td>deepseek-flash</td></tr>
@@ -927,7 +927,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Collocations Model</td><td>gpt-6-luna</td></tr>
         <tr><td>Sentence Analysis Model</td><td>deepseek-flash</td></tr>
         <tr><td>Grammar Model</td><td>gpt-6-luna</td></tr>
-        <tr><td>OCR Model (Language Check)</td><td>claude-haiku-5-5 · claude-sonnet-5-5 · gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
+        <tr><td>OCR Model (Language Check)</td><td>claude-haiku-5-5 · gpt-6-luna</td><td>claude-haiku-5-5</td></tr>
         <tr><td>Language Check Model</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>gpt-6.1-sol</td></tr>
         <tr><td>Reading Text Generator Model</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>AI Tutor Model</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
@@ -2650,8 +2650,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>A. AI model reference</h3>
       <table class="ref">
         <tr><th>Model list</th><th>Members</th><th>Default</th></tr>
-        <tr><td><b>Vision</b> (OCR)</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
-        <tr><td><b>OCR</b> (Language Check)</td><td>claude-haiku-5-5 · claude-sonnet-5-5 · gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
+        <tr><td><b>Vision</b> (OCR)</td><td>claude-haiku-5-5 · gpt-6-luna</td><td>gpt-6-luna</td></tr>
+        <tr><td><b>OCR</b> (Language Check)</td><td>claude-haiku-5-5 · gpt-6-luna</td><td>claude-haiku-5-5</td></tr>
         <tr><td><b>Image</b> (visualization)</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-nano-banana-2.1 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
         <tr><td><b>Available</b> — default <code>deepseek-flash</code> (summary, mind map, adapt, simplify, glossary, sentence-analysis)</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td><b>Available</b> — default <code>gpt-6-luna</code> (pre-reading, reading test, suggest vocabulary, collocations, grammar)</td><td>same list as above</td><td>gpt-6-luna</td></tr>

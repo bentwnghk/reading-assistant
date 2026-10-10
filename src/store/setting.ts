@@ -10,21 +10,18 @@ export const AVAILABLE_MODELS = [
 
 export type AvailableModel = (typeof AVAILABLE_MODELS)[number];
 
-export const VISION_MODELS = ["gpt-5.6-luna", "gpt-6-luna"] as const;
+export const VISION_MODELS = ["claude-haiku-5-5", "gpt-6-luna"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
 /**
  * OCR model for Language Check transcription, separate from visionModel
- * (which OCRs reading-assistant uploads). Claude models are included on
- * purpose and the field is NOT in RESTRICTED_MODEL_FIELD_NAMES, so every
- * user can pick them.
+ * (which OCRs reading-assistant uploads). Deliberately NOT in
+ * RESTRICTED_MODEL_FIELD_NAMES, so every user can pick any option. The list
+ * happens to equal VISION_MODELS today but is kept explicit so the two can
+ * diverge.
  */
-export const OCR_MODELS = [
-  "claude-haiku-5-5",
-  "claude-sonnet-5-5",
-  ...VISION_MODELS,
-] as const;
+export const OCR_MODELS = ["claude-haiku-5-5", "gpt-6-luna"] as const;
 
 export type OcrModel = (typeof OCR_MODELS)[number];
 
@@ -75,8 +72,8 @@ export const RESTRICTED_TUTOR_MODELS: string[] = [
 ];
 
 // Pure model-id renames for the general/reading-text/tutor model fields —
-// visionModel is NOT in this pass, so a rename never touches the Vision
-// Model setting even when the old id is still valid there.
+// visionModel/ocrModel are NOT in this pass; retired ids in those two lists
+// are handled by validateSettings falling back to defaultValues instead.
 // Keep in sync with scripts/migrate-deepseek-flash-rename.sql and
 // scripts/migrate-unified-tutor-model.sql.
 const RENAMED_MODELS: Record<string, string> = {
@@ -382,7 +379,7 @@ export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
   visionModel: "gpt-6-luna",
-  ocrModel: "gpt-6-luna",
+  ocrModel: "claude-haiku-5-5",
   imageModel: "google/gemini-3.1-flash-lite-image",
   prereadingModel: "gpt-6-luna",
   summaryModel: "deepseek-flash",
