@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/style";
 import { buildSegments } from "@/utils/languageCheck";
 import {
@@ -28,6 +29,9 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
   const { t } = useTranslation();
   const categoryLabel = useCategoryLabel();
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Categories the user has switched off. Ephemeral view state: the essay's
+  // data and numbering are never affected, only what is drawn.
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
 
   // Offsets are relative to the snapshot that was checked, never the live transcript.
   const text = essay.checkedText;
@@ -47,6 +51,20 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
     }));
   }, [essay.corrections]);
 
+  const totalCount = essay.corrections.length;
+  const visibleCount = essay.corrections.filter(
+    (e) => !hidden.has(e.category),
+  ).length;
+
+  function toggleCategory(category: string) {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  }
+
   // Selecting from either side scrolls the counterpart into view.
   function handleSelect(id: string, source: "text" | "card") {
     setActiveId(id);
@@ -56,30 +74,92 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
     target?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  // Drop the highlight when switching essays.
-  useEffect(() => setActiveId(null), [essay.id]);
+  // Drop the highlight and filter when switching essays.
+  useEffect(() => {
+    setActiveId(null);
+    setHidden(new Set());
+  }, [essay.id]);
+
+  // A hidden correction can't stay "active" (nothing on screen to point at).
+  const shownActiveId =
+    activeId &&
+    essay.corrections.some((e) => e.id === activeId && !hidden.has(e.category))
+      ? activeId
+      : null;
 
   return (
     <div className="flex min-h-0 flex-col gap-3">
       {counts.length > 0 && (
-        <div
-          className="flex flex-wrap gap-1.5"
-          aria-label={t("languageCheck.results.legend")}
-        >
-          {counts.map(({ category, count }) => (
-            <span
-              key={category}
-              className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs"
-            >
-              <span
-                className={cn("h-2.5 w-2.5 rounded-full", categoryStyle(category).dot)}
-              />
-              {categoryLabel(category)}
-              <span className="font-semibold tabular-nums text-muted-foreground">
-                {count}
-              </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <div
+            role="group"
+            className="flex flex-wrap gap-1.5"
+            aria-label={t("languageCheck.results.legend")}
+          >
+            {counts.map(({ category, count }) => {
+              const on = !hidden.has(category);
+              const label = categoryLabel(category);
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  aria-pressed={on}
+                  title={t(
+                    on
+                      ? "languageCheck.results.hideCategory"
+                      : "languageCheck.results.showCategory",
+                    { category: label },
+                  )}
+                  onClick={() => toggleCategory(category)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    on
+                      ? "bg-card hover:bg-accent"
+                      : "border-dashed bg-transparent text-muted-foreground hover:bg-accent/50",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "h-2.5 w-2.5 rounded-full",
+                      on
+                        ? categoryStyle(category).dot
+                        : "border border-muted-foreground/60",
+                    )}
+                  />
+                  <span className={cn(!on && "line-through")}>{label}</span>
+                  <span className="font-semibold tabular-nums text-muted-foreground">
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() =>
+              setHidden(
+                hidden.size > 0
+                  ? new Set()
+                  : new Set(counts.map((c) => c.category)),
+              )
+            }
+          >
+            {hidden.size > 0
+              ? t("languageCheck.results.showAll")
+              : t("languageCheck.results.hideAll")}
+          </Button>
+          {hidden.size > 0 && (
+            <span className="text-xs text-muted-foreground" aria-live="polite">
+              {t("languageCheck.results.showing", {
+                shown: visibleCount,
+                total: totalCount,
+              })}
             </span>
-          ))}
+          )}
         </div>
       )}
 
@@ -90,7 +170,7 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
             lang="en"
           >
             {segments.map((seg, i) =>
-              seg.kind === "text" ? (
+              seg.kind === "text" || hidden.has(seg.error.category) ? (
                 <span key={i}>{seg.text}</span>
               ) : (
                 <ErrorSpan
@@ -99,7 +179,7 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
                   number={seg.number}
                   text={seg.text}
                   language={language}
-                  active={activeId === seg.error.id}
+                  active={shownActiveId === seg.error.id}
                   onSelect={(id) => handleSelect(id, "text")}
                 />
               ),
@@ -108,17 +188,26 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-3 lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto lg:pr-1">
-          {essay.corrections.map((error, i) => (
-            <CorrectionCard
-              key={error.id}
-              error={error}
-              number={i + 1}
-              text={text}
-              language={language}
-              active={activeId === error.id}
-              onSelect={(id) => handleSelect(id, "card")}
-            />
-          ))}
+          {essay.corrections.map((error, i) =>
+            hidden.has(error.category) ? null : (
+              <CorrectionCard
+                key={error.id}
+                error={error}
+                // Numbers come from the full list so they match the highlights
+                // and stay stable while categories are toggled.
+                number={i + 1}
+                text={text}
+                language={language}
+                active={shownActiveId === error.id}
+                onSelect={(id) => handleSelect(id, "card")}
+              />
+            ),
+          )}
+          {totalCount > 0 && visibleCount === 0 && (
+            <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+              {t("languageCheck.results.allHidden")}
+            </p>
+          )}
         </div>
       </div>
     </div>

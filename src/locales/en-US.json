@@ -4536,13 +4536,13 @@
       "retryConfirm": "Re-transcribing will replace the current transcript, including your edits. Continue?"
     },
     "review": {
-      "hint": "Compare the transcript with the original scan and fix any misread words. Keep the student's own mistakes — they are what gets checked.",
+      "hint": "Compare the transcript with the original scan and fix any misread words.",
       "scan": "Original scan",
       "transcript": "Transcript",
       "wordCount_one": "{{count}} word",
       "wordCount_other": "{{count}} words",
       "placeholder": "The transcript will appear here. You can also type or paste the essay.",
-      "paragraphHint": "Separate paragraphs with a blank line. Do not correct spelling or grammar here.",
+      "paragraphHint": "Separate paragraphs with a blank line.",
       "runCheck": "Run language check",
       "backToResults": "Back to results",
       "changedSince": "The transcript was edited after the last check. Run the check again to update the corrections.",
@@ -4581,6 +4581,12 @@
       "recheck": "Check again",
       "export": "Export .docx",
       "explanationLanguage": "Explanation language",
+      "hideCategory": "Hide {{category}}",
+      "showCategory": "Show {{category}}",
+      "showAll": "Show all",
+      "hideAll": "Hide all",
+      "showing": "Showing {{shown}} of {{total}}",
+      "allHidden": "All categories are hidden. Turn a category back on to see its corrections.",
       "noErrors": "No errors found",
       "noErrorsHint": "Nothing needed correcting. If you expected corrections, check that the transcript matches the handwriting exactly."
     },

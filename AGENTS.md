@@ -682,6 +682,7 @@ Standalone essay error-correction tool, reachable from the hamburger menu (`Sect
 - **Generation state is store-level** (`activeGenerations` keys `ocr` / `language-check`, module-level abort controllers, `generatingEssayId`) so it survives SPA navigation; results are saved against the essay **id** that started the job (never "whatever is open").
 - **Reset on account change**: `AuthProvider` calls `useLanguageCheckStore.getState().reset()` on sign-out and account switch (essays are per-account server data cached in-memory).
 - Popover is a hand-composed Radix `Popover` (no hover-card dependency): hover-intent for mouse, tap/Enter for touch/keyboard, `onOpenAutoFocus` prevented (no scroll jump), `onInteractOutside` ignores the anchor.
+- **Category filter** (`ResultsView`): the legend chips are `aria-pressed` toggle buttons backed by component-local `hidden` state (ephemeral view state — not persisted, reset on essay switch). Hidden categories are skipped at render time only; numbering always comes from the full `essay.corrections` index so highlights, cards and popovers keep matching numbers, and `exportLanguageCheckDocx` ignores the filter. Never filter `corrections` before `buildSegments` (it numbers by array index).
 - Transcript textarea and OCR output suppress spell-check/autocorrect (it is the proofreading target).
 
 ---

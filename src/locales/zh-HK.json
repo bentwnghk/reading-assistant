@@ -4564,12 +4564,12 @@
       "retryConfirm": "重新轉錄會取代目前的文字（包括你的修改）。是否繼續？"
     },
     "review": {
-      "hint": "請對照原稿核對轉錄文字，並修正辨識錯誤的字詞。請保留學生原有的錯誤，因為那正是檢查的對象。",
+      "hint": "請對照原稿核對轉錄文字，並修正辨識錯誤的字詞。",
       "scan": "原稿掃描",
       "transcript": "轉錄文字",
       "wordCount_other": "{{count}} 字",
       "placeholder": "轉錄文字會顯示在此。你亦可直接輸入或貼上作文。",
-      "paragraphHint": "請以空白行分隔段落。請勿在此更正拼寫或文法。",
+      "paragraphHint": "請以空白行分隔段落。",
       "runCheck": "開始語言檢查",
       "backToResults": "返回結果",
       "changedSince": "自上次檢查後文字已被修改。請重新檢查以更新更正內容。",
@@ -4606,6 +4606,12 @@
       "recheck": "重新檢查",
       "export": "匯出 .docx",
       "explanationLanguage": "說明語言",
+      "hideCategory": "隱藏「{{category}}」",
+      "showCategory": "顯示「{{category}}」",
+      "showAll": "全部顯示",
+      "hideAll": "全部隱藏",
+      "showing": "顯示 {{shown}} / {{total}} 項",
+      "allHidden": "所有類別均已隱藏，請重新開啟類別以查看更正。",
       "noErrors": "沒有發現錯誤",
       "noErrorsHint": "沒有需要更正的地方。如果你預期有更正，請檢查轉錄文字是否與手寫內容完全一致。"
     },
