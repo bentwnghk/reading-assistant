@@ -1,4 +1,4 @@
-import { getClient } from "./db"
+import { getClient, getPool } from "./db"
 import { ensureSchoolSubscriptionTables } from "./school-subscription"
 import { isFreeAccessEmail } from "./free-access"
 import { ensureTrialTable } from "./trial"
@@ -585,39 +585,47 @@ export async function getStudentUserIds(userIds: string[]): Promise<Set<string>>
 }
 
 export async function ensureUserRole(userId: string, email?: string | null): Promise<UserRole> {
-  const role = await getUserRole(userId, email)
-  
-  const client = await getClient()
-  try {
-    if (role === 'super-admin' || role === 'admin') {
-      try {
-        await client.query(
-          `INSERT INTO user_roles (user_id, role) VALUES ($1, $2)
-           ON CONFLICT (user_id) DO UPDATE SET role = $2`,
-          [userId, role]
-        )
-      } catch {
-        // If INSERT fails (e.g., check constraint not updated), role is still valid
-        // based on email configuration
-      }
-    } else {
-      const existingResult = await client.query(
-        'SELECT role FROM user_roles WHERE user_id = $1',
-        [userId]
+  // Env-configured admins: the role is known without a DB read. Upsert only
+  // when the stored row differs so the hot path (every authenticated request)
+  // is a no-write statement instead of an unconditional UPDATE.
+  const configuredRole: UserRole | null =
+    email && isSuperAdminEmail(email)
+      ? 'super-admin'
+      : email && isAdminEmail(email)
+        ? 'admin'
+        : null
+
+  if (configuredRole) {
+    try {
+      await getPool().query(
+        `INSERT INTO user_roles (user_id, role) VALUES ($1, $2)
+         ON CONFLICT (user_id) DO UPDATE SET role = EXCLUDED.role
+         WHERE user_roles.role IS DISTINCT FROM EXCLUDED.role`,
+        [userId, configuredRole]
       )
-      
-      if (existingResult.rows.length === 0) {
-        await client.query(
-          `INSERT INTO user_roles (user_id, role) VALUES ($1, 'student')`,
-          [userId]
-        )
-      }
+    } catch {
+      // If INSERT fails (e.g., check constraint not updated), role is still valid
+      // based on email configuration
     }
-    
-    return role
-  } finally {
-    client.release()
+    return configuredRole
   }
+
+  // Everyone else: ONE read in the common case (the row exists). The insert
+  // only runs for brand-new users, and DO NOTHING keeps it race-safe.
+  const pool = getPool()
+  const existing = await pool.query(
+    'SELECT role FROM user_roles WHERE user_id = $1',
+    [userId]
+  )
+  if (existing.rows.length > 0) {
+    return existing.rows[0].role as UserRole
+  }
+  await pool.query(
+    `INSERT INTO user_roles (user_id, role) VALUES ($1, 'student')
+     ON CONFLICT (user_id) DO NOTHING`,
+    [userId]
+  )
+  return 'student'
 }
 
 export async function setUserRole(userId: string, role: UserRole): Promise<boolean> {
@@ -836,24 +844,79 @@ export async function getOrCreateSchoolByDomain(domain: string): Promise<SchoolI
   }
 }
 
+// Domain-school auto-assignment is idempotent and only changes state for a
+// user who has no school and wasn't manually removed. Once it has run for a
+// user it is a no-op until an admin reassigns them, so remember that for a
+// while instead of re-running two write statements on every request.
+const SCHOOL_PROVISION_TTL_MS = 10 * 60 * 1000
+const SCHOOL_PROVISION_MAX_ENTRIES = 5000
+const schoolProvisionedUntil = new Map<string, number>()
+
+export function invalidateSchoolProvisioning(userId?: string): void {
+  if (userId) schoolProvisionedUntil.delete(userId)
+  else schoolProvisionedUntil.clear()
+}
+
 export async function ensureUserSchool(userId: string, email: string): Promise<void> {
+  const now = Date.now()
+  const until = schoolProvisionedUntil.get(userId)
+  if (until && until > now) return
+
   await ensureSchoolManuallyRemovedColumn()
   const atIndex = email.indexOf('@')
   if (atIndex === -1) return
   const domain = email.slice(atIndex + 1).toLowerCase()
   if (!domain) return
 
-  const school = await getOrCreateSchoolByDomain(domain)
+  // One round trip: upsert the domain's school and attach it if the user has
+  // none (same semantics as getOrCreateSchoolByDomain + the guarded UPDATE).
+  await getPool().query(
+    `WITH school AS (
+       INSERT INTO schools (name, domain)
+       VALUES ($1, $1)
+       ON CONFLICT (domain) DO UPDATE SET domain = EXCLUDED.domain
+       RETURNING id
+     )
+     UPDATE users SET school_id = (SELECT id FROM school)
+     WHERE id = $2 AND school_id IS NULL AND school_manually_removed = FALSE`,
+    [domain, userId]
+  )
 
-  const client = await getClient()
-  try {
-    await client.query(
-      `UPDATE users SET school_id = $1 WHERE id = $2 AND school_id IS NULL AND school_manually_removed = FALSE`,
-      [school.id, userId]
-    )
-  } finally {
-    client.release()
+  if (schoolProvisionedUntil.size >= SCHOOL_PROVISION_MAX_ENTRIES) {
+    for (const [key, expiry] of schoolProvisionedUntil) {
+      if (expiry <= now) schoolProvisionedUntil.delete(key)
+    }
+    if (schoolProvisionedUntil.size >= SCHOOL_PROVISION_MAX_ENTRIES) {
+      schoolProvisionedUntil.clear()
+    }
   }
+  schoolProvisionedUntil.set(userId, now + SCHOOL_PROVISION_TTL_MS)
+}
+
+// Sign-in fires ~7 authenticated API requests at once and each runs the
+// NextAuth session callback. Overlapping calls for the same user share one
+// provisioning pass (nothing is cached after it settles, so role changes
+// still take effect on the very next request).
+const inflightProvisioning = new Map<string, Promise<UserRole>>()
+
+export function provisionSessionUser(
+  userId: string,
+  email?: string | null
+): Promise<UserRole> {
+  const key = `${userId}:${email ?? ''}`
+  const inflight = inflightProvisioning.get(key)
+  if (inflight) return inflight
+
+  const promise = Promise.all([
+    ensureUserRole(userId, email),
+    email ? ensureUserSchool(userId, email) : Promise.resolve(),
+  ])
+    .then(([role]) => role)
+    .finally(() => {
+      inflightProvisioning.delete(key)
+    })
+  inflightProvisioning.set(key, promise)
+  return promise
 }
 
 export async function getAllSchools(): Promise<SchoolInfo[]> {
@@ -921,6 +984,8 @@ export async function deleteSchool(schoolId: string): Promise<boolean> {
       `DELETE FROM schools WHERE id = $1`,
       [schoolId]
     )
+    // Users were un-assigned by the FK; let them be re-provisioned.
+    invalidateSchoolProvisioning()
     return (result.rowCount ?? 0) > 0
   } finally {
     client.release()
@@ -934,6 +999,7 @@ export async function assignUserSchool(userId: string, schoolId: string | null):
       `UPDATE users SET school_id = $1, school_manually_removed = FALSE WHERE id = $2`,
       [schoolId, userId]
     )
+    invalidateSchoolProvisioning(userId)
     return (result.rowCount ?? 0) > 0
   } finally {
     client.release()

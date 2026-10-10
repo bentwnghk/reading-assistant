@@ -194,6 +194,7 @@ CREATE TABLE reading_images (
 CREATE INDEX idx_reading_sessions_user_id ON reading_sessions(user_id);
 CREATE INDEX idx_reading_sessions_created_at ON reading_sessions(created_at DESC);
 CREATE INDEX idx_reading_sessions_updated_at ON reading_sessions(updated_at DESC);
+CREATE INDEX idx_reading_sessions_user_updated ON reading_sessions(user_id, updated_at DESC);
 
 CREATE INDEX idx_reading_images_session_id ON reading_images(session_id);
 CREATE INDEX idx_reading_images_user_id ON reading_images(user_id);

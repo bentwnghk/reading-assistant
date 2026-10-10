@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "pg"
 import type { NextAuthConfig } from "next-auth"
-import { ensureUserRole, ensureUserSchool, isUserBanned, refreshGoogleProfile, type UserRole } from "@/lib/users"
+import { provisionSessionUser, isUserBanned, refreshGoogleProfile, type UserRole } from "@/lib/users"
 import { authConfig } from "@/auth.config"
 import { enforceConcurrentSessionLimit } from "@/lib/session-security"
 
@@ -48,12 +48,9 @@ export const config: NextAuthConfig = {
     async session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id
-        const role = await ensureUserRole(user.id, user.email)
-        session.user.role = role
-        // Auto-assign school based on email domain (only if not already assigned)
-        if (user.email) {
-          await ensureUserSchool(user.id, user.email)
-        }
+        // Role + domain-school provisioning run concurrently and are
+        // coalesced across the parallel requests fired at sign-in.
+        session.user.role = await provisionSessionUser(user.id, user.email)
       }
       return session
     },

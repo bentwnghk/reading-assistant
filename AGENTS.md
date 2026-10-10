@@ -217,6 +217,8 @@ The project uses **PostgreSQL 16** as its primary database.
 - **Data Access**: Server-side queries live in `src/lib/*.ts` files. All database operations should go through these modules, not raw SQL in API routes.
 - **Migrations**: SQL migration files in `scripts/` (e.g., `init-db.sql`, `add-subscriptions.sql`, `migrate-ai-models.sql`). Apply migrations manually in order.
 - **Auth Storage**: next-auth uses the `@auth/pg-adapter` with its own schema managed by the adapter.
+- **Session-callback cost**: the NextAuth `session` callback runs on every `auth()` call, and sign-in fires ~7 authenticated requests at once. `auth.ts` therefore calls `provisionSessionUser` (`src/lib/users.ts`), which runs role + domain-school provisioning concurrently, coalesces overlapping calls per user, and TTL-caches the (idempotent) school assignment — `invalidateSchoolProvisioning` must be called by any code that changes `users.school_id` outside `ensureUserSchool`. Keep this callback to the minimum number of queries.
+- **Session list index**: `GET /api/sessions` relies on `idx_reading_sessions_user_updated (user_id, updated_at DESC)` (`scripts/add-reading-sessions-user-updated-index.sql`).
 
 ---
 
