@@ -240,7 +240,7 @@ export async function listStaffEssays(
     pageSize: number
     userId?: string
     status?: LanguageCheckStatus
-    /** Free-text search over student name/email and essay title. */
+    /** Free-text search over essay titles only (students filter via userId). */
     q?: string
   },
 ): Promise<{
@@ -259,15 +259,7 @@ export async function listStaffEssays(
   }
   if (opts.userId) add("e.user_id = @", opts.userId)
   if (opts.status) add("e.status = @", opts.status)
-  if (opts.q) {
-    const pattern = `%${opts.q}%`
-    add(
-      "(u.name ILIKE @ OR u.email ILIKE @ OR e.title ILIKE @)",
-      pattern,
-      pattern,
-      pattern,
-    )
-  }
+  if (opts.q) add("e.title ILIKE @", `%${opts.q}%`)
   const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
 
   // Stats and the student filter reflect the scope only (not page filters), so
