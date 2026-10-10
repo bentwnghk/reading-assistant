@@ -268,6 +268,11 @@ export default function useLanguageCheck() {
 
     const { languageCheckModel } = useSettingStore.getState();
     const ac = getLanguageCheckAbort("language-check");
+    // Persistent toast for the whole run; replaced in place on completion, so
+    // the check stays visible even if the user navigates away mid-run.
+    const progressToastId = toast.loading(
+      i18next.t("languageCheck.check.working"),
+    );
     store.setGenerating("language-check", true);
     store.setGeneratingEssayId(essayId);
 
@@ -308,7 +313,9 @@ export default function useLanguageCheck() {
       });
 
       if (errors.length === 0) {
-        toast.success(i18next.t("languageCheck.check.noErrors"));
+        toast.success(i18next.t("languageCheck.check.noErrors"), {
+          id: progressToastId,
+        });
       } else {
         const suggestions = errors.filter((e) =>
           isExpressionCategory(e.category),
@@ -318,15 +325,18 @@ export default function useLanguageCheck() {
             errors: errors.length - suggestions,
             suggestions,
           }),
+          { id: progressToastId },
         );
       }
       return true;
     } catch (error) {
       if (isAbortError(error) || ac.signal.aborted) {
-        toast.warning(i18next.t("languageCheck.cancelled"));
+        toast.warning(i18next.t("languageCheck.cancelled"), {
+          id: progressToastId,
+        });
       } else {
         console.error("Language check failed:", error);
-        toast.error(parseError(error));
+        toast.error(parseError(error), { id: progressToastId });
       }
       return false;
     } finally {
