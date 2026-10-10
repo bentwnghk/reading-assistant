@@ -24,6 +24,7 @@ import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { parseError } from "@/utils/error";
+import { STATUS_TONE } from "@/components/LanguageCheck/shared";
 import {
   LANGUAGE_CHECK_MAX_PAGES,
   LANGUAGE_CHECK_RETENTION_DAYS,
@@ -34,12 +35,6 @@ interface EssayListProps {
   onFiles: (files: File[]) => void;
   onOpen: (id: string) => void;
 }
-
-const STATUS_TONE: Record<LanguageCheckEssaySummary["status"], string> = {
-  draft: "bg-muted text-muted-foreground",
-  transcribed: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-  checked: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
-};
 
 /** Upload zone + saved essays. */
 export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps) {

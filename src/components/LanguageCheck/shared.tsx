@@ -10,6 +10,13 @@ import {
 import { diffChanges } from "@/utils/languageCheck";
 import type { ExplanationLanguage } from "@/store/languageCheck";
 
+/** Status pill colours shared by the personal list and the staff log. */
+export const STATUS_TONE: Record<"draft" | "transcribed" | "checked", string> = {
+  draft: "bg-muted text-muted-foreground",
+  transcribed: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+  checked: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
+};
+
 export function categoryStyle(category: string): CategoryStyle {
   return (
     LANGUAGE_CHECK_CATEGORY_STYLES[category as LanguageCheckCategory] ??

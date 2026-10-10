@@ -1,4 +1,5 @@
 import { getPool } from "./db"
+import { getSchoolForUser } from "./users"
 import {
   LANGUAGE_CHECK_MAX_ESSAYS,
   LANGUAGE_CHECK_RETENTION_DAYS,
@@ -168,4 +169,225 @@ export async function deleteEssay(
     [id, userId],
   )
   return (result.rowCount ?? 0) > 0
+}
+
+// ─── Staff essay log (teachers / admins / super-admins) ─────────────────────
+
+export type LanguageCheckStaffScope =
+  | { kind: "all" }
+  | { kind: "school"; schoolId: string }
+  | { kind: "teacher"; teacherId: string }
+
+export function isStaffRole(role: string | null | undefined): boolean {
+  return role === "teacher" || role === "admin" || role === "super-admin"
+}
+
+/**
+ * Resolve the essay-visibility scope for a staff session:
+ * teacher → students in their classes, admin → their school,
+ * super-admin → everyone. Returns null for students (no staff access).
+ */
+export async function resolveStaffScope(
+  role: string | null | undefined,
+  userId: string,
+): Promise<LanguageCheckStaffScope | null> {
+  if (role === "super-admin") return { kind: "all" }
+  if (role === "admin") {
+    const schoolId = await getSchoolForUser(userId)
+    return { kind: "school", schoolId: schoolId ?? "" }
+  }
+  if (role === "teacher") return { kind: "teacher", teacherId: userId }
+  return null
+}
+
+/**
+ * Builds role-scoped WHERE fragments over the aliases used by the staff
+ * queries (`e` = language_check_essays, `u` = users). "@" placeholders are
+ * replaced with sequential $N params.
+ */
+function scopeConditions(
+  scope: LanguageCheckStaffScope,
+): { clauses: string[]; params: unknown[] } {
+  const clauses: string[] = []
+  const params: unknown[] = []
+  const add = (sql: string, ...values: unknown[]) => {
+    let i = 0
+    clauses.push(sql.replace(/@/g, () => `$${params.length + 1 + i++}`))
+    params.push(...values)
+  }
+  if (scope.kind === "teacher") {
+    add(
+      `EXISTS (
+        SELECT 1 FROM class_members scm
+        JOIN classes sc ON sc.id = scm.class_id
+        WHERE scm.student_id = e.user_id AND sc.teacher_id = @
+      )`,
+      scope.teacherId,
+    )
+  } else if (scope.kind === "school") {
+    add("u.school_id = @", scope.schoolId)
+  }
+  return { clauses, params }
+}
+
+const STAFF_FROM = `FROM language_check_essays e JOIN users u ON u.id = e.user_id`
+
+/** Lightweight staff list: no images/transcript/corrections payloads. */
+export async function listStaffEssays(
+  scope: LanguageCheckStaffScope,
+  opts: {
+    page: number
+    pageSize: number
+    userId?: string
+    status?: LanguageCheckStatus
+  },
+): Promise<{
+  rows: LanguageCheckStaffRow[]
+  total: number
+  stats: LanguageCheckStaffStats
+  users: LanguageCheckStaffUser[]
+}> {
+  await deleteExpiredEssays()
+
+  const { clauses, params } = scopeConditions(scope)
+  const add = (sql: string, ...values: unknown[]) => {
+    let i = 0
+    clauses.push(sql.replace(/@/g, () => `$${params.length + 1 + i++}`))
+    params.push(...values)
+  }
+  if (opts.userId) add("e.user_id = @", opts.userId)
+  if (opts.status) add("e.status = @", opts.status)
+  const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
+
+  // Stats and the student filter reflect the scope only (not page filters), so
+  // the dropdown and cards stay stable while paging/filtering.
+  const scopeOnly = scopeConditions(scope)
+  const scopeWhere =
+    scopeOnly.clauses.length > 0
+      ? `WHERE ${scopeOnly.clauses.join(" AND ")}`
+      : ""
+
+  const [listRes, countRes, statsRes, usersRes] = await Promise.all([
+    getPool().query(
+      `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
+              e.user_id, u.name AS user_name, u.email AS user_email,
+              jsonb_array_length(e.images) AS page_count,
+              jsonb_array_length(e.corrections) AS error_count
+       ${STAFF_FROM}
+       ${where}
+       ORDER BY e.updated_at DESC
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, opts.pageSize, (opts.page - 1) * opts.pageSize],
+    ),
+    getPool().query(
+      `SELECT COUNT(*)::int AS n ${STAFF_FROM} ${where}`,
+      params,
+    ),
+    getPool().query(
+      `SELECT COUNT(*)::int AS total,
+              COUNT(*) FILTER (WHERE e.status = 'checked')::int AS checked,
+              COUNT(*) FILTER (WHERE e.status = 'transcribed')::int AS transcribed,
+              COUNT(*) FILTER (WHERE e.status = 'draft')::int AS draft,
+              COUNT(DISTINCT e.user_id)::int AS students,
+              COALESCE(SUM(jsonb_array_length(e.images)), 0)::int AS pages,
+              COALESCE(SUM(jsonb_array_length(e.corrections)), 0)::int AS corrections
+       ${STAFF_FROM}
+       ${scopeWhere}`,
+      scopeOnly.params,
+    ),
+    getPool().query(
+      `SELECT e.user_id AS id, u.name, u.email
+       ${STAFF_FROM}
+       ${scopeWhere}
+       GROUP BY e.user_id, u.name, u.email
+       ORDER BY u.name
+       LIMIT 1000`,
+      scopeOnly.params,
+    ),
+  ])
+
+  return {
+    rows: listRes.rows.map(
+      (row: Record<string, unknown>): LanguageCheckStaffRow => ({
+        id: row.id as string,
+        userId: row.user_id as string,
+        userName: (row.user_name as string) || (row.user_email as string) || "",
+        userEmail: (row.user_email as string) || "",
+        title: (row.title as string) || "",
+        status: row.status as LanguageCheckStaffRow["status"],
+        pageCount: Number(row.page_count) || 0,
+        errorCount: Number(row.error_count) || 0,
+        createdAt: toMs(row.created_at),
+        updatedAt: toMs(row.updated_at),
+      }),
+    ),
+    total: Number(countRes.rows[0]?.n) || 0,
+    stats: {
+      total: Number(statsRes.rows[0]?.total) || 0,
+      checked: Number(statsRes.rows[0]?.checked) || 0,
+      transcribed: Number(statsRes.rows[0]?.transcribed) || 0,
+      draft: Number(statsRes.rows[0]?.draft) || 0,
+      students: Number(statsRes.rows[0]?.students) || 0,
+      pages: Number(statsRes.rows[0]?.pages) || 0,
+      corrections: Number(statsRes.rows[0]?.corrections) || 0,
+    },
+    users: usersRes.rows.map(
+      (row: Record<string, unknown>): LanguageCheckStaffUser => ({
+        id: row.id as string,
+        name: (row.name as string) || (row.email as string) || "",
+        email: (row.email as string) || "",
+      }),
+    ),
+  }
+}
+
+/**
+ * Read-only staff view of one essay (transcript + corrections). Scans
+ * (images) are never selected — staff see the text, not the original pages.
+ */
+export async function getStaffEssay(
+  scope: LanguageCheckStaffScope,
+  id: string,
+): Promise<LanguageCheckStaffDetail | null> {
+  const { clauses, params } = scopeConditions(scope)
+  const add = (sql: string, ...values: unknown[]) => {
+    let i = 0
+    clauses.push(sql.replace(/@/g, () => `$${params.length + 1 + i++}`))
+    params.push(...values)
+  }
+  add("e.id = @", id)
+  add(
+    "e.created_at >= now() - make_interval(days => @)",
+    LANGUAGE_CHECK_RETENTION_DAYS,
+  )
+  const { rows } = await getPool().query(
+    `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
+            e.user_id, u.name AS user_name, u.email AS user_email,
+            e.transcript, e.checked_text, e.corrections,
+            e.ocr_model, e.check_model, e.dropped_count,
+            jsonb_array_length(e.images) AS page_count
+     ${STAFF_FROM}
+     WHERE ${clauses.join(" AND ")}`,
+    params,
+  )
+  const row = rows[0]
+  if (!row) return null
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    userName: (row.user_name as string) || (row.user_email as string) || "",
+    userEmail: (row.user_email as string) || "",
+    title: (row.title as string) || "",
+    status: row.status as LanguageCheckStaffDetail["status"],
+    pageCount: Number(row.page_count) || 0,
+    errorCount: arrayOf<LanguageCheckError>(row.corrections).length,
+    createdAt: toMs(row.created_at),
+    updatedAt: toMs(row.updated_at),
+    transcript: (row.transcript as string) || "",
+    checkedText: (row.checked_text as string) || "",
+    corrections: arrayOf<LanguageCheckError>(row.corrections),
+    ocrModel: (row.ocr_model as string) || "",
+    checkModel: (row.check_model as string) || "",
+    droppedCount: Number(row.dropped_count) || 0,
+  }
 }

@@ -1161,3 +1161,47 @@ interface LanguageCheckEssay {
   createdAt: number;
   updatedAt: number;
 }
+
+// ─── Staff essay log (teachers / admins / super-admins) ──────────────────────
+
+/** Student/user summary for the staff essay-log filter dropdown. */
+interface LanguageCheckStaffUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+/** Scope-wide totals for the staff essay log. */
+interface LanguageCheckStaffStats {
+  total: number;
+  checked: number;
+  transcribed: number;
+  draft: number;
+  students: number;
+  pages: number;
+  corrections: number;
+}
+
+/** One row of the staff essay log (lightweight; no scans, transcript or corrections). */
+interface LanguageCheckStaffRow {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  title: string;
+  status: "draft" | "transcribed" | "checked";
+  pageCount: number;
+  errorCount: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** Read-only staff view of one essay. Scans (images) are never included. */
+interface LanguageCheckStaffDetail extends LanguageCheckStaffRow {
+  transcript: string;
+  checkedText: string;
+  corrections: LanguageCheckError[];
+  ocrModel: string;
+  checkModel: string;
+  droppedCount: number;
+}

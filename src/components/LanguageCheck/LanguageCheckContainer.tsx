@@ -27,6 +27,7 @@ import EssayList from "@/components/LanguageCheck/EssayList";
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
+import StaffEssayLog from "@/components/LanguageCheck/StaffEssayLog";
 import { useCategoryLabel } from "@/components/LanguageCheck/shared";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
 import {
@@ -132,7 +133,13 @@ export default function LanguageCheckContainer() {
   }
 
   if (!active) {
-    return <EssayList preparing={preparing} onFiles={handleFiles} onOpen={handleOpen} />;
+    return (
+      <div className="flex flex-col gap-6">
+        <EssayList preparing={preparing} onFiles={handleFiles} onOpen={handleOpen} />
+        {/* Renders nothing for students; staff see a scoped activity log. */}
+        <StaffEssayLog />
+      </div>
+    );
   }
 
   // key: reset the local view state when a different essay is opened.
