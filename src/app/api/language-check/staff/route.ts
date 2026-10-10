@@ -14,6 +14,7 @@ const querySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   userId: z.string().min(1).optional(),
   status: z.enum(LANGUAGE_CHECK_STATUSES).optional(),
+  q: z.string().trim().min(1).max(100).optional(),
 })
 
 /** Staff essay log: scoped list + scope-wide stats + student filter options. */

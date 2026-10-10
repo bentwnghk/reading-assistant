@@ -65,7 +65,7 @@ export function formatClassLabel(c: { name: string; subjectName?: string; gradeN
  * "s4"). Require every whitespace-separated search token to appear as a
  * substring of the item value instead.
  */
-function commandFilter(value: string, search: string): number {
+export function commandFilter(value: string, search: string): number {
   const tokens = search.toLowerCase().trim().split(/\s+/).filter(Boolean)
   if (tokens.length === 0) return 1
   const v = value.toLowerCase()

@@ -9,9 +9,11 @@ import {
   Eye,
   LoaderCircle,
   RefreshCw,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -28,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
+import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
 import { STATUS_TONE } from "@/components/LanguageCheck/shared";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { cn } from "@/utils/style";
@@ -65,8 +68,20 @@ export default function StaffEssayLog() {
   const [pageSize, setPageSize] = useState(20);
   const [userId, setUserId] = useState("all");
   const [status, setStatus] = useState("all");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
   const [detail, setDetail] = useState<LanguageCheckStaffDetail | null>(null);
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
+
+  // Debounce the free-text search so typing doesn't fire a request per key.
+  useEffect(() => {
+    const value = searchInput.trim();
+    const timer = window.setTimeout(() => {
+      setSearch(value);
+      setPage(1);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -77,6 +92,7 @@ export default function StaffEssayLog() {
       });
       if (userId !== "all") params.set("userId", userId);
       if (status !== "all") params.set("status", status);
+      if (search) params.set("q", search);
       const res = await fetch(`/api/language-check/staff?${params.toString()}`);
       const body = await res.json().catch(() => null);
       if (!res.ok) {
@@ -88,7 +104,7 @@ export default function StaffEssayLog() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, userId, status]);
+  }, [page, pageSize, userId, status, search]);
 
   useEffect(() => {
     void load();
@@ -127,7 +143,7 @@ export default function StaffEssayLog() {
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const safePage = Math.min(page, totalPages);
-  const hasFilters = userId !== "all" || status !== "all";
+  const hasFilters = userId !== "all" || status !== "all" || search !== "";
 
   const statCards: { label: string; value: number | undefined }[] = [
     { label: t("languageCheck.staff.statEssays"), value: stats?.total },
@@ -174,27 +190,20 @@ export default function StaffEssayLog() {
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Select
-          value={userId}
-          onValueChange={(v) => {
-            setUserId(v);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="h-9 w-56" aria-label={t("languageCheck.staff.filterStudent")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">
-              {t("languageCheck.staff.allStudents")}
-            </SelectItem>
-            {users.map((user) => (
-              <SelectItem key={user.id} value={user.id}>
-                {user.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-56">
+          <StudentCombobox
+            users={users}
+            value={userId === "all" ? null : userId}
+            onChange={(v) => {
+              setUserId(v ?? "all");
+              setPage(1);
+            }}
+            placeholder={t("languageCheck.staff.allStudents")}
+            allLabel={t("languageCheck.staff.allStudents")}
+            emptyLabel={t("languageCheck.staff.noStudents")}
+            searchPlaceholder={t("languageCheck.staff.searchStudents")}
+          />
+        </div>
         <Select
           value={status}
           onValueChange={(v) => {
@@ -216,6 +225,15 @@ export default function StaffEssayLog() {
             ))}
           </SelectContent>
         </Select>
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("languageCheck.staff.search")}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-64 pl-8"
+          />
+        </div>
       </div>
 
       {loading && !data ? (
