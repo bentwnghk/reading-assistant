@@ -4588,9 +4588,7 @@
     },
     "check": {
       "working": "檢查中…",
-      "etaSeconds_other": "約剩 {{count}} 秒",
-      "etaMinutes_other": "約剩 {{count}} 分鐘",
-      "etaDone": "即將完成，正在儲存結果…",
+      "waitHint": "可能需要 1 至 2 分鐘。",
       "noText": "沒有可檢查的文字。",
       "parseError": "AI 傳回的結果無法讀取，請重試。",
       "noErrors": "沒有發現語言錯誤。",
