@@ -4562,6 +4562,11 @@
     },
     "check": {
       "working": "Checking…",
+      "etaSeconds_one": "About {{count}} second remaining",
+      "etaSeconds_other": "About {{count}} seconds remaining",
+      "etaMinutes_one": "About {{count}} minute remaining",
+      "etaMinutes_other": "About {{count}} minutes remaining",
+      "etaDone": "Almost done — saving the results…",
       "noText": "There is no text to check.",
       "parseError": "The AI returned an unreadable result. Please try again.",
       "noErrors": "No language errors found.",
