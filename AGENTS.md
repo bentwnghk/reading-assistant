@@ -662,7 +662,7 @@ Activity types added: `assignment_create`, `assignment_start`, `assignment_submi
 
 Standalone essay error-correction tool, reachable from the hamburger menu (`SectionNavSheet` → `pageLinks[]`). **Independent of reading sessions**: own table, store, API, hook and components — it must never read/write `reading.ts`, `history.ts` or `reading_sessions`.
 
-**Flow**: upload images/PDF → `downscaleImage` (`utils/image.ts`, ≤2000px JPEG) → `POST /api/language-check` → vision-model OCR (`visionModel` setting, **verbatim** prompt `extractHandwrittenEssayPrompt` + `transcriberSystemPrompt`, one call per page, never a teacher system prompt so mistakes are not fixed) → user reviews transcript beside the zoomable scan (`ReviewStage`) → `runCheck` with `languageCheckModel` → inline highlights + popover + side cards (`ResultsView`, `ErrorSpan`, `CorrectionCard`) → optional `.docx` export.
+**Flow**: upload images/PDF → `downscaleImage` (`utils/image.ts`, ≤2000px JPEG) → `POST /api/language-check` → vision-model OCR (`ocrModel` setting — separate from `visionModel`, which stays on reading-assistant uploads; NOT in `RESTRICTED_MODEL_FIELD_NAMES`, so Claude options are selectable by everyone; see §G: introduced with no migration via `user_settings` JSONB + `validateSettings` default; `scripts/migrate-vision-ocr-default-gpt-6-luna.sql` later forced both it and `visionModel` to the `gpt-6-luna` default) with the **verbatim** prompt `extractHandwrittenEssayPrompt` + `transcriberSystemPrompt`, one call per page, never a teacher system prompt so mistakes are not fixed → user reviews transcript beside the zoomable scan (`ReviewStage`) → `runCheck` with `languageCheckModel` → inline highlights + popover + side cards (`ResultsView`, `ErrorSpan`, `CorrectionCard`) → optional `.docx` export.
 
 | Piece | Location |
 |-------|----------|
@@ -673,7 +673,7 @@ Standalone essay error-correction tool, reachable from the hamburger menu (`Sect
 | Store (cache + generation state; only `explanationLanguage` persisted) | `src/store/languageCheck.ts` |
 | Data access / API | `src/lib/language-check.ts`; `/api/language-check`, `/api/language-check/[id]` |
 | Docx export | `src/utils/languageCheckExport.ts` |
-| Setting | `languageCheckModel` (`READING_TEXT_MODELS`, default `gpt-6.1-sol`; in `RESTRICTED_MODEL_FIELD_NAMES`) |
+| Setting | `ocrModel` (`OCR_MODELS` = claude-haiku-5-5, claude-sonnet-5-5 + `VISION_MODELS`; default `gpt-6-luna`) for transcription, `languageCheckModel` (`READING_TEXT_MODELS`, default `gpt-6.1-sol`; in `RESTRICTED_MODEL_FIELD_NAMES`) for the check |
 
 **Database**: `language_check_essays` (`scripts/add-language-check.sql` + `init-db.sql`). Columns: `images` JSONB (downscaled JPEG data URLs), `transcript`, `status` (`draft`/`transcribed`/`checked`), `checked_text` (snapshot the offsets refer to), `corrections` JSONB (`LanguageCheckError[]`), `ocr_model`, `check_model`, `dropped_count`. `listEssays` never selects images/transcript/corrections (lightweight/full split, like the history store). Caps: 100 essays/user, 10 pages/essay, ~3.5M chars/page.
 

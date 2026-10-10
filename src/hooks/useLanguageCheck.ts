@@ -71,7 +71,7 @@ export default function useLanguageCheck() {
     const essay = store.active;
     if (!essay || essay.id !== essayId || essay.images.length === 0) return;
 
-    const { visionModel } = useSettingStore.getState();
+    const { ocrModel } = useSettingStore.getState();
     const verify = useLanguageCheckStore.getState().verifyTranscription;
     const ac = getLanguageCheckAbort("ocr");
     store.setGenerating("ocr", true);
@@ -83,7 +83,7 @@ export default function useLanguageCheck() {
     const pages: string[] = [];
     let restored = 0;
     try {
-      const model = await createModelProvider(visionModel);
+      const model = await createModelProvider(ocrModel);
       for (let i = 0; i < essay.images.length; i++) {
         if (ac.signal.aborted) throw new DOMException("Aborted", "AbortError");
         useLanguageCheckStore
@@ -185,7 +185,7 @@ export default function useLanguageCheck() {
         transcript,
         title,
         status: "transcribed",
-        ocrModel: visionModel,
+        ocrModel,
         // New transcript invalidates any earlier check.
         checkedText: "",
         corrections: [],

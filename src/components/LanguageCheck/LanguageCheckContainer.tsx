@@ -104,7 +104,7 @@ export default function LanguageCheckContainer() {
         toast.error(t("languageCheck.upload.tooManyPages", { max: LANGUAGE_CHECK_MAX_PAGES }));
         return;
       }
-      const essay = await create(pages, useSettingStore.getState().visionModel);
+      const essay = await create(pages, useSettingStore.getState().ocrModel);
       // Fire and forget: progress/state live in the store, so it survives navigation.
       void transcribe(essay.id);
     } catch (error) {

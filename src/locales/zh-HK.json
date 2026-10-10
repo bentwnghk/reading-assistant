@@ -3042,6 +3042,7 @@
     "tabTTS": "語音",
     "model": "模型",
     "visionModel": "視覺模型",
+    "ocrModel": "OCR 模型（語言檢查）",
     "imageModel": "視覺化模型",
     "prereadingModel": "讀前模型",
     "summaryModel": "摘要模型",

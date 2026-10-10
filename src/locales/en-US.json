@@ -3012,6 +3012,7 @@
     "tabTTS": "TTS",
     "model": "Model",
     "visionModel": "Vision Model",
+    "ocrModel": "OCR Model (Language Check)",
     "imageModel": "Visualization Model",
     "prereadingModel": "Pre-reading Model",
     "summaryModel": "Summary Model",

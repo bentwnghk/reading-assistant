@@ -21,7 +21,7 @@ export function isDeepSeekFlashModel(model: string) {
  *  parameter ("temperature is deprecated for this model"), so it must be
  *  stripped from request bodies — the AI SDK defaults it to 0. */
 export function isTemperatureUnsupportedModel(model: string) {
-  return model.startsWith("claude-sonnet-5");
+  return model.startsWith("claude-sonnet-5") || model.startsWith("claude-haiku-5");
 }
 
 export function isThinkingModel(model: string) {

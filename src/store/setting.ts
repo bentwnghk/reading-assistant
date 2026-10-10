@@ -14,6 +14,20 @@ export const VISION_MODELS = ["gpt-5.6-luna", "gpt-6-luna"] as const;
 
 export type VisionModel = (typeof VISION_MODELS)[number];
 
+/**
+ * OCR model for Language Check transcription, separate from visionModel
+ * (which OCRs reading-assistant uploads). Claude models are included on
+ * purpose and the field is NOT in RESTRICTED_MODEL_FIELD_NAMES, so every
+ * user can pick them.
+ */
+export const OCR_MODELS = [
+  "claude-haiku-5-5",
+  "claude-sonnet-5-5",
+  ...VISION_MODELS,
+] as const;
+
+export type OcrModel = (typeof OCR_MODELS)[number];
+
 export const IMAGE_MODELS = [
   "google/gemini-3.1-flash-lite-image",
   "x-ai/grok-imagine-image-2.0",
@@ -212,6 +226,7 @@ export interface SettingStore {
   provider: string;
   mode: ApiMode;
   visionModel: VisionModel;
+  ocrModel: OcrModel;
   imageModel: ImageModel;
   prereadingModel: AvailableModel;
   summaryModel: AvailableModel;
@@ -366,7 +381,8 @@ function debouncedSync(settings: Partial<SettingStore>) {
 export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
-  visionModel: "gpt-5.6-luna",
+  visionModel: "gpt-6-luna",
+  ocrModel: "gpt-6-luna",
   imageModel: "google/gemini-3.1-flash-lite-image",
   prereadingModel: "gpt-6-luna",
   summaryModel: "deepseek-flash",
@@ -445,6 +461,9 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   }
   if (!VISION_MODELS.includes(state.visionModel as VisionModel)) {
     state.visionModel = defaultValues.visionModel;
+  }
+  if (!OCR_MODELS.includes(state.ocrModel as OcrModel)) {
+    state.ocrModel = defaultValues.ocrModel;
   }
   if (!IMAGE_MODELS.includes(state.imageModel as ImageModel)) {
     state.imageModel = defaultValues.imageModel;

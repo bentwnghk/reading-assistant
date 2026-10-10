@@ -914,7 +914,7 @@ body.toc-noscroll{overflow:hidden}
       <p>「<b>視覺化模型</b>」一列選擇文本視覺化（§4.7）所用的圖像生成器。該列中標有 <b>‡</b> 的模型為<b>高級圖像模型</b>——僅在<b>管理員／超級管理員</b>及<b>計量（API 金鑰）</b>用戶的下拉選單中出現；其他帳戶不會看到，生成時亦會自動改用預設模型。</p>
       <table class="ref">
         <tr><th>功能（標籤）</th><th>可用模型</th><th>預設</th></tr>
-        <tr><td>視覺（OCR）模型</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-5.6-luna</td></tr>
+        <tr><td>視覺（OCR）模型</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
         <tr><td>摘要模型</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>讀前模型</td><td rowspan="2">與摘要相同</td><td>gpt-6-luna</td></tr>
         <tr><td>思維導圖模型</td><td>deepseek-flash</td></tr>
@@ -927,6 +927,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>搭配模型</td><td>gpt-6-luna</td></tr>
         <tr><td>句子分析模型</td><td>deepseek-flash</td></tr>
         <tr><td>語法模型</td><td>gpt-6-luna</td></tr>
+        <tr><td>OCR 模型（語言檢查）</td><td>claude-haiku-5-5 · claude-sonnet-5-5 · gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
         <tr><td>語言檢查模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>gpt-6.1-sol</td></tr>
         <tr><td>閱讀文本生成模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>AI 導師模型</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
@@ -2514,7 +2515,7 @@ body.toc-noscroll{overflow:hidden}
       <p>從 <svg class="ic sm"><use href="#i-menu"/></svg> 漢堡選單開啟<b>語言檢查</b>。此功能獨立於閱讀記錄：作文有自己的清單，不會影響閱讀工作區。</p>
       <ol>
         <li><b>上載</b>手寫作文或掃描習作（JPG/PNG/PDF，最多 10 頁），可選擇檔案、拖放或貼上相片。</li>
-        <li>設定中的<b>視覺模型</b>會辨識手寫內容並保留段落。轉錄時會<i>逐字照抄</i>，拼寫及文法錯誤會被保留，因為那正是檢查的對象。</li>
+        <li>設定中的<b>OCR 模型（語言檢查）</b>會辨識手寫內容並保留段落。此模型獨立於用於閱讀助理上傳的<b>視覺模型</b>，除 GPT 視覺模型外，亦可選用 Claude 模型。轉錄時會<i>逐字照抄</i>，拼寫及文法錯誤會被保留，因為那正是檢查的對象。</li>
         <li>在原稿旁<b>核對</b>轉錄文字（可縮放、拖曳、翻頁），修正辨識錯誤後按<b>開始語言檢查</b>。AI 無法辨認的字會顯示為 <code>[?]</code>，請手動補上（若保留，檢查時會略過）。如發現 AI 在辨識時悄悄改正了拼寫或文法錯誤，可在（重新）轉錄前開啟<b>覆核謄寫內容</b>：每頁會多做一次與原稿的比對，還原被改動的字詞。此選項較慢，並會多用一倍視覺模型呼叫次數。</li>
         <li>回饋分為<b>兩層</b>，均會以<b>行內標示</b>並按類別配色，附有上標編號。<b>錯誤</b>是確實有誤的地方（主謂一致、時態、冠詞、介詞、連寫句、拼寫、標點等）；<b>建議</b>則針對文法正確但不夠清晰或可改進的字句，以<b>點線底線</b>標示：<i>表達不清／生硬</i>、<i>中式英語（逐字翻譯）</i>、<i>冗長，宜精簡</i>、<i>更精準的用詞</i>。<b>滑過或點按</b>標示可看到更正及簡短語法說明；右側卡片顯示<b>原文</b>、紅色刪除線 &rarr; 綠色的修改、<b>更正</b>及<b>說明</b>。建議卡片會標示「建議」，並提供<b>較清晰的寫法</b>、最多三個<b>其他說法</b>，以及<b>為何這樣更好</b>的說明，從讀者角度解釋原句為何令人費解、不自然或冗長。</li>
         <li>圖例分為<b>錯誤</b>與<b>表達建議</b>兩行，各有隱藏／顯示按鈕。點按作文上方的<b>類別標籤</b>可隱藏或顯示該類錯誤（標示與卡片同步）；<b>全部隱藏／全部顯示</b>可一次切換所有類別。篩選時編號不變，而且只影響畫面，開啟另一篇作文時會重設，匯出 Word 時仍包含所有內容。建議屬選擇性：乾淨的「更正後的作文」只套用錯誤更正，另有<b>潤飾版作文</b>一節會連同建議一併套用。</li>
@@ -2649,7 +2650,8 @@ body.toc-noscroll{overflow:hidden}
       <h3>A. AI 模型參考</h3>
       <table class="ref">
         <tr><th>模型清單</th><th>成員</th><th>預設</th></tr>
-        <tr><td><b>視覺</b>（OCR）</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-5.6-luna</td></tr>
+        <tr><td><b>視覺</b>（OCR）</td><td>gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
+        <tr><td>OCR（語言檢查）</td><td>claude-haiku-5-5 · claude-sonnet-5-5 · gpt-5.6-luna · gpt-6-luna</td><td>gpt-6-luna</td></tr>
         <tr><td><b>圖像</b>（視覺化）</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-nano-banana-2.1 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
         <tr><td><b>通用</b>——預設 <code>deepseek-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td><b>通用</b>——預設 <code>gpt-6-luna</code>（讀前、閱讀測驗、推薦生字、搭配、語法）</td><td>同上</td><td>gpt-6-luna</td></tr>

@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, OCR_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
 import { formatModelLabel } from "@/utils/model";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
@@ -63,6 +63,7 @@ const formSchema = z.object({
   provider: z.string(),
   mode: z.enum(["local", "proxy", "subscription"]).optional(),
   visionModel: z.enum(VISION_MODELS),
+  ocrModel: z.enum(OCR_MODELS),
   imageModel: z.enum(IMAGE_MODELS),
   prereadingModel: z.enum(AVAILABLE_MODELS),
   summaryModel: z.enum(AVAILABLE_MODELS),
@@ -1173,37 +1174,6 @@ function Setting({ open, onClose }: SettingProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="languageCheckModel"
-                  render={({ field }) => (
-                    <FormItem className="from-item">
-                      <FormLabel className="from-label">
-                        {t("setting.languageCheckModel")}
-                      </FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            updateSetting("languageCheckModel", value);
-                          }}
-                        >
-                          <SelectTrigger className="form-field">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {readingTextModelOptions.map((m) => (
-                              <SelectItem key={m} value={m}>
-                                {formatModelLabel(m)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="tutorModel"
                   render={({ field }) => (
                     <FormItem className="from-item">
@@ -1282,6 +1252,69 @@ function Setting({ open, onClose }: SettingProps) {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="ocrModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.ocrModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("ocrModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {OCR_MODELS.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {formatModelLabel(m)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="languageCheckModel"
+                  render={({ field }) => (
+                    <FormItem className="from-item">
+                      <FormLabel className="from-label">
+                        {t("setting.languageCheckModel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            updateSetting("languageCheckModel", value);
+                          }}
+                        >
+                          <SelectTrigger className="form-field">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {readingTextModelOptions.map((m) => (
+                              <SelectItem key={m} value={m}>
+                                {formatModelLabel(m)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
               </TabsContent>
 
               <TabsContent value="tts" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
