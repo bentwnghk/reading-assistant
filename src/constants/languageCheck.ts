@@ -304,3 +304,6 @@ export const LANGUAGE_CHECK_MAX_ESSAYS = 100;
 /** ~2.5 MB base64 per page after downscale is far above the expected ~300 KB. */
 export const LANGUAGE_CHECK_MAX_IMAGE_CHARS = 3_500_000;
 export const LANGUAGE_CHECK_MAX_TRANSCRIPT_CHARS = 60_000;
+
+/** Essays (scans included) are auto-deleted this many days after upload. */
+export const LANGUAGE_CHECK_RETENTION_DAYS = 30;

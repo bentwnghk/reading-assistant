@@ -1,6 +1,7 @@
 import { getPool } from "./db"
 import {
   LANGUAGE_CHECK_MAX_ESSAYS,
+  LANGUAGE_CHECK_RETENTION_DAYS,
   type LanguageCheckStatus,
 } from "@/constants/languageCheck"
 
@@ -41,10 +42,24 @@ function mapEssay(row: Record<string, unknown>): LanguageCheckEssay {
   }
 }
 
+/**
+ * Retention sweep. Scans live inside the row (`images` JSONB), so deleting
+ * the row deletes them too. Runs opportunistically (list/count) — this app
+ * has no scheduler of its own.
+ */
+export async function deleteExpiredEssays(): Promise<void> {
+  await getPool().query(
+    `DELETE FROM language_check_essays
+     WHERE created_at < now() - make_interval(days => $1)`,
+    [LANGUAGE_CHECK_RETENTION_DAYS],
+  )
+}
+
 /** Lightweight list: never selects images/transcript/corrections payloads. */
 export async function listEssays(
   userId: string,
 ): Promise<LanguageCheckEssaySummary[]> {
+  await deleteExpiredEssays()
   const { rows } = await getPool().query(
     `SELECT id, title, status, created_at, updated_at,
             jsonb_array_length(images) AS page_count,
@@ -62,6 +77,14 @@ export async function getEssay(
   userId: string,
   id: string,
 ): Promise<LanguageCheckEssay | null> {
+  // Expired essays are purged on direct access too (the list sweep may not
+  // have run, e.g. for an id that only lives in the client-side cache).
+  await getPool().query(
+    `DELETE FROM language_check_essays
+     WHERE id = $1 AND user_id = $2
+       AND created_at < now() - make_interval(days => $3)`,
+    [id, userId, LANGUAGE_CHECK_RETENTION_DAYS],
+  )
   const { rows } = await getPool().query(
     `SELECT * FROM language_check_essays WHERE id = $1 AND user_id = $2`,
     [id, userId],
@@ -70,6 +93,7 @@ export async function getEssay(
 }
 
 export async function countEssays(userId: string): Promise<number> {
+  await deleteExpiredEssays()
   const { rows } = await getPool().query(
     `SELECT COUNT(*)::int AS n FROM language_check_essays WHERE user_id = $1`,
     [userId],

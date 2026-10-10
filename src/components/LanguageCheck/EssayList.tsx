@@ -16,7 +16,10 @@ import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { parseError } from "@/utils/error";
-import { LANGUAGE_CHECK_MAX_PAGES } from "@/constants/languageCheck";
+import {
+  LANGUAGE_CHECK_MAX_PAGES,
+  LANGUAGE_CHECK_RETENTION_DAYS,
+} from "@/constants/languageCheck";
 
 interface EssayListProps {
   preparing: boolean;
@@ -143,6 +146,11 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
         <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
           {t("languageCheck.list.title")}
         </h2>
+        <p className="mb-2 text-xs text-muted-foreground">
+          {t("languageCheck.list.retentionHint", {
+            days: LANGUAGE_CHECK_RETENTION_DAYS,
+          })}
+        </p>
         {listLoading && !listLoaded ? (
           <div className="flex justify-center py-8">
             <LoaderCircle className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -170,6 +178,12 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
                       {t("languageCheck.list.pages", { count: essay.pageCount })}
                       {essay.status === "checked" &&
                         ` · ${t("languageCheck.list.errors", { count: essay.errorCount })}`}
+                      {` · ${t("languageCheck.list.expires", {
+                        date: formatDateTime(
+                          essay.createdAt +
+                            LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000,
+                        ),
+                      })}`}
                     </span>
                   </span>
                   <span

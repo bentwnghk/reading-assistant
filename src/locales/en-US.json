@@ -4526,7 +4526,9 @@
       },
       "delete": "Delete",
       "deleteTitle": "Delete this essay?",
-      "deleteDesc": "\"{{title}}\" and its scans and corrections will be permanently deleted."
+      "deleteDesc": "\"{{title}}\" and its scans and corrections will be permanently deleted.",
+      "expires": "Expires {{date}}",
+      "retentionHint": "Essays and their scans are automatically deleted {{days}} days after upload."
     },
     "ocr": {
       "verify": "Double-check transcription",
