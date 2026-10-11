@@ -1,12 +1,22 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
+  Clock,
+  Download,
+  Eye,
   FileText,
+  Filter,
+  HelpCircle,
   ImagePlus,
+  Languages,
   LoaderCircle,
+  ShieldCheck,
+  SpellCheck,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -26,6 +36,7 @@ import { useLanguageCheckStore } from "@/store/languageCheck";
 import { parseError } from "@/utils/error";
 import { STATUS_TONE } from "@/components/LanguageCheck/shared";
 import {
+  LANGUAGE_CHECK_ILLEGIBLE_MARKER,
   LANGUAGE_CHECK_MAX_PAGES,
   LANGUAGE_CHECK_RETENTION_DAYS,
 } from "@/constants/languageCheck";
@@ -39,6 +50,7 @@ interface EssayListProps {
 /** Upload zone + saved essays. */
 export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps) {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const essays = useLanguageCheckStore((s) => s.essays);
   const listLoading = useLanguageCheckStore((s) => s.listLoading);
   const listLoaded = useLanguageCheckStore((s) => s.listLoaded);
@@ -49,6 +61,13 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
   const [deleting, setDeleting] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showHelp, setShowHelp] = useState(false);
+  const [helpTab, setHelpTab] = useState<"overview" | "transcript" | "results">("overview");
+
+  // Same gate as StaffEssayLog: the staff-only card only shows for staff.
+  const role = session?.user?.role;
+  const isStaff =
+    role === "teacher" || role === "admin" || role === "super-admin";
 
   // safePage clamps automatically when the list shrinks (deletion, retention
   // sweep on reload) so the controls never point past the last page.
@@ -103,7 +122,18 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold">{t("languageCheck.title")}</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-bold">
+          {t("languageCheck.title")}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setShowHelp(true)}
+            title={t("languageCheck.help.title")}
+          >
+            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("languageCheck.subtitle")}
         </p>
@@ -321,6 +351,200 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
               {t("languageCheck.list.delete")}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Help guide — mirrors the /vocabulary help dialog pattern. */}
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5 text-primary" />
+              {t("languageCheck.help.title")}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex gap-1 p-1 bg-muted rounded-lg">
+            {(["overview", "transcript", "results"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setHelpTab(tab)}
+                className={cn(
+                  "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
+                  helpTab === tab
+                    ? "bg-background shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {t(`languageCheck.help.tabs.${tab}`)}
+              </button>
+            ))}
+          </div>
+
+          {helpTab === "overview" && (
+            <div className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">
+                {t("languageCheck.help.overview.intro")}
+              </p>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
+                  <ImagePlus className="h-5 w-5 text-indigo-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.overview.upload.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t("languageCheck.help.overview.upload.desc", { max: LANGUAGE_CHECK_MAX_PAGES })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.overview.statuses.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.overview.statuses.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-orange-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.overview.retention.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t("languageCheck.help.overview.retention.desc", { days: LANGUAGE_CHECK_RETENTION_DAYS })}
+                  </p>
+                </div>
+              </div>
+
+              {isStaff && (
+                <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                    <ClipboardList className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm">{t("languageCheck.help.overview.staffLog.name")}</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.overview.staffLog.desc")}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{t("languageCheck.help.overview.tip.title")}</span>{" "}
+                  {t("languageCheck.help.overview.tip.desc")}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {helpTab === "transcript" && (
+            <div className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">
+                {t("languageCheck.help.transcript.intro")}
+              </p>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
+                  <Eye className="h-5 w-5 text-cyan-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.transcript.review.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.transcript.review.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <ShieldCheck className="h-5 w-5 text-green-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.transcript.verify.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.transcript.verify.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <HelpCircle className="h-5 w-5 text-amber-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">
+                    {t("languageCheck.help.transcript.illegible.name", { marker: LANGUAGE_CHECK_ILLEGIBLE_MARKER })}
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {t("languageCheck.help.transcript.illegible.desc", { marker: LANGUAGE_CHECK_ILLEGIBLE_MARKER })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{t("languageCheck.help.transcript.tip.title")}</span>{" "}
+                  {t("languageCheck.help.transcript.tip.desc")}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {helpTab === "results" && (
+            <div className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">
+                {t("languageCheck.help.results.intro")}
+              </p>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center">
+                  <SpellCheck className="h-5 w-5 text-rose-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.results.tiers.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.results.tiers.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center">
+                  <Filter className="h-5 w-5 text-violet-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.results.filter.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.results.filter.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center">
+                  <Languages className="h-5 w-5 text-sky-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.results.language.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.results.language.desc")}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-teal-500/10 flex items-center justify-center">
+                  <Download className="h-5 w-5 text-teal-500" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm">{t("languageCheck.help.results.export.name")}</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("languageCheck.help.results.export.desc")}</p>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{t("languageCheck.help.results.tip.title")}</span>{" "}
+                  {t("languageCheck.help.results.tip.desc")}
+                </p>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -4503,9 +4503,82 @@
     "stop": "Stop",
     "rename": "Rename essay",
     "cancelled": "Cancelled.",
+    "help": {
+      "title": "Language Check Guide",
+      "tabs": {
+        "overview": "Overview",
+        "transcript": "Transcript",
+        "results": "Results"
+      },
+      "overview": {
+        "intro": "Language Check digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
+        "upload": {
+          "name": "Uploading",
+          "desc": "Drag and drop, choose files or paste a screenshot. Images or PDFs of handwritten essays, up to {{max}} pages each."
+        },
+        "statuses": {
+          "name": "Essay Statuses",
+          "desc": "Each essay moves through Draft (uploaded) → Transcribed (digitised) → Checked (marked). The list shows pages, comments and the last update."
+        },
+        "retention": {
+          "name": "Storage & Privacy",
+          "desc": "Original scans are removed {{days}} days after upload. Checked essays keep their transcript and corrections so you can review them anytime."
+        },
+        "staffLog": {
+          "name": "Essay Activity Log",
+          "desc": "Staff see a log of student essays with stats and filters below the list — teachers see their classes, admins their school."
+        },
+        "tip": {
+          "title": "Tip:",
+          "desc": "Rename an essay by clicking its title to find it again faster."
+        }
+      },
+      "transcript": {
+        "intro": "The AI transcribes your handwriting verbatim — including mistakes — so nothing is silently fixed before marking. Always review the transcript before running the check.",
+        "review": {
+          "name": "Review Stage",
+          "desc": "The scan and the transcript sit side by side. Fix any misread words, or type or paste the essay yourself; separate paragraphs with a blank line."
+        },
+        "verify": {
+          "name": "Double-check Transcription",
+          "desc": "An optional second pass that restores spelling or grammar mistakes the AI quietly corrected. Slower and uses twice the vision-model calls."
+        },
+        "illegible": {
+          "name": "The {{marker}} Marker",
+          "desc": "A {{marker}} in the transcript means the AI could not read a word. Check the scan and type it in yourself."
+        },
+        "tip": {
+          "title": "Important:",
+          "desc": "Corrections always refer to the checked snapshot — if you edit the transcript afterwards, run the check again to update them."
+        }
+      },
+      "results": {
+        "intro": "Corrections appear as inline highlights in the essay, each numbered and paired with an explanation card.",
+        "tiers": {
+          "name": "Errors vs. Suggestions",
+          "desc": "Errors (grammar and mechanics) get a solid underline; expression suggestions (phrasing, concision, stronger words) are optional polish with alternative ways to say it."
+        },
+        "filter": {
+          "name": "Category Filter",
+          "desc": "Click the colour legend to show or hide categories and focus on one error type at a time."
+        },
+        "language": {
+          "name": "Explanation Language",
+          "desc": "Switch explanations between English and 繁體中文 with the toggle above the results."
+        },
+        "export": {
+          "name": "Export",
+          "desc": "Download a .docx containing the marked essay, the corrected essay, correction notes and a polished version."
+        },
+        "tip": {
+          "title": "Tip:",
+          "desc": "Hover or tap a highlight to see its correction popover without losing your place in the essay."
+        }
+      }
+    },
     "upload": {
       "drop": "Drop images or a PDF here, or paste a photo",
-      "hint": "JPG, PNG or PDF of a handwritten essay (up to {{max}} pages). Pages are downscaled before upload.",
+      "hint": "JPG, PNG or PDF of a handwritten essay (up to {{max}} pages).",
       "choose": "Choose files",
       "preparing": "Preparing your pages…",
       "unsupported": "Please upload an image or a PDF file.",
@@ -4551,7 +4624,7 @@
       "colTitle": "Title",
       "colStatus": "Status",
       "colPages": "Pages",
-      "colErrors": "Errors",
+      "colErrors": "Comments",
       "colUpdated": "Updated",
       "view": "View",
       "empty": "No essays yet.",
