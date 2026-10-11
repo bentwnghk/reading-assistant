@@ -29,6 +29,11 @@ const CLOSE_DELAY = 180;
  * Inline highlight with an interactive popover card. Mouse: hover-intent.
  * Touch / keyboard: tap, Enter or Space toggles. The popover never steals
  * focus, so hovering over text does not scroll the page.
+ *
+ * On the stacked (<lg) layout with touch/pen input, tapping the highlight
+ * only opens the popover — the cards live below the essay there, so an
+ * immediate jump would scroll the text being read off-screen. Tapping the
+ * popover then performs the jump (and closes it).
  */
 export default function ErrorSpan({
   error,
@@ -86,8 +91,14 @@ export default function ErrorSpan({
           }}
           onClick={() => {
             clearTimer();
-            onSelect(error.id);
-            setOpen((o) => (pointerType.current === "mouse" ? true : !o));
+            const isMouse = pointerType.current === "mouse";
+            // Stacked (<lg) layout + touch/pen: jumping on tap would scroll
+            // the whole page away from the word being read. Open the popover
+            // only — the jump fires when the popover itself is tapped.
+            const stackedTouch =
+              !isMouse && !window.matchMedia("(min-width: 1024px)").matches;
+            if (!stackedTouch) onSelect(error.id);
+            setOpen((o) => (isMouse ? true : !o));
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -120,6 +131,17 @@ export default function ErrorSpan({
           }}
           onPointerLeave={(e) => {
             if (e.pointerType === "mouse") schedule(false, CLOSE_DELAY);
+          }}
+          onPointerDown={(e) => {
+            // Keep the ref accurate when the popover, not the span, is the
+            // interaction target (hybrid devices: mouse open, finger tap).
+            pointerType.current = e.pointerType;
+          }}
+          onClick={() => {
+            // Deferred jump from the highlight tap on the stacked layout;
+            // on wide layouts this just re-centers the card column.
+            onSelect(error.id);
+            if (pointerType.current !== "mouse") setOpen(false);
           }}
           className="z-[60] w-[min(26rem,calc(100vw-1.5rem))] rounded-xl border bg-popover p-4 text-popover-foreground shadow-xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
