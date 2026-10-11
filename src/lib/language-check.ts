@@ -266,6 +266,13 @@ export async function listStaffEssays(
     status?: LanguageCheckStatus
     /** Free-text search over essay titles only (students filter via userId). */
     q?: string
+    /**
+     * Class filter — unlike userId/status/q it narrows the whole view (rows,
+     * stats AND the student options), so picking a class shows its data and
+     * its students only. Intersects with the staff scope (a foreign class's
+     * members are not in scope, so nothing leaks).
+     */
+    classId?: string
   },
 ): Promise<{
   rows: LanguageCheckStaffRow[]
@@ -286,9 +293,22 @@ export async function listStaffEssays(
   if (opts.q) add("e.title ILIKE @", `%${opts.q}%`)
   const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
 
-  // Stats and the student filter reflect the scope only (not page filters), so
-  // the dropdown and cards stay stable while paging/filtering.
+  // Stats and the student filter reflect the scope + class filter only (not
+  // page filters), so the cards and dropdown stay stable while paging.
   const scopeOnly = scopeConditions(scope)
+  const scopeAdd = (sql: string, ...values: unknown[]) => {
+    let i = 0
+    scopeOnly.clauses.push(
+      sql.replace(/@/g, () => `$${scopeOnly.params.length + 1 + i++}`),
+    )
+    scopeOnly.params.push(...values)
+  }
+  if (opts.classId) {
+    const inClass =
+      "e.user_id IN (SELECT student_id FROM class_members WHERE class_id = @)"
+    add(inClass, opts.classId)
+    scopeAdd(inClass, opts.classId)
+  }
   const scopeWhere =
     scopeOnly.clauses.length > 0
       ? `WHERE ${scopeOnly.clauses.join(" AND ")}`

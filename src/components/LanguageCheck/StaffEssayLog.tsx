@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
+import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import { STATUS_TONE } from "@/components/LanguageCheck/shared";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { cn } from "@/utils/style";
@@ -63,6 +64,8 @@ export default function StaffEssayLog() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [classId, setClassId] = useState("all");
+  const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [userId, setUserId] = useState("all");
   const [status, setStatus] = useState("all");
   const [searchInput, setSearchInput] = useState("");
@@ -87,6 +90,7 @@ export default function StaffEssayLog() {
         page: String(page),
         pageSize: String(pageSize),
       });
+      if (classId !== "all") params.set("classId", classId);
       if (userId !== "all") params.set("userId", userId);
       if (status !== "all") params.set("status", status);
       if (search) params.set("q", search);
@@ -101,7 +105,7 @@ export default function StaffEssayLog() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, userId, status, search]);
+  }, [page, pageSize, classId, userId, status, search]);
 
   // Role comes from the session, which loads asynchronously: while it is
   // still undefined the guard below skips the fetch, and the effect re-runs
@@ -112,6 +116,21 @@ export default function StaffEssayLog() {
     if (!isStaff) return;
     void load();
   }, [load, isStaff]);
+
+  // Class picker options (teacher → own classes, admin → school, super-admin
+  // → all) — the same source the Student Data tab uses. Non-fatal on failure:
+  // the log still works, just without the class filter.
+  useEffect(() => {
+    if (!isStaff) return;
+    void (async () => {
+      try {
+        const res = await fetch("/api/classes");
+        if (res.ok) setClasses((await res.json()) as ClassInfo[]);
+      } catch {
+        // ignore — class filter stays empty
+      }
+    })();
+  }, [isStaff]);
 
   async function openDetail(id: string) {
     setDetailLoadingId(id);
@@ -146,7 +165,8 @@ export default function StaffEssayLog() {
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const safePage = Math.min(page, totalPages);
-  const hasFilters = userId !== "all" || status !== "all" || search !== "";
+  const hasFilters =
+    classId !== "all" || userId !== "all" || status !== "all" || search !== "";
 
   const statCards: { label: string; value: number | undefined }[] = [
     { label: t("languageCheck.staff.statEssays"), value: stats?.total },
@@ -193,6 +213,20 @@ export default function StaffEssayLog() {
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="w-56">
+          <ClassCombobox
+            classes={classes}
+            value={classId === "all" ? null : classId}
+            onChange={(v) => {
+              setClassId(v ?? "all");
+              // The student options reload scoped to the new class; drop any
+              // previously picked student that may not belong to it.
+              setUserId("all");
+              setPage(1);
+            }}
+            allowAll
+          />
+        </div>
         <div className="w-56">
           <StudentCombobox
             users={users}
