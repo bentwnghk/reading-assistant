@@ -135,7 +135,9 @@ export default function LanguageCheckContainer() {
 
   if (!active) {
     return (
-      <div className="flex flex-col gap-6">
+      // Shared width so the upload/list section and the staff activity log
+      // align instead of stretching to different container widths.
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <EssayList preparing={preparing} onFiles={handleFiles} onOpen={handleOpen} />
         {/* Renders nothing for students; staff see a scoped activity log. */}
         <StaffEssayLog />
