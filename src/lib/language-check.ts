@@ -291,6 +291,14 @@ export async function listStaffEssays(
   if (opts.userId) add("e.user_id = @", opts.userId)
   if (opts.status) add("e.status = @", opts.status)
   if (opts.q) add("e.title ILIKE @", `%${opts.q}%`)
+  // The class filter narrows rows too. Every add() that feeds `where` must
+  // run BEFORE it is stringified — a later add() pushes its value into
+  // `params` while the clause lands in the already-built string's blind
+  // spot, shifting the LIMIT/OFFSET numbering (LIMIT $3 with no $2 anywhere
+  // → "could not determine data type of parameter $2").
+  const inClass =
+    "e.user_id IN (SELECT student_id FROM class_members WHERE class_id = @)"
+  if (opts.classId) add(inClass, opts.classId)
   const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
 
   // Stats and the student filter reflect the scope + class filter only (not
@@ -303,12 +311,7 @@ export async function listStaffEssays(
     )
     scopeOnly.params.push(...values)
   }
-  if (opts.classId) {
-    const inClass =
-      "e.user_id IN (SELECT student_id FROM class_members WHERE class_id = @)"
-    add(inClass, opts.classId)
-    scopeAdd(inClass, opts.classId)
-  }
+  if (opts.classId) scopeAdd(inClass, opts.classId)
   const scopeWhere =
     scopeOnly.clauses.length > 0
       ? `WHERE ${scopeOnly.clauses.join(" AND ")}`
