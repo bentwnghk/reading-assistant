@@ -36,10 +36,7 @@ import { useLanguageCheckStore } from "@/store/languageCheck";
 import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
 import { parseError } from "@/utils/error";
-import {
-  LANGUAGE_CHECK_RETENTION_DAYS,
-  LANGUAGE_CHECK_STATUSES,
-} from "@/constants/languageCheck";
+import { LANGUAGE_CHECK_STATUSES } from "@/constants/languageCheck";
 
 interface StaffListResponse {
   rows: LanguageCheckStaffRow[];
@@ -413,12 +410,6 @@ export default function StaffEssayLog() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs text-muted-foreground">
                   {formatDateTime(detail.createdAt)}
-                  {` · ${t("languageCheck.list.expires", {
-                    date: formatDateTime(
-                      detail.createdAt +
-                        LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000,
-                    ),
-                  })}`}
                   {detail.checkModel &&
                     ` · ${t("languageCheck.results.checkedWith", { model: detail.checkModel })}`}
                 </p>
