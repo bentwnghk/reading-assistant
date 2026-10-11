@@ -270,9 +270,6 @@ export default function StaffEssayLog() {
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colUpdated")}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {t("languageCheck.staff.colExpires")}
-                  </th>
                   <th className="py-2 font-medium" />
                 </tr>
               </thead>
@@ -306,12 +303,6 @@ export default function StaffEssayLog() {
                     </td>
                     <td className="whitespace-nowrap py-2 pr-3 text-muted-foreground">
                       {formatDateTime(row.updatedAt)}
-                    </td>
-                    <td className="whitespace-nowrap py-2 pr-3 text-muted-foreground">
-                      {formatDateTime(
-                        row.createdAt +
-                          LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000,
-                      )}
                     </td>
                     <td className="py-2 text-right">
                       <Button

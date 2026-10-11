@@ -193,12 +193,6 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
                       {t("languageCheck.list.pages", { count: essay.pageCount })}
                       {essay.status === "checked" &&
                         ` · ${t("languageCheck.list.errors", { count: essay.errorCount })}`}
-                      {` · ${t("languageCheck.list.expires", {
-                        date: formatDateTime(
-                          essay.createdAt +
-                            LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000,
-                        ),
-                      })}`}
                     </span>
                   </span>
                   <span
