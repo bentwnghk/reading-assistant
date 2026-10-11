@@ -103,9 +103,15 @@ export default function StaffEssayLog() {
     }
   }, [page, pageSize, userId, status, search]);
 
+  // Role comes from the session, which loads asynchronously: while it is
+  // still undefined the guard below skips the fetch, and the effect re-runs
+  // once the role resolves — so students never hit the API (no console 403).
+  const isStaff = role === "teacher" || role === "admin" || role === "super-admin";
+
   useEffect(() => {
+    if (!isStaff) return;
     void load();
-  }, [load]);
+  }, [load, isStaff]);
 
   async function openDetail(id: string) {
     setDetailLoadingId(id);
@@ -123,7 +129,7 @@ export default function StaffEssayLog() {
     }
   }
 
-  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
+  if (!isStaff) {
     return null;
   }
 
