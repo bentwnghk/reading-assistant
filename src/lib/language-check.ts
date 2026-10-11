@@ -267,10 +267,10 @@ export async function listStaffEssays(
     /** Free-text search over essay titles only (students filter via userId). */
     q?: string
     /**
-     * Class filter — unlike userId/status/q it narrows the whole view (rows,
-     * stats AND the student options), so picking a class shows its data and
-     * its students only. Intersects with the staff scope (a foreign class's
-     * members are not in scope, so nothing leaks).
+     * Class filter — narrows rows AND stats like the other filters, but is
+     * the only filter that also narrows the student options (a class scope
+     * implies its students). Intersects with the staff scope (a foreign
+     * class's members are not in scope, so nothing leaks).
      */
     classId?: string
   },
@@ -301,8 +301,10 @@ export async function listStaffEssays(
   if (opts.classId) add(inClass, opts.classId)
   const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
 
-  // Stats and the student filter reflect the scope + class filter only (not
-  // page filters), so the cards and dropdown stay stable while paging.
+  // The student dropdown options reflect the scope + class filter only —
+  // NOT the student/status/search filters — so switching students (or
+  // keeping the picker usable while a status filter is active) never
+  // empties the list.
   const scopeOnly = scopeConditions(scope)
   const scopeAdd = (sql: string, ...values: unknown[]) => {
     let i = 0
@@ -333,6 +335,9 @@ export async function listStaffEssays(
       `SELECT COUNT(*)::int AS n ${STAFF_FROM} ${where}`,
       params,
     ),
+    // Stats reflect the full row filter set (scope + class/student/status/
+    // search) so the cards always describe exactly what the table shows;
+    // only page/pageSize are excluded, so the cards stay stable while paging.
     getPool().query(
       `SELECT COUNT(*)::int AS total,
               COUNT(*) FILTER (WHERE e.status = 'checked')::int AS checked,
@@ -342,8 +347,8 @@ export async function listStaffEssays(
               COALESCE(SUM(jsonb_array_length(e.images)), 0)::int AS pages,
               COALESCE(SUM(jsonb_array_length(e.corrections)), 0)::int AS corrections
        ${STAFF_FROM}
-       ${scopeWhere}`,
-      scopeOnly.params,
+       ${where}`,
+      params,
     ),
     getPool().query(
       `SELECT e.user_id AS id, u.name, u.email
