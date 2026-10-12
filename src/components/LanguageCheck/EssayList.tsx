@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import {
@@ -18,7 +18,6 @@ import {
   ShieldCheck,
   SpellCheck,
   Trash2,
-  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,6 +34,9 @@ import { formatDateTime } from "@/utils/formatDate";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { parseError } from "@/utils/error";
 import { STATUS_TONE } from "@/components/LanguageCheck/shared";
+import PageSourceButtons, {
+  filterSupportedFiles,
+} from "@/components/LanguageCheck/PageSourceButtons";
 import {
   LANGUAGE_CHECK_ILLEGIBLE_MARKER,
   LANGUAGE_CHECK_MAX_PAGES,
@@ -45,17 +47,18 @@ interface EssayListProps {
   preparing: boolean;
   onFiles: (files: File[]) => void;
   onOpen: (id: string) => void;
+  /** Staging tray (crop/reorder pages); replaces the empty drop prompt when present. */
+  staging?: ReactNode;
 }
 
 /** Upload zone + saved essays. */
-export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps) {
+export default function EssayList({ preparing, onFiles, onOpen, staging }: EssayListProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const essays = useLanguageCheckStore((s) => s.essays);
   const listLoading = useLanguageCheckStore((s) => s.listLoading);
   const listLoaded = useLanguageCheckStore((s) => s.listLoaded);
   const remove = useLanguageCheckStore((s) => s.remove);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [toDelete, setToDelete] = useState<LanguageCheckEssaySummary | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -80,12 +83,7 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
 
   function accept(list: FileList | File[] | null) {
     if (!list || preparing) return;
-    const files = Array.from(list).filter(
-      (f) =>
-        f.type.startsWith("image/") ||
-        f.type === "application/pdf" ||
-        f.name.toLowerCase().endsWith(".pdf"),
-    );
+    const files = filterSupportedFiles(list);
     if (files.length === 0) {
       toast.error(t("languageCheck.upload.unsupported"));
       return;
@@ -156,7 +154,9 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
           dragging ? "border-primary bg-primary/5" : "border-border bg-card",
         )}
       >
-        {preparing ? (
+        {staging ? (
+          staging
+        ) : preparing ? (
           <>
             <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm font-medium">{t("languageCheck.upload.preparing")}</p>
@@ -168,23 +168,9 @@ export default function EssayList({ preparing, onFiles, onOpen }: EssayListProps
             <p className="max-w-md text-xs text-muted-foreground">
               {t("languageCheck.upload.hint", { max: LANGUAGE_CHECK_MAX_PAGES })}
             </p>
-            <Button size="sm" onClick={() => inputRef.current?.click()}>
-              <Upload className="mr-1.5 h-4 w-4" />
-              {t("languageCheck.upload.choose")}
-            </Button>
+            <PageSourceButtons onFiles={onFiles} />
           </>
         )}
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          hidden
-          accept="image/*,.pdf,application/pdf"
-          onChange={(e) => {
-            accept(e.target.files);
-            e.target.value = "";
-          }}
-        />
       </div>
 
       <div>

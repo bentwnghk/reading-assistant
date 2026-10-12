@@ -300,6 +300,13 @@ export const LANGUAGE_CHECK_ILLEGIBLE_MARKER = "[?]";
 
 /** Server-side caps (also enforced client-side for friendlier errors). */
 export const LANGUAGE_CHECK_MAX_PAGES = 10;
+
+/**
+ * Longest side (px) of a page held in the pre-upload staging tray. Higher than
+ * the 2000px upload size so a tight crop of a full-page photo still has enough
+ * pixels left; the cropped result is downscaled to the upload size afterwards.
+ */
+export const LANGUAGE_CHECK_STAGING_MAX_SIDE = 3200;
 export const LANGUAGE_CHECK_MAX_ESSAYS = 100;
 /** ~2.5 MB base64 per page after downscale is far above the expected ~300 KB. */
 export const LANGUAGE_CHECK_MAX_IMAGE_CHARS = 3_500_000;

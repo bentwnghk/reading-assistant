@@ -4514,7 +4514,7 @@
         "intro": "Language Check digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
         "upload": {
           "name": "Uploading",
-          "desc": "Drag and drop, choose files or paste a screenshot. Images or PDFs of handwritten essays, up to {{max}} pages each."
+          "desc": "Drag and drop, choose files, paste a screenshot or (on a phone) take photos with the camera — tap \"Take another photo\" for each page. Crop each page to just the handwriting before transcribing. Up to {{max}} pages per essay."
         },
         "statuses": {
           "name": "Essay Statuses",
@@ -4578,11 +4578,32 @@
     },
     "upload": {
       "drop": "Drop images or a PDF here, or paste a photo",
-      "hint": "JPG, PNG or PDF of a handwritten essay (up to {{max}} pages).",
+      "hint": "JPG, PNG or PDF of a handwritten essay (up to {{max}} pages). You can crop each page before it is transcribed.",
       "choose": "Choose files",
+      "camera": "Take photo",
       "preparing": "Preparing your pages…",
       "unsupported": "Please upload an image or a PDF file.",
       "tooManyPages": "Too many pages. Please upload at most {{max}} pages per essay."
+    },
+    "staging": {
+      "title": "Pages to transcribe ({{count}}/{{max}})",
+      "hint": "Crop each page to just the handwriting, then add more pages if your essay continues. Pages are read in this order.",
+      "addFiles": "Add files",
+      "takeAnother": "Take another photo",
+      "crop": "Crop page",
+      "cropped": "Cropped",
+      "remove": "Remove page",
+      "moveEarlier": "Move earlier",
+      "moveLater": "Move later",
+      "discard": "Discard all",
+      "start": "Transcribe essay"
+    },
+    "crop": {
+      "title": "Crop page {{page}}",
+      "hint": "Drag on the image to select the part to transcribe. Drag the handles to adjust.",
+      "apply": "Apply crop",
+      "useFull": "Use full page",
+      "failed": "Could not crop this page."
     },
     "list": {
       "title": "Your essays",

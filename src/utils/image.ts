@@ -18,6 +18,46 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+export interface PercentRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Crops an image data URL to a rectangle expressed in percent (0–100) of the
+ * image, at the image's native resolution (no resampling), as high-quality JPEG.
+ */
+export async function cropImage(
+  dataUrl: string,
+  rect: PercentRect,
+  quality = 0.95,
+): Promise<string> {
+  const img = await loadImage(dataUrl);
+  const clamp = (v: number) => Math.min(100, Math.max(0, v));
+  const x = Math.round((clamp(rect.x) / 100) * img.naturalWidth);
+  const y = Math.round((clamp(rect.y) / 100) * img.naturalHeight);
+  const width = Math.max(
+    1,
+    Math.min(img.naturalWidth - x, Math.round((clamp(rect.width) / 100) * img.naturalWidth)),
+  );
+  const height = Math.max(
+    1,
+    Math.min(img.naturalHeight - y, Math.round((clamp(rect.height) / 100) * img.naturalHeight)),
+  );
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not get canvas context");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
+  return canvas.toDataURL("image/jpeg", quality);
+}
+
 /**
  * Downscales an image data URL so its longest side is at most `maxSide` px and
  * re-encodes it as JPEG. Handwriting stays legible at ~2000px while payloads

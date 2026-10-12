@@ -705,7 +705,7 @@ A standalone page (`/language-check`, opened from the hamburger menu) that is in
 
 | Step | What happens |
 |------|--------------|
-| 📷 **Upload** | Handwritten essay or scanned work as images or PDF (up to 10 pages) |
+| 📷 **Upload** | Handwritten essay or scanned work as images or PDF (up to 10 pages), or photos taken with a phone camera one page at a time. Pages wait in a tray where each can be **cropped** to just the handwriting, reordered or removed before transcription |
 | 🔤 **OCR** | The Settings *OCR Model (Language Check)* (`claude-haiku-5-5` by default, or `gpt-6-luna`) transcribes it **verbatim** (mistakes kept; unreadable words become `[?]`) with paragraph breaks preserved. A transcriber-only system prompt with few-shot examples resists the model's habit of silently fixing errors, and an optional **Double-check transcription** switch adds a second pass that reverts any it still fixed |
 | 👀 **Review** | Edit the transcript side by side with the zoomable original scan |
 | ✍️ **Check** | The Settings *Language Check Model* (`deepseek-flash`, `gemini-3.8-flash`, `gpt-6.1-sol`, `claude-sonnet-5-5`) finds **errors** tuned to common ESL/EFL (HK) patterns and HKDSE Writing, plus optional **expression suggestions**: unclear/awkward phrasing, Chinglish (literal translation), wordiness and stronger word choice, each with alternatives and a "why" note |

@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import EssayList from "@/components/LanguageCheck/EssayList";
+import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageStaging";
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
@@ -39,6 +40,7 @@ import {
   LANGUAGE_CHECK_MAX_IMAGE_CHARS,
   LANGUAGE_CHECK_MAX_PAGES,
   LANGUAGE_CHECK_RETENTION_DAYS,
+  LANGUAGE_CHECK_STAGING_MAX_SIDE,
   isExpressionCategory,
 } from "@/constants/languageCheck";
 import { downscaleImage, readFileAsDataURL } from "@/utils/image";
@@ -76,37 +78,70 @@ export default function LanguageCheckContainer() {
   const open = useLanguageCheckStore((s) => s.open);
   const create = useLanguageCheckStore((s) => s.create);
   const [preparing, setPreparing] = useState(false);
+  const [staged, setStaged] = useState<StagedPage[]>([]);
 
   useEffect(() => {
     loadList().catch((e) => toast.error(parseError(e)));
   }, [loadList]);
 
+  // Pages are staged (and optionally cropped) before anything is uploaded, so
+  // a multi-page essay can be built from several camera shots. Ephemeral UI
+  // state: nothing is persisted or sent until the user starts the transcription.
   async function handleFiles(files: File[]) {
+    const room = LANGUAGE_CHECK_MAX_PAGES - staged.length;
+    if (room <= 0) {
+      toast.error(t("languageCheck.upload.tooManyPages", { max: LANGUAGE_CHECK_MAX_PAGES }));
+      return;
+    }
     setPreparing(true);
     try {
-      const pages: string[] = [];
+      const added: StagedPage[] = [];
+      let overflow = false;
       for (const file of files) {
         const isPdf =
           file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-        if (isPdf) {
-          for (const page of await processPdfFile(file)) {
-            pages.push(await preparePage(page));
-            if (pages.length > LANGUAGE_CHECK_MAX_PAGES) break;
+        const sources = isPdf
+          ? await processPdfFile(file)
+          : [await readFileAsDataURL(file)];
+        for (const source of sources) {
+          if (added.length >= room) {
+            overflow = true;
+            break;
           }
-        } else {
-          pages.push(await preparePage(await readFileAsDataURL(file)));
+          // Re-encoding through a canvas also bakes in the EXIF orientation of phone photos.
+          const original = await downscaleImage(
+            source,
+            LANGUAGE_CHECK_STAGING_MAX_SIDE,
+            0.92,
+          );
+          added.push({ id: crypto.randomUUID(), original, src: original });
         }
-        if (pages.length > LANGUAGE_CHECK_MAX_PAGES) break;
+        if (overflow) break;
       }
-      if (pages.length === 0) {
+      if (added.length === 0) {
         toast.error(t("languageCheck.upload.unsupported"));
         return;
       }
-      if (pages.length > LANGUAGE_CHECK_MAX_PAGES) {
-        toast.error(t("languageCheck.upload.tooManyPages", { max: LANGUAGE_CHECK_MAX_PAGES }));
-        return;
+      if (overflow) {
+        toast.warning(t("languageCheck.upload.tooManyPages", { max: LANGUAGE_CHECK_MAX_PAGES }));
       }
+      setStaged((prev) => [...prev, ...added]);
+    } catch (error) {
+      console.error("Language check upload failed:", error);
+      toast.error(parseError(error));
+    } finally {
+      setPreparing(false);
+    }
+  }
+
+  async function handleStart() {
+    if (staged.length === 0) return;
+    setPreparing(true);
+    try {
+      const pages: string[] = [];
+      for (const page of staged) pages.push(await preparePage(page.src));
       const essay = await create(pages, useSettingStore.getState().ocrModel);
+      setStaged([]);
       // Fire and forget: progress/state live in the store, so it survives navigation.
       void transcribe(essay.id);
     } catch (error) {
@@ -138,7 +173,23 @@ export default function LanguageCheckContainer() {
       // Shared width so the upload/list section and the staff activity log
       // align instead of stretching to different container widths.
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <EssayList preparing={preparing} onFiles={handleFiles} onOpen={handleOpen} />
+        <EssayList
+          preparing={preparing}
+          onFiles={handleFiles}
+          onOpen={handleOpen}
+          staging={
+            staged.length > 0 ? (
+              <PageStaging
+                pages={staged}
+                max={LANGUAGE_CHECK_MAX_PAGES}
+                busy={preparing}
+                onPagesChange={setStaged}
+                onFiles={handleFiles}
+                onStart={handleStart}
+              />
+            ) : undefined
+          }
+        />
         {/* Renders nothing for students; staff see a scoped activity log. */}
         <StaffEssayLog />
       </div>
