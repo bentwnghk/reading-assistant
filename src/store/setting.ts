@@ -155,22 +155,20 @@ export const DEFAULT_TTS_VOICES: Record<TtsModel, AnyTtsVoice> = {
  *  /v1/audio/speech.
  *
  *  - tts-1 and the Grok voice model serve mp3.
- *  - gemini-3.8-flash-lite-tts is requested with WAV — its documented unary
- *    default (Gemini 3.8 TTS switched from 3.1's raw-PCM default to WAV).
- *    WAV is a self-describing container, so decodeAudioData() reads the true
- *    sample rate and chunk boundaries itself. Requesting "pcm" for it
- *    produced ~1s of cracking noise AFTER the speech: headerless-PCM
- *    decoding cannot tell audio samples from trailing container/metadata
- *    bytes some OpenAI-compatible layers leave in the body, and plays them
- *    as garbage samples.
- *  - "pcm" stays a supported entry for any future model configured with raw
- *    PCM (headerless 24kHz 16-bit mono), which the client decodes manually
- *    — see src/utils/tts.ts. */
+ *  - gemini-3.8-flash-lite-tts requests "pcm": the OpenAI-compatible
+ *    audio/speech endpoint rejects response_format "wav" with HTTP 400
+ *    (its allowlist only covers the classic pcm/mp3 values), while "pcm"
+ *    is accepted. Some layers do hand back container/metadata bytes in the
+ *    "pcm" body, so the client decoder sniffs for a RIFF/WAVE header and
+ *    routes container bodies through decodeAudioData() — playing raw
+ *    samples otherwise (see src/utils/tts.ts).
+ *  - "wav" stays a supported entry value for any provider/model pairing
+ *    that accepts it; it is simply not selected by the current map. */
 export type TtsResponseFormat = "mp3" | "wav" | "pcm";
 
 export const TTS_MODEL_RESPONSE_FORMATS: Record<TtsModel, TtsResponseFormat> = {
   "tts-1": "mp3",
-  "gemini-3.8-flash-lite-tts": "wav",
+  "gemini-3.8-flash-lite-tts": "pcm",
   "x-ai/grok-voice-tts-1.0": "mp3",
 };
 

@@ -168,15 +168,20 @@ function decodeAudioDataP(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBu
 }
 
 // ── Raw PCM (response_format "pcm") support ────────────────────────────────
-// Fallback path for TTS models configured with raw PCM: 16-bit
-// little-endian mono at 24kHz (the OpenAI-compatible "pcm" contract),
-// with NO container. Browsers can neither decodeAudioData() headerless PCM
-// nor play it as a plain Blob, so it is converted manually into an
-// AudioBuffer (or wrapped with a RIFF/WAV header for the <audio> fallback
-// path). No model currently uses "pcm" — gemini-3.8-flash-lite-tts moved to
-// WAV (see TTS_MODEL_RESPONSE_FORMATS) because byte-exact PCM bodies proved
-// fragile with some OpenAI-compatible layers — but the machinery stays for
-// any future raw-PCM model.
+// For TTS models configured with raw PCM: 16-bit little-endian mono at 24kHz
+// (the OpenAI-compatible "pcm" contract), with NO container. Browsers can
+// neither decodeAudioData() headerless PCM nor play it as a plain Blob, so
+// it is converted manually into an AudioBuffer (or wrapped with a RIFF/WAV
+// header for the <audio> fallback path).
+//
+// CAVEAT: some OpenAI-compatible layers ignore the requested format for
+// Gemini 3.8 TTS and return its native WAV container in the "pcm" body.
+// Blindly converting every byte to EOF then plays the RIFF header and any
+// trailing metadata chunks as garbage samples — heard as a click at the
+// start and ~1s of cracking noise at the END of the speech. The decode path
+// therefore sniffs for a container first (isWavResponse) and routes WAV
+// bodies through the platform decoder, which reads the real sample rate and
+// chunk boundaries itself.
 const PCM_SAMPLE_RATE = 24000;
 const PCM_CHANNELS = 1;
 
@@ -218,19 +223,38 @@ function pcm16ToWavBlob(data: ArrayBuffer): Blob {
 
 // ── Format-aware response handling ─────────────────────────────────────────
 
-/** Decodes a TTS response body per its format. Container formats (mp3/wav)
- *  go through the platform decoder — WAV is self-describing, so
- *  decodeAudioData() reads the true sample rate, channel count and chunk
- *  boundaries from the header itself and never plays container/metadata
- *  bytes as audio. Raw PCM has no container and is converted manually. */
+/** True when the body carries a RIFF/WAVE container — e.g. a provider that
+ *  ignores the "pcm" response_format and returns the model's native WAV
+ *  (Gemini 3.8 TTS's unary default). Container-aware decoding is required
+ *  so header/metadata/trailing chunk bytes are never played as samples
+ *  (they surface as clicks and cracking noise). Tolerates short/truncated
+ *  bodies and non-WAVE RIFF payloads (e.g. WebP) by returning false. */
+export function isWavResponse(data: ArrayBuffer): boolean {
+  if (data.byteLength < 12) return false;
+  const view = new DataView(data);
+  return (
+    // "RIFF" (big-endian uint32 at offset 0)
+    view.getUint32(0, false) === 0x52494646 &&
+    // "WAVE" (big-endian uint32 at offset 8)
+    view.getUint32(8, false) === 0x57415645
+  );
+}
+
+/** Decodes a TTS response body per its format. Container bodies — mp3/wav
+ *  requests, AND WAV containers returned for a "pcm" request — go through
+ *  the platform decoder: WAV is self-describing, so decodeAudioData() reads
+ *  the true sample rate, channel count and chunk boundaries from the header
+ *  itself and never plays container/metadata bytes as audio. Only a genuine
+ *  headerless-PCM body is converted manually. */
 function decodeTtsResponseBody(
   ctx: AudioContext,
   data: ArrayBuffer,
   format: TtsResponseFormat
 ): Promise<AudioBuffer> {
-  return format === "pcm"
-    ? Promise.resolve(pcm16ToAudioBuffer(ctx, data))
-    : decodeAudioDataP(ctx, data);
+  if (format === "pcm" && !isWavResponse(data)) {
+    return Promise.resolve(pcm16ToAudioBuffer(ctx, data));
+  }
+  return decodeAudioDataP(ctx, data);
 }
 
 /** Whether playback rate must be applied client-side for this format. Only
@@ -243,10 +267,11 @@ function usesClientSideSpeed(format: TtsResponseFormat): boolean {
 
 /** Wraps a TTS response body as a playable Blob for the HTMLAudioElement
  *  fallback path. Raw PCM needs a synthesized RIFF/WAV header; container
- *  formats are passed through with their matching MIME type. */
+ *  bodies (including a WAV returned for a "pcm" request) are passed through
+ *  with their matching MIME type. */
 function ttsResponseBodyBlob(data: ArrayBuffer, format: TtsResponseFormat): Blob {
-  if (format === "pcm") return pcm16ToWavBlob(data);
-  return new Blob([data], { type: format === "wav" ? "audio/wav" : "audio/mpeg" });
+  if (format === "pcm" && !isWavResponse(data)) return pcm16ToWavBlob(data);
+  return new Blob([data], { type: format === "mp3" ? "audio/mpeg" : "audio/wav" });
 }
 
 // ── Shared request building ────────────────────────────────────────────────
