@@ -1,0 +1,32 @@
+-- Soft delete for My Vocabulary (/vocabulary Words & Phrases tables).
+--
+-- hidden_at = 0          -> visible (existing behaviour)
+-- hidden_at = <ms epoch> -> removed by the user: excluded from every read
+--                           path (list, stats, due queue, teacher dashboard,
+--                           leaderboard) but never hard-removed.
+--
+-- Why soft delete instead of DELETE: user_vocabulary rows are continuously
+-- re-upserted by glossary auto-sync (useVocabularySync -> POST
+-- /api/vocabulary/sync) and auto-inserted by review PATCHes
+-- (recordSRSAction / insertVocabularyWordOnReview). A hard DELETE would be
+-- undone by the next sync of any session whose glossary still contains the
+-- word — resurrecting it with wiped SRS history (fresh INSERT resets
+-- srs_counts, mastery_level, review/correct counts and shared_by).
+--
+-- Tombstone semantics (enforced in src/lib/vocabulary.ts):
+--   * same-session re-sync keeps the row hidden (upsert CASE on
+--     source_session_ids containment) — restoring/visiting a session, or an
+--     offline PWA sync retry, does NOT resurrect deleted words;
+--   * a genuinely NEW session containing the word re-collects it (un-hides,
+--     keeping its accumulated SRS state);
+--   * review PATCHes (recordSRSAction / updateVocabularyReview /
+--     insertVocabularyWordOnReview) update hidden rows in place — they stay
+--     hidden and no duplicate is inserted;
+--   * accepting a shared review list explicitly un-hides (user consent);
+--   * teacher re-share of an individually shared word is skipped while the
+--     row exists, hidden or not (the recipient's deletion is respected).
+--
+-- Teacher-shared words are deletable like any other: it is the user's own
+-- word bank. shared_by provenance is preserved on the hidden row.
+
+ALTER TABLE user_vocabulary ADD COLUMN IF NOT EXISTS hidden_at BIGINT NOT NULL DEFAULT 0;

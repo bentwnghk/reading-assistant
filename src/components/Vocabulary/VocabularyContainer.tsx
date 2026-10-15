@@ -27,6 +27,7 @@ import {
   Shuffle,
   TrendingDown,
   Eye,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -46,6 +47,7 @@ import AutoSelectPanel from "./AutoSelectPanel";
 import ExportPanel from "./ExportPanel";
 import ShareVocabularyDialog from "./ShareVocabularyDialog";
 import AddToReviewListDialog from "./AddToReviewListDialog";
+import DeleteWordsDialog from "./DeleteWordsDialog";
 import ReviewListsTab from "./ReviewListsTab";
 import StudyPlanDialog from "./StudyPlanDialog";
 import StudentViewFilters from "./StudentViewFilters";
@@ -118,6 +120,7 @@ function VocabularyContainer() {
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [shareOpen, setShareOpen] = useState(false);
   const [addToListOpen, setAddToListOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [helpTab, setHelpTab] = useState<"overview" | "review" | "extras">("overview");
   const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
@@ -205,6 +208,28 @@ function VocabularyContainer() {
       ).length,
     };
   }, [words]);
+
+  /**
+   * Real user_vocabulary rows behind the current tab's selection. Shared
+   * between the Words and Phrases tabs (selection is cleared on tab switch
+   * when it holds the other type). Review-list queue entries carry
+   * client-only "review-list-*" ids with no DB row, so they are excluded —
+   * deleting them would be a silent no-op.
+   */
+  const deletableIds = useMemo(
+    () =>
+      words
+        .filter(
+          (w) =>
+            selectedWordIds.has(w.id) &&
+            !w.id.startsWith("review-list-") &&
+            (activeTab === "phrases"
+              ? w.entryType === "phrase"
+              : w.entryType !== "phrase")
+        )
+        .map((w) => w.id),
+    [words, selectedWordIds, activeTab]
+  );
 
   const isPhraseContext =
     activeTab === "phrases" ||
@@ -638,6 +663,21 @@ function VocabularyContainer() {
                   >
                     {t("vocabulary.clearSelection")}
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-red-400 dark:hover:text-red-300"
+                    disabled={deletableIds.length === 0}
+                    title={
+                      deletableIds.length === 0
+                        ? t("vocabulary.deleteDialog.nothingDeletable")
+                        : undefined
+                    }
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    {t("vocabulary.deleteSelected")}
+                  </Button>
                 </div>
               )}
             </>
@@ -720,6 +760,12 @@ function VocabularyContainer() {
           <AddToReviewListDialog
             open={addToListOpen}
             onOpenChange={setAddToListOpen}
+          />
+          <DeleteWordsDialog
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            ids={deletableIds}
+            entryType={activeTab === "phrases" ? "phrase" : "word"}
           />
           {!isStudentView && <StudyPlanDialog onStartPlan={handleStartPlan} />}
 

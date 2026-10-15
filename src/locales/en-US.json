@@ -2192,6 +2192,19 @@
     "selectedPhrasesCount": "{{count}} phrases selected",
     "clearSelection": "Clear",
     "startReview": "Start Review",
+    "deleteSelected": "Delete",
+    "deleteDialog": {
+      "title": "Delete from My Vocabulary",
+      "descriptionWords": "Delete {{count}} words from My Vocabulary? They will be removed from this list, review queues, flashcards, quizzes and spelling games.",
+      "descriptionPhrases": "Delete {{count}} phrases from My Vocabulary? They will be removed from this list, review queues, flashcards, quizzes and spelling games.",
+      "note": "Your review history is kept. A deleted word is only collected again when you meet it in a new reading session or accept it from a shared list.",
+      "nothingDeletable": "Only words saved in My Vocabulary can be deleted.",
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "successWords": "Deleted {{count}} words",
+      "successPhrases": "Deleted {{count}} phrases",
+      "error": "Failed to delete words"
+    },
     "source": "Source",
     "sourceLabels": {
       "own": "Own",

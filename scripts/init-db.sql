@@ -685,6 +685,7 @@ CREATE TABLE user_vocabulary (
   shared_by TEXT DEFAULT NULL REFERENCES users(id) ON DELETE SET NULL,
   srs_counts JSONB NOT NULL DEFAULT '{"hard":0,"medium":0}'::jsonb,
   entry_type TEXT NOT NULL DEFAULT 'word' CHECK (entry_type IN ('word', 'phrase')),
+  hidden_at BIGINT NOT NULL DEFAULT 0,
   created_at BIGINT NOT NULL DEFAULT 0,
   updated_at BIGINT NOT NULL DEFAULT 0,
   UNIQUE (user_id, word)

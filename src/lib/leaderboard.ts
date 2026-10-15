@@ -703,7 +703,7 @@ export async function refreshAllTimeStatsForUser(
     const vocabResult = await client.query(
       `SELECT COUNT(*)::int AS total_vocab
        FROM user_vocabulary
-       WHERE user_id = $1 AND entry_type = 'word'`,
+       WHERE user_id = $1 AND entry_type = 'word' AND hidden_at = 0`,
       [userId]
     )
 
@@ -1095,7 +1095,7 @@ export async function getPersonalStats(
     const vocabResult = await client.query(
       `SELECT COUNT(*)::int AS total_vocab
        FROM user_vocabulary
-       WHERE user_id = $1 AND entry_type = 'word'`,
+       WHERE user_id = $1 AND entry_type = 'word' AND hidden_at = 0`,
       [userId]
     )
 

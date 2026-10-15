@@ -87,6 +87,13 @@ interface VocabularyStoreActions {
     word: string,
     correct: boolean
   ) => Promise<VocabularySrsOutcome | null>;
+  /**
+   * Soft-deletes the given word ids from My Vocabulary (server sets
+   * hidden_at). Review-list queue entries carry client-only
+   * "review-list-*" ids with no DB row — they are filtered out. Returns the
+   * number of rows the server hid; throws on request failure.
+   */
+  deleteWords: (ids: string[]) => Promise<number>;
   setSearchQuery: (query: string) => void;
   fetchDueForReviewCount: () => Promise<void>;
   setSortBy: (sortBy: SortField) => void;
@@ -379,6 +386,39 @@ export const useVocabularyStore = create<
       console.error("Failed to update review:", error);
       return null;
     }
+  },
+
+  deleteWords: async (ids) => {
+    const state = get();
+    if (state.viewingUserId) return 0;
+    // Review-list queue entries have client-only ids ("review-list-...")
+    // with no user_vocabulary row — nothing to delete for those.
+    const realIds = ids.filter((id) => !id.startsWith("review-list-"));
+    if (realIds.length === 0) return 0;
+
+    const res = await fetch("/api/vocabulary", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: realIds }),
+    });
+    if (!res.ok) throw new Error("Failed to delete words");
+    const data = (await res.json()) as { deleted?: number };
+    const deleted = new Set(realIds);
+    set((s) => ({
+      words: s.words.filter((w) => !deleted.has(w.id)),
+      selectedWordIds: new Set(
+        [...s.selectedWordIds].filter((id) => !deleted.has(id))
+      ),
+      reviewQueue: s.reviewQueue.filter((w) => !deleted.has(w.id)),
+      activeReviewListWordIds: s.activeReviewListWordIds
+        ? new Set(
+            [...s.activeReviewListWordIds].filter((id) => !deleted.has(id))
+          )
+        : null,
+    }));
+    // Keep the header due-review badge in sync with the shrunk queue.
+    void get().fetchDueForReviewCount();
+    return data.deleted ?? 0;
   },
 
   setSearchQuery: (query) => set({ searchQuery: query }),

@@ -1,7 +1,47 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
-import { getUserVocabulary, getVocabularyStats, getVocabularyDueForReview } from "@/lib/vocabulary";
+import { getUserVocabulary, getVocabularyStats, getVocabularyDueForReview, deleteVocabularyWords } from "@/lib/vocabulary";
 import { canViewStudentVocabulary } from "@/lib/users";
+
+const deleteSchema = z.object({
+  ids: z
+    .array(z.string().min(1))
+    .min(1)
+    .max(500),
+});
+
+export async function DELETE(request: Request) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Soft delete only ever targets the caller's own word bank. The teacher
+  // student-view is read-only by design — there is deliberately no userId
+  // override here (unlike GET above).
+  try {
+    const parsed = deleteSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "ids must be a non-empty array of word ids (max 500)" },
+        { status: 400 }
+      );
+    }
+
+    const deleted = await deleteVocabularyWords(
+      session.user.id,
+      parsed.data.ids
+    );
+    return NextResponse.json({ success: true, deleted });
+  } catch (error) {
+    console.error("Failed to delete vocabulary words:", error);
+    return NextResponse.json(
+      { error: "Failed to delete vocabulary words" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function GET(request: Request) {
   const session = await auth();

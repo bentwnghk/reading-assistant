@@ -43,7 +43,7 @@ export async function getUserVocabulary(
 ): Promise<VocabularyWord[]> {
   const pool = getPool();
   const { rows } = await pool.query(
-    `SELECT * FROM user_vocabulary WHERE user_id = $1 ORDER BY word ASC`,
+    `SELECT * FROM user_vocabulary WHERE user_id = $1 AND hidden_at = 0 ORDER BY word ASC`,
     [userId]
   );
   return rows.map(rowToVocabularyWord);
@@ -57,7 +57,7 @@ export async function getVocabularyDueForReview(
   const now = Date.now();
   const { rows } = await pool.query(
     `SELECT * FROM user_vocabulary
-     WHERE user_id = $1 AND entry_type = 'word' AND next_review_at > 0 AND next_review_at <= $2
+     WHERE user_id = $1 AND entry_type = 'word' AND hidden_at = 0 AND next_review_at > 0 AND next_review_at <= $2
      ORDER BY next_review_at ASC, mastery_level ASC
      LIMIT $3`,
     [userId, now, limit]
@@ -82,7 +82,7 @@ export async function getVocabularyStats(
         COUNT(*) FILTER (WHERE rating = 'medium') AS medium,
         COUNT(*) FILTER (WHERE rating = 'easy') AS easy,
         COUNT(*) FILTER (WHERE rating IS NULL) AS unrated
-      FROM user_vocabulary WHERE user_id = $1 AND entry_type = 'word'`,
+      FROM user_vocabulary WHERE user_id = $1 AND entry_type = 'word' AND hidden_at = 0`,
     [userId, now]
   );
   const r = rows[0];
@@ -141,6 +141,11 @@ export async function upsertVocabularyFromGlossary(
         entry_type = CASE
           WHEN user_vocabulary.entry_type = 'phrase' OR EXCLUDED.entry_type = 'phrase' THEN 'phrase'
           ELSE user_vocabulary.entry_type
+        END,
+        hidden_at = CASE
+          WHEN jsonb_array_length(EXCLUDED.source_session_ids) = 0 THEN 0
+          WHEN user_vocabulary.source_session_ids @> EXCLUDED.source_session_ids THEN user_vocabulary.hidden_at
+          ELSE 0
         END,
         source_session_ids = (
           SELECT jsonb_agg(DISTINCT elem) FROM jsonb_array_elements(
@@ -211,6 +216,11 @@ export async function upsertPhrase(
         chinese_definition = COALESCE(NULLIF(EXCLUDED.chinese_definition, ''), user_vocabulary.chinese_definition),
         example = COALESCE(NULLIF(EXCLUDED.example, ''), user_vocabulary.example),
         entry_type = 'phrase',
+        hidden_at = CASE
+          WHEN jsonb_array_length(EXCLUDED.source_session_ids) = 0 THEN 0
+          WHEN user_vocabulary.source_session_ids @> EXCLUDED.source_session_ids THEN user_vocabulary.hidden_at
+          ELSE 0
+        END,
         source_session_ids = (
           SELECT jsonb_agg(DISTINCT elem) FROM jsonb_array_elements(
             user_vocabulary.source_session_ids || EXCLUDED.source_session_ids
@@ -394,6 +404,36 @@ export async function deleteVocabularyBySession(
   );
 }
 
+/**
+ * Soft-deletes words/phrases from the user's vocabulary (sets hidden_at).
+ * Rows are never hard-removed: their SRS history and shared_by provenance
+ * survive, and a hidden row is re-collected (un-hidden, keeping its SRS
+ * state) when a NEW reading session containing the word syncs its glossary
+ * (see the hidden_at CASE in upsertVocabularyFromGlossary/upsertPhrase) or
+ * the user accepts a shared review list containing it. Review PATCHes
+ * (recordSRSAction/updateVocabularyReview/insertVocabularyWordOnReview)
+ * keep hidden rows hidden — they update them in place instead of inserting.
+ *
+ * Teacher-shared words are deletable like any other: it is the recipient's
+ * own word bank. Teacher re-share of an individually shared word stays
+ * skipped (shareVocabularyWords skips existing rows, hidden or not).
+ *
+ * Returns the number of rows newly hidden.
+ */
+export async function deleteVocabularyWords(
+  userId: string,
+  ids: string[]
+): Promise<number> {
+  const pool = getPool();
+  const { rowCount } = await pool.query(
+    `UPDATE user_vocabulary
+     SET hidden_at = $3, updated_at = $3
+     WHERE user_id = $1 AND id = ANY($2::text[]) AND hidden_at = 0`,
+    [userId, ids, Date.now()]
+  );
+  return rowCount ?? 0;
+}
+
 export async function createReviewSession(
   userId: string,
   mode: VocabularyReviewMode,
@@ -544,7 +584,7 @@ export async function getVocabularyCountsForUsers(
   const { rows } = await pool.query(
     `SELECT user_id, COUNT(*)::int AS word_count
      FROM user_vocabulary
-     WHERE user_id = ANY($1::text[]) AND entry_type = 'word'
+     WHERE user_id = ANY($1::text[]) AND entry_type = 'word' AND hidden_at = 0
      GROUP BY user_id`,
     [userIds]
   );
@@ -713,6 +753,9 @@ export async function getVocabularyWordMastery(
   word: string
 ): Promise<{ masteryLevel: VocabularyMasteryLevel } | null> {
   const pool = getPool();
+  // Deliberately NOT filtered by hidden_at: review PATCHes may land on
+  // soft-deleted rows (they exist, just hidden), and their mastery updates
+  // should compute from the row's true level rather than resetting to 0.
   const { rows } = await pool.query(
     `SELECT mastery_level FROM user_vocabulary WHERE user_id = $1 AND word = $2`,
     [userId, word.toLowerCase()]

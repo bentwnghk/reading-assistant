@@ -54,7 +54,7 @@ async function fetchVocabulary(hostUserId: string, filter: VocabularyFilter, req
   const pool = getPool();
   const now = Date.now();
   let query = `SELECT word, syllabification, part_of_speech, english_definition, chinese_definition, example
-               FROM user_vocabulary WHERE user_id = $1`;
+               FROM user_vocabulary WHERE user_id = $1 AND hidden_at = 0`;
   const params: unknown[] = [hostUserId];
 
   // Strategy filters — mirror the My Vocabulary "Auto Select" strategies
@@ -145,7 +145,7 @@ async function fetchSelectedWords(hostUserId: string, words: string[] | undefine
   const pool = getPool();
   const result = await pool.query<VocabularyRow>(
     `SELECT word, syllabification, part_of_speech, english_definition, chinese_definition, example
-     FROM user_vocabulary WHERE user_id = $1 AND word = ANY($2::text[])`,
+     FROM user_vocabulary WHERE user_id = $1 AND hidden_at = 0 AND word = ANY($2::text[])`,
     [hostUserId, words],
   );
   return result.rows.map((r) => ({

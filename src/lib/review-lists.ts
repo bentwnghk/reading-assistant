@@ -264,6 +264,7 @@ export async function acceptReviewListShare(
           ELSE user_vocabulary.entry_type
         END,
         shared_by = COALESCE(user_vocabulary.shared_by, EXCLUDED.shared_by),
+        hidden_at = 0,
         updated_at = $10`,
       [
         recipientId,

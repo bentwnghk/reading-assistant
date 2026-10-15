@@ -2222,6 +2222,19 @@
     "selectedPhrasesCount": "已選擇 {{count}} 個詞組",
     "clearSelection": "清除",
     "startReview": "開始複習",
+    "deleteSelected": "刪除",
+    "deleteDialog": {
+      "title": "從我的詞彙庫刪除",
+      "descriptionWords": "確定從我的詞彙庫刪除 {{count}} 個單詞？它們將從列表、複習隊列、閃卡、測驗及拼字遊戲中移除。",
+      "descriptionPhrases": "確定從我的詞彙庫刪除 {{count}} 個詞組？它們將從列表、複習隊列、閃卡、測驗及拼字遊戲中移除。",
+      "note": "你的複習紀錄會保留。已刪除的詞彙只會在新的閱讀篇章中再次遇到，或重新接受分享清單時，才會再次收錄。",
+      "nothingDeletable": "只能刪除已保存在我的詞彙庫中的詞彙。",
+      "confirm": "刪除",
+      "cancel": "取消",
+      "successWords": "已刪除 {{count}} 個單詞",
+      "successPhrases": "已刪除 {{count}} 個詞組",
+      "error": "刪除失敗"
+    },
     "source": "來源",
     "sourceLabels": {
       "own": "自己",
