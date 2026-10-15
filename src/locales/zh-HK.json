@@ -1558,6 +1558,7 @@
       "regenerate": "重新生成",
       "downloadWord": "下載 Word",
       "downloadExcel": "下載 Excel",
+      "addToReviewList": "加入複習列表",
       "word": "生字",
       "phrase": "詞組",
       "syllabification": "音節",
@@ -1689,6 +1690,10 @@
           "phrases": {
             "name": "詞組",
             "desc": "多詞條目（短語動詞、搭配詞、慣用語），獨立分類以便集中學習。可隨時在「我的詞彙」頁面複習。"
+          },
+          "reviewList": {
+            "name": "複習列表",
+            "desc": "點擊「加入複習列表」，將此課文的單詞、詞組或兩者儲存至具名列表。之後可隨時在「我的詞彙」頁面開啟複習。"
           },
           "flashcard": {
             "name": "字卡",
@@ -2233,6 +2238,14 @@
       "addTitle": "建立複習列表",
       "addDescription": "用已選的 {{count}} 個單詞建立複習列表。",
       "addDescriptionPhrase": "用已選的 {{count}} 個詞組建立複習列表。",
+      "fromGlossaryTitle": "從詞彙表建立複習列表",
+      "fromGlossaryDescription": "選擇此課文的單詞及／或詞組，加入「我的詞彙」的新複習列表。",
+      "includeLabel": "包含",
+      "includeWords": "僅單詞（{{count}}）",
+      "includePhrases": "僅詞組（{{count}}）",
+      "includeBoth": "單詞與詞組（{{count}}）",
+      "createdItems": "已建立包含 {{count}} 個項目的複習列表。",
+      "signInRequired": "請先登入以建立複習列表。",
       "listName": "列表名稱",
       "listNamePlaceholder": "輸入複習列表的名稱...",
       "preview": "預覽",
@@ -2519,7 +2532,7 @@
         },
         "reviewLists": {
           "name": "複習清單",
-          "desc": "建立具名詞彙清單進行重點學習。可編輯、分享或刪除你的清單。老師可與學生分享清單。"
+          "desc": "建立具名的單詞與詞組清單進行重點學習——可在此頁面建立，也可從閱讀頁面的詞彙區直接建立。可編輯、分享或刪除你的清單。老師可與學生分享清單。"
         },
         "share": {
           "name": "分享詞彙",

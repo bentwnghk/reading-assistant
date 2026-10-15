@@ -1558,6 +1558,7 @@
       "regenerate": "Regenerate",
       "downloadWord": "Download Word",
       "downloadExcel": "Download Excel",
+      "addToReviewList": "Add to Review List",
       "word": "Word",
       "phrase": "Phrase",
       "syllabification": "Syllables",
@@ -1689,6 +1690,10 @@
           "phrases": {
             "name": "Phrases",
             "desc": "Multi-word entries (phrasal verbs, collocations, idioms) separated out for focused study. Review them anytime on the My Vocabulary page."
+          },
+          "reviewList": {
+            "name": "Review Lists",
+            "desc": "Click \"Add to Review List\" to save this text's words, phrases, or both into a named list. Review it anytime on the My Vocabulary page."
           },
           "flashcard": {
             "name": "Flashcards",
@@ -2234,6 +2239,14 @@
       "addTitle": "Create Review List",
       "addDescription": "Create a review list with {{count}} selected word(s).",
       "addDescriptionPhrase": "Create a review list with {{count}} selected phrases.",
+      "fromGlossaryTitle": "Create Review List from Glossary",
+      "fromGlossaryDescription": "Choose the words and/or phrases from this text to include in a new review list in My Vocabulary.",
+      "includeLabel": "Include",
+      "includeWords": "Words only ({{count}})",
+      "includePhrases": "Phrases only ({{count}})",
+      "includeBoth": "Words and phrases ({{count}})",
+      "createdItems": "Review list created with {{count}} item(s).",
+      "signInRequired": "Sign in to create review lists.",
       "listName": "List Name",
       "listNamePlaceholder": "Enter a name for this review list...",
       "preview": "Preview",
@@ -2520,7 +2533,7 @@
         },
         "reviewLists": {
           "name": "Review Lists",
-          "desc": "Create named lists of words for focused study. Edit, share, or delete your lists. Teachers can share lists with students."
+          "desc": "Create named lists of words and phrases for focused study — here, or straight from a reading's Vocabulary section. Edit, share, or delete your lists. Teachers can share lists with students."
         },
         "share": {
           "name": "Share Vocabulary",

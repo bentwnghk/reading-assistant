@@ -2,7 +2,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine, Volume2, Info, Wand2 } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine, Volume2, Info, Wand2, ListPlus } from "lucide-react";
 import Link from "next/link";
 import {
   Document,
@@ -52,6 +52,7 @@ import { cn } from "@/utils/style";
 import VocabularyFlashcard from "./VocabularyFlashcard";
 import VocabularyQuiz from "./VocabularyQuiz";
 import VocabularySpelling from "./VocabularySpelling";
+import CreateReviewListDialog from "./CreateReviewListDialog";
 
 type TabType = "table" | "phrases" | "flashcard" | "quiz" | "spelling";
 type SortField = "word" | "partOfSpeech" | null;
@@ -77,6 +78,7 @@ function Glossary() {
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [reviewListOpen, setReviewListOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleSpeak = useCallback(
@@ -656,6 +658,7 @@ function Glossary() {
             items={[
               { key: "words", icon: Table, bgClass: "bg-primary/10", iconClass: "text-primary" },
               { key: "phrases", icon: Combine, bgClass: "bg-teal-500/10", iconClass: "text-teal-500" },
+              { key: "reviewList", icon: ListPlus, bgClass: "bg-violet-500/10", iconClass: "text-violet-500" },
               { key: "flashcard", icon: Layers, bgClass: "bg-indigo-500/10", iconClass: "text-indigo-500" },
               { key: "spelling", icon: SpellCheck, bgClass: "bg-orange-500/10", iconClass: "text-orange-500" },
               { key: "quiz", icon: ClipboardList, bgClass: "bg-green-500/10", iconClass: "text-green-500" },
@@ -675,6 +678,14 @@ function Glossary() {
         <div className="flex flex-wrap justify-end gap-2 ml-auto">
           {glossary.length > 0 && (
             <>
+              <Button
+                onClick={() => setReviewListOpen(true)}
+                variant="secondary"
+                size="sm"
+              >
+                <ListPlus className="h-4 w-4" />
+                <span>{t("reading.glossary.addToReviewList")}</span>
+              </Button>
               <Button
                 onClick={handleDownloadWord}
                 variant="secondary"
@@ -794,6 +805,13 @@ function Glossary() {
           </Link>
         </div>
       )}
+
+      <CreateReviewListDialog
+        open={reviewListOpen}
+        onOpenChange={setReviewListOpen}
+        words={wordEntries}
+        phrases={phraseEntries}
+      />
     </section>
   );
 }
