@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,20 @@ function toReviewListWord(entry: GlossaryEntry): ReviewListWord {
   };
 }
 
+// Module-scope so the open-reset effect can depend on the stable props
+// (words/phrases) rather than a per-render function identity.
+function entriesFor(
+  choice: IncludeChoice,
+  words: GlossaryEntry[],
+  phrases: GlossaryEntry[],
+): GlossaryEntry[] {
+  return choice === "words"
+    ? words
+    : choice === "phrases"
+      ? phrases
+      : [...words, ...phrases];
+}
+
 export default function CreateReviewListDialog({
   open,
   onOpenChange,
@@ -51,6 +66,9 @@ export default function CreateReviewListDialog({
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [include, setInclude] = useState<IncludeChoice>("both");
+  // Working set of previewed entries — the include choice's full contents,
+  // minus whatever the user has removed with the per-row X buttons.
+  const [entries, setEntries] = useState<GlossaryEntry[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Reset on open: default the name to the document title (the words come
@@ -59,25 +77,31 @@ export default function CreateReviewListDialog({
   useEffect(() => {
     if (!open) return;
     setSaving(false);
-    setInclude(
+    const initial: IncludeChoice =
       words.length > 0 && phrases.length > 0
         ? "both"
         : phrases.length > 0
           ? "phrases"
-          : "words",
-    );
+          : "words";
+    setInclude(initial);
+    setEntries(entriesFor(initial, words, phrases));
     setName(useReadingStore.getState().docTitle.trim().slice(0, 200));
-  }, [open, words.length, phrases.length]);
+  }, [open, words, phrases]);
 
-  const selectedEntries =
-    include === "words"
-      ? words
-      : include === "phrases"
-        ? phrases
-        : [...words, ...phrases];
+  // Switching scope starts from that scope's full contents — removals are
+  // per-choice and do not carry across radio changes.
+  const handleIncludeChange = (value: string) => {
+    const choice = value as IncludeChoice;
+    setInclude(choice);
+    setEntries(entriesFor(choice, words, phrases));
+  };
+
+  const handleRemoveEntry = (index: number) => {
+    setEntries((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSave = async () => {
-    if (!name.trim() || selectedEntries.length === 0) return;
+    if (!name.trim() || entries.length === 0) return;
     setSaving(true);
     try {
       const res = await fetch("/api/review-lists", {
@@ -85,7 +109,7 @@ export default function CreateReviewListDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
-          words: selectedEntries.map(toReviewListWord),
+          words: entries.map(toReviewListWord),
         }),
       });
       if (res.status === 401) {
@@ -100,7 +124,7 @@ export default function CreateReviewListDialog({
             : include === "both"
               ? "vocabulary.reviewLists.createdItems"
               : "vocabulary.reviewLists.created",
-          { count: selectedEntries.length },
+          { count: entries.length },
         ),
       );
       onOpenChange(false);
@@ -148,7 +172,7 @@ export default function CreateReviewListDialog({
             </Label>
             <RadioGroup
               value={include}
-              onValueChange={(v) => setInclude(v as IncludeChoice)}
+              onValueChange={handleIncludeChange}
               className="mt-2 gap-2"
             >
               {options.map((option) => (
@@ -177,18 +201,32 @@ export default function CreateReviewListDialog({
               {t("vocabulary.reviewLists.preview")}
             </label>
             <div className="border rounded-md overflow-hidden max-h-48 min-h-0 overflow-y-auto">
-              <div className="p-2 space-y-1">
-                {selectedEntries.map((entry) => (
+              <div className="divide-y">
+                {entries.map((entry, i) => (
                   <div
-                    key={entry.word}
-                    className="flex items-center gap-2 text-sm py-1 px-2 rounded hover:bg-muted min-w-0"
+                    key={`${entry.word}-${i}`}
+                    className="flex items-center gap-2 text-sm py-2 px-3 hover:bg-muted min-w-0"
                   >
                     <span className="font-medium shrink-0">{entry.word}</span>
                     <span className="text-muted-foreground truncate min-w-0 flex-1">
                       {entry.chineseDefinition}
                     </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                      title={t("vocabulary.reviewLists.removeItem")}
+                      onClick={() => handleRemoveEntry(i)}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 ))}
+                {entries.length === 0 && (
+                  <div className="text-center py-6 text-muted-foreground text-sm">
+                    {t("vocabulary.reviewLists.previewEmpty")}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -204,7 +242,7 @@ export default function CreateReviewListDialog({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!name.trim() || saving || selectedEntries.length === 0}
+            disabled={!name.trim() || saving || entries.length === 0}
           >
             {saving
               ? t("vocabulary.reviewLists.saving")

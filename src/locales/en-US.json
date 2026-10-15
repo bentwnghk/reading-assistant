@@ -2245,6 +2245,8 @@
       "includeWords": "Words only ({{count}})",
       "includePhrases": "Phrases only ({{count}})",
       "includeBoth": "Words and phrases ({{count}})",
+      "removeItem": "Remove item",
+      "previewEmpty": "No items remaining.",
       "createdItems": "Review list created with {{count}} item(s).",
       "signInRequired": "Sign in to create review lists.",
       "listName": "List Name",

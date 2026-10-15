@@ -2244,6 +2244,8 @@
       "includeWords": "僅單詞（{{count}}）",
       "includePhrases": "僅詞組（{{count}}）",
       "includeBoth": "單詞與詞組（{{count}}）",
+      "removeItem": "移除項目",
+      "previewEmpty": "沒有剩餘項目。",
       "createdItems": "已建立包含 {{count}} 個項目的複習列表。",
       "signInRequired": "請先登入以建立複習列表。",
       "listName": "列表名稱",
