@@ -22,6 +22,7 @@ import {
   getEffectiveTtsVoice,
   isPromptStyleGeminiTtsModel,
   type TtsModel,
+  type TtsResponseFormat,
 } from "@/store/setting";
 
 export interface SpeakWordOptions {
@@ -167,15 +168,15 @@ function decodeAudioDataP(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBu
 }
 
 // ── Raw PCM (response_format "pcm") support ────────────────────────────────
-// Some OpenAI-compatible TTS models (e.g. gemini-3.8-flash-lite-tts) return
-// raw PCM when explicitly requested — 16-bit little-endian mono at 24kHz (the
-// OpenAI-compatible "pcm" contract) — instead of a container format. (Gemini
-// 3.8 TTS actually defaults to WAV on unary requests, but our explicit
-// response_format "pcm" selects headerless L16, which this path decodes
-// without a container.) Browsers can neither decodeAudioData() headerless
-// PCM nor play it as a plain Blob, so it is converted manually into an
+// Fallback path for TTS models configured with raw PCM: 16-bit
+// little-endian mono at 24kHz (the OpenAI-compatible "pcm" contract),
+// with NO container. Browsers can neither decodeAudioData() headerless PCM
+// nor play it as a plain Blob, so it is converted manually into an
 // AudioBuffer (or wrapped with a RIFF/WAV header for the <audio> fallback
-// path).
+// path). No model currently uses "pcm" — gemini-3.8-flash-lite-tts moved to
+// WAV (see TTS_MODEL_RESPONSE_FORMATS) because byte-exact PCM bodies proved
+// fragile with some OpenAI-compatible layers — but the machinery stays for
+// any future raw-PCM model.
 const PCM_SAMPLE_RATE = 24000;
 const PCM_CHANNELS = 1;
 
@@ -213,6 +214,39 @@ function pcm16ToWavBlob(data: ArrayBuffer): Blob {
   writeAscii(36, "data");
   view.setUint32(40, sampleCount * 2, true);
   return new Blob([header, data], { type: "audio/wav" });
+}
+
+// ── Format-aware response handling ─────────────────────────────────────────
+
+/** Decodes a TTS response body per its format. Container formats (mp3/wav)
+ *  go through the platform decoder — WAV is self-describing, so
+ *  decodeAudioData() reads the true sample rate, channel count and chunk
+ *  boundaries from the header itself and never plays container/metadata
+ *  bytes as audio. Raw PCM has no container and is converted manually. */
+function decodeTtsResponseBody(
+  ctx: AudioContext,
+  data: ArrayBuffer,
+  format: TtsResponseFormat
+): Promise<AudioBuffer> {
+  return format === "pcm"
+    ? Promise.resolve(pcm16ToAudioBuffer(ctx, data))
+    : decodeAudioDataP(ctx, data);
+}
+
+/** Whether playback rate must be applied client-side for this format. Only
+ *  mp3 models take a server-side `speed` param; Gemini TTS has no
+ *  server-side speed, so pcm/wav playback rate is set on the decoded
+ *  buffer/source instead. */
+function usesClientSideSpeed(format: TtsResponseFormat): boolean {
+  return format !== "mp3";
+}
+
+/** Wraps a TTS response body as a playable Blob for the HTMLAudioElement
+ *  fallback path. Raw PCM needs a synthesized RIFF/WAV header; container
+ *  formats are passed through with their matching MIME type. */
+function ttsResponseBodyBlob(data: ArrayBuffer, format: TtsResponseFormat): Blob {
+  if (format === "pcm") return pcm16ToWavBlob(data);
+  return new Blob([data], { type: format === "wav" ? "audio/wav" : "audio/mpeg" });
 }
 
 // ── Shared request building ────────────────────────────────────────────────
@@ -278,8 +312,9 @@ interface TtsRequest {
 
 /** Builds the /v1/audio/speech request for the given model/voice/format.
  *  Handles all three billing modes (local / subscription / proxy signature).
- *  The `speed` param is only sent to mp3 models — pcm-only models ignore or
- *  reject it, so playback rate is applied client-side there instead. */
+ *  The `speed` param is only sent to mp3 models — pcm/wav models (Gemini
+ *  TTS) ignore or reject it, so playback rate is applied client-side there
+ *  instead (see usesClientSideSpeed). */
 function buildTtsRequest(opts: {
   text: string;
   model?: string;
@@ -316,7 +351,7 @@ function buildTtsRequest(opts: {
     voice,
     response_format: responseFormat,
   };
-  if (responseFormat !== "pcm") {
+  if (responseFormat === "mp3") {
     body.speed = opts.speed;
   }
 
@@ -372,16 +407,13 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
 
     // Preferred path: Web Audio (deterministic auto-play after one unlock).
     if (ctx) {
-      const decoded =
-        responseFormat === "pcm"
-          ? pcm16ToAudioBuffer(ctx, audioData)
-          : await decodeAudioDataP(ctx, audioData);
+      const decoded = await decodeTtsResponseBody(ctx, audioData, responseFormat);
       stopSpeaking(); // cut off any still-playing previous word
       const source = ctx.createBufferSource();
       source.buffer = decoded;
       source.connect(ctx.destination);
-      // pcm models don't take a server-side speed param — apply it here.
-      if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+      // non-mp3 models don't take a server-side speed param — apply it here.
+      if (usesClientSideSpeed(responseFormat) && opts.speed && opts.speed !== 1) {
         source.playbackRate.value = opts.speed;
       }
       currentSource = source;
@@ -396,15 +428,12 @@ export async function speakWord(opts: SpeakWordOptions): Promise<void> {
     // Fallback: HTMLAudioElement (only when AudioContext is unavailable — e.g.
     // very old browsers). Subject to autoplay policy, but those environments
     // are generally desktop and lenient.
-    const audioBlob =
-      responseFormat === "pcm"
-        ? pcm16ToWavBlob(audioData)
-        : new Blob([audioData], { type: "audio/mpeg" });
+    const audioBlob = ttsResponseBodyBlob(audioData, responseFormat);
     const audioUrl = URL.createObjectURL(audioBlob);
     await new Promise<void>((resolve, reject) => {
       const audio = new Audio();
       opts.audioRef.current = audio;
-      if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+      if (usesClientSideSpeed(responseFormat) && opts.speed && opts.speed !== 1) {
         audio.playbackRate = opts.speed;
       }
       audio.oncanplay = () => {
@@ -505,17 +534,14 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
       if (_readAlongToken !== myToken) return;
 
       if (ctx) {
-        const decoded =
-          responseFormat === "pcm"
-            ? pcm16ToAudioBuffer(ctx, audioData)
-            : await decodeAudioDataP(ctx, audioData);
+        const decoded = await decodeTtsResponseBody(ctx, audioData, responseFormat);
         if (_readAlongToken !== myToken) return;
         stopSpeaking();
         const source = ctx.createBufferSource();
         source.buffer = decoded;
         source.connect(ctx.destination);
-        // pcm models don't take a server-side speed param — apply it here.
-        if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+        // non-mp3 models don't take a server-side speed param — apply it here.
+        if (usesClientSideSpeed(responseFormat) && opts.speed && opts.speed !== 1) {
           source.playbackRate.value = opts.speed;
         }
         currentSource = source;
@@ -529,15 +555,12 @@ export async function readAlong(opts: ReadAlongOptions): Promise<void> {
         });
       } else {
         // Fallback: HTMLAudioElement (lenient environments)
-        const audioBlob =
-          responseFormat === "pcm"
-            ? pcm16ToWavBlob(audioData)
-            : new Blob([audioData], { type: "audio/mpeg" });
+        const audioBlob = ttsResponseBodyBlob(audioData, responseFormat);
         const audioUrl = URL.createObjectURL(audioBlob);
         await new Promise<void>((resolve) => {
           const audio = new Audio();
           opts.audioRef.current = audio;
-          if (responseFormat === "pcm" && opts.speed && opts.speed !== 1) {
+          if (usesClientSideSpeed(responseFormat) && opts.speed && opts.speed !== 1) {
             audio.playbackRate = opts.speed;
           }
           audio.oncanplay = () => {

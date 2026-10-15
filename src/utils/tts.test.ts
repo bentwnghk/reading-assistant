@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { isPromptStyleGeminiTtsModel } from "@/store/setting";
+import {
+  TTS_MODEL_RESPONSE_FORMATS,
+  isPromptStyleGeminiTtsModel,
+} from "@/store/setting";
 import { frameTtsInput, normalizeHyphensForTts } from "./tts";
 
 describe("normalizeHyphensForTts", () => {
@@ -85,5 +88,22 @@ describe("frameTtsInput", () => {
     expect(frameTtsInput("gemini-3.1-flash-tts-preview", 'He said "hi"')).toBe(
       'Say the following text exactly as written, word for word, in a neutral and clear tone: "He said \'hi\'"'
     );
+  });
+});
+
+describe("TTS_MODEL_RESPONSE_FORMATS", () => {
+  it("requests WAV for Gemini 3.8 TTS", () => {
+    // Regression test: requesting "pcm" for gemini-3.8-flash-lite-tts yielded
+    // ~1s of cracking noise AFTER the speech — headerless-PCM decoding
+    // converts every byte to EOF into samples, including trailing
+    // container/metadata bytes some OpenAI-compatible layers leave in the
+    // body. WAV is self-describing (and 3.8's documented unary default), so
+    // decodeAudioData() reads the real chunk boundaries itself.
+    expect(TTS_MODEL_RESPONSE_FORMATS["gemini-3.8-flash-lite-tts"]).toBe("wav");
+  });
+
+  it("keeps mp3 for the container-native models", () => {
+    expect(TTS_MODEL_RESPONSE_FORMATS["tts-1"]).toBe("mp3");
+    expect(TTS_MODEL_RESPONSE_FORMATS["x-ai/grok-voice-tts-1.0"]).toBe("mp3");
   });
 });
