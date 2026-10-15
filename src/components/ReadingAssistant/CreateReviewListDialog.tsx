@@ -185,7 +185,7 @@ export default function CreateReviewListDialog({
                   >
                     <span className="font-medium shrink-0">{entry.word}</span>
                     <span className="text-muted-foreground truncate min-w-0 flex-1">
-                      {entry.englishDefinition}
+                      {entry.chineseDefinition}
                     </span>
                   </div>
                 ))}
