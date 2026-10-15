@@ -153,8 +153,10 @@ export const DEFAULT_TTS_VOICES: Record<TtsModel, AnyTtsVoice> = {
 
 /** Audio format each TTS model is requested with (and returns) from
  *  /v1/audio/speech. tts-1 and the Grok voice model serve mp3; the Gemini
- *  TTS model only supports raw PCM (24kHz 16-bit mono), which the client
- *  decodes manually — see src/utils/tts.ts. */
+ *  TTS model is requested with raw PCM (24kHz 16-bit mono headerless L16 —
+ *  Gemini 3.8 TTS defaults to WAV on unary requests, but the explicit
+ *  response_format still selects headerless PCM), which the client decodes
+ *  manually — see src/utils/tts.ts. */
 export const TTS_MODEL_RESPONSE_FORMATS: Record<TtsModel, "mp3" | "pcm"> = {
   "tts-1": "mp3",
   "gemini-3.8-flash-lite-tts": "pcm",
@@ -185,16 +187,25 @@ export function getSavedTtsVoiceFor(
   return DEFAULT_TTS_VOICES[model as TtsModel] ?? DEFAULT_TTS_VOICES["tts-1"];
 }
 
-/** Gemini TTS models are LLM-based and treat the request input as a
- *  controllable *prompt* (style/tone/role directions are read out of the text
- *  itself — see the official prompting guide). Bare inputs like the single
- *  word "antagonist" get interpreted as a performance direction ("act as an
- *  antagonist") instead of content to recite, and the resulting "performance"
- *  can trip the safety filter (PROHIBITED_CONTENT → 400/500). Callers must
- *  wrap input for these models with an explicit recitation instruction —
- *  see buildTtsRequest() in src/utils/tts.ts. */
-export function isGeminiTtsModel(model: string): boolean {
-  return model.startsWith("gemini");
+/** LEGACY prompt-style Gemini TTS models (e.g. gemini-3.1-flash-tts-preview,
+ *  gemini-2.5-flash-preview-tts — the "preview" TTS family): LLM-based, they
+ *  treat the request input as a controllable *prompt* (style/tone/role
+ *  directions are read out of the text itself — see the official prompting
+ *  guide). Bare inputs like the single word "antagonist" get interpreted as a
+ *  performance direction ("act as an antagonist") instead of content to
+ *  recite, and the resulting "performance" can trip the safety filter
+ *  (PROHIBITED_CONTENT → 400/500). Callers must wrap input for these models
+ *  with an explicit recitation instruction — see buildTtsRequest() in
+ *  src/utils/tts.ts.
+ *
+ *  Gemini 3.8 TTS models (gemini-3.8-flash-tts, gemini-3.8-flash-lite-tts)
+ *  are NOT prompt-style: they treat the input strictly as a VERBATIM
+ *  TRANSCRIPT and read aloud any embedded stage directions (delivery control
+ *  moved to the structured speech_metadata annotation), so framing their
+ *  input makes the model speak the framing. They must NOT be wrapped.
+ *  Ref: https://ai.google.dev/gemini-api/docs/speech-generation */
+export function isPromptStyleGeminiTtsModel(model: string): boolean {
+  return model.startsWith("gemini") && model.includes("preview");
 }
 
 export const TTS_VOICE_LABELS: Record<string, string> = {

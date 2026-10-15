@@ -20,7 +20,7 @@ import {
   TTS_MODELS,
   TTS_MODEL_RESPONSE_FORMATS,
   getEffectiveTtsVoice,
-  isGeminiTtsModel,
+  isPromptStyleGeminiTtsModel,
   type TtsModel,
 } from "@/store/setting";
 
@@ -167,12 +167,15 @@ function decodeAudioDataP(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBu
 }
 
 // ── Raw PCM (response_format "pcm") support ────────────────────────────────
-// Some OpenAI-compatible TTS models (e.g. gemini-3.8-flash-lite-tts) only
-// return raw PCM — 16-bit little-endian mono at 24kHz (the OpenAI-compatible
-// "pcm" contract) — instead of a container format. Browsers can neither
-// decodeAudioData() headerless PCM nor play it as a plain Blob, so it is
-// converted manually into an AudioBuffer (or wrapped with a RIFF/WAV header
-// for the <audio> fallback path).
+// Some OpenAI-compatible TTS models (e.g. gemini-3.8-flash-lite-tts) return
+// raw PCM when explicitly requested — 16-bit little-endian mono at 24kHz (the
+// OpenAI-compatible "pcm" contract) — instead of a container format. (Gemini
+// 3.8 TTS actually defaults to WAV on unary requests, but our explicit
+// response_format "pcm" selects headerless L16, which this path decodes
+// without a container.) Browsers can neither decodeAudioData() headerless
+// PCM nor play it as a plain Blob, so it is converted manually into an
+// AudioBuffer (or wrapped with a RIFF/WAV header for the <audio> fallback
+// path).
 const PCM_SAMPLE_RATE = 24000;
 const PCM_CHANNELS = 1;
 
@@ -218,16 +221,24 @@ function resolveTtsModel(model: string | undefined): TtsModel {
   return TTS_MODELS.includes(model as TtsModel) ? (model as TtsModel) : "tts-1";
 }
 
-/** Recitation framing for Gemini TTS models. They are LLM-based and treat the
- *  input as a controllable prompt (the official docs steer delivery with
- *  patterns like `Say in a spooky whisper: "..."`). A bare payload — e.g. the
- *  single word "antagonist" or "romantic" — is ambiguous, so the model
- *  sometimes *performs* it (acts out the word) instead of reciting it, and the
+/** Recitation framing for LEGACY prompt-style Gemini TTS models only (see
+ *  isPromptStyleGeminiTtsModel — the preview-era models, e.g.
+ *  gemini-3.1-flash-tts-preview). They are LLM-based and treat the input as a
+ *  controllable prompt (the official docs steer delivery with patterns like
+ *  `Say in a spooky whisper: "..."`). A bare payload — e.g. the single word
+ *  "antagonist" or "romantic" — is ambiguous, so the model sometimes
+ *  *performs* it (acts out the word) instead of reciting it, and the
  *  improvised performance can trip the safety filter (PROHIBITED_CONTENT →
- *  400/500, which the docs list as a known gemini-3.8-flash-lite-tts
+ *  400/500, which the docs list as a known gemini-3.1-flash-tts-preview
  *  limitation). Framing the payload as an explicit verbatim recitation
  *  instruction resolves both failure modes. Inner double quotes are normalized
  *  to apostrophes so they can't break the quotation convention.
+ *
+ *  Gemini 3.8 TTS models (gemini-3.8-flash-tts, gemini-3.8-flash-lite-tts)
+ *  treat the input strictly as a VERBATIM TRANSCRIPT and moved delivery
+ *  control into the structured speech_metadata annotation — embedding this
+ *  framing in the text makes the model READ THE FRAMING ALOUD ("Say the
+ *  following text..."), so it must never be applied to them.
  *  Ref: https://ai.google.dev/gemini-api/docs/speech-generation */
 const GEMINI_TTS_RECITATION_PREFIX =
   "Say the following text exactly as written, word for word, in a neutral and clear tone";
@@ -250,8 +261,11 @@ export function normalizeHyphensForTts(text: string): string {
   return text.replace(/\p{L}+(?:-+\p{L}+)+/gu, (compound) => compound.replace(/-+/g, " "));
 }
 
-function frameTtsInput(model: TtsModel, text: string): string {
-  return isGeminiTtsModel(model)
+/** Applies recitation framing ONLY for legacy prompt-style Gemini TTS models
+ *  (see GEMINI_TTS_RECITATION_PREFIX). Everything else — Gemini 3.8 TTS
+ *  (verbatim-transcript models), tts-1, Grok — gets the bare text. */
+export function frameTtsInput(model: string, text: string): string {
+  return isPromptStyleGeminiTtsModel(model)
     ? `${GEMINI_TTS_RECITATION_PREFIX}: "${text.replace(/"/g, "'")}"`
     : text;
 }
