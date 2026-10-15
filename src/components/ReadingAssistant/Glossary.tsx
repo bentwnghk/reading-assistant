@@ -2,7 +2,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine, Volume2, Info, Wand2, ListPlus } from "lucide-react";
+import { BookMarked, LoaderCircle, FileDown, FileSpreadsheet, ChevronDown, Table, Layers, ClipboardList, SpellCheck, ArrowUpDown, ExternalLink, Sword, Combine, Volume2, Info, Wand2, ListPlus } from "lucide-react";
 import Link from "next/link";
 import {
   Document,
@@ -23,6 +23,12 @@ import {
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatDateTime } from "@/utils/formatDate";
 import {
   Table as DataTable,
@@ -686,22 +692,25 @@ function Glossary() {
                 <ListPlus className="h-4 w-4" />
                 <span>{t("reading.glossary.addToReviewList")}</span>
               </Button>
-              <Button
-                onClick={handleDownloadWord}
-                variant="secondary"
-                size="sm"
-              >
-                <FileDown className="h-4 w-4" />
-                <span>{t("reading.glossary.downloadWord")}</span>
-              </Button>
-              <Button
-                onClick={handleDownloadExcel}
-                variant="secondary"
-                size="sm"
-              >
-                <FileSpreadsheet className="h-4 w-4" />
-                <span>{t("reading.glossary.downloadExcel")}</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm">
+                    <FileDown className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t("reading.glossary.download")}</span>
+                    <ChevronDown className="h-3 w-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleDownloadWord()}>
+                    <FileDown className="h-4 w-4 mr-1" />
+                    {t("reading.glossary.downloadWord")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDownloadExcel()}>
+                    <FileSpreadsheet className="h-4 w-4 mr-1" />
+                    {t("reading.glossary.downloadExcel")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
             </>
           )}

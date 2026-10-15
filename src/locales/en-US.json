@@ -1556,6 +1556,7 @@
       "generating": "Generating...",
       "generatingWait": "Generating glossary... This may take 1-2 minutes. Please wait.",
       "regenerate": "Regenerate",
+      "download": "Download",
       "downloadWord": "Download Word",
       "downloadExcel": "Download Excel",
       "addToReviewList": "Add to Review List",

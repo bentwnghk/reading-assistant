@@ -1556,6 +1556,7 @@
       "generating": "正在生成...",
       "generatingWait": "正在生成詞彙表... 這可能需要 1-2 分鐘，請稍候。",
       "regenerate": "重新生成",
+      "download": "下載",
       "downloadWord": "下載 Word",
       "downloadExcel": "下載 Excel",
       "addToReviewList": "加入複習列表",
