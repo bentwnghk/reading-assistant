@@ -92,6 +92,15 @@ const TUTOR_MODEL_REPLACEMENTS: Record<string, TutorModel> = {
   "gpt-5.6-terra": "step-3.7-flash",
 };
 
+// Retired TTS model ids remapped to their replacements. Applied in
+// sanitizeModelSettings BEFORE the TTS_MODELS membership check so an existing
+// selection of the retired id migrates to its replacement instead of being
+// reset to the default model. Keep in sync with
+// scripts/migrate-tts-gemini-flash-lite-rename.sql.
+const TTS_MODEL_REPLACEMENTS: Record<string, TtsModel> = {
+  "gemini-3.1-flash-tts-preview": "gemini-3.8-flash-lite-tts",
+};
+
 export const RESTRICTED_MODEL_FIELD_NAMES = [
   "prereadingModel",
   "summaryModel",
@@ -115,7 +124,7 @@ export const TTS_VOICES = ["alloy", "nova", "echo", "fable", "onyx", "shimmer"] 
 
 export type TTSVoice = (typeof TTS_VOICES)[number];
 
-export const TTS_MODELS = ["tts-1", "gemini-3.1-flash-tts-preview", "x-ai/grok-voice-tts-1.0"] as const;
+export const TTS_MODELS = ["tts-1", "gemini-3.8-flash-lite-tts", "x-ai/grok-voice-tts-1.0"] as const;
 
 export type TtsModel = (typeof TTS_MODELS)[number];
 
@@ -132,13 +141,13 @@ export type AnyTtsVoice = (typeof ALL_TTS_VOICES)[number];
  *  new list (see getEffectiveTtsVoice). */
 export const TTS_MODEL_VOICES: Record<TtsModel, readonly AnyTtsVoice[]> = {
   "tts-1": TTS_VOICES,
-  "gemini-3.1-flash-tts-preview": GEMINI_TTS_VOICES,
+  "gemini-3.8-flash-lite-tts": GEMINI_TTS_VOICES,
   "x-ai/grok-voice-tts-1.0": GROK_TTS_VOICES,
 };
 
 export const DEFAULT_TTS_VOICES: Record<TtsModel, AnyTtsVoice> = {
   "tts-1": "onyx",
-  "gemini-3.1-flash-tts-preview": "kore",
+  "gemini-3.8-flash-lite-tts": "kore",
   "x-ai/grok-voice-tts-1.0": "ara",
 };
 
@@ -148,7 +157,7 @@ export const DEFAULT_TTS_VOICES: Record<TtsModel, AnyTtsVoice> = {
  *  decodes manually — see src/utils/tts.ts. */
 export const TTS_MODEL_RESPONSE_FORMATS: Record<TtsModel, "mp3" | "pcm"> = {
   "tts-1": "mp3",
-  "gemini-3.1-flash-tts-preview": "pcm",
+  "gemini-3.8-flash-lite-tts": "pcm",
   "x-ai/grok-voice-tts-1.0": "mp3",
 };
 
@@ -474,6 +483,13 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   if (!READING_TEXT_MODELS.includes(state.languageCheckModel as ReadingTextModel)) {
     state.languageCheckModel = defaultValues.languageCheckModel;
   }
+  const ttsModelValue = state.ttsModel;
+  if (
+    typeof ttsModelValue === "string" &&
+    ttsModelValue in TTS_MODEL_REPLACEMENTS
+  ) {
+    state.ttsModel = TTS_MODEL_REPLACEMENTS[ttsModelValue];
+  }
   if (!TTS_MODELS.includes(state.ttsModel as TtsModel)) {
     state.ttsModel = defaultValues.ttsModel;
   }
@@ -489,6 +505,18 @@ function sanitizeModelSettings(state: Record<string, unknown>) {
   const rawVoiceMap = state.ttsVoiceByModel as unknown;
   const cleanedVoiceMap: Record<string, string> = {};
   if (rawVoiceMap && typeof rawVoiceMap === "object" && !Array.isArray(rawVoiceMap)) {
+    // Rename remembered voices saved under retired TTS model ids to their
+    // replacements (same voice catalog), so the selection survives the model
+    // rename instead of falling back to the default voice.
+    for (const [from, to] of Object.entries(TTS_MODEL_REPLACEMENTS)) {
+      const legacyVoice = (rawVoiceMap as Record<string, unknown>)[from];
+      if (
+        typeof legacyVoice === "string" &&
+        (rawVoiceMap as Record<string, unknown>)[to] === undefined
+      ) {
+        (rawVoiceMap as Record<string, unknown>)[to] = legacyVoice;
+      }
+    }
     for (const model of TTS_MODELS) {
       const voice = (rawVoiceMap as Record<string, unknown>)[model];
       if (

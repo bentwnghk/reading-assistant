@@ -167,7 +167,7 @@ function decodeAudioDataP(ctx: AudioContext, data: ArrayBuffer): Promise<AudioBu
 }
 
 // ── Raw PCM (response_format "pcm") support ────────────────────────────────
-// Some OpenAI-compatible TTS models (e.g. gemini-3.1-flash-tts-preview) only
+// Some OpenAI-compatible TTS models (e.g. gemini-3.8-flash-lite-tts) only
 // return raw PCM — 16-bit little-endian mono at 24kHz (the OpenAI-compatible
 // "pcm" contract) — instead of a container format. Browsers can neither
 // decodeAudioData() headerless PCM nor play it as a plain Blob, so it is
@@ -224,7 +224,7 @@ function resolveTtsModel(model: string | undefined): TtsModel {
  *  single word "antagonist" or "romantic" — is ambiguous, so the model
  *  sometimes *performs* it (acts out the word) instead of reciting it, and the
  *  improvised performance can trip the safety filter (PROHIBITED_CONTENT →
- *  400/500, which the docs list as a known gemini-3.1-flash-tts-preview
+ *  400/500, which the docs list as a known gemini-3.8-flash-lite-tts
  *  limitation). Framing the payload as an explicit verbatim recitation
  *  instruction resolves both failure modes. Inner double quotes are normalized
  *  to apostrophes so they can't break the quotation convention.
