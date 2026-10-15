@@ -346,7 +346,7 @@
         },
         "q4": {
           "q": "Vocabulary building is key to improving my reading, but it's really difficult and boring to remember so many new words. What can I do?",
-          "a": "<p>We totally get it — rote memorization is a drag. That's why Mr.🆖 ProReader turns vocabulary building into something that feels less like studying and more like playing:</p><p><strong>1. Vocabulary comes to you naturally</strong> — As you read, simply highlight and add unfamiliar words. The AI automatically generates bilingual definitions, syllable breakdowns, and example sentences. No manual data entry needed.</p><p><strong>2. Flashcards with Spaced Repetition</strong> — The built-in flashcard system uses a scientifically-backed Leitner 5-box algorithm. Rate each card with Again, Hard, Good, or Easy, and it schedules the next review accordingly (1 day to 30 days). Over time, you spend less time on easy words and more on the ones that need reinforcement.</p><p><strong>3. Spelling Games</strong> — Four interactive modes make active recall feel like play: Listen &amp; Type, Scramble, Fill in the Blanks, and Mixed. Choose difficulty levels, word count, and Time Challenge mode for extra adrenaline.</p><p><strong>4. Vocabulary Quiz</strong> — Auto-generated quizzes from your own word list with difficulty levels and Time Challenge mode.</p><p><strong>5. My Vocabulary page</strong> — A personal word command center with sortable table, flashcards, spelling games, quizzes, auto-select strategies (overdue, hard, random, new, oldest), named review lists, export to PDF/Word/CSV, and review history.</p><p><strong>6. Shared by your teacher</strong> — Teachers can share vocabulary lists and review lists directly with you. Accept a shared list and the words are added to your vocabulary bank automatically.</p><p><strong>Pro tip:</strong> After each reading session, spend just 5–10 minutes on flashcards or a quick spelling game. The spaced repetition system shows you words right when you're about to forget them — the scientifically best time to reinforce memory. Small, consistent doses beat cramming every time.</p>"
+          "a": "<p>We totally get it — rote memorization is a drag. That's why Mr.🆖 ProReader turns vocabulary building into something that feels less like studying and more like playing:</p><p><strong>1. Vocabulary comes to you naturally</strong> — As you read, simply highlight and add unfamiliar words. The AI automatically generates bilingual definitions, syllable breakdowns, and example sentences. No manual data entry needed.</p><p><strong>2. Flashcards with Spaced Repetition</strong> — The built-in flashcard system uses a scientifically-backed Leitner 5-box algorithm. Rate each card with Again, Hard, Good, or Easy, and it schedules the next review accordingly (1 day to 30 days). Over time, you spend less time on easy words and more on the ones that need reinforcement.</p><p><strong>3. Spelling Games</strong> — Four interactive modes make active recall feel like play: Listen &amp; Type, Scramble, Fill in the Blanks, and Mixed. Choose difficulty levels, word count, and Time Challenge mode for extra adrenaline.</p><p><strong>4. Vocabulary Quiz</strong> — Auto-generated quizzes from your own word list with difficulty levels and Time Challenge mode.</p><p><strong>5. My Vocabulary page</strong> — A personal word command center with sortable table, flashcards, spelling games, quizzes, auto-select strategies (overdue, hard, random, new, oldest), named review lists, export to PDF/Word/CSV, review history, and deleting words you no longer need — a deleted word is only collected again from a new reading session or an accepted shared list.</p><p><strong>6. Shared by your teacher</strong> — Teachers can share vocabulary lists and review lists directly with you. Accept a shared list and the words are added to your vocabulary bank automatically.</p><p><strong>Pro tip:</strong> After each reading session, spend just 5–10 minutes on flashcards or a quick spelling game. The spaced repetition system shows you words right when you're about to forget them — the scientifically best time to reinforce memory. Small, consistent doses beat cramming every time.</p>"
         },
         "q5": {
           "q": "I often struggle with questions in school reading exams, especially DSE exam practices. How can Mr.🆖 ProReader help?",
@@ -2436,7 +2436,7 @@
         },
         "table": {
           "title": "Word Table",
-          "desc": "Browse, search, sort, and filter all your words. Select words manually or use Auto Select, then start a review."
+          "desc": "Browse, search, sort, and filter all your words. Select words manually or use Auto Select, then start a review — or delete words you no longer need."
         },
         "phrases": {
           "name": "Phrases",
@@ -2529,6 +2529,10 @@
         "history": {
           "name": "Review History",
           "desc": "See past review sessions with per-word results. Flashcard sessions show Again/Hard/Good/Easy counts; Quiz and Spelling sessions show accuracy."
+        },
+        "deleteWords": {
+          "name": "Delete Words",
+          "desc": "Select words or phrases in the table and delete them from My Vocabulary — including teacher-shared ones. Review history is kept, and a deleted word is only collected again when you meet it in a new reading session or accept it from a shared list."
         },
         "studentView": {
           "name": "View student data (Teachers)",

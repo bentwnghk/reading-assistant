@@ -1023,6 +1023,16 @@ function VocabularyContainer() {
                     </div>
                   </div>
 
+                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                      <Trash2 className="h-5 w-5 text-red-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.deleteWords.name")}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.deleteWords.desc")}</p>
+                    </div>
+                  </div>
+
                   {isTeacherOrAbove && (
                     <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
                       <div className="shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">

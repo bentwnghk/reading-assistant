@@ -125,6 +125,7 @@ Everything lives in one place: the **My Vocabulary** page (`/vocabulary`). Here 
 - Create named **review lists** (e.g., "DSE Vocabulary Set 1") and organize words into focused study groups
 - **Export** your glossary to PDF, Word, CSV, or even as an image
 - Track your **review history** with detailed session stats
+- **Delete** words or phrases you no longer need — including teacher-shared ones. Your review history is kept, and a deleted word is only collected again when you meet it in a new reading session or accept it from a shared list.
 
 ### 6. Shared by your teacher — vocabulary assigned to you
 
