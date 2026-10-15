@@ -163,7 +163,7 @@ function Collocations() {
         </h3>
         <div className="flex items-center gap-2 ml-auto">
           {collocations.length > 0 && (
-            <Button onClick={addAll} disabled={isGenerating || addingAll} size="sm" variant="ghost">
+            <Button onClick={addAll} disabled={isGenerating || addingAll} size="sm" variant="secondary">
               {addingAll ? <LoaderCircle className="h-4 w-4 mr-1 animate-spin" /> : <Plus className="h-4 w-4 mr-1" />}
               {t("reading.collocations.addAll")}
             </Button>
