@@ -198,7 +198,7 @@ export default function CreateReviewListDialog({
 
           <div className="flex flex-col min-h-0">
             <label className="text-sm font-medium text-muted-foreground mb-1">
-              {t("vocabulary.reviewLists.preview")}
+              {t("vocabulary.reviewLists.preview")} ({entries.length})
             </label>
             <div className="border rounded-md overflow-hidden max-h-48 min-h-0 overflow-y-auto">
               <div className="divide-y">
