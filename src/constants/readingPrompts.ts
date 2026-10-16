@@ -1111,7 +1111,7 @@ export function generateErrorSurgeryPrompt(topics: GrammarTopic[], age: number):
 Grammar topics:
 ${topicList}
 
-For each topic, generate 3 sentences. Each sentence contains exactly ONE deliberate grammar error related to that topic — specifically the kind of mistake Hong Kong students commonly make (see commonMistakes above). The student must identify the single erroneous word or short phrase and correct it.
+For each topic, generate 2 sentences. Each sentence contains exactly ONE deliberate grammar error related to that topic — specifically the kind of mistake Hong Kong students commonly make (see commonMistakes above). The student must identify the single erroneous word or short phrase and correct it.
 
 Respond with ONLY a valid JSON array. No markdown, no code blocks.
 
@@ -1132,7 +1132,7 @@ Guidelines:
 - Errors must be realistic, natural-sounding sentences (not obviously artificial)
 - Use vocabulary appropriate for age ${age}
 - The error should be clearly related to the grammar topic, not a spelling or vocabulary mistake
-- Generate exactly 3 error sentences per topic
+- Generate exactly 2 error sentences per topic
 - distractors must be exactly 3 real words or short phrases of the same form as the correction — plausible alternatives that are grammatically wrong in this context (NOT the correction, NOT grammatical terms like "participle" or "agent", NOT meta-labels like "correct")
 - Respond with ONLY the JSON array, no markdown, no code blocks`;
 }
