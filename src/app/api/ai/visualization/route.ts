@@ -217,12 +217,16 @@ async function callOpenAICompatibleApi(
  *  Edits additionally need an xAI-style resolution: gateways relay the OpenAI
  *  `size` field verbatim into xAI's `resolution` parameter, which only accepts
  *  "1k"/"2k" — the OpenAI default "1024x1024" is rejected with 422. Send "1k"
- *  via both `size` and `resolution` so either mapping style works. */
+ *  via both `size` and `resolution` so either mapping style works.
+ *
+ *  `response_format` must be explicit: xAI defaults to "url", which Zero Data
+ *  Retention teams are forbidden from using (the URL variant requires xAI to
+ *  store the generated image) — those requests fail with 400. "b64_json" is
+ *  always accepted and is what we consume anyway. */
 function imagesApiExtraParams(model: string, isEdit: boolean): Record<string, unknown> {
   if (!/imagine/i.test(model)) return {};
-  return isEdit
-    ? { quality: "low", size: "1k", resolution: "1k" }
-    : { quality: "low" };
+  const base = { quality: "low", response_format: "b64_json" };
+  return isEdit ? { ...base, size: "1k", resolution: "1k" } : base;
 }
 
 async function callOpenAIImagesGenerationsApi(
