@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { LANGUAGE_CHECK_LEARN_DEFAULT_AGE } from "@/constants/languageCheck";
+import { useLanguageCheckLearnStore } from "@/store/languageCheckLearn";
 
 /**
  * Language Check store — fully independent of the reading/history stores.
@@ -31,6 +33,8 @@ interface LanguageCheckState {
   explanationLanguage: ExplanationLanguage;
   /** Persisted preference: run a second OCR pass that reverts silent corrections. */
   verifyTranscription: boolean;
+  /** Persisted learner age (8–18) that levels the "Learn from your mistakes" materials. */
+  learnAge: number;
   /** AI generation flags — store-level so spinners survive SPA navigation. */
   activeGenerations: Record<string, boolean>;
   /** Essay id the running generation belongs to. */
@@ -41,6 +45,7 @@ interface LanguageCheckState {
 interface LanguageCheckActions {
   setExplanationLanguage: (lang: ExplanationLanguage) => void;
   setVerifyTranscription: (on: boolean) => void;
+  setLearnAge: (age: number) => void;
   setGenerating: (type: LanguageCheckGeneration, active: boolean) => void;
   setGeneratingEssayId: (id: string | null) => void;
   setProgress: (progress: LanguageCheckProgress | null) => void;
@@ -131,15 +136,21 @@ export const useLanguageCheckStore = create(
     LanguageCheckState & LanguageCheckActions,
     [],
     [],
-    { explanationLanguage: ExplanationLanguage; verifyTranscription: boolean }
+    {
+      explanationLanguage: ExplanationLanguage;
+      verifyTranscription: boolean;
+      learnAge: number;
+    }
   >(
     (set, get) => ({
       ...initialData,
       explanationLanguage: "en",
       verifyTranscription: false,
+      learnAge: LANGUAGE_CHECK_LEARN_DEFAULT_AGE,
 
       setExplanationLanguage: (explanationLanguage) => set({ explanationLanguage }),
       setVerifyTranscription: (verifyTranscription) => set({ verifyTranscription }),
+      setLearnAge: (learnAge) => set({ learnAge }),
 
       setGenerating: (type, active) =>
         set((s) => ({
@@ -254,6 +265,7 @@ export const useLanguageCheckStore = create(
       // show for the next on a shared device.
       reset: () => {
         abortLanguageCheck();
+        useLanguageCheckLearnStore.getState().reset();
         set({ ...initialData });
       },
     }),
@@ -262,6 +274,7 @@ export const useLanguageCheckStore = create(
       partialize: (state) => ({
         explanationLanguage: state.explanationLanguage,
         verifyTranscription: state.verifyTranscription,
+        learnAge: state.learnAge,
       }),
     },
   ),

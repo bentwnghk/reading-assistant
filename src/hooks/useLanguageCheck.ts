@@ -345,5 +345,5 @@ export default function useLanguageCheck() {
     }
   }
 
-  return { transcribe, runCheck };
+  return { transcribe, runCheck, generate: generateWithFallback };
 }

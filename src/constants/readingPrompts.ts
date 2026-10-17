@@ -1,5 +1,13 @@
 import i18next from "i18next";
-import { LANGUAGE_CHECK_ILLEGIBLE_MARKER } from "@/constants/languageCheck";
+import {
+  LANGUAGE_CHECK_ILLEGIBLE_MARKER,
+  LEARN_CATEGORY_FOCUS,
+  LEARN_CATEGORY_TYPES,
+  isExpressionCategory,
+  type LanguageCheckCategory,
+  type LearnExerciseType,
+} from "@/constants/languageCheck";
+import type { LearnErrorSample } from "@/utils/languageCheckLearn";
 
 export const systemInstruction = `You are an expert English reading teacher for Hong Kong primary and secondary school students. Today is {now}. Follow these instructions:
 
@@ -1519,4 +1527,300 @@ OUTPUT FORMAT (valid JSON only, no markdown code blocks, no additional text):
 }
 
 Respond with ONLY the JSON object, no markdown, no code blocks, no commentary.`;
+}
+
+
+// ─── Language Check: learn from your mistakes ────────────────────────────────
+
+interface LearnerProfile {
+  label: string;
+  cefr: string;
+  maxWords: number;
+  style: string;
+  contexts: string;
+}
+
+function learnerProfile(age: number): LearnerProfile {
+  const { cefr } = getAgeLevelMapping(age);
+  if (age <= 9) {
+    return {
+      label: `Primary ${age - 5} (age ${age})`,
+      cefr,
+      maxWords: 8,
+      style:
+        "Explain in one or two very short sentences. Use only everyday words a young child knows. Avoid grammar jargon except: word, sentence, verb (action word), noun (naming word), capital letter, full stop. Be warm and playful.",
+      contexts: "family, pets, food, toys, playground, school day",
+    };
+  }
+  if (age <= 12) {
+    return {
+      label: age <= 11 ? `Primary ${age - 5} (age ${age})` : `Secondary 1 (age ${age})`,
+      cefr,
+      maxWords: 12,
+      style:
+        "Explain in short, concrete sentences. Basic terms are fine (subject, verb, noun, past tense, plural) but define any other term in plain words. Encouraging tone.",
+      contexts: "hobbies, weekend trips, school clubs, sports, friends, festivals in Hong Kong",
+    };
+  }
+  if (age <= 14) {
+    return {
+      label: `Secondary ${age - 11} (age ${age})`,
+      cefr,
+      maxWords: 16,
+      style:
+        "Explain clearly and briefly. Standard grammar terms are fine. Show the pattern, then the reason.",
+      contexts: "school events, technology, travel, community activities, environment, social media",
+    };
+  }
+  if (age <= 16) {
+    return {
+      label: `Secondary ${age - 11} (age ${age})`,
+      cefr,
+      maxWords: 22,
+      style:
+        "Explain precisely, like a good HKDSE preparation teacher: rule, reason, exam-relevant tip. Use correct grammar terminology.",
+      contexts:
+        "HKDSE-style writing tasks: letters, proposals, articles, speeches, reviews, reports on youth, work, environment and technology",
+    };
+  }
+  return {
+    label: age >= 18 ? `DSE level (age ${age})` : `Secondary 6 (age ${age})`,
+    cefr,
+    maxWords: 28,
+    style:
+      "Explain with nuance: rule, exceptions, register and effect on the reader. Assume solid grammar terminology and aim at top-band exam writing.",
+    contexts:
+      "HKDSE Paper 2 tasks and abstract topics: social issues, education, ethics, technology, public policy, formal and semi-formal registers",
+  };
+}
+
+export function learnSystemPrompt(): string {
+  return `You are a gifted English language teacher for Hong Kong students whose first language is Cantonese. Today is {now}. You are building a short, personalised learning unit from the mistakes a student made in their own essay.
+
+Teaching principles you ALWAYS follow:
+1. Teach from the learner's own errors first, then widen: notice the pattern -> understand the rule and the reason -> practise with support -> use it independently.
+2. Be accurate. Every model sentence, option and answer you write MUST be perfectly correct standard English (British spelling). A wrong "correct answer" harms the learner more than no exercise.
+3. Be specific and concrete. Short rule + contrasting examples beat long explanations. Show the typical Cantonese/Chinese-transfer cause of the mistake where relevant ("English says X; Chinese would say Y").
+4. Match the learner's level exactly (given in each task): vocabulary, sentence length, grammar terminology, topics and tone.
+5. Be encouraging and never condescending. Mistakes are information.
+6. Use Traditional Chinese (繁體中文, Hong Kong written style) for every "Zh" field; keep English examples, options, sentences and passages in English.
+7. Respond with ONLY the requested JSON - no markdown fences, no commentary.`.replace(
+    "{now}",
+    new Date().toLocaleDateString(i18next.language),
+  );
+}
+
+function formatLearnerErrors(samples: LearnErrorSample[]): string {
+  if (samples.length === 0) return "(none recorded)";
+  return samples
+    .map(
+      (s, i) =>
+        `${i + 1}. In: "${s.sentence}"\n   Wrong: "${s.original}" -> Right: "${s.correction || "(delete)"}"${
+          s.explanation ? `\n   Note: ${s.explanation}` : ""
+        }`,
+    )
+    .join("\n");
+}
+
+export function learnLessonPrompt(args: {
+  category: LanguageCheckCategory;
+  categoryLabel: string;
+  age: number;
+  samples: LearnErrorSample[];
+  mistakeCount: number;
+}): string {
+  const { category, categoryLabel, age, samples, mistakeCount } = args;
+  const profile = learnerProfile(age);
+  const expression = isExpressionCategory(category);
+  return `Write ONE mini-lesson on "${categoryLabel}" for this learner.
+
+<learner>
+Level: ${profile.label} - target CEFR ${profile.cefr}
+Explanation style: ${profile.style}
+Example sentences: at most ${profile.maxWords} words each, topics such as ${profile.contexts}.
+</learner>
+
+<teaching-scope>
+${LEARN_CATEGORY_FOCUS[category]}
+</teaching-scope>
+
+<learner-mistakes count="${mistakeCount}">
+${formatLearnerErrors(samples)}
+</learner-mistakes>
+${
+  expression
+    ? "\nThis is an EXPRESSION topic: the learner's sentences were grammatical, but unclear, unnatural or improvable. Teach how to recognise the weakness and how to choose a clearer, more natural alternative; do not call the originals 'errors'.\n"
+    : ""
+}
+Return ONE JSON object with exactly this shape:
+
+{
+  "title": "Short lesson title in English",
+  "titleZh": "繁體中文標題",
+  "summary": "ONE sentence: the single most important idea of this lesson",
+  "summaryZh": "繁體中文",
+  "whyItMatters": "1-2 sentences: what goes wrong for the reader/examiner if this is ignored",
+  "whyItMattersZh": "繁體中文",
+  "rules": [
+    {
+      "heading": "Short name of rule 1",
+      "headingZh": "繁體中文",
+      "explanation": "The rule and the reason, at the learner's level (${age <= 9 ? "1-2 short sentences" : "2-3 sentences"})",
+      "explanationZh": "繁體中文",
+      "pattern": "A compact formula or memory aid, e.g. 'he / she / it + verb-s'; '' if none fits",
+      "examples": ["Correct example sentence 1", "Correct example sentence 2"]
+    }
+  ],
+  "contrasts": [
+    { "wrong": "A realistic learner mistake", "right": "Its correction", "why": "One short sentence of explanation", "whyZh": "繁體中文" }
+  ],
+  "chineseTransfer": { "explanation": "Why Cantonese/Chinese speakers make this mistake and what English does differently; '' if there is no real transfer cause", "explanationZh": "繁體中文" },
+  "tips": [ { "tip": "A practical self-check or memory trick the learner can use while writing", "tipZh": "繁體中文" } ]
+}
+
+Requirements:
+- "rules": ${age <= 9 ? "1-2" : "2-4"} rules, most important first. Each must have 2-3 correct "examples" that highlight the target item by showing it in the sentence (do not use markup).
+- "contrasts": 3-4 pairs. At least ONE pair must be built from the learner's own mistakes above (adapt it so it is a clean, single-error sentence). The rest are other realistic errors Hong Kong learners make with this topic. "wrong" must contain exactly one error of this topic; "right" fixes only that error.
+- "tips": 2-3 short, actionable checks (e.g. "After writing, circle every verb and ask: who does this?").
+- Keep ALL English at the learner's level. Do not mention that you are an AI. Do not include the learner's name.
+- Double-check that every "right", every example and every pattern is correct English.`;
+}
+
+export function learnExercisePlan(args: {
+  category: LanguageCheckCategory;
+  phase: "practice" | "quiz";
+  age: number;
+}): { count: number; types: LearnExerciseType[] } {
+  const { category, phase, age } = args;
+  let types = [...LEARN_CATEGORY_TYPES[category]];
+  // Quizzes are scored instantly and without hints, so only formats that can
+  // be graded exactly are used.
+  if (phase === "quiz") {
+    types = types.filter((t) => t !== "rewrite" && t !== "compose");
+  }
+  // Young learners get shorter, simpler formats.
+  if (age <= 9) {
+    types = types.filter((t) => t !== "compose" && t !== "proofread");
+  }
+  if (types.length === 0) types = ["choice"];
+  const count =
+    phase === "practice" ? (age <= 9 ? 5 : 7) : age <= 9 ? 5 : 6;
+  return { count, types };
+}
+
+const EXERCISE_SPECS: Record<LearnExerciseType, string> = {
+  choice: `{ "type": "choice", "question": "Prompt or sentence with the gap shown as ___ (e.g. 'My brother ___ football every day.')", "options": ["3-4 options"], "answer": "the correct option, copied EXACTLY from options", "hint": "...", "explanation": "...", "explanationZh": "..." }
+   - Exactly ONE option is correct. Distractors are realistic learner errors of this topic (never silly or also-correct).`,
+  "fill-blank": `{ "type": "fill-blank", "sentence": "A sentence with 1-2 gaps written as ___ ", "answers": [["accepted fill for gap 1", "another accepted fill"], ["accepted fill for gap 2"]], "hint": "e.g. the base word in brackets", "explanation": "...", "explanationZh": "..." }
+   - "answers" has ONE array per gap, listing EVERY fill that is correct for it (include contractions/variants). Put the base word in the hint (or in brackets in the sentence) when more than one fill could fit.`,
+  reorder: `{ "type": "reorder", "context": "Optional one-line situation that fixes the intended meaning ('' if the words make it obvious)", "answer": "The complete correct sentence, ${"5-12"} words, with its capital letter and final punctuation", "alternatives": ["Other complete sentences that are also correct with the same words"], "hint": "...", "explanation": "...", "explanationZh": "..." }
+   - Use only when the word order really is the point. List all valid orderings in "alternatives".`,
+  "error-correction": `{ "type": "error-correction", "passage": "1-2 sentences containing EXACTLY ONE error of this topic", "errors": [ { "wrong": "the exact wrong words copied from the passage (1-3 words)", "right": ["accepted correction", "another accepted correction"], "explanation": "...", "explanationZh": "..." } ], "hint": "...", "explanation": "", "explanationZh": "" }
+   - For a MISSING word, set "wrong" to the neighbouring word(s) and "right" to those words plus the missing word (e.g. wrong "to shop" -> right "to the shop"). For an UNNECESSARY word, "right" is the words without it.`,
+  proofread: `{ "type": "proofread", "passage": "A natural 3-5 sentence paragraph (a diary entry, message or short article) containing 3-4 errors of this topic", "errors": [ { "wrong": "exact words from the passage", "right": ["accepted correction"], "explanation": "...", "explanationZh": "..." } ], "hint": "e.g. how many errors to find", "explanation": "", "explanationZh": "" }
+   - Every "wrong" must appear exactly as written in the passage; errors must not overlap; the passage must contain NO other mistakes.`,
+  rewrite: `{ "type": "rewrite", "instruction": "Clear instruction, e.g. 'Rewrite the sentence correctly.' / 'Combine the two sentences using although.'", "source": "The sentence(s) to rewrite", "answers": ["Every fully correct rewrite you can think of (2-4)"], "criteria": "What a correct rewrite MUST achieve (used to judge answers you did not list)", "hint": "...", "explanation": "...", "explanationZh": "..." }`,
+  compose: `{ "type": "compose", "instruction": "A short writing task for 1-2 sentences in a concrete situation that needs this topic", "criteria": "A short checklist of what a good answer must show", "modelAnswer": "One model answer at the learner's level", "hint": "...", "explanation": "", "explanationZh": "" }`,
+};
+
+export function learnExercisesPrompt(args: {
+  category: LanguageCheckCategory;
+  categoryLabel: string;
+  phase: "practice" | "quiz";
+  age: number;
+  count: number;
+  types: LearnExerciseType[];
+  samples: LearnErrorSample[];
+  lessonSummary: string;
+  rules: string[];
+  avoid: string[];
+}): string {
+  const { category, categoryLabel, phase, age, count, types, samples, lessonSummary, rules, avoid } = args;
+  const profile = learnerProfile(age);
+  const specs = types.map((t) => `- ${t}: ${EXERCISE_SPECS[t]}`).join("\n");
+  const expression = isExpressionCategory(category);
+  return `Create ${count} ${phase === "practice" ? "PRACTICE exercises" : "end-of-unit QUIZ questions"} on "${categoryLabel}".
+
+<learner>
+Level: ${profile.label} - target CEFR ${profile.cefr}
+Sentences: at most ${profile.maxWords} words (passages: at most ${profile.maxWords * 4} words), topics such as ${profile.contexts}.
+${profile.style}
+</learner>
+
+<teaching-scope>
+${LEARN_CATEGORY_FOCUS[category]}
+</teaching-scope>
+
+<lesson-the-learner-just-read>
+Key idea: ${lessonSummary}
+Rules taught:
+${rules.map((r) => `- ${r}`).join("\n") || "- (see teaching scope)"}
+</lesson-the-learner-just-read>
+
+<learner-mistakes-from-their-essay>
+${formatLearnerErrors(samples)}
+</learner-mistakes-from-their-essay>
+${
+  avoid.length > 0
+    ? `\n<already-used>\nDo NOT repeat or closely copy any of these (the learner has already seen them):\n${avoid.map((a) => `- ${a}`).join("\n")}\n</already-used>\n`
+    : ""
+}
+Allowed exercise types (use ONLY these, as the "type" value):
+${specs}
+
+Return a JSON ARRAY of exactly ${count} exercise objects.
+
+${
+  phase === "practice"
+    ? `Design (practice = supported learning):
+- Order from easiest to hardest: start with recognising the right form (choice), then controlled production (fill-blank, reorder), then finding and fixing errors (error-correction, proofread), then freer production (rewrite, compose) - using only the allowed types.
+- Use as many DIFFERENT allowed types as is natural; do not make more than 3 items of the same type.
+- Each item has a "hint" that nudges toward the idea WITHOUT giving the answer (e.g. "Who is doing the action?").
+- Every item has an "explanation" (1-2 sentences, the rule behind the answer, at the learner's level) and "explanationZh".
+- At least two items should rework the learner's own mistakes in NEW sentences (a different sentence with the same kind of error).`
+    : `Design (quiz = independent check, no hints):
+- Mix difficulty: about a third easy, a third medium, a third challenging for this level. Put some items in NEW contexts to test transfer, not just recall.
+- "hint" MUST be "" for every item (the quiz gives no hints).
+- Every item has an "explanation" (1-2 sentences: the rule behind the answer) and "explanationZh" - the learner reads these after finishing.
+- Use as many different allowed types as is natural.
+- Questions must be unambiguous: exactly one defensible answer, or every acceptable answer listed.`
+}
+
+Quality checklist - verify before answering:
+1. Every sentence, option, answer, "right" and model answer is correct English.
+2. In choice items, the "answer" is word-for-word one of the options and no distractor is also acceptable.
+3. In fill-blank items, the number of arrays in "answers" equals the number of ___ gaps.
+4. In error-correction/proofread items, each "wrong" is copied exactly from the passage, and the passage has no unlisted errors.
+5. Items test THIS topic only${expression ? " (for expression topics, the better version must keep exactly the same meaning)" : ""} and do not give the answer away in the stem.
+6. Chinese ("Zh" fields) is Traditional Chinese.`;
+}
+
+export function learnEvaluatePrompt(args: {
+  type: "rewrite" | "compose";
+  age: number;
+  categoryLabel: string;
+  instruction: string;
+  source: string;
+  criteria: string;
+  accepted: string[];
+  studentAnswer: string;
+}): string {
+  const { type, age, categoryLabel, instruction, source, criteria, accepted, studentAnswer } = args;
+  const profile = learnerProfile(age);
+  return `A ${profile.label} Hong Kong student is practising "${categoryLabel}". Judge their answer fairly, like a kind but accurate teacher.
+
+Task type: ${type}
+Instruction: ${instruction}
+${source ? `Given text: ${source}\n` : ""}Success criteria: ${criteria || "(use the instruction)"}
+${accepted.length > 0 ? `Known correct answers: ${accepted.join(" | ")}\n` : ""}Student's answer: ${studentAnswer || "(blank)"}
+
+Rules:
+- "correct": the answer meets the criteria and has no mistake in the target topic, even if worded differently from the known answers.
+- "partial": the target topic is handled correctly but the answer has another small mistake (spelling, punctuation, a different grammar slip), OR it only partly meets the criteria.
+- "incorrect": the target topic is still wrong or the task was not done.
+- Never mark an answer wrong merely because it differs from the known answers.
+- Feedback: 1-3 sentences at the learner's level. Say what is right, then what to fix. If not fully correct, include one corrected version. Do not lecture.
+
+Respond with ONLY this JSON object:
+{ "verdict": "correct" | "partial" | "incorrect", "feedback": "English feedback", "feedbackZh": "繁體中文 feedback" }`;
 }

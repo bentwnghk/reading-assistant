@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Download,
   Eye,
+  GraduationCap,
   LoaderCircle,
   Pencil,
   RefreshCw,
@@ -24,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import EssayList from "@/components/LanguageCheck/EssayList";
+import LearnSetupDialog from "@/components/LanguageCheck/Learn/LearnSetupDialog";
 import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageStaging";
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
@@ -213,6 +215,7 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const [view, setView] = useState<View>("auto");
   const [scanOpen, setScanOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [learnOpen, setLearnOpen] = useState(false);
   const [title, setTitle] = useState(essay.title);
 
   const busyHere = generatingId === essay.id;
@@ -353,6 +356,19 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
                 {t("languageCheck.results.recheck")}
               </Button>
             )}
+            <Button
+              size="sm"
+              disabled={essay.corrections.length === 0}
+              title={
+                essay.corrections.length === 0
+                  ? t("languageCheck.learn.noMistakes")
+                  : undefined
+              }
+              onClick={() => setLearnOpen(true)}
+            >
+              <GraduationCap className="mr-1.5 h-4 w-4" />
+              {t("languageCheck.learn.button")}
+            </Button>
             <Button size="sm" disabled={exporting || !hasResults} onClick={handleExport}>
               {exporting ? (
                 <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
@@ -392,6 +408,10 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
           essay={essay}
           onChecked={() => setView("results")}
         />
+      )}
+
+      {learnOpen && (
+        <LearnSetupDialog essay={essay} open={learnOpen} onOpenChange={setLearnOpen} />
       )}
 
       <Dialog open={scanOpen} onOpenChange={setScanOpen}>

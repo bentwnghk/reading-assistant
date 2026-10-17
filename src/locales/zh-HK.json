@@ -4769,6 +4769,144 @@
       "notes": "更正說明",
       "generatedBy": "由 Mr.🆖 ProReader 於 {{date}} 生成"
     },
+    "learn": {
+      "button": "從錯誤中學習",
+      "noMistakes": "這篇作文沒有可供學習的錯誤",
+      "title": "從錯誤中學習",
+      "backToResults": "返回批改結果",
+      "locked": "請先完成上一步，才能解鎖此步驟。",
+      "goBack": "返回",
+      "setup": {
+        "title": "從錯誤中學習",
+        "description": "選擇你想弄清楚的錯誤類別。系統會根據你的作文，為每個類別準備簡短課文、練習和小測。",
+        "chooseTitle": "你想學習哪些方面？",
+        "mistakes_other": "{{count}} 個錯誤",
+        "pickTop": "最常見 {{count}} 項",
+        "clear": "清除",
+        "selected": "已選 {{count}} / {{max}} 項",
+        "limit": "最多可選 {{max}} 項。如要選其他類別，請先取消一項。",
+        "levelTitle": "你的程度",
+        "levelHint": "課文和練習會按此程度（{{age}} 歲）編寫。如覺得太難，可選低一點。",
+        "start": "開始學習"
+      },
+      "path": {
+        "title": "學習路徑",
+        "lesson": "課文",
+        "practice": "練習",
+        "quiz": "小測",
+        "summary": "總結"
+      },
+      "loading": {
+        "lesson": "正在編寫課文……",
+        "practice": "正在準備練習……",
+        "quiz": "正在準備小測……",
+        "hint": "可能需時一分鐘。你可以留在此頁，後續內容會在背景準備。",
+        "failed": "出現問題",
+        "retry": "重試"
+      },
+      "lesson": {
+        "label": "課文",
+        "yourMistakes_other": "你的 {{count}} 個錯誤",
+        "theRule": "規則",
+        "commonMistakes": "常見錯誤",
+        "wrong": "錯",
+        "right": "對",
+        "chineseTransfer": "為何會出錯",
+        "tips": "自我檢查",
+        "startPractice": "開始練習"
+      },
+      "exercise": {
+        "counter": "第 {{current}} 題，共 {{total}} 題",
+        "types": {
+          "choice": "選擇",
+          "fillBlank": "填空",
+          "reorder": "排列詞序",
+          "errorCorrection": "改正錯誤",
+          "proofread": "校對",
+          "rewrite": "改寫",
+          "compose": "寫作"
+        },
+        "instructions": {
+          "choice": "選出最佳答案。",
+          "fillBlank": "輸入缺少的詞語。",
+          "reorder": "按正確次序點選詞語，組成正確的句子。",
+          "errorCorrection": "句中有一個錯誤。點選錯誤的詞語，然後輸入更正。",
+          "proofread": "點選所有錯誤的詞語或短語，然後逐一輸入更正。"
+        },
+        "blankN": "空格 {{n}}",
+        "reorderEmpty": "點選下方詞語來組成句子",
+        "removeWord": "點選以移除",
+        "yourFixes": "你的更正",
+        "fixPlaceholder": "輸入更正（留空表示刪去）",
+        "fixFor": "「{{text}}」的更正",
+        "fixHint": "把文字改成正確寫法。如該詞語應刪去，請清空輸入框。",
+        "typeHere": "在此輸入答案",
+        "hint": "提示",
+        "check": "核對",
+        "checking": "核對中……",
+        "submit": "提交答案",
+        "submitLast": "提交並完成",
+        "tryAgain": "再試一次",
+        "showAnswer": "顯示答案",
+        "next": "下一題",
+        "finish": "完成",
+        "previous": "上一題",
+        "correct": "答對了！",
+        "almost": "差不多了",
+        "notQuite": "不太對",
+        "correctAnswer": "正確答案",
+        "modelAnswer": "參考答案",
+        "alreadyDone": "你已完成此題。"
+      },
+      "practice": {
+        "doneTitle": "練習完成",
+        "mastery": {
+          "secure": "非常好！大部分題目你都一次答對。準備好就可以做小測。",
+          "developing": "進步不錯。可以多做幾題，或做小測看看自己的程度。",
+          "review": "這個主題需要多加練習。請重讀課文，再做多些練習。"
+        },
+        "moreExercises": "更多練習",
+        "reviewAnswers": "檢視我的答案",
+        "toQuiz": "做小測"
+      },
+      "quiz": {
+        "introTitle": "小測時間",
+        "introBody": "共 {{count}} 題，沒有提示，答案一經提交即為最終答案。完成後會看到詳細解釋。",
+        "begin": "開始小測",
+        "resultTitle": "小測結果",
+        "score": "答對 {{right}} / {{total}} 題",
+        "mastery": {
+          "secure": "做得好！你已牢牢掌握這個主題。",
+          "developing": "快掌握了。請檢視答錯的題目，然後重做小測。",
+          "review": "請返回課文和練習，再做新的小測。"
+        },
+        "retake": "新小測",
+        "reviewTitle": "檢視你的答案",
+        "yourAnswer": "你的答案",
+        "nextTopic": "下一個主題",
+        "seeSummary": "查看總結"
+      },
+      "summary": {
+        "title": "你的學習總結",
+        "average_other": "{{count}} 個主題的小測平均分",
+        "allSecure": "做得很好！你學習的每個主題都已牢牢掌握。",
+        "keepGoing": "請繼續練習：{{topics}}。",
+        "detail": "作文中有 {{count}} 個錯誤 · 練習 {{practice}}% · 小測 {{quiz}}%",
+        "levels": {
+          "secure": "已掌握",
+          "developing": "進步中",
+          "review": "需要溫習"
+        },
+        "reviewTopic": "溫習",
+        "nextStep": "下一步：運用所學重寫作文，然後再次運行語言檢查，看看有多少錯誤已經消失。",
+        "backToEssay": "返回我的作文"
+      },
+      "errors": {
+        "lesson": "未能建立課文，請重試。",
+        "exercises": "未能建立足夠的有效練習，請重試。",
+        "evaluate": "未能核對你的答案，請重試。"
+      }
+    },
     "categories": {
       "unclear-phrasing": "表達不清／生硬",
       "chinglish": "中式英語（逐字翻譯）",

@@ -314,3 +314,129 @@ export const LANGUAGE_CHECK_MAX_TRANSCRIPT_CHARS = 60_000;
 
 /** Essays (scans included) are auto-deleted this many days after upload. */
 export const LANGUAGE_CHECK_RETENTION_DAYS = 30;
+
+// ─── Learn from your mistakes (lessons → practice → quiz) ───────────────────
+
+/** Max categories studied in one learning session (each one is a full unit). */
+export const LANGUAGE_CHECK_LEARN_MAX_CATEGORIES = 6;
+
+/** Age used until the learner picks a level (S4 — the Language Check's baseline). */
+export const LANGUAGE_CHECK_LEARN_DEFAULT_AGE = 15;
+export const LANGUAGE_CHECK_LEARN_MIN_AGE = 8;
+export const LANGUAGE_CHECK_LEARN_MAX_AGE = 18;
+
+/**
+ * Exercise formats, ordered the way a unit should progress: recognise →
+ * controlled production → freer production → proofreading in context.
+ */
+export const LEARN_EXERCISE_TYPES = [
+  "choice",
+  "fill-blank",
+  "reorder",
+  "error-correction",
+  "rewrite",
+  "compose",
+  "proofread",
+] as const;
+
+export type LearnExerciseType = (typeof LEARN_EXERCISE_TYPES)[number];
+
+/**
+ * Exercise formats that suit each category, most useful first. Spelling is not
+ * a word-order task and word-order is not a free-writing task, so each
+ * category only gets the formats that genuinely train it. Typed as a Record so
+ * adding a category forces a decision here.
+ */
+export const LEARN_CATEGORY_TYPES: Record<
+  LanguageCheckCategory,
+  readonly LearnExerciseType[]
+> = {
+  "subject-verb-agreement": ["fill-blank", "choice", "error-correction", "rewrite", "proofread"],
+  tense: ["fill-blank", "choice", "error-correction", "proofread", "rewrite"],
+  article: ["choice", "fill-blank", "error-correction", "proofread"],
+  "plural-countable": ["choice", "fill-blank", "error-correction", "rewrite"],
+  preposition: ["choice", "fill-blank", "error-correction", "proofread"],
+  pronoun: ["choice", "fill-blank", "error-correction", "rewrite"],
+  "word-form": ["fill-blank", "choice", "error-correction", "rewrite"],
+  "word-choice": ["choice", "fill-blank", "rewrite", "error-correction"],
+  collocation: ["choice", "fill-blank", "rewrite", "error-correction"],
+  register: ["choice", "rewrite", "error-correction", "compose"],
+  redundancy: ["choice", "rewrite", "error-correction", "proofread"],
+  fragment: ["choice", "error-correction", "rewrite", "compose", "proofread"],
+  "run-on": ["choice", "rewrite", "error-correction", "compose", "proofread"],
+  "missing-element": ["fill-blank", "error-correction", "reorder", "rewrite"],
+  "word-order": ["reorder", "choice", "error-correction", "rewrite"],
+  connector: ["choice", "fill-blank", "rewrite", "compose", "proofread"],
+  spelling: ["choice", "fill-blank", "error-correction", "proofread"],
+  punctuation: ["choice", "error-correction", "rewrite", "proofread"],
+  capitalisation: ["choice", "error-correction", "rewrite", "proofread"],
+  "unclear-phrasing": ["choice", "rewrite", "compose", "error-correction"],
+  chinglish: ["choice", "rewrite", "fill-blank", "compose"],
+  concision: ["choice", "rewrite", "compose", "error-correction"],
+  "vocabulary-upgrade": ["choice", "fill-blank", "rewrite", "compose"],
+};
+
+/**
+ * Categories where letter case and punctuation ARE the skill, so answers are
+ * compared exactly (every other category ignores case and end punctuation).
+ */
+export const LEARN_STRICT_CATEGORIES: readonly LanguageCheckCategory[] = [
+  "capitalisation",
+  "punctuation",
+];
+
+/**
+ * Teaching scope per category — prompt-only (never shown in the UI). It pins
+ * down WHAT a unit teaches so the lesson, exercises and quiz of a category
+ * stay on target, and carries the Cantonese/Chinese transfer patterns behind
+ * the typical Hong Kong learner error. Typed as a Record so adding a category
+ * forces a description here.
+ */
+export const LEARN_CATEGORY_FOCUS: Record<LanguageCheckCategory, string> = {
+  "subject-verb-agreement":
+    "The verb must agree with its subject in number: third-person singular -s in the present simple (she goes), is/are, was/were, has/have, 'there is/are', 'each/every/everyone + singular verb', subjects separated from the verb by a phrase. Chinese verbs never change form, so learners drop -s or add it to plural subjects.",
+  tense:
+    "Choosing and keeping a consistent verb tense/time frame: simple past vs present perfect, past narrative consistency, present simple for facts and routines, future forms, tense after time words (yesterday, since, for, already). Chinese marks time with words, not verb forms, so learners leave verbs in the base form or shift tense mid-paragraph.",
+  article:
+    "a / an / the / no article: first vs second mention, specific vs general reference, uncountable and plural nouns with no article, fixed phrases (in hospital, at school, the sun). Chinese has no articles, so learners omit them or overuse 'the'.",
+  "plural-countable":
+    "Plural -s/-es and irregular plurals (children, people), countable vs uncountable nouns (information, advice, homework, equipment, furniture never take -s or 'a'), quantifiers (much/many, a few/a little, fewer/less). Chinese nouns do not inflect for number.",
+  preposition:
+    "Prepositions of time and place (in/on/at), dependent prepositions after verbs/adjectives/nouns (depend on, interested in, discuss [no preposition], arrive in/at, good at), and unnecessary prepositions. Prepositions are learnt as chunks; direct translation from Chinese misleads.",
+  pronoun:
+    "Pronoun case (I/me, he/him, who/whom), agreement with the noun they replace, clear reference (what does 'it/this/they' point to), consistent person (not switching you/we/they), reflexive pronouns, possessives (its vs it's, their/there).",
+  "word-form":
+    "Using the right part of speech and derivation: noun/verb/adjective/adverb forms (success/succeed/successful/successfully, decide/decision), -ing vs -ed adjectives (bored/boring), verb patterns (verb + -ing vs to-infinitive), comparatives and superlatives.",
+  "word-choice":
+    "Choosing the word whose meaning really fits: commonly confused words (borrow/lend, say/tell, look/see/watch, hear/listen, make/do, economic/economical, affect/effect), near-synonyms with different usage.",
+  collocation:
+    "Words that naturally go together in English: verb + noun (make a decision, do homework, take a photo, have a look), adjective + noun (heavy rain, strong tea), and set phrases. Learners translate word by word from Chinese, producing combinations that no English speaker uses.",
+  register:
+    "Matching formality to the task: avoiding contractions, slang, text-speak, chatty fillers and phrasal verbs in formal writing (letters, proposals, reports, essays), and using suitable formal alternatives. Also keeping a consistent register within one text.",
+  redundancy:
+    "Cutting words that repeat meaning: 'return back', 'repeat again', 'in my opinion I think', 'more and more increasing', 'each and every', double subjects ('my teacher he'), double connectors ('Although ... but ...', 'Because ... so ...').",
+  fragment:
+    "A sentence needs a subject and a finite verb and must express a complete thought. Fixing fragments: dependent clauses standing alone (Because I was tired.), missing finite verb (-ing phrase on its own), and attaching or completing them.",
+  "run-on":
+    "Joining independent clauses correctly: comma splices and fused sentences. Fixes: full stop, semicolon, comma + coordinating conjunction (FANBOYS), or subordination (although, because, which). Chinese allows comma-chains of clauses, so learners join sentences with commas.",
+  "missing-element":
+    "Every English clause needs an explicit subject and a verb: dummy subjects 'it/there' (It is raining; There are three reasons), the linking verb 'be' before adjectives and nouns (She is tall — Chinese says 'she very tall'), auxiliary verbs in questions/negatives, and missing objects.",
+  "word-order":
+    "Standard English word order: Subject-Verb-Object, adverb/adverbial placement (frequency adverbs before the main verb, time/place order), adjective order, question word order (inversion with auxiliaries; no inversion in embedded questions), and indirect questions. Chinese word order differs (time before verb, question words in place).",
+  connector:
+    "Linking ideas logically: addition (moreover, in addition), contrast (however, although, whereas), cause/result (because, therefore, as a result), sequence (firstly, finally), exemplification; correct position and punctuation of connectors; avoiding weak/overused 'and', 'but', 'so' chains; matching the logical relation.",
+  spelling:
+    "Accurate spelling of common words: doubled consonants (beginning, stopped), silent letters, ie/ei, -able/-ible, homophones (their/there, to/too, its/it's), plurals and -ing/-ed spelling rules, and frequently misspelt words (receive, necessary, separate, definitely). Teach memorisation strategies (syllable chunking, mnemonics, look-cover-write-check).",
+  punctuation:
+    "Commas (lists, after introductory phrases, before coordinating conjunctions, around non-essential clauses), full stops, question/exclamation marks, apostrophes (possession vs contraction), colons/semicolons, quotation marks. Case sensitivity: answers must match the punctuation exactly.",
+  capitalisation:
+    "Capital letters for sentence starts, the pronoun I, proper nouns (names, places, nationalities, languages, days, months, titles), and titles; NOT for common nouns, seasons or school subjects other than languages. Case sensitivity: answers must match capital letters exactly.",
+  "unclear-phrasing":
+    "Writing so a reader understands on first reading: vague words (thing, something, people), ambiguous reference, over-long tangled sentences, misplaced modifiers, and fixing by naming the exact idea, shortening and re-ordering.",
+  chinglish:
+    "Literal translation from Chinese that sounds unnatural (open the light, learn knowledge, give me a deep impression, I very like it, according to my opinion, have a good time to play, add oil). Teach 'English says X, not Y' by showing the natural English expression and the Chinese pattern behind the mistake.",
+  concision:
+    "Saying the same thing in fewer, stronger words: delete padding (due to the fact that → because; in order to → to), turn noun phrases into verbs, remove repeated ideas, and replace wordy lead-ins. The meaning must stay identical.",
+  "vocabulary-upgrade":
+    "Replacing plain or vague words (good, bad, very important, a lot of, get, thing, big problem) with precise, higher-register vocabulary an S4–S6 writer can use correctly (beneficial, detrimental, crucial, numerous, obtain, issue, serious). Teach nuance, collocation and register of the new word, not just a synonym list.",
+};
