@@ -21,6 +21,8 @@ interface LessonViewProps {
   language: ExplanationLanguage;
   categoryLabel: string;
   onContinue: () => void;
+  /** Read-only review (staff / history): no "Start practice" button. */
+  readOnly?: boolean;
 }
 
 function SectionTitle({
@@ -51,6 +53,7 @@ export default function LessonView({
   language,
   categoryLabel,
   onContinue,
+  readOnly = false,
 }: LessonViewProps) {
   const { t } = useTranslation();
   const style = categoryStyle(unit.category);
@@ -197,12 +200,14 @@ export default function LessonView({
         </section>
       )}
 
-      <div className="flex justify-end pt-2">
-        <Button size="lg" onClick={onContinue}>
-          {t("languageCheck.learn.lesson.startPractice")}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex justify-end pt-2">
+          <Button size="lg" onClick={onContinue}>
+            {t("languageCheck.learn.lesson.startPractice")}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,11 +2,7 @@
 
 import i18next from "i18next";
 import { toast } from "sonner";
-import {
-  LANGUAGE_CHECK_LEARN_MAX_CATEGORIES,
-  isExpressionCategory,
-  type LanguageCheckCategory,
-} from "@/constants/languageCheck";
+import type { LanguageCheckCategory } from "@/constants/languageCheck";
 import {
   learnEvaluatePrompt,
   learnExercisePlan,
@@ -16,9 +12,9 @@ import {
 } from "@/constants/readingPrompts";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
 import {
-  createUnit,
-  getLearnAbort,
   abortLearn,
+  getLearnAbort,
+  sessionFromWire,
   useLanguageCheckLearnStore,
   type LearnUnit,
 } from "@/store/languageCheckLearn";
@@ -26,8 +22,6 @@ import { useSettingStore } from "@/store/setting";
 import { parseError } from "@/utils/error";
 import { stripJsonFences } from "@/utils/languageCheck";
 import {
-  buildErrorSamples,
-  countByCategory,
   parseExercises,
   parseLesson,
   type LearnExercise,
@@ -36,9 +30,19 @@ import {
   exercisePrompt,
   type Grade,
 } from "@/utils/languageCheckLearnGrade";
+import type { LearnSessionWire } from "@/utils/languageCheckLearnWire";
 
 /** Fewest usable exercises a stage needs before it is shown. */
 const MIN_EXERCISES = 3;
+/**
+ * Short random tag for exercise ids. Results are keyed by exercise id, so two
+ * devices that generate a set at the same moment must not produce the same ids
+ * for different questions (an answer would attach to the wrong one).
+ */
+function tag(): string {
+  return Math.random().toString(36).slice(2, 6);
+}
+
 /** Max earlier prompts passed to the model so it does not repeat them. */
 const MAX_AVOID = 24;
 
@@ -60,6 +64,17 @@ function isAbort(error: unknown): boolean {
 /** "subject-verb-agreement" → "subject verb agreement" (prompt label). */
 function promptLabel(category: string): string {
   return category.replace(/-/g, " ");
+}
+
+const BASE = "/api/language-check/learn";
+
+async function readError(res: Response): Promise<string> {
+  try {
+    const data = (await res.json()) as { error?: string };
+    return data.error || `Request failed (${res.status})`;
+  } catch {
+    return `Request failed (${res.status})`;
+  }
 }
 
 function clip(text: string, max = 140): string {
@@ -115,7 +130,15 @@ export default function useLanguageCheckLearn() {
       return true;
     } catch (error) {
       const aborted = isAbort(error) || ac.signal.aborted;
-      if (!aborted) console.error(`Language check learn (${stage}) failed:`, error);
+      if (!aborted) {
+        console.error(`Language check learn (${stage}) failed:`, error);
+        store().logEvent(key, {
+          type: "generation_failed",
+          category: category as LanguageCheckCategory,
+          details: { stage },
+          key: `gf:${key}:${category}:${stage}:${Date.now()}`,
+        });
+      }
       store().patchUnit(key, category, (u) => ({
         [stage]: aborted
           ? { status: u[stage].data ? "ready" : "idle", data: u[stage].data, error: null }
@@ -239,7 +262,7 @@ export default function useLanguageCheckLearn() {
           key,
           fresh,
           "practice",
-          `p${existing.length}`,
+          `p${existing.length}${tag()}`,
           existing.map((e) => clip(exercisePrompt(e))),
           signal,
         );
@@ -280,6 +303,12 @@ export default function useLanguageCheckLearn() {
     const round = opts.retake ? unit.quizRound + 1 : unit.quizRound;
 
     if (opts.retake) {
+      // The finished round must reach the server before the next one replaces
+      // it; if it cannot, keep the finished round on screen rather than lose it.
+      if (!(await store().flush())) {
+        toast.error(i18next.t("languageCheck.learn.errors.save"));
+        return;
+      }
       store().patchUnit(key, category, () => ({
         quizResults: {},
         quizRound: round,
@@ -298,7 +327,7 @@ export default function useLanguageCheckLearn() {
           key,
           fresh,
           "quiz",
-          `q${round}`,
+          `q${round}${tag()}`,
           [...practiceSeen, ...seen],
           signal,
         );
@@ -361,47 +390,66 @@ export default function useLanguageCheckLearn() {
   // ── Session ───────────────────────────────────────────────────────────────
 
   /**
-   * Starts (or resumes) a learning session for the chosen categories. An
-   * identical selection for the same essay and level keeps its progress.
-   * Returns the session key.
+   * Starts a learning session for the chosen categories on the server — which
+   * builds it from the stored essay and resumes an unfinished session with the
+   * same selection (on any device). Returns the session id, or null on failure
+   * (the error has been shown).
    */
-  function begin(
-    essay: Pick<LanguageCheckEssay, "id" | "title" | "checkedText" | "corrections">,
+  async function begin(
+    essay: Pick<LanguageCheckEssay, "id">,
     categories: LanguageCheckCategory[],
     age: number,
-  ): string {
-    const counts = countByCategory(essay.corrections);
-    const chosen = counts
-      .filter((c) => categories.includes(c.category))
-      // Errors before suggestions, then most frequent first.
-      .sort(
-        (a, b) =>
-          Number(isExpressionCategory(a.category)) - Number(isExpressionCategory(b.category)) ||
-          b.count - a.count,
-      )
-      .slice(0, LANGUAGE_CHECK_LEARN_MAX_CATEGORIES);
-    const key = `${essay.id}|${chosen.map((c) => c.category).join(",")}|${age}`;
+  ): Promise<{ id: string; resumed: boolean } | null> {
+    try {
+      const res = await fetch(BASE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ essayId: essay.id, categories, age }),
+      });
+      if (!res.ok) throw new Error(await readError(res));
+      const { session, resumed } = (await res.json()) as {
+        session: LearnSessionWire;
+        resumed: boolean;
+      };
+      return { id: adopt(session), resumed };
+    } catch (error) {
+      toast.error(parseError(error));
+      return null;
+    }
+  }
 
+  /** Opens a saved session (from the list, a link or another device). */
+  async function openSession(id: string): Promise<string | null> {
+    const current = store().session;
+    if (current?.key === id) return id;
+    try {
+      const res = await fetch(`${BASE}/${id}`);
+      if (!res.ok) throw new Error(await readError(res));
+      const { session } = (await res.json()) as { session: LearnSessionWire };
+      const key = adopt(session);
+      store().logEvent(key, {
+        type: "session_resumed",
+        details: { via: "open" },
+        key: `rs:${key}:${Math.floor(Date.now() / 600_000)}`,
+      });
+      return key;
+    } catch (error) {
+      toast.error(parseError(error));
+      return null;
+    }
+  }
+
+  function adopt(wire: LearnSessionWire): string {
     const existing = store().session;
-    if (existing?.key === key) return key;
-
+    if (existing?.key === wire.id) return wire.id;
     abortLearn();
-    store().start({
-      key,
-      essayId: essay.id,
-      essayTitle: essay.title,
-      age,
-      units: chosen.map((c) =>
-        createUnit(c.category, c.count, buildErrorSamples(essay, c.category)),
-      ),
-      current: { unit: 0, stage: "lesson" },
-    });
-    if (chosen[0]) void ensureLesson(key, chosen[0].category);
-    return key;
+    store().start(sessionFromWire(wire));
+    return wire.id;
   }
 
   return {
     begin,
+    openSession,
     ensureLesson,
     ensurePractice,
     ensureQuiz,

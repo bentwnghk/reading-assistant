@@ -4796,7 +4796,8 @@
         "limit": "Maximum of {{max}} topics reached. Untick one to choose another.",
         "levelTitle": "Your level",
         "levelHint": "Lessons and exercises are written for this level (age {{age}}). Choose a little lower if the material feels too hard.",
-        "start": "Start learning"
+        "start": "Start learning",
+        "resumed": "Continuing your saved session for this selection."
       },
       "path": {
         "title": "Learning path",
@@ -4915,7 +4916,127 @@
       "errors": {
         "lesson": "The lesson could not be created. Please try again.",
         "exercises": "Not enough valid exercises could be created. Please try again.",
-        "evaluate": "Your answer could not be checked. Please try again."
+        "evaluate": "Your answer could not be checked. Please try again.",
+        "save": "Your finished quiz could not be saved yet, so a new one was not started. Check your connection and try again."
+      },
+      "sync": {
+        "saving": "Saving…",
+        "saved": "Saved",
+        "error": "Not saved — tap to retry",
+        "retryHint": "Your work is kept on this device and will be saved when the connection returns."
+      }
+    },
+    "learnData": {
+      "title": "My learning",
+      "staffTitle": "Learning progress",
+      "tabs": {
+        "sessions": "Sessions",
+        "dashboard": "Dashboard",
+        "activity": "Activity"
+      },
+      "staffTabs": {
+        "overview": "Overview",
+        "sessions": "Sessions",
+        "activity": "Activity"
+      },
+      "range": {
+        "label": "Time range",
+        "all": "All time",
+        "days_one": "{{count}} day",
+        "days_other": "{{count}} days"
+      },
+      "noSessions": "Nothing saved yet. Open a checked essay and choose \"Learn from mistakes\" — your lessons, practice and quiz results are saved here and are available on any device.",
+      "noSessionsStaff": "No learning sessions for this selection yet.",
+      "noData": "No learning activity in this period yet.",
+      "noActivity": "No activity in this period.",
+      "status": {
+        "in_progress": "In progress",
+        "completed": "Completed"
+      },
+      "unitsProgress": "{{done}} of {{total}} topics finished",
+      "resume": "Continue",
+      "review": "Review",
+      "viewDetail": "View lessons, answers and quiz results",
+      "openHere": "Currently open in this browser",
+      "deleteTitle": "Delete this learning session?",
+      "deleteDesc": "The lessons, exercises and quiz results for \"{{title}}\" will be deleted. Your activity history and progress statistics are kept.",
+      "updated": "Last updated",
+      "round": "Round {{round}}",
+      "right": "correct",
+      "wrong": "incorrect",
+      "topicCount_one": "{{count}} topic",
+      "topicCount_other": "{{count}} topics",
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min",
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "lessThanMinute": "< 1 min",
+      "statSessions": "Sessions started",
+      "statSessionsHint": "{{count}} completed",
+      "statPractice": "Practice answers",
+      "statPracticeHint": "{{percent}}% right first time",
+      "statQuizzes": "Quizzes finished",
+      "statQuizzesHint": "average {{percent}}%",
+      "statImprovement": "Improvement",
+      "statImprovementHint": "points gained on retaken topics",
+      "statSecure": "Secure topics",
+      "statTopicsHint": "{{developing}} developing · {{review}} need review",
+      "statLessons": "Lessons read",
+      "statActiveDays": "Active days",
+      "statTime": "Time on task",
+      "statTimeHint": "estimated from activity",
+      "chartActivity": {
+        "day": "Activity per day",
+        "week": "Activity per week"
+      },
+      "chartHistory": "Quiz scores over time",
+      "seriesPractice": "Practice answers",
+      "seriesQuizzes": "Quizzes finished",
+      "seriesAverage": "Average quiz score",
+      "quizScore": "Quiz score",
+      "colTopic": "Topic",
+      "colTopics": "Topics",
+      "colLearners": "Learners",
+      "colQuizzes": "Quizzes",
+      "colLatest": "Latest score",
+      "colAverage": "Average score",
+      "colImprovement": "Improvement",
+      "colPractice": "Practice accuracy",
+      "colMastery": "Mastery",
+      "colSessions": "Sessions (done/started)",
+      "colWeakest": "Weakest topic",
+      "colTime": "Time on task",
+      "colLastActive": "Last active",
+      "studentsTitle": "Students",
+      "filterToStudent": "Show only this student",
+      "practiceNote": "Practice accuracy is self-reported by the learner's browser; quiz scores are re-marked by the server.",
+      "detail": {
+        "noLesson": "This lesson was not generated.",
+        "noPractice": "No practice exercises were generated.",
+        "noQuiz": "No quiz was generated.",
+        "practiceSummary": "{{completed}} of {{total}} exercises completed · {{percent}}% right first time",
+        "attempts_one": "{{count}} attempt",
+        "attempts_other": "{{count}} attempts",
+        "revealed": "answer revealed",
+        "notAttempted": "Not attempted",
+        "inProgress": "In progress"
+      },
+      "events": {
+        "session_started": "Started learning",
+        "session_resumed": "Resumed learning",
+        "session_completed": "Completed all topics",
+        "session_deleted": "Deleted a learning session",
+        "lesson_generated": "Lesson created",
+        "lesson_viewed": "Read the lesson",
+        "practice_generated": "Practice created",
+        "practice_answered": "Practice answer",
+        "practice_revealed": "Looked at an answer",
+        "practice_completed": "Finished practice",
+        "quiz_generated": "Quiz created",
+        "quiz_answered": "Quiz answer",
+        "quiz_completed": "Finished quiz",
+        "quiz_retaken": "Retook the quiz",
+        "summary_viewed": "Viewed the summary",
+        "generation_failed": "Generation failed"
       }
     },
     "categories": {

@@ -1,8 +1,10 @@
 import { z } from "zod";
 import {
   LANGUAGE_CHECK_CATEGORIES,
+  LANGUAGE_CHECK_LEARN_MAX_CATEGORIES,
   LEARN_EXERCISE_TYPES,
   LEARN_STRICT_CATEGORIES,
+  isExpressionCategory,
   type LanguageCheckCategory,
   type LearnExerciseType,
 } from "@/constants/languageCheck";
@@ -420,6 +422,45 @@ export function countByCategory(
   return LANGUAGE_CHECK_CATEGORIES.filter((c) => map.has(c))
     .map((category) => ({ category, count: map.get(category) ?? 0 }))
     .sort((a, b) => b.count - a.count);
+}
+
+export interface LearnUnitPlan {
+  category: LanguageCheckCategory;
+  count: number;
+  samples: LearnErrorSample[];
+}
+
+/**
+ * The units of a learning session for the chosen categories: errors before
+ * suggestions, most frequent first, capped. Used by the browser to start a
+ * session and by the server to build the authoritative copy from the stored
+ * essay, so both always agree. `key` identifies the selection (essay +
+ * categories + level); the same selection resumes an unfinished session.
+ */
+export function planLearnUnits(
+  essay: Pick<LanguageCheckEssay, "id" | "checkedText" | "corrections">,
+  categories: readonly string[],
+  age: number,
+): { key: string; units: LearnUnitPlan[] } {
+  const units = countByCategory(essay.corrections)
+    .filter((c) => categories.includes(c.category))
+    .sort(
+      (a, b) =>
+        Number(isExpressionCategory(a.category)) - Number(isExpressionCategory(b.category)) ||
+        b.count - a.count,
+    )
+    .slice(0, LANGUAGE_CHECK_LEARN_MAX_CATEGORIES)
+    .map((c) => ({
+      category: c.category,
+      count: c.count,
+      samples: buildErrorSamples(essay, c.category),
+    }));
+  return { key: `${essay.id}|${units.map((u) => u.category).join(",")}|${age}`, units };
+}
+
+/** Where a learning session lives; the id is the database id, so it opens on any device. */
+export function learnUrl(id: string): string {
+  return `/language-check/learn?session=${encodeURIComponent(id)}`;
 }
 
 // ─── Display ─────────────────────────────────────────────────────────────────

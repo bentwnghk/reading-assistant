@@ -57,6 +57,7 @@ function session(u = unit()): LearnSession {
     essayId: "e",
     essayTitle: "My essay",
     age: 15,
+    status: "in_progress",
     units: [u],
     current: { unit: 0, stage: "lesson" },
   };

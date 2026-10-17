@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, LoaderCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -28,7 +29,7 @@ import {
 } from "@/components/LanguageCheck/shared";
 import useLanguageCheckLearn from "@/hooks/useLanguageCheckLearn";
 import { useLanguageCheckStore } from "@/store/languageCheck";
-import { countByCategory, levelKeyForAge } from "@/utils/languageCheckLearn";
+import { countByCategory, learnUrl, levelKeyForAge } from "@/utils/languageCheckLearn";
 
 interface LearnSetupDialogProps {
   essay: LanguageCheckEssay;
@@ -59,6 +60,7 @@ export default function LearnSetupDialog({ essay, open, onOpenChange }: LearnSet
     (errors.length > 0 ? errors : suggestions).slice(0, 2).map((c) => c.category),
   );
 
+  const [starting, setStarting] = useState(false);
   const atLimit = selected.length >= max;
 
   function toggle(category: LanguageCheckCategory) {
@@ -77,11 +79,18 @@ export default function LearnSetupDialog({ essay, open, onOpenChange }: LearnSet
     );
   }
 
-  function start() {
-    if (selected.length === 0) return;
-    begin(essay, selected, learnAge);
-    onOpenChange(false);
-    router.push("/language-check/learn");
+  async function start() {
+    if (selected.length === 0 || starting) return;
+    setStarting(true);
+    try {
+      const result = await begin(essay, selected, learnAge);
+      if (!result) return;
+      if (result.resumed) toast.info(t("languageCheck.learn.setup.resumed"));
+      onOpenChange(false);
+      router.push(learnUrl(result.id));
+    } finally {
+      setStarting(false);
+    }
   }
 
   function renderRow({ category, count }: { category: LanguageCheckCategory; count: number }) {
@@ -192,7 +201,8 @@ export default function LearnSetupDialog({ essay, open, onOpenChange }: LearnSet
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {t("languageCheck.cancel")}
           </Button>
-          <Button type="button" onClick={start} disabled={selected.length === 0}>
+          <Button type="button" onClick={() => void start()} disabled={selected.length === 0 || starting}>
+            {starting && <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />}
             {t("languageCheck.learn.setup.start")}
           </Button>
         </DialogFooter>

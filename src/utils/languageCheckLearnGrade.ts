@@ -1,4 +1,8 @@
 import {
+  LANGUAGE_CHECK_LEARN_MASTERY_DEVELOPING,
+  LANGUAGE_CHECK_LEARN_MASTERY_SECURE,
+} from "@/constants/languageCheck";
+import {
   splitAtBlanks,
   type ChoiceExercise,
   type FillBlankExercise,
@@ -267,8 +271,8 @@ export function percentScore(scores: readonly number[], count: number): number {
 export type Mastery = "secure" | "developing" | "review";
 
 export function masteryFor(percent: number): Mastery {
-  if (percent >= 80) return "secure";
-  if (percent >= 50) return "developing";
+  if (percent >= LANGUAGE_CHECK_LEARN_MASTERY_SECURE) return "secure";
+  if (percent >= LANGUAGE_CHECK_LEARN_MASTERY_DEVELOPING) return "developing";
   return "review";
 }
 

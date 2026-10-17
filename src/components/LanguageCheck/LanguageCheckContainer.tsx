@@ -30,7 +30,9 @@ import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageSta
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
+import MyLearning from "@/components/LanguageCheck/Learn/MyLearning";
 import StaffEssayLog from "@/components/LanguageCheck/StaffEssayLog";
+import StaffLearning from "@/components/LanguageCheck/Learn/StaffLearning";
 import { useCategoryLabel } from "@/components/LanguageCheck/shared";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
 import {
@@ -192,8 +194,11 @@ export default function LanguageCheckContainer() {
             ) : undefined
           }
         />
-        {/* Renders nothing for students; staff see a scoped activity log. */}
+        {/* The learner's saved "Learn from your mistakes" sessions, dashboard and activity. */}
+        <MyLearning />
+        {/* Render nothing for students; staff see scoped logs and dashboards. */}
         <StaffEssayLog />
+        <StaffLearning />
       </div>
     );
   }

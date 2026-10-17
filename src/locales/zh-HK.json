@@ -4787,7 +4787,8 @@
         "limit": "最多可選 {{max}} 項。如要選其他類別，請先取消一項。",
         "levelTitle": "你的程度",
         "levelHint": "課文和練習會按此程度（{{age}} 歲）編寫。如覺得太難，可選低一點。",
-        "start": "開始學習"
+        "start": "開始學習",
+        "resumed": "正繼續你為此選擇儲存的學習進度。"
       },
       "path": {
         "title": "學習路徑",
@@ -4904,7 +4905,123 @@
       "errors": {
         "lesson": "未能建立課文，請重試。",
         "exercises": "未能建立足夠的有效練習，請重試。",
-        "evaluate": "未能核對你的答案，請重試。"
+        "evaluate": "未能核對你的答案，請重試。",
+        "save": "你完成的測驗暫時未能儲存，因此未有開始新的測驗。請檢查網絡連線後再試。"
+      },
+      "sync": {
+        "saving": "儲存中…",
+        "saved": "已儲存",
+        "error": "未能儲存 — 點擊重試",
+        "retryHint": "你的進度已保留在此裝置，連線恢復後會自動儲存。"
+      }
+    },
+    "learnData": {
+      "title": "我的學習",
+      "staffTitle": "學習進度",
+      "tabs": {
+        "sessions": "學習記錄",
+        "dashboard": "數據總覽",
+        "activity": "活動紀錄"
+      },
+      "staffTabs": {
+        "overview": "總覽",
+        "sessions": "學習記錄",
+        "activity": "活動紀錄"
+      },
+      "range": {
+        "label": "時間範圍",
+        "all": "全部",
+        "days_other": "{{count}} 日"
+      },
+      "noSessions": "暫時未有儲存的記錄。開啟一篇已檢查的文章並選擇「從錯誤中學習」，課堂、練習和測驗結果便會儲存在這裡，並可在任何裝置上查看。",
+      "noSessionsStaff": "此篩選條件下暫時沒有學習記錄。",
+      "noData": "此期間暫時沒有學習活動。",
+      "noActivity": "此期間沒有活動。",
+      "status": {
+        "in_progress": "進行中",
+        "completed": "已完成"
+      },
+      "unitsProgress": "已完成 {{done}} / {{total}} 個主題",
+      "resume": "繼續",
+      "review": "重溫",
+      "viewDetail": "查看課堂、答案及測驗結果",
+      "openHere": "目前在此瀏覽器開啟",
+      "deleteTitle": "刪除此學習記錄？",
+      "deleteDesc": "「{{title}}」的課堂、練習和測驗結果將被刪除，活動紀錄和進度統計會保留。",
+      "updated": "最後更新",
+      "round": "第 {{round}} 次",
+      "right": "正確",
+      "wrong": "錯誤",
+      "topicCount_other": "{{count}} 個主題",
+      "minutes_other": "{{count}} 分鐘",
+      "hoursMinutes": "{{hours}} 小時 {{minutes}} 分鐘",
+      "lessThanMinute": "少於 1 分鐘",
+      "statSessions": "開始的學習",
+      "statSessionsHint": "已完成 {{count}} 次",
+      "statPractice": "練習作答",
+      "statPracticeHint": "首次答對 {{percent}}%",
+      "statQuizzes": "完成的測驗",
+      "statQuizzesHint": "平均 {{percent}}%",
+      "statImprovement": "進步幅度",
+      "statImprovementHint": "重做測驗的主題所提升的分數",
+      "statSecure": "已掌握主題",
+      "statTopicsHint": "{{developing}} 個發展中 · {{review}} 個需重溫",
+      "statLessons": "已讀課堂",
+      "statActiveDays": "活躍日數",
+      "statTime": "學習時間",
+      "statTimeHint": "根據活動紀錄估算",
+      "chartActivity": {
+        "day": "每日活動",
+        "week": "每週活動"
+      },
+      "chartHistory": "測驗成績走勢",
+      "seriesPractice": "練習作答",
+      "seriesQuizzes": "完成的測驗",
+      "seriesAverage": "測驗平均分",
+      "quizScore": "測驗成績",
+      "colTopic": "主題",
+      "colTopics": "主題",
+      "colLearners": "學生人數",
+      "colQuizzes": "測驗",
+      "colLatest": "最近成績",
+      "colAverage": "平均成績",
+      "colImprovement": "進步幅度",
+      "colPractice": "練習準確度",
+      "colMastery": "掌握程度",
+      "colSessions": "學習（完成/開始）",
+      "colWeakest": "最弱主題",
+      "colTime": "學習時間",
+      "colLastActive": "最後活動",
+      "studentsTitle": "學生",
+      "filterToStudent": "只顯示此學生",
+      "practiceNote": "練習準確度由學生瀏覽器自行回報；測驗成績則由伺服器重新批改。",
+      "detail": {
+        "noLesson": "此課堂尚未生成。",
+        "noPractice": "尚未生成練習。",
+        "noQuiz": "尚未生成測驗。",
+        "practiceSummary": "已完成 {{completed}} / {{total}} 題 · 首次答對 {{percent}}%",
+        "attempts_other": "{{count}} 次嘗試",
+        "revealed": "已查看答案",
+        "notAttempted": "未作答",
+        "inProgress": "進行中"
+      },
+      "events": {
+        "session_started": "開始學習",
+        "session_resumed": "繼續學習",
+        "session_completed": "完成所有主題",
+        "session_deleted": "刪除了學習記錄",
+        "lesson_generated": "已生成課堂",
+        "lesson_viewed": "閱讀課堂",
+        "practice_generated": "已生成練習",
+        "practice_answered": "練習作答",
+        "practice_revealed": "查看了答案",
+        "practice_completed": "完成練習",
+        "quiz_generated": "已生成測驗",
+        "quiz_answered": "測驗作答",
+        "quiz_completed": "完成測驗",
+        "quiz_retaken": "重做測驗",
+        "summary_viewed": "查看總結",
+        "generation_failed": "生成失敗"
       }
     },
     "categories": {

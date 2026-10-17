@@ -440,3 +440,60 @@ export const LEARN_CATEGORY_FOCUS: Record<LanguageCheckCategory, string> = {
   "vocabulary-upgrade":
     "Replacing plain or vague words (good, bad, very important, a lot of, get, thing, big problem) with precise, higher-register vocabulary an S4–S6 writer can use correctly (beneficial, detrimental, crucial, numerous, obtain, issue, serious). Teach nuance, collocation and register of the new word, not just a synonym list.",
 };
+
+// ─── Learn from your mistakes: persistence, activity log & dashboards ───────
+
+/** Quiz percentage from which a topic counts as secure / developing (else needs review). */
+export const LANGUAGE_CHECK_LEARN_MASTERY_SECURE = 80;
+export const LANGUAGE_CHECK_LEARN_MASTERY_DEVELOPING = 50;
+
+/** Learning sessions kept per user; starting another one needs a delete first. */
+export const LANGUAGE_CHECK_LEARN_MAX_SESSIONS = 50;
+
+/** Consecutive learning events further apart than this are not counted as time on task. */
+export const LANGUAGE_CHECK_LEARN_ACTIVE_GAP_SECONDS = 300;
+
+/** Dashboard time windows in days (0 = all time). */
+export const LANGUAGE_CHECK_LEARN_RANGES = [0, 7, 30, 90] as const;
+
+/**
+ * Activity-log event types for the learning page, stored as plain text in
+ * `language_check_learn_events.type` (no SQL CHECK on purpose: a drifted list
+ * would fail the whole save, so the Zod enums derived from these arrays are the
+ * single gate — AGENTS §M).
+ *
+ * Almost every event is DERIVED SERVER-SIDE from the content/results the
+ * browser saves (a lesson appears, an answer is recorded, a quiz round
+ * completes…), so a replayed or duplicated save can never double-count and a
+ * score can never be typed in by the client. The browser only reports what the
+ * server cannot see.
+ */
+export const LANGUAGE_CHECK_LEARN_CLIENT_EVENT_TYPES = [
+  "session_resumed",
+  "summary_viewed",
+  "generation_failed",
+] as const;
+
+export const LANGUAGE_CHECK_LEARN_EVENT_TYPES = [
+  "session_started",
+  "session_resumed",
+  "lesson_generated",
+  "lesson_viewed",
+  "practice_generated",
+  "practice_answered",
+  "practice_revealed",
+  "practice_completed",
+  "quiz_generated",
+  "quiz_answered",
+  "quiz_completed",
+  "quiz_retaken",
+  "summary_viewed",
+  "session_completed",
+  "session_deleted",
+  "generation_failed",
+] as const;
+
+export type LanguageCheckLearnEventType =
+  (typeof LANGUAGE_CHECK_LEARN_EVENT_TYPES)[number];
+export type LanguageCheckLearnClientEventType =
+  (typeof LANGUAGE_CHECK_LEARN_CLIENT_EVENT_TYPES)[number];
