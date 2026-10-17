@@ -1111,6 +1111,38 @@ export async function getStaffDashboard(
   }
 }
 
+/**
+ * Students a staff member can pick on /language-check: everyone in scope who
+ * has an essay or a learning event (so a learner whose essay was deleted but
+ * whose learning history survives is still selectable). Narrowed by class only —
+ * never by other filters — so the shared picker stays switchable.
+ */
+export async function listStaffStudents(
+  scope: LanguageCheckStaffScope,
+  opts: { classId?: string },
+): Promise<{ id: string; name: string; email: string }[]> {
+  const p = new Params()
+  const where = whereOf(filterClauses(p, scope, "x", { range: 0, classId: opts.classId }))
+  const res = await getPool().query(
+    `SELECT DISTINCT u.id, u.name, u.email
+     FROM (
+       SELECT user_id FROM language_check_essays
+       UNION
+       SELECT user_id FROM ${EV} WHERE type <> 'session_deleted'
+     ) x
+     JOIN users u ON u.id = x.user_id
+     ${where}
+     ORDER BY u.name, u.email
+     LIMIT 1000`,
+    p.values,
+  )
+  return res.rows.map((r: Row) => ({
+    id: r.id as string,
+    name: (r.name as string) || (r.email as string) || "",
+    email: (r.email as string) || "",
+  }))
+}
+
 // ─── Activity feed ───────────────────────────────────────────────────────────
 
 export async function listEvents(

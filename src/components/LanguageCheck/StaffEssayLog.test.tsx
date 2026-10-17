@@ -3,11 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/react";
 import StaffEssayLog from "./StaffEssayLog";
 
-// Regression tests for the Essay Activity Log filters. Each filter — class,
-// student, status — must fire a narrowed request WITHOUT requiring a class
-// to be picked first, narrow the table rows AND the stats cards, and the
-// student dropdown options must survive student/status filters (they stay
-// scoped to the staff scope + class so students remain switchable).
+// Regression tests for the Student essays filters. Class and student now come
+// from the shared staff filter bar as props; status (and title search) are
+// local. Every filter must fire a narrowed request, and narrow BOTH the table
+// rows and the stats cards.
 
 vi.mock("next-auth/react", () => ({
   useSession: () => ({
@@ -72,12 +71,6 @@ function staffResponse(url: URL) {
       pages: rows.length,
       corrections: 0,
     },
-    // Like the real API: student options stay scope-wide (2 students)
-    // regardless of the student/status filters.
-    users: [
-      { id: "alice", name: "Alice", email: "alice@example.com" },
-      { id: "bob", name: "Bob", email: "bob@example.com" },
-    ],
   };
 }
 
@@ -145,19 +138,25 @@ function statValue(label: string): string {
   return card.querySelector("p")?.textContent ?? "";
 }
 
-async function openStudentPicker() {
-  // class, student and the status Select all have role=combobox; the status
-  // trigger carries an aria-label, so the unnamed ones are class + student.
-  const combos = screen
-    .getAllByRole("combobox")
-    .filter((el) => !el.getAttribute("aria-label"));
-  expect(combos.length).toBe(2);
-  fireEvent.click(combos[1]);
+async function chooseStatus(label: string) {
+  const trigger = screen.getByRole("combobox", {
+    name: "languageCheck.staff.filterStatus",
+  });
+  fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+  fireEvent.click(trigger);
+  const option = await waitFor(() => {
+    const matches = screen
+      .getAllByText(label)
+      .filter((el) => el.closest("[role=option]") !== null);
+    expect(matches.length).toBeGreaterThan(0);
+    return matches[0];
+  });
+  fireEvent.click(option);
 }
 
 describe("StaffEssayLog filters", () => {
-  it("picking a student without a class narrows the table and the stats cards", async () => {
-    render(<StaffEssayLog />);
+  it("a shared student selection narrows the table and the stats cards", async () => {
+    const { rerender } = render(<StaffEssayLog classId={null} userId={null} />);
 
     await waitFor(() => {
       expect(screen.getByText("Alice essay")).toBeTruthy();
@@ -166,60 +165,46 @@ describe("StaffEssayLog filters", () => {
     expect(statValue("languageCheck.staff.statEssays")).toBe("2");
     const before = staffRequests.length;
 
-    await openStudentPicker();
-    const alice = await waitFor(() => {
-      const matches = screen.getAllByText("Alice").filter(
-        (el) => el.closest("[cmdk-item]") !== null,
-      );
-      expect(matches.length).toBeGreaterThan(0);
-      return matches[0];
-    });
-    fireEvent.click(alice);
+    rerender(<StaffEssayLog classId={null} userId="alice" />);
 
     await waitFor(() => {
       expect(staffRequests.length).toBeGreaterThan(before);
       expect(staffRequests[staffRequests.length - 1]).toContain("userId=alice");
     });
-
     await waitFor(() => {
       expect(screen.getByText("Alice essay")).toBeTruthy();
       expect(screen.queryByText("Bob essay")).toBeNull();
-      // Stats cards reflect the narrowed set, not the scope-wide totals.
       expect(statValue("languageCheck.staff.statEssays")).toBe("1");
       expect(statValue("languageCheck.staff.statStudents")).toBe("1");
     });
   });
 
-  it("picking a status without a class narrows the table and the stats cards", async () => {
-    render(<StaffEssayLog />);
+  it("a shared class selection is sent to the API", async () => {
+    render(<StaffEssayLog classId="class-1" userId={null} />);
+    await waitFor(() => {
+      expect(staffRequests[staffRequests.length - 1]).toContain("classId=class-1");
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Alice essay")).toBeTruthy();
+      expect(screen.queryByText("Bob essay")).toBeNull();
+    });
+  });
+
+  it("picking a status narrows the table and the stats cards", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
 
     await waitFor(() => {
       expect(screen.getByText("Alice essay")).toBeTruthy();
       expect(screen.getByText("Bob essay")).toBeTruthy();
     });
-    expect(statValue("languageCheck.staff.statEssays")).toBe("2");
     const before = staffRequests.length;
 
-    const trigger = screen.getByRole("combobox", {
-      name: "languageCheck.staff.filterStatus",
-    });
-    fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
-    fireEvent.click(trigger);
-
-    const option = await waitFor(() => {
-      const matches = screen.getAllByText("languageCheck.list.status.checked").filter(
-        (el) => el.closest("[role=option]") !== null,
-      );
-      expect(matches.length).toBeGreaterThan(0);
-      return matches[0];
-    });
-    fireEvent.click(option);
+    await chooseStatus("languageCheck.list.status.checked");
 
     await waitFor(() => {
       expect(staffRequests.length).toBeGreaterThan(before);
       expect(staffRequests[staffRequests.length - 1]).toContain("status=checked");
     });
-
     await waitFor(() => {
       expect(screen.getByText("Alice essay")).toBeTruthy();
       expect(screen.queryByText("Bob essay")).toBeNull();
@@ -228,39 +213,12 @@ describe("StaffEssayLog filters", () => {
     });
   });
 
-  it("student dropdown options survive a status filter (stay scope-wide)", async () => {
-    render(<StaffEssayLog />);
-
+  it("changing the shared selection returns to the first page", async () => {
+    const { rerender } = render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    rerender(<StaffEssayLog classId={null} userId="bob" />);
     await waitFor(() => {
-      expect(screen.getByText("Alice essay")).toBeTruthy();
-    });
-
-    // Narrow by status first
-    const trigger = screen.getByRole("combobox", {
-      name: "languageCheck.staff.filterStatus",
-    });
-    fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
-    fireEvent.click(trigger);
-    const option = await waitFor(() => {
-      const matches = screen.getAllByText("languageCheck.list.status.checked").filter(
-        (el) => el.closest("[role=option]") !== null,
-      );
-      expect(matches.length).toBeGreaterThan(0);
-      return matches[0];
-    });
-    fireEvent.click(option);
-    await waitFor(() => {
-      expect(screen.queryByText("Bob essay")).toBeNull();
-    });
-
-    // The student picker must still list both students so the user can
-    // switch (the server keeps `users` scoped, not filtered).
-    await openStudentPicker();
-    await waitFor(() => {
-      const items = screen
-        .getAllByText("Bob")
-        .filter((el) => el.closest("[cmdk-item]") !== null);
-      expect(items.length).toBeGreaterThan(0);
+      expect(staffRequests[staffRequests.length - 1]).toContain("page=1");
     });
   });
 });

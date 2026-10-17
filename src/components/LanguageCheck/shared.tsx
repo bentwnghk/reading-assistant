@@ -7,8 +7,94 @@ import {
   type CategoryStyle,
   type LanguageCheckCategory,
 } from "@/constants/languageCheck";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/utils/style";
 import { diffChanges } from "@/utils/languageCheck";
 import type { ExplanationLanguage } from "@/store/languageCheck";
+
+/** English / 繁體中文 switch for the explanation language (workspace, staff detail, lessons). */
+export function ExplanationLanguageToggle({
+  language,
+  onChange,
+  className,
+}: {
+  language: ExplanationLanguage;
+  onChange: (language: ExplanationLanguage) => void;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm",
+        className,
+      )}
+    >
+      <span className={language === "en" ? "font-semibold" : "text-muted-foreground"}>
+        English
+      </span>
+      <Switch
+        checked={language === "zh"}
+        onCheckedChange={(c) => onChange(c ? "zh" : "en")}
+        aria-label={t("languageCheck.results.explanationLanguage")}
+      />
+      <span className={language === "zh" ? "font-semibold" : "text-muted-foreground"}>
+        繁體中文
+      </span>
+    </div>
+  );
+}
+
+export interface SegmentedOption<T extends string> {
+  value: T;
+  label: React.ReactNode;
+  disabled?: boolean;
+  title?: string;
+}
+
+/** Compact pill tab-switcher shared by every sub-view on /language-check. */
+export function SegmentedTabs<T extends string>({
+  value,
+  onChange,
+  options,
+  ariaLabel,
+  className,
+}: {
+  value: T;
+  onChange: (value: T) => void;
+  options: SegmentedOption<T>[];
+  ariaLabel?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn("flex gap-1 rounded-lg bg-muted p-1", className)}
+      role="tablist"
+      aria-label={ariaLabel}
+    >
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          role="tab"
+          aria-selected={value === o.value}
+          disabled={o.disabled}
+          title={o.title}
+          onClick={() => onChange(o.value)}
+          className={cn(
+            "rounded-md px-3 py-1 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            value === o.value
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /** Status pill colours shared by the personal list and the staff log. */
 export const STATUS_TONE: Record<"draft" | "transcribed" | "checked", string> = {

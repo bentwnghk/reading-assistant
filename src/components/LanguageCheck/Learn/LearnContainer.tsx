@@ -39,7 +39,7 @@ export default function LearnContainer() {
   useEffect(() => {
     if (!wanted) {
       if (session) router.replace(learnUrl(session.key));
-      else router.replace("/language-check");
+      else router.replace("/language-check?tab=learning");
       return;
     }
     if (requested.current === wanted) return;
@@ -55,7 +55,7 @@ export default function LearnContainer() {
   }, [wanted]);
 
   useEffect(() => {
-    if (failed) router.replace("/language-check");
+    if (failed) router.replace("/language-check?tab=learning");
   }, [failed, router]);
 
   if (!session || (wanted && session.key !== wanted)) {

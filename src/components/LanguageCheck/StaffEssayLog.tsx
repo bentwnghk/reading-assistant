@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
   Eye,
   LoaderCircle,
   RefreshCw,
@@ -14,7 +13,6 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -30,9 +28,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
-import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
-import { ClassCombobox } from "@/components/Internal/ClassCombobox";
-import { STATUS_TONE } from "@/components/LanguageCheck/shared";
+import {
+  ExplanationLanguageToggle,
+  STATUS_TONE,
+} from "@/components/LanguageCheck/shared";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
@@ -43,17 +42,23 @@ interface StaffListResponse {
   rows: LanguageCheckStaffRow[];
   total: number;
   stats: LanguageCheckStaffStats;
-  users: LanguageCheckStaffUser[];
+}
+
+interface StaffEssayLogProps {
+  /** Shared class / student selection from the staff filter bar (null = all). */
+  classId: string | null;
+  userId: string | null;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 /**
- * Staff-only essay log shown under "Your essays" on /language-check.
- * Renders nothing for students. Teachers see their classes' students,
- * admins their school, super-admins everyone.
+ * Staff "Student essays" tab on /language-check. Renders nothing for students.
+ * Teachers see their classes' students, admins their school, super-admins
+ * everyone. Class and student come from the shared staff filter bar; status
+ * and title search are essay-specific and live here.
  */
-export default function StaffEssayLog() {
+export default function StaffEssayLog({ classId: classProp, userId: userProp }: StaffEssayLogProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const language = useLanguageCheckStore((s) => s.explanationLanguage);
@@ -64,14 +69,21 @@ export default function StaffEssayLog() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [classId, setClassId] = useState("all");
-  const [classes, setClasses] = useState<ClassInfo[]>([]);
-  const [userId, setUserId] = useState("all");
+  const classId = classProp ?? "all";
+  const userId = userProp ?? "all";
   const [status, setStatus] = useState("all");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [detail, setDetail] = useState<LanguageCheckStaffDetail | null>(null);
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
+
+  // A different class/student starts again from the first page.
+  const selectionKey = `${classId}|${userId}`;
+  const [lastSelection, setLastSelection] = useState(selectionKey);
+  if (lastSelection !== selectionKey) {
+    setLastSelection(selectionKey);
+    setPage(1);
+  }
 
   // Debounce the free-text search so typing doesn't fire a request per key.
   useEffect(() => {
@@ -117,21 +129,6 @@ export default function StaffEssayLog() {
     void load();
   }, [load, isStaff]);
 
-  // Class picker options (teacher → own classes, admin → school, super-admin
-  // → all) — the same source the Student Data tab uses. Non-fatal on failure:
-  // the log still works, just without the class filter.
-  useEffect(() => {
-    if (!isStaff) return;
-    void (async () => {
-      try {
-        const res = await fetch("/api/classes");
-        if (res.ok) setClasses((await res.json()) as ClassInfo[]);
-      } catch {
-        // ignore — class filter stays empty
-      }
-    })();
-  }, [isStaff]);
-
   async function openDetail(id: string) {
     setDetailLoadingId(id);
     try {
@@ -152,16 +149,8 @@ export default function StaffEssayLog() {
     return null;
   }
 
-  const scopeLabel =
-    role === "teacher"
-      ? t("languageCheck.staff.scopeTeacher")
-      : role === "admin"
-        ? t("languageCheck.staff.scopeSchool")
-        : t("languageCheck.staff.scopeAll");
-
   const rows = data?.rows ?? [];
   const stats = data?.stats;
-  const users = data?.users ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -176,35 +165,11 @@ export default function StaffEssayLog() {
   ];
 
   return (
-    <section className="rounded-xl border bg-card p-4">
-      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <ClipboardList className="h-5 w-5 shrink-0 text-muted-foreground" />
-        <h2 className="text-base font-semibold">
-          {t("languageCheck.staff.title")}
-        </h2>
-        <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
-          {scopeLabel}
-        </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-auto"
-          disabled={loading}
-          onClick={() => void load()}
-        >
-          {loading ? (
-            <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="mr-1.5 h-4 w-4" />
-          )}
-          {t("languageCheck.staff.refresh")}
-        </Button>
-      </div>
-
-      <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <section className="flex flex-col gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {statCards.map((card) => (
-          <div key={card.label} className="rounded-lg border bg-muted/40 px-3 py-2">
-            <p className="text-lg font-semibold leading-tight">
+          <div key={card.label} className="rounded-xl border bg-card px-3 py-2.5">
+            <p className="text-xl font-semibold leading-tight tabular-nums">
               {card.value ?? "…"}
             </p>
             <p className="text-xs text-muted-foreground">{card.label}</p>
@@ -212,35 +177,7 @@ export default function StaffEssayLog() {
         ))}
       </div>
 
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <div className="w-56">
-          <ClassCombobox
-            classes={classes}
-            value={classId === "all" ? null : classId}
-            onChange={(v) => {
-              setClassId(v ?? "all");
-              // The student options reload scoped to the new class; drop any
-              // previously picked student that may not belong to it.
-              setUserId("all");
-              setPage(1);
-            }}
-            allowAll
-          />
-        </div>
-        <div className="w-56">
-          <StudentCombobox
-            users={users}
-            value={userId === "all" ? null : userId}
-            onChange={(v) => {
-              setUserId(v ?? "all");
-              setPage(1);
-            }}
-            placeholder={t("languageCheck.staff.allStudents")}
-            allLabel={t("languageCheck.staff.allStudents")}
-            emptyLabel={t("languageCheck.staff.noStudents")}
-            searchPlaceholder={t("languageCheck.staff.searchStudents")}
-          />
-        </div>
+      <div className="flex flex-wrap items-center gap-2">
         <Select
           value={status}
           onValueChange={(v) => {
@@ -262,15 +199,29 @@ export default function StaffEssayLog() {
             ))}
           </SelectContent>
         </Select>
-        <div className="relative">
+        <div className="relative min-w-[12rem] flex-1 sm:max-w-xs">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("languageCheck.staff.search")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-64 pl-8"
+            className="pl-8"
           />
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ml-auto"
+          disabled={loading}
+          onClick={() => void load()}
+        >
+          {loading ? (
+            <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="mr-1.5 h-4 w-4" />
+          )}
+          {t("languageCheck.staff.refresh")}
+        </Button>
       </div>
 
       {loading && !data ? (
@@ -278,14 +229,14 @@ export default function StaffEssayLog() {
           <LoaderCircle className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : total === 0 ? (
-        <p className="rounded-lg border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-xl border border-dashed bg-card px-4 py-8 text-center text-sm text-muted-foreground">
           {hasFilters
             ? t("languageCheck.staff.emptyFilter")
             : t("languageCheck.staff.empty")}
         </p>
       ) : (
         <>
-          <div className={cn("overflow-x-auto", loading && "opacity-60")}>
+          <div className={cn("overflow-x-auto rounded-xl border bg-card px-3", loading && "opacity-60")}>
             <table className="w-full min-w-[52rem] text-sm">
               <thead>
                 <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -453,23 +404,7 @@ export default function StaffEssayLog() {
                   {detail.checkModel &&
                     ` · ${t("languageCheck.results.checkedWith", { model: detail.checkModel })}`}
                 </p>
-                <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
-                  <span
-                    className={language === "en" ? "font-semibold" : "text-muted-foreground"}
-                  >
-                    English
-                  </span>
-                  <Switch
-                    checked={language === "zh"}
-                    onCheckedChange={(c) => setLanguage(c ? "zh" : "en")}
-                    aria-label={t("languageCheck.results.explanationLanguage")}
-                  />
-                  <span
-                    className={language === "zh" ? "font-semibold" : "text-muted-foreground"}
-                  >
-                    繁體中文
-                  </span>
-                </div>
+                <ExplanationLanguageToggle language={language} onChange={setLanguage} />
               </div>
 
               {detail.status === "checked" && detail.checkedText ? (

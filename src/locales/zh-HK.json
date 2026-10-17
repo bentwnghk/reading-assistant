@@ -4637,6 +4637,30 @@
       "useFull": "使用整頁",
       "failed": "無法裁剪此頁。"
     },
+    "page": {
+      "scopeLabel": "顯示對象",
+      "scope": {
+        "mine": "我的作業",
+        "students": "我的學生"
+      },
+      "sections": {
+        "mine": {
+          "essays": "我的作文",
+          "learning": "我的學習"
+        },
+        "students": {
+          "essays": "學生作文",
+          "learning": "學生學習"
+        }
+      },
+      "steps": {
+        "label": "作文進度",
+        "scan": "掃描",
+        "review": "核對轉錄",
+        "results": "更正"
+      },
+      "more": "更多操作"
+    },
     "list": {
       "title": "我的作文",
       "empty": "暫時沒有作文，請在上方上載第一篇。",

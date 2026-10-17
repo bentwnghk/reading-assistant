@@ -1,12 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  GraduationCap,
   LoaderCircle,
   RefreshCw,
 } from "lucide-react";
@@ -19,9 +17,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ClassCombobox } from "@/components/Internal/ClassCombobox";
-import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
-import { categoryStyle, useCategoryLabel } from "@/components/LanguageCheck/shared";
+import {
+  SegmentedTabs,
+  categoryStyle,
+  useCategoryLabel,
+} from "@/components/LanguageCheck/shared";
 import LearnActivityLog from "@/components/LanguageCheck/Learn/LearnActivityLog";
 import LearnDashboardView, {
   Delta,
@@ -43,117 +43,55 @@ import type {
 type Tab = "overview" | "sessions" | "activity";
 const PAGE_SIZE = 20;
 
-/**
- * Staff view of "Learn from your mistakes" on /language-check: class-level
- * dashboard, per-student progress over time, every learner's sessions (read
- * only) and the activity feed. Scope matches the essay log — teacher → students
- * in their classes, admin → their school, super-admin → everyone. Students get
- * nothing (and never hit the API).
- */
-export default function StaffLearning() {
-  const { t } = useTranslation();
-  const { data: session } = useSession();
-  const role = session?.user?.role;
-  const isStaff = role === "teacher" || role === "admin" || role === "super-admin";
+interface StaffLearningProps {
+  /** Shared class / student selection from the staff filter bar (null = all). */
+  classId: string | null;
+  userId: string | null;
+  onPickStudent: (userId: string) => void;
+}
 
+/**
+ * Staff "Student learning" tab on /language-check: class-level dashboard,
+ * per-student progress over time, every learner's sessions (read only) and the
+ * activity feed. Scope matches the essay log — teacher → students in their
+ * classes, admin → their school, super-admin → everyone. Class and student come
+ * from the shared staff filter bar. Students never reach this component.
+ */
+export default function StaffLearning({ classId, userId, onPickStudent }: StaffLearningProps) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("overview");
   const [range, setRange] = useRange(30);
-  const [classId, setClassId] = useState("all");
-  const [userId, setUserId] = useState("all");
-  const [classes, setClasses] = useState<ClassInfo[]>([]);
-
-  useEffect(() => {
-    if (!isStaff) return;
-    void (async () => {
-      try {
-        const res = await fetch("/api/classes");
-        if (res.ok) setClasses((await res.json()) as ClassInfo[]);
-      } catch {
-        // class filter stays empty
-      }
-    })();
-  }, [isStaff]);
 
   const filters: Record<string, string | undefined> = {
-    classId: classId === "all" ? undefined : classId,
-    userId: userId === "all" ? undefined : userId,
+    classId: classId ?? undefined,
+    userId: userId ?? undefined,
   };
 
-  // Student options come from the dashboard response (scope + class only).
-  const [users, setUsers] = useState<LearnStaffDashboardData["users"]>([]);
-
-  if (!isStaff) return null;
-
-  const scopeLabel =
-    role === "teacher"
-      ? t("languageCheck.staff.scopeTeacher")
-      : role === "admin"
-        ? t("languageCheck.staff.scopeSchool")
-        : t("languageCheck.staff.scopeAll");
-
   return (
-    <section className="rounded-xl border bg-card p-4">
-      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <GraduationCap className="h-5 w-5 shrink-0 text-muted-foreground" />
-        <h2 className="text-base font-semibold">{t("languageCheck.learnData.staffTitle")}</h2>
-        <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">{scopeLabel}</span>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <div className="flex gap-1 rounded-lg bg-muted p-1" role="tablist">
-            {(["overview", "sessions", "activity"] as const).map((x) => (
-              <button
-                key={x}
-                type="button"
-                role="tab"
-                aria-selected={tab === x}
-                onClick={() => setTab(x)}
-                className={cn(
-                  "rounded-md px-3 py-1 text-sm font-medium transition-colors",
-                  tab === x ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {t(`languageCheck.learnData.staffTabs.${x}`)}
-              </button>
-            ))}
-          </div>
-          {tab !== "sessions" && <LearnRangeTabs value={range} onChange={setRange} />}
-        </div>
-      </div>
-
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <div className="w-56">
-          <ClassCombobox
-            classes={classes}
-            value={classId === "all" ? null : classId}
-            onChange={(v) => {
-              setClassId(v ?? "all");
-              setUserId("all");
-            }}
-            allowAll
-          />
-        </div>
-        <div className="w-56">
-          <StudentCombobox
-            users={users}
-            value={userId === "all" ? null : userId}
-            onChange={(v) => setUserId(v ?? "all")}
-            placeholder={t("languageCheck.staff.allStudents")}
-            allLabel={t("languageCheck.staff.allStudents")}
-            emptyLabel={t("languageCheck.staff.noStudents")}
-            searchPlaceholder={t("languageCheck.staff.searchStudents")}
-          />
-        </div>
+    <section className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <SegmentedTabs
+          value={tab}
+          onChange={setTab}
+          options={(["overview", "sessions", "activity"] as const).map((x) => ({
+            value: x,
+            label: t(`languageCheck.learnData.staffTabs.${x}`),
+          }))}
+        />
+        {tab !== "sessions" && <LearnRangeTabs value={range} onChange={setRange} />}
       </div>
 
       {tab === "overview" && (
         <Overview
           range={range}
           filters={filters}
-          onUsers={setUsers}
-          onPickStudent={(id) => setUserId(id)}
-          selectedUser={userId === "all" ? null : userId}
+          onPickStudent={onPickStudent}
+          selectedUser={userId}
         />
       )}
-      {tab === "sessions" && <StaffSessions key={`${classId}|${userId}`} filters={filters} />}
+      {tab === "sessions" && (
+        <StaffSessions key={`${classId}|${userId}`} filters={filters} />
+      )}
       {tab === "activity" && (
         <LearnActivityLog
           key={`${range}|${classId}|${userId}`}
@@ -169,13 +107,11 @@ export default function StaffLearning() {
 function Overview({
   range,
   filters,
-  onUsers,
   onPickStudent,
   selectedUser,
 }: {
   range: number;
   filters: Record<string, string | undefined>;
-  onUsers: (users: LearnStaffDashboardData["users"]) => void;
   onPickStudent: (id: string) => void;
   selectedUser: string | null;
 }) {
@@ -192,10 +128,6 @@ function Overview({
   const { data, loading, error, reload } = useLanguageCheckLearnData<LearnStaffDashboardData>(
     `/api/language-check/learn/staff/dashboard?${params.toString()}`,
   );
-
-  useEffect(() => {
-    if (data) onUsers(data.users);
-  }, [data, onUsers]);
 
   // Any filter change goes back to the first page of students.
   const filterKey = `${range}|${filters.classId}|${filters.userId}`;

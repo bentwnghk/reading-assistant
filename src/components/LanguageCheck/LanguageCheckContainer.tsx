@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
+  Check,
   Download,
-  Eye,
   GraduationCap,
   LoaderCircle,
+  MoreHorizontal,
   Pencil,
   RefreshCw,
   ScanText,
@@ -14,9 +15,15 @@ import {
   Square,
 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -24,16 +31,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import EssayList from "@/components/LanguageCheck/EssayList";
+import LanguageCheckHome from "@/components/LanguageCheck/LanguageCheckHome";
 import LearnSetupDialog from "@/components/LanguageCheck/Learn/LearnSetupDialog";
 import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageStaging";
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
-import MyLearning from "@/components/LanguageCheck/Learn/MyLearning";
-import StaffEssayLog from "@/components/LanguageCheck/StaffEssayLog";
-import StaffLearning from "@/components/LanguageCheck/Learn/StaffLearning";
-import { useCategoryLabel } from "@/components/LanguageCheck/shared";
+import {
+  ExplanationLanguageToggle,
+  useCategoryLabel,
+} from "@/components/LanguageCheck/shared";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
 import {
   abortLanguageCheck,
@@ -174,14 +181,12 @@ export default function LanguageCheckContainer() {
 
   if (!active) {
     return (
-      // Shared width so the upload/list section and the staff activity log
-      // align instead of stretching to different container widths.
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <EssayList
-          preparing={preparing}
-          onFiles={handleFiles}
-          onOpen={handleOpen}
-          staging={
+      <LanguageCheckHome
+        essayListProps={{
+          preparing,
+          onFiles: handleFiles,
+          onOpen: handleOpen,
+          staging:
             staged.length > 0 ? (
               <PageStaging
                 pages={staged}
@@ -191,15 +196,9 @@ export default function LanguageCheckContainer() {
                 onFiles={handleFiles}
                 onStart={handleStart}
               />
-            ) : undefined
-          }
-        />
-        {/* The learner's saved "Learn from your mistakes" sessions, dashboard and activity. */}
-        <MyLearning />
-        {/* Render nothing for students; staff see scoped logs and dashboards. */}
-        <StaffEssayLog />
-        <StaffLearning />
-      </div>
+            ) : undefined,
+        }}
+      />
     );
   }
 
@@ -274,6 +273,28 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
 
   const hasResults = essay.status === "checked" && essay.checkedText.length > 0;
 
+  const steps: {
+    id: "review" | "results";
+    label: string;
+    done: boolean;
+    disabled: boolean;
+    title?: string;
+  }[] = [
+    {
+      id: "review",
+      label: t("languageCheck.page.steps.review"),
+      done: hasResults,
+      disabled: expired,
+      title: expiredTitle,
+    },
+    {
+      id: "results",
+      label: t("languageCheck.page.steps.results"),
+      done: false,
+      disabled: !hasResults,
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -301,64 +322,68 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
             className="h-9 border-transparent bg-transparent text-base font-semibold shadow-none hover:border-input focus-visible:border-input"
           />
         </div>
+      </div>
 
-        {effective === "review" && hasResults && (
-          <Button variant="outline" size="sm" onClick={() => setView("results")}>
-            <SpellCheck className="mr-1.5 h-4 w-4" />
-            {t("languageCheck.review.backToResults")}
-          </Button>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <ol
+          className="flex items-center gap-1.5 text-sm"
+          aria-label={t("languageCheck.page.steps.label")}
+        >
+          <li className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-white">
+              <Check className="h-3 w-3" />
+            </span>
+            {t("languageCheck.page.steps.scan")}
+          </li>
+          {steps.map((step, i) => {
+            const current = effective === step.id;
+            return (
+              <li key={step.id} className="flex items-center gap-1.5">
+                <span className="h-px w-4 bg-border" aria-hidden />
+                <button
+                  type="button"
+                  disabled={step.disabled || current}
+                  title={step.title}
+                  aria-current={current ? "step" : undefined}
+                  onClick={() => setView(step.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full px-2 py-0.5 transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    current
+                      ? "bg-primary/10 font-semibold text-foreground"
+                      : "text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-full text-xs tabular-nums",
+                      current
+                        ? "bg-primary text-primary-foreground"
+                        : step.done
+                          ? "bg-green-600 text-white"
+                          : "border",
+                    )}
+                  >
+                    {step.done && !current ? <Check className="h-3 w-3" /> : i + 2}
+                  </span>
+                  {step.label}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
 
         {effective === "results" && (
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
-              <span className={language === "en" ? "font-semibold" : "text-muted-foreground"}>
-                English
-              </span>
-              <Switch
-                checked={language === "zh"}
-                onCheckedChange={(c) => setLanguage(c ? "zh" : "en")}
-                aria-label={t("languageCheck.results.explanationLanguage")}
-              />
-              <span className={language === "zh" ? "font-semibold" : "text-muted-foreground"}>
-                繁體中文
-              </span>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setScanOpen(true)}
-              disabled={expired}
-              title={expiredTitle}
-            >
-              <ScanText className="mr-1.5 h-4 w-4" />
-              {t("languageCheck.results.viewScan")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setView("review")}
-              disabled={expired}
-              title={expiredTitle}
-            >
-              <Eye className="mr-1.5 h-4 w-4" />
-              {t("languageCheck.results.editTranscript")}
-            </Button>
-            {checkRunning ? (
-              <Button size="sm" onClick={() => abortLanguageCheck("language-check")}>
+            <ExplanationLanguageToggle language={language} onChange={setLanguage} />
+            {checkRunning && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => abortLanguageCheck("language-check")}
+              >
                 <Square className="mr-1.5 h-3.5 w-3.5" />
                 {t("languageCheck.stop")}
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={ocrRunning || expired}
-                title={expiredTitle}
-                onClick={handleRecheck}
-              >
-                <RefreshCw className="mr-1.5 h-4 w-4" />
-                {t("languageCheck.results.recheck")}
               </Button>
             )}
             <Button
@@ -374,7 +399,12 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
               <GraduationCap className="mr-1.5 h-4 w-4" />
               {t("languageCheck.learn.button")}
             </Button>
-            <Button size="sm" disabled={exporting || !hasResults} onClick={handleExport}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={exporting || !hasResults}
+              onClick={handleExport}
+            >
               {exporting ? (
                 <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
               ) : (
@@ -382,6 +412,37 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
               )}
               {t("languageCheck.results.export")}
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  aria-label={t("languageCheck.page.more")}
+                  title={t("languageCheck.page.more")}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  disabled={expired}
+                  title={expiredTitle}
+                  onSelect={() => setScanOpen(true)}
+                >
+                  <ScanText className="mr-2 h-4 w-4" />
+                  {t("languageCheck.results.viewScan")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={ocrRunning || checkRunning || expired}
+                  title={expiredTitle}
+                  onSelect={() => void handleRecheck()}
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  {t("languageCheck.results.recheck")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>

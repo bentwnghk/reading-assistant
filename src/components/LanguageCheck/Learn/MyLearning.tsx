@@ -26,7 +26,11 @@ import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
 import { parseError } from "@/utils/error";
 import { learnUrl } from "@/utils/languageCheckLearn";
-import { categoryStyle, useCategoryLabel } from "@/components/LanguageCheck/shared";
+import {
+  SegmentedTabs,
+  categoryStyle,
+  useCategoryLabel,
+} from "@/components/LanguageCheck/shared";
 import LearnActivityLog from "@/components/LanguageCheck/Learn/LearnActivityLog";
 import LearnDashboardView, { PercentBadge } from "@/components/LanguageCheck/Learn/LearnDashboardView";
 import LearnRangeTabs, { useRange } from "@/components/LanguageCheck/Learn/LearnRangeTabs";
@@ -43,9 +47,9 @@ type Tab = "sessions" | "dashboard" | "activity";
 const PAGE_SIZE = 8;
 
 /**
- * The learner's own learning history on /language-check: every saved
- * "Learn from your mistakes" session (resume on any device), a dashboard of
- * progress over time and the activity log.
+ * The learner's own learning history on /language-check ("My learning" tab):
+ * every saved "Learn from your mistakes" session (resume on any device), a
+ * dashboard of progress over time and the activity log.
  */
 export default function MyLearning() {
   const { t } = useTranslation();
@@ -53,30 +57,17 @@ export default function MyLearning() {
   const [range, setRange] = useRange(30);
 
   return (
-    <section className="rounded-xl border bg-card p-4">
-      <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <GraduationCap className="h-5 w-5 shrink-0 text-muted-foreground" />
-        <h2 className="text-base font-semibold">{t("languageCheck.learnData.title")}</h2>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <div className="flex gap-1 rounded-lg bg-muted p-1" role="tablist">
-            {(["sessions", "dashboard", "activity"] as const).map((x) => (
-              <button
-                key={x}
-                type="button"
-                role="tab"
-                aria-selected={tab === x}
-                onClick={() => setTab(x)}
-                className={cn(
-                  "rounded-md px-3 py-1 text-sm font-medium transition-colors",
-                  tab === x ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {t(`languageCheck.learnData.tabs.${x}`)}
-              </button>
-            ))}
-          </div>
-          {tab !== "sessions" && <LearnRangeTabs value={range} onChange={setRange} />}
-        </div>
+    <section className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <SegmentedTabs
+          value={tab}
+          onChange={setTab}
+          options={(["sessions", "dashboard", "activity"] as const).map((x) => ({
+            value: x,
+            label: t(`languageCheck.learnData.tabs.${x}`),
+          }))}
+        />
+        {tab !== "sessions" && <LearnRangeTabs value={range} onChange={setRange} />}
       </div>
 
       {tab === "sessions" && <SessionsList />}
@@ -189,9 +180,12 @@ function SessionsList() {
 
   if (rows.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
-        {t("languageCheck.learnData.noSessions")}
-      </p>
+      <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed bg-card px-4 py-10 text-center">
+        <GraduationCap className="h-8 w-8 text-muted-foreground" />
+        <p className="max-w-md text-sm text-muted-foreground">
+          {t("languageCheck.learnData.noSessions")}
+        </p>
+      </div>
     );
   }
 

@@ -4638,6 +4638,30 @@
       "useFull": "Use full page",
       "failed": "Could not crop this page."
     },
+    "page": {
+      "scopeLabel": "Whose work to show",
+      "scope": {
+        "mine": "My work",
+        "students": "My students"
+      },
+      "sections": {
+        "mine": {
+          "essays": "My essays",
+          "learning": "My learning"
+        },
+        "students": {
+          "essays": "Student essays",
+          "learning": "Student learning"
+        }
+      },
+      "steps": {
+        "label": "Essay progress",
+        "scan": "Scan",
+        "review": "Review transcript",
+        "results": "Corrections"
+      },
+      "more": "More actions"
+    },
     "list": {
       "title": "Your essays",
       "empty": "No essays yet. Upload your first one above.",
