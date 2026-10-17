@@ -49,6 +49,15 @@ export interface LearnUnitWire {
   /** Prompts of quiz rounds already taken, so a new round never repeats them. */
   previousQuizPrompts: string[];
   quizRound: number;
+  /**
+   * Only present in review responses (`redactForReview`): the stage exists but
+   * its questions and answers were withheld because the learner has not
+   * finished it yet. Never stored, never sent by the browser.
+   */
+  hidden?: {
+    practice?: { completed: number; total: number };
+    quiz?: { answered: number; total: number };
+  };
 }
 
 export type LearnSessionStatus = "in_progress" | "completed";

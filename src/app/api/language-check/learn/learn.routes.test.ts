@@ -11,6 +11,7 @@ const lib = vi.hoisted(() => ({
   startSession: vi.fn(),
   listSessions: vi.fn(async () => []),
   getSession: vi.fn(async () => null),
+  getSessionForReview: vi.fn(async () => null),
   syncSession: vi.fn(async () => null),
   deleteSession: vi.fn(async () => false),
   getOwnDashboard: vi.fn(async () => ({})),
@@ -32,6 +33,7 @@ vi.mock("@/lib/language-check", () => ({
 
 import { GET as listGET, POST as startPOST } from "./route";
 import { PATCH, DELETE } from "./[id]/route";
+import { GET as reviewGET } from "./[id]/review/route";
 import { GET as dashboardGET } from "./dashboard/route";
 import { GET as staffDashboardGET } from "./staff/dashboard/route";
 import { GET as staffActivityGET } from "./staff/activity/route";
@@ -97,6 +99,14 @@ describe("learning routes", () => {
     expect((await start({ essayId: "e", categories: [], age: 15 })).status).toBe(400);
     expect((await PATCH({ json: async () => ({ events: [{ type: "quiz_completed", key: "k" }] }) } as unknown as NextRequest, ctx)).status).toBe(400);
     expect(lib.syncSession).not.toHaveBeenCalled();
+  });
+
+  it("the history view needs a user, only reads the caller's own sessions, and 404s otherwise", async () => {
+    expect((await reviewGET(req(), ctx)).status).toBe(401);
+    session = { user: { id: "me", role: "teacher" } };
+    expect((await reviewGET(req(), ctx)).status).toBe(404);
+    expect(lib.getSessionForReview).toHaveBeenCalledWith("me", "s1");
+    expect(lib.getStaffSession).not.toHaveBeenCalled();
   });
 
   it("maps a missing session to 404 and a start refusal to 409", async () => {

@@ -108,3 +108,50 @@ describe("LearnSessionDetail (read-only)", () => {
     expect(screen.queryByRole("button", { name: /startPractice/ })).toBeNull();
   });
 });
+
+describe("LearnSessionDetail while the session is in progress", () => {
+  const hiddenSession: LearnSessionWire = {
+    ...session,
+    status: "in_progress",
+    units: [{
+      ...session.units[0],
+      practice: null, quiz: null, practiceResults: {}, quizResults: {}, quizRound: 1,
+      hidden: { practice: { completed: 6, total: 7 }, quiz: { answered: 0, total: 5 } },
+    }],
+  };
+
+  it("shows a lock with the progress instead of questions and model answers", () => {
+    render(<LearnSessionDetail session={hiddenSession} rounds={[]} />);
+    // quiz tab is the default
+    expect(screen.getByText("languageCheck.learnData.detail.quizLocked")).toBeTruthy();
+    expect(screen.getByText(/quizLockedHint\{"answered":0,"total":5\}/)).toBeTruthy();
+    expect(screen.queryByText("goes")).toBeNull();
+    fireEvent.click(screen.getByRole("tab", { name: "languageCheck.learn.path.practice" }));
+    expect(screen.getByText("languageCheck.learnData.detail.practiceLocked")).toBeTruthy();
+    expect(screen.getByText(/practiceLockedHint\{"completed":6,"total":7\}/)).toBeTruthy();
+    expect(screen.queryByText(/SHE/)).toBeNull();
+  });
+
+  it("an archived earlier round stays visible while the current round is locked", () => {
+    render(<LearnSessionDetail session={{ ...hiddenSession, units: [{ ...hiddenSession.units[0], quizRound: 2 }] }} rounds={rounds} />);
+    expect(screen.getByText("languageCheck.learnData.detail.quizLocked")).toBeTruthy();
+    expect(screen.getByText("Add -s.")).toBeTruthy();
+  });
+
+  it("a practice set that is finished reports its real first-attempt score, never a fake 0%", () => {
+    const done: LearnSessionWire = {
+      ...session,
+      units: [{
+        ...session.units[0],
+        practice: [exercise, { ...exercise, id: "q9" }],
+        practiceResults: {
+          q1: { score: 0, attempts: 2, completed: true },
+          q9: { score: 1, attempts: 1, completed: true },
+        },
+      }],
+    };
+    render(<LearnSessionDetail session={done} rounds={[]} />);
+    fireEvent.click(screen.getByRole("tab", { name: "languageCheck.learn.path.practice" }));
+    expect(screen.getByText(/practiceSummary\{"completed":2,"total":2,"percent":50\}/)).toBeTruthy();
+  });
+});

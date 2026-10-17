@@ -5013,12 +5013,17 @@
         "noLesson": "This lesson was not generated.",
         "noPractice": "No practice exercises were generated.",
         "noQuiz": "No quiz was generated.",
-        "practiceSummary": "{{completed}} of {{total}} exercises completed · {{percent}}% right first time",
+        "practiceSummary": "{{completed}} of {{total}} exercises completed · {{percent}}% right first time (so far)",
         "attempts_one": "{{count}} attempt",
         "attempts_other": "{{count}} attempts",
         "revealed": "answer revealed",
         "notAttempted": "Not attempted",
-        "inProgress": "In progress"
+        "inProgress": "In progress",
+        "practiceSummaryNone": "{{completed}} of {{total}} exercises completed",
+        "practiceLocked": "Practice is hidden until you finish it",
+        "practiceLockedHint": "{{completed}} of {{total}} exercises completed. The questions and answers are shown here once you have completed them all.",
+        "quizLocked": "The quiz is hidden until you finish it",
+        "quizLockedHint": "{{answered}} of {{total}} questions answered. The questions and model answers are shown here once you have answered them all."
       },
       "events": {
         "session_started": "Started learning",

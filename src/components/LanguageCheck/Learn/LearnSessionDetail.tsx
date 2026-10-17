@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleCheck, CircleX, Lock } from "lucide-react";
 import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
 import { Switch } from "@/components/ui/switch";
@@ -197,18 +197,45 @@ function Review({ items, language }: { items: ReviewItem[]; language: Explanatio
   );
 }
 
+function Locked({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+      <Lock className="h-5 w-5" />
+      {children}
+    </div>
+  );
+}
+
 function PracticeTab({ unit, language }: { unit: LearnUnitWire; language: ExplanationLanguage }) {
   const { t } = useTranslation();
+  if (unit.hidden?.practice) {
+    return (
+      <Locked>
+        <p className="font-medium text-foreground">{t("languageCheck.learnData.detail.practiceLocked")}</p>
+        <p>
+          {t("languageCheck.learnData.detail.practiceLockedHint", {
+            completed: unit.hidden.practice.completed,
+            total: unit.hidden.practice.total,
+          })}
+        </p>
+      </Locked>
+    );
+  }
   if (!unit.practice) return <Missing>{t("languageCheck.learnData.detail.noPractice")}</Missing>;
   const p = practiceProgress(unit.practice, unit.practiceResults);
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        {t("languageCheck.learnData.detail.practiceSummary", {
-          completed: p.completed,
-          total: p.total,
-          percent: p.percent ?? 0,
-        })}
+        {p.percentSoFar === null
+          ? t("languageCheck.learnData.detail.practiceSummaryNone", {
+              completed: p.completed,
+              total: p.total,
+            })
+          : t("languageCheck.learnData.detail.practiceSummary", {
+              completed: p.completed,
+              total: p.total,
+              percent: p.percentSoFar,
+            })}
       </p>
       <Review
         language={language}
@@ -263,7 +290,22 @@ function QuizTab({
     ...(live ? [live] : []),
   ];
   const [selected, setSelected] = useState<number | null>(null);
-  if (all.length === 0) return <Missing>{t("languageCheck.learnData.detail.noQuiz")}</Missing>;
+  const lockedRound = unit.hidden?.quiz;
+  if (all.length === 0) {
+    return lockedRound ? (
+      <Locked>
+        <p className="font-medium text-foreground">{t("languageCheck.learnData.detail.quizLocked")}</p>
+        <p>
+          {t("languageCheck.learnData.detail.quizLockedHint", {
+            answered: lockedRound.answered,
+            total: lockedRound.total,
+          })}
+        </p>
+      </Locked>
+    ) : (
+      <Missing>{t("languageCheck.learnData.detail.noQuiz")}</Missing>
+    );
+  }
   const round = all.find((r) => r.round === selected) ?? all[all.length - 1];
 
   return (
@@ -289,6 +331,17 @@ function QuizTab({
           ? formatDateTime(round.completedAt)
           : t("languageCheck.learnData.detail.inProgress")}
       </p>
+      {lockedRound && (
+        <Locked>
+          <p className="font-medium text-foreground">{t("languageCheck.learnData.detail.quizLocked")}</p>
+          <p>
+            {t("languageCheck.learnData.detail.quizLockedHint", {
+              answered: lockedRound.answered,
+              total: lockedRound.total,
+            })}
+          </p>
+        </Locked>
+      )}
       <Review
         language={language}
         items={round.items.map((item) => {

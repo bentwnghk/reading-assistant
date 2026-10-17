@@ -19,6 +19,7 @@ import { mergeUnit, type UnitIncoming } from "@/utils/languageCheckLearnMerge"
 import {
   practiceProgress,
   quizProgress,
+  redactUnitForReview,
   rollupSession,
   statusFor,
 } from "@/utils/languageCheckLearnProgress"
@@ -501,6 +502,23 @@ export async function getSession(
 }
 
 /**
+ * The learner's history view of a session. Unlike `getSession` (which the
+ * learning page needs in full to run the exercises), unfinished practice and
+ * quiz content is withheld here — see `redactUnitForReview`.
+ */
+export async function getSessionForReview(
+  userId: string,
+  id: string,
+): Promise<LearnSessionDetailWire | null> {
+  const detail = await getSession(userId, id)
+  if (!detail) return null
+  return {
+    session: { ...detail.session, units: detail.session.units.map(redactUnitForReview) },
+    rounds: detail.rounds,
+  }
+}
+
+/**
  * Applies a save: merges the browser's delta into the stored session under a
  * row lock (so two devices converge instead of overwriting each other),
  * archives finished quiz rounds, logs the derived events and returns the merged
@@ -597,9 +615,11 @@ export async function syncSession(
     }
     await writeEvents(db, ctx, events)
 
+    // Progress does not always imply an event (e.g. a wrong answer retried
+    // correctly while other items are still open), so compare the state itself.
     const changed =
-      derived.length > 0 ||
       completedNow ||
+      JSON.stringify(after) !== JSON.stringify(before) ||
       JSON.stringify(current) !== JSON.stringify(stored.current)
     const updated = changed
       ? await db.query(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { mergeUnit } from "./languageCheckLearnMerge";
-import { practiceProgress, quizProgress, rollupSession } from "./languageCheckLearnProgress";
+import { practiceProgress, quizProgress, redactUnitForReview, rollupSession } from "./languageCheckLearnProgress";
 import type { LearnUnitWire } from "./languageCheckLearnWire";
 
 const item = (id: string) => ({
@@ -119,5 +119,81 @@ describe("progress maths", () => {
     expect(r.masteryCounts).toEqual({ secure: 1, developing: 0, review: 1 });
     expect(rollupSession([secure, review]).allDone).toBe(true);
     expect(rollupSession([]).allDone).toBe(false);
+  });
+});
+
+describe("practice progress shown mid-way", () => {
+  it("percentSoFar is the score over answered items; percent stays null until all are done", () => {
+    const items = [item("a"), item("b"), item("c")];
+    const p = practiceProgress(items, {
+      a: { score: 0, completed: true },
+      b: { score: 1, completed: true },
+    });
+    expect(p).toMatchObject({ completed: 2, total: 3, percent: null, percentSoFar: 50 });
+    expect(practiceProgress(items, {}).percentSoFar).toBeNull();
+  });
+
+  it("wrong first, then right on retry: completes, with the first-attempt score kept", () => {
+    const items = [item("a"), item("b")];
+    const p = practiceProgress(items, {
+      a: { score: 0, completed: true },
+      b: { score: 1, completed: true },
+    });
+    expect(p).toMatchObject({ completed: 2, total: 2, percent: 50 });
+  });
+});
+
+describe("redactUnitForReview", () => {
+  const answered = (id: string, correct = true) => ({ answer: "a", score: correct ? 1 : 0, correct });
+  const full = (patch: Partial<LearnUnitWire> = {}) =>
+    unit({
+      lesson: { title: "T" } as never,
+      practice: [item("p1"), item("p2")],
+      quiz: [item("q1"), item("q2")],
+      previousQuizPrompts: ["an old question"],
+      ...patch,
+    });
+
+  it("withholds unfinished practice AND quiz, keeps the lesson and says how far the learner got", () => {
+    const u = full({
+      practiceResults: { p1: { score: 1, attempts: 1, completed: true } },
+      quizResults: { q1: answered("q1") },
+    });
+    const r = redactUnitForReview(u);
+    expect(r.practice).toBeNull();
+    expect(r.quiz).toBeNull();
+    expect(r.practiceResults).toEqual({});
+    expect(r.quizResults).toEqual({});
+    expect(r.previousQuizPrompts).toEqual([]);
+    expect(r.lesson).toBe(u.lesson);
+    expect(r.hidden).toEqual({ practice: { completed: 1, total: 2 }, quiz: { answered: 1, total: 2 } });
+    // nothing of the questions survives serialisation
+    expect(JSON.stringify(r)).not.toContain("She ___");
+    expect(JSON.stringify(r)).not.toContain("an old question");
+  });
+
+  it("a finished stage is shown, an unfinished one is not (independently)", () => {
+    const practiceDone = full({
+      practiceResults: { p1: { score: 1, attempts: 1, completed: true }, p2: { score: 0, attempts: 2, completed: true } },
+    });
+    const r = redactUnitForReview(practiceDone);
+    expect(r.practice).toHaveLength(2);
+    expect(r.quiz).toBeNull();
+    expect(r.hidden).toEqual({ quiz: { answered: 0, total: 2 } });
+
+    const quizDone = full({ quizResults: { q1: answered("q1"), q2: answered("q2", false) } });
+    const r2 = redactUnitForReview(quizDone);
+    expect(r2.quiz).toHaveLength(2);
+    expect(r2.practice).toBeNull();
+  });
+
+  it("returns the same object when there is nothing to hide, and ignores stages that were never generated", () => {
+    const done = full({
+      practiceResults: { p1: { score: 1, attempts: 1, completed: true }, p2: { score: 1, attempts: 1, completed: true } },
+      quizResults: { q1: answered("q1"), q2: answered("q2") },
+    });
+    expect(redactUnitForReview(done)).toBe(done);
+    const none = unit();
+    expect(redactUnitForReview(none)).toBe(none);
   });
 });

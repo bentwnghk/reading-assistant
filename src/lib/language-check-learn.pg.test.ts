@@ -258,4 +258,64 @@ describe.skipIf(pgliteMissing)("learn persistence against real Postgres", () => 
     expect(feed.rows.some((r) => r.type === "session_deleted")).toBe(true);
     expect(feed.rows.find((r) => r.type === "quiz_completed")?.sessionId).toBeNull();
   });
+
+  it("persists progress that implies no ledger event (wrong first, correct on retry)", async () => {
+    const started = await lib.startSession("s2", { essayId: "e2", categories: ["subject-verb-agreement"], age: 13 });
+    if (!started.ok) throw new Error("start");
+    const id = started.session.id;
+    const cat = "subject-verb-agreement" as const;
+    await lib.syncSession("s2", id, {
+      units: [{
+        category: cat,
+        practice: [choice("p1"), choice("p2")],
+        // item 1 answered wrong at first
+        practiceResults: { p1: { score: 0, attempts: 1, completed: false } },
+      }],
+    });
+    // the learner retries item 1 and gets it right while item 2 is still open:
+    // no new answer, no completed practice -> no event, but it MUST be saved.
+    const res = await lib.syncSession("s2", id, {
+      units: [{ category: cat, practiceResults: { p1: { score: 0, attempts: 2, completed: true } } }],
+    });
+    expect(res!.session.units[0].practiceResults.p1).toMatchObject({ score: 0, attempts: 2, completed: true });
+    const stored = (await lib.getSession("s2", id))!.session.units[0];
+    expect(stored.practiceResults.p1.completed).toBe(true);
+    expect(stored.practiceResults.p1.attempts).toBe(2);
+    await lib.deleteSession("s2", id);
+  });
+
+  it("review view withholds unfinished practice/quiz from the response; the learning page's load keeps them", async () => {
+    const started = await lib.startSession("s2", { essayId: "e2", categories: ["subject-verb-agreement"], age: 13 });
+    if (!started.ok) throw new Error("start");
+    const id = started.session.id;
+    const cat = "subject-verb-agreement" as const;
+    await lib.syncSession("s2", id, {
+      units: [{
+        category: cat,
+        lesson, lessonSeen: true,
+        practice: [{ ...choice("p1"), question: "SECRET PRACTICE" }, choice("p2")],
+        practiceResults: { p1: { score: 1, attempts: 1, completed: true } },
+        quiz: [{ ...choice("q1"), question: "SECRET QUIZ" }, choice("q2")],
+        quizResults: { q1: { answer: "goes", score: 1, correct: true } },
+      }],
+    });
+    const review = await lib.getSessionForReview("s2", id);
+    const text = JSON.stringify(review);
+    expect(text).not.toContain("SECRET PRACTICE");
+    expect(text).not.toContain("SECRET QUIZ");
+    expect(review!.session.units[0].hidden).toEqual({ practice: { completed: 1, total: 2 }, quiz: { answered: 1, total: 2 } });
+    expect(review!.session.units[0].lesson?.title).toBe("T");
+    // the redacted copy is a view only: the stored session is untouched
+    const full = await lib.getSession("s2", id);
+    expect(JSON.stringify(full)).toContain("SECRET PRACTICE");
+    expect(full!.session.units[0].practiceResults.p1.completed).toBe(true);
+    // finishing the practice reveals it, the quiz stays hidden
+    await lib.syncSession("s2", id, { units: [{ category: cat, practiceResults: { p2: { score: 1, attempts: 1, completed: true } } }] });
+    const later = JSON.stringify(await lib.getSessionForReview("s2", id));
+    expect(later).toContain("SECRET PRACTICE");
+    expect(later).not.toContain("SECRET QUIZ");
+    // another user gets nothing
+    expect(await lib.getSessionForReview("s1", id)).toBeNull();
+    await lib.deleteSession("s2", id);
+  });
 });

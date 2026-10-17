@@ -142,7 +142,8 @@ function SessionsList() {
   async function openDetail(id: string) {
     setDetailId(id);
     try {
-      const res = await fetch(`/api/language-check/learn/${id}`);
+      // The history view: unfinished practice/quiz content is withheld server-side.
+      const res = await fetch(`/api/language-check/learn/${id}/review`);
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
       setDetail(body as LearnSessionDetailWire);

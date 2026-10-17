@@ -4999,11 +4999,16 @@
         "noLesson": "此課堂尚未生成。",
         "noPractice": "尚未生成練習。",
         "noQuiz": "尚未生成測驗。",
-        "practiceSummary": "已完成 {{completed}} / {{total}} 題 · 首次答對 {{percent}}%",
+        "practiceSummary": "已完成 {{completed}} / {{total}} 題 · 首次答對 {{percent}}%（至目前為止）",
         "attempts_other": "{{count}} 次嘗試",
         "revealed": "已查看答案",
         "notAttempted": "未作答",
-        "inProgress": "進行中"
+        "inProgress": "進行中",
+        "practiceSummaryNone": "已完成 {{completed}} / {{total}} 題",
+        "practiceLocked": "完成練習後才會顯示",
+        "practiceLockedHint": "已完成 {{completed}} / {{total}} 題。完成全部題目後，這裡才會顯示題目和答案。",
+        "quizLocked": "完成測驗後才會顯示",
+        "quizLockedHint": "已作答 {{answered}} / {{total}} 題。完成全部題目後，這裡才會顯示題目和參考答案。"
       },
       "events": {
         "session_started": "開始學習",
