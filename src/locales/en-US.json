@@ -4541,10 +4541,15 @@
       "tabs": {
         "overview": "Overview",
         "transcript": "Transcript",
-        "results": "Results"
+        "results": "Results",
+        "learning": "Learning"
       },
       "overview": {
         "intro": "Language Check digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
+        "sections": {
+          "name": "Two Sections",
+          "desc": "\"My essays\" holds the upload area and your saved essays; \"My learning\" holds saved learning sessions, a progress dashboard and an activity log."
+        },
         "upload": {
           "name": "Uploading",
           "desc": "Drag and drop, choose files, paste a screenshot or (on a phone) take photos with the camera — tap \"Take another photo\" for each page. Crop each page to just the handwriting before transcribing. Up to {{max}} pages per essay."
@@ -4557,9 +4562,9 @@
           "name": "Storage & Privacy",
           "desc": "Original scans are removed {{days}} days after upload. Checked essays keep their transcript and corrections so you can review them anytime."
         },
-        "staffLog": {
-          "name": "Essay Activity Log",
-          "desc": "Staff see a log of student essays with stats and filters below the list — teachers see their classes, admins their school."
+        "staff": {
+          "name": "Staff View",
+          "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the two sections become \"Student essays\" and \"Student learning\", sharing one class and student filter — teachers see their classes, admins their school."
         },
         "tip": {
           "title": "Tip:",
@@ -4606,6 +4611,29 @@
         "tip": {
           "title": "Tip:",
           "desc": "Hover or tap a highlight to see its correction popover without losing your place in the essay."
+        }
+      },
+      "learning": {
+        "intro": "\"Learn from your mistakes\" turns a checked essay into a study plan: each kind of mistake you pick gets a lesson, practice exercises and a quiz — all built from your own writing.",
+        "topics": {
+          "name": "Choose Your Topics",
+          "desc": "In the results view, press \"Learn from mistakes\", pick up to {{max}} categories from your corrections and set your level — the lesson starts from the mistakes you actually made."
+        },
+        "path": {
+          "name": "Lesson → Practice → Quiz",
+          "desc": "Stages unlock in order. Practice offers hints, retries and more exercises (only the first attempt is scored); quiz answers are final, with explanations and a mastery summary at the end."
+        },
+        "saved": {
+          "name": "Saved Progress",
+          "desc": "Everything saves to your account as you go — resume on any device from \"My learning\", which also holds a progress dashboard and an activity log."
+        },
+        "staff": {
+          "name": "Student Learning",
+          "desc": "Under \"My students\", staff get class dashboards, per-student progress and every learner's sessions (read-only), using the same class and student filter as the essay log."
+        },
+        "tip": {
+          "title": "Tip:",
+          "desc": "Press \"New quiz\" to retake a quiz with different questions — your latest score is the one that counts towards mastery."
         }
       }
     },

@@ -2,17 +2,22 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  BookOpen,
   ClipboardList,
+  Cloud,
   Clock,
   Download,
   Eye,
   FileText,
   Filter,
+  GraduationCap,
   HelpCircle,
   ImagePlus,
   Languages,
+  Route,
   ShieldCheck,
   SpellCheck,
+  Users,
 } from "lucide-react";
 import {
   Dialog,
@@ -23,11 +28,12 @@ import {
 import { cn } from "@/utils/style";
 import {
   LANGUAGE_CHECK_ILLEGIBLE_MARKER,
+  LANGUAGE_CHECK_LEARN_MAX_CATEGORIES,
   LANGUAGE_CHECK_MAX_PAGES,
   LANGUAGE_CHECK_RETENTION_DAYS,
 } from "@/constants/languageCheck";
 
-type HelpTab = "overview" | "transcript" | "results";
+type HelpTab = "overview" | "transcript" | "results" | "learning";
 
 interface HelpDialogProps {
   open: boolean;
@@ -91,7 +97,7 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
         </DialogHeader>
 
         <div className="flex gap-1 rounded-lg bg-muted p-1">
-          {(["overview", "transcript", "results"] as const).map((x) => (
+          {(["overview", "transcript", "results", "learning"] as const).map((x) => (
             <button
               key={x}
               onClick={() => setTab(x)}
@@ -112,6 +118,12 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
             <p className="text-sm text-muted-foreground">
               {t("languageCheck.help.overview.intro")}
             </p>
+            <HelpRow
+              icon={BookOpen}
+              tone="bg-emerald-500/10 text-emerald-500"
+              name={t("languageCheck.help.overview.sections.name")}
+              desc={t("languageCheck.help.overview.sections.desc")}
+            />
             <HelpRow
               icon={ImagePlus}
               tone="bg-indigo-500/10 text-indigo-500"
@@ -136,10 +148,10 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
             />
             {isStaff && (
               <HelpRow
-                icon={ClipboardList}
+                icon={Users}
                 tone="bg-amber-500/10 text-amber-500"
-                name={t("languageCheck.help.overview.staffLog.name")}
-                desc={t("languageCheck.help.overview.staffLog.desc")}
+                name={t("languageCheck.help.overview.staff.name")}
+                desc={t("languageCheck.help.overview.staff.desc")}
               />
             )}
             <HelpTip
@@ -211,6 +223,46 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
             <HelpTip
               title={t("languageCheck.help.results.tip.title")}
               desc={t("languageCheck.help.results.tip.desc")}
+            />
+          </div>
+        )}
+
+        {tab === "learning" && (
+          <div className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">
+              {t("languageCheck.help.learning.intro")}
+            </p>
+            <HelpRow
+              icon={GraduationCap}
+              tone="bg-emerald-500/10 text-emerald-500"
+              name={t("languageCheck.help.learning.topics.name")}
+              desc={t("languageCheck.help.learning.topics.desc", {
+                max: LANGUAGE_CHECK_LEARN_MAX_CATEGORIES,
+              })}
+            />
+            <HelpRow
+              icon={Route}
+              tone="bg-fuchsia-500/10 text-fuchsia-500"
+              name={t("languageCheck.help.learning.path.name")}
+              desc={t("languageCheck.help.learning.path.desc")}
+            />
+            <HelpRow
+              icon={Cloud}
+              tone="bg-cyan-500/10 text-cyan-500"
+              name={t("languageCheck.help.learning.saved.name")}
+              desc={t("languageCheck.help.learning.saved.desc")}
+            />
+            {isStaff && (
+              <HelpRow
+                icon={ClipboardList}
+                tone="bg-amber-500/10 text-amber-500"
+                name={t("languageCheck.help.learning.staff.name")}
+                desc={t("languageCheck.help.learning.staff.desc")}
+              />
+            )}
+            <HelpTip
+              title={t("languageCheck.help.learning.tip.title")}
+              desc={t("languageCheck.help.learning.tip.desc")}
             />
           </div>
         )}
