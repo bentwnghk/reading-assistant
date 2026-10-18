@@ -33,6 +33,7 @@ import {
 } from "@/components/LanguageCheck/shared";
 import LearnActivityLog from "@/components/LanguageCheck/Learn/LearnActivityLog";
 import LearnDashboardView, { PercentBadge } from "@/components/LanguageCheck/Learn/LearnDashboardView";
+import LearnExportMenu from "@/components/LanguageCheck/Learn/LearnExportMenu";
 import LearnRangeTabs, { useRange } from "@/components/LanguageCheck/Learn/LearnRangeTabs";
 import LearnSessionDetail from "@/components/LanguageCheck/Learn/LearnSessionDetail";
 import useLanguageCheckLearnData, { browserTimeZone } from "@/hooks/useLanguageCheckLearnData";
@@ -242,6 +243,7 @@ function SessionsList() {
                     <Eye className="h-4 w-4" />
                   )}
                 </Button>
+                <LearnExportMenu sessionId={s.id} status={s.status} variant="ghost" iconOnly />
                 <Button
                   size="icon"
                   variant="ghost"

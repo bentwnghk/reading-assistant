@@ -34,6 +34,7 @@ vi.mock("@/lib/language-check", () => ({
 import { GET as listGET, POST as startPOST } from "./route";
 import { PATCH, DELETE } from "./[id]/route";
 import { GET as reviewGET } from "./[id]/review/route";
+import { GET as exportGET } from "./[id]/export/route";
 import { GET as dashboardGET } from "./dashboard/route";
 import { GET as staffDashboardGET } from "./staff/dashboard/route";
 import { GET as staffActivityGET } from "./staff/activity/route";
@@ -116,5 +117,42 @@ describe("learning routes", () => {
     lib.startSession.mockResolvedValueOnce({ ok: false, reason: "essay-not-checked" });
     const res = await startPOST({ json: async () => ({ essayId: "e", categories: ["tense"], age: 15 }) } as unknown as Request);
     expect(res.status).toBe(409);
+  });
+});
+
+describe("export route", () => {
+  const stored = (status: "in_progress" | "completed") => ({
+    session: { id: "s1", status, units: [] },
+    rounds: [],
+  });
+
+  it("needs a signed-in user", async () => {
+    expect((await exportGET(req(), ctx)).status).toBe(401);
+    expect(lib.getSession).not.toHaveBeenCalled();
+  });
+
+  it("a learner may export only a completed session", async () => {
+    session = { user: { id: "stu", role: "student" } };
+    lib.getSession.mockResolvedValueOnce(stored("in_progress") as never);
+    expect((await exportGET(req(), ctx)).status).toBe(403);
+
+    lib.getSession.mockResolvedValueOnce(stored("completed") as never);
+    const ok = await exportGET(req(), ctx);
+    expect(ok.status).toBe(200);
+    expect((await ok.json()).session.id).toBe("s1");
+    expect(lib.getSession).toHaveBeenCalledWith("stu", "s1");
+  });
+
+  it("staff may export their own session whether or not it is finished", async () => {
+    for (const role of ["teacher", "admin", "super-admin"]) {
+      session = { user: { id: "t1", role } };
+      lib.getSession.mockResolvedValueOnce(stored("in_progress") as never);
+      expect((await exportGET(req(), ctx)).status).toBe(200);
+    }
+  });
+
+  it("is 404 for a session that is not theirs", async () => {
+    session = { user: { id: "stu", role: "student" } };
+    expect((await exportGET(req(), ctx)).status).toBe(404);
   });
 });

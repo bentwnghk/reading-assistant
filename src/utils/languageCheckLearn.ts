@@ -378,6 +378,35 @@ export function parseExercises(
   return { items, dropped };
 }
 
+/** Locale key suffix under `languageCheck.learn.exercise.types` for an exercise format. */
+export function exerciseTypeKey(type: LearnExerciseType): string {
+  switch (type) {
+    case "fill-blank":
+      return "fillBlank";
+    case "error-correction":
+      return "errorCorrection";
+    default:
+      return type;
+  }
+}
+
+/** Locale key suffix under `...exercise.instructions` ("" = the prompt itself says what to do). */
+export function exerciseInstructionKey(item: LearnExercise): string {
+  switch (item.type) {
+    case "choice":
+    case "reorder":
+    case "proofread":
+      return item.type;
+    case "fill-blank":
+      return "fillBlank";
+    case "error-correction":
+      return "errorCorrection";
+    case "rewrite":
+    case "compose":
+      return "";
+  }
+}
+
 // ─── Learner's own mistakes (prompt context + lesson display) ────────────────
 
 export interface LearnErrorSample {

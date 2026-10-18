@@ -252,6 +252,12 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
               name={t("languageCheck.help.learning.saved.name")}
               desc={t("languageCheck.help.learning.saved.desc")}
             />
+            <HelpRow
+              icon={Download}
+              tone="bg-teal-500/10 text-teal-500"
+              name={t("languageCheck.help.learning.export.name")}
+              desc={t("languageCheck.help.learning.export.desc")}
+            />
             {isStaff && (
               <HelpRow
                 icon={ClipboardList}

@@ -5,12 +5,14 @@ import type { LanguageCheckStaffScope } from "./language-check"
 
 type Denied = { response: NextResponse }
 
-export async function requireUser(): Promise<{ userId: string } | Denied> {
+export async function requireUser(): Promise<
+  { userId: string; role: string | undefined } | Denied
+> {
   const session = await auth()
   if (!session?.user?.id) {
     return { response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) }
   }
-  return { userId: session.user.id }
+  return { userId: session.user.id, role: session.user.role }
 }
 
 /** Staff session + the learner scope its role may see (students are refused). */

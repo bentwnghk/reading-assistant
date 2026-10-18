@@ -121,6 +121,19 @@ export function statusFor(allDone: boolean, previous: LearnSessionStatus): Learn
   return allDone || previous === "completed" ? "completed" : "in_progress";
 }
 
+/**
+ * Who may export a session to Word: staff (teacher / admin / super-admin) any
+ * time, learners only once the session is completed — the export contains every
+ * practice and quiz question with its model answer. The server enforces the
+ * same rule; this is the shared predicate the UI uses to enable the button.
+ */
+export function canExportLearnSession(
+  role: string | null | undefined,
+  status: LearnSessionStatus,
+): boolean {
+  return role === "teacher" || role === "admin" || role === "super-admin" || status === "completed";
+}
+
 // ─── Review redaction ────────────────────────────────────────────────────────
 
 /**

@@ -20,7 +20,12 @@ import {
   ReorderInput,
   TextInput,
 } from "@/components/LanguageCheck/Learn/ExerciseInputs";
-import { pickLang, type LearnExercise } from "@/utils/languageCheckLearn";
+import {
+  exerciseInstructionKey,
+  exerciseTypeKey,
+  pickLang,
+  type LearnExercise,
+} from "@/utils/languageCheckLearn";
 import {
   answerReady,
   emptyAnswer,
@@ -32,35 +37,6 @@ import {
 } from "@/utils/languageCheckLearnGrade";
 import type { OpenEvaluation } from "@/hooks/useLanguageCheckLearn";
 import type { ExplanationLanguage } from "@/store/languageCheck";
-
-const TYPE_LABEL_KEY: Record<LearnExercise["type"], string> = {
-  choice: "choice",
-  "fill-blank": "fillBlank",
-  reorder: "reorder",
-  "error-correction": "errorCorrection",
-  proofread: "proofread",
-  rewrite: "rewrite",
-  compose: "compose",
-};
-
-/** What the learner is asked to do, as a short imperative. */
-function instructionKey(item: LearnExercise): string {
-  switch (item.type) {
-    case "choice":
-      return "choice";
-    case "fill-blank":
-      return "fillBlank";
-    case "reorder":
-      return "reorder";
-    case "error-correction":
-      return "errorCorrection";
-    case "proofread":
-      return "proofread";
-    case "rewrite":
-    case "compose":
-      return "";
-  }
-}
 
 interface AttemptOutcome {
   score: number;
@@ -182,7 +158,7 @@ export default function ExerciseCard({
           {t("languageCheck.learn.exercise.counter", { current: index + 1, total })}
         </span>
         <span className="rounded-full border px-2.5 py-1 text-muted-foreground">
-          {t(`languageCheck.learn.exercise.types.${TYPE_LABEL_KEY[item.type]}`)}
+          {t(`languageCheck.learn.exercise.types.${exerciseTypeKey(item.type)}`)}
         </span>
       </header>
 
@@ -281,7 +257,7 @@ export default function ExerciseCard({
 
 function Prompt({ item }: { item: LearnExercise }) {
   const { t } = useTranslation();
-  const key = instructionKey(item);
+  const key = exerciseInstructionKey(item);
   return (
     <div className="space-y-2">
       {key && (

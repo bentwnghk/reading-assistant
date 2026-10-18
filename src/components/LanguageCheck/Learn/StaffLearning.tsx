@@ -29,6 +29,7 @@ import LearnDashboardView, {
   formatMinutes,
 } from "@/components/LanguageCheck/Learn/LearnDashboardView";
 import LearnRangeTabs, { useRange } from "@/components/LanguageCheck/Learn/LearnRangeTabs";
+import LearnExportMenu from "@/components/LanguageCheck/Learn/LearnExportMenu";
 import LearnSessionDetail from "@/components/LanguageCheck/Learn/LearnSessionDetail";
 import useLanguageCheckLearnData, { browserTimeZone } from "@/hooks/useLanguageCheckLearnData";
 import { cn } from "@/utils/style";
@@ -346,7 +347,7 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
                   </span>
                 </td>
                 <td className="whitespace-nowrap py-2 pr-3 text-muted-foreground">{formatDateTime(s.updatedAt)}</td>
-                <td className="py-2 text-right">
+                <td className="whitespace-nowrap py-2 text-right">
                   <Button variant="ghost" size="sm" disabled={detailId === s.id} onClick={() => void openDetail(s.id)}>
                     {detailId === s.id ? (
                       <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -357,6 +358,13 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
                       </>
                     )}
                   </Button>
+                  <LearnExportMenu
+                    sessionId={s.id}
+                    status={s.status}
+                    endpoint={`/api/language-check/learn/staff/sessions/${s.id}`}
+                    variant="ghost"
+                    iconOnly
+                  />
                 </td>
               </tr>
             ))}

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, CloudOff, GraduationCap, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import LearnExportMenu from "@/components/LanguageCheck/Learn/LearnExportMenu";
 import LearnPath from "@/components/LanguageCheck/Learn/LearnPath";
 import LearnSummary from "@/components/LanguageCheck/Learn/LearnSummary";
 import LessonView from "@/components/LanguageCheck/Learn/LessonView";
@@ -186,6 +187,7 @@ function LearnWorkspace({ session }: { session: LearnSession }) {
           </div>
         </div>
         <SaveStatus />
+        <LearnExportMenu sessionId={key} status={session.status} language={language} flushFirst />
         <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
           <span className={language === "en" ? "font-semibold" : "text-muted-foreground"}>English</span>
           <Switch

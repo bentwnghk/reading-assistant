@@ -4626,6 +4626,10 @@
           "name": "進度保存",
           "desc": "進度會自動保存至你的帳戶——可在任何裝置於「我的學習」繼續，該處還有進度儀表板及活動記錄。"
         },
+                "export": {
+          "name": "匯出至 Word",
+          "desc": "可將已儲存的學習環節下載為一個 Word 文件——答案留空的學生工作紙，或附參考答案的版本。學生完成環節後即可匯出；教職員則可隨時匯出。"
+        },
         "staff": {
           "name": "學生學習",
           "desc": "在「我的學生」下，教職員可查看班級儀表板、每位學生的進度及所有學生的學習環節（唯讀），並使用與作文記錄相同的班級及學生篩選。"
@@ -4966,6 +4970,25 @@
         "error": "未能儲存 — 點擊重試",
         "retryHint": "你的進度已保留在此裝置，連線恢復後會自動儲存。"
       }
+    },
+    "learnExport": {
+      "button": "匯出至 Word",
+      "student": "學生工作紙",
+      "studentHint": "課堂、練習及測驗（不含答案）",
+      "answers": "附參考答案",
+      "answersHint": "含正確答案及解釋的答案版",
+      "unavailable": "完成所有主題後才可匯出",
+      "failed": "無法建立 Word 文件。",
+      "versionStudent": "學生工作紙",
+      "versionAnswers": "參考答案",
+      "subtitle_other": "{{count}} 個主題 · {{level}} · {{date}}",
+      "topics": "涵蓋主題",
+      "mistakes_other": "作文中有 {{count}} 個錯誤",
+      "practiceTitle": "練習",
+      "practiceIntro_other": "共 {{count}} 題。慢慢做，需要時可參考提示。",
+      "alsoAccepted": "其他可接受答案",
+      "criteria": "好答案應包含",
+      "page": "頁"
     },
     "learnData": {
       "title": "我的學習",

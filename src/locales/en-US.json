@@ -4627,6 +4627,10 @@
           "name": "Saved Progress",
           "desc": "Everything saves to your account as you go — resume on any device from \"My learning\", which also holds a progress dashboard and an activity log."
         },
+                "export": {
+          "name": "Export to Word",
+          "desc": "Download any saved session as one Word document — a blank student worksheet or a version with model answers. Students export a session once it is completed; staff, at any time."
+        },
         "staff": {
           "name": "Student Learning",
           "desc": "Under \"My students\", staff get class dashboards, per-student progress and every learner's sessions (read-only), using the same class and student filter as the essay log."
@@ -4977,6 +4981,28 @@
         "error": "Not saved — tap to retry",
         "retryHint": "Your work is kept on this device and will be saved when the connection returns."
       }
+    },
+    "learnExport": {
+      "button": "Export to Word",
+      "student": "Student worksheet",
+      "studentHint": "Lesson, practice and quiz, with blank answers",
+      "answers": "With model answers",
+      "answersHint": "Answer key with correct answers and explanations",
+      "unavailable": "Finish all topics to export this session",
+      "failed": "The Word document could not be created.",
+      "versionStudent": "Student worksheet",
+      "versionAnswers": "Model answers",
+      "subtitle_one": "{{count}} topic · {{level}} · {{date}}",
+      "subtitle_other": "{{count}} topics · {{level}} · {{date}}",
+      "topics": "Topics covered",
+      "mistakes_one": "{{count}} mistake in your essay",
+      "mistakes_other": "{{count}} mistakes in your essay",
+      "practiceTitle": "Practice",
+      "practiceIntro_one": "{{count}} exercise. Take your time and use the hints if you need them.",
+      "practiceIntro_other": "{{count}} exercises. Take your time and use the hints if you need them.",
+      "alsoAccepted": "Also accepted",
+      "criteria": "What a good answer includes",
+      "page": "Page"
     },
     "learnData": {
       "title": "My learning",
