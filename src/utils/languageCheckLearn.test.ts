@@ -266,9 +266,52 @@ describe("proofreading", () => {
     expect(gradeFindFix(multi, [shop], { [shop]: "shops" }).correct).toBe(false);
   });
 
+  it("accepts a narrower mark that swallows the word spacing (period before the run)", () => {
+    // Planted fragment fix spans the preceding word ("entrance. Because" →
+    // "entrance because"); the learner marks only ". Because" and types
+    // "because" — the space lived inside the marked span, so the splice must
+    // not glue "entrancebecause" together.
+    const fragment = parse([
+      {
+        type: "proofread",
+        passage: "Several visitors taking notes near the entrance. Because the guide included details.",
+        errors: [
+          { wrong: "visitors taking", right: ["visitors were taking"] },
+          { wrong: "entrance. Because", right: ["entrance because"] },
+        ],
+      },
+    ]).items[0] as FindFixExercise;
+    const t = tokenizePassage(fragment.passage);
+    const idx = (word: string) => t.find((x) => x.text === word)!.index;
+    const because = idx("Because");
+    const marked = [idx("visitors"), idx("taking"), because - 1, because];
+    const fixes = { [idx("visitors")]: "visitors were taking", [because - 1]: "because" };
+    expect(gradeFindFix(fragment, marked, fixes).correct).toBe(true);
+    // Keeping the period (marking only "Because") is still wrong — the fix
+    // must remove the sentence break.
+    expect(gradeFindFix(fragment, [idx("Because")], { [idx("Because")]: "because" }).correct).toBe(false);
+    // Marking without fixing anything still does not count.
+    expect(gradeFindFix(fragment, [because - 1, because], {}).correct).toBe(false);
+  });
+
   it("builds the corrected passage", () => {
     expect(correctedPassage(item)).toBe("He goes to school. She likes cats very much.");
     expect(exerciseSolution(item)).toBe("He goes to school. She likes cats very much.");
+  });
+
+  it("keeps a word space in the corrected passage when a fix starts at punctuation", () => {
+    // "right" starting with a letter where the span started with "." must not
+    // glue onto the preceding word ("entrancebecause").
+    const glued = parse([
+      {
+        type: "proofread",
+        passage: "We stayed near the entrance. Because the guide included details.",
+        errors: [{ wrong: ". Because", right: ["because"] }],
+      },
+    ]).items[0] as FindFixExercise;
+    expect(correctedPassage(glued)).toBe(
+      "We stayed near the entrance because the guide included details.",
+    );
   });
 });
 

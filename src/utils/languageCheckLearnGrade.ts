@@ -159,6 +159,29 @@ export function runsFromMarks(
   return runs;
 }
 
+const WORD_CHAR = /[\p{L}\p{N}]/u;
+
+/**
+ * Normalised forms of `left + mid + right`, allowing ONE optional space at
+ * each seam (left|mid and mid|right) where both sides meet on a word
+ * character. Replacing a marked span swallows the spacing that lived inside
+ * it: marking ". Because" and typing "because" for the planted error
+ * "entrance. Because" must still count as the fix "entrance because" — the
+ * learner cannot be expected to type a leading space. Only spaces are ever
+ * inserted, so punctuation differences (the point of punctuation exercises)
+ * and, in strict mode, case still fail as before.
+ */
+function windowForms(left: string, mid: string, right: string, strict: boolean): string[] {
+  const mids = new Set([mid]);
+  if (WORD_CHAR.test(left.slice(-1)) && WORD_CHAR.test(mid.slice(0, 1))) mids.add(" " + mid);
+  const forms = new Set<string>();
+  for (const m of mids) {
+    forms.add(m);
+    if (WORD_CHAR.test(m.slice(-1)) && WORD_CHAR.test(right.slice(0, 1))) forms.add(m + " ");
+  }
+  return [...forms].map((m) => normalizeAnswer(left + m + right, strict));
+}
+
 /**
  * Grades a proofreading answer. An error counts as *detected* when a marked
  * run overlaps it and as *fixed* when the learner's replacement turns the
@@ -187,11 +210,16 @@ export function gradeFindFix(
     const from = Math.min(hit.start, err.start);
     const to = Math.max(hit.end, err.end);
     const typed = fixes[hit.first] ?? hit.text;
-    const learner = passage.slice(from, hit.start) + typed + passage.slice(hit.end, to);
-    const fixed = err.right.some(
-      (r) =>
-        normalizeAnswer(passage.slice(from, err.start) + r + passage.slice(err.end, to), strict) ===
-        normalizeAnswer(learner, strict),
+    const learnerForms = windowForms(
+      passage.slice(from, hit.start),
+      typed,
+      passage.slice(hit.end, to),
+      strict,
+    );
+    const fixed = err.right.some((r) =>
+      windowForms(passage.slice(from, err.start), r, passage.slice(err.end, to), strict).some(
+        (form) => learnerForms.includes(form),
+      ),
     );
     return { detected: true, fixed };
   });
@@ -212,7 +240,16 @@ export function correctedPassage(item: FindFixExercise): string {
   let out = "";
   let cursor = 0;
   for (const e of item.errors) {
-    out += item.passage.slice(cursor, e.start) + (e.right[0] ?? "");
+    const fix = e.right[0] ?? "";
+    const kept = item.passage.slice(cursor, e.start);
+    // Splice in a word space where the accepted fix meets the kept text on a
+    // word character (otherwise "entrance" + "because" shows as one word).
+    const lead = WORD_CHAR.test(kept.slice(-1)) && WORD_CHAR.test(fix.slice(0, 1)) ? " " : "";
+    const trail =
+      WORD_CHAR.test(fix.slice(-1)) && WORD_CHAR.test(item.passage.slice(e.end, e.end + 1))
+        ? " "
+        : "";
+    out += kept + lead + fix + trail;
     cursor = e.end;
   }
   return (out + item.passage.slice(cursor))
