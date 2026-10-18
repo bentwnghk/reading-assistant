@@ -27,6 +27,9 @@ async function flush() {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  // The retry/give-up tests intentionally fail syncs; the hook's real
+  // console.error would flood the test output with expected stderr noise.
+  vi.spyOn(console, "error").mockImplementation(() => {});
   remainingFailures = 0;
   syncCalls = [];
   useReadingStore.setState({ glossary: [], glossaryRatings: {}, id: undefined });

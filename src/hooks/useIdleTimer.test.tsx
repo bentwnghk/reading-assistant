@@ -46,6 +46,9 @@ async function flush() {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  // The retry-fallback test intentionally fails sign-out POSTs; the hook's
+  // real console.error would flood the output with expected stderr noise.
+  vi.spyOn(console, "error").mockImplementation(() => {});
   localStorage.clear();
   postOk = true;
   idlePostCount = 0;
