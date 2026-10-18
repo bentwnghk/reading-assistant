@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import ExerciseCard from "@/components/LanguageCheck/Learn/ExerciseCard";
 import StageStatus from "@/components/LanguageCheck/Learn/StageStatus";
+import { useFinishCelebration } from "@/components/LanguageCheck/Learn/ResultCelebration";
 import useLanguageCheckLearn from "@/hooks/useLanguageCheckLearn";
 import {
   practicePercent,
@@ -40,6 +41,9 @@ export default function PracticePlayer({
   const recordPractice = useLanguageCheckLearnStore((s) => s.recordPractice);
   const items = unit.practice.data;
   const [index, setIndex] = useState(() => (items ? firstOpen(unit, items) : 0));
+  const finished = !!items && index >= items.length;
+  // Celebrate the moment the results appear — not when reopening a finished set.
+  useFinishCelebration(finished, finished ? masteryFor(practicePercent(unit) ?? 0) : null);
 
   if (!items || unit.practice.status === "error" || (unit.practice.status === "loading" && !items)) {
     return (
@@ -53,14 +57,13 @@ export default function PracticePlayer({
 
   const strict = isStrictCategory(unit.category);
   const done = items.filter((i) => unit.practiceResults[i.id]?.completed).length;
-  const finished = index >= items.length;
   const loadingMore = unit.practice.status === "loading";
 
   if (finished) {
     const pct = practicePercent(unit) ?? 0;
     const mastery = masteryFor(pct);
     return (
-      <div className="space-y-5 rounded-2xl border bg-card p-6 text-center sm:p-10">
+      <div className="animate-pop-in space-y-5 rounded-2xl border bg-card p-6 text-center sm:p-10">
         <PartyPopper className="mx-auto h-10 w-10 text-primary" />
         <h2 className="text-2xl font-bold">{t("languageCheck.learn.practice.doneTitle")}</h2>
         <p className="text-4xl font-extrabold tabular-nums">{pct}%</p>

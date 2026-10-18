@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/utils/style";
 import ExerciseCard from "@/components/LanguageCheck/Learn/ExerciseCard";
 import StageStatus from "@/components/LanguageCheck/Learn/StageStatus";
+import { useFinishCelebration } from "@/components/LanguageCheck/Learn/ResultCelebration";
 import useLanguageCheckLearn from "@/hooks/useLanguageCheckLearn";
 import {
   quizDone,
@@ -43,6 +44,10 @@ export default function QuizPlayer({
   const recordQuiz = useLanguageCheckLearnStore((s) => s.recordQuiz);
   const items = unit.quiz.data;
   const [started, setStarted] = useState(false);
+  // `quizPercent` is non-null exactly when every question is answered; the
+  // null → value transition is the moment the result screen appears.
+  const resultPct = quizPercent(unit);
+  useFinishCelebration(resultPct !== null, resultPct === null ? null : masteryFor(resultPct));
 
   if (!items || unit.quiz.status === "error" || unit.quiz.status === "loading") {
     return (
@@ -138,7 +143,7 @@ function QuizReview({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3 rounded-2xl border bg-card p-6 text-center sm:p-10">
+      <div className="animate-pop-in space-y-3 rounded-2xl border bg-card p-6 text-center sm:p-10">
         <Trophy
           className={cn(
             "mx-auto h-10 w-10",

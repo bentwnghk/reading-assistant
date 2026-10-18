@@ -48,7 +48,8 @@ export function burstConfetti(options?: {
   originY?: number;
 }): void {
   if (typeof window === "undefined") return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  // Optional chain: jsdom (tests) has no matchMedia — treat as "no preference".
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
   import("canvas-confetti")
     .then((mod) => {
       mod.default({

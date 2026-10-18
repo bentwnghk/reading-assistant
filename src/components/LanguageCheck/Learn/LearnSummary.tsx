@@ -4,6 +4,7 @@ import { ArrowLeft, Award, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/style";
 import { categoryStyle, useCategoryLabel } from "@/components/LanguageCheck/shared";
+import { SummaryCelebration } from "@/components/LanguageCheck/Learn/ResultCelebration";
 import { practicePercent, quizPercent, type LearnSession } from "@/store/languageCheckLearn";
 import { masteryFor, type Mastery } from "@/utils/languageCheckLearnGrade";
 
@@ -34,7 +35,8 @@ export default function LearnSummary({ session, onReview, onBackToEssay }: Learn
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2 rounded-2xl border bg-card p-6 text-center sm:p-10">
+      <SummaryCelebration sessionKey={session.key} mastery={masteryFor(average)} />
+      <div className="animate-pop-in space-y-2 rounded-2xl border bg-card p-6 text-center sm:p-10">
         <Award className="mx-auto h-10 w-10 text-amber-500" />
         <h2 className="text-2xl font-bold">{t("languageCheck.learn.summary.title")}</h2>
         <p className="text-5xl font-extrabold tabular-nums">{average}%</p>
