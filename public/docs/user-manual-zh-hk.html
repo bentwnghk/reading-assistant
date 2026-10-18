@@ -910,7 +910,7 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <h3>3.2 模型分頁 — 為每項功能選擇 AI 引擎</h3>
-      <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。標有 <b>†</b> 的模型為<b>預覽模型</b>——僅在<b>管理員／超級管理員</b>及<b>計量（API 金鑰）</b>用戶的下拉選單中出現。使用訂閱或免費模式時會隱藏，已儲存的相關選擇會在你登入或切換計費模式時自動重設為該功能的預設值。</p>
+      <p>每項 AI 功能可用不同模型。較輕／快的模型較便宜；較大的模型較聰明。可自由搭配。若已儲存的模型被移除，會自動重設為預設值。標有 <b>†</b> 的模型為<b>預覽模型</b>——僅在<b>管理員／超級管理員</b>及<b>計量（API 金鑰）</b>用戶的下拉選單中出現。使用訂閱或免費模式時會隱藏，已儲存的相關選擇會在你登入或切換計費模式時自動重設為該功能的預設值。「語言檢查模型」一列是例外——其<b>所有</b>選項（包括預設的 <code>claude-sonnet-5-5</code>）在任何計費模式下均開放給所有用戶。</p>
       <p>「<b>視覺化模型</b>」一列選擇文本視覺化（§4.7）所用的圖像生成器。該列中標有 <b>‡</b> 的模型為<b>高級圖像模型</b>——僅在<b>管理員／超級管理員</b>及<b>計量（API 金鑰）</b>用戶的下拉選單中出現；其他帳戶不會看到，生成時亦會自動改用預設模型。</p>
       <table class="ref">
         <tr><th>功能（標籤）</th><th>可用模型</th><th>預設</th></tr>
@@ -928,7 +928,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>句子分析模型</td><td>deepseek-flash</td></tr>
         <tr><td>語法模型</td><td>gpt-6-luna</td></tr>
         <tr><td>OCR 模型（語言檢查）</td><td>claude-haiku-5-5 · gpt-6-luna</td><td>claude-haiku-5-5</td></tr>
-        <tr><td>語言檢查模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>gpt-6.1-sol</td></tr>
+        <tr><td>語言檢查模型</td><td>claude-sonnet-5-5 · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash</td><td>claude-sonnet-5-5</td></tr>
         <tr><td>閱讀文本生成模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td>AI 導師模型</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
         <tr><td>語音模型</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
@@ -2522,7 +2522,7 @@ body.toc-noscroll{overflow:hidden}
         <li>圖例分為<b>錯誤</b>與<b>表達建議</b>兩行，各有隱藏／顯示按鈕。點按作文上方的<b>類別標籤</b>可隱藏或顯示該類錯誤（標示與卡片同步）；<b>全部隱藏／全部顯示</b>可一次切換所有類別。篩選時編號不變，而且只影響畫面，開啟另一篇作文時會重設，匯出 Word 時仍包含所有內容。建議屬選擇性：乾淨的「更正後的作文」只套用錯誤更正，另有<b>潤飾版作文</b>一節會連同建議一併套用。</li>
         <li>以 <b>English / 繁體中文</b> 開關即時切換語法說明的語言。<b>匯出 .docx</b> 會產生批改後的作文、乾淨的更正版本及編號說明；<b>原始掃描</b>與<b>重新檢查</b>位於「更多操作」選單。同一工具列的<b>從錯誤中學習</b>按鈕可將批改結果變成課堂——見 10.9。</li>
       </ol>
-      <div class="callout"><strong>選擇模型</strong> 可在「設定 &rarr; 模型」選擇<b>語言檢查模型</b>（預設為 <code>gpt-6.1-sol</code>；亦可選 <code>deepseek-flash</code>、<code>gemini-3.8-flash</code>†、<code>claude-sonnet-5-5</code>†）。更正配合 HKDSE 寫作「語言」範疇，以最少修改為原則，保留學生原本的意思和語氣。</div>
+      <div class="callout"><strong>選擇模型</strong> 可在「設定 &rarr; 模型」選擇<b>語言檢查模型</b>（預設為 <code>claude-sonnet-5-5</code>；亦可選 <code>gpt-6.1-sol</code>、<code>deepseek-flash</code>、<code>gemini-3.8-flash</code>——所有選項均開放給所有用戶，不限管理員及計量用戶）。更正配合 HKDSE 寫作「語言」範疇，以最少修改為原則，保留學生原本的意思和語氣。</div>
 
       <h3>10.9 從錯誤中學習</h3>
       <p>在已檢查作文的結果頁按<b>從錯誤中學習</b>，即可將批改結果變成根據你自己作文生成的學習計劃。從作文的批改結果中選擇最多 <b>6 個類別</b>（錯誤與建議分開列出；<b>最常見 3 項</b>會自動選取最常見的類別），並在年齡滑桿上設定你的程度——課堂與練習會按該程度編寫。每個類別成一個主題，三個階段依次解鎖：</p>
@@ -2673,11 +2673,12 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>圖像</b>（視覺化）</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-nano-banana-2.1 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
         <tr><td><b>通用</b>——預設 <code>deepseek-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td><b>通用</b>——預設 <code>gpt-6-luna</code>（讀前、閱讀測驗、推薦生字、搭配、語法）</td><td>同上</td><td>gpt-6-luna</td></tr>
+        <tr><td><b>語言檢查</b>（錯誤更正）</td><td>claude-sonnet-5-5 · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash</td><td>claude-sonnet-5-5</td></tr>
         <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
         <tr><td><b>AI 導師</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
         <tr><td><b>語音合成</b>（TTS）</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
-      <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。<b>†</b> 預覽模型——除非你是管理員／超級管理員或使用計量計費，否則不會出現在設定的下拉選單；已儲存的選擇會自動重設為該功能預設值。<b>‡</b> 高級圖像模型——僅管理員／超級管理員及計量（API 金鑰）用戶可在 設定 → 模型 → 視覺化模型 中選用；其他帳戶生成時會自動採用預設模型。</p>
+      <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。<b>†</b> 預覽模型——除非你是管理員／超級管理員或使用計量計費，否則不會出現在設定的下拉選單；已儲存的選擇會自動重設為該功能預設值（語言檢查模型清單不帶 <b>†</b>，其所有選項均開放給每位用戶）。<b>‡</b> 高級圖像模型——僅管理員／超級管理員及計量（API 金鑰）用戶可在 設定 → 模型 → 視覺化模型 中選用；其他帳戶生成時會自動採用預設模型。</p>
 
       <h3>B. 角色能力對照表</h3>
       <table class="ref">

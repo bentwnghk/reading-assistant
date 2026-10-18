@@ -1303,7 +1303,10 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {readingTextModelOptions.map((m) => (
+                            {/* Not filtered by RESTRICTED_MODELS: every user
+                                may pick any Language Check model (same policy
+                                as ocrModel). */}
+                            {READING_TEXT_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {formatModelLabel(m)}
                               </SelectItem>

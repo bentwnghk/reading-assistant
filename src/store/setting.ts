@@ -101,6 +101,11 @@ const TTS_MODEL_REPLACEMENTS: Record<string, TtsModel> = {
   "gemini-3.1-flash-tts-preview": "gemini-3.8-flash-lite-tts",
 };
 
+// Fields whose selections are limited by RESTRICTED_MODELS /
+// RESTRICTED_TUTOR_MODELS for non-privileged users. languageCheckModel and
+// ocrModel are deliberately NOT here: every user may pick any option in
+// their lists (claude-sonnet-5-5 is the languageCheckModel default and must
+// stay selectable by everyone).
 export const RESTRICTED_MODEL_FIELD_NAMES = [
   "prereadingModel",
   "summaryModel",
@@ -114,7 +119,6 @@ export const RESTRICTED_MODEL_FIELD_NAMES = [
   "collocationModel",
   "grammarModel",
   "readingTextModel",
-  "languageCheckModel",
   "tutorModel",
 ] as const;
 
@@ -422,7 +426,7 @@ export const defaultValues: SettingStore = {
   collocationModel: "gpt-6-luna",
   grammarModel: "gpt-6-luna",
   readingTextModel: "deepseek-flash",
-  languageCheckModel: "gpt-6.1-sol",
+  languageCheckModel: "claude-sonnet-5-5",
   tutorModel: "step-3.7-flash",
   ttsModel: "x-ai/grok-voice-tts-1.0",
   ttsVoice: "ara",
