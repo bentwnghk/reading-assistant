@@ -4605,7 +4605,7 @@
         },
         "export": {
           "name": "匯出",
-          "desc": "下載 .docx 檔案，包含已標記作文、已更正作文、批改說明及潤飾版本。"
+          "desc": "下載 Word 檔案，包含已標記作文、已更正作文、批改說明及潤飾版本。"
         },
         "tip": {
           "title": "小提示：",
@@ -4806,7 +4806,7 @@
       "recheck": "重新檢查",
       "expiredDisabled": "超過保留期後掃描圖片已被移除",
       "expiredNotice": "此作文已超過 {{days}} 天保留期：原始掃描圖片已移除以節省儲存空間，文字記錄與批改結果會保留供溫習。",
-      "export": "匯出 .docx",
+      "export": "匯出至 Word",
       "explanationLanguage": "說明語言",
       "hideCategory": "隱藏「{{category}}」",
       "showCategory": "顯示「{{category}}」",

@@ -4606,7 +4606,7 @@
         },
         "export": {
           "name": "Export",
-          "desc": "Download a .docx containing the marked essay, the corrected essay, correction notes and a polished version."
+          "desc": "Download a Word file containing the marked essay, the corrected essay, correction notes and a polished version."
         },
         "tip": {
           "title": "Tip:",
@@ -4814,7 +4814,7 @@
       "recheck": "Check again",
       "expiredDisabled": "Scans are removed after the retention period",
       "expiredNotice": "This essay is past its {{days}}-day retention period: the original scan was removed to save storage. The transcript and corrections are kept for review.",
-      "export": "Export .docx",
+      "export": "Export to Word",
       "explanationLanguage": "Explanation language",
       "hideCategory": "Hide {{category}}",
       "showCategory": "Show {{category}}",
