@@ -280,7 +280,7 @@
         },
         "languageCheck": {
           "title": "Language Check",
-          "desc": "Upload a handwritten essay or scanned work (image or PDF). AI digitises it with paragraph breaks, you review the transcript next to the original, then get colour-coded inline corrections plus suggestions for unclear, Chinglish or wordy phrasing — with alternative wordings and a note on why each reads better — aligned with HKDSE writing, in English or 繁體中文. Export the marked essay as Word."
+          "desc": "AI digitises handwritten essays (image/PDF) and marks them up with colour-coded, HKDSE-aligned corrections and phrasing suggestions. Learn from your mistakes then turns those same errors into lessons, practice and quizzes."
         },
         "assignments": {
           "title": "Assignments",
