@@ -118,7 +118,8 @@
       "loading": "Loading...",
       "stuck": "This is taking longer than usual.",
       "reload": "Reload",
-      "banned": "Your account has been banned from accessing this app. Please contact your administrator if you believe this is a mistake."
+      "banned": "Your account has been banned from accessing this app. Please contact your administrator if you believe this is a mistake.",
+      "signInError": "Sign-in failed ({{code}}). Please try again in a moment."
     },
     "shortcuts": {
       "title": "Keyboard Shortcuts",

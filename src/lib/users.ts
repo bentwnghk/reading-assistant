@@ -1,4 +1,5 @@
 import { getClient, getPool } from "./db"
+import type { PoolClient } from "pg"
 import { ensureSchoolSubscriptionTables } from "./school-subscription"
 import { isFreeAccessEmail } from "./free-access"
 import { ensureTrialTable } from "./trial"
@@ -651,8 +652,12 @@ export async function setUserRole(userId: string, role: UserRole): Promise<boole
  */
 export async function isUserBanned(userId?: string | null, email?: string | null): Promise<boolean> {
   if (!userId && !email) return false
-  const client = await getClient()
+  // Pool acquisition happens INSIDE the try so a transient DB failure fails
+  // open (like the query below). A throw here would abort sign-in and be
+  // masked by NextAuth as /?error=Configuration.
+  let client: PoolClient | null = null
   try {
+    client = await getClient()
     const result = await client.query(
       `SELECT COALESCE(banned, FALSE) as banned FROM users WHERE id = $1 OR email = $2 LIMIT 1`,
       [userId ?? null, email ? email.toLowerCase() : null]
@@ -661,7 +666,7 @@ export async function isUserBanned(userId?: string | null, email?: string | null
   } catch {
     return false
   } finally {
-    client.release()
+    client?.release()
   }
 }
 
@@ -697,8 +702,11 @@ export async function refreshGoogleProfile(
   const image =
     typeof profile.picture === "string" && profile.picture ? profile.picture : null
   if (!name && !image) return
-  const client = await getClient()
+  // Best-effort refresh: pool acquisition is inside the try so a transient
+  // DB failure can never abort the sign-in flow that calls this.
+  let client: PoolClient | null = null
   try {
+    client = await getClient()
     await client.query(
       `UPDATE users
        SET name = COALESCE($1, name), image = COALESCE($2, image)
@@ -708,7 +716,7 @@ export async function refreshGoogleProfile(
     )
   } catch {
   } finally {
-    client.release()
+    client?.release()
   }
 }
 

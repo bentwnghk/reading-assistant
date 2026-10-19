@@ -8,7 +8,10 @@ export function getPool(): Pool {
       connectionString: process.env.DATABASE_URL,
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      // Generous on purpose: a brief DB stall/pool saturation must queue and
+      // wait, not throw. (A thrown pool.connect() during the OAuth callback
+      // surfaces as /?error=Configuration with the sign-in aborted.)
+      connectionTimeoutMillis: 10000,
     })
   }
   return pool
