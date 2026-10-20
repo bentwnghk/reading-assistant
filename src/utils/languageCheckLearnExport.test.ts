@@ -47,6 +47,7 @@ function session(units = 2): LearnSessionWire {
         { original: "go", correction: "goes", explanation: "Third person singular.", sentence: "She go to school by bus every single day." },
         { original: "have", correction: "has", explanation: "He needs has.", sentence: "He have a dog." },
         { original: "is", correction: "are", explanation: "", sentence: "The boys is happy." },
+        { original: "feedback seriously", correction: "feedback is taken seriously", explanation: "Missing verb.", sentence: "All customers' feedback seriously.", matchStart: 14, matchEnd: 32 },
       ],
       lesson, practice: exercises, quiz: exercises.filter((e) => e.type !== "compose"),
       lessonSeen: true, practiceResults: {}, quizResults: {}, previousQuizPrompts: [], quizRound: 1,
@@ -84,6 +85,19 @@ describe("learn docx export", () => {
     }
     expect(key).toContain("The verb agrees with its subject.");
     expect(blank).not.toContain("The verb agrees with its subject.");
+  });
+
+  it("underlines wrong words in red and marks missing words with a red ^ in the quoted sentences", async () => {
+    const xml = await xmlOf(false, 1);
+    const runs = xml.match(/<w:r>[\s\S]*?<\/w:r>/g) ?? [];
+    const textOf = (r: string) => (r.match(/<w:t[^>]*>([\s\S]*?)<\/w:t>/) ?? [])[1];
+    const underlinedRed = runs.filter((r) => r.includes("<w:u ") && r.includes("B91C1C")).map(textOf);
+    expect(underlinedRed).toEqual(expect.arrayContaining(["go", "have", "is"]));
+    const carets = runs.filter((r) => textOf(r) === "^");
+    expect(carets).toHaveLength(1);
+    expect(carets[0]).toContain("B91C1C");
+    // The sentence is still quoted in full around the marks.
+    expect(xml).toContain("All customers&apos; feedback ");
   });
 
   it("hints appear in practice only, not in the quiz", async () => {

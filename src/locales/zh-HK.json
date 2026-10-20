@@ -4865,6 +4865,7 @@
       "lesson": {
         "label": "課堂",
         "yourMistakes_other": "你的 {{count}} 個錯誤",
+        "missingHere": "這裡漏了字詞",
         "theRule": "規則",
         "commonMistakes": "常見錯誤",
         "wrong": "錯",

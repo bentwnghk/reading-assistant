@@ -11,7 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/style";
 import { DiffChips, categoryStyle } from "@/components/LanguageCheck/shared";
-import { pickLang, type LearnLesson } from "@/utils/languageCheckLearn";
+import {
+  markSentence,
+  pickLang,
+  type LearnErrorSample,
+  type LearnLesson,
+} from "@/utils/languageCheckLearn";
 import type { LearnUnit } from "@/store/languageCheckLearn";
 import type { ExplanationLanguage } from "@/store/languageCheck";
 
@@ -39,6 +44,44 @@ function SectionTitle({
       <Icon className={cn("h-4 w-4", tone)} />
       {children}
     </h3>
+  );
+}
+
+/** The learner's sentence with the wrong words underlined and a red ^ where something is missing. */
+function MarkedSentence({ sample }: { sample: LearnErrorSample }) {
+  const { t } = useTranslation();
+  const pieces = markSentence(sample);
+  return (
+    <>
+      “
+      {pieces.map((piece, i) => {
+        if (piece.kind === "wrong") {
+          return (
+            <span
+              key={i}
+              className="font-medium text-foreground underline decoration-red-500 decoration-2 underline-offset-4"
+            >
+              {piece.text}
+            </span>
+          );
+        }
+        if (piece.kind === "missing") {
+          return (
+            <span
+              key={i}
+              role="img"
+              aria-label={t("languageCheck.learn.lesson.missingHere")}
+              title={t("languageCheck.learn.lesson.missingHere")}
+              className="mx-px select-none text-base font-extrabold leading-none text-red-600 dark:text-red-400"
+            >
+              ^
+            </span>
+          );
+        }
+        return <span key={i}>{piece.text}</span>;
+      })}
+      ”
+    </>
   );
 }
 
@@ -83,7 +126,7 @@ export default function LessonView({
             {unit.samples.slice(0, 4).map((sample, i) => (
               <div key={i} className="space-y-2 rounded-xl border bg-card p-4">
                 <p className="text-sm leading-relaxed text-muted-foreground" lang="en">
-                  “{sample.sentence}”
+                  <MarkedSentence sample={sample} />
                 </p>
                 <DiffChips original={sample.original} correction={sample.correction} />
                 {sample.explanation && <p className="text-sm">{sample.explanation}</p>}

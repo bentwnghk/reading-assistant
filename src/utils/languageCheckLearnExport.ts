@@ -29,8 +29,10 @@ import {
   exerciseInstructionKey,
   exerciseTypeKey,
   levelKeyForAge,
+  markSentence,
   pickLang,
   splitAtBlanks,
+  type LearnErrorSample,
   type LearnExercise,
   type LearnLesson,
 } from "@/utils/languageCheckLearn";
@@ -491,6 +493,20 @@ function lessonBlocks(
   return out;
 }
 
+/** The quoted sentence: wrong words underlined in red, a red ^ where something is missing (like the screen). */
+function markedSentence(sample: LearnErrorSample): TextRun[] {
+  const base = { color: C.muted, size: 21 };
+  return [
+    run("“", base),
+    ...markSentence(sample).map((piece) => {
+      if (piece.kind === "wrong") return run(piece.text, { ...base, color: C.red, underline: true });
+      if (piece.kind === "missing") return run("^", { color: C.red, size: 24, bold: true });
+      return run(piece.text, base);
+    }),
+    run("”", base),
+  ];
+}
+
 /** The learner's own mistakes: two cards per row, like the on-screen grid. */
 function mistakesGrid(unit: LearnUnitWire, ctx: Ctx): Table {
   const { t } = ctx;
@@ -501,7 +517,7 @@ function mistakesGrid(unit: LearnUnitWire, ctx: Ctx): Table {
   const card = (sample: (typeof samples)[number]): TableCell => {
     const changes = diffChanges(sample.original, sample.correction);
     const kids: Paragraph[] = [
-      para([run(`“${sample.sentence}”`, { color: C.muted, size: 21 })], { after: 110 }),
+      para(markedSentence(sample), { after: 110 }),
       ...changes.map((c) =>
         para(
           [

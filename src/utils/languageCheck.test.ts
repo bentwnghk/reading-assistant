@@ -7,6 +7,7 @@ import {
   contextAround,
   deriveTitle,
   diffChanges,
+  originalMarks,
   parseRawErrors,
   resolveErrors,
   splitParagraphs,
@@ -173,6 +174,44 @@ describe("diffChanges", () => {
     ]);
     expect(diffChanges("went school", "went to school")).toEqual([
       { removed: "", added: "to" },
+    ]);
+  });
+});
+
+describe("originalMarks", () => {
+  it("marks a replaced word as wrong", () => {
+    const original = "project";
+    expect(originalMarks(original, "protect")).toEqual([{ type: "wrong", start: 0, end: 7 }]);
+  });
+
+  it("only underlines the words that change", () => {
+    const original = "He have a dog";
+    expect(originalMarks(original, "He has a dog")).toEqual([{ type: "wrong", start: 3, end: 7 }]);
+  });
+
+  it("marks a missing phrase with an insertion point before the next word", () => {
+    const original = "feedback seriously";
+    expect(originalMarks(original, "feedback is taken seriously")).toEqual([
+      { type: "missing", at: original.indexOf("seriously") },
+    ]);
+  });
+
+  it("puts a missing punctuation mark right after the previous word", () => {
+    const original = "Yes I agree";
+    expect(originalMarks(original, "Yes, I agree")).toEqual([{ type: "missing", at: 3 }]);
+  });
+
+  it("handles a replacement plus a missing word", () => {
+    const original = "Tom go home quickly";
+    expect(originalMarks(original, "Tom goes home very quickly")).toEqual([
+      { type: "wrong", start: 4, end: 6 },
+      { type: "missing", at: original.indexOf("quickly") },
+    ]);
+  });
+
+  it("treats a replacement that also adds words as one wrong range", () => {
+    expect(originalMarks("go school", "went to school")).toEqual([
+      { type: "wrong", start: 0, end: 2 },
     ]);
   });
 });

@@ -8,7 +8,7 @@ import {
   type LanguageCheckCategory,
   type LearnExerciseType,
 } from "@/constants/languageCheck";
-import { contextAround } from "@/utils/languageCheck";
+import { contextAround, originalMarks } from "@/utils/languageCheck";
 
 /**
  * Pure logic for "Learn from your mistakes": AI response schemas (parsed
@@ -415,6 +415,57 @@ export interface LearnErrorSample {
   explanation: string;
   /** The learner's sentence around the error. */
   sentence: string;
+  /** Where `original` sits in `sentence` (absent on sessions saved before this existed). */
+  matchStart?: number;
+  matchEnd?: number;
+}
+
+export type SentencePiece =
+  | { kind: "text"; text: string }
+  | { kind: "wrong"; text: string }
+  | { kind: "missing" };
+
+/**
+ * The learner's sentence split into plain text, the wrongly written words
+ * (to underline) and the points where a word/phrase is missing (to mark with
+ * a caret). Sentences saved without offsets are searched for `original`; if it
+ * cannot be found the sentence is returned unmarked.
+ */
+export function markSentence(
+  sample: Pick<LearnErrorSample, "original" | "correction" | "sentence" | "matchStart" | "matchEnd">,
+): SentencePiece[] {
+  const { sentence, original, correction } = sample;
+  let start = sample.matchStart;
+  if (
+    start === undefined ||
+    sample.matchEnd === undefined ||
+    sentence.slice(start, sample.matchEnd) !== original
+  ) {
+    const found = sentence.indexOf(original);
+    start = found === -1 ? undefined : found;
+  }
+  if (start === undefined || !original) return [{ kind: "text", text: sentence }];
+
+  const marks = originalMarks(original, correction);
+  const pieces: SentencePiece[] = [];
+  let cursor = 0;
+  const pushText = (to: number) => {
+    if (to > cursor) pieces.push({ kind: "text", text: sentence.slice(cursor, to) });
+    cursor = Math.max(cursor, to);
+  };
+  for (const mark of marks) {
+    if (mark.type === "wrong") {
+      pushText(start + mark.start);
+      const end = start + mark.end;
+      pieces.push({ kind: "wrong", text: sentence.slice(cursor, end) });
+      cursor = end;
+    } else {
+      pushText(start + mark.at);
+      pieces.push({ kind: "missing" });
+    }
+  }
+  pushText(sentence.length);
+  return pieces;
 }
 
 /** Up to `max` distinct mistakes of one category, in reading order. */
@@ -431,11 +482,16 @@ export function buildErrorSamples(
     if (seen.has(key)) continue;
     seen.add(key);
     const ctx = contextAround(essay.checkedText, e.start, e.end, 90);
+    const raw = `${ctx.before}${ctx.match}${ctx.after}`;
+    const leading = raw.length - raw.trimStart().length;
+    const matchStart = Math.max(0, ctx.before.length - leading);
     out.push({
       original: e.original,
       correction: e.correction,
       explanation: e.explanation || e.explanationZh,
-      sentence: `${ctx.before}${ctx.match}${ctx.after}`.trim(),
+      sentence: raw.trim(),
+      matchStart,
+      matchEnd: matchStart + ctx.match.length,
     });
     if (out.length >= max) break;
   }

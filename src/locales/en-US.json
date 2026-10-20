@@ -4875,6 +4875,7 @@
         "label": "Lesson",
         "yourMistakes_one": "Your mistake",
         "yourMistakes_other": "Your {{count}} mistakes",
+        "missingHere": "Something is missing here",
         "theRule": "The rule",
         "commonMistakes": "Common mistakes",
         "wrong": "Wrong",

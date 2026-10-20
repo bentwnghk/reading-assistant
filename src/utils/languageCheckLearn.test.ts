@@ -3,6 +3,7 @@ import {
   buildErrorSamples,
   countByCategory,
   levelKeyForAge,
+  markSentence,
   parseExercises,
   parseLesson,
   splitAtBlanks,
@@ -315,6 +316,48 @@ describe("proofreading", () => {
   });
 });
 
+describe("markSentence", () => {
+  it("underlines a wrong word inside the sentence", () => {
+    const sentence = "Jone knew he had to project this famous historical site.";
+    expect(
+      markSentence({ sentence, original: "project", correction: "protect", matchStart: 22, matchEnd: 29 }),
+    ).toEqual([
+      { kind: "text", text: "Jone knew he had to " },
+      { kind: "wrong", text: "project" },
+      { kind: "text", text: " this famous historical site." },
+    ]);
+  });
+
+  it("places a caret where words are missing", () => {
+    const sentence = "We value your comments, and I assure you that all customers' feedback seriously.";
+    const start = sentence.indexOf("feedback");
+    expect(
+      markSentence({
+        sentence,
+        original: "feedback seriously",
+        correction: "feedback is taken seriously",
+        matchStart: start,
+        matchEnd: start + "feedback seriously".length,
+      }),
+    ).toEqual([
+      { kind: "text", text: "We value your comments, and I assure you that all customers' feedback " },
+      { kind: "missing" },
+      { kind: "text", text: "seriously." },
+    ]);
+  });
+
+  it("finds the mistake by text for sessions saved without offsets", () => {
+    const pieces = markSentence({ sentence: "He go home.", original: "go", correction: "goes" });
+    expect(pieces.map((p) => p.kind)).toEqual(["text", "wrong", "text"]);
+  });
+
+  it("leaves the sentence unmarked when the mistake cannot be located", () => {
+    expect(markSentence({ sentence: "Fine.", original: "zzz", correction: "y" })).toEqual([
+      { kind: "text", text: "Fine." },
+    ]);
+  });
+});
+
 describe("misc helpers", () => {
   it("splits at blanks", () => {
     expect(splitAtBlanks("a ___ b ____ c")).toEqual(["a ", " b ", " c"]);
@@ -348,6 +391,7 @@ describe("misc helpers", () => {
     // The repeated "go -> goes" collapses into one sample.
     expect(samples).toHaveLength(2);
     expect(samples[0].sentence).toContain("He go home.");
+    expect(samples[0].sentence.slice(samples[0].matchStart, samples[0].matchEnd)).toBe("go");
     expect(buildErrorSamples(essay, "tense")).toEqual([]);
     expect(countByCategory(essay.corrections)).toEqual([
       { category: "subject-verb-agreement", count: 3 },

@@ -291,9 +291,23 @@ export interface DiffToken {
   text: string;
 }
 
-function tokenize(s: string): string[] {
+interface OffsetToken {
+  text: string;
+  start: number;
+  end: number;
+}
+
+function tokenizeWithOffsets(s: string): OffsetToken[] {
   // Words (incl. apostrophes/hyphens) or single non-space symbols.
-  return s.match(/[\p{L}\p{N}'’-]+|[^\s]/gu) ?? [];
+  return Array.from(s.matchAll(/[\p{L}\p{N}'’-]+|[^\s]/gu), (m) => ({
+    text: m[0],
+    start: m.index ?? 0,
+    end: (m.index ?? 0) + m[0].length,
+  }));
+}
+
+function tokenize(s: string): string[] {
+  return tokenizeWithOffsets(s).map((t) => t.text);
 }
 
 /** LCS-based word diff between the original snippet and its correction. */
@@ -363,6 +377,78 @@ export function diffChanges(original: string, correction: string): DiffChange[] 
     else current.added = token.text;
   }
   return changes;
+}
+
+export type OriginalMark =
+  /** Wrong / unnecessary text: [start, end) offsets into `original`. */
+  | { type: "wrong"; start: number; end: number }
+  /** Text that is missing: the offset in `original` where it belongs. */
+  | { type: "missing"; at: number };
+
+/**
+ * Where the student went wrong inside `original`: words that the correction
+ * replaces or removes are "wrong" ranges; words the correction only adds
+ * (nothing of the original is removed there) are "missing" insertion points.
+ * "feedback seriously" → "feedback is taken seriously" gives one `missing`
+ * mark between the two words.
+ */
+export function originalMarks(original: string, correction: string): OriginalMark[] {
+  const a = tokenizeWithOffsets(original);
+  const b = tokenize(correction);
+  const n = a.length;
+  const m = b.length;
+  if (n === 0) return [];
+  const dp: number[][] = Array.from({ length: n + 1 }, () =>
+    new Array<number>(m + 1).fill(0),
+  );
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] =
+        a[i].text === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+
+  const marks: OriginalMark[] = [];
+  let removedFrom = -1;
+  let removedTo = -1;
+  let added: string[] = [];
+  const flush = (at: number) => {
+    if (removedFrom >= 0) {
+      marks.push({ type: "wrong", start: a[removedFrom].start, end: a[removedTo].end });
+    } else if (added.length > 0) {
+      const punctuationOnly = added.every((t) => !/[\p{L}\p{N}]/u.test(t));
+      // A missing comma/full stop sits right after the previous word; a missing
+      // word sits in the gap, i.e. just before the next one.
+      const pos =
+        punctuationOnly && at > 0
+          ? a[at - 1].end
+          : at < n
+            ? a[at].start
+            : a[n - 1].end;
+      marks.push({ type: "missing", at: pos });
+    }
+    removedFrom = -1;
+    removedTo = -1;
+    added = [];
+  };
+
+  let i = 0;
+  let j = 0;
+  while (i < n || j < m) {
+    if (i < n && j < m && a[i].text === b[j]) {
+      flush(i);
+      i++;
+      j++;
+    } else if (j >= m || (i < n && dp[i + 1][j] >= dp[i][j + 1])) {
+      if (removedFrom < 0) removedFrom = i;
+      removedTo = i;
+      i++;
+    } else {
+      added.push(b[j++]);
+    }
+  }
+  flush(i);
+  return marks;
 }
 
 export interface ErrorContext {
