@@ -29,6 +29,7 @@ import {
   exerciseInstructionKey,
   exerciseTypeKey,
   levelKeyForAge,
+  mistakeMark,
   pickLang,
   splitAtBlanks,
   type LearnExercise,
@@ -500,8 +501,30 @@ function mistakesGrid(unit: LearnUnitWire, ctx: Ctx): Table {
 
   const card = (sample: (typeof samples)[number]): TableCell => {
     const changes = diffChanges(sample.original, sample.correction);
+    // The quoted sentence with the mistake marked like the card on screen:
+    // wrong words underlined in red, a missing word/phrase as a red ^.
+    const mark = mistakeMark(sample);
+    const quote: ParagraphChild[] = [run("“", { color: C.muted, size: 21 })];
+    if (mark?.kind === "underline") {
+      quote.push(
+        run(mark.before, { color: C.muted, size: 21 }),
+        run(mark.mistake, { color: C.red, size: 21, underline: true }),
+        run(mark.after, { color: C.muted, size: 21 }),
+      );
+    } else if (mark?.kind === "insert") {
+      // Separate the caret from the word before it (no double space).
+      const caret = (mark.before && !/\s$/.test(mark.before) ? " " : "") + "^";
+      quote.push(
+        run(mark.before, { color: C.muted, size: 21 }),
+        run(caret, { bold: true, color: C.red, size: 21 }),
+        run(mark.after, { color: C.muted, size: 21 }),
+      );
+    } else {
+      quote.push(run(sample.sentence, { color: C.muted, size: 21 }));
+    }
+    quote.push(run("”", { color: C.muted, size: 21 }));
     const kids: Paragraph[] = [
-      para([run(`“${sample.sentence}”`, { color: C.muted, size: 21 })], { after: 110 }),
+      para(quote, { after: 110 }),
       ...changes.map((c) =>
         para(
           [

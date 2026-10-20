@@ -3,6 +3,7 @@ import {
   buildErrorSamples,
   countByCategory,
   levelKeyForAge,
+  mistakeMark,
   parseExercises,
   parseLesson,
   splitAtBlanks,
@@ -348,9 +349,127 @@ describe("misc helpers", () => {
     // The repeated "go -> goes" collapses into one sample.
     expect(samples).toHaveLength(2);
     expect(samples[0].sentence).toContain("He go home.");
+    expect(samples[0].matchStart).toBe(3);
+    expect(mistakeMark(samples[0])).toEqual({
+      kind: "underline",
+      before: "He ",
+      mistake: "go",
+      after: " home.",
+    });
     expect(buildErrorSamples(essay, "tense")).toEqual([]);
     expect(countByCategory(essay.corrections)).toEqual([
       { category: "subject-verb-agreement", count: 3 },
     ]);
+  });
+
+  it("underlines the flagged mistake, not an earlier identical word", () => {
+    const text = "She go out and they go away.";
+    const essay = {
+      checkedText: text,
+      corrections: [
+        {
+          id: "1",
+          start: 20,
+          end: 22,
+          original: "go",
+          correction: "goes",
+          category: "subject-verb-agreement",
+          explanation: "",
+          explanationZh: "",
+        },
+      ],
+    };
+    const [sample] = buildErrorSamples(essay, "subject-verb-agreement");
+    expect(sample.sentence).toBe(text);
+    expect(sample.matchStart).toBe(20);
+    // A plain search would underline the first "go" ("She [go] out…") — the
+    // recorded position must win.
+    expect(mistakeMark(sample)).toEqual({
+      kind: "underline",
+      before: "She go out and they ",
+      mistake: "go",
+      after: " away.",
+    });
+  });
+
+  it("marks a missing word/phrase with a caret between the anchor words", () => {
+    const sentence =
+      "We value your comments, and I assure you that all customers' feedback seriously.";
+    const sample = {
+      sentence,
+      original: "feedback seriously",
+      correction: "feedback is taken seriously",
+      matchStart: sentence.indexOf("feedback seriously"),
+    };
+    expect(sample.matchStart).toBe(61);
+    // The anchor words are NOT the mistake: nothing is underlined, the caret
+    // sits in the gap where "is taken" belongs.
+    expect(mistakeMark(sample)).toEqual({
+      kind: "insert",
+      before: sentence.slice(0, 70),
+      after: sentence.slice(70),
+      missing: "is taken",
+    });
+    expect(mistakeMark(sample)).toMatchObject({
+      before: expect.stringMatching(/feedback $/),
+      after: expect.stringMatching(/^seriously/),
+    });
+    // The same works for sessions stored before matchStart existed.
+    expect(mistakeMark({ ...sample, matchStart: undefined })).toMatchObject({
+      kind: "insert",
+      missing: "is taken",
+    });
+  });
+
+  it("a caret for a missing word before or between the anchor words", () => {
+    // "the" is missing BEFORE the anchor word: caret at the start of the span.
+    expect(
+      mistakeMark({
+        sentence: "I like music.",
+        original: "music",
+        correction: "the music",
+        matchStart: 7,
+      }),
+    ).toEqual({
+      kind: "insert",
+      before: "I like ",
+      after: "music.",
+      missing: "the",
+    });
+    // "to" is missing BETWEEN the anchor words: caret after "went".
+    expect(
+      mistakeMark({
+        sentence: "I went shop yesterday.",
+        original: "went shop",
+        correction: "went to shop",
+        matchStart: 2,
+      }),
+    ).toEqual({
+      kind: "insert",
+      before: "I went ",
+      after: "shop yesterday.",
+      missing: "to",
+    });
+  });
+
+  it("mistakeMark falls back for older samples and tolerates misses", () => {
+    // Sessions stored before matchStart existed have no position recorded.
+    expect(mistakeMark({ sentence: "She go home.", original: "go", correction: "goes" })).toEqual({
+      kind: "underline",
+      before: "She ",
+      mistake: "go",
+      after: " home.",
+    });
+    // Case differences still mark the words as the learner wrote them.
+    expect(
+      mistakeMark({ sentence: "She Go home.", original: "go", correction: "goes" }),
+    ).toMatchObject({ kind: "underline", mistake: "Go" });
+    // A wrong recorded position is ignored in favour of a real match.
+    expect(
+      mistakeMark({ sentence: "She go home.", original: "go", correction: "goes", matchStart: 99 }),
+    ).toEqual({ kind: "underline", before: "She ", mistake: "go", after: " home." });
+    // Nothing to mark when the sentence does not contain the mistake.
+    expect(mistakeMark({ sentence: "Fine.", original: "go", correction: "goes" })).toBeNull();
+    expect(mistakeMark({ sentence: "Fine.", original: "  ", correction: "goes" })).toBeNull();
   });
 });

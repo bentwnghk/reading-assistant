@@ -8,7 +8,7 @@ import {
   type LanguageCheckCategory,
   type LearnExerciseType,
 } from "@/constants/languageCheck";
-import { contextAround } from "@/utils/languageCheck";
+import { contextAround, diffChanges, tokenize, wordDiff } from "@/utils/languageCheck";
 
 /**
  * Pure logic for "Learn from your mistakes": AI response schemas (parsed
@@ -415,6 +415,12 @@ export interface LearnErrorSample {
   explanation: string;
   /** The learner's sentence around the error. */
   sentence: string;
+  /**
+   * Where the mistake starts inside `sentence` (index of `original`). Absent
+   * in sessions stored before this field existed — `underlineMistake` then
+   * locates the text instead.
+   */
+  matchStart?: number;
 }
 
 /** Up to `max` distinct mistakes of one category, in reading order. */
@@ -431,15 +437,116 @@ export function buildErrorSamples(
     if (seen.has(key)) continue;
     seen.add(key);
     const ctx = contextAround(essay.checkedText, e.start, e.end, 90);
+    const sentence = `${ctx.before}${ctx.match}${ctx.after}`.trim();
     out.push({
       original: e.original,
       correction: e.correction,
       explanation: e.explanation || e.explanationZh,
-      sentence: `${ctx.before}${ctx.match}${ctx.after}`.trim(),
+      sentence,
+      // `before` is left-trimmed (or "…"-prefixed), so the sentence's own
+      // leading trim — if any — never shifts the match: it starts at
+      // before.length, or at 0 when there is no before.
+      matchStart: ctx.before.length,
     });
     if (out.length >= max) break;
   }
   return out;
+}
+
+export type MistakeMark =
+  | { kind: "underline"; before: string; mistake: string; after: string }
+  | { kind: "insert"; before: string; after: string; missing: string };
+
+/**
+ * Where the mistake sits inside a sample's quoted sentence, so both the
+ * on-screen lesson and the Word export can mark the exact spot:
+ *
+ * - The student wrote something wrong → `underline` splits the sentence around
+ *   the wrong words (rendered with a red wavy underline).
+ * - The student left something out — the correction only ADDS words to what
+ *   they wrote, a pure insertion — → `insert` splits the sentence at the gap
+ *   where the missing words belong (rendered with a red ^). The anchor words
+ *   around the gap are NOT the mistake, so they are never underlined.
+ *
+ * The position prefers the recorded `matchStart` (sessions stored before that
+ * field existed do not have it) and falls back to locating the original text,
+ * verbatim first, then trimmed / case-insensitive. Null when the mistake
+ * cannot be found in the sentence (nothing is marked then). For multiple
+ * insertion gaps in one correction the FIRST gap is marked.
+ */
+export function mistakeMark(
+  sample: Pick<
+    LearnErrorSample,
+    "sentence" | "original" | "correction" | "matchStart"
+  >,
+): MistakeMark | null {
+  const { sentence, original, correction } = sample;
+  if (!sentence || !original.trim()) return null;
+
+  const start = locateOriginal(sample);
+  if (start < 0) return null;
+  const end = start + original.length;
+
+  const changes = diffChanges(original, correction);
+  const isInsertion =
+    changes.length > 0 && changes.every((c) => !c.removed && !!c.added);
+
+  if (!isInsertion) {
+    return {
+      kind: "underline",
+      before: sentence.slice(0, start),
+      mistake: sentence.slice(start, end),
+      after: sentence.slice(end),
+    };
+  }
+
+  // How many of the student's own words stand before the first inserted run.
+  let sameBefore = 0;
+  for (const token of wordDiff(original, correction)) {
+    if (token.type === "added") break;
+    // A pure insertion has no "removed" tokens, so everything else is "same".
+    sameBefore += 1;
+  }
+  // Map those words onto a character offset inside the original span…
+  let at = start;
+  for (const word of tokenize(original).slice(0, sameBefore)) {
+    const found = sentence.indexOf(word, at);
+    if (found < 0 || found + word.length > end) return null;
+    at = found + word.length;
+  }
+  // …then sit the caret at the left edge of whatever follows, so it reads as
+  // its own token ("feedback ^ seriously", not "feedback^ seriously").
+  while (at < end && /\s/.test(sentence[at])) at += 1;
+
+  return {
+    kind: "insert",
+    before: sentence.slice(0, at),
+    after: sentence.slice(at),
+    missing: changes[0].added,
+  };
+}
+
+/**
+ * Index of the original span inside the sentence: the recorded `matchStart`
+ * when it really points at the original text, else the first verbatim
+ * occurrence, else the first trimmed / case-insensitive one. -1 when the
+ * sentence does not contain the mistake.
+ */
+function locateOriginal(
+  sample: Pick<LearnErrorSample, "sentence" | "original" | "matchStart">,
+): number {
+  const { sentence, original } = sample;
+  const start = sample.matchStart;
+  if (
+    typeof start === "number" &&
+    Number.isInteger(start) &&
+    sentence.slice(start, start + original.length) === original
+  ) {
+    return start;
+  }
+  const verbatim = sentence.indexOf(original);
+  if (verbatim >= 0) return verbatim;
+  return sentence.toLowerCase().indexOf(original.trim().toLowerCase());
 }
 
 /** Category → number of corrections, most frequent first (stable by taxonomy order). */

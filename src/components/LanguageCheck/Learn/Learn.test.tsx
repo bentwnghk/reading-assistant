@@ -63,6 +63,12 @@ const quiz = parseExercises(
 function unit() {
   const u = createUnit("subject-verb-agreement", 3, [
     { original: "go", correction: "goes", explanation: "Add -s.", sentence: "She go home." },
+    {
+      original: "feedback seriously",
+      correction: "feedback is taken seriously",
+      explanation: "Missing verb.",
+      sentence: "All customers' feedback seriously.",
+    },
   ]);
   u.lesson = { status: "ready", data: lesson, error: null };
   return u;
@@ -83,13 +89,30 @@ function session(u = unit()): LearnSession {
 describe("learn screens render", () => {
   it("lesson shows the learner's mistake, rule, contrast, transfer and tips", () => {
     const onContinue = vi.fn();
-    render(
+    const { container } = render(
       <LessonView unit={unit()} lesson={lesson} language="en" categoryLabel="SVA" onContinue={onContinue} />,
     );
     expect(screen.getByText("Add -s for he/she/it.")).toBeTruthy();
     expect(screen.getAllByText("She runs.").length).toBe(2);
     expect(screen.getByText("Chinese verbs never change.")).toBeTruthy();
     expect(screen.getByText("Circle the verb.")).toBeTruthy();
+    // The quoted sentence underlines the exact words that were wrong (the
+    // sample has no recorded position, so this also covers the fallback).
+    expect(screen.getByText((_, el) => el?.textContent === "“She go home.”")).toBeTruthy();
+    const underlined = Array.from(container.querySelectorAll("span.underline")).find(
+      (el) => el.textContent === "go",
+    );
+    expect(underlined).toBeTruthy();
+    // A missing word/phrase is marked with a red ^ in the gap instead.
+    expect(
+      screen.getByText(
+        (_, el) => el?.textContent === "“All customers' feedback ^seriously.”",
+      ),
+    ).toBeTruthy();
+    const caret = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "^",
+    );
+    expect(caret?.className).toContain("text-red");
     fireEvent.click(screen.getByRole("button", { name: /startPractice/ }));
     expect(onContinue).toHaveBeenCalled();
   });
