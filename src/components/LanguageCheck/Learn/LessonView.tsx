@@ -11,12 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/style";
 import { DiffChips, categoryStyle } from "@/components/LanguageCheck/shared";
-import {
-  pickLang,
-  mistakeMark,
-  type LearnErrorSample,
-  type LearnLesson,
-} from "@/utils/languageCheckLearn";
+import { pickLang, type LearnLesson } from "@/utils/languageCheckLearn";
 import type { LearnUnit } from "@/store/languageCheckLearn";
 import type { ExplanationLanguage } from "@/store/languageCheck";
 
@@ -44,42 +39,6 @@ function SectionTitle({
       <Icon className={cn("h-4 w-4", tone)} />
       {children}
     </h3>
-  );
-}
-
-/**
- * The learner's quoted sentence with the exact mistake marked where it occurs:
- * the wrong words carry a red wavy underline, and a missing word/phrase is
- * shown as a red ^ in the gap where it belongs (the same red the correction
- * chips below use). Falls back to the plain sentence when the spot cannot be
- * located.
- */
-function SampleSentence({ sample }: { sample: LearnErrorSample }) {
-  const mark = mistakeMark(sample);
-  if (!mark) return <>{sample.sentence}</>;
-  if (mark.kind === "insert") {
-    return (
-      <>
-        {mark.before}
-        {/* Decorative: the "insert" chip below says what is missing. */}
-        <span
-          aria-hidden="true"
-          className="px-0.5 font-bold text-red-600 select-none dark:text-red-400"
-        >
-          ^
-        </span>
-        {mark.after}
-      </>
-    );
-  }
-  return (
-    <>
-      {mark.before}
-      <span className="font-medium text-foreground underline decoration-wavy decoration-red-500 underline-offset-2">
-        {mark.mistake}
-      </span>
-      {mark.after}
-    </>
   );
 }
 
@@ -124,7 +83,7 @@ export default function LessonView({
             {unit.samples.slice(0, 4).map((sample, i) => (
               <div key={i} className="space-y-2 rounded-xl border bg-card p-4">
                 <p className="text-sm leading-relaxed text-muted-foreground" lang="en">
-                  “<SampleSentence sample={sample} />”
+                  “{sample.sentence}”
                 </p>
                 <DiffChips original={sample.original} correction={sample.correction} />
                 {sample.explanation && <p className="text-sm">{sample.explanation}</p>}

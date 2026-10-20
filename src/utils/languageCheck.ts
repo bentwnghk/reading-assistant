@@ -291,8 +291,8 @@ export interface DiffToken {
   text: string;
 }
 
-/** Words (incl. apostrophes/hyphens) or single non-space symbols. */
-export function tokenize(s: string): string[] {
+function tokenize(s: string): string[] {
+  // Words (incl. apostrophes/hyphens) or single non-space symbols.
   return s.match(/[\p{L}\p{N}'’-]+|[^\s]/gu) ?? [];
 }
 

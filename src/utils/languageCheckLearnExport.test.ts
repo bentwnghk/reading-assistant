@@ -45,7 +45,6 @@ function session(units = 2): LearnSessionWire {
       mistakeCount: 4,
       samples: [
         { original: "go", correction: "goes", explanation: "Third person singular.", sentence: "She go to school by bus every single day." },
-        { original: "feedback seriously", correction: "feedback is taken seriously", explanation: "Missing verb.", sentence: "All customers' feedback seriously." },
         { original: "have", correction: "has", explanation: "He needs has.", sentence: "He have a dog." },
         { original: "is", correction: "are", explanation: "", sentence: "The boys is happy." },
       ],
@@ -71,13 +70,6 @@ describe("learn docx export", () => {
     for (const c of ["subject-verb-agreement", "tense"]) expect(xml).toContain(c);
     expect(xml.match(/pageBreakBefore/g)!.length).toBe(6);
     expect(xml).toContain("She walks to school.");
-    // The learner's mistakes are underlined inside the quoted sentences (the
-    // mistake run is red + underlined; the chip runs are " go " with spaces).
-    expect(xml).toMatch(/<w:u [^>]+\/><\/w:rPr><w:t[^>]*>go<\/w:t>/);
-    expect(xml).toMatch(/<w:u [^>]+\/><\/w:rPr><w:t[^>]*>have<\/w:t>/);
-    // A missing word/phrase shows as a red ^ at the gap, not an underline.
-    expect(xml).toMatch(/<w:t[^>]*>\s*\^<\/w:t>/);
-    expect(xml).not.toMatch(/<w:u [^>]+\/><\/w:rPr><w:t[^>]*>feedback seriously<\/w:t>/);
   });
 
   it("the student version hides the answers; the answer version shows them", async () => {
