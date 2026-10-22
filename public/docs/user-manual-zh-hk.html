@@ -930,10 +930,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>OCR 模型（語言檢查）</td><td>claude-haiku-5-5 · gpt-6-luna</td><td>claude-haiku-5-5</td></tr>
         <tr><td>語言檢查模型</td><td>claude-sonnet-5-5 · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash</td><td>claude-sonnet-5-5</td></tr>
         <tr><td>閱讀文本生成模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
-        <tr><td>AI 導師模型</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
+        <tr><td>AI 導師模型</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5 · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>gpt-6-luna</td></tr>
         <tr><td>語音模型</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
-      <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>step-3.7-flash</code> 為推薦之選；<code>claude-sonnet-5-5</code>† 及 <code>gemini-3.8-flash</code>† 為最強（亦最貴）的選擇——此等預覽模型僅提供予管理員／超級管理員及計量用戶。</div>
+      <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>gpt-6-luna</code> 為推薦之選；<code>claude-haiku-5-5</code> 為快速輕量之選；<code>claude-sonnet-5-5</code>† 及 <code>gemini-3.8-flash</code>† 為最強（亦最貴）的選擇——此等預覽模型僅提供予管理員／超級管理員及計量用戶。</div>
 
       <h3>3.3 語音分頁</h3>
       <table class="ref">
@@ -2676,7 +2676,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>通用</b>——預設 <code>gpt-6-luna</code>（讀前、閱讀測驗、推薦生字、搭配、語法）</td><td>同上</td><td>gpt-6-luna</td></tr>
         <tr><td><b>語言檢查</b>（錯誤更正）</td><td>claude-sonnet-5-5 · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash</td><td>claude-sonnet-5-5</td></tr>
         <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
-        <tr><td><b>AI 導師</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
+        <tr><td><b>AI 導師</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5 · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>gpt-6-luna</td></tr>
         <tr><td><b>語音合成</b>（TTS）</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
       <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。<b>†</b> 預覽模型——除非你是管理員／超級管理員或使用計量計費，否則不會出現在設定的下拉選單；已儲存的選擇會自動重設為該功能預設值（語言檢查模型清單不帶 <b>†</b>，其所有選項均開放給每位用戶）。<b>‡</b> 高級圖像模型——僅管理員／超級管理員及計量（API 金鑰）用戶可在 設定 → 模型 → 視覺化模型 中選用；其他帳戶生成時會自動採用預設模型。</p>

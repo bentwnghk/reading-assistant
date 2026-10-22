@@ -40,10 +40,14 @@ export const RESTRICTED_IMAGE_MODELS: string[] = [
   "google/gemini-3.1-flash-image",
 ];
 
+// claude-haiku-5-5 is deliberately NOT in RESTRICTED_TUTOR_MODELS — every
+// user may pick it (same policy as ocrModel), not just
+// admins/super-admins/meter-billing users.
 export const TUTOR_MODELS = [
   "deepseek-flash",
   "step-3.7-flash",
   "gpt-6-luna",
+  "claude-haiku-5-5",
   "claude-sonnet-5-5",
   "gemini-3.8-flash",
 ] as const;
@@ -427,7 +431,7 @@ export const defaultValues: SettingStore = {
   grammarModel: "gpt-6-luna",
   readingTextModel: "deepseek-flash",
   languageCheckModel: "claude-sonnet-5-5",
-  tutorModel: "step-3.7-flash",
+  tutorModel: "gpt-6-luna",
   ttsModel: "x-ai/grok-voice-tts-1.0",
   ttsVoice: "ara",
   ttsVoiceByModel: {},

@@ -930,10 +930,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>OCR Model (Language Check)</td><td>claude-haiku-5-5 · gpt-6-luna</td><td>claude-haiku-5-5</td></tr>
         <tr><td>Language Check Model</td><td>claude-sonnet-5-5 · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash</td><td>claude-sonnet-5-5</td></tr>
         <tr><td>Reading Text Generator Model</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
-        <tr><td>AI Tutor Model</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
+        <tr><td>AI Tutor Model</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5 · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>gpt-6-luna</td></tr>
         <tr><td>TTS Model</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
-      <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>step-3.7-flash</code> is the recommended all-rounder; <code>claude-sonnet-5-5</code>† and <code>gemini-3.8-flash</code>† are the strongest (and costliest) options — these preview models are only offered to admins/super-admins and Meter users.</div>
+      <div class="callout tip"><strong>Which to pick?</strong> Defaults are balanced for cost and quality. For the AI Tutor, <code>gpt-6-luna</code> is the recommended all-rounder; <code>claude-haiku-5-5</code> is a fast, lightweight alternative; <code>claude-sonnet-5-5</code>† and <code>gemini-3.8-flash</code>† are the strongest (and costliest) options — these preview models are only offered to admins/super-admins and Meter users.</div>
 
       <h3>3.3 TTS tab — text-to-speech</h3>
       <table class="ref">
@@ -2676,7 +2676,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Available</b> — default <code>gpt-6-luna</code> (pre-reading, reading test, suggest vocabulary, collocations, grammar)</td><td>same list as above</td><td>gpt-6-luna</td></tr>
         <tr><td><b>Language Check</b> (error correction)</td><td>claude-sonnet-5-5 · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash</td><td>claude-sonnet-5-5</td></tr>
         <tr><td><b>Reading Text</b> (AI text generator)</td><td>claude-sonnet-5-5† · gpt-6.1-sol · deepseek-flash · gemini-3.8-flash†</td><td>deepseek-flash</td></tr>
-        <tr><td><b>AI Tutor</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>step-3.7-flash</td></tr>
+        <tr><td><b>AI Tutor</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5 · claude-sonnet-5-5† · gemini-3.8-flash†</td><td>gpt-6-luna</td></tr>
         <tr><td><b>TTS</b> (text-to-speech)</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
       <p class="small"><b>Note:</b> The actual model list visible to you may differ if your deployment has set <code>NEXT_PUBLIC_MODEL_LIST</code> (allow/deny syntax like <code>-all,+gpt-5.4-mini</code>) or disabled providers via <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code>. <b>†</b> Preview model — hidden from the Settings dropdowns unless you are an admin/super-admin or on Meter billing; stored selections auto-reset to the feature default (the Language Check model list carries no <b>†</b> — all of its options are available to every user). <b>‡</b> Premium image model — shown in Settings → Models → Visualization Model only to admins/super-admins and Meter (API key) users; other accounts are silently served the default model.</p>
