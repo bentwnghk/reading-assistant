@@ -107,12 +107,18 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
         setPresets(loadedPresets);
       }
 
-      if (isAdmin) {
+      // Staff with at least one class start on the "All classes" aggregate
+      // (teachers: every class they teach — the server resolves "all" by
+      // role). Classless teachers (rosters via saved presets) start on
+      // their first used roster instead.
+      if (isAdmin || data.length > 0) {
         setSelectedClassId("all");
-      } else if (data.length > 0) {
-        setSelectedClassId(`class:${data[0].id}`);
       } else if (loadedPresets.length > 0) {
         setSelectedClassId(`preset:${loadedPresets[0].id}`);
+      } else if (isTeacher) {
+        // No classes and no used rosters — undo the optimistic "all" so
+        // the select-a-class prompt shows instead of an empty aggregate.
+        setSelectedClassId("");
       }
     } catch (err) {
       console.error("Failed to load classes:", err);
@@ -121,10 +127,11 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
 
   useEffect(() => {
     if (open && (isTeacher || isAdmin)) {
-      // Admins always default to "all" — set it immediately so the dashboard
-      // data fetch starts in parallel with the class/school list loads
-      // instead of waiting for them to resolve first.
-      if (isAdmin) {
+      // Staff default to "all" — set it immediately so the dashboard data
+      // fetch starts in parallel with the class/school list loads instead
+      // of waiting for them to resolve first. Classless teachers are
+      // switched to their first used roster once the metadata loads.
+      if (isAdmin || isTeacher) {
         setSelectedClassId((prev) => prev || "all");
       }
       loadClasses();
@@ -272,6 +279,8 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
                 rosterCountLabel={(count) =>
                   t("assignments.presets.studentCount", { count })
                 }
+                allowAll={filteredClasses.length > 0}
+                allLabel={t("teacherDashboard.allClasses")}
               />
             ) : (
               <ClassCombobox

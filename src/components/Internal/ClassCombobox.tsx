@@ -127,12 +127,14 @@ function CommandClassList({
   itemId,
   renderItem,
   emptyLabel,
+  header,
   footer,
 }: {
   options: ClassOption[]
   itemId: (c: ClassOption) => string
   renderItem: (c: ClassOption, secondaryLabel: string | undefined) => React.ReactNode
   emptyLabel: string
+  header?: React.ReactNode
   footer?: React.ReactNode
 }) {
   const groups = groupBySubject(options)
@@ -146,6 +148,7 @@ function CommandClassList({
   return (
     <CommandList className="max-h-72">
       <CommandEmpty>{emptyLabel}</CommandEmpty>
+      {header}
       {groups.map((g, gi) => (
         <CommandGroup
           key={g.label || "ungrouped"}
@@ -413,7 +416,7 @@ export interface BattleRosterTarget {
 export interface ClassBattleTargetComboboxProps {
   classes: ClassComboboxClass[]
   rosters: BattleRosterTarget[]
-  /** Composite value: "class:<id>" | "preset:<id>" | "" */
+  /** Composite value: "class:<id>" | "preset:<id>" | "all" | "" */
   value: string
   onChange: (compositeValue: string) => void
   placeholder?: string
@@ -421,6 +424,10 @@ export interface ClassBattleTargetComboboxProps {
   searchPlaceholder?: string
   rostersLabel?: string
   rosterCountLabel?: (count: number) => string
+  /** Show an "All classes" option (selects "all") above the class list.
+   *  Only pass this when the viewer actually has classes to aggregate. */
+  allowAll?: boolean
+  allLabel?: string
   disabled?: boolean
   className?: string
 }
@@ -428,7 +435,8 @@ export interface ClassBattleTargetComboboxProps {
 /**
  * Searchable picker for multiplayer class-battle targets: classes (grouped
  * by subject/form) plus saved rosters. Emits composite "class:<id>" /
- * "preset:<id>" values, mirroring the previous Select's value scheme.
+ * "preset:<id>" values (and "all" when `allowAll`), mirroring the previous
+ * Select's value scheme.
  */
 export function ClassBattleTargetCombobox({
   classes,
@@ -440,6 +448,8 @@ export function ClassBattleTargetCombobox({
   searchPlaceholder,
   rostersLabel,
   rosterCountLabel,
+  allowAll = false,
+  allLabel,
   disabled = false,
   className,
 }: ClassBattleTargetComboboxProps) {
@@ -455,6 +465,7 @@ export function ClassBattleTargetCombobox({
   const selectedId = value.includes(":") ? value.slice(value.indexOf(":") + 1) : ""
   const selectedClass = selectedKind === "class" ? options.find(c => c.id === selectedId) : undefined
   const selectedRoster = selectedKind === "preset" ? rosters.find(r => r.id === selectedId) : undefined
+  const allOptionLabel = allLabel ?? t("classCombobox.all")
 
   const select = (composite: string) => {
     onChange(composite)
@@ -469,16 +480,18 @@ export function ClassBattleTargetCombobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className={cn("w-full justify-between font-normal", !selectedClass && !selectedRoster && "text-muted-foreground", className)}
+          className={cn("w-full justify-between font-normal", value !== "all" && !selectedClass && !selectedRoster && "text-muted-foreground", className)}
         >
           <span className="truncate">
-            {selectedClass
-              ? classLabel(selectedClass)
-              : selectedRoster
-                ? rosterCountLabel
-                  ? `${selectedRoster.name} · ${rosterCountLabel(selectedRoster.studentCount ?? 0)}`
-                  : selectedRoster.name
-                : placeholder ?? t("classCombobox.selectClass")}
+            {allowAll && value === "all"
+              ? allOptionLabel
+              : selectedClass
+                ? classLabel(selectedClass)
+                : selectedRoster
+                  ? rosterCountLabel
+                    ? `${selectedRoster.name} · ${rosterCountLabel(selectedRoster.studentCount ?? 0)}`
+                    : selectedRoster.name
+                  : placeholder ?? t("classCombobox.selectClass")}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -501,6 +514,20 @@ export function ClassBattleTargetCombobox({
             options={options}
             itemId={c => `class-${c.id}`}
             emptyLabel={emptyLabel ?? t("classCombobox.empty")}
+            header={
+              allowAll ? (
+                <div className="border-b">
+                  <CommandItem
+                    value={allOptionLabel}
+                    onSelect={() => select("all")}
+                  >
+                    <GraduationCap className="h-4 w-4 shrink-0 opacity-60" />
+                    <span className="flex-1">{allOptionLabel}</span>
+                    {value === "all" && <Layers className="h-4 w-4 text-primary" />}
+                  </CommandItem>
+                </div>
+              ) : undefined
+            }
             renderItem={(c, secondary) => (
               <button
                 type="button"

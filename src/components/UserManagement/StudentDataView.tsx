@@ -220,11 +220,10 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             setSelectedClassId(`user:${initialStudentFocus.userId}`)
             autoSelected = true
           } else if (data.length > 0) {
-            if (isSuperAdmin || isAdmin) {
-              setSelectedClassId("all")
-            } else {
-              setSelectedClassId(`class:${data[0].id}`)
-            }
+            // Staff with classes start on the "All classes" aggregate —
+            // the server resolves it to every class in the viewer's scope
+            // (teachers: all classes they teach).
+            setSelectedClassId("all")
             autoSelected = true
           }
         }
@@ -253,7 +252,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     } finally {
       setLoading(false)
     }
-  }, [t, isSuperAdmin, isAdmin, isTeacher, initialStudentFocus, initialClassId])
+  }, [t, isSuperAdmin, isTeacher, initialStudentFocus, initialClassId])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return
@@ -752,6 +751,8 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
               rosterCountLabel={(count) =>
                 t("assignments.presets.studentCount", { count })
               }
+              allowAll={filteredClasses.length > 0}
+              allLabel={t("userManagement.studentData.allClasses")}
             />
           ) : (
             <ClassCombobox

@@ -163,12 +163,12 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
         setPresets(loadedPresets)
       }
 
-      // Teachers start on their first class; classless teachers (rosters via
-      // saved presets) start on their first used roster instead.
+      // Teachers start on the "All classes" aggregate — the initial "all"
+      // value already means "every class they teach" server-side. Classless
+      // teachers (rosters via saved presets) start on their first used
+      // roster instead.
       if (isTeacher && !initializedTeacherClass) {
-        if (loadedClasses.length > 0) {
-          setSelectedClassId(`class:${loadedClasses[0].id}`)
-        } else if (loadedPresets.length > 0) {
+        if (loadedClasses.length === 0 && loadedPresets.length > 0) {
           setSelectedClassId(`preset:${loadedPresets[0].id}`)
         }
         setInitializedTeacherClass(true)
@@ -390,6 +390,8 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
               rosterCountLabel={(count) =>
                 t("assignments.presets.studentCount", { count })
               }
+              allowAll={filteredClasses.length > 0}
+              allLabel={t("userManagement.aiQuestions.allClasses")}
             />
           ) : (
             <ClassCombobox
