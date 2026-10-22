@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useSession } from "next-auth/react"
 import dynamic from "next/dynamic"
 import { Loader2, Search, ChevronDown, ChevronRight, ChevronLeft, MessageCircle, Users, FileText, ArrowUpDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -116,6 +117,8 @@ interface AiQuestionsViewProps {
 
 export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsViewProps) {
   const { t, i18n } = useTranslation()
+  const { data: session } = useSession()
+  const currentUserId = session?.user?.id
   const isTeacher = !isSuperAdmin && !isAdmin
   
   const [schools, setSchools] = useState<SchoolInfo[]>([])
@@ -131,7 +134,7 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   const [expandedHashes, setExpandedHashes] = useState<Set<string>>(new Set())
   const [instancesCache, setInstancesCache] = useState<Map<string, QuestionInstance[]>>(new Map())
   const [loadingInstances, setLoadingInstances] = useState<Set<string>>(new Set())
-  const [initializedTeacherClass, setInitializedTeacherClass] = useState(false)
+  const [initializedDefaultClass, setInitializedDefaultClass] = useState(false)
   const [page, setPage] = useState(1)
   const [sortField, setSortField] = useState<"question" | "frequency" | "users" | "lastAsked">("frequency")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
@@ -163,24 +166,34 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
         setPresets(loadedPresets)
       }
 
-      // Teachers start on the "All classes" aggregate — the initial "all"
-      // value already means "every class they teach" server-side. Classless
-      // teachers (rosters via saved presets) start on their first used
-      // roster instead.
-      if (isTeacher && !initializedTeacherClass) {
-        if (loadedClasses.length === 0 && loadedPresets.length > 0) {
-          setSelectedClassId(`preset:${loadedPresets[0].id}`)
+      // Default scope once the class list loads: teachers keep the initial
+      // "all" aggregate (every class they teach server-side; classless
+      // teachers fall back to their first used roster). Admins/super-admins
+      // who also teach switch from the broad school/all-schools aggregate
+      // to "mine" (only their own classes); other admins keep "all".
+      if (!initializedDefaultClass) {
+        if (isTeacher) {
+          if (loadedClasses.length === 0 && loadedPresets.length > 0) {
+            setSelectedClassId(`preset:${loadedPresets[0].id}`)
+          }
+        } else if (loadedClasses.some((c) => c.teacherId === currentUserId)) {
+          setSelectedClassId("mine")
         }
-        setInitializedTeacherClass(true)
       }
     } catch (error) {
       console.error("Failed to load data:", error)
       toast.error(t("userManagement.loadFailed"))
+    } finally {
+      // Always release the questions-fetch gate on the first pass — even
+      // when the metadata fetch failed, the broad aggregate is still a
+      // valid view.
+      setInitializedDefaultClass(true)
     }
-  }, [t, isSuperAdmin, isTeacher, initializedTeacherClass])
+  }, [t, isSuperAdmin, isTeacher, currentUserId, initializedDefaultClass])
 
-  // Composite targets from the teacher dropdown: "preset:<id>" filters by
-  // saved roster, "class:<id>" by class; plain ids/"all" unchanged.
+  // Composite targets from the staff dropdown: "preset:<id>" filters by
+  // saved roster, "class:<id>" by class; "mine" passes through as classId
+  // (resolved server-side), "all" omits the param, plain ids unchanged.
   const applyTargetParam = useCallback((params: URLSearchParams) => {
     if (selectedClassId.startsWith("preset:")) {
       params.set("presetId", selectedClassId.slice("preset:".length))
@@ -227,10 +240,14 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
   }, [loadInitialData])
 
   useEffect(() => {
+    // Wait for the default scope to be picked before the first fetch —
+    // otherwise an admin with classes would fetch the broad aggregate and
+    // immediately refetch "mine".
+    if (!initializedDefaultClass) return
     loadQuestions()
     setExpandedHashes(new Set())
     setInstancesCache(new Map())
-  }, [loadQuestions])
+  }, [loadQuestions, initializedDefaultClass])
 
   const filteredQuestions = useMemo(() => {
     const result = searchQuery
@@ -288,6 +305,14 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
       : classes.filter(c => c.schoolId === selectedSchoolId)
     return [...scoped].sort((a, b) => a.name.localeCompare(b.name))
   }, [classes, selectedSchoolId, isSuperAdmin])
+
+  // The admin's/super-admin's own taught classes — drives the "My classes"
+  // option. Independently of the school filter: it is the viewer's own
+  // scope, not a school-scoped one.
+  const myClasses = useMemo(
+    () => classes.filter(c => c.teacherId === currentUserId),
+    [classes, currentUserId]
+  )
 
   const toggleExpand = async (hash: string) => {
     const newExpanded = new Set(expandedHashes)
@@ -396,10 +421,12 @@ export default function AiQuestionsView({ isSuperAdmin, isAdmin }: AiQuestionsVi
           ) : (
             <ClassCombobox
               classes={filteredClasses}
-              value={selectedClassId === "all" ? null : selectedClassId}
-              onChange={(v) => setSelectedClassId(v ?? "all")}
+              value={selectedClassId === "all" ? null : selectedClassId === "mine" ? "__mine__" : selectedClassId}
+              onChange={(v) => setSelectedClassId(v === null ? "all" : v === "__mine__" ? "mine" : v)}
               placeholder={t("userManagement.aiQuestions.selectClass")}
               emptyLabel={t("userManagement.classes.noClasses")}
+              allowMine={myClasses.length > 0}
+              mineLabel={t("userManagement.aiQuestions.myClasses")}
               allowAll={isSuperAdmin || isAdmin}
               allLabel={t("userManagement.aiQuestions.allClasses")}
             />

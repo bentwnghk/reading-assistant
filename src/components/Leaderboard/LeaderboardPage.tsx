@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import {
@@ -69,6 +69,7 @@ import type {
 interface TeacherClass {
   id: string;
   name: string;
+  teacherId?: string;
   schoolName?: string;
   subjectName?: string;
   subjectSortOrder?: number;
@@ -117,6 +118,10 @@ export function LeaderboardPage() {
   const [helpTab, setHelpTab] = useState<"achievements" | "leaderboard">("achievements");
   const [teacherClasses, setTeacherClasses] = useState<TeacherClass[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>("all");
+  // Releases the first board fetch once the default class scope has been
+  // picked — an admin/super-admin who teaches would otherwise fetch the
+  // broad school/all-schools aggregate and immediately refetch "mine".
+  const [defaultClassReady, setDefaultClassReady] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isStudent, setIsStudent] = useState(false);
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
@@ -144,9 +149,19 @@ export function LeaderboardPage() {
           if (role === "student" && classes.length > 0) {
             setSelectedClassId(prev => prev === "all" ? classes[0].id : prev);
           }
+          // Admins/super-admins who also teach default to their own classes
+          // ("mine"); the broad school/all-schools aggregate stays one click
+          // away. Teachers keep "all" — the server already resolves it to
+          // every class they teach.
+          if ((role === "admin" || role === "super-admin")
+            && classes.some(c => c.teacherId === userId)) {
+            setSelectedClassId(prev => prev === "all" ? "mine" : prev);
+          }
         }
       } catch {
         // Silently fail - teacher may not have classes
+      } finally {
+        setDefaultClassReady(true);
       }
     }
     fetchTeacherClasses();
@@ -172,6 +187,14 @@ export function LeaderboardPage() {
     }
     fetchSchools();
   }, [isSuperAdmin]);
+
+  // The admin's/super-admin's own taught classes — drives the "My classes"
+  // option (their default scope). Not school-filtered: it is the viewer's
+  // own scope, not a school-scoped one.
+  const myClasses = useMemo(
+    () => teacherClasses.filter(c => c.teacherId === userId),
+    [teacherClasses, userId]
+  );
 
   // ── Fetch leaderboard ──
   const fetchBoard = useCallback(async () => {
@@ -223,7 +246,12 @@ export function LeaderboardPage() {
     }
   }, [userId, weekStart, t]);
 
-  useEffect(() => { fetchBoard(); }, [fetchBoard]);
+  useEffect(() => {
+    // Wait for the default class scope to be picked before the first fetch
+    // (see defaultClassReady) — afterwards every dep change refetches as usual.
+    if (!defaultClassReady) return;
+    fetchBoard();
+  }, [fetchBoard, defaultClassReady]);
   useEffect(() => {
     if (tab === "me") fetchPersonal();
   }, [tab, fetchPersonal]);
@@ -415,10 +443,12 @@ export function LeaderboardPage() {
           {scope === "class" && !isStudent && (teacherClasses.length > 1 || (isSuperAdmin && teacherClasses.length > 0)) && (
             <ClassCombobox
               classes={teacherClasses}
-              value={selectedClassId === "all" ? null : selectedClassId}
-              onChange={(v) => setSelectedClassId(v ?? "all")}
+              value={selectedClassId === "all" ? null : selectedClassId === "mine" ? "__mine__" : selectedClassId}
+              onChange={(v) => setSelectedClassId(v === null ? "all" : v === "__mine__" ? "mine" : v)}
               placeholder={t("leaderboard.selectClass")}
               emptyLabel={t("leaderboard.allClasses")}
+              allowMine={myClasses.length > 0}
+              mineLabel={t("leaderboard.myClasses")}
               allowAll
               allLabel={t("leaderboard.allClasses")}
             />

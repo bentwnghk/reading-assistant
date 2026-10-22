@@ -14,7 +14,7 @@ import { getWeekStart } from "@/lib/activity"
 import { getStudentClassId, getClassesForTeacher, getClassesForSchool, getSchoolForUser, getAllClasses } from "@/lib/users"
 import { NextResponse } from "next/server"
 
-// GET /api/leaderboard?scope=class|school|global&period=weekly|all-time&classId=...&schoolId=...&week=YYYY-MM-DD&sortBy=...&limit=50
+// GET /api/leaderboard?scope=class|school|global&period=weekly|all-time&classId=...|"mine"&schoolId=...&week=YYYY-MM-DD&sortBy=...&limit=50
 export async function GET(request: Request) {
   try {
     const session = await auth()
@@ -61,12 +61,23 @@ export async function GET(request: Request) {
     let resolvedSchoolId = schoolId
     let resolvedScope    = scopeParam
 
-    // Auto-resolve class when none is supplied explicitly.
-    // For students: use their class membership.
-    // For super-admins: use ALL classes across all schools.
-    // For admins: use ALL classes in their school.
-    // For teachers: use ALL classes they teach.
-    if (resolvedScope === "class" && !resolvedClassId) {
+    // "mine" explicitly scopes to the classes the viewer teaches (any staff
+    // role) — admins/super-admins who also teach get their own classes as
+    // their default "My Class" view instead of the whole school / all
+    // schools. An empty teaching load yields an empty board, not a silent
+    // fallback to the broad aggregate.
+    if (resolvedScope === "class" && resolvedClassId === "mine") {
+      const ownClasses = await getClassesForTeacher(userId)
+      resolvedClassId = undefined
+      if (ownClasses.length > 0) {
+        resolvedClassIds = ownClasses.map(c => c.id)
+      }
+    } else if (resolvedScope === "class" && !resolvedClassId) {
+      // Auto-resolve class when none is supplied explicitly.
+      // For students: use their class membership.
+      // For super-admins: use ALL classes across all schools.
+      // For admins: use ALL classes in their school.
+      // For teachers: use ALL classes they teach.
       const studentClassId = await getStudentClassId(userId)
       if (studentClassId) {
         resolvedClassId = studentClassId

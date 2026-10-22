@@ -1711,19 +1711,22 @@ export async function getClasslessStudentSessions(
 }
 
 /**
- * Student-session rows for a whole class scope ("all" or a single class id)
- * in one batched call — the Student Data tab's initial-load path. Replaces
- * the former client-side fan-out (one members request per class plus one
- * sessions request per student, each costing a NextAuth DB session lookup
- * and a pool client).
+ * Student-session rows for a whole class scope ("all", "mine" or a single
+ * class id) in one batched call — the Student Data tab's initial-load path.
+ * Replaces the former client-side fan-out (one members request per class
+ * plus one sessions request per student, each costing a NextAuth DB session
+ * lookup and a pool client).
  *
- * Scope resolution ("all" only): super-admin sees all classes (optionally
+ * Scope resolution ("all"/"mine"): super-admin sees all classes (optionally
  * narrowed by schoolId), admin sees their own school's classes, teacher
- * sees the classes they teach. Single-class scopes rely on the caller's
- * canAccessClass check (same rule as the per-student route). Teacher
- * session-visibility applies inside the session query. Admin/super-admin
- * "all" scopes also merge classless students, mirroring the dedicated
- * classless endpoint; teachers stay roster-scoped by design.
+ * sees the classes they teach. "mine" resolves to the classes the viewer
+ * teaches regardless of role (admins/super-admins who also teach) and,
+ * like a teacher scope, never merges classless students. Single-class
+ * scopes rely on the caller's canAccessClass check (same rule as the
+ * per-student route). Teacher session-visibility applies inside the
+ * session query. Admin/super-admin "all" scopes also merge classless
+ * students, mirroring the dedicated classless endpoint; teachers stay
+ * roster-scoped by design.
  */
 export async function getRosterSessions(
   viewer: { id: string; role: string },
@@ -1731,10 +1734,13 @@ export async function getRosterSessions(
 ): Promise<StudentSessionWithSchool[]> {
   const { id: viewerId, role } = viewer
   const isAll = scope.classId === "all"
+  const isMine = scope.classId === "mine"
 
   let classIds: string[]
-  if (!isAll) {
+  if (!isAll && !isMine) {
     classIds = [scope.classId]
+  } else if (isMine) {
+    classIds = (await getClassesForTeacher(viewerId)).map((c) => c.id)
   } else {
     let classes: ClassInfo[]
     if (role === "super-admin") {

@@ -26,7 +26,17 @@ export async function GET(
   try {
     let sessions: Awaited<ReturnType<typeof getTeacherDashboardData>> = []
 
-    if (id === "all") {
+    if (id === "mine") {
+      // The classes the viewer teaches (any staff role) — same aggregation
+      // and teacher session-visibility as a teacher's "all" scope. Used by
+      // admins/super-admins who also teach, so their default view is their
+      // own classes rather than the whole school / all schools.
+      const ownClasses = await getClassesForTeacher(session.user.id)
+      sessions = await getTeacherDashboardDataForClasses(
+        ownClasses.map((c) => c.id),
+        session.user.id
+      )
+    } else if (id === "all") {
       if (role === "super-admin") {
         if (schoolId && schoolId !== "all") {
           sessions = await getTeacherDashboardDataForSchool(schoolId)

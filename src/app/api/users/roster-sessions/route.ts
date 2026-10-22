@@ -4,15 +4,17 @@ import { canAccessClass, getRosterSessions } from "@/lib/users"
 import { getSpellingReviewSessionCountsForUsers } from "@/lib/vocabulary"
 
 /**
- * GET /api/users/roster-sessions?classId=all|<id>[&schoolId=...]
+ * GET /api/users/roster-sessions?classId=all|mine|<id>[&schoolId=...]
  *
  * Student Data rows for a whole class scope in ONE request — replaces the
  * former client-side fan-out (one members request per class plus one
  * sessions request per student). Teacher session-visibility applies inside
  * the query; "all" resolves the viewer's visible classes server-side
- * (admin: own school, teacher: own classes, super-admin: all or ?schoolId=).
- * "all" for admins/super-admins also merges classless students. Spelling
- * review counts are batched for every returned user.
+ * (admin: own school, teacher: own classes, super-admin: all or ?schoolId=),
+ * while "mine" resolves to the classes the viewer teaches regardless of
+ * role (admins/super-admins who also teach). "all" for admins/super-admins
+ * also merges classless students. Spelling review counts are batched for
+ * every returned user.
  */
 export async function GET(request: Request) {
   const session = await auth()
@@ -32,8 +34,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "classId is required" }, { status: 400 })
   }
 
-  // Single-class scopes keep the same access check as the per-student route.
-  if (classId !== "all" && !(await canAccessClass(session.user.id, role, classId))) {
+  // Single-class scopes keep the same access check as the per-student route;
+  // "all"/"mine" are scope sentinels resolved inside getRosterSessions.
+  if (classId !== "all" && classId !== "mine" && !(await canAccessClass(session.user.id, role, classId))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 

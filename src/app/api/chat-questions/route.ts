@@ -91,6 +91,10 @@ export async function GET(request: Request) {
     const classId = query.classId
     let classIds: string[] | undefined
     let studentIds: string[] | undefined
+    // "mine" scopes to the classes the viewer teaches (any staff role) with
+    // the same teacher question-visibility rules as a teacher's own scope.
+    const isMineScope = classId === "mine"
+    let appliesTeacherVisibility = isTeacher
 
     if (query.presetId) {
       const preset = await getPresetForViewer(query.presetId, session.user.id, role)
@@ -100,7 +104,11 @@ export async function GET(request: Request) {
       studentIds = preset.studentIds
     }
 
-    if (isTeacher) {
+    if (isMineScope) {
+      const ownClasses = await getClassesForTeacher(session.user.id)
+      classIds = ownClasses.map(c => c.id)
+      appliesTeacherVisibility = true
+    } else if (isTeacher) {
       const teacherClasses = await getClassesForTeacher(session.user.id)
       const teacherClassIds = teacherClasses.map(c => c.id)
 
@@ -119,15 +127,15 @@ export async function GET(request: Request) {
     }
 
     const result = await getAggregatedQuestions({
-      schoolId: effectiveSchoolId,
-      classId,
+      schoolId: isMineScope ? undefined : effectiveSchoolId,
+      classId: isMineScope ? undefined : classId,
       classIds,
       studentIds,
       startDate,
       endDate,
       limit: query.limit,
       offset: query.offset,
-      viewerId: isTeacher ? session.user.id : undefined,
+      viewerId: appliesTeacherVisibility ? session.user.id : undefined,
     })
 
     return NextResponse.json(result)

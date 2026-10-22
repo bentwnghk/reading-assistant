@@ -69,6 +69,14 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
     return [...scoped].sort((a, b) => a.name.localeCompare(b.name));
   }, [allClasses, selectedSchoolId, isSuperAdmin]);
 
+  // The admin's/super-admin's own taught classes — drives the "My classes"
+  // option. Independently of the school filter: it is the viewer's own
+  // scope, not a school-scoped one.
+  const myClasses = useMemo(
+    () => allClasses.filter((c) => c.teacherId === session?.user?.id),
+    [allClasses, session?.user?.id]
+  );
+
   const { metrics, skillAverages, loading, error } = useTeacherDashboard(
     selectedClassId,
     isSuperAdmin ? selectedSchoolId : undefined
@@ -107,32 +115,40 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
         setPresets(loadedPresets);
       }
 
-      // Staff with at least one class start on the "All classes" aggregate
-      // (teachers: every class they teach — the server resolves "all" by
-      // role). Classless teachers (rosters via saved presets) start on
-      // their first used roster instead.
-      if (isAdmin || data.length > 0) {
+      // Admins/super-admins who teach classes start on those ("mine" — the
+      // server aggregates only the classes they teach); other admins start
+      // on the broad school-wide / all-schools aggregate. Teachers with at
+      // least one class start on "all" (their whole teaching load);
+      // classless teachers (rosters via saved presets) start on their first
+      // used roster instead.
+      const teachesClasses = data.some((c) => c.teacherId === session?.user?.id);
+      if (isAdmin) {
+        setSelectedClassId(teachesClasses ? "mine" : "all");
+      } else if (data.length > 0) {
         setSelectedClassId("all");
       } else if (loadedPresets.length > 0) {
         setSelectedClassId(`preset:${loadedPresets[0].id}`);
       } else if (isTeacher) {
-        // No classes and no used rosters — undo the optimistic "all" so
+        // No classes and no used rosters — undo the optimistic default so
         // the select-a-class prompt shows instead of an empty aggregate.
         setSelectedClassId("");
       }
     } catch (err) {
       console.error("Failed to load classes:", err);
     }
-  }, [isAdmin, isTeacher]);
+  }, [isAdmin, isTeacher, session?.user?.id]);
 
   useEffect(() => {
     if (open && (isTeacher || isAdmin)) {
-      // Staff default to "all" — set it immediately so the dashboard data
+      // Staff get their default scope immediately so the dashboard data
       // fetch starts in parallel with the class/school list loads instead
-      // of waiting for them to resolve first. Classless teachers are
-      // switched to their first used roster once the metadata loads.
+      // of waiting for them to resolve first. Both optimistic defaults are
+      // cheap when wrong: an admin without classes gets an instant empty
+      // "mine" response, and loadClasses corrects classless teachers to
+      // their first used roster (or the select-a-class prompt) once the
+      // metadata loads.
       if (isAdmin || isTeacher) {
-        setSelectedClassId((prev) => prev || "all");
+        setSelectedClassId((prev) => prev || (isAdmin ? "mine" : "all"));
       }
       loadClasses();
       if (isSuperAdmin) {
@@ -209,11 +225,14 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
         ? presets.find((p) => p.id === selectedClassId.slice("preset:".length))
         : undefined;
       const selectedSchool = schools.find((s) => s.id === selectedSchoolId);
+      const mineScopeLabel = selectedClassId === "mine"
+        ? t("teacherDashboard.myClasses")
+        : undefined;
 
       await exportTeacherDashboardToExcel({
         metrics,
         chartImages,
-        className: selectedClass?.name ?? selectedPreset?.name,
+        className: selectedClass?.name ?? selectedPreset?.name ?? mineScopeLabel,
         schoolName: selectedSchool?.name,
       });
     } catch (err) {
@@ -285,10 +304,12 @@ export default function TeacherDashboard({ open, onClose }: TeacherDashboardProp
             ) : (
               <ClassCombobox
                 classes={filteredClasses}
-                value={selectedClassId === "all" ? null : selectedClassId}
-                onChange={(v) => setSelectedClassId(v ?? "all")}
+                value={selectedClassId === "all" ? null : selectedClassId === "mine" ? "__mine__" : selectedClassId}
+                onChange={(v) => setSelectedClassId(v === null ? "all" : v === "__mine__" ? "mine" : v)}
                 placeholder={t("teacherDashboard.selectClass")}
                 emptyLabel={t("teacherDashboard.noClasses")}
+                allowMine={myClasses.length > 0}
+                mineLabel={t("teacherDashboard.myClasses")}
                 allowAll={isAdmin || isSuperAdmin}
                 allLabel={t("teacherDashboard.allClasses")}
               />

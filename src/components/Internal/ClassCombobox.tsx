@@ -184,6 +184,11 @@ export interface ClassComboboxProps {
   allLabel?: string
   /** Show an "All classes" option that selects null. Default: false */
   allowAll?: boolean
+  /** Show a "My classes" (classes I teach) option that selects the
+   *  "__mine__" sentinel. Only pass this when the viewer teaches at
+   *  least one class. Default: false */
+  allowMine?: boolean
+  mineLabel?: string
   /** Show a "No class" option that selects the "__none__" sentinel. Default: false */
   allowNone?: boolean
   noneLabel?: string
@@ -202,6 +207,8 @@ export function ClassCombobox({
   emptyLabel,
   allLabel,
   allowAll = false,
+  allowMine = false,
+  mineLabel,
   allowNone = false,
   noneLabel,
   customLabel,
@@ -213,6 +220,7 @@ export function ClassCombobox({
   const options = React.useMemo(() => toOptions(classes), [classes])
   const selected = options.find(c => c.id === value)
   const noneOptionLabel = noneLabel ?? t("classCombobox.noClass")
+  const mineOptionLabel = mineLabel ?? t("classCombobox.mine")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -222,18 +230,20 @@ export function ClassCombobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className={cn("w-full justify-between font-normal", !selected && value !== "__none__" && !customLabel && "text-muted-foreground", className)}
+          className={cn("w-full justify-between font-normal", !selected && value !== "__none__" && value !== "__mine__" && !customLabel && "text-muted-foreground", className)}
         >
           <span className="truncate">
-            {allowAll && (value === "all" || value == null)
-              ? allLabel ?? t("classCombobox.all")
-              : value === "__none__"
-                ? noneOptionLabel
-                : selected
-                  ? classLabel(selected)
-                  : customLabel
-                    ? customLabel
-                    : placeholder ?? t("classCombobox.selectClass")}
+            {allowMine && value === "__mine__"
+              ? mineOptionLabel
+              : allowAll && (value === "all" || value == null)
+                ? allLabel ?? t("classCombobox.all")
+                : value === "__none__"
+                  ? noneOptionLabel
+                  : selected
+                    ? classLabel(selected)
+                    : customLabel
+                      ? customLabel
+                      : placeholder ?? t("classCombobox.selectClass")}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -256,6 +266,23 @@ export function ClassCombobox({
             options={options}
             itemId={c => c.id}
             emptyLabel={emptyLabel ?? t("classCombobox.empty")}
+            header={
+              allowMine ? (
+                <div className="border-b">
+                  <CommandItem
+                    value={mineOptionLabel}
+                    onSelect={() => {
+                      onChange("__mine__")
+                      setOpen(false)
+                    }}
+                  >
+                    <GraduationCap className="h-4 w-4 shrink-0 opacity-60" />
+                    <span className="flex-1">{mineOptionLabel}</span>
+                    {value === "__mine__" && <Layers className="h-4 w-4 text-primary" />}
+                  </CommandItem>
+                </div>
+              ) : undefined
+            }
             renderItem={(c, secondary) => (
               <button
                 type="button"

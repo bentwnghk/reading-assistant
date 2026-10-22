@@ -89,7 +89,7 @@ interface SessionWithSchool extends StudentSessionData {
   schoolName?: string
 }
 
-export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: _currentUserId, initialStudentFocus, initialClassId }: StudentDataViewProps) {
+export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId, initialStudentFocus, initialClassId }: StudentDataViewProps) {
   const { t, i18n } = useTranslation()
   const [schools, setSchools] = useState<SchoolInfo[]>([])
   const [classes, setClasses] = useState<ClassInfo[]>([])
@@ -220,10 +220,15 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
             setSelectedClassId(`user:${initialStudentFocus.userId}`)
             autoSelected = true
           } else if (data.length > 0) {
-            // Staff with classes start on the "All classes" aggregate —
-            // the server resolves it to every class in the viewer's scope
-            // (teachers: all classes they teach).
-            setSelectedClassId("all")
+            // Teachers start on the "All classes" aggregate (every class
+            // they teach). Admins/super-admins who also teach start on
+            // "mine" (only their own classes); other admins start on the
+            // broad school-wide / all-schools aggregate.
+            setSelectedClassId(
+              (isSuperAdmin || isAdmin) && data.some((c) => c.teacherId === currentUserId)
+                ? "mine"
+                : "all"
+            )
             autoSelected = true
           }
         }
@@ -252,7 +257,7 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
     } finally {
       setLoading(false)
     }
-  }, [t, isSuperAdmin, isTeacher, initialStudentFocus, initialClassId])
+  }, [t, isSuperAdmin, isAdmin, isTeacher, initialStudentFocus, initialClassId, currentUserId])
 
   const loadSessions = useCallback(async () => {
     if (!selectedClassId) return
@@ -293,10 +298,10 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         return
       }
 
-      // Class scopes ("all" or a single class) load every member's sessions
-      // in ONE batched request — the server resolves the roster, applies
-      // teacher session-visibility, merges classless students (admins/
-      // super-admins, "all" only) and returns per-row school names.
+      // Class scopes ("all", "mine" or a single class) load every member's
+      // sessions in ONE batched request — the server resolves the roster,
+      // applies teacher session-visibility, merges classless students
+      // (admins/super-admins, "all" only) and returns per-row school names.
       const targetClassId = selectedClassId.startsWith("class:")
         ? selectedClassId.slice("class:".length)
         : selectedClassId
@@ -431,9 +436,11 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
         ? classes.find(c => c.id === selectedClassId.slice("class:".length))?.name
         : selectedClassId.startsWith("preset:")
           ? presets.find(p => p.id === selectedClassId.slice("preset:".length))?.name
-          : selectedClassId !== "all"
-            ? classes.find(c => c.id === selectedClassId)?.name
-            : undefined
+          : selectedClassId === "mine"
+            ? t("userManagement.studentData.myClasses")
+            : selectedClassId !== "all"
+              ? classes.find(c => c.id === selectedClassId)?.name
+              : undefined
       
       await exportStudentDataToExcel({
         sessions: filteredAndSortedSessions,
@@ -456,6 +463,14 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
       : classes.filter(c => c.schoolId === selectedSchoolId)
     return [...scoped].sort((a, b) => a.name.localeCompare(b.name))
   }, [classes, selectedSchoolId, isSuperAdmin])
+
+  // The admin's/super-admin's own taught classes — drives the "My classes"
+  // option. Independently of the school filter: it is the viewer's own
+  // scope, not a school-scoped one.
+  const myClasses = useMemo(
+    () => classes.filter(c => c.teacherId === currentUserId),
+    [classes, currentUserId]
+  )
 
   const highlightedTextHtml = useMemo(() => {
     if (!viewingText?.text) return ""
@@ -757,10 +772,12 @@ export default function StudentDataView({ isSuperAdmin, isAdmin, currentUserId: 
           ) : (
             <ClassCombobox
               classes={filteredClasses}
-              value={selectedClassId === "all" ? null : selectedClassId}
-              onChange={(v) => setSelectedClassId(v ?? "all")}
+              value={selectedClassId === "all" ? null : selectedClassId === "mine" ? "__mine__" : selectedClassId}
+              onChange={(v) => setSelectedClassId(v === null ? "all" : v === "__mine__" ? "mine" : v)}
               placeholder={t("userManagement.studentData.selectClass")}
               emptyLabel={t("userManagement.studentData.noClasses")}
+              allowMine={myClasses.length > 0}
+              mineLabel={t("userManagement.studentData.myClasses")}
               allowAll={isSuperAdmin || isAdmin}
               allLabel={t("userManagement.studentData.allClasses")}
               customLabel={focusStudentLabel}
