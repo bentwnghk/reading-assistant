@@ -4,7 +4,7 @@
 
 Mr.🆖 ProReader is built exactly for moments like that. Just upload your text (or snap a photo of it), and the AI goes to work in several ways:
 
-1. **Before You Read** — Prepare before you dive in: activate what you already know, learn the cultural background and key words, then skim the title, headings, and first/last paragraphs to predict what the text is about. After reading, check how close your prediction was.
+1. **Before You Read** — Prepare before you dive in: activate what you already know, learn the cultural background and key words, then skim the title and first/last paragraphs to predict what the text is about. After reading, check how close your prediction was.
 
 2. **Instant Summary & Mind Map** — Get a clear TL;DR, key points, and a visual mind map so you grasp the big picture before diving into the details.
 

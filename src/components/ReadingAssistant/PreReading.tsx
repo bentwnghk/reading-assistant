@@ -16,7 +16,6 @@ import {
   Send,
   Heading,
   Pilcrow,
-  ListTree,
   FileText,
   Globe,
 } from "lucide-react";
@@ -55,33 +54,8 @@ function SkimHelper({ text, title }: SkimHelperProps) {
     return excerpts.subheadings[0];
   }, [title, text, excerpts.subheadings]);
 
-  const subheadings = useMemo(
-    () =>
-      effectiveTitle
-        ? excerpts.subheadings.filter((h) => h.trim() !== effectiveTitle.trim())
-        : excerpts.subheadings,
-    [excerpts.subheadings, effectiveTitle],
-  );
-
-  // Drop topic sentences already shown verbatim inside the first/last paragraph
-  // excerpts to avoid repeating the same sentence twice in the panel.
-  const topicSentences = useMemo(() => {
-    let list = excerpts.topicSentences;
-    if (excerpts.firstParagraph && list.length > 0) {
-      list = list.slice(1);
-    }
-    if (excerpts.lastParagraph && list.length > 0) {
-      list = list.slice(0, -1);
-    }
-    return list;
-  }, [excerpts.topicSentences, excerpts.firstParagraph, excerpts.lastParagraph]);
-
   const hasAny =
-    !!effectiveTitle ||
-    !!excerpts.firstParagraph ||
-    subheadings.length > 0 ||
-    topicSentences.length > 0 ||
-    !!excerpts.lastParagraph;
+    !!effectiveTitle || !!excerpts.firstParagraph || !!excerpts.lastParagraph;
   if (!hasAny) return null;
 
   const items: { icon: typeof Eye; label: string; node: React.ReactNode }[] = [];
@@ -97,32 +71,6 @@ function SkimHelper({ text, title }: SkimHelperProps) {
       icon: Pilcrow,
       label: t("reading.preReading.skim.firstParagraph"),
       node: <p className="text-muted-foreground">{normalizeExcerpt(excerpts.firstParagraph)}</p>,
-    });
-  }
-  if (subheadings.length > 0) {
-    items.push({
-      icon: ListTree,
-      label: t("reading.preReading.skim.headings"),
-      node: (
-        <ul className="list-disc pl-5 text-muted-foreground">
-          {subheadings.slice(0, 10).map((h, i) => (
-            <li key={`${h}-${i}`}>{h}</li>
-          ))}
-        </ul>
-      ),
-    });
-  }
-  if (topicSentences.length > 0) {
-    items.push({
-      icon: ListTree,
-      label: t("reading.preReading.skim.topicSentences"),
-      node: (
-        <ul className="list-disc pl-5 text-muted-foreground space-y-1">
-          {topicSentences.map((s, i) => (
-            <li key={`${s}-${i}`}>{s}</li>
-          ))}
-        </ul>
-      ),
     });
   }
   if (excerpts.lastParagraph) {

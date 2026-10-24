@@ -160,34 +160,21 @@ export class ThinkTagStreamProcessor {
 export interface SkimExcerpts {
   firstParagraph?: string;
   subheadings: string[];
-  topicSentences: string[];
   lastParagraph?: string;
 }
 
 const SKIM_HEADING_RE = /^\s*#{1,6}\s+(.+?)\s*#*\s*$/;
 
 /**
- * Extract the first sentence of a paragraph. Handles ASCII and CJK terminal
- * punctuation. Falls back to the first line if no terminal punctuation exists.
- */
-function firstSentence(paragraph: string): string {
-  const trimmed = paragraph.trim();
-  if (!trimmed) return "";
-  const match = trimmed.match(/^.+?[.!?。！？](?=\s|$)/);
-  if (match) return match[0].trim();
-  return trimmed.split(/\n/)[0].trim();
-}
-
-/**
  * Derive the text features a reader should SKIM before predicting, per standard
- * reading-strategy guidance (UNC Learning Center; Lumen Learning). The sequence
- * a good reader samples is: title (passed separately as `docTitle`), first
- * paragraph, subheadings, the first sentence of each body paragraph, and the
- * last paragraph. This mirrors that set so the prediction step is grounded in
- * actual skimming rather than the title alone.
+ * reading-strategy guidance (UNC Learning Center; Lumen Learning): the title
+ * (passed separately as `docTitle`), the first paragraph, and the last
+ * paragraph. Subheadings are still extracted (as a fallback title source) but
+ * are not surfaced in the Skim-first panel. This keeps the prediction step
+ * grounded in actual skimming rather than the title alone.
  */
 export function extractSkimExcerpts(text: string): SkimExcerpts {
-  const result: SkimExcerpts = { subheadings: [], topicSentences: [] };
+  const result: SkimExcerpts = { subheadings: [] };
   if (!text || typeof text !== "string") return result;
 
   const blocks = text
@@ -254,11 +241,6 @@ export function extractSkimExcerpts(text: string): SkimExcerpts {
         }
       }
     }
-
-    result.topicSentences = bodyParagraphs
-      .map(firstSentence)
-      .filter((s) => s.length > 0)
-      .slice(0, 8);
   }
 
   return result;

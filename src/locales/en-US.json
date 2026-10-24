@@ -293,7 +293,7 @@
         },
         "preReading": {
           "title": "Before You Read",
-          "desc": "Get ready before you read! Activate prior knowledge, learn the cultural background, set a purpose, and pre-learn key words. Then skim the title, headings, and first/last paragraphs to predict what the text is about — and check your prediction after reading."
+          "desc": "Get ready before you read! Activate prior knowledge, learn the cultural background, set a purpose, and pre-learn key words. Then skim the title and first/last paragraphs to predict what the text is about — and check your prediction after reading."
         }
       },
       "workflow": {
@@ -335,7 +335,7 @@
         "title": "Frequently Asked Questions",
         "q1": {
           "q": "I'm reading a text that I find really difficult to understand. How can Mr.🆖 ProReader help me?",
-          "a": "<p>Mr.🆖 ProReader is built exactly for moments like that. Just upload your text (or snap a photo of it), and the AI goes to work in several ways:</p><ol><li><strong>Before You Read</strong> — Prepare before you dive in: activate what you already know, learn the cultural background and key words, then skim the title, headings, and first/last paragraphs to predict what the text is about. After reading, check how close your prediction was.</li><li><strong>Instant Summary &amp; Mind Map</strong> — Get a clear TL;DR, key points, and a visual mind map so you grasp the big picture before diving into the details.</li><li><strong>AI Text Visualization</strong> — The AI generates a vivid, colorful image that brings the main ideas to life! It automatically picks the best style — infographic, comic strip, cartoon, or painting — based on the text's genre. Available in English and Chinese.</li><li><strong>Simplified &amp; Adapted Text</strong> — The app rewrites the passage at your level using simpler vocabulary and shorter sentences, while keeping the original meaning intact.</li><li><strong>Vocabulary Glossary</strong> — Every tricky word is highlighted and explained with bilingual definitions, syllable breakdowns, and example sentences. You can review them later with flashcards, spelling games, and quizzes powered by spaced repetition.</li><li><strong>Grammar Analysis</strong> — Complex grammar structures are identified and explained with patterns and examples from the text itself, plus interactive grammar games to reinforce your understanding.</li><li><strong>AI Tutor</strong> — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.</li><li><strong>Reading Comprehension Test</strong> — Once you feel ready, take a generated quiz covering main ideas, details, inferences, and more, with detailed explanations for every answer.</li></ol><p>Think of Mr.🆖 ProReader as a patient, personalized tutor that turns any difficult text into a learnable experience.</p>"
+          "a": "<p>Mr.🆖 ProReader is built exactly for moments like that. Just upload your text (or snap a photo of it), and the AI goes to work in several ways:</p><ol><li><strong>Before You Read</strong> — Prepare before you dive in: activate what you already know, learn the cultural background and key words, then skim the title and first/last paragraphs to predict what the text is about. After reading, check how close your prediction was.</li><li><strong>Instant Summary &amp; Mind Map</strong> — Get a clear TL;DR, key points, and a visual mind map so you grasp the big picture before diving into the details.</li><li><strong>AI Text Visualization</strong> — The AI generates a vivid, colorful image that brings the main ideas to life! It automatically picks the best style — infographic, comic strip, cartoon, or painting — based on the text's genre. Available in English and Chinese.</li><li><strong>Simplified &amp; Adapted Text</strong> — The app rewrites the passage at your level using simpler vocabulary and shorter sentences, while keeping the original meaning intact.</li><li><strong>Vocabulary Glossary</strong> — Every tricky word is highlighted and explained with bilingual definitions, syllable breakdowns, and example sentences. You can review them later with flashcards, spelling games, and quizzes powered by spaced repetition.</li><li><strong>Grammar Analysis</strong> — Complex grammar structures are identified and explained with patterns and examples from the text itself, plus interactive grammar games to reinforce your understanding.</li><li><strong>AI Tutor</strong> — A conversational AI tutor is always on standby. Ask it anything about the passage — highlight a confusing sentence, and it will break it down for you step by step.</li><li><strong>Reading Comprehension Test</strong> — Once you feel ready, take a generated quiz covering main ideas, details, inferences, and more, with detailed explanations for every answer.</li></ol><p>Think of Mr.🆖 ProReader as a patient, personalized tutor that turns any difficult text into a learnable experience.</p>"
         },
         "q2": {
           "q": "If there's a word or phrase I don't understand in the text, what can I do?",
@@ -827,12 +827,10 @@
       "submitPrediction": "Submit",
       "skimLabel": "Skim first",
       "skimHint": "Good readers skim before predicting",
-      "skimGuide": "Skimming means quickly reading the title, headings, and the first & last paragraphs to get the gist — not every word. Skim these, then predict.",
+      "skimGuide": "Skimming means quickly reading the title and the first & last paragraphs to get the gist — not every word. Skim these, then predict.",
       "skim": {
         "title": "Title",
         "firstParagraph": "First paragraph",
-        "headings": "Headings",
-        "topicSentences": "Topic sentences",
         "lastParagraph": "Last paragraph"
       },
       "purposeLabel": "Purpose",
@@ -864,7 +862,7 @@
         "steps": {
           "s1": "Click Prepare Pre-Reading to generate your activities.",
           "s2": "Work top to bottom: activate your knowledge, read the background, set your purpose, and learn the key words.",
-          "s3": "Skim the title, headings, and first/last paragraphs, then type your prediction.",
+          "s3": "Skim the title and first/last paragraphs, then type your prediction.",
           "s4": "After you read and get the summary, rate how close your prediction was."
         },
         "tipTitle": "Tip",
