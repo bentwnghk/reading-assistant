@@ -137,11 +137,17 @@ export default function LearnDashboardView({ data, showLearners = false }: Learn
     );
   }
 
-  const history = quizHistory.map((p) => ({
+  // One point per quiz round, so the x axis must key on something unique per
+  // point: recharts resolves tooltips by axis value, and several rounds sharing
+  // one day label would all show the first round of that day.
+  const history = quizHistory.map((p, i) => ({
     ...p,
+    idx: i,
     label: new Date(p.at).toLocaleDateString(i18n.language, { month: "short", day: "numeric" }),
     name: categoryLabel(p.category),
   }));
+  // Show the date only on a day's first round so same-day points don't repeat it.
+  const historyTicks = history.map((p, i) => (i === 0 || p.label !== history[i - 1].label ? p.label : ""));
 
   return (
     <div className="space-y-4">
@@ -261,7 +267,7 @@ export default function LearnDashboardView({ data, showLearners = false }: Learn
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={history}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+              <XAxis dataKey="idx" tickFormatter={(v) => historyTicks[Number(v)] ?? ""} tick={{ fontSize: 10 }} />
               <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 10 }} />
               <Tooltip
                 formatter={(value) => [`${value}%`, t("languageCheck.learnData.quizScore")]}
