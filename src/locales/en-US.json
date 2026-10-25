@@ -2143,10 +2143,12 @@
     "startReading": "Start Reading",
     "analytics": {
       "title": "Student analytics",
+      "myTitle": "My analytics",
       "viewLabel": "Vocabulary view",
       "view": {
         "mine": "My vocabulary",
-        "analytics": "Student analytics"
+        "analytics": "Student analytics",
+        "myAnalytics": "My analytics"
       },
       "tabs": {
         "overview": "Overview",
@@ -2154,6 +2156,7 @@
         "activity": "Activity"
       },
       "noData": "No vocabulary activity for this selection yet.",
+      "selfNoData": "No vocabulary activity yet — review some words and your analytics will appear here.",
       "noSessions": "No review sessions for this selection yet.",
       "noActivity": "No activity in this period yet.",
       "statBank": "Word bank",
@@ -2201,6 +2204,7 @@
       "colMissed": "Missed",
       "colLearnersMissed": "Students who missed it",
       "note": "Word bank figures show the current state of each student's vocabulary; sessions, accuracy and activity cover the selected time range. Accuracy is the share of correct answers across review sessions.",
+      "selfNote": "Word bank figures show the current state of your vocabulary; sessions, accuracy and activity cover the selected time range. Accuracy is the share of correct answers across your review sessions.",
       "studentsTitle": "Students",
       "filterToStudent": "Show only this student",
       "openVocabulary": "Vocabulary",
@@ -2515,7 +2519,8 @@
       "tabs": {
         "overview": "Overview",
         "review": "Review Modes",
-        "extras": "More Features"
+        "extras": "More Features",
+        "analytics": "Analytics"
       },
       "overview": {
         "intro": "My Vocabulary collects every glossary word from your reading sessions into one place for systematic review. Words are automatically synced — just read and they appear here.",
@@ -2645,6 +2650,37 @@
         "tip": {
           "title": "Tip",
           "content": "Use Auto Select with \"Due for Review\" to quickly catch up on overdue words, or \"Random Mix\" for a balanced study session."
+        }
+      },
+      "analytics": {
+        "intro": "The switch at the top of the page flips between your word bank and the analytics panel — a report of your vocabulary and review activity. The ? button beside the title opens this guide from every view.",
+        "switch": {
+          "name": "The analytics switch",
+          "desc": "One toggle, two views: keep studying on My Vocabulary, or open the analytics panel to see how your word bank and review practice are going. Students see \"My analytics\" with their own data; teachers and admins see \"Student analytics\" for their classes. The switch and this guide stay available on both views."
+        },
+        "cards": {
+          "name": "Overview Cards",
+          "desc": "Word bank size (words + phrases), mastered count, words due for review, average mastery level, review sessions with average accuracy, words reviewed, words added, and active days."
+        },
+        "charts": {
+          "name": "Charts & Tables",
+          "desc": "Daily or weekly activity (words reviewed vs added, with an accuracy line), your mastery-level distribution, review accuracy over time, per-mode totals, and the words you miss most often."
+        },
+        "range": {
+          "name": "Time Range",
+          "desc": "Scope the whole report to the last 7, 30, or 90 days, or all time. Word-bank figures always reflect the current state of the vocabulary."
+        },
+        "private": {
+          "name": "Your Data Only",
+          "desc": "My analytics shows only your own numbers — never other students'. Your teacher can follow your progress from their own Student analytics view."
+        },
+        "staff": {
+          "name": "Student analytics (Teachers)",
+          "desc": "Filter by class and student to see the overview for any learner, plus a per-student table (bank, mastered, due, sessions, accuracy, trend, last active), read-only review-session details, an activity feed, and \"Open vocabulary\" to browse a student's bank read-only."
+        },
+        "tip": {
+          "title": "Tip",
+          "content": "Watch the accuracy line and the \"Due for review\" card — reviewing due words before they pile up is the fastest way to grow the mastered count."
         }
       }
     }

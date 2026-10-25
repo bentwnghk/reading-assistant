@@ -18,14 +18,6 @@ import {
   Share2,
   ListPlus,
   HelpCircle,
-  Zap,
-  FileDown,
-  ListChecks,
-  RotateCcw,
-  Flame,
-  Sparkles,
-  Shuffle,
-  TrendingDown,
   Eye,
   Trash2,
 } from "lucide-react";
@@ -33,12 +25,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import HelpDialog from "./HelpDialog";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { isDueForReview } from "@/utils/srs";
 import { cn } from "@/utils/style";
@@ -127,7 +114,6 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
   const [addToListOpen, setAddToListOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [helpTab, setHelpTab] = useState<"overview" | "review" | "extras">("overview");
   const currentReviewMode = useRef<VocabularyReviewMode>("flashcard");
   const currentEntryType = useRef<"word" | "phrase">("word");
   const prevViewingUserIdRef = useRef<string | null>(viewingUserId);
@@ -775,292 +761,11 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
           />
           {!isStudentView && <StudyPlanDialog onStartPlan={handleStartPlan} />}
 
-          <Dialog open={showHelp} onOpenChange={setShowHelp}>
-            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <HelpCircle className="h-5 w-5 text-primary" />
-                  {t("vocabulary.help.title")}
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="flex gap-1 p-1 bg-muted rounded-lg">
-                {(["overview", "review", "extras"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setHelpTab(tab)}
-                    className={cn(
-                      "flex-1 py-1.5 text-sm font-medium rounded-md transition-colors",
-                      helpTab === tab
-                        ? "bg-background shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {t(`vocabulary.help.tabs.${tab}`)}
-                  </button>
-                ))}
-              </div>
-
-              {helpTab === "overview" && (
-                <div className="space-y-4 pt-2">
-                  <p className="text-sm text-muted-foreground">
-                    {t("vocabulary.help.overview.intro")}
-                  </p>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                      <BookMarked className="h-5 w-5 text-indigo-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.stats.total.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.stats.total.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-                      <Clock className="h-5 w-5 text-orange-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.stats.due.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.stats.due.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.stats.mastered.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.stats.mastered.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                      <Brain className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.stats.new.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.stats.new.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Table className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.table.title")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.table.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                      <Combine className="h-5 w-5 text-cyan-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.phrases.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.phrases.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                      <BookOpen className="h-5 w-5 text-purple-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.overview.studyPlan.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.overview.studyPlan.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
-                    <p className="text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">{t("vocabulary.help.overview.clickableStats.name")}</span>{" "}
-                      {t("vocabulary.help.overview.clickableStats.desc")}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {helpTab === "review" && (
-                <div className="space-y-4 pt-2">
-                  <p className="text-sm text-muted-foreground">
-                    {t("vocabulary.help.review.intro")}
-                  </p>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                      <Layers className="h-5 w-5 text-indigo-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.review.flashcard.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.review.flashcard.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 ml-4">
-                    {(["again", "hard", "good", "easy"] as const).map((key) => (
-                      <div key={key} className="flex gap-2 p-2 rounded-md bg-muted/30">
-                        <div className={cn(
-                          "shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-                          key === "again" && "bg-rose-500/10 text-rose-500",
-                          key === "hard" && "bg-orange-500/10 text-orange-500",
-                          key === "good" && "bg-blue-500/10 text-blue-500",
-                          key === "easy" && "bg-green-500/10 text-green-500",
-                        )}>
-                          {key === "again" ? <RotateCcw className="h-3.5 w-3.5" /> : key.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <span className="text-xs font-semibold">{t(`vocabulary.help.review.${key}.name`)}</span>
-                          <p className="text-[10px] text-muted-foreground leading-tight">{t(`vocabulary.help.review.${key}.desc`)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                      <ClipboardList className="h-5 w-5 text-purple-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.review.quiz.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.review.quiz.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center">
-                      <SpellCheck className="h-5 w-5 text-pink-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.review.spelling.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.review.spelling.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
-                    <p className="text-xs">
-                      <span className="font-semibold">{t("vocabulary.help.review.srs.title")}</span>{" "}
-                      <span className="text-muted-foreground">{t("vocabulary.help.review.srs.desc")}</span>
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {helpTab === "extras" && (
-                <div className="space-y-4 pt-2">
-                  <p className="text-sm text-muted-foreground">
-                    {t("vocabulary.help.extras.intro")}
-                  </p>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                      <Zap className="h-5 w-5 text-yellow-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.autoSelect.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.autoSelect.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 ml-4">
-                    {(
-                      [
-                        { key: "due", icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
-                        { key: "hardest", icon: Flame, color: "text-rose-500", bg: "bg-rose-500/10" },
-                        { key: "newest", icon: Sparkles, color: "text-sky-500", bg: "bg-sky-500/10" },
-                        { key: "random", icon: Shuffle, color: "text-violet-500", bg: "bg-violet-500/10" },
-                        { key: "weakest", icon: TrendingDown, color: "text-amber-500", bg: "bg-amber-500/10" },
-                      ] as { key: string; icon: typeof Clock; color: string; bg: string }[]
-                    ).map(({ key, icon: Icon, color, bg }) => (
-                      <div key={key} className="flex gap-2 p-2 rounded-md bg-muted/30">
-                        <div className={cn("shrink-0 w-6 h-6 rounded-full flex items-center justify-center", bg, color)}>
-                          <Icon className="h-3.5 w-3.5" />
-                        </div>
-                        <div>
-                          <span className="text-xs font-semibold">{t(`vocabulary.help.extras.autoSelect.strategies.${key}.name`)}</span>
-                          <p className="text-[10px] text-muted-foreground leading-tight">{t(`vocabulary.help.extras.autoSelect.strategies.${key}.desc`)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-teal-500/10 flex items-center justify-center">
-                      <FileDown className="h-5 w-5 text-teal-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.export.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.export.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                      <ListChecks className="h-5 w-5 text-cyan-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.reviewLists.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.reviewLists.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                      <Share2 className="h-5 w-5 text-blue-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.share.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.share.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-slate-500/10 flex items-center justify-center">
-                      <History className="h-5 w-5 text-slate-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.history.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.history.desc")}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className="shrink-0 w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-                      <Trash2 className="h-5 w-5 text-red-500" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.deleteWords.name")}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.deleteWords.desc")}</p>
-                    </div>
-                  </div>
-
-                  {isTeacherOrAbove && (
-                    <div className="flex gap-3 p-3 rounded-lg bg-muted/50">
-                      <div className="shrink-0 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                        <Eye className="h-5 w-5 text-amber-500" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm">{t("vocabulary.help.extras.studentView.name")}</h4>
-                        <p className="text-xs text-muted-foreground mt-0.5">{t("vocabulary.help.extras.studentView.desc")}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
-                    <p className="text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">{t("vocabulary.help.extras.tip.title")}</span>{" "}
-                      {t("vocabulary.help.extras.tip.content")}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+          <HelpDialog
+            open={showHelp}
+            onOpenChange={setShowHelp}
+            isTeacherOrAbove={isTeacherOrAbove}
+          />
         </>
       )}
     </div>

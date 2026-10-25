@@ -151,7 +151,7 @@ export async function listAnalyticsStudents(
 
 export async function getVocabularyAnalytics(
   scope: LanguageCheckStaffScope,
-  opts: AnalyticsFilters & { timeZone: string; page: number; pageSize: number }
+  opts: AnalyticsFilters & { timeZone: string; page: number; pageSize: number; selfOnly?: boolean }
 ): Promise<VocabularyAnalyticsData> {
   const tz = safeTimeZone(opts.timeZone);
   const bucketUnit: "day" | "week" =
@@ -275,7 +275,7 @@ export async function getVocabularyAnalytics(
       )
     : Promise.resolve({ rows: [] as Row[] });
 
-  const studentsQ = q((p, sc) => {
+  const perStudentQuery = (p: Params, sc: string): string => {
     const n = p.add(now);
     const mastered = p.add(VOCABULARY_MASTERED_LEVEL);
     const sinceS = p.add(since);
@@ -325,7 +325,12 @@ export async function getVocabularyAnalytics(
       LEFT JOIN added a ON a.user_id = sc.id
       ORDER BY GREATEST(s.last_active, a.last_added) DESC NULLS LAST, sc.name, sc.id
       LIMIT ${limit} OFFSET ${offset}`;
-  });
+  };
+  // selfOnly (the learner's own "My analytics" view) needs neither the
+  // per-student table nor the filter-bar user list.
+  const studentsQ = opts.selfOnly
+    ? Promise.resolve({ rows: [] as Row[] })
+    : q(perStudentQuery);
 
   const [modesR, activityR, snapR, seriesR, hardR, historyR, studentsR, users] =
     await Promise.all([
@@ -336,7 +341,9 @@ export async function getVocabularyAnalytics(
       hardQ,
       historyQ,
       studentsQ,
-      listAnalyticsStudents(scope, { classId: opts.classId }),
+      opts.selfOnly
+        ? Promise.resolve([])
+        : listAnalyticsStudents(scope, { classId: opts.classId }),
     ]);
 
   const modeOrder: Mode[] = ["flashcard", "quiz", "spelling"];
@@ -440,6 +447,22 @@ export async function getVocabularyAnalytics(
     studentsTotal: num(studentsR.rows[0]?.total),
     users,
   };
+}
+
+/**
+ * The signed-in learner's own analytics (the /vocabulary "My analytics" view):
+ * the same Overview data as the staff dashboard, scoped to that one learner
+ * (`selfOnly` skips the per-student table and the filter-bar user list, so
+ * other students' identities are never queried, let alone returned).
+ */
+export async function getSelfVocabularyAnalytics(
+  userId: string,
+  opts: { range: number; timeZone: string }
+): Promise<VocabularyAnalyticsData> {
+  return getVocabularyAnalytics(
+    { kind: "all" },
+    { ...opts, userId, page: 1, pageSize: 1, selfOnly: true }
+  );
 }
 
 /** Newest-first review sessions of every learner in scope (read only). */

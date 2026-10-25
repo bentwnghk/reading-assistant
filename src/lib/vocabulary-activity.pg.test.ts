@@ -145,6 +145,21 @@ describe.skipIf(pgliteMissing)("vocabulary analytics SQL", () => {
     expect(out.totals.sessions).toBe(0);
   });
 
+  it("self analytics: the learner's own data only, no per-student/user lists", async () => {
+    const d = await lib.getSelfVocabularyAnalytics("a", { range: 30, timeZone: "UTC" });
+    expect(d.students).toEqual([]);
+    expect(d.studentsTotal).toBe(0);
+    expect(d.users).toEqual([]);
+    expect(d.totals.sessions).toBe(2);
+    expect(d.totals.accuracy).toBe(88); // 7/8, same as the staff view of "a"
+    expect(d.sessionHistory.map((p) => p.accuracy)).toEqual([75, 100]);
+    // another learner's rows never leak into a self view
+    const b = await lib.getSelfVocabularyAnalytics("b", { range: 0, timeZone: "UTC" });
+    expect(b.totals.sessions).toBe(2); // s3 + the 200-day-old s4 (range 0 = all time)
+    expect(b.hardWords.length).toBeGreaterThan(0);
+    expect(b.hardWords.every((w) => w.learners === 1)).toBe(true);
+  });
+
   it("sessions + activity lists are scoped, paged and newest-first", async () => {
     const s = await lib.listStaffReviewSessions(t1, { range: 0, page: 1, pageSize: 1 });
     expect(s.total).toBe(2);

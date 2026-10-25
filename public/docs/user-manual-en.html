@@ -2201,13 +2201,13 @@ body.toc-noscroll{overflow:hidden}
         <p class="small">A dedicated hub at <code>/vocabulary</code> for systematic vocabulary review across <em>all</em> your reading sessions.</p>
       </div>
 
-      <p>Open it from the header's <b>My Vocabulary</b> icon or the "My Vocabulary" link inside the Glossary section. It aggregates every word you've ever collected into one searchable, sortable bank, with stats, auto-selection strategies, named review lists, exports, and history.</p>
+      <p>Open it from the header's <b>My Vocabulary</b> icon or the "My Vocabulary" link inside the Glossary section. It aggregates every word you've ever collected into one searchable, sortable bank, with stats, auto-selection strategies, named review lists, exports, and history. At the top of the page a switch flips between <b>My Vocabulary</b> and the <b>analytics panel</b> — <b>My analytics</b> for students, <b>Student analytics</b> <span class="tag-teacher"></span> for teachers and admins (§9.10) — and the <b>?</b> guide button beside the title opens the My Vocabulary Guide from every view.</p>
 
       <h3>9.1 Layout &amp; stats</h3>
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com/vocabulary</span></div>
         <div class="mock-body">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><b style="font-size:15px;display:inline-flex;align-items:center;gap:6px"><svg class="ic pri"><use href="#i-book-marked"/></svg> My Vocabulary</b><svg class="ic muted"><use href="#i-info"/></svg></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><b style="font-size:15px;display:inline-flex;align-items:center;gap:6px"><svg class="ic pri"><use href="#i-book-marked"/></svg> My Vocabulary</b><span style="display:inline-flex;align-items:center;gap:8px"><span class="seg"><span class="on">My Vocabulary</span><span>My analytics</span></span><svg class="ic muted"><use href="#i-info"/></svg></span></div>
           <div style="display:flex;gap:8px;margin-bottom:12px">
             <div class="card-mini" style="flex:1;margin:0;text-align:center;box-shadow:0 0 0 2px rgba(59,130,246,.4)"><div class="small"><svg class="ic sm" style="color:#6366f1"><use href="#i-book-marked"/></svg> Total Words</div><b style="font-size:1.2rem">248</b><div class="small" style="display:flex;gap:6px;justify-content:center"><span class="chip" style="font-size:10px">Own: 210</span><span class="chip" style="font-size:10px">Teacher: 38</span></div></div>
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#f97316"><use href="#i-clock"/></svg> Due for Review</div><b style="font-size:1.2rem;color:#f97316">42</b></div>
@@ -2335,6 +2335,30 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
+
+      <h3>9.10 My / Student analytics <span style="font-weight:400;font-size:.8em">(the view switch)</span></h3>
+      <p>The switch at the top of the page (§9.1) flips between your word bank and the <b>analytics panel</b> — a report of the vocabulary and review activity behind it. Students see <b>My analytics</b>; teachers, admins and super-admins see <b>Student analytics</b> <span class="tag-teacher"></span> instead. The <b>?</b> guide button sits beside the title on both views and documents the panel under its <i>Analytics</i> tab. Your place is kept in the URL (<code>/vocabulary?view=analytics</code>), so reloading or sharing the link reopens the same view.</p>
+      <div class="mock">
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com/vocabulary?view=analytics</span></div>
+        <div class="mock-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><b style="font-size:15px;display:inline-flex;align-items:center;gap:6px"><svg class="ic" style="color:#6366f1"><use href="#i-bar-chart-3"/></svg> My analytics</b><span style="display:inline-flex;align-items:center;gap:8px"><span class="seg"><span>My Vocabulary</span><span class="on">My analytics</span></span><svg class="ic muted"><use href="#i-info"/></svg></span></div>
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><span class="seg"><span class="on">7d</span><span>30d</span><span>90d</span><span>All</span></span></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#6366f1"><use href="#i-book-marked"/></svg> Word bank</div><b style="font-size:1.2rem">248</b><div class="small">210 words · 38 phrases</div></div>
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#22c55e"><use href="#i-check-circle-2"/></svg> Mastered (L5)</div><b style="font-size:1.2rem;color:#22c55e">95</b><div class="small">38% of the bank</div></div>
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#f97316"><use href="#i-clock"/></svg> Due for review</div><b style="font-size:1.2rem;color:#f97316">42</b><div class="small">18 rated hard</div></div>
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#8b5cf6"><use href="#i-brain"/></svg> Average level</div><b style="font-size:1.2rem">2.4</b><div class="small">0 (new) to 5 (mastered)</div></div>
+          </div>
+          <div class="card-mini"><div class="ttl">Daily activity</div>
+            <div class="barchart"><i style="height:30%"></i><i style="height:60%;background:var(--green)"></i><i style="height:45%"></i><i style="height:80%;background:var(--amber)"></i><i style="height:55%"></i><i style="height:70%;background:var(--violet)"></i><i style="height:40%"></i></div>
+          </div>
+        </div>
+      </div>
+      <p><b>Overview cards</b> — Word bank (words + phrases), Mastered (L5), Due for review (with the count rated hard), Average mastery level (0–5), Review sessions (with average accuracy), Words reviewed, Words added, and Active days.</p>
+      <p><b>Charts &amp; tables</b> — a daily (windows of 30 days or less) or weekly activity chart stacking words reviewed vs words added with an accuracy line; a mastery-level distribution (New → L5) of the current bank; a per-mode table (flashcards / quiz / spelling with sessions, words reviewed and accuracy); a review-accuracy-over-time line (one point per session, single-learner views); and a <b>Most missed words</b> table ranked by wrong answers.</p>
+      <p><b>Time range</b> — the 7d / 30d / 90d / All-time picker scopes every session-based figure; word-bank figures always show the current state. Accuracy is the share of correct answers across review sessions in range.</p>
+      <div class="callout"><strong>Private by design</strong> My analytics shows only your own numbers — never other students'. Your teacher can follow your progress from their own Student analytics view.</div>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>Student analytics (teachers / admins / super-admins)</strong> A class + student filter bar narrows everything at once: the overview above, a <b>Students</b> table (bank, mastered, due, sessions, accuracy, a trend arrow comparing the later vs earlier half of the window, last active) with a <b>Vocabulary</b> button that opens any student's bank read-only (§9.1 banner), a <b>Review sessions</b> tab with word-by-word results in a read-only dialog, and an <b>Activity</b> feed of sessions finished and words added.</div>
 
       </section>
     <!-- ============ CHAPTER 10: DASHBOARDS & SHARING ============ -->

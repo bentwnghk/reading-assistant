@@ -45,10 +45,21 @@ export const MODE_ICON: Record<"flashcard" | "quiz" | "spelling", LucideIcon> = 
 
 const shortDate = (bucket: string) => bucket.slice(5);
 
-/** Totals, activity over time, mastery distribution, modes and the hardest words. */
-export default function VocabularyDashboardView({ data }: { data: VocabularyAnalyticsData }) {
+/**
+ * Totals, activity over time, mastery distribution, modes and the hardest
+ * words. `variant="self"` is the learner's own view: staff-only phrasing and
+ * the "students who missed it" column are dropped.
+ */
+export default function VocabularyDashboardView({
+  data,
+  variant = "staff",
+}: {
+  data: VocabularyAnalyticsData;
+  variant?: "staff" | "self";
+}) {
   const { t, i18n } = useTranslation();
   const { totals, snapshot, modes, series, hardWords, sessionHistory } = data;
+  const isSelf = variant === "self";
 
   if (
     totals.sessions === 0 &&
@@ -57,7 +68,7 @@ export default function VocabularyDashboardView({ data }: { data: VocabularyAnal
   ) {
     return (
       <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
-        {t("vocabulary.analytics.noData")}
+        {t(isSelf ? "vocabulary.analytics.selfNoData" : "vocabulary.analytics.noData")}
       </p>
     );
   }
@@ -245,7 +256,9 @@ export default function VocabularyDashboardView({ data }: { data: VocabularyAnal
               <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-3 py-2 font-medium">{t("vocabulary.analytics.colWord")}</th>
                 <th className="px-3 py-2 font-medium">{t("vocabulary.analytics.colMissed")}</th>
-                <th className="px-3 py-2 font-medium">{t("vocabulary.analytics.colLearnersMissed")}</th>
+                {!isSelf && (
+                  <th className="px-3 py-2 font-medium">{t("vocabulary.analytics.colLearnersMissed")}</th>
+                )}
                 <th className="px-3 py-2 font-medium">{t("vocabulary.analytics.colAccuracy")}</th>
               </tr>
             </thead>
@@ -254,7 +267,7 @@ export default function VocabularyDashboardView({ data }: { data: VocabularyAnal
                 <tr key={w.word} className="border-b last:border-0">
                   <td className="px-3 py-2 font-medium">{w.word}</td>
                   <td className="px-3 py-2 tabular-nums">{w.wrong}/{w.attempts}</td>
-                  <td className="px-3 py-2 tabular-nums">{w.learners}</td>
+                  {!isSelf && <td className="px-3 py-2 tabular-nums">{w.learners}</td>}
                   <td className="px-3 py-2">
                     <PercentBadge value={Math.round(((w.attempts - w.wrong) / w.attempts) * 100)} />
                   </td>
@@ -265,7 +278,7 @@ export default function VocabularyDashboardView({ data }: { data: VocabularyAnal
         </div>
       )}
       <p className={cn("text-[11px] text-muted-foreground")}>
-        {t("vocabulary.analytics.note")}
+        {t(isSelf ? "vocabulary.analytics.selfNote" : "vocabulary.analytics.note")}
       </p>
     </div>
   );

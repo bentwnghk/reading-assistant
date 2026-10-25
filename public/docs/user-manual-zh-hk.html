@@ -2201,13 +2201,13 @@ body.toc-noscroll{overflow:hidden}
         <p class="small">位於 <code>/vocabulary</code> 的專屬中樞，用於跨越<em>所有</em>閱讀的系統化詞彙複習。</p>
       </div>
 
-      <p>從頂欄的 <b>我的詞彙</b> 圖示或詞彙表內的「我的詞彙」連結開啟。它把你歷來收集的所有詞彙匯聚為一個可搜尋、可排序的詞庫，並附統計、自動選取策略、命名複習清單、匯出及歷史記錄。</p>
+      <p>從頂欄的 <b>我的詞彙</b> 圖示或詞彙表內的「我的詞彙」連結開啟。它把你歷來收集的所有詞彙匯聚為一個可搜尋、可排序的詞庫，並附統計、自動選取策略、命名複習清單、匯出及歷史記錄。頁面頂部的切換器可在<b>我的詞彙</b>與<b>分析面板</b>之間切換——學生看到<b>我的分析</b>，老師及管理員則看到<b>學生分析</b> <span class="tag-teacher"></span>（§9.10）；標題旁的 <b>？</b> 按鈕可在任何檢視開啟「我的詞彙庫指南」。</p>
 
       <h3>9.1 佈局與統計</h3>
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com/vocabulary</span></div>
         <div class="mock-body">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><b style="font-size:15px;display:inline-flex;align-items:center;gap:6px"><svg class="ic pri"><use href="#i-book-marked"/></svg> 我的詞彙</b><svg class="ic muted"><use href="#i-info"/></svg></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><b style="font-size:15px;display:inline-flex;align-items:center;gap:6px"><svg class="ic pri"><use href="#i-book-marked"/></svg> 我的詞彙</b><span style="display:inline-flex;align-items:center;gap:8px"><span class="seg"><span class="on">我的詞彙</span><span>我的分析</span></span><svg class="ic muted"><use href="#i-info"/></svg></span></div>
           <div style="display:flex;gap:8px;margin-bottom:12px">
             <div class="card-mini" style="flex:1;margin:0;text-align:center;box-shadow:0 0 0 2px rgba(59,130,246,.4)"><div class="small"><svg class="ic sm" style="color:#6366f1"><use href="#i-book-marked"/></svg> 詞彙總數</div><b style="font-size:1.2rem">248</b><div class="small" style="display:flex;gap:6px;justify-content:center"><span class="chip" style="font-size:10px">自有: 210</span><span class="chip" style="font-size:10px">教師: 38</span></div></div>
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#f97316"><use href="#i-clock"/></svg> 待複習</div><b style="font-size:1.2rem;color:#f97316">42</b></div>
@@ -2335,6 +2335,30 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
+
+      <h3>9.10 我的／學生分析 <span style="font-weight:400;font-size:.8em">（檢視切換器）</span></h3>
+      <p>頁面頂部的切換器（§9.1）可在詞彙庫與<b>分析面板</b>之間切換——分析面板是一份關於背後詞彙與複習活動的報告。學生看到<b>我的分析</b>；老師、管理員及超級管理員則看到<b>學生分析</b> <span class="tag-teacher"></span>。<b>？</b>按鈕在兩個檢視的標題旁都會出現，其指南內的<i>分析</i>分頁會說明此面板。目前檢視記錄在網址中（<code>/vocabulary?view=analytics</code>），重新整理或分享連結都會回到同一檢視。</p>
+      <div class="mock">
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com/vocabulary?view=analytics</span></div>
+        <div class="mock-body">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px"><b style="font-size:15px;display:inline-flex;align-items:center;gap:6px"><svg class="ic" style="color:#6366f1"><use href="#i-bar-chart-3"/></svg> 我的分析</b><span style="display:inline-flex;align-items:center;gap:8px"><span class="seg"><span>我的詞彙</span><span class="on">我的分析</span></span><svg class="ic muted"><use href="#i-info"/></svg></span></div>
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><span class="seg"><span class="on">7日</span><span>30日</span><span>90日</span><span>全部</span></span></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#6366f1"><use href="#i-book-marked"/></svg> 詞庫</div><b style="font-size:1.2rem">248</b><div class="small">210 個單字 · 38 個片語</div></div>
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#22c55e"><use href="#i-check-circle-2"/></svg> 已掌握（L5）</div><b style="font-size:1.2rem;color:#22c55e">95</b><div class="small">佔詞庫 38%</div></div>
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#f97316"><use href="#i-clock"/></svg> 待複習</div><b style="font-size:1.2rem;color:#f97316">42</b><div class="small">18 個標為困難</div></div>
+            <div class="card-mini" style="flex:1;min-width:96px;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#8b5cf6"><use href="#i-brain"/></svg> 平均等級</div><b style="font-size:1.2rem">2.4</b><div class="small">0（新）至 5（已掌握）</div></div>
+          </div>
+          <div class="card-mini"><div class="ttl">每日活動</div>
+            <div class="barchart"><i style="height:30%"></i><i style="height:60%;background:var(--green)"></i><i style="height:45%"></i><i style="height:80%;background:var(--amber)"></i><i style="height:55%"></i><i style="height:70%;background:var(--violet)"></i><i style="height:40%"></i></div>
+          </div>
+        </div>
+      </div>
+      <p><b>概覽統計卡</b>——詞庫規模（單字＋片語）、已掌握（L5）、待複習（附標為困難的數目）、平均掌握等級（0–5）、複習次數（附平均準確率）、已複習字詞、新增字詞，以及活躍日數。</p>
+      <p><b>圖表與表格</b>——每日（30 日或以內）或每週活動圖表，以堆疊柱顯示已複習與新增字詞並附準確率走勢線；目前詞庫的掌握等級分佈（新 → L5）；各複習模式表格（字卡／測驗／拼字的次數、已複習字詞及準確率）；複習準確率走勢線（每次複習一點，單一學生檢視）；以及按答錯次數排序的<b>最常答錯字詞</b>表格。</p>
+      <p><b>時間範圍</b>——7日／30日／90日／全部時間選擇器限定所有按複習計算的數字；詞庫數字永遠顯示目前狀況。準確率為範圍內所有複習中答對的比例。</p>
+      <div class="callout"><strong>私隱保障</strong> 「我的分析」只顯示你自己的數據——絕不包含其他同學。老師可在自己的「學生分析」查看你的進度。</div>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>學生分析（老師／管理員／超級管理員）</strong> 班別＋學生篩選列會同時收窄所有內容：上述概覽、<b>學生</b>表格（詞庫、已掌握、待複習、次數、準確率、比較時間範圍後半與前半的趨勢箭嘴、最近活躍），每行附<b>詞彙</b>按鈕以唯讀模式開啟該學生的詞庫（§9.1 橫額）、附逐詞結果唯讀對話框的<b>複習記錄</b>分頁，以及記錄已完成複習與新增字詞的<b>活動</b>記錄。</div>
 
       </section>
     <!-- ============ CHAPTER 10: DASHBOARDS & SHARING ============ -->
