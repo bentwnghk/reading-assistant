@@ -23,7 +23,7 @@ import {
   type ParagraphChild,
 } from "docx";
 import { saveAs } from "file-saver";
-import { DEFAULT_CATEGORY_STYLE, LANGUAGE_CHECK_CATEGORY_STYLES, type LanguageCheckCategory } from "@/constants/languageCheck";
+import { DEFAULT_CATEGORY_STYLE, LANGUAGE_CHECK_CATEGORY_STYLES, LANGUAGE_CHECK_LEARN_MASTERY_DEVELOPING, LANGUAGE_CHECK_LEARN_MASTERY_SECURE, type LanguageCheckCategory } from "@/constants/languageCheck";
 import { diffChanges } from "@/utils/languageCheck";
 import {
   exerciseInstructionKey,
@@ -36,7 +36,8 @@ import {
   type LearnExercise,
   type LearnLesson,
 } from "@/utils/languageCheckLearn";
-import { answerText, exerciseSolution } from "@/utils/languageCheckLearnGrade";
+import { answerText, exerciseSolution, masteryFor, type Mastery } from "@/utils/languageCheckLearnGrade";
+import { practiceProgress, quizProgress } from "@/utils/languageCheckLearnProgress";
 import type { LearnSessionWire, LearnUnitWire } from "@/utils/languageCheckLearnWire";
 
 /**
@@ -972,6 +973,201 @@ interface Ctx {
   categoryLabel: (category: string) => string;
 }
 
+// ─── Student scores (staff review copy) ──────────────────────────────────────
+
+/** Green ≥ secure cut-off, amber ≥ developing, red below — the mastery colours. */
+function scoreTone(percent: number): string {
+  if (percent >= LANGUAGE_CHECK_LEARN_MASTERY_SECURE) return C.green;
+  if (percent >= LANGUAGE_CHECK_LEARN_MASTERY_DEVELOPING) return C.amber;
+  return C.red;
+}
+
+/** Per-topic scores: practice % (first-attempt credit) and quiz % with mastery. */
+function unitScores(unit: LearnUnitWire): {
+  practice: number | null;
+  quiz: number | null;
+  mastery: Mastery | null;
+} {
+  const p = practiceProgress(unit.practice, unit.practiceResults);
+  const q = quizProgress(unit.quiz, unit.quizResults);
+  // Mid-way practice shows the credit earned so far (never a misleading 0%).
+  return { practice: p.percent ?? p.percentSoFar, quiz: q.percent, mastery: q.mastery };
+}
+
+function masteryLabel(mastery: Mastery, ctx: Ctx): TextRun {
+  const tone = mastery === "secure" ? C.green : mastery === "developing" ? C.amber : C.red;
+  return run(ctx.t(`languageCheck.learn.summary.levels.${mastery}`), {
+    bold: true,
+    color: tone,
+    size: 21,
+  });
+}
+
+/** The learner's outcome for a stage, shown inside the stage banner (staff review copy). */
+function stageScore(unit: LearnUnitWire, stage: "practice" | "quiz", ctx: Ctx): Paragraph {
+  const { t } = ctx;
+  const label = (key: string) =>
+    run(`${t(key)}:  `, { bold: true, color: C.muted, size: 19, caps: true, spacing: 16 });
+  if (stage === "practice") {
+    const { practice } = unitScores(unit);
+    return para(
+      [
+        label("languageCheck.learnExport.practiceScoreLabel"),
+        ...(practice === null
+          ? [run(t("languageCheck.learnExport.scoreNone"), { italics: true, color: C.muted, size: 21 })]
+          : [run(`${practice}%`, { bold: true, color: scoreTone(practice), size: 23 })]),
+      ],
+      { after: 0 },
+    );
+  }
+  const { quiz, mastery } = unitScores(unit);
+  const answered = unit.quiz?.filter((i) => unit.quizResults[i.id]).length ?? 0;
+  return para(
+    [
+      label("languageCheck.learnExport.quizScoreLabel"),
+      ...(quiz === null
+        ? [
+            run(
+              answered
+                ? t("languageCheck.learnExport.quizInProgress", {
+                    answered,
+                    total: unit.quiz?.length ?? 0,
+                  })
+                : t("languageCheck.learnExport.scoreNone"),
+              { italics: true, color: C.muted, size: 21 },
+            ),
+          ]
+        : [
+            run(`${quiz}%`, { bold: true, color: scoreTone(quiz), size: 23 }),
+            ...(mastery
+              ? [run("   ·   ", { color: C.muted, size: 21 }), masteryLabel(mastery, ctx)]
+              : []),
+          ]),
+    ],
+    { after: 0 },
+  );
+}
+
+/**
+ * Cover summary of the learner's scores: one row per topic (practice %, quiz %,
+ * mastery) plus an overall row. Practice % is the first-attempt credit; quiz %
+ * is the latest finished quiz.
+ */
+function scoreTable(session: LearnSessionWire, ctx: Ctx): (Paragraph | Table)[] {
+  const { t } = ctx;
+  const center = AlignmentType.CENTER;
+  const edge = line(C.line, 4);
+  const borders = { top: edge, bottom: edge, right: edge, left: edge };
+  const colW = 1000;
+  const topicW = WIDTH - colW * 3;
+
+  type Row = { unit: LearnUnitWire; practice: number | null; quiz: number | null; mastery: Mastery | null };
+  const rows: Row[] = session.units.map((unit) => ({ unit, ...unitScores(unit) }));
+  const average = (pick: (r: Row) => number | null): number | null => {
+    const vals = rows.map(pick).filter((v): v is number => v !== null);
+    return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
+  };
+  const overallQuiz = average((r) => r.quiz);
+  const overallMastery = overallQuiz === null ? null : masteryFor(overallQuiz);
+
+  const cell = (children: Paragraph[], o: { width: number; fill?: string }) =>
+    new TableCell({
+      children,
+      width: { size: o.width, type: WidthType.DXA },
+      shading: o.fill ? shade(o.fill) : undefined,
+      borders,
+      margins: { top: 90, bottom: 90, left: 140, right: 140 },
+      verticalAlign: VerticalAlign.CENTER,
+    });
+  const head = (text: string, width: number, centerIt = false) =>
+    cell(
+      [para([run(text, { bold: true, color: C.muted, size: 18, caps: true, spacing: 16 })], { after: 0, align: centerIt ? center : undefined })],
+      { width, fill: C.soft },
+    );
+  const numCell = (v: number | null, width: number, fill?: string) =>
+    cell(
+      [
+        para(
+          [run(v === null ? "—" : `${v}%`, { bold: v !== null, color: v === null ? C.muted : scoreTone(v), size: 22 })],
+          { after: 0, align: center },
+        ),
+      ],
+      { width, fill },
+    );
+  const resultCell = (mastery: Mastery | null, width: number, fill?: string) =>
+    cell(
+      [para([mastery ? masteryLabel(mastery, ctx) : run("—", { color: C.muted, size: 22 })], { after: 0, align: center })],
+      { width, fill },
+    );
+
+  return [
+    sectionTitle(t("languageCheck.learnExport.results"), C.ink),
+    new Table({
+      width: { size: WIDTH, type: WidthType.DXA },
+      columnWidths: [topicW, colW, colW, colW],
+      layout: TableLayoutType.FIXED,
+      borders: {
+        top: NONE,
+        bottom: NONE,
+        left: NONE,
+        right: NONE,
+        insideHorizontal: NONE,
+        insideVertical: NONE,
+      },
+      rows: [
+        new TableRow({
+          cantSplit: true,
+          children: [
+            head(t("languageCheck.learnExport.colTopic"), topicW),
+            head(t("languageCheck.learnExport.colPractice"), colW, true),
+            head(t("languageCheck.learnExport.colQuiz"), colW, true),
+            head(t("languageCheck.learnExport.colResult"), colW, true),
+          ],
+        }),
+        ...rows.map(({ unit, practice, quiz, mastery }) =>
+          new TableRow({
+            cantSplit: true,
+            children: [
+              cell(
+                [
+                  para(
+                    [
+                      run("■ ", { color: categoryHex(unit.category), size: 18 }),
+                      run(ctx.categoryLabel(unit.category), { bold: true, color: C.ink, size: 23 }),
+                    ],
+                    { after: 0 },
+                  ),
+                ],
+                { width: topicW },
+              ),
+              numCell(practice, colW),
+              numCell(quiz, colW),
+              resultCell(mastery, colW),
+            ],
+          }),
+        ),
+        new TableRow({
+          cantSplit: true,
+          children: [
+            cell(
+              [para([run(t("languageCheck.learnExport.overall"), { bold: true, color: C.ink, size: 22 })], { after: 0 })],
+              { width: topicW, fill: C.soft },
+            ),
+            numCell(average((r) => r.practice), colW, C.soft),
+            numCell(overallQuiz, colW, C.soft),
+            resultCell(overallMastery, colW, C.soft),
+          ],
+        }),
+      ],
+    }),
+    para([run(t("languageCheck.learnExport.practiceNote"), { color: C.muted, size: 19 })], {
+      before: 100,
+      after: 0,
+    }),
+    gap(),
+  ];
+}
+
 function stageBanner(
   unit: LearnUnitWire,
   stage: "practice" | "quiz",
@@ -1011,7 +1207,8 @@ function stageBanner(
             ),
           ],
         }),
-        para([run(description, { color: C.muted, size: 22 })], { after: 0 }),
+        para([run(description, { color: C.muted, size: 22 })], { after: ctx.studentWork ? 60 : 0 }),
+        ...(ctx.studentWork ? [stageScore(unit, stage, ctx)] : []),
       ],
       { border: C.line, bar: categoryHex(unit.category), barSize: 48, pad: 230 },
     ),
@@ -1127,6 +1324,7 @@ function cover(session: LearnSessionWire, ctx: Ctx, date: string): (Paragraph | 
           ),
         ]
       : []),
+    ...(ctx.studentWork ? scoreTable(session, ctx) : []),
     sectionTitle(t("languageCheck.learnExport.topics"), C.ink),
   ];
   session.units.forEach((unit, i) => {
